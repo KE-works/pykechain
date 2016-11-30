@@ -15,5 +15,9 @@ class Property(object):
 
         return property
 
+    def set_value(self, value):
+        self.value = value
+        self._dirty = True
+
     def __repr__(self):
         return 'Property({0}, {1})'.format(self.name, self.value)
