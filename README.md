@@ -9,3 +9,34 @@ enable jupyterlab:
 
 start jupyterlab:
     $ jupyter lab
+
+
+
+
+usage:
+
+```python
+import kechain
+```
+
+```
+kechain.sync()
+```
+
+    Retrieved 14 parts
+
+```
+wheel = kechain.find_part('Front Wheel')
+mat = wheel.find_property('Rim Material')
+mat.set_value("Steel")
+```
+
+```
+kechain.find_part('Rear Wheel').find_property('Rim Material').set_value('Carbon')
+```
+
+```
+kechain.sync()
+```
+
+    Updated 2 properties
