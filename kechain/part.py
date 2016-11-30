@@ -18,6 +18,9 @@ class Part(object):
 
         return part
 
+    def find_property(self, property_name):
+        return next(prop for prop in self.properties if prop.name == property_name)
+
     def __repr__(self):
         props = ', '.join('{0}: {1}'.format(p.name, p.value) for p in self.properties)
 
