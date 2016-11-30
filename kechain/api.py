@@ -1,30 +1,35 @@
 import requests
 
+from .globals import data
 from .part import Part
 
 api_parts_url = 'http://0.0.0.0:8000/api/parts.json'
 api_property_url = 'http://0.0.0.0:8000/api/properties/{0}.json'
-api_token_admin = '***REMOVED***'
-api_token_testuser = '***REMOVED***'
 
-headers = {'Authorization': 'Token ' + api_token_testuser}
 
-parts = []
+def set_auth_token(token):
+    data.api_headers['Authorization'] = 'Token ' + token
 
 
 def retrieve_parts():
-    old_part_ids = set(part.id for part in parts)
+    old_part_ids = set(part.id for part in data.parts)
 
-    r = requests.get(api_parts_url, headers=headers)
+    r = requests.get(api_parts_url, headers=data.api_headers)
 
     assert r.status_code == 200
 
     raw_data = r.json()
 
-    global parts
-    parts = [Part.from_dict(part_data) for part_data in raw_data['results'] if part_data['category'] == 'INSTANCE']
+    data.parts[:] = [Part.from_dict(part_data)
+                     for part_data
+                     in raw_data['results']
+                     if part_data['category'] == 'INSTANCE']
 
-    new_part_ids = set(part.id for part in parts)
+    new_part_ids = set(part.id for part in data.parts)
+
+    refreshed_parts = len(old_part_ids & new_part_ids)
+    if refreshed_parts:
+        print("Refreshed {0} parts".format(refreshed_parts))
 
     retrieved_parts = len(new_part_ids - old_part_ids)
     if retrieved_parts:
@@ -38,10 +43,10 @@ def retrieve_parts():
 def update_properties():
     updated_properties = 0
 
-    for part in parts:
+    for part in data.parts:
         for prop in part.properties:
             if prop._dirty:
-                r = requests.put(api_property_url.format(prop.id), headers=headers, data={
+                r = requests.put(api_property_url.format(prop.id), headers=data.api_headers, data={
                     'value': prop.value
                 })
 
@@ -56,7 +61,8 @@ def update_properties():
 
 
 def find_part(name):
-    return next(part for part in parts if part.name == name)
+    return next(part for part in data.parts if part.name == name)
+
 
 def sync():
     update_properties()

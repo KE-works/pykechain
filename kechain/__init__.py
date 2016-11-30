@@ -1,1 +1,2 @@
-from .api import find_part, sync
+from .globals import data
+from .api import set_auth_token, find_part, sync

@@ -2,41 +2,48 @@
 install virtualenv python 3.5
 
 install python packages:
-    $ pip install -r requirements.txt
+```
+pip install -r requirements.txt
+```
 
 enable jupyterlab:
-    $ jupyter serverextension enable --py jupyterlab --sys-prefix
+```
+jupyter serverextension enable --py jupyterlab --sys-prefix
+```
 
 start jupyterlab:
-    $ jupyter lab
-
+```
+jupyter lab
+```
 
 
 
 usage:
 
-```python
-import kechain
+```
+>>> import kechain
 ```
 
 ```
-kechain.sync()
-```
-
-    Retrieved 14 parts
-
-```
-wheel = kechain.find_part('Front Wheel')
-mat = wheel.find_property('Rim Material')
-mat.set_value("Steel")
+>>> kechain.set_auth_token("################")
 ```
 
 ```
-kechain.find_part('Rear Wheel').find_property('Rim Material').set_value('Carbon')
+>>> kechain.sync()
+Retrieved 14 parts
+```    
+
+```
+>>> wheel = kechain.find_part('Front Wheel')
+>>> mat = wheel.find_property('Rim Material')
+>>> mat.set_value("Steel")
 ```
 
 ```
-kechain.sync()
+>>> kechain.find_part('Rear Wheel').find_property('Rim Material').set_value('Carbon')
 ```
 
-    Updated 2 properties
+```
+>>> kechain.sync()
+Updated 2 properties
+```
