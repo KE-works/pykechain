@@ -1,5 +1,6 @@
 import requests
 
+from kechain.query import PartSet
 from .globals import data
 from .part import Part
 
@@ -66,9 +67,12 @@ def find_part(name):
 
 
 def find_parts(name):
-    return [part for part in data.parts if part.model['name'] == name]
+    return PartSet(part for part in data.parts if part.model['name'] == name)
 
 
-def sync():
-    update_properties()
-    retrieve_parts()
+def sync(push=True, pull=True):
+    if push:
+        update_properties()
+
+    if pull:
+        retrieve_parts()
