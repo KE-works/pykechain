@@ -46,7 +46,8 @@ def update_properties():
     for part in data.parts:
         for prop in part.properties:
             if prop.dirty:
-                r = requests.put(api_property_url.format(prop.id), headers=data.api_headers, data={
+
+                r = requests.put(api_property_url.format(prop.id), headers=data.api_headers, json={
                     'value': prop.value
                 })
 
