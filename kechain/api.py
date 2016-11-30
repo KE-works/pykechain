@@ -64,6 +64,10 @@ def find_part(name):
     return next(part for part in data.parts if part.name == name)
 
 
+def find_parts(name):
+    return [part for part in data.parts if part.model['name'] == name]
+
+
 def sync():
     update_properties()
     retrieve_parts()

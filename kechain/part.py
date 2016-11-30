@@ -15,6 +15,12 @@ class Part(Structure):
     def find_property(self, property_name):
         return next(prop for prop in self.properties if prop.name == property_name)
 
+    def __getitem__(self, key):
+        return self.find_property(key).value
+
+    def __setitem__(self, key, value):
+        self.find_property(key).value = value
+
     @classmethod
     def from_dict(cls, data):
         obj = super().from_dict(data)

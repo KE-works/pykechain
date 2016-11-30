@@ -5,6 +5,7 @@ class Structure(object):
     def __init__(self):
         self._id = None
         self._name = None
+        self._model = None
         self._dirty = False
 
     @property
@@ -14,6 +15,10 @@ class Structure(object):
     @property
     def name(self):
         return self._name
+
+    @property
+    def model(self):
+        return self._model
 
     @property
     def dirty(self):
@@ -26,5 +31,6 @@ class Structure(object):
 
         obj._id = data['id']
         obj._name = data['name']
+        obj._model = data['model']
 
         return obj

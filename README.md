@@ -47,3 +47,13 @@ Retrieved 14 parts
 >>> kechain.sync()
 Updated 2 properties
 ```
+
+```
+>>> wheels = kechain.find_parts('Wheel')
+>>> 
+>>> for wheel in wheels:
+>>>     wheel['Diameter'] = wheel['Spokes'] * 4
+>>>     
+>>> kechain.sync()
+Updated 4 properties
+```
