@@ -1,16 +1,11 @@
+from kechain.structure import Structure
 
-class Property(object):
-    id = None
-    name = None
+
+class Property(Structure):
 
     def __init__(self):
-        self._dirty = False
+        super().__init__()
         self._value = None
-
-    @property
-    def dirty(self):
-        """Boolean indicating if the property is modified."""
-        return self._dirty
 
     @property
     def value(self):
@@ -24,13 +19,11 @@ class Property(object):
 
     @classmethod
     def from_dict(cls, data):
-        prop = cls()
+        obj = super().from_dict(data)
 
-        prop.id = data['id']
-        prop.name = data['name']
-        prop._value = data['value']
+        obj._value = data['value']
 
-        return prop
+        return obj
 
     def __repr__(self):
         return 'Property({0}, {1})'.format(self.name, self.value)
