@@ -8,6 +8,10 @@ api_parts_url = 'http://0.0.0.0:8000/api/parts.json'
 api_property_url = 'http://0.0.0.0:8000/api/properties/{0}.json'
 
 
+def set_activity(activity_id):
+    data.activity_id = activity_id
+
+
 def set_auth_token(token):
     data.api_headers['Authorization'] = 'Token ' + token
 
@@ -15,7 +19,9 @@ def set_auth_token(token):
 def retrieve_parts():
     old_part_ids = set(part.id for part in data.parts)
 
-    r = requests.get(api_parts_url, headers=data.api_headers)
+    r = requests.get(api_parts_url, headers=data.api_headers, params={
+        'activity_id': data.activity_id
+    })
 
     assert r.status_code == 200
 
