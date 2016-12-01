@@ -1,3 +1,5 @@
+import io
+
 import requests
 
 from kechain.query import PartSet
@@ -6,7 +8,6 @@ from .part import Part
 
 api_parts_url = 'http://0.0.0.0:8000/api/parts.json'
 api_property_url = 'http://0.0.0.0:8000/api/properties/{0}.json'
-
 
 def set_activity(activity_id):
     data.activity_id = activity_id
