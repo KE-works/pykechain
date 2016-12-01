@@ -3,6 +3,7 @@
 
 
 class Data(object):
+    activity_id = None
     api_headers = {}
     parts = []
 
