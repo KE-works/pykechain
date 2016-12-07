@@ -1,6 +1,7 @@
 import io
 
 import requests
+import sys
 
 from kechain.query import PartSet
 from .globals import data
@@ -24,7 +25,9 @@ def retrieve_parts():
         'activity_id': data.activity_id
     })
 
-    assert r.status_code == 200
+    if not r.status_code == 200:
+        print(r.json()["results"][0]["detail"], file=sys.stderr)
+        return
 
     raw_data = r.json()
 
