@@ -31,6 +31,6 @@ class Structure(object):
 
         obj._id = data['id']
         obj._name = data['name']
-        obj._model = data['model']
+        obj._model = data.get('model')
 
         return obj
