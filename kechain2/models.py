@@ -47,6 +47,14 @@ class Property(object):
             self._put_value(value)
             self._value = value
 
+    @property
+    def part(self):
+        from .api import part
+
+        part_id = self._json_data['part']
+
+        return part(pk=part_id)
+
     def _put_value(self, value):
         from kechain2.api import api_url, HEADERS
 
