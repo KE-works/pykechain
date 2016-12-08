@@ -21,10 +21,11 @@ def api_url(resource, **kwargs):
     return API_ROOT + API_PATH[resource].format(**kwargs)
 
 
-def parts(name=None, model=None, category='INSTANCE'):
+def parts(name=None, pk=None, model=None, category='INSTANCE'):
     r = requests.get(api_url('parts'), headers=HEADERS, params={
         'name': name,
         'model': model,
+        'id': pk,
         'category': category
     })
 
