@@ -39,7 +39,18 @@ def parts(name=None, pk=None, model=None, category='INSTANCE'):
 def part(*args, **kwargs):
     _parts = parts(*args, **kwargs)
 
+    assert len(_parts) > 0, "No part fits criteria"
     assert len(_parts) == 1, "Multiple parts fit criteria"
+
+    return _parts[0]
+
+
+def model(*args, **kwargs):
+    kwargs['category'] = 'MODEL'
+    _parts = parts(*args, **kwargs)
+
+    assert len(_parts) > 0, "No model fits criteria"
+    assert len(_parts) == 1, "Multiple models fit criteria"
 
     return _parts[0]
 
