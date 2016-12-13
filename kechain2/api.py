@@ -12,13 +12,15 @@ API_PATH = {
     'property_upload': 'api/properties/{property_id}/upload'
 }
 
-HEADERS = {
-    'Authorization': 'Token ***REMOVED***'
-}
+HEADERS = {}
 
 
 def api_url(resource, **kwargs):
     return API_ROOT + API_PATH[resource].format(**kwargs)
+
+
+def login(token):
+    HEADERS['Authorization'] = 'Token {}'.format(token)
 
 
 def parts(name=None, pk=None, model=None, category='INSTANCE'):
