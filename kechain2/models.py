@@ -1,5 +1,4 @@
 import matplotlib.figure
-import requests
 
 from kechain2.utils import find
 
@@ -11,6 +10,17 @@ class Scope(object):
 
         self.id = json.get('id')
         self.name = json.get('name')
+        self.bucket = json.get('bucket', {})
+
+    def parts(self, *args, **kwargs):
+        from .api import parts
+
+        return parts(*args, bucket=self.bucket.get('id'), **kwargs)
+
+    def part(self, *args, **kwargs):
+        from .api import part
+
+        return part(*args, bucket=self.bucket.get('id'), **kwargs)
 
 
 class Part(object):

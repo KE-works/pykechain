@@ -48,12 +48,13 @@ def scope(*args, **kwargs):
     return _scopes[0]
 
 
-def parts(name=None, pk=None, model=None, category='INSTANCE'):
+def parts(name=None, pk=None, model=None, category='INSTANCE', bucket=None):
     r = session.get(api_url('parts'), headers=HEADERS, params={
         'id': pk,
         'name': name,
         'model': model.id if model else None,
-        'category': category
+        'category': category,
+        'bucket': bucket
     })
 
     assert r.status_code == 200, "Could not retrieve parts"
