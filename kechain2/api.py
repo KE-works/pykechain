@@ -14,6 +14,8 @@ API_PATH = {
 
 HEADERS = {}
 
+session = requests.Session()
+
 
 def api_url(resource, **kwargs):
     return API_ROOT + API_PATH[resource].format(**kwargs)
@@ -24,7 +26,7 @@ def login(token):
 
 
 def parts(name=None, pk=None, model=None, category='INSTANCE'):
-    r = requests.get(api_url('parts'), headers=HEADERS, params={
+    r = session.get(api_url('parts'), headers=HEADERS, params={
         'id': pk,
         'name': name,
         'model': model.id if model else None,
@@ -58,7 +60,7 @@ def model(*args, **kwargs):
 
 
 def properties(name=None, category='INSTANCE'):
-    r = requests.get(api_url('properties'), headers=HEADERS, params={
+    r = session.get(api_url('properties'), headers=HEADERS, params={
         'name': name,
         'category': category
     })
