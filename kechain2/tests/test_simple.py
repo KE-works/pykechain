@@ -2,7 +2,7 @@ import betamax
 import kechain2
 
 with betamax.Betamax.configure() as config:
-    config.cassette_library_dir = 'cassettes'
+    config.cassette_library_dir = 'kechain2/tests/cassettes'
 
 
 class TestApi(object):
