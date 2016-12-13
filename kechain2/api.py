@@ -23,9 +23,9 @@ def api_url(resource, **kwargs):
 
 def parts(name=None, pk=None, model=None, category='INSTANCE'):
     r = requests.get(api_url('parts'), headers=HEADERS, params={
-        'name': name,
-        'model': model,
         'id': pk,
+        'name': name,
+        'model': model.id if model else None,
         'category': category
     })
 
