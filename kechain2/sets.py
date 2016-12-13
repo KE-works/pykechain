@@ -15,3 +15,23 @@ class PartSet(object):
         assert isinstance(k, int), "[not implemented] non-integer indexing in PartSet"
 
         return self._parts[k]
+
+    def _repr_html_(self):
+        html = []
+
+        html.append("<table width=100%>")
+
+        html.append("<tr>")
+        html.append("<th>Part</th>")
+        html.append("<th>ID</th>")
+        html.append("</tr>")
+
+        for part in self:
+            html.append("<tr>")
+            html.append("<td>{}</td>".format(part.name))
+            html.append("<td>{}</td>".format(part.id))
+            html.append("</tr>")
+
+        html.append("</table>")
+
+        return '' .join(html)
