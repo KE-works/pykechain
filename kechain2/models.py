@@ -28,6 +28,21 @@ class Scope(object):
         return model(*args, bucket=self.bucket.get('id'), **kwargs)
 
 
+class Activity(object):
+
+    def __init__(self, json):
+        self._json_data = json
+
+        self.id = json.get('id')
+        self.name = json.get('name')
+        self.scope = json.get('scope')
+
+    def parts(self, *args, **kwargs):
+        from .api import parts
+
+        return parts(*args, activity=self.id, **kwargs)
+
+
 class Part(object):
 
     def __init__(self, json):

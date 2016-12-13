@@ -1,12 +1,13 @@
 import requests
 
-from kechain2.models import Part, Property, Scope
+from kechain2.models import Part, Property, Scope, Activity
 from kechain2.sets import PartSet
 
 API_ROOT = 'http://0.0.0.0:8000/'
 
 API_PATH = {
     'scopes': 'api/scopes.json',
+    'activities': 'api/activities.json',
     'parts': 'api/parts.json',
     'part': 'api/parts/{part_id}',
     'properties': 'api/properties.json',
@@ -49,13 +50,35 @@ def scope(*args, **kwargs):
     return _scopes[0]
 
 
-def parts(name=None, pk=None, model=None, category='INSTANCE', bucket=None):
+def activities(name=None):
+    r = session.get(api_url('activities'), headers=HEADERS, params={
+        'name': name
+    })
+
+    assert r.status_code == 200, "Could not retrieve activities"
+
+    data = r.json()
+
+    return [Activity(a) for a in data['results']]
+
+
+def activity(*args, **kwargs):
+    _activities = activities(*args, **kwargs)
+
+    assert len(_activities) > 0, "No activity fits criteria"
+    assert len(_activities) == 1, "Multiple activities fit criteria"
+
+    return _activities[0]
+
+
+def parts(name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None):
     r = session.get(api_url('parts'), headers=HEADERS, params={
         'id': pk,
         'name': name,
         'model': model.id if model else None,
         'category': category,
-        'bucket': bucket
+        'bucket': bucket,
+        'activity_id': activity
     })
 
     assert r.status_code == 200, "Could not retrieve parts"
