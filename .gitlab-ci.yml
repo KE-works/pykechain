@@ -1,5 +1,8 @@
-test:
+# Test in python 3.5 using a Docker runner
+test_35:
+  image: python:3.5
   script:
-  # this configures Django application to use attached postgres database that is run on `postgres` host
   - pip install -r requirements.txt
-  - python -c "import this;"
+  - pytest kechain2
+  after_script:
+  - docker_cleanup.sh
