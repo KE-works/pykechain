@@ -1,11 +1,12 @@
 import requests
 
-from kechain2.models import Part, Property
+from kechain2.models import Part, Property, Scope
 from kechain2.sets import PartSet
 
 API_ROOT = 'http://0.0.0.0:8000/'
 
 API_PATH = {
+    'scopes': 'api/scopes.json',
     'parts': 'api/parts.json',
     'properties': 'api/properties.json',
     'property': 'api/properties/{property_id}.json',
@@ -23,6 +24,28 @@ def api_url(resource, **kwargs):
 
 def login(token):
     HEADERS['Authorization'] = 'Token {}'.format(token)
+
+
+def scopes(name=None, status='ACTIVE'):
+    r = session.get(api_url('scopes'), headers=HEADERS, params={
+        'name': name,
+        'status': status
+    })
+
+    assert r.status_code == 200, "Could not retrieve scopes"
+
+    data = r.json()
+
+    return [Scope(s) for s in data['results']]
+
+
+def scope(*args, **kwargs):
+    _scopes = scopes(*args, **kwargs)
+
+    assert len(_scopes) > 0, "No scope fits criteria"
+    assert len(_scopes) == 1, "Multiple scopes fit criteria"
+
+    return _scopes[0]
 
 
 def parts(name=None, pk=None, model=None, category='INSTANCE'):
