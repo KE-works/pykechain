@@ -11,6 +11,7 @@ class Part(object):
 
         self.id = json.get('id')
         self.name = json.get('name')
+        self.category = json.get('category')
 
         self.properties = [Property(p) for p in json['properties']]
 
@@ -20,6 +21,39 @@ class Part(object):
         assert found, "Could not find property with name {}".format(name)
 
         return found
+
+    def add(self, model, **kwargs):
+        return self._post_instance(self, model, **kwargs)
+
+    def add_to(self, parent, **kwargs):
+        return self._post_instance(parent, self, **kwargs)
+
+    @classmethod
+    def _post_instance(cls, parent, model, name=None):
+        from kechain2.api import api_url, HEADERS
+
+        assert parent.category == 'INSTANCE'
+        assert model.category == 'MODEL'
+
+        if not name:
+            name = model.name
+
+        r = requests.post(api_url('parts'),
+                          headers=HEADERS,
+                          params={
+                              "select_action": "new_instance"
+                          },
+                          data={
+                              "name": name,
+                              "parent": parent.id,
+                              "model": model.id
+                          })
+
+        assert r.status_code == 201, "Could not create part"
+
+        data = r.json()
+
+        return Part(data['results'][0])
 
 
 class Property(object):
