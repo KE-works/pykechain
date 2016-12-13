@@ -1,5 +1,4 @@
 test:
   script:
-  # this configures Django application to use attached postgres database that is run on `postgres` host
   - pip install -r requirements.txt
-  - python -c "import this;"
+  - pytest kechain
