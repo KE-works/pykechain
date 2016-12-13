@@ -2,7 +2,8 @@
 test_35:
   image: python:3.5
   script:
-  - pip install -r requirements.txt
+  - pip install -U --force pip
+  - pip install -r requirements-testing.txt -U
   - pytest kechain2
   after_script:
-  - docker_cleanup.sh
+  - echo "cleanup docker here"
