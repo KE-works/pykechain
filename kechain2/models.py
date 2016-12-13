@@ -22,6 +22,11 @@ class Scope(object):
 
         return part(*args, bucket=self.bucket.get('id'), **kwargs)
 
+    def model(self, *args, **kwargs):
+        from .api import model
+
+        return model(*args, bucket=self.bucket.get('id'), **kwargs)
+
 
 class Part(object):
 
