@@ -8,6 +8,7 @@ API_ROOT = 'http://0.0.0.0:8000/'
 API_PATH = {
     'scopes': 'api/scopes.json',
     'parts': 'api/parts.json',
+    'part': 'api/parts/{part_id}',
     'properties': 'api/properties.json',
     'property': 'api/properties/{property_id}.json',
     'property_upload': 'api/properties/{property_id}/upload'

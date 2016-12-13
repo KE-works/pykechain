@@ -17,6 +17,8 @@ class PartSet(object):
         return self._parts[k]
 
     def _repr_html_(self):
+        from .api import api_url
+
         html = []
 
         html.append("<table width=100%>")
@@ -29,7 +31,8 @@ class PartSet(object):
         for part in self:
             html.append("<tr>")
             html.append("<td>{}</td>".format(part.name))
-            html.append("<td>{}</td>".format(part.id))
+            html.append("<td><a target='_blank' href={}>".format(api_url('part', part_id=part.id)))
+            html.append("{}</a></td>".format(part.id))
             html.append("</tr>")
 
         html.append("</table>")
