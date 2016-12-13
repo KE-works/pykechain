@@ -74,6 +74,27 @@ class Part(object):
 
         return Part(data['results'][0])
 
+    def _repr_html_(self):
+        html = []
+
+        html.append("<table width=100%>")
+        html.append("<caption>{}</caption>".format(self.name))
+
+        html.append("<tr>")
+        html.append("<th>Property</th>")
+        html.append("<th>Value</th>")
+        html.append("</tr>")
+
+        for prop in self.properties:
+            html.append("<tr>")
+            html.append("<td>{}</td>".format(prop.name))
+            html.append("<td>{}</td>".format(prop.value))
+            html.append("</tr>")
+
+        html.append("</table>")
+
+        return '' .join(html)
+
 
 class Property(object):
 
