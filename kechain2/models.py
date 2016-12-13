@@ -4,6 +4,15 @@ import requests
 from kechain2.utils import find
 
 
+class Scope(object):
+
+    def __init__(self, json):
+        self._json_data = json
+
+        self.id = json.get('id')
+        self.name = json.get('name')
+
+
 class Part(object):
 
     def __init__(self, json):
