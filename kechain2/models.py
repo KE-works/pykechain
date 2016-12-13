@@ -30,7 +30,7 @@ class Part(object):
 
     @classmethod
     def _post_instance(cls, parent, model, name=None):
-        from kechain2.api import api_url, HEADERS
+        from kechain2.api import session, api_url, HEADERS
 
         assert parent.category == 'INSTANCE'
         assert model.category == 'MODEL'
@@ -38,7 +38,7 @@ class Part(object):
         if not name:
             name = model.name
 
-        r = requests.post(api_url('parts'),
+        r = session.post(api_url('parts'),
                           headers=HEADERS,
                           params={
                               "select_action": "new_instance"
@@ -90,18 +90,18 @@ class Property(object):
         return part(pk=part_id)
 
     def _put_value(self, value):
-        from kechain2.api import api_url, HEADERS
+        from kechain2.api import session, api_url, HEADERS
 
-        r = requests.put(api_url('property', property_id=self.id),
+        r = session.put(api_url('property', property_id=self.id),
                          headers=HEADERS,
                          json={'value': value})
 
         assert r.status_code == 200, "Could not update property value"
 
     def _post_attachment(self, data):
-        from kechain2.api import api_url, HEADERS
+        from kechain2.api import session, api_url, HEADERS
 
-        r = requests.post(api_url('property_upload', property_id=self.id),
+        r = session.post(api_url('property_upload', property_id=self.id),
                           headers=HEADERS,
                           data={"part": self._json_data['part']},
                           files={"attachment": data})

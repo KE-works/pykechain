@@ -2,5 +2,6 @@ jupyter
 jupyterlab
 
 requests
+betamax
 
 matplotlib
