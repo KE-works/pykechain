@@ -1,4 +1,5 @@
 #testing with venv in py27
+
 test_py27:
   script:
   - pwd
@@ -13,7 +14,8 @@ test_py27:
   - deactivate
 
 # testing with venv in py35
-test_py35
+
+test_py35:
   script:
   - pwd
   - virtualenv _venv --python=python3
