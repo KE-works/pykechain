@@ -1,32 +1,84 @@
 import requests
 
-from kechain2.models import Part, Property
+from kechain2.models import Part, Property, Scope, Activity
 from kechain2.sets import PartSet
 
 API_ROOT = 'http://0.0.0.0:8000/'
 
 API_PATH = {
+    'scopes': 'api/scopes.json',
+    'activities': 'api/activities.json',
     'parts': 'api/parts.json',
+    'part': 'api/parts/{part_id}',
     'properties': 'api/properties.json',
     'property': 'api/properties/{property_id}.json',
     'property_upload': 'api/properties/{property_id}/upload'
 }
 
-HEADERS = {
-    'Authorization': 'Token 4fd189d669793373264dc188ce902a2af99d90bc'
-}
+HEADERS = {}
+
+session = requests.Session()
 
 
 def api_url(resource, **kwargs):
     return API_ROOT + API_PATH[resource].format(**kwargs)
 
 
-def parts(name=None, pk=None, model=None, category='INSTANCE'):
-    r = requests.get(api_url('parts'), headers=HEADERS, params={
+def login(token):
+    HEADERS['Authorization'] = 'Token {}'.format(token)
+
+
+def scopes(name=None, status='ACTIVE'):
+    r = session.get(api_url('scopes'), headers=HEADERS, params={
+        'name': name,
+        'status': status
+    })
+
+    assert r.status_code == 200, "Could not retrieve scopes"
+
+    data = r.json()
+
+    return [Scope(s) for s in data['results']]
+
+
+def scope(*args, **kwargs):
+    _scopes = scopes(*args, **kwargs)
+
+    assert len(_scopes) > 0, "No scope fits criteria"
+    assert len(_scopes) == 1, "Multiple scopes fit criteria"
+
+    return _scopes[0]
+
+
+def activities(name=None):
+    r = session.get(api_url('activities'), headers=HEADERS, params={
+        'name': name
+    })
+
+    assert r.status_code == 200, "Could not retrieve activities"
+
+    data = r.json()
+
+    return [Activity(a) for a in data['results']]
+
+
+def activity(*args, **kwargs):
+    _activities = activities(*args, **kwargs)
+
+    assert len(_activities) > 0, "No activity fits criteria"
+    assert len(_activities) == 1, "Multiple activities fit criteria"
+
+    return _activities[0]
+
+
+def parts(name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None):
+    r = session.get(api_url('parts'), headers=HEADERS, params={
         'id': pk,
         'name': name,
         'model': model.id if model else None,
-        'category': category
+        'category': category,
+        'bucket': bucket,
+        'activity_id': activity
     })
 
     assert r.status_code == 200, "Could not retrieve parts"
@@ -56,7 +108,7 @@ def model(*args, **kwargs):
 
 
 def properties(name=None, category='INSTANCE'):
-    r = requests.get(api_url('properties'), headers=HEADERS, params={
+    r = session.get(api_url('properties'), headers=HEADERS, params={
         'name': name,
         'category': category
     })
