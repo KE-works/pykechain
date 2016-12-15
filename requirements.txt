@@ -4,3 +4,6 @@ jupyterlab
 requests
 
 matplotlib
+
+betamax
+pytest
