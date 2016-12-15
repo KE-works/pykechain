@@ -12,9 +12,10 @@ class PartSet(object):
         return len(self._parts)
 
     def __getitem__(self, k):
-        assert isinstance(k, int), "[not implemented] non-integer indexing in PartSet"
+        if isinstance(k, int):
+            return self._parts[k]
 
-        return self._parts[k]
+        return [p.property(k).value for p in self._parts]
 
     def _repr_html_(self):
         from .api import api_url
