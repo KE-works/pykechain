@@ -1,9 +1,20 @@
 # Test in python 3.5 using a Docker runner
-test_35:
-  image: python:3.5
+#test_35:
+#  image: python:3.5
+#  script:
+#  - pip install -U --force pip
+#  - pip install -r requirements-testing.txt -U
+#  - pytest kechain2
+#  after_script:
+#  - echo "cleanup docker here"
+
+#testing with venv in py35
+test_27:
   script:
+  - virtualenv _venv
+  - . _venv/bin/activate
   - pip install -U --force pip
   - pip install -r requirements-testing.txt -U
   - pytest kechain2
   after_script:
-  - echo "cleanup docker here"
+  - echo "cleanup here"
