@@ -106,7 +106,9 @@ class Part(object):
         html.append("</tr>")
 
         for prop in self.properties:
-            html.append("<tr>")
+            style = "color:blue;" if prop.output else ""
+
+            html.append("<tr style=\"{}\">".format(style))
             html.append("<td>{}</td>".format(prop.name))
             html.append("<td>{}</td>".format(prop.value))
             html.append("</tr>")
@@ -123,6 +125,7 @@ class Property(object):
 
         self.id = json.get('id')
         self.name = json.get('name')
+        self.output = json.get('output')
 
         self._value = json.get('value')
 
