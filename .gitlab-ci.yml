@@ -7,7 +7,7 @@ test_py27:
   - source _venv/bin/activate
   - echo $VIRTUAL_ENV
   - pip install -U --force pip
-  - pip install -r requirements-testing.txt -U
+  - pip install -r requirements.txt -U
   - pytest kechain2
   tags:
   - python27
@@ -21,7 +21,7 @@ test_py35:
   - source _venv/bin/activate
   - echo $VIRTUAL_ENV
   - pip install -U --force pip
-  - pip install -r requirements-testing.txt -U
+  - pip install -r requirements.txt -U
   - pytest kechain2
   tags:
   - python35
