@@ -1,3 +1,32 @@
+#testing with venv in py27
+test_py27:
+  script:
+  - pwd
+  - virtualenv _venv --python=python2
+  - . _venv/bin/activate
+  - pip install -U --force pip
+  - pip install -r requirements-testing.txt -U
+  - pytest kechain2
+  tags:
+  - python27
+  after_script:
+  - deactivate
+
+# testing with venv in py35
+test_py35
+  script:
+  - pwd
+  - virtualenv _venv --python=python3
+  - . _venv/bin/activate
+  - pip install -U --force pip
+  - pip install -r requirements-testing.txt -U
+  - pytest kechain2
+  tags:
+  - python35
+  after_script:
+  - deactivate
+
+
 # Test in python 3.5 using a Docker runner
 #test_35:
 #  image: python:3.5
@@ -7,14 +36,3 @@
 #  - pytest kechain2
 #  after_script:
 #  - echo "cleanup docker here"
-
-#testing with venv in py35
-test_27:
-  script:
-  - virtualenv _venv
-  - . _venv/bin/activate
-  - pip install -U --force pip
-  - pip install -r requirements-testing.txt -U
-  - pytest kechain2
-  after_script:
-  - echo "cleanup here"
