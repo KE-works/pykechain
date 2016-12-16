@@ -13,7 +13,7 @@ class TestApi(object):
         with betamax.Betamax(client.session) as vcr:
             vcr.use_cassette('parts')
 
-            kechain2.login("***REMOVED***")
+            kechain2.login(token="***REMOVED***")
 
             part_set = kechain2.parts()
 
@@ -25,7 +25,7 @@ class TestApi(object):
         with betamax.Betamax(client.session) as vcr:
             vcr.use_cassette('part')
 
-            kechain2.login("***REMOVED***")
+            kechain2.login(token="***REMOVED***")
 
             gears = kechain2.part('Bike').property('Gears')
 
