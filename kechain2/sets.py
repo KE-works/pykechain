@@ -2,7 +2,9 @@
 
 class PartSet(object):
 
-    def __init__(self, parts):
+    def __init__(self, parts, client=None):
+        self._client = client
+
         self._parts = list(parts)
 
     def __iter__(self):
@@ -18,15 +20,13 @@ class PartSet(object):
         return [p.property(k).value for p in self._parts]
 
     def _repr_html_(self):
-        from .api import api_url
-
         all_instances = all(p.category == 'INSTANCE' for p in self._parts)
 
-        html = []
-
-        html.append("<table width=100%>")
-        html.append("<tr>")
-        html.append("<th>Part</th>")
+        html = [
+            "<table width=100%>",
+            "<tr>",
+            "<th>Part</th>"
+        ]
 
         if not all_instances:
             html.append("<th>Category</th>")
@@ -41,7 +41,7 @@ class PartSet(object):
             if not all_instances:
                 html.append("<td>{}</td>".format(part.category))
 
-            html.append("<td><a target='_blank' href={}>".format(api_url('part', part_id=part.id)))
+            html.append("<td><a target='_blank' href={}>".format(self._client.build_url('part', part_id=part.id)))
             html.append("{}</a></td>".format(part.id))
             html.append("</tr>")
 
