@@ -1,5 +1,6 @@
 import requests
 
+from kechain2.exceptions import LoginRequiredError
 from kechain2.models import Part
 from kechain2.sets import PartSet
 
@@ -33,8 +34,16 @@ class Client(object):
     def build_url(self, resource, **kwargs):
         return self.api_root + API_PATH[resource].format(**kwargs)
 
+    def _request(self, method, url, **kwargs):
+        r = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
+
+        if r.status_code == 403:
+            raise LoginRequiredError
+
+        return r
+
     def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None):
-        r = self.session.get(self.build_url('parts'), auth=self.auth, headers=self.headers, params={
+        r = self._request('GET', self.build_url('parts'), params={
             'id': pk,
             'name': name,
             'model': model.id if model else None,
