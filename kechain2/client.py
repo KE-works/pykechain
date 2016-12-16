@@ -20,15 +20,21 @@ class Client(object):
         self.session = requests.Session()
         self.api_root = 'http://localhost:8000/'
         self.headers = {}
+        self.auth = None
 
-    def login(self, token):
-        self.headers['Authorization'] = 'Token {}'.format(token)
+    def login(self, username=None, password=None, token=None):
+        if token:
+            self.headers['Authorization'] = 'Token {}'.format(token)
+            self.auth = None
+        else:
+            self.headers.pop('Authorization', None)
+            self.auth = (username, password)
 
     def build_url(self, resource, **kwargs):
         return self.api_root + API_PATH[resource].format(**kwargs)
 
     def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None):
-        r = self.session.get(self.build_url('parts'), headers=self.headers, params={
+        r = self.session.get(self.build_url('parts'), auth=self.auth, headers=self.headers, params={
             'id': pk,
             'name': name,
             'model': model.id if model else None,
