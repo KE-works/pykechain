@@ -1,6 +1,6 @@
 before_script:
   - pip install tox
-  - pip install pip wheel -U --force
+  - sudo pip install pip wheel -U --force
 
 
 test_py27:
