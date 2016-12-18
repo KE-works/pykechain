@@ -1,4 +1,3 @@
-
 DESCRIPTION = """ Open source Python API to KE-chain. Provide remote access and control through the public KE-chain api.
 Works only in combination with a valid KE-chain license. """
 
@@ -85,8 +84,8 @@ setup(
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        'dev': ['check-manifest','matplotlib','jupyter','jupyterlab'],
-        'test': ['pytest','coverage','betamax','matplotlib'],
+        'dev': ['check-manifest', 'matplotlib', 'jupyter', 'jupyterlab'],
+        'test': ['pytest', 'coverage', 'betamax', 'matplotlib'],
     },
 
     # If there are data files included in your packages that need to be
