@@ -1,7 +1,5 @@
 before_script:
   - pip install tox
-  - sudo pip install pip wheel -U --force
-
 
 test_py27:
   variables:
