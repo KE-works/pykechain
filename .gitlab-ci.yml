@@ -1,41 +1,53 @@
-#testing with venv in py27
 
-test_py27:
+# this file is *not* meant to cover or endorse the use of travis, but rather to
+# help confirm pull requests to this project.
+
+language: python
+
+variables:
+  - TOXENV=py26
+  - TOXENV=py27
+  - TOXENV=py33
+  - TOXENV=py34
+
+before_script:
+  - pip install tox
+
+test_with_tox:
   script:
-  - pwd
-  - virtualenv _venv27 --python=python2
-  - source _venv27/bin/activate
-  - echo $VIRTUAL_ENV
-  - pip install -U --force pip
-  - pip install -r requirements.txt -U -q
-  - pytest kechain2
-  tags:
-  - python27
-
-# testing with venv in py35
-
-test_py35:
-  script:
-  - pwd
-  - virtualenv _venv35 --python=python3
-  - source _venv35/bin/activate
-  - echo $VIRTUAL_ENV
-  - pip install -U --force pip
-  - pip install -r requirements.txt -U -q
-  - pytest kechain2
-  tags:
-  - python35
-
-after_script:
-- rm -rf _venv*
+    - tox
 
 
-# Test in python 3.5 using a Docker runner
-#test_35:
-#  image: python:3.5
+
+
+
+##testing with venv in py27
+#
+#test_py27:
 #  script:
+#  - pwd
+#  - virtualenv _venv27 --python=python2
+#  - source _venv27/bin/activate
+#  - echo $VIRTUAL_ENV
 #  - pip install -U --force pip
-#  - pip install -r requirements-testing.txt -U
+#  - pip install -r requirements.txt -U -q
 #  - pytest kechain2
-#  after_script:
-#  - echo "cleanup docker here"
+#  tags:
+#  - python27
+#
+## testing with venv in py35
+#
+#test_py35:
+#  script:
+#  - pwd
+#  - virtualenv _venv35 --python=python3
+#  - source _venv35/bin/activate
+#  - echo $VIRTUAL_ENV
+#  - pip install -U --force pip
+#  - pip install -r requirements.txt -U -q
+#  - pytest kechain2
+#  tags:
+#  - python35
+#
+#after_script:
+#- rm -rf _venv*
