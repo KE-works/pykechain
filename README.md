@@ -1,3 +1,5 @@
+[![build status](https://git.ke-works.net/wilco-schoneveld/jupyterlab/badges/master/build.svg)](https://git.ke-works.net/wilco-schoneveld/jupyterlab/commits/master)  
+
 
 install virtualenv python 3.5
 
