@@ -1,21 +1,17 @@
-
-# this file is *not* meant to cover or endorse the use of travis, but rather to
-# help confirm pull requests to this project.
-
-variables:
-  TOXENV: py27
-  TOXENV: py34
-
 before_script:
   - pip install tox
 
-test_with_tox:
+test_py27:
+  variables:
+  TOXENV:py27
   script:
     - tox
 
-
-
-
+test_py34:
+  variables:
+  TOXENV:py34
+  script:
+    - tox
 
 ##testing with venv in py27
 #
