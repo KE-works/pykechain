@@ -3,13 +3,13 @@ before_script:
 
 test_py27:
   variables:
-  TOXENV:py27
+    TOXENV: py27
   script:
     - tox
 
 test_py34:
   variables:
-  TOXENV:py34
+    TOXENV: py34
   script:
     - tox
 
