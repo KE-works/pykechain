@@ -3,10 +3,10 @@
 # help confirm pull requests to this project.
 
 variables:
-  - TOXENV:py26
-  - TOXENV:py27
-  - TOXENV:py33
-  - TOXENV:py34
+  TOXENV: py26
+  TOXENV: py27
+  TOXENV: py33
+  TOXENV: py34
 
 before_script:
   - pip install tox
