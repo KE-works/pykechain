@@ -29,6 +29,7 @@ class Client(object):
     def login(self, username=None, password=None, token=None):
         """
         Login into KE-chain with either username/password or token
+
         :param username: username for your user from KE-chain
         :param password: password for your user from KE-chain
         :param token: user authentication token retrieved from KE-chain
@@ -117,7 +118,7 @@ class Client(object):
 
         data = r.json()
 
-        return PartSet((Part(p) for p in data['results']), client=self)
+        return PartSet((Part(p, client=self) for p in data['results']))
 
     def part(self, *args, **kwargs):
         """

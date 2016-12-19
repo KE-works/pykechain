@@ -25,18 +25,14 @@ class Part(Base):
     def add_to(self, parent, **kwargs):
         return self._post_instance(parent, self, **kwargs)
 
-    @classmethod
-    def _post_instance(cls, parent, model, name=None):
-        from kechain2.api import session, api_url, HEADERS
-
+    def _post_instance(self, parent, model, name=None):
         assert parent.category == 'INSTANCE'
         assert model.category == 'MODEL'
 
         if not name:
             name = model.name
 
-        r = session.post(api_url('parts'),
-                         headers=HEADERS,
+        r = self._client._request('POST', self._client._build_url('parts'),
                          params={"select_action": "new_instance"},
                          data={
                              "name": name,

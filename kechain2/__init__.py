@@ -1,5 +1,1 @@
-from .api import (
-    login,
-    part,
-    parts
-)
+from .client import Client
