@@ -1,7 +1,7 @@
 import requests
 
 from kechain2.exceptions import LoginRequiredError
-from kechain2.models import Part
+from kechain2.models import Scope, Activity, Part, Property
 from kechain2.sets import PartSet
 
 API_PATH = {
@@ -53,6 +53,45 @@ class Client(object):
 
         return r
 
+    def scopes(self, name=None, status='ACTIVE'):
+        r = self._request('GET', self._build_url('scopes'), params={
+            'name': name,
+            'status': status
+        })
+
+        assert r.status_code == 200, "Could not retrieve scopes"
+
+        data = r.json()
+
+        return [Scope(s) for s in data['results']]
+
+    def scope(self, *args, **kwargs):
+        _scopes = self.scopes(*args, **kwargs)
+
+        assert len(_scopes) > 0, "No scope fits criteria"
+        assert len(_scopes) == 1, "Multiple scopes fit criteria"
+
+        return _scopes[0]
+
+    def activities(self, name=None):
+        r = self._request('GET', self._build_url('activities'), params={
+            'name': name
+        })
+
+        assert r.status_code == 200, "Could not retrieve activities"
+
+        data = r.json()
+
+        return [Activity(a) for a in data['results']]
+
+    def activity(self, *args, **kwargs):
+        _activities = self.activities(*args, **kwargs)
+
+        assert len(_activities) > 0, "No activity fits criteria"
+        assert len(_activities) == 1, "Multiple activities fit criteria"
+
+        return _activities[0]
+
     def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None):
         """
         Retrieve multiple KE-chain Parts
@@ -98,3 +137,25 @@ class Client(object):
         assert len(_parts) == 1, "Multiple parts fit criteria"
 
         return _parts[0]
+
+    def model(self, *args, **kwargs):
+        kwargs['category'] = 'MODEL'
+        _parts = self.parts(*args, **kwargs)
+
+        assert len(_parts) > 0, "No model fits criteria"
+        assert len(_parts) == 1, "Multiple models fit criteria"
+
+        return _parts[0]
+
+    def properties(self, name=None, category='INSTANCE'):
+        r = self._request('GET', self._build_url('properties'), params={
+            'name': name,
+            'category': category
+        })
+
+        assert r.status_code == 200, "Could not retrieve properties"
+
+        data = r.json()
+
+        return [Property(p) for p in data['results']]
+
