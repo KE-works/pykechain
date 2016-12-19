@@ -30,11 +30,9 @@ class Property(Base):
 
     @property
     def part(self):
-        from kechain2.api import part
-
         part_id = self._json_data['part']
 
-        return part(pk=part_id)
+        return self._client.part(pk=part_id)
 
     def _put_value(self, value):
         url = self._client._build_url('property', property_id=self.id)
