@@ -3,12 +3,10 @@ from kechain2.models import Base
 
 class Activity(Base):
 
-    def __init__(self, json):
-        super(Activity, self).__init__(json)
+    def __init__(self, json, **kwargs):
+        super(Activity, self).__init__(json, **kwargs)
 
         self.scope = json.get('scope')
 
     def parts(self, *args, **kwargs):
-        from kechain2.api import parts
-
-        return parts(*args, activity=self.id, **kwargs)
+        return self._client.parts(*args, activity=self.id, **kwargs)

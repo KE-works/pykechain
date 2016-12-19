@@ -1,3 +1,4 @@
+import io
 import matplotlib.figure
 
 from kechain2.models import Base
@@ -5,8 +6,8 @@ from kechain2.models import Base
 
 class Property(Base):
 
-    def __init__(self, json):
-        super(Property, self).__init__(json)
+    def __init__(self, json, **kwargs):
+        super(Property, self).__init__(json, **kwargs)
 
         self.output = json.get('output')
 
@@ -36,26 +37,22 @@ class Property(Base):
         return part(pk=part_id)
 
     def _put_value(self, value):
-        from kechain2.api import session, api_url, HEADERS
+        url = self._client._build_url('property', property_id=self.id)
 
-        r = session.put(api_url('property', property_id=self.id),
-                        headers=HEADERS,
-                        json={'value': value})
+        r = self._client._request('PUT', url, json={'value': value})
 
         assert r.status_code == 200, "Could not update property value"
 
     def _post_attachment(self, data):
-        from kechain2.api import session, api_url, HEADERS
+        url = self._client._build_url('property_upload', property_id=self.id)
 
-        r = session.post(api_url('property_upload', property_id=self.id),
-                         headers=HEADERS,
-                         data={"part": self._json_data['part']},
-                         files={"attachment": data})
+        r = self._client._request('POST', url,
+                              data={"part": self._json_data['part']},
+                              files={"attachment": data})
 
         assert r.status_code == 200, "Could not upload attachment"
 
     def _attach_plot(self, figure):
-        import io
         buffer = io.BytesIO()
 
         figure.savefig(buffer, format="png")

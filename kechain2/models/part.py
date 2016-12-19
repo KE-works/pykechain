@@ -4,8 +4,8 @@ from kechain2.utils import find
 
 class Part(Base):
 
-    def __init__(self, json):
-        super(Part, self).__init__(json)
+    def __init__(self, json, **kwargs):
+        super(Part, self).__init__(json, **kwargs)
 
         self.category = json.get('category')
 
