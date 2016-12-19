@@ -17,25 +17,22 @@ API_PATH = {
 
 class Client(object):
 
-    def __init__(self):
+    def __init__(self, url='http://localhost:8000/', check_certificates=True):
         self.session = requests.Session()
-        self.api_root = 'http://localhost:8000/'
+        self.api_root = url
         self.headers = {}
         self.auth = None
 
-    def login(self, username=None, password=None, token=None, url=None, check_certificate=True):
+        if not check_certificates:
+            self.session.verify = False
+
+    def login(self, username=None, password=None, token=None):
         """
         Login into KE-chain with either username/password or token
         :param username: username for your user from KE-chain
         :param password: password for your user from KE-chain
         :param token: user authentication token retrieved from KE-chain
-        :param url: url where KE-chain lives, defaults to localhost:8000 for development
-        :param check_certificate: checks ssl certificates, set to False to ignore https (self-signed) certificates
         """
-        if url:
-            self.api_root = url
-        if not check_certificate:
-            self.session = requests.Session(verify=False)
         if token:
             self.headers['Authorization'] = 'Token {}'.format(token)
             self.auth = None
