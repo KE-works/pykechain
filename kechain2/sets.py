@@ -2,9 +2,7 @@
 
 class PartSet(object):
 
-    def __init__(self, parts, client=None):
-        self._client = client
-
+    def __init__(self, parts):
         self._parts = list(parts)
 
     def __iter__(self):
@@ -41,8 +39,7 @@ class PartSet(object):
             if not all_instances:
                 html.append("<td>{}</td>".format(part.category))
 
-            html.append("<td><a target='_blank' href={}>".format(self._client._build_url('part', part_id=part.id)))
-            html.append("{}</a></td>".format(part.id))
+            html.append("<td>{}</td>".format(part.id))
             html.append("</tr>")
 
         html.append("</table>")
