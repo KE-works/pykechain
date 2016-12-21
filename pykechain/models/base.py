@@ -8,7 +8,7 @@ class Base(object):
 
         # If a client is not given, use default
         if not client:
-            from kechain2.api import client
+            from pykechain.api import client
             self._client = client
 
         self.id = json.get('id')
