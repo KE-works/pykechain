@@ -50,7 +50,7 @@ class Client(object):
         r = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
 
         if r.status_code == 403:
-            raise LoginRequiredError
+            raise LoginRequiredError(r.json()['results'][0]['detail'])
 
         return r
 
