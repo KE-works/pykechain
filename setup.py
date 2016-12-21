@@ -1,5 +1,5 @@
-DESCRIPTION = """ Open source Python API to KE-chain. Provide remote access and control through the public KE-chain API.
-Works only in combination with a valid KE-chain license. """
+DESCRIPTION = """pykechain is a an open source Python API to KE-chain. Provide remote access and control through the
+public KE-chain API. Works only in combination with a valid KE-chain license. KE-chain BV (c) 2016 """
 
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
@@ -22,10 +22,10 @@ setup(
     version='1.0.0.dev1',
 
     description='KE-chain Python SDK',
-    long_description=long_description,
+    long_description=DESCRIPTION,
 
     # The project's main homepage.
-    url='http://www.ke-chain.com',
+    url='https://github.com/KE-works/pykechain',
 
     # Author details
     author='KE-works BV',

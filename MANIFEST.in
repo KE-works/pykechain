@@ -1,2 +1,23 @@
 # Include the license file
 include LICENSE
+
+include README.rst CHANGES.rst CONTRIBUTING.md
+include tox.ini
+
+include *.ipynb
+include *.sh
+include *.txt
+include *.yml
+recursive-include docs *.bat
+recursive-include docs *.png
+recursive-include docs *.py
+recursive-include docs *.rst
+recursive-include docs Makefile
+
+recursive-include kechain2 *.py
+recursive-include kechain2 *.json
+
+recursive-include tests *.html
+recursive-include tests *.py
+recursive-include tests *.rst
+recursive-include tests *.json
