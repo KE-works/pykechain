@@ -11,7 +11,7 @@ Welcome to KE-chain Python API's documentation!
    :caption: Contents:
 
 
-.. autoclass:: kechain2.Client
+.. autoclass:: pykechain.Client
    :members:
    :undoc-members:
 
