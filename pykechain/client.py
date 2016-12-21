@@ -94,7 +94,7 @@ class Client(object):
         })
 
         if r.status_code == 200:
-            raise NotFoundError(msg="Could not retrieve scopes")
+            raise NotFoundError("Could not retrieve scopes")
 
         data = r.json()
 
@@ -113,9 +113,9 @@ class Client(object):
         _scopes = self.scopes(*args, **kwargs)
 
         if len(_scopes) == 0:
-            raise NotFoundError(msg="No scope fits criteria")
+            raise NotFoundError("No scope fits criteria")
         if len(_scopes) != 1:
-            raise MultipleFoundError(msg="Multiple scopes fit criteria")
+            raise MultipleFoundError("Multiple scopes fit criteria")
 
         return _scopes[0]
 
@@ -133,7 +133,7 @@ class Client(object):
         })
 
         if r.status_code == 200:
-            raise NotFoundError(msg="Could not retrieve activities")
+            raise NotFoundError("Could not retrieve activities")
 
         data = r.json()
 
@@ -151,10 +151,10 @@ class Client(object):
         _activities = self.activities(*args, **kwargs)
 
         if len(_activities) == 0:
-            raise NotFoundError(msg="No activity fits criteria")
+            raise NotFoundError("No activity fits criteria")
         # TODO: could also be a warning (see warnings.warn)
         if len(_activities) != 1:
-            raise MultipleFoundError(msg="Multiple activities fit criteria")
+            raise MultipleFoundError("Multiple activities fit criteria")
 
         return _activities[0]
 
@@ -181,7 +181,7 @@ class Client(object):
         })
 
         if r.status_code == 200:
-            raise NotFoundError(msg="Could not retrieve parts")
+            raise NotFoundError("Could not retrieve parts")
 
         data = r.json()
 
@@ -203,10 +203,10 @@ class Client(object):
         _parts = self.parts(*args, **kwargs)
 
         if len(_parts) == 0:
-            raise NotFoundError(msg="No part fits criteria")
+            raise NotFoundError("No part fits criteria")
         # TODO: could also be a warning (see warnings.warn)
         if len(_parts) != 1:
-            raise MultipleFoundError(msg="Multiple parts fit criteria")
+            raise MultipleFoundError("Multiple parts fit criteria")
 
         return _parts[0]
 
@@ -215,10 +215,10 @@ class Client(object):
         _parts = self.parts(*args, **kwargs)
 
         if len(_parts) == 0:
-            raise NotFoundError(msg="No model fits criteria")
+            raise NotFoundError("No model fits criteria")
         # TODO: could also be a warning (see warnings.warn)
         if len(_parts) != 1:
-            raise MultipleFoundError(msg="Multiple model fit criteria")
+            raise MultipleFoundError("Multiple model fit criteria")
 
         return _parts[0]
 
@@ -237,7 +237,7 @@ class Client(object):
         })
 
         if r.status_code == 200:
-            raise NotFoundError(msg="Could not retrieve properties")
+            raise NotFoundError("Could not retrieve properties")
 
         data = r.json()
 
