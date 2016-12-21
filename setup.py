@@ -1,4 +1,4 @@
-DESCRIPTION = """ Open source Python API to KE-chain. Provide remote access and control through the public KE-chain api.
+DESCRIPTION = """ Open source Python API to KE-chain. Provide remote access and control through the public KE-chain API.
 Works only in combination with a valid KE-chain license. """
 
 # Always prefer setuptools over distutils
@@ -19,9 +19,9 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.10',
+    version='1.0.0dev1',
 
-    description='Python API to KE-chain',
+    description='KE-chain Python SDK',
     long_description=DESCRIPTION,
 
     # The project's main homepage.
@@ -67,7 +67,7 @@ setup(
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    packages=find_packages(exclude=['kechain2', 'docs', 'kechain2.tests', 'kechain2.models']),
+    packages=find_packages(exclude=['tests']),
 
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
@@ -84,8 +84,8 @@ setup(
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        'dev': ['check-manifest', 'matplotlib', 'jupyter', 'jupyterlab'],
-        'test': ['pytest', 'coverage', 'betamax', 'matplotlib'],
+        'dev': ['check-manifest'],
+        'test': ['pytest', 'betamax'],
     },
 
     # If there are data files included in your packages that need to be
