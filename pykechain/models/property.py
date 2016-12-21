@@ -1,5 +1,4 @@
 import io
-import matplotlib.figure
 
 from pykechain.models import Base
 
@@ -19,10 +18,15 @@ class Property(Base):
 
     @value.setter
     def value(self, value):
-        if isinstance(value, matplotlib.figure.Figure):
-            self._attach_plot(value)
-            self._value = '<PLOT>'
-            return
+        try:
+            import matplotlib.figure
+
+            if isinstance(value, matplotlib.figure.Figure):
+                self._attach_plot(value)
+                self._value = '<PLOT>'
+                return
+        except ImportError:
+            pass
 
         if value != self._value:
             self._put_value(value)
