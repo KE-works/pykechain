@@ -30,7 +30,7 @@ Ensure you have member access to a KE-chain instance and login::
 
 Now interact with it::
 
-    project = kec.project.get('Bike')
+    project = kec.scope('Bike Project')
     for part in project.parts():
         print(part.name)
 
