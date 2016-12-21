@@ -1,6 +1,6 @@
 import requests
 
-from .exceptions import LoginRequiredError, NotFoundError, MultipleFoundError, MultipleFoundWarning
+from .exceptions import LoginRequiredError, NotFoundError, MultipleFoundError
 from .models import Scope, Activity, Part, Property
 from .sets import PartSet
 
@@ -16,7 +16,6 @@ API_PATH = {
 
 
 class Client(object):
-
     def __init__(self, url='http://localhost:8000/', check_certificates=True):
         """
         The KE-chain 2 python client to connect to a KE-chain (version 2) instance.
@@ -243,4 +242,3 @@ class Client(object):
         data = r.json()
 
         return [Property(p) for p in data['results']]
-
