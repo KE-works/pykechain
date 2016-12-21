@@ -1,7 +1,7 @@
 import io
 import matplotlib.figure
 
-from kechain2.models import Base
+from pykechain.models import Base
 
 
 class Property(Base):

@@ -1,5 +1,5 @@
-from kechain2.models import Base
-from kechain2.utils import find
+from pykechain.models import Base
+from pykechain.utils import find
 
 
 class Part(Base):
@@ -9,7 +9,7 @@ class Part(Base):
 
         self.category = json.get('category')
 
-        from kechain2.models import Property
+        from pykechain.models import Property
         self.properties = [Property(p) for p in json['properties']]
 
     def property(self, name):

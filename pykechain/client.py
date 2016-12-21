@@ -1,8 +1,8 @@
 import requests
 
-from kechain2.exceptions import LoginRequiredError
-from kechain2.models import Scope, Activity, Part, Property
-from kechain2.sets import PartSet
+from .exceptions import LoginRequiredError
+from .models import Scope, Activity, Part, Property
+from .sets import PartSet
 
 API_PATH = {
     'scopes': 'api/scopes.json',

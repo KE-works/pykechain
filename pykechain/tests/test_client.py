@@ -1,4 +1,4 @@
-from kechain2.client import Client
+from pykechain.client import Client
 
 
 class TestClient(object):
