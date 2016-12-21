@@ -7,11 +7,11 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
-# here = path.abspath(path.dirname(__file__))
-#
-# # Get the long description from the README file
-# with open(path.join(here, 'README.md')) as f:
-#     long_description = f.read()
+here = path.abspath(path.dirname(__file__))
+
+# Get the long description from the README file
+with open(path.join(here, 'README.md')) as f:
+    long_description = f.read()
 
 setup(
     name='pykechain',
@@ -22,7 +22,7 @@ setup(
     version='1.0.0.dev1',
 
     description='KE-chain Python SDK',
-    long_description=DESCRIPTION,
+    long_description=long_description,
 
     # The project's main homepage.
     url='http://www.ke-chain.com',
