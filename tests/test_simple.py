@@ -3,7 +3,7 @@ import pykechain
 
 
 with betamax.Betamax.configure() as config:
-    config.cassette_library_dir = 'kechain2/tests/cassettes'
+    config.cassette_library_dir = 'tests/cassettes'
 
 
 class TestApi(object):
@@ -13,9 +13,9 @@ class TestApi(object):
         with betamax.Betamax(client.session) as vcr:
             vcr.use_cassette('parts')
 
-            pykechain.login(token="e920094902818b26feb4fac3dfa2904fff88649c")
+            client.login(token="e920094902818b26feb4fac3dfa2904fff88649c")
 
-            part_set = pykechain.parts()
+            part_set = client.parts()
 
             assert len(part_set) == 29
 
@@ -25,8 +25,8 @@ class TestApi(object):
         with betamax.Betamax(client.session) as vcr:
             vcr.use_cassette('part')
 
-            pykechain.login(token="e920094902818b26feb4fac3dfa2904fff88649c")
+            client.login(token="e920094902818b26feb4fac3dfa2904fff88649c")
 
-            gears = pykechain.part('Bike').property('Gears')
+            gears = client.part('Bike').property('Gears')
 
             assert gears.value == 6
