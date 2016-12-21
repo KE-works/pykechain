@@ -25,6 +25,11 @@ class Part(Base):
     def add_to(self, parent, **kwargs):
         return self._post_instance(parent, self, **kwargs)
 
+    def delete(self):
+        r = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
+
+        assert r.status_code == 204, "Could not delete part"
+
     def _post_instance(self, parent, model, name=None):
         assert parent.category == 'INSTANCE'
         assert model.category == 'MODEL'
