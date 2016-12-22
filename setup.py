@@ -84,14 +84,8 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=['requests'],
 
-    # List additional groups of dependencies here (e.g. development
-    # dependencies). You can install these using the following syntax,
-    # for example:
-    # $ pip install -e .[dev,test]
-    extras_require={
-        'dev': ['check-manifest'],
-        'test': ['pytest', 'betamax'],
-    },
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest', 'betamax'],
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
