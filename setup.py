@@ -7,29 +7,34 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
-here = path.abspath(path.dirname(__file__))
+PACKAGE_NAME = 'pykechain'
+HERE = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+with open(path.join(HERE, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
+ABOUT = {}
+with open(path.join(HERE, PACKAGE_NAME, '__about__.py')) as f:
+    exec(f.read(), ABOUT)
+
 setup(
-    name='pykechain',
+    name=ABOUT['name'],
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='1.0.0.dev1',
+    version=ABOUT['version'],
 
-    description='KE-chain Python SDK',
+    description=ABOUT['description'],
     long_description=long_description,
 
     # The project's main homepage.
     url='https://github.com/KE-works/pykechain',
 
     # Author details
-    author='KE-works BV',
-    author_email='support+python_api@ke-works.com',
+    author=ABOUT['author'],
+    author_email=ABOUT['email'],
 
     # Choose your license
     license='Apache Open Source License 2.0',

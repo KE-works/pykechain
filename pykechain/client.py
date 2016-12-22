@@ -175,7 +175,7 @@ class Client(object):
     def part(self, *args, **kwargs):
         """Retrieve single KE-chain Part
 
-        :return: a single :obj:`Part:
+        :return: a single :obj:`Part`
         :raises: NotFoundError, MultipleFoundError
         """
         _parts = self.parts(*args, **kwargs)
