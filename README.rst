@@ -9,6 +9,11 @@ KE-chain Python SDK
     :target: http://pykechain.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
+.. image:: https://coveralls.io/repos/github/KE-works/pykechain/badge.svg?branch=master
+    :target: https://coveralls.io/github/KE-works/pykechain?branch=master
+    :alt: Coverage Status
+
+
 About pykechain
 ---------------
 
