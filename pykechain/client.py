@@ -1,6 +1,6 @@
 import requests
 
-from .exceptions import LoginRequiredError
+from .exceptions import LoginRequiredError, NotFoundError, MultipleFoundError
 from .models import Scope, Activity, Part, Property
 from .sets import PartSet
 
@@ -16,8 +16,21 @@ API_PATH = {
 
 
 class Client(object):
-
     def __init__(self, url='http://localhost:8000/', check_certificates=True):
+        """The KE-chain 2 python client to connect to a KE-chain (version 2) instance.
+
+        :param url: the url of the KE-chain instance to connect to (defaults to http://localhost:8000)
+        :param check_certificates: if to check TLS/SSL Certificates. Defaults to True
+
+        Examples
+        --------
+        >>> from pykechain import Client
+        >>> kec = Client()
+
+        >>> from pykechain import Client
+        >>> kec = Client(url='https://default-tst.localhost:9443', check_certificates=False)
+
+        """
         self.session = requests.Session()
         self.api_root = url
         self.headers = {}
@@ -27,12 +40,19 @@ class Client(object):
             self.session.verify = False
 
     def login(self, username=None, password=None, token=None):
-        """
-        Login into KE-chain with either username/password or token
+        """Login into KE-chain with either username/password or token
 
         :param username: username for your user from KE-chain
         :param password: password for your user from KE-chain
         :param token: user authentication token retrieved from KE-chain
+
+        Examples
+        --------
+        >>> kec = Client()
+        >>> kec.login(token='<some-super-long-secret-token>')
+
+        >>> kec = Client()
+        >>> kec.login(username='user', password='pw')
         """
         if token:
             self.headers['Authorization'] = 'Token {}'.format(token)
@@ -49,61 +69,92 @@ class Client(object):
         """helper method to perform the request on the API"""
         r = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
 
-        if r.status_code == 403:
+        if r.status_code == requests.codes.forbidden:
             raise LoginRequiredError(r.json()['results'][0]['detail'])
 
         return r
 
     def scopes(self, name=None, status='ACTIVE'):
+        """Returns all scopes visible / accessible for the logged in user
+
+        :param name: if provided, filter the search for a scope/project by name
+        :param status: if provided, filter the search for the status. eg. 'ACTIVE', 'TEMPLATE', 'LIBRARY'
+        :return: :obj:`list` of :obj:`Scope`
+        :raises: NotFoundError
+        """
         r = self._request('GET', self._build_url('scopes'), params={
             'name': name,
             'status': status
         })
 
-        assert r.status_code == 200, "Could not retrieve scopes"
+        if r.status_code != requests.codes.ok:
+            raise NotFoundError("Could not retrieve scopes")
 
         data = r.json()
 
         return [Scope(s) for s in data['results']]
 
     def scope(self, *args, **kwargs):
+        """Returns a single scope based on the provided name.
+
+        :return: a single :obj:`Scope`
+        :raises: NotFoundError, MultipleFoundError
+        """
         _scopes = self.scopes(*args, **kwargs)
 
-        assert len(_scopes) > 0, "No scope fits criteria"
-        assert len(_scopes) == 1, "Multiple scopes fit criteria"
+        if len(_scopes) == 0:
+            raise NotFoundError("No scope fits criteria")
+        if len(_scopes) != 1:
+            raise MultipleFoundError("Multiple scopes fit criteria")
 
         return _scopes[0]
 
     def activities(self, name=None):
+        """Searches on activities with optional name filter.
+
+        :param name: filter the activities by name
+        :return: :obj:`list` of :obj:`Activity`
+        :raises: NotFoundError
+        """
         r = self._request('GET', self._build_url('activities'), params={
             'name': name
         })
 
-        assert r.status_code == 200, "Could not retrieve activities"
+        if r.status_code != requests.codes.ok:
+            raise NotFoundError("Could not retrieve activities")
 
         data = r.json()
 
         return [Activity(a) for a in data['results']]
 
     def activity(self, *args, **kwargs):
+        """Ssearches for a single activity
+
+        :param name: Name of the activity to search
+        :return: a single :obj:`Activity`
+        :raises: NotFoundError, MultipleFoundError
+        """
         _activities = self.activities(*args, **kwargs)
 
-        assert len(_activities) > 0, "No activity fits criteria"
-        assert len(_activities) == 1, "Multiple activities fit criteria"
+        if len(_activities) == 0:
+            raise NotFoundError("No activity fits criteria")
+        # TODO: could also be a warning (see warnings.warn)
+        if len(_activities) != 1:
+            raise MultipleFoundError("Multiple activities fit criteria")
 
         return _activities[0]
 
     def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None):
-        """
-        Retrieve multiple KE-chain Parts
+        """Retrieve multiple KE-chain Parts
 
         :param name: filter on name
         :param pk: filter on primary key
         :param model: filter on model_id
-        :param category: filter on category_id
+        :param category: filter on category (INSTANCE, MODEL, None)
         :param bucket: filter on bucket_id
         :param activity: filter on activity_id
-        :return: a list of Parts
+        :return: :obj:`PartSet`
+        :raises: NotFoundError
         """
         r = self._request('GET', self._build_url('parts'), params={
             'id': pk,
@@ -114,49 +165,62 @@ class Client(object):
             'activity_id': activity
         })
 
-        assert r.status_code == 200, "Could not retrieve parts"
+        if r.status_code != requests.codes.ok:
+            raise NotFoundError("Could not retrieve parts")
 
         data = r.json()
 
         return PartSet((Part(p, client=self) for p in data['results']))
 
     def part(self, *args, **kwargs):
-        """
-        Retrieve single KE-chain Part, if multiple parts are returned if will notify and returns the first part.
+        """Retrieve single KE-chain Part
 
-        :param name: filter on name
-        :param pk: filter on primary key
-        :param model: filter on model_id
-        :param category: filter on category_id
-        :param bucket: filter on bucket_id
-        :param activity: filter on activity_id
-        :return: a single Part or AssertionError
+        :return: a single :obj:`Part:
+        :raises: NotFoundError, MultipleFoundError
         """
         _parts = self.parts(*args, **kwargs)
 
-        assert len(_parts) > 0, "No part fits criteria"
-        assert len(_parts) == 1, "Multiple parts fit criteria"
+        if len(_parts) == 0:
+            raise NotFoundError("No part fits criteria")
+        # TODO: could also be a warning (see warnings.warn)
+        if len(_parts) != 1:
+            raise MultipleFoundError("Multiple parts fit criteria")
 
         return _parts[0]
 
     def model(self, *args, **kwargs):
+        """Retrieve single KE-chain model
+
+        :return: a single :obj:`Part`
+        :raises: NotFoundError, MultipleFoundError
+        """
         kwargs['category'] = 'MODEL'
         _parts = self.parts(*args, **kwargs)
 
-        assert len(_parts) > 0, "No model fits criteria"
-        assert len(_parts) == 1, "Multiple models fit criteria"
+        if len(_parts) == 0:
+            raise NotFoundError("No model fits criteria")
+        # TODO: could also be a warning (see warnings.warn)
+        if len(_parts) != 1:
+            raise MultipleFoundError("Multiple model fit criteria")
 
         return _parts[0]
 
     def properties(self, name=None, category='INSTANCE'):
+        """Retrieves properties
+
+        :param name: name to limit the search for.
+        :param category: filter the properties by category. Defaults to INSTANCE. Other options MODEL or None
+        :return: :obj:`list` of :obj:`Property`
+        :raises: NotFoundError
+        """
         r = self._request('GET', self._build_url('properties'), params={
             'name': name,
             'category': category
         })
 
-        assert r.status_code == 200, "Could not retrieve properties"
+        if r.status_code != requests.codes.ok:
+            raise NotFoundError("Could not retrieve properties")
 
         data = r.json()
 
         return [Property(p) for p in data['results']]
-
