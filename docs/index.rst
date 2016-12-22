@@ -12,8 +12,7 @@ Welcome to KE-chain Python API's documentation!
 
 
 .. autoclass:: pykechain.Client
-   :members:
-   :undoc-members:
+    :members:
 
 .. note::
    hallo pas op
