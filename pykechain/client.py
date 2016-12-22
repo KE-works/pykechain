@@ -52,7 +52,7 @@ class Client(object):
         Token Authentication::
         >>> from pykechain import Client
         >>> kec = Client()
-        >>> kec.login(Token='<some-super-long-secret-token-you-download-from-your-kechain-user-profile')
+        >>> kec.login(token='<some-super-long-secret-token-you-download-from-your-kechain-user-profile>')
 
         Basic Authentication::
         >>> from pykechain import Client
@@ -74,7 +74,7 @@ class Client(object):
         """helper method to perform the request on the API"""
         r = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
 
-        if r.status_code == 403:
+        if r.status_code == requests.codes.forbidden:
             raise LoginRequiredError(r.json()['results'][0]['detail'])
 
         return r
@@ -93,7 +93,7 @@ class Client(object):
             'status': status
         })
 
-        if r.status_code == 200:
+        if r.status_code != requests.codes.ok:
             raise NotFoundError("Could not retrieve scopes")
 
         data = r.json()
@@ -132,7 +132,7 @@ class Client(object):
             'name': name
         })
 
-        if r.status_code == 200:
+        if r.status_code != requests.codes.ok:
             raise NotFoundError("Could not retrieve activities")
 
         data = r.json()
@@ -180,7 +180,7 @@ class Client(object):
             'activity_id': activity
         })
 
-        if r.status_code == 200:
+        if r.status_code != requests.codes.ok:
             raise NotFoundError("Could not retrieve parts")
 
         data = r.json()
@@ -236,7 +236,7 @@ class Client(object):
             'category': category
         })
 
-        if r.status_code == 200:
+        if r.status_code != requests.codes.ok:
             raise NotFoundError("Could not retrieve properties")
 
         data = r.json()

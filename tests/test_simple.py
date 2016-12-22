@@ -7,7 +7,7 @@ import pykechain
 with betamax.Betamax.configure() as config:
     config.cassette_library_dir = 'tests/cassettes'
 
-@skip
+
 class TestApi(object):
     def test_parts(self):
         from pykechain.api import client
