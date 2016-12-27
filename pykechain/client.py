@@ -1,4 +1,5 @@
 import requests
+from requests.compat import urljoin
 
 from .exceptions import LoginRequiredError, NotFoundError, MultipleFoundError
 from .models import Scope, Activity, Part, Property
@@ -63,7 +64,7 @@ class Client(object):
 
     def _build_url(self, resource, **kwargs):
         """helper method to build the correct API url"""
-        return self.api_root + API_PATH[resource].format(**kwargs)
+        return urljoin(self.api_root, API_PATH[resource].format(**kwargs))
 
     def _request(self, method, url, **kwargs):
         """helper method to perform the request on the API"""
