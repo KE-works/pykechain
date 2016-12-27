@@ -1,18 +1,25 @@
 
+class APIError(Exception):
+    """
+    A general API Error
 
-class LoginRequiredError(Exception):
+    A end-user descriptive message is required
+    """
+    pass
+
+class LoginRequiredError(APIError):
     """
     A login is required
     """
     pass
 
-class MultipleFoundError(Exception):
+class MultipleFoundError(APIError):
     """
     Multiple objects are found, while a single object is requested
     """
     pass
 
-class NotFoundError(Exception):
+class NotFoundError(APIError):
     """
     Object not found error
     """

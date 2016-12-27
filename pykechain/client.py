@@ -9,7 +9,7 @@ API_PATH = {
     'scopes': 'api/scopes.json',
     'activities': 'api/activities.json',
     'parts': 'api/parts.json',
-    'part': 'api/parts/{part_id}',
+    'part': 'api/parts/{part_id}.json',
     'properties': 'api/properties.json',
     'property': 'api/properties/{property_id}.json',
     'property_upload': 'api/properties/{property_id}/upload'
@@ -49,11 +49,16 @@ class Client(object):
 
         Examples
         --------
+        Using Token Authentication (retrieve user Token from the KE-chain instance)
         >>> kec = Client()
         >>> kec.login(token='<some-super-long-secret-token>')
 
+        Using Basic authentications (Username/Password)
         >>> kec = Client()
         >>> kec.login(username='user', password='pw')
+
+        >>> kec = Client()
+        >>> kec.login('username','password')
         """
         if token:
             self.headers['Authorization'] = 'Token {}'.format(token)
@@ -82,6 +87,14 @@ class Client(object):
         :param status: if provided, filter the search for the status. eg. 'ACTIVE', 'TEMPLATE', 'LIBRARY'
         :return: :obj:`list` of :obj:`Scope`
         :raises: NotFoundError
+
+        Example
+        -------
+
+        >>> kec = Client(url='https://default.localhost:9443', verify=False)
+        >>> kec.login('admin','pass')
+        >>> kec.scopes()  # doctest: Ellipsis
+        ...
         """
         r = self._request('GET', self._build_url('scopes'), params={
             'name': name,
