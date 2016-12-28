@@ -14,12 +14,16 @@ class PartSet(object):
 
     def __init__(self, parts):
         self._parts = list(parts)
+        self._iter = iter(self._parts)
 
     def __iter__(self):
-        return self._parts.__iter__()
+        return self
 
     def __len__(self):
         return len(self._parts)
+
+    def __next__(self):
+        return next(self._iter)
 
     def __getitem__(self, k):
         if isinstance(k, int):
