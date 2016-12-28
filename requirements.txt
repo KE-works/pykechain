@@ -11,6 +11,7 @@ matplotlib
 #testing
 betamax
 pytest
+envparse
 
 #documentation
 Sphinx

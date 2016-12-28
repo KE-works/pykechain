@@ -61,3 +61,6 @@ docs/_build/
 .venv/
 venv/
 ENV/
+
+# local environment settings
+.env
