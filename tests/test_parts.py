@@ -42,3 +42,12 @@ class TestPartAPI(TestCase):
             self.assertEqual(type(scope), Scope)
             self.assertEqual(scope.name, "Bike Project")
             self.assertEqual(scope.id, TEST_SCOPE_ID)
+
+    def test_iterable_partset(self):
+        with Betamax(self.client.session) as vcr:
+            vcr.use_cassette(get_method_name())
+            self.client.login(token=TEST_TOKEN)
+            partset = self.client.parts()
+
+            # should not raise an error
+            self.assertTrue(len([p for p in partset])>=2)
