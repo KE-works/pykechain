@@ -2,8 +2,7 @@ import requests
 from requests.compat import urljoin
 
 from .exceptions import LoginRequiredError, NotFoundError, MultipleFoundError
-from .models import Scope, Activity, Part, Property
-from .sets import PartSet
+from .models import Scope, Activity, Part, PartSet, Property
 
 API_PATH = {
     'scopes': 'api/scopes.json',
@@ -80,10 +79,11 @@ class Client(object):
 
         return r
 
-    def scopes(self, name=None, status='ACTIVE'):
+    def scopes(self, name=None, id=None, status='ACTIVE'):
         """Returns all scopes visible / accessible for the logged in user
 
         :param name: if provided, filter the search for a scope/project by name
+        :param id: if provided, filter the search by scope_id
         :param status: if provided, filter the search for the status. eg. 'ACTIVE', 'TEMPLATE', 'LIBRARY'
         :return: :obj:`list` of :obj:`Scope`
         :raises: NotFoundError
@@ -95,9 +95,13 @@ class Client(object):
         >>> kec.login('admin','pass')
         >>> kec.scopes()  # doctest: Ellipsis
         ...
+
+        >>> kec.scopes(name="Bike Project") # doctest: Ellipsis
+        ...
         """
         r = self._request('GET', self._build_url('scopes'), params={
             'name': name,
+            'id': id,
             'status': status
         })
 
@@ -152,7 +156,6 @@ class Client(object):
 
         if len(_activities) == 0:
             raise NotFoundError("No activity fits criteria")
-        # TODO: could also be a warning (see warnings.warn)
         if len(_activities) != 1:
             raise MultipleFoundError("Multiple activities fit criteria")
 
@@ -196,7 +199,6 @@ class Client(object):
 
         if len(_parts) == 0:
             raise NotFoundError("No part fits criteria")
-        # TODO: could also be a warning (see warnings.warn)
         if len(_parts) != 1:
             raise MultipleFoundError("Multiple parts fit criteria")
 
@@ -213,7 +215,6 @@ class Client(object):
 
         if len(_parts) == 0:
             raise NotFoundError("No model fits criteria")
-        # TODO: could also be a warning (see warnings.warn)
         if len(_parts) != 1:
             raise MultipleFoundError("Multiple model fit criteria")
 
