@@ -10,7 +10,7 @@ class Part(Base):
         self.category = json.get('category')
 
         from pykechain.models import Property
-        self.properties = [Property(p) for p in json['properties']]
+        self.properties = [Property(p, client=self._client) for p in json['properties']]
 
     def property(self, name):
         found = find(self.properties, lambda p: name == p.name)
