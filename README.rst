@@ -24,8 +24,8 @@ many other aspects of KE-chain from python scripts or iPython / `Jupyter <http:/
 
 It requires normal user access to a KE-chain (version 2) instance for it to work.
 
-Very Basic Use
---------------
+Basic usage
+-----------
 
 Ensure you have member access to a KE-chain instance and login::
 

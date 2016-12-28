@@ -110,7 +110,7 @@ class Client(object):
 
         data = r.json()
 
-        return [Scope(s) for s in data['results']]
+        return [Scope(s, client=self) for s in data['results']]
 
     def scope(self, *args, **kwargs):
         """Returns a single scope based on the provided name.
@@ -143,7 +143,7 @@ class Client(object):
 
         data = r.json()
 
-        return [Activity(a) for a in data['results']]
+        return [Activity(a, client=self) for a in data['results']]
 
     def activity(self, *args, **kwargs):
         """Ssearches for a single activity
@@ -238,4 +238,4 @@ class Client(object):
 
         data = r.json()
 
-        return [Property(p) for p in data['results']]
+        return [Property(p, client=self) for p in data['results']]
