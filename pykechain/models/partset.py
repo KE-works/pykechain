@@ -1,6 +1,4 @@
 
-#TODO: add proper iterator functionality [p for p in partset]
-
 class PartSet(object):
     """
     A Set of Parts
@@ -23,6 +21,9 @@ class PartSet(object):
         return len(self._parts)
 
     def __next__(self):
+        return next(self._iter)
+
+    def next(self):
         return next(self._iter)
 
     def __getitem__(self, k):
