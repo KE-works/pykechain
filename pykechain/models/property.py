@@ -1,5 +1,3 @@
-import io
-
 from pykechain.exceptions import APIError
 from pykechain.models import Base
 
@@ -18,16 +16,6 @@ class Property(Base):
 
     @value.setter
     def value(self, value):
-        try:
-            import matplotlib.figure
-
-            if isinstance(value, matplotlib.figure.Figure):
-                self._attach_plot(value)
-                self._value = '<PLOT>'
-                return
-        except ImportError:
-            pass
-
         if value != self._value:
             self._put_value(value)
             self._value = value
@@ -46,21 +34,10 @@ class Property(Base):
         if r.status_code != 200:
             raise APIError("Could not update property value")
 
-    def _post_attachment(self, data):
-        url = self._client._build_url('property_upload', property_id=self.id)
-
-        r = self._client._request('POST', url,
-                                  data={"part": self._json_data['part']},
-                                  files={"attachment": data})
-
-        if r.status_code != 200:
-            raise APIError("Could not upload attachment")
-
-    def _attach_plot(self, figure):
-        buffer = io.BytesIO()
-
-        figure.savefig(buffer, format="png")
-
-        data = ('plot.png', buffer.getvalue(), 'image/png')
-
-        self._post_attachment(data)
+    @classmethod
+    def create(cls, json, **kwargs):
+        if json.get('property_type') == 'ATTACHMENT_VALUE':
+            from pykechain.models import AttachmentProperty
+            return AttachmentProperty(json, **kwargs)
+        else:
+            return Property(json, **kwargs)
