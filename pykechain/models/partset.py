@@ -2,6 +2,15 @@
 #TODO: add proper iterator functionality [p for p in partset]
 
 class PartSet(object):
+    """
+    A Set of Parts
+
+    Adding set-like methods on a list of parts:
+     * iterable
+     * len()
+     * get()
+     * iPython notebook support for HTML table
+    """
 
     def __init__(self, parts):
         self._parts = list(parts)
