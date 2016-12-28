@@ -1,3 +1,4 @@
+from pykechain.exceptions import NotFoundError, APIError
 from pykechain.models import Base
 from pykechain.utils import find
 
@@ -15,7 +16,8 @@ class Part(Base):
     def property(self, name):
         found = find(self.properties, lambda p: name == p.name)
 
-        assert found, "Could not find property with name {}".format(name)
+        if not found:
+            raise NotFoundError("Could not find property with name {}".format(name))
 
         return found
 
@@ -28,7 +30,8 @@ class Part(Base):
     def delete(self):
         r = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
 
-        assert r.status_code == 204, "Could not delete part"
+        if r.status_code != 204:
+            raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
 
     def _post_instance(self, parent, model, name=None):
         assert parent.category == 'INSTANCE'
@@ -44,8 +47,8 @@ class Part(Base):
                              "parent": parent.id,
                              "model": model.id
                          })
-
-        assert r.status_code == 201, "Could not create part"
+        if r.status_code != 201:
+            raise APIError("Could not create part: {}".format(self.name))
 
         data = r.json()
 
