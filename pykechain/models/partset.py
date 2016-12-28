@@ -1,4 +1,5 @@
 
+#TODO: add proper iterator functionality [p for p in partset]
 
 class PartSet(object):
 
