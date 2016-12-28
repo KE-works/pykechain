@@ -49,7 +49,7 @@ class Part(Base):
 
         data = r.json()
 
-        return Part(data['results'][0])
+        return Part(data['results'][0], client=self._client)
 
     def _repr_html_(self):
         html = [
