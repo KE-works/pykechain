@@ -21,9 +21,11 @@ class PartSet(object):
         return len(self._parts)
 
     def __next__(self):
+        # py3.4 and up style next
         return next(self._iter)
 
     def next(self):
+        # py27 style next
         return self.__next__()
 
     def __getitem__(self, k):
