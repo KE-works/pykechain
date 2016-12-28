@@ -24,7 +24,7 @@ class PartSet(object):
         return next(self._iter)
 
     def next(self):
-        return next(self._iter)
+        return self.__next__()
 
     def __getitem__(self, k):
         if isinstance(k, int):
