@@ -1,10 +1,10 @@
 import io
 
+from pykechain.exceptions import APIError
 from pykechain.models import Base
 
 
 class Property(Base):
-
     def __init__(self, json, **kwargs):
         super(Property, self).__init__(json, **kwargs)
 
@@ -43,16 +43,18 @@ class Property(Base):
 
         r = self._client._request('PUT', url, json={'value': value})
 
-        assert r.status_code == 200, "Could not update property value"
+        if r.status_code != 200:
+            raise APIError("Could not update property value")
 
     def _post_attachment(self, data):
         url = self._client._build_url('property_upload', property_id=self.id)
 
         r = self._client._request('POST', url,
-                              data={"part": self._json_data['part']},
-                              files={"attachment": data})
+                                  data={"part": self._json_data['part']},
+                                  files={"attachment": data})
 
-        assert r.status_code == 200, "Could not upload attachment"
+        if r.status_code != 200:
+            raise APIError("Could not upload attachment")
 
     def _attach_plot(self, figure):
         buffer = io.BytesIO()
