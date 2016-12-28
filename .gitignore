@@ -56,8 +56,12 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+docs/*.html
 
 # virtualenv
 .venv/
 venv/
 ENV/
+
+# local environment settings
+.env
