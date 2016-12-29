@@ -1,5 +1,5 @@
 #basis
-requests
+requests==2.12.4
 jupyter==1.0.0
 
 # optional jupyterlab
