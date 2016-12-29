@@ -17,6 +17,11 @@ KE-chain Python SDK
     :target: https://pypi.python.org/pypi/pykechain
     :alt: Supported Python Versions
 
+.. image:: https://pyup.io/repos/github/ke-works/pykechain/shield.svg
+     :target: https://pyup.io/repos/github/ke-works/pykechain/
+     :alt: Updates
+
+
 About pykechain
 ---------------
 
