@@ -14,4 +14,4 @@ pytest
 envparse
 
 #documentation
-Sphinx
+Sphinx==1.5.1
