@@ -1,6 +1,6 @@
 #basis
 requests
-jupyter
+jupyter==1.0.0
 
 # optional jupyterlab
 jupyterlab
