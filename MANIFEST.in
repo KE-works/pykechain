@@ -1,13 +1,14 @@
 # Include the license file
 include LICENSE
 
-include README.rst CHANGES.rst CONTRIBUTING.md
+include README.rst CHANGES.rst CONTRIBUTING.rst
 include tox.ini
 
 include *.ipynb
 include *.sh
 include *.txt
 include *.yml
+
 recursive-include docs *.bat
 recursive-include docs *.png
 recursive-include docs *.py
