@@ -9,7 +9,7 @@ jupyterlab
 matplotlib
 
 #testing
-betamax
+betamax==0.8.0
 pytest
 envparse
 
