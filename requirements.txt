@@ -3,7 +3,7 @@ requests==2.12.4
 jupyter==1.0.0
 
 # optional jupyterlab
-jupyterlab
+jupyterlab==0.12.1
 
 # doing some science
 matplotlib==1.5.3
