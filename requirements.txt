@@ -11,7 +11,7 @@ matplotlib==1.5.3
 #testing
 betamax==0.8.0
 pytest==3.0.5
-envparse
+envparse==0.2.0
 
 #documentation
 Sphinx==1.5.1
