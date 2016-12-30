@@ -7,17 +7,20 @@ class APIError(Exception):
     """
     pass
 
+
 class LoginRequiredError(APIError):
     """
     A login is required
     """
     pass
 
+
 class MultipleFoundError(APIError):
     """
     Multiple objects are found, while a single object is requested
     """
     pass
+
 
 class NotFoundError(APIError):
     """

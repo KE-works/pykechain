@@ -40,13 +40,16 @@ class Part(Base):
         if not name:
             name = model.name
 
+        data = {
+            "name": name,
+            "parent": parent.id,
+            "model": model.id
+        }
+
         r = self._client._request('POST', self._client._build_url('parts'),
-                         params={"select_action": "new_instance"},
-                         data={
-                             "name": name,
-                             "parent": parent.id,
-                             "model": model.id
-                         })
+                                  params={"select_action": "new_instance"},
+                                  data=data)
+
         if r.status_code != 201:
             raise APIError("Could not create part: {}".format(self.name))
 
