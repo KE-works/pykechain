@@ -1,17 +1,17 @@
 #basis
-requests
-jupyter
+requests==2.12.4
+jupyter==1.0.0
 
 # optional jupyterlab
-jupyterlab
+jupyterlab==0.12.1
 
 # doing some science
-matplotlib
+matplotlib==1.5.3
 
 #testing
-betamax
-pytest
-envparse
+betamax==0.8.0
+pytest==3.0.5
+envparse==0.2.0
 
 #documentation
-Sphinx
+Sphinx==1.5.1
