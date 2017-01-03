@@ -12,5 +12,6 @@ __all__ = [
     'Activity',
     'Part',
     'Property',
+    'AttachmentProperty',
     'PartSet'
 ]
