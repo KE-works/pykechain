@@ -11,7 +11,8 @@ API_PATH = {
     'part': 'api/parts/{part_id}.json',
     'properties': 'api/properties.json',
     'property': 'api/properties/{property_id}.json',
-    'property_upload': 'api/properties/{property_id}/upload'
+    'property_upload': 'api/properties/{property_id}/upload',
+    'property_download': 'api/properties/{property_id}/download'
 }
 
 
@@ -238,4 +239,4 @@ class Client(object):
 
         data = r.json()
 
-        return [Property(p, client=self) for p in data['results']]
+        return [Property.create(p, client=self) for p in data['results']]

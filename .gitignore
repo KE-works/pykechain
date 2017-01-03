@@ -61,6 +61,7 @@ docs/*.html
 # virtualenv
 .venv/
 venv/
+venv*/
 ENV/
 
 # local environment settings

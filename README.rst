@@ -13,6 +13,14 @@ KE-chain Python SDK
     :target: https://coveralls.io/github/KE-works/pykechain?branch=master
     :alt: Coverage Status
 
+.. image:: https://img.shields.io/pypi/pyversions/pykechain.svg
+    :target: https://pypi.python.org/pypi/pykechain
+    :alt: Supported Python Versions
+
+.. image:: https://pyup.io/repos/github/ke-works/pykechain/shield.svg
+     :target: https://pyup.io/repos/github/ke-works/pykechain/
+     :alt: Updates
+
 
 About pykechain
 ---------------
