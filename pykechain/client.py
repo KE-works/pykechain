@@ -106,7 +106,7 @@ class Client(object):
             'status': status
         })
 
-        if r.status_code != requests.codes.ok:
+        if r.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve scopes")
 
         data = r.json()
@@ -139,7 +139,7 @@ class Client(object):
             'name': name
         })
 
-        if r.status_code != requests.codes.ok:
+        if r.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve activities")
 
         data = r.json()
@@ -183,7 +183,7 @@ class Client(object):
             'activity_id': activity
         })
 
-        if r.status_code != requests.codes.ok:
+        if r.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve parts")
 
         data = r.json()
@@ -234,7 +234,7 @@ class Client(object):
             'category': category
         })
 
-        if r.status_code != requests.codes.ok:
+        if r.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve properties")
 
         data = r.json()

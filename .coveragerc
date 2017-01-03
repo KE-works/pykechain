@@ -1,7 +1,6 @@
 [run]
 omit =
     */tests*
-    __about__
 
 [report]
 exclude_lines =
