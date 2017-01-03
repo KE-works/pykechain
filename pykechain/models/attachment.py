@@ -7,7 +7,7 @@ from pykechain.models import Property
 class AttachmentProperty(Property):
     @property
     def value(self):
-        return self._download()
+        return '[Attachment]'
 
     @value.setter
     def value(self, value):
