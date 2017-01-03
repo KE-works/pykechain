@@ -1,5 +1,5 @@
 from pykechain.exceptions import NotFoundError, MultipleFoundError
-from tests.betamax import TestBetamax
+from tests.classes import TestBetamax
 
 
 class TestParts(TestBetamax):

@@ -1,4 +1,4 @@
-from tests.betamax import TestBetamax
+from tests.classes import TestBetamax
 
 
 class TestProperties(TestBetamax):
