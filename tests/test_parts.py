@@ -1,4 +1,4 @@
-from pykechain.exceptions import NotFoundError, MultipleFoundError
+from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
 from tests.classes import TestBetamax
 
 
@@ -29,6 +29,14 @@ class TestParts(TestBetamax):
 
         assert project.parts(model=wheel)
 
+    def test_retrieve_model_unknown(self):
+        with self.assertRaises(NotFoundError):
+            self.client.model('123lladadwd')
+
+    def test_retrieve_model_multiple(self):
+        with self.assertRaises(MultipleFoundError):
+            self.client.model('Frame')
+
     def test_part_set_iterator(self):
         for part in self.client.parts():
             assert part.name
@@ -37,11 +45,16 @@ class TestParts(TestBetamax):
         project = self.client.scope('Bike Project')
 
         bike = project.part('Bike')
-        wheel = project.model('Wheel')
+        wheel_model = project.model('Wheel')
 
-        wheel = bike.add(wheel, name='Test Wheel')
-
+        wheel = bike.add(wheel_model, name='Test Wheel')
         wheel.delete()
+
+        wheel = wheel_model.add_to(bike)
+        wheel.delete()
+
+        with self.assertRaises(APIError):
+            bike.delete()
 
     def test_part_html_table(self):
         part = self.client.part('Unique Wheel')

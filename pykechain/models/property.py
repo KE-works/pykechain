@@ -31,7 +31,7 @@ class Property(Base):
 
         r = self._client._request('PUT', url, json={'value': value})
 
-        if r.status_code != 200:
+        if r.status_code != 200:  # pragma: no cover
             raise APIError("Could not update property value")
 
     @classmethod

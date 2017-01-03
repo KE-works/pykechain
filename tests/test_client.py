@@ -1,4 +1,6 @@
 from pykechain.client import Client
+from pykechain.exceptions import LoginRequiredError
+from tests.classes import TestBetamax
 
 
 class TestClient(object):
@@ -39,3 +41,15 @@ class TestClient(object):
         client = Client(check_certificates=False)
 
         assert client.session.verify is False
+
+
+class TestClientLive(TestBetamax):
+
+    def test_login(self):
+        assert self.client.parts()
+
+    def test_no_login(self):
+        self.client.login('wrong', 'user')
+
+        with self.assertRaises(LoginRequiredError):
+            self.client.parts()
