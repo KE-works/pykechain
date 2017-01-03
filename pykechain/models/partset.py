@@ -61,4 +61,4 @@ class PartSet(object):
 
         html.append("</table>")
 
-        return '' .join(html)
+        return ''.join(html)
