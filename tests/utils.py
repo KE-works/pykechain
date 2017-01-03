@@ -8,14 +8,5 @@ env.read_envfile()
 
 TEST_URL = env('TEST_URL', default='https://kec2api.ke-chain.com')
 TEST_USERNAME = env('TEST_USERNAME', default='pykechain')  # LVL1
-TEST_TOKEN = env('TEST_TOKEN', default=None)
+TEST_TOKEN = env('TEST_TOKEN', default='')
 TEST_SCOPE_ID = env('TEST_SCOPE_ID', default='b9e3f77b-281b-4e17-8d7c-a457b4d92005')
-
-
-def get_method_name():
-    """
-    returns the function name
-    :return: name of the function
-    """
-    import inspect
-    return inspect.stack()[1][3]

@@ -1,53 +1,72 @@
-import os
-from unittest import TestCase
-from unittest import skip
-
-from betamax import Betamax
-
-from pykechain import Client
-from pykechain.models import Scope
-from .utils import TEST_TOKEN, get_method_name, TEST_URL, TEST_SCOPE_ID
+from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
+from tests.classes import TestBetamax
 
 
-class TestPartAPI(TestCase):
-    """
-    tests the part API
-    """
+class TestParts(TestBetamax):
 
-    def setUp(self):
-        self.client = Client(url=TEST_URL)
+    def test_retrieve_parts(self):
+        parts = self.client.parts()
 
-        with Betamax.configure() as config:
-            config.cassette_library_dir = os.path.join(os.path.dirname(__file__), 'cassettes')
+        # Check if there are parts
+        assert len(parts)
 
-    @skip('TODO: fix bug that part by name retrieval for users < superuser')
-    def test_retrieve_part(self):
-        with Betamax(self.client.session) as vcr:
-            vcr.use_cassette(get_method_name())
+    def test_retrieve_single_part(self):
+        part = self.client.part('Unique Wheel')
 
-            self.client.login(token=TEST_TOKEN)
+        assert part
 
-            bike_parts = self.client.parts(name="Bike")
+    def test_retrieve_single_unknown(self):
+        with self.assertRaises(NotFoundError):
+            self.client.part('123lladadwd')
 
-            # TODO: fix this bug that a normal member or manager cannot retrieve part by name
-            self.assertEqual(len(bike_parts), 1)
+    def test_retrieve_single_multiple(self):
+        with self.assertRaises(MultipleFoundError):
+            self.client.part('Frame')
 
-    def test_get_scope(self):
-        with Betamax(self.client.session) as vcr:
-            vcr.use_cassette(get_method_name())
+    def test_retrieve_models(self):
+        project = self.client.scope('Bike Project')
+        wheel = project.model('Wheel')
 
-            self.client.login(token=TEST_TOKEN)
+        assert project.parts(model=wheel)
 
-            scope = self.client.scope(id=TEST_SCOPE_ID)
-            self.assertEqual(type(scope), Scope)
-            self.assertEqual(scope.name, "Bike Project")
-            self.assertEqual(scope.id, TEST_SCOPE_ID)
+    def test_retrieve_model_unknown(self):
+        with self.assertRaises(NotFoundError):
+            self.client.model('123lladadwd')
 
-    def test_iterable_partset(self):
-        with Betamax(self.client.session) as vcr:
-            vcr.use_cassette(get_method_name())
-            self.client.login(token=TEST_TOKEN)
-            partset = self.client.parts()
+    def test_retrieve_model_multiple(self):
+        with self.assertRaises(MultipleFoundError):
+            self.client.model('Frame')
 
-            # should not raise an error
-            self.assertTrue(len([p for p in partset])>=2)
+    def test_part_set_iterator(self):
+        for part in self.client.parts():
+            assert part.name
+
+    def test_part_add_delete_part(self):
+        project = self.client.scope('Bike Project')
+
+        bike = project.part('Bike')
+        wheel_model = project.model('Wheel')
+
+        wheel = bike.add(wheel_model, name='Test Wheel')
+        wheel.delete()
+
+        wheel = wheel_model.add_to(bike)
+        wheel.delete()
+
+        with self.assertRaises(APIError):
+            bike.delete()
+
+    def test_part_html_table(self):
+        part = self.client.part('Unique Wheel')
+
+        assert "</table>" in part._repr_html_()
+
+    def test_part_set_html_table(self):
+        parts = self.client.parts()
+
+        assert "</table>" in parts._repr_html_()
+
+    def test_part_set_html_categories(self):
+        parts = self.client.parts(category=None)
+
+        assert "<th>Category</th>" in parts._repr_html_()
