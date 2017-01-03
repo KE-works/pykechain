@@ -1,6 +1,14 @@
 KE-chain Python SDK
 ===================
 
+.. image:: https://img.shields.io/pypi/v/pykechain.svg
+    :target: https://pypi.python.org/pypi/pykechain
+    :alt: Version
+
+.. image:: https://img.shields.io/pypi/pyversions/pykechain.svg
+    :target: https://pypi.python.org/pypi/pykechain
+    :alt: Supported Python Versions
+
 .. image:: https://travis-ci.org/KE-works/pykechain.svg?branch=master
     :target: https://travis-ci.org/KE-works/pykechain
     :alt: Build Status
@@ -13,13 +21,9 @@ KE-chain Python SDK
     :target: https://coveralls.io/github/KE-works/pykechain?branch=master
     :alt: Coverage Status
 
-.. image:: https://img.shields.io/pypi/pyversions/pykechain.svg
-    :target: https://pypi.python.org/pypi/pykechain
-    :alt: Supported Python Versions
-
 .. image:: https://pyup.io/repos/github/ke-works/pykechain/shield.svg
-     :target: https://pyup.io/repos/github/ke-works/pykechain/
-     :alt: Updates
+    :target: https://pyup.io/repos/github/ke-works/pykechain/
+    :alt: Updates
 
 
 About pykechain
@@ -50,7 +54,7 @@ Now interact with it::
 Installation
 ------------
 
-pykechain is easily installed using pip. pykechain is Python 2.7 and Python 3.4 compatible::
+pykechain is easily installed using pip. pykechain is Python 2.7, 3.5 and 3.6 compatible::
 
     pip install pykechain
     
