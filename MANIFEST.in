@@ -1,0 +1,11 @@
+include LICENSE
+include CONTRIBUTING.rst
+include requirements.txt
+include .env.template
+
+exclude tox.ini
+
+recursive-include docs *
+recursive-exclude docs/_build *
+
+recursive-include tests *
