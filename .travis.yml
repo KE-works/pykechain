@@ -10,7 +10,7 @@ python:
 
 matrix:
   include:
-    - env: TOXENV=flake8
+    - env: TOXENV=stats
       python: 3.6
 
 install:
