@@ -96,8 +96,7 @@ html_theme_options = {
     'logo': 'logo.png',
     'github_user': 'KE-works',
     'github_repo': 'pykechain',
-    'github_button': 'false',
-    'travis_button': 'true'
+    'github_button': 'true'
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
