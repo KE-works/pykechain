@@ -1,3 +1,4 @@
+import os
 import requests
 from requests.compat import urljoin
 
@@ -39,6 +40,13 @@ class Client(object):
 
         if not check_certificates:
             self.session.verify = False
+
+    @classmethod
+    def from_env(cls):
+        client = cls(url=os.environ['KECHAIN_URL'])
+        client.login(token=os.environ['KECHAIN_TOKEN'])
+
+        return client
 
     def login(self, username=None, password=None, token=None):
         """Login into KE-chain with either username/password or token
