@@ -11,6 +11,7 @@ python:
 matrix:
   include:
     - env: TOXENV=flake8
+      python: 3.6
 
 install:
   pip install tox-travis coveralls
