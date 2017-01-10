@@ -6,7 +6,7 @@ from .property import Property
 from .attachment import AttachmentProperty
 from .partset import PartSet
 
-__all__ = [
+__all__ = (
     'Base',
     'Scope',
     'Activity',
@@ -14,4 +14,4 @@ __all__ = [
     'Property',
     'AttachmentProperty',
     'PartSet'
-]
+)
