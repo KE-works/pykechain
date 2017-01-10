@@ -1,5 +1,6 @@
 import requests
 from requests.compat import urljoin
+from envparse import env
 
 from .exceptions import LoginRequiredError, NotFoundError, MultipleFoundError
 from .models import Scope, Activity, Part, PartSet, Property
@@ -14,6 +15,8 @@ API_PATH = {
     'property_upload': 'api/properties/{property_id}/upload',
     'property_download': 'api/properties/{property_id}/download'
 }
+
+env.read_envfile()
 
 
 class Client(object):
@@ -39,6 +42,13 @@ class Client(object):
 
         if not check_certificates:
             self.session.verify = False
+
+    @classmethod
+    def from_env(cls):
+        client = cls(url=env('KECHAIN_URL'))
+        client.login(token=env('KECHAIN_TOKEN'))
+
+        return client
 
     def login(self, username=None, password=None, token=None):
         """Login into KE-chain with either username/password or token
