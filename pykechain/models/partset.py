@@ -24,9 +24,7 @@ class PartSet(object):
         # py3.4 and up style next
         return next(self._iter)
 
-    def next(self):
-        # py27 style next
-        return self.__next__()
+    next = __next__  # py2.7 alias
 
     def __getitem__(self, k):
         if isinstance(k, int):
