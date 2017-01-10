@@ -1,4 +1,3 @@
-import os
 import requests
 from requests.compat import urljoin
 from envparse import env
