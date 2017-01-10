@@ -1,5 +1,5 @@
 from .client import Client
 
-__all__ = (
+__all__ = [
     'Client'
-)
+]
