@@ -20,8 +20,10 @@ env.read_envfile()
 
 
 class Client(object):
+    """The KE-chain 2 python client to connect to a KE-chain (version 2) instance."""
+
     def __init__(self, url='http://localhost:8000/', check_certificates=True):
-        """The KE-chain 2 python client to connect to a KE-chain (version 2) instance.
+        """Create a KE-chain client with given settings.
 
         :param url: the url of the KE-chain instance to connect to (defaults to http://localhost:8000)
         :param check_certificates: if to check TLS/SSL Certificates. Defaults to True
@@ -45,13 +47,14 @@ class Client(object):
 
     @classmethod
     def from_env(cls):
+        """Create a client from environment variable settings."""
         client = cls(url=env('KECHAIN_URL'))
         client.login(token=env('KECHAIN_TOKEN'))
 
         return client
 
     def login(self, username=None, password=None, token=None):
-        """Login into KE-chain with either username/password or token
+        """Login into KE-chain with either username/password or token.
 
         :param username: username for your user from KE-chain
         :param password: password for your user from KE-chain
@@ -78,11 +81,11 @@ class Client(object):
             self.auth = (username, password)
 
     def _build_url(self, resource, **kwargs):
-        """helper method to build the correct API url"""
+        """Helper method to build the correct API url."""
         return urljoin(self.api_root, API_PATH[resource].format(**kwargs))
 
     def _request(self, method, url, **kwargs):
-        """helper method to perform the request on the API"""
+        """Helper method to perform the request on the API."""
         r = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
 
         if r.status_code == requests.codes.forbidden:
@@ -91,7 +94,7 @@ class Client(object):
         return r
 
     def scopes(self, name=None, id=None, status='ACTIVE'):
-        """Returns all scopes visible / accessible for the logged in user
+        """Return all scopes visible / accessible for the logged in user.
 
         :param name: if provided, filter the search for a scope/project by name
         :param id: if provided, filter the search by scope_id
@@ -124,7 +127,7 @@ class Client(object):
         return [Scope(s, client=self) for s in data['results']]
 
     def scope(self, *args, **kwargs):
-        """Returns a single scope based on the provided name.
+        """Return a single scope based on the provided name.
 
         :return: a single :obj:`Scope`
         :raises: NotFoundError, MultipleFoundError
@@ -139,7 +142,7 @@ class Client(object):
         return _scopes[0]
 
     def activities(self, name=None):
-        """Searches on activities with optional name filter.
+        """Search on activities with optional name filter.
 
         :param name: filter the activities by name
         :return: :obj:`list` of :obj:`Activity`
@@ -157,7 +160,7 @@ class Client(object):
         return [Activity(a, client=self) for a in data['results']]
 
     def activity(self, *args, **kwargs):
-        """Ssearches for a single activity
+        """Search for a single activity.
 
         :param name: Name of the activity to search
         :return: a single :obj:`Activity`
@@ -173,7 +176,7 @@ class Client(object):
         return _activities[0]
 
     def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None):
-        """Retrieve multiple KE-chain Parts
+        """Retrieve multiple KE-chain parts.
 
         :param name: filter on name
         :param pk: filter on primary key
@@ -201,7 +204,7 @@ class Client(object):
         return PartSet((Part(p, client=self) for p in data['results']))
 
     def part(self, *args, **kwargs):
-        """Retrieve single KE-chain Part
+        """Retrieve single KE-chain part.
 
         :return: a single :obj:`Part`
         :raises: NotFoundError, MultipleFoundError
@@ -216,7 +219,7 @@ class Client(object):
         return _parts[0]
 
     def model(self, *args, **kwargs):
-        """Retrieve single KE-chain model
+        """Retrieve single KE-chain model.
 
         :return: a single :obj:`Part`
         :raises: NotFoundError, MultipleFoundError
@@ -232,7 +235,7 @@ class Client(object):
         return _parts[0]
 
     def properties(self, name=None, category='INSTANCE'):
-        """Retrieves properties
+        """Retrieve properties.
 
         :param name: name to limit the search for.
         :param category: filter the properties by category. Defaults to INSTANCE. Other options MODEL or None
