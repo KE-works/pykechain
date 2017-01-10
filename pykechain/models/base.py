@@ -2,7 +2,7 @@
 
 class Base(object):
 
-    def __init__(self, json, client=None):
+    def __init__(self, json, client):
         self._json_data = json
         self._client = client
 
