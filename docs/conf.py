@@ -35,7 +35,8 @@ from pykechain import __about__ as about
 # ones.
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.doctest',
-              'sphinx.ext.napoleon']
+              'sphinx.ext.napoleon',
+              'nbsphinx']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -172,3 +173,5 @@ suppress_warnings = ['image.nonlocal_uri']
 
 autodoc_member_order = 'bysource'
 autoclass_content = 'both'
+
+nbsphinx_execute = 'never'
