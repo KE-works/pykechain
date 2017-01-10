@@ -8,5 +8,5 @@ graft tests
 graft docs
 prune docs/_build
 
-global-exclude *.ipynb
 global-exclude *.pyc
+global-exclude .ipynb_checkpoints/*

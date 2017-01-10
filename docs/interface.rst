@@ -8,7 +8,7 @@ Developer API
 
 
 KE-chain Concepts
-=================
+-----------------
 
 .. autoclass:: pykechain.models.Scope
    :members:

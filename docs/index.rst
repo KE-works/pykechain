@@ -7,5 +7,6 @@
    self
    bike
    interface
+   notebooks
 
 .. include:: ../README.rst
