@@ -26,6 +26,15 @@ class AttachmentProperty(Property):
         except ImportError:
             pass
 
+    def upload(self, filename):
+        """Upload a file to the attachment property.
+
+        :param filename: File path
+        :raises: APIError
+        """
+        with open(filename, 'rb') as f:
+            self._upload(f)
+
     def save_as(self, filename):
         """Download the attachment to a file.
 
