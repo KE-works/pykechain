@@ -41,6 +41,12 @@ class TestParts(TestBetamax):
         for part in self.client.parts():
             assert part.name
 
+    def test_part_set_get_item_invalid(self):
+        part_set = self.client.parts()
+
+        with self.assertRaises(NotImplementedError):
+            part_set['testing']
+
     def test_part_add_delete_part(self):
         project = self.client.scope('Bike Project')
 
