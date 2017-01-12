@@ -3,7 +3,10 @@ from pykechain.models import Base
 
 
 class Property(Base):
+    """A virtual object representing a KE-chain property."""
+
     def __init__(self, json, **kwargs):
+        """Construct a Property from a json object."""
         super(Property, self).__init__(json, **kwargs)
 
         self.output = json.get('output')
@@ -12,6 +15,10 @@ class Property(Base):
 
     @property
     def value(self):
+        """Data value of a property.
+
+        Setting this value will immediately update the property in KE-chain.
+        """
         return self._value
 
     @value.setter
@@ -22,6 +29,7 @@ class Property(Base):
 
     @property
     def part(self):
+        """Retrieve the part that holds this Property."""
         part_id = self._json_data['part']
 
         return self._client.part(pk=part_id)
@@ -36,6 +44,10 @@ class Property(Base):
 
     @classmethod
     def create(cls, json, **kwargs):
+        """Create a property based on the json data.
+
+        This method will attach the right class to a property, enabling the use of type-specific methods.
+        """
         if json.get('property_type') == 'ATTACHMENT_VALUE':
             from pykechain.models import AttachmentProperty
             return AttachmentProperty(json, **kwargs)
