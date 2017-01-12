@@ -1,7 +1,6 @@
 
 class PartSet(object):
-    """
-    A Set of Parts
+    """A set of KE-chain parts.
 
     Adding set-like methods on a list of parts:
      * iterable
@@ -11,6 +10,7 @@ class PartSet(object):
     """
 
     def __init__(self, parts):
+        """Construct a PartSet from a part iterable."""
         self._parts = list(parts)
         self._iter = iter(self._parts)
 
