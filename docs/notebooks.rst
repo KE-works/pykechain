@@ -1,5 +1,5 @@
 
-Example Notebooks
+Jupyter Notebooks
 =================
 
 .. toctree::
