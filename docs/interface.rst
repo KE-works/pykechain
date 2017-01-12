@@ -21,3 +21,9 @@ KE-chain Concepts
 
 .. autoclass:: pykechain.models.Property
    :members:
+
+pykechain Exceptions
+--------------------
+
+.. automodule:: pykechain.exceptions
+   :members:
