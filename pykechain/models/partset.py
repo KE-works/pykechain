@@ -30,7 +30,7 @@ class PartSet(object):
         if isinstance(k, int):
             return self._parts[k]
 
-        return [p.property(k).value for p in self._parts]
+        raise NotImplementedError
 
     def _repr_html_(self):
         all_instances = all(p.category == 'INSTANCE' for p in self._parts)
