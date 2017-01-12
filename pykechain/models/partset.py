@@ -1,7 +1,6 @@
 
 class PartSet(object):
-    """
-    A Set of Parts
+    """A set of KE-chain parts.
 
     Adding set-like methods on a list of parts:
      * iterable
@@ -11,6 +10,7 @@ class PartSet(object):
     """
 
     def __init__(self, parts):
+        """Construct a PartSet from a part iterable."""
         self._parts = list(parts)
         self._iter = iter(self._parts)
 
@@ -24,15 +24,13 @@ class PartSet(object):
         # py3.4 and up style next
         return next(self._iter)
 
-    def next(self):
-        # py27 style next
-        return self.__next__()
+    next = __next__  # py2.7 alias
 
     def __getitem__(self, k):
         if isinstance(k, int):
             return self._parts[k]
 
-        return [p.property(k).value for p in self._parts]
+        raise NotImplementedError
 
     def _repr_html_(self):
         all_instances = all(p.category == 'INSTANCE' for p in self._parts)
