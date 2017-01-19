@@ -13,6 +13,3 @@ nbsphinx==0.2.12
 # data science
 jupyter==1.0.0
 matplotlib==2.0.0
-
-# scripts
-click==6.7
