@@ -2,17 +2,21 @@
 """
 Commandline script to upload any file to KE-chain
 """
+from __future__ import print_function
+
+import logging
 import os
 import sys
 
-import logging
 from envparse import Env
+
+from pykechain.exceptions import NotFoundError
 
 try:
     from pykechain import Client
     from pykechain.models import AttachmentProperty
 except ImportError:
-    sys.path.append('../pykechain'.replace('/',os.path.sep))
+    sys.path.append('..')
     from pykechain import Client
     from pykechain.models import AttachmentProperty
 
@@ -44,7 +48,8 @@ def parse_arguments():
     parser.add_argument('--part', '-P', required=True,
                         help='part name under which the property lives (quoted if the partname contains spaces')
     parser.add_argument('--property', '-A', type=str, required=True,
-                        help='property name to Attach file to (quotes if the partname has spaces) [Default: "%(default)s"]')
+                        help='property name to Attach file to (quotes if the partname has spaces) '
+                             '[Default: "%(default)s"]')
     parser.add_argument('--file', '-f', required=True,
                         help='Filename to upload to the node in the model in the repo')
     parser.add_argument('--logging', '-l', action='store_true',
@@ -55,7 +60,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def upload_the_file_to_an_attachment_property(client, scope_id, part_name, property_name, filename):
+def upload_the_file_to_an_attachment_property(client, scope_id, part_name, property_name, filename, verbose=True):
     # find the property
     # check if attachment property
     # check if file exist
@@ -70,14 +75,13 @@ def upload_the_file_to_an_attachment_property(client, scope_id, part_name, prope
     target_property = target_part.property(property_name)
 
     if type(target_property) == AttachmentProperty:
-
         print('DO STUF HERE')  # do stuff
-
+        if verbose: sys.stdout.writelines('-- uploading {}\n'.format(filename))
+        target_property.upload(filename)
+        if verbose: sys.stdout.write('-- done')
     else:
         raise Exception("property '{}' is not of type AttachmentProperty, so could not upload file".
                         format(target_property))
-
-
 
 
 def main():
@@ -98,8 +102,8 @@ def main():
         sys.stderr.write("\nError: Ensure that you provide both username and password or a single API auth token\n")
         return 1
 
-    result = upload_the_file_to_an_attachment_property(client, args.scope, args.part, args.property, args.file)
-
+    result = upload_the_file_to_an_attachment_property(client, args.scope, args.part, args.property, args.file,
+                                                       args.logging)
     if result:
         msg = 'File "{}" is successfully uploaded to KE-chain'.format(args.file)
         return 0
