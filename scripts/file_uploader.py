@@ -8,9 +8,13 @@ import sys
 import logging
 from envparse import Env
 
-import click
-from pykechain import Client
-from pykechain.models import AttachmentProperty
+try:
+    from pykechain import Client
+    from pykechain.models import AttachmentProperty
+except ImportError:
+    sys.path.append('../pykechain'.replace('/',os.path.sep))
+    from pykechain import Client
+    from pykechain.models import AttachmentProperty
 
 env = Env()
 env.read_envfile('../.env')
@@ -67,14 +71,13 @@ def upload_the_file_to_an_attachment_property(client, scope_id, part_name, prope
 
     if type(target_property) == AttachmentProperty:
 
-        print('DO STUF HERE') #do stuff
-        pass
+        print('DO STUF HERE')  # do stuff
+
     else:
         raise Exception("property '{}' is not of type AttachmentProperty, so could not upload file".
                         format(target_property))
 
 
-    pass
 
 
 def main():
