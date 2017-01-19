@@ -10,15 +10,14 @@ import sys
 
 from envparse import Env
 
-from pykechain.exceptions import NotFoundError
-
 try:
     from pykechain import Client
-    from pykechain.models import AttachmentProperty
 except ImportError:
     sys.path.append('..')
     from pykechain import Client
-    from pykechain.models import AttachmentProperty
+
+from pykechain.models import AttachmentProperty
+from pykechain.exceptions import NotFoundError, MultipleFoundError, LoginRequiredError
 
 env = Env()
 env.read_envfile('../.env')
@@ -60,7 +59,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def upload_the_file_to_an_attachment_property(client, scope_id, part_name, property_name, filename, verbose=True):
+def upload_file_to_attachment_property(client, scope_id, part_name, property_name, filename, verbose=True):
     # find the property
     # check if attachment property
     # check if file exist
@@ -75,7 +74,6 @@ def upload_the_file_to_an_attachment_property(client, scope_id, part_name, prope
     target_property = target_part.property(property_name)
 
     if type(target_property) == AttachmentProperty:
-        print('DO STUF HERE')  # do stuff
         if verbose: sys.stdout.writelines('-- uploading {}\n'.format(filename))
         target_property.upload(filename)
         if verbose: sys.stdout.write('-- done')
@@ -86,14 +84,19 @@ def upload_the_file_to_an_attachment_property(client, scope_id, part_name, prope
 
 def main():
     args = parse_arguments()
-    sys.stdout.writelines(['%s : %s\n' % (k, v) for k, v in vars(args).items()])
+    if args.logging:
+        sys.stdout.writelines(['%s : %s\n' % (k, v) for k, v in vars(args).items() if k not in ['password', 'token']])
 
     if args.logging:
         logging.basicConfig(level=logging.INFO)
         logging.getLogger('suds.client').setLevel(logging.DEBUG)
         logging.getLogger('suds.transport').setLevel(logging.DEBUG)
+    try:
+        client = Client(url=args.url, check_certificates=args.check_certificate)
+    except LoginRequiredError as e:
+        print(e)
+        return 403
 
-    client = Client(url=args.url, check_certificates=args.check_certificate)
     if "token" in args and args.token:
         client.login(token=args.token)
     elif "username" in args and args.username and "password" in args and args.password:
@@ -102,8 +105,21 @@ def main():
         sys.stderr.write("\nError: Ensure that you provide both username and password or a single API auth token\n")
         return 1
 
-    result = upload_the_file_to_an_attachment_property(client, args.scope, args.part, args.property, args.file,
-                                                       args.logging)
+    try:
+        result = upload_file_to_attachment_property(client, args.scope, args.part, args.property, args.file,
+                                                    args.logging)
+    except Exception as e:
+        print(e)
+        return 1
+    except NotFoundError as e:
+        print(e)
+        return 1
+    except MultipleFoundError as e:
+        print(e)
+        return 3
+
+
+
     if result:
         msg = 'File "{}" is successfully uploaded to KE-chain'.format(args.file)
         return 0
