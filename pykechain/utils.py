@@ -1,4 +1,4 @@
-from typing import TypeVar, Iterable, Callable, Optional
+from typing import TypeVar, Iterable, Callable, Optional  # flake8: noqa
 
 T = TypeVar('T')
 
