@@ -1,5 +1,7 @@
+from typing import Sized  # flake8: noqa
 
-class PartSet(object):
+
+class PartSet(Sized):
     """A set of KE-chain parts.
 
     Adding set-like methods on a list of parts:

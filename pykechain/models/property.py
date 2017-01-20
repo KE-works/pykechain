@@ -8,6 +8,7 @@ class Property(Base):
     """A virtual object representing a KE-chain property."""
 
     def __init__(self, json, **kwargs):
+        # type: (dict, **Any) -> None
         """Construct a Property from a json object."""
         super(Property, self).__init__(json, **kwargs)
 
@@ -17,6 +18,7 @@ class Property(Base):
 
     @property
     def value(self):
+        # type: () -> Any
         """Data value of a property.
 
         Setting this value will immediately update the property in KE-chain.
@@ -25,6 +27,7 @@ class Property(Base):
 
     @value.setter
     def value(self, value):
+        # type: (Any) -> None
         if value != self._value:
             self._put_value(value)
             self._value = value
