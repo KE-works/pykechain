@@ -8,6 +8,7 @@ from .models import Scope, Activity, Part, PartSet, Property
 API_PATH = {
     'scopes': 'api/scopes.json',
     'activities': 'api/activities.json',
+    'association': 'api/associations/{association_id}.json',
     'parts': 'api/parts.json',
     'part': 'api/parts/{part_id}.json',
     'properties': 'api/properties.json',
@@ -141,15 +142,17 @@ class Client(object):
 
         return _scopes[0]
 
-    def activities(self, name=None):
+    def activities(self, name=None, scope=None):
         """Search on activities with optional name filter.
 
         :param name: filter the activities by name
+        :param scope: filter by scope id
         :return: :obj:`list` of :obj:`Activity`
         :raises: NotFoundError
         """
         r = self._request('GET', self._build_url('activities'), params={
-            'name': name
+            'name': name,
+            'scope': scope
         })
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
