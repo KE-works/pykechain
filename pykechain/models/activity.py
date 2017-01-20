@@ -35,3 +35,10 @@ class Activity(Base):
 
         if r.status_code != 200:
             raise APIError("Could not configure activity")
+
+    def delete(self):
+        """Delete this activity."""
+        r = self._client._request('DELETE', self._client._build_url('activity', activity_id=self.id))
+
+        if r.status_code != 204:
+            raise APIError("Could not delete activity: {} with id {}".format(self.name, self.id))
