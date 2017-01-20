@@ -2,7 +2,7 @@ import requests
 from requests.compat import urljoin
 from envparse import env
 
-from .exceptions import LoginRequiredError, NotFoundError, MultipleFoundError
+from .exceptions import LoginRequiredError, NotFoundError, MultipleFoundError, APIError
 from .models import Scope, Activity, Part, PartSet, Property
 
 API_PATH = {
@@ -257,3 +257,24 @@ class Client(object):
         data = r.json()
 
         return [Property.create(p, client=self) for p in data['results']]
+
+    def create_activity(self, process, name):
+        """Create a new activity.
+
+        :param process: parent process id.
+        :param name: new activity name.
+        :return: Activity
+        """
+        data = {
+            "name": name,
+            "process": process
+        }
+
+        r = self._request('POST', self._build_url('activities'), data=data)
+
+        if r.status_code != 201:
+            raise APIError("Could not create activity")
+
+        data = r.json()
+
+        return Activity(data['results'][0], client=self)
