@@ -1,4 +1,4 @@
-from pykechain.models import Base
+from pykechain.models.base import Base
 
 
 class Scope(Base):

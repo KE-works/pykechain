@@ -1,5 +1,5 @@
 from pykechain.exceptions import NotFoundError, APIError
-from pykechain.models import Base
+from pykechain.models.base import Base
 from pykechain.utils import find
 
 

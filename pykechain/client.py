@@ -1,5 +1,5 @@
 import requests
-from requests.compat import urljoin
+from requests.compat import urljoin  # type: ignore
 from envparse import env
 
 from .exceptions import LoginRequiredError, NotFoundError, MultipleFoundError
