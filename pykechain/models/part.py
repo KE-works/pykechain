@@ -1,3 +1,5 @@
+from typing import Any  # flake8: noqa
+
 from pykechain.exceptions import NotFoundError, APIError
 from pykechain.models.base import Base
 from pykechain.utils import find
@@ -30,6 +32,7 @@ class Part(Base):
         return found
 
     def add(self, model, **kwargs):
+        # type: (Part, **Any) -> Part
         """Add a new child to this part.
 
         :param model: model to use for the child
@@ -39,6 +42,7 @@ class Part(Base):
         return self._post_instance(self, model, **kwargs)
 
     def add_to(self, parent, **kwargs):
+        # type: (Part, **Any) -> Part
         """Add a new instance of this model to a part.
 
         :param parent: part to add the new instance to
@@ -54,7 +58,9 @@ class Part(Base):
         if r.status_code != 204:
             raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
 
-    def _post_instance(self, parent, model, name=None):
+    def _post_instance(self, parent, model, name=''):
+        # type: (Part, Part, str) -> Part
+
         assert parent.category == 'INSTANCE'
         assert model.category == 'MODEL'
 
