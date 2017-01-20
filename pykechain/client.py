@@ -1,3 +1,5 @@
+from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
+
 import requests
 from requests.compat import urljoin  # type: ignore
 from envparse import env
@@ -23,6 +25,7 @@ class Client(object):
     """The KE-chain 2 python client to connect to a KE-chain (version 2) instance."""
 
     def __init__(self, url='http://localhost:8000/', check_certificates=True):
+        # type: (str, bool) -> None
         """Create a KE-chain client with given settings.
 
         :param url: the url of the KE-chain instance to connect to (defaults to http://localhost:8000)
@@ -39,14 +42,15 @@ class Client(object):
         """
         self.session = requests.Session()
         self.api_root = url
-        self.headers = {}
-        self.auth = None
+        self.headers = {}  # type: Dict[str, str]
+        self.auth = None  # type: Optional[Tuple[str, str]]
 
         if not check_certificates:
             self.session.verify = False
 
     @classmethod
     def from_env(cls):
+        # type: () -> Client
         """Create a client from environment variable settings."""
         client = cls(url=env('KECHAIN_URL'))
         client.login(token=env('KECHAIN_TOKEN'))
@@ -54,6 +58,7 @@ class Client(object):
         return client
 
     def login(self, username=None, password=None, token=None):
+        # type: (Optional[str], Optional[str], Optional[str]) -> None
         """Login into KE-chain with either username/password or token.
 
         :param username: username for your user from KE-chain
@@ -73,18 +78,21 @@ class Client(object):
         >>> kec = Client()
         >>> kec.login('username','password')
         """
+        self.headers.pop('Authorization', None)
+        self.auth = None
+
         if token:
             self.headers['Authorization'] = 'Token {}'.format(token)
-            self.auth = None
-        else:
-            self.headers.pop('Authorization', None)
+        elif username is not None and password is not None:
             self.auth = (username, password)
 
     def _build_url(self, resource, **kwargs):
+        # type: (str, **str) -> str
         """Helper method to build the correct API url."""
         return urljoin(self.api_root, API_PATH[resource].format(**kwargs))
 
     def _request(self, method, url, **kwargs):
+        # type: (str, str, **Any) -> requests.Response
         """Helper method to perform the request on the API."""
         r = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
 
@@ -94,6 +102,7 @@ class Client(object):
         return r
 
     def scopes(self, name=None, id=None, status='ACTIVE'):
+        # type: (Optional[str], Optional[str], Optional[str]) -> List[Scope]
         """Return all scopes visible / accessible for the logged in user.
 
         :param name: if provided, filter the search for a scope/project by name
@@ -127,6 +136,7 @@ class Client(object):
         return [Scope(s, client=self) for s in data['results']]
 
     def scope(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Scope
         """Return a single scope based on the provided name.
 
         :return: a single :obj:`Scope`
@@ -142,6 +152,7 @@ class Client(object):
         return _scopes[0]
 
     def activities(self, name=None):
+        # type: (Optional[str]) -> List[Activity]
         """Search on activities with optional name filter.
 
         :param name: filter the activities by name
@@ -160,6 +171,7 @@ class Client(object):
         return [Activity(a, client=self) for a in data['results']]
 
     def activity(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Activity
         """Search for a single activity.
 
         :param name: Name of the activity to search
@@ -175,7 +187,15 @@ class Client(object):
 
         return _activities[0]
 
-    def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None):
+    def parts(self,
+              name=None,            # type: Optional[str]
+              pk=None,              # type: Optional[str]
+              model=None,           # type: Optional[Part]
+              category='INSTANCE',  # type: Optional[str]
+              bucket=None,          # type: Optional[str]
+              activity=None         # type: Optional[str]
+              ):
+        # type: (...) -> PartSet
         """Retrieve multiple KE-chain parts.
 
         :param name: filter on name
@@ -204,6 +224,7 @@ class Client(object):
         return PartSet((Part(p, client=self) for p in data['results']))
 
     def part(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Part
         """Retrieve single KE-chain part.
 
         :return: a single :obj:`Part`
@@ -219,6 +240,7 @@ class Client(object):
         return _parts[0]
 
     def model(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Part
         """Retrieve single KE-chain model.
 
         :return: a single :obj:`Part`
@@ -235,6 +257,7 @@ class Client(object):
         return _parts[0]
 
     def properties(self, name=None, category='INSTANCE'):
+        # type: (Optional[str], Optional[str]) -> List[Property]
         """Retrieve properties.
 
         :param name: name to limit the search for.
