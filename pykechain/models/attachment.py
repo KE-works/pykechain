@@ -1,7 +1,7 @@
 import io
 
 from pykechain.exceptions import APIError
-from pykechain.models import Property
+from pykechain.models.property import Property
 
 
 class AttachmentProperty(Property):
