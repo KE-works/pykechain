@@ -1,3 +1,5 @@
+from typing import Any  # flake8: noqa
+
 from pykechain.exceptions import APIError
 from pykechain.models.base import Base
 
@@ -44,12 +46,13 @@ class Property(Base):
 
     @classmethod
     def create(cls, json, **kwargs):
+        # type: (dict, **Any) -> Property
         """Create a property based on the json data.
 
         This method will attach the right class to a property, enabling the use of type-specific methods.
         """
         if json.get('property_type') == 'ATTACHMENT_VALUE':
-            from pykechain.models import AttachmentProperty
+            from pykechain.models.attachment import AttachmentProperty
             return AttachmentProperty(json, **kwargs)
         else:
             return Property(json, **kwargs)

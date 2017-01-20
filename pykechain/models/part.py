@@ -1,6 +1,7 @@
 from typing import Any  # flake8: noqa
 
 from pykechain.exceptions import NotFoundError, APIError
+from pykechain.models.property import Property
 from pykechain.models.base import Base
 from pykechain.utils import find
 
@@ -9,15 +10,17 @@ class Part(Base):
     """A virtual object representing a KE-chain part."""
 
     def __init__(self, json, **kwargs):
+        # type: (dict, **Any) -> None
         """Construct a part from provided json data."""
         super(Part, self).__init__(json, **kwargs)
 
         self.category = json.get('category')
 
-        from pykechain.models import Property
+        from pykechain.models.property import Property
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
 
     def property(self, name):
+        # type: (str) -> Property
         """Retrieve property belonging to this part.
 
         :param name: property name to search for
@@ -52,6 +55,7 @@ class Part(Base):
         return self._post_instance(parent, self, **kwargs)
 
     def delete(self):
+        # type: () -> None
         """Delete this part."""
         r = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
 
@@ -85,6 +89,8 @@ class Part(Base):
         return Part(data['results'][0], client=self._client)
 
     def _repr_html_(self):
+        # type: () -> str
+
         html = [
             "<table width=100%>",
             "<caption>{}</caption>".format(self.name),
