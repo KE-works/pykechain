@@ -1,5 +1,5 @@
 # basis
-requests==2.12.5
+requests==2.13.0
 
 # testing
 envparse==0.2.0
