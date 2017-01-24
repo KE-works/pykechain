@@ -42,3 +42,10 @@ class Activity(Base):
 
         if r.status_code != 204:
             raise APIError("Could not delete activity: {} with id {}".format(self.name, self.id))
+
+    def create_activity(self, *args, **kwargs):
+        """Create a new activity belonging to this subprocess.
+
+        See :class:`pykechain.Client.create_activity` for available parameters.
+        """
+        return self._client.create_activity(self.id, *args, **kwargs)

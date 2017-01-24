@@ -258,16 +258,18 @@ class Client(object):
 
         return [Property.create(p, client=self) for p in data['results']]
 
-    def create_activity(self, process, name):
+    def create_activity(self, process, name, activity_class="UserTask"):
         """Create a new activity.
 
-        :param process: parent process id.
-        :param name: new activity name.
+        :param process: parent process id
+        :param name: new activity name
+        :param activity_class: type of activity: UserTask (default) or Subprocess
         :return: Activity
         """
         data = {
             "name": name,
-            "process": process
+            "process": process,
+            "activity_class": activity_class
         }
 
         r = self._request('POST', self._build_url('activities'), data=data)
