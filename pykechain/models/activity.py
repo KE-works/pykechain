@@ -33,7 +33,7 @@ class Activity(Base):
             'outputs': [p.id for p in outputs]
         })
 
-        if r.status_code != 200:
+        if r.status_code != 200:  # pragma: no cover
             raise APIError("Could not configure activity")
 
     def delete(self):
