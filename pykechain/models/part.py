@@ -36,7 +36,7 @@ class Part(Base):
         :return: :class:`pykechain.models.Part`
         :raises: APIError
         """
-        return self._post_instance(self, model, **kwargs)
+        return self._client.create_part(self, model, **kwargs)
 
     def add_to(self, parent, **kwargs):
         """Add a new instance of this model to a part.
@@ -45,7 +45,7 @@ class Part(Base):
         :return: :class:`pykechain.models.Part`
         :raises: APIError
         """
-        return self._post_instance(parent, self, **kwargs)
+        return self._client.create_part(parent, self, **kwargs)
 
     def delete(self):
         """Delete this part."""
@@ -53,30 +53,6 @@ class Part(Base):
 
         if r.status_code != 204:
             raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
-
-    def _post_instance(self, parent, model, name=None):
-        assert parent.category == 'INSTANCE'
-        assert model.category == 'MODEL'
-
-        if not name:
-            name = model.name
-
-        data = {
-            "name": name,
-            "parent": parent.id,
-            "model": model.id
-        }
-
-        r = self._client._request('POST', self._client._build_url('parts'),
-                                  params={"select_action": "new_instance"},
-                                  data=data)
-
-        if r.status_code != 201:
-            raise APIError("Could not create part: {}".format(self.name))
-
-        data = r.json()
-
-        return Part(data['results'][0], client=self._client)
 
     def _repr_html_(self):
         html = [
