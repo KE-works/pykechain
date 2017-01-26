@@ -1,4 +1,4 @@
-from pykechain.exceptions import NotFoundError, MultipleFoundError
+from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
 from tests.classes import TestBetamax
 
 
@@ -28,6 +28,30 @@ class TestActivities(TestBetamax):
     def test_create_activity(self):
         project = self.client.scope('Bike Project')
 
+        subprocess = project.create_activity('Random', activity_class='Subprocess')
+
+        assert subprocess.name == 'Random'
+
+        task = subprocess.create_activity('Another')
+
+        subprocess.delete()
+
+        with self.assertRaises(APIError):
+            subprocess.delete()
+
+    def test_configure_activity(self):
+        project = self.client.scope('Bike Project')
+
+        bike = project.model('Bike')
+        wheel = project.model('Wheel')
+
         task = project.create_activity('Random')
 
-        assert task.name == 'Random'
+        task.configure([
+            bike.property('Gears'),
+            bike.property('Total height')
+        ], [
+            wheel.property('Spokes')
+        ])
+
+        task.delete()
