@@ -11,7 +11,7 @@ class TestParts(TestBetamax):
         assert len(parts)
 
     def test_retrieve_single_part(self):
-        part = self.client.part('Unique Wheel')
+        part = self.client.part('Front Wheel')
 
         assert part
 
@@ -21,7 +21,7 @@ class TestParts(TestBetamax):
 
     def test_retrieve_single_multiple(self):
         with self.assertRaises(MultipleFoundError):
-            self.client.part('Frame')
+            self.client.part()
 
     def test_retrieve_models(self):
         project = self.client.scope('Bike Project')
@@ -35,7 +35,7 @@ class TestParts(TestBetamax):
 
     def test_retrieve_model_multiple(self):
         with self.assertRaises(MultipleFoundError):
-            self.client.model('Frame')
+            self.client.model()
 
     def test_part_set_iterator(self):
         for part in self.client.parts():
@@ -63,7 +63,7 @@ class TestParts(TestBetamax):
             bike.delete()
 
     def test_part_html_table(self):
-        part = self.client.part('Unique Wheel')
+        part = self.client.part('Front Wheel')
 
         assert "</table>" in part._repr_html_()
 

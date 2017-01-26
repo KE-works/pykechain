@@ -2,12 +2,14 @@ import requests
 from requests.compat import urljoin
 from envparse import env
 
-from .exceptions import LoginRequiredError, NotFoundError, MultipleFoundError
+from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError
 from .models import Scope, Activity, Part, PartSet, Property
 
 API_PATH = {
     'scopes': 'api/scopes.json',
     'activities': 'api/activities.json',
+    'activity': 'api/activities/{activity_id}.json',
+    'association': 'api/associations/{association_id}.json',
     'parts': 'api/parts.json',
     'part': 'api/parts/{part_id}.json',
     'properties': 'api/properties.json',
@@ -89,7 +91,7 @@ class Client(object):
         r = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
 
         if r.status_code == requests.codes.forbidden:
-            raise LoginRequiredError(r.json()['results'][0]['detail'])
+            raise ForbiddenError(r.json()['results'][0]['detail'])
 
         return r
 
@@ -141,15 +143,17 @@ class Client(object):
 
         return _scopes[0]
 
-    def activities(self, name=None):
+    def activities(self, name=None, scope=None):
         """Search on activities with optional name filter.
 
         :param name: filter the activities by name
+        :param scope: filter by scope id
         :return: :obj:`list` of :obj:`Activity`
         :raises: NotFoundError
         """
         r = self._request('GET', self._build_url('activities'), params={
-            'name': name
+            'name': name,
+            'scope': scope
         })
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
@@ -253,3 +257,57 @@ class Client(object):
         data = r.json()
 
         return [Property.create(p, client=self) for p in data['results']]
+
+    def create_activity(self, process, name, activity_class="UserTask"):
+        """Create a new activity.
+
+        :param process: parent process id
+        :param name: new activity name
+        :param activity_class: type of activity: UserTask (default) or Subprocess
+        :return: Activity
+        """
+        data = {
+            "name": name,
+            "process": process,
+            "activity_class": activity_class
+        }
+
+        r = self._request('POST', self._build_url('activities'), data=data)
+
+        if r.status_code != 201:
+            raise APIError("Could not create activity")
+
+        data = r.json()
+
+        return Activity(data['results'][0], client=self)
+
+    def create_part(self, parent, model, name=None):
+        """Create a new part from a given model under a given parent.
+
+        :param parent: parent part instance
+        :param model: target part model
+        :param name: new part name
+        :return: Part
+        """
+        assert parent.category == 'INSTANCE'
+        assert model.category == 'MODEL'
+
+        if not name:
+            name = model.name
+
+        data = {
+            "name": name,
+            "parent": parent.id,
+            "model": model.id
+        }
+
+        r = self._request('POST', self._build_url('parts'),
+                          params={"select_action": "new_instance"},
+                          data=data)
+
+        if r.status_code != 201:
+            raise APIError("Could not create part: {}".format(name))
+
+        data = r.json()
+
+        return Part(data['results'][0], client=self)
