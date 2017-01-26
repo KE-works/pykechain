@@ -24,11 +24,18 @@ class TestProperties(TestBetamax):
 
     def test_set_property(self):
         project = self.client.scope('Bike Project')
+
         gears = project.part('Bike').property('Gears')
 
-        gears.value = 10
+        gears.value = 5
 
-        self.assertEqual(gears.value, 10)
+        self.assertEqual(gears.value, 5)
+
+        gears.value = 2
+
+        self.assertEqual(project.part('Bike').property('Gears').value, 2)
+
+        gears.value = 10
 
     def test_property_to_part(self):
         project = self.client.scope('Bike Project')
