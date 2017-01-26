@@ -8,7 +8,7 @@ class APIError(Exception):
     pass
 
 
-class LoginRequiredError(APIError):
+class ForbiddenError(APIError):
     """A login is required."""
 
     pass

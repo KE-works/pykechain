@@ -1,4 +1,5 @@
-from pykechain.exceptions import NotFoundError
+import json
+
 from tests.classes import TestBetamax
 
 
@@ -9,6 +10,10 @@ class TestAttachment(TestBetamax):
     def test_retrieve_attachment(self):
         project = self.client.scope('Bike Project')
         picture = project.part('Bike').property('Picture')
+
+        data = ('data.json', json.dumps(self.test_dict), 'application/json')
+
+        picture._upload(data)
 
         r = picture._download().json()
 
