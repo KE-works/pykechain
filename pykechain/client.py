@@ -2,7 +2,7 @@ import requests
 from requests.compat import urljoin
 from envparse import env
 
-from .exceptions import LoginRequiredError, NotFoundError, MultipleFoundError, APIError
+from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError
 from .models import Scope, Activity, Part, PartSet, Property
 
 API_PATH = {
@@ -91,7 +91,7 @@ class Client(object):
         r = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
 
         if r.status_code == requests.codes.forbidden:
-            raise LoginRequiredError(r.json()['results'][0]['detail'])
+            raise ForbiddenError(r.json()['results'][0]['detail'])
 
         return r
 

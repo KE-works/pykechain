@@ -13,7 +13,7 @@ class TestProperties(TestBetamax):
         project = self.client.scope('Bike Project')
         bike = project.part('Bike')
 
-        self.assertEqual(bike.property('Gears').value, 6)
+        self.assertEqual(bike.property('Gears').value, 10)
 
     def test_get_invalid_property(self):
         project = self.client.scope('Bike Project')
