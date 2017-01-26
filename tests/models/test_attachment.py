@@ -5,7 +5,7 @@ from tests.classes import TestBetamax
 
 class TestAttachment(TestBetamax):
 
-    test_dict = {'a': 1, 'b': 2}
+    test_dict = {'a': 1, 'b': 3}
 
     def test_retrieve_attachment(self):
         project = self.client.scope('Bike Project')
