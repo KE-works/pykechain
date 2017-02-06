@@ -212,7 +212,7 @@ class Client(object):
         if isinstance(limit, type(None)):
             retrieve_all_next_parts = True
             limit = 100
-        elif limit:
+        else:
             retrieve_all_next_parts = False
             limit = limit
 
