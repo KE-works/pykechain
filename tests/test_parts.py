@@ -76,3 +76,9 @@ class TestParts(TestBetamax):
         parts = self.client.parts(category=None)
 
         assert "<th>Category</th>" in parts._repr_html_()
+
+    def test_part_set_with_limit(self):
+        limit = 5
+        parts = self.client.parts(limit=limit)
+
+        assert len(parts) > limit
