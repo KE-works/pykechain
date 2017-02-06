@@ -1,5 +1,5 @@
 from pykechain.client import Client
-from pykechain.exceptions import LoginRequiredError
+from pykechain.exceptions import ForbiddenError
 from tests.classes import TestBetamax
 
 
@@ -51,5 +51,5 @@ class TestClientLive(TestBetamax):
     def test_no_login(self):
         self.client.login('wrong', 'user')
 
-        with self.assertRaises(LoginRequiredError):
+        with self.assertRaises(ForbiddenError):
             self.client.parts()

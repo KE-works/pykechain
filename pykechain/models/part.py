@@ -42,7 +42,7 @@ class Part(Base):
         :return: :class:`pykechain.models.Part`
         :raises: APIError
         """
-        return self._post_instance(self, model, **kwargs)
+        return self._client.create_part(self, model, **kwargs)
 
     def add_to(self, parent, **kwargs):
         # type: (Part, **Any) -> Part
@@ -52,7 +52,7 @@ class Part(Base):
         :return: :class:`pykechain.models.Part`
         :raises: APIError
         """
-        return self._post_instance(parent, self, **kwargs)
+        return self._client.create_part(parent, self, **kwargs)
 
     def delete(self):
         # type: () -> None
