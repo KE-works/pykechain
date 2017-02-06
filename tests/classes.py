@@ -8,6 +8,7 @@ from tests.utils import TEST_TOKEN, TEST_URL
 
 with Betamax.configure() as config:
     config.cassette_library_dir = os.path.join(os.path.dirname(__file__), 'cassettes')
+    config.define_cassette_placeholder('<API_URL>', TEST_URL)
     config.define_cassette_placeholder('<AUTH_TOKEN>', TEST_TOKEN)
 
 
