@@ -24,8 +24,6 @@ env.read_envfile()
 class Client(object):
     """The KE-chain 2 python client to connect to a KE-chain (version 2) instance.
 
-`Link text <http://example.com/>`_
-
     :ivar last_request: last executed request. Which is of type `requests.Request`_
     :ivar last_response: last executed response. Which is of type `requests.Response`_
     :ivar last_url: last called api url
