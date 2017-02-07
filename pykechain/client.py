@@ -196,7 +196,7 @@ class Client(object):
 
         return _activities[0]
 
-    def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None, limit=None):
+    def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None, limit=None, batch=100):
         """Retrieve multiple KE-chain parts.
 
         :param name: filter on name
@@ -205,16 +205,22 @@ class Client(object):
         :param category: filter on category (INSTANCE, MODEL, None)
         :param bucket: filter on bucket_id
         :param activity: filter on activity_id
-        :param limit: limit the return to # items (default unlimited)
+        :param limit: limit the return to # items (default unlimited, so return all results)
+        :param batch: limit the batch size to # items (defaults to 100 items per batch)
         :return: :obj:`PartSet`
         :raises: NotFoundError
+
+        Examples
+        --------
+
+        >>> kec = Client(url='https://default.localhost:9443', verify=False)
+        >>> kec.login('admin','pass')
+        >>> kec.parts(name='Gears')  # doctest:Ellipsis
+        ...
         """
-        if isinstance(limit, type(None)):
-            retrieve_all_next_parts = True
-            limit = 100
-        else:
-            retrieve_all_next_parts = False
-            limit = limit
+        # if limit is provided and the batchsize is bigger than the limit, ensure that the batch size is maximised
+        if limit and limit < batch:
+            batch = limit
 
         request_params = {
             'id': pk,
@@ -223,7 +229,7 @@ class Client(object):
             'category': category,
             'bucket': bucket,
             'activity_id': activity,
-            'limit': limit
+            'limit': batch
         }
         r = self._request('GET', self._build_url('parts'), params=request_params)
 
@@ -234,8 +240,11 @@ class Client(object):
 
         part_results = data['results']
 
-        if retrieve_all_next_parts and data.get('next'):
+        if batch and data.get('next'):
             while data['next']:
+                # respect the limit if set to > 0
+                if limit and len(part_results) >= limit:
+                    break
                 r = self._request('GET', data['next'])
                 data = r.json()
                 part_results.extend(data['results'])
