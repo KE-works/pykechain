@@ -4,7 +4,7 @@ from unittest import TestCase
 from betamax import Betamax
 
 from pykechain import Client
-from tests.utils import TEST_TOKEN, TEST_URL
+from tests.utils import TEST_TOKEN, TEST_URL, TEST_SCOPE_NAME
 
 with Betamax.configure() as config:
     config.cassette_library_dir = os.path.join(os.path.dirname(__file__), 'cassettes')
@@ -29,6 +29,7 @@ class TestBetamax(TestCase):
         self.recorder = Betamax(session=self.client.session)
         self.recorder.use_cassette(self.cassette_name)
         self.recorder.start()
+        self.project = self.client.scope(TEST_SCOPE_NAME)
 
     def tearDown(self):
         self.recorder.stop()
