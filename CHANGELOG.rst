@@ -3,7 +3,7 @@ Change Log
 
 pykechain changelog
 
-1.1.0 (7FEB17)
+1.1.2 (7FEB17)
 --------------
 
  * improved (iterative) part retriever capability with batch processed request. Will enable to retrieve large datasets
