@@ -196,7 +196,8 @@ class Client(object):
 
         return _activities[0]
 
-    def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None, limit=None, batch=100):
+    def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None, limit=None,
+              batch=100):
         """Retrieve multiple KE-chain parts.
 
         :param name: filter on name
