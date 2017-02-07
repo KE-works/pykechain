@@ -232,15 +232,15 @@ class Client(object):
 
         data = r.json()
 
-        if retrieve_all_next_parts and 'next' in data and data['next'] is not None:
-            part_results = data['results']
-            while data['next'] is not None:
+        part_results = data['results']
+
+        if retrieve_all_next_parts and data.get('next'):
+            while data['next']:
                 r = self._request('GET', data['next'])
                 data = r.json()
                 part_results.extend(data['results'])
-            return PartSet((Part(p, client=self) for p in part_results))
-        else:
-            return PartSet((Part(p, client=self) for p in data['results']))
+
+        return PartSet((Part(p, client=self) for p in part_results))
 
     def part(self, *args, **kwargs):
         """Retrieve single KE-chain part.
