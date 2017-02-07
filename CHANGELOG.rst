@@ -27,8 +27,8 @@ pykechain changelog
 
 
 
-0.1.1 (23DEC16)
----------------
+0.1.0.dev0 - 0.1.1.dev0 (23DEC16)
+---------------------------------
 
  * Initial pre-release of pykechain
  * ability to create a client to connect to a KE-chain instance
