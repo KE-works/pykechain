@@ -18,6 +18,7 @@ API_PATH = {
     'property_download': 'api/properties/{property_id}/download'
 }
 
+
 env.read_envfile()
 
 
