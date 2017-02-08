@@ -1,14 +1,14 @@
 # basis
-requests==2.12.5
+requests==2.13.0
 
 # testing
 envparse==0.2.0
-pytest==3.0.5
+pytest==3.0.6
 betamax==0.8.0
 
 # documentation
-Sphinx==1.5.1
-nbsphinx==0.2.12
+Sphinx==1.5.2
+nbsphinx==0.2.13
 
 # data science
 jupyter==1.0.0
