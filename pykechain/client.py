@@ -1,6 +1,6 @@
 import requests
-from requests.compat import urljoin
 from envparse import env
+from requests.compat import urljoin
 
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError
 from .models import Scope, Activity, Part, PartSet, Property
@@ -22,7 +22,15 @@ env.read_envfile()
 
 
 class Client(object):
-    """The KE-chain 2 python client to connect to a KE-chain (version 2) instance."""
+    """The KE-chain 2 python client to connect to a KE-chain (version 2) instance.
+
+    :ivar last_request: last executed request. Which is of type `requests.Request`_
+    :ivar last_response: last executed response. Which is of type `requests.Response`_
+    :ivar last_url: last called api url
+
+    .. _requests.Request: http://docs.python-requests.org/en/master/api/#requests.Request
+    .. _requests.Response: http://docs.python-requests.org/en/master/api/#requests.Response
+    """
 
     def __init__(self, url='http://localhost:8000/', check_certificates=True):
         """Create a KE-chain client with given settings.
@@ -43,6 +51,9 @@ class Client(object):
         self.api_root = url
         self.headers = {}
         self.auth = None
+        self.last_request = None
+        self.last_response = None
+        self.last_url = None
 
         if not check_certificates:
             self.session.verify = False
@@ -91,12 +102,15 @@ class Client(object):
 
     def _request(self, method, url, **kwargs):
         """Helper method to perform the request on the API."""
-        r = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
+        self.last_url = url
+        self.last_request = None
+        self.last_response = self.session.request(method, self.last_url, auth=self.auth, headers=self.headers, **kwargs)
+        self.last_request = self.last_response.request
 
-        if r.status_code == requests.codes.forbidden:
-            raise ForbiddenError(r.json()['results'][0]['detail'])
+        if self.last_response.status_code == requests.codes.forbidden:
+            raise ForbiddenError(self.last_response.json()['results'][0]['detail'])
 
-        return r
+        return self.last_response
 
     def scopes(self, name=None, id=None, status='ACTIVE'):
         """Return all scopes visible / accessible for the logged in user.
@@ -115,7 +129,10 @@ class Client(object):
         >>> kec.scopes()  # doctest: Ellipsis
         ...
 
-        >>> kec.scopes(name="Bike Project") # doctest: Ellipsis
+        >>> kec.scopes(name="Bike Project")  # doctest: Ellipsis
+        ...
+
+        >>> last_request = kec.last_request  # doctest: Ellipsis
         ...
         """
         r = self._request('GET', self._build_url('scopes'), params={
@@ -182,7 +199,8 @@ class Client(object):
 
         return _activities[0]
 
-    def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None):
+    def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None, limit=None,
+              batch=100):
         """Retrieve multiple KE-chain parts.
 
         :param name: filter on name
@@ -191,24 +209,51 @@ class Client(object):
         :param category: filter on category (INSTANCE, MODEL, None)
         :param bucket: filter on bucket_id
         :param activity: filter on activity_id
+        :param limit: limit the return to # items (default unlimited, so return all results)
+        :param batch: limit the batch size to # items (defaults to 100 items per batch)
         :return: :obj:`PartSet`
         :raises: NotFoundError
+
+        Examples
+        --------
+
+        >>> kec = Client(url='https://default.localhost:9443', verify=False)
+        >>> kec.login('admin','pass')
+        >>> kec.parts(name='Gears')  # doctest:Ellipsis
+        ...
         """
-        r = self._request('GET', self._build_url('parts'), params={
+        # if limit is provided and the batchsize is bigger than the limit, ensure that the batch size is maximised
+        if limit and limit < batch:
+            batch = limit
+
+        request_params = {
             'id': pk,
             'name': name,
             'model': model.id if model else None,
             'category': category,
             'bucket': bucket,
-            'activity_id': activity
-        })
+            'activity_id': activity,
+            'limit': batch
+        }
+        r = self._request('GET', self._build_url('parts'), params=request_params)
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve parts")
 
         data = r.json()
 
-        return PartSet((Part(p, client=self) for p in data['results']))
+        part_results = data['results']
+
+        if batch and data.get('next'):
+            while data['next']:
+                # respect the limit if set to > 0
+                if limit and len(part_results) >= limit:
+                    break
+                r = self._request('GET', data['next'])
+                data = r.json()
+                part_results.extend(data['results'])
+
+        return PartSet((Part(p, client=self) for p in part_results))
 
     def part(self, *args, **kwargs):
         """Retrieve single KE-chain part.
