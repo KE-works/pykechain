@@ -3,11 +3,19 @@ Change Log
 
 pykechain changelog
 
+UNRELEASED
+----------
+ * batch updates of a properties in a part using a dictionary is now possible use the part `update({'prop_name': val})`
+   `Part`_ method for that.
+
+.. _Part: http://pykechain.readthedocs.io/en/latest/api/models.html#pykechain.models.Part
+
 1.1.2 (7FEB17)
 --------------
 
- * improved (iterative) part retriever capability with batch processed request. Will enable to retrieve large datasets
-   than normal take longer than a standard timeout
+ * improved (iterative) part retriever capability with a batch processed request. Will enable to retrieve large datasets
+   than normal, that take longer than a standard timeout. Will concatenate the results of the various requests.
+   Check out the documentation for the new `limit` and `batch` parameters on the `Client.parts`_ method.
  * improved upload of files and attachments
  * added bucket and limit filters to limit the number of parts retrieved
  * improved testing
@@ -15,6 +23,7 @@ pykechain changelog
  * updated dependencies
  * improved documentation
 
+.. _Client.parts: http://pykechain.readthedocs.io/en/latest/api/client.html#pykechain.Client.parts
 
 1.0.0 (3JAN17)
 --------------
