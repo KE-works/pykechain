@@ -91,8 +91,5 @@ class Part(Base):
         >>> bike.update({'Gears': 11, 'Total Height': 56.3})
         """
         assert type(property_dict) is dict, "update needs a dictionary with {'property_name': 'property_value', ... }"
-        for property_name,property_value in property_dict.items():
+        for property_name, property_value in property_dict.items():
             self.property(property_name).value = property_value
-
-
-
