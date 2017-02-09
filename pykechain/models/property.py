@@ -13,6 +13,9 @@ class Property(Base):
 
         self._value = json.get('value')
 
+    def __repr__(self):
+        return "<pyke Property '{}' id {}>".format(self.name, self.id[-8:])
+
     @property
     def value(self):
         """Data value of a property.
