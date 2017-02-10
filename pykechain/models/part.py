@@ -11,6 +11,7 @@ class Part(Base):
         super(Part, self).__init__(json, **kwargs)
 
         self.category = json.get('category')
+        self.parent_id = json.get('parent').get('id', None)
 
         from pykechain.models import Property
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]

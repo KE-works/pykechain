@@ -41,10 +41,10 @@ class Client(object):
         Examples
         --------
         >>> from pykechain import Client
-        >>> kec = Client()
+        >>> client = Client()
 
         >>> from pykechain import Client
-        >>> kec = Client(url='https://default-tst.localhost:9443', check_certificates=False)
+        >>> client = Client(url='https://default-tst.localhost:9443', check_certificates=False)
 
         """
         self.session = requests.Session()
@@ -76,15 +76,15 @@ class Client(object):
         Examples
         --------
         Using Token Authentication (retrieve user Token from the KE-chain instance)
-        >>> kec = Client()
-        >>> kec.login(token='<some-super-long-secret-token>')
+        >>> client = Client()
+        >>> client.login(token='<some-super-long-secret-token>')
 
         Using Basic authentications (Username/Password)
-        >>> kec = Client()
-        >>> kec.login(username='user', password='pw')
+        >>> client = Client()
+        >>> client.login(username='user', password='pw')
 
-        >>> kec = Client()
-        >>> kec.login('username','password')
+        >>> client = Client()
+        >>> client.login('username','password')
         """
         if token:
             self.headers['Authorization'] = 'Token {}'.format(token)
@@ -121,15 +121,15 @@ class Client(object):
         Example
         -------
 
-        >>> kec = Client(url='https://default.localhost:9443', verify=False)
-        >>> kec.login('admin','pass')
-        >>> kec.scopes()  # doctest: Ellipsis
+        >>> client = Client(url='https://default.localhost:9443', verify=False)
+        >>> client.login('admin','pass')
+        >>> client.scopes()  # doctest: Ellipsis
         ...
 
-        >>> kec.scopes(name="Bike Project")  # doctest: Ellipsis
+        >>> client.scopes(name="Bike Project")  # doctest: Ellipsis
         ...
 
-        >>> last_request = kec.last_request  # doctest: Ellipsis
+        >>> last_request = client.last_request  # doctest: Ellipsis
         ...
         """
         r = self._request('GET', self._build_url('scopes'), params={
@@ -196,8 +196,8 @@ class Client(object):
 
         return _activities[0]
 
-    def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None, limit=None,
-              batch=100):
+    def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, parent=None, activity=None,
+              limit=None, batch=100):
         """Retrieve multiple KE-chain parts.
 
         :param name: filter on name
@@ -205,6 +205,7 @@ class Client(object):
         :param model: filter on model_id
         :param category: filter on category (INSTANCE, MODEL, None)
         :param bucket: filter on bucket_id
+        :param parent: filter on the parent_id, returns all childrent of the parent_id
         :param activity: filter on activity_id
         :param limit: limit the return to # items (default unlimited, so return all results)
         :param batch: limit the batch size to # items (defaults to 100 items per batch)
@@ -214,9 +215,18 @@ class Client(object):
         Examples
         --------
 
-        >>> kec = Client(url='https://default.localhost:9443', verify=False)
-        >>> kec.login('admin','pass')
-        >>> kec.parts(name='Gears')  # doctest:Ellipsis
+        Return all parts (defaults to instances) with exact name 'Gears'.
+        >>> client = Client(url='https://default.localhost:9443', verify=False)
+        >>> client.login('admin','pass')
+        >>> client.parts(name='Gears')  # doctest:Ellipsis
+        ...
+
+        Return all parts with category is MODEL or category is INSTANCE.
+        >>> client.parts(name='Gears', category=None)  # doctest:Ellipsis
+        ...
+
+        Return a maximum of 5 parts
+        >>> client.parts(limit=5)  # doctest:Ellipsis
         ...
         """
         # if limit is provided and the batchsize is bigger than the limit, ensure that the batch size is maximised
@@ -229,6 +239,7 @@ class Client(object):
             'model': model.id if model else None,
             'category': category,
             'bucket': bucket,
+            'parent': parent,
             'activity_id': activity,
             'limit': batch
         }
@@ -255,6 +266,8 @@ class Client(object):
     def part(self, *args, **kwargs):
         """Retrieve single KE-chain part.
 
+        Uses the same interface as the `part` method but returns only a single pykechain `Part` instance.
+
         :return: a single :obj:`Part`
         :raises: NotFoundError, MultipleFoundError
         """
@@ -268,7 +281,9 @@ class Client(object):
         return _parts[0]
 
     def model(self, *args, **kwargs):
-        """Retrieve single KE-chain model.
+        """Retrieve single KE-chain part model.
+
+        Uses the same interface as the `part` method but returns only a single pykechain `Part` instance.
 
         :return: a single :obj:`Part`
         :raises: NotFoundError, MultipleFoundError
@@ -283,16 +298,18 @@ class Client(object):
 
         return _parts[0]
 
-    def properties(self, name=None, category='INSTANCE'):
+    def properties(self, name=None, pk=None, category='INSTANCE'):
         """Retrieve properties.
 
         :param name: name to limit the search for.
+        :param pk: primary key or id (UUID) of the property to search for
         :param category: filter the properties by category. Defaults to INSTANCE. Other options MODEL or None
         :return: :obj:`list` of :obj:`Property`
         :raises: NotFoundError
         """
         r = self._request('GET', self._build_url('properties'), params={
             'name': name,
+            'id': pk,
             'category': category
         })
 
