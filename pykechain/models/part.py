@@ -11,7 +11,7 @@ class Part(Base):
         super(Part, self).__init__(json, **kwargs)
 
         self.category = json.get('category')
-        if 'id' in json.get('parent', {}):
+        if 'parent' in json and json.get('parent') and 'id' in json.get('parent'):
             self.parent_id = json.get('parent').get('id', None)
         else:
             self.parent_id = None
