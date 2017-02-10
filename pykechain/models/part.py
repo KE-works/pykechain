@@ -34,7 +34,7 @@ class Part(Base):
         return found
 
     def children(self):
-        """Returns the children of this `Part` as `Partset`.
+        """Return the children of this `Part` as `Partset`.
 
         :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no children
         :raises: APIError
@@ -42,7 +42,7 @@ class Part(Base):
         return self._client.parts(parent=self.id)
 
     def siblings(self):
-        """Returns the siblings of this `Part` as `Partset`.
+        """Return the siblings of this `Part` as `Partset`.
 
         Siblings are other Parts sharing the same parent of this `Part`
 
