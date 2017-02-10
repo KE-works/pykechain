@@ -63,4 +63,4 @@ class AttachmentProperty(Property):
 
         data = ('plot.png', buffer.getvalue(), 'image/png')
 
-        self._post_attachment(data)
+        self._upload(data)
