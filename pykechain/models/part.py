@@ -82,7 +82,7 @@ class Part(Base):
     def update(self, property_dict={}):
         # type: (dict) -> None
         """
-        using a dictionary with property names and property values, update the properties belonging to this part
+        Using a dictionary with property names and property values, update the properties belonging to this part.
 
         :param property_dict: dictionary with keys being property names (str) and values being property values
         :return:
