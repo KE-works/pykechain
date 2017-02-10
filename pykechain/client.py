@@ -196,8 +196,8 @@ class Client(object):
 
         return _activities[0]
 
-    def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, activity=None, limit=None,
-              batch=100):
+    def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, parent=None, activity=None,
+              limit=None, batch=100):
         """Retrieve multiple KE-chain parts.
 
         :param name: filter on name
@@ -205,6 +205,7 @@ class Client(object):
         :param model: filter on model_id
         :param category: filter on category (INSTANCE, MODEL, None)
         :param bucket: filter on bucket_id
+        :param parent: filter on parent_id, returns all children from the parent
         :param activity: filter on activity_id
         :param limit: limit the return to # items (default unlimited, so return all results)
         :param batch: limit the batch size to # items (defaults to 100 items per batch)
@@ -229,6 +230,7 @@ class Client(object):
             'model': model.id if model else None,
             'category': category,
             'bucket': bucket,
+            'parent': parent,
             'activity_id': activity,
             'limit': batch
         }

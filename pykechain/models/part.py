@@ -11,6 +11,10 @@ class Part(Base):
         super(Part, self).__init__(json, **kwargs)
 
         self.category = json.get('category')
+        if 'id' in json.get('parent', {}):
+            self.parent_id = json.get('parent').get('id', None)
+        else:
+            self.parent_id = None
 
         from pykechain.models import Property
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
@@ -28,6 +32,28 @@ class Part(Base):
             raise NotFoundError("Could not find property with name {}".format(name))
 
         return found
+
+    def children(self):
+        """Returns the children of this `Part` as `Partset`.
+
+        :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no children
+        :raises: APIError
+        """
+        return self._client.parts(parent=self.id)
+
+    def siblings(self):
+        """Returns the siblings of this `Part` as `Partset`.
+
+        Siblings are other Parts sharing the same parent of this `Part`
+
+        :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no children
+        :raises: APIError
+        """
+        if self.parent_id:
+            return self._client.parts(parent=self.parent_id)
+        else:
+            from pykechain.models import PartSet
+            return PartSet(parts=None)
 
     def add(self, model, **kwargs):
         """Add a new child to this part.
