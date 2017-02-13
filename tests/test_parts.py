@@ -111,7 +111,7 @@ class TestParts(TestBetamax):
         assert len(siblings_of_frame) >= 1  # eg. Wheels ...
 
         # double check that the children of the parent of frame are the same as the siblings of frame
-        children_of_parent_of_frame = frame.parent().children() # type: Part
+        children_of_parent_of_frame = frame.parent().children() # type: PartSet
         assert len(children_of_parent_of_frame) == len(siblings_of_frame)
         children_of_parent_of_frame_ids = [p.id for p in children_of_parent_of_frame]
         for sibling in siblings_of_frame:
