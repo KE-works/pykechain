@@ -1,9 +1,9 @@
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
+from pykechain.models import Part, PartSet
 from tests.classes import TestBetamax
 
 
 class TestParts(TestBetamax):
-
     def test_retrieve_parts(self):
         parts = self.project.parts()
 
@@ -77,6 +77,7 @@ class TestParts(TestBetamax):
 
         assert "<th>Category</th>" in parts._repr_html_()
 
+    # version 1.1.2 and later
     def test_part_set_with_limit(self):
         limit = 5
         parts = self.project.parts(limit=limit)
@@ -84,8 +85,36 @@ class TestParts(TestBetamax):
         assert len(parts) == limit
 
     def test_part_set_with_batch(self):
-        batch=5
+        batch = 5
         parts = self.project.parts(batch=batch)
         assert len(parts) >= batch
 
-        
+    # version 1.1.3 and later
+    def test_retrieve_parent_of_part(self):
+        frame = self.project.part('Frame')  # type:Part
+        assert hasattr(frame, 'parent_id')
+        parent_of_frame = frame.parent()
+        assert type(parent_of_frame) is type(frame)
+
+    def test_retrieve_children_of_part(self):
+        bike = self.project.part('Bike')  # type:Part
+        assert type(bike) is Part
+        children_of_bike = bike.children()
+        assert type(children_of_bike) is PartSet
+        assert len(children_of_bike) >= 1  # eg. Wheels ...
+
+    def test_retrieve_siblings_of_part(self):
+        """Test if the siblings of a part is the same as the children of the parent of the part"""
+        frame = self.project.part('Frame')  # type:Part
+        siblings_of_frame = frame.siblings()
+        assert type(siblings_of_frame) is PartSet
+        assert len(siblings_of_frame) >= 1  # eg. Wheels ...
+
+        # double check that the children of the parent of frame are the same as the siblings of frame
+        children_of_parent_of_frame = frame.parent().children() # type: Part
+        assert len(children_of_parent_of_frame) == len(siblings_of_frame)
+        children_of_parent_of_frame_ids = [p.id for p in children_of_parent_of_frame]
+        for sibling in siblings_of_frame:
+            assert sibling.id in children_of_parent_of_frame_ids, \
+                'sibling {} is appearing in the siblings method and not in the children of ' \
+                'parent method'.format(sibling)

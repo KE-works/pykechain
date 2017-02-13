@@ -20,7 +20,7 @@ class Part(Base):
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
 
     def property(self, name):
-        """Retrieve property belonging to this part.
+        """Retrieve the property belonging to this part.
 
         :param name: property name to search for
         :return: a single :class:`pykechain.models.Property`
@@ -33,8 +33,16 @@ class Part(Base):
 
         return found
 
+    def parent(self):
+        """The parent of this `Part`.
+
+        :return: a set of `Part`s as :class:`pykechain.model.Part`.
+        :raises: APIError
+        """
+        return self._client.part(pk=self.parent_id)
+
     def children(self):
-        """Return the children of this `Part` as `Partset`.
+        """The children of this `Part` as `Partset`.
 
         :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no children
         :raises: APIError
@@ -42,7 +50,7 @@ class Part(Base):
         return self._client.parts(parent=self.id)
 
     def siblings(self):
-        """Return the siblings of this `Part` as `Partset`.
+        """The siblings of this `Part` as `Partset`.
 
         Siblings are other Parts sharing the same parent of this `Part`
 
