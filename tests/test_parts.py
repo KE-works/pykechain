@@ -93,17 +93,12 @@ class TestParts(TestBetamax):
 
 class TestPartUpdate(TestBetamax):
 
-    def setUp(self):
-        TestBetamax.setUp(self)
-        self.front_fork = self.project.part('Front Fork')  # type: Part
-        self.saved_front_fork_properties = dict([(p.name,p.value) for p in self.front_fork.properties])
-
-    def tearDown(self):
-        for prop_name, prop_value in self.saved_front_fork_properties.items():
-            self.front_fork.property(prop_name).value = prop_value
-
     def test_part_update_with_dictionary(self):
-        front_fork = self.front_fork
+        #setup
+        front_fork = self.project.part('Front Fork')  # type: Part
+        saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
+
+        #do tests
         update_dict = {
             'Material': 'Unobtanium',
             'Height (mm)': 123.4,
@@ -116,11 +111,22 @@ class TestPartUpdate(TestBetamax):
             assert update_dict[prop.name] == prop.value, "property {} with value {} did not match contents " \
                                                          "with KEC".format(prop.name, prop.value)
 
+        # tearDown
+        for prop_name, prop_value in saved_front_fork_properties.items():
+            front_fork.property(prop_name).value = prop_value
 
     def test_part_update_with_missing_property(self):
-        front_fork = self.front_fork
+        # setup
+        front_fork = self.project.part('Front Fork')  # type: Part
+        saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
+
+        # do tests
         update_dict = {
             'Unknown Property': 'Woot!'
         }
         with self.assertRaises(NotFoundError):
             front_fork.update(update_dict)
+
+        # tearDown
+        for prop_name, prop_value in saved_front_fork_properties.items():
+            front_fork.property(prop_name).value = prop_value
