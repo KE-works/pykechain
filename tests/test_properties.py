@@ -3,8 +3,6 @@ from tests.classes import TestBetamax
 
 
 class TestProperties(TestBetamax):
-
-
     def test_retrieve_properties(self):
         properties = self.client.properties('Diameter')
 
@@ -22,7 +20,6 @@ class TestProperties(TestBetamax):
             bike.property('Price')
 
     def test_set_property(self):
-
         gears = self.project.part('Bike').property('Gears')
 
         gears.value = 5
@@ -36,7 +33,7 @@ class TestProperties(TestBetamax):
         gears.value = 10
 
     def test_property_to_part(self):
-        bike = self.project.part('Bike')\
+        bike = self.project.part('Bike')
 
         bike2 = bike.property('Gears').part
 
