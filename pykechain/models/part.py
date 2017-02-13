@@ -39,7 +39,10 @@ class Part(Base):
         :return: a set of `Part`s as :class:`pykechain.model.Part`.
         :raises: APIError
         """
-        return self._client.part(pk=self.parent_id)
+        if self.parent_id:
+            return self._client.part(pk=self.parent_id)
+        else:
+            return None
 
     def children(self):
         """The children of this `Part` as `Partset`.

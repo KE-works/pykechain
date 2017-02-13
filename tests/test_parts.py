@@ -118,3 +118,24 @@ class TestParts(TestBetamax):
             assert sibling.id in children_of_parent_of_frame_ids, \
                 'sibling {} is appearing in the siblings method and not in the children of ' \
                 'parent method'.format(sibling)
+
+    def test_retrieve_part_without_parent_id(self):
+        # only the root does not have a parent_id
+        ROOT_NODE_ID = 'f521333e-a1ed-4e65-b166-999f91a38cf1'
+        root_node = self.project.part(pk=ROOT_NODE_ID)  #type: Part
+        assert hasattr(root_node, 'parent_id')
+        assert root_node.parent_id == None
+
+    def test_retrieve_parent_of_part_without_parent_id(self):
+        # only the root does not have a parent_id
+        ROOT_NODE_ID = 'f521333e-a1ed-4e65-b166-999f91a38cf1'
+        root_node = self.project.part(pk=ROOT_NODE_ID)  #type: Part
+        parent_of_rootnode = root_node.parent()
+        assert parent_of_rootnode is None
+
+    def test_retrieve_siblings_of_part_without_parent_id(self):
+        ROOT_NODE_ID = 'f521333e-a1ed-4e65-b166-999f91a38cf1'
+        root_node = self.project.part(pk=ROOT_NODE_ID)  #type: Part
+        siblings_of_root_node = root_node.siblings()
+        assert type(siblings_of_root_node) is PartSet
+        assert len(siblings_of_root_node) is 0
