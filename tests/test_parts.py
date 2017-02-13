@@ -1,4 +1,7 @@
+import copy
+
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
+from pykechain.models import Part
 from tests.classes import TestBetamax
 
 
@@ -88,4 +91,36 @@ class TestParts(TestBetamax):
         parts = self.project.parts(batch=batch)
         assert len(parts) >= batch
 
-        
+class TestPartUpdate(TestBetamax):
+
+    def setUp(self):
+        TestBetamax.setUp(self)
+        self.front_fork = self.project.part('Front Fork')  # type: Part
+        self.saved_front_fork_properties = dict([(p.name,p.value) for p in self.front_fork.properties])
+
+    def tearDown(self):
+        for prop_name, prop_value in self.saved_front_fork_properties.items():
+            self.front_fork.property(prop_name).value = prop_value
+
+    def test_part_update_with_dictionary(self):
+        front_fork = self.front_fork
+        update_dict = {
+            'Material': 'Unobtanium',
+            'Height (mm)': 123.4,
+            'Color': 'Space Grey (old)'
+        }
+        front_fork.update(update_dict)
+        refreshed_front_fork = self.project.part(pk=front_fork.id)
+        for prop in refreshed_front_fork.properties:
+            assert prop.name in update_dict, "property with {} should be in the update dict".format(prop.name)
+            assert update_dict[prop.name] == prop.value, "property {} with value {} did not match contents " \
+                                                         "with KEC".format(prop.name, prop.value)
+
+
+    def test_part_update_with_missing_property(self):
+        front_fork = self.front_fork
+        update_dict = {
+            'Unknown Property': 'Woot!'
+        }
+        with self.assertRaises(NotFoundError):
+            front_fork.update(update_dict)
