@@ -15,9 +15,6 @@ class Part(Base):
         from pykechain.models import Property
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
 
-    def __repr__(self):
-        return "<pyke Part '{}' id {}>".format(self.name, self.id[-8:])
-
     def property(self, name):
         """Retrieve property belonging to this part.
 
