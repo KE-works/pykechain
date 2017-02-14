@@ -20,11 +20,21 @@ class Part(Base):
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
 
     def property(self, name):
-        """Retrieve the property belonging to this part.
+        """Retrieve the property with name belonging to this part.
+
+        If you need to retrieve the property using eg. the id, use :method:`pykechain.Client.properties`.
 
         :param name: property name to search for
         :return: a single :class:`pykechain.models.Property`
         :raises: NotFoundError
+
+        Example
+        -------
+
+        >>> part = project.part('Bike')
+        >>> gears = part.property('Gears')
+        >>> gears.value
+        6
         """
         found = find(self.properties, lambda p: name == p.name)
 
