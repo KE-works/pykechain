@@ -11,10 +11,11 @@ class Part(Base):
         super(Part, self).__init__(json, **kwargs)
 
         self.category = json.get('category')
-        if 'parent' in json and json.get('parent') and 'id' in json.get('parent'):
-            self.parent_id = json.get('parent').get('id', None)
-        else:
-            self.parent_id = None
+        self.parent_id = json['parent'].get('id') if 'parent' in json and json.get('parent') else None
+        # if 'parent' in json and json.get('parent') and 'id' in json.get('parent'):
+        #     self.parent_id = json.get('parent').get('id', None)
+        # else:
+        #     self.parent_id = None
 
         from pykechain.models import Property
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
