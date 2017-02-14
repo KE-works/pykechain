@@ -1,12 +1,9 @@
-import copy
-
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
-from pykechain.models import Part
+from pykechain.models import Part, PartSet
 from tests.classes import TestBetamax
 
 
 class TestParts(TestBetamax):
-
     def test_retrieve_parts(self):
         parts = self.project.parts()
 
@@ -80,6 +77,7 @@ class TestParts(TestBetamax):
 
         assert "<th>Category</th>" in parts._repr_html_()
 
+    # version 1.1.2 and later
     def test_part_set_with_limit(self):
         limit = 5
         parts = self.project.parts(limit=limit)
@@ -87,18 +85,69 @@ class TestParts(TestBetamax):
         assert len(parts) == limit
 
     def test_part_set_with_batch(self):
-        batch=5
+        batch = 5
         parts = self.project.parts(batch=batch)
         assert len(parts) >= batch
 
-class TestPartUpdate(TestBetamax):
+    # version 1.1.3 and later
+    def test_retrieve_parent_of_part(self):
+        frame = self.project.part('Frame')  # type:Part
+        assert hasattr(frame, 'parent_id')
+        parent_of_frame = frame.parent()
+        assert type(parent_of_frame) is type(frame)
 
+    def test_retrieve_children_of_part(self):
+        bike = self.project.part('Bike')  # type:Part
+        assert type(bike) is Part
+        children_of_bike = bike.children()
+        assert type(children_of_bike) is PartSet
+        assert len(children_of_bike) >= 1  # eg. Wheels ...
+
+    def test_retrieve_siblings_of_part(self):
+        """Test if the siblings of a part is the same as the children of the parent of the part"""
+        frame = self.project.part('Frame')  # type:Part
+        siblings_of_frame = frame.siblings()
+        assert type(siblings_of_frame) is PartSet
+        assert len(siblings_of_frame) >= 1  # eg. Wheels ...
+
+        # double check that the children of the parent of frame are the same as the siblings of frame
+        children_of_parent_of_frame = frame.parent().children()  # type: PartSet
+        assert len(children_of_parent_of_frame) == len(siblings_of_frame)
+        children_of_parent_of_frame_ids = [p.id for p in children_of_parent_of_frame]
+        for sibling in siblings_of_frame:
+            assert sibling.id in children_of_parent_of_frame_ids, \
+                'sibling {} is appearing in the siblings method and not in the children of ' \
+                'parent method'.format(sibling)
+
+    def test_retrieve_part_without_parent_id(self):
+        # only the root does not have a parent_id
+        ROOT_NODE_ID = 'f521333e-a1ed-4e65-b166-999f91a38cf1'
+        root_node = self.project.part(pk=ROOT_NODE_ID)  # type: Part
+        assert hasattr(root_node, 'parent_id')
+        assert root_node.parent_id == None
+
+    def test_retrieve_parent_of_part_without_parent_id(self):
+        # only the root does not have a parent_id
+        ROOT_NODE_ID = 'f521333e-a1ed-4e65-b166-999f91a38cf1'
+        root_node = self.project.part(pk=ROOT_NODE_ID)  # type: Part
+        parent_of_rootnode = root_node.parent()
+        assert parent_of_rootnode is None
+
+    def test_retrieve_siblings_of_part_without_parent_id(self):
+        ROOT_NODE_ID = 'f521333e-a1ed-4e65-b166-999f91a38cf1'
+        root_node = self.project.part(pk=ROOT_NODE_ID)  # type: Part
+        siblings_of_root_node = root_node.siblings()
+        assert type(siblings_of_root_node) is PartSet
+        assert len(siblings_of_root_node) is 0
+
+
+class TestPartUpdate(TestBetamax):
     def test_part_update_with_dictionary(self):
-        #setup
+        # setup
         front_fork = self.project.part('Front Fork')  # type: Part
         saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
 
-        #do tests
+        # do tests
         update_dict = {
             'Material': 'Unobtanium',
             'Height (mm)': 123.4,

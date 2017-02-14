@@ -11,16 +11,27 @@ class Part(Base):
         super(Part, self).__init__(json, **kwargs)
 
         self.category = json.get('category')
+        self.parent_id = json['parent'].get('id') if 'parent' in json and json.get('parent') else None
 
         from pykechain.models import Property
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
 
     def property(self, name):
-        """Retrieve property belonging to this part.
+        """Retrieve the property with name belonging to this part.
+
+        If you need to retrieve the property using eg. the id, use :meth:`pykechain.Client.properties`.
 
         :param name: property name to search for
         :return: a single :class:`pykechain.models.Property`
         :raises: NotFoundError
+
+        Example
+        -------
+
+        >>> part = project.part('Bike')
+        >>> gears = part.property('Gears')
+        >>> gears.value
+        6
         """
         found = find(self.properties, lambda p: name == p.name)
 
@@ -28,6 +39,52 @@ class Part(Base):
             raise NotFoundError("Could not find property with name {}".format(name))
 
         return found
+
+    def parent(self):
+        """The parent of this `Part`.
+
+        :return: the parent `Part`s as :class:`pykechain.model.Part`.
+        :raises: APIError
+
+        Example
+        -------
+
+        >>> part = project.part('Frame')
+        >>> bike = part.parent()
+
+        """
+        if self.parent_id:
+            return self._client.part(pk=self.parent_id)
+        else:
+            return None
+
+    def children(self):
+        """The children of this `Part` as `Partset`.
+
+        :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no children
+        :raises: APIError
+
+        Example
+        -------
+
+        >>> bike = project.part('Bike')
+        >>> direct_descendants_of_bike = bike.children()
+        """
+        return self._client.parts(parent=self.id)
+
+    def siblings(self):
+        """The siblings of this `Part` as `Partset`.
+
+        Siblings are other Parts sharing the same parent of this `Part`
+
+        :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no siblings
+        :raises: APIError
+        """
+        if self.parent_id:
+            return self._client.parts(parent=self.parent_id)
+        else:
+            from pykechain.models import PartSet
+            return PartSet(parts=None)
 
     def add(self, model, **kwargs):
         """Add a new child to this part.
@@ -48,7 +105,11 @@ class Part(Base):
         return self._client.create_part(parent, self, **kwargs)
 
     def delete(self):
-        """Delete this part."""
+        """Delete this part.
+
+        :return: None
+        :raises: APIError if delete was not succesfull
+        """
         r = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
 
         if r.status_code != 204:

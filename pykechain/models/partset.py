@@ -10,7 +10,10 @@ class PartSet(object):
 
     def __init__(self, parts):
         """Construct a PartSet from a part iterable."""
-        self._parts = list(parts)
+        if parts:
+            self._parts = list(parts)
+        else:
+            self._parts = []
         self._iter = iter(self._parts)
 
     def __iter__(self):

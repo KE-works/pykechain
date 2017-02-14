@@ -3,10 +3,17 @@ Change Log
 
 pykechain changelog
 
-UNRELEASED
-----------
- * batch updates of a properties in a part using a dictionary is now possible use the part `update({'prop_name': val})`
-   `Part`_ method for that.
+1.2.0 (14FEB17)
+---------------
+
+ * batch updates of properties in a part using a dictionary is now possible using the part `update({'prop_name': val})`
+   `Part`_ method.
+ * added relational methods on the part like: `Part.parent()`, `Part.children()` and `Part.siblings()`. See
+   documentation of :class:`Part`_ for that.
+ * improved documentation
+ * improved testing
+ * improved introspection of objects due to correct representation for debugging
+ * version number now available through pykechain.version
 
 .. _Part: http://pykechain.readthedocs.io/en/latest/api/models.html#pykechain.models.Part
 
