@@ -11,3 +11,4 @@ prune docs/_build
 
 global-exclude *.pyc
 global-exclude .ipynb_checkpoints/*
+prune scripts
