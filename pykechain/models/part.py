@@ -46,8 +46,15 @@ class Part(Base):
     def parent(self):
         """The parent of this `Part`.
 
-        :return: a set of `Part`s as :class:`pykechain.model.Part`.
+        :return: the parent `Part`s as :class:`pykechain.model.Part`.
         :raises: APIError
+
+        Example
+        -------
+
+        >>> part = project.part('Frame')
+        >>> bike = part.parent()
+
         """
         if self.parent_id:
             return self._client.part(pk=self.parent_id)
@@ -59,6 +66,12 @@ class Part(Base):
 
         :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no children
         :raises: APIError
+
+        Example
+        -------
+
+        >>> bike = project.part('Bike')
+        >>> direct_descendants_of_bike = bike.children()
         """
         return self._client.parts(parent=self.id)
 
@@ -67,7 +80,7 @@ class Part(Base):
 
         Siblings are other Parts sharing the same parent of this `Part`
 
-        :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no children
+        :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no siblings
         :raises: APIError
         """
         if self.parent_id:
@@ -95,7 +108,11 @@ class Part(Base):
         return self._client.create_part(parent, self, **kwargs)
 
     def delete(self):
-        """Delete this part."""
+        """Delete this part.
+
+        :return: None
+        :raises: APIError if delete was not succesfull
+        """
         r = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
 
         if r.status_code != 204:
