@@ -28,7 +28,9 @@ more gears means bigger wheels (can't argue with this logic). In order to get st
     kec = pykechain.Client(url='<ke-chain-url>')
     kec.login('<username>', '<password>')
 
-In order to add new wheels, the bike part and wheel model are needed. These can be queried from the project directly::
+In order to add new wheels, the bike part and wheel model are needed. When opening the right project (scope) to work
+in first, it ensures that all parts are returned only from that scope. These parts then can be queried from the project
+directly::
 
     project = kec.scope('Bike Project')
 
@@ -60,3 +62,7 @@ After execution of the script, the product will be modified as shown below:
 
 .. image:: _static/bikeproduct2.png
     :width: 325
+
+Alternatively the property values can also be updated using a dictionary and the `update` method of the `Part`::
+
+    wheel.update({'Spokes':32, 'Rim Material':'Unobtanium'})

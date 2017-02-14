@@ -11,6 +11,9 @@ class Scope(Base):
         self.bucket = json.get('bucket', {})
         self.process = json.get('process')
 
+    def __repr__(self):
+        return "<pyke Scope '{}' id {}>".format(self.name, self.id[-8:])
+
     def parts(self, *args, **kwargs):
         """Retrieve parts belonging to this scope.
 

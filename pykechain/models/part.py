@@ -136,3 +136,22 @@ class Part(Base):
         html.append("</table>")
 
         return ''.join(html)
+
+    def update(self, update_dict=None):
+        # type: (dict) -> None
+        """
+        Use a dictionary with property names and property values to update the properties belonging to this part.
+
+        :param update_dict: dictionary with keys being property names (str) and values being property values
+        :return: :class:`pykechain.models.Part`
+        :raises: APIError, Raises `NotFoundError` when the property name is not a valid property of this part
+
+        Example
+        -------
+
+        >>> bike = client.scope('Bike Project').part('Bike')
+        >>> bike.update({'Gears': 11, 'Total Height': 56.3})
+        """
+        assert type(update_dict) is dict, "update needs a dictionary with {'property_name': 'property_value', ... }"
+        for property_name, property_value in update_dict.items():
+            self.property(property_name).value = property_value

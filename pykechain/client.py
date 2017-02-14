@@ -58,6 +58,9 @@ class Client(object):
         if not check_certificates:
             self.session.verify = False
 
+    def __repr__(self):
+        return "<pyke Client '{}'>".format(self.api_root)
+
     @classmethod
     def from_env(cls):
         """Create a client from environment variable settings."""
