@@ -1,5 +1,3 @@
-import copy
-
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
 from pykechain.models import Part, PartSet
 from tests.classes import TestBetamax
@@ -113,7 +111,7 @@ class TestParts(TestBetamax):
         assert len(siblings_of_frame) >= 1  # eg. Wheels ...
 
         # double check that the children of the parent of frame are the same as the siblings of frame
-        children_of_parent_of_frame = frame.parent().children() # type: PartSet
+        children_of_parent_of_frame = frame.parent().children()  # type: PartSet
         assert len(children_of_parent_of_frame) == len(siblings_of_frame)
         children_of_parent_of_frame_ids = [p.id for p in children_of_parent_of_frame]
         for sibling in siblings_of_frame:
@@ -124,33 +122,32 @@ class TestParts(TestBetamax):
     def test_retrieve_part_without_parent_id(self):
         # only the root does not have a parent_id
         ROOT_NODE_ID = 'f521333e-a1ed-4e65-b166-999f91a38cf1'
-        root_node = self.project.part(pk=ROOT_NODE_ID)  #type: Part
+        root_node = self.project.part(pk=ROOT_NODE_ID)  # type: Part
         assert hasattr(root_node, 'parent_id')
         assert root_node.parent_id == None
 
     def test_retrieve_parent_of_part_without_parent_id(self):
         # only the root does not have a parent_id
         ROOT_NODE_ID = 'f521333e-a1ed-4e65-b166-999f91a38cf1'
-        root_node = self.project.part(pk=ROOT_NODE_ID)  #type: Part
+        root_node = self.project.part(pk=ROOT_NODE_ID)  # type: Part
         parent_of_rootnode = root_node.parent()
         assert parent_of_rootnode is None
 
     def test_retrieve_siblings_of_part_without_parent_id(self):
         ROOT_NODE_ID = 'f521333e-a1ed-4e65-b166-999f91a38cf1'
-        root_node = self.project.part(pk=ROOT_NODE_ID)  #type: Part
+        root_node = self.project.part(pk=ROOT_NODE_ID)  # type: Part
         siblings_of_root_node = root_node.siblings()
         assert type(siblings_of_root_node) is PartSet
         assert len(siblings_of_root_node) is 0
 
 
 class TestPartUpdate(TestBetamax):
-
     def test_part_update_with_dictionary(self):
-        #setup
+        # setup
         front_fork = self.project.part('Front Fork')  # type: Part
         saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
 
-        #do tests
+        # do tests
         update_dict = {
             'Material': 'Unobtanium',
             'Height (mm)': 123.4,
