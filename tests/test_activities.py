@@ -3,7 +3,6 @@ from tests.classes import TestBetamax
 
 
 class TestActivities(TestBetamax):
-
     def test_retrieve_activities(self):
         assert self.project.activities()
 
