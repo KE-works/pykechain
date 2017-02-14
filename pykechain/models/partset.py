@@ -1,4 +1,3 @@
-
 class PartSet(object):
     """A set of KE-chain parts.
 
