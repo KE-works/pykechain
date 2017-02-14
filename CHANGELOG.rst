@@ -9,7 +9,7 @@ pykechain changelog
  * batch updates of properties in a part using a dictionary is now possible using the part `update({'prop_name': val})`
    `Part`_ method.
  * added relational methods on the part like: `Part.parent()`, `Part.children()` and `Part.siblings()`. See
-   documentation of :class:`Part`_ for that.
+   documentation of `Part`_ for that.
  * improved documentation
  * improved testing
  * improved introspection of objects due to correct representation for debugging
