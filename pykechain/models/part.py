@@ -22,7 +22,7 @@ class Part(Base):
     def property(self, name):
         """Retrieve the property with name belonging to this part.
 
-        If you need to retrieve the property using eg. the id, use :method:`pykechain.Client.properties`.
+        If you need to retrieve the property using eg. the id, use :meth:`pykechain.Client.properties`.
 
         :param name: property name to search for
         :return: a single :class:`pykechain.models.Property`
