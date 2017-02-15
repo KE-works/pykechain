@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from pykechain.exceptions import APIError
 from tests.classes import TestBetamax
 
@@ -13,20 +15,21 @@ class TestSelectListProperty(TestBetamax):
             assert isinstance(item, str)
 
     def test_set_options_list(self):
-        #setup
+        # setup
         sellist_model = self.project.model('Model').property('a_select_list_property')
 
         saved_options_list = [str(i) for i in sellist_model.options]
 
-        #do test
-        new_options_list = [1,3.14, "a", u"こんにちは"]
+        # do test
+        from datetime import datetime
+        new_options_list = [1, 3.14, "a", str(datetime.utcnow())]
         sellist_model.options = new_options_list
         self.assertListEqual(sellist_model.options, list(map(str, new_options_list)))
 
         sellist_model2 = self.project.model('Model').property('a_select_list_property')
         self.assertListEqual(sellist_model.options, sellist_model2.options)
 
-        #teardown
+        # teardown
         sellist_model.options = saved_options_list
 
     def test_illegal_options_are_not_set(self):
@@ -41,7 +44,7 @@ class TestSelectListProperty(TestBetamax):
 
         with self.assertRaises(AssertionError):
             # set
-            sellist_model.options = set((1,2))
+            sellist_model.options = set((1, 2))
 
         with self.assertRaises(AssertionError):
             # dict
@@ -50,7 +53,6 @@ class TestSelectListProperty(TestBetamax):
         with self.assertRaises(AssertionError):
             # tuple
             sellist_model.options = (1,)
-
 
     def test_fail_to_set_options_on_instance(self):
         """Test settings options on a property instance, only models are allowed optiosn to be set"""
@@ -63,10 +65,4 @@ class TestSelectListProperty(TestBetamax):
         assert hasattr(sellist_property, 'options')
 
         with self.assertRaises(APIError):
-            sellist_property.options = [1,3.14]
-
-
-
-
-
-
+            sellist_property.options = [1, 3.14]

@@ -59,6 +59,4 @@ class SelectListProperty(Property):
         if response.status_code != 200:  # pragma: no cover
             raise APIError("Could not update property value. Response: {}".format(str(response)))
 
-        # if responsecode is successfull, set the options internally correct
-
-
+            # if responsecode is successfull, set the options internally correct
