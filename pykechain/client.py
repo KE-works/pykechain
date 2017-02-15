@@ -112,11 +112,11 @@ class Client(object):
 
         return self.last_response
 
-    def scopes(self, name=None, id=None, status='ACTIVE'):
+    def scopes(self, name=None, pk=None, status='ACTIVE'):
         """Return all scopes visible / accessible for the logged in user.
 
         :param name: if provided, filter the search for a scope/project by name
-        :param id: if provided, filter the search by scope_id
+        :param pk: if provided, filter the search by scope_id
         :param status: if provided, filter the search for the status. eg. 'ACTIVE', 'TEMPLATE', 'LIBRARY'
         :return: :obj:`list` of :obj:`Scope`
         :raises: NotFoundError
@@ -137,7 +137,7 @@ class Client(object):
         """
         r = self._request('GET', self._build_url('scopes'), params={
             'name': name,
-            'id': id,
+            'id': pk,
             'status': status
         })
 
