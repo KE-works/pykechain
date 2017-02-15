@@ -12,7 +12,7 @@ class TestSelectListProperty(TestBetamax):
         assert hasattr(sellist_model, 'options')
         assert isinstance(sellist_model.options, list)
         for item in sellist_model.options:
-            assert isinstance(item, str)
+            self.assertTrue(type(item), str)
 
     def test_set_options_list(self):
         # setup
