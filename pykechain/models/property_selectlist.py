@@ -35,9 +35,10 @@ class SelectListProperty(Property):
         >>> select_list_property.options = [1,3,5,"wow"]
         """
         assert isinstance(options_list, list), "The list of options should be a list"
-        assert self._json_data.get('category') is not 'MODEL', "We can only update the options list of the model of " \
-                                                               "this property. The model of this property has " \
-                                                               "id {}".format(self._json_data.get('model'))
+        if self._json_data.get('category') != 'MODEL':
+            raise APIError("We can only update the options list of the model of this property. The model of this "
+                           "property has id '{}'".format(self._json_data.get('model')))
+
         # stringify the options list
         options_list = list(map(str, options_list))
         if set(options_list) != set(self._json_data.get('options')):
