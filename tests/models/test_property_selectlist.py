@@ -22,7 +22,7 @@ class TestSelectListProperty(TestBetamax):
 
         # do test
         from datetime import datetime
-        new_options_list = [1, 3.14, "a", str(datetime.utcnow())]
+        new_options_list = [1, 3.14, "a"]
         sellist_model.options = new_options_list
         self.assertListEqual(sellist_model.options, list(map(str, new_options_list)))
 
