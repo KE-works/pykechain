@@ -102,10 +102,10 @@ class Client(object):
 
     def _request(self, method, url, **kwargs):
         """Helper method to perform the request on the API."""
-        self.last_url = url
         self.last_request = None
-        self.last_response = self.session.request(method, self.last_url, auth=self.auth, headers=self.headers, **kwargs)
+        self.last_response = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
         self.last_request = self.last_response.request
+        self.last_url = self.last_response.url
 
         if self.last_response.status_code == requests.codes.forbidden:
             raise ForbiddenError(self.last_response.json()['results'][0]['detail'])
@@ -200,7 +200,7 @@ class Client(object):
         return _activities[0]
 
     def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, parent=None, activity=None,
-              limit=None, batch=100):
+              limit=None, batch=100, **kwargs):
         """Retrieve multiple KE-chain parts.
 
         :param name: filter on name
@@ -212,6 +212,8 @@ class Client(object):
         :param activity: filter on activity_id
         :param limit: limit the return to # items (default unlimited, so return all results)
         :param batch: limit the batch size to # items (defaults to 100 items per batch)
+        :param kwargs: additional keyword, value arguments for the api with are passed to the /parts/ api as filters
+                       please refer to the full KE-chain 2 REST API documentation.
         :return: :obj:`PartSet`
         :raises: NotFoundError
 
@@ -246,6 +248,10 @@ class Client(object):
             'activity_id': activity,
             'limit': batch
         }
+
+        if kwargs:
+            request_params.update(**kwargs)
+
         r = self._request('GET', self._build_url('parts'), params=request_params)
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
