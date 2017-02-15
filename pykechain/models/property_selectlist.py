@@ -3,17 +3,17 @@ from pykechain.models import Property
 
 
 class SelectListProperty(Property):
-    """A select list property that needs to update its options"""
+    """A select list property that needs to update its options."""
 
     @property
     def options(self):
-        """List of options of this property to select from"""
+        """List of options of this property to select from."""
         return self._json_data.get('options').get('value_choices')
 
     @options.setter
     def options(self, options_list):
         """
-        Set the options of the select list property if the property is a property model
+        Set the options of the select list property if the property is a property model.
 
         Will raise an exception if the property is not a model. Will also raise an exception if the list is of
         incorrect form and contains non string, floats or integers.
@@ -46,7 +46,7 @@ class SelectListProperty(Property):
             self._json_data.get('options')['value_choices'] = options_list
 
     def _put_options(self, options_list):
-        """saving the options to the database.
+        """Saving the options to the database.
 
         Will check for the correct form of the data.
 
