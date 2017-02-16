@@ -5,10 +5,15 @@ from pykechain.models import Property
 class SelectListProperty(Property):
     """A select list property that needs to update its options."""
 
+    def __init__(self, json, **kwargs):
+        """Construct a Property from a json object."""
+        super(SelectListProperty, self).__init__(json, **kwargs)
+        self._options = self._json_data.get('options').get('value_choices')
+
     @property
     def options(self):
         """List of options of this property to select from."""
-        return self._json_data.get('options').get('value_choices')
+        return self._options
 
     @options.setter
     def options(self, options_list):
@@ -41,9 +46,9 @@ class SelectListProperty(Property):
 
         # stringify the options list
         options_list = list(map(str, options_list))
-        if set(options_list) != set(self._json_data.get('options')):
+        if set(options_list) != set(self._options):
             self._put_options(options_list=options_list)
-            self._json_data.get('options')['value_choices'] = options_list
+            self._options = options_list
 
     def _put_options(self, options_list):
         """Saving the options to the database.
@@ -58,5 +63,3 @@ class SelectListProperty(Property):
 
         if response.status_code != 200:  # pragma: no cover
             raise APIError("Could not update property value. Response: {}".format(str(response)))
-
-            # if responsecode is successfull, set the options internally correct
