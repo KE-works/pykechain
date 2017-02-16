@@ -74,6 +74,8 @@ class Client(object):
         user token authentication.
 
         .. code-block:: guess
+           :caption: .env
+           :name: dot-env
 
             # User test token here (required)
             KECHAIN_TOKEN=...<secret user token>...
