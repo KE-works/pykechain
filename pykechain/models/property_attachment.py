@@ -1,3 +1,4 @@
+import json
 import io
 
 from pykechain.exceptions import APIError
@@ -13,27 +14,35 @@ class AttachmentProperty(Property):
 
         Use save_as in order to download as a file.
         """
-        return '[Attachment]'
+        raise RuntimeError("Cannot read the value of an attachment property, use save_as()")
 
     @value.setter
     def value(self, value):
-        try:
-            import matplotlib.figure
+        raise RuntimeError("Cannot set the value of an attachment property, use upload()")
 
-            if isinstance(value, matplotlib.figure.Figure):
-                self._attach_plot(value)
-                return
-        except ImportError:
-            pass
+    def json_load(self):
+        return self._download().json()
 
-    def upload(self, filename):
+    def upload(self, data, **kwargs):
         """Upload a file to the attachment property.
 
         :param filename: File path
         :raises: APIError
         """
-        with open(filename, 'rb') as f:
-            self._upload(f)
+        try:
+            import matplotlib.figure
+
+            if isinstance(data, matplotlib.figure.Figure):
+                self._upload_plot(data, **kwargs)
+                return
+        except ImportError:
+            pass
+
+        if isinstance(data, str):
+            with open(data, 'rb') as fp:
+                self._upload(fp)
+        else:
+            self._upload_json(data, **kwargs)
 
     def save_as(self, filename):
         """Download the attachment to a file.
@@ -65,11 +74,16 @@ class AttachmentProperty(Property):
         if r.status_code != 200:
             raise APIError("Could not upload attachment")
 
-    def _attach_plot(self, figure):
+    def _upload_json(self, content, name='data.json'):
+        data = (name, json.dumps(content), 'application/json')
+
+        self._upload(data)
+
+    def _upload_plot(self, figure, name='plot.png'):
         buffer = io.BytesIO()
 
         figure.savefig(buffer, format="png")
 
-        data = ('plot.png', buffer.getvalue(), 'image/png')
+        data = (name, buffer.getvalue(), 'image/png')
 
         self._upload(data)
