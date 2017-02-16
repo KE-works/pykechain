@@ -14,7 +14,7 @@ pykechain changelog
    of the `Client.from_env()`_ method. Including an example of this .env file.
  * Improved documentation
  * Improved testing (and coverage)
- * Improved introspection of `PartSet`s.
+ * Improved introspection of `PartSet`.
 
 .. _SelectListProperty: http://pykechain.readthedocs.io/en/latest/api/models.html#pykechain.models.SelectListProperty
 .. _Client.from_env(): http://pykechain.readthedocs.io/en/latest/api/client.html#pykechain.Client.from_env
