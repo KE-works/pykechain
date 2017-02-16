@@ -3,6 +3,22 @@ Change Log
 
 pykechain changelog
 
+1.3.0 (16FEB17)
+---------------
+
+ * Added functionality to support a select list property type from KE-chain in pykechain. Now you can inquire for the
+   options and set the list of options (on the model) to choose from. See documentation of `SelectListProperty`_.
+ * Added additional keyword arguments to the `Client.parts()` method. This allows access to additional filters on the
+   KE-chain REST API.
+ * Fixed a bug that shows a warning when importing pykechain without a `.env` file being present. Improved documentation
+   of the `Client.from_env()`_ method. Including an example of this .env file.
+ * Improved documentation
+ * Improved testing (and coverage)
+ * Improved introspection of `PartSet`s.
+
+.. _SelectListProperty: http://pykechain.readthedocs.io/en/latest/api/models.html#pykechain.models.SelectListProperty
+.. _Client.from_env(): http://pykechain.readthedocs.io/en/latest/api/client.html#pykechain.Client.from_env
+
 1.2.0 (14FEB17)
 ---------------
 
