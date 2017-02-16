@@ -49,7 +49,10 @@ class Property(Base):
         This method will attach the right class to a property, enabling the use of type-specific methods.
         """
         if json.get('property_type') == 'ATTACHMENT_VALUE':
-            from pykechain.models import AttachmentProperty
+            from .property_attachment import AttachmentProperty
             return AttachmentProperty(json, **kwargs)
+        elif json.get('property_type') == 'SINGLE_SELECT_VALUE':
+            from .property_selectlist import SelectListProperty
+            return SelectListProperty(json, **kwargs)
         else:
             return Property(json, **kwargs)

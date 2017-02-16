@@ -140,6 +140,12 @@ class TestParts(TestBetamax):
         assert type(siblings_of_root_node) is PartSet
         assert len(siblings_of_root_node) is 0
 
+    # new in 1.3+
+    def test_kwargs_on_part_retrieval(self):
+        # test that the additional kwargs are added to the query filter on the api
+        bikes = self.project.parts('Bike', descendants=True)  # type:Part
+        assert len(bikes) > 1
+        assert self.client.last_url.find('descendants')
 
 class TestPartUpdate(TestBetamax):
     def test_part_update_with_dictionary(self):
