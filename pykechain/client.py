@@ -18,8 +18,6 @@ API_PATH = {
     'property_download': 'api/properties/{property_id}/download'
 }
 
-env.read_envfile()
-
 
 class Client(object):
     """The KE-chain 2 python client to connect to a KE-chain (version 2) instance.
@@ -62,10 +60,41 @@ class Client(object):
         return "<pyke Client '{}'>".format(self.api_root)
 
     @classmethod
-    def from_env(cls):
-        """Create a client from environment variable settings."""
+    def from_env(cls, env_filename=None):
+        """Create a client from environment variable settings.
+
+        :param env_filename: filename of the environment file, defaults to '.env' in the local dir (or parent dir)
+        :return: none
+
+        Example
+        -------
+
+        Initiates the pykechain client from the contents of an environment file. Authentication information is optional
+        but ensure that you provide this later in your code. Offered are both username/password authentication and
+        user token authentication.
+
+        .. code-block:: guess
+           :caption: .env
+           :name: dot-env
+
+            # User token here (required)
+            KECHAIN_TOKEN=...<secret user token>...
+            KECHAIN_URL=https://an_url.ke-chain.com
+            # or use Basic Auth with username/password
+            KECHAIN_USERNAME=...
+            KECHAIN_PASSWORD=...
+
+
+        >>> client = Client().from_env()
+
+        """
+        env.read_envfile(env_filename)
         client = cls(url=env('KECHAIN_URL'))
-        client.login(token=env('KECHAIN_TOKEN'))
+
+        if env('KECHAIN_TOKEN', None):
+            client.login(token=env('KECHAIN_TOKEN'))
+        elif env('KECHAIN_USERNAME', '') and env('KECHAIN_PASSWORD', ''):
+            client.login(username=env('KECHAIN_USERNAME'), password=env('KECHAIN_PASSWORD'))
 
         return client
 
@@ -102,21 +131,21 @@ class Client(object):
 
     def _request(self, method, url, **kwargs):
         """Helper method to perform the request on the API."""
-        self.last_url = url
         self.last_request = None
-        self.last_response = self.session.request(method, self.last_url, auth=self.auth, headers=self.headers, **kwargs)
+        self.last_response = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
         self.last_request = self.last_response.request
+        self.last_url = self.last_response.url
 
         if self.last_response.status_code == requests.codes.forbidden:
             raise ForbiddenError(self.last_response.json()['results'][0]['detail'])
 
         return self.last_response
 
-    def scopes(self, name=None, id=None, status='ACTIVE'):
+    def scopes(self, name=None, pk=None, status='ACTIVE'):
         """Return all scopes visible / accessible for the logged in user.
 
         :param name: if provided, filter the search for a scope/project by name
-        :param id: if provided, filter the search by scope_id
+        :param pk: if provided, filter the search by scope_id
         :param status: if provided, filter the search for the status. eg. 'ACTIVE', 'TEMPLATE', 'LIBRARY'
         :return: :obj:`list` of :obj:`Scope`
         :raises: NotFoundError
@@ -137,7 +166,7 @@ class Client(object):
         """
         r = self._request('GET', self._build_url('scopes'), params={
             'name': name,
-            'id': id,
+            'id': pk,
             'status': status
         })
 
@@ -200,7 +229,7 @@ class Client(object):
         return _activities[0]
 
     def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, parent=None, activity=None,
-              limit=None, batch=100):
+              limit=None, batch=100, **kwargs):
         """Retrieve multiple KE-chain parts.
 
         :param name: filter on name
@@ -212,6 +241,8 @@ class Client(object):
         :param activity: filter on activity_id
         :param limit: limit the return to # items (default unlimited, so return all results)
         :param batch: limit the batch size to # items (defaults to 100 items per batch)
+        :param kwargs: additional keyword, value arguments for the api with are passed to the /parts/ api as filters
+                       please refer to the full KE-chain 2 REST API documentation.
         :return: :obj:`PartSet`
         :raises: NotFoundError
 
@@ -246,6 +277,10 @@ class Client(object):
             'activity_id': activity,
             'limit': batch
         }
+
+        if kwargs:
+            request_params.update(**kwargs)
+
         r = self._request('GET', self._build_url('parts'), params=request_params)
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
