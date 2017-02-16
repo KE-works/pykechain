@@ -64,7 +64,7 @@ class Client(object):
         """Create a client from environment variable settings.
 
         :param env_filename: filename of the environment file, defaults to '.env' in the local dir (or parent dir)
-        :return: none
+        :return: :class:`pykechain.Client`
 
         Example
         -------
@@ -73,13 +73,14 @@ class Client(object):
         but ensure that you provide this later in your code. Offered are both username/password authentication and
         user token authentication.
 
-        .. code-block:: guess
+        .. code-block:: none
            :caption: .env
            :name: dot-env
 
             # User token here (required)
             KECHAIN_TOKEN=...<secret user token>...
             KECHAIN_URL=https://an_url.ke-chain.com
+
             # or use Basic Auth with username/password
             KECHAIN_USERNAME=...
             KECHAIN_PASSWORD=...
