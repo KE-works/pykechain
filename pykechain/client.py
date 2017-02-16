@@ -18,8 +18,6 @@ API_PATH = {
     'property_download': 'api/properties/{property_id}/download'
 }
 
-env.read_envfile()
-
 
 class Client(object):
     """The KE-chain 2 python client to connect to a KE-chain (version 2) instance.
@@ -62,10 +60,38 @@ class Client(object):
         return "<pyke Client '{}'>".format(self.api_root)
 
     @classmethod
-    def from_env(cls):
-        """Create a client from environment variable settings."""
+    def from_env(cls, env_filename=None):
+        """Create a client from environment variable settings.
+
+        :param env_filename: filename of the environment file, defaults to '.env' in the local dir (or parent dir)
+        :return: none
+
+        Example
+        -------
+
+        Initiates the pykechain client from the contents of an environment file. Authentication information is optional
+        but ensure that you provide this later in your code. Offered are both username/password authentication and
+        user token authentication.
+
+        .. code-block:: guess
+
+            # User test token here (required)
+            KECHAIN_TOKEN=...<secret user token>...
+            KECHAIN_URL=https://an_url.ke-chain.com
+            # or use Basic Auth with username/password
+            KECHAIN_USERNAME=...
+            KECHAIN_PASSWORD=...
+
+
+        >>> client = Client().from_env()
+
+        """
+        env.read_envfile(env_filename)
         client = cls(url=env('KECHAIN_URL'))
-        client.login(token=env('KECHAIN_TOKEN'))
+        if env('KECHAIN_TOKEN'):
+            client.login(token=env('KECHAIN_TOKEN'))
+        elif env('KECHAIN_USERNAME') and env('KECHAIN_PASSWORD'):
+            client.login(username=env('KECHAIN_USERNAME'), password=env('KECHAIN_PASSWORD'))
 
         return client
 
