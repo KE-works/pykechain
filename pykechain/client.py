@@ -77,7 +77,7 @@ class Client(object):
            :caption: .env
            :name: dot-env
 
-            # User test token here (required)
+            # User token here (required)
             KECHAIN_TOKEN=...<secret user token>...
             KECHAIN_URL=https://an_url.ke-chain.com
             # or use Basic Auth with username/password
