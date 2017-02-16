@@ -90,9 +90,10 @@ class Client(object):
         """
         env.read_envfile(env_filename)
         client = cls(url=env('KECHAIN_URL'))
-        if env('KECHAIN_TOKEN'):
+
+        if env('KECHAIN_TOKEN', None):
             client.login(token=env('KECHAIN_TOKEN'))
-        elif env('KECHAIN_USERNAME') and env('KECHAIN_PASSWORD'):
+        elif env('KECHAIN_USERNAME', '') and env('KECHAIN_PASSWORD', ''):
             client.login(username=env('KECHAIN_USERNAME'), password=env('KECHAIN_PASSWORD'))
 
         return client
