@@ -432,13 +432,14 @@ class Client(object):
 
         return self._create_part("create_child_model", data)
 
-    def create_property(self, model, name, property_type='CHAR'):
+    def create_property(self, model, name, property_type='CHAR', default_value=None):
         """Create a new property model under a given model.
 
         :param model: parent model
         :param name: property model name
         :param property_type: choose between FLOAT, INT, TEXT, LINK, REFERENCE, DATETIME, BOOLEAN, CHAR, ATTACHMENT or
          SINGLE_SELECT
+        :param default_value: default value used for part instances
         :return: Property
         """
         assert model.category == 'MODEL'
@@ -446,7 +447,8 @@ class Client(object):
         data = {
             "name": name,
             "part": model.id,
-            "property_type": property_type.upper() + '_VALUE'
+            "property_type": property_type.upper() + '_VALUE',
+            "value": default_value
         }
 
         r = self._request('POST', self._build_url('properties'),
