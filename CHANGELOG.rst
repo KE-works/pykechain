@@ -3,6 +3,15 @@ Change Log
 
 pykechain changelog
 
+1.4.0 (17FEB17)
+---------------
+ * Added functionality to create part models, just as you create part instances.
+ * Added functionality to upload files (using filename), python objects (as json) and matplotlib figures as attachments
+ * Added functionality to download attachments directly as file or python objects (from json).
+ * Improved logic if you request children or siblings that the corresponding category (Model or Instance) is retrieved.
+ * Improved continuous integration.
+ * Improved documentation
+
 1.3.0 (16FEB17)
 ---------------
 
@@ -56,8 +65,6 @@ pykechain changelog
  * ability to retrieve parts and properties within a KE-chain scope (project)
  * ability to retrieve activities with a KE-chain scope
  * ability to upload and download a property value
-
-
 
 0.1.0.dev0 - 0.1.1.dev0 (23DEC16)
 ---------------------------------
