@@ -424,3 +424,18 @@ class Client(object):
         }
 
         return self._create_part("create_child_model", data)
+
+    def create_property(self, part, name, property_type='CHAR_VALUE'):
+        data = {
+            "name": name,
+            "part": part.id,
+            "property_type": property_type
+        }
+
+        r = self._request('POST', self._build_url('properties'),
+                          data=data)
+
+        if r.status_code != 201:
+            raise APIError("Could not create property")
+
+        return Property.create(r.json()['results'][0], client=self)
