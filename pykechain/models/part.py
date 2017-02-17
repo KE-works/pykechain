@@ -93,6 +93,8 @@ class Part(Base):
         :return: :class:`pykechain.models.Part`
         :raises: APIError
         """
+        assert self.category == 'INSTANCE'
+
         return self._client.create_part(self, model, **kwargs)
 
     def add_to(self, parent, **kwargs):
@@ -102,10 +104,19 @@ class Part(Base):
         :return: :class:`pykechain.models.Part`
         :raises: APIError
         """
+        assert self.category == 'MODEL'
+
         return self._client.create_part(parent, self, **kwargs)
 
-    def add_model(self, **kwargs):
-        return self._client.create_model(self, **kwargs)
+    def add_model(self, name, **kwargs):
+        assert self.category == 'MODEL'
+
+        return self._client.create_model(self, name, **kwargs)
+
+    def add_property(self, name, **kwargs):
+        assert self.category == 'MODEL'
+
+        return self._client.create_property(self, name, **kwargs)
 
     def delete(self):
         """Delete this part.
