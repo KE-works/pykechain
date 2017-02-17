@@ -21,7 +21,7 @@ class AttachmentProperty(Property):
         raise RuntimeError("Cannot set the value of an attachment property, use upload()")
 
     def json_load(self):
-        """Download the data from the attachment and deserialise the contained json
+        """Download the data from the attachment and deserialise the contained json.
 
         :return: deserialised json data
         :raises: APIError, JSONDecodeError
