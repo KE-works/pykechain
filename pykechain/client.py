@@ -416,11 +416,11 @@ class Client(object):
 
     def create_model(self, parent, name, multiplicity='ZERO_MANY'):
         """Create a new child model under a given parent.
-        
+
         :param parent: parent model
         :param name: new model name
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N
-        :return: Model
+        :return: Part
         """
         assert parent.category == 'MODEL'
 
@@ -434,12 +434,12 @@ class Client(object):
 
     def create_property(self, model, name, property_type='CHAR'):
         """Create a new property model under a given model.
-        
+
         :param model: parent model
         :param name: property model name
         :param property_type: choose between FLOAT, INT, TEXT, LINK, REFERENCE, DATETIME, BOOLEAN, CHAR, ATTACHMENT or
          SINGLE_SELECT
-        :return: Property 
+        :return: Property
         """
         assert model.category == 'MODEL'
 
