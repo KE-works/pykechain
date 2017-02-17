@@ -382,10 +382,20 @@ class Client(object):
 
         return Activity(data['results'][0], client=self)
 
+    def _create_part(self, action, data):
+        r = self._request('POST', self._build_url('parts'),
+                          params={"select_action": action},
+                          data=data)
+
+        if r.status_code != 201:
+            raise APIError("Could not create part")
+
+        return Part(r.json()['results'][0], client=self)
+
     def create_part(self, parent, model, name=None):
         """Create a new part from a given model under a given parent.
 
-        :param parent: parent part instance
+        :param parent: parent part
         :param model: target part model
         :param name: new part name
         :return: Part
@@ -402,13 +412,15 @@ class Client(object):
             "model": model.id
         }
 
-        r = self._request('POST', self._build_url('parts'),
-                          params={"select_action": "new_instance"},
-                          data=data)
+        self._create_part("new_instance", data)
 
-        if r.status_code != 201:
-            raise APIError("Could not create part: {}".format(name))
+    def create_model(self, parent, name, multiplicity='ZERO_MANY'):
+        assert parent.category == 'MODEL'
 
-        data = r.json()
+        data = {
+            "name": name,
+            "parent": parent.id,
+            "multiplicity": multiplicity
+        }
 
-        return Part(data['results'][0], client=self)
+        return self._create_part("create_child_model", data)
