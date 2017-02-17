@@ -393,12 +393,12 @@ class Client(object):
         return Part(r.json()['results'][0], client=self)
 
     def create_part(self, parent, model, name=None):
-        """Create a new part from a given model under a given parent.
+        """Create a new part instance from a given model under a given parent.
 
-        :param parent: parent part
+        :param parent: parent part instance
         :param model: target part model
         :param name: new part name
-        :return: Part
+        :return: Part (categoty = instance)
         """
         assert parent.category == 'INSTANCE'
         assert model.category == 'MODEL'
@@ -420,7 +420,7 @@ class Client(object):
         :param parent: parent model
         :param name: new model name
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N
-        :return: Part
+        :return: Part (category = model)
         """
         assert parent.category == 'MODEL'
 
