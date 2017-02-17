@@ -415,6 +415,13 @@ class Client(object):
         return self._create_part("new_instance", data)
 
     def create_model(self, parent, name, multiplicity='ZERO_MANY'):
+        """Create a new child model under a given parent.
+        
+        :param parent: parent model
+        :param name: new model name
+        :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N
+        :return: Model
+        """
         assert parent.category == 'MODEL'
 
         data = {
@@ -425,11 +432,21 @@ class Client(object):
 
         return self._create_part("create_child_model", data)
 
-    def create_property(self, part, name, property_type='CHAR_VALUE'):
+    def create_property(self, model, name, property_type='CHAR'):
+        """Create a new property model under a given model.
+        
+        :param model: parent model
+        :param name: property model name
+        :param property_type: choose between FLOAT, INT, TEXT, LINK, REFERENCE, DATETIME, BOOLEAN, CHAR, ATTACHMENT or
+         SINGLE_SELECT
+        :return: Property 
+        """
+        assert model.category == 'MODEL'
+
         data = {
             "name": name,
-            "part": part.id,
-            "property_type": property_type
+            "part": model.id,
+            "property_type": property_type.upper() + '_VALUE'
         }
 
         r = self._request('POST', self._build_url('properties'),
