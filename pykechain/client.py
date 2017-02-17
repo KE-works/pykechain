@@ -398,7 +398,7 @@ class Client(object):
         :param parent: parent part instance
         :param model: target part model
         :param name: new part name
-        :return: Part (categoty = instance)
+        :return: Part (category = instance)
         """
         assert parent.category == 'INSTANCE'
         assert model.category == 'MODEL'
