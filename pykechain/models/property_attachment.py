@@ -22,14 +22,14 @@ class AttachmentProperty(Property):
 
     def json_load(self):
         """Download the data from the attachment and deserialise the contained json
-        
+
         :return: deserialised json data
         :raises: APIError, JSONDecodeError
-        
+
         Example
         -------
         Ensure that the attachment is valid json data
-        
+
         >>> json_attachment = project.part('Bike').property('json_attachment')
         >>> deserialised_json = json_attachment.json_load()
         """
