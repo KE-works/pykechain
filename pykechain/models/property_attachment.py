@@ -14,7 +14,7 @@ class AttachmentProperty(Property):
 
         Use save_as in order to download as a file.
         """
-        raise RuntimeError("Cannot read the value of an attachment property, use save_as()")
+        return '[Attachment]'
 
     @value.setter
     def value(self, value):
