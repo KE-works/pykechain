@@ -412,7 +412,7 @@ class Client(object):
             "model": model.id
         }
 
-        self._create_part("new_instance", data)
+        return self._create_part("new_instance", data)
 
     def create_model(self, parent, name, multiplicity='ZERO_MANY'):
         assert parent.category == 'MODEL'
