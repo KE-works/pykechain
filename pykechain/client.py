@@ -382,13 +382,23 @@ class Client(object):
 
         return Activity(data['results'][0], client=self)
 
+    def _create_part(self, action, data):
+        r = self._request('POST', self._build_url('parts'),
+                          params={"select_action": action},
+                          data=data)
+
+        if r.status_code != 201:
+            raise APIError("Could not create part")
+
+        return Part(r.json()['results'][0], client=self)
+
     def create_part(self, parent, model, name=None):
-        """Create a new part from a given model under a given parent.
+        """Create a new part instance from a given model under a given parent.
 
         :param parent: parent part instance
         :param model: target part model
         :param name: new part name
-        :return: Part
+        :return: Part (category = instance)
         """
         assert parent.category == 'INSTANCE'
         assert model.category == 'MODEL'
@@ -402,13 +412,53 @@ class Client(object):
             "model": model.id
         }
 
-        r = self._request('POST', self._build_url('parts'),
-                          params={"select_action": "new_instance"},
+        return self._create_part("new_instance", data)
+
+    def create_model(self, parent, name, multiplicity='ZERO_MANY'):
+        """Create a new child model under a given parent.
+
+        :param parent: parent model
+        :param name: new model name
+        :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N
+        :return: Part (category = model)
+        """
+        assert parent.category == 'MODEL'
+
+        data = {
+            "name": name,
+            "parent": parent.id,
+            "multiplicity": multiplicity
+        }
+
+        return self._create_part("create_child_model", data)
+
+    def create_property(self, model, name, property_type='CHAR', default_value=None):
+        """Create a new property model under a given model.
+
+        :param model: parent model
+        :param name: property model name
+        :param property_type: choose between FLOAT, INT, TEXT, LINK, REFERENCE, DATETIME, BOOLEAN, CHAR, ATTACHMENT or
+         SINGLE_SELECT
+        :param default_value: default value used for part instances
+        :return: Property
+        """
+        assert model.category == 'MODEL'
+
+        data = {
+            "name": name,
+            "part": model.id,
+            "property_type": property_type.upper() + '_VALUE',
+            "value": default_value
+        }
+
+        r = self._request('POST', self._build_url('properties'),
                           data=data)
 
         if r.status_code != 201:
-            raise APIError("Could not create part: {}".format(name))
+            raise APIError("Could not create property")
 
-        data = r.json()
+        prop = Property.create(r.json()['results'][0], client=self)
 
-        return Part(data['results'][0], client=self)
+        model.properties.append(prop)
+
+        return prop

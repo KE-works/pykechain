@@ -54,7 +54,7 @@ class Part(Base):
 
         """
         if self.parent_id:
-            return self._client.part(pk=self.parent_id)
+            return self._client.part(pk=self.parent_id, category=self.category)
         else:
             return None
 
@@ -70,7 +70,7 @@ class Part(Base):
         >>> bike = project.part('Bike')
         >>> direct_descendants_of_bike = bike.children()
         """
-        return self._client.parts(parent=self.id)
+        return self._client.parts(parent=self.id, category=self.category)
 
     def siblings(self):
         """The siblings of this `Part` as `Partset`.
@@ -81,7 +81,7 @@ class Part(Base):
         :raises: APIError
         """
         if self.parent_id:
-            return self._client.parts(parent=self.parent_id)
+            return self._client.parts(parent=self.parent_id, category=self.category)
         else:
             from pykechain.models import PartSet
             return PartSet(parts=None)
@@ -93,6 +93,8 @@ class Part(Base):
         :return: :class:`pykechain.models.Part`
         :raises: APIError
         """
+        assert self.category == 'INSTANCE'
+
         return self._client.create_part(self, model, **kwargs)
 
     def add_to(self, parent, **kwargs):
@@ -102,7 +104,31 @@ class Part(Base):
         :return: :class:`pykechain.models.Part`
         :raises: APIError
         """
+        assert self.category == 'MODEL'
+
         return self._client.create_part(parent, self, **kwargs)
+
+    def add_model(self, *args, **kwargs):
+        """Add a new child model to this model.
+
+        See :class:`pykechain.Client.create_model` for available parameters.
+
+        :return: Part
+        """
+        assert self.category == 'MODEL'
+
+        return self._client.create_model(self, *args, **kwargs)
+
+    def add_property(self, *args, **kwargs):
+        """Add a new property to this model.
+
+        See :class:`pykechain.Client.create_property` for available parameters.
+
+        :return: Property
+        """
+        assert self.category == 'MODEL'
+
+        return self._client.create_property(self, *args, **kwargs)
 
     def delete(self):
         """Delete this part.
