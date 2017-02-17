@@ -455,4 +455,8 @@ class Client(object):
         if r.status_code != 201:
             raise APIError("Could not create property")
 
-        return Property.create(r.json()['results'][0], client=self)
+        prop = Property.create(r.json()['results'][0], client=self)
+
+        model.properties.append(prop)
+
+        return prop
