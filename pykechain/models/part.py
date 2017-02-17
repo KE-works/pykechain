@@ -108,15 +108,27 @@ class Part(Base):
 
         return self._client.create_part(parent, self, **kwargs)
 
-    def add_model(self, name, **kwargs):
+    def add_model(self, *args, **kwargs):
+        """Add a new child model to this model.
+
+        See :class:`pykechain.Client.create_model` for available parameters.
+
+        :return: Part
+        """
         assert self.category == 'MODEL'
 
-        return self._client.create_model(self, name, **kwargs)
+        return self._client.create_model(self, *args, **kwargs)
 
-    def add_property(self, name, **kwargs):
+    def add_property(self, *args, **kwargs):
+        """Add a new property to this model.
+
+        See :class:`pykechain.Client.create_property` for available parameters.
+
+        :return: Property
+        """
         assert self.category == 'MODEL'
 
-        return self._client.create_property(self, name, **kwargs)
+        return self._client.create_property(self, *args, **kwargs)
 
     def delete(self):
         """Delete this part.
