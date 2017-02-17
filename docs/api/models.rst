@@ -23,3 +23,6 @@ pykechain.models
 
 .. autoclass:: pykechain.models.AttachmentProperty
    :members:
+
+.. autoclass:: pykechain.models.SelectListProperty
+   :members:
