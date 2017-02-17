@@ -1,3 +1,4 @@
+import json
 import io
 
 from pykechain.exceptions import APIError
@@ -17,14 +18,43 @@ class AttachmentProperty(Property):
 
     @value.setter
     def value(self, value):
+        raise RuntimeError("Cannot set the value of an attachment property, use upload()")
+
+    def json_load(self):
+        """Download the data from the attachment and deserialise the contained json.
+
+        :return: deserialised json data
+        :raises: APIError, JSONDecodeError
+
+        Example
+        -------
+        Ensure that the attachment is valid json data
+
+        >>> json_attachment = project.part('Bike').property('json_attachment')
+        >>> deserialised_json = json_attachment.json_load()
+        """
+        return self._download().json()
+
+    def upload(self, data, **kwargs):
+        """Upload a file to the attachment property.
+
+        :param filename: File path
+        :raises: APIError
+        """
         try:
             import matplotlib.figure
 
-            if isinstance(value, matplotlib.figure.Figure):
-                self._attach_plot(value)
+            if isinstance(data, matplotlib.figure.Figure):
+                self._upload_plot(data, **kwargs)
                 return
         except ImportError:
             pass
+
+        if isinstance(data, str):
+            with open(data, 'rb') as fp:
+                self._upload(fp)
+        else:
+            self._upload_json(data, **kwargs)
 
     def save_as(self, filename):
         """Download the attachment to a file.
@@ -56,11 +86,16 @@ class AttachmentProperty(Property):
         if r.status_code != 200:
             raise APIError("Could not upload attachment")
 
-    def _attach_plot(self, figure):
+    def _upload_json(self, content, name='data.json'):
+        data = (name, json.dumps(content), 'application/json')
+
+        self._upload(data)
+
+    def _upload_plot(self, figure, name='plot.png'):
         buffer = io.BytesIO()
 
         figure.savefig(buffer, format="png")
 
-        data = ('plot.png', buffer.getvalue(), 'image/png')
+        data = (name, buffer.getvalue(), 'image/png')
 
         self._upload(data)
