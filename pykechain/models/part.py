@@ -54,7 +54,7 @@ class Part(Base):
 
         """
         if self.parent_id:
-            return self._client.part(pk=self.parent_id)
+            return self._client.part(pk=self.parent_id, category=self.category)
         else:
             return None
 
@@ -70,7 +70,7 @@ class Part(Base):
         >>> bike = project.part('Bike')
         >>> direct_descendants_of_bike = bike.children()
         """
-        return self._client.parts(parent=self.id)
+        return self._client.parts(parent=self.id, category=self.category)
 
     def siblings(self):
         """The siblings of this `Part` as `Partset`.
@@ -81,7 +81,7 @@ class Part(Base):
         :raises: APIError
         """
         if self.parent_id:
-            return self._client.parts(parent=self.parent_id)
+            return self._client.parts(parent=self.parent_id, category=self.category)
         else:
             from pykechain.models import PartSet
             return PartSet(parts=None)
@@ -103,6 +103,9 @@ class Part(Base):
         :raises: APIError
         """
         return self._client.create_part(parent, self, **kwargs)
+
+    def add_model(self, **kwargs):
+        return self._client.create_model(self, **kwargs)
 
     def delete(self):
         """Delete this part.
