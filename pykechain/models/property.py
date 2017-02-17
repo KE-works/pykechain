@@ -34,6 +34,17 @@ class Property(Base):
 
         return self._client.part(pk=part_id)
 
+    def delete(self):
+        """Delete this property.
+
+        :return: None
+        :raises: APIError if delete was not successful
+        """
+        r = self._client._request('DELETE', self._client._build_url('property', property_id=self.id))
+
+        if r.status_code != 204:
+            raise APIError("Could not delete property: {} with id {}".format(self.name, self.id))
+
     def _put_value(self, value):
         url = self._client._build_url('property', property_id=self.id)
 
