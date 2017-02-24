@@ -1,3 +1,5 @@
+import requests
+
 from pykechain.exceptions import NotFoundError, APIError
 from pykechain.models import Base
 from pykechain.utils import find
@@ -140,6 +142,42 @@ class Part(Base):
 
         if r.status_code != 204:
             raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
+
+    def edit(self, name=None, description=None):
+        """
+        Edit the details of a part (model or instance).
+
+        For an instance you can edit the Part instance name and the part instance description
+
+        :param name: optional name of the part to edit
+        :param description: optional description of the part
+        :return: None
+        :raises: APIError
+
+        Example
+        -------
+
+        For changing a part
+        >>> front_fork = project.part('Front Fork')
+        >>> front_fork.edit(name='Front Fork - updated')
+        >>> front_fork.edit(name='Front Fork cruizer', description='With my ragtop down so my hair can blow' )
+
+        for changing a model
+        >>> front_fork = project.model('Front Fork')
+        >>> front_fork.edit(name='Front Fork basemodel', description='Some description here')
+
+        """
+        update_dict = {'id': self.id}
+        if name:
+            assert type(name) == str, "name should be provided as a string"
+            update_dict.update({'name': name})
+        if description:
+            assert type(description) == str, "description should be provided as a string"
+            update_dict.update({'description': description})
+        r = self._client._request('PUT', self._client._build_url('part', part_id=self.id), json=update_dict)
+
+        if r.status_code != requests.codes.ok:
+            raise APIError("Could not update Part ({})".format(r))
 
     def _repr_html_(self):
         html = [
