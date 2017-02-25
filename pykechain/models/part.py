@@ -179,6 +179,9 @@ class Part(Base):
         if r.status_code != requests.codes.ok:
             raise APIError("Could not update Part ({})".format(r))
 
+        if name:
+            self.name = name
+
     def _repr_html_(self):
         html = [
             "<table width=100%>",
