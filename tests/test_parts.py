@@ -154,7 +154,8 @@ class TestParts(TestBetamax):
 
         front_fork_u = self.project.part('Front Fork - updated')
         assert front_fork.id == front_fork_u.id
-        assert front_fork.name == front_fork.name
+        assert front_fork.name == front_fork_u.name
+        assert front_fork.name == 'Front Fork - updated'
 
         front_fork.edit(name='Front Fork')
 
@@ -173,7 +174,7 @@ class TestParts(TestBetamax):
 
         front_fork_u = self.project.model('Front Fork - updated')
         assert front_fork.id == front_fork_u.id
-        assert front_fork.name == front_fork.name
+        assert front_fork.name == front_fork_u.name
 
         front_fork.edit(name='Front Fork')
 
