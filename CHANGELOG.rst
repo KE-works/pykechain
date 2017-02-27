@@ -3,6 +3,12 @@ Change Log
 
 pykechain changelog
 
+1.5.0 (UNRELEASED)
+------------------
+ * Added ability to edit the part name and description functionality. See the `Part.edit()` method.
+
+
+
 1.4.0 (17FEB17)
 ---------------
  * Added functionality to create part models, just as you create part instances.
