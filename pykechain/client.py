@@ -2,7 +2,8 @@ import requests
 from envparse import env
 from requests.compat import urljoin
 
-from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError
+from pykechain import __about__
+from .exceptions import NotFoundError, MultipleFoundError, APIError
 from .models import Scope, Activity, Part, PartSet, Property
 
 API_PATH = {
@@ -47,7 +48,7 @@ class Client(object):
         """
         self.session = requests.Session()
         self.api_root = url
-        self.headers = {}
+        self.headers = {'X-Requested-With': 'XMLHttpRequest', 'X-Pyke-Version': __about__.version}
         self.auth = None
         self.last_request = None
         self.last_response = None
@@ -134,11 +135,11 @@ class Client(object):
         """Helper method to perform the request on the API."""
         self.last_request = None
         self.last_response = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
-        self.last_request = self.last_response.request
-        self.last_url = self.last_response.url
+        # self.last_request = self.last_response.request
+        # self.last_url = self.last_response.url
 
-        if self.last_response.status_code == requests.codes.forbidden:
-            raise ForbiddenError(self.last_response.json()['results'][0]['detail'])
+        # if self.last_response.status_code == requests.codes.forbidden:
+        #     raise ForbiddenError(self.last_response.json()['results'][0]['detail'])
 
         return self.last_response
 

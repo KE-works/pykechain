@@ -110,6 +110,21 @@ class Part(Base):
 
         return self._client.create_part(parent, self, **kwargs)
 
+    def add_and_update(self, model, update_dict, **kwargs):
+        created_part = self.add(model, **kwargs)
+        created_part.async_update(update_dict)
+
+    def bulk_add_and_update(self, model, list_of_update_dicts, names=None, name=None, **kwargs):
+        if name and not names:
+            names = [name for i in list_of_update_dicts]
+        elif names and not name:
+            pass
+        else:
+            raise APIError('Provide at least one name for all parts or a list of partnames')
+
+        for props_to_update, part_name in zip(list_of_update_dicts, names):
+            self.add_and_update(model, props_to_update, name=part_name)
+
     def add_model(self, *args, **kwargs):
         """Add a new child model to this model.
 
@@ -222,3 +237,18 @@ class Part(Base):
         assert type(update_dict) is dict, "update needs a dictionary with {'property_name': 'property_value', ... }"
         for property_name, property_value in update_dict.items():
             self.property(property_name).value = property_value
+
+    def async_update(self, update_dict):
+        from requests_futures.sessions import FuturesSession
+        from concurrent.futures import ThreadPoolExecutor
+
+        self._client.async_session = FuturesSession(session=self._client.session,
+                                                    executor=ThreadPoolExecutor(max_workers=4))
+
+        resultpool = []
+        for property_name, property_value in update_dict.items():
+            p = self.property(property_name)
+            resultpool.append(p._client.async_session.put(p._client._build_url('property', property_id=p.id),
+                                                  headers=p._client.headers, json={'value': property_value}))
+
+        print([r.result() for r in resultpool])
