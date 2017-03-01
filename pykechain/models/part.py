@@ -1,4 +1,5 @@
 import requests
+import sys
 
 from pykechain.exceptions import NotFoundError, APIError
 from pykechain.models import Base
@@ -112,7 +113,7 @@ class Part(Base):
 
     def add_and_update(self, model, update_dict, **kwargs):
         created_part = self.add(model, **kwargs)
-        created_part.async_update(update_dict)
+        created_part.update(update_dict)
 
     def bulk_add_and_update(self, model, list_of_update_dicts, names=None, name=None, **kwargs):
         if name and not names:
@@ -123,6 +124,7 @@ class Part(Base):
             raise APIError('Provide at least one name for all parts or a list of partnames')
 
         for props_to_update, part_name in zip(list_of_update_dicts, names):
+            sys.stdout.write('.')
             self.add_and_update(model, props_to_update, name=part_name)
 
     def add_model(self, *args, **kwargs):
@@ -251,4 +253,9 @@ class Part(Base):
             resultpool.append(p._client.async_session.put(p._client._build_url('property', property_id=p.id),
                                                   headers=p._client.headers, json={'value': property_value}))
 
-        print([r.result() for r in resultpool])
+        if hasattr(self._client, 'resultpool'):
+            self._client.resultpool.extend(resultpool)
+        else:
+            self._client.resultpool = resultpool
+
+        print('{} new updates posted to the threadpool (contains {} total async requests)'.format(len(resultpool), len(self._client.resultpool)))

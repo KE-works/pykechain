@@ -1,6 +1,10 @@
 # basis
 requests==2.13.0
 
+# multitreading
+requests-futures==0.9.7
+futures; python_version < '3'
+
 # testing
 envparse==0.2.0
 pytest==3.0.6
