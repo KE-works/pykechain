@@ -1,11 +1,14 @@
+from typing import Any  # flake8: noqa
+
 from pykechain.exceptions import APIError
-from pykechain.models import Base
+from pykechain.models.base import Base
 
 
 class Activity(Base):
     """A virtual object representing a KE-chain activity."""
 
     def __init__(self, json, **kwargs):
+        # type: (dict, **Any) -> None
         """Construct an Activity from a json object."""
         super(Activity, self).__init__(json, **kwargs)
 
