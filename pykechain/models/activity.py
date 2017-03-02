@@ -1,6 +1,7 @@
 from typing import Any  # flake8: noqa
+
 from pykechain.exceptions import APIError
-from pykechain.models import Base
+from pykechain.models.base import Base
 
 
 class Activity(Base):

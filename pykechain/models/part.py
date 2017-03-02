@@ -1,4 +1,4 @@
-from typing import Any  # flake8: noqa
+from typing import Dict, Any  # flake8: noqa
 
 import requests
 
@@ -214,7 +214,6 @@ class Part(Base):
         return ''.join(html)
 
     def update(self, update_dict=None):
-        # type: (dict) -> None
         """
         Use a dictionary with property names and property values to update the properties belonging to this part.
 
@@ -228,6 +227,5 @@ class Part(Base):
         >>> bike = client.scope('Bike Project').part('Bike')
         >>> bike.update({'Gears': 11, 'Total Height': 56.3})
         """
-        assert type(update_dict) is dict, "update needs a dictionary with {'property_name': 'property_value', ... }"
         for property_name, property_value in update_dict.items():
             self.property(property_name).value = property_value
