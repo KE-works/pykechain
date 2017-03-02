@@ -6,8 +6,8 @@ pykechain changelog
 1.5.0 (UNRELEASED)
 ------------------
  * Added ability to edit the part name and description functionality. See the `Part.edit()` method.
-
-
+ * Added type annotations throughout the code and added mypy to the continuous integration pipeline to ensure high 
+   quality of the code provided.
 
 1.4.0 (17FEB17)
 ---------------
