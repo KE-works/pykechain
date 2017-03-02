@@ -1,8 +1,8 @@
 from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
 
 import requests
-from requests.compat import urljoin  # type: ignore
 from envparse import env
+from requests.compat import urljoin
 
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError
 from .models import Scope, Activity, Part, PartSet, Property
@@ -20,11 +20,17 @@ API_PATH = {
     'property_download': 'api/properties/{property_id}/download'
 }
 
-env.read_envfile()
-
 
 class Client(object):
-    """The KE-chain 2 python client to connect to a KE-chain (version 2) instance."""
+    """The KE-chain 2 python client to connect to a KE-chain (version 2) instance.
+
+    :ivar last_request: last executed request. Which is of type `requests.Request`_
+    :ivar last_response: last executed response. Which is of type `requests.Response`_
+    :ivar last_url: last called api url
+
+    .. _requests.Request: http://docs.python-requests.org/en/master/api/#requests.Request
+    .. _requests.Response: http://docs.python-requests.org/en/master/api/#requests.Response
+    """
 
     def __init__(self, url='http://localhost:8000/', check_certificates=True):
         # type: (str, bool) -> None
@@ -36,26 +42,64 @@ class Client(object):
         Examples
         --------
         >>> from pykechain import Client
-        >>> kec = Client()
+        >>> client = Client()
 
         >>> from pykechain import Client
-        >>> kec = Client(url='https://default-tst.localhost:9443', check_certificates=False)
+        >>> client = Client(url='https://default-tst.localhost:9443', check_certificates=False)
 
         """
         self.session = requests.Session()
         self.api_root = url
         self.headers = {}  # type: Dict[str, str]
         self.auth = None  # type: Optional[Tuple[str, str]]
+        self.last_request = None
+        self.last_response = None
+        self.last_url = None
 
         if not check_certificates:
             self.session.verify = False
 
+    def __repr__(self):
+        return "<pyke Client '{}'>".format(self.api_root)
+
     @classmethod
-    def from_env(cls):
+    def from_env(cls, env_filename=None):
         # type: () -> Client
-        """Create a client from environment variable settings."""
+        """Create a client from environment variable settings.
+
+        :param env_filename: filename of the environment file, defaults to '.env' in the local dir (or parent dir)
+        :return: :class:`pykechain.Client`
+
+        Example
+        -------
+
+        Initiates the pykechain client from the contents of an environment file. Authentication information is optional
+        but ensure that you provide this later in your code. Offered are both username/password authentication and
+        user token authentication.
+
+        .. code-block:: none
+           :caption: .env
+           :name: dot-env
+
+            # User token here (required)
+            KECHAIN_TOKEN=...<secret user token>...
+            KECHAIN_URL=https://an_url.ke-chain.com
+
+            # or use Basic Auth with username/password
+            KECHAIN_USERNAME=...
+            KECHAIN_PASSWORD=...
+
+
+        >>> client = Client().from_env()
+
+        """
+        env.read_envfile(env_filename)
         client = cls(url=env('KECHAIN_URL'))
-        client.login(token=env('KECHAIN_TOKEN'))
+
+        if env('KECHAIN_TOKEN', None):
+            client.login(token=env('KECHAIN_TOKEN'))
+        elif env('KECHAIN_USERNAME', '') and env('KECHAIN_PASSWORD', ''):
+            client.login(username=env('KECHAIN_USERNAME'), password=env('KECHAIN_PASSWORD'))
 
         return client
 
@@ -70,22 +114,21 @@ class Client(object):
         Examples
         --------
         Using Token Authentication (retrieve user Token from the KE-chain instance)
-        >>> kec = Client()
-        >>> kec.login(token='<some-super-long-secret-token>')
+        >>> client = Client()
+        >>> client.login(token='<some-super-long-secret-token>')
 
         Using Basic authentications (Username/Password)
-        >>> kec = Client()
-        >>> kec.login(username='user', password='pw')
+        >>> client = Client()
+        >>> client.login(username='user', password='pw')
 
-        >>> kec = Client()
-        >>> kec.login('username','password')
+        >>> client = Client()
+        >>> client.login('username','password')
         """
-        self.headers.pop('Authorization', None)
-        self.auth = None
-
         if token:
             self.headers['Authorization'] = 'Token {}'.format(token)
-        elif username is not None and password is not None:
+            self.auth = None
+        else:
+            self.headers.pop('Authorization', None)
             self.auth = (username, password)
 
     def _build_url(self, resource, **kwargs):
@@ -96,19 +139,22 @@ class Client(object):
     def _request(self, method, url, **kwargs):
         # type: (str, str, **Any) -> requests.Response
         """Helper method to perform the request on the API."""
-        r = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
+        self.last_request = None
+        self.last_response = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
+        self.last_request = self.last_response.request
+        self.last_url = self.last_response.url
 
-        if r.status_code == requests.codes.forbidden:
-            raise ForbiddenError(r.json()['results'][0]['detail'])
+        if self.last_response.status_code == requests.codes.forbidden:
+            raise ForbiddenError(self.last_response.json()['results'][0]['detail'])
 
-        return r
+        return self.last_response
 
-    def scopes(self, name=None, id=None, status='ACTIVE'):
+    def scopes(self, name=None, pk=None, status='ACTIVE'):
         # type: (Optional[str], Optional[str], Optional[str]) -> List[Scope]
         """Return all scopes visible / accessible for the logged in user.
 
         :param name: if provided, filter the search for a scope/project by name
-        :param id: if provided, filter the search by scope_id
+        :param pk: if provided, filter the search by scope_id
         :param status: if provided, filter the search for the status. eg. 'ACTIVE', 'TEMPLATE', 'LIBRARY'
         :return: :obj:`list` of :obj:`Scope`
         :raises: NotFoundError
@@ -116,17 +162,20 @@ class Client(object):
         Example
         -------
 
-        >>> kec = Client(url='https://default.localhost:9443', verify=False)
-        >>> kec.login('admin','pass')
-        >>> kec.scopes()  # doctest: Ellipsis
+        >>> client = Client(url='https://default.localhost:9443', verify=False)
+        >>> client.login('admin','pass')
+        >>> client.scopes()  # doctest: Ellipsis
         ...
 
-        >>> kec.scopes(name="Bike Project") # doctest: Ellipsis
+        >>> client.scopes(name="Bike Project")  # doctest: Ellipsis
+        ...
+
+        >>> last_request = client.last_request  # doctest: Ellipsis
         ...
         """
         r = self._request('GET', self._build_url('scopes'), params={
             'name': name,
-            'id': id,
+            'id': pk,
             'status': status
         })
 
@@ -197,8 +246,11 @@ class Client(object):
               model=None,           # type: Optional[Part]
               category='INSTANCE',  # type: Optional[str]
               bucket=None,          # type: Optional[str]
-              activity=None         # type: Optional[str]
-              ):
+              parent=None,          # type: Optional[str]
+              activity=None,        # type: Optional[str]
+              limit=None,           # type: Optional[int]
+              batch=100,            # type: Optional[int]
+              **kwargs):
         # type: (...) -> PartSet
         """Retrieve multiple KE-chain parts.
 
@@ -207,29 +259,75 @@ class Client(object):
         :param model: filter on model_id
         :param category: filter on category (INSTANCE, MODEL, None)
         :param bucket: filter on bucket_id
+        :param parent: filter on the parent_id, returns all childrent of the parent_id
         :param activity: filter on activity_id
+        :param limit: limit the return to # items (default unlimited, so return all results)
+        :param batch: limit the batch size to # items (defaults to 100 items per batch)
+        :param kwargs: additional keyword, value arguments for the api with are passed to the /parts/ api as filters
+                       please refer to the full KE-chain 2 REST API documentation.
         :return: :obj:`PartSet`
         :raises: NotFoundError
+
+        Examples
+        --------
+
+        Return all parts (defaults to instances) with exact name 'Gears'.
+        >>> client = Client(url='https://default.localhost:9443', verify=False)
+        >>> client.login('admin','pass')
+        >>> client.parts(name='Gears')  # doctest:Ellipsis
+        ...
+
+        Return all parts with category is MODEL or category is INSTANCE.
+        >>> client.parts(name='Gears', category=None)  # doctest:Ellipsis
+        ...
+
+        Return a maximum of 5 parts
+        >>> client.parts(limit=5)  # doctest:Ellipsis
+        ...
         """
-        r = self._request('GET', self._build_url('parts'), params={
+        # if limit is provided and the batchsize is bigger than the limit, ensure that the batch size is maximised
+        if limit and limit < batch:
+            batch = limit
+
+        request_params = {
             'id': pk,
             'name': name,
             'model': model.id if model else None,
             'category': category,
             'bucket': bucket,
-            'activity_id': activity
-        })
+            'parent': parent,
+            'activity_id': activity,
+            'limit': batch
+        }
+
+        if kwargs:
+            request_params.update(**kwargs)
+
+        r = self._request('GET', self._build_url('parts'), params=request_params)
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve parts")
 
         data = r.json()
 
-        return PartSet((Part(p, client=self) for p in data['results']))
+        part_results = data['results']
+
+        if batch and data.get('next'):
+            while data['next']:
+                # respect the limit if set to > 0
+                if limit and len(part_results) >= limit:
+                    break
+                r = self._request('GET', data['next'])
+                data = r.json()
+                part_results.extend(data['results'])
+
+        return PartSet((Part(p, client=self) for p in part_results))
 
     def part(self, *args, **kwargs):
         # type: (*Any, **Any) -> Part
         """Retrieve single KE-chain part.
+
+        Uses the same interface as the `part` method but returns only a single pykechain `Part` instance.
 
         :return: a single :obj:`Part`
         :raises: NotFoundError, MultipleFoundError
@@ -245,7 +343,9 @@ class Client(object):
 
     def model(self, *args, **kwargs):
         # type: (*Any, **Any) -> Part
-        """Retrieve single KE-chain model.
+        """Retrieve single KE-chain part model.
+
+        Uses the same interface as the `part` method but returns only a single pykechain `Part` instance.
 
         :return: a single :obj:`Part`
         :raises: NotFoundError, MultipleFoundError
@@ -260,17 +360,19 @@ class Client(object):
 
         return _parts[0]
 
-    def properties(self, name=None, category='INSTANCE'):
-        # type: (Optional[str], Optional[str]) -> List[Property]
+    def properties(self, name=None, pk=None, category='INSTANCE'):
+        # type: (Optional[str], Optional[str], Optional[str]) -> List[Property]
         """Retrieve properties.
 
         :param name: name to limit the search for.
+        :param pk: primary key or id (UUID) of the property to search for
         :param category: filter the properties by category. Defaults to INSTANCE. Other options MODEL or None
         :return: :obj:`list` of :obj:`Property`
         :raises: NotFoundError
         """
         r = self._request('GET', self._build_url('properties'), params={
             'name': name,
+            'id': pk,
             'category': category
         })
 
@@ -304,13 +406,23 @@ class Client(object):
 
         return Activity(data['results'][0], client=self)
 
+    def _create_part(self, action, data):
+        r = self._request('POST', self._build_url('parts'),
+                          params={"select_action": action},
+                          data=data)
+
+        if r.status_code != 201:
+            raise APIError("Could not create part")
+
+        return Part(r.json()['results'][0], client=self)
+
     def create_part(self, parent, model, name=None):
-        """Create a new part from a given model under a given parent.
+        """Create a new part instance from a given model under a given parent.
 
         :param parent: parent part instance
         :param model: target part model
         :param name: new part name
-        :return: Part
+        :return: Part (category = instance)
         """
         assert parent.category == 'INSTANCE'
         assert model.category == 'MODEL'
@@ -324,13 +436,53 @@ class Client(object):
             "model": model.id
         }
 
-        r = self._request('POST', self._build_url('parts'),
-                          params={"select_action": "new_instance"},
+        return self._create_part("new_instance", data)
+
+    def create_model(self, parent, name, multiplicity='ZERO_MANY'):
+        """Create a new child model under a given parent.
+
+        :param parent: parent model
+        :param name: new model name
+        :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N
+        :return: Part (category = model)
+        """
+        assert parent.category == 'MODEL'
+
+        data = {
+            "name": name,
+            "parent": parent.id,
+            "multiplicity": multiplicity
+        }
+
+        return self._create_part("create_child_model", data)
+
+    def create_property(self, model, name, property_type='CHAR', default_value=None):
+        """Create a new property model under a given model.
+
+        :param model: parent model
+        :param name: property model name
+        :param property_type: choose between FLOAT, INT, TEXT, LINK, REFERENCE, DATETIME, BOOLEAN, CHAR, ATTACHMENT or
+         SINGLE_SELECT
+        :param default_value: default value used for part instances
+        :return: Property
+        """
+        assert model.category == 'MODEL'
+
+        data = {
+            "name": name,
+            "part": model.id,
+            "property_type": property_type.upper() + '_VALUE',
+            "value": default_value
+        }
+
+        r = self._request('POST', self._build_url('properties'),
                           data=data)
 
         if r.status_code != 201:
-            raise APIError("Could not create part: {}".format(name))
+            raise APIError("Could not create property")
 
-        data = r.json()
+        prop = Property.create(r.json()['results'][0], client=self)
 
-        return Part(data['results'][0], client=self)
+        model.properties.append(prop)
+
+        return prop

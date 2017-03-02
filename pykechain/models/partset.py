@@ -19,6 +19,9 @@ class PartSet(Sized):
         self._parts = list(parts)
         self._iter = iter(self._parts)
 
+    def __repr__(self):
+        return "<pyke {} object {} parts>".format(self.__class__.__name__, self.__len__())
+
     def __iter__(self):
         return self
 

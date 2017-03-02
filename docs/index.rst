@@ -5,6 +5,7 @@
    :maxdepth: 2
 
    self
+   changelog
    bike
    notebooks
    interface

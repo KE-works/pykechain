@@ -1,8 +1,10 @@
 from typing import Any  # flake8: noqa
 
+import requests
+
 from pykechain.exceptions import NotFoundError, APIError
-from pykechain.models.property import Property
 from pykechain.models.base import Base
+from pykechain.models.property import Property
 from pykechain.utils import find
 
 
@@ -15,17 +17,27 @@ class Part(Base):
         super(Part, self).__init__(json, **kwargs)
 
         self.category = json.get('category')
+        self.parent_id = json['parent'].get('id') if 'parent' in json and json.get('parent') else None
 
-        from pykechain.models.property import Property
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
 
     def property(self, name):
         # type: (str) -> Property
-        """Retrieve property belonging to this part.
+        """Retrieve the property with name belonging to this part.
+
+        If you need to retrieve the property using eg. the id, use :meth:`pykechain.Client.properties`.
 
         :param name: property name to search for
         :return: a single :class:`pykechain.models.Property`
         :raises: NotFoundError
+
+        Example
+        -------
+
+        >>> part = project.part('Bike')
+        >>> gears = part.property('Gears')
+        >>> gears.value
+        6
         """
         found = find(self.properties, lambda p: name == p.name)
 
@@ -33,6 +45,52 @@ class Part(Base):
             raise NotFoundError("Could not find property with name {}".format(name))
 
         return found
+
+    def parent(self):
+        """The parent of this `Part`.
+
+        :return: the parent `Part`s as :class:`pykechain.model.Part`.
+        :raises: APIError
+
+        Example
+        -------
+
+        >>> part = project.part('Frame')
+        >>> bike = part.parent()
+
+        """
+        if self.parent_id:
+            return self._client.part(pk=self.parent_id, category=self.category)
+        else:
+            return None
+
+    def children(self):
+        """The children of this `Part` as `Partset`.
+
+        :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no children
+        :raises: APIError
+
+        Example
+        -------
+
+        >>> bike = project.part('Bike')
+        >>> direct_descendants_of_bike = bike.children()
+        """
+        return self._client.parts(parent=self.id, category=self.category)
+
+    def siblings(self):
+        """The siblings of this `Part` as `Partset`.
+
+        Siblings are other Parts sharing the same parent of this `Part`
+
+        :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no siblings
+        :raises: APIError
+        """
+        if self.parent_id:
+            return self._client.parts(parent=self.parent_id, category=self.category)
+        else:
+            from pykechain.models import PartSet
+            return PartSet(parts=None)
 
     def add(self, model, **kwargs):
         # type: (Part, **Any) -> Part
@@ -42,6 +100,8 @@ class Part(Base):
         :return: :class:`pykechain.models.Part`
         :raises: APIError
         """
+        assert self.category == 'INSTANCE'
+
         return self._client.create_part(self, model, **kwargs)
 
     def add_to(self, parent, **kwargs):
@@ -52,41 +112,82 @@ class Part(Base):
         :return: :class:`pykechain.models.Part`
         :raises: APIError
         """
+        assert self.category == 'MODEL'
+
         return self._client.create_part(parent, self, **kwargs)
+
+    def add_model(self, *args, **kwargs):
+        """Add a new child model to this model.
+
+        See :class:`pykechain.Client.create_model` for available parameters.
+
+        :return: Part
+        """
+        assert self.category == 'MODEL'
+
+        return self._client.create_model(self, *args, **kwargs)
+
+    def add_property(self, *args, **kwargs):
+        """Add a new property to this model.
+
+        See :class:`pykechain.Client.create_property` for available parameters.
+
+        :return: Property
+        """
+        assert self.category == 'MODEL'
+
+        return self._client.create_property(self, *args, **kwargs)
 
     def delete(self):
         # type: () -> None
-        """Delete this part."""
+        """Delete this part.
+
+        :return: None
+        :raises: APIError if delete was not succesfull
+        """
         r = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
 
         if r.status_code != 204:
             raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
 
-    def _post_instance(self, parent, model, name=''):
-        # type: (Part, Part, str) -> Part
+    def edit(self, name=None, description=None):
+        """
+        Edit the details of a part (model or instance).
 
-        assert parent.category == 'INSTANCE'
-        assert model.category == 'MODEL'
+        For an instance you can edit the Part instance name and the part instance description
 
-        if not name:
-            name = model.name
+        :param name: optional name of the part to edit
+        :param description: optional description of the part
+        :return: None
+        :raises: APIError
 
-        data = {
-            "name": name,
-            "parent": parent.id,
-            "model": model.id
-        }
+        Example
+        -------
 
-        r = self._client._request('POST', self._client._build_url('parts'),
-                                  params={"select_action": "new_instance"},
-                                  data=data)
+        For changing a part
+        >>> front_fork = project.part('Front Fork')
+        >>> front_fork.edit(name='Front Fork - updated')
+        >>> front_fork.edit(name='Front Fork cruizer', description='With my ragtop down so my hair can blow' )
 
-        if r.status_code != 201:
-            raise APIError("Could not create part: {}".format(self.name))
+        for changing a model
+        >>> front_fork = project.model('Front Fork')
+        >>> front_fork.edit(name='Front Fork basemodel', description='Some description here')
 
-        data = r.json()
+        """
+        update_dict = {'id': self.id}
+        if name:
+            assert type(name) == str, "name should be provided as a string"
+            update_dict.update({'name': name})
+        if description:
+            assert type(description) == str, "description should be provided as a string"
+            update_dict.update({'description': description})
+        r = self._client._request('PUT', self._client._build_url('part', part_id=self.id), json=update_dict)
 
-        return Part(data['results'][0], client=self._client)
+        if r.status_code != requests.codes.ok:
+            raise APIError("Could not update Part ({})".format(r))
+
+        if name:
+            self.name = name
 
     def _repr_html_(self):
         # type: () -> str
@@ -111,3 +212,22 @@ class Part(Base):
         html.append("</table>")
 
         return ''.join(html)
+
+    def update(self, update_dict=None):
+        # type: (dict) -> None
+        """
+        Use a dictionary with property names and property values to update the properties belonging to this part.
+
+        :param update_dict: dictionary with keys being property names (str) and values being property values
+        :return: :class:`pykechain.models.Part`
+        :raises: APIError, Raises `NotFoundError` when the property name is not a valid property of this part
+
+        Example
+        -------
+
+        >>> bike = client.scope('Bike Project').part('Bike')
+        >>> bike.update({'Gears': 11, 'Total Height': 56.3})
+        """
+        assert type(update_dict) is dict, "update needs a dictionary with {'property_name': 'property_value', ... }"
+        for property_name, property_value in update_dict.items():
+            self.property(property_name).value = property_value
