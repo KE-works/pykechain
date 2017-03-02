@@ -1,6 +1,8 @@
+from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
+
 import requests
 from envparse import env
-from requests.compat import urljoin
+from requests.compat import urljoin  # type: ignore
 
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError
 from .models import Scope, Activity, Part, PartSet, Property
@@ -31,6 +33,7 @@ class Client(object):
     """
 
     def __init__(self, url='http://localhost:8000/', check_certificates=True):
+        # type: (str, bool) -> None
         """Create a KE-chain client with given settings.
 
         :param url: the url of the KE-chain instance to connect to (defaults to http://localhost:8000)
@@ -47,11 +50,11 @@ class Client(object):
         """
         self.session = requests.Session()
         self.api_root = url
-        self.headers = {}
-        self.auth = None
-        self.last_request = None
-        self.last_response = None
-        self.last_url = None
+        self.headers = {}  # type: Dict[str, str]
+        self.auth = None  # type: Optional[Tuple[str, str]]
+        self.last_request = None  # type: Optional[requests.PreparedRequest]
+        self.last_response = None  # type: Optional[requests.Response]
+        self.last_url = None  # type: Optional[str]
 
         if not check_certificates:
             self.session.verify = False
@@ -61,6 +64,7 @@ class Client(object):
 
     @classmethod
     def from_env(cls, env_filename=None):
+        # type: (Optional[str]) -> Client
         """Create a client from environment variable settings.
 
         :param env_filename: filename of the environment file, defaults to '.env' in the local dir (or parent dir)
@@ -100,6 +104,7 @@ class Client(object):
         return client
 
     def login(self, username=None, password=None, token=None):
+        # type: (Optional[str], Optional[str], Optional[str]) -> None
         """Login into KE-chain with either username/password or token.
 
         :param username: username for your user from KE-chain
@@ -122,15 +127,17 @@ class Client(object):
         if token:
             self.headers['Authorization'] = 'Token {}'.format(token)
             self.auth = None
-        else:
+        elif username and password:
             self.headers.pop('Authorization', None)
             self.auth = (username, password)
 
     def _build_url(self, resource, **kwargs):
+        # type: (str, **str) -> str
         """Helper method to build the correct API url."""
         return urljoin(self.api_root, API_PATH[resource].format(**kwargs))
 
     def _request(self, method, url, **kwargs):
+        # type: (str, str, **Any) -> requests.Response
         """Helper method to perform the request on the API."""
         self.last_request = None
         self.last_response = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
@@ -143,6 +150,7 @@ class Client(object):
         return self.last_response
 
     def scopes(self, name=None, pk=None, status='ACTIVE'):
+        # type: (Optional[str], Optional[str], Optional[str]) -> List[Scope]
         """Return all scopes visible / accessible for the logged in user.
 
         :param name: if provided, filter the search for a scope/project by name
@@ -179,6 +187,7 @@ class Client(object):
         return [Scope(s, client=self) for s in data['results']]
 
     def scope(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Scope
         """Return a single scope based on the provided name.
 
         :return: a single :obj:`Scope`
@@ -194,6 +203,7 @@ class Client(object):
         return _scopes[0]
 
     def activities(self, name=None, scope=None):
+      # type: (Optional[str], Optional[str]) -> List[Activity]
         """Search on activities with optional name filter.
 
         :param name: filter the activities by name
@@ -214,6 +224,7 @@ class Client(object):
         return [Activity(a, client=self) for a in data['results']]
 
     def activity(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Activity
         """Search for a single activity.
 
         :param name: Name of the activity to search
@@ -229,8 +240,18 @@ class Client(object):
 
         return _activities[0]
 
-    def parts(self, name=None, pk=None, model=None, category='INSTANCE', bucket=None, parent=None, activity=None,
-              limit=None, batch=100, **kwargs):
+    def parts(self,
+              name=None,            # type: Optional[str]
+              pk=None,              # type: Optional[str]
+              model=None,           # type: Optional[Part]
+              category='INSTANCE',  # type: Optional[str]
+              bucket=None,          # type: Optional[str]
+              parent=None,          # type: Optional[str]
+              activity=None,        # type: Optional[str]
+              limit=None,           # type: Optional[int]
+              batch=100,            # type: int
+              **kwargs):
+        # type: (...) -> PartSet
         """Retrieve multiple KE-chain parts.
 
         :param name: filter on name
@@ -303,6 +324,7 @@ class Client(object):
         return PartSet((Part(p, client=self) for p in part_results))
 
     def part(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Part
         """Retrieve single KE-chain part.
 
         Uses the same interface as the `part` method but returns only a single pykechain `Part` instance.
@@ -320,6 +342,7 @@ class Client(object):
         return _parts[0]
 
     def model(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Part
         """Retrieve single KE-chain part model.
 
         Uses the same interface as the `part` method but returns only a single pykechain `Part` instance.
@@ -338,6 +361,7 @@ class Client(object):
         return _parts[0]
 
     def properties(self, name=None, pk=None, category='INSTANCE'):
+        # type: (Optional[str], Optional[str], Optional[str]) -> List[Property]
         """Retrieve properties.
 
         :param name: name to limit the search for.
