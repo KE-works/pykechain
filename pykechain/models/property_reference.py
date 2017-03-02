@@ -17,9 +17,11 @@ class ReferenceProperty(Property):
 
     @value.setter
     def value(self, value):
-        if value and not isinstance(value, Part):
-            raise ValueError("Reference must be a Part")
-
-        part_id = value.id if value else None
+        if isinstance(value, Part):
+            part_id = value.id
+        elif isinstance(value, (type(None), str)):
+            part_id = value
+        else:
+            raise ValueError("Reference must be a Part, Part id or None")
 
         self._value = self._put_value(part_id)
