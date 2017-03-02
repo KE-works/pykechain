@@ -5,10 +5,10 @@ from .scope import Scope
 from .activity import Activity
 from .part import Part
 from .property import Property
-from .attachment import AttachmentProperty
+from .property_attachment import AttachmentProperty
 from .partset import PartSet
 
-__all__ = [
+__all__ = (
     'Base',
     'Scope',
     'Activity',
@@ -16,4 +16,4 @@ __all__ = [
     'Property',
     'AttachmentProperty',
     'PartSet'
-]
+)

@@ -9,4 +9,5 @@ env.read_envfile()
 TEST_URL = env('TEST_URL', default='https://kec2api.ke-chain.com')
 TEST_USERNAME = env('TEST_USERNAME', default='pykechain')  # LVL1
 TEST_TOKEN = env('TEST_TOKEN', default='')
-TEST_SCOPE_ID = env('TEST_SCOPE_ID', default='b9e3f77b-281b-4e17-8d7c-a457b4d92005')
+TEST_SCOPE_ID = env('TEST_SCOPE_ID', default='6f7bc9f0-228e-4d3a-9dc0-ec5a75d73e1d')
+TEST_SCOPE_NAME = env('TEST_SCOPE_NAME', default='Bike Project (pykechain testing)')
