@@ -90,7 +90,7 @@ class Part(Base):
             return self._client.parts(parent=self.parent_id, category=self.category)
         else:
             from pykechain.models import PartSet
-            return PartSet(parts=None)
+            return PartSet(parts=[])
 
     def add(self, model, **kwargs):
         # type: (Part, **Any) -> Part
