@@ -8,6 +8,8 @@ class ReferenceProperty(Property):
     def value(self):
         """Value of a reference property.
 
+        You can set the reference with a Part, Part id or None value.
+
         :return: Part or None
         """
         if not self._value:
