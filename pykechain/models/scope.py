@@ -1,10 +1,13 @@
-from pykechain.models import Base
+from typing import Any  # flake8: noqa
+
+from pykechain.models.base import Base
 
 
 class Scope(Base):
     """A virtual object representing a KE-chain scope."""
 
     def __init__(self, json, **kwargs):
+        # type: (dict, **Any) -> None
         """Construct a scope from provided json data."""
         super(Scope, self).__init__(json, **kwargs)
 

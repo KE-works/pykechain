@@ -1,7 +1,10 @@
+from typing import Dict, Any  # flake8: noqa
+
 import requests
 
 from pykechain.exceptions import NotFoundError, APIError
-from pykechain.models import Base
+from pykechain.models.base import Base
+from pykechain.models.property import Property
 from pykechain.utils import find
 
 
@@ -9,16 +12,17 @@ class Part(Base):
     """A virtual object representing a KE-chain part."""
 
     def __init__(self, json, **kwargs):
+        # type: (dict, **Any) -> None
         """Construct a part from provided json data."""
         super(Part, self).__init__(json, **kwargs)
 
         self.category = json.get('category')
         self.parent_id = json['parent'].get('id') if 'parent' in json and json.get('parent') else None
 
-        from pykechain.models import Property
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
 
     def property(self, name):
+        # type: (str) -> Property
         """Retrieve the property with name belonging to this part.
 
         If you need to retrieve the property using eg. the id, use :meth:`pykechain.Client.properties`.
@@ -86,9 +90,10 @@ class Part(Base):
             return self._client.parts(parent=self.parent_id, category=self.category)
         else:
             from pykechain.models import PartSet
-            return PartSet(parts=None)
+            return PartSet(parts=[])
 
     def add(self, model, **kwargs):
+        # type: (Part, **Any) -> Part
         """Add a new child to this part.
 
         :param model: model to use for the child
@@ -100,6 +105,7 @@ class Part(Base):
         return self._client.create_part(self, model, **kwargs)
 
     def add_to(self, parent, **kwargs):
+        # type: (Part, **Any) -> Part
         """Add a new instance of this model to a part.
 
         :param parent: part to add the new instance to
@@ -133,6 +139,7 @@ class Part(Base):
         return self._client.create_property(self, *args, **kwargs)
 
     def delete(self):
+        # type: () -> None
         """Delete this part.
 
         :return: None
@@ -183,6 +190,8 @@ class Part(Base):
             self.name = name
 
     def _repr_html_(self):
+        # type: () -> str
+
         html = [
             "<table width=100%>",
             "<caption>{}</caption>".format(self.name),
@@ -205,7 +214,6 @@ class Part(Base):
         return ''.join(html)
 
     def update(self, update_dict=None):
-        # type: (dict) -> None
         """
         Use a dictionary with property names and property values to update the properties belonging to this part.
 
@@ -219,6 +227,5 @@ class Part(Base):
         >>> bike = client.scope('Bike Project').part('Bike')
         >>> bike.update({'Gears': 11, 'Total Height': 56.3})
         """
-        assert type(update_dict) is dict, "update needs a dictionary with {'property_name': 'property_value', ... }"
         for property_name, property_value in update_dict.items():
             self.property(property_name).value = property_value
