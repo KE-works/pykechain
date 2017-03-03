@@ -1,4 +1,9 @@
-class PartSet(object):
+from typing import Sized, Any, Iterable  # flake8: noqa
+
+from pykechain.models.part import Part
+
+
+class PartSet(Sized):
     """A set of KE-chain parts.
 
     Adding set-like methods on a list of parts:
@@ -9,11 +14,9 @@ class PartSet(object):
     """
 
     def __init__(self, parts):
+        # type: (Iterable[Part]) -> None
         """Construct a PartSet from a part iterable."""
-        if parts:
-            self._parts = list(parts)
-        else:
-            self._parts = []
+        self._parts = list(parts)
         self._iter = iter(self._parts)
 
     def __repr__(self):
@@ -32,12 +35,14 @@ class PartSet(object):
     next = __next__  # py2.7 alias
 
     def __getitem__(self, k):
+        # type: (Any) -> Part
         if isinstance(k, int):
             return self._parts[k]
 
         raise NotImplementedError
 
     def _repr_html_(self):
+        # type: () -> str
         all_instances = all(p.category == 'INSTANCE' for p in self._parts)
 
         html = [
@@ -52,7 +57,7 @@ class PartSet(object):
         html.append("<th>ID</th>")
         html.append("</tr>")
 
-        for part in self:
+        for part in self._parts:
             html.append("<tr>")
             html.append("<td>{}</td>".format(part.name))
 

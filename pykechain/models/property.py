@@ -1,11 +1,14 @@
+from typing import Any  # flake8: noqa
+
 from pykechain.exceptions import APIError
-from pykechain.models import Base
+from pykechain.models.base import Base
 
 
 class Property(Base):
     """A virtual object representing a KE-chain property."""
 
     def __init__(self, json, **kwargs):
+        # type: (dict, **Any) -> None
         """Construct a Property from a json object."""
         super(Property, self).__init__(json, **kwargs)
 
@@ -15,6 +18,7 @@ class Property(Base):
 
     @property
     def value(self):
+        # type: () -> Any
         """Data value of a property.
 
         Setting this value will immediately update the property in KE-chain.
@@ -23,6 +27,7 @@ class Property(Base):
 
     @value.setter
     def value(self, value):
+        # type: (Any) -> None
         self._value = self._put_value(value)
 
     @property
@@ -55,6 +60,7 @@ class Property(Base):
 
     @classmethod
     def create(cls, json, **kwargs):
+        # type: (dict, **Any) -> Property
         """Create a property based on the json data.
 
         This method will attach the right class to a property, enabling the use of type-specific methods.

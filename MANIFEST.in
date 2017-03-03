@@ -3,6 +3,7 @@ include CONTRIBUTING.rst
 include CHANGELOG.rst
 include requirements.txt
 include tox.ini
+include mypy.ini
 include .env.template
 
 graft tests
