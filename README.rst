@@ -21,8 +21,8 @@ KE-chain Python SDK
     :target: https://coveralls.io/github/KE-works/pykechain?branch=master
     :alt: Coverage Status
 
-.. image:: https://pyup.io/repos/github/ke-works/pykechain/shield.svg
-    :target: https://pyup.io/repos/github/ke-works/pykechain/
+.. image:: https://pyup.io/repos/github/KE-works/pykechain/shield.svg
+    :target: https://pyup.io/repos/github/KE-works/pykechain/
     :alt: Updates
 
 
