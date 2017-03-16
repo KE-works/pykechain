@@ -272,16 +272,19 @@ class Client(object):
         --------
 
         Return all parts (defaults to instances) with exact name 'Gears'.
+        
         >>> client = Client(url='https://default.localhost:9443', verify=False)
         >>> client.login('admin','pass')
         >>> client.parts(name='Gears')  # doctest:Ellipsis
         ...
 
         Return all parts with category is MODEL or category is INSTANCE.
+        
         >>> client.parts(name='Gears', category=None)  # doctest:Ellipsis
         ...
 
         Return a maximum of 5 parts
+        
         >>> client.parts(limit=5)  # doctest:Ellipsis
         ...
         """
