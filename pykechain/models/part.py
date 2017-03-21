@@ -1,3 +1,4 @@
+import json
 from typing import Dict, Any  # flake8: noqa
 
 import requests
@@ -227,5 +228,19 @@ class Part(Base):
         >>> bike = client.scope('Bike Project').part('Bike')
         >>> bike.update({'Gears': 11, 'Total Height': 56.3})
         """
-        for property_name, property_value in update_dict.items():
-            self.property(property_name).value = property_value
+        # new for 1.5 and KE-chain 2 (released after 14 march 2017) is the 'bulk_update_properties' action on the api
+        # lets first use this one.
+        # dict(properties=json.dumps(update_dict))) with property ids:value
+
+
+        url = self._client._build_url('part', part_id=self.id)
+        request_body = dict([(self.property(property_name).id, property_value)
+                             for property_name, property_value in update_dict.items()])
+        r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
+                              data=dict(properties=json.dumps(request_body)),
+                              params=dict(select_action='bulk_update_properties'))
+        if r.status_code != 200:
+            raise APIError('{}: {}'.format(str(r), r.content))
+
+        # for property_name, property_value in update_dict.items():
+        #     self.property(property_name).value = property_value
