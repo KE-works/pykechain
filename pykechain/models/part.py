@@ -214,11 +214,12 @@ class Part(Base):
 
         return ''.join(html)
 
-    def update(self, update_dict=None):
+    def update(self, update_dict: dict = None, bulk: bool = True):
         """
         Use a dictionary with property names and property values to update the properties belonging to this part.
 
         :param update_dict: dictionary with keys being property names (str) and values being property values
+        :param bulk: True to use the bulk_update_properties API endpoint for KE-chain versions later then 2.1.0b
         :return: :class:`pykechain.models.Part`
         :raises: APIError, Raises `NotFoundError` when the property name is not a valid property of this part
 
@@ -226,7 +227,8 @@ class Part(Base):
         -------
 
         >>> bike = client.scope('Bike Project').part('Bike')
-        >>> bike.update({'Gears': 11, 'Total Height': 56.3})
+        >>> bike.update({'Gears': 11, 'Total Height': 56.3}, bulk=True)
+        
         """
         # new for 1.5 and KE-chain 2 (released after 14 march 2017) is the 'bulk_update_properties' action on the api
         # lets first use this one.
@@ -236,11 +238,12 @@ class Part(Base):
         url = self._client._build_url('part', part_id=self.id)
         request_body = dict([(self.property(property_name).id, property_value)
                              for property_name, property_value in update_dict.items()])
-        r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
-                              data=dict(properties=json.dumps(request_body)),
-                              params=dict(select_action='bulk_update_properties'))
-        if r.status_code != 200:
-            raise APIError('{}: {}'.format(str(r), r.content))
-
-        # for property_name, property_value in update_dict.items():
-        #     self.property(property_name).value = property_value
+        if bulk and len(update_dict.keys()) > 1:
+            r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
+                                      data=dict(properties=json.dumps(request_body)),
+                                      params=dict(select_action='bulk_update_properties'))
+            if r.status_code != 200:
+                raise APIError('{}: {}'.format(str(r), r.content))
+        else:
+            for property_name, property_value in update_dict.items():
+                self.property(property_name).value = property_value
