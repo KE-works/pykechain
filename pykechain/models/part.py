@@ -1,7 +1,7 @@
 import json
-from typing import Dict, Any  # flake8: noqa
 
 import requests
+from typing import Dict, Any, AnyStr  # flake8: noqa
 
 from pykechain.exceptions import NotFoundError, APIError
 from pykechain.models.base import Base
@@ -48,6 +48,7 @@ class Part(Base):
         return found
 
     def parent(self):
+        # type: () -> Any
         """The parent of this `Part`.
 
         :return: the parent `Part`s as :class:`pykechain.model.Part`.
@@ -66,6 +67,7 @@ class Part(Base):
             return None
 
     def children(self):
+        # type: () -> Any
         """The children of this `Part` as `Partset`.
 
         :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no children
@@ -80,6 +82,7 @@ class Part(Base):
         return self._client.parts(parent=self.id, category=self.category)
 
     def siblings(self):
+        # type: () -> Any
         """The siblings of this `Part` as `Partset`.
 
         Siblings are other Parts sharing the same parent of this `Part`
@@ -90,7 +93,7 @@ class Part(Base):
         if self.parent_id:
             return self._client.parts(parent=self.parent_id, category=self.category)
         else:
-            from pykechain.models import PartSet
+            from pykechain.models.partset import PartSet
             return PartSet(parts=[])
 
     def add(self, model, **kwargs):
@@ -118,6 +121,7 @@ class Part(Base):
         return self._client.create_part(parent, self, **kwargs)
 
     def add_model(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Part
         """Add a new child model to this model.
 
         See :class:`pykechain.Client.create_model` for available parameters.
@@ -129,6 +133,7 @@ class Part(Base):
         return self._client.create_model(self, *args, **kwargs)
 
     def add_property(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Property
         """Add a new property to this model.
 
         See :class:`pykechain.Client.create_property` for available parameters.
@@ -152,6 +157,7 @@ class Part(Base):
             raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
 
     def edit(self, name=None, description=None):
+        # type: (AnyStr, AnyStr) -> None
         """
         Edit the details of a part (model or instance).
 
@@ -214,7 +220,7 @@ class Part(Base):
 
         return ''.join(html)
 
-    def update(self, update_dict: dict = None, bulk: bool = True):
+    def update(self, update_dict=None, bulk=True):
         """
         Use a dictionary with property names and property values to update the properties belonging to this part.
 
