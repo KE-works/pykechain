@@ -8,6 +8,9 @@ pykechain changelog
  * Added ability to edit the part name and description functionality. See the `Part.edit()` method.
  * Added type annotations throughout the code and added mypy to the continuous integration pipeline to ensure high 
    quality of the code provided.
+ * Added the ability to use the bulk_update_properties API endpoint for KE-chain releases later then 2.1.0b. No need to
+   alter your pykechain code. The implementation of `Part.update()` method is augmented to use this faster method of
+   uploading changes to property values. For connections to legacy KE-chain 2 instances, use the switch `bulk=False`.
 
 1.4.0 (17FEB17)
 ---------------
