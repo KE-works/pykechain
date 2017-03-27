@@ -255,7 +255,7 @@ class Part(Base):
             for property_name, property_value in update_dict.items():
                 self.property(property_name).value = property_value
 
-    def add_with_properties(self, model, name=None, update_dict=None, bulk=True, **kwargs):
+    def add_with_properties(self, model, name=None, update_dict=None, bulk=True):
         """
         add a part and update its properties in one go
         
@@ -266,7 +266,15 @@ class Part(Base):
         :return: :class:`pykechain.models.Part`
         :raises: APIError, Raises `NotFoundError` when the property name is not a valid property of this part
 
+        Examples
+        --------
+        
+        >>> bike = client.scope('Bike Project').part('Bike')
+        >>> wheel_model = client.scope('Bike Project').model('Wheel') 
+        >>> bike.add_with_properties(wheel_model, 'Wooden Wheel', {'Spokes': 11, 'Material': 'Wood'})
+        
         """
+        #TODO: add test coverage for this method
         assert self.category == 'INSTANCE'
         name = name or model.name
         action = 'new_instance_with_properties'
