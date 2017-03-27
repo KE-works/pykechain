@@ -1,7 +1,7 @@
 import json
 
 import requests
-from typing import Dict, Any, AnyStr  # flake8: noqa
+from typing import Any, AnyStr  # flake8: noqa
 
 from pykechain.exceptions import NotFoundError, APIError
 from pykechain.models.base import Base
@@ -239,17 +239,51 @@ class Part(Base):
         # new for 1.5 and KE-chain 2 (released after 14 march 2017) is the 'bulk_update_properties' action on the api
         # lets first use this one.
         # dict(properties=json.dumps(update_dict))) with property ids:value
-
+        action = 'bulk_update_properties'
 
         url = self._client._build_url('part', part_id=self.id)
         request_body = dict([(self.property(property_name).id, property_value)
                              for property_name, property_value in update_dict.items()])
+
         if bulk and len(update_dict.keys()) > 1:
             r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
                                       data=dict(properties=json.dumps(request_body)),
-                                      params=dict(select_action='bulk_update_properties'))
+                                      params=dict(select_action=action))
             if r.status_code != 200:
                 raise APIError('{}: {}'.format(str(r), r.content))
         else:
             for property_name, property_value in update_dict.items():
                 self.property(property_name).value = property_value
+
+    def add_with_properties(self, model, name=None, update_dict=None, bulk=True, **kwargs):
+        """
+        add a part and update its properties in one go
+        
+        :param model: model of the part which to add a new instance, should follow the model tree in KE-chain
+        :param name: (optional) name provided for the new instance as string otherwise use the name of the model
+        :param update_dict: dictionary with keys being property names (str) and values being property values
+        :param bulk: True to use the bulk_update_properties API endpoint for KE-chain versions later then 2.1.0b
+        :return: :class:`pykechain.models.Part`
+        :raises: APIError, Raises `NotFoundError` when the property name is not a valid property of this part
+
+        """
+        assert self.category == 'INSTANCE'
+        name = name or model.name
+        action = 'new_instance_with_properties'
+        url = self._client._build_url('parts')
+
+        properties_update_dict = dict([(model.property(property_name).id, property_value)
+                                       for property_name, property_value in update_dict.items()])
+
+        r = self._client._request('POST', url,
+                                  data=dict(
+                                      name=name,
+                                      model=model.id,
+                                      parent=self.id,
+                                      properties=json.dumps(properties_update_dict)
+                                  ),
+                                  params=dict(select_action=action))
+        if r.status_code != 201:
+            raise APIError('{}: {}'.format(str(r), r.content))
+
+        return Part(r.json()['results'][0], client=self)
