@@ -270,12 +270,11 @@ class Part(Base):
         assert self.category == 'INSTANCE'
         name = name or model.name
         action = 'new_instance_with_properties'
-        url = self._client._build_url('parts')
 
         properties_update_dict = dict([(model.property(property_name).id, property_value)
                                        for property_name, property_value in update_dict.items()])
 
-        r = self._client._request('POST', url,
+        r = self._client._request('POST', self._client._build_url('parts'),
                                   data=dict(
                                       name=name,
                                       model=model.id,
