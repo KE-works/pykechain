@@ -285,4 +285,4 @@ class Part(Base):
         if r.status_code != 201:
             raise APIError('{}: {}'.format(str(r), r.content))
 
-        return Part(r.json()['results'][0], client=self)
+        return Part(r.json()['results'][0], client=self._client)
