@@ -273,7 +273,7 @@ class Part(Base):
 
         properties_update_dict = dict([(model.property(property_name).id, property_value)
                                        for property_name, property_value in update_dict.items()])
-
+        #TODO: add bulk = False flags such that is used the old API (sequential)
         r = self._client._request('POST', self._client._build_url('parts'),
                                   data=dict(
                                       name=name,

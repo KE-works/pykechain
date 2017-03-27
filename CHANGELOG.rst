@@ -11,6 +11,9 @@ pykechain changelog
  * Added the ability to use the bulk_update_properties API endpoint for KE-chain releases later then 2.1.0b. No need to
    alter your pykechain code. The implementation of `Part.update()` method is augmented to use this faster method of
    uploading changes to property values. For connections to legacy KE-chain 2 instances, use the switch `bulk=False`.
+ * Added the ability to create a new part and provide its properties values for KE-chain releases later then 2.1.0b.
+   You can use the new `Part.add_with_properties()` method and it will connect to the new KE-chain API endpoint of
+   'new_instance_with_properties'. Properties are provided by name and value in a dict. For examples see the docs.
 
 1.4.0 (17FEB17)
 ---------------
