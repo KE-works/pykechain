@@ -1,6 +1,7 @@
-from typing import Dict, Any  # flake8: noqa
+import json
 
 import requests
+from typing import Any, AnyStr  # flake8: noqa
 
 from pykechain.exceptions import NotFoundError, APIError
 from pykechain.models.base import Base
@@ -47,6 +48,7 @@ class Part(Base):
         return found
 
     def parent(self):
+        # type: () -> Any
         """The parent of this `Part`.
 
         :return: the parent `Part`s as :class:`pykechain.model.Part`.
@@ -65,6 +67,7 @@ class Part(Base):
             return None
 
     def children(self):
+        # type: () -> Any
         """The children of this `Part` as `Partset`.
 
         :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no children
@@ -79,6 +82,7 @@ class Part(Base):
         return self._client.parts(parent=self.id, category=self.category)
 
     def siblings(self):
+        # type: () -> Any
         """The siblings of this `Part` as `Partset`.
 
         Siblings are other Parts sharing the same parent of this `Part`
@@ -89,7 +93,7 @@ class Part(Base):
         if self.parent_id:
             return self._client.parts(parent=self.parent_id, category=self.category)
         else:
-            from pykechain.models import PartSet
+            from pykechain.models.partset import PartSet
             return PartSet(parts=[])
 
     def add(self, model, **kwargs):
@@ -117,6 +121,7 @@ class Part(Base):
         return self._client.create_part(parent, self, **kwargs)
 
     def add_model(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Part
         """Add a new child model to this model.
 
         See :class:`pykechain.Client.create_model` for available parameters.
@@ -128,6 +133,7 @@ class Part(Base):
         return self._client.create_model(self, *args, **kwargs)
 
     def add_property(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Property
         """Add a new property to this model.
 
         See :class:`pykechain.Client.create_property` for available parameters.
@@ -147,10 +153,11 @@ class Part(Base):
         """
         r = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
 
-        if r.status_code != 204:
+        if r.status_code != requests.codes.no_content:
             raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
 
     def edit(self, name=None, description=None):
+        # type: (AnyStr, AnyStr) -> None
         """
         Edit the details of a part (model or instance).
 
@@ -213,11 +220,12 @@ class Part(Base):
 
         return ''.join(html)
 
-    def update(self, update_dict=None):
+    def update(self, update_dict=None, bulk=True):
         """
         Use a dictionary with property names and property values to update the properties belonging to this part.
 
         :param update_dict: dictionary with keys being property names (str) and values being property values
+        :param bulk: True to use the bulk_update_properties API endpoint for KE-chain versions later then 2.1.0b
         :return: :class:`pykechain.models.Part`
         :raises: APIError, Raises `NotFoundError` when the property name is not a valid property of this part
 
@@ -225,7 +233,69 @@ class Part(Base):
         -------
 
         >>> bike = client.scope('Bike Project').part('Bike')
-        >>> bike.update({'Gears': 11, 'Total Height': 56.3})
+        >>> bike.update({'Gears': 11, 'Total Height': 56.3}, bulk=True)
+        
         """
-        for property_name, property_value in update_dict.items():
-            self.property(property_name).value = property_value
+        # new for 1.5 and KE-chain 2 (released after 14 march 2017) is the 'bulk_update_properties' action on the api
+        # lets first use this one.
+        # dict(properties=json.dumps(update_dict))) with property ids:value
+        action = 'bulk_update_properties'
+
+        url = self._client._build_url('part', part_id=self.id)
+        request_body = dict([(self.property(property_name).id, property_value)
+                             for property_name, property_value in update_dict.items()])
+
+        if bulk and len(update_dict.keys()) > 1:
+            r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
+                                      data=dict(properties=json.dumps(request_body)),
+                                      params=dict(select_action=action))
+            if r.status_code != requests.codes.ok:
+                raise APIError('{}: {}'.format(str(r), r.content))
+        else:
+            for property_name, property_value in update_dict.items():
+                self.property(property_name).value = property_value
+
+    def add_with_properties(self, model, name=None, update_dict=None, bulk=True):
+        """
+        Add a part and update its properties in one go.
+        
+        :param model: model of the part which to add a new instance, should follow the model tree in KE-chain
+        :param name: (optional) name provided for the new instance as string otherwise use the name of the model
+        :param update_dict: dictionary with keys being property names (str) and values being property values
+        :param bulk: True to use the bulk_update_properties API endpoint for KE-chain versions later then 2.1.0b
+        :return: :class:`pykechain.models.Part`
+        :raises: APIError, Raises `NotFoundError` when the property name is not a valid property of this part
+
+        Examples
+        --------
+        
+        >>> bike = client.scope('Bike Project').part('Bike')
+        >>> wheel_model = client.scope('Bike Project').model('Wheel') 
+        >>> bike.add_with_properties(wheel_model, 'Wooden Wheel', {'Spokes': 11, 'Material': 'Wood'})
+        
+        """
+        # TODO: add test coverage for this method
+        assert self.category == 'INSTANCE'
+        name = name or model.name
+        action = 'new_instance_with_properties'
+
+        properties_update_dict = dict([(model.property(property_name).id, property_value)
+                                       for property_name, property_value in update_dict.items()])
+        # TODO: add bulk = False flags such that is used the old API (sequential)
+        if bulk:
+            r = self._client._request('POST', self._client._build_url('parts'),
+                                      data=dict(
+                                          name=name,
+                                          model=model.id,
+                                          parent=self.id,
+                                          properties=json.dumps(properties_update_dict)
+                                      ),
+                                      params=dict(select_action=action))
+
+            if r.status_code != requests.codes.created:
+                raise APIError('{}: {}'.format(str(r), r.content))
+            return Part(r.json()['results'][0], client=self._client)
+        else:  # do the old way
+            new_part = self.add(model, name=name)  # type: Part
+            new_part.update(update_dict=update_dict, bulk=bulk)
+            return new_part
