@@ -257,7 +257,7 @@ class Part(Base):
 
     def add_with_properties(self, model, name=None, update_dict=None, bulk=True):
         """
-        add a part and update its properties in one go
+        Add a part and update its properties in one go.
         
         :param model: model of the part which to add a new instance, should follow the model tree in KE-chain
         :param name: (optional) name provided for the new instance as string otherwise use the name of the model
