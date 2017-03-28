@@ -216,3 +216,42 @@ class TestPartUpdate(TestBetamax):
         # tearDown
         for prop_name, prop_value in saved_front_fork_properties.items():
             front_fork.property(prop_name).value = prop_value
+
+class TestPartCreateWithProperties(TestBetamax):
+    def test_create_part_with_properties_no_bulk(self):
+        """Test create a part with the properties when bulk = False for old API compatibility"""
+        parent = self.project.part('Bike')  # type: Part
+        wheel_model = self.project.model('Wheel')  #type: Part
+
+        update_dict = {
+            'Diameter': 42.42,
+            'Spokes': 42,
+            'Rim Material': 'Unobtanium'
+        }
+
+        new_wheel = parent.add_with_properties(wheel_model, "Fresh Wheel", update_dict=update_dict, bulk=False)
+
+        self.assertEqual(type(new_wheel), Part)
+        self.assertTrue(new_wheel.property('Diameter'), 42.42)
+
+        new_wheel.delete()
+
+    def test_create_part_with_properties_with_bulk(self):
+        """Test create a part with the properties when bulk = False for old API compatibility"""
+        parent = self.project.part('Bike')  # type: Part
+        wheel_model = self.project.model('Wheel')  #type: Part
+
+        update_dict = {
+            'Diameter': 42.43,
+            'Spokes': 42,
+            'Rim Material': 'Unobtanium'
+        }
+
+        new_wheel = parent.add_with_properties(wheel_model, "Fresh Wheel", update_dict=update_dict, bulk=True)
+
+        self.assertEqual(type(new_wheel), Part)
+        self.assertTrue(new_wheel.property('Diameter'), 42.43)
+
+        new_wheel.delete()
+
+

@@ -274,23 +274,28 @@ class Part(Base):
         >>> bike.add_with_properties(wheel_model, 'Wooden Wheel', {'Spokes': 11, 'Material': 'Wood'})
         
         """
-        #TODO: add test coverage for this method
+        # TODO: add test coverage for this method
         assert self.category == 'INSTANCE'
         name = name or model.name
         action = 'new_instance_with_properties'
 
         properties_update_dict = dict([(model.property(property_name).id, property_value)
                                        for property_name, property_value in update_dict.items()])
-        #TODO: add bulk = False flags such that is used the old API (sequential)
-        r = self._client._request('POST', self._client._build_url('parts'),
-                                  data=dict(
-                                      name=name,
-                                      model=model.id,
-                                      parent=self.id,
-                                      properties=json.dumps(properties_update_dict)
-                                  ),
-                                  params=dict(select_action=action))
-        if r.status_code != 201:
-            raise APIError('{}: {}'.format(str(r), r.content))
+        # TODO: add bulk = False flags such that is used the old API (sequential)
+        if bulk:
+            r = self._client._request('POST', self._client._build_url('parts'),
+                                      data=dict(
+                                          name=name,
+                                          model=model.id,
+                                          parent=self.id,
+                                          properties=json.dumps(properties_update_dict)
+                                      ),
+                                      params=dict(select_action=action))
+            if r.status_code != 201:
+                raise APIError('{}: {}'.format(str(r), r.content))
+            return Part(r.json()['results'][0], client=self._client)
+        else:  # do the old way
+            new_part = self.add(model, name=name)  # type: Part
+            new_part.update(update_dict=update_dict, bulk=bulk)
+            return new_part
 
-        return Part(r.json()['results'][0], client=self._client)
