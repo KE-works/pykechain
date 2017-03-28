@@ -153,7 +153,7 @@ class Part(Base):
         """
         r = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
 
-        if r.status_code != 204:
+        if r.status_code != requests.codes.no_content:
             raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
 
     def edit(self, name=None, description=None):
@@ -249,7 +249,7 @@ class Part(Base):
             r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
                                       data=dict(properties=json.dumps(request_body)),
                                       params=dict(select_action=action))
-            if r.status_code != 200:
+            if r.status_code != requests.codes.ok:
                 raise APIError('{}: {}'.format(str(r), r.content))
         else:
             for property_name, property_value in update_dict.items():
@@ -291,11 +291,11 @@ class Part(Base):
                                           properties=json.dumps(properties_update_dict)
                                       ),
                                       params=dict(select_action=action))
-            if r.status_code != 201:
+
+            if r.status_code != requests.codes.created:
                 raise APIError('{}: {}'.format(str(r), r.content))
             return Part(r.json()['results'][0], client=self._client)
         else:  # do the old way
             new_part = self.add(model, name=name)  # type: Part
             new_part.update(update_dict=update_dict, bulk=bulk)
             return new_part
-
