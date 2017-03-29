@@ -14,7 +14,10 @@ class AttachmentProperty(Property):
 
         Use save_as in order to download as a file.
         """
-        return '[Attachment]'
+        if 'value' in self._json_data and self._json_data['value']:
+            return "[Attachment: {}]".format(self._json_data['value'].split('/')[-1])
+        else:
+            return None
 
     @value.setter
     def value(self, value):
@@ -62,7 +65,7 @@ class AttachmentProperty(Property):
         :param filename: File path
         :raises: APIError
         """
-        with open(filename, 'wb') as f:
+        with open(filename, 'w+b') as f:
             for chunk in self._download():
                 f.write(chunk)
 
