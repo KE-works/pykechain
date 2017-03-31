@@ -178,6 +178,7 @@ class TestParts(TestBetamax):
 
         front_fork.edit(name='Front Fork')
 
+
 class TestPartUpdate(TestBetamax):
     def test_part_update_with_dictionary(self):
         # setup
@@ -216,6 +217,7 @@ class TestPartUpdate(TestBetamax):
         # tearDown
         for prop_name, prop_value in saved_front_fork_properties.items():
             front_fork.property(prop_name).value = prop_value
+
 
 class TestPartCreateWithProperties(TestBetamax):
     def test_create_part_with_properties_no_bulk(self):

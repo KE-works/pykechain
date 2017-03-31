@@ -9,7 +9,7 @@ class TestScopes(TestBetamax):
 
     def test_retrieve_single_unknown(self):
         with self.assertRaises(NotFoundError):
-            self.client.scope('123lladadwd')
+            self.client.scope('non-existing-scope-name')
 
     def test_retrieve_single_multiple(self):
         with self.assertRaises(MultipleFoundError):
