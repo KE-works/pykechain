@@ -1,9 +1,11 @@
+from unittest import TestCase
+
 from pykechain.client import Client
 from pykechain.exceptions import ForbiddenError
 from tests.classes import TestBetamax
 
 
-class TestClient(object):
+class TestClient(TestCase):
 
     def test_init_default_url(self):
         client = Client()
