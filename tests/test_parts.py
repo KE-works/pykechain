@@ -11,27 +11,26 @@ class TestParts(TestBetamax):
         assert len(parts)
 
     def test_retrieve_single_part(self):
-        part = self.project.part('Front Wheel')
+        part = self.project.part('One')
 
         assert part
 
     def test_retrieve_single_unknown(self):
         with self.assertRaises(NotFoundError):
-            self.project.part('123lladadwd')
+            self.project.part('part-does-not-exist')
 
     def test_retrieve_single_multiple(self):
         with self.assertRaises(MultipleFoundError):
             self.project.part()
 
     def test_retrieve_models(self):
-        project = self.client.scope('Bike Project')
-        wheel = project.model('Wheel')
+        many = self.project.model('Many')
 
-        assert project.parts(model=wheel)
+        assert self.project.parts(model=many)
 
     def test_retrieve_model_unknown(self):
         with self.assertRaises(NotFoundError):
-            self.client.model('123lladadwd')
+            self.client.model('model-does-not-exist')
 
     def test_retrieve_model_multiple(self):
         with self.assertRaises(MultipleFoundError):
@@ -48,22 +47,22 @@ class TestParts(TestBetamax):
             part_set['testing']
 
     def test_part_add_delete_part(self):
-        project = self.client.scope('Bike Project')
+        product = self.project.part('Product')
+        many_model = self.project.model('Many')
 
-        bike = project.part('Bike')
-        wheel_model = project.model('Wheel')
+        many_test = product.add(many_model, name='ManyTest')
+        assert self.project.part('ManyTest')
+        many_test.delete()
 
-        wheel = bike.add(wheel_model, name='Test Wheel')
-        wheel.delete()
-
-        wheel = wheel_model.add_to(bike)
-        wheel.delete()
+        many_test2 = many_model.add_to(product, name="ManyTest2")
+        assert self.project.part('ManyTest2')
+        many_test2.delete()
 
         with self.assertRaises(APIError):
-            bike.delete()
+            many_test2.delete()
 
     def test_part_html_table(self):
-        part = self.project.part('Front Wheel')
+        part = self.project.part('One')
 
         assert "</table>" in part._repr_html_()
 
