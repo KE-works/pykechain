@@ -148,6 +148,11 @@ class Client(object):
         if self.last_response.status_code == requests.codes.forbidden:
             raise ForbiddenError(self.last_response.json()['results'][0]['detail'])
 
+        # TODO: format in a nice way
+        if self.last_response.status_code != requests.codes.ok:
+            print(self.last_response.status_code)
+            print(self.last_response.text)
+
         return self.last_response
 
     def scopes(self, name=None, pk=None, status='ACTIVE'):
