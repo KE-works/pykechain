@@ -1,3 +1,5 @@
+from unittest import skip
+
 from pykechain.exceptions import NotFoundError, MultipleFoundError
 from tests.classes import TestBetamax
 
@@ -12,6 +14,3 @@ class TestScopes(TestBetamax):
         with self.assertRaises(NotFoundError):
             self.client.scope('does-not-exist')
 
-    def test_retrieve_single_multiple(self):
-        with self.assertRaises(MultipleFoundError):
-            self.client.scope()
