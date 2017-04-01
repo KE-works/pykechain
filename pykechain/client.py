@@ -148,7 +148,7 @@ class Client(object):
         if self.last_response.status_code == requests.codes.forbidden:
             raise ForbiddenError(self.last_response.json()['results'][0]['detail'])
 
-        # TODO: format in a nice way
+        # TODO: format in a nice way, also 201 is ok, and maybe only show in debug mode?
         if self.last_response.status_code != requests.codes.ok:
             print(self.last_response.status_code)
             print(self.last_response.text)

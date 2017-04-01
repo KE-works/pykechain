@@ -7,11 +7,11 @@ class TestActivities(TestBetamax):
         assert self.project.activities()
 
     def test_retrieve_single_activity(self):
-        assert self.project.activity('Specify wheel diameter')
+        assert self.project.activity('Task')
 
     def test_retrieve_unknown_activity(self):
         with self.assertRaises(NotFoundError):
-            self.project.activity('Hello?!')
+            self.project.activity('task-does-not-exist')
 
     def test_retrieve_too_many_activity(self):
         with self.assertRaises(MultipleFoundError):
@@ -25,32 +25,28 @@ class TestActivities(TestBetamax):
         assert len(parts) == 2
 
     def test_create_activity(self):
-        project = self.client.scope('Bike Project')
+        subprocess = self.project.create_activity('Subprocess', activity_class='Subprocess')
 
-        subprocess = project.create_activity('Random', activity_class='Subprocess')
+        assert subprocess.name == 'Subprocess'
 
-        assert subprocess.name == 'Random'
-
-        task = subprocess.create_activity('Another')
+        task = subprocess.create_activity('Subtask')
 
         subprocess.delete()
 
         with self.assertRaises(APIError):
-            subprocess.delete()
+            task.delete()
 
     def test_configure_activity(self):
-        project = self.client.scope('Bike Project')
+        one = self.project.model('One')
+        many = self.project.model('Many')
 
-        bike = project.model('Bike')
-        wheel = project.model('Wheel')
-
-        task = project.create_activity('Random')
+        task = self.project.create_activity('TestTask')
 
         task.configure([
-            bike.property('Gears'),
-            bike.property('Total height')
+            one.property('Integer'),
+            one.property('Boolean')
         ], [
-            wheel.property('Spokes')
+            many.property('Float')
         ])
 
-        task.delete()
+        # task.delete()
