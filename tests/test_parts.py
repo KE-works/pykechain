@@ -170,41 +170,33 @@ class TestParts(TestBetamax):
 class TestPartUpdate(TestBetamax):
     def test_part_update_with_dictionary(self):
         # setup
-        front_fork = self.project.part('Front Fork')  # type: Part
-        saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
+        one = self.project.part('One')  # type: Part
+        saved_properties = dict([(p.name, p.value) for p in one.properties])
 
-        # do tests
         update_dict = {
-            'Material': 'Unobtanium',
-            'Height (mm)': 123.4,
-            'Color': 'Space Grey (old)'
+            'Float': 12.4,
+            'Integer': 1,
+            'String': 'hey'
         }
-        front_fork.update(update_dict)
-        refreshed_front_fork = self.project.part(pk=front_fork.id)
-        for prop in refreshed_front_fork.properties:
-            assert prop.name in update_dict, "property with {} should be in the update dict".format(prop.name)
-            assert update_dict[prop.name] == prop.value, "property {} with value {} did not match contents " \
-                                                         "with KEC".format(prop.name, prop.value)
+
+        one.update(update_dict)
+        refreshed = self.project.part(pk=one.id)
+
+        for prop, value in update_dict.items():
+            assert refreshed.property(prop).value == value
 
         # tearDown
-        for prop_name, prop_value in saved_front_fork_properties.items():
-            front_fork.property(prop_name).value = prop_value
+        for prop in update_dict:
+            refreshed.property(prop).value = saved_properties[prop]
 
     def test_part_update_with_missing_property(self):
         # setup
-        front_fork = self.project.part('Front Fork')  # type: Part
-        saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
+        one = self.project.part('One')  # type: Part
 
-        # do tests
-        update_dict = {
-            'Unknown Property': 'Woot!'
-        }
         with self.assertRaises(NotFoundError):
-            front_fork.update(update_dict)
-
-        # tearDown
-        for prop_name, prop_value in saved_front_fork_properties.items():
-            front_fork.property(prop_name).value = prop_value
+            one.update({
+                'property-does-not-exist': None
+            })
 
 
 class TestPartCreateWithProperties(TestBetamax):
