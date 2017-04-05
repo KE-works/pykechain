@@ -167,7 +167,7 @@ class Part(Base):
         >>> from pykechain.enums import Multiplicity
         >>> bike_model = project.model('Bike')
         # find the catalog model container, the highest parent to create catalog models under
-        >>> catalog_model_container = project.model('Catalog Container')
+        >>> catalog_model_container = project.model('Catalog container')
         >>> new_wheel_model = project.create_model(catalog_model_container, 'Wheel Catalog', 
         ...                                        multiplicity=Multiplicity.ZERO_MANY)
         >>> new_wheel_model.add_proxy_to(bike_model, "Wheel", multiplicity=Multiplicity.ONE_MANY)

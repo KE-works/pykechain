@@ -198,14 +198,11 @@ class TestParts(TestBetamax):
 
         all_bearing_catalog_models = self.project.parts(name='Bearing', category=Category.MODEL)
         self.assertGreaterEqual(len(all_bearing_catalog_models), 1)
-        for bearing_proxy in all_bearing_catalog_models:
-            bearing_proxy.delete()
+        for bearing_catalog_model in all_bearing_catalog_models:
+            bearing_catalog_model.delete()
 
         all_bearing_models = self.project.parts(name='Bearing', category=Category.MODEL)
         self.assertEqual(len(all_bearing_models), 0)
-
-
-
 
 
 class TestPartUpdate(TestBetamax):
@@ -247,11 +244,12 @@ class TestPartUpdate(TestBetamax):
         for prop_name, prop_value in saved_front_fork_properties.items():
             front_fork.property(prop_name).value = prop_value
 
+
 class TestPartCreateWithProperties(TestBetamax):
     def test_create_part_with_properties_no_bulk(self):
         """Test create a part with the properties when bulk = False for old API compatibility"""
         parent = self.project.part('Bike')  # type: Part
-        wheel_model = self.project.model('Wheel')  #type: Part
+        wheel_model = self.project.model('Wheel')  # type: Part
 
         update_dict = {
             'Diameter': 42.42,
@@ -269,7 +267,7 @@ class TestPartCreateWithProperties(TestBetamax):
     def test_create_part_with_properties_with_bulk(self):
         """Test create a part with the properties when bulk = False for old API compatibility"""
         parent = self.project.part('Bike')  # type: Part
-        wheel_model = self.project.model('Wheel')  #type: Part
+        wheel_model = self.project.model('Wheel')  # type: Part
 
         update_dict = {
             'Diameter': 42.43,
@@ -283,5 +281,3 @@ class TestPartCreateWithProperties(TestBetamax):
         self.assertTrue(new_wheel.property('Diameter'), 42.43)
 
         new_wheel.delete()
-
-
