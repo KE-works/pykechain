@@ -8,13 +8,14 @@ class TestAttachment(TestBetamax):
     test_dict = {'a': 1, 'b': 3}
 
     def test_retrieve_attachment(self):
-        project = self.client.scope('Bike Project (pykechain testing)')
-        picture = project.part('Bike').property('Picture')
+        attach = self.project.part('One').property('Attachment')
 
         data = ('data.json', json.dumps(self.test_dict), 'application/json')
 
-        picture._upload(data)
+        attach._upload(data)
 
-        r = picture._download().json()
+        r = attach._download().json()
 
         self.assertDictEqual(r, self.test_dict)
+
+        # TODO: attach._upload(None) or attach.clear() for fixture consistency
