@@ -3,6 +3,7 @@ import json
 import requests
 from typing import Any, AnyStr  # flake8: noqa
 
+from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import NotFoundError, APIError
 from pykechain.models.base import Base
 from pykechain.models.property import Property
@@ -99,12 +100,21 @@ class Part(Base):
     def add(self, model, **kwargs):
         # type: (Part, **Any) -> Part
         """Add a new child to this part.
+        
+        This can only act on instances
 
         :param model: model to use for the child
         :return: :class:`pykechain.models.Part`
         :raises: APIError
+        
+        Example
+        -------
+        
+        >>> bike = project.part('Bike')
+        >>> wheel_model = project.model('Wheel')
+        >>> bike.add(wheel_model)
         """
-        assert self.category == 'INSTANCE'
+        assert self.category == Category.INSTANCE
 
         return self._client.create_part(self, model, **kwargs)
 
@@ -115,8 +125,15 @@ class Part(Base):
         :param parent: part to add the new instance to
         :return: :class:`pykechain.models.Part`
         :raises: APIError
+        
+        Example
+        -------
+        
+        >>> wheel_model = project.model('wheel')
+        >>> bike = project.part('Bike')
+        >>> wheel_model.add_to(bike)
         """
-        assert self.category == 'MODEL'
+        assert self.category == Category.MODEL
 
         return self._client.create_part(parent, self, **kwargs)
 
@@ -128,9 +145,35 @@ class Part(Base):
 
         :return: Part
         """
-        assert self.category == 'MODEL'
+        assert self.category == Category.MODEL
 
         return self._client.create_model(self, *args, **kwargs)
+
+    def add_proxy_to(self, parent, name, multiplicity=Multiplicity.ONE_MANY):
+        # type: (Any, AnyStr, Any) -> Part
+        """Add this model as a proxy to another parent model.
+        
+        This will add the current model as a proxy model to another parent model. It ensure that it will copy the
+        whole subassembly to the 'parent' model.
+        
+        :param name: Name of the new proxy model
+        :param parent: parent of the 
+        :param multiplicity: the multiplicity of the new proxy model (default ONE_MANY) 
+        :return: Part (self)
+        
+        Examples
+        --------
+        
+        >>> from pykechain.enums import Multiplicity
+        >>> bike_model = project.model('Bike')
+        # find the catalog model container, the highest parent to create catalog models under
+        >>> catalog_model_container = project.model('Catalog Container')
+        >>> new_wheel_model = project.create_model(catalog_model_container, 'Wheel Catalog', 
+        ...                                        multiplicity=Multiplicity.ZERO_MANY)
+        >>> new_wheel_model.add_proxy_to(bike_model, "Wheel", multiplicity=Multiplicity.ONE_MANY)
+        
+        """
+        return self._client.create_proxy_model(self, parent, name, multiplicity)
 
     def add_property(self, *args, **kwargs):
         # type: (*Any, **Any) -> Property
@@ -140,7 +183,7 @@ class Part(Base):
 
         :return: Property
         """
-        assert self.category == 'MODEL'
+        assert self.category == Category.MODEL
 
         return self._client.create_property(self, *args, **kwargs)
 
@@ -277,7 +320,7 @@ class Part(Base):
         
         """
         # TODO: add test coverage for this method
-        assert self.category == 'INSTANCE'
+        assert self.category == Category.INSTANCE
         name = name or model.name
         action = 'new_instance_with_properties'
 
