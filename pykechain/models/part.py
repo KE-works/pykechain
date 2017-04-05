@@ -171,12 +171,14 @@ class Part(Base):
         Example
         -------
 
-        For changing a part::       
+        For changing a part:
+              
         >>> front_fork = project.part('Front Fork')
         >>> front_fork.edit(name='Front Fork - updated')
         >>> front_fork.edit(name='Front Fork cruizer', description='With my ragtop down so my hair can blow' )
 
-        for changing a model::        
+        for changing a model:
+                
         >>> front_fork = project.model('Front Fork')
         >>> front_fork.edit(name='Front Fork basemodel', description='Some description here')
 
