@@ -13,7 +13,6 @@ class Activity(Base):
         super(Activity, self).__init__(json, **kwargs)
 
         self.scope = json.get('scope')
-        self.association = json.get('association_id')
 
     def parts(self, *args, **kwargs):
         """Retrieve parts belonging to this activity.
@@ -29,9 +28,9 @@ class Activity(Base):
         :param outputs: iterable of output property models
         :raises: APIError
         """
-        url = self._client._build_url('association', association_id=self.association)
+        url = self._client._build_url('activity', activity_id=self.id)
 
-        r = self._client._request('PUT', url, json={
+        r = self._client._request('PUT', url, params={'select_action': 'update_associations'}, json={
             'inputs': [p.id for p in inputs],
             'outputs': [p.id for p in outputs]
         })

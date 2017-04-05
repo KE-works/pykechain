@@ -12,7 +12,6 @@ API_PATH = {
     'scopes': 'api/scopes.json',
     'activities': 'api/activities.json',
     'activity': 'api/activities/{activity_id}.json',
-    'association': 'api/associations/{association_id}.json',
     'parts': 'api/parts.json',
     'part': 'api/parts/{part_id}.json',
     'properties': 'api/properties.json',
