@@ -25,7 +25,7 @@ class TestActivities(TestBetamax):
         assert len(parts) == 2
 
     def test_create_activity(self):
-        project = self.client.scope('Bike Project')
+        project = self.project
 
         subprocess = project.create_activity('Random', activity_class='Subprocess')
 
@@ -39,7 +39,7 @@ class TestActivities(TestBetamax):
             subprocess.delete()
 
     def test_configure_activity(self):
-        project = self.client.scope('Bike Project')
+        project = self.project
 
         bike = project.model('Bike')
         wheel = project.model('Wheel')
