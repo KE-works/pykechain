@@ -7,7 +7,7 @@ pytest==3.0.7
 betamax==0.8.0
 
 # documentation
-Sphinx==1.5.3
+Sphinx==1.5.5
 nbsphinx==0.2.13
 
 # data science
