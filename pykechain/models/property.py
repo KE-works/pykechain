@@ -28,9 +28,7 @@ class Property(Base):
     @value.setter
     def value(self, value):
         # type: (Any) -> None
-        if value != self._value:
-            self._put_value(value)
-            self._value = value
+        self._value = self._put_value(value)
 
     @property
     def part(self):
@@ -58,6 +56,8 @@ class Property(Base):
         if r.status_code != 200:  # pragma: no cover
             raise APIError("Could not update property value")
 
+        return r.json()['results'][0]['value']
+
     @classmethod
     def create(cls, json, **kwargs):
         # type: (dict, **Any) -> Property
@@ -65,11 +65,16 @@ class Property(Base):
 
         This method will attach the right class to a property, enabling the use of type-specific methods.
         """
-        if json.get('property_type') == 'ATTACHMENT_VALUE':
+        property_type = json.get('property_type')
+
+        if property_type == 'ATTACHMENT_VALUE':
             from .property_attachment import AttachmentProperty
             return AttachmentProperty(json, **kwargs)
-        elif json.get('property_type') == 'SINGLE_SELECT_VALUE':
+        elif property_type == 'SINGLE_SELECT_VALUE':
             from .property_selectlist import SelectListProperty
             return SelectListProperty(json, **kwargs)
+        elif property_type == 'REFERENCE_VALUE':
+            from .property_reference import ReferenceProperty
+            return ReferenceProperty(json, **kwargs)
         else:
             return Property(json, **kwargs)
