@@ -13,17 +13,17 @@ class AttachmentProperty(Property):
         """Data value of this attachment.
 
         Will show the filename of the attachment if there is an attachment available otherwise None
-        Use save_as in order to download as a file. 
-                
+        Use save_as in order to download as a file.
+
         Example
         -------
-        
+
         >>> file_attachment_property = project.part('Bike').property('file_attachment')
         >>> if file_attachment_property.value:
         ...     file_attachment_property.save_as('file.ext')
         ... else:
         ...     print('file attachment not set, its value is None')
-        
+
         """
         if 'value' in self._json_data and self._json_data['value']:
             return "[Attachment: {}]".format(self._json_data['value'].split('/')[-1])
