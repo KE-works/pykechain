@@ -8,7 +8,7 @@ class TestSelectListProperty(TestBetamax):
     """Tests for the select list properties"""
 
     def test_get_options_list(self):
-        sellist_model = self.project.model('Model').property('a_select_list_property')
+        sellist_model = self.project.model('One').property('Select')
         assert hasattr(sellist_model, 'options')
         assert isinstance(sellist_model.options, list)
         for item in sellist_model.options:
@@ -16,17 +16,16 @@ class TestSelectListProperty(TestBetamax):
 
     def test_set_options_list(self):
         # setup
-        sellist_model = self.project.model('Model').property('a_select_list_property')
+        sellist_model = self.project.model('One').property('Select')
 
         saved_options_list = [str(i) for i in sellist_model.options]
 
         # do test
-        from datetime import datetime
         new_options_list = [1, 3.14, "a"]
         sellist_model.options = new_options_list
         self.assertListEqual(sellist_model.options, list(map(str, new_options_list)))
 
-        sellist_model2 = self.project.model('Model').property('a_select_list_property')
+        sellist_model2 = self.project.model('One').property('Select')
         self.assertListEqual(sellist_model.options, sellist_model2.options)
 
         # teardown
@@ -34,7 +33,7 @@ class TestSelectListProperty(TestBetamax):
 
     def test_illegal_options_are_not_set(self):
         """Test for secveral illegal lists to be set"""
-        sellist_model = self.project.model('Model').property('a_select_list_property')
+        sellist_model = self.project.model('One').property('Select')
         with self.assertRaises(AssertionError):
             # not a list
             sellist_model.options = 1
@@ -56,12 +55,12 @@ class TestSelectListProperty(TestBetamax):
 
     def test_fail_to_set_options_on_instance(self):
         """Test settings options on a property instance, only models are allowed optiosn to be set"""
-        sellist_model = self.project.model('Model')
+        sellist_model = self.project.model('One')
         sellist_part_instance = self.project.parts(model=sellist_model)
         sellist_part_instance = sellist_part_instance[0]
         assert sellist_part_instance.category == 'INSTANCE'
 
-        sellist_property = sellist_part_instance.property('a_select_list_property')
+        sellist_property = sellist_part_instance.property('Select')
         assert hasattr(sellist_property, 'options')
 
         with self.assertRaises(APIError):
