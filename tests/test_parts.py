@@ -202,38 +202,36 @@ class TestPartUpdate(TestBetamax):
 class TestPartCreateWithProperties(TestBetamax):
     def test_create_part_with_properties_no_bulk(self):
         """Test create a part with the properties when bulk = False for old API compatibility"""
-        parent = self.project.part('Bike')  # type: Part
-        wheel_model = self.project.model('Wheel')  #type: Part
+        parent = self.project.part('Product')  # type: Part
+        many_model = self.project.model('Many')  #type: Part
 
         update_dict = {
-            'Diameter': 42.42,
-            'Spokes': 42,
-            'Rim Material': 'Unobtanium'
+            'Float': 42.42,
+            'Integer': 42,
         }
 
-        new_wheel = parent.add_with_properties(wheel_model, "Fresh Wheel", update_dict=update_dict, bulk=False)
+        new = parent.add_with_properties(many_model, "ManyX", update_dict=update_dict, bulk=False)
 
-        self.assertEqual(type(new_wheel), Part)
-        self.assertTrue(new_wheel.property('Diameter'), 42.42)
+        self.assertEqual(type(new), Part)
+        self.assertTrue(new.property('Float'), 42.42)
 
-        new_wheel.delete()
+        new.delete()
 
     def test_create_part_with_properties_with_bulk(self):
-        """Test create a part with the properties when bulk = False for old API compatibility"""
-        parent = self.project.part('Bike')  # type: Part
-        wheel_model = self.project.model('Wheel')  #type: Part
+        """Test create a part with the properties with bulk"""
+        parent = self.project.part('Product')  # type: Part
+        many_model = self.project.model('Many')  #type: Part
 
         update_dict = {
-            'Diameter': 42.43,
-            'Spokes': 42,
-            'Rim Material': 'Unobtanium'
+            'Float': 42.42,
+            'Integer': 42,
         }
 
-        new_wheel = parent.add_with_properties(wheel_model, "Fresh Wheel", update_dict=update_dict, bulk=True)
+        new = parent.add_with_properties(many_model, "ManyX", update_dict=update_dict, bulk=True)
 
-        self.assertEqual(type(new_wheel), Part)
-        self.assertTrue(new_wheel.property('Diameter'), 42.43)
+        self.assertEqual(type(new), Part)
+        self.assertTrue(new.property('Float'), 42.42)
 
-        new_wheel.delete()
+        new.delete()
 
 
