@@ -9,15 +9,15 @@ class TestProperties(TestBetamax):
         assert len(properties)
 
     def test_get_property(self):
-        bike = self.project.part('One')
+        one = self.project.part('One')
 
-        self.assertEqual(bike.property('Integer').value, 10)
+        self.assertEqual(one.property('Integer').value, 10)
 
     def test_get_invalid_property(self):
-        bike = self.project.part('One')
+        one = self.project.part('One')
 
         with self.assertRaises(NotFoundError):
-            bike.property('Price')
+            one.property('Price')
 
     def test_set_property(self):
         int = self.project.part('One').property('Integer')
@@ -33,8 +33,7 @@ class TestProperties(TestBetamax):
         int.value = 10
 
     def test_property_to_part(self):
-        bike = self.project.part('One')
+        one = self.project.part('One')
+        one2 = one.property('Float').part
 
-        bike2 = bike.property('Float').part
-
-        self.assertEqual(bike.id, bike2.id)
+        self.assertEqual(one.id, one2.id)
