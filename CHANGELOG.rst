@@ -15,6 +15,7 @@ pykechain changelog
  * Added the ability to create a new part and provide its properties values for KE-chain releases later then 2.1.0b.
    You can use the new `Part.add_with_properties()` method and it will connect to the new KE-chain API endpoint of
    'new_instance_with_properties'. Properties are provided by name and value in a dict. For examples see the docs.
+ * Reference properties can now be set with a Part directly. Setting a reference property to None will clear the value.
 
  * (Backwards Incompatibile) The task configuration (association) API is updated to the
    latest KE-chain release (release 2.1.0b-sprint119 30MAR17). This affects the `task.configure()` method.
