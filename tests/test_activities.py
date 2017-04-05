@@ -17,8 +17,8 @@ class TestActivities(TestBetamax):
         with self.assertRaises(MultipleFoundError):
             self.project.activity()
 
-    def test_retrieve_single_bike(self):
-        activity = self.project.activity('Specify wheel diameter')
+    def test_retrieve_activity_parts(self):
+        activity = self.project.activity('Task2')
 
         parts = activity.parts()
 
@@ -49,4 +49,4 @@ class TestActivities(TestBetamax):
             many.property('Float')
         ])
 
-        # task.delete()
+        task.delete()
