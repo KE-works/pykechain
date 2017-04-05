@@ -4,6 +4,7 @@ import requests
 from envparse import env
 from requests.compat import urljoin  # type: ignore
 
+from .__about__ import version
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError
 from .models import Scope, Activity, Part, PartSet, Property
 
@@ -50,7 +51,7 @@ class Client(object):
         """
         self.session = requests.Session()
         self.api_root = url
-        self.headers = {}  # type: Dict[str, str]
+        self.headers = {'X-Requested-With':'XMLHttpRequest', 'PyKechain-Version': version}  # type: Dict[str, str]
         self.auth = None  # type: Optional[Tuple[str, str]]
         self.last_request = None  # type: Optional[requests.PreparedRequest]
         self.last_response = None  # type: Optional[requests.Response]
@@ -272,16 +273,19 @@ class Client(object):
         --------
 
         Return all parts (defaults to instances) with exact name 'Gears'.
+        
         >>> client = Client(url='https://default.localhost:9443', verify=False)
         >>> client.login('admin','pass')
         >>> client.parts(name='Gears')  # doctest:Ellipsis
         ...
 
         Return all parts with category is MODEL or category is INSTANCE.
+        
         >>> client.parts(name='Gears', category=None)  # doctest:Ellipsis
         ...
 
         Return a maximum of 5 parts
+        
         >>> client.parts(limit=5)  # doctest:Ellipsis
         ...
         """
