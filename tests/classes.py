@@ -4,7 +4,7 @@ from unittest import TestCase
 from betamax import Betamax
 
 from pykechain import Client
-from tests.utils import TEST_TOKEN, TEST_URL, TEST_SCOPE_NAME
+from tests.utils import TEST_TOKEN, TEST_URL, TEST_SCOPE_NAME, TEST_RECORD
 
 with Betamax.configure() as config:
     config.cassette_library_dir = os.path.join(os.path.dirname(__file__), 'cassettes')
@@ -29,7 +29,7 @@ class TestBetamax(TestCase):
 
         self.recorder = Betamax(session=self.client.session)
         # TODO: turn off recording for travis CI
-        self.recorder.use_cassette(self.cassette_name, record='all')
+        self.recorder.use_cassette(self.cassette_name, record=TEST_RECORD)
         self.recorder.start()
 
         if self.find_project:
