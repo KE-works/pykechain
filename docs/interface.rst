@@ -8,3 +8,4 @@ Developer API
     api/client
     api/models
     api/exceptions
+    api/enums
