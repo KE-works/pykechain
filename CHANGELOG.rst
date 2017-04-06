@@ -3,11 +3,9 @@ Change Log
 
 pykechain changelog
 
-1.5.0 (UNRELEASED)
+1.5.0 (6APR17)
 ------------------
  * Added ability to edit the part name and description functionality. See the `Part.edit()` method.
- * Added type annotations throughout the code and added mypy to the continuous integration pipeline to ensure high 
-   quality of the code provided.
  * Added the ability to use the bulk_update_properties API endpoint for KE-chain releases later then 2.1.0b. No need to
    alter your pykechain code. The implementation of `Part.update()` method is augmented to use this faster method of
    uploading changes to property values. For connections to legacy KE-chain 2 instances, use the switch `bulk=False`.
@@ -15,6 +13,15 @@ pykechain changelog
    You can use the new `Part.add_with_properties()` method and it will connect to the new KE-chain API endpoint of
    'new_instance_with_properties'. Properties are provided by name and value in a dict. For examples see the docs.
  * Reference properties can now be set with a Part directly. Setting a reference property to None will clear the value.
+ * Added the ability to create a proxy model with `Part.add_proxy_to()` and `Client.create_proxy_model()`. For exmaples
+   see the documentation.
+ * Added enumerations for `Category` and `Multiplicity` in `pykechain.enums`. You can use these constants to ensure
+   that these values are correct, aligned and thusfor accepted by KE-chain. Examples are included in the documentation.
+ * Attachment properties have now a value set if there is a file attached in KE-chain. Otherwise the value is None.
+   Now you are able to check if there is a file attachment set before you download or upload. See the docs for examples.
+ * Added type annotations throughout the code and added mypy to the continuous integration pipeline to ensure high
+   quality of the code provided.
+ * Improved the documentation
 
 1.4.0 (17FEB17)
 ---------------
