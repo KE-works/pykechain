@@ -29,7 +29,9 @@ class TestBetamax(TestCase):
 
         self.recorder = Betamax(session=self.client.session)
         # TODO: turn off recording for travis CI
-        self.recorder.use_cassette(self.cassette_name, record=TEST_RECORD)
+        self.recorder.use_cassette(self.cassette_name,
+                                   match_requests_on=['method', 'path', 'query', 'body'],
+                                   record=TEST_RECORD)
         self.recorder.start()
 
         if self.find_project:
