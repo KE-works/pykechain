@@ -1,8 +1,10 @@
+from unittest import TestCase
+
 from pykechain import Client
 from pykechain.models.base import Base
 
 
-class TestBase(object):
+class TestBase(TestCase):
 
     json = {
         'id': '123',

@@ -1,6 +1,7 @@
+from unittest import TestCase
 
 
-class TestAbout(object):
+class TestAbout(TestCase):
 
     def test_import(self):
         from pykechain import __about__ as about

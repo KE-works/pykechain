@@ -12,7 +12,6 @@ API_PATH = {
     'scopes': 'api/scopes.json',
     'activities': 'api/activities.json',
     'activity': 'api/activities/{activity_id}.json',
-    'association': 'api/associations/{association_id}.json',
     'parts': 'api/parts.json',
     'part': 'api/parts/{part_id}.json',
     'properties': 'api/properties.json',
@@ -147,6 +146,11 @@ class Client(object):
 
         if self.last_response.status_code == requests.codes.forbidden:
             raise ForbiddenError(self.last_response.json()['results'][0]['detail'])
+
+        # TODO: format in a nice way, also 201 is ok, and maybe only show in debug mode?
+        if self.last_response.status_code != requests.codes.ok:
+            print(self.last_response.status_code)
+            print(self.last_response.text)
 
         return self.last_response
 
