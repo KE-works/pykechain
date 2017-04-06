@@ -1,9 +1,9 @@
-from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
-
 import requests
 from envparse import env
 from requests.compat import urljoin  # type: ignore
+from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
 
+from pykechain.enums import Category
 from .__about__ import version
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError
 from .models import Scope, Activity, Part, PartSet, Property
@@ -51,7 +51,7 @@ class Client(object):
         """
         self.session = requests.Session()
         self.api_root = url
-        self.headers = {'X-Requested-With':'XMLHttpRequest', 'PyKechain-Version': version}  # type: Dict[str, str]
+        self.headers = {'X-Requested-With': 'XMLHttpRequest', 'PyKechain-Version': version}  # type: Dict[str, str]
         self.auth = None  # type: Optional[Tuple[str, str]]
         self.last_request = None  # type: Optional[requests.PreparedRequest]
         self.last_response = None  # type: Optional[requests.Response]
@@ -204,7 +204,7 @@ class Client(object):
         return _scopes[0]
 
     def activities(self, name=None, scope=None):
-      # type: (Optional[str], Optional[str]) -> List[Activity]
+        # type: (Optional[str], Optional[str]) -> List[Activity]
         """Search on activities with optional name filter.
 
         :param name: filter the activities by name
@@ -242,15 +242,15 @@ class Client(object):
         return _activities[0]
 
     def parts(self,
-              name=None,            # type: Optional[str]
-              pk=None,              # type: Optional[str]
-              model=None,           # type: Optional[Part]
-              category='INSTANCE',  # type: Optional[str]
-              bucket=None,          # type: Optional[str]
-              parent=None,          # type: Optional[str]
-              activity=None,        # type: Optional[str]
-              limit=None,           # type: Optional[int]
-              batch=100,            # type: int
+              name=None,  # type: Optional[str]
+              pk=None,  # type: Optional[str]
+              model=None,  # type: Optional[Part]
+              category=Category.INSTANCE,  # type: Optional[str]
+              bucket=None,  # type: Optional[str]
+              parent=None,  # type: Optional[str]
+              activity=None,  # type: Optional[str]
+              limit=None,  # type: Optional[int]
+              batch=100,  # type: int
               **kwargs):
         # type: (...) -> PartSet
         """Retrieve multiple KE-chain parts.
@@ -364,7 +364,7 @@ class Client(object):
 
         return _parts[0]
 
-    def properties(self, name=None, pk=None, category='INSTANCE'):
+    def properties(self, name=None, pk=None, category=Category.INSTANCE):
         # type: (Optional[str], Optional[str], Optional[str]) -> List[Property]
         """Retrieve properties.
 
@@ -415,8 +415,8 @@ class Client(object):
                           params={"select_action": action},
                           data=data)
 
-        if r.status_code != 201:
-            raise APIError("Could not create part")
+        if r.status_code != requests.codes.created:
+            raise APIError("Could not create part, {}: {}".format(str(r), r.content))
 
         return Part(r.json()['results'][0], client=self)
 
@@ -428,8 +428,8 @@ class Client(object):
         :param name: new part name
         :return: Part (category = instance)
         """
-        assert parent.category == 'INSTANCE'
-        assert model.category == 'MODEL'
+        assert parent.category == Category.INSTANCE
+        assert model.category == Category.MODEL
 
         if not name:
             name = model.name
@@ -450,7 +450,7 @@ class Client(object):
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N
         :return: Part (category = model)
         """
-        assert parent.category == 'MODEL'
+        assert parent.category == Category.MODEL
 
         data = {
             "name": name,
@@ -459,6 +459,29 @@ class Client(object):
         }
 
         return self._create_part("create_child_model", data)
+
+    def create_proxy_model(self, model, parent, name, multiplicity='ZERO_MANY'):
+        """Add this model as a proxy to another parent model.
+
+        This will add a model as a proxy model to another parent model. It ensure that it will copy the
+        whole subassembly to the 'parent' model.
+
+        :param name: Name of the new proxy model
+        :param parent: parent of the 
+        :param multiplicity: the multiplicity of the new proxy model (default ONE_MANY) 
+        :return: the new proxy model part
+        """
+        assert model.category == Category.MODEL, "The model should be of category MODEL"
+        assert parent.category == Category.MODEL, "The parent should be of category MODEL"
+
+        data = {
+            "name": name,
+            "model": model.id,
+            "parent": parent.id,
+            "multiplicity": multiplicity
+        }
+
+        return self._create_part('create_proxy_model', data)
 
     def create_property(self, model, name, property_type='CHAR', default_value=None):
         """Create a new property model under a given model.
@@ -470,7 +493,7 @@ class Client(object):
         :param default_value: default value used for part instances
         :return: Property
         """
-        assert model.category == 'MODEL'
+        assert model.category == Category.MODEL
 
         data = {
             "name": name,
