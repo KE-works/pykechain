@@ -1,6 +1,7 @@
 from requests.packages.urllib3.packages.six import text_type
 
-from pykechain.models import Property, Part
+from pykechain.models.property import Property
+from pykechain.models.part import Part
 
 
 class ReferenceProperty(Property):
