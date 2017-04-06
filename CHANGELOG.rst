@@ -3,8 +3,13 @@ Change Log
 
 pykechain changelog
 
+1.5.1 (6APR17)
+--------------
+ * Patch release to include the python package typing.
+
 1.5.0 (6APR17)
-------------------
+--------------
+
  * Added ability to edit the part name and description functionality. See the `Part.edit()` method.
  * Added the ability to use the bulk_update_properties API endpoint for KE-chain releases later then 2.1.0b. No need to
    alter your pykechain code. The implementation of `Part.update()` method is augmented to use this faster method of
