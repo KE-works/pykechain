@@ -15,7 +15,7 @@ jupyter==1.0.0
 matplotlib==2.0.0
 
 # integration
-tox==2.6.0
+tox==2.7.0
 
 # code style
 flake8==3.3.0
