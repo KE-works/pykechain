@@ -20,7 +20,6 @@ class Part(Base):
 
         self.category = json.get('category')
         self.parent_id = json['parent'].get('id') if 'parent' in json and json.get('parent') else None
-
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
 
     def property(self, name):
@@ -50,7 +49,7 @@ class Part(Base):
 
     def parent(self):
         # type: () -> Any
-        """The parent of this `Part`.
+        """Retrieve the parent of this `Part`.
 
         :return: the parent `Part`s as :class:`pykechain.model.Part`.
         :raises: APIError
@@ -69,7 +68,7 @@ class Part(Base):
 
     def children(self):
         # type: () -> Any
-        """The children of this `Part` as `Partset`.
+        """Retrieve the children of this `Part` as `Partset`.
 
         :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no children
         :raises: APIError
@@ -84,7 +83,7 @@ class Part(Base):
 
     def siblings(self):
         # type: () -> Any
-        """The siblings of this `Part` as `Partset`.
+        """Retrieve the siblings of this `Part` as `Partset`.
 
         Siblings are other Parts sharing the same parent of this `Part`
 
@@ -96,6 +95,28 @@ class Part(Base):
         else:
             from pykechain.models.partset import PartSet
             return PartSet(parts=[])
+
+    def model(self):
+        """
+        Retrieve the model of this `Part` as `Part`.
+
+        For instance, you can get the part model of a part instance. But trying to get the model of a part that
+        has no model, like a part model, will raise a NotFoundError.
+
+        :return: pykechain.models.Part
+        :raises: NotFoundError
+
+        Example
+        -------
+        >>> front_fork = project.part('Front Fork')
+        >>> front_fork_model = front_fork.model()
+
+        """
+        if self.category == Category.INSTANCE:
+            model_id = self._json_data['model'].get('id')
+            return self._client.model(pk=model_id)
+        else:
+            raise NotFoundError("Part {} has no model".format(self.name))
 
     def add(self, model, **kwargs):
         # type: (Part, **Any) -> Part
@@ -163,7 +184,6 @@ class Part(Base):
         
         Examples
         --------
-        
         >>> from pykechain.enums import Multiplicity
         >>> bike_model = project.model('Bike')
         # find the catalog model container, the highest parent to create catalog models under
@@ -276,7 +296,7 @@ class Part(Base):
 
         Example
         -------
-
+        
         >>> bike = client.scope('Bike Project').part('Bike')
         >>> bike.update({'Gears': 11, 'Total Height': 56.3}, bulk=True)
         
@@ -313,7 +333,6 @@ class Part(Base):
 
         Examples
         --------
-        
         >>> bike = client.scope('Bike Project').part('Bike')
         >>> wheel_model = client.scope('Bike Project').model('Wheel') 
         >>> bike.add_with_properties(wheel_model, 'Wooden Wheel', {'Spokes': 11, 'Material': 'Wood'})

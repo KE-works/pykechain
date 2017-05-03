@@ -19,7 +19,7 @@ class Property(Base):
     @property
     def value(self):
         # type: () -> Any
-        """Data value of a property.
+        """Retrieve the data value of a property.
 
         Setting this value will immediately update the property in KE-chain.
         """
