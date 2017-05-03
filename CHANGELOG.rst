@@ -3,10 +3,13 @@ Change Log
 
 pykechain changelog
 
-1.6.0 (UNRELEASED)
+1.6.0 (3MAY17)
 ------------------
  * Added a `Part.model()` method to retrieve the model from an instance.
+ * Added `Getting Started`_ documentation page for pykechain using jupyter notebooks
  * Updated documentation according to PEP257
+
+.. _Getting Started: http://pykechain.readthedocs.io/en/latest/notebooks/00_getting_started.html
 
 1.5.1 (6APR17)
 --------------
