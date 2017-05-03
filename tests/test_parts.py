@@ -209,7 +209,7 @@ class TestParts(TestBetamax):
         front_fork = self.project.part('Front Fork')
         front_fork_model = self.project.model('Front Fork')
 
-        front_fork_retrieved_model = front_fork.get_model()
+        front_fork_retrieved_model = front_fork.model()
 
         assert front_fork_model.id == front_fork_retrieved_model.id
 
