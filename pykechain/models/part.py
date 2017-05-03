@@ -11,7 +11,15 @@ from pykechain.utils import find
 
 
 class Part(Base):
-    """A virtual object representing a KE-chain part."""
+    """A virtual object representing a KE-chain part.
+
+    Attributes
+    ----------
+    :cvar category: The category of the part, either 'MODEL' or 'INSTANCE' (use `pykechain.enums.Category`)
+    :cvar parent_id: The UUID of the parent of this part
+    :cvar properties: The list of `pykechain.models.Property` objects belonging to this part.
+
+    """
 
     def __init__(self, json, **kwargs):
         # type: (dict, **Any) -> None
@@ -36,6 +44,10 @@ class Part(Base):
         -------
 
         >>> part = project.part('Bike')
+        >>> part.properties
+        [<pyke Property ...>, ...]
+        # this returns a list of all properties of this part
+        
         >>> gears = part.property('Gears')
         >>> gears.value
         6

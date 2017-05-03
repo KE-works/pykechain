@@ -12,9 +12,17 @@ class Property(Base):
         """Construct a Property from a json object."""
         super(Property, self).__init__(json, **kwargs)
 
-        self.output = json.get('output')
-
+        self._output = json.get('output')
         self._value = json.get('value')
+
+    @property
+    def output(self):
+        # type: () -> bool
+        """Return True if the property is configured as output in an activity, otherwise False."""
+        import warnings
+        warnings.warn("-D- The `Property.output` property will be deprecated in pykechain release 2.0.0")
+        return self._output
+
 
     @property
     def value(self):
