@@ -18,28 +18,34 @@ class ReferenceProperty(Property):
 
         Example
         -------
-        get the wheel reference property
+        Get the wheel reference property
+        
         >>> part = project.part('Bike')
         >>> material_ref_property = part.property('Material Selection')
         >>> type(material_ref_property) == ReferenceProperty
         True
 
         The value either returns a Part or is None if not set (yet)
+        
         >>> type(material_ref_property.value) in (Part, None)
         True
 
         Get the selection of material instances containing the word material (icontains is for case-insensitive)
+        
         >>> material_choices = project.parts(icontains='material')
 
         Choose random material option
+        
         >>> from random import choice
         >>> chosen_material = choice(material_choices)
 
         Set chosen material        
         1: provide the part
+        
         >>> material_ref_property.value = chosen_material
 
         2: provide the id
+        
         >>> material_ref_property.value = chosen_material.id
 
         """
