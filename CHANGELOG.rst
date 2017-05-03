@@ -5,6 +5,7 @@ pykechain changelog
 
 1.6.0 (UNRELEASED)
 ------------------
+ * Added a `Part.model()` method to retrieve the model from an instance.
  * Updated documentation according to PEP257
 
 1.5.1 (6APR17)
