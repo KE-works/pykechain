@@ -50,7 +50,7 @@ class Part(Base):
 
     def parent(self):
         # type: () -> Any
-        """The parent of this `Part`.
+        """Retrieve the parent of this `Part`.
 
         :return: the parent `Part`s as :class:`pykechain.model.Part`.
         :raises: APIError
@@ -69,7 +69,7 @@ class Part(Base):
 
     def children(self):
         # type: () -> Any
-        """The children of this `Part` as `Partset`.
+        """Retrieve the children of this `Part` as `Partset`.
 
         :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no children
         :raises: APIError
@@ -84,7 +84,7 @@ class Part(Base):
 
     def siblings(self):
         # type: () -> Any
-        """The siblings of this `Part` as `Partset`.
+        """Retrieve the siblings of this `Part` as `Partset`.
 
         Siblings are other Parts sharing the same parent of this `Part`
 
@@ -163,7 +163,6 @@ class Part(Base):
         
         Examples
         --------
-        
         >>> from pykechain.enums import Multiplicity
         >>> bike_model = project.model('Bike')
         # find the catalog model container, the highest parent to create catalog models under
@@ -276,7 +275,7 @@ class Part(Base):
 
         Example
         -------
-
+        
         >>> bike = client.scope('Bike Project').part('Bike')
         >>> bike.update({'Gears': 11, 'Total Height': 56.3}, bulk=True)
         
@@ -313,7 +312,6 @@ class Part(Base):
 
         Examples
         --------
-        
         >>> bike = client.scope('Bike Project').part('Bike')
         >>> wheel_model = client.scope('Bike Project').model('Wheel') 
         >>> bike.add_with_properties(wheel_model, 'Wooden Wheel', {'Spokes': 11, 'Material': 'Wood'})
