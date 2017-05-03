@@ -1,0 +1,509 @@
+{
+  "http_interactions": [
+    {
+      "response": {
+        "headers": {
+          "Vary": "Accept-Encoding",
+          "Content-Encoding": "gzip",
+          "Transfer-Encoding": "chunked",
+          "Server": "nginx/1.10.2",
+          "Allow": "GET, POST, OPTIONS",
+          "Strict-Transport-Security": "max-age=518400; includeSubDomains",
+          "Connection": "keep-alive",
+          "Content-Type": "application/json",
+          "Date": "Wed, 05 Apr 2017 19:36:05 GMT",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "X-XSS-Protection": "1; mode=block"
+        },
+        "url": "<API_URL>/api/scopes.json?name=Bike+Project+%28pykechain+testing%29&status=ACTIVE",
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "body": {
+          "base64_string": "H4sIAAAAAAAAA51T24rbMBD9laCnFqJElmzLytO22z4UCi102YeWJegyTpTYcrDkXgj5945zKU1pd5diG6zROWfmSDN70kMcmhTJ4sueDH1DFmSd0i4u5vMtWK53frYFatfah5nt2jkG5tF2O4jzspbGqppRziuguROaKmcZBVtoWTgpIHOzTewCmRLvUPg5BMQG3QKiX/stTD723QZsmrzY/cByxiomCWLyYfUSkQm+J0TiX0w6DWiCvLq9e3f/dtzrdYg++S6cvJ1Vb99/+DRur/1q3eCXACtL/QC/aRwxb8jhYUp0jH4VAJlhaJopaaE10F8pju7i8rRxkRrt8mNc2+S/wiUOrfbjEZsbMwsNMocI/Vln9NXqoFcoc5I8L47cw/TJhOUjCTedXUM7QwYEF2/wSr91/TaOV3pdxTXw/woRjxSi/+F8XP6RrdZNfE46+Ui660S/muhvvh6OHdCnpdNpBHOWScoyyss7LhaM4fsZeW6AJxBmsFvAvtwTH1AxWFj2XTc2al3wTAgBVGfgaA5lQU1WllQpVatMi8rW2WVYcsaYKLikGU4hzWWpacUlDouRheRQKgCG2LZz0Fz0peJaWAMUmSUOmMpplVc1Ndaa2gjOaivIYUp2fWchjq3OnIZCCUUrISzNK6mpUWVOWeFyK0DVYBU5Elb9kcFmpSoZ5/Ly4GWD80mbBi4HefgJnCZzz1YEAAA=",
+          "string": "",
+          "encoding": null
+        }
+      },
+      "recorded_at": "2017-04-05T19:36:16",
+      "request": {
+        "method": "GET",
+        "headers": {
+          "User-Agent": "python-requests/2.13.0",
+          "Accept": "*/*",
+          "PyKechain-Version": "1.5.0rc2",
+          "Accept-Encoding": "gzip, deflate",
+          "X-Requested-With": "XMLHttpRequest",
+          "Connection": "keep-alive",
+          "Authorization": "Token <AUTH_TOKEN>"
+        },
+        "uri": "<API_URL>/api/scopes.json?name=Bike+Project+%28pykechain+testing%29&status=ACTIVE",
+        "body": {
+          "string": "",
+          "encoding": "utf-8"
+        }
+      }
+    },
+    {
+      "response": {
+        "headers": {
+          "Vary": "Accept-Encoding",
+          "Content-Encoding": "gzip",
+          "Transfer-Encoding": "chunked",
+          "Server": "nginx/1.10.2",
+          "Allow": "GET, POST, OPTIONS",
+          "Strict-Transport-Security": "max-age=518400; includeSubDomains",
+          "Connection": "keep-alive",
+          "Content-Type": "application/json",
+          "Date": "Wed, 05 Apr 2017 19:36:05 GMT",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "X-XSS-Protection": "1; mode=block"
+        },
+        "url": "<API_URL>/api/parts.json?name=Catalog+container&category=MODEL&limit=100&bucket=40003527-1c2a-476a-8270-eb7572e69ee0",
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "body": {
+          "base64_string": "H4sIAAAAAAAAA42RTW/CMAyG/8qUM6WhLaztDTG0CxvTtNs0oTRxISM0UeJMIMR/n8vXrjslr+288WMfmbSxQ1aPBqyDPV26aMyAOQ8/2sZw0x5CNEjy88i0YjUrQBRjzqsk5+NJUjRVlZQjDoniMisrXik+mbABi95Q8QbRhTpNtyAz4fRwC4ncCN0Npd2lFEid8BjS/3gOv4PtyLgTOyDnmUBh7PpB2g7JEDylFATptUNNhTWjgNxoo1Y7q8Dcgc7qj9Y68KihB/yiBwJhbf2Bnr8sn+aL3sOIEHSrKXXxnU0/povl8/k/AygaQ/20wgQYMFD6GkAfSduILuJNBTokRg8rPLge4o3oyYeGAP0qjje4d2v7+Hnej1UmctlAwvN+NqoqkrIo26SRsmmbPOOtzNmJuGhN2hktNfbtL1/nffP36VxbIOD94UJ/+jr9Ao10m/UFAgAA",
+          "string": "",
+          "encoding": null
+        }
+      },
+      "recorded_at": "2017-04-05T19:36:16",
+      "request": {
+        "method": "GET",
+        "headers": {
+          "User-Agent": "python-requests/2.13.0",
+          "Accept": "*/*",
+          "PyKechain-Version": "1.5.0rc2",
+          "Accept-Encoding": "gzip, deflate",
+          "X-Requested-With": "XMLHttpRequest",
+          "Connection": "keep-alive",
+          "Authorization": "Token <AUTH_TOKEN>"
+        },
+        "uri": "<API_URL>/api/parts.json?name=Catalog+container&category=MODEL&limit=100&bucket=40003527-1c2a-476a-8270-eb7572e69ee0",
+        "body": {
+          "string": "",
+          "encoding": "utf-8"
+        }
+      }
+    },
+    {
+      "response": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Vary": "Accept, Cookie",
+          "Date": "Wed, 05 Apr 2017 19:36:05 GMT",
+          "Transfer-Encoding": "chunked",
+          "Server": "nginx/1.10.2",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Allow": "GET, POST, OPTIONS",
+          "Strict-Transport-Security": "max-age=518400; includeSubDomains",
+          "Connection": "keep-alive",
+          "X-XSS-Protection": "1; mode=block"
+        },
+        "url": "<API_URL>/api/parts.json?select_action=create_child_model",
+        "status": {
+          "code": 201,
+          "message": "Created"
+        },
+        "body": {
+          "string": "{\"results\":[{\"id\":\"40a8a40e-06be-4151-a9c0-ea41a0db0fe9\",\"name\":\"Bearing\",\"description\":\"\",\"child_models\":null,\"properties\":[],\"category\":\"MODEL\",\"model\":null,\"classification\":\"CATALOG\",\"deletable\":true,\"editable\":true,\"created_at\":\"2017-04-05T19:36:05.533159Z\",\"updated_at\":\"2017-04-05T19:36:05.533171Z\",\"output\":true,\"structure_type\":\"Part\",\"parent\":{\"name\":\"Catalog container\",\"id\":\"4ea45009-3056-4b99-810e-d0c28909d066\"},\"multiplicity\":\"ZERO_MANY\",\"container\":false,\"proxy\":null}]}",
+          "encoding": null
+        }
+      },
+      "recorded_at": "2017-04-05T19:36:16",
+      "request": {
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Length": "79",
+          "User-Agent": "python-requests/2.13.0",
+          "Accept": "*/*",
+          "PyKechain-Version": "1.5.0rc2",
+          "Accept-Encoding": "gzip, deflate",
+          "X-Requested-With": "XMLHttpRequest",
+          "Connection": "keep-alive",
+          "Authorization": "Token <AUTH_TOKEN>"
+        },
+        "uri": "<API_URL>/api/parts.json?select_action=create_child_model",
+        "body": {
+          "string": "name=Bearing&parent=4ea45009-3056-4b99-810e-d0c28909d066&multiplicity=ZERO_MANY",
+          "encoding": "utf-8"
+        }
+      }
+    },
+    {
+      "response": {
+        "headers": {
+          "Vary": "Accept-Encoding",
+          "Content-Encoding": "gzip",
+          "Transfer-Encoding": "chunked",
+          "Server": "nginx/1.10.2",
+          "Allow": "GET, POST, OPTIONS",
+          "Strict-Transport-Security": "max-age=518400; includeSubDomains",
+          "Connection": "keep-alive",
+          "Content-Type": "application/json",
+          "Date": "Wed, 05 Apr 2017 19:36:05 GMT",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "X-XSS-Protection": "1; mode=block"
+        },
+        "url": "<API_URL>/api/parts.json?name=Wheel&category=MODEL&limit=100&bucket=40003527-1c2a-476a-8270-eb7572e69ee0",
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "body": {
+          "base64_string": "H4sIAAAAAAAAA71UXW/aMBT9K5WfMRAncRzeWGHaJCgVpZu2aUL+uBkeJokSpypC/Pfd8FVV2wMP7Z6S62ufe85xcnZEF03uySDokBye8SVvnOuQsoInWzT1ua6gbpzH8seOWEMGBIwWoGSfRomOaRTEhoqEJZSblCVxFAKEinRIUzncvPK+rAe93ho0k6XtroHqlbR5VxebHi70Sln5uncNZvd3XeQInMsNIPLXFYDD0kCtK1t6i80BwQW9ss4sN4UBdxFxqF4UFiVU3sJR1AlvZPHpoWqp5/bFDuR3vehXc4oDKRyy23eO1ok0UUoYQbPUGBppxajScUB5JAQkYRTGImkVSA+/imqLJ6az0XhCLpy3S78tW7YfJ7PhYvllOHkcY/dJugbOY2tfNdo3FZz33p/O4sai8WVz0rbvXLQ/lMUa3XhH5VmWhbrPGc3iUNAIBKeKM0GZTiCKk5BpZa5T/vnu7XTP7eZmiiMrK917qmeJ0iYNBO2nKaMRk4qmRvSpElqrNEsYj6+899tPw/mbyV/YCm4WK6vXOdTvev0QmEDqjNMo44jCeUClCGIaSp3ysG8Ygv2/D//nPydpJ+vaZhZbxyy5n89Gj7eLQ8Y48FI5BMUZ0EFX7Kv6DH+s/ibSenmwFNrEvVzAB7sGcrIoDg2PQCka9DEgIq4E/iE8pVoyLiQYHgYhQT83mMa2dFZb37L/Pp7PltPh3bdWQZF7zFbMsEEmXQ0H9563Z9X7P8i3uc7zBQAA",
+          "string": "",
+          "encoding": null
+        }
+      },
+      "recorded_at": "2017-04-05T19:36:17",
+      "request": {
+        "method": "GET",
+        "headers": {
+          "User-Agent": "python-requests/2.13.0",
+          "Accept": "*/*",
+          "PyKechain-Version": "1.5.0rc2",
+          "Accept-Encoding": "gzip, deflate",
+          "X-Requested-With": "XMLHttpRequest",
+          "Connection": "keep-alive",
+          "Authorization": "Token <AUTH_TOKEN>"
+        },
+        "uri": "<API_URL>/api/parts.json?name=Wheel&category=MODEL&limit=100&bucket=40003527-1c2a-476a-8270-eb7572e69ee0",
+        "body": {
+          "string": "",
+          "encoding": "utf-8"
+        }
+      }
+    },
+    {
+      "response": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Vary": "Accept, Cookie",
+          "Date": "Wed, 05 Apr 2017 19:36:05 GMT",
+          "Transfer-Encoding": "chunked",
+          "Server": "nginx/1.10.2",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "Allow": "GET, POST, OPTIONS",
+          "Strict-Transport-Security": "max-age=518400; includeSubDomains",
+          "Connection": "keep-alive",
+          "X-XSS-Protection": "1; mode=block"
+        },
+        "url": "<API_URL>/api/parts.json?select_action=create_proxy_model",
+        "status": {
+          "code": 201,
+          "message": "Created"
+        },
+        "body": {
+          "string": "{\"results\":[{\"id\":\"bce7aeeb-a384-4e59-a53b-4a76aee63779\",\"name\":\"Bearing\",\"description\":\"\",\"child_models\":null,\"properties\":[],\"category\":\"MODEL\",\"model\":null,\"classification\":\"PRODUCT\",\"deletable\":false,\"editable\":false,\"created_at\":\"2017-04-05T19:36:05.789354Z\",\"updated_at\":\"2017-04-05T19:36:05.789366Z\",\"output\":true,\"structure_type\":\"Part\",\"parent\":{\"name\":\"Wheel\",\"id\":\"edc8eba0-47c5-415d-8727-6d927543ee3b\"},\"multiplicity\":\"ZERO_ONE\",\"container\":false,\"proxy\":{\"name\":\"Bearing\",\"id\":\"40a8a40e-06be-4151-a9c0-ea41a0db0fe9\"}}]}",
+          "encoding": null
+        }
+      },
+      "recorded_at": "2017-04-05T19:36:17",
+      "request": {
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Length": "121",
+          "User-Agent": "python-requests/2.13.0",
+          "Accept": "*/*",
+          "PyKechain-Version": "1.5.0rc2",
+          "Accept-Encoding": "gzip, deflate",
+          "X-Requested-With": "XMLHttpRequest",
+          "Connection": "keep-alive",
+          "Authorization": "Token <AUTH_TOKEN>"
+        },
+        "uri": "<API_URL>/api/parts.json?select_action=create_proxy_model",
+        "body": {
+          "string": "name=Bearing&model=40a8a40e-06be-4151-a9c0-ea41a0db0fe9&multiplicity=ZERO_ONE&parent=edc8eba0-47c5-415d-8727-6d927543ee3b",
+          "encoding": "utf-8"
+        }
+      }
+    },
+    {
+      "response": {
+        "headers": {
+          "Vary": "Accept-Encoding",
+          "Content-Encoding": "gzip",
+          "Transfer-Encoding": "chunked",
+          "Server": "nginx/1.10.2",
+          "Allow": "GET, POST, OPTIONS",
+          "Strict-Transport-Security": "max-age=518400; includeSubDomains",
+          "Connection": "keep-alive",
+          "Content-Type": "application/json",
+          "Date": "Wed, 05 Apr 2017 19:36:05 GMT",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "X-XSS-Protection": "1; mode=block"
+        },
+        "url": "<API_URL>/api/parts.json?category=MODEL&id=edc8eba0-47c5-415d-8727-6d927543ee3b&limit=100",
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "body": {
+          "base64_string": "H4sIAAAAAAAAA71UXW/aMBT9K5WfMRAncRzeWGHaJCgVpZu2aUL+uBkeJokSpypC/Pfd8FVV2wMP7Z6S62ufe85xcnZEF03uySDokBye8SVvnOuQsoInWzT1ua6gbpzH8seOWEMGBIwWoGSfRomOaRTEhoqEJZSblCVxFAKEinRIUzncvPK+rAe93ho0k6XtroHqlbR5VxebHi70Sln5uncNZvd3XeQInMsNIPLXFYDD0kCtK1t6i80BwQW9ss4sN4UBdxFxqF4UFiVU3sJR1AlvZPHpoWqp5/bFDuR3vehXc4oDKRyy23eO1ok0UUoYQbPUGBppxajScUB5JAQkYRTGImkVSA+/imqLJ6az0XhCLpy3S78tW7YfJ7PhYvllOHkcY/dJugbOY2tfNdo3FZz33p/O4sai8WVz0rbvXLQ/lMUa3XhH5VmWhbrPGc3iUNAIBKeKM0GZTiCKk5BpZa5T/vnu7XTP7eZmiiMrK917qmeJ0iYNBO2nKaMRk4qmRvSpElqrNEsYj6+899tPw/mbyV/YCm4WK6vXOdTvev0QmEDqjNMo44jCeUClCGIaSp3ysG8Ygv2/D//nPydpJ+vaZhZbxyy5n89Gj7eLQ8Y48FI5BMUZ0EFX7Kv6DH+s/ibSenmwFNrEvVzAB7sGcrIoDg2PQCka9DEgIq4E/iE8pVoyLiQYHgYhQT83mMa2dFZb37L/Pp7PltPh3bdWQZF7zFbMsEEmXQ0H9563Z9X7P8i3uc7zBQAA",
+          "string": "",
+          "encoding": null
+        }
+      },
+      "recorded_at": "2017-04-05T19:36:17",
+      "request": {
+        "method": "GET",
+        "headers": {
+          "User-Agent": "python-requests/2.13.0",
+          "Accept": "*/*",
+          "PyKechain-Version": "1.5.0rc2",
+          "Accept-Encoding": "gzip, deflate",
+          "X-Requested-With": "XMLHttpRequest",
+          "Connection": "keep-alive",
+          "Authorization": "Token <AUTH_TOKEN>"
+        },
+        "uri": "<API_URL>/api/parts.json?category=MODEL&id=edc8eba0-47c5-415d-8727-6d927543ee3b&limit=100",
+        "body": {
+          "string": "",
+          "encoding": "utf-8"
+        }
+      }
+    },
+    {
+      "response": {
+        "headers": {
+          "Vary": "Accept-Encoding",
+          "Content-Encoding": "gzip",
+          "Transfer-Encoding": "chunked",
+          "Server": "nginx/1.10.2",
+          "Allow": "GET, POST, OPTIONS",
+          "Strict-Transport-Security": "max-age=518400; includeSubDomains",
+          "Connection": "keep-alive",
+          "Content-Type": "application/json",
+          "Date": "Wed, 05 Apr 2017 19:36:06 GMT",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "X-XSS-Protection": "1; mode=block"
+        },
+        "url": "<API_URL>/api/parts.json?name=Bearing&category=MODEL&parent=edc8eba0-47c5-415d-8727-6d927543ee3b&limit=100&bucket=40003527-1c2a-476a-8270-eb7572e69ee0",
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "body": {
+          "base64_string": "H4sIAAAAAAAAA42RTU8CMRCG/0vPW3ZhuyzLUeWmQojGREPIbDtItWybfhgJ4b87i0H05qmdd9p35pk5MGlTF9l0mLEOP+nSJWMy5jx+aJvCOfYYkokUvhyYVmzKWok1ILYcyongAquGQ1W2XEA9Jn1c1nXDMpa8ocfbGF2Y5vk7yhE4PXhHLregu4G0u5yE3IGPIf+P5+At2I6MO9ghOV8heN29kqAwSK9d1JSeMhLkVhu13lmF5gfjFF0YrUMfNfZYK/oAEV+t39P3u/nN7Lb3MBCC3mhKffsulvObx+uHUz2DEVpDXWzABMwYKv1XsCm6RCONPlEU6JAxeVzHvet7XxA0GRE79hs4nJmetkhNZt9zRiUn2ELBRS0rLoaV4pN6VPOxakZ1JUrEsmVHIqP1aGe01LEHeJ4t5+v5/axnsF2kWaP/6YvAP/e/Cl6GeCopCpiAKJAX4xb7kkMOjSw4ghhCodpigw07HlfHL0M20ww9AgAA",
+          "string": "",
+          "encoding": null
+        }
+      },
+      "recorded_at": "2017-04-05T19:36:17",
+      "request": {
+        "method": "GET",
+        "headers": {
+          "User-Agent": "python-requests/2.13.0",
+          "Accept": "*/*",
+          "PyKechain-Version": "1.5.0rc2",
+          "Accept-Encoding": "gzip, deflate",
+          "X-Requested-With": "XMLHttpRequest",
+          "Connection": "keep-alive",
+          "Authorization": "Token <AUTH_TOKEN>"
+        },
+        "uri": "<API_URL>/api/parts.json?name=Bearing&category=MODEL&parent=edc8eba0-47c5-415d-8727-6d927543ee3b&limit=100&bucket=40003527-1c2a-476a-8270-eb7572e69ee0",
+        "body": {
+          "string": "",
+          "encoding": "utf-8"
+        }
+      }
+    },
+    {
+      "response": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Vary": "Accept, Cookie",
+          "Date": "Wed, 05 Apr 2017 19:36:06 GMT",
+          "Server": "nginx/1.10.2",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-XSS-Protection": "1; mode=block",
+          "X-Content-Type-Options": "nosniff",
+          "Allow": "GET, PUT, PATCH, DELETE, OPTIONS",
+          "Strict-Transport-Security": "max-age=518400; includeSubDomains",
+          "Content-Length": "0",
+          "Connection": "keep-alive"
+        },
+        "url": "<API_URL>/api/parts/bce7aeeb-a384-4e59-a53b-4a76aee63779.json",
+        "status": {
+          "code": 204,
+          "message": "No Content"
+        },
+        "body": {
+          "string": "",
+          "encoding": null
+        }
+      },
+      "recorded_at": "2017-04-05T19:36:17",
+      "request": {
+        "method": "DELETE",
+        "headers": {
+          "Content-Length": "0",
+          "User-Agent": "python-requests/2.13.0",
+          "Accept": "*/*",
+          "PyKechain-Version": "1.5.0rc2",
+          "Accept-Encoding": "gzip, deflate",
+          "X-Requested-With": "XMLHttpRequest",
+          "Connection": "keep-alive",
+          "Authorization": "Token <AUTH_TOKEN>"
+        },
+        "uri": "<API_URL>/api/parts/bce7aeeb-a384-4e59-a53b-4a76aee63779.json",
+        "body": {
+          "string": "",
+          "encoding": "utf-8"
+        }
+      }
+    },
+    {
+      "response": {
+        "headers": {
+          "Vary": "Accept-Encoding",
+          "Content-Encoding": "gzip",
+          "Transfer-Encoding": "chunked",
+          "Server": "nginx/1.10.2",
+          "Allow": "GET, POST, OPTIONS",
+          "Strict-Transport-Security": "max-age=518400; includeSubDomains",
+          "Connection": "keep-alive",
+          "Content-Type": "application/json",
+          "Date": "Wed, 05 Apr 2017 19:36:06 GMT",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "X-XSS-Protection": "1; mode=block"
+        },
+        "url": "<API_URL>/api/parts.json?name=Bearing&category=MODEL&limit=100&bucket=40003527-1c2a-476a-8270-eb7572e69ee0",
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "body": {
+          "base64_string": "H4sIAAAAAAAAA42RQU8CMRCF/4rpect2cdmwe0MkXkCM8aKGkG53gErZNu3UQAj/3VkIGG+e2jedee33emTKxhZZlSWshT1t2mhMwpyHb21juGoPIRok+XlkumEVy4UcylwAF0UNPM8GGZelEhxknknR1GIFJUtY9IaaN4guVGm6BdWXTve2wNVG6ran7C6lQuqkx5D+x7P3FWxLxq3cATk/gPS6XVOhgaC8dqjpuGJUUBttmuXONmBuGGf1y2gdeNTQYS1oQCKsrT/Q+Gz+OJl2HkaGoFeaji6+49HbaDp/Ot9nAGVt6BXoIyQMGv1H24gu4lUFWhRGD0s8uO7lL4RMNkQOXf7HK9FYojR2fadsixQReGq6JE4xDIQo+b0YFDyvy5IPMwqrEao/LEXZiKJgJ2Kkj9LOaKWxQ/mYvM6Xs9Hze4dz86xW0gQ4Z7A/XAI5LU4/zJZLnw4CAAA=",
+          "string": "",
+          "encoding": null
+        }
+      },
+      "recorded_at": "2017-04-05T19:36:17",
+      "request": {
+        "method": "GET",
+        "headers": {
+          "User-Agent": "python-requests/2.13.0",
+          "Accept": "*/*",
+          "PyKechain-Version": "1.5.0rc2",
+          "Accept-Encoding": "gzip, deflate",
+          "X-Requested-With": "XMLHttpRequest",
+          "Connection": "keep-alive",
+          "Authorization": "Token <AUTH_TOKEN>"
+        },
+        "uri": "<API_URL>/api/parts.json?name=Bearing&category=MODEL&limit=100&bucket=40003527-1c2a-476a-8270-eb7572e69ee0",
+        "body": {
+          "string": "",
+          "encoding": "utf-8"
+        }
+      }
+    },
+    {
+      "response": {
+        "headers": {
+          "Content-Type": "application/json",
+          "Vary": "Accept, Cookie",
+          "Date": "Wed, 05 Apr 2017 19:36:06 GMT",
+          "Server": "nginx/1.10.2",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-XSS-Protection": "1; mode=block",
+          "X-Content-Type-Options": "nosniff",
+          "Allow": "GET, PUT, PATCH, DELETE, OPTIONS",
+          "Strict-Transport-Security": "max-age=518400; includeSubDomains",
+          "Content-Length": "0",
+          "Connection": "keep-alive"
+        },
+        "url": "<API_URL>/api/parts/40a8a40e-06be-4151-a9c0-ea41a0db0fe9.json",
+        "status": {
+          "code": 204,
+          "message": "No Content"
+        },
+        "body": {
+          "string": "",
+          "encoding": null
+        }
+      },
+      "recorded_at": "2017-04-05T19:36:17",
+      "request": {
+        "method": "DELETE",
+        "headers": {
+          "Content-Length": "0",
+          "User-Agent": "python-requests/2.13.0",
+          "Accept": "*/*",
+          "PyKechain-Version": "1.5.0rc2",
+          "Accept-Encoding": "gzip, deflate",
+          "X-Requested-With": "XMLHttpRequest",
+          "Connection": "keep-alive",
+          "Authorization": "Token <AUTH_TOKEN>"
+        },
+        "uri": "<API_URL>/api/parts/40a8a40e-06be-4151-a9c0-ea41a0db0fe9.json",
+        "body": {
+          "string": "",
+          "encoding": "utf-8"
+        }
+      }
+    },
+    {
+      "response": {
+        "headers": {
+          "Vary": "Accept-Encoding",
+          "Content-Encoding": "gzip",
+          "Transfer-Encoding": "chunked",
+          "Server": "nginx/1.10.2",
+          "Allow": "GET, POST, OPTIONS",
+          "Strict-Transport-Security": "max-age=518400; includeSubDomains",
+          "Connection": "keep-alive",
+          "Content-Type": "application/json",
+          "Date": "Wed, 05 Apr 2017 19:36:06 GMT",
+          "X-Frame-Options": "SAMEORIGIN",
+          "X-Content-Type-Options": "nosniff",
+          "X-XSS-Protection": "1; mode=block"
+        },
+        "url": "<API_URL>/api/parts.json?name=Bearing&category=MODEL&limit=100&bucket=40003527-1c2a-476a-8270-eb7572e69ee0",
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "body": {
+          "base64_string": "H4sIAAAAAAAAA6tWSs4vzStRsjLQUcpLrQAy8kpzcnSUCopSyzLzS4th/KLU4tKcEiA3OrYWAHDt3lM0AAAA",
+          "string": "",
+          "encoding": null
+        }
+      },
+      "recorded_at": "2017-04-05T19:36:17",
+      "request": {
+        "method": "GET",
+        "headers": {
+          "User-Agent": "python-requests/2.13.0",
+          "Accept": "*/*",
+          "PyKechain-Version": "1.5.0rc2",
+          "Accept-Encoding": "gzip, deflate",
+          "X-Requested-With": "XMLHttpRequest",
+          "Connection": "keep-alive",
+          "Authorization": "Token <AUTH_TOKEN>"
+        },
+        "uri": "<API_URL>/api/parts.json?name=Bearing&category=MODEL&limit=100&bucket=40003527-1c2a-476a-8270-eb7572e69ee0",
+        "body": {
+          "string": "",
+          "encoding": "utf-8"
+        }
+      }
+    }
+  ],
+  "recorded_with": "betamax/0.8.0"
+}

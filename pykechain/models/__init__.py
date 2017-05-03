@@ -6,6 +6,8 @@ from .activity import Activity
 from .part import Part
 from .property import Property
 from .property_attachment import AttachmentProperty
+from .property_selectlist import SelectListProperty
+from .property_reference import ReferenceProperty
 from .partset import PartSet
 
 __all__ = (
@@ -13,7 +15,9 @@ __all__ = (
     'Scope',
     'Activity',
     'Part',
+    'PartSet',
     'Property',
     'AttachmentProperty',
-    'PartSet'
+    'SelectListProperty',
+    'ReferenceProperty',
 )
