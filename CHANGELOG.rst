@@ -4,16 +4,15 @@ Change Log
 pykechain changelog
 
 1.6.0 (3MAY17)
-------------------
+--------------
  * Added a `Part.model()` method to retrieve the model from an instance.
+ * (Backwards Incompatibile) The task configuration (association) API is updated to the
+   latest KE-chain release (release 2.1.0b-sprint119 30MAR17). This affects the `activity.configure()` method.
+   This change is not compatible with older KE-chain 2 releases. For older KE-chain 2 releases use a
+   pykechain version < 1.6
  * Added `Getting Started`_ documentation page for pykechain using jupyter notebooks
  * Documentation update for the reference property
  * Updated documentation according to PEP257
-
- * (Backwards Incompatibile) The task configuration (association) API is updated to the
-   latest KE-chain release (release 2.1.0b-sprint119 30MAR17). This affects the `task.configure()` method.
-   This change is not compatible with older KE-chain 2 releases and updating of activities will fail for
-   older KE-chain releases.
 
 .. _Getting Started: http://pykechain.readthedocs.io/en/latest/notebooks/00_getting_started.html
 
