@@ -44,13 +44,13 @@ We create a new directory for this project, eg. 'pyke-bike'. Create that in your
 pykechain and notebooks we will create a virtual environment in this directory and we will do that from the
 windows commandline.
 
-.. image:: _static/new_folder.png
-    :width: 325
+.. image:: /_static/new_folder.png
+    :width: 660
 
 Hold 'SHIFT' and open the right-mouse-menu on the newly created folder, select 'open Command Window here...'
 
-.. image:: _static/open_command_window.png
-    :width: 325
+.. image:: /_static/open_command_window.png
+    :width: 200
 
 Ensure that you are inside the right folder we will type the following in the command window::
 
@@ -80,8 +80,8 @@ Inside the open command terminal from step 1 type the following::
     You may want to include handy additional packages that we use a lot to perform datacrunching such as: ``numpy``,
     ``scipy``, ``matplotlib``, ``mpld3``, and ``pandas``.
 
-.. image:: _static/command_window_with_jupyter_notebook_response.png
-    :width: 325
+.. image:: /_static/command_window_with_jupyter_notebook_response.png
+    :width: 660
 
 Jupyter notebook will automatically open your browser to the link provided in the command window output.
 If not you need to open your browser to the link provided in the command window.
