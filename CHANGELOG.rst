@@ -7,6 +7,7 @@ pykechain changelog
 ------------------
  * Added a `Part.model()` method to retrieve the model from an instance.
  * Added `Getting Started`_ documentation page for pykechain using jupyter notebooks
+ * Documentation update for the reference property
  * Updated documentation according to PEP257
 
  * (Backwards Incompatibile) The task configuration (association) API is updated to the
