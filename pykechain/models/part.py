@@ -3,6 +3,7 @@ import json
 import requests
 from typing import Any, AnyStr  # flake8: noqa
 
+from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import NotFoundError, APIError
 from pykechain.models.base import Base
 from pykechain.models.property import Property
@@ -49,7 +50,7 @@ class Part(Base):
 
     def parent(self):
         # type: () -> Any
-        """The parent of this `Part`.
+        """Retrieve the parent of this `Part`.
 
         :return: the parent `Part`s as :class:`pykechain.model.Part`.
         :raises: APIError
@@ -68,7 +69,7 @@ class Part(Base):
 
     def children(self):
         # type: () -> Any
-        """The children of this `Part` as `Partset`.
+        """Retrieve the children of this `Part` as `Partset`.
 
         :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no children
         :raises: APIError
@@ -83,7 +84,7 @@ class Part(Base):
 
     def siblings(self):
         # type: () -> Any
-        """The siblings of this `Part` as `Partset`.
+        """Retrieve the siblings of this `Part` as `Partset`.
 
         Siblings are other Parts sharing the same parent of this `Part`
 
@@ -99,12 +100,21 @@ class Part(Base):
     def add(self, model, **kwargs):
         # type: (Part, **Any) -> Part
         """Add a new child to this part.
+        
+        This can only act on instances
 
         :param model: model to use for the child
         :return: :class:`pykechain.models.Part`
         :raises: APIError
+        
+        Example
+        -------
+        
+        >>> bike = project.part('Bike')
+        >>> wheel_model = project.model('Wheel')
+        >>> bike.add(wheel_model)
         """
-        assert self.category == 'INSTANCE'
+        assert self.category == Category.INSTANCE
 
         return self._client.create_part(self, model, **kwargs)
 
@@ -115,8 +125,15 @@ class Part(Base):
         :param parent: part to add the new instance to
         :return: :class:`pykechain.models.Part`
         :raises: APIError
+        
+        Example
+        -------
+        
+        >>> wheel_model = project.model('wheel')
+        >>> bike = project.part('Bike')
+        >>> wheel_model.add_to(bike)
         """
-        assert self.category == 'MODEL'
+        assert self.category == Category.MODEL
 
         return self._client.create_part(parent, self, **kwargs)
 
@@ -128,9 +145,34 @@ class Part(Base):
 
         :return: Part
         """
-        assert self.category == 'MODEL'
+        assert self.category == Category.MODEL
 
         return self._client.create_model(self, *args, **kwargs)
+
+    def add_proxy_to(self, parent, name, multiplicity=Multiplicity.ONE_MANY):
+        # type: (Any, AnyStr, Any) -> Part
+        """Add this model as a proxy to another parent model.
+        
+        This will add the current model as a proxy model to another parent model. It ensure that it will copy the
+        whole subassembly to the 'parent' model.
+        
+        :param name: Name of the new proxy model
+        :param parent: parent of the 
+        :param multiplicity: the multiplicity of the new proxy model (default ONE_MANY) 
+        :return: Part (self)
+        
+        Examples
+        --------
+        >>> from pykechain.enums import Multiplicity
+        >>> bike_model = project.model('Bike')
+        # find the catalog model container, the highest parent to create catalog models under
+        >>> catalog_model_container = project.model('Catalog container')
+        >>> new_wheel_model = project.create_model(catalog_model_container, 'Wheel Catalog', 
+        ...                                        multiplicity=Multiplicity.ZERO_MANY)
+        >>> new_wheel_model.add_proxy_to(bike_model, "Wheel", multiplicity=Multiplicity.ONE_MANY)
+        
+        """
+        return self._client.create_proxy_model(self, parent, name, multiplicity)
 
     def add_property(self, *args, **kwargs):
         # type: (*Any, **Any) -> Property
@@ -140,7 +182,7 @@ class Part(Base):
 
         :return: Property
         """
-        assert self.category == 'MODEL'
+        assert self.category == Category.MODEL
 
         return self._client.create_property(self, *args, **kwargs)
 
@@ -171,12 +213,14 @@ class Part(Base):
         Example
         -------
 
-        For changing a part
+        For changing a part:
+              
         >>> front_fork = project.part('Front Fork')
         >>> front_fork.edit(name='Front Fork - updated')
         >>> front_fork.edit(name='Front Fork cruizer', description='With my ragtop down so my hair can blow' )
 
-        for changing a model
+        for changing a model:
+                
         >>> front_fork = project.model('Front Fork')
         >>> front_fork.edit(name='Front Fork basemodel', description='Some description here')
 
@@ -231,7 +275,7 @@ class Part(Base):
 
         Example
         -------
-
+        
         >>> bike = client.scope('Bike Project').part('Bike')
         >>> bike.update({'Gears': 11, 'Total Height': 56.3}, bulk=True)
         
@@ -268,14 +312,13 @@ class Part(Base):
 
         Examples
         --------
-        
         >>> bike = client.scope('Bike Project').part('Bike')
         >>> wheel_model = client.scope('Bike Project').model('Wheel') 
         >>> bike.add_with_properties(wheel_model, 'Wooden Wheel', {'Spokes': 11, 'Material': 'Wood'})
         
         """
         # TODO: add test coverage for this method
-        assert self.category == 'INSTANCE'
+        assert self.category == Category.INSTANCE
         name = name or model.name
         action = 'new_instance_with_properties'
 

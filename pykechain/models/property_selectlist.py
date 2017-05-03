@@ -1,5 +1,5 @@
 from pykechain.exceptions import APIError
-from pykechain.models import Property
+from pykechain.models.property import Property
 
 
 class SelectListProperty(Property):
@@ -51,7 +51,7 @@ class SelectListProperty(Property):
             self._options = options_list
 
     def _put_options(self, options_list):
-        """Saving the options to the database.
+        """Save the options to the database.
 
         Will check for the correct form of the data.
 

@@ -1,3 +1,4 @@
+from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
 from pykechain.models import Part, PartSet
 from tests.classes import TestBetamax
@@ -178,6 +179,32 @@ class TestParts(TestBetamax):
 
         front_fork.edit(name='Front Fork')
 
+    def test_new_proxy_model(self):
+        catalog_container = self.project.model('Catalog container')
+        bearing_catalog_model = catalog_container.add_model('Bearing', multiplicity=Multiplicity.ZERO_MANY)
+        wheel_model = self.project.model('Wheel')
+
+        bearing_proxy_model = self.client.create_proxy_model(
+            bearing_catalog_model, wheel_model, 'Bearing', Multiplicity.ZERO_ONE)
+
+        self.assertTrue(bearing_proxy_model.category, Category.MODEL)
+        self.assertTrue(bearing_proxy_model.parent(), wheel_model)
+
+        # teardown
+        all_bearing_proxies = self.project.parts(name='Bearing', category=Category.MODEL, parent=wheel_model.id)
+        self.assertGreaterEqual(len(all_bearing_proxies), 1)
+        for bearing_proxy in all_bearing_proxies:
+            bearing_proxy.delete()
+
+        all_bearing_catalog_models = self.project.parts(name='Bearing', category=Category.MODEL)
+        self.assertGreaterEqual(len(all_bearing_catalog_models), 1)
+        for bearing_catalog_model in all_bearing_catalog_models:
+            bearing_catalog_model.delete()
+
+        all_bearing_models = self.project.parts(name='Bearing', category=Category.MODEL)
+        self.assertEqual(len(all_bearing_models), 0)
+
+
 class TestPartUpdate(TestBetamax):
     def test_part_update_with_dictionary(self):
         # setup
@@ -217,11 +244,12 @@ class TestPartUpdate(TestBetamax):
         for prop_name, prop_value in saved_front_fork_properties.items():
             front_fork.property(prop_name).value = prop_value
 
+
 class TestPartCreateWithProperties(TestBetamax):
     def test_create_part_with_properties_no_bulk(self):
         """Test create a part with the properties when bulk = False for old API compatibility"""
         parent = self.project.part('Bike')  # type: Part
-        wheel_model = self.project.model('Wheel')  #type: Part
+        wheel_model = self.project.model('Wheel')  # type: Part
 
         update_dict = {
             'Diameter': 42.42,
@@ -239,7 +267,7 @@ class TestPartCreateWithProperties(TestBetamax):
     def test_create_part_with_properties_with_bulk(self):
         """Test create a part with the properties when bulk = False for old API compatibility"""
         parent = self.project.part('Bike')  # type: Part
-        wheel_model = self.project.model('Wheel')  #type: Part
+        wheel_model = self.project.model('Wheel')  # type: Part
 
         update_dict = {
             'Diameter': 42.43,
@@ -253,5 +281,3 @@ class TestPartCreateWithProperties(TestBetamax):
         self.assertTrue(new_wheel.property('Diameter'), 42.43)
 
         new_wheel.delete()
-
-
