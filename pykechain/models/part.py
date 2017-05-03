@@ -18,6 +18,7 @@ class Part(Base):
     :cvar category: The category of the part, either 'MODEL' or 'INSTANCE' (use `pykechain.enums.Category`)
     :cvar parent_id: The UUID of the parent of this part
     :cvar properties: The list of `pykechain.models.Property` objects belonging to this part.
+
     """
 
     def __init__(self, json, **kwargs):
