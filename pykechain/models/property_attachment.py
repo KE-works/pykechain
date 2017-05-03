@@ -10,7 +10,7 @@ class AttachmentProperty(Property):
 
     @property
     def value(self):
-        """Data value of this attachment.
+        """Retrieve the data value of this attachment.
 
         Will show the filename of the attachment if there is an attachment available otherwise None
         Use save_as in order to download as a file.
