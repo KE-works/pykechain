@@ -13,8 +13,6 @@ from pykechain.utils import find
 class Part(Base):
     """A virtual object representing a KE-chain part.
 
-    Attributes
-    ----------
     :cvar category: The category of the part, either 'MODEL' or 'INSTANCE' (use `pykechain.enums.Category`)
     :cvar parent_id: The UUID of the parent of this part
     :cvar properties: The list of `pykechain.models.Property` objects belonging to this part.
