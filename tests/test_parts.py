@@ -204,6 +204,15 @@ class TestParts(TestBetamax):
         all_bearing_models = self.project.parts(name='Bearing', category=Category.MODEL)
         self.assertEqual(len(all_bearing_models), 0)
 
+    # new in 1.6
+    def test_retrieve_model(self):
+        front_fork = self.project.part('Front Fork')
+        front_fork_model = self.project.model('Front Fork')
+
+        front_fork_retrieved_model = front_fork.get_model()
+
+        assert front_fork_model.id == front_fork_retrieved_model.id
+
 
 class TestPartUpdate(TestBetamax):
     def test_part_update_with_dictionary(self):

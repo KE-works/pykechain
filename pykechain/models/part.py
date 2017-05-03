@@ -20,7 +20,7 @@ class Part(Base):
 
         self.category = json.get('category')
         self.parent_id = json['parent'].get('id') if 'parent' in json and json.get('parent') else None
-
+        self.model_id = json['model'].get('id') if 'model' in json and json.get('model') else None
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
 
     def property(self, name):
@@ -240,6 +240,28 @@ class Part(Base):
 
         if name:
             self.name = name
+
+    def get_model(self):
+        """
+        Retrieve the model of this `Part` as `Part`.
+
+        For instance, you can get the part model of a part instance. But trying to get the model of a part that
+        has no model, like a part model, will raise a NotFoundError.
+
+        :return: pykechain.models.Part
+        :raises: NotFoundError
+
+        Example
+        -------
+
+        >>> front_fork = project.part('Front Fork')
+        >>> front_fork_model = front_fork.get_model()
+
+        """
+        if self.model_id:
+            return self._client.model(pk=self.model_id)
+        else:
+            raise NotFoundError("Part {} has no model".format(self.name))
 
     def _repr_html_(self):
         # type: () -> str
