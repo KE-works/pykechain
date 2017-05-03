@@ -6,7 +6,7 @@
 
    self
    changelog
-   bike
+   example_bike
    notebooks
    interface
 
