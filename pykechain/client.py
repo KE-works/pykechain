@@ -135,12 +135,12 @@ class Client(object):
 
     def _build_url(self, resource, **kwargs):
         # type: (str, **str) -> str
-        """A helper method to build the correct API url."""
+        """Build the correct API url."""
         return urljoin(self.api_root, API_PATH[resource].format(**kwargs))
 
     def _request(self, method, url, **kwargs):
         # type: (str, str, **Any) -> requests.Response
-        """A helper method to perform the request on the API."""
+        """Perform the request on the API."""
         self.last_request = None
         self.last_response = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
         self.last_request = self.last_response.request
@@ -272,7 +272,6 @@ class Client(object):
 
         Examples
         --------
-
         Return all parts (defaults to instances) with exact name 'Gears'.
         
         >>> client = Client(url='https://default.localhost:9443', verify=False)
