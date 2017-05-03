@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+1.6.0 (UNRELEASED)
+------------------
+ * Updated documentation according to PEP257
+
 1.5.1 (6APR17)
 --------------
  * Patch release to include the python package typing.
