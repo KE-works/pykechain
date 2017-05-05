@@ -65,3 +65,27 @@ class ReferenceProperty(Property):
             raise ValueError("Reference must be a Part, Part id or None. type: {}".format(type(value)))
 
         self._value = self._put_value(part_id)
+
+    def referenced_parts(self):
+        """Retrieve the parts that you can reference for this `ReferenceProperty`.
+
+        :return: the parts that can be referenced as :class:`pykechain.model.PartSet`.
+        :raises: PropertyTypeError
+
+        Example
+        -------
+
+        >>> property = project.part('Bike').property('RefTest')
+        >>> referenced_parts = property.parts()
+
+        """
+        if self._json_data['property_type'] == 'REFERENCE_VALUE':
+            parent_part = self.part
+            model_parent_part = parent_part.model()
+            property_model = model_parent_part.property(self.name)
+            referenced_part_id = property_model._value['id']
+            referenced_part_model = self._client.model(pk=referenced_part_id)
+            possible_parts = self._client.parts(model=referenced_part_model)
+        else:
+            raise PropertyTypeError("Property {} must be a reference type property".format(self.name))
+        return possible_parts
