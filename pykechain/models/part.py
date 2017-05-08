@@ -128,6 +128,28 @@ class Part(Base):
         else:
             raise NotFoundError("Part {} has no model".format(self.name))
 
+    def catalog_model(self):
+        """
+        Retrieve the catalog model of this proxy `Part` as `Part`.
+
+        Allows you to retrieve the catalog model of a proxy. But trying to get the catalog model of a part that
+        has is no proxy, will raise a NotFoundError.
+
+        :return: pykechain.models.Part
+        :raises: NotFoundError
+
+        Example
+        -------
+        >>> proxy_part = project.model('Proxy based on catalog model')
+        >>> catalog_model_of_proxy_part = proxy_part.catalog_model()
+
+        """
+        if self._json_data['proxy']:
+            catalog_model_id = self._json_data['proxy'].get('id')
+            return self._client.model(pk=catalog_model_id)
+        else:
+            raise NotFoundError("Part {} is not a proxy".format(self.name))
+
     def add(self, model, **kwargs):
         # type: (Part, **Any) -> Part
         """Add a new child to this part.
