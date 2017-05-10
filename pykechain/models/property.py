@@ -17,7 +17,7 @@ class Property(Base):
 
     @property
     def output(self):
-        # type: () -> bool
+        # type: () -> Any
         """Return True if the property is configured as output in an activity, otherwise False."""
         import warnings
         warnings.warn("-D- The `Property.output` property will be deprecated in pykechain release 2.0.0")
