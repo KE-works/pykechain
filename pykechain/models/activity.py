@@ -1,6 +1,8 @@
+import requests
+import datetime
 from typing import Any  # flake8: noqa
 
-from pykechain.exceptions import APIError
+from pykechain.exceptions import APIError, NotFoundError
 from pykechain.models.base import Base
 
 
@@ -51,3 +53,50 @@ class Activity(Base):
         See :class:`pykechain.Client.create_activity` for available parameters.
         """
         return self._client.create_activity(self.id, *args, **kwargs)
+
+    def edit(self, name=None, description=None, start_date=None, due_date=None, assignee=None):
+        update_dict = {'id': self.id}
+        if name:
+            if isinstance(name, str):
+                update_dict.update({'name': name})
+                self.name = name
+            else:
+                raise TypeError('Name should be a string')
+
+        if description:
+            if isinstance(description, str):
+                update_dict.update({'description': description})
+                self.description = description
+            else:
+                raise TypeError('Description should be a string')
+
+        if start_date:
+            if isinstance(start_date, datetime.datetime):
+                update_dict.update({'start_date': str(start_date)})
+                self.start_date = str(start_date)
+            else:
+                raise TypeError('Start date should be a datetime.datetime() object')
+
+        if due_date:
+            if isinstance(due_date, datetime.datetime):
+                update_dict.update({'due_date': str(due_date)})
+                self.due_date = str(due_date)
+            else:
+                raise TypeError('Due date should be a datetime.datetime() object')
+
+        if assignee:
+            if isinstance(assignee, str):
+                project = self._client.scope(self._json_data['scope']['name'])
+                members_list = [member['username'] for member in project._json_data['members']]
+                if assignee in members_list:
+                    update_dict.update({'assignee': assignee})
+                    self.assignee = assignee
+                else:
+                    raise NotFoundError('Assignee should be a member of the scope')
+            else:
+                raise TypeError('Assignee should be a string')
+
+        r = self._client._request('PUT', self._client._build_url('activity', activity_id=self.id), json=update_dict)
+
+        if r.status_code != requests.codes.ok:
+            raise APIError("Could not update Activity ({})".format(r))
