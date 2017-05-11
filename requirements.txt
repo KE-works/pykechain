@@ -20,4 +20,4 @@ tox==2.7.0
 # code style
 flake8==3.3.0
 pydocstyle==2.0.0
-mypy==0.501
+mypy==0.510
