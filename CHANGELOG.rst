@@ -11,6 +11,8 @@ pykechain changelog
    A proxied model is a copy of the proxy_model that can have a different name, but follow that exact model definition
    of the proxy_model including its properties and submodel parts. A handy way to create model structures in the
    catalog world and use a multiple of those in the product world. An example is provided in the API documentation.
+ * added the `Activity.edit()` method to be able to update the activity name, description, start_date, due_date
+   and assignee.
  * Updated documentation according to PEP257
  * Updated requirements
 
