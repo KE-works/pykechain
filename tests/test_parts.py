@@ -216,7 +216,7 @@ class TestParts(TestBetamax):
     def test_retrieve_catalog_model_of_proxy(self):
         catalog_model = self.project.model('Model')
         proxy_catalog_model = self.project.model('Proxy based on catalog model')
-        retrieved_catalog_model = proxy_catalog_model.catalog_model()
+        retrieved_catalog_model = proxy_catalog_model.proxy_model()
         assert catalog_model.id == retrieved_catalog_model.id
 
 

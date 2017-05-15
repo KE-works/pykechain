@@ -128,23 +128,26 @@ class Part(Base):
         else:
             raise NotFoundError("Part {} has no model".format(self.name))
 
-    def catalog_model(self):
+    def proxy_model(self):
         """
-        Retrieve the catalog model of this proxy `Part` as `Part`.
+        Retrieve the proxy model of this proxied `Part` as a `Part`.
 
-        Allows you to retrieve the catalog model of a proxy. But trying to get the catalog model of a part that
-        has is no proxy, will raise a NotFoundError.
+        Allows you to retrieve the model of a proxy. But trying to get the catalog model of a part that
+        has is no proxy, will raise a NotFoundError. Only models can have a proxy.
 
         :return: pykechain.models.Part
         :raises: NotFoundError
 
         Example
         -------
+
         >>> proxy_part = project.model('Proxy based on catalog model')
-        >>> catalog_model_of_proxy_part = proxy_part.catalog_model()
+        >>> catalog_model_of_proxy_part = proxy_part.proxy_model()
 
         """
-        if self._json_data['proxy']:
+        assert self.category == Category.MODEL, \
+            "Part {} is not a model, therefore it cannot have a proxy model".format(self)
+        if 'proxy' in self._json_data and self._json_data.get('proxy'):
             catalog_model_id = self._json_data['proxy'].get('id')
             return self._client.model(pk=catalog_model_id)
         else:
@@ -153,16 +156,16 @@ class Part(Base):
     def add(self, model, **kwargs):
         # type: (Part, **Any) -> Part
         """Add a new child to this part.
-        
+
         This can only act on instances
 
         :param model: model to use for the child
         :return: :class:`pykechain.models.Part`
         :raises: APIError
-        
+
         Example
         -------
-        
+
         >>> bike = project.part('Bike')
         >>> wheel_model = project.model('Wheel')
         >>> bike.add(wheel_model)
