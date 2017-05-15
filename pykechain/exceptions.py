@@ -25,6 +25,7 @@ class NotFoundError(APIError):
 
     pass
 
+
 class PropertyTypeError(APIError):
     """Incorrect property type error."""
 
