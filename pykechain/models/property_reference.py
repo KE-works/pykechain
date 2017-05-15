@@ -1,5 +1,6 @@
 from requests.packages.urllib3.packages.six import text_type
 
+from pykechain.enums import PropertyType
 from pykechain.models.property import Property
 from pykechain.models.part import Part
 
@@ -65,3 +66,29 @@ class ReferenceProperty(Property):
             raise ValueError("Reference must be a Part, Part id or None. type: {}".format(type(value)))
 
         self._value = self._put_value(part_id)
+
+    def choices(self):
+        """Retrieve the parts that you can reference for this `ReferenceProperty`.
+
+        :return: the parts that can be referenced as :class:`pykechain.model.PartSet`.
+        :raises: PropertyTypeError
+
+        Example
+        -------
+
+        >>> property = project.part('Bike').property('RefTest')
+        >>> reference_part_choices = property.choices()
+
+        """
+        assert self._json_data['property_type'] == PropertyType.REFERENCE_VALUE, \
+            "Property {} must be a reference type property".format(self.name)
+
+        # TODO: there is maybe another way to retrieve the parts in less calls.
+        # from the reference property (instance) we need to get the value of the reference property in the model
+        # in the reference property of the model the value is set to the ID of the model from which we can choose parts
+        model_parent_part = self.part.model()  # makes single part call
+        property_model = model_parent_part.property(self.name)
+        referenced_model = self._client.model(pk=property_model._value['id'])  # makes single part call
+        possible_choices = self._client.parts(model=referenced_model)  # makes multiple parts call
+
+        return possible_choices

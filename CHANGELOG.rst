@@ -3,6 +3,18 @@ Change Log
 
 pykechain changelog
 
+1.7.0 (UNRELEASED)
+------------------
+ * Added `ReferencyProperty.choices()` convenience method to provide you the list of parts (instances) that are
+   acceptable as a choice for the value of the reference property.
+ * Added `Part.proxy_model()` method that will return the model that is used as the basis for the proxied model.
+   A proxied model is a copy of the proxy_model that can have a different name, but follow that exact model definition
+   of the proxy_model including its properties and submodel parts. A handy way to create model structures in the
+   catalog world and use a multiple of those in the product world. An example is provided in the API documentation.
+ * Updated documentation according to PEP257
+ * Updated requirements
+
+
 1.6.0 (3MAY17)
 --------------
  * Added a `Part.model()` method to retrieve the model from an instance.

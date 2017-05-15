@@ -213,6 +213,12 @@ class TestParts(TestBetamax):
 
         assert front_fork_model.id == front_fork_retrieved_model.id
 
+    def test_retrieve_catalog_model_of_proxy(self):
+        catalog_model = self.project.model('Model')
+        proxy_catalog_model = self.project.model('Proxy based on catalog model')
+        retrieved_catalog_model = proxy_catalog_model.proxy_model()
+        assert catalog_model.id == retrieved_catalog_model.id
+
 
 class TestPartUpdate(TestBetamax):
     def test_part_update_with_dictionary(self):
