@@ -39,7 +39,7 @@ class TestReferenceProperty(TestBetamax):
         assert self.ref.value is None
 
     def test_retrieve_parts(self):
-        reference_property_parts = self.ref.referenced_parts()
+        reference_property_parts = self.ref.choices()
         wheel_model = self.project.model('Wheel')
         instances_of_wheel_model = self.project.parts(model=wheel_model)
         assert len(reference_property_parts) == len(instances_of_wheel_model)
