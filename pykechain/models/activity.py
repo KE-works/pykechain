@@ -55,6 +55,25 @@ class Activity(Base):
         return self._client.create_activity(self.id, *args, **kwargs)
 
     def edit(self, name=None, description=None, start_date=None, due_date=None, assignee=None):
+        """Edit the details of an activity.
+
+        :param name: (optionally) edit the name of the activity
+        :param description: (optionally) edit the description of the activity
+        :param start_date: (optionally) edit the start date of the activity
+        :param due_date: (optionally) edit the due_date of the activity
+        :param assignee: (optionally) edit the assignee of the activity
+
+        :return: None
+        :raises: NotFoundError, TypeError, APIError
+
+        Example
+        ----------
+
+        >>> specify_wheel_diameter = project.activity('Specify wheel diameter')
+        >>> specify_wheel_diameter.edit(name='Specify wheel diameter and circumference', description='The diameter
+        >>>                             and circumference are specified in inches', start_date=datetime.datetime.now(),
+        >>>                             assignee='testuser')
+        """
         update_dict = {'id': self.id}
         if name:
             if isinstance(name, str):

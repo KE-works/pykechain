@@ -1,7 +1,6 @@
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
 from tests.classes import TestBetamax
 import datetime
-from datetime import timezone
 
 class TestActivities(TestBetamax):
     def test_retrieve_activities(self):
