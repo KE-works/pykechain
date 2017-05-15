@@ -1,5 +1,6 @@
 from requests.packages.urllib3.packages.six import text_type
 
+from pykechain.enums import PropertyType
 from pykechain.models.property import Property
 from pykechain.models.part import Part
 
@@ -66,7 +67,7 @@ class ReferenceProperty(Property):
 
         self._value = self._put_value(part_id)
 
-    def referenced_parts(self):
+    def choices(self):
         """Retrieve the parts that you can reference for this `ReferenceProperty`.
 
         :return: the parts that can be referenced as :class:`pykechain.model.PartSet`.
@@ -76,16 +77,18 @@ class ReferenceProperty(Property):
         -------
 
         >>> property = project.part('Bike').property('RefTest')
-        >>> referenced_parts = property.parts()
+        >>> reference_part_choices = property.choices()
 
         """
-        if self._json_data['property_type'] == 'REFERENCE_VALUE':
-            parent_part = self.part
-            model_parent_part = parent_part.model()
-            property_model = model_parent_part.property(self.name)
-            referenced_part_id = property_model._value['id']
-            referenced_part_model = self._client.model(pk=referenced_part_id)
-            possible_parts = self._client.parts(model=referenced_part_model)
-        else:
-            raise PropertyTypeError("Property {} must be a reference type property".format(self.name))
-        return possible_parts
+        assert self._json_data['property_type'] == PropertyType.REFERENCE_VALUE, \
+            "Property {} must be a reference type property".format(self.name)
+
+        # TODO: there is maybe another way to retrieve the parts in less calls.
+        # from the reference property (instance) we need to get the value of the reference property in the model
+        # in the reference property of the model the value is set to the ID of the model from which we can choose parts
+        model_parent_part = self.part.model()  # makes single part call
+        property_model = model_parent_part.property(self.name)
+        referenced_model = self._client.model(pk=property_model._value['id'])  # makes single part call
+        possible_choices = self._client.parts(model=referenced_model)  # makes multiple parts call
+
+        return possible_choices

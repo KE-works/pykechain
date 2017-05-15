@@ -24,9 +24,3 @@ class NotFoundError(APIError):
     """Object not found error."""
 
     pass
-
-
-class PropertyTypeError(APIError):
-    """Incorrect property type error."""
-
-    pass
