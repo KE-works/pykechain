@@ -144,6 +144,9 @@ class Part(Base):
         >>> proxy_part = project.model('Proxy based on catalog model')
         >>> catalog_model_of_proxy_part = proxy_part.proxy_model()
 
+        >>> proxied_material_of_the_bolt_model = project.model('Bolt Material')
+        >>> proxy_basis_for_the_material_model = proxied_material_of_the_bolt_model.proxy_model()
+
         """
         assert self.category == Category.MODEL, \
             "Part {} is not a model, therefore it cannot have a proxy model".format(self)
