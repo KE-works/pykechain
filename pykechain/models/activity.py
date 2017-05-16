@@ -1,4 +1,5 @@
 import warnings
+import json
 
 import requests
 import datetime
@@ -140,3 +141,10 @@ class Activity(Base):
 
         if r.status_code != requests.codes.ok:
             raise APIError("Could not update Activity ({})".format(r))
+
+    def customize_activity(self, config):
+        widget_config_id = self._json_data.get('widget_config')['id']
+        update_dict = {'id': widget_config_id}
+        update_dict.update({'config': json.dumps(config, indent=4)})
+        url = self._client._build_url('widget_config', widget_config_id=widget_config_id)
+        r = self._client._request('PUT', url, json=update_dict)
