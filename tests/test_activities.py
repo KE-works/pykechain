@@ -129,3 +129,12 @@ class TestActivities(TestBetamax):
         self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
 
         specify_wd.edit(assignee=original_assignee)
+
+    def test_customize_activity(self):
+        customized_task = self.project.activity('Customized task')
+        customized_task.customize_activity(
+        config={"components": [{
+        "xtype": "superGrid",
+        "filter": {
+            "parent": "e5106946-40f7-4b49-ae5e-421450857911",
+            "model": "edc8eba0-47c5-415d-8727-6d927543ee3b"}}]})
