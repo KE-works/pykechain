@@ -42,13 +42,6 @@ class TestAttachment(TestBetamax):
     def test_upload(self):
         plot_attach = self.project.part('Bike').property('Plot Attachment')
 
-        # Test the upload of matplotlib figures
-        fig = plt.figure(1)
-        plt.plot([1, 2, 3, 4], [1, 4, 9, 16], 'ro')
-        plt.axis([0, 6, 0, 20])
-        plt.close(fig)
-        plot_attach.upload(fig)
-
         # Test the upload of regular data (such a .txt file)
         project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')))
         requirements = project_root + '/requirements.txt'
