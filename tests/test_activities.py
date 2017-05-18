@@ -73,6 +73,10 @@ class TestActivities(TestBetamax):
         self.assertEqual(specify_wd.name, specify_wd_u.name)
         self.assertEqual(specify_wd.name, 'Specify wheel diameter - updated')
 
+        # Added to improve coverage. Assert whether TypeError is raised when 'name' is not a string object.
+        with self.assertRaises(TypeError):
+            specify_wd.edit(name=True)
+
         specify_wd.edit(name='Specify wheel diameter')
 
     def test_edit_activity_description(self):
@@ -80,6 +84,10 @@ class TestActivities(TestBetamax):
         specify_wd.edit(description='This task has an even cooler description')
 
         self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
+
+        # Added to improve coverage. Assert whether TypeError is raised when 'description' is not a string object.
+        with self.assertRaises(TypeError):
+            specify_wd.edit(description=42)
 
         specify_wd.edit(description='This task has a cool description')
 
@@ -96,6 +104,14 @@ class TestActivities(TestBetamax):
             specify_wd.edit(start_date=start_time, due_date=due_time)
 
         self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
+
+        # Added to improve coverage. Assert whether TypeError is raised when 'start_date' and 'due_date are not
+        # datetime objects
+        with self.assertRaises(TypeError):
+            specify_wd.edit(start_date='All you need is love')
+
+        with self.assertRaises(TypeError):
+            specify_wd.edit(due_date='Love is all you need')
 
         specify_wd_u = self.project.activity('Specify wheel diameter')
 
@@ -127,6 +143,16 @@ class TestActivities(TestBetamax):
         specify_wd.edit(assignee='pykechain')
 
         self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
+
+        # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
+        # scope members
+        with self.assertRaises(NotFoundError):
+            specify_wd.edit(assignee='Not Member')
+
+        # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
+        # scope members
+        with self.assertRaises(TypeError):
+            specify_wd.edit(assignee=0.5)
 
         specify_wd.edit(assignee=original_assignee)
 
