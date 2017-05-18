@@ -1,7 +1,3 @@
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-
 import json
 import os
 from tests.classes import TestBetamax
