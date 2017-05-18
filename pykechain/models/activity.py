@@ -143,7 +143,7 @@ class Activity(Base):
             raise APIError("Could not update Activity ({})".format(r))
 
     def customize(self, config):
-        """Customize an activity
+        """Customize an activity.
 
         :param config: the json to be used in customization
 
