@@ -38,3 +38,14 @@ class TestProperties(TestBetamax):
         bike2 = bike.property('Gears').part
 
         self.assertEqual(bike.id, bike2.id)
+
+    def test_create_property(self):
+        bike = self.project.model('Bike')
+
+        new_property = self.client.create_property(model=bike, name='New property', property_type='CHAR',
+                                                    default_value='EURIKA!')
+
+    def test_delete_property(self):
+        bike = self.project.model('Bike')
+        new_property = bike.property('New property')
+        new_property.delete()
