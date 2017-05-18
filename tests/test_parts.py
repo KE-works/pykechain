@@ -211,12 +211,23 @@ class TestParts(TestBetamax):
 
         front_fork_retrieved_model = front_fork.model()
 
+        # Added to improve coverage. Assert whether NotFoundError is raised when model() method is applied to
+        # a part that has no model
+        with self.assertRaises(NotFoundError):
+            front_fork_model.model()
+
         assert front_fork_model.id == front_fork_retrieved_model.id
 
     def test_retrieve_catalog_model_of_proxy(self):
         catalog_model = self.project.model('Model')
         proxy_catalog_model = self.project.model('Proxy based on catalog model')
         retrieved_catalog_model = proxy_catalog_model.proxy_model()
+
+        # Added to improve coverage. Assert whether NotFoundError is raised when proxy_model() method is applied to
+        # a part that is not a proxy
+        with self.assertRaises(NotFoundError):
+            catalog_model.proxy_model()
+
         assert catalog_model.id == retrieved_catalog_model.id
 
 
