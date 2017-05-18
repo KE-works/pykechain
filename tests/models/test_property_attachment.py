@@ -29,9 +29,9 @@ class TestAttachment(TestBetamax):
 
         self.assertEqual(photo_attach_expected_value, photo_attach_actual_value)
 
-        picture = self.project.part('Bike').property('Picture')
+        empty_attach = self.project.part('Bike').property('Empty attachment')
 
-        self.assertEqual(picture.value, None)
+        self.assertEqual(empty_attach.value, None)
 
     def test_set_value(self):
         picture = self.project.part('Bike').property('Picture')
