@@ -131,8 +131,8 @@ class TestActivities(TestBetamax):
         specify_wd.edit(assignee=original_assignee)
 
     def test_customize_activity(self):
-        customized_task = self.project.activity('Uncostumized task')
-        customized_task.customize_activity(
+        activity_to_costumize = self.project.activity('Customized task')
+        activity_to_costumize.customize(
         config={"components": [{
         "xtype": "superGrid",
         "filter": {

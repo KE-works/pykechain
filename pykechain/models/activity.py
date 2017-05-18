@@ -142,14 +142,36 @@ class Activity(Base):
         if r.status_code != requests.codes.ok:
             raise APIError("Could not update Activity ({})".format(r))
 
-    def customize_activity(self, config):
+    def customize(self, config):
+        """Customize an activity
+
+        :param config: the json to be used in customization
+
+        :return: None
+
+        >>> my_activity = self.project.activity('Customizable activity')
+        >>> my_activity.customize(config =
+        ...                          {"components":
+        ...                              [{"xtype": "superGrid",
+        ...                                "filter":
+        ...                                    {"parent": "e5106946-40f7-4b49-ae5e-421450857911",
+        ...                                     "model": "edc8eba0-47c5-415d-8727-6d927543ee3b"
+        ...                                    }
+        ...                              }]
+        ...                          }
+        ...                      )
+
+        """
         widget_config = self._json_data.get('widget_config')
+        # When an activity has been costumized at least once before, then its widget config already exists
         if widget_config:
             widget_config_id = widget_config['id']
             update_dict = {'id': widget_config_id}
             update_dict.update({'config': json.dumps(config, indent=4)})
             url = self._client._build_url('widget_config', widget_config_id=widget_config_id)
             r = self._client._request('PUT', url, json=update_dict)
+        # When an activity was not customized before, then there is no widget config and a new one must be created for
+        # that activity
         else:
             r = self._client._request('POST', self._client._build_url('widgets_config'),
                                       data=dict(
