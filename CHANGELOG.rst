@@ -3,19 +3,20 @@ Change Log
 
 pykechain changelog
 
-1.7.0 (UNRELEASED)
+1.7.0 (29MAY16)
 ------------------
  * Added `ReferencyProperty.choices()` convenience method to provide you the list of parts (instances) that are
    acceptable as a choice for the value of the reference property.
  * Added `Part.proxy_model()` method that will return the model that is used as the basis for the proxied model.
-   A proxied model is a copy of the proxy_model that can have a different name, but follow that exact model definition
-   of the proxy_model including its properties and submodel parts. A handy way to create model structures in the
-   catalog world and use a multiple of those in the product world. An example is provided in the API documentation.
- * added the `Activity.edit()` method to be able to update the activity name, description, start_date, due_date
+   A proxied model is a linkedcopy of the proxy_model that can have a different name, but follow that exact model
+   definition of the proxy_model including its properties and submodel parts. A handy way to create model structures
+   in the catalog world and use a multiple of those in the product world. An example is provided in the documentation.
+ * Added the `Activity.edit()` method to be able to update the activity name, description, start_date, due_date
    and assignee.
- * Upgraded package `requests` to the latest version. Updated other packages to the latest available for development.
- * Updated documentation according to PEP257
- * Updated requirements
+ * Added the ability to customize an activity using the `Activity.customize()` method using a proper inspector NG json.
+ * Upgraded package `requests` to the latest version.
+ * Updated documentation according to PEP257.
+ * Updated requirements for development.
 
 
 1.6.0 (3MAY17)
