@@ -17,7 +17,10 @@ API_PATH = {
     'properties': 'api/properties.json',
     'property': 'api/properties/{property_id}.json',
     'property_upload': 'api/properties/{property_id}/upload',
-    'property_download': 'api/properties/{property_id}/download'
+    'property_download': 'api/properties/{property_id}/download',
+    'widgets_config': 'api/widget_config.json',
+    'widget_config': 'api/widget_config/{widget_config_id}.json'
+
 }
 
 
