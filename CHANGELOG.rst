@@ -13,6 +13,7 @@ pykechain changelog
    catalog world and use a multiple of those in the product world. An example is provided in the API documentation.
  * added the `Activity.edit()` method to be able to update the activity name, description, start_date, due_date
    and assignee.
+ * Upgraded package `requests` to the latest version. Updated other packages to the latest available for development.
  * Updated documentation according to PEP257
  * Updated requirements
 
