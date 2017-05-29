@@ -230,6 +230,11 @@ class TestParts(TestBetamax):
 
         assert catalog_model.id == retrieved_catalog_model.id
 
+    # new in 1.8+
+    def test_retrieve_part_multiplicity(self):
+        bike_model = self.project.model('Bike')
+        self.assertEqual(bike_model.multiplicity, Multiplicity.ONE)
+
 
 class TestPartUpdate(TestBetamax):
     def test_part_update_with_dictionary(self):
