@@ -3,7 +3,7 @@ Change Log
 
 pykechain changelog
 
-1.7.0 (29MAY16)
+1.7.0 (29MAY17)
 ------------------
  * Added `ReferencyProperty.choices()` convenience method to provide you the list of parts (instances) that are
    acceptable as a choice for the value of the reference property.
