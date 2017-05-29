@@ -8,6 +8,7 @@ pykechain changelog
 ---------------
  * Added `Part.multiplicity` property method. Use the `pykechain.enums.Multiplicity` to check the multiplicity of a part
    against the set multiplicities.
+ * Updated documentation (a.o. the Basic Usage notebook).
 
 
 1.7.0 (29MAY17)
