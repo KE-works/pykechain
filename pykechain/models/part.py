@@ -28,6 +28,26 @@ class Part(Base):
         self.parent_id = json['parent'].get('id') if 'parent' in json and json.get('parent') else None
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
 
+    @property
+    def multiplicity(self):
+        """Return the multiplicity of a part.
+        
+        Multiplicity of a part is one of the following options: ZERO_ONE, ONE, ZERO_MANY, ONE_MANY, (reserved) M_N
+        Use `pykechain.enums.Multiplicity` to check for the correct multiplicity
+        
+        Examples
+        --------
+        >>> bike = project.models('Bike')
+        >>> bike.multiplicity
+        ONE_MANY
+        
+        >>> from pykechain.enums import Multiplicity
+        >>> bike.multiplicity == Multiplicity.ONE_MANY
+        True      
+        
+        """
+        return self._json_data.get('multiplicity', None)
+
     def property(self, name):
         # type: (str) -> Property
         """Retrieve the property with name belonging to this part.
