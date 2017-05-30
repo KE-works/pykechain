@@ -3,7 +3,7 @@ import json
 from pykechain.models import Base
 
 uuid_pattern = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
-uuid_string = {"type":"string", "pattern": uuid_pattern}
+uuid_string = {"type": "string", "pattern": uuid_pattern}
 component_json_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "Component JSON Schema",
@@ -43,7 +43,15 @@ widgetconfig_json_schema = {
 
 
 class InspectorComponent(object):
-    def __init__(self, json, **kwargs):
+    """Inspector Base Component for a customization."""
+
+    def __init__(self, json=None, **kwargs):
+        """
+        Customisation Component.
+
+        :param json:
+        :param kwargs:
+        """
         if not json:
             self._json_data = dict(xtype="panel", **kwargs)
         else:
@@ -55,42 +63,122 @@ class InspectorComponent(object):
         self.validate()
 
     def validate(self):
+        """Validate the component against the component JSON Schema.
+
+        :return: None if valid
+        :return: ValidationError
+        """
         from jsonschema import validate
         return validate(self._json_data, component_json_schema)
 
     def as_dict(self):
+        """Return the component as a dictionary."""
         return self._json_data
 
     def as_json(self):
+        """Return the component as a rendered and valid JSON string."""
         return self.render()
 
     def render(self):
-        return json.dumps(self._json_data, indent=2)
+        """Return the component as a rendered and valid JSON string."""
+        return json.dumps(self.as_dict(), indent=2)
 
     def __repr__(self):
         return "<{} ({}) at {:#x}>".format(self.__class__.__name__, self.xtype, id(self))
 
 
 class SuperGrid(InspectorComponent):
-    def __init__(self, json=None, parent=None, model=None, **kwargs):
-        if not json:
+    """The SuperGird component."""
+
+    def __init__(self, json=None, parent=None, model=None, activity_id=None, **kwargs):
+        """
+        Instantiate a SuperGrid.
+
+        Provide either json or (parent and model or activity)
+
+        :param json: provide a valid SuperGrid json (optional if not parent & model)
+        :param parent: provide a parent id (or pykechain Part) (optional if json)
+        :param model: provide a model id (or pykechain Part) (optional if json)
+        :param activity_id: provide a acitivity id (or pykechain Activity) (optional)
+        :param kwargs: Optional extra kwargs.
+        """
+        if not json and parent and model:
+            if isinstance(parent, Base):
+                parent = parent.id
+            if isinstance(model, Base):
+                model = model.id
+            if isinstance(activity_id, Base):
+                activity_id = activity_id.id
             super(self.__class__, self).__init__(json=dict(
                 xtype="superGrid",
-                parent=parent,
-                model=model,
+                filter=dict(parent=parent, model=model, activity_id=activity_id),
                 **kwargs))
-        else:
+        elif json and not parent and not model:
             super(self.__class__, self).__init__(json=json)
+        else:
+            raise Exception("Either provide json or (parent and model)")
+
+    def get(self, item):
+        """Get an item from the filter subdict.
+
+        :param item: item to retrieve. eg. model, parent, activity_id
+        :return: uuid (as string)
+        """
+        return self._json_data['filter'].get(item, None)
+
+    def set(self, key, value):
+        """Set an item to a value in the filter subdictionary.
+
+        :param key: string to set e.g model, parent, activity_id
+        :param value: UUID as string or an pykechain object (will retrieve the id from that)
+        :return: None
+        """
+        if isinstance(value, Base):
+            value = value.id
+        self._json_data['filter'][key] = value
+
+        # @property
+        # def model(self):
+        #     return self._json_data['filter'].get('model')
+        #
+        # @model.setter
+        # def model(self, pk):
+        #     if isinstance(pk, Base):
+        #         pk = pk.id
+        #     self._json_data['filter']['model'] = pk
+        #
+        # @property
+        # def parent(self):
+        #     return self._json_data['filter'].get('parent')
+        #
+        # @parent.setter
+        # def parent(self, pk):
+        #     if isinstance(pk, Base):
+        #         pk = pk.id
+        #     self._json_data['filter']['parent'] = pk
+        #
+        # @property
+        # def activity_id(self):
+        #     return self._json_data['filter'].get('activity_id')
+        #
+        # @activity_id.setter
+        # def activity_id(self, pk):
+        #     if isinstance(pk, Base):
+        #         pk = pk.id
+        #     self._json_data['filter']['activity_id'] = pk
 
 
 class Customization(InspectorComponent):
-    def __init__(self, json, **kwargs):
+    """Customization wrapper object."""
+
+    def __init__(self, json=None, **kwargs):
+        """Make a new Customization object that wraps the various components.
+
+        :param json: (optional) provide a Customization json, will be validated
+        :ivar components: list of components
+        """
         self.components = []
-        if not json:
-            super(self.__class__, self).__init__(json=dict(
-                components=[]
-            ))
-        else:
+        if json:
             assert isinstance(json, dict), "json needs to be deserialised as a dictionary first, use `json.loads()`"
             assert 'components' in json, "Customization need a 'components' key in the json, got {}".format(json)
             assert isinstance(json.get('components'), (list, tuple)), \
@@ -100,19 +188,27 @@ class Customization(InspectorComponent):
             self.validate()
 
     def add_component(self, component):
+        """Add a component to the internal components list."""
         assert isinstance(component, InspectorComponent), \
             "Component need to be of instance InspectorComponent or an object based on InspectorComponent, " \
             "got {}".format(type(component))
         self.components.append(component)
 
     def validate(self):
+        """Validate the Customization objects (including the internal components).
+
+        :return: None if valid
+        :raises: ValidationError
+        """
         from jsonschema import validate
         return validate(self.as_dict(), widgetconfig_json_schema)
 
     def as_dict(self):
+        """Return the Customization as dictionary."""
         return dict(components=[component.as_dict() for component in self.components])
 
     def as_json(self):
+        """Return the Customization as rendered and valid JSON string."""
         return json.dumps(self.as_dict())
 
     def __repr__(self):
