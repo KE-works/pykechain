@@ -164,3 +164,52 @@ class TestActivities(TestBetamax):
         "filter": {
             "parent": "e5106946-40f7-4b49-ae5e-421450857911",
             "model": "edc8eba0-47c5-415d-8727-6d927543ee3b"}}]})
+
+    # 1.7.2
+    def test_datetime_with_naive_duedate_only_fails(self):
+        """reference to #121 - thanks to @joost.schut"""
+        # setup
+        specify_wd = self.project.activity('Specify wheel diameter')
+
+        # save old values
+        old_start, old_due = datetime.strptime(specify_wd._json_data.get('start_date'), ISOFORMAT), \
+                             datetime.strptime(specify_wd._json_data.get('due_date'), ISOFORMAT)
+        naive_duedate = datetime(2017,6,5, 5,0,0)
+        with self.assertWarnsRegex(UserWarning, "This date is interpreted as UTC time\."):
+            specify_wd.edit(due_date = naive_duedate)
+
+        #teardown
+        specify_wd.edit(due_date = old_due)
+
+    def test_datetime_with_tzinfo_provides_correct_offset(self):
+        """reference to #121 - thanks to @joost.schut
+
+        The tzinfo.timezone('Europe/Amsterdam') should provide a 2 hour offset, recording 20 minutes
+        """
+        # setup
+        specify_wd = self.project.activity('Specify wheel diameter')
+        # save old values
+        old_start, old_due = datetime.strptime(specify_wd._json_data.get('start_date'), ISOFORMAT), \
+                             datetime.strptime(specify_wd._json_data.get('due_date'), ISOFORMAT)
+
+        tz = pytz.timezone('Europe/Amsterdam')
+        tzaware_due = tz.localize(datetime(2017,7,1))
+        tzaware_start = tz.localize(datetime(2017,6,30,0,0,0))
+
+        specify_wd.edit(start_date = tzaware_start)
+        self.assertTrue(specify_wd._json_data['start_date'], tzaware_start.isoformat(sep='T'))
+        self.assertRegex(specify_wd._json_data['start_date'], r'^.*(\+02:00|\+01:00)$')
+
+        specify_wd.edit(due_date=tzaware_due)
+        self.assertTrue(specify_wd._json_data['due_date'], tzaware_due.isoformat(sep='T'))
+        self.assertRegex(specify_wd._json_data['due_date'], r'^.*(\+02:00|\+01:00)$')
+
+        # teardown
+        with self.assertWarns(UserWarning):
+            specify_wd.edit(start_date = old_start, due_date = old_due)
+
+
+
+
+
+
