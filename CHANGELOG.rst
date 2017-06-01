@@ -6,7 +6,7 @@ pykechain changelog
 1.7.2 (01JUN17)
 ---------------
  * updated `property.part` property that gets the part for its property. For model this did not work as underlying
-   only category=INSTANCES were retrieved. Thanks to @joost.schut for finding it and reporting.
+   only `category=INSTANCES` were retrieved. Thanks to @joost.schut for finding it and reporting.
 
 
 1.7.1 (29MAY17)
@@ -17,7 +17,7 @@ pykechain changelog
 
 
 1.7.0 (29MAY17)
-------------------
+---------------
  * Added `ReferencyProperty.choices()` convenience method to provide you the list of parts (instances) that are
    acceptable as a choice for the value of the reference property.
  * Added `Part.proxy_model()` method that will return the model that is used as the basis for the proxied model.
