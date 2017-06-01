@@ -7,6 +7,7 @@ pykechain changelog
 ---------------
  * updated `property.part` property that gets the part for its property. For model this did not work as underlying
    only `category=INSTANCES` were retrieved. Thanks to @joost.schut for finding it and reporting.
+ * updated requirements for development.
 
 
 1.7.1 (29MAY17)
