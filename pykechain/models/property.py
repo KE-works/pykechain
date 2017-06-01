@@ -44,7 +44,7 @@ class Property(Base):
         """Retrieve the part that holds this Property."""
         part_id = self._json_data['part']
 
-        return self._client.part(pk=part_id)
+        return self._client.part(pk=part_id, category=self._json_data['category'])
 
     def delete(self):
         """Delete this property.
