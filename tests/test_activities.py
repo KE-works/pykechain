@@ -1,8 +1,8 @@
-import warnings
+from datetime import datetime
 
 import pytz
 import requests
-from datetime import datetime
+import warnings
 
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
 from tests.classes import TestBetamax
@@ -159,8 +159,55 @@ class TestActivities(TestBetamax):
     def test_customize_activity(self):
         activity_to_costumize = self.project.activity('Customized task')
         activity_to_costumize.customize(
-        config={"components": [{
-        "xtype": "superGrid",
-        "filter": {
-            "parent": "e5106946-40f7-4b49-ae5e-421450857911",
-            "model": "edc8eba0-47c5-415d-8727-6d927543ee3b"}}]})
+            config={"components": [{
+                "xtype": "superGrid",
+                "filter": {
+                    "parent": "e5106946-40f7-4b49-ae5e-421450857911",
+                    "model": "edc8eba0-47c5-415d-8727-6d927543ee3b"}}]})
+
+    # 1.7.2
+    def test_datetime_with_naive_duedate_only_fails(self):
+        """reference to #121 - thanks to @joost.schut"""
+        # setup
+        specify_wd = self.project.activity('Specify wheel diameter')
+
+        # save old values
+        old_start, old_due = datetime.strptime(specify_wd._json_data.get('start_date'), ISOFORMAT), \
+                             datetime.strptime(specify_wd._json_data.get('due_date'), ISOFORMAT)
+        naive_duedate = datetime(2017, 6, 5, 5, 0, 0)
+        with warnings.catch_warnings(record=False) as w:
+            warnings.simplefilter("ignore")
+            specify_wd.edit(due_date=naive_duedate)
+
+        # teardown
+        with warnings.catch_warnings(record=False) as w:
+            warnings.simplefilter("ignore")
+            specify_wd.edit(due_date=old_due)
+
+    def test_datetime_with_tzinfo_provides_correct_offset(self):
+        """reference to #121 - thanks to @joost.schut
+
+        The tzinfo.timezone('Europe/Amsterdam') should provide a 2 hour offset, recording 20 minutes
+        """
+        # setup
+        specify_wd = self.project.activity('Specify wheel diameter')
+        # save old values
+        old_start, old_due = datetime.strptime(specify_wd._json_data.get('start_date'), ISOFORMAT), \
+                             datetime.strptime(specify_wd._json_data.get('due_date'), ISOFORMAT)
+
+        tz = pytz.timezone('Europe/Amsterdam')
+        tzaware_due = tz.localize(datetime(2017, 7, 1))
+        tzaware_start = tz.localize(datetime(2017, 6, 30, 0, 0, 0))
+
+        specify_wd.edit(start_date=tzaware_start)
+        self.assertTrue(specify_wd._json_data['start_date'], tzaware_start.isoformat(sep='T'))
+        self.assertRegexpMatches(specify_wd._json_data['start_date'], r'^.*(\+02:00|\+01:00)$')
+
+        specify_wd.edit(due_date=tzaware_due)
+        self.assertTrue(specify_wd._json_data['due_date'], tzaware_due.isoformat(sep='T'))
+        self.assertRegexpMatches(specify_wd._json_data['due_date'], r'^.*(\+02:00|\+01:00)$')
+
+        # teardown
+        with warnings.catch_warnings(record=False) as w:
+            warnings.simplefilter("ignore")
+            specify_wd.edit(start_date=old_start, due_date=old_due)
