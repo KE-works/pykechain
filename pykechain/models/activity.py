@@ -64,8 +64,10 @@ class Activity(Base):
 
         :param name: (optionally) edit the name of the activity
         :param description: (optionally) edit the description of the activity
-        :param start_date: (optionally) edit the start date of the activity as a datetime object (UTC time preferred)
-        :param due_date: (optionally) edit the due_date of the activity as a datetime object (UTC time/timzeone aware preferred)
+        :param start_date: (optionally) edit the start date of the activity as a datetime object (UTC time/timezone
+                            aware preferred)
+        :param due_date: (optionally) edit the due_date of the activity as a datetime object (UTC time/timzeone
+                            aware preferred)
         :param assignee: (optionally) edit the assignee of the activity as a string
 
         :return: None
@@ -77,17 +79,22 @@ class Activity(Base):
         >>> from datetime import datetime
         >>> specify_wheel_diameter = project.activity('Specify wheel diameter')
         >>> specify_wheel_diameter.edit(name='Specify wheel diameter and circumference',
-        ...                             description='The diameter and circumference are specified in inches', 
+        ...                             description='The diameter and circumference are specified in inches',
         ...                             start_date=datetime.utcnow(),  # naive time is interpreted as UTC time
         ...                             assignee='testuser')
-        
+
         If we want to provide timezone aware datetime objects we can use the 3rd party convenience library `pytz`.
-        
+        Mind that we need to fetch the timezone first and use `<timezone>.localize(<your datetime>)` to make it
+        work correctly. Using datetime(2017,6,1,23,59,0 tzinfo=<tz>) does NOT work for most timezones with a
+        daylight saving time. Check the pytz documentation.
+        (see http://pythonhosted.org/pytz/#localized-times-and-date-arithmetic)
+
         >>> import pytz
         >>> start_date_tzaware = datetime.now(pytz.utc)
-        >>> due_date_tzaware = datetime(2019, 10, 27, 23, 59, 0, tzinfo=pytz.timezone('Europe/Amsterdam'))
+        >>> mytimezone = pytz.timezone('Europe/Amsterdam')
+        >>> due_date_tzaware = mytimezone.localize(datetime(2019, 10, 27, 23, 59, 0))
         >>> specify_wheel_diameter.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
-        
+
         """
         update_dict = {'id': self.id}
         if name:
@@ -107,20 +114,18 @@ class Activity(Base):
         if start_date:
             if isinstance(start_date, datetime.datetime):
                 if not start_date.tzinfo:
-                    warnings.warn("The startdate '{}' is naive and not timezone aware, use tzinfo. "
+                    warnings.warn("The startdate '{}' is naive and not timezone aware, use pytz.timezone info. "
                                   "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
                 update_dict.update({'start_date': start_date.isoformat(sep='T')})
-                self.start_date = str(start_date)
             else:
                 raise TypeError('Start date should be a datetime.datetime() object')
 
         if due_date:
             if isinstance(due_date, datetime.datetime):
                 if not due_date.tzinfo:
-                    warnings.warn("The duedate '{}' is naive and not timezone aware, use tzinfo. "
-                                  "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
+                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
                 update_dict.update({'due_date': due_date.isoformat(sep='T')})
-                self.due_date = str(due_date)
             else:
                 raise TypeError('Due date should be a datetime.datetime() object')
 
@@ -130,7 +135,6 @@ class Activity(Base):
                 members_list = [member['username'] for member in project._json_data['members']]
                 if assignee in members_list:
                     update_dict.update({'assignee': assignee})
-                    self.assignee = assignee
                 else:
                     raise NotFoundError('Assignee should be a member of the scope')
             else:
@@ -141,6 +145,14 @@ class Activity(Base):
 
         if r.status_code != requests.codes.ok:
             raise APIError("Could not update Activity ({})".format(r))
+
+        if assignee:
+            self._json_data['assignee'] = assignee
+        if due_date:
+            self._json_data['due_date'] = str(due_date)
+        if start_date:
+            self._json_data['start_date'] = str(start_date)
+
 
     def customize(self, config):
         """Customize an activity.
