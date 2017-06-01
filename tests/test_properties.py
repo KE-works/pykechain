@@ -43,6 +43,16 @@ class TestProperties(TestBetamax):
         bike = self.project.model('Bike')
 
         new_property = self.client.create_property(model=bike, name='New property', property_type='CHAR',
-                                                    default_value='EURIKA!')
+                                                    default_value='EUREKA!')
 
         new_property.delete()
+
+    # 1.7.2
+    def test_get_partmodel_of_propertymodel(self):
+        """As found by @joost.schut, see #119 - thanks!"""
+
+        wheel_model = self.project.model('Wheel')
+        spokes_model = wheel_model.property('Spokes')
+        part_of_spokes_model = spokes_model.part
+
+        self.assertTrue(wheel_model.id == part_of_spokes_model.id)
