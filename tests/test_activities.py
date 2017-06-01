@@ -201,11 +201,11 @@ class TestActivities(TestBetamax):
 
         specify_wd.edit(start_date=tzaware_start)
         self.assertTrue(specify_wd._json_data['start_date'], tzaware_start.isoformat(sep='T'))
-        # self.assertRegex(specify_wd._json_data['start_date'], r'^.*(\+02:00|\+01:00)$')
+        self.assertRegexpMatches(specify_wd._json_data['start_date'], r'^.*(\+02:00|\+01:00)$')
 
         specify_wd.edit(due_date=tzaware_due)
         self.assertTrue(specify_wd._json_data['due_date'], tzaware_due.isoformat(sep='T'))
-        # self.assertRegex(specify_wd._json_data['due_date'], r'^.*(\+02:00|\+01:00)$')
+        self.assertRegexpMatches(specify_wd._json_data['due_date'], r'^.*(\+02:00|\+01:00)$')
 
         # teardown
         with warnings.catch_warnings(record=False) as w:
