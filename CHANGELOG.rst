@@ -3,6 +3,19 @@ Change Log
 
 pykechain changelog
 
+
+1.7.3 (01JUN17)
+---------------
+ * Updated documentation for activity startdate and duedate editting using timezone supported datetime objects.
+   If a user want to make use of timezone aware datetime the best way to do it is::
+
+    >>> my_tz = pytz.timezone('Europe/Amsterdam')
+    >>> start_date = my_tz.localize(datetime(2017,6,1,23,59,0))
+    >>> due_date = my_tz.localize(datetime(2017,12,31))
+    >>> my_task.edit(start_date = start_date, due_date = due_date)
+
+ * Fixed a bug where a naive due_date and no provided start_date resulted in an error. Keep them bugs comin'!
+
 1.7.2 (01JUN17)
 ---------------
  * updated `property.part` property that gets the part for its property. For model this did not work as underlying
