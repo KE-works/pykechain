@@ -4,6 +4,7 @@ import pytz
 import requests
 import warnings
 
+from pykechain.enums import ActivityType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
 from tests.classes import TestBetamax
 
@@ -211,3 +212,35 @@ class TestActivities(TestBetamax):
         with warnings.catch_warnings(record=False) as w:
             warnings.simplefilter("ignore")
             specify_wd.edit(start_date=old_start, due_date=old_due)
+
+    # 1.8
+    def test_retrieve_subprocess_of_task(self):
+        task = self.project.activity(name='SubTask')
+        subprocess = task.subprocess()  # type Activity
+        self.assertEqual(subprocess.activity_type, ActivityType.SUBPROCESS)
+
+    def test_retrieve_subprocess_of_a_toplevel_task(self):
+        task = self.project.activity('Specify wheel diameter')
+        with self.assertRaises(NotFoundError):
+            subprocess = task.subprocess()
+
+    def test_retrieve_children_of_subprocess(self):
+        subprocess = self.project.activity(name='Subprocess')  # type: Activity
+        children = subprocess.children()
+        self.assertTrue(len(children) >= 1)
+        for child in children:
+            self.assertEqual(child._json_data.get('container'), subprocess.id)
+
+    def test_retrieve_activity_by_id(self):
+        task = self.project.activity(name='SubTask') # type: Activity
+
+        task_by_id = self.client.activity(pk = task.id)
+
+        self.assertEqual(task.id, task_by_id.id)
+
+    def test_retrieve_siblings_of_a_task_in_a_subprocess(self):
+        task = self.project.activity(name='SubTask')  # type: Activity
+        siblings = task.siblings()
+
+        self.assertTrue(task.id in [sibling.id for sibling in siblings])
+        self.assertTrue(len(siblings) >= 1)

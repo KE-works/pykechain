@@ -50,3 +50,11 @@ class PropertyType(Enum):
     BOOLEAN_VALUE = "BOOLEAN_VALUE"
     CHAR_VALUE = "CHAR_VALUE"
     ATTACHMENT_VALUE = "ATTACHMENT_VALUE"
+
+
+class ActivityType(Enum):
+    """The various Acitivity types that are accepted by KE-chain."""
+
+    USERTASK = "UserTask"
+    SERVICETASK = "ServiceTask"  # RND code only
+    SUBPROCESS = "Subprocess"
