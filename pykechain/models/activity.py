@@ -7,6 +7,7 @@ import datetime
 from six import text_type
 from typing import Any  # flake8: noqa
 
+from pykechain.enums import ActivityType
 from pykechain.exceptions import APIError, NotFoundError
 from pykechain.models.base import Base
 
@@ -20,6 +21,8 @@ class Activity(Base):
         super(Activity, self).__init__(json, **kwargs)
 
         self.scope = json.get('scope')
+        self.activity_type = json.get('activity_class', None)
+        self.status = json.get('status', None)
 
     def parts(self, *args, **kwargs):
         """Retrieve parts belonging to this activity.
@@ -52,12 +55,80 @@ class Activity(Base):
         if r.status_code != 204:
             raise APIError("Could not delete activity: {} with id {}".format(self.name, self.id))
 
-    def create_activity(self, *args, **kwargs):
+    def subprocess(self):
+        """Retrieve the subprocess in which this activity is defined.
+
+        If this is a task on top level, it raises NotFounderror
+
+        :return: subprocess `Activity`
+        :raises: NotFoundError when it is a task in the top level of a project
+
+        Example
+        -------
+        >>> task = project.activity('Subtask')
+        >>> subprocess = task.subprocess()
+
+        """
+        subprocess_id = self._json_data.get('container')
+        if subprocess_id == self._json_data.get('root_container'):
+            raise NotFoundError("Cannot find subprocess for this task '{}', "
+                                "as this task exist on top level.".format(self.name))
+        return self._client.activity(pk=subprocess_id, scope=self._json_data['scope']['id'])
+
+    def children(self):
+        """Retrieve the direct activities of this subprocess.
+
+        It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the direct descending level.
+        Only when the activity is a Subprocess, otherwise it raises a NotFoundError
+
+        :return: list of activities
+        :raises: NotFoundError when this task is not of type `ActivityType.SUBPROCESS`
+
+        Example
+        -------
+        >>> subprocess = project.subprocess('Subprocess')
+        >>> children = subprocess.children()
+
+        """
+        if self.activity_type != ActivityType.SUBPROCESS:
+            raise NotFoundError("Only subprocesses can have children, please choose a subprocess instead of a '{}' "
+                                "(activity '{}')".format(self.activity_type, self.name))
+
+        return self._client.activities(container=self.id, scope=self._json_data['scope']['id'])
+
+    def siblings(self):
+        """Retrieve the other activities that also belong to the subprocess.
+
+        It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the level of the current task.
+        This also works if the activity is of type `ActivityType.SUBPROCESS`.
+
+        :return: list of activities
+
+        Example
+        -------
+        >>> task = project.activity('Some Task')
+        >>> siblings = task.siblings()
+
+        """
+        container_id = self._json_data.get('container')
+        return self._client.activities(container=container_id, scope=self._json_data['scope']['id'])
+
+    def create(self, *args, **kwargs):
         """Create a new activity belonging to this subprocess.
 
         See :class:`pykechain.Client.create_activity` for available parameters.
         """
+        assert self.activity_type == ActivityType.SUBPROCESS, "One can only create a task under a subprocess."
         return self._client.create_activity(self.id, *args, **kwargs)
+
+    def create_activity(self, *args, **kwargs):
+        """See :method:`pykechain.Activity.create`. This method will be deprecated in version 1.9 onwards.
+
+        See :class:`pykechain.Client.create_activity` for available parameters.
+        """
+        warnings.warn('This method will be deprecated in version 1.9 and replaced with `Activity.create()` '
+                      'for consistency reasons.', PendingDeprecationWarning)
+        return self.create(*args, **kwargs)
 
     def edit(self, name=None, description=None, start_date=None, due_date=None, assignee=None):
         """Edit the details of an activity.
@@ -153,7 +224,6 @@ class Activity(Base):
         if start_date:
             self._json_data['start_date'] = str(start_date)
 
-
     def customize(self, config):
         """Customize an activity.
 
@@ -190,4 +260,3 @@ class Activity(Base):
                                           activity=self.id,
                                           config=json.dumps(config, indent=4))
                                       )
-
