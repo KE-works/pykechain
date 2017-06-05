@@ -3,6 +3,20 @@ Change Log
 
 pykechain changelog
 
+1.8.0 (UNRELEASED)
+------------------
+ * Added `Activity.subprocess()`, `Activity.siblings()` and `Activity.children()` methods to the `Activity`. It eases
+   relative retrieval of other tasks in the task tree. Documentation is included.
+ * added `Activity.activity_type` property to the Activity.
+ * added `ActivityType` enumaration. This can be used to check if the `activity_type` of an `Activity` is either a
+   Usertask or a Subprocess.
+ * Added ability to retrieve an `Activity` based on an id. As this included in the low level `Client` object, it can
+   be used almost everywhere to retrieve an activity by its id (or primary key, pk) eg. in the `Scope.activity`.
+ * Added ability to add additional keyword to the activities searcher
+ * Added a FutureDeprecationWarning to the `Activity.create_activity()` method. This will is replace with the
+   `Activity.create()` method. Update your code please!
+ * added tests for all new features.
+ * Updated the documentation.
 
  * Added a convenience method to retrieve models and instances related to a task at once: `Activity.associated_parts()`.
    Making use of the already provided method in `Activity.parts()`. (#118)
