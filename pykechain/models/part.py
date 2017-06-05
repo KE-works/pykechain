@@ -4,7 +4,7 @@ import requests
 from typing import Any, AnyStr  # flake8: noqa
 
 from pykechain.enums import Multiplicity, Category
-from pykechain.exceptions import NotFoundError, APIError
+from pykechain.exceptions import NotFoundError, APIError, MultipleFoundError
 from pykechain.models.base import Base
 from pykechain.models.property import Property
 from pykechain.utils import find
@@ -16,6 +16,35 @@ class Part(Base):
     :cvar category: The category of the part, either 'MODEL' or 'INSTANCE' (use `pykechain.enums.Category`)
     :cvar parent_id: The UUID of the parent of this part
     :cvar properties: The list of `pykechain.models.Property` objects belonging to this part.
+    :cvar multiplicity: The multiplicity of the part being one of the following options: ZERO_ONE, ONE, ZERO_MANY,
+                        ONE_MANY, (reserved) M_N
+
+    Examples
+    --------
+    For the category property
+
+    >>> bike = project.part('Bike')
+    >>> bike.category
+    'INSTANCE'
+
+    >>> bike_model = project.model('Bike')
+    >>> bike_model.category
+    'MODEL'
+
+    >>> bike_model == Category.MODEL
+    True
+    >>> bike == Category.INSTANCE
+    True
+
+    For the multiplicity property
+
+    >>> bike = project.models('Bike')
+    >>> bike.multiplicity
+    ONE_MANY
+
+    >>> from pykechain.enums import Multiplicity
+    >>> bike.multiplicity == Multiplicity.ONE_MANY
+    True
 
     """
 
@@ -27,26 +56,7 @@ class Part(Base):
         self.category = json.get('category')
         self.parent_id = json['parent'].get('id') if 'parent' in json and json.get('parent') else None
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
-
-    @property
-    def multiplicity(self):
-        """Return the multiplicity of a part.
-        
-        Multiplicity of a part is one of the following options: ZERO_ONE, ONE, ZERO_MANY, ONE_MANY, (reserved) M_N
-        Use `pykechain.enums.Multiplicity` to check for the correct multiplicity
-        
-        Examples
-        --------
-        >>> bike = project.models('Bike')
-        >>> bike.multiplicity
-        ONE_MANY
-        
-        >>> from pykechain.enums import Multiplicity
-        >>> bike.multiplicity == Multiplicity.ONE_MANY
-        True      
-        
-        """
-        return self._json_data.get('multiplicity', None)
+        self.multiplicity = json.get('multiplicity', None)
 
     def property(self, name):
         # type: (str) -> Property
@@ -147,6 +157,44 @@ class Part(Base):
             return self._client.model(pk=model_id)
         else:
             raise NotFoundError("Part {} has no model".format(self.name))
+
+    def instances(self):
+        """
+        Retrieve the instances of this `Part` as a `PartSet`.
+
+        For instance, if you have a model part, you can get the list of instances that are created based on this
+        moodel. If there are no instances (only possible if the multiplicity is `Multiplicity.ZERO_MANY` than a
+        NotFoundError is returned
+
+        :return: pykechain.models.PartSet
+        :raises: NotFoundError
+
+        Example
+        -------
+        >>> wheel_model = project.model('Wheel')
+        >>> wheel_instance_set = wheel_model.instances()
+
+        """
+        if self.category == Category.MODEL:
+            return self._client.parts(model=self, category=Category.INSTANCE)
+        else:
+            raise NotFoundError("Part {} has no instances or is not a model".format(self.name))
+
+    def instance(self):
+        """
+        Retrieve the single (expected) instance of this 'Part' (of `Category.MODEL`) as a 'Part'.
+
+        See `Part.instances()` method for documentation.
+
+        :return: pykechain.models.Part
+        :raises: NotFoundError, MultipleFoundError
+        """
+        instances_list = list(self.instances())
+        if len(instances_list) == 1:
+            return instances_list[0]
+        else:
+            raise MultipleFoundError("Part {} has more than a single instance. "
+                                     "Use the `Part.instances()` method".format(self.name))
 
     def proxy_model(self):
         """

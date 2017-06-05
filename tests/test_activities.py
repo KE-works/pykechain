@@ -4,8 +4,9 @@ import pytz
 import requests
 import warnings
 
-from pykechain.enums import ActivityType
+from pykechain.enums import Category, ActivityType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
+from pykechain.models import Part
 from tests.classes import TestBetamax
 
 ISOFORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -244,3 +245,32 @@ class TestActivities(TestBetamax):
 
         self.assertTrue(task.id in [sibling.id for sibling in siblings])
         self.assertTrue(len(siblings) >= 1)
+
+    def test_retrieve_part_associated_to_activities(self):
+        task = self.project.activity('Specify wheel diameter')
+        parts = list(task.parts())
+
+        for part in parts:
+            self.assertIsInstance(part, Part)
+            self.assertTrue(part.category, Category.INSTANCE)
+
+    def test_retrieve_part_models_associated_to_activities(self):
+        task = self.project.activity('Specify wheel diameter')
+        parts = list(task.parts(category=Category.MODEL))
+
+        for part in parts:
+            self.assertIsInstance(part, Part)
+            self.assertTrue(part.category, Category.MODEL)
+
+    def test_retrieve_associated_parts_to_activity(self):
+        task = self.project.activity('Specify wheel diameter')
+        (models, parts) = list(task.associated_parts())
+
+        for part in parts:
+            self.assertIsInstance(part, Part)
+            self.assertTrue(part.category, Category.INSTANCE)
+
+        for part in parts:
+            self.assertIsInstance(part, Part)
+            self.assertTrue(part.category, Category.INSTANCE)
+
