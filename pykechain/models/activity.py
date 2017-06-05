@@ -43,7 +43,7 @@ class Activity(Base):
     def associated_parts(self, *args, **kwargs):
         """Retrieve models and instances belonging to this activity.
 
-        This is a conveinience method for the `Activity.parts()` method, which is used to retrieve both the
+        This is a convenience method for the `Activity.parts()` method, which is used to retrieve both the
         `Category.MODEL` as well as the `Category.INSTANCE` in a tuple.
 
         If you want to retrieve only the models associated to this task it is better to use:
