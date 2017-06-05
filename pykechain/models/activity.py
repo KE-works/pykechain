@@ -7,6 +7,7 @@ import datetime
 from six import text_type
 from typing import Any  # flake8: noqa
 
+from pykechain.enums import Category
 from pykechain.exceptions import APIError, NotFoundError
 from pykechain.models.base import Base
 
@@ -24,9 +25,42 @@ class Activity(Base):
     def parts(self, *args, **kwargs):
         """Retrieve parts belonging to this activity.
 
-        See :class:`pykechain.Client.parts` for available parameters.
+        Without any arguments it retrieves the Instances related to this task only.
+
+        See :class:`pykechain.Client.parts` for additional available parameters.
+
+        Example
+        -------
+        >>> task = project.activity('Specify Wheel Diameter')
+        >>> parts = task.parts()
+
+        To retrieve the models only.
+        >>> parts = task.parts(category=Category.MODEL)
+
         """
         return self._client.parts(*args, activity=self.id, **kwargs)
+
+    def associated_parts(self, *args, **kwargs):
+        """Retrieve models and instances belonging to this activity.
+
+        This is a convenience method for the `Activity.parts()` method, which is used to retrieve both the
+        `Category.MODEL` as well as the `Category.INSTANCE` in a tuple.
+
+        If you want to retrieve only the models associated to this task it is better to use:
+            `task.parts(category=Category.MODEL)`.
+
+        See :class:`pykechain.Client.parts` for additional available parameters.
+
+        :returns: Tuple(models PartSet, instances PartSet)
+
+        Example
+        -------
+        >>> task = project.activity('Specify Wheel Diameter')
+        >>> all_models, all_instances = task.associated_parts()
+
+        """
+        return self.parts(category=Category.MODEL, *args, **kwargs), \
+               self.parts(category=Category.INSTANCE, *args, **kwargs)
 
     def configure(self, inputs, outputs):
         """Configure activity input and output.
