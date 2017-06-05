@@ -4,7 +4,9 @@ import pytz
 import requests
 import warnings
 
+from pykechain.enums import Category
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
+from pykechain.models import Part
 from tests.classes import TestBetamax
 
 ISOFORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -211,3 +213,31 @@ class TestActivities(TestBetamax):
         with warnings.catch_warnings(record=False) as w:
             warnings.simplefilter("ignore")
             specify_wd.edit(start_date=old_start, due_date=old_due)
+
+    def test_retrieve_part_associated_to_activities(self):
+        task = self.project.activity('Specify wheel diameter')
+        parts = list(task.parts())
+
+        for part in parts:
+            self.assertIsInstance(part, Part)
+            self.assertTrue(part.category, Category.INSTANCE)
+
+    def test_retrieve_part_models_associated_to_activities(self):
+        task = self.project.activity('Specify wheel diameter')
+        parts = list(task.parts(category=Category.MODEL))
+
+        for part in parts:
+            self.assertIsInstance(part, Part)
+            self.assertTrue(part.category, Category.MODEL)
+
+    def test_retrieve_associated_parts_to_activity(self):
+        task = self.project.activity('Specify wheel diameter')
+        (models, parts) = list(task.associated_parts())
+
+        for part in parts:
+            self.assertIsInstance(part, Part)
+            self.assertTrue(part.category, Category.INSTANCE)
+
+        for part in parts:
+            self.assertIsInstance(part, Part)
+            self.assertTrue(part.category, Category.INSTANCE)
