@@ -4,6 +4,12 @@ Change Log
 pykechain changelog
 
 
+ * Added a convenience method to retrieve models and instances related to a task at once: `Activity.associated_parts()`.
+   Making use of the already provided method in `Activity.parts()`. (#118)
+ * Added missing tests for `Activity.parts()` and `Activity.associated_parts()`
+ * Added documentation
+
+
 1.7.3 (01JUN17)
 ---------------
  * Updated documentation for activity startdate and duedate editting using timezone supported datetime objects.
