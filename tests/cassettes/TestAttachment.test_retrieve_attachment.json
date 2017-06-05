@@ -1,1 +1,190 @@
-{"http_interactions": [{"request": {"uri": "<API_URL>/api/scopes.json?name=Bike+Project+%28pykechain+testing%29&status=ACTIVE", "body": {"string": "", "encoding": "utf-8"}, "method": "GET", "headers": {"Authorization": "Token <AUTH_TOKEN>", "Accept-Encoding": "gzip, deflate", "Connection": "keep-alive", "PyKechain-Version": "1.6.0", "User-Agent": "python-requests/2.13.0", "Accept": "*/*", "X-Requested-With": "XMLHttpRequest"}}, "response": {"body": {"base64_string": "H4sIAAAAAAAAA5VTTYvbMBD9K0GnFqJElmzLymnb7R4KhRa67KFlCfoYJ0psOVhyPwj57x0nm7Q5lLTYBmn8Zt4b6c2e9BCHJkWy+LonQ9+QBVmntIuL+XwLluudn22B2rX2YWa7do6BebTdDuK8rKWxqmaU8wpo7oSmyllGwRZaFk4KyNxsE7tApsQ7LPwvCYgNugVEv/VbmHzquw3YNHm1+4lyRhWTBDH5sHqNyAQ/EiJxFZNOAzZB3tw/vn96GP/1OkSffBdOvV0Q9x8+fn54h4i1X60b/BKguNQPcKE+QsjheUp0jH4VAINhaJopaaE10J8q+rg8bc/ZY0AHvfodgVb78UjNnZmFBjmHCP0LydjHGX5hJscq2ib/DS5lUR4/TG8Q1rqJfzDqvzCO29t04ibddX/XPJe7uk0k/5No09k1tDPEQnDxDq35veu3cbTmtYZr4G0h5Xjb6JE+LZ1OI5KzTFKWUV4+crFgDN8vmO0GuIEwg90C+nJP2s5Bs+y7bnSpVFwLa4AyUZTofpXTKq9qaqw1tRGc1VaM6gKqCBbOaXXBMyEEUJ2BozmUBTVZWVKlVK0yLSpbZ+cByxnD4lzSDCeX5rLUtOISB8zIQnIoFQAjhynZ9Z2FOA4DcxoKJRSthLA0r6SmRpU5ZYXLrQBVg1XkmLDqjxlsJvnVI/BynE/aNC/neXg+/AKYAMdDVgQAAA==", "encoding": null, "string": ""}, "status": {"code": 200, "message": "OK"}, "url": "<API_URL>/api/scopes.json?name=Bike+Project+%28pykechain+testing%29&status=ACTIVE", "headers": {"X-Content-Type-Options": "nosniff", "Vary": "Accept-Encoding", "Connection": "keep-alive", "Date": "Thu, 18 May 2017 12:51:50 GMT", "Allow": "GET, POST, OPTIONS", "Content-Type": "application/json", "Strict-Transport-Security": "max-age=518400; includeSubDomains", "Content-Encoding": "gzip", "Server": "nginx/1.10.2", "X-Frame-Options": "SAMEORIGIN", "Transfer-Encoding": "chunked", "X-XSS-Protection": "1; mode=block"}}, "recorded_at": "2017-05-18T12:51:50"}, {"request": {"uri": "<API_URL>/api/parts.json?limit=100&name=Bike&bucket=40003527-1c2a-476a-8270-eb7572e69ee0&category=INSTANCE", "body": {"string": "", "encoding": "utf-8"}, "method": "GET", "headers": {"Authorization": "Token <AUTH_TOKEN>", "Accept-Encoding": "gzip, deflate", "Connection": "keep-alive", "PyKechain-Version": "1.6.0", "User-Agent": "python-requests/2.13.0", "Accept": "*/*", "X-Requested-With": "XMLHttpRequest"}}, "response": {"body": {"base64_string": "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", "encoding": null, "string": ""}, "status": {"code": 200, "message": "OK"}, "url": "<API_URL>/api/parts.json?limit=100&name=Bike&bucket=40003527-1c2a-476a-8270-eb7572e69ee0&category=INSTANCE", "headers": {"X-Content-Type-Options": "nosniff", "Vary": "Accept-Encoding", "Connection": "keep-alive", "Date": "Thu, 18 May 2017 12:51:50 GMT", "Allow": "GET, POST, OPTIONS", "Content-Type": "application/json", "Strict-Transport-Security": "max-age=518400; includeSubDomains", "Content-Encoding": "gzip", "Server": "nginx/1.10.2", "X-Frame-Options": "SAMEORIGIN", "Transfer-Encoding": "chunked", "X-XSS-Protection": "1; mode=block"}}, "recorded_at": "2017-05-18T12:51:50"}, {"request": {"uri": "<API_URL>/api/properties/c4a6b0e1-bf90-45c1-b428-841baea30416/upload", "body": {"string": "--1086b539744040f89610a2bdf9771341\r\nContent-Disposition: form-data; name=\"part\"\r\n\r\ne5106946-40f7-4b49-ae5e-421450857911\r\n--1086b539744040f89610a2bdf9771341\r\nContent-Disposition: form-data; name=\"attachment\"; filename=\"data.json\"\r\nContent-Type: application/json\r\n\r\n{\"b\": 3, \"a\": 1}\r\n--1086b539744040f89610a2bdf9771341--\r\n", "encoding": "utf-8"}, "method": "POST", "headers": {"Content-Type": "multipart/form-data; boundary=1086b539744040f89610a2bdf9771341", "Authorization": "Token <AUTH_TOKEN>", "Accept-Encoding": "gzip, deflate", "Connection": "keep-alive", "PyKechain-Version": "1.6.0", "User-Agent": "python-requests/2.13.0", "Accept": "*/*", "Content-Length": "320", "X-Requested-With": "XMLHttpRequest"}}, "response": {"body": {"base64_string": "H4sIAAAAAAAAA6tWLy5NTk4tLla3UigpKk2tBQAdtLDDEQAAAA==", "encoding": "utf-8", "string": ""}, "status": {"code": 200, "message": "OK"}, "url": "<API_URL>/api/properties/c4a6b0e1-bf90-45c1-b428-841baea30416/upload", "headers": {"X-Content-Type-Options": "nosniff", "Vary": "Accept-Encoding", "Connection": "keep-alive", "Date": "Thu, 18 May 2017 12:51:51 GMT", "Allow": "POST, OPTIONS", "Content-Type": "text/html; charset=utf-8", "Strict-Transport-Security": "max-age=518400; includeSubDomains", "Content-Encoding": "gzip", "Server": "nginx/1.10.2", "X-Frame-Options": "SAMEORIGIN", "Transfer-Encoding": "chunked", "X-XSS-Protection": "1; mode=block"}}, "recorded_at": "2017-05-18T12:51:51"}, {"request": {"uri": "<API_URL>/api/properties/c4a6b0e1-bf90-45c1-b428-841baea30416/download", "body": {"string": "", "encoding": "utf-8"}, "method": "GET", "headers": {"Authorization": "Token <AUTH_TOKEN>", "Accept-Encoding": "gzip, deflate", "Connection": "keep-alive", "PyKechain-Version": "1.6.0", "User-Agent": "python-requests/2.13.0", "Accept": "*/*", "X-Requested-With": "XMLHttpRequest"}}, "response": {"body": {"string": "{\"b\": 3, \"a\": 1}", "encoding": "ISO-8859-1"}, "status": {"code": 200, "message": "OK"}, "url": "<API_URL>/api/properties/c4a6b0e1-bf90-45c1-b428-841baea30416/download", "headers": {"X-Content-Type-Options": "nosniff", "Vary": "Accept, Cookie", "Connection": "keep-alive", "Date": "Thu, 18 May 2017 12:51:51 GMT", "Content-Disposition": "attachment; filename=\"data_JLNlRTk.json\"", "Allow": "GET, OPTIONS", "Content-Type": "text/plain", "X-Frame-Options": "SAMEORIGIN", "Content-Length": "16", "Server": "nginx/1.10.2", "Strict-Transport-Security": "max-age=518400; includeSubDomains", "X-XSS-Protection": "1; mode=block"}}, "recorded_at": "2017-05-18T12:51:51"}], "recorded_with": "betamax/0.8.0"}
+{
+  "http_interactions": [
+    {
+      "request": {
+        "uri": "<API_URL>/api/scopes.json?name=Bike+Project+%28pykechain+testing%29&status=ACTIVE",
+        "body": {
+          "string": "",
+          "encoding": "utf-8"
+        },
+        "method": "GET",
+        "headers": {
+          "Authorization": "Token <AUTH_TOKEN>",
+          "Accept-Encoding": "gzip, deflate",
+          "Connection": "keep-alive",
+          "PyKechain-Version": "1.6.0",
+          "User-Agent": "python-requests/2.13.0",
+          "Accept": "*/*",
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      },
+      "response": {
+        "body": {
+          "base64_string": "H4sIAAAAAAAAA5VTTYvbMBD9K0GnFqJElmzLymnb7R4KhRa67KFlCfoYJ0psOVhyPwj57x0nm7Q5lLTYBmn8Zt4b6c2e9BCHJkWy+LonQ9+QBVmntIuL+XwLluudn22B2rX2YWa7do6BebTdDuK8rKWxqmaU8wpo7oSmyllGwRZaFk4KyNxsE7tApsQ7LPwvCYgNugVEv/VbmHzquw3YNHm1+4lyRhWTBDH5sHqNyAQ/EiJxFZNOAzZB3tw/vn96GP/1OkSffBdOvV0Q9x8+fn54h4i1X60b/BKguNQPcKE+QsjheUp0jH4VAINhaJopaaE10J8q+rg8bc/ZY0AHvfodgVb78UjNnZmFBjmHCP0LydjHGX5hJscq2ib/DS5lUR4/TG8Q1rqJfzDqvzCO29t04ibddX/XPJe7uk0k/5No09k1tDPEQnDxDq35veu3cbTmtYZr4G0h5Xjb6JE+LZ1OI5KzTFKWUV4+crFgDN8vmO0GuIEwg90C+nJP2s5Bs+y7bnSpVFwLa4AyUZTofpXTKq9qaqw1tRGc1VaM6gKqCBbOaXXBMyEEUJ2BozmUBTVZWVKlVK0yLSpbZ+cByxnD4lzSDCeX5rLUtOISB8zIQnIoFQAjhynZ9Z2FOA4DcxoKJRSthLA0r6SmRpU5ZYXLrQBVg1XkmLDqjxlsJvnVI/BynE/aNC/neXg+/AKYAMdDVgQAAA==",
+          "encoding": null,
+          "string": ""
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "<API_URL>/api/scopes.json?name=Bike+Project+%28pykechain+testing%29&status=ACTIVE",
+        "headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Vary": "Accept-Encoding",
+          "Connection": "keep-alive",
+          "Date": "Thu, 18 May 2017 12:51:50 GMT",
+          "Allow": "GET, POST, OPTIONS",
+          "Content-Type": "application/json",
+          "Strict-Transport-Security": "max-age=518400; includeSubDomains",
+          "Content-Encoding": "gzip",
+          "Server": "nginx/1.10.2",
+          "X-Frame-Options": "SAMEORIGIN",
+          "Transfer-Encoding": "chunked",
+          "X-XSS-Protection": "1; mode=block"
+        }
+      },
+      "recorded_at": "2017-05-18T12:51:50"
+    },
+    {
+      "request": {
+        "uri": "<API_URL>/api/parts.json?limit=100&name=Bike&bucket=40003527-1c2a-476a-8270-eb7572e69ee0&category=INSTANCE",
+        "body": {
+          "string": "",
+          "encoding": "utf-8"
+        },
+        "method": "GET",
+        "headers": {
+          "Authorization": "Token <AUTH_TOKEN>",
+          "Accept-Encoding": "gzip, deflate",
+          "Connection": "keep-alive",
+          "PyKechain-Version": "1.6.0",
+          "User-Agent": "python-requests/2.13.0",
+          "Accept": "*/*",
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      },
+      "response": {
+        "body": {
+          "base64_string": "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",
+          "encoding": null,
+          "string": ""
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "<API_URL>/api/parts.json?limit=100&name=Bike&bucket=40003527-1c2a-476a-8270-eb7572e69ee0&category=INSTANCE",
+        "headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Vary": "Accept-Encoding",
+          "Connection": "keep-alive",
+          "Date": "Thu, 18 May 2017 12:51:50 GMT",
+          "Allow": "GET, POST, OPTIONS",
+          "Content-Type": "application/json",
+          "Strict-Transport-Security": "max-age=518400; includeSubDomains",
+          "Content-Encoding": "gzip",
+          "Server": "nginx/1.10.2",
+          "X-Frame-Options": "SAMEORIGIN",
+          "Transfer-Encoding": "chunked",
+          "X-XSS-Protection": "1; mode=block"
+        }
+      },
+      "recorded_at": "2017-05-18T12:51:50"
+    },
+    {
+      "request": {
+        "uri": "<API_URL>/api/properties/c4a6b0e1-bf90-45c1-b428-841baea30416/upload",
+        "body": {
+          "string": "--1086b539744040f89610a2bdf9771341\r\nContent-Disposition: form-data; name=\"part\"\r\n\r\ne5106946-40f7-4b49-ae5e-421450857911\r\n--1086b539744040f89610a2bdf9771341\r\nContent-Disposition: form-data; name=\"attachment\"; filename=\"data.json\"\r\nContent-Type: application/json\r\n\r\n{\"b\": 3, \"a\": 1}\r\n--1086b539744040f89610a2bdf9771341--\r\n",
+          "encoding": "utf-8"
+        },
+        "method": "POST",
+        "headers": {
+          "Content-Type": "multipart/form-data; boundary=1086b539744040f89610a2bdf9771341",
+          "Authorization": "Token <AUTH_TOKEN>",
+          "Accept-Encoding": "gzip, deflate",
+          "Connection": "keep-alive",
+          "PyKechain-Version": "1.6.0",
+          "User-Agent": "python-requests/2.13.0",
+          "Accept": "*/*",
+          "Content-Length": "320",
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      },
+      "response": {
+        "body": {
+          "base64_string": "H4sIAAAAAAAAA6tWLy5NTk4tLla3UigpKk2tBQAdtLDDEQAAAA==",
+          "encoding": "utf-8",
+          "string": ""
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "<API_URL>/api/properties/c4a6b0e1-bf90-45c1-b428-841baea30416/upload",
+        "headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Vary": "Accept-Encoding",
+          "Connection": "keep-alive",
+          "Date": "Thu, 18 May 2017 12:51:51 GMT",
+          "Allow": "POST, OPTIONS",
+          "Content-Type": "text/html; charset=utf-8",
+          "Strict-Transport-Security": "max-age=518400; includeSubDomains",
+          "Content-Encoding": "gzip",
+          "Server": "nginx/1.10.2",
+          "X-Frame-Options": "SAMEORIGIN",
+          "Transfer-Encoding": "chunked",
+          "X-XSS-Protection": "1; mode=block"
+        }
+      },
+      "recorded_at": "2017-05-18T12:51:51"
+    },
+    {
+      "request": {
+        "uri": "<API_URL>/api/properties/c4a6b0e1-bf90-45c1-b428-841baea30416/download",
+        "body": {
+          "string": "",
+          "encoding": "utf-8"
+        },
+        "method": "GET",
+        "headers": {
+          "Authorization": "Token <AUTH_TOKEN>",
+          "Accept-Encoding": "gzip, deflate",
+          "Connection": "keep-alive",
+          "PyKechain-Version": "1.6.0",
+          "User-Agent": "python-requests/2.13.0",
+          "Accept": "*/*",
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      },
+      "response": {
+        "body": {
+          "string": "{\"b\": 3, \"a\": 1}",
+          "encoding": "ISO-8859-1"
+        },
+        "status": {
+          "code": 200,
+          "message": "OK"
+        },
+        "url": "<API_URL>/api/properties/c4a6b0e1-bf90-45c1-b428-841baea30416/download",
+        "headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Vary": "Accept, Cookie",
+          "Connection": "keep-alive",
+          "Date": "Thu, 18 May 2017 12:51:51 GMT",
+          "Content-Disposition": "attachment; filename=\"data_JLNlRTk.json\"",
+          "Allow": "GET, OPTIONS",
+          "Content-Type": "text/plain",
+          "X-Frame-Options": "SAMEORIGIN",
+          "Content-Length": "16",
+          "Server": "nginx/1.10.2",
+          "Strict-Transport-Security": "max-age=518400; includeSubDomains",
+          "X-XSS-Protection": "1; mode=block"
+        }
+      },
+      "recorded_at": "2017-05-18T12:51:51"
+    }
+  ],
+  "recorded_with": "betamax/0.8.0"
+}
