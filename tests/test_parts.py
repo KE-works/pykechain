@@ -179,20 +179,19 @@ class TestParts(TestBetamax):
 
         front_fork.edit(name='Front Fork')
 
-    def test_new_model(self):
+    def test_create_model(self):
         bike = self.project.model('Bike')
         pedal = self.project.create_model(bike, 'Pedal', multiplicity=Multiplicity.ZERO_MANY)
         pedal_model = self.project.model('Pedal')
         self.assertTrue(pedal.id, pedal_model.id)
         pedal_model.delete()
 
-    def test_new_proxy_model(self):
+    def test_add_proxy_to(self):
         catalog_container = self.project.model('Catalog container')
         bearing_catalog_model = catalog_container.add_model('Bearing', multiplicity=Multiplicity.ZERO_MANY)
         wheel_model = self.project.model('Wheel')
 
-        bearing_proxy_model = self.client.create_proxy_model(
-            bearing_catalog_model, wheel_model, 'Bearing', Multiplicity.ZERO_ONE)
+        bearing_proxy_model = bearing_catalog_model.add_proxy_to(wheel_model, 'Bearing', Multiplicity.ZERO_ONE)
 
         self.assertTrue(bearing_proxy_model.category, Category.MODEL)
         self.assertTrue(bearing_proxy_model.parent(), wheel_model)
