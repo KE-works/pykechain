@@ -45,8 +45,8 @@ class TestProperties(TestBetamax):
         bike = self.project.model('Bike')
 
         # test creation of new property model of bike
-        new_property = self.client.create_property(model=bike, name='New property', property_type='CHAR',
-                                                   default_value='EUREKA!')
+        new_property = bike.add_property(name='New property', property_type='CHAR',
+                                         default_value='EUREKA!')
 
         # check whether the property has been created and whether it's name and type are correct
         self.assertIsInstance(bike.property('New property'), Property)
@@ -69,8 +69,7 @@ class TestProperties(TestBetamax):
 
         # Test whether an integer property model can be created with an incorrect default value
         with self.assertRaises(APIError):
-            self.client.create_property(model=bike_model, name='Integer', property_type='INT',
-                                        default_value='Why is there a string here?')
+            bike_model.add_property(name='Integer', property_type='INT', default_value='Why is there a string here?')
 
     # 1.7.2
     def test_get_partmodel_of_propertymodel(self):
