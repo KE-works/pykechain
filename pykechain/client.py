@@ -62,7 +62,7 @@ class Client(object):
         if not check_certificates:
             self.session.verify = False
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return "<pyke Client '{}'>".format(self.api_root)
 
     @classmethod

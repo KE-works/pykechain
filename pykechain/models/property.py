@@ -54,7 +54,7 @@ class Property(Base):
         """
         r = self._client._request('DELETE', self._client._build_url('property', property_id=self.id))
 
-        if r.status_code != 204:
+        if r.status_code != 204: # pragma: no cover
             raise APIError("Could not delete property: {} with id {}".format(self.name, self.id))
 
     def _put_value(self, value):

@@ -15,7 +15,7 @@ class Scope(Base):
         self.bucket = json.get('bucket', {})
         self.process = json.get('process')
 
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return "<pyke Scope '{}' id {}>".format(self.name, self.id[-8:])
 
     def parts(self, *args, **kwargs):
