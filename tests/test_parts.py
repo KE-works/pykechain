@@ -179,6 +179,13 @@ class TestParts(TestBetamax):
 
         front_fork.edit(name='Front Fork')
 
+    def test_new_model(self):
+        bike = self.project.model('Bike')
+        pedal = self.project.create_model(bike, 'Pedal', multiplicity=Multiplicity.ZERO_MANY)
+        pedal_model = self.project.model('Pedal')
+        self.assertTrue(pedal.id, pedal_model.id)
+        pedal_model.delete()
+
     def test_new_proxy_model(self):
         catalog_container = self.project.model('Catalog container')
         bearing_catalog_model = catalog_container.add_model('Bearing', multiplicity=Multiplicity.ZERO_MANY)
