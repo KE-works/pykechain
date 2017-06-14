@@ -412,7 +412,7 @@ class Client(object):
 
         r = self._request('POST', self._build_url('activities'), data=data)
 
-        if r.status_code != 201:
+        if r.status_code != 201:  # pragma: no cover
             raise APIError("Could not create activity")
 
         data = r.json()
@@ -424,7 +424,7 @@ class Client(object):
                           params={"select_action": action},
                           data=data)
 
-        if r.status_code != requests.codes.created:
+        if r.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create part, {}: {}".format(str(r), r.content))
 
         return Part(r.json()['results'][0], client=self)
