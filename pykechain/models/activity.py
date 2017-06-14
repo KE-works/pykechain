@@ -247,7 +247,7 @@ class Activity(Base):
         url = self._client._build_url('activity', activity_id=self.id)
         r = self._client._request('PUT', url, json=update_dict)
 
-        if r.status_code != requests.codes.ok:
+        if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Activity ({})".format(r))
 
         if assignee:
