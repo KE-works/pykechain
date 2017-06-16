@@ -472,7 +472,8 @@ class Part(Base):
 
     def to_dict(self):
         """
-        Retrieve the properties of a part inside a dict in this structure: {property_name: property_value}
+        Retrieve the properties of a part inside a dict in this structure: {property_name: property_value}.
+
         Example
         -------
         >>> bike = client.scope('Bike Project').part('Bike')
