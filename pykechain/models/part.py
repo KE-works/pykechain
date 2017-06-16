@@ -469,3 +469,22 @@ class Part(Base):
             new_part = self.add(model, name=name)  # type: Part
             new_part.update(update_dict=update_dict, bulk=bulk)
             return new_part
+
+    def to_dict(self):
+        """
+        Retrieve the properties of a part inside a dict in this structure: {property_name: property_value}
+        Example
+        -------
+        >>> bike = client.scope('Bike Project').part('Bike')
+        >>> bike_properties = bike.to_dict()
+
+        """
+        properties_dict = dict()
+        for prop in self.properties:
+            if prop._json_data['property_type'] == 'REFERENCE_VALUE':
+                properties_dict[prop.name] = prop.value.name
+            else:
+                properties_dict[prop.name] = prop.value
+
+        return properties_dict
+
