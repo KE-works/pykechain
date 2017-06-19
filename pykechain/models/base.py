@@ -11,5 +11,5 @@ class Base(object):
         self.id = json.get('id', None)
         self.name = json.get('name', None)
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.name, self.id[-8:])

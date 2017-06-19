@@ -3,22 +3,22 @@ Change Log
 
 pykechain changelog
 
+1.9.0 (UNRELEASED)
+------------------
+
+ * Improved test coverage and refactored the HTTP codes to human readable form
+
+
 1.8.0 (05JUN17)
 ---------------
- * Added `Part.instances()` method for models to find their associated instances. (#113) Also added a `Part.instance()`
-   method if you for sure that you will get only a single instance back.
- * Added `Activity.subprocess()`, `Activity.siblings()` and `Activity.children()` methods to the `Activity`. It eases
-   relative retrieval of other tasks in the task tree. Documentation is included. (#100)
+ * Added `Part.instances()` method for models to find their associated instances. (#113) Also added a `Part.instance()` method if you for sure that you will get only a single instance back.
+ * Added `Activity.subprocess()`, `Activity.siblings()` and `Activity.children()` methods to the `Activity`. It eases relative retrieval of other tasks in the task tree. Documentation is included. (#100)
  * added `Activity.activity_type` property to the Activity.
- * added `ActivityType` enumeration. This can be used to check if the `activity_type` of an `Activity` is either a
-   Usertask or a Subprocess.
- * Added ability to retrieve an `Activity` based on an id. As this included in the low level `Client` object, it can
-   be used almost everywhere to retrieve an activity by its id (or primary key, pk) eg. in the `Scope.activity`.
+ * added `ActivityType` enumeration. This can be used to check if the `activity_type` of an `Activity` is either a Usertask or a Subprocess.
+ * Added ability to retrieve an `Activity` based on an id. As this included in the low level `Client` object, it can be used almost everywhere to retrieve an activity by its id (or primary key, pk) eg. in the `Scope.activity`.
  * Added ability to add additional keywords to the activities searcher to be able to search by name, pk, container etc.
- * Added a FutureDeprecationWarning to the `Activity.create_activity()` method. This will is replace with the
-   `Activity.create()` method. Update your code please!
- * Added a convenience method to retrieve models and instances related to a task at once: `Activity.associated_parts()`.
-   Making use of the already provided method in `Activity.parts()`. (#118)
+ * Added a FutureDeprecationWarning to the `Activity.create_activity()` method. This will is replace with the `Activity.create()` method. Update your code please!
+ * Added a convenience method to retrieve models and instances related to a task at once: `Activity.associated_parts()`. Making use of the already provided method in `Activity.parts()`. (#118)
  * Added missing tests for `Activity.parts()` and `Activity.associated_parts()`
  * added tests for all new features.
  * Updated the documentation.
