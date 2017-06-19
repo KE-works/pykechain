@@ -1,5 +1,6 @@
 import json
 import io
+import requests
 
 from pykechain.exceptions import APIError
 from pykechain.models.property import Property
@@ -85,7 +86,7 @@ class AttachmentProperty(Property):
 
         r = self._client._request('GET', url)
 
-        if r.status_code != 200:
+        if r.status_code != requests.codes.ok:
             raise APIError("Could not download property value")
 
         return r
@@ -97,7 +98,7 @@ class AttachmentProperty(Property):
                                   data={"part": self._json_data['part']},
                                   files={"attachment": data})
 
-        if r.status_code != 200:
+        if r.status_code != requests.codes.ok:
             raise APIError("Could not upload attachment")
 
     def _upload_json(self, content, name='data.json'):

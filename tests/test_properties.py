@@ -1,4 +1,5 @@
-from pykechain.exceptions import NotFoundError
+from pykechain.exceptions import NotFoundError, APIError
+from pykechain.models import Property
 from tests.classes import TestBetamax
 
 
@@ -39,13 +40,36 @@ class TestProperties(TestBetamax):
 
         self.assertEqual(bike.id, bike2.id)
 
-    def test_create_and_delete_property(self):
+    def test_create_and_delete_property_model(self):
+        # Retrieve the bike model
         bike = self.project.model('Bike')
 
-        new_property = self.client.create_property(model=bike, name='New property', property_type='CHAR',
-                                                    default_value='EUREKA!')
+        # test creation of new property model of bike
+        new_property = bike.add_property(name='New property', property_type='CHAR',
+                                         default_value='EUREKA!')
 
+        # check whether the property has been created and whether it's name and type are correct
+        self.assertIsInstance(bike.property('New property'), Property)
+        self.assertEqual(bike.property('New property').value, 'EUREKA!')
+        self.assertEqual(bike.property('New property')._json_data['property_type'], 'CHAR_VALUE')
+
+        # Now delete the property model
         new_property.delete()
+
+        # Retrieve the bike model again
+        updated_bike = self.project.model('Bike')
+
+        # Check whether it still has the property model that has just been deleted
+        with self.assertRaises(NotFoundError):
+            updated_bike.property('New property')
+
+    def test_wrongly_creation_of_property(self):
+        # These actions should not be possible. This test is of course, expecting APIErrors to be raised
+        bike_model = self.project.model('Bike')
+
+        # Test whether an integer property model can be created with an incorrect default value
+        with self.assertRaises(APIError):
+            bike_model.add_property(name='Integer', property_type='INT', default_value='Why is there a string here?')
 
     # 1.7.2
     def test_get_partmodel_of_propertymodel(self):

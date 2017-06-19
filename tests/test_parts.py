@@ -151,6 +151,7 @@ class TestParts(TestBetamax):
     # new in 1.5+
     def test_edit_part_instance_name(self):
         front_fork = self.project.part('Front Fork')
+        front_fork_oldname = str(front_fork.name)
         front_fork.edit(name='Front Fork - updated')
 
         front_fork_u = self.project.part('Front Fork - updated')
@@ -158,34 +159,47 @@ class TestParts(TestBetamax):
         assert front_fork.name == front_fork_u.name
         assert front_fork.name == 'Front Fork - updated'
 
-        front_fork.edit(name='Front Fork')
+        # teardown
+        front_fork.edit(name=front_fork_oldname)
 
     def test_edit_part_instance_description(self):
         front_fork = self.project.part('Front Fork')
+        front_fork_olddescription = str(front_fork._json_data.get('description'))
         front_fork.edit(description='A normal Front Fork')
 
         front_fork_u = self.project.part('Front Fork')
         assert front_fork.id == front_fork_u.id
 
-        front_fork.edit(description='A perfectly normal Front Fork')
+        # teardown
+        front_fork.edit(description=front_fork_olddescription)
 
     def test_edit_part_model_name(self):
         front_fork = self.project.model('Front Fork')
+        front_fork_oldname = str(front_fork.name)
         front_fork.edit(name='Front Fork - updated')
 
         front_fork_u = self.project.model('Front Fork - updated')
         assert front_fork.id == front_fork_u.id
         assert front_fork.name == front_fork_u.name
 
-        front_fork.edit(name='Front Fork')
+        # teardown
+        front_fork.edit(name=front_fork_oldname)
 
-    def test_new_proxy_model(self):
+    def test_create_model(self):
+        bike = self.project.model('Bike')
+        pedal = self.project.create_model(bike, 'Pedal', multiplicity=Multiplicity.ZERO_MANY)
+        pedal_model = self.project.model('Pedal')
+        self.assertTrue(pedal.id, pedal_model.id)
+
+        # teardown
+        pedal_model.delete()
+
+    def test_add_proxy_to(self):
         catalog_container = self.project.model('Catalog container')
         bearing_catalog_model = catalog_container.add_model('Bearing', multiplicity=Multiplicity.ZERO_MANY)
         wheel_model = self.project.model('Wheel')
 
-        bearing_proxy_model = self.client.create_proxy_model(
-            bearing_catalog_model, wheel_model, 'Bearing', Multiplicity.ZERO_ONE)
+        bearing_proxy_model = bearing_catalog_model.add_proxy_to(wheel_model, 'Bearing', Multiplicity.ZERO_ONE)
 
         self.assertTrue(bearing_proxy_model.category, Category.MODEL)
         self.assertTrue(bearing_proxy_model.parent(), wheel_model)
