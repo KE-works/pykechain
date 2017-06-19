@@ -235,6 +235,7 @@ class TestParts(TestBetamax):
         bike_model = self.project.model('Bike')
         self.assertEqual(bike_model.multiplicity, Multiplicity.ONE)
 
+    # new in 1.9
     def test_retrieve_part_properties_in_a_dict(self):
         # Retrieve the bike part
         bike = self.project.part('Bike')
