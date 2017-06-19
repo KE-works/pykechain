@@ -1,5 +1,7 @@
 from typing import Any  # flake8: noqa
 
+import requests
+
 from pykechain.exceptions import APIError
 from pykechain.models.base import Base
 
@@ -54,7 +56,7 @@ class Property(Base):
         """
         r = self._client._request('DELETE', self._client._build_url('property', property_id=self.id))
 
-        if r.status_code != 204: # pragma: no cover
+        if r.status_code != requests.codes.no_content: # pragma: no cover
             raise APIError("Could not delete property: {} with id {}".format(self.name, self.id))
 
     def _put_value(self, value):
@@ -62,7 +64,7 @@ class Property(Base):
 
         r = self._client._request('PUT', url, json={'value': value})
 
-        if r.status_code != 200:  # pragma: no cover
+        if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update property value")
 
         return r.json()['results'][0]['value']
