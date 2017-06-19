@@ -239,18 +239,12 @@ class TestParts(TestBetamax):
         # Retrieve the bike part
         bike = self.project.part('Bike')
 
-        # Provide the dict that is expected based on the properties and property values of bike instance
-        expected_dict = {'Empty attachment': None, 'Description': '', 'linkkkkk': None, 'select list': None,
-                         'Total height': None, 'RefTest': 'Rear Wheel', 'Picture': '[Attachment: data_JLNlRTk.json]',
-                         'Expiring date': None, 'Gears': 10, 'Website': 'http://www.ns.nl',
-                         'Photo Attachment': '[Attachment: Awesome.jpg]', 'Plot Attachment': None, 'Sale?': True}
-
         # Call the function to be tested
-        bike_properties = bike.to_dict()
+        bike_properties = bike.as_dict()
 
-        # Check whether it returns the right thing - assertEqual calls the assertDictEqual method, which correctly
-        # compares two unordered dicts
-        self.assertEqual(bike_properties, expected_dict)
+        # Check whether bike_properties contains all the property names in bike
+        for prop in bike.properties:
+            self.assertTrue(prop.name in bike_properties)
 
 
 class TestPartUpdate(TestBetamax):
