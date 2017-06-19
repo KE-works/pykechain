@@ -361,7 +361,7 @@ class Part(Base):
             update_dict.update({'description': description})
         r = self._client._request('PUT', self._client._build_url('part', part_id=self.id), json=update_dict)
 
-        if r.status_code != requests.codes.ok:
+        if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Part ({})".format(r))
 
         if name:
@@ -420,7 +420,7 @@ class Part(Base):
             r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
                                       data=dict(properties=json.dumps(request_body)),
                                       params=dict(select_action=action))
-            if r.status_code != requests.codes.ok:
+            if r.status_code != requests.codes.ok:  # pragma: no cover
                 raise APIError('{}: {}'.format(str(r), r.content))
         else:
             for property_name, property_value in update_dict.items():
@@ -462,7 +462,7 @@ class Part(Base):
                                       ),
                                       params=dict(select_action=action))
 
-            if r.status_code != requests.codes.created:
+            if r.status_code != requests.codes.created:  # pragma: no cover
                 raise APIError('{}: {}'.format(str(r), r.content))
             return Part(r.json()['results'][0], client=self._client)
         else:  # do the old way
