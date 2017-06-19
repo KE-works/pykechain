@@ -476,13 +476,20 @@ class Part(Base):
 
         Example
         -------
-        >>> bike = client.scope('Bike Project').part('Bike')
-        >>> bike_properties = bike.as_dict()
+        >>> front_wheel = client.scope('Bike Project').part('Front Wheel')
+        >>> front_wheel_properties = front_wheel.as_dict()
+
+        Output example
+        --------------
+        >>> front_wheel_properties = {'Diameter': 60.8,
+        >>>                           'Spokes': 24,
+        >>>                           'Rim Material': 'Aluminium',
+        >>>                           'Tire Thickness': 4.2
+        >>>                   }
 
         """
         properties_dict = dict()
         for prop in self.properties:
             properties_dict[prop.name] = prop.value
-
         return properties_dict
 
