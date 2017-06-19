@@ -237,6 +237,7 @@ class TestParts(TestBetamax):
 
 
 class TestPartUpdate(TestBetamax):
+    # updated in 1.9
     def test_part_update_with_dictionary_without_name(self):
         # setup
         front_fork = self.project.part('Front Fork')  # type: Part
@@ -260,6 +261,7 @@ class TestPartUpdate(TestBetamax):
         for prop_name, prop_value in saved_front_fork_properties.items():
             front_fork.property(prop_name).value = prop_value
 
+    # new in 1.9
     def test_part_update_with_dictionary_including_name(self):
         # setup
         front_fork = self.project.part('Front Fork')  # type: Part
