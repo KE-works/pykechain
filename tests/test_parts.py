@@ -249,6 +249,18 @@ class TestParts(TestBetamax):
         bike_model = self.project.model('Bike')
         self.assertEqual(bike_model.multiplicity, Multiplicity.ONE)
 
+    # new in 1.9
+    def test_retrieve_part_properties_in_a_dict(self):
+        # Retrieve the bike part
+        bike = self.project.part('Bike')
+
+        # Call the function to be tested
+        bike_properties = bike.as_dict()
+
+        # Check whether bike_properties contains all the property names in bike
+        for prop in bike.properties:
+            self.assertTrue(prop.name in bike_properties)
+
 
 class TestPartUpdate(TestBetamax):
     def test_part_update_with_dictionary(self):
@@ -344,7 +356,7 @@ class TestPartCreateWithProperties(TestBetamax):
 
     def test_get_single_instance_of_a_model(self):
         bike_model = self.project.model('Bike')
-        bike_instance= bike_model.instance()
+        bike_instance = bike_model.instance()
 
         self.assertEqual(bike_instance.category, Category.INSTANCE)
 
