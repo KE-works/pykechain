@@ -392,10 +392,9 @@ class Part(Base):
         return ''.join(html)
 
     def update(self, name=None, update_dict=None, bulk=True):
-
         """
-        Use a dictionary with property names and property values to update the properties belonging to this part.
-        Optionally, one can also edit the name of the part using the same call.
+        Use a dictionary with property names and property values to update the properties belonging to this part and
+        optionally also the part name.
 
         :param name: new part name (defined as a string)
         :param update_dict: dictionary with keys being property names (str) and values being property values
