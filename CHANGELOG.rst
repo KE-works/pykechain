@@ -8,6 +8,7 @@ pykechain changelog
 
  * Improved test coverage and refactored the HTTP codes to human readable form
  * Add `Part.as_dict()` method to retrieve the properties of a part in pykechain as a python dictionary as `{<property_name> : <property_value>}`
+ * Added the ability to optionally update the name of a part together with the value of its properties. See the `Part.update()` method.
 
 1.8.0 (05JUN17)
 ---------------

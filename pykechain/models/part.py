@@ -391,10 +391,11 @@ class Part(Base):
 
         return ''.join(html)
 
-    def update(self, update_dict=None, bulk=True):
+    def update(self, name=None, update_dict=None, bulk=True):
         """
-        Use a dictionary with property names and property values to update the properties belonging to this part.
+        Edit part name and property values in one go.
 
+        :param name: new part name (defined as a string)
         :param update_dict: dictionary with keys being property names (str) and values being property values
         :param bulk: True to use the bulk_update_properties API endpoint for KE-chain versions later then 2.1.0b
         :return: :class:`pykechain.models.Part`
@@ -404,12 +405,12 @@ class Part(Base):
         -------
 
         >>> bike = client.scope('Bike Project').part('Bike')
-        >>> bike.update({'Gears': 11, 'Total Height': 56.3}, bulk=True)
+        >>> bike.update(name='Good name', update_dict={'Gears': 11, 'Total Height': 56.3}, bulk=True)
 
         """
         # new for 1.5 and KE-chain 2 (released after 14 march 2017) is the 'bulk_update_properties' action on the api
         # lets first use this one.
-        # dict(properties=json.dumps(update_dict))) with property ids:value
+        # dict(name=name, properties=json.dumps(update_dict))) with property ids:value
         action = 'bulk_update_properties'
 
         url = self._client._build_url('part', part_id=self.id)
@@ -417,8 +418,10 @@ class Part(Base):
                              for property_name, property_value in update_dict.items()])
 
         if bulk and len(update_dict.keys()) > 1:
+            if name:
+                assert type(name) == str, "Name of the part should be provided as a string"
             r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
-                                      data=dict(properties=json.dumps(request_body)),
+                                      data=dict(name=name, properties=json.dumps(request_body)),
                                       params=dict(select_action=action))
             if r.status_code != requests.codes.ok:  # pragma: no cover
                 raise APIError('{}: {}'.format(str(r), r.content))
