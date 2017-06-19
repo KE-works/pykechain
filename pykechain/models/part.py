@@ -393,8 +393,7 @@ class Part(Base):
 
     def update(self, name=None, update_dict=None, bulk=True):
         """
-        Use a dictionary with property names and property values to update the properties belonging to this part and
-        optionally also the part name.
+        Edit part name and property values in one go.
 
         :param name: new part name (defined as a string)
         :param update_dict: dictionary with keys being property names (str) and values being property values
