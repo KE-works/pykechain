@@ -3,6 +3,12 @@ Change Log
 
 pykechain changelog
 
+1.9.0 (UNRELEASED)
+------------------
+
+ * Improved test coverage and refactored the HTTP codes to human readable form
+
+
 1.8.0 (05JUN17)
 ---------------
  * Added `Part.instances()` method for models to find their associated instances. (#113) Also added a `Part.instance()` method if you for sure that you will get only a single instance back.
