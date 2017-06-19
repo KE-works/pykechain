@@ -361,7 +361,7 @@ class Part(Base):
             update_dict.update({'description': description})
         r = self._client._request('PUT', self._client._build_url('part', part_id=self.id), json=update_dict)
 
-        if r.status_code != requests.codes.ok:
+        if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Part ({})".format(r))
 
         if name:
@@ -423,8 +423,7 @@ class Part(Base):
             r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
                                       data=dict(name=name, properties=json.dumps(request_body)),
                                       params=dict(select_action=action))
-
-            if r.status_code != requests.codes.ok:
+            if r.status_code != requests.codes.ok:  # pragma: no cover
                 raise APIError('{}: {}'.format(str(r), r.content))
         else:
             for property_name, property_value in update_dict.items():
@@ -466,10 +465,30 @@ class Part(Base):
                                       ),
                                       params=dict(select_action=action))
 
-            if r.status_code != requests.codes.created:
+            if r.status_code != requests.codes.created:  # pragma: no cover
                 raise APIError('{}: {}'.format(str(r), r.content))
             return Part(r.json()['results'][0], client=self._client)
         else:  # do the old way
             new_part = self.add(model, name=name)  # type: Part
             new_part.update(update_dict=update_dict, bulk=bulk)
             return new_part
+
+    def as_dict(self):
+        """
+        Retrieve the properties of a part inside a dict in this structure: {property_name: property_value}.
+
+        Example
+        -------
+        >>> front_wheel = client.scope('Bike Project').part('Front Wheel')
+        >>> front_wheel_properties = front_wheel.as_dict()
+        {'Diameter': 60.8,
+         'Spokes': 24,
+         'Rim Material': 'Aluminium',
+         'Tire Thickness': 4.2}
+
+        """
+        properties_dict = dict()
+        for prop in self.properties:
+            properties_dict[prop.name] = prop.value
+        return properties_dict
+

@@ -18,11 +18,9 @@ class TestSelectListProperty(TestBetamax):
         # setup
         sellist_model = self.project.model('Model').property('a_select_list_property')
 
-        saved_options_list = [str(i) for i in sellist_model.options]
-
         # do test
-        from datetime import datetime
-        new_options_list = [1, 3.14, "a"]
+        current_options_list = [1, 3.14, "a"]
+        new_options_list = ['this', 'is', 'new']
         sellist_model.options = new_options_list
         self.assertListEqual(sellist_model.options, list(map(str, new_options_list)))
 
@@ -30,7 +28,7 @@ class TestSelectListProperty(TestBetamax):
         self.assertListEqual(sellist_model.options, sellist_model2.options)
 
         # teardown
-        sellist_model.options = saved_options_list
+        sellist_model.options = current_options_list
 
     def test_illegal_options_are_not_set(self):
         """Test for secveral illegal lists to be set"""
@@ -55,7 +53,7 @@ class TestSelectListProperty(TestBetamax):
             sellist_model.options = (1,)
 
     def test_fail_to_set_options_on_instance(self):
-        """Test settings options on a property instance, only models are allowed optiosn to be set"""
+        """Test settings options on a property instance, only models are allowed options to be set"""
         sellist_model = self.project.model('Model')
         sellist_part_instance = self.project.parts(model=sellist_model)
         sellist_part_instance = sellist_part_instance[0]
