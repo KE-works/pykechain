@@ -412,7 +412,7 @@ class Client(object):
 
         r = self._request('POST', self._build_url('activities'), data=data)
 
-        if r.status_code != 201:  # pragma: no cover
+        if r.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create activity")
 
         data = r.json()
@@ -514,7 +514,7 @@ class Client(object):
         r = self._request('POST', self._build_url('properties'),
                           data=data)
 
-        if r.status_code != 201:
+        if r.status_code != requests.codes.created:
             raise APIError("Could not create property")
 
         prop = Property.create(r.json()['results'][0], client=self)

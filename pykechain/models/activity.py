@@ -78,14 +78,14 @@ class Activity(Base):
             'outputs': [p.id for p in outputs]
         })
 
-        if r.status_code != 200:  # pragma: no cover
+        if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not configure activity")
 
     def delete(self):
         """Delete this activity."""
         r = self._client._request('DELETE', self._client._build_url('activity', activity_id=self.id))
 
-        if r.status_code != 204:
+        if r.status_code != requests.codes.no_content:
             raise APIError("Could not delete activity: {} with id {}".format(self.name, self.id))
 
     def subprocess(self):
