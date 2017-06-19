@@ -392,6 +392,7 @@ class Part(Base):
         return ''.join(html)
 
     def update(self, name=None, update_dict=None, bulk=True):
+
         """
         Use a dictionary with property names and property values to update the properties belonging to this part.
         Optionally, one can also edit the name of the part using the same call.
@@ -411,7 +412,7 @@ class Part(Base):
         """
         # new for 1.5 and KE-chain 2 (released after 14 march 2017) is the 'bulk_update_properties' action on the api
         # lets first use this one.
-        # dict(properties=json.dumps(update_dict))) with property ids:value
+        # dict(name=name, properties=json.dumps(update_dict))) with property ids:value
         action = 'bulk_update_properties'
 
         url = self._client._build_url('part', part_id=self.id)
