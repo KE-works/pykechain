@@ -3,6 +3,8 @@ Change Log
 
 pykechain changelog
 
+* Add `Part.as_dict()` method to retrieve the properties of a part in pykechain as a python dictionary as `{<property_name> : <property_value>}`
+
 1.8.0 (05JUN17)
 ---------------
  * Added `Part.instances()` method for models to find their associated instances. (#113) Also added a `Part.instance()`
