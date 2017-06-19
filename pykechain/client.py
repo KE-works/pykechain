@@ -62,7 +62,7 @@ class Client(object):
         if not check_certificates:
             self.session.verify = False
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return "<pyke Client '{}'>".format(self.api_root)
 
     @classmethod
@@ -412,7 +412,7 @@ class Client(object):
 
         r = self._request('POST', self._build_url('activities'), data=data)
 
-        if r.status_code != 201:
+        if r.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create activity")
 
         data = r.json()
@@ -424,7 +424,7 @@ class Client(object):
                           params={"select_action": action},
                           data=data)
 
-        if r.status_code != requests.codes.created:
+        if r.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create part, {}: {}".format(str(r), r.content))
 
         return Part(r.json()['results'][0], client=self)
@@ -514,7 +514,7 @@ class Client(object):
         r = self._request('POST', self._build_url('properties'),
                           data=data)
 
-        if r.status_code != 201:
+        if r.status_code != requests.codes.created:
             raise APIError("Could not create property")
 
         prop = Property.create(r.json()['results'][0], client=self)
