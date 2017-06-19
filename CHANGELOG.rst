@@ -3,6 +3,8 @@ Change Log
 
 pykechain changelog
 
+* Added the ability to optionally update the name of a part together with the value of its properties. See the `Part.update()` method.
+
 1.8.0 (05JUN17)
 ---------------
  * Added `Part.instances()` method for models to find their associated instances. (#113) Also added a `Part.instance()`
