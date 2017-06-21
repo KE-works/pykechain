@@ -4,7 +4,7 @@ import requests
 from typing import Any, AnyStr  # flake8: noqa
 
 from pykechain.enums import Multiplicity, Category
-from pykechain.exceptions import NotFoundError, APIError
+from pykechain.exceptions import NotFoundError, APIError, MultipleFoundError
 from pykechain.models.base import Base
 from pykechain.models.property import Property
 from pykechain.utils import find
@@ -16,6 +16,35 @@ class Part(Base):
     :cvar category: The category of the part, either 'MODEL' or 'INSTANCE' (use `pykechain.enums.Category`)
     :cvar parent_id: The UUID of the parent of this part
     :cvar properties: The list of `pykechain.models.Property` objects belonging to this part.
+    :cvar multiplicity: The multiplicity of the part being one of the following options: ZERO_ONE, ONE, ZERO_MANY,
+                        ONE_MANY, (reserved) M_N
+
+    Examples
+    --------
+    For the category property
+
+    >>> bike = project.part('Bike')
+    >>> bike.category
+    'INSTANCE'
+
+    >>> bike_model = project.model('Bike')
+    >>> bike_model.category
+    'MODEL'
+
+    >>> bike_model == Category.MODEL
+    True
+    >>> bike == Category.INSTANCE
+    True
+
+    For the multiplicity property
+
+    >>> bike = project.models('Bike')
+    >>> bike.multiplicity
+    ONE_MANY
+
+    >>> from pykechain.enums import Multiplicity
+    >>> bike.multiplicity == Multiplicity.ONE_MANY
+    True
 
     """
 
@@ -27,26 +56,7 @@ class Part(Base):
         self.category = json.get('category')
         self.parent_id = json['parent'].get('id') if 'parent' in json and json.get('parent') else None
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
-
-    @property
-    def multiplicity(self):
-        """Return the multiplicity of a part.
-        
-        Multiplicity of a part is one of the following options: ZERO_ONE, ONE, ZERO_MANY, ONE_MANY, (reserved) M_N
-        Use `pykechain.enums.Multiplicity` to check for the correct multiplicity
-        
-        Examples
-        --------
-        >>> bike = project.models('Bike')
-        >>> bike.multiplicity
-        ONE_MANY
-        
-        >>> from pykechain.enums import Multiplicity
-        >>> bike.multiplicity == Multiplicity.ONE_MANY
-        True      
-        
-        """
-        return self._json_data.get('multiplicity', None)
+        self.multiplicity = json.get('multiplicity', None)
 
     def property(self, name):
         # type: (str) -> Property
@@ -65,7 +75,7 @@ class Part(Base):
         >>> part.properties
         [<pyke Property ...>, ...]
         # this returns a list of all properties of this part
-        
+
         >>> gears = part.property('Gears')
         >>> gears.value
         6
@@ -148,6 +158,44 @@ class Part(Base):
         else:
             raise NotFoundError("Part {} has no model".format(self.name))
 
+    def instances(self):
+        """
+        Retrieve the instances of this `Part` as a `PartSet`.
+
+        For instance, if you have a model part, you can get the list of instances that are created based on this
+        moodel. If there are no instances (only possible if the multiplicity is `Multiplicity.ZERO_MANY` than a
+        NotFoundError is returned
+
+        :return: pykechain.models.PartSet
+        :raises: NotFoundError
+
+        Example
+        -------
+        >>> wheel_model = project.model('Wheel')
+        >>> wheel_instance_set = wheel_model.instances()
+
+        """
+        if self.category == Category.MODEL:
+            return self._client.parts(model=self, category=Category.INSTANCE)
+        else:
+            raise NotFoundError("Part {} has no instances or is not a model".format(self.name))
+
+    def instance(self):
+        """
+        Retrieve the single (expected) instance of this 'Part' (of `Category.MODEL`) as a 'Part'.
+
+        See `Part.instances()` method for documentation.
+
+        :return: pykechain.models.Part
+        :raises: NotFoundError, MultipleFoundError
+        """
+        instances_list = list(self.instances())
+        if len(instances_list) == 1:
+            return instances_list[0]
+        else:
+            raise MultipleFoundError("Part {} has more than a single instance. "
+                                     "Use the `Part.instances()` method".format(self.name))
+
     def proxy_model(self):
         """
         Retrieve the proxy model of this proxied `Part` as a `Part`.
@@ -204,10 +252,10 @@ class Part(Base):
         :param parent: part to add the new instance to
         :return: :class:`pykechain.models.Part`
         :raises: APIError
-        
+
         Example
         -------
-        
+
         >>> wheel_model = project.model('wheel')
         >>> bike = project.part('Bike')
         >>> wheel_model.add_to(bike)
@@ -231,25 +279,25 @@ class Part(Base):
     def add_proxy_to(self, parent, name, multiplicity=Multiplicity.ONE_MANY):
         # type: (Any, AnyStr, Any) -> Part
         """Add this model as a proxy to another parent model.
-        
+
         This will add the current model as a proxy model to another parent model. It ensure that it will copy the
         whole subassembly to the 'parent' model.
-        
+
         :param name: Name of the new proxy model
-        :param parent: parent of the 
-        :param multiplicity: the multiplicity of the new proxy model (default ONE_MANY) 
+        :param parent: parent of the
+        :param multiplicity: the multiplicity of the new proxy model (default ONE_MANY)
         :return: Part (self)
-        
+
         Examples
         --------
         >>> from pykechain.enums import Multiplicity
         >>> bike_model = project.model('Bike')
         # find the catalog model container, the highest parent to create catalog models under
         >>> catalog_model_container = project.model('Catalog container')
-        >>> new_wheel_model = project.create_model(catalog_model_container, 'Wheel Catalog', 
+        >>> new_wheel_model = project.create_model(catalog_model_container, 'Wheel Catalog',
         ...                                        multiplicity=Multiplicity.ZERO_MANY)
         >>> new_wheel_model.add_proxy_to(bike_model, "Wheel", multiplicity=Multiplicity.ONE_MANY)
-        
+
         """
         return self._client.create_proxy_model(self, parent, name, multiplicity)
 
@@ -293,13 +341,13 @@ class Part(Base):
         -------
 
         For changing a part:
-              
+
         >>> front_fork = project.part('Front Fork')
         >>> front_fork.edit(name='Front Fork - updated')
         >>> front_fork.edit(name='Front Fork cruizer', description='With my ragtop down so my hair can blow' )
 
         for changing a model:
-                
+
         >>> front_fork = project.model('Front Fork')
         >>> front_fork.edit(name='Front Fork basemodel', description='Some description here')
 
@@ -313,7 +361,7 @@ class Part(Base):
             update_dict.update({'description': description})
         r = self._client._request('PUT', self._client._build_url('part', part_id=self.id), json=update_dict)
 
-        if r.status_code != requests.codes.ok:
+        if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Part ({})".format(r))
 
         if name:
@@ -343,10 +391,11 @@ class Part(Base):
 
         return ''.join(html)
 
-    def update(self, update_dict=None, bulk=True):
+    def update(self, name=None, update_dict=None, bulk=True):
         """
-        Use a dictionary with property names and property values to update the properties belonging to this part.
+        Edit part name and property values in one go.
 
+        :param name: new part name (defined as a string)
         :param update_dict: dictionary with keys being property names (str) and values being property values
         :param bulk: True to use the bulk_update_properties API endpoint for KE-chain versions later then 2.1.0b
         :return: :class:`pykechain.models.Part`
@@ -354,14 +403,14 @@ class Part(Base):
 
         Example
         -------
-        
+
         >>> bike = client.scope('Bike Project').part('Bike')
-        >>> bike.update({'Gears': 11, 'Total Height': 56.3}, bulk=True)
-        
+        >>> bike.update(name='Good name', update_dict={'Gears': 11, 'Total Height': 56.3}, bulk=True)
+
         """
         # new for 1.5 and KE-chain 2 (released after 14 march 2017) is the 'bulk_update_properties' action on the api
         # lets first use this one.
-        # dict(properties=json.dumps(update_dict))) with property ids:value
+        # dict(name=name, properties=json.dumps(update_dict))) with property ids:value
         action = 'bulk_update_properties'
 
         url = self._client._build_url('part', part_id=self.id)
@@ -369,10 +418,12 @@ class Part(Base):
                              for property_name, property_value in update_dict.items()])
 
         if bulk and len(update_dict.keys()) > 1:
+            if name:
+                assert type(name) == str, "Name of the part should be provided as a string"
             r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
-                                      data=dict(properties=json.dumps(request_body)),
+                                      data=dict(name=name, properties=json.dumps(request_body)),
                                       params=dict(select_action=action))
-            if r.status_code != requests.codes.ok:
+            if r.status_code != requests.codes.ok:  # pragma: no cover
                 raise APIError('{}: {}'.format(str(r), r.content))
         else:
             for property_name, property_value in update_dict.items():
@@ -381,7 +432,7 @@ class Part(Base):
     def add_with_properties(self, model, name=None, update_dict=None, bulk=True):
         """
         Add a part and update its properties in one go.
-        
+
         :param model: model of the part which to add a new instance, should follow the model tree in KE-chain
         :param name: (optional) name provided for the new instance as string otherwise use the name of the model
         :param update_dict: dictionary with keys being property names (str) and values being property values
@@ -392,9 +443,9 @@ class Part(Base):
         Examples
         --------
         >>> bike = client.scope('Bike Project').part('Bike')
-        >>> wheel_model = client.scope('Bike Project').model('Wheel') 
+        >>> wheel_model = client.scope('Bike Project').model('Wheel')
         >>> bike.add_with_properties(wheel_model, 'Wooden Wheel', {'Spokes': 11, 'Material': 'Wood'})
-        
+
         """
         # TODO: add test coverage for this method
         assert self.category == Category.INSTANCE
@@ -414,10 +465,30 @@ class Part(Base):
                                       ),
                                       params=dict(select_action=action))
 
-            if r.status_code != requests.codes.created:
+            if r.status_code != requests.codes.created:  # pragma: no cover
                 raise APIError('{}: {}'.format(str(r), r.content))
             return Part(r.json()['results'][0], client=self._client)
         else:  # do the old way
             new_part = self.add(model, name=name)  # type: Part
             new_part.update(update_dict=update_dict, bulk=bulk)
             return new_part
+
+    def as_dict(self):
+        """
+        Retrieve the properties of a part inside a dict in this structure: {property_name: property_value}.
+
+        Example
+        -------
+        >>> front_wheel = client.scope('Bike Project').part('Front Wheel')
+        >>> front_wheel_properties = front_wheel.as_dict()
+        {'Diameter': 60.8,
+         'Spokes': 24,
+         'Rim Material': 'Aluminium',
+         'Tire Thickness': 4.2}
+
+        """
+        properties_dict = dict()
+        for prop in self.properties:
+            properties_dict[prop.name] = prop.value
+        return properties_dict
+

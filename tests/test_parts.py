@@ -151,6 +151,7 @@ class TestParts(TestBetamax):
     # new in 1.5+
     def test_edit_part_instance_name(self):
         front_fork = self.project.part('Front Fork')
+        front_fork_oldname = str(front_fork.name)
         front_fork.edit(name='Front Fork - updated')
 
         front_fork_u = self.project.part('Front Fork - updated')
@@ -158,34 +159,47 @@ class TestParts(TestBetamax):
         assert front_fork.name == front_fork_u.name
         assert front_fork.name == 'Front Fork - updated'
 
-        front_fork.edit(name='Front Fork')
+        # teardown
+        front_fork.edit(name=front_fork_oldname)
 
     def test_edit_part_instance_description(self):
         front_fork = self.project.part('Front Fork')
+        front_fork_olddescription = str(front_fork._json_data.get('description'))
         front_fork.edit(description='A normal Front Fork')
 
         front_fork_u = self.project.part('Front Fork')
         assert front_fork.id == front_fork_u.id
 
-        front_fork.edit(description='A perfectly normal Front Fork')
+        # teardown
+        front_fork.edit(description=front_fork_olddescription)
 
     def test_edit_part_model_name(self):
         front_fork = self.project.model('Front Fork')
+        front_fork_oldname = str(front_fork.name)
         front_fork.edit(name='Front Fork - updated')
 
         front_fork_u = self.project.model('Front Fork - updated')
         assert front_fork.id == front_fork_u.id
         assert front_fork.name == front_fork_u.name
 
-        front_fork.edit(name='Front Fork')
+        # teardown
+        front_fork.edit(name=front_fork_oldname)
 
-    def test_new_proxy_model(self):
+    def test_create_model(self):
+        bike = self.project.model('Bike')
+        pedal = self.project.create_model(bike, 'Pedal', multiplicity=Multiplicity.ZERO_MANY)
+        pedal_model = self.project.model('Pedal')
+        self.assertTrue(pedal.id, pedal_model.id)
+
+        # teardown
+        pedal_model.delete()
+
+    def test_add_proxy_to(self):
         catalog_container = self.project.model('Catalog container')
         bearing_catalog_model = catalog_container.add_model('Bearing', multiplicity=Multiplicity.ZERO_MANY)
         wheel_model = self.project.model('Wheel')
 
-        bearing_proxy_model = self.client.create_proxy_model(
-            bearing_catalog_model, wheel_model, 'Bearing', Multiplicity.ZERO_ONE)
+        bearing_proxy_model = bearing_catalog_model.add_proxy_to(wheel_model, 'Bearing', Multiplicity.ZERO_ONE)
 
         self.assertTrue(bearing_proxy_model.category, Category.MODEL)
         self.assertTrue(bearing_proxy_model.parent(), wheel_model)
@@ -235,21 +249,35 @@ class TestParts(TestBetamax):
         bike_model = self.project.model('Bike')
         self.assertEqual(bike_model.multiplicity, Multiplicity.ONE)
 
+    # new in 1.9
+    def test_retrieve_part_properties_in_a_dict(self):
+        # Retrieve the bike part
+        bike = self.project.part('Bike')
+
+        # Call the function to be tested
+        bike_properties = bike.as_dict()
+
+        # Check whether bike_properties contains all the property names in bike
+        for prop in bike.properties:
+            self.assertTrue(prop.name in bike_properties)
+
 
 class TestPartUpdate(TestBetamax):
-    def test_part_update_with_dictionary(self):
+    # updated in 1.9
+    def test_part_update_with_dictionary_without_name(self):
         # setup
         front_fork = self.project.part('Front Fork')  # type: Part
         saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
 
         # do tests
         update_dict = {
-            'Material': 'Unobtanium',
-            'Height (mm)': 123.4,
-            'Color': 'Space Grey (old)'
+            'Material': 'Adamantium',
+            'Height (mm)': 432.1,
+            'Color': 'Earth Blue (new)'
         }
-        front_fork.update(update_dict)
+        front_fork.update(update_dict=update_dict)
         refreshed_front_fork = self.project.part(pk=front_fork.id)
+
         for prop in refreshed_front_fork.properties:
             assert prop.name in update_dict, "property with {} should be in the update dict".format(prop.name)
             assert update_dict[prop.name] == prop.value, "property {} with value {} did not match contents " \
@@ -258,6 +286,31 @@ class TestPartUpdate(TestBetamax):
         # tearDown
         for prop_name, prop_value in saved_front_fork_properties.items():
             front_fork.property(prop_name).value = prop_value
+
+    # new in 1.9
+    def test_part_update_with_dictionary_including_name(self):
+        # setup
+        front_fork = self.project.part('Front Fork')  # type: Part
+        saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
+
+        # do tests
+        update_dict = {
+            'Material': 'Adamantium',
+            'Height (mm)': 432.1,
+            'Color': 'Earth Blue (new)'
+        }
+        front_fork.update(name='Better front fork', update_dict=update_dict)
+        refreshed_front_fork = self.project.part(pk=front_fork.id)
+        self.assertEqual(refreshed_front_fork.name, 'Better front fork')
+        for prop in refreshed_front_fork.properties:
+            assert prop.name in update_dict, "property with {} should be in the update dict".format(prop.name)
+            assert update_dict[prop.name] == prop.value, "property {} with value {} did not match contents " \
+                                                         "with KEC".format(prop.name, prop.value)
+
+        # tearDown
+        for prop_name, prop_value in saved_front_fork_properties.items():
+            front_fork.property(prop_name).value = prop_value
+        refreshed_front_fork.edit(name='Front Fork')
 
     def test_part_update_with_missing_property(self):
         # setup
@@ -269,7 +322,7 @@ class TestPartUpdate(TestBetamax):
             'Unknown Property': 'Woot!'
         }
         with self.assertRaises(NotFoundError):
-            front_fork.update(update_dict)
+            front_fork.update(update_dict=update_dict)
 
         # tearDown
         for prop_name, prop_value in saved_front_fork_properties.items():
@@ -312,3 +365,30 @@ class TestPartCreateWithProperties(TestBetamax):
         self.assertTrue(new_wheel.property('Diameter'), 42.43)
 
         new_wheel.delete()
+
+    # 1.8
+    def test_get_instances_of_a_model(self):
+        wheel_model = self.project.model('Wheel')
+        wheel_instances = wheel_model.instances()
+
+        self.assertIsInstance(wheel_instances, PartSet)
+        for wheel_instance in wheel_instances:
+            self.assertEqual(wheel_instance.category, Category.INSTANCE)
+            self.assertEqual(wheel_instance.model().id, wheel_model.id)
+
+    def test_get_instances_of_an_instances_raises_notfound(self):
+        wheel_instance = self.project.part('Rear Wheel', category=Category.INSTANCE)
+        with self.assertRaises(NotFoundError):
+            wheel_instance.instances()
+
+    def test_get_single_instance_of_a_model(self):
+        bike_model = self.project.model('Bike')
+        bike_instance = bike_model.instance()
+
+        self.assertEqual(bike_instance.category, Category.INSTANCE)
+
+    def test_get_single_instance_of_a_multiplicity_model_raises_multiplefounderror(self):
+        wheel_model = self.project.model('Wheel')
+
+        with self.assertRaises(MultipleFoundError):
+            wheel_model.instance()

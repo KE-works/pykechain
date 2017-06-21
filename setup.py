@@ -88,7 +88,7 @@ setup(
     install_requires=['requests', 'envparse', 'typing', 'jsonschema'],
 
     setup_requires=['pytest-runner'],
-    tests_require=['pytest', 'pytz', 'betamax'],
+    tests_require=['pytest', 'pytz', 'betamax', 'six'],
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
