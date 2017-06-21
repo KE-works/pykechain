@@ -1,10 +1,12 @@
-import warnings
+from datetime import datetime
 
 import pytz
 import requests
-from datetime import datetime
+import warnings
 
+from pykechain.enums import Category, ActivityType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
+from pykechain.models import Part
 from tests.classes import TestBetamax
 
 ISOFORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -156,11 +158,158 @@ class TestActivities(TestBetamax):
 
         specify_wd.edit(assignee=original_assignee)
 
-    def test_customize_activity(self):
+    def test_customize_activity_with_widget_config(self):
+        # Retrieve the activity to be customized
         activity_to_costumize = self.project.activity('Customized task')
+
+        # Create the widget config it should have now
+        widget_config = {'components': [{'xtype': 'superGrid', 'filter':
+                        {'parent': 'e5106946-40f7-4b49-ae5e-421450857911',
+                         'model': 'edc8eba0-47c5-415d-8727-6d927543ee3b'}}]}
+
+        # Customize it with a config
         activity_to_costumize.customize(
-        config={"components": [{
-        "xtype": "superGrid",
-        "filter": {
-            "parent": "e5106946-40f7-4b49-ae5e-421450857911",
-            "model": "edc8eba0-47c5-415d-8727-6d927543ee3b"}}]})
+            config=widget_config)
+
+        # Re-retrieve it
+        activity_to_costumize = self.project.activity('Customized task')
+
+        # Check whether it's widget config has changed
+        self.assertTrue(activity_to_costumize._json_data['widget_config']['config'] != '{}')
+
+        # Change it back to an empty config
+        activity_to_costumize.customize(config={})
+
+    def test_customize_new_activity(self):
+        # Create the activity to be freshly customized
+        new_task = self.project.create_activity('New task')
+
+        # Customize it with a config
+        new_task.customize(
+            config={"components": [{
+                "xtype": "superGrid",
+                "filter": {
+                    "parent": "e5106946-40f7-4b49-ae5e-421450857911",
+                    "model": "edc8eba0-47c5-415d-8727-6d927543ee3b"}}]})
+
+        # Retrieve it again
+        new_task = self.project.activity('New task')
+
+        # Check whether it's widget config has changed
+        self.assertTrue(new_task._json_data['widget_config']['config'] is not None)
+
+        # Delete it
+        new_task.delete()
+
+    # 1.7.2
+    def test_datetime_with_naive_duedate_only_fails(self):
+        """reference to #121 - thanks to @joost.schut"""
+        # setup
+        specify_wd = self.project.activity('Specify wheel diameter')
+
+        # save old values
+        old_start, old_due = datetime.strptime(specify_wd._json_data.get('start_date'), ISOFORMAT), \
+                             datetime.strptime(specify_wd._json_data.get('due_date'), ISOFORMAT)
+        naive_duedate = datetime(2017, 6, 5, 5, 0, 0)
+        with warnings.catch_warnings(record=False) as w:
+            warnings.simplefilter("ignore")
+            specify_wd.edit(due_date=naive_duedate)
+
+        # teardown
+        with warnings.catch_warnings(record=False) as w:
+            warnings.simplefilter("ignore")
+            specify_wd.edit(due_date=old_due)
+
+    def test_datetime_with_tzinfo_provides_correct_offset(self):
+        """reference to #121 - thanks to @joost.schut
+
+        The tzinfo.timezone('Europe/Amsterdam') should provide a 2 hour offset, recording 20 minutes
+        """
+        # setup
+        specify_wd = self.project.activity('Specify wheel diameter')
+        # save old values
+        old_start, old_due = datetime.strptime(specify_wd._json_data.get('start_date'), ISOFORMAT), \
+                             datetime.strptime(specify_wd._json_data.get('due_date'), ISOFORMAT)
+
+        tz = pytz.timezone('Europe/Amsterdam')
+        tzaware_due = tz.localize(datetime(2017, 7, 1))
+        tzaware_start = tz.localize(datetime(2017, 6, 30, 0, 0, 0))
+
+        specify_wd.edit(start_date=tzaware_start)
+        self.assertTrue(specify_wd._json_data['start_date'], tzaware_start.isoformat(sep='T'))
+        self.assertRegexpMatches(specify_wd._json_data['start_date'], r'^.*(\+02:00|\+01:00)$')
+
+        specify_wd.edit(due_date=tzaware_due)
+        self.assertTrue(specify_wd._json_data['due_date'], tzaware_due.isoformat(sep='T'))
+        self.assertRegexpMatches(specify_wd._json_data['due_date'], r'^.*(\+02:00|\+01:00)$')
+
+        # teardown
+        with warnings.catch_warnings(record=False) as w:
+            warnings.simplefilter("ignore")
+            specify_wd.edit(start_date=old_start, due_date=old_due)
+
+    # 1.8
+    def test_retrieve_subprocess_of_task(self):
+        task = self.project.activity(name='SubTask')
+        subprocess = task.subprocess()  # type Activity
+        self.assertEqual(subprocess.activity_type, ActivityType.SUBPROCESS)
+
+    def test_retrieve_subprocess_of_a_toplevel_task(self):
+        task = self.project.activity('Specify wheel diameter')
+        with self.assertRaises(NotFoundError):
+            subprocess = task.subprocess()
+
+    def test_retrieve_children_of_subprocess(self):
+        subprocess = self.project.activity(name='Subprocess')  # type: Activity
+        children = subprocess.children()
+        self.assertTrue(len(children) >= 1)
+        for child in children:
+            self.assertEqual(child._json_data.get('container'), subprocess.id)
+
+    def test_retrieve_children_of_task(self):
+        task = self.project.activity(name='SubTask')
+        with self.assertRaises(NotFoundError):
+            task.children()
+
+    def test_retrieve_activity_by_id(self):
+        task = self.project.activity(name='SubTask') # type: Activity
+
+        task_by_id = self.client.activity(pk = task.id)
+
+        self.assertEqual(task.id, task_by_id.id)
+
+    def test_retrieve_siblings_of_a_task_in_a_subprocess(self):
+        task = self.project.activity(name='SubTask')  # type: Activity
+        siblings = task.siblings()
+
+        self.assertTrue(task.id in [sibling.id for sibling in siblings])
+        self.assertTrue(len(siblings) >= 1)
+
+    def test_retrieve_part_associated_to_activities(self):
+        task = self.project.activity('Specify wheel diameter')
+        parts = list(task.parts())
+
+        for part in parts:
+            self.assertIsInstance(part, Part)
+            self.assertTrue(part.category, Category.INSTANCE)
+
+    def test_retrieve_part_models_associated_to_activities(self):
+        task = self.project.activity('Specify wheel diameter')
+        parts = list(task.parts(category=Category.MODEL))
+
+        for part in parts:
+            self.assertIsInstance(part, Part)
+            self.assertTrue(part.category, Category.MODEL)
+
+    def test_retrieve_associated_parts_to_activity(self):
+        task = self.project.activity('Specify wheel diameter')
+        (models, parts) = list(task.associated_parts())
+
+        for part in parts:
+            self.assertIsInstance(part, Part)
+            self.assertTrue(part.category, Category.INSTANCE)
+
+        for part in parts:
+            self.assertIsInstance(part, Part)
+            self.assertTrue(part.category, Category.INSTANCE)
+
