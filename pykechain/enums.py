@@ -58,3 +58,12 @@ class ActivityType(Enum):
     USERTASK = "UserTask"
     SERVICETASK = "ServiceTask"  # RND code only
     SUBPROCESS = "Subprocess"
+
+
+class ComponentXType(Enum):
+    """The various inspectortypes supported in the customized task in KE-chain"""
+
+    PROPERTYGRID = "propertyGrid"
+    SUPERGRID = "superGrid"
+    PAGINATEDSUPERGRID = "paginatedSuperGrid"
+    FILTEREDGRID = "filteredGrid"

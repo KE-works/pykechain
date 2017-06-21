@@ -1,5 +1,6 @@
 import json
 
+from pykechain.enums import ComponentXType
 from pykechain.models import Base
 
 uuid_pattern = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
@@ -11,7 +12,8 @@ component_json_schema = {
     "properties": {
         "xtype": {
             "type": "string",
-            "enum": ["propertyGrid", "superGrid", "panel", "iframe", "filteredGrid", "paginatedSuperGrid"]
+            "enum": [ComponentXType.PROPERTYGRID, ComponentXType.SUPERGRID, "panel", "iframe",
+                     ComponentXType.FILTEREDGRID, ComponentXType.PAGINATEDSUPERGRID]
         },
         "filter": {
             "type": "object",
@@ -87,19 +89,54 @@ class InspectorComponent(object):
         return "<{} ({}) at {:#x}>".format(self.__class__.__name__, self.xtype, id(self))
 
 
+class PropertyGrid(InspectorComponent):
+    def __init__(self, json=None, part=None, title=None, **kwargs):
+        """
+        Instantiate a PropertyGrid.
+
+        Provide either json or (parent and model or activity)
+
+        :param json: provide a valid json (optional if not part)
+        :param part: provide a part id (or pykechain Part) (optional if json)
+        :param kwargs: Optional Extras
+        """
+        if not json and part:
+            if isinstance(part, Base):
+                part = part.id
+            super(self.__class__, self).__init__(json=dict(
+                xtype=ComponentXType.PROPERTYGRID,
+                filter=dict(part=part),
+                **kwargs))
+        elif json and not part:
+            super(self.__class__, self).__init__(json=json)
+        else:
+            raise Exception("Either provide json or (parent and model)")
+
+        if title:
+            self._json_data['title'] = title
+            self._json_data['viewModel'] = {'data': {'style': {'displayPartTitle': True}}}
+
+
 class SuperGrid(InspectorComponent):
     """The SuperGird component."""
 
-    def __init__(self, json=None, parent=None, model=None, activity_id=None, **kwargs):
+    def __init__(self, json=None, parent=None, model=None, activity_id=None, title=None, **kwargs):
         """
         Instantiate a SuperGrid.
 
         Provide either json or (parent and model or activity)
 
+        in kwargs you may: "newInstance" in kwargs or "edit" in kwargs or "delete" in kwargs or "export" in kwargs
+
         :param json: provide a valid SuperGrid json (optional if not parent & model)
         :param parent: provide a parent id (or pykechain Part) (optional if json)
         :param model: provide a model id (or pykechain Part) (optional if json)
         :param activity_id: provide a acitivity id (or pykechain Activity) (optional)
+        :param title: adding title to the component (optional)
+        :param newInstance: boolean to show button
+        :param edit: boolean to show button
+        :param delete: boolean to show button
+        :param export: boolean to show button
         :param kwargs: Optional extra kwargs.
         """
         if not json and parent and model:
@@ -110,13 +147,25 @@ class SuperGrid(InspectorComponent):
             if isinstance(activity_id, Base):
                 activity_id = activity_id.id
             super(self.__class__, self).__init__(json=dict(
-                xtype="superGrid",
+                xtype=ComponentXType.SUPERGRID,
                 filter=dict(parent=parent, model=model, activity_id=activity_id),
                 **kwargs))
         elif json and not parent and not model:
             super(self.__class__, self).__init__(json=json)
         else:
             raise Exception("Either provide json or (parent and model)")
+
+        if title:
+            self._json_data['title'] = title
+
+        # check for buttons
+        if "newInstance" in kwargs or "edit" in kwargs or "delete" in kwargs or "export" in kwargs:
+            self._json_data['viewModel'] = {'data': {"actions": {
+                "newInstance": kwargs.get("newInstance", False),
+                "edit": kwargs.get("edit", False),
+                "delete": kwargs.get("delete", False),
+                "export": kwargs.get("export", False)
+            }}}
 
     def get(self, item):
         """Get an item from the filter subdict.
@@ -136,36 +185,6 @@ class SuperGrid(InspectorComponent):
         if isinstance(value, Base):
             value = value.id
         self._json_data['filter'][key] = value
-
-        # @property
-        # def model(self):
-        #     return self._json_data['filter'].get('model')
-        #
-        # @model.setter
-        # def model(self, pk):
-        #     if isinstance(pk, Base):
-        #         pk = pk.id
-        #     self._json_data['filter']['model'] = pk
-        #
-        # @property
-        # def parent(self):
-        #     return self._json_data['filter'].get('parent')
-        #
-        # @parent.setter
-        # def parent(self, pk):
-        #     if isinstance(pk, Base):
-        #         pk = pk.id
-        #     self._json_data['filter']['parent'] = pk
-        #
-        # @property
-        # def activity_id(self):
-        #     return self._json_data['filter'].get('activity_id')
-        #
-        # @activity_id.setter
-        # def activity_id(self, pk):
-        #     if isinstance(pk, Base):
-        #         pk = pk.id
-        #     self._json_data['filter']['activity_id'] = pk
 
 
 class Customization(InspectorComponent):
