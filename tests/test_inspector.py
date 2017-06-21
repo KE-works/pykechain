@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from jsonschema import ValidationError
 
-from pykechain.models.inspector import Customization
+from pykechain.models.inspector_base import Customization
 
 
 class TestWidgetConfig(TestCase):
