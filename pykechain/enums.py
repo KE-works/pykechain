@@ -61,8 +61,9 @@ class ActivityType(Enum):
 
 
 class ComponentXType(Enum):
-    """The various inspectortypes supported in the customized task in KE-chain"""
+    """The various inspectortypes supported in the customized task in KE-chain."""
 
+    PANEL = "panel"
     PROPERTYGRID = "propertyGrid"
     SUPERGRID = "superGrid"
     PAGINATEDSUPERGRID = "paginatedSuperGrid"
