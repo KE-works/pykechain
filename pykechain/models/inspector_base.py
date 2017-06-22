@@ -11,8 +11,9 @@ component_json_schema = {
     "properties": {
         "xtype": {
             "type": "string",
-            "enum": [ComponentXType.PROPERTYGRID, ComponentXType.SUPERGRID, ComponentXType.PANEL,
-                     ComponentXType.FILTEREDGRID, ComponentXType.PAGINATEDSUPERGRID]
+            "enum": [ComponentXType.PROPERTYGRID, ComponentXType.SUPERGRID,
+                     ComponentXType.FILTEREDGRID, ComponentXType.PAGINATEDSUPERGRID,
+                     ComponentXType.PANEL, ComponentXType.TOOLBAR]
         },
         "filter": {
             "type": "object",
