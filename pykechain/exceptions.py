@@ -1,4 +1,3 @@
-
 class APIError(Exception):
     """A general API Error.
 
@@ -25,5 +24,8 @@ class NotFoundError(APIError):
 
     pass
 
+
 class InspectorComponentError(Exception):
-    """Error in the InspectorComponent"""
+    """Error in the InspectorComponent."""
+
+    pass
