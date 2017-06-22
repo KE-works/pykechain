@@ -486,11 +486,12 @@ class Client(object):
 
         return self._create_part('create_proxy_model', data)
 
-    def create_property(self, model, name, property_type='CHAR', default_value=None):
+    def create_property(self, model, name, description, property_type='CHAR', default_value=None):
         """Create a new property model under a given model.
 
         :param model: parent model
         :param name: property model name
+        :param description: property model description
         :param property_type: choose between FLOAT, INT, TEXT, LINK, REFERENCE, DATETIME, BOOLEAN, CHAR, ATTACHMENT or
          SINGLE_SELECT
         :param default_value: default value used for part instances
@@ -501,6 +502,7 @@ class Client(object):
         data = {
             "name": name,
             "part": model.id,
+            "description": description,
             "property_type": property_type.upper() + '_VALUE',
             "value": default_value
         }
