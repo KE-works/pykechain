@@ -45,8 +45,8 @@ class TestProperties(TestBetamax):
         bike = self.project.model('Bike')
 
         # test creation of new property model of bike
-        new_property = bike.add_property(name='New property', property_type='CHAR',
-                                         default_value='EUREKA!')
+        new_property = self.client.create_property(model=bike, name='New property', description='Nice prop',
+                                                   property_type='CHAR', default_value='EURIKA!')
 
         # check whether the property has been created and whether it's name and type are correct
         self.assertIsInstance(bike.property('New property'), Property)
