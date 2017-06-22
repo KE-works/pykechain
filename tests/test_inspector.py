@@ -1,9 +1,11 @@
 import json
+import uuid
 from unittest import TestCase
 
 from jsonschema import ValidationError
 
-from pykechain.models.inspector import Customization
+from pykechain.models.inspector_base import Customization
+from pykechain.models.inspectors import SuperGrid
 
 
 class TestWidgetConfig(TestCase):
@@ -40,6 +42,11 @@ class TestWidgetConfig(TestCase):
             #     ' 8395b4a6-186b-4215-8168-6574e65a1571'
             customisation = Customization(json.loads(config_str))
             customisation.validate()
+
+    def test_supergrid_component(self):
+        component = SuperGrid(parent=str(uuid.uuid4()), model=str(uuid.uuid4()), activity_id=str(uuid.uuid4()), title="title")
+        component.validate()
+        print(component.as_json())
 
         # class TestParts(TestBetamax):
     #     def test_retrieve_parts(self):

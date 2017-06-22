@@ -1,17 +1,17 @@
 # basis
-requests==2.16.5
+requests==2.18.1
 envparse==0.2.0
 
 # json validation (inspector)
 jsonschema==2.6.0
 
 # testing
-pytest==3.1.0
+pytest==3.1.2
 betamax==0.8.0
 
 # documentation
 Sphinx==1.6.2
-nbsphinx==0.2.13
+nbsphinx==0.2.14
 
 # data science
 jupyter==1.0.0
@@ -24,3 +24,6 @@ tox==2.7.0
 flake8==3.3.0
 pydocstyle==2.0.0
 mypy==0.511
+
+# to fix connection issues
+PyOpenSSL==17.0.0; python_version <= '2.7'

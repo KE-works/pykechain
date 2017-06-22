@@ -3,6 +3,47 @@ Change Log
 
 pykechain changelog
 
+1.9.0 (UNRELEASED)
+------------------
+
+ * Improved test coverage and refactored the HTTP codes to human readable form
+ * Add `Part.as_dict()` method to retrieve the properties of a part in pykechain as a python dictionary as `{<property_name> : <property_value>}`
+ * Added the ability to optionally update the name of a part together with the value of its properties. See the `Part.update()` method.
+
+1.8.0 (05JUN17)
+---------------
+ * Added `Part.instances()` method for models to find their associated instances. (#113) Also added a `Part.instance()` method if you for sure that you will get only a single instance back.
+ * Added `Activity.subprocess()`, `Activity.siblings()` and `Activity.children()` methods to the `Activity`. It eases relative retrieval of other tasks in the task tree. Documentation is included. (#100)
+ * added `Activity.activity_type` property to the Activity.
+ * added `ActivityType` enumeration. This can be used to check if the `activity_type` of an `Activity` is either a Usertask or a Subprocess.
+ * Added ability to retrieve an `Activity` based on an id. As this included in the low level `Client` object, it can be used almost everywhere to retrieve an activity by its id (or primary key, pk) eg. in the `Scope.activity`.
+ * Added ability to add additional keywords to the activities searcher to be able to search by name, pk, container etc.
+ * Added a FutureDeprecationWarning to the `Activity.create_activity()` method. This will is replace with the `Activity.create()` method. Update your code please!
+ * Added a convenience method to retrieve models and instances related to a task at once: `Activity.associated_parts()`. Making use of the already provided method in `Activity.parts()`. (#118)
+ * Added missing tests for `Activity.parts()` and `Activity.associated_parts()`
+ * added tests for all new features.
+ * Updated the documentation.
+
+
+1.7.3 (01JUN17)
+---------------
+ * Updated documentation for activity startdate and duedate editting using timezone supported datetime objects.
+   If a user want to make use of timezone aware datetime the best way to do it is::
+
+    >>> my_tz = pytz.timezone('Europe/Amsterdam')
+    >>> start_date = my_tz.localize(datetime(2017,6,1,23,59,0))
+    >>> due_date = my_tz.localize(datetime(2017,12,31))
+    >>> my_task.edit(start_date = start_date, due_date = due_date)
+
+ * Fixed a bug where a naive due_date and no provided start_date resulted in an error. Keep them bugs comin'!
+
+
+1.7.2 (01JUN17)
+---------------
+ * updated `property.part` property that gets the part for its property. For model this did not work as underlying
+   only `category=INSTANCES` were retrieved. Thanks to @joost.schut for finding it and reporting.
+ * updated requirements for development.
+
 
 1.7.1 (29MAY17)
 ---------------
@@ -12,7 +53,7 @@ pykechain changelog
 
 
 1.7.0 (29MAY17)
-------------------
+---------------
  * Added `ReferencyProperty.choices()` convenience method to provide you the list of parts (instances) that are
    acceptable as a choice for the value of the reference property.
  * Added `Part.proxy_model()` method that will return the model that is used as the basis for the proxied model.

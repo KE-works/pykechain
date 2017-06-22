@@ -1,27 +1,27 @@
 KE-chain Python SDK
 ===================
 
-.. image:: https://img.shields.io/pypi/v/pykechain.svg
+.. image:: https://img.shields.io/pypi/v/pykechain.svg?style=flat-square
     :target: https://pypi.python.org/pypi/pykechain
     :alt: Version
 
-.. image:: https://img.shields.io/pypi/pyversions/pykechain.svg
+.. image:: https://img.shields.io/pypi/pyversions/pykechain.svg?style=flat-square
     :target: https://pypi.python.org/pypi/pykechain
     :alt: Supported Python Versions
 
-.. image:: https://travis-ci.org/KE-works/pykechain.svg?branch=master
+.. image:: https://travis-ci.org/KE-works/pykechain.svg?branch=master&style=flat-square
     :target: https://travis-ci.org/KE-works/pykechain
     :alt: Build Status
 
-.. image:: https://readthedocs.org/projects/pykechain/badge/?version=latest
+.. image:: https://readthedocs.org/projects/pykechain/badge/?version=latest&style=flat-square
     :target: http://pykechain.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. image:: https://coveralls.io/repos/github/KE-works/pykechain/badge.svg?branch=master
+.. image:: https://coveralls.io/repos/github/KE-works/pykechain/badge.svg?branch=master&style=flat-square
     :target: https://coveralls.io/github/KE-works/pykechain?branch=master
     :alt: Coverage Status
 
-.. image:: https://pyup.io/repos/github/KE-works/pykechain/shield.svg
+.. image:: https://pyup.io/repos/github/KE-works/pykechain/shield.svg?style=flat-square
     :target: https://pyup.io/repos/github/KE-works/pykechain/
     :alt: Updates
 
