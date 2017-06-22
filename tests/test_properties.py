@@ -42,7 +42,7 @@ class TestProperties(TestBetamax):
     def test_create_and_delete_property(self):
         bike = self.project.model('Bike')
 
-        new_property = self.client.create_property(model=bike, name='New property', property_type='CHAR',
-                                                    default_value='EURIKA!')
+        new_property = self.client.create_property(model=bike, name='New property', description='Nice prop',
+                                                   property_type='CHAR', default_value='EURIKA!')
 
         new_property.delete()
