@@ -11,7 +11,7 @@ component_json_schema = {
     "properties": {
         "xtype": {
             "type": "string",
-            "enum": [ComponentXType.PROPERTYGRID, ComponentXType.SUPERGRID, "panel", "iframe",
+            "enum": [ComponentXType.PROPERTYGRID, ComponentXType.SUPERGRID, ComponentXType.PANEL,
                      ComponentXType.FILTEREDGRID, ComponentXType.PAGINATEDSUPERGRID]
         },
         "filter": {
@@ -22,7 +22,7 @@ component_json_schema = {
                 "parent": uuid_string
             }
         },
-        "title": {"type": "string"},
+        "title": {"type": ["string", "null"]},
         "viewModel": {"type": "object"},
         # "model": {"type": "string"},
         # "parent": uuid_string

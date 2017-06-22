@@ -1,6 +1,7 @@
 import json
 
 from pykechain.enums import ComponentXType
+from pykechain.exceptions import InspectorComponentError
 from pykechain.models import Base
 from pykechain.models.inspector_base import InspectorComponent, Customization
 
@@ -28,7 +29,7 @@ class HtmlPanel(InspectorComponent):
         elif json:
             super(self.__class__, self).__init__(json=json)
         else:
-            raise Exception("Either provide json or html")
+            raise InspectorComponentError("Either provide json or html")
 
 
 class PropertyGrid(InspectorComponent):
@@ -54,7 +55,7 @@ class PropertyGrid(InspectorComponent):
         elif json and not part:
             super(self.__class__, self).__init__(json=json)
         else:
-            raise Exception("Either provide json or (parent and model)")
+            raise InspectorComponentError("Either provide json or (parent and model)")
 
         if title:
             self._json_data['title'] = title
@@ -111,7 +112,7 @@ class SuperGrid(InspectorComponent):
         elif json and not parent and not model:
             super(self.__class__, self).__init__(json=json)
         else:
-            raise Exception("Either provide json or (parent and model)")
+            raise InspectorComponentError("Either provide json or (parent and model)")
 
     def get(self, item):
         """Get an item from the filter subdict.
@@ -165,7 +166,7 @@ class FilteredGrid(InspectorComponent):
 
     def __init__(self, json=None, parent=None, model=None, title=None, **kwargs):
         """
-        Instantiate a FilteredGrid Component
+        Instantiate a FilteredGrid Component.
 
         :param json: provide a valid SuperGrid json (optional if not parent & model)
         :param parent: provide a parent id (or pykechain Part) (optional if json)
@@ -194,7 +195,7 @@ class FilteredGrid(InspectorComponent):
                 collapseFilters=kwargs.get('collapsefilters', False),
                 pageSize=kwargs.get('pagesize', 25),
                 flex=kwargs.get('flex', 0),
-                height=kwargs.get('height', 0),
+                height=kwargs.get('height', 600),
                 grid=dict(
                     xtype=ComponentXType.PAGINATEDSUPERGRID,
                     viewModel=dict(
@@ -212,7 +213,87 @@ class FilteredGrid(InspectorComponent):
         elif json and not parent and not model:
             super(self.__class__, self).__init__(json=json)
         else:
-            raise Exception("Either provide json or (parent and model)")
+            raise InspectorComponentError("Either provide json or (parent and model)")
+
+class PaginatedGrid(InspectorComponent):
+    """
+    Paginated Grid component for a task customization in KE-chain 2.
+
+    Example JSON defenition::
+
+        {
+            "components": [{
+                "xtype": "paginatedSuperGrid",
+                "filter": {
+                    "model": "365e3e6f-38ab-491d-86d6-4dfe51f95804", "parent": "b7658eed-4fab-4c4d-bbed-e68996e89b13"
+                }
+            }, {
+                "xtype": "superGrid",
+                "filter": {
+                    "model": "365e3e6f-38ab-491d-86d6-4dfe51f95804",
+                    "parent": "b7658eed-4fab-4c4d-bbed-e68996e89b13",
+                    "limit": 5
+                },
+                "viewModel": {
+                    "data": {
+                        "actions": {
+                            "edit": false,
+                            "newInstance": false,
+                            "delete": true
+                        }
+                    }
+                }
+            }]
+        }
+
+    """
+    def __init__(self, json=None, model=None, parent=None, title=None, **kwargs):
+        """
+        Instantiate the PaginatedGrid component.
+
+        :param json: provide a valid SuperGrid json (optional if not parent & model)
+        :param parent: provide a parent id (or pykechain Part) (optional if json)
+        :param model: provide a model id (or pykechain Part) (optional if json)
+        :param title: provide a title
+        :param pagesize: integer to set the pagesize of the page (default 25)
+        :param flex: integer to set drawing behaviour (defaults to 0)
+        :param height: integer for the hieght of the grid (defaults to 600)
+        :param newInstance: show this button (default True)
+        :param delete: show this button (default True)
+        :param edit: show this button (default True)
+        :param export: show this button (default True)
+        :param kwargs:
+        """
+        if not json and parent and model:
+            if isinstance(parent, Base):
+                parent = parent.id
+            if isinstance(model, Base):
+                model = model.id
+            super(self.__class__, self).__init__(json=dict(
+                xtype=ComponentXType.PAGINATEDSUPERGRID,
+                filter=dict(
+                    model=model,
+                    parent=parent
+                ),
+                title=title,
+                pageSize=kwargs.get('pagesize', 25),
+                flex=kwargs.get('flex', 0),
+                height=kwargs.get('height', 600),
+                viewModel=dict(
+                    data=dict(
+                        actions=dict(
+                            newInstance=kwargs.get('newInstance', True),
+                            delete=kwargs.get('delete', True),
+                            edit=kwargs.get('edit', True),
+                            export=kwargs.get('export', True)
+                        )
+                    )
+                )
+            ))
+        elif json and not parent and not model:
+            super(self.__class__, self).__init__(json=json)
+        else:
+            raise InspectorComponentError("Either provide json or (parent and model)")
 
 
 if __name__ == '__main__':
