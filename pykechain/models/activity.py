@@ -7,6 +7,7 @@ import datetime
 from six import text_type
 from typing import Any  # flake8: noqa
 
+from pykechain.enums import Category, ActivityType
 from pykechain.exceptions import APIError, NotFoundError
 from pykechain.models.base import Base
 
@@ -20,13 +21,48 @@ class Activity(Base):
         super(Activity, self).__init__(json, **kwargs)
 
         self.scope = json.get('scope')
+        self.activity_type = json.get('activity_class', None)
+        self.status = json.get('status', None)
 
     def parts(self, *args, **kwargs):
         """Retrieve parts belonging to this activity.
 
-        See :class:`pykechain.Client.parts` for available parameters.
+        Without any arguments it retrieves the Instances related to this task only.
+
+        See :class:`pykechain.Client.parts` for additional available parameters.
+
+        Example
+        -------
+        >>> task = project.activity('Specify Wheel Diameter')
+        >>> parts = task.parts()
+
+        To retrieve the models only.
+        >>> parts = task.parts(category=Category.MODEL)
+
         """
         return self._client.parts(*args, activity=self.id, **kwargs)
+
+    def associated_parts(self, *args, **kwargs):
+        """Retrieve models and instances belonging to this activity.
+
+        This is a convenience method for the `Activity.parts()` method, which is used to retrieve both the
+        `Category.MODEL` as well as the `Category.INSTANCE` in a tuple.
+
+        If you want to retrieve only the models associated to this task it is better to use:
+            `task.parts(category=Category.MODEL)`.
+
+        See :class:`pykechain.Client.parts` for additional available parameters.
+
+        :returns: Tuple(models PartSet, instances PartSet)
+
+        Example
+        -------
+        >>> task = project.activity('Specify Wheel Diameter')
+        >>> all_models, all_instances = task.associated_parts()
+
+        """
+        return self.parts(category=Category.MODEL, *args, **kwargs), \
+               self.parts(category=Category.INSTANCE, *args, **kwargs)
 
     def configure(self, inputs, outputs):
         """Configure activity input and output.
@@ -42,30 +78,100 @@ class Activity(Base):
             'outputs': [p.id for p in outputs]
         })
 
-        if r.status_code != 200:  # pragma: no cover
+        if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not configure activity")
 
     def delete(self):
         """Delete this activity."""
         r = self._client._request('DELETE', self._client._build_url('activity', activity_id=self.id))
 
-        if r.status_code != 204:
+        if r.status_code != requests.codes.no_content:
             raise APIError("Could not delete activity: {} with id {}".format(self.name, self.id))
 
-    def create_activity(self, *args, **kwargs):
+    def subprocess(self):
+        """Retrieve the subprocess in which this activity is defined.
+
+        If this is a task on top level, it raises NotFounderror
+
+        :return: subprocess `Activity`
+        :raises: NotFoundError when it is a task in the top level of a project
+
+        Example
+        -------
+        >>> task = project.activity('Subtask')
+        >>> subprocess = task.subprocess()
+
+        """
+        subprocess_id = self._json_data.get('container')
+        if subprocess_id == self._json_data.get('root_container'):
+            raise NotFoundError("Cannot find subprocess for this task '{}', "
+                                "as this task exist on top level.".format(self.name))
+        return self._client.activity(pk=subprocess_id, scope=self._json_data['scope']['id'])
+
+    def children(self):
+        """Retrieve the direct activities of this subprocess.
+
+        It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the direct descending level.
+        Only when the activity is a Subprocess, otherwise it raises a NotFoundError
+
+        :return: list of activities
+        :raises: NotFoundError when this task is not of type `ActivityType.SUBPROCESS`
+
+        Example
+        -------
+        >>> subprocess = project.subprocess('Subprocess')
+        >>> children = subprocess.children()
+
+        """
+        if self.activity_type != ActivityType.SUBPROCESS:
+            raise NotFoundError("Only subprocesses can have children, please choose a subprocess instead of a '{}' "
+                                "(activity '{}')".format(self.activity_type, self.name))
+
+        return self._client.activities(container=self.id, scope=self._json_data['scope']['id'])
+
+    def siblings(self):
+        """Retrieve the other activities that also belong to the subprocess.
+
+        It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the level of the current task.
+        This also works if the activity is of type `ActivityType.SUBPROCESS`.
+
+        :return: list of activities
+
+        Example
+        -------
+        >>> task = project.activity('Some Task')
+        >>> siblings = task.siblings()
+
+        """
+        container_id = self._json_data.get('container')
+        return self._client.activities(container=container_id, scope=self._json_data['scope']['id'])
+
+    def create(self, *args, **kwargs):
         """Create a new activity belonging to this subprocess.
 
         See :class:`pykechain.Client.create_activity` for available parameters.
         """
+        assert self.activity_type == ActivityType.SUBPROCESS, "One can only create a task under a subprocess."
         return self._client.create_activity(self.id, *args, **kwargs)
+
+    def create_activity(self, *args, **kwargs):
+        """See :method:`pykechain.Activity.create`. This method will be deprecated in version 1.9 onwards.
+
+        See :class:`pykechain.Client.create_activity` for available parameters.
+        """
+        warnings.warn('This method will be deprecated in version 1.9 and replaced with `Activity.create()` '
+                      'for consistency reasons.', PendingDeprecationWarning)
+        return self.create(*args, **kwargs)
 
     def edit(self, name=None, description=None, start_date=None, due_date=None, assignee=None):
         """Edit the details of an activity.
 
         :param name: (optionally) edit the name of the activity
         :param description: (optionally) edit the description of the activity
-        :param start_date: (optionally) edit the start date of the activity as a datetime object (UTC time preferred)
-        :param due_date: (optionally) edit the due_date of the activity as a datetime object (UTC time/timzeone aware preferred)
+        :param start_date: (optionally) edit the start date of the activity as a datetime object (UTC time/timezone
+                            aware preferred)
+        :param due_date: (optionally) edit the due_date of the activity as a datetime object (UTC time/timzeone
+                            aware preferred)
         :param assignee: (optionally) edit the assignee of the activity as a string
 
         :return: None
@@ -77,17 +183,22 @@ class Activity(Base):
         >>> from datetime import datetime
         >>> specify_wheel_diameter = project.activity('Specify wheel diameter')
         >>> specify_wheel_diameter.edit(name='Specify wheel diameter and circumference',
-        ...                             description='The diameter and circumference are specified in inches', 
+        ...                             description='The diameter and circumference are specified in inches',
         ...                             start_date=datetime.utcnow(),  # naive time is interpreted as UTC time
         ...                             assignee='testuser')
-        
+
         If we want to provide timezone aware datetime objects we can use the 3rd party convenience library `pytz`.
-        
+        Mind that we need to fetch the timezone first and use `<timezone>.localize(<your datetime>)` to make it
+        work correctly. Using datetime(2017,6,1,23,59,0 tzinfo=<tz>) does NOT work for most timezones with a
+        daylight saving time. Check the pytz documentation.
+        (see http://pythonhosted.org/pytz/#localized-times-and-date-arithmetic)
+
         >>> import pytz
         >>> start_date_tzaware = datetime.now(pytz.utc)
-        >>> due_date_tzaware = datetime(2019, 10, 27, 23, 59, 0, tzinfo=pytz.timezone('Europe/Amsterdam'))
+        >>> mytimezone = pytz.timezone('Europe/Amsterdam')
+        >>> due_date_tzaware = mytimezone.localize(datetime(2019, 10, 27, 23, 59, 0))
         >>> specify_wheel_diameter.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
-        
+
         """
         update_dict = {'id': self.id}
         if name:
@@ -107,20 +218,18 @@ class Activity(Base):
         if start_date:
             if isinstance(start_date, datetime.datetime):
                 if not start_date.tzinfo:
-                    warnings.warn("The startdate '{}' is naive and not timezone aware, use tzinfo. "
+                    warnings.warn("The startdate '{}' is naive and not timezone aware, use pytz.timezone info. "
                                   "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
                 update_dict.update({'start_date': start_date.isoformat(sep='T')})
-                self.start_date = str(start_date)
             else:
                 raise TypeError('Start date should be a datetime.datetime() object')
 
         if due_date:
             if isinstance(due_date, datetime.datetime):
                 if not due_date.tzinfo:
-                    warnings.warn("The duedate '{}' is naive and not timezone aware, use tzinfo. "
-                                  "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
+                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
                 update_dict.update({'due_date': due_date.isoformat(sep='T')})
-                self.due_date = str(due_date)
             else:
                 raise TypeError('Due date should be a datetime.datetime() object')
 
@@ -130,7 +239,6 @@ class Activity(Base):
                 members_list = [member['username'] for member in project._json_data['members']]
                 if assignee in members_list:
                     update_dict.update({'assignee': assignee})
-                    self.assignee = assignee
                 else:
                     raise NotFoundError('Assignee should be a member of the scope')
             else:
@@ -139,8 +247,15 @@ class Activity(Base):
         url = self._client._build_url('activity', activity_id=self.id)
         r = self._client._request('PUT', url, json=update_dict)
 
-        if r.status_code != requests.codes.ok:
+        if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Activity ({})".format(r))
+
+        if assignee:
+            self._json_data['assignee'] = assignee
+        if due_date:
+            self._json_data['due_date'] = str(due_date)
+        if start_date:
+            self._json_data['start_date'] = str(start_date)
 
     def customize(self, config):
         """Customize an activity.
@@ -178,4 +293,3 @@ class Activity(Base):
                                           activity=self.id,
                                           config=json.dumps(config, indent=4))
                                       )
-

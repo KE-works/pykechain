@@ -62,7 +62,7 @@ class Client(object):
         if not check_certificates:
             self.session.verify = False
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return "<pyke Client '{}'>".format(self.api_root)
 
     @classmethod
@@ -126,7 +126,7 @@ class Client(object):
 
         >>> client = Client()
         >>> client.login('username','password')
-        
+
         """
         if token:
             self.headers['Authorization'] = 'Token {}'.format(token)
@@ -206,22 +206,28 @@ class Client(object):
 
         return _scopes[0]
 
-    def activities(self, name=None, scope=None):
-        # type: (Optional[str], Optional[str]) -> List[Activity]
+    def activities(self, name=None, pk=None, scope=None, **kwargs):
+        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Activity]
         """Search on activities with optional name filter.
 
+        :param pk: id (primary key) of the activity to retrieve
         :param name: filter the activities by name
         :param scope: filter by scope id
         :return: :obj:`list` of :obj:`Activity`
         :raises: NotFoundError
         """
-        r = self._request('GET', self._build_url('activities'), params={
+        request_params = {
+            'id': pk,
             'name': name,
             'scope': scope
-        })
+        }
+        if kwargs:
+            request_params.update(**kwargs)
+
+        r = self._request('GET', self._build_url('activities'), params=request_params)
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve activities")
+            raise NotFoundError("Could not retrieve activities. Server responded with {}".format(str(r)))
 
         data = r.json()
 
@@ -275,22 +281,22 @@ class Client(object):
         Examples
         --------
         Return all parts (defaults to instances) with exact name 'Gears'.
-        
+
         >>> client = Client(url='https://default.localhost:9443', verify=False)
         >>> client.login('admin','pass')
         >>> client.parts(name='Gears')  # doctest:Ellipsis
         ...
 
         Return all parts with category is MODEL or category is INSTANCE.
-        
+
         >>> client.parts(name='Gears', category=None)  # doctest:Ellipsis
         ...
 
         Return a maximum of 5 parts
-        
+
         >>> client.parts(limit=5)  # doctest:Ellipsis
         ...
-        
+
         """
         # if limit is provided and the batchsize is bigger than the limit, ensure that the batch size is maximised
         if limit and limit < batch:
@@ -406,7 +412,7 @@ class Client(object):
 
         r = self._request('POST', self._build_url('activities'), data=data)
 
-        if r.status_code != 201:
+        if r.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create activity")
 
         data = r.json()
@@ -418,7 +424,7 @@ class Client(object):
                           params={"select_action": action},
                           data=data)
 
-        if r.status_code != requests.codes.created:
+        if r.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create part, {}: {}".format(str(r), r.content))
 
         return Part(r.json()['results'][0], client=self)
@@ -470,8 +476,8 @@ class Client(object):
         whole subassembly to the 'parent' model.
 
         :param name: Name of the new proxy model
-        :param parent: parent of the 
-        :param multiplicity: the multiplicity of the new proxy model (default ONE_MANY) 
+        :param parent: parent of the
+        :param multiplicity: the multiplicity of the new proxy model (default ONE_MANY)
         :return: the new proxy model part
         """
         assert model.category == Category.MODEL, "The model should be of category MODEL"
@@ -510,7 +516,7 @@ class Client(object):
         r = self._request('POST', self._build_url('properties'),
                           data=data)
 
-        if r.status_code != 201:
+        if r.status_code != requests.codes.created:
             raise APIError("Could not create property")
 
         prop = Property.create(r.json()['results'][0], client=self)

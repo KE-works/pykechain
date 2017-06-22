@@ -50,3 +50,21 @@ class PropertyType(Enum):
     BOOLEAN_VALUE = "BOOLEAN_VALUE"
     CHAR_VALUE = "CHAR_VALUE"
     ATTACHMENT_VALUE = "ATTACHMENT_VALUE"
+
+
+class ActivityType(Enum):
+    """The various Acitivity types that are accepted by KE-chain."""
+
+    USERTASK = "UserTask"
+    SERVICETASK = "ServiceTask"  # RND code only
+    SUBPROCESS = "Subprocess"
+
+
+class ComponentXType(Enum):
+    """The various inspectortypes supported in the customized task in KE-chain."""
+
+    PANEL = "panel"
+    PROPERTYGRID = "propertyGrid"
+    SUPERGRID = "superGrid"
+    PAGINATEDSUPERGRID = "paginatedSuperGrid"
+    FILTEREDGRID = "filteredGrid"

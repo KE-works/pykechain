@@ -1,6 +1,6 @@
 import json
 
-from pykechain.models import Base
+from pykechain.enums import ComponentXType
 
 uuid_pattern = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 uuid_string = {"type": "string", "pattern": uuid_pattern}
@@ -11,7 +11,8 @@ component_json_schema = {
     "properties": {
         "xtype": {
             "type": "string",
-            "enum": ["propertyGrid", "superGrid", "panel", "iframe", "filteredGrid", "paginatedSuperGrid"]
+            "enum": [ComponentXType.PROPERTYGRID, ComponentXType.SUPERGRID, "panel", "iframe",
+                     ComponentXType.FILTEREDGRID, ComponentXType.PAGINATEDSUPERGRID]
         },
         "filter": {
             "type": "object",
@@ -28,7 +29,6 @@ component_json_schema = {
     },
     "required": ["xtype"]
 }
-
 widgetconfig_json_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "WidgetConfig JSON",
@@ -87,87 +87,6 @@ class InspectorComponent(object):
         return "<{} ({}) at {:#x}>".format(self.__class__.__name__, self.xtype, id(self))
 
 
-class SuperGrid(InspectorComponent):
-    """The SuperGird component."""
-
-    def __init__(self, json=None, parent=None, model=None, activity_id=None, **kwargs):
-        """
-        Instantiate a SuperGrid.
-
-        Provide either json or (parent and model or activity)
-
-        :param json: provide a valid SuperGrid json (optional if not parent & model)
-        :param parent: provide a parent id (or pykechain Part) (optional if json)
-        :param model: provide a model id (or pykechain Part) (optional if json)
-        :param activity_id: provide a acitivity id (or pykechain Activity) (optional)
-        :param kwargs: Optional extra kwargs.
-        """
-        if not json and parent and model:
-            if isinstance(parent, Base):
-                parent = parent.id
-            if isinstance(model, Base):
-                model = model.id
-            if isinstance(activity_id, Base):
-                activity_id = activity_id.id
-            super(self.__class__, self).__init__(json=dict(
-                xtype="superGrid",
-                filter=dict(parent=parent, model=model, activity_id=activity_id),
-                **kwargs))
-        elif json and not parent and not model:
-            super(self.__class__, self).__init__(json=json)
-        else:
-            raise Exception("Either provide json or (parent and model)")
-
-    def get(self, item):
-        """Get an item from the filter subdict.
-
-        :param item: item to retrieve. eg. model, parent, activity_id
-        :return: uuid (as string)
-        """
-        return self._json_data['filter'].get(item, None)
-
-    def set(self, key, value):
-        """Set an item to a value in the filter subdictionary.
-
-        :param key: string to set e.g model, parent, activity_id
-        :param value: UUID as string or an pykechain object (will retrieve the id from that)
-        :return: None
-        """
-        if isinstance(value, Base):
-            value = value.id
-        self._json_data['filter'][key] = value
-
-        # @property
-        # def model(self):
-        #     return self._json_data['filter'].get('model')
-        #
-        # @model.setter
-        # def model(self, pk):
-        #     if isinstance(pk, Base):
-        #         pk = pk.id
-        #     self._json_data['filter']['model'] = pk
-        #
-        # @property
-        # def parent(self):
-        #     return self._json_data['filter'].get('parent')
-        #
-        # @parent.setter
-        # def parent(self, pk):
-        #     if isinstance(pk, Base):
-        #         pk = pk.id
-        #     self._json_data['filter']['parent'] = pk
-        #
-        # @property
-        # def activity_id(self):
-        #     return self._json_data['filter'].get('activity_id')
-        #
-        # @activity_id.setter
-        # def activity_id(self, pk):
-        #     if isinstance(pk, Base):
-        #         pk = pk.id
-        #     self._json_data['filter']['activity_id'] = pk
-
-
 class Customization(InspectorComponent):
     """Customization wrapper object."""
 
@@ -213,25 +132,3 @@ class Customization(InspectorComponent):
 
     def __repr__(self):
         return "<{} ({} comp's) at {:#x}>".format(self.__class__.__name__, len(self.components), id(self))
-
-
-if __name__ == '__main__':
-    with open('/home/jochem/Development/pykechain/w.json', 'r') as fd:
-        widgetconfigs = json.load(fd)
-
-    w = widgetconfigs[15]
-    c = Customization(json=json.loads(w))
-    c.validate()
-    c.as_dict()
-    c.as_json()
-
-    i = -1
-    for w in widgetconfigs:
-        i += 1
-        try:
-            c = Customization(json=json.loads(w))
-            print(i, c)
-
-        except Exception as e:
-            print("EEE - got {}".format(e))
-    pass
