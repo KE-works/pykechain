@@ -64,6 +64,7 @@ class ComponentXType(Enum):
     """The various inspectortypes supported in the customized task in KE-chain."""
 
     PANEL = "panel"
+    TOOLBAR = "toolbar"
     PROPERTYGRID = "propertyGrid"
     SUPERGRID = "superGrid"
     PAGINATEDSUPERGRID = "paginatedSuperGrid"
