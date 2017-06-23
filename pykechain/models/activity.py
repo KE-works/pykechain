@@ -1,15 +1,15 @@
-import warnings
+import datetime
 import json
+from typing import Any  # flake8: noqa
 
 import requests
-import datetime
-
+import warnings
 from six import text_type
-from typing import Any  # flake8: noqa
 
 from pykechain.enums import Category, ActivityType
 from pykechain.exceptions import APIError, NotFoundError
 from pykechain.models.base import Base
+from pykechain.models.inspector_base import Customization
 
 
 class Activity(Base):
@@ -160,7 +160,7 @@ class Activity(Base):
         See :class:`pykechain.Client.create_activity` for available parameters.
         """
         warnings.warn('This method will be deprecated in version 1.9 and replaced with `Activity.create()` '
-                      'for consistency reasons.', PendingDeprecationWarning)
+                      'for consistency reasons.', DeprecationWarning)
         return self.create(*args, **kwargs)
 
     def edit(self, name=None, description=None, start_date=None, due_date=None, assignee=None):
@@ -260,9 +260,10 @@ class Activity(Base):
     def customize(self, config):
         """Customize an activity.
 
-        :param config: the json to be used in customization
+        :param config: the InspectorComponent or raw inspector json (as python dict) to be used in customization
 
         :return: None
+        :raises: InspectorComponentError if the customisation is provided incorrectly.
 
         >>> my_activity = self.project.activity('Customizable activity')
         >>> my_activity.customize(config =
@@ -277,19 +278,32 @@ class Activity(Base):
         ...                      )
 
         """
-        widget_config = self._json_data.get('widget_config')
+        if isinstance(config, dict):
+            customization = Customization(json=config)
+            customization.validate()
+        elif isinstance(config, Customization):
+            config.validate()
+            customization = config
+        else:
+            raise Exception("Need to provide either a dictionary or Customization as input, got: '{}'".
+                            format(type(config)))
+
+        activity_widget_config = self._json_data.get('widget_config')
         # When an activity has been costumized at least once before, then its widget config already exists
-        if widget_config:
-            widget_config_id = widget_config['id']
-            update_dict = {'id': widget_config_id}
-            update_dict.update({'config': json.dumps(config, indent=4)})
+        if activity_widget_config:
+            widget_config_id = activity_widget_config['id']
+            request_update_dict = {'id': widget_config_id, 'config': json.dumps(customization.as_dict(), indent=2)}
             url = self._client._build_url('widget_config', widget_config_id=widget_config_id)
-            r = self._client._request('PUT', url, json=update_dict)
+            r = self._client._request('PUT', url, json=request_update_dict)
         # When an activity was not customized before, then there is no widget config and a new one must be created for
         # that activity
         else:
             r = self._client._request('POST', self._client._build_url('widgets_config'),
                                       data=dict(
                                           activity=self.id,
-                                          config=json.dumps(config, indent=4))
+                                          config=json.dumps(customization.as_dict(), indent=2))
                                       )
+
+        if r.status_code in (requests.codes.ok, requests.codes.created):
+            self._json_data['widget_config'] = {'id': r.json()['results'][0].get('id'),
+                                                'config': json.dumps(customization.as_dict(), indent=2)}
