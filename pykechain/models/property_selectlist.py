@@ -46,7 +46,7 @@ class SelectListProperty(Property):
 
         # stringify the options list
         options_list = list(map(str, options_list))
-        if set(options_list) != set(self._options):
+        if not self._options or set(options_list) != set(self._options):
             self._put_options(options_list=options_list)
             self._options = options_list
 

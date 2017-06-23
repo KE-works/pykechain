@@ -1,4 +1,3 @@
-
 class APIError(Exception):
     """A general API Error.
 
@@ -22,5 +21,11 @@ class MultipleFoundError(APIError):
 
 class NotFoundError(APIError):
     """Object not found error."""
+
+    pass
+
+
+class InspectorComponentError(Exception):
+    """Error in the InspectorComponent."""
 
     pass
