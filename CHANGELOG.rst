@@ -21,6 +21,7 @@ pykechain changelog
  * Added the ability to edit the description of property models. This was included in `Part.create_property(... description=...)` (#135)
  * Add `Part.as_dict()` method to retrieve the properties of a part in pykechain as a python dictionary as `{<property_name> : <property_value>}` (#131)
  * Added the ability to optionally update the name of a part together with the value of its properties. See the `Part.update()` method. (#126)
+ * Deprecated the `Activity.create_activity()` method in favor of `Activity.create()`. Use the latter. Will warn with a `DeprecationWarning` until removed.
 
 
 1.8.0 (05JUN17)
