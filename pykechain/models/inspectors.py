@@ -1,9 +1,7 @@
-import json
-
 from pykechain.enums import ComponentXType
 from pykechain.exceptions import InspectorComponentError
 from pykechain.models import Base
-from pykechain.models.inspector_base import InspectorComponent, Customization
+from pykechain.models.inspector_base import InspectorComponent
 
 
 class HtmlPanel(InspectorComponent):
@@ -43,6 +41,7 @@ class PropertyGrid(InspectorComponent):
 
         :param json: provide a valid json (optional if not part)
         :param part: provide a part id (or pykechain Part) (optional if json)
+        :param title: provide a title for the propertygrid (optional)
         :param kwargs: Optional Extras
         """
         if not json and part:
@@ -296,25 +295,3 @@ class PaginatedGrid(InspectorComponent):
             super(self.__class__, self).__init__(json=json)
         else:
             raise InspectorComponentError("Either provide json or (parent and model)")
-
-
-if __name__ == '__main__':
-    with open('/home/jochem/Development/pykechain/w.json', 'r') as fd:
-        widgetconfigs = json.load(fd)
-
-    w = widgetconfigs[15]
-    c = Customization(json=json.loads(w))
-    c.validate()
-    c.as_dict()
-    c.as_json()
-
-    i = -1
-    for w in widgetconfigs:
-        i += 1
-        try:
-            c = Customization(json=json.loads(w))
-            print(i, c)
-
-        except Exception as e:
-            print("EEE - got: {}".format(e))
-    pass
