@@ -9,6 +9,16 @@ pykechain changelog
  * Improved test coverage and refactored the HTTP codes to human readable form
  * Add `Part.as_dict()` method to retrieve the properties of a part in pykechain as a python dictionary as `{<property_name> : <property_value>}`
  * Added the ability to optionally update the name of a part together with the value of its properties. See the `Part.update()` method.
+ * Added a major new feature to create `Customization`s of activities in KE-chain 2 all programmatically and pythonic.
+   We provide building block classes such as `SuperGrid`, `PaginatedGrid`s and `PropertyGrid`s to make you own
+   customisations. All is documented with examples.
+
+    >>> my_task = project.activity('my task')
+    >>> bike = project.part(name='Bike')
+    >>> customization = Customization()  # init customization object for the task
+    >>> my_prop_grid = PropertyGrid(part=bike, title=bike.name)  # create a PropertyGrid
+    >>> customization.add_component(my_prop_grid)  # add PropertyGrid to the Customization component list
+    >>> my_task.customize(config=customization.as_dict())  # upload/set the Customization. Ensure you have data access set correct.
 
 1.8.0 (05JUN17)
 ---------------

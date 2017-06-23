@@ -1,3 +1,5 @@
+import json
+import uuid
 from datetime import datetime
 
 import pytz
@@ -7,6 +9,8 @@ import warnings
 from pykechain.enums import Category, ActivityType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
 from pykechain.models import Part
+from pykechain.models.inspector_base import Customization
+from pykechain.models.inspectors import SuperGrid, PropertyGrid
 from tests.classes import TestBetamax
 
 ISOFORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -41,7 +45,7 @@ class TestActivities(TestBetamax):
 
         assert subprocess.name == 'Random'
 
-        task = subprocess.create_activity('Another')
+        task = subprocess.create('Another')
 
         subprocess.delete()
 
@@ -158,49 +162,6 @@ class TestActivities(TestBetamax):
 
         specify_wd.edit(assignee=original_assignee)
 
-    def test_customize_activity_with_widget_config(self):
-        # Retrieve the activity to be customized
-        activity_to_costumize = self.project.activity('Customized task')
-
-        # Create the widget config it should have now
-        widget_config = {'components': [{'xtype': 'superGrid', 'filter':
-                        {'parent': 'e5106946-40f7-4b49-ae5e-421450857911',
-                         'model': 'edc8eba0-47c5-415d-8727-6d927543ee3b'}}]}
-
-        # Customize it with a config
-        activity_to_costumize.customize(
-            config=widget_config)
-
-        # Re-retrieve it
-        activity_to_costumize = self.project.activity('Customized task')
-
-        # Check whether it's widget config has changed
-        self.assertTrue(activity_to_costumize._json_data['widget_config']['config'] != '{}')
-
-        # Change it back to an empty config
-        activity_to_costumize.customize(config={})
-
-    def test_customize_new_activity(self):
-        # Create the activity to be freshly customized
-        new_task = self.project.create_activity('New task')
-
-        # Customize it with a config
-        new_task.customize(
-            config={"components": [{
-                "xtype": "superGrid",
-                "filter": {
-                    "parent": "e5106946-40f7-4b49-ae5e-421450857911",
-                    "model": "edc8eba0-47c5-415d-8727-6d927543ee3b"}}]})
-
-        # Retrieve it again
-        new_task = self.project.activity('New task')
-
-        # Check whether it's widget config has changed
-        self.assertTrue(new_task._json_data['widget_config']['config'] is not None)
-
-        # Delete it
-        new_task.delete()
-
     # 1.7.2
     def test_datetime_with_naive_duedate_only_fails(self):
         """reference to #121 - thanks to @joost.schut"""
@@ -272,9 +233,9 @@ class TestActivities(TestBetamax):
             task.children()
 
     def test_retrieve_activity_by_id(self):
-        task = self.project.activity(name='SubTask') # type: Activity
+        task = self.project.activity(name='SubTask')  # type: Activity
 
-        task_by_id = self.client.activity(pk = task.id)
+        task_by_id = self.client.activity(pk=task.id)
 
         self.assertEqual(task.id, task_by_id.id)
 
@@ -313,3 +274,74 @@ class TestActivities(TestBetamax):
             self.assertIsInstance(part, Part)
             self.assertTrue(part.category, Category.INSTANCE)
 
+    # updated and new in 1.9
+    def test_customize_activity_with_widget_config(self):
+        # Retrieve the activity to be customized
+        activity_to_costumize = self.project.activity('Customized task')
+
+        # Create the widget config it should have now
+        widget_config = {'components': [{'xtype': 'superGrid', 'filter':
+            {'parent': 'e5106946-40f7-4b49-ae5e-421450857911',
+             'model': 'edc8eba0-47c5-415d-8727-6d927543ee3b'}}]}
+
+        # Customize it with a config
+        activity_to_costumize.customize(
+            config=widget_config)
+
+        # Re-retrieve it
+        activity_to_costumize = self.project.activity('Customized task')
+
+        # Check whether it's widget config has changed
+        self.assertTrue(activity_to_costumize._json_data['widget_config']['config'] != '{}')
+
+        # Change it back to an empty config
+        activity_to_costumize.customize(config={})
+
+    def test_customize_new_activity(self):
+        # Create the activity to be freshly customized
+        new_task = self.project.create_activity('New task')
+
+        # Customize it with a config
+        new_task.customize(
+            config={"components": [{
+                "xtype": "superGrid",
+                "filter": {
+                    "parent": "e5106946-40f7-4b49-ae5e-421450857911",
+                    "model": "edc8eba0-47c5-415d-8727-6d927543ee3b"}}]})
+
+        # Retrieve it again
+        new_task = self.project.activity('New task')
+
+        # Check whether it's widget config has changed
+        self.assertTrue(new_task._json_data['widget_config']['config'] is not None)
+
+        # Delete it
+        new_task.delete()
+
+    def test_customize_activity_with_inspectorcomponent(self):
+        # Create the activity to be freshly customized
+        new_task = self.project.create_activity('New task (test_customize_activity_with_insp_component)')
+
+        customization = Customization()
+        supergrid = SuperGrid(parent=str(uuid.uuid4()), model=str(uuid.uuid4()))
+        customization.add_component(supergrid)
+
+        # set as new customization in the task
+        new_task.customize(customization)
+
+        # retrieve and make another oene
+        new_task2 = self.project.activity(new_task.name)
+
+        propertygrid = PropertyGrid(part=str(uuid.uuid4()), title="new name")
+        customization = Customization()
+        customization.add_component(propertygrid)
+        new_task2.customize(customization)
+
+        self.assertTrue(new_task._json_data['widget_config']['config'] is not None)
+        self.assertTrue(new_task2._json_data['widget_config']['config'] is not None)
+
+        # the customization from the activity still validates
+        Customization(json.loads(new_task2._json_data['widget_config']['config'])).validate()
+
+        # teardown
+        new_task.delete()
