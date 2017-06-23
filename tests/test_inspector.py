@@ -78,13 +78,3 @@ class TestWidgetConfig(TestCase):
         component = PaginatedGrid(model=str(uuid.uuid4()), parent=str(uuid.uuid4()), title="a title",
                                   newInstance=False, edit=False, delete=False, export=False)
         component.validate()
-
-
-
-
-        # class TestParts(TestBetamax):
-        #     def test_retrieve_parts(self):
-        #         parts = self.project.parts()
-        #
-        #         # Check if there are parts
-        #         assert len(parts)
