@@ -9,6 +9,7 @@ pykechain changelog
  * Improved test coverage and refactored the HTTP codes to human readable form
  * Add `Part.as_dict()` method to retrieve the properties of a part in pykechain as a python dictionary as `{<property_name> : <property_value>}`
  * Added the ability to optionally update the name of a part together with the value of its properties. See the `Part.update()` method.
+ * Added a major new feature to create Customisations of activities in KE-chain 2 all programmaticly and pythonic. We provide building block classes such as SuperGrid, PaginatedGrids and PropertyGrids to make you own customisations. All is properly documented with examples.
 
 1.8.0 (05JUN17)
 ---------------
