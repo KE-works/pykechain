@@ -3,33 +3,42 @@ Change Log
 
 pykechain changelog
 
-1.9.0 (UNRELEASED)
-------------------
+1.9.0 (23JUN17)
+---------------
 
- * Improved test coverage and refactored the HTTP codes to human readable form
- * Add `Part.as_dict()` method to retrieve the properties of a part in pykechain as a python dictionary as `{<property_name> : <property_value>}`
- * Added the ability to optionally update the name of a part together with the value of its properties. See the `Part.update()` method.
- * Added a major new feature to create `Customization`s of activities in KE-chain 2 all programmatically and pythonic.
-   We provide building block classes such as `SuperGrid`, `PaginatedGrid`s and `PropertyGrid`s to make you own
-   customisations. All is documented with examples.
+ * Added a major new feature to create `Customization`s of activities in KE-chain 2 all programmatically and pythonic. We provide building block classes such as `SuperGrid`, `PaginatedGrid`s and `PropertyGrid`s to make your own task customization. All is documented with examples. A `validation()` method is available. (#110)
 
     >>> my_task = project.activity('my task')
     >>> bike = project.part(name='Bike')
     >>> customization = Customization()  # init customization object for the task
     >>> my_prop_grid = PropertyGrid(part=bike, title=bike.name)  # create a PropertyGrid
     >>> customization.add_component(my_prop_grid)  # add PropertyGrid to the Customization component list
-    >>> my_task.customize(config=customization.as_dict())  # upload/set the Customization. Ensure you have data access set correct.
+    >>> customization.validate()  # you can validate the customization
+    >>> my_task.customize(customization)  # upload/set the Customization. Ensure you have data access set correctly.
+
+ * Updated the way the `Activity.customize()` method works. This method now accepts a `Customization` object or a josn (as a python dict). It uses the `Customization.validate()` method to validate if it conforms to the required json structure before uploading it to KE-chain.
+ * Improved test coverage and refactored the HTTP codes to human readable form. (#128)
+ * Added the ability to edit the description of property models. This was included in `Part.create_property(... description=...)` (#135)
+ * Add `Part.as_dict()` method to retrieve the properties of a part in pykechain as a python dictionary as `{<property_name> : <property_value>}` (#131)
+ * Added the ability to optionally update the name of a part together with the value of its properties. See the `Part.update()` method. (#126)
+
 
 1.8.0 (05JUN17)
 ---------------
- * Added `Part.instances()` method for models to find their associated instances. (#113) Also added a `Part.instance()` method if you for sure that you will get only a single instance back.
- * Added `Activity.subprocess()`, `Activity.siblings()` and `Activity.children()` methods to the `Activity`. It eases relative retrieval of other tasks in the task tree. Documentation is included. (#100)
+ * Added `Part.instances()` method for models to find their associated instances. (#113) Also added a
+   `Part.instance()` method if you for sure that you will get only a single instance back.
+ * Added `Activity.subprocess()`, `Activity.siblings()` and `Activity.children()` methods to the `Activity`.
+   It eases relative retrieval of other tasks in the task tree. Documentation is included. (#100)
  * added `Activity.activity_type` property to the Activity.
- * added `ActivityType` enumeration. This can be used to check if the `activity_type` of an `Activity` is either a Usertask or a Subprocess.
- * Added ability to retrieve an `Activity` based on an id. As this included in the low level `Client` object, it can be used almost everywhere to retrieve an activity by its id (or primary key, pk) eg. in the `Scope.activity`.
+ * added `ActivityType` enumeration. This can be used to check if the `activity_type` of an `Activity` is either
+   a Usertask or a Subprocess.
+ * Added ability to retrieve an `Activity` based on an id. As this included in the low level `Client` object,
+   it can be used almost everywhere to retrieve an activity by its id (or primary key, pk) eg. in the `Scope.activity`.
  * Added ability to add additional keywords to the activities searcher to be able to search by name, pk, container etc.
- * Added a FutureDeprecationWarning to the `Activity.create_activity()` method. This will is replace with the `Activity.create()` method. Update your code please!
- * Added a convenience method to retrieve models and instances related to a task at once: `Activity.associated_parts()`. Making use of the already provided method in `Activity.parts()`. (#118)
+ * Added a FutureDeprecationWarning to the `Activity.create_activity()` method. This will is replace with the
+   `Activity.create()` method. Update your code please!
+ * Added a convenience method to retrieve models and instances related to a task at once:
+   `Activity.associated_parts()`. Making use of the already provided method in `Activity.parts()`. (#118)
  * Added missing tests for `Activity.parts()` and `Activity.associated_parts()`
  * added tests for all new features.
  * Updated the documentation.
