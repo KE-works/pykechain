@@ -1,15 +1,35 @@
 import json
 import uuid
-from unittest import TestCase
+import yaml
 
 from jsonschema import ValidationError
 
+from pykechain.enums import ComponentXType
+from tests.classes import TestBetamax
+
 from pykechain.exceptions import InspectorComponentError
 from pykechain.models.inspector_base import Customization
-from pykechain.models.inspectors import SuperGrid, PropertyGrid, PaginatedGrid, FilteredGrid
+from pykechain.models.inspectors import SuperGrid, PropertyGrid, PaginatedGrid, FilteredGrid, HtmlPanel
 
 
-class TestWidgetConfig(TestCase):
+class TestWidgetConfig(TestBetamax):
+    def setUp(self):
+        super(TestWidgetConfig, self).setUp()
+        self.parent = self.project.part('Bike')
+        self.activity = self.project.activity('Customized task')
+        self.model = self.project.model('Wheel')
+        self.viewModel = {
+                            'data': {
+                                'actions': {
+                                    'export': True,
+                                    'newInstance': True,
+                                    'edit': True,
+                                    'delete': True
+                                }
+                            }
+                         }
+        self.html = "<h1><a href=https://kec2api.ke-chain.com/#scopes/6f7bc9f0-228e-4d3a-9dc0-ec5a75d73e1d/productmodel target=_blank>Link to Data Model</a></h1>"
+
     def test_single_widget_config(self):
         config_str = "{\n   \"components\":[\n      {\n         \"xtype\":\"superGrid\",\n         \"filter\":{\n            \"parent\":\"e334fa50-9ce9-46ca-b8dc-97a0018f33a4\",\n            \"model\":\"4c0e22e5-3890-4763-873e-937f24c7732e\",\n\"activity_id\" : \"7a41b32c-c02c-483a-81be-beaadc51d534\"\n         },\n         \"viewModel\":{\n            \"data\": {\n                \"actions\":{\n                    \"newInstance\": false,\n                    \"edit\": true,\n                    \"delete\": false,\n                    \"export\": true\n                } \n            }\n        \n        }\n      }\n   ]\n}"
         customisation = Customization(json.loads(config_str))
@@ -44,7 +64,15 @@ class TestWidgetConfig(TestCase):
 
     def test_empty_component_fails_with_validation_error(self):
         with self.assertRaises(InspectorComponentError):
-            component = SuperGrid()
+            SuperGrid()
+        with self.assertRaises(InspectorComponentError):
+            PropertyGrid()
+        with self.assertRaises(InspectorComponentError):
+            PaginatedGrid()
+        with self.assertRaises(InspectorComponentError):
+            FilteredGrid()
+        with self.assertRaises(InspectorComponentError):
+            HtmlPanel()
 
     def test_supergrid_component(self):
         component = SuperGrid(parent=str(uuid.uuid4()), model=str(uuid.uuid4()), activity_id=str(uuid.uuid4()),
@@ -78,3 +106,174 @@ class TestWidgetConfig(TestCase):
         component = PaginatedGrid(model=str(uuid.uuid4()), parent=str(uuid.uuid4()), title="a title",
                                   newInstance=False, edit=False, delete=False, export=False)
         component.validate()
+
+    def test_supergrid_with_part_objects_and_json(self):
+        # Set up
+        title = "Customized SuperGrid"
+        json_config = {'xtype': ComponentXType.SUPERGRID,
+                       'filter': {'activity_id': self.activity.id, 'model': self.model.id, 'parent': self.parent.id},
+                       'title': title,
+                       'viewModel': self.viewModel
+                       }
+
+        # First customization - using parent, model and activity
+        first_component = SuperGrid(parent=self.parent, model=self.model, activity_id=self.activity, title=title)
+        first_customization = Customization()
+        first_customization.add_component(first_component)
+        self.activity.customize(first_customization.as_dict())
+        config_first_customization = self.activity._json_data['widget_config']['config']
+
+        # Second customization - using json only
+        second_component = SuperGrid(json=json_config)
+        second_customization = Customization()
+        second_customization.add_component(second_component)
+        self.activity.customize(second_customization.as_dict())
+        config_second_customization = self.activity._json_data['widget_config']['config']
+
+        # Check whether the configs are equal
+        self.assertEqual(yaml.load(config_first_customization), yaml.load(config_second_customization))
+
+        # teardown
+        self.activity.customize(config={})
+
+    def test_propertygrid_with_part_objects_and_json(self):
+        # Set up
+        title = "Customized PropertyGrid"
+        json_config = {'xtype': ComponentXType.PROPERTYGRID,
+                       'filter': {'part': self.parent.id},
+                       'title': title,
+                       'viewModel': {
+                            'data': {
+                                'style': {
+                                    'displayPartTitle': True
+                                }
+                            }
+                        }
+                       }
+
+        # First customization - using part instance only
+        first_component = PropertyGrid(part=self.parent, title=title)
+        first_customization = Customization()
+        first_customization.add_component(first_component)
+        self.activity.customize(first_customization.as_dict())
+        config_first_customization = self.activity._json_data['widget_config']['config']
+
+        # Second customization - using json only
+        second_component = PropertyGrid(json=json_config)
+        second_customization = Customization()
+        second_customization.add_component(second_component)
+        self.activity.customize(second_customization.as_dict())
+        config_second_customization = self.activity._json_data['widget_config']['config']
+
+        # Check whether the configs are equal
+        self.assertEqual(yaml.load(config_first_customization), yaml.load(config_second_customization))
+
+        # teardown
+        self.activity.customize(config={})
+
+    def test_paginatedsupergrid_with_part_objects_and_json(self):
+        # Set up
+        title = "Customized PaginatedGrid"
+        json_config = {'xtype': ComponentXType.PAGINATEDSUPERGRID,
+                       'filter': {'model': self.model.id, 'parent': self.parent.id},
+                       'title': title,
+                       'pageSize': 25,
+                       'flex': 0,
+                       'height': 600,
+                       'viewModel': self.viewModel
+                       }
+
+        # First customization - using parent and model
+        first_component = PaginatedGrid(parent=self.parent, model=self.model, title=title)
+        first_customization = Customization()
+        first_customization.add_component(first_component)
+        self.activity.customize(first_customization.as_dict())
+        config_first_customization = self.activity._json_data['widget_config']['config']
+
+        # Second customization - using only json
+        second_component = PaginatedGrid(json=json_config)
+        second_customization = Customization()
+        second_customization.add_component(second_component)
+        self.activity.customize(second_customization.as_dict())
+        config_second_customization = self.activity._json_data['widget_config']['config']
+
+        # Check whether the configs are equal
+        self.assertEqual(yaml.load(config_first_customization), yaml.load(config_second_customization))
+
+        # teardown
+        self.activity.customize(config={})
+
+    def test_filteredgrid_with_part_objects_and_json(self):
+        # Set up
+        title = "Customized FilteredGrid"
+        json_config = {'xtype': ComponentXType.FILTEREDGRID,
+                       'partModelId': self.model.id,
+                       'parentInstanceId': self.parent.id,
+                       'title': title,
+                       'collapseFilters': False,
+                       'pageSize': 25,
+                       'flex': 0,
+                       'height': 600,
+                       'grid': {'xtype': ComponentXType.PAGINATEDSUPERGRID, 'viewModel': self.viewModel}
+                       }
+
+        # First customization - using parent and model
+        first_component = FilteredGrid(parent=self.parent, model=self.model, title=title)
+        first_customization = Customization()
+        first_customization.add_component(first_component)
+        self.activity.customize(first_customization.as_dict())
+        config_first_customization = self.activity._json_data['widget_config']['config']
+
+        # Second customization - using only json
+        second_component = FilteredGrid(json=json_config)
+        second_customization = Customization()
+        second_customization.add_component(second_component)
+        self.activity.customize(second_customization.as_dict())
+        config_second_customization = self.activity._json_data['widget_config']['config']
+
+        # Check whether the configs are equal
+        self.assertEqual(yaml.load(config_first_customization), yaml.load(config_second_customization))
+
+        # teardown
+        self.activity.customize(config={})
+
+    def test_htmlpanel_with_part_objects_and_json(self):
+        # Set up
+        title = 'Customized HTMLPanel'
+        json_config = {"xtype": "panel",
+                       "title": title,
+                       "html": self.html
+                       }
+
+        # First customization - using html
+        first_component = HtmlPanel(html=self.html, title=title)
+        first_customization = Customization()
+        first_customization.add_component(first_component)
+        self.activity.customize(first_customization.as_dict())
+        config_first_customization = self.activity._json_data['widget_config']['config']
+
+        # Second customization - using only json
+        second_component = HtmlPanel(json=json_config)
+        second_customization = Customization()
+        second_customization.add_component(second_component)
+        self.activity.customize(second_customization.as_dict())
+        config_second_customization = self.activity._json_data['widget_config']['config']
+
+        # Check whether the configs are equal
+        self.assertEqual(yaml.load(config_first_customization), yaml.load(config_second_customization))
+
+        # teardown
+        self.activity.customize(config={})
+
+    def test_set_and_get_methods(self):
+        # Set up
+        title = "Customized SuperGrid"
+        frame_model = self.project.model('Frame')
+
+        # Creating superGrid component
+        super_grid = SuperGrid(parent=self.parent, model=self.model, activity_id=self.activity, title=title)
+
+        # Setting the value of model
+        super_grid.set('model', frame_model)
+
+        self.assertEqual(frame_model.id, super_grid.get('model'))
