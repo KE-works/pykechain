@@ -84,7 +84,7 @@ class InspectorComponent(object):
         """Return the component as a rendered and valid JSON string."""
         return json.dumps(self.as_dict(), indent=2)
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return "<{} ({}) at {:#x}>".format(self.__class__.__name__, self.xtype, id(self))
 
 
@@ -131,5 +131,5 @@ class Customization(InspectorComponent):
         """Return the Customization as rendered and valid JSON string."""
         return json.dumps(self.as_dict())
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return "<{} ({} comp's) at {:#x}>".format(self.__class__.__name__, len(self.components), id(self))
