@@ -345,3 +345,14 @@ class TestActivities(TestBetamax):
 
         # teardown
         new_task.delete()
+
+    def test_wrong_customization(self):
+        # Set up
+        new_task = self.project.create_activity('Task for wrong customization')
+        config = 'This will not work'
+
+        with self.assertRaises(Exception):
+            new_task.customize(config)
+
+        # teardown
+        new_task.delete()
