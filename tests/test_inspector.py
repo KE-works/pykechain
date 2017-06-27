@@ -1,15 +1,13 @@
 import json
 import uuid
-import yaml
 
 from jsonschema import ValidationError
 
 from pykechain.enums import ComponentXType
-from tests.classes import TestBetamax
-
 from pykechain.exceptions import InspectorComponentError
 from pykechain.models.inspector_base import Customization
 from pykechain.models.inspectors import SuperGrid, PropertyGrid, PaginatedGrid, FilteredGrid, HtmlPanel
+from tests.classes import TestBetamax
 
 
 class TestWidgetConfig(TestBetamax):
@@ -19,15 +17,15 @@ class TestWidgetConfig(TestBetamax):
         self.activity = self.project.activity('Customized task')
         self.model = self.project.model('Wheel')
         self.viewModel = {
-                            'data': {
-                                'actions': {
-                                    'export': True,
-                                    'newInstance': True,
-                                    'edit': True,
-                                    'delete': True
-                                }
-                            }
-                         }
+            'data': {
+                'actions': {
+                    'export': True,
+                    'newInstance': True,
+                    'edit': True,
+                    'delete': True
+                }
+            }
+        }
         self.html = "<h1><a href=https://kec2api.ke-chain.com/#scopes/6f7bc9f0-228e-4d3a-9dc0-ec5a75d73e1d/productmodel target=_blank>Link to Data Model</a></h1>"
 
     def test_single_widget_config(self):
@@ -131,7 +129,7 @@ class TestWidgetConfig(TestBetamax):
         config_second_customization = self.activity._json_data['widget_config']['config']
 
         # Check whether the configs are equal
-        self.assertEqual(yaml.load(config_first_customization), yaml.load(config_second_customization))
+        self.assertEqual(json.loads(config_first_customization), json.loads(config_second_customization))
 
         # teardown
         self.activity.customize(config={})
@@ -143,12 +141,12 @@ class TestWidgetConfig(TestBetamax):
                        'filter': {'part': self.parent.id},
                        'title': title,
                        'viewModel': {
-                            'data': {
-                                'style': {
-                                    'displayPartTitle': True
-                                }
-                            }
-                        }
+                           'data': {
+                               'style': {
+                                   'displayPartTitle': True
+                               }
+                           }
+                       }
                        }
 
         # First customization - using part instance only
@@ -166,7 +164,7 @@ class TestWidgetConfig(TestBetamax):
         config_second_customization = self.activity._json_data['widget_config']['config']
 
         # Check whether the configs are equal
-        self.assertEqual(yaml.load(config_first_customization), yaml.load(config_second_customization))
+        self.assertEqual(json.loads(config_first_customization), json.loads(config_second_customization))
 
         # teardown
         self.activity.customize(config={})
@@ -198,7 +196,7 @@ class TestWidgetConfig(TestBetamax):
         config_second_customization = self.activity._json_data['widget_config']['config']
 
         # Check whether the configs are equal
-        self.assertEqual(yaml.load(config_first_customization), yaml.load(config_second_customization))
+        self.assertEqual(json.loads(config_first_customization), json.loads(config_second_customization))
 
         # teardown
         self.activity.customize(config={})
@@ -232,7 +230,7 @@ class TestWidgetConfig(TestBetamax):
         config_second_customization = self.activity._json_data['widget_config']['config']
 
         # Check whether the configs are equal
-        self.assertEqual(yaml.load(config_first_customization), yaml.load(config_second_customization))
+        self.assertEqual(json.loads(config_first_customization), json.loads(config_second_customization))
 
         # teardown
         self.activity.customize(config={})
@@ -260,7 +258,7 @@ class TestWidgetConfig(TestBetamax):
         config_second_customization = self.activity._json_data['widget_config']['config']
 
         # Check whether the configs are equal
-        self.assertEqual(yaml.load(config_first_customization), yaml.load(config_second_customization))
+        self.assertEqual(json.loads(config_first_customization), json.loads(config_second_customization))
 
         # teardown
         self.activity.customize(config={})
