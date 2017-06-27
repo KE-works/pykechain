@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+1.9.1 (27JUN17)
+---------------
+ * Improved testing. Notably on the new inspector objects. No functional change only that we want to reach our goal of 95% test coverage! Thanks to @radu.iordache (#137)
+
 1.9.0 (23JUN17)
 ---------------
 
