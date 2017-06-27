@@ -6,7 +6,6 @@ envparse==0.2.0
 jsonschema==2.6.0
 
 # testing
-pyyaml==3.12
 pytest==3.1.2
 betamax==0.8.0
 
