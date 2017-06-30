@@ -26,4 +26,4 @@ pydocstyle==2.0.0
 mypy==0.511
 
 # to fix connection issues
-PyOpenSSL==17.0.0; python_version <= '2.7'
+PyOpenSSL==17.1.0; python_version <= '2.7'
