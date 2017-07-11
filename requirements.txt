@@ -23,7 +23,7 @@ tox==2.7.0
 # code style
 flake8==3.3.0
 pydocstyle==2.0.0
-mypy==0.511
+mypy==0.520
 
 # to fix connection issues
 PyOpenSSL==17.1.0; python_version <= '2.7'
