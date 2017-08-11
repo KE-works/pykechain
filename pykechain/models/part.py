@@ -354,10 +354,10 @@ class Part(Base):
         """
         update_dict = {'id': self.id}
         if name:
-            assert type(name) == str, "name should be provided as a string"
+            assert isinstance(name, str), "name should be provided as a string"
             update_dict.update({'name': name})
         if description:
-            assert type(description) == str, "description should be provided as a string"
+            assert isinstance(description, str), "description should be provided as a string"
             update_dict.update({'description': description})
         r = self._client._request('PUT', self._client._build_url('part', part_id=self.id), json=update_dict)
 
@@ -419,7 +419,7 @@ class Part(Base):
 
         if bulk and len(update_dict.keys()) > 1:
             if name:
-                assert type(name) == str, "Name of the part should be provided as a string"
+                assert isinstance(name, str), "Name of the part should be provided as a string"
             r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
                                       data=dict(name=name, properties=json.dumps(request_body)),
                                       params=dict(select_action=action))

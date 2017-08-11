@@ -23,7 +23,7 @@ class ReferenceProperty(Property):
 
         >>> part = project.part('Bike')
         >>> material_ref_property = part.property('Material Selection')
-        >>> type(material_ref_property) == ReferenceProperty
+        >>> isinstance(material_ref_property, ReferenceProperty)
         True
 
         The value either returns a Part or is None if not set (yet)
