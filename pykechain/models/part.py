@@ -492,3 +492,12 @@ class Part(Base):
             properties_dict[prop.name] = prop.value
         return properties_dict
 
+    def order_properties(self, properties_list):
+        order_dict = dict()
+        for prop in properties_list:
+            order_dict[self.property(name=prop).id] = properties_list.index(prop)
+
+        r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
+                                  data=dict(
+                                      property_order=json.dumps(order_dict)
+                                  ))

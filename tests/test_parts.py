@@ -392,3 +392,9 @@ class TestPartCreateWithProperties(TestBetamax):
 
         with self.assertRaises(MultipleFoundError):
             wheel_model.instance()
+
+    def test_reorder_properties(self):
+        front_fork_model = self.project.model('Front Fork')
+        front_fork_model.order_properties(['Material', 'Color', 'Height (mm)'])
+
+        front_fork_model = self.project.model('Front Fork')
