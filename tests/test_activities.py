@@ -6,7 +6,7 @@ import pytz
 import requests
 import warnings
 
-from pykechain.enums import Category, ActivityType
+from pykechain.enums import Category, ActivityType, Status
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
 from pykechain.models import Part
 from pykechain.models.inspector_base import Customization
@@ -161,6 +161,21 @@ class TestActivities(TestBetamax):
             specify_wd.edit(assignee=0.5)
 
         specify_wd.edit(assignee=original_assignee)
+
+    # 1.10.0
+    def test_edit_activity_status(self):
+        specify_wd = self.project.activity('Specify wheel diameter')
+        original_status = specify_wd.status
+
+        specify_wd.edit(status=Status.COMPLETED)
+
+        # If the status is not part of Enums.Status then it should raise an APIError
+        with self.assertRaises(APIError):
+            specify_wd.edit(status='NO STATUS')
+
+        # Return the status to how it used to be
+        specify_wd.edit(status=original_status)
+
 
     # 1.7.2
     def test_datetime_with_naive_duedate_only_fails(self):
