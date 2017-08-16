@@ -180,7 +180,6 @@ class TestActivities(TestBetamax):
         # Return the status to how it used to be
         specify_wd.edit(status=original_status)
 
-
     # 1.7.2
     def test_datetime_with_naive_duedate_only_fails(self):
         """reference to #121 - thanks to @joost.schut"""
