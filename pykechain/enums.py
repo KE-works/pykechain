@@ -73,5 +73,6 @@ class ComponentXType(Enum):
 
 class Status(Enum):
     """The various Activity statuses that are accepted by KE-chain."""
+
     OPEN = 'OPEN'
     COMPLETED = 'COMPLETED'

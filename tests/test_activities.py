@@ -169,6 +169,10 @@ class TestActivities(TestBetamax):
 
         specify_wd.edit(status=Status.COMPLETED)
 
+        # Added to improve coverage. Assert whether TypeError is raised when 'status' is not a string
+        with self.assertRaises(TypeError):
+            specify_wd.edit(status=True)
+
         # If the status is not part of Enums.Status then it should raise an APIError
         with self.assertRaises(APIError):
             specify_wd.edit(status='NO STATUS')
