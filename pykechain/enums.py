@@ -71,7 +71,7 @@ class ComponentXType(Enum):
     FILTEREDGRID = "filteredGrid"
 
 
-class Status(Enum):
+class ActivityStatus(Enum):
     """The various Activity statuses that are accepted by KE-chain."""
 
     OPEN = 'OPEN'
