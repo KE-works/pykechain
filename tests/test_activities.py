@@ -252,27 +252,27 @@ class TestActivities(TestBetamax):
 
         for part in parts:
             self.assertIsInstance(part, Part)
-            self.assertTrue(part.category, Category.INSTANCE)
+            self.assertTrue(part.category == Category.INSTANCE)
 
     def test_retrieve_part_models_associated_to_activities(self):
         task = self.project.activity('Specify wheel diameter')
-        parts = list(task.parts(category=Category.MODEL))
+        models = list(task.parts(category=Category.MODEL))
 
-        for part in parts:
-            self.assertIsInstance(part, Part)
-            self.assertTrue(part.category, Category.MODEL)
+        for model in models:
+            self.assertIsInstance(model, Part)
+            self.assertTrue(model.category == Category.MODEL)
 
     def test_retrieve_associated_parts_to_activity(self):
         task = self.project.activity('Specify wheel diameter')
         (models, parts) = list(task.associated_parts())
 
-        for part in parts:
+        for part in models:
             self.assertIsInstance(part, Part)
-            self.assertTrue(part.category, Category.INSTANCE)
+            self.assertTrue(part.category == Category.MODEL)
 
         for part in parts:
             self.assertIsInstance(part, Part)
-            self.assertTrue(part.category, Category.INSTANCE)
+            self.assertTrue(part.category == Category.INSTANCE)
 
     # updated and new in 1.9
     def test_customize_activity_with_widget_config(self):
