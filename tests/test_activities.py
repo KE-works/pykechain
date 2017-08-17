@@ -6,7 +6,7 @@ import pytz
 import requests
 import warnings
 
-from pykechain.enums import Category, ActivityType, Status
+from pykechain.enums import Category, ActivityType, ActivityStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
 from pykechain.models import Part
 from pykechain.models.inspector_base import Customization
@@ -167,7 +167,7 @@ class TestActivities(TestBetamax):
         specify_wd = self.project.activity('Specify wheel diameter')
         original_status = specify_wd.status
 
-        specify_wd.edit(status=Status.COMPLETED)
+        specify_wd.edit(status=ActivityStatus.COMPLETED)
 
         # Added to improve coverage. Assert whether TypeError is raised when 'status' is not a string
         with self.assertRaises(TypeError):

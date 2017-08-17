@@ -248,7 +248,6 @@ class Activity(Base):
         if status:
             if isinstance(status, (str, text_type)):
                 update_dict.update({'status': status})
-                self.status = status
             else:
                 raise TypeError('Status should be a string')
 
@@ -258,6 +257,8 @@ class Activity(Base):
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Activity ({})".format(r))
 
+        if status:
+            self._json_data['status'] = str(status)
         if assignee:
             self._json_data['assignee'] = assignee
         if due_date:
