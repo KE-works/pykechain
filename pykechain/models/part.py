@@ -511,26 +511,23 @@ class Part(Base):
         >>> color = front_fork.property('Color')
         >>> front_fork.order_properties([material, height, color])
 
-
         """
         assert self.category == Category.MODEL
-
-        if isinstance(property_list, list):
-            order_dict = dict()
-
-            for prop in property_list:
-                if isinstance(prop, (str, text_type)):
-                    order_dict[self.property(name=prop).id] = property_list.index(prop)
-                else:
-                    order_dict[prop.id] = property_list.index(prop)
-
-            r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
-                                      data=dict(
-                                          property_order=json.dumps(order_dict)
-                                      ))
-            if r.status_code != requests.codes.ok:  # pragma: no cover
-                raise APIError("Could not reorder properties")
-
-        else:
+        if not isinstance(property_list, list):
             raise TypeError('Expected a list of strings or Property() objects, got a {} object'.
                             format(type(property_list)))
+
+        order_dict = dict()
+
+        for prop in property_list:
+            if isinstance(prop, (str, text_type)):
+                order_dict[self.property(name=prop).id] = property_list.index(prop)
+            else:
+                order_dict[prop.id] = property_list.index(prop)
+
+        r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
+                                  data=dict(
+                                      property_order=json.dumps(order_dict)
+                                  ))
+        if r.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not reorder properties")
