@@ -492,12 +492,27 @@ class Part(Base):
             properties_dict[prop.name] = prop.value
         return properties_dict
 
-    def order_properties(self, properties_list):
-        order_dict = dict()
-        for prop in properties_list:
-            order_dict[self.property(name=prop).id] = properties_list.index(prop)
+    def order_properties(self, list_property_names=None):
+        """
+        Order the properties of a part model using a list of property names.
 
-        r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
-                                  data=dict(
-                                      property_order=json.dumps(order_dict)
-                                  ))
+        Example
+        -------
+        >>> front_fork = client.scope('Bike Project').model('Front Fork')
+        >>> front_fork.order_properties(['Material', 'Height (mm)', 'Color'])
+
+        """
+        assert self.category == Category.MODEL
+
+        if isinstance(list_property_names, list):
+            order_dict = dict()
+
+            for prop in list_property_names:
+                order_dict[self.property(name=prop).id] = list_property_names.index(prop)
+
+            r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
+                                      data=dict(
+                                          property_order=json.dumps(order_dict)
+                                      ))
+        else:
+            raise TypeError('Expected a list of strings, got a {} object'.format(type(list_property_names)))

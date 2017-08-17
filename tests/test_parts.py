@@ -393,8 +393,63 @@ class TestPartCreateWithProperties(TestBetamax):
         with self.assertRaises(MultipleFoundError):
             wheel_model.instance()
 
+    # new in 1.10
     def test_reorder_properties(self):
+        # Retrieve the front fork model
         front_fork_model = self.project.model('Front Fork')
-        front_fork_model.order_properties(['Material', 'Color', 'Height (mm)'])
 
+        # Sort the properties of the front fork model based on their original order
+        original_sorted_list_of_props = sorted(front_fork_model.properties, key=lambda k: k._json_data['order'])
+
+        # Make a new list with only the names of the properties sorted by order. This will later be used to
+        # reverse the order to the initial status
+        original_list_of_prop_names = [prop.name for prop in original_sorted_list_of_props]
+
+        # Instantiate the list that will be used to reorder the properties
+        desired_order_list = ['Material', 'Height (mm)', 'Color']
+
+        # Make the call to re-order the properties according to the above list
+        front_fork_model.order_properties(list_property_names=desired_order_list)
+
+        # Re-retrieve the front fork model
         front_fork_model = self.project.model('Front Fork')
+
+        # Do the same steps as above. This will be used to check whether the action performed correctly.
+        new_sorted_list_of_props = sorted(front_fork_model.properties, key=lambda k: k._json_data['order'])
+        new_list_of_prop_names = [prop.name for prop in new_sorted_list_of_props]
+
+        # Check the new list with the desired one
+        self.assertEqual(desired_order_list, new_list_of_prop_names)
+
+        # Return the front fork model to the initial status
+        front_fork_model.order_properties(list_property_names=original_list_of_prop_names)
+
+    def test_reorder_wrong_properties(self):
+        # Retrieve the front fork model
+        front_fork_model = self.project.model('Front Fork')
+
+        # Instantiate a wrong list that will be used to reorder the properties.
+        desired_order_list = ['Material', 'Height (mm)', 'Color', 'Width (mm)']
+
+        with self.assertRaises(NotFoundError):
+            front_fork_model.order_properties(list_property_names=desired_order_list)
+
+    def test_reorder_not_list(self):
+        # Retrieve the front fork model
+        front_fork_model = self.project.model('Front Fork')
+
+        # Instantiate a wrong list that will be used to reorder the properties.
+        desired_order_list = 'Material Height (mm) Color'
+
+        with self.assertRaises(TypeError):
+            front_fork_model.order_properties(list_property_names=desired_order_list)
+
+    def test_reorder_properties_of_instance(self):
+        # Retrieve the front fork model
+        front_fork_instance = self.project.part(name='Front Fork', category='INSTANCE')
+
+        # Instantiate a list that will be used to reorder the properties.
+        desired_order_list = ['Material', 'Height (mm)', 'Color']
+
+        with self.assertRaises(AssertionError):
+            front_fork_instance.order_properties(list_property_names=desired_order_list)
