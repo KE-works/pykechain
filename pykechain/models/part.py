@@ -3,6 +3,8 @@ import json
 import requests
 from typing import Any, AnyStr  # flake8: noqa
 
+from six import text_type
+
 from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import NotFoundError, APIError, MultipleFoundError
 from pykechain.models.base import Base
@@ -492,27 +494,43 @@ class Part(Base):
             properties_dict[prop.name] = prop.value
         return properties_dict
 
-    def order_properties(self, list_property_names=None):
+    def order_properties(self, property_list=None):
         """
-        Order the properties of a part model using a list of property names.
+        Order the properties of a part model using a list of property objects or property names.
 
-        Example
-        -------
+        Example 1
+        ---------
         >>> front_fork = client.scope('Bike Project').model('Front Fork')
         >>> front_fork.order_properties(['Material', 'Height (mm)', 'Color'])
+
+        Example 2
+        ---------
+        >>> front_fork = client.scope('Bike Project').model('Front Fork')
+        >>> material = front_fork.property('Material')
+        >>> height = front_fork.property('Height (mm)')
+        >>> color = front_fork.property('Color')
+        >>> front_fork.order_properties([material, height, color])
+
 
         """
         assert self.category == Category.MODEL
 
-        if isinstance(list_property_names, list):
+        if isinstance(property_list, list):
             order_dict = dict()
 
-            for prop in list_property_names:
-                order_dict[self.property(name=prop).id] = list_property_names.index(prop)
+            for prop in property_list:
+                if isinstance(prop, (str, text_type)):
+                    order_dict[self.property(name=prop).id] = property_list.index(prop)
+                else:
+                    order_dict[prop.id] = property_list.index(prop)
 
             r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
                                       data=dict(
                                           property_order=json.dumps(order_dict)
                                       ))
+            if r.status_code != requests.codes.ok:  # pragma: no cover
+                raise APIError("Could not reorder properties")
+
         else:
-            raise TypeError('Expected a list of strings, got a {} object'.format(type(list_property_names)))
+            raise TypeError('Expected a list of strings or Property() objects, got a {} object'.
+                            format(type(property_list)))
