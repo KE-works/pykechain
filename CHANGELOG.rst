@@ -3,6 +3,14 @@ Change Log
 
 pykechain changelog
 
+1.10 (18AUG17 UNRELEASED)
+-----------------------
+ * Ability to edit the status of an `Activity`. Please refer to the `ActivityStatus` enumerations.
+ * Ability to sort properties of a `Part` model.
+ * Upgraded the requirements of dependent packages for development. 
+ * Added tests for all new features to get the > 95% coverage
+ * Updated the documentation.
+
 1.9.1 (27JUN17)
 ---------------
  * Improved testing. Notably on the new inspector objects. No functional change only that we want to reach our goal of 95% test coverage! Thanks to @raduiordache (#137)
