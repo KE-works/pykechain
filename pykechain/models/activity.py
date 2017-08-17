@@ -163,7 +163,7 @@ class Activity(Base):
                       'for consistency reasons.', DeprecationWarning)
         return self.create(*args, **kwargs)
 
-    def edit(self, name=None, description=None, start_date=None, due_date=None, assignee=None):
+    def edit(self, name=None, description=None, start_date=None, due_date=None, assignee=None, status=None):
         """Edit the details of an activity.
 
         :param name: (optionally) edit the name of the activity
@@ -173,6 +173,7 @@ class Activity(Base):
         :param due_date: (optionally) edit the due_date of the activity as a datetime object (UTC time/timzeone
                             aware preferred)
         :param assignee: (optionally) edit the assignee of the activity as a string
+        :param status: (optionally) edit the status of the activity as a string
 
         :return: None
         :raises: NotFoundError, TypeError, APIError
@@ -244,12 +245,20 @@ class Activity(Base):
             else:
                 raise TypeError('Assignee should be a string')
 
+        if status:
+            if isinstance(status, (str, text_type)):
+                update_dict.update({'status': status})
+            else:
+                raise TypeError('Status should be a string')
+
         url = self._client._build_url('activity', activity_id=self.id)
         r = self._client._request('PUT', url, json=update_dict)
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Activity ({})".format(r))
 
+        if status:
+            self._json_data['status'] = str(status)
         if assignee:
             self._json_data['assignee'] = assignee
         if due_date:

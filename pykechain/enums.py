@@ -53,7 +53,7 @@ class PropertyType(Enum):
 
 
 class ActivityType(Enum):
-    """The various Acitivity types that are accepted by KE-chain."""
+    """The various Activity types that are accepted by KE-chain."""
 
     USERTASK = "UserTask"
     SERVICETASK = "ServiceTask"  # RND code only
@@ -69,3 +69,10 @@ class ComponentXType(Enum):
     SUPERGRID = "superGrid"
     PAGINATEDSUPERGRID = "paginatedSuperGrid"
     FILTEREDGRID = "filteredGrid"
+
+
+class ActivityStatus(Enum):
+    """The various Activity statuses that are accepted by KE-chain."""
+
+    OPEN = 'OPEN'
+    COMPLETED = 'COMPLETED'
