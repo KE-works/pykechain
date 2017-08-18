@@ -3,11 +3,15 @@ Change Log
 
 pykechain changelog
 
+1.10.1 (18AUG17)
+----------------
+ * updated incorrect tests related to `Activity.associated_parts()`. (#96, #149)
+
 1.10.0 (18AUG17)
 ----------------
- * Ability to edit the status of an `Activity`. Please refer to the `ActivityStatus` enumerations.
- * Ability to sort properties of a `Part` model.
- * Upgraded the requirements of dependent packages for development.
+ * Ability to edit the status of an `Activity`. Please refer to the `ActivityStatus` enumerations. (#163)
+ * Ability to sort properties of a `Part` model. (#141)
+ * Upgraded the requirements of dependent packages for development. (#152, #160, #159, #153, #157, #154)
  * Added tests for all new features to get the > 95% coverage
  * Updated the documentation.
 
