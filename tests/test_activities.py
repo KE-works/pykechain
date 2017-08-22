@@ -144,23 +144,26 @@ class TestActivities(TestBetamax):
 
     def test_edit_activity_assignee(self):
         specify_wd = self.project.activity('Specify wheel diameter')
-        original_assignee = specify_wd._json_data.get('assignee', 'testuser')
+        original_assignee = specify_wd._json_data.get('assignees', ['testuser', 'testmanager'])
 
-        specify_wd.edit(assignee='pykechain')
+        specify_wd.edit(assignees=['pykechain'])
+
+        specify_wd = self.project.activity('Specify wheel diameter')
+        self.assertEqual(['pykechain'], specify_wd._json_data.get('assignees'))
 
         self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
 
         # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
         # scope members
         with self.assertRaises(NotFoundError):
-            specify_wd.edit(assignee='Not Member')
+            specify_wd.edit(assignees=['Not Member'])
 
         # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
         # scope members
         with self.assertRaises(TypeError):
-            specify_wd.edit(assignee=0.5)
+            specify_wd.edit(assignees='Not Member')
 
-        specify_wd.edit(assignee=original_assignee)
+        specify_wd.edit(assignees=original_assignee)
 
     # 1.10.0
     def test_edit_activity_status(self):
