@@ -3,6 +3,11 @@ Change Log
 
 pykechain changelog
 
+1.10.2 (22AUG17)
+----------------
+ * Corrected the ability to assign multiple assignees, using a list of assignees to an activity using the `Activity.edit()` method. (#167)
+ * Updated tests.
+
 1.10.1 (18AUG17)
 ----------------
  * updated incorrect tests related to `Activity.associated_parts()`. (#96, #149)
