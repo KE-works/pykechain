@@ -163,7 +163,7 @@ class Activity(Base):
                       'for consistency reasons.', DeprecationWarning)
         return self.create(*args, **kwargs)
 
-    def edit(self, name=None, description=None, start_date=None, due_date=None, assignee=None, status=None):
+    def edit(self, name=None, description=None, start_date=None, due_date=None, assignees=None, status=None):
         """Edit the details of an activity.
 
         :param name: (optionally) edit the name of the activity
@@ -172,7 +172,7 @@ class Activity(Base):
                             aware preferred)
         :param due_date: (optionally) edit the due_date of the activity as a datetime object (UTC time/timzeone
                             aware preferred)
-        :param assignee: (optionally) edit the assignee of the activity as a string
+        :param assignees: (optionally) edit the assignees of the activity as a list
         :param status: (optionally) edit the status of the activity as a string
 
         :return: None
@@ -234,16 +234,16 @@ class Activity(Base):
             else:
                 raise TypeError('Due date should be a datetime.datetime() object')
 
-        if assignee:
-            if isinstance(assignee, (str, text_type)):
+        if assignees:
+            if isinstance(assignees, list):
                 project = self._client.scope(self._json_data['scope']['name'])
                 members_list = [member['username'] for member in project._json_data['members']]
-                if assignee in members_list:
-                    update_dict.update({'assignee': assignee})
-                else:
-                    raise NotFoundError('Assignee should be a member of the scope')
+                for assignee in assignees:
+                    if assignee not in members_list:
+                        raise NotFoundError('Assignee should be a member of the scope')
+                update_dict.update({'assignees': assignees})
             else:
-                raise TypeError('Assignee should be a string')
+                raise TypeError('Assignees should be a list')
 
         if status:
             if isinstance(status, (str, text_type)):
@@ -259,8 +259,8 @@ class Activity(Base):
 
         if status:
             self._json_data['status'] = str(status)
-        if assignee:
-            self._json_data['assignee'] = assignee
+        if assignees:
+            self._json_data['assignees'] = assignees
         if due_date:
             self._json_data['due_date'] = str(due_date)
         if start_date:
