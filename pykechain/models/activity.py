@@ -172,7 +172,7 @@ class Activity(Base):
                             aware preferred)
         :param due_date: (optionally) edit the due_date of the activity as a datetime object (UTC time/timzeone
                             aware preferred)
-        :param assignees: (optionally) edit the assignees of the activity as a list
+        :param assignees: (optionally) edit the assignees of the activity as a list, will overwrite all assignees
         :param status: (optionally) edit the status of the activity as a string
 
         :return: None
@@ -240,7 +240,7 @@ class Activity(Base):
                 members_list = [member['username'] for member in project._json_data['members']]
                 for assignee in assignees:
                     if assignee not in members_list:
-                        raise NotFoundError('Assignee should be a member of the scope')
+                        raise NotFoundError("Assignee '{}' should be a member of the scope".format(assignee))
                 update_dict.update({'assignees': assignees})
             else:
                 raise TypeError('Assignees should be a list')
