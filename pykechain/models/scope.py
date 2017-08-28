@@ -32,12 +32,12 @@ class Scope(Base):
         """
         return self._client.part(*args, bucket=self.bucket.get('id'), **kwargs)
 
-    def create_model(self, parent, name, multiplicity = Multiplicity.ZERO_MANY):
+    def create_model(self, parent, name, multiplicity=Multiplicity.ZERO_MANY):
         """Create a single part model in this scope.
-        
-        See :class:`pykechain.Client.create_model` for available parameters.        
+
+        See :class:`pykechain.Client.create_model` for available parameters.
         """
-        return self._client.create_model(parent, name, multiplicity=Multiplicity.ZERO_MANY)
+        return self._client.create_model(parent, name, multiplicity=multiplicity)
 
     def model(self, *args, **kwargs):
         """Retrieve a single model belonging to this scope.

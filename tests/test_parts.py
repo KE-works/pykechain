@@ -187,9 +187,10 @@ class TestParts(TestBetamax):
 
     def test_create_model(self):
         bike = self.project.model('Bike')
-        pedal = self.project.create_model(bike, 'Pedal', multiplicity=Multiplicity.ZERO_MANY)
+        pedal = self.project.create_model(bike, 'Pedal', multiplicity=Multiplicity.ONE)
         pedal_model = self.project.model('Pedal')
         self.assertTrue(pedal.id, pedal_model.id)
+        self.assertTrue(pedal._json_data['multiplicity'], 'ONE')
 
         # teardown
         pedal_model.delete()
