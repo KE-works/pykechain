@@ -451,7 +451,7 @@ class Client(object):
 
         return self._create_part("new_instance", data)
 
-    def create_model(self, parent, name, multiplicity='ZERO_MANY'):
+    def create_model(self, parent, name, multiplicity):
         """Create a new child model under a given parent.
 
         :param parent: parent model
