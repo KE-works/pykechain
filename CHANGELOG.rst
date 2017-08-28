@@ -3,6 +3,11 @@ Change Log
 
 pykechain changelog
 
+1.10.3 (28AUG17)
+----------------
+ * Corrected the creation of partmodels (`Part` with category `MODEL`) with multiplicities other than `ZERO_MANY` as the provided multiplicity option was not respected in the `create_model()` method of `Client` and `Scope`. Thanks @raduiordache for the find. (#170)
+ * Updated tests.
+
 1.10.2 (22AUG17)
 ----------------
  * Corrected the ability to assign multiple assignees, using a list of assignees to an activity using the `Activity.edit()` method. (#167)
