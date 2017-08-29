@@ -67,7 +67,7 @@ class Scope(Base):
         """
         return self._client.create_activity(self.process, *args, **kwargs)
 
-    def get_members(self, is_manager=None):
+    def members(self, is_manager=None):
         """
         Retrieve members of the scope.
 
@@ -76,8 +76,8 @@ class Scope(Base):
 
         Examples
         --------
-        >>> members = project.get_members()
-        >>> managers = project.get_members(is_manager=True)
+        >>> members = project.members()
+        >>> managers = project.members(is_manager=True)
 
         """
         if not is_manager:
