@@ -14,3 +14,13 @@ class TestScopes(TestBetamax):
     def test_retrieve_single_multiple(self):
         with self.assertRaises(MultipleFoundError):
             self.client.scope()
+
+    def test_retrieve_scope_members(self):
+        scope_managers = ['pykechain', 'testmanager', 'jochem.berends']
+        scope_members = scope_managers + ['testuser']
+
+        members_usernames = [member['username'] for member in self.project.get_members()]
+        managers_usernames = [manager['username'] for manager in self.project.get_members(is_manager=True)]
+
+        self.assertListEqual(sorted(scope_members), sorted(members_usernames))
+        self.assertListEqual(sorted(scope_managers), sorted(managers_usernames))
