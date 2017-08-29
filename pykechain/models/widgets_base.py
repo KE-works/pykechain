@@ -1,3 +1,5 @@
+import json
+
 from pykechain.enums import ComponentXType
 
 uuid_pattern = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
