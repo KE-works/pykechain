@@ -66,3 +66,21 @@ class Scope(Base):
         See :class:`pykechain.Client.create_activity` for available parameters.
         """
         return self._client.create_activity(self.process, *args, **kwargs)
+
+    def get_members(self, is_manager=None):
+        """
+        Retrieve members of the scope.
+
+        :param is_manager: True to return only Scope members that are also managers. Defaults to False.
+        :return: List of members
+
+        Examples
+        --------
+        >>> managers = client.scope('Bike Project').get_members(is_manager=True)
+        
+        """
+        if is_manager:
+            members = [member for member in self._json_data['members'] if member['is_active'] and member['is_manager']]
+        else:
+            members = [member for member in self._json_data['members'] if member['is_active']]
+        return members
