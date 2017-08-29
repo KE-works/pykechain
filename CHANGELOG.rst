@@ -5,7 +5,7 @@ pykechain changelog
 
 1.11 (UNRELEASED)
 -----------------
- * Added the ability to retrieve a list of project members and managers with the ``Scope.get_members()` method (#169)
+ * Added the ability to retrieve a list of project members and managers with the ``Scope.members()` method (#169)
 
 1.10.3 (28AUG17)
 ----------------
