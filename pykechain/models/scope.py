@@ -71,16 +71,17 @@ class Scope(Base):
         """
         Retrieve members of the scope.
 
-        :param is_manager: True to return only Scope members that are also managers. Defaults to False.
-        :return: List of members
+        :param is_manager: (optional) set to True to return only Scope members that are also managers.
+        :return: List of members (usernames)
 
         Examples
         --------
-        >>> managers = client.scope('Bike Project').get_members(is_manager=True)
-        
+        >>> members = project.get_members()
+        >>> managers = project.get_members(is_manager=True)
+
         """
-        if is_manager:
-            members = [member for member in self._json_data['members'] if member['is_active'] and member['is_manager']]
+        if not is_manager:
+            return [member for member in self._json_data['members'] if member['is_active']]
         else:
-            members = [member for member in self._json_data['members'] if member['is_active']]
-        return members
+            return [member for member in self._json_data['members'] if
+                    member.get('is_active', False) and member.get('is_manager', False)]
