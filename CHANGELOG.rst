@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+1.11 (UNRELEASED)
+-----------------
+ * Added the ability to retrieve a list of project members and managers with the ``Scope.members()` method (#169)
+
 1.10.3 (28AUG17)
 ----------------
  * Corrected the creation of partmodels (`Part` with category `MODEL`) with multiplicities other than `ZERO_MANY` as the provided multiplicity option was not respected in the `create_model()` method of `Client` and `Scope`. Thanks @raduiordache for the find. (#170)
