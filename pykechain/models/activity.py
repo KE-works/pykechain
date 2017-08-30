@@ -316,3 +316,13 @@ class Activity(Base):
         if r.status_code in (requests.codes.ok, requests.codes.created):
             self._json_data['widget_config'] = {'id': r.json()['results'][0].get('id'),
                                                 'config': json.dumps(customization.as_dict(), indent=2)}
+
+    def customization(self):
+        """
+        Get a customization object representing the customization of the activity
+        :return: An ExtCustomization instance
+        """
+        from .customization import ExtCustomization
+
+        # For now, we only allow customization in an Ext JS context
+        return ExtCustomization(activity=self, client=self._client)
