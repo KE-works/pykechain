@@ -18,7 +18,7 @@ class Enum(object):
     @classmethod
     def values(cls):
         """Provide a (sorted) list of values."""
-        return [value for (name, value) in cls.options()]
+        return [value for (value, name) in cls.options()]
 
 
 class Multiplicity(Enum):
@@ -69,6 +69,7 @@ class ComponentXType(Enum):
     SUPERGRID = "superGrid"
     PAGINATEDSUPERGRID = "paginatedSuperGrid"
     FILTEREDGRID = "filteredGrid"
+    DISPLAYFIELD = 'displayfield'
 
 
 class ActivityStatus(Enum):
