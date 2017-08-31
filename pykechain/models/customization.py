@@ -1,4 +1,5 @@
 import requests
+from jsonschema import validate
 
 from pykechain.enums import ComponentXType, Category
 from pykechain.exceptions import APIError
@@ -72,7 +73,6 @@ class ExtCustomization(CustomizationBase):
         Save the complete customization to the activity.
 
         :param widgets: The complete set of widgets to be customized
-        :return: None
         """
         if len(widgets) > 0:
             # Get the current customization and only replace the 'ext' part of it
@@ -86,14 +86,16 @@ class ExtCustomization(CustomizationBase):
         else:
             customization = None
 
+        # perform validation
+        if customization:
+            validate(customization, widgetconfig_json_schema)
+
         # Save to the activity and store the saved activity to self
-        res = self._client._request("PUT", self._client._build_url("activity", activity_id=str(self.activity.id)),
-                                    json=dict(customization=customization))
-        if res.status_code != requests.codes.ok:  # pragma: no cover
-            print(self._client.last_response)
-            print(self._client.last_response.json())
-            print(self._client.last_url)
-            raise APIError("Could not save customization")
+        response = self._client._request("PUT",
+                                         self._client._build_url("activity", activity_id=str(self.activity.id)),
+                                         json=dict(customization=customization))
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not save customization ({})".format(response))
         else:
             self.activity = self._client.scope(self.activity.scope["name"]).activity(self.activity.name)
 
@@ -101,8 +103,9 @@ class ExtCustomization(CustomizationBase):
         """
         Add a widget to the customization.
 
+        Will save the widget to KE-chain.
+
         :param widget: The widget to be added
-        :return: None
         """
         widgets = self.widgets()
         widgets += [widget]
@@ -113,7 +116,7 @@ class ExtCustomization(CustomizationBase):
         Get the Ext JS specific customization from the activity.
 
         :return: The Ext JS specific customization
-        :rtype: List
+        :rtype: list of widgets
         """
         customization = self.activity._json_data.get('customization')
 
@@ -127,7 +130,6 @@ class ExtCustomization(CustomizationBase):
         Delete widgets by index.
 
         :param index: The index of the widget to be deleted in the self.widgets
-        :return: None
         """
         widgets = self.widgets()
         if len(widgets) is 0:
@@ -136,31 +138,19 @@ class ExtCustomization(CustomizationBase):
         self._save_customization(widgets)
 
     def delete_all_widgets(self):
-        """
-        Delete all widgets.
-
-        :return: None
-        """
+        """Delete all widgets."""
         self._save_customization([])
 
     def add_json_widget(self, config):
         """
         Add an Ext Json Widget to the customization.
 
-        :param config: The config of the widget
-        :return: None
+        The configuration json provided must be interpretable by KE-chain. The json will be validated
+        against the widget json schema.
+
+        :param config: The json configuration of the widget
         """
-        def _validate(value):
-            """
-            Validate the config against the component JSON Schema.
-
-            :param value: The dict value representing an Ext JS component
-            :return: None
-            """
-            from jsonschema import validate
-            validate(value, component_json_schema)
-
-        _validate(config)
+        validate(config, component_json_schema)
         self._add_widget(dict(config=config, name="jsonWidget"))
 
     def add_property_grid_widget(self, part_instance, max_height=None, custom_title=None):
