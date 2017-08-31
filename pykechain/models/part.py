@@ -324,7 +324,7 @@ class Part(Base):
         """
         r = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
 
-        if r.status_code != requests.codes.no_content:
+        if r.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
 
     def edit(self, name=None, description=None):
@@ -382,7 +382,7 @@ class Part(Base):
         ]
 
         for prop in self.properties:
-            style = "color:blue;" if prop.output else ""
+            style = "color:blue;" if prop._output else ""
 
             html.append("<tr style=\"{}\">".format(style))
             html.append("<td>{}</td>".format(prop.name))
@@ -498,13 +498,11 @@ class Part(Base):
         """
         Order the properties of a part model using a list of property objects or property names.
 
-        Example 1
-        ---------
+        Examples
+        --------
         >>> front_fork = client.scope('Bike Project').model('Front Fork')
         >>> front_fork.order_properties(['Material', 'Height (mm)', 'Color'])
 
-        Example 2
-        ---------
         >>> front_fork = client.scope('Bike Project').model('Front Fork')
         >>> material = front_fork.property('Material')
         >>> height = front_fork.property('Height (mm)')

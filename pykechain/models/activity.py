@@ -9,7 +9,7 @@ from six import text_type
 from pykechain.enums import Category, ActivityType
 from pykechain.exceptions import APIError, NotFoundError
 from pykechain.models.base import Base
-from pykechain.models.inspector_base import Customization
+from pykechain.models.inspector_base import Customization, InspectorComponent
 
 
 class Activity(Base):
@@ -154,15 +154,6 @@ class Activity(Base):
         assert self.activity_type == ActivityType.SUBPROCESS, "One can only create a task under a subprocess."
         return self._client.create_activity(self.id, *args, **kwargs)
 
-    def create_activity(self, *args, **kwargs):
-        """See :method:`pykechain.Activity.create`. This method will be deprecated in version 1.9 onwards.
-
-        See :class:`pykechain.Client.create_activity` for available parameters.
-        """
-        warnings.warn('This method will be deprecated in version 1.9 and replaced with `Activity.create()` '
-                      'for consistency reasons.', DeprecationWarning)
-        return self.create(*args, **kwargs)
-
     def edit(self, name=None, description=None, start_date=None, due_date=None, assignees=None, status=None):
         """Edit the details of an activity.
 
@@ -180,7 +171,6 @@ class Activity(Base):
 
         Example
         -------
-
         >>> from datetime import datetime
         >>> specify_wheel_diameter = project.activity('Specify wheel diameter')
         >>> specify_wheel_diameter.edit(name='Specify wheel diameter and circumference',
@@ -269,11 +259,18 @@ class Activity(Base):
     def customize(self, config):
         """Customize an activity.
 
-        :param config: the InspectorComponent or raw inspector json (as python dict) to be used in customization
+        .. warning::
 
+           The use of `InspectorComponents` and `Customization` object will become deprecated in November 2017. For
+           KE-chain releases later than 2.5, please use the `activity.customization()` method to retrieve the newer
+           type customization.
+
+        :param config: the `InspectorComponent` or raw inspector json (as python dict) to be used in customization
         :return: None
         :raises: InspectorComponentError if the customisation is provided incorrectly.
 
+        Example
+        -------
         >>> my_activity = self.project.activity('Customizable activity')
         >>> my_activity.customize(config =
         ...                          {"components":
@@ -288,11 +285,15 @@ class Activity(Base):
 
         """
         if isinstance(config, dict):
-            customization = Customization(json=config)
-            customization.validate()
-        elif isinstance(config, Customization):
+            deprecated_customizations = Customization(json=config)
+            deprecated_customizations.validate()
+        elif isinstance(config, (Customization, InspectorComponent)):
+            # TODO(JB): ensure that the deprecation warning will come into effect in November 2017 (pykechain 1.14/1.15)
+            warnings.warn("The definition of customization widgets has changed in KE-chain version 2.5. The use "
+                          "of Customization and InspectorComponents will be deprecated in November 2017",
+                          PendingDeprecationWarning)
             config.validate()
-            customization = config
+            deprecated_customizations = config
         else:
             raise Exception("Need to provide either a dictionary or Customization as input, got: '{}'".
                             format(type(config)))
@@ -301,7 +302,8 @@ class Activity(Base):
         # When an activity has been costumized at least once before, then its widget config already exists
         if activity_widget_config:
             widget_config_id = activity_widget_config['id']
-            request_update_dict = {'id': widget_config_id, 'config': json.dumps(customization.as_dict(), indent=2)}
+            request_update_dict = {'id': widget_config_id, 'config': json.dumps(deprecated_customizations.as_dict(),
+                                                                                indent=2)}
             url = self._client._build_url('widget_config', widget_config_id=widget_config_id)
             r = self._client._request('PUT', url, json=request_update_dict)
         # When an activity was not customized before, then there is no widget config and a new one must be created for
@@ -310,9 +312,30 @@ class Activity(Base):
             r = self._client._request('POST', self._client._build_url('widgets_config'),
                                       data=dict(
                                           activity=self.id,
-                                          config=json.dumps(customization.as_dict(), indent=2))
+                                          config=json.dumps(deprecated_customizations.as_dict(), indent=2))
                                       )
 
         if r.status_code in (requests.codes.ok, requests.codes.created):
             self._json_data['widget_config'] = {'id': r.json()['results'][0].get('id'),
-                                                'config': json.dumps(customization.as_dict(), indent=2)}
+                                                'config': json.dumps(deprecated_customizations.as_dict(), indent=2)}
+
+    def customization(self):
+        """
+        Get a customization object representing the customization of the activity.
+
+        .. versionadded:: 1.11
+
+        :return: An ExtCustomization instance
+
+        Example
+        -------
+        >>> activity = project.activity(name='Customizable activity')
+        >>> customization = activity.customization()
+        >>> part_to_show = project.part(name='Bike')
+        >>> customization.add_property_grid_widget(part_to_show, custom_title="My super bike"))
+
+        """
+        from .customization import ExtCustomization
+
+        # For now, we only allow customization in an Ext JS context
+        return ExtCustomization(activity=self, client=self._client)
