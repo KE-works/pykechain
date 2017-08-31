@@ -85,3 +85,13 @@ class Scope(Base):
         else:
             return [member for member in self._json_data['members'] if
                     member.get('is_active', False) and member.get('is_manager', False)]
+
+    def add_members(self, members):
+        """
+        Add a single member, or multiple members (provided as list or tuple) to be added to the scope
+
+        You may only edit the list of members if the pykechain credentials allow this.
+
+        :param member:
+        :return:
+        """
