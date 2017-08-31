@@ -8,6 +8,6 @@
    changelog
    example_bike
    notebooks
-   interface
+   developer_api
 
 .. include:: ../README.rst
