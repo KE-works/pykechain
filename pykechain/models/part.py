@@ -382,7 +382,7 @@ class Part(Base):
         ]
 
         for prop in self.properties:
-            style = "color:blue;" if prop.output else ""
+            style = "color:blue;" if prop._output else ""
 
             html.append("<tr style=\"{}\">".format(style))
             html.append("<td>{}</td>".format(prop.name))
