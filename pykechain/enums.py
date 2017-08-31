@@ -69,7 +69,7 @@ class ComponentXType(Enum):
     SUPERGRID = "superGrid"
     PAGINATEDSUPERGRID = "paginatedSuperGrid"
     FILTEREDGRID = "filteredGrid"
-    DISPLAYFIELD = 'displayfield'
+    DISPLAYFIELD = "displayfield"
 
 
 class ActivityStatus(Enum):
