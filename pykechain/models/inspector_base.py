@@ -1,5 +1,7 @@
 import json
 
+from jsonschema import ValidationError
+
 from pykechain.enums import ComponentXType
 
 uuid_pattern = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
@@ -56,7 +58,9 @@ class InspectorComponent(object):
         if not json:
             self._json_data = dict(xtype="panel", **kwargs)
         else:
-            assert 'xtype' in json, "A component of the Inspector customization needs an 'xtype', got {}".format(json)
+            if 'xtype' not in json:
+                raise ValidationError("A component of the Inspector customization needs an 'xtype', got {}".
+                                      format(json))
             self._json_data = json
 
         self.xtype = self._json_data.get('xtype')

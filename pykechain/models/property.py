@@ -18,16 +18,6 @@ class Property(Base):
         self._value = json.get('value')
 
     @property
-    def output(self):
-        # type: () -> Any
-        """Return True if the property is configured as output in an activity, otherwise False."""
-        import warnings
-        warnings.warn("-D- The `Property.output` property will be deprecated in pykechain release 2.0.0",
-                      PendingDeprecationWarning)
-        return self._output
-
-
-    @property
     def value(self):
         # type: () -> Any
         """Retrieve the data value of a property.
