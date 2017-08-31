@@ -3,6 +3,16 @@ Change Log
 
 pykechain changelog
 
+ * In KE-chain 2.5 the way we use task customization has changed drastically. Pykechain (from 1.11 onwards) supports this by implementing a new concept in the activity called `Activity.customization()` (#161). This provides you an `ExtCustomization` object, which you can inspect and add new widgets. Please see the documentation on `ExtCustomization` and `Activity.customization()` for more details. An example to use is:
+
+    >>> activity = project.activity(name='Customizable activity')
+    >>> customization = activity.customization()
+    >>> part_to_show = project.part(name='Bike')
+    >>> customization.add_property_grid_widget(part_to_show, custom_title="My super bike"))
+
+ * removed previously announced deprecated methods for `activity.create_activity()` (use `Activity.create()`) and `property.output` (unused).
+ * Added deprecation warnings when using `InspectComponent` objects and old style `Customization` components. They will be removed in November 2017 (introduced in pykechain 1.9)
+
 1.10.3 (28AUG17)
 ----------------
  * Corrected the creation of partmodels (`Part` with category `MODEL`) with multiplicities other than `ZERO_MANY` as the provided multiplicity option was not respected in the `create_model()` method of `Client` and `Scope`. Thanks @raduiordache for the find. (#170)
