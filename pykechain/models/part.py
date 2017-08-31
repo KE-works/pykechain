@@ -498,13 +498,11 @@ class Part(Base):
         """
         Order the properties of a part model using a list of property objects or property names.
 
-        Example 1
-        ---------
+        Examples
+        --------
         >>> front_fork = client.scope('Bike Project').model('Front Fork')
         >>> front_fork.order_properties(['Material', 'Height (mm)', 'Color'])
 
-        Example 2
-        ---------
         >>> front_fork = client.scope('Bike Project').model('Front Fork')
         >>> material = front_fork.property('Material')
         >>> height = front_fork.property('Height (mm)')
