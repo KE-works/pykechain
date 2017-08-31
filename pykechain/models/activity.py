@@ -319,7 +319,8 @@ class Activity(Base):
 
     def customization(self):
         """
-        Get a customization object representing the customization of the activity
+        Get a customization object representing the customization of the activity.
+
         :return: An ExtCustomization instance
         """
         from .customization import ExtCustomization
