@@ -1,5 +1,6 @@
 import json
 import uuid
+from unittest import skip
 
 from jsonschema import ValidationError
 
@@ -105,6 +106,7 @@ class TestWidgetConfig(TestBetamax):
                                   newInstance=False, edit=False, delete=False, export=False)
         component.validate()
 
+    @skip('KE-chain deprecated the inspector components')
     def test_supergrid_with_part_objects_and_json(self):
         # Set up
         title = "Customized SuperGrid"
@@ -134,6 +136,7 @@ class TestWidgetConfig(TestBetamax):
         # teardown
         self.activity.customize(config={})
 
+    @skip('KE-chain deprecated the inspector components')
     def test_propertygrid_with_part_objects_and_json(self):
         # Set up
         title = "Customized PropertyGrid"
@@ -169,6 +172,7 @@ class TestWidgetConfig(TestBetamax):
         # teardown
         self.activity.customize(config={})
 
+    @skip('KE-chain deprecated the inspector components')
     def test_paginatedsupergrid_with_part_objects_and_json(self):
         # Set up
         title = "Customized PaginatedGrid"
@@ -201,6 +205,7 @@ class TestWidgetConfig(TestBetamax):
         # teardown
         self.activity.customize(config={})
 
+    @skip('KE-chain deprecated the inspector components')
     def test_filteredgrid_with_part_objects_and_json(self):
         # Set up
         title = "Customized FilteredGrid"
@@ -235,6 +240,7 @@ class TestWidgetConfig(TestBetamax):
         # teardown
         self.activity.customize(config={})
 
+    @skip('KE-chain deprecated the inspector components')
     def test_htmlpanel_with_part_objects_and_json(self):
         # Set up
         title = 'Customized HTMLPanel'

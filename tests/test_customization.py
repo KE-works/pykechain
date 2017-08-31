@@ -32,7 +32,7 @@ class TestExtCustomization(TestBetamax):
 
         customization.add_json_widget(dict(xtype="displayfield", value="Some text"))
 
-        self.assertIs(len(customization.widgets()), 1, "The customization should have 1 widget")
+        self.assertEqual(len(customization.widgets()), 1, "The customization should have 1 widget")
         self.assertTrue(customization.widgets()[0]["name"] == "jsonWidget",
                         "The first widget should be a jsonWidget")
 
@@ -48,7 +48,7 @@ class TestExtCustomization(TestBetamax):
 
         customization.add_property_grid_widget(part)
 
-        self.assertIs(len(customization.widgets()), 1, "The customization should have 1 widget")
+        self.assertEqual(len(customization.widgets()), 1, "The customization should have 1 widget")
         self.assertTrue(customization.widgets()[0]["name"] == "propertyGridWidget",
                         "The first widget should be a propertyGridWidget")
 
@@ -64,10 +64,10 @@ class TestExtCustomization(TestBetamax):
 
         customization.add_property_grid_widget(part, 20)
 
-        self.assertIs(len(customization.widgets()), 1, "The customization should have 1 widget")
+        self.assertEqual(len(customization.widgets()), 1, "The customization should have 1 widget")
         self.assertTrue(customization.widgets()[0]["name"] == "propertyGridWidget",
                         "The first widget should be a propertyGridWidget")
-        self.assertIs(customization.widgets()[0]["config"]["maxHeight"], 20,
+        self.assertEqual(customization.widgets()[0]["config"]["maxHeight"], 20,
                       "The max height property of the config should be 20")
 
         # Teardown
@@ -83,7 +83,7 @@ class TestExtCustomization(TestBetamax):
 
         customization.add_property_grid_widget(part, None, custom_title)
 
-        self.assertIs(len(customization.widgets()), 1, "The customization should have 1 widget")
+        self.assertEqual(len(customization.widgets()), 1, "The customization should have 1 widget")
         self.assertTrue(customization.widgets()[0]["name"] == "propertyGridWidget",
                         "The first widget should be a propertyGridWidget")
         self.assertTrue(customization.widgets()[0]["config"]["title"] == custom_title,
@@ -101,10 +101,10 @@ class TestExtCustomization(TestBetamax):
 
         customization.add_property_grid_widget(part, None, False)
 
-        self.assertIs(len(customization.widgets()), 1, "The customization should have 1 widget")
+        self.assertEqual(len(customization.widgets()), 1, "The customization should have 1 widget")
         self.assertTrue(customization.widgets()[0]["name"] == "propertyGridWidget",
                         "The first widget should be a propertyGridWidget")
-        self.assertIs(customization.widgets()[0]["config"]["title"], None,
+        self.assertEqual(customization.widgets()[0]["config"]["title"], None,
                       "The config should be not have a title property")
 
         # Teardown
@@ -119,13 +119,13 @@ class TestExtCustomization(TestBetamax):
 
         customization.add_property_grid_widget(part)
 
-        self.assertIs(len(customization.widgets()), 2, "The customization should have 2 widget")
+        self.assertEqual(len(customization.widgets()), 2, "The customization should have 2 widget")
         self.assertTrue(customization.widgets()[1]["name"] == "propertyGridWidget",
                         "The second widget should be a propertyGridWidget")
 
         customization.delete_widget(1)
 
-        self.assertIs(len(customization.widgets()), 1, "The customization should have 1 widget")
+        self.assertEqual(len(customization.widgets()), 1, "The customization should have 1 widget")
         self.assertTrue(customization.widgets()[0]["name"] == "jsonWidget",
                         "The first widget should be a jsonWidget")
 
@@ -135,7 +135,7 @@ class TestExtCustomization(TestBetamax):
         """
         customization = self.activity_1.customization()
 
-        self.assertIs(len(customization.widgets()), 0, "The customization should have no widgets")
+        self.assertEqual(len(customization.widgets()), 0, "The customization should have no widgets")
 
         with self.assertRaises(ValueError):
             customization.delete_widget(0)
@@ -149,13 +149,13 @@ class TestExtCustomization(TestBetamax):
 
         customization.add_property_grid_widget(part)
 
-        self.assertIs(len(customization.widgets()), 2, "The customization should have 2 widget")
+        self.assertEqual(len(customization.widgets()), 2, "The customization should have 2 widget")
         self.assertTrue(customization.widgets()[1]["name"] == "propertyGridWidget",
                         "The second widget should be a propertyGridWidget")
 
         customization.delete_all_widgets()
 
-        self.assertIs(len(customization.widgets()), 0, "The customization should have no widgets")
+        self.assertEqual(len(customization.widgets()), 0, "The customization should have no widgets")
 
         # Teardown
         customization.add_json_widget(dict(xtype="displayfield", value="This is a custom widget!"))
