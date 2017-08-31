@@ -49,15 +49,16 @@ widgetconfig_json_schema = {
 
 
 class CustomizationBase(object):
-    """ Base class for customization objects """
+    """Base class for customization objects."""
 
     def __init__(self, activity, client):
+        """Initialize the Base class for customization objects."""
         self._client = client
         self.activity = activity
 
 
 class ExtCustomization(CustomizationBase):
-    """ A class to represent the activity customization for Ext Js"""
+    """A class to represent the activity customization for Ext Js."""
 
     def __str__(self):  # pragma: no cover
         return "<pyke ExtCustomization '{}' id {} ({} widgets)>".format(
@@ -68,7 +69,8 @@ class ExtCustomization(CustomizationBase):
 
     def _save_customization(self, widgets):
         """
-        Save the complete customization to the activity
+        Save the complete customization to the activity.
+
         :param widgets: The complete set of widgets to be customized
         :return: None
         """
@@ -85,8 +87,8 @@ class ExtCustomization(CustomizationBase):
             customization = None
 
         # Save to the activity and store the saved activity to self
-        res =self._client._request("PUT", self._client._build_url("activity", activity_id=str(self.activity.id)),
-                                   json=dict(customization=customization))
+        res = self._client._request("PUT", self._client._build_url("activity", activity_id=str(self.activity.id)),
+                                    json=dict(customization=customization))
         if res.status_code != requests.codes.ok:  # pragma: no cover
             print(self._client.last_response)
             print(self._client.last_response.json())
@@ -97,7 +99,8 @@ class ExtCustomization(CustomizationBase):
 
     def _add_widget(self, widget):
         """
-        Add a widget to the customization
+        Add a widget to the customization.
+
         :param widget: The widget to be added
         :return: None
         """
@@ -107,7 +110,8 @@ class ExtCustomization(CustomizationBase):
 
     def widgets(self):
         """
-        Get the Ext JS specific customization from the activity
+        Get the Ext JS specific customization from the activity.
+
         :return: The Ext JS specific customization
         :rtype: List
         """
@@ -120,7 +124,8 @@ class ExtCustomization(CustomizationBase):
 
     def delete_widget(self, index):
         """
-        Delete widgets by index
+        Delete widgets by index.
+
         :param index: The index of the widget to be deleted in the self.widgets
         :return: None
         """
@@ -132,21 +137,23 @@ class ExtCustomization(CustomizationBase):
 
     def delete_all_widgets(self):
         """
-        Delete all widgets
+        Delete all widgets.
+
         :return: None
         """
         self._save_customization([])
 
     def add_json_widget(self, config):
         """
-        Add an Ext Json Widget to the customization
+        Add an Ext Json Widget to the customization.
+
         :param config: The config of the widget
         :return: None
         """
-
         def _validate(value):
             """
             Validate the config against the component JSON Schema.
+
             :param value: The dict value representing an Ext JS component
             :return: None
             """
@@ -158,7 +165,8 @@ class ExtCustomization(CustomizationBase):
 
     def add_property_grid_widget(self, part_instance, max_height=None, custom_title=None):
         """
-        Add an Ext JS property grid widget to the customziation
+        Add an Ext JS property grid widget to the customization.
+
         :param part_instance: The part instance on which the property grid will be based
         :param max_height: The max height of the property grid in pixels
         :param custom_title: A custom title for the property grid
