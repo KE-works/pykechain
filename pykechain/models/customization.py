@@ -1,10 +1,7 @@
-import json
-
 import requests
 
 from pykechain.enums import ComponentXType, Category
 from pykechain.exceptions import APIError
-from pykechain.models import Activity
 
 uuid_pattern = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 uuid_string = {"type": "string", "pattern": uuid_pattern}
@@ -62,11 +59,11 @@ class CustomizationBase(object):
 class ExtCustomization(CustomizationBase):
     """ A class to represent the activity customization for Ext Js"""
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return "<pyke ExtCustomization '{}' id {} ({} widgets)>".format(
             self.activity.name, str(self.activity.id)[-8:], len(self.widgets()))
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return self.__str__()
 
     def _save_customization(self, widgets):
@@ -87,12 +84,9 @@ class ExtCustomization(CustomizationBase):
         else:
             customization = None
 
-        # JSONify the customization or leave in None
-        customization = json.dumps(customization) if customization else None
-
         # Save to the activity and store the saved activity to self
         res =self._client._request("PUT", self._client._build_url("activity", activity_id=str(self.activity.id)),
-                                   data=dict(customization=customization))
+                                   json=dict(customization=customization))
         if res.status_code != requests.codes.ok:  # pragma: no cover
             print(self._client.last_response)
             print(self._client.last_response.json())
