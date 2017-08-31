@@ -324,7 +324,7 @@ class Part(Base):
         """
         r = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
 
-        if r.status_code != requests.codes.no_content:
+        if r.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
 
     def edit(self, name=None, description=None):

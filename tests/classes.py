@@ -26,10 +26,10 @@ class TestBetamax(TestCase):
         if TEST_TOKEN:
             self.client.login(token=TEST_TOKEN)
 
-        # self.recorder = Betamax(session=self.client.session)
-        # self.recorder.use_cassette(self.cassette_name)
-        # self.recorder.start()
+        self.recorder = Betamax(session=self.client.session)
+        self.recorder.use_cassette(self.cassette_name)
+        self.recorder.start()
         self.project = self.client.scope(TEST_SCOPE_NAME)
 
-    # def tearDown(self):
-    #     self.recorder.stop()
+    def tearDown(self):
+        self.recorder.stop()
