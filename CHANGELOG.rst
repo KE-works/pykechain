@@ -14,7 +14,7 @@ pykechain changelog
 
  * removed previously announced deprecated methods for `activity.create_activity()` (use `Activity.create()`) and `property.output` (unused).
  * Added deprecation warnings when using `InspectComponent` objects and old style `Customization` components. They will be removed in November 2017 (introduced in pykechain 1.9)
- * Added the ability to retrieve a list of project members and managers with the ``Scope.members()` method (#169)
+ * Added the ability to retrieve a list of project members and managers with the `Scope.members()` method (#169)
  * updated the documentation structure to better access all the pykechain models.
  * updated tests
 
