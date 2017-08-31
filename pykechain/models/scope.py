@@ -92,6 +92,16 @@ class Scope(Base):
 
         You may only edit the list of members if the pykechain credentials allow this.
 
-        :param member:
-        :return:
+        :param member: single username or list of usernames to be added to the scope list of members
         """
+        select_action='add_member'
+
+        if isinstance(members, str):
+            pass
+        elif isinstance(members, (list, tuple)):
+            pass
+
+
+
+
+
