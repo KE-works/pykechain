@@ -129,6 +129,17 @@ class TestExtCustomization(TestBetamax):
         self.assertTrue(customization.widgets()[0]["name"] == "jsonWidget",
                         "The first widget should be a jsonWidget")
 
+    def test_raise_error_when_delete_a_widget_of_empty_customization(self):
+        """
+        Test if an error is raised when trying to delete a widget when there are no widgets customized
+        """
+        customization = self.activity_1.customization()
+
+        self.assertIs(len(customization.widgets()), 0, "The customization should have no widgets")
+
+        with self.assertRaises(ValueError):
+            customization.delete_widget(0)
+
     def test_delete_all_widgets(self):
         """
         Test if all widgets can be deleted
