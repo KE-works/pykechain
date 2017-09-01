@@ -328,7 +328,7 @@ class Part(Base):
             raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
 
     def edit(self, name=None, description=None, **kwargs):
-        # type: (AnyStr, AnyStr) -> None
+        # type: (AnyStr, AnyStr, Any) -> None
         """
         Edit the details of a part (model or instance).
 
@@ -336,7 +336,7 @@ class Part(Base):
 
         :param name: optional name of the part to edit
         :param description: (optional) description of the part
-        :param kwargs: (optional)
+        :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
         :return: None
         :raises: APIError
 
@@ -403,6 +403,7 @@ class Part(Base):
         :param name: new part name (defined as a string)
         :param update_dict: dictionary with keys being property names (str) and values being property values
         :param bulk: True to use the bulk_update_properties API endpoint for KE-chain versions later then 2.1.0b
+        :param kwargs: (optional) additional keyword arguments that will be passed inside the update request
         :return: :class:`pykechain.models.Part`
         :raises: APIError, Raises `NotFoundError` when the property name is not a valid property of this part
 
@@ -442,6 +443,7 @@ class Part(Base):
         :param name: (optional) name provided for the new instance as string otherwise use the name of the model
         :param update_dict: dictionary with keys being property names (str) and values being property values
         :param bulk: True to use the bulk_update_properties API endpoint for KE-chain versions later then 2.1.0b
+        :param kwargs: (optional) additional keyword arguments that will be passed inside the update request
         :return: :class:`pykechain.models.Part`
         :raises: APIError, Raises `NotFoundError` when the property name is not a valid property of this part
 
