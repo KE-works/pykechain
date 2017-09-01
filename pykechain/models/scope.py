@@ -86,21 +86,52 @@ class Scope(Base):
             return [member for member in self._json_data['members'] if
                     member.get('is_active', False) and member.get('is_manager', False)]
 
-    def add_members(self, members):
+    def add_member(self, member):
         """
-        Add a single member, or multiple members (provided as list or tuple) to be added to the scope
+        Add a single member to the scope.
 
         You may only edit the list of members if the pykechain credentials allow this.
 
-        :param member: single username or list of usernames to be added to the scope list of members
+        :param member: single username to be added to the scope list of members
         """
         select_action='add_member'
 
-        if isinstance(members, str):
-            pass
-        elif isinstance(members, (list, tuple)):
+        if isinstance(member, str):
             pass
 
+    def remove_member(self, member):
+        """
+        Remove a single member to the scope.
+
+        :param member: single username to be removed to the scope list of members
+        """
+        select_action = 'remove_member'
+
+        if isinstance(member, str):
+            pass
+
+
+    def add_manager(self, manager):
+        """
+        Add a single manager to the scope.
+
+        :param manager: single username to be added to the scope list of managers
+        """
+        select_action='add_manager'
+
+        if isinstance(manager, str):
+            pass
+
+    def remove_manager(self, manager):
+        """
+        Remove a single manager to the scope.
+
+        :param manager: single username to be removed to the scope list of managers
+        """
+        select_action = 'remove_manager'
+
+        if isinstance(manager, str):
+            pass
 
 
 
