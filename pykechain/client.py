@@ -10,6 +10,7 @@ from .models import Scope, Activity, Part, PartSet, Property
 
 API_PATH = {
     'scopes': 'api/scopes.json',
+    'scope': 'api/scopes/{scope_id}.json',
     'activities': 'api/activities.json',
     'activity': 'api/activities/{activity_id}.json',
     'parts': 'api/parts.json',
@@ -19,7 +20,8 @@ API_PATH = {
     'property_upload': 'api/properties/{property_id}/upload',
     'property_download': 'api/properties/{property_id}/download',
     'widgets_config': 'api/widget_config.json',
-    'widget_config': 'api/widget_config/{widget_config_id}.json'
+    'widget_config': 'api/widget_config/{widget_config_id}.json',
+    'users': 'api/users.json'
 
 }
 
@@ -139,6 +141,18 @@ class Client(object):
         # type: (str, **str) -> str
         """Build the correct API url."""
         return urljoin(self.api_root, API_PATH[resource].format(**kwargs))
+
+    def _retrieve_users(self):
+        """
+        Retrieves users of the
+        Returns
+        -------
+
+        """
+        users_url = self._build_url('users')
+        response = self._request('GET', users_url)
+        users = response.json()
+        return users
 
     def _request(self, method, url, **kwargs):
         # type: (str, str, **Any) -> requests.Response

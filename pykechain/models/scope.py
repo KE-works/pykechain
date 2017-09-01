@@ -1,7 +1,9 @@
 from typing import Any  # flake8: noqa
+import requests
 
 from pykechain.enums import Multiplicity
 from pykechain.models.base import Base
+from pykechain.exceptions import APIError, NotFoundError
 
 
 class Scope(Base):
@@ -94,10 +96,10 @@ class Scope(Base):
 
         :param member: single username to be added to the scope list of members
         """
-        select_action='add_member'
+        select_action = 'add_member'
 
-        if isinstance(member, str):
-            pass
+        self.update_scope_project_team(select_action=select_action, user=member, user_type='member',
+                                       select_action_type='add')
 
     def remove_member(self, member):
         """
@@ -107,9 +109,8 @@ class Scope(Base):
         """
         select_action = 'remove_member'
 
-        if isinstance(member, str):
-            pass
-
+        self.update_scope_project_team(select_action=select_action, user=member, user_type='member',
+                                       select_action_type='remove')
 
     def add_manager(self, manager):
         """
@@ -117,10 +118,10 @@ class Scope(Base):
 
         :param manager: single username to be added to the scope list of managers
         """
-        select_action='add_manager'
+        select_action = 'add_manager'
 
-        if isinstance(manager, str):
-            pass
+        self.update_scope_project_team(select_action=select_action, user=manager, user_type='manager',
+                                       select_action_type='add')
 
     def remove_manager(self, manager):
         """
@@ -130,9 +131,23 @@ class Scope(Base):
         """
         select_action = 'remove_manager'
 
-        if isinstance(manager, str):
-            pass
+        self.update_scope_project_team(select_action=select_action, user=manager, user_type='manager',
+                                       select_action_type='remove')
 
-
-
+    def update_scope_project_team(self, select_action, user, user_type, select_action_type):
+        if isinstance(user, str):
+            users = self._client._retrieve_users()
+            manager_object = next((item for item in users['results'] if item["username"] == user), None)
+            if manager_object:
+                url = self._client._build_url('scope', scope_id=self.id)
+                r = self._client._request('PUT', url, params={'select_action': select_action},
+                                          data={
+                                              'user_id': manager_object['pk']
+                                          })
+                if r.status_code != requests.codes.ok:  # pragma: no cover
+                    raise APIError("Could not {} {} in Scope".format(select_action_type, user_type))
+            else:
+                raise NotFoundError("User {} does not exist".format(user))
+        else:
+            raise TypeError("User {} should be defined as a string".format(user))
 
