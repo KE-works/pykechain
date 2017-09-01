@@ -327,7 +327,7 @@ class Part(Base):
         if r.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
 
-    def edit(self, name=None, description=None):
+    def edit(self, name=None, description=None, **kwargs):
         # type: (AnyStr, AnyStr) -> None
         """
         Edit the details of a part (model or instance).
@@ -335,7 +335,8 @@ class Part(Base):
         For an instance you can edit the Part instance name and the part instance description
 
         :param name: optional name of the part to edit
-        :param description: optional description of the part
+        :param description: (optional) description of the part
+        :param kwargs: (optional)
         :return: None
         :raises: APIError
 
@@ -361,6 +362,8 @@ class Part(Base):
         if description:
             assert isinstance(description, str), "description should be provided as a string"
             update_dict.update({'description': description})
+        if kwargs:
+            update_dict.update(**kwargs)
         r = self._client._request('PUT', self._client._build_url('part', part_id=self.id), json=update_dict)
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
@@ -393,7 +396,7 @@ class Part(Base):
 
         return ''.join(html)
 
-    def update(self, name=None, update_dict=None, bulk=True):
+    def update(self, name=None, update_dict=None, bulk=True, **kwargs):
         """
         Edit part name and property values in one go.
 
@@ -423,7 +426,7 @@ class Part(Base):
             if name:
                 assert isinstance(name, str), "Name of the part should be provided as a string"
             r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
-                                      data=dict(name=name, properties=json.dumps(request_body)),
+                                      data=dict(name=name, properties=json.dumps(request_body), **kwargs),
                                       params=dict(select_action=action))
             if r.status_code != requests.codes.ok:  # pragma: no cover
                 raise APIError('{}: {}'.format(str(r), r.content))
@@ -431,7 +434,7 @@ class Part(Base):
             for property_name, property_value in update_dict.items():
                 self.property(property_name).value = property_value
 
-    def add_with_properties(self, model, name=None, update_dict=None, bulk=True):
+    def add_with_properties(self, model, name=None, update_dict=None, bulk=True, **kwargs):
         """
         Add a part and update its properties in one go.
 
@@ -463,7 +466,8 @@ class Part(Base):
                                           name=name,
                                           model=model.id,
                                           parent=self.id,
-                                          properties=json.dumps(properties_update_dict)
+                                          properties=json.dumps(properties_update_dict),
+                                          **kwargs
                                       ),
                                       params=dict(select_action=action))
 
