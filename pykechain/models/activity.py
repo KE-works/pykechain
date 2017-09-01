@@ -9,7 +9,7 @@ from six import text_type
 from pykechain.enums import Category, ActivityType
 from pykechain.exceptions import APIError, NotFoundError
 from pykechain.models.base import Base
-from pykechain.models.inspector_base import Customization
+from pykechain.models.inspector_base import Customization, InspectorComponent
 
 
 class Activity(Base):
@@ -154,16 +154,7 @@ class Activity(Base):
         assert self.activity_type == ActivityType.SUBPROCESS, "One can only create a task under a subprocess."
         return self._client.create_activity(self.id, *args, **kwargs)
 
-    def create_activity(self, *args, **kwargs):
-        """See :method:`pykechain.Activity.create`. This method will be deprecated in version 1.9 onwards.
-
-        See :class:`pykechain.Client.create_activity` for available parameters.
-        """
-        warnings.warn('This method will be deprecated in version 1.9 and replaced with `Activity.create()` '
-                      'for consistency reasons.', DeprecationWarning)
-        return self.create(*args, **kwargs)
-
-    def edit(self, name=None, description=None, start_date=None, due_date=None, assignee=None):
+    def edit(self, name=None, description=None, start_date=None, due_date=None, assignees=None, status=None):
         """Edit the details of an activity.
 
         :param name: (optionally) edit the name of the activity
@@ -172,14 +163,14 @@ class Activity(Base):
                             aware preferred)
         :param due_date: (optionally) edit the due_date of the activity as a datetime object (UTC time/timzeone
                             aware preferred)
-        :param assignee: (optionally) edit the assignee of the activity as a string
+        :param assignees: (optionally) edit the assignees of the activity as a list, will overwrite all assignees
+        :param status: (optionally) edit the status of the activity as a string
 
         :return: None
         :raises: NotFoundError, TypeError, APIError
 
         Example
         -------
-
         >>> from datetime import datetime
         >>> specify_wheel_diameter = project.activity('Specify wheel diameter')
         >>> specify_wheel_diameter.edit(name='Specify wheel diameter and circumference',
@@ -233,16 +224,22 @@ class Activity(Base):
             else:
                 raise TypeError('Due date should be a datetime.datetime() object')
 
-        if assignee:
-            if isinstance(assignee, (str, text_type)):
+        if assignees:
+            if isinstance(assignees, list):
                 project = self._client.scope(self._json_data['scope']['name'])
                 members_list = [member['username'] for member in project._json_data['members']]
-                if assignee in members_list:
-                    update_dict.update({'assignee': assignee})
-                else:
-                    raise NotFoundError('Assignee should be a member of the scope')
+                for assignee in assignees:
+                    if assignee not in members_list:
+                        raise NotFoundError("Assignee '{}' should be a member of the scope".format(assignee))
+                update_dict.update({'assignees': assignees})
             else:
-                raise TypeError('Assignee should be a string')
+                raise TypeError('Assignees should be a list')
+
+        if status:
+            if isinstance(status, (str, text_type)):
+                update_dict.update({'status': status})
+            else:
+                raise TypeError('Status should be a string')
 
         url = self._client._build_url('activity', activity_id=self.id)
         r = self._client._request('PUT', url, json=update_dict)
@@ -250,8 +247,10 @@ class Activity(Base):
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Activity ({})".format(r))
 
-        if assignee:
-            self._json_data['assignee'] = assignee
+        if status:
+            self._json_data['status'] = str(status)
+        if assignees:
+            self._json_data['assignees'] = assignees
         if due_date:
             self._json_data['due_date'] = str(due_date)
         if start_date:
@@ -260,11 +259,18 @@ class Activity(Base):
     def customize(self, config):
         """Customize an activity.
 
-        :param config: the InspectorComponent or raw inspector json (as python dict) to be used in customization
+        .. warning::
 
+           The use of `InspectorComponents` and `Customization` object will become deprecated in November 2017. For
+           KE-chain releases later than 2.5, please use the `activity.customization()` method to retrieve the newer
+           type customization.
+
+        :param config: the `InspectorComponent` or raw inspector json (as python dict) to be used in customization
         :return: None
         :raises: InspectorComponentError if the customisation is provided incorrectly.
 
+        Example
+        -------
         >>> my_activity = self.project.activity('Customizable activity')
         >>> my_activity.customize(config =
         ...                          {"components":
@@ -279,11 +285,15 @@ class Activity(Base):
 
         """
         if isinstance(config, dict):
-            customization = Customization(json=config)
-            customization.validate()
-        elif isinstance(config, Customization):
+            deprecated_customizations = Customization(json=config)
+            deprecated_customizations.validate()
+        elif isinstance(config, (Customization, InspectorComponent)):
+            # TODO(JB): ensure that the deprecation warning will come into effect in November 2017 (pykechain 1.14/1.15)
+            warnings.warn("The definition of customization widgets has changed in KE-chain version 2.5. The use "
+                          "of Customization and InspectorComponents will be deprecated in November 2017",
+                          PendingDeprecationWarning)
             config.validate()
-            customization = config
+            deprecated_customizations = config
         else:
             raise Exception("Need to provide either a dictionary or Customization as input, got: '{}'".
                             format(type(config)))
@@ -292,7 +302,8 @@ class Activity(Base):
         # When an activity has been costumized at least once before, then its widget config already exists
         if activity_widget_config:
             widget_config_id = activity_widget_config['id']
-            request_update_dict = {'id': widget_config_id, 'config': json.dumps(customization.as_dict(), indent=2)}
+            request_update_dict = {'id': widget_config_id, 'config': json.dumps(deprecated_customizations.as_dict(),
+                                                                                indent=2)}
             url = self._client._build_url('widget_config', widget_config_id=widget_config_id)
             r = self._client._request('PUT', url, json=request_update_dict)
         # When an activity was not customized before, then there is no widget config and a new one must be created for
@@ -301,9 +312,30 @@ class Activity(Base):
             r = self._client._request('POST', self._client._build_url('widgets_config'),
                                       data=dict(
                                           activity=self.id,
-                                          config=json.dumps(customization.as_dict(), indent=2))
+                                          config=json.dumps(deprecated_customizations.as_dict(), indent=2))
                                       )
 
         if r.status_code in (requests.codes.ok, requests.codes.created):
             self._json_data['widget_config'] = {'id': r.json()['results'][0].get('id'),
-                                                'config': json.dumps(customization.as_dict(), indent=2)}
+                                                'config': json.dumps(deprecated_customizations.as_dict(), indent=2)}
+
+    def customization(self):
+        """
+        Get a customization object representing the customization of the activity.
+
+        .. versionadded:: 1.11
+
+        :return: An ExtCustomization instance
+
+        Example
+        -------
+        >>> activity = project.activity(name='Customizable activity')
+        >>> customization = activity.customization()
+        >>> part_to_show = project.part(name='Bike')
+        >>> customization.add_property_grid_widget(part_to_show, custom_title="My super bike"))
+
+        """
+        from .customization import ExtCustomization
+
+        # For now, we only allow customization in an Ext JS context
+        return ExtCustomization(activity=self, client=self._client)

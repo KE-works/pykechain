@@ -3,6 +3,8 @@ import json
 import requests
 from typing import Any, AnyStr  # flake8: noqa
 
+from six import text_type
+
 from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import NotFoundError, APIError, MultipleFoundError
 from pykechain.models.base import Base
@@ -322,7 +324,7 @@ class Part(Base):
         """
         r = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
 
-        if r.status_code != requests.codes.no_content:
+        if r.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
 
     def edit(self, name=None, description=None):
@@ -354,10 +356,10 @@ class Part(Base):
         """
         update_dict = {'id': self.id}
         if name:
-            assert type(name) == str, "name should be provided as a string"
+            assert isinstance(name, str), "name should be provided as a string"
             update_dict.update({'name': name})
         if description:
-            assert type(description) == str, "description should be provided as a string"
+            assert isinstance(description, str), "description should be provided as a string"
             update_dict.update({'description': description})
         r = self._client._request('PUT', self._client._build_url('part', part_id=self.id), json=update_dict)
 
@@ -380,7 +382,7 @@ class Part(Base):
         ]
 
         for prop in self.properties:
-            style = "color:blue;" if prop.output else ""
+            style = "color:blue;" if prop._output else ""
 
             html.append("<tr style=\"{}\">".format(style))
             html.append("<td>{}</td>".format(prop.name))
@@ -419,7 +421,7 @@ class Part(Base):
 
         if bulk and len(update_dict.keys()) > 1:
             if name:
-                assert type(name) == str, "Name of the part should be provided as a string"
+                assert isinstance(name, str), "Name of the part should be provided as a string"
             r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
                                       data=dict(name=name, properties=json.dumps(request_body)),
                                       params=dict(select_action=action))
@@ -492,3 +494,38 @@ class Part(Base):
             properties_dict[prop.name] = prop.value
         return properties_dict
 
+    def order_properties(self, property_list=None):
+        """
+        Order the properties of a part model using a list of property objects or property names.
+
+        Examples
+        --------
+        >>> front_fork = client.scope('Bike Project').model('Front Fork')
+        >>> front_fork.order_properties(['Material', 'Height (mm)', 'Color'])
+
+        >>> front_fork = client.scope('Bike Project').model('Front Fork')
+        >>> material = front_fork.property('Material')
+        >>> height = front_fork.property('Height (mm)')
+        >>> color = front_fork.property('Color')
+        >>> front_fork.order_properties([material, height, color])
+
+        """
+        assert self.category == Category.MODEL
+        if not isinstance(property_list, list):
+            raise TypeError('Expected a list of strings or Property() objects, got a {} object'.
+                            format(type(property_list)))
+
+        order_dict = dict()
+
+        for prop in property_list:
+            if isinstance(prop, (str, text_type)):
+                order_dict[self.property(name=prop).id] = property_list.index(prop)
+            else:
+                order_dict[prop.id] = property_list.index(prop)
+
+        r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
+                                  data=dict(
+                                      property_order=json.dumps(order_dict)
+                                  ))
+        if r.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not reorder properties")

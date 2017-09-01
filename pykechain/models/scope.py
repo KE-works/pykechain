@@ -32,12 +32,12 @@ class Scope(Base):
         """
         return self._client.part(*args, bucket=self.bucket.get('id'), **kwargs)
 
-    def create_model(self, parent, name, multiplicity = Multiplicity.ZERO_MANY):
+    def create_model(self, parent, name, multiplicity=Multiplicity.ZERO_MANY):
         """Create a single part model in this scope.
-        
-        See :class:`pykechain.Client.create_model` for available parameters.        
+
+        See :class:`pykechain.Client.create_model` for available parameters.
         """
-        return self._client.create_model(parent, name, multiplicity=Multiplicity.ZERO_MANY)
+        return self._client.create_model(parent, name, multiplicity=multiplicity)
 
     def model(self, *args, **kwargs):
         """Retrieve a single model belonging to this scope.
@@ -66,3 +66,22 @@ class Scope(Base):
         See :class:`pykechain.Client.create_activity` for available parameters.
         """
         return self._client.create_activity(self.process, *args, **kwargs)
+
+    def members(self, is_manager=None):
+        """
+        Retrieve members of the scope.
+
+        :param is_manager: (optional) set to True to return only Scope members that are also managers.
+        :return: List of members (usernames)
+
+        Examples
+        --------
+        >>> members = project.members()
+        >>> managers = project.members(is_manager=True)
+
+        """
+        if not is_manager:
+            return [member for member in self._json_data['members'] if member['is_active']]
+        else:
+            return [member for member in self._json_data['members'] if
+                    member.get('is_active', False) and member.get('is_manager', False)]

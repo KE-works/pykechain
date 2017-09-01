@@ -6,7 +6,7 @@ import pytz
 import requests
 import warnings
 
-from pykechain.enums import Category, ActivityType
+from pykechain.enums import Category, ActivityType, ActivityStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
 from pykechain.models import Part
 from pykechain.models.inspector_base import Customization
@@ -144,23 +144,44 @@ class TestActivities(TestBetamax):
 
     def test_edit_activity_assignee(self):
         specify_wd = self.project.activity('Specify wheel diameter')
-        original_assignee = specify_wd._json_data.get('assignee', 'testuser')
+        original_assignee = specify_wd._json_data.get('assignees', ['testuser', 'testmanager'])
 
-        specify_wd.edit(assignee='pykechain')
+        specify_wd.edit(assignees=['pykechain'])
+
+        specify_wd = self.project.activity('Specify wheel diameter')
+        self.assertEqual(['pykechain'], specify_wd._json_data.get('assignees'))
 
         self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
 
         # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
         # scope members
         with self.assertRaises(NotFoundError):
-            specify_wd.edit(assignee='Not Member')
+            specify_wd.edit(assignees=['Not Member'])
 
         # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
         # scope members
         with self.assertRaises(TypeError):
-            specify_wd.edit(assignee=0.5)
+            specify_wd.edit(assignees='Not Member')
 
-        specify_wd.edit(assignee=original_assignee)
+        specify_wd.edit(assignees=original_assignee)
+
+    # 1.10.0
+    def test_edit_activity_status(self):
+        specify_wd = self.project.activity('Specify wheel diameter')
+        original_status = specify_wd.status
+
+        specify_wd.edit(status=ActivityStatus.COMPLETED)
+
+        # Added to improve coverage. Assert whether TypeError is raised when 'status' is not a string
+        with self.assertRaises(TypeError):
+            specify_wd.edit(status=True)
+
+        # If the status is not part of Enums.Status then it should raise an APIError
+        with self.assertRaises(APIError):
+            specify_wd.edit(status='NO STATUS')
+
+        # Return the status to how it used to be
+        specify_wd.edit(status=original_status)
 
     # 1.7.2
     def test_datetime_with_naive_duedate_only_fails(self):
@@ -252,27 +273,27 @@ class TestActivities(TestBetamax):
 
         for part in parts:
             self.assertIsInstance(part, Part)
-            self.assertTrue(part.category, Category.INSTANCE)
+            self.assertTrue(part.category == Category.INSTANCE)
 
     def test_retrieve_part_models_associated_to_activities(self):
         task = self.project.activity('Specify wheel diameter')
-        parts = list(task.parts(category=Category.MODEL))
+        models = list(task.parts(category=Category.MODEL))
 
-        for part in parts:
-            self.assertIsInstance(part, Part)
-            self.assertTrue(part.category, Category.MODEL)
+        for model in models:
+            self.assertIsInstance(model, Part)
+            self.assertTrue(model.category == Category.MODEL)
 
     def test_retrieve_associated_parts_to_activity(self):
         task = self.project.activity('Specify wheel diameter')
         (models, parts) = list(task.associated_parts())
 
-        for part in parts:
+        for part in models:
             self.assertIsInstance(part, Part)
-            self.assertTrue(part.category, Category.INSTANCE)
+            self.assertTrue(part.category == Category.MODEL)
 
         for part in parts:
             self.assertIsInstance(part, Part)
-            self.assertTrue(part.category, Category.INSTANCE)
+            self.assertTrue(part.category == Category.INSTANCE)
 
     # updated and new in 1.9
     def test_customize_activity_with_widget_config(self):

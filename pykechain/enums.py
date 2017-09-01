@@ -18,7 +18,7 @@ class Enum(object):
     @classmethod
     def values(cls):
         """Provide a (sorted) list of values."""
-        return [value for (name, value) in cls.options()]
+        return [value for (value, name) in cls.options()]
 
 
 class Multiplicity(Enum):
@@ -53,7 +53,7 @@ class PropertyType(Enum):
 
 
 class ActivityType(Enum):
-    """The various Acitivity types that are accepted by KE-chain."""
+    """The various Activity types that are accepted by KE-chain."""
 
     USERTASK = "UserTask"
     SERVICETASK = "ServiceTask"  # RND code only
@@ -69,3 +69,11 @@ class ComponentXType(Enum):
     SUPERGRID = "superGrid"
     PAGINATEDSUPERGRID = "paginatedSuperGrid"
     FILTEREDGRID = "filteredGrid"
+    DISPLAYFIELD = "displayfield"
+
+
+class ActivityStatus(Enum):
+    """The various Activity statuses that are accepted by KE-chain."""
+
+    OPEN = 'OPEN'
+    COMPLETED = 'COMPLETED'
