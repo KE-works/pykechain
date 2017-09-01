@@ -44,6 +44,7 @@ class Classification(Enum):
     PRODUCT = "PRODUCT"
     CATALOG = "CATALOG"
 
+
 class PropertyType(Enum):
     """The various property types that are accepted by KE-chain."""
 
