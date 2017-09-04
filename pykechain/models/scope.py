@@ -1,7 +1,9 @@
 from typing import Any  # flake8: noqa
+import requests
 
 from pykechain.enums import Multiplicity
 from pykechain.models.base import Base
+from pykechain.exceptions import APIError, NotFoundError
 
 
 class Scope(Base):
@@ -85,3 +87,70 @@ class Scope(Base):
         else:
             return [member for member in self._json_data['members'] if
                     member.get('is_active', False) and member.get('is_manager', False)]
+
+    def add_member(self, member):
+        """
+        Add a single member to the scope.
+
+        You may only edit the list of members if the pykechain credentials allow this.
+
+        :param member: single username to be added to the scope list of members
+        """
+        select_action = 'add_member'
+
+        self._update_scope_project_team(select_action=select_action, user=member, user_type='member')
+
+    def remove_member(self, member):
+        """
+        Remove a single member to the scope.
+
+        :param member: single username to be removed to the scope list of members
+        """
+        select_action = 'remove_member'
+
+        self._update_scope_project_team(select_action=select_action, user=member, user_type='member')
+
+    def add_manager(self, manager):
+        """
+        Add a single manager to the scope.
+
+        :param manager: single username to be added to the scope list of managers
+        """
+        select_action = 'add_manager'
+
+        self._update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
+
+    def remove_manager(self, manager):
+        """
+        Remove a single manager to the scope.
+
+        :param manager: single username to be removed to the scope list of managers
+        """
+        select_action = 'remove_manager'
+
+        self._update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
+
+    def _update_scope_project_team(self, select_action, user, user_type):
+        """
+        Update the Project Team of the Scope. Updates include addition or removing of managers or members.
+
+        :param select_action: type of action to be applied
+        :param user: the username of the user to which the action applies to
+        :param user_type: the type of the user (member or manager)
+        """
+        if isinstance(user, str):
+            users = self._client._retrieve_users()
+            manager_object = next((item for item in users['results'] if item["username"] == user), None)
+            if manager_object:
+                url = self._client._build_url('scope', scope_id=self.id)
+                r = self._client._request('PUT', url, params={'select_action': select_action},
+                                          data={
+                                              'user_id': manager_object['pk']
+                                          })
+                if r.status_code != requests.codes.ok:  # pragma: no cover
+                    raise APIError("Could not {} {} in Scope".format(select_action.split('_')[0], user_type))
+            else:
+                raise NotFoundError("User {} does not exist".format(user))
+        else:
+            raise TypeError("User {} should be defined as a string".format(user))
+
