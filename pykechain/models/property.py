@@ -18,6 +18,14 @@ class Property(Base):
         self._value = json.get('value')
 
     @property
+    def output(self):
+        """Return true if the property is configured as an output.
+
+        :return: True if the property output is configured as output, otherwise false
+        """
+        return self._json_data.get('output', False)
+
+    @property
     def value(self):
         # type: () -> Any
         """Retrieve the data value of a property.
