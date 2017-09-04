@@ -15,11 +15,12 @@ pykechain changelog
  * Removed previously announced deprecated method for `activity.create_activity()` (use `Activity.create()`).
  * Added deprecation warnings when using `InspectorComponent` objects and old style `Customization` components. They will be removed in November 2017 (introduced in pykechain 1.9)
  * Added the ability to retrieve a list of project members and managers with the `Scope.members()` method (#169)
- * Updated the documentation structure to better access all the pykechain models.
- * Added the ability to manage member and managers of a scope. See the `Scope.add_member`, `add_manager`, `remove_member`, 'remove_manager` (#175)
+ * Added the ability to manage member and managers of a scope. See the `Scope.add_member`, `add_manager`, `remove_member`, `remove_manager` (#175)
  * Added the ability to add additional keyword arguments for the methods `Part.update()`, `Part.add_with_properties()` and `Part.edit()`. This will allow to provide additional (including undocumented) arguments to the KE-chain API. (eg. 'suppress_kevents=True') (#177)
+ * Added the ability to edit the name of the property, its description and the unit (#179)
  * Added classification enumeration (#175)
- * Updated tests
+ * Updated the documentation structure to better access all the pykechain models related documentation. See http://pykechain.readthedocs.io/en/latest/developer_api.html
+ * Updated all tests such that our coverage aim of 95%+ is achieved.
 
 1.10.3 (28AUG17)
 ----------------
