@@ -101,7 +101,7 @@ class TestProperties(TestBetamax):
         gears_property = bike_model.property(name='Gears')
         gears_old_description = str(gears_property._json_data.get('description'))
 
-        new_description = 'Are they cogs or are they gears?'
+        new_description = 'Cogs, definitely cogs.'
         gears_property.edit(description=new_description)
         gears_property_u = bike_model.property(name='Gears')
 
