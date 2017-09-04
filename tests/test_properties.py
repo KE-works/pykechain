@@ -1,3 +1,5 @@
+from random import random, randrange
+
 from pykechain.exceptions import NotFoundError, APIError
 from pykechain.models import Property
 from tests.classes import TestBetamax
@@ -130,3 +132,20 @@ class TestProperties(TestBetamax):
 
         # teardown
         height_property.edit(unit=height_old_unit)
+
+    # 1.11
+    def test_set_property_for_real(self):
+        gears = self.project.part('Bike').property('Gears')
+        old_value = int(gears.value)
+
+        # set the value
+        new_value = randrange(old_value+1, old_value*20)
+        self.assertNotEqual(new_value, old_value)
+
+        gears.value = new_value
+        self.assertEqual(gears.value, new_value)
+        self.assertEqual(gears._value, new_value)
+        self.assertEqual(gears._json_data.get('value'), new_value)
+
+        # teardown
+        gears.value = old_value

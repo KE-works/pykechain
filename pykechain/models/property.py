@@ -38,7 +38,9 @@ class Property(Base):
     @value.setter
     def value(self, value):
         # type: (Any) -> None
-        self._value = self._put_value(value)
+        if self._put_value(value):
+            self._value = value
+            self._json_data['value'] = value
 
     @property
     def part(self):
