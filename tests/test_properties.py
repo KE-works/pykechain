@@ -130,4 +130,3 @@ class TestProperties(TestBetamax):
 
         # teardown
         height_property.edit(unit=height_old_unit)
-
