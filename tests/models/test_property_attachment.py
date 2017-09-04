@@ -43,3 +43,18 @@ class TestAttachment(TestBetamax):
         requirements = project_root + '/requirements.txt'
         plot_attach.upload(requirements)
 
+    # 1.11.1
+    def test_clear_an_attachment_property(self):
+        # setUp
+        plot_attach = self.project.part('Bike').property('Plot Attachment')
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')))
+        requirements = project_root + '/requirements.txt'
+        plot_attach.upload(requirements)
+        plot_attach_u = self.project.part('Bike').property('Plot Attachment')
+
+        # testing
+        self.assertTrue(plot_attach_u.value.find('requirements.txt'))
+        plot_attach.clear()
+        self.assertEqual(plot_attach.value, None)
+        self.assertEqual(plot_attach._value, None)
+

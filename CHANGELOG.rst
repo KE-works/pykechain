@@ -3,6 +3,11 @@ Change Log
 
 pykechain changelog
 
+1.11.1 (4SEP17)
+---------------
+ * Added the ability to clear and attachment field (unlink the attachment). Please refer to the `AttachmentProperty.clear()` method.
+ * Ensured a more robust updating of property value all over by altering `Property._value` and `Property._json_data['value']` after you set a value on a property.
+
 1.11 (4SEP17)
 -------------
  * In KE-chain 2.5 the way we use task customization has changed drastically. Pykechain (from 1.11 onwards) supports this by implementing a new concept in the activity called `Activity.customization()` (#161). This provides you an `ExtCustomization` object, which you can inspect and add new widgets. Please see the documentation on `ExtCustomization` and `Activity.customization()` for more details. An example to use is:
