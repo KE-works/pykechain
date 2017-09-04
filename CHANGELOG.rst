@@ -20,6 +20,7 @@ pykechain changelog
  * Added the ability to edit the name of the property, its description and the unit (#146, PR #179)
  * Added classification enumeration (#175)
  * Updated the documentation structure to better access all the pykechain models related documentation. See http://pykechain.readthedocs.io/en/latest/developer_api.html
+ * Updated dependent version of tox to 2.8.0 (#178) and further to 2.8.1 (#180)
  * Updated all tests such that our coverage aim of 96%+ is maintained.
 
 1.10.3 (28AUG17)
