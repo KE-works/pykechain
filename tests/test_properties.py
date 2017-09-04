@@ -1,4 +1,4 @@
-from random import random, randrange
+from random import randrange
 
 from pykechain.exceptions import NotFoundError, APIError
 from pykechain.models import Property
@@ -139,7 +139,7 @@ class TestProperties(TestBetamax):
         old_value = int(gears.value)
 
         # set the value
-        new_value = randrange(old_value+1, old_value*20)
+        new_value = randrange(old_value + 1, old_value * 20)
         self.assertNotEqual(new_value, old_value)
 
         gears.value = new_value
