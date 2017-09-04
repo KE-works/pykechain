@@ -6,6 +6,7 @@ pykechain changelog
 1.11.1 (4SEP17)
 ---------------
  * Added the ability to clear and attachment field (unlink the attachment). Please refer to the `AttachmentProperty.clear()` method.
+ * Ensured a more robust updating of property value all over by altering `Property._value` and `Property._json_data['value']` after you set a value on a property.
 
 1.11 (4SEP17)
 -------------
