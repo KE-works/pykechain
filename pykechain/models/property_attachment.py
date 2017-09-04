@@ -33,7 +33,11 @@ class AttachmentProperty(Property):
 
     @value.setter
     def value(self, value):
-        raise RuntimeError("Cannot set the value of an attachment property, use upload()")
+        raise RuntimeError("Cannot set the value of an attachment property, use upload() to upload a new attachment or "
+                           "clear() to clear the attachment from the field")
+
+    def clear(self):
+        """Clears the attachment from the attachment field"""
 
     def json_load(self):
         """Download the data from the attachment and deserialise the contained json.
