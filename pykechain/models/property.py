@@ -79,3 +79,34 @@ class Property(Base):
             return ReferenceProperty(json, **kwargs)
         else:
             return Property(json, **kwargs)
+
+    def edit(self, name=None, description=None):
+        # type: (AnyStr, AnyStr) -> None
+        """
+        Edit the details of a property (model).
+
+        :param name: (optional) new name of the property to edit
+        :param description: (optional) new description of the property
+        :return: None
+        :raises: APIError
+
+        Example
+        -------
+        >>> front_fork = project.part('Front Fork')
+        >>> color_property = front_fork.property(name='Color')
+        >>> color_property.edit(name='Shade', description='Could also be called tint, depending on mixture')
+
+        """
+        update_dict = {'id': self.id}
+        if name:
+            assert isinstance(name, str), "name should be provided as a string"
+            update_dict.update({'name': name})
+            self.name = name
+        if description:
+            assert isinstance(description, str), "description should be provided as a string"
+            update_dict.update({'description': description})
+        r = self._client._request('PUT', self._client._build_url('property', property_id=self.id), json=update_dict)
+
+        if r.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Property ({})".format(r))
+

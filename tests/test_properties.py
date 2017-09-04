@@ -80,3 +80,32 @@ class TestProperties(TestBetamax):
         part_of_spokes_model = spokes_model.part
 
         self.assertTrue(wheel_model.id == part_of_spokes_model.id)
+
+    # 1.12
+    def test_edit_property_model_name(self):
+        bike_model = self.project.model('Bike')
+        gears_property = bike_model.property(name='Gears')
+        gears_old_name = gears_property.name
+        gears_property.edit(name='Cogs')
+        gears_property_u = bike_model.property(name='Cogs')
+
+        assert gears_property.id == gears_property_u.id
+        assert gears_property.name == gears_property_u.name
+        assert gears_property.name == 'Cogs'
+
+        # teardown
+        gears_property.edit(name=gears_old_name)
+
+    def test_edit_property_model_description(self):
+        bike_model = self.project.model('Bike')
+        gears_property = bike_model.property(name='Gears')
+        gears_old_description = str(gears_property._json_data.get('description'))
+
+        new_description = 'Are they cogs or are they gears?'
+        gears_property.edit(description=new_description)
+        gears_property_u = bike_model.property(name='Gears')
+
+        assert gears_property.id == gears_property_u.id
+
+        # teardown
+        gears_property.edit(description=gears_old_description)
