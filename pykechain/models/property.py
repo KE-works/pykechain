@@ -81,13 +81,14 @@ class Property(Base):
         else:
             return Property(json, **kwargs)
 
-    def edit(self, name=None, description=None):
-        # type: (AnyStr, AnyStr) -> None
+    def edit(self, name=None, description=None, unit=None):
+        # type: (AnyStr, AnyStr, AnyStr) -> None
         """
         Edit the details of a property (model).
 
         :param name: (optional) new name of the property to edit
         :param description: (optional) new description of the property
+        :param unit: (optional) new unit of the property
         :return: None
         :raises: APIError
 
@@ -95,7 +96,8 @@ class Property(Base):
         -------
         >>> front_fork = project.part('Front Fork')
         >>> color_property = front_fork.property(name='Color')
-        >>> color_property.edit(name='Shade', description='Could also be called tint, depending on mixture')
+        >>> color_property.edit(name='Shade', description='Could also be called tint, depending on mixture',
+        >>> unit='RGB')
 
         """
         update_dict = {'id': self.id}
@@ -109,6 +111,11 @@ class Property(Base):
                 raise TypeError("description should be provided as a string, was provided as '{}'".
                                 format(type(description)))
             update_dict.update({'description': description})
+        if unit:
+            if not isinstance(unit, (str, text_type)):
+                raise TypeError("unit should be provided as a string, was provided as '{}'".
+                                format(type(unit)))
+            update_dict.update({'unit': unit})
 
         r = self._client._request('PUT', self._client._build_url('property', property_id=self.id), json=update_dict)
 

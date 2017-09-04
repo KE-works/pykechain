@@ -114,3 +114,20 @@ class TestProperties(TestBetamax):
         # teardown
         gears_property.edit(description=gears_old_description)
 
+    def test_edit_property_model_unit(self):
+        front_fork_model = self.project.model('Front Fork')
+        height_property = front_fork_model.property(name='Height (mm)')
+        height_old_unit = str(height_property._json_data.get('unit'))
+        new_unit = 'm'
+
+        height_property.edit(unit=new_unit)
+
+        height_property_u = front_fork_model.property(name='Height (mm)')
+        self.assertEqual(height_property.id, height_property_u.id)
+
+        with self.assertRaises(TypeError):
+            height_property.edit(unit=4)
+
+        # teardown
+        height_property.edit(unit=height_old_unit)
+
