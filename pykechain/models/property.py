@@ -1,6 +1,7 @@
-from typing import Any  # flake8: noqa
+from typing import Any, AnyStr  # flake8: noqa
 
 import requests
+from six import text_type
 
 from pykechain.exceptions import APIError
 from pykechain.models.base import Base
@@ -99,11 +100,11 @@ class Property(Base):
         """
         update_dict = {'id': self.id}
         if name:
-            assert isinstance(name, str), "name should be provided as a string"
+            assert isinstance(name, (str, text_type)), "name should be provided as a string"
             update_dict.update({'name': name})
             self.name = name
         if description:
-            assert isinstance(description, str), "description should be provided as a string"
+            assert isinstance(description, (str, text_type)), "description should be provided as a string"
             update_dict.update({'description': description})
         r = self._client._request('PUT', self._client._build_url('property', property_id=self.id), json=update_dict)
 
