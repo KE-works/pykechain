@@ -28,10 +28,13 @@ class TestScopes(TestBetamax):
 
     def test_add_member(self):
         member_to_be_added = 'superuser'
+        # testing
         self.project.add_member(member_to_be_added)
         self.project = self.client.scope(pk=self.project.id)
         project_members = self.project.members()
         self.assertTrue(member_to_be_added in [member['username'] for member in project_members])
+        # teardown
+        self.project.remove_member(member_to_be_added)
 
     def test_add_member_by_id(self):
         member_id = 4
@@ -45,6 +48,9 @@ class TestScopes(TestBetamax):
 
     def test_remove_member(self):
         member_to_be_removed = 'superuser'
+        # setUp
+        self.project.add_member(member_to_be_removed)
+        # testing
         self.project.remove_member(member_to_be_removed)
         self.project = self.client.scope(pk=self.project.id)
         project_members = self.project.members()
@@ -52,16 +58,24 @@ class TestScopes(TestBetamax):
 
     def test_add_manager(self):
         manager_to_be_added = 'superuser'
+        # testing
         self.project.add_manager(manager_to_be_added)
         self.project = self.client.scope(pk=self.project.id)
         project_managers = self.project.members(is_manager=True)
         self.assertTrue(manager_to_be_added in [manager['username'] for manager in project_managers])
+        # teardown
+        self.project.remove_member(manager_to_be_added)
 
     def test_remove_manager(self):
         manager_to_be_removed = 'superuser'
+        # setUp
+        self.project.add_manager(manager_to_be_removed)
+        # testing
         self.project.remove_manager(manager_to_be_removed)
         self.project = self.client.scope(pk=self.project.id)
         project_managers = self.project.members(is_manager=True)
         self.assertTrue(manager_to_be_removed not in [manager['username'] for manager in project_managers])
         project_managers = self.project.members(is_manager=False)
         self.assertTrue(manager_to_be_removed in [manager['username'] for manager in project_managers])
+        # teardown
+        self.project.remove_member(manager_to_be_removed)
