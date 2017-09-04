@@ -93,6 +93,8 @@ class TestProperties(TestBetamax):
         self.assertEqual(gears_property.name, gears_property_u.name)
         self.assertEqual(gears_property.name, 'Cogs')
 
+        with self.assertRaises(TypeError):
+            gears_property.edit(name=True)
         # teardown
         gears_property.edit(name=gears_old_name)
 
@@ -106,6 +108,9 @@ class TestProperties(TestBetamax):
         gears_property_u = bike_model.property(name='Gears')
 
         self.assertEqual(gears_property.id, gears_property_u.id)
+        with self.assertRaises(TypeError):
+            gears_property.edit(description=True)
 
         # teardown
         gears_property.edit(description=gears_old_description)
+
