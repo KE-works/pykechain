@@ -81,7 +81,7 @@ class TestProperties(TestBetamax):
 
         self.assertTrue(wheel_model.id == part_of_spokes_model.id)
 
-    # 1.12
+    # 1.11
     def test_edit_property_model_name(self):
         bike_model = self.project.model('Bike')
         gears_property = bike_model.property(name='Gears')
