@@ -7,7 +7,7 @@ class TestProperties(TestBetamax):
     def test_retrieve_properties(self):
         properties = self.client.properties('Diameter')
 
-        assert len(properties)
+        self.assertTrue(len(properties) > 0)
 
     def test_get_property(self):
         bike = self.project.part('Bike')
@@ -89,9 +89,9 @@ class TestProperties(TestBetamax):
         gears_property.edit(name='Cogs')
         gears_property_u = bike_model.property(name='Cogs')
 
-        assert gears_property.id == gears_property_u.id
-        assert gears_property.name == gears_property_u.name
-        assert gears_property.name == 'Cogs'
+        self.assertEqual(gears_property.id, gears_property_u.id)
+        self.assertEqual(gears_property.name, gears_property_u.name)
+        self.assertEqual(gears_property.name, 'Cogs')
 
         # teardown
         gears_property.edit(name=gears_old_name)
@@ -105,7 +105,7 @@ class TestProperties(TestBetamax):
         gears_property.edit(description=new_description)
         gears_property_u = bike_model.property(name='Gears')
 
-        assert gears_property.id == gears_property_u.id
+        self.assertEqual(gears_property.id, gears_property_u.id)
 
         # teardown
         gears_property.edit(description=gears_old_description)
