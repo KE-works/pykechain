@@ -100,12 +100,16 @@ class Property(Base):
         """
         update_dict = {'id': self.id}
         if name:
-            assert isinstance(name, (str, text_type)), "name should be provided as a string"
+            if not isinstance(name, (str, text_type)):
+                raise TypeError("name should be provided as a string, was provided as '{}'".format(type(name)))
             update_dict.update({'name': name})
             self.name = name
         if description:
-            assert isinstance(description, (str, text_type)), "description should be provided as a string"
+            if not isinstance(description, (str, text_type)):
+                raise TypeError("description should be provided as a string, was provided as '{}'".
+                                format(type(description)))
             update_dict.update({'description': description})
+
         r = self._client._request('PUT', self._client._build_url('property', property_id=self.id), json=update_dict)
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
