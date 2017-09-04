@@ -37,7 +37,13 @@ class AttachmentProperty(Property):
                            "clear() to clear the attachment from the field")
 
     def clear(self):
-        """Clears the attachment from the attachment field"""
+        """Clears the attachment from the attachment field.
+
+        :raises: APIError if not possible to remove the attachment
+        """
+        if self._put_value(None) == None:
+            self._value = None
+            self._json_data['value'] = None
 
     def json_load(self):
         """Download the data from the attachment and deserialise the contained json.
