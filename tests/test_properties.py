@@ -7,7 +7,7 @@ class TestProperties(TestBetamax):
     def test_retrieve_properties(self):
         properties = self.client.properties('Diameter')
 
-        assert len(properties)
+        self.assertTrue(len(properties) > 0)
 
     def test_get_property(self):
         bike = self.project.part('Bike')
@@ -80,3 +80,54 @@ class TestProperties(TestBetamax):
         part_of_spokes_model = spokes_model.part
 
         self.assertTrue(wheel_model.id == part_of_spokes_model.id)
+
+    # 1.11
+    def test_edit_property_model_name(self):
+        bike_model = self.project.model('Bike')
+        gears_property = bike_model.property(name='Gears')
+        gears_old_name = gears_property.name
+        gears_property.edit(name='Cogs')
+        gears_property_u = bike_model.property(name='Cogs')
+
+        self.assertEqual(gears_property.id, gears_property_u.id)
+        self.assertEqual(gears_property.name, gears_property_u.name)
+        self.assertEqual(gears_property.name, 'Cogs')
+
+        with self.assertRaises(TypeError):
+            gears_property.edit(name=True)
+        # teardown
+        gears_property.edit(name=gears_old_name)
+
+    def test_edit_property_model_description(self):
+        bike_model = self.project.model('Bike')
+        gears_property = bike_model.property(name='Gears')
+        gears_old_description = str(gears_property._json_data.get('description'))
+
+        new_description = 'Cogs, definitely cogs.'
+        gears_property.edit(description=new_description)
+        gears_property_u = bike_model.property(name='Gears')
+
+        self.assertEqual(gears_property.id, gears_property_u.id)
+        with self.assertRaises(TypeError):
+            gears_property.edit(description=True)
+
+        # teardown
+        gears_property.edit(description=gears_old_description)
+
+    def test_edit_property_model_unit(self):
+        front_fork_model = self.project.model('Front Fork')
+        height_property = front_fork_model.property(name='Height (mm)')
+        height_old_unit = str(height_property._json_data.get('unit'))
+        new_unit = 'm'
+
+        height_property.edit(unit=new_unit)
+
+        height_property_u = front_fork_model.property(name='Height (mm)')
+        self.assertEqual(height_property.id, height_property_u.id)
+
+        with self.assertRaises(TypeError):
+            height_property.edit(unit=4)
+
+        # teardown
+        height_property.edit(unit=height_old_unit)
+
