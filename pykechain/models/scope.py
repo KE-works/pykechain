@@ -98,7 +98,7 @@ class Scope(Base):
         """
         select_action = 'add_member'
 
-        self.update_scope_project_team(select_action=select_action, user=member, user_type='member')
+        self._update_scope_project_team(select_action=select_action, user=member, user_type='member')
 
     def remove_member(self, member):
         """
@@ -108,7 +108,7 @@ class Scope(Base):
         """
         select_action = 'remove_member'
 
-        self.update_scope_project_team(select_action=select_action, user=member, user_type='member')
+        self._update_scope_project_team(select_action=select_action, user=member, user_type='member')
 
     def add_manager(self, manager):
         """
@@ -118,7 +118,7 @@ class Scope(Base):
         """
         select_action = 'add_manager'
 
-        self.update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
+        self._update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
 
     def remove_manager(self, manager):
         """
@@ -128,9 +128,9 @@ class Scope(Base):
         """
         select_action = 'remove_manager'
 
-        self.update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
+        self._update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
 
-    def update_scope_project_team(self, select_action, user, user_type):
+    def _update_scope_project_team(self, select_action, user, user_type):
         """
         Update the Project Team of the Scope. Updates include addition or removing of managers or members.
 
