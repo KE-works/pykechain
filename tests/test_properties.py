@@ -139,7 +139,7 @@ class TestProperties(TestBetamax):
         old_value = int(gears.value)
 
         # set the value
-        new_value = randrange(old_value + 1, old_value * 20)
+        new_value = old_value * 20 + 1
         self.assertNotEqual(new_value, old_value)
 
         gears.value = new_value
