@@ -98,8 +98,7 @@ class Scope(Base):
         """
         select_action = 'add_member'
 
-        self.update_scope_project_team(select_action=select_action, user=member, user_type='member',
-                                       select_action_type='add')
+        self.update_scope_project_team(select_action=select_action, user=member, user_type='member')
 
     def remove_member(self, member):
         """
@@ -109,8 +108,7 @@ class Scope(Base):
         """
         select_action = 'remove_member'
 
-        self.update_scope_project_team(select_action=select_action, user=member, user_type='member',
-                                       select_action_type='remove')
+        self.update_scope_project_team(select_action=select_action, user=member, user_type='member')
 
     def add_manager(self, manager):
         """
@@ -120,8 +118,7 @@ class Scope(Base):
         """
         select_action = 'add_manager'
 
-        self.update_scope_project_team(select_action=select_action, user=manager, user_type='manager',
-                                       select_action_type='add')
+        self.update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
 
     def remove_manager(self, manager):
         """
@@ -131,10 +128,16 @@ class Scope(Base):
         """
         select_action = 'remove_manager'
 
-        self.update_scope_project_team(select_action=select_action, user=manager, user_type='manager',
-                                       select_action_type='remove')
+        self.update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
 
-    def update_scope_project_team(self, select_action, user, user_type, select_action_type):
+    def update_scope_project_team(self, select_action, user, user_type):
+        """
+        Update the Project Team of the Scope. Updates include addition or removing of managers or members.
+
+        :param select_action: type of action to be applied
+        :param user: the username of the user to which the action applies to
+        :param user_type: the type of the user (member or manager)
+        """
         if isinstance(user, str):
             users = self._client._retrieve_users()
             manager_object = next((item for item in users['results'] if item["username"] == user), None)
@@ -145,7 +148,7 @@ class Scope(Base):
                                               'user_id': manager_object['pk']
                                           })
                 if r.status_code != requests.codes.ok:  # pragma: no cover
-                    raise APIError("Could not {} {} in Scope".format(select_action_type, user_type))
+                    raise APIError("Could not {} {} in Scope".format(select_action.split('_')[0], user_type))
             else:
                 raise NotFoundError("User {} does not exist".format(user))
         else:

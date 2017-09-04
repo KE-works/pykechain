@@ -39,7 +39,7 @@ class Category(Enum):
 
 
 class Classification(Enum):
-    """The various classification of Parts that are accepted by KE-chain"""
+    """The various classification of Parts that are accepted by KE-chain."""
 
     PRODUCT = "PRODUCT"
     CATALOG = "CATALOG"

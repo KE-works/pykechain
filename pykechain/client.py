@@ -144,8 +144,9 @@ class Client(object):
 
     def _retrieve_users(self):
         """
-        Retrieves users of the
-        Returns
+        Retrieve user objects of the entire administration.
+
+        :return: `list` of :obj:`User`
         -------
 
         """
