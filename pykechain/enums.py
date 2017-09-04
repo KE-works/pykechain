@@ -38,6 +38,13 @@ class Category(Enum):
     MODEL = "MODEL"
 
 
+class Classification(Enum):
+    """The various classification of Parts that are accepted by KE-chain."""
+
+    PRODUCT = "PRODUCT"
+    CATALOG = "CATALOG"
+
+
 class PropertyType(Enum):
     """The various property types that are accepted by KE-chain."""
 
