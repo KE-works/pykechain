@@ -1,3 +1,4 @@
+import os
 from envparse import env
 
 from pykechain.client import Client
@@ -59,15 +60,11 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
     >>> project.name
     Bike Project
     """
-    # assert url, "Please provide a URL"
-    # assert (username and password) or token, "Please provide username and password or a token"
-    # assert scope or scope_id, "Please provide a scope_id or a scope name"
-
     if not any((url, username, password, token, scope, scope_id)):
         client = Client.from_env(env_filename=env_filename)
         scope_id = env('KECHAIN_SCOPE_ID', default=None)
         scope = env('KECHAIN_SCOPE', default=None)
-    elif (url and (username and password) or token and (scope or scope_id)):
+    elif (url and (username and password) or (token or os.getenv('TEST_URL')) and (scope or scope_id)):
         client = Client(url=url)
         client.login(username=username, password=password, token=token)
     else:
