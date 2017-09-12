@@ -1,12 +1,20 @@
+import sys
+from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
+
+import os
 import requests
 from envparse import env
 from requests.compat import urljoin  # type: ignore
-from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
 
 from pykechain.enums import Category
 from .__about__ import version
-from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError
+from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError
 from .models import Scope, Activity, Part, PartSet, Property
+
+if sys.version_info.major < 3:
+    from urlparse import urlparse
+else:
+    from urllib.parse import urlparse
 
 API_PATH = {
     'scopes': 'api/scopes.json',
@@ -53,6 +61,10 @@ class Client(object):
         >>> client = Client(url='https://default-tst.localhost:9443', check_certificates=False)
 
         """
+        parsed_url = urlparse(url)
+        if not (parsed_url.scheme and parsed_url.netloc):
+            raise ClientError("Please provide a valid URL to a KE-chain instance")
+
         self.session = requests.Session()
         self.api_root = url
         self.headers = {'X-Requested-With': 'XMLHttpRequest', 'PyKechain-Version': version}  # type: Dict[str, str]
@@ -94,11 +106,15 @@ class Client(object):
             KECHAIN_USERNAME=...
             KECHAIN_PASSWORD=...
 
+            # optional add a scope name or scope id
+            KECHAIN_SCOPE=...
+            KECHAIN_SCOPE_ID=...
 
         >>> client = Client().from_env()
 
         """
-        env.read_envfile(env_filename)
+        if env_filename and os.path.exists(env_filename):
+            env.read_envfile(env_filename)
         client = cls(url=env('KECHAIN_URL'))
 
         if env('KECHAIN_TOKEN', None):

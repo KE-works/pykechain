@@ -1,9 +1,11 @@
+from unittest import TestCase
+
 from pykechain.client import Client
-from pykechain.exceptions import ForbiddenError
+from pykechain.exceptions import ForbiddenError, ClientError
 from tests.classes import TestBetamax
 
 
-class TestClient(object):
+class TestClient(TestCase):
 
     def test_init_default_url(self):
         client = Client()
@@ -41,6 +43,11 @@ class TestClient(object):
         client = Client(check_certificates=False)
 
         assert client.session.verify is False
+
+    # 1.12
+    def test_client_raises_error_with_false_url(self):
+        with self.assertRaises(ClientError):
+            Client(url='wrongurl')
 
 
 class TestClientLive(TestBetamax):

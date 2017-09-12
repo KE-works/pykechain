@@ -25,6 +25,12 @@ class NotFoundError(APIError):
     pass
 
 
+class ClientError(APIError):
+    """Error with instantiating the Client."""
+
+    pass
+
+
 class InspectorComponentError(Exception):
     """Error in the InspectorComponent."""
 

@@ -1,6 +1,7 @@
 import os
 from unittest import TestCase
 
+import sys
 from betamax import Betamax
 
 from pykechain import Client
@@ -33,3 +34,11 @@ class TestBetamax(TestCase):
 
     def tearDown(self):
         self.recorder.stop()
+
+    def assertRaisesRegex(self, expected_exception, expected_regex,
+                          *args, **kwargs):
+        if sys.version_info.major < 3:
+            return self.assertRaisesRegexp(expected_exception, expected_regex, *args, **kwargs)
+        else:
+            return super(__class__,self).assertRaisesRegex(expected_exception, expected_regex,
+                          *args, **kwargs)
