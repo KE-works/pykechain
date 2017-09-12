@@ -3,6 +3,16 @@ Change Log
 
 pykechain changelog
 
+1.12 (UNRELEASED)
+-----------------
+ * Added a new helper `get_project()` to bootstrap a pykechain client and return a project (aka Scope) immediately. You can retrieve a project using direct arguments `url`, `token` (or `username` and `password`), and `scope_id` (or `scope` name). Alternatively, you can provide an `.env` file or provide the arguments from the environment as the environment variables `KECHAIN_URL`, `KECHAIN_TOKEN` (or `KECHAIN_USERNAME` and `KECHAIN_PASSWORD`), and `KECHAIN_SCOPE_ID` (or `KECHAIN_SCOPE`) (#185). This is ideal for `pykechain` scripts in the KE-chain SIM, as we provide support for this to make your scripting experience in KE-chain buttersmooth. An example:
+
+    >>> from pykechain import get_project
+    >>> project = get_project(url='http://localhost:8000', username='foo', password='bar', scope='Bike Project')
+    >>> print(project.name)
+
+ * Added additional checks for the `Client` to check if the url provided is correct (#185)
+
 1.11.1 (4SEP17)
 ---------------
  * Added the ability to clear and attachment field (unlink the attachment). Please refer to the `AttachmentProperty.clear()` method.

@@ -113,8 +113,7 @@ class Client(object):
         >>> client = Client().from_env()
 
         """
-        if env_filename and os.path.exists(env_filename):
-            env.read_envfile(env_filename)
+        env.read_envfile(env_filename)
         client = cls(url=env('KECHAIN_URL'))
 
         if env('KECHAIN_TOKEN', None):
