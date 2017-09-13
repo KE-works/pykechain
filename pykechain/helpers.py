@@ -1,4 +1,3 @@
-import os
 from envparse import env
 
 from pykechain.client import Client
@@ -64,13 +63,12 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
         client = Client.from_env(env_filename=env_filename)
         scope_id = env('KECHAIN_SCOPE_ID', default=None)
         scope = env('KECHAIN_SCOPE', default=None)
-    elif (url and (username and password) or (token or os.getenv('TEST_URL')) and (scope or scope_id)):
+    elif (url and ((username and password)) or (token) and (scope or scope_id)):
         client = Client(url=url)
         client.login(username=username, password=password, token=token)
     else:
-        raise ClientError(
-            "Error: We need to have sufficient arguments to connect to KE-chain. "
-            "See documentation of `pykechain.get_project()`")
+        raise ClientError("Error: We need to have sufficient arguments to connect to KE-chain. "
+                          "See documentation of `pykechain.get_project()`")
 
     if scope_id:
         return client.scope(pk=scope_id)
