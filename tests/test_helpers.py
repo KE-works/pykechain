@@ -8,7 +8,7 @@ from tests.utils import TEST_TOKEN, TEST_URL, TEST_SCOPE_NAME
 
 ERROR_MESSAGE_REGEX = "Error: insufficient arguments"
 
-@pytest.mark.skipif(os.getenv('TRAVIS')=='true', reason="Skipping tests when using Travis, as not Auth can be provided")
+@pytest.mark.skipif(str(os.getenv('TRAVIS', ''))=='true', reason="Skipping tests when using Travis, as not Auth can be provided")
 class TestGetProjectHelperNotForTravis(TestBetamax):
     def test_get_project_not_for_travis(self):
         project = get_project(TEST_URL, token=TEST_TOKEN, scope=TEST_SCOPE_NAME)
