@@ -1,8 +1,10 @@
+from unittest import TestCase
+
 from pykechain import Client
 from pykechain.models.base import Base
 
 
-class TestBase(object):
+class TestBase(TestCase):
 
     json = {
         'id': '123',
@@ -12,16 +14,17 @@ class TestBase(object):
     def test_id(self):
         obj = Base(self.json, None)
 
-        assert obj.id == '123'
+        self.assertEqual(obj.id , '123')
 
     def test_name(self):
         obj = Base(self.json, None)
 
-        assert obj.name == 'test'
+        self.assertEqual( obj.name ,'test')
 
     def test_given_client(self):
         client = Client()
 
         obj = Base(self.json, client)
 
-        assert obj._client is client
+        self.assertEqual(obj._client, client)
+        self.assertIsInstance(obj._client, Client)
