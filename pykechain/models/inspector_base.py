@@ -3,6 +3,7 @@ import json
 from jsonschema import ValidationError
 
 from pykechain.enums import ComponentXType
+from pykechain.exceptions import InspectorComponentError
 
 uuid_pattern = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 uuid_string = {"type": "string", "pattern": uuid_pattern}
@@ -100,22 +101,26 @@ class Customization(InspectorComponent):
 
         :param json: (optional) provide a Customization json, will be validated
         :ivar components: list of components
+        :raises ValueError, InspectorComponentError
         """
         self.components = []
         if json:
-            assert isinstance(json, dict), "json needs to be deserialised as a dictionary first, use `json.loads()`"
-            assert 'components' in json, "Customization need a 'components' key in the json, got {}".format(json)
-            assert isinstance(json.get('components'), (list, tuple)), \
-                "Customization need a list of 'components', got {}".format(type(json.get('components')))
+            if not isinstance(json, dict):
+                raise ValueError("json needs to be deserialised as a dictionary first, use `json.loads()`")
+            if 'components' not in json:
+                raise InspectorComponentError("Customization need a 'components' key in the json, got {}".format(json))
+            if not isinstance(json.get('components'), (list, tuple)):
+                raise InspectorComponentError("Customization need a list of 'components', got {}".
+                                              format(type(json.get('components'))))
             for component_json in json.get('components'):
                 self.components.append(InspectorComponent(json=component_json))
             self.validate()
 
     def add_component(self, component):
         """Add a component to the internal components list."""
-        assert isinstance(component, InspectorComponent), \
-            "Component need to be of instance InspectorComponent or an object based on InspectorComponent, " \
-            "got {}".format(type(component))
+        if not isinstance(component, InspectorComponent):
+            raise InspectorComponentError("Component need to be of instance InspectorComponent or an object based on "
+                                          "InspectorComponent, got {}".format(type(component)))
         self.components.append(component)
 
     def validate(self):

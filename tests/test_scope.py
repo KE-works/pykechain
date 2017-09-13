@@ -5,7 +5,7 @@ from tests.classes import TestBetamax
 class TestScopes(TestBetamax):
 
     def test_retrieve_scopes(self):
-        assert self.client.scopes()
+        self.assertTrue(self.client.scopes())
 
     def test_retrieve_single_unknown(self):
         with self.assertRaises(NotFoundError):

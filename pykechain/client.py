@@ -6,7 +6,7 @@ from requests.compat import urljoin, urlparse  # type: ignore
 
 from pykechain.enums import Category
 from .__about__ import version
-from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError
+from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError, IllegalArgumentError
 from .models import Scope, Activity, Part, PartSet, Property
 
 API_PATH = {
@@ -459,8 +459,10 @@ class Client(object):
         :param name: new part name
         :return: Part (category = instance)
         """
-        assert parent.category == Category.INSTANCE
-        assert model.category == Category.MODEL
+        if parent.category != Category.INSTANCE:
+            raise APIError("The parent should be an instance")
+        if model.category != Category.MODEL:
+            raise APIError("The models should be of category 'MODEL'")
 
         if not name:
             name = model.name
@@ -481,7 +483,8 @@ class Client(object):
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N
         :return: Part (category = model)
         """
-        assert parent.category == Category.MODEL
+        if parent.category != Category.MODEL:
+            raise APIError("The parent should be a model")
 
         data = {
             "name": name,
@@ -502,8 +505,10 @@ class Client(object):
         :param multiplicity: the multiplicity of the new proxy model (default ONE_MANY)
         :return: the new proxy model part
         """
-        assert model.category == Category.MODEL, "The model should be of category MODEL"
-        assert parent.category == Category.MODEL, "The parent should be of category MODEL"
+        if model.category != Category.MODEL:
+            raise IllegalArgumentError("The model should be of category MODEL")
+        if parent.category != Category.MODEL:
+            raise IllegalArgumentError("The parent should be of category MODEL")
 
         data = {
             "name": name,
@@ -525,7 +530,8 @@ class Client(object):
         :param default_value: default value used for part instances
         :return: Property
         """
-        assert model.category == Category.MODEL
+        if model.category != Category.MODEL:
+            raise IllegalArgumentError("The model should be of category MODEL")
 
         data = {
             "name": name,

@@ -37,7 +37,7 @@ class TestClient(TestCase):
         client.login(token=PSEUDO_TOKEN)
 
         self.assertTrue(client.headers['Authorization'], 'Token {}'.format(PSEUDO_TOKEN))
-        assert client.auth is None
+        self.assertIsNone(client.auth)
 
     def test_init_no_ssl(self):
         client = Client(check_certificates=False)

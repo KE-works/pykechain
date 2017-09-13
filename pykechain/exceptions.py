@@ -31,6 +31,12 @@ class ClientError(APIError):
     pass
 
 
+class IllegalArgumentError(ValueError):
+    """Error when provided illegal arguments to a function or method."""
+
+    pass
+
+
 class InspectorComponentError(Exception):
     """Error in the InspectorComponent."""
 
