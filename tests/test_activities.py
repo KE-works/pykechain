@@ -18,10 +18,10 @@ ISOFORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 class TestActivities(TestBetamax):
     def test_retrieve_activities(self):
-        assert self.project.activities()
+        self.assertTrue(self.project.activities())
 
     def test_retrieve_single_activity(self):
-        assert self.project.activity('Specify wheel diameter')
+        self.assertTrue(self.project.activity('Specify wheel diameter'))
 
     def test_retrieve_unknown_activity(self):
         with self.assertRaises(NotFoundError):
@@ -36,14 +36,14 @@ class TestActivities(TestBetamax):
 
         parts = activity.parts()
 
-        assert len(parts) == 2
+        self.assertEqual(len(parts), 2)
 
     def test_create_activity(self):
         project = self.project
 
         subprocess = project.create_activity('Random', activity_class='Subprocess')
 
-        assert subprocess.name == 'Random'
+        self.assertEqual(subprocess.name, 'Random')
 
         task = subprocess.create('Another')
 
@@ -121,7 +121,7 @@ class TestActivities(TestBetamax):
 
         specify_wd_u = self.project.activity('Specify wheel diameter')
 
-        assert specify_wd.id == specify_wd_u.id
+        self.assertEqual(specify_wd.id, specify_wd_u.id)
 
         specify_wd.edit(start_date=old_start, due_date=old_due)
 

@@ -7,7 +7,7 @@ import warnings
 from six import text_type
 
 from pykechain.enums import Category, ActivityType
-from pykechain.exceptions import APIError, NotFoundError
+from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
 from pykechain.models.inspector_base import Customization, InspectorComponent
 
@@ -151,7 +151,8 @@ class Activity(Base):
 
         See :class:`pykechain.Client.create_activity` for available parameters.
         """
-        assert self.activity_type == ActivityType.SUBPROCESS, "One can only create a task under a subprocess."
+        if self.activity_type != ActivityType.SUBPROCESS:
+            raise IllegalArgumentError("One can only create a task under a subprocess.")
         return self._client.create_activity(self.id, *args, **kwargs)
 
     def edit(self, name=None, description=None, start_date=None, due_date=None, assignees=None, status=None):
