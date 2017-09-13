@@ -23,8 +23,6 @@ class TestBetamax(TestCase):
     def setUp(self):
         self.client = Client(url=TEST_URL)
 
-        print('---> ENVIRONMENT VARIABLES: {}'.format(os.environ))
-
         if TEST_TOKEN:
             self.client.login(token=TEST_TOKEN)
 
