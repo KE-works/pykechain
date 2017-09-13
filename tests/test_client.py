@@ -26,7 +26,7 @@ class TestClient(TestCase):
     def test_init_basic_auth(self):
         client = Client()
 
-        client.login('admin', 'pass')
+        client.login('someuser', 'withpass')
 
         assert 'Authorization' not in client.headers
         assert client.auth
