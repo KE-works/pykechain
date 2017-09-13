@@ -9,12 +9,12 @@ class TestParts(TestBetamax):
         parts = self.project.parts()
 
         # Check if there are parts
-        assert len(parts)
+        self.assertTrue(len(parts))
 
     def test_retrieve_single_part(self):
         part = self.project.part('Front Wheel')
 
-        assert part
+        self.assertTrue(part)
 
     def test_retrieve_single_unknown(self):
         with self.assertRaises(NotFoundError):
@@ -28,7 +28,7 @@ class TestParts(TestBetamax):
         project = self.client.scope('Bike Project')
         wheel = project.model('Wheel')
 
-        assert project.parts(model=wheel)
+        self.assertTrue(project.parts(model=wheel))
 
     def test_retrieve_model_unknown(self):
         with self.assertRaises(NotFoundError):
@@ -40,7 +40,7 @@ class TestParts(TestBetamax):
 
     def test_part_set_iterator(self):
         for part in self.project.parts():
-            assert part.name
+            self.assertTrue(part.name)
 
     def test_part_set_get_item_invalid(self):
         part_set = self.project.parts()
@@ -66,87 +66,87 @@ class TestParts(TestBetamax):
     def test_part_html_table(self):
         part = self.project.part('Front Wheel')
 
-        assert "</table>" in part._repr_html_()
+        self.assertIn("</table>", part._repr_html_())
 
     def test_part_set_html_table(self):
         parts = self.project.parts()
 
-        assert "</table>" in parts._repr_html_()
+        self.assertIn("</table>", parts._repr_html_())
 
     def test_part_set_html_categories(self):
         parts = self.project.parts(category=None)
 
-        assert "<th>Category</th>" in parts._repr_html_()
+        self.assertIn("<th>Category</th>", parts._repr_html_())
 
     # version 1.1.2 and later
     def test_part_set_with_limit(self):
         limit = 5
         parts = self.project.parts(limit=limit)
 
-        assert len(parts) == limit
+        self.assertEqual(len(parts), limit)
 
     def test_part_set_with_batch(self):
         batch = 5
         parts = self.project.parts(batch=batch)
-        assert len(parts) >= batch
+        self.assertTrue(len(parts) >= batch)
 
     # version 1.1.3 and later
     def test_retrieve_parent_of_part(self):
         frame = self.project.part('Frame')  # type:Part
-        assert hasattr(frame, 'parent_id')
+        self.assertTrue(hasattr(frame, 'parent_id'))
         parent_of_frame = frame.parent()
-        assert type(parent_of_frame) is type(frame)
+        self.assertIsInstance(parent_of_frame, type(frame))
 
     def test_retrieve_children_of_part(self):
         bike = self.project.part('Bike')  # type:Part
-        assert type(bike) is Part
+        self.assertIsInstance(bike, Part)
         children_of_bike = bike.children()
-        assert type(children_of_bike) is PartSet
-        assert len(children_of_bike) >= 1  # eg. Wheels ...
+        self.assertIsInstance(children_of_bike, PartSet)
+        self.assertTrue(len(children_of_bike) >= 1)  # eg. Wheels ...
 
     def test_retrieve_siblings_of_part(self):
         """Test if the siblings of a part is the same as the children of the parent of the part"""
         frame = self.project.part('Frame')  # type:Part
         siblings_of_frame = frame.siblings()
-        assert type(siblings_of_frame) is PartSet
-        assert len(siblings_of_frame) >= 1  # eg. Wheels ...
+        self.assertIsInstance(siblings_of_frame, PartSet)
+        self.assertTrue(len(siblings_of_frame) >= 1)  # eg. Wheels ...
 
         # double check that the children of the parent of frame are the same as the siblings of frame
         children_of_parent_of_frame = frame.parent().children()  # type: PartSet
-        assert len(children_of_parent_of_frame) == len(siblings_of_frame)
+        self.assertEqual(len(children_of_parent_of_frame), len(siblings_of_frame))
         children_of_parent_of_frame_ids = [p.id for p in children_of_parent_of_frame]
         for sibling in siblings_of_frame:
-            assert sibling.id in children_of_parent_of_frame_ids, \
-                'sibling {} is appearing in the siblings method and not in the children of ' \
-                'parent method'.format(sibling)
+            self.assertIn(sibling.id, children_of_parent_of_frame_ids,
+                          'sibling {} is appearing in the siblings method and not in the children of ' \
+                          'parent method'.format(sibling))
 
     def test_retrieve_part_without_parent_id(self):
         # only the root does not have a parent_id
         ROOT_NODE_ID = 'f521333e-a1ed-4e65-b166-999f91a38cf1'
         root_node = self.project.part(pk=ROOT_NODE_ID)  # type: Part
-        assert hasattr(root_node, 'parent_id')
-        assert root_node.parent_id == None
+        self.assertTrue(hasattr(root_node, 'parent_id'))
+        self.assertIsNone(root_node.parent_id)
 
     def test_retrieve_parent_of_part_without_parent_id(self):
         # only the root does not have a parent_id
         ROOT_NODE_ID = 'f521333e-a1ed-4e65-b166-999f91a38cf1'
         root_node = self.project.part(pk=ROOT_NODE_ID)  # type: Part
         parent_of_rootnode = root_node.parent()
-        assert parent_of_rootnode is None
+        self.assertIsNone(parent_of_rootnode)
 
     def test_retrieve_siblings_of_part_without_parent_id(self):
         ROOT_NODE_ID = 'f521333e-a1ed-4e65-b166-999f91a38cf1'
         root_node = self.project.part(pk=ROOT_NODE_ID)  # type: Part
         siblings_of_root_node = root_node.siblings()
-        assert type(siblings_of_root_node) is PartSet
-        assert len(siblings_of_root_node) is 0
+        self.assertIsInstance(siblings_of_root_node, PartSet)
+        self.assertEqual(len(siblings_of_root_node), 0)
 
     # new in 1.3+
     def test_kwargs_on_part_retrieval(self):
         # test that the additional kwargs are added to the query filter on the api
-        bikes = self.project.parts('Bike', descendants=True)  # type:Part
-        assert len(bikes) > 1
-        assert self.client.last_url.find('descendants')
+        bikes = self.project.parts('Bike', descendants=True)  # type:PartSet
+        self.assertTrue(len(bikes) > 1)
+        self.assertTrue(self.client.last_url.find('descendants'))
 
     # new in 1.5+
     def test_edit_part_instance_name(self):
@@ -154,10 +154,10 @@ class TestParts(TestBetamax):
         front_fork_oldname = str(front_fork.name)
         front_fork.edit(name='Front Fork - updated')
 
-        front_fork_u = self.project.part('Front Fork - updated')
-        assert front_fork.id == front_fork_u.id
-        assert front_fork.name == front_fork_u.name
-        assert front_fork.name == 'Front Fork - updated'
+        front_fork_updated = self.project.part('Front Fork - updated')
+        self.assertEqual(front_fork.id, front_fork_updated.id)
+        self.assertEqual(front_fork.name, front_fork_updated.name)
+        self.assertEqual(front_fork.name, 'Front Fork - updated')
 
         # teardown
         front_fork.edit(name=front_fork_oldname)
@@ -167,8 +167,8 @@ class TestParts(TestBetamax):
         front_fork_olddescription = str(front_fork._json_data.get('description'))
         front_fork.edit(description='A normal Front Fork')
 
-        front_fork_u = self.project.part('Front Fork')
-        assert front_fork.id == front_fork_u.id
+        front_fork_updated = self.project.part('Front Fork')
+        self.assertEqual(front_fork.id, front_fork_updated.id)
 
         # teardown
         front_fork.edit(description=front_fork_olddescription)
@@ -178,9 +178,9 @@ class TestParts(TestBetamax):
         front_fork_oldname = str(front_fork.name)
         front_fork.edit(name='Front Fork - updated')
 
-        front_fork_u = self.project.model('Front Fork - updated')
-        assert front_fork.id == front_fork_u.id
-        assert front_fork.name == front_fork_u.name
+        front_fork_updated = self.project.model('Front Fork - updated')
+        self.assertEqual(front_fork.id, front_fork_updated.id)
+        self.assertEqual(front_fork.name, front_fork_updated.name)
 
         # teardown
         front_fork.edit(name=front_fork_oldname)
@@ -231,7 +231,7 @@ class TestParts(TestBetamax):
         with self.assertRaises(NotFoundError):
             front_fork_model.model()
 
-        assert front_fork_model.id == front_fork_retrieved_model.id
+        self.assertEqual(front_fork_model.id, front_fork_retrieved_model.id)
 
     def test_retrieve_catalog_model_of_proxy(self):
         catalog_model = self.project.model('Model')
@@ -243,7 +243,7 @@ class TestParts(TestBetamax):
         with self.assertRaises(NotFoundError):
             catalog_model.proxy_model()
 
-        assert catalog_model.id == retrieved_catalog_model.id
+        self.assertEqual(catalog_model.id, retrieved_catalog_model.id)
 
     # new in 1.8+
     def test_retrieve_part_multiplicity(self):
@@ -280,9 +280,9 @@ class TestPartUpdate(TestBetamax):
         refreshed_front_fork = self.project.part(pk=front_fork.id)
 
         for prop in refreshed_front_fork.properties:
-            assert prop.name in update_dict, "property with {} should be in the update dict".format(prop.name)
-            assert update_dict[prop.name] == prop.value, "property {} with value {} did not match contents " \
-                                                         "with KEC".format(prop.name, prop.value)
+            self.assertIn(prop.name , update_dict, "property with {} should be in the update dict".format(prop.name))
+            self.assertEqual(update_dict[prop.name] ,prop.value, "property {} with value {} did not match contents " \
+                                                         "with KEC".format(prop.name, prop.value))
 
         # tearDown
         for prop_name, prop_value in saved_front_fork_properties.items():
@@ -304,9 +304,9 @@ class TestPartUpdate(TestBetamax):
         refreshed_front_fork = self.project.part(pk=front_fork.id)
         self.assertEqual(refreshed_front_fork.name, 'Better front fork')
         for prop in refreshed_front_fork.properties:
-            assert prop.name in update_dict, "property with {} should be in the update dict".format(prop.name)
-            assert update_dict[prop.name] == prop.value, "property {} with value {} did not match contents " \
-                                                         "with KEC".format(prop.name, prop.value)
+            self.assertIn(prop.name , update_dict, "property with {} should be in the update dict".format(prop.name))
+            self.assertEqual(update_dict[prop.name] ,prop.value, "property {} with value {} did not match contents " \
+                                                         "with KEC".format(prop.name, prop.value))
 
         # tearDown
         for prop_name, prop_value in saved_front_fork_properties.items():
@@ -484,5 +484,5 @@ class TestPartCreateWithProperties(TestBetamax):
         # Instantiate a list that will be used to reorder the properties.
         desired_order_list = ['Material', 'Height (mm)', 'Color']
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(APIError):
             front_fork_instance.order_properties(property_list=desired_order_list)
