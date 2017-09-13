@@ -1,12 +1,11 @@
 import json
-
-import requests
 from typing import Any, AnyStr  # flake8: noqa
 
+import requests
 from six import text_type
 
 from pykechain.enums import Multiplicity, Category
-from pykechain.exceptions import NotFoundError, APIError, MultipleFoundError
+from pykechain.exceptions import NotFoundError, APIError, MultipleFoundError, IllegalArgumentError
 from pykechain.models.base import Base
 from pykechain.models.property import Property
 from pykechain.utils import find
@@ -218,8 +217,8 @@ class Part(Base):
         >>> proxy_basis_for_the_material_model = proxied_material_of_the_bolt_model.proxy_model()
 
         """
-        assert self.category == Category.MODEL, \
-            "Part {} is not a model, therefore it cannot have a proxy model".format(self)
+        if self.category != Category.MODEL:
+            raise IllegalArgumentError("Part {} is not a model, therefore it cannot have a proxy model".format(self))
         if 'proxy' in self._json_data and self._json_data.get('proxy'):
             catalog_model_id = self._json_data['proxy'].get('id')
             return self._client.model(pk=catalog_model_id)
@@ -243,7 +242,8 @@ class Part(Base):
         >>> wheel_model = project.model('Wheel')
         >>> bike.add(wheel_model)
         """
-        assert self.category == Category.INSTANCE
+        if self.category != Category.INSTANCE:
+            raise APIError("Part should be of category INSTANCE")
 
         return self._client.create_part(self, model, **kwargs)
 
@@ -262,7 +262,8 @@ class Part(Base):
         >>> bike = project.part('Bike')
         >>> wheel_model.add_to(bike)
         """
-        assert self.category == Category.MODEL
+        if self.category != Category.MODEL:
+            raise APIError("Part should be of category MODEL")
 
         return self._client.create_part(parent, self, **kwargs)
 
@@ -274,7 +275,8 @@ class Part(Base):
 
         :return: Part
         """
-        assert self.category == Category.MODEL
+        if self.category != Category.MODEL:
+            raise APIError("Part should be of category MODEL")
 
         return self._client.create_model(self, *args, **kwargs)
 
@@ -311,7 +313,8 @@ class Part(Base):
 
         :return: Property
         """
-        assert self.category == Category.MODEL
+        if self.category != Category.MODEL:
+            raise APIError("Part should be of category MODEL")
 
         return self._client.create_property(self, *args, **kwargs)
 
@@ -357,10 +360,12 @@ class Part(Base):
         """
         update_dict = {'id': self.id}
         if name:
-            assert isinstance(name, str), "name should be provided as a string"
+            if not isinstance(name, str):
+                raise IllegalArgumentError("name should be provided as a string")
             update_dict.update({'name': name})
         if description:
-            assert isinstance(description, str), "description should be provided as a string"
+            if not isinstance(description, str):
+                raise IllegalArgumentError("description should be provided as a string")
             update_dict.update({'description': description})
         if kwargs:
             update_dict.update(**kwargs)
@@ -425,7 +430,8 @@ class Part(Base):
 
         if bulk and len(update_dict.keys()) > 1:
             if name:
-                assert isinstance(name, str), "Name of the part should be provided as a string"
+                if not isinstance(name, str):
+                    raise IllegalArgumentError("Name of the part should be provided as a string")
             r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
                                       data=dict(name=name, properties=json.dumps(request_body), **kwargs),
                                       params=dict(select_action=action))
@@ -455,7 +461,8 @@ class Part(Base):
 
         """
         # TODO: add test coverage for this method
-        assert self.category == Category.INSTANCE
+        if self.category != Category.INSTANCE:
+            raise APIError("Part should be of category INSTANCE")
         name = name or model.name
         action = 'new_instance_with_properties'
 
@@ -516,7 +523,8 @@ class Part(Base):
         >>> front_fork.order_properties([material, height, color])
 
         """
-        assert self.category == Category.MODEL
+        if self.category != Category.MODEL:
+            raise APIError("Part should be of category MODEL")
         if not isinstance(property_list, list):
             raise TypeError('Expected a list of strings or Property() objects, got a {} object'.
                             format(type(property_list)))

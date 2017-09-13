@@ -9,8 +9,8 @@ class TestSelectListProperty(TestBetamax):
 
     def test_get_options_list(self):
         sellist_model = self.project.model('Model').property('a_select_list_property')
-        assert hasattr(sellist_model, 'options')
-        assert isinstance(sellist_model.options, list)
+        self.assertTrue(hasattr(sellist_model, 'options'))
+        self.assertIsInstance(sellist_model.options, list)
         for item in sellist_model.options:
             self.assertTrue(type(item), str)
 
@@ -33,22 +33,22 @@ class TestSelectListProperty(TestBetamax):
     def test_illegal_options_are_not_set(self):
         """Test for secveral illegal lists to be set"""
         sellist_model = self.project.model('Model').property('a_select_list_property')
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(APIError):
             # not a list
             sellist_model.options = 1
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(APIError):
             sellist_model.options = None
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(APIError):
             # set
             sellist_model.options = set((1, 2))
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(APIError):
             # dict
             sellist_model.options = {}
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(APIError):
             # tuple
             sellist_model.options = (1,)
 
@@ -57,10 +57,10 @@ class TestSelectListProperty(TestBetamax):
         sellist_model = self.project.model('Model')
         sellist_part_instance = self.project.parts(model=sellist_model)
         sellist_part_instance = sellist_part_instance[0]
-        assert sellist_part_instance.category == 'INSTANCE'
+        self.assertEqual(sellist_part_instance.category ,'INSTANCE')
 
         sellist_property = sellist_part_instance.property('a_select_list_property')
-        assert hasattr(sellist_property, 'options')
+        self.assertTrue(hasattr(sellist_property, 'options'))
 
         with self.assertRaises(APIError):
             sellist_property.options = [1, 3.14]
