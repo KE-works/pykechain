@@ -1,8 +1,9 @@
 from requests.packages.urllib3.packages.six import text_type
 
 from pykechain.enums import PropertyType
-from pykechain.models.property import Property
+from pykechain.exceptions import APIError
 from pykechain.models.part import Part
+from pykechain.models.property import Property
 
 
 class ReferenceProperty(Property):
@@ -80,8 +81,8 @@ class ReferenceProperty(Property):
         >>> reference_part_choices = property.choices()
 
         """
-        assert self._json_data['property_type'] == PropertyType.REFERENCE_VALUE, \
-            "Property {} must be a reference type property".format(self.name)
+        if self._json_data['property_type'] != PropertyType.REFERENCE_VALUE:
+            raise APIError("Property {} must be a reference type property".format(self.name))
 
         # TODO: there is maybe another way to retrieve the parts in less calls.
         # from the reference property (instance) we need to get the value of the reference property in the model
