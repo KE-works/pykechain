@@ -7,6 +7,10 @@ from tests.classes import TestBetamax
 from tests.utils import TEST_TOKEN, TEST_URL, TEST_SCOPE_NAME
 
 ERROR_MESSAGE_REGEX = "Error: insufficient arguments"
+PSEUDO_TOKEN = 'aabbccddeeffgg0011223344556677889900'
+PSEUDO_PASSWORD = 'abc123!@#'
+PSEUDO_SCOPE_ID = 'eeb0937b-da50-4eb2-8d74-f36259cca96e'
+
 
 @pytest.mark.skipif("os.getenv('TRAVIS', False)", reason="Skipping tests when using Travis, as not Auth can be provided")
 class TestGetProjectHelperNotForTravis(TestBetamax):
@@ -49,17 +53,17 @@ class TestGetProjectHelper(TestBetamax):
 
     def test_project_raises_error__auth_and_no_scope(self):
         with self.assertRaisesRegexp(ClientError, ERROR_MESSAGE_REGEX):
-            get_project(url=TEST_URL, username='auser', password='somepass')
+            get_project(url=TEST_URL, username='auser', password=PSEUDO_PASSWORD)
 
     def test_project_raises_error__scope_id_and_no_pass(self):
         with self.assertRaisesRegexp(ClientError, ERROR_MESSAGE_REGEX):
-            get_project(url=TEST_URL, username='auser', scope_id='234')
+            get_project(url=TEST_URL, username='auser', scope_id=PSEUDO_SCOPE_ID)
 
     def test_project_raises_error__auth_and_no_url(self):
         with self.assertRaisesRegexp(ClientError, ERROR_MESSAGE_REGEX):
-            get_project(username='auser', password='somepass', scope_id='234')
+            get_project(username='auser', password=PSEUDO_PASSWORD, scope_id=PSEUDO_SCOPE_ID)
 
     def test_project_raises_error__token_and_no_url(self):
         with self.assertRaisesRegexp(ClientError, ERROR_MESSAGE_REGEX):
-            get_project(token='123', scope_id='234')
+            get_project(token=PSEUDO_TOKEN, scope_id=PSEUDO_SCOPE_ID)
 
