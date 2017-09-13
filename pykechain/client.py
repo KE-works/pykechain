@@ -1,20 +1,13 @@
-import sys
 from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
 
-import os
 import requests
 from envparse import env
-from requests.compat import urljoin  # type: ignore
+from requests.compat import urljoin, urlparse  # type: ignore
 
 from pykechain.enums import Category
 from .__about__ import version
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError
 from .models import Scope, Activity, Part, PartSet, Property
-
-if sys.version_info.major < 3:
-    from urlparse import urlparse
-else:
-    from urllib.parse import urlparse
 
 API_PATH = {
     'scopes': 'api/scopes.json',
@@ -30,7 +23,6 @@ API_PATH = {
     'widgets_config': 'api/widget_config.json',
     'widget_config': 'api/widget_config/{widget_config_id}.json',
     'users': 'api/users.json'
-
 }
 
 
