@@ -1,5 +1,4 @@
 from tests.classes import TestBetamax
-from pykechain.exceptions import APIError
 
 
 class TestReferenceProperty(TestBetamax):
