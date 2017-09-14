@@ -1,6 +1,10 @@
 KE-chain Python SDK
 ===================
 
+.. image:: https://api.codacy.com/project/badge/Grade/d963ed6986b249699ce975cac1bc67f6
+   :alt: Codacy Badge
+   :target: https://www.codacy.com/app/KE-works/pykechain?utm_source=github.com&utm_medium=referral&utm_content=KE-works/pykechain&utm_campaign=badger
+
 .. image:: https://img.shields.io/pypi/v/pykechain.svg?style=flat-square
     :target: https://pypi.python.org/pypi/pykechain
     :alt: Version
