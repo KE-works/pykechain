@@ -1,4 +1,5 @@
 from tests.classes import TestBetamax
+from pykechain.exceptions import APIError
 
 
 class TestReferenceProperty(TestBetamax):
@@ -43,3 +44,4 @@ class TestReferenceProperty(TestBetamax):
         self.assertEqual(len(reference_property_parts), len(instances_of_wheel_model))
         self.assertEqual(instances_of_wheel_model._parts[0].id, reference_property_parts[0].id)
         self.assertEqual(instances_of_wheel_model._parts[1].id, reference_property_parts[1].id)
+

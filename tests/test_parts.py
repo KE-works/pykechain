@@ -1,5 +1,5 @@
 from pykechain.enums import Multiplicity, Category
-from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
+from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import Part, PartSet
 from tests.classes import TestBetamax
 
@@ -49,7 +49,7 @@ class TestParts(TestBetamax):
             part_set['testing']
 
     def test_part_add_delete_part(self):
-        project = self.client.scope('Bike Project')
+        project = self.client.scope('Bike Project (pykechain testing)')
 
         bike = project.part('Bike')
         wheel_model = project.model('Wheel')
@@ -62,6 +62,33 @@ class TestParts(TestBetamax):
 
         with self.assertRaises(APIError):
             bike.delete()
+
+    def test_add_to_wrong_categories(self):
+        # This test has the purpose of testing of whether APIErrors are raised when illegal operations are
+        # performed (e.g. operation that should be performed on part instances but instead are being performed
+        # on part models and vice versa)
+        project = self.client.scope('Bike Project (pykechain testing)')
+
+        bike_model = project.model('Bike')
+        bike_instance = project.part('Bike')
+        wheel_model = project.model('Wheel')
+
+        with self.assertRaises(APIError):
+            bike_model.add(wheel_model)
+
+        front_fork_instance = project.part('Front Fork')
+
+        with self.assertRaises(APIError):
+            front_fork_instance.add_to(bike_instance)
+
+        with self.assertRaises(APIError):
+            bike_instance.add_model('Engine')
+
+        with self.assertRaises(APIError):
+            bike_instance.add_property('Electrical Power')
+
+        with self.assertRaises(APIError):
+            bike_model.add_with_properties(wheel_model)
 
     def test_part_html_table(self):
         part = self.project.part('Front Wheel')
@@ -159,6 +186,9 @@ class TestParts(TestBetamax):
         self.assertEqual(front_fork.name, front_fork_updated.name)
         self.assertEqual(front_fork.name, 'Front Fork - updated')
 
+        with self.assertRaises(IllegalArgumentError):
+            front_fork.edit(name=True)
+
         # teardown
         front_fork.edit(name=front_fork_oldname)
 
@@ -169,6 +199,9 @@ class TestParts(TestBetamax):
 
         front_fork_updated = self.project.part('Front Fork')
         self.assertEqual(front_fork.id, front_fork_updated.id)
+
+        with self.assertRaises(IllegalArgumentError):
+            front_fork.edit(description=42)
 
         # teardown
         front_fork.edit(description=front_fork_olddescription)
@@ -245,6 +278,12 @@ class TestParts(TestBetamax):
 
         self.assertEqual(catalog_model.id, retrieved_catalog_model.id)
 
+    def test_retrieve_proxy_of_instance(self):
+        instance = self.project.part('Rear Wheel')
+
+        with self.assertRaises(IllegalArgumentError):
+            instance.proxy_model()
+
     # new in 1.8+
     def test_retrieve_part_multiplicity(self):
         bike_model = self.project.model('Bike')
@@ -307,6 +346,9 @@ class TestPartUpdate(TestBetamax):
             self.assertIn(prop.name , update_dict, "property with {} should be in the update dict".format(prop.name))
             self.assertEqual(update_dict[prop.name] ,prop.value, "property {} with value {} did not match contents " \
                                                          "with KEC".format(prop.name, prop.value))
+
+        with self.assertRaises(IllegalArgumentError):
+            front_fork.update(name=12, update_dict=update_dict)
 
         # tearDown
         for prop_name, prop_value in saved_front_fork_properties.items():
