@@ -7,7 +7,7 @@ import requests
 import warnings
 
 from pykechain.enums import Category, ActivityType, ActivityStatus
-from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
+from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import Part
 from pykechain.models.inspector_base import Customization
 from pykechain.models.inspectors import SuperGrid, PropertyGrid
@@ -51,6 +51,12 @@ class TestActivities(TestBetamax):
 
         with self.assertRaises(APIError):
             subprocess.delete()
+
+    def test_create_activity_under_task(self):
+        task = self.project.activity('Customized task')
+
+        with self.assertRaises(IllegalArgumentError):
+            task.create('This cannot happen')
 
     def test_configure_activity(self):
         project = self.project
@@ -282,6 +288,10 @@ class TestActivities(TestBetamax):
         for model in models:
             self.assertIsInstance(model, Part)
             self.assertTrue(model.category == Category.MODEL)
+            if model.name == 'Bike':
+                self.assertTrue(not model.property('Gears').output)
+            elif model.name == 'Front Fork':
+                self.assertTrue(model.property('Material').output)
 
     def test_retrieve_associated_parts_to_activity(self):
         task = self.project.activity('Specify wheel diameter')

@@ -81,10 +81,6 @@ class ReferenceProperty(Property):
         >>> reference_part_choices = property.choices()
 
         """
-        if self._json_data['property_type'] != PropertyType.REFERENCE_VALUE:
-            raise APIError("Property {} must be a reference type property".format(self.name))
-
-        # TODO: there is maybe another way to retrieve the parts in less calls.
         # from the reference property (instance) we need to get the value of the reference property in the model
         # in the reference property of the model the value is set to the ID of the model from which we can choose parts
         model_parent_part = self.part.model()  # makes single part call
