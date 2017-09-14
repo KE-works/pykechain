@@ -14,6 +14,7 @@ pykechain changelog
  * Added additional checks for the `Client` to check if the url provided is correct (#185)
  * Improved the state of the project on codacy, a nice code quality monitor, from B to A grade. Removed over 100 insecure code elements, according to codacy. See: https://www.codacy.com/app/KE-works/pykechain/dashboard (#187)
  * Updated dependent versions of pyopenssl to 1.1.2 (#188), pytest to 3.2.2 (#183) and tox to 2.8.2 (#184)
+ * Updated coverage of the files to internal standards. The critical models are now 100% tested such as the `Client`, `Activity` and `Part`. (#190) see: https://coveralls.io/github/KE-works/pykechain.
 
 1.11.1 (4SEP17)
 ---------------
