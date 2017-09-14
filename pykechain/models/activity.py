@@ -257,7 +257,7 @@ class Activity(Base):
         if start_date:
             self._json_data['start_date'] = str(start_date)
 
-    def customize(self, config):
+    def customize(self, config):  # pragma: no cover
         """Customize an activity.
 
         .. warning::

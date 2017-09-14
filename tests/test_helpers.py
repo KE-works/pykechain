@@ -4,7 +4,7 @@ import pytest
 from pykechain import get_project
 from pykechain.exceptions import ClientError
 from tests.classes import TestBetamax
-from tests.utils import TEST_TOKEN, TEST_URL, TEST_SCOPE_NAME
+from tests.utils import TEST_TOKEN, TEST_URL, TEST_SCOPE_NAME, TEST_SCOPE_ID
 
 ERROR_MESSAGE_REGEX = "Error: insufficient arguments"
 PSEUDO_TOKEN = 'aabbccddeeffgg0011223344556677889900'
@@ -16,6 +16,10 @@ PSEUDO_SCOPE_ID = 'eeb0937b-da50-4eb2-8d74-f36259cca96e'
 class TestGetProjectHelperNotForTravis(TestBetamax):
     def test_get_project__not_for_travis(self):
         project = get_project(TEST_URL, token=TEST_TOKEN, scope=TEST_SCOPE_NAME)
+        self.assertEqual(project.name, TEST_SCOPE_NAME)
+
+    def test_test_get_project_with_scope_id__not_for_travis(self):
+        project = get_project(TEST_URL, token=TEST_TOKEN, scope_id=TEST_SCOPE_ID)
         self.assertEqual(project.name, TEST_SCOPE_NAME)
 
     def test_get_project_from_env__not_for_travis(self):
@@ -66,4 +70,5 @@ class TestGetProjectHelper(TestBetamax):
     def test_project_raises_error__token_and_no_url(self):
         with self.assertRaisesRegexp(ClientError, ERROR_MESSAGE_REGEX):
             get_project(token=PSEUDO_TOKEN, scope_id=PSEUDO_SCOPE_ID)
+
 
