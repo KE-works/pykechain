@@ -202,7 +202,7 @@ class Part(Base):
         Retrieve the proxy model of this proxied `Part` as a `Part`.
 
         Allows you to retrieve the model of a proxy. But trying to get the catalog model of a part that
-        has is no proxy, will raise a NotFoundError. Only models can have a proxy.
+        has no proxy, will raise an NotFoundError. Only models can have a proxy.
 
         :return: pykechain.models.Part
         :raises: NotFoundError
@@ -367,7 +367,9 @@ class Part(Base):
             if not isinstance(description, str):
                 raise IllegalArgumentError("description should be provided as a string")
             update_dict.update({'description': description})
-        if kwargs:
+
+        # TODO: What else can we edit? Don't know how to test for it, so for now I have decide to skip it in the tests
+        if kwargs:  # pragma: no cover
             update_dict.update(**kwargs)
         r = self._client._request('PUT', self._client._build_url('part', part_id=self.id), json=update_dict)
 

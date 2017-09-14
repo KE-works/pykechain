@@ -6,8 +6,9 @@ import pytz
 import requests
 import warnings
 
+from unittest import skip
 from pykechain.enums import Category, ActivityType, ActivityStatus
-from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError
+from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import Part
 from pykechain.models.inspector_base import Customization
 from pykechain.models.inspectors import SuperGrid, PropertyGrid
@@ -51,6 +52,12 @@ class TestActivities(TestBetamax):
 
         with self.assertRaises(APIError):
             subprocess.delete()
+
+    def test_create_activity_under_task(self):
+        task = self.project.activity('Customized task')
+
+        with self.assertRaises(IllegalArgumentError):
+            task.create('This cannot happen')
 
     def test_configure_activity(self):
         project = self.project
@@ -282,6 +289,10 @@ class TestActivities(TestBetamax):
         for model in models:
             self.assertIsInstance(model, Part)
             self.assertTrue(model.category == Category.MODEL)
+            if model.name == 'Bike':
+                self.assertTrue(not model.property('Gears').output)
+            elif model.name == 'Front Fork':
+                self.assertTrue(model.property('Material').output)
 
     def test_retrieve_associated_parts_to_activity(self):
         task = self.project.activity('Specify wheel diameter')
@@ -296,6 +307,7 @@ class TestActivities(TestBetamax):
             self.assertTrue(part.category == Category.INSTANCE)
 
     # updated and new in 1.9
+    @skip('KE-chain deprecated the inspector components')
     def test_customize_activity_with_widget_config(self):
         # Retrieve the activity to be customized
         activity_to_costumize = self.project.activity('Customized task')
@@ -318,6 +330,7 @@ class TestActivities(TestBetamax):
         # Change it back to an empty config
         activity_to_costumize.customize(config={})
 
+    @skip('KE-chain deprecated the inspector components')
     def test_customize_new_activity(self):
         # Create the activity to be freshly customized
         new_task = self.project.create_activity('New task')
@@ -339,6 +352,7 @@ class TestActivities(TestBetamax):
         # Delete it
         new_task.delete()
 
+    @skip('KE-chain deprecated the inspector components')
     def test_customize_activity_with_inspectorcomponent(self):
         # Create the activity to be freshly customized
         new_task = self.project.create_activity('New task (test_customize_activity_with_insp_component)')
