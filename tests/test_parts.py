@@ -25,7 +25,7 @@ class TestParts(TestBetamax):
             self.project.part()
 
     def test_retrieve_models(self):
-        project = self.client.scope('Bike Project')
+        project = self.client.scope('Bike Project (pykechain testing)')
         wheel = project.model('Wheel')
 
         self.assertTrue(project.parts(model=wheel))
@@ -172,7 +172,7 @@ class TestParts(TestBetamax):
     def test_kwargs_on_part_retrieval(self):
         # test that the additional kwargs are added to the query filter on the api
         bikes = self.project.parts('Bike', descendants=True)  # type:PartSet
-        self.assertTrue(len(bikes) > 1)
+        self.assertTrue(len(bikes) == 1)
         self.assertTrue(self.client.last_url.find('descendants'))
 
     # new in 1.5+

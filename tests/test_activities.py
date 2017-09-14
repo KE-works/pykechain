@@ -6,6 +6,7 @@ import pytz
 import requests
 import warnings
 
+from unittest import skip
 from pykechain.enums import Category, ActivityType, ActivityStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import Part
@@ -306,6 +307,7 @@ class TestActivities(TestBetamax):
             self.assertTrue(part.category == Category.INSTANCE)
 
     # updated and new in 1.9
+    @skip('KE-chain deprecated the inspector components')
     def test_customize_activity_with_widget_config(self):
         # Retrieve the activity to be customized
         activity_to_costumize = self.project.activity('Customized task')
@@ -328,6 +330,7 @@ class TestActivities(TestBetamax):
         # Change it back to an empty config
         activity_to_costumize.customize(config={})
 
+    @skip('KE-chain deprecated the inspector components')
     def test_customize_new_activity(self):
         # Create the activity to be freshly customized
         new_task = self.project.create_activity('New task')
@@ -349,6 +352,7 @@ class TestActivities(TestBetamax):
         # Delete it
         new_task.delete()
 
+    @skip('KE-chain deprecated the inspector components')
     def test_customize_activity_with_inspectorcomponent(self):
         # Create the activity to be freshly customized
         new_task = self.project.create_activity('New task (test_customize_activity_with_insp_component)')

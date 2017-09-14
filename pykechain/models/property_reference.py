@@ -1,7 +1,5 @@
-from requests.packages.urllib3.packages.six import text_type
+from six import text_type
 
-from pykechain.enums import PropertyType
-from pykechain.exceptions import APIError
 from pykechain.models.part import Part
 from pykechain.models.property import Property
 
