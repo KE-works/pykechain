@@ -3,8 +3,8 @@ Change Log
 
 pykechain changelog
 
-1.12 (UNRELEASED)
------------------
+1.12 (14SEP17)
+--------------
  * Added a new helper `get_project()` to bootstrap a pykechain client and return a project (aka Scope) immediately. You can retrieve a project using direct arguments `url`, `token` (or `username` and `password`), and `scope_id` (or `scope` name). Alternatively, you can provide an `.env` file or provide the arguments from the environment as the environment variables `KECHAIN_URL`, `KECHAIN_TOKEN` (or `KECHAIN_USERNAME` and `KECHAIN_PASSWORD`), and `KECHAIN_SCOPE_ID` (or `KECHAIN_SCOPE`) (#185). This is ideal for `pykechain` scripts in the KE-chain SIM, as we provide support for this to make your scripting experience in KE-chain buttersmooth. An example:
 
     >>> from pykechain import get_project
@@ -12,6 +12,8 @@ pykechain changelog
     >>> print(project.name)
 
  * Added additional checks for the `Client` to check if the url provided is correct (#185)
+ * Improved the state of the project on codacy, a nice code quality monitor, from B to A grade. Removed over 100 insecure code elements, according to codacy. See: https://www.codacy.com/app/KE-works/pykechain/dashboard (#187)
+ * Updated dependent versions of pyopenssl to 1.1.2 (#188), pytest to 3.2.2 (#183) and tox to 2.8.2 (#184)
 
 1.11.1 (4SEP17)
 ---------------

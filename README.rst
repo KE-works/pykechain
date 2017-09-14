@@ -25,6 +25,10 @@ KE-chain Python SDK
     :target: https://pyup.io/repos/github/KE-works/pykechain/
     :alt: Updates
 
+.. image:: https://api.codacy.com/project/badge/Grade/d963ed6986b249699ce975cac1bc67f6
+    :target: https://www.codacy.com/app/KE-works/pykechain
+    :alt: Code Quality from Codacy
+
 
 About pykechain
 ---------------
@@ -57,9 +61,10 @@ Installation
 pykechain is easily installed using pip. pykechain is Python 2.7, 3.5 and 3.6 compatible::
 
     pip install pykechain
-    
+
 Or install the latest and greatest::
 
     pip install https://github.com/KE-works/pykechain/archive/master.zip
     # or the dev branch
     pip install https://github.com/KE-works/pykechain/archive/dev.zip
+
