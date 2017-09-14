@@ -3,8 +3,8 @@ Change Log
 
 pykechain changelog
 
-1.11 (UNRELEASED)
------------------
+1.11 (4SEP17)
+-------------
  * In KE-chain 2.5 the way we use task customization has changed drastically. Pykechain (from 1.11 onwards) supports this by implementing a new concept in the activity called `Activity.customization()` (#161). This provides you an `ExtCustomization` object, which you can inspect and add new widgets. Please see the documentation on `ExtCustomization` and `Activity.customization()` for more details. An example to use is:
 
     >>> activity = project.activity(name='Customizable activity')
@@ -12,11 +12,16 @@ pykechain changelog
     >>> part_to_show = project.part(name='Bike')
     >>> customization.add_property_grid_widget(part_to_show, custom_title="My super bike"))
 
- * removed previously announced deprecated methods for `activity.create_activity()` (use `Activity.create()`) and `property.output` (unused).
+ * Removed previously announced deprecated method for `activity.create_activity()` (use `Activity.create()`).
  * Added deprecation warnings when using `InspectorComponent` objects and old style `Customization` components. They will be removed in November 2017 (introduced in pykechain 1.9)
  * Added the ability to retrieve a list of project members and managers with the `Scope.members()` method (#169)
- * updated the documentation structure to better access all the pykechain models.
- * updated tests
+ * Added the ability to manage member and managers of a scope. See the `Scope.add_member`, `add_manager`, `remove_member`, `remove_manager` (#175)
+ * Added the ability to add additional keyword arguments for the methods `Part.update()`, `Part.add_with_properties()` and `Part.edit()`. This will allow to provide additional (including undocumented) arguments to the KE-chain API. (eg. 'suppress_kevents=True') (#177)
+ * Added the ability to edit the name of the property, its description and the unit (#146, PR #179)
+ * Added classification enumeration (#175)
+ * Updated the documentation structure to better access all the pykechain models related documentation. See http://pykechain.readthedocs.io/en/latest/developer_api.html
+ * Updated dependent version of tox to 2.8.0 (#178) and further to 2.8.1 (#180)
+ * Updated all tests such that our coverage aim of 96%+ is maintained.
 
 1.10.3 (28AUG17)
 ----------------
