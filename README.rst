@@ -58,13 +58,15 @@ Now interact with it::
 Installation
 ------------
 
-pykechain is easily installed using pip. pykechain is Python 2.7, 3.5 and 3.6 compatible::
+pykechain is easily installed using pip. pykechain is Python 2.7, 3.4, 3.5 and 3.6 compatible::
 
     pip install pykechain
 
-Or install the latest and greatest::
+Or if you want to live on the edge, install the latest and greatest from the master branch::
 
     pip install https://github.com/KE-works/pykechain/archive/master.zip
-    # or the dev branch
-    pip install https://github.com/KE-works/pykechain/archive/dev.zip
 
+Changelog
+---------
+
+A proper changelog is maintained in the `Changelog <http://pykechain.readthedocs.io/en/latest/changelog.html>`__
