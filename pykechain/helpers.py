@@ -1,6 +1,7 @@
 from envparse import env
 
 from pykechain.client import Client
+from pykechain.enums import KechainEnv as kecenv
 from pykechain.exceptions import ClientError
 
 
@@ -14,6 +15,17 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
 
     When no parameters are passed in this function, it will try to retrieve `url`, `token`, `scope` (or `scope_id`)
     from the environment variables or a neatly placed '.env' file.
+
+    when the environment variable KECHAIN_FORCE_ENV_USE is set to true, (or ok, on, 1, yes) then the use of
+    environmentvariables for the retrieval of the scope are enforced. The following environment variables can be set::
+
+        KECHAIN_URL         - full url of KE-chain where to connect to eg: 'https://<some>.ke-chain.com'
+        KECHAIN_TOKEN       - authentication token for the KE-chain user provided from KE-chain user account control
+        KECHAIN_USERNAME    - the username for the credentials
+        KECHAIN_PASSWORD    - the password for the credentials
+        KECHAIN_SCOPE       - the name of the project / scope. Should be unique, otherwise use scope_id
+        KECHAIN_SCOPE_ID    - the UUID of the project / scope.
+        KECHAIN_FORCE_ENV_USE - set to 'true', '1', 'ok', or 'yes' to always use the environment variables.
 
     :param url: (optional) url of KE-chain
     :param username: (optional) username for authentication (together with password, if not token)
@@ -59,11 +71,25 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
     >>> project.name
     Bike Project
     """
-    if not any((url, username, password, token, scope, scope_id)):
+    if env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False):
+        if not env(kecenv.KECHAIN_URL):
+            raise ClientError(
+                "Error: KECHAIN_URL should be provided as environment variable (use of env vars is enforced)")
+        if not env(kecenv.KECHAIN_TOKEN, None) or \
+                not (env(kecenv.KECHAIN_PASSWORD, None) and (env(kecenv.KECHAIN_PASSWORD, None))):
+            raise ClientError("Error: KECHAIN_TOKEN or KECHAIN_USERNAME and KECHAIN_PASSWORD should be provided as "
+                              "environment variable(s) (use of env vars is enforced)")
+        if not env(kecenv.KECHAIN_SCOPE, None) or not env(kecenv.KECHAIN_SCOPE_ID, None):
+            raise ClientError("Error: KECHAIN_SCOPE or KECHAIN_SCOPE_ID should be provided as environment variable "
+                              "(use of env vars is enforced)")
+
+    if env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False) or \
+            not any((url, username, password, token, scope, scope_id)):
         client = Client.from_env(env_filename=env_filename)
-        scope_id = env('KECHAIN_SCOPE_ID', default=None)
-        scope = env('KECHAIN_SCOPE', default=None)
-    elif (url and ((username and password) or (token)) and (scope or scope_id)):
+        scope_id = env(kecenv.KECHAIN_SCOPE_ID, default=None)
+        scope = env(kecenv.KECHAIN_SCOPE, default=None)
+    elif (url and ((username and password) or (token)) and (scope or scope_id)) and \
+            not env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False):
         client = Client(url=url)
         client.login(username=username, password=password, token=token)
     else:
