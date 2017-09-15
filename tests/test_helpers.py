@@ -21,6 +21,7 @@ class TestGetProjectHelperNotForTravis(TestBetamax):
         project = get_project(TEST_URL, token=TEST_TOKEN, scope=TEST_SCOPE_NAME)
         self.assertEqual(project.name, TEST_SCOPE_NAME)
 
+    # 1.12.1
     def test_get_project__force_env_use(self):
         """Test the get_project by using KECHAIN_FORCE_ENV_USE=True"""
         #setup
@@ -47,7 +48,6 @@ class TestGetProjectHelperNotForTravis(TestBetamax):
 
 
         # teardown
-        #
         os.unsetenv('KECHAIN_URL')
         os.unsetenv('KECHAIN_TOKEN')
         os.unsetenv('KECHAIN_SCOPE')
