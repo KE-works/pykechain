@@ -1,3 +1,4 @@
+import os
 from envparse import env
 
 from pykechain.client import Client
@@ -72,14 +73,14 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
     Bike Project
     """
     if env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False):
-        if not env(kecenv.KECHAIN_URL):
+        if not os.getenv(kecenv.KECHAIN_URL):
             raise ClientError(
                 "Error: KECHAIN_URL should be provided as environment variable (use of env vars is enforced)")
-        if not env(kecenv.KECHAIN_TOKEN, None) or \
-                not (env(kecenv.KECHAIN_PASSWORD, None) and (env(kecenv.KECHAIN_PASSWORD, None))):
+        if not (os.getenv(kecenv.KECHAIN_TOKEN) or
+                (os.getenv(kecenv.KECHAIN_PASSWORD) and os.getenv(kecenv.KECHAIN_PASSWORD))):
             raise ClientError("Error: KECHAIN_TOKEN or KECHAIN_USERNAME and KECHAIN_PASSWORD should be provided as "
                               "environment variable(s) (use of env vars is enforced)")
-        if not env(kecenv.KECHAIN_SCOPE, None) or not env(kecenv.KECHAIN_SCOPE_ID, None):
+        if not (os.getenv(kecenv.KECHAIN_SCOPE) or os.getenv(kecenv.KECHAIN_SCOPE_ID)):
             raise ClientError("Error: KECHAIN_SCOPE or KECHAIN_SCOPE_ID should be provided as environment variable "
                               "(use of env vars is enforced)")
 

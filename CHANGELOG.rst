@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+1.12.2 (15SEP17)
+----------------
+ * Removed a logical error in the checking of the existing of the environment variables
+
 1.12.1 (15SEP17)
 ----------------
  * Added the ability to enforce the use of environment variables when the KECHAIN_FORCE_ENV_USE is set to a true value in the environment. Altered documentation and altered tests for that (#193)
