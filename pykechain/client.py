@@ -4,7 +4,7 @@ import requests
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
 
-from pykechain.enums import Category
+from pykechain.enums import Category, KechainEnv
 from .__about__ import version
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError, IllegalArgumentError
 from .models import Scope, Activity, Part, PartSet, Property
@@ -106,12 +106,12 @@ class Client(object):
 
         """
         env.read_envfile(env_filename)
-        client = cls(url=env('KECHAIN_URL'))
+        client = cls(url=env(KechainEnv.KECHAIN_URL))
 
-        if env('KECHAIN_TOKEN', None):
-            client.login(token=env('KECHAIN_TOKEN'))
-        elif env('KECHAIN_USERNAME', '') and env('KECHAIN_PASSWORD', ''):
-            client.login(username=env('KECHAIN_USERNAME'), password=env('KECHAIN_PASSWORD'))
+        if env(KechainEnv.KECHAIN_TOKEN, None):
+            client.login(token=env(KechainEnv.KECHAIN_TOKEN))
+        elif env(KechainEnv.KECHAIN_USERNAME, None) and env(KechainEnv.KECHAIN_PASSWORD, None):
+            client.login(username=env(KechainEnv.KECHAIN_USERNAME), password=env(KechainEnv.KECHAIN_PASSWORD))
 
         return client
 
@@ -385,7 +385,7 @@ class Client(object):
         :return: a single :obj:`Part`
         :raises: NotFoundError, MultipleFoundError
         """
-        kwargs['category'] = 'MODEL'
+        kwargs['category'] = Category.MODEL
         _parts = self.parts(*args, **kwargs)
 
         if len(_parts) == 0:

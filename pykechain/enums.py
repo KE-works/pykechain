@@ -84,3 +84,15 @@ class ActivityStatus(Enum):
 
     OPEN = 'OPEN'
     COMPLETED = 'COMPLETED'
+
+
+class KechainEnv(Enum):
+    """Environment variables that can be set for pykechain."""
+
+    KECHAIN_FORCE_ENV_USE = 'KECHAIN_FORCE_ENV_USE'
+    KECHAIN_URL = 'KECHAIN_URL'
+    KECHAIN_TOKEN = 'KECHAIN_TOKEN'
+    KECHAIN_USERNAME = 'KECHAIN_USERNAME'
+    KECHAIN_PASSWORD = 'KECHAIN_PASSWORD'
+    KECHAIN_SCOPE = 'KECHAIN_SCOPE'
+    KECHAIN_SCOPE_ID = 'KECHAIN_SCOPE_ID'
