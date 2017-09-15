@@ -77,32 +77,30 @@ class TestGetProjectHelperNotForTravis(TestBetamax):
 
 
 class TestGetProjectHelper(TestBetamax):
-    ERROR_MESSAGE_REGEX = "Error: insufficient arguments"
-
     def test_project_raises_error__no_auth(self):
-        with self.assertRaisesRegex(ClientError, self.ERROR_MESSAGE_REGEX):
+        with self.assertRaisesRegex(ClientError, "Error: insufficient arguments"):
             get_project(url=TEST_URL)
 
     def test_project_raises_error__token_and_no_scope(self):
-        with self.assertRaisesRegex(ClientError, self.ERROR_MESSAGE_REGEX):
+        with self.assertRaisesRegex(ClientError, "Error: insufficient arguments"):
             get_project(url=TEST_URL, token=TEST_TOKEN)
 
     def test_project_raises_error__no_pass(self):
-        with self.assertRaisesRegex(ClientError, self.ERROR_MESSAGE_REGEX):
+        with self.assertRaisesRegex(ClientError, "Error: insufficient arguments"):
             get_project(url=TEST_URL, username='auser', scope='Scope')
 
     def test_project_raises_error__auth_and_no_scope(self):
-        with self.assertRaisesRegex(ClientError, self.ERROR_MESSAGE_REGEX):
+        with self.assertRaisesRegex(ClientError, "Error: insufficient arguments"):
             get_project(url=TEST_URL, username='auser', password=PSEUDO_PASSWORD)
 
     def test_project_raises_error__scope_id_and_no_pass(self):
-        with self.assertRaisesRegex(ClientError, self.ERROR_MESSAGE_REGEX):
+        with self.assertRaisesRegex(ClientError, "Error: insufficient arguments"):
             get_project(url=TEST_URL, username='auser', scope_id=PSEUDO_SCOPE_ID)
 
     def test_project_raises_error__auth_and_no_url(self):
-        with self.assertRaisesRegex(ClientError, self.ERROR_MESSAGE_REGEX):
+        with self.assertRaisesRegex(ClientError, "Error: insufficient arguments"):
             get_project(username='auser', password=PSEUDO_PASSWORD, scope_id=PSEUDO_SCOPE_ID)
 
     def test_project_raises_error__token_and_no_url(self):
-        with self.assertRaisesRegex(ClientError, self.ERROR_MESSAGE_REGEX):
+        with self.assertRaisesRegex(ClientError, "Error: insufficient arguments"):
             get_project(token=PSEUDO_TOKEN, scope_id=PSEUDO_SCOPE_ID)
