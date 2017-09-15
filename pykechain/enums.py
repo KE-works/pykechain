@@ -85,6 +85,7 @@ class ActivityStatus(Enum):
     OPEN = 'OPEN'
     COMPLETED = 'COMPLETED'
 
+
 class KechainEnv(Enum):
     """Environment variables that can be set for pykechain"""
 
