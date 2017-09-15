@@ -87,7 +87,7 @@ class ActivityStatus(Enum):
 
 
 class KechainEnv(Enum):
-    """Environment variables that can be set for pykechain"""
+    """Environment variables that can be set for pykechain."""
 
     KECHAIN_FORCE_ENV_USE = 'KECHAIN_FORCE_ENV_USE'
     KECHAIN_URL = 'KECHAIN_URL'
