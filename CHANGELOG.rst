@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+1.12.1 (15SEP17)
+----------------
+ * Added the ability to enforce the use of environment variables when the KECHAIN_FORCE_ENV_USE is set to a true value in the environment. Altered documentation and altered tests for that (#193)
+
 1.12 (14SEP17)
 --------------
  * Added a new helper `get_project()` to bootstrap a pykechain client and return a project (aka Scope) immediately. You can retrieve a project using direct arguments `url`, `token` (or `username` and `password`), and `scope_id` (or `scope` name). Alternatively, you can provide an `.env` file or provide the arguments from the environment as the environment variables `KECHAIN_URL`, `KECHAIN_TOKEN` (or `KECHAIN_USERNAME` and `KECHAIN_PASSWORD`), and `KECHAIN_SCOPE_ID` (or `KECHAIN_SCOPE`) (#185). This is ideal for `pykechain` scripts in the KE-chain SIM, as we provide support for this to make your scripting experience in KE-chain buttersmooth. An example:
