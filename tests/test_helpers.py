@@ -17,41 +17,58 @@ PSEUDO_SCOPE_ID = 'eeb0937b-da50-4eb2-8d74-f36259cca96e'
                     reason="Skipping tests when using Travis, as not Auth can be provided")
 class TestGetProjectHelperNotForTravis(TestBetamax):
     def test_get_project__not_for_travis(self):
-        os.environ[KechainEnv.KECHAIN_FORCE_ENV_USE] = "false"
-        project = get_project(TEST_URL, token=TEST_TOKEN, scope=TEST_SCOPE_NAME)
-        self.assertEqual(project.name, TEST_SCOPE_NAME)
+        self.env.set(KechainEnv.KECHAIN_FORCE_ENV_USE, "false")
+        with self.env:
+            project = get_project(TEST_URL, token=TEST_TOKEN, scope=TEST_SCOPE_NAME)
+            self.assertEqual(project.name, TEST_SCOPE_NAME)
 
     # 1.12.1
-    def test_get_project__force_env_use(self):
+    def test_get_project__force_env_use_no_vars(self):
         """Test the get_project by using KECHAIN_FORCE_ENV_USE=True"""
-        # setup
-        saved_environment = dict(os.environ)
+        self.env.set('KECHAIN_FORCE_ENV_USE', 'True')
+        with self.env:
+            self.assertTrue(env.bool(KechainEnv.KECHAIN_FORCE_ENV_USE))
 
-        os.environ['KECHAIN_FORCE_ENV_USE'] = str(True)
-        self.assertTrue(env.bool(KechainEnv.KECHAIN_FORCE_ENV_USE))
+            with self.assertRaisesRegex(ClientError, "should be provided as environment variable"):
+                # KECHAIN_SCOPE or KECHAIN_SCOPE_ID should be provided as environment variable
+                get_project()
 
-        with self.assertRaisesRegex(ClientError, "should be provided as environment variable"):
-            _ = get_project()
+    def test_get_project__force_env_use__only_url(self):
+        self.env.update(dict(KECHAIN_URL=TEST_URL,
+                             KECHAIN_FORCE_ENV_USE='True'))
+        with self.env:
+            self.assertTrue(env.bool(KechainEnv.KECHAIN_FORCE_ENV_USE))
+            with self.assertRaisesRegex(ClientError, "should be provided as environment variable"):
+                # Error: KECHAIN_SCOPE or KECHAIN_SCOPE_ID should be provided as environment variable
+                get_project()
 
-        os.environ['KECHAIN_URL'] = TEST_URL
-        with self.assertRaisesRegex(ClientError, "should be provided as environment variable"):
-            _ = get_project()
+    def test_get_project__force_env_use__url_and_token(self):
+        self.env.update(dict(KECHAIN_URL=TEST_URL,
+                             KECHAIN_TOKEN=TEST_TOKEN,
+                             KECHAIN_FORCE_ENV_USE='True'))
+        with self.env:
+            self.assertTrue(env.bool(KechainEnv.KECHAIN_FORCE_ENV_USE))
+            with self.assertRaisesRegex(ClientError, "should be provided as environment variable"):
+                # Error: KECHAIN_SCOPE or KECHAIN_SCOPE_ID should be provided as environment variable
+                get_project()
 
-        os.environ['KECHAIN_TOKEN'] = TEST_TOKEN
-        with self.assertRaisesRegex(ClientError, "should be provided as environment variable"):
-            _ = get_project()
+    def test_get_project__force_env_use__url_token_and_name(self):
+        self.env.update(dict(KECHAIN_URL=TEST_URL,
+                             KECHAIN_TOKEN=TEST_TOKEN,
+                             KECHAIN_SCOPE_ID=TEST_SCOPE_ID,
+                             KECHAIN_FORCE_ENV_USE='True'))
+        with self.env:
+            self.assertTrue(env.bool(KechainEnv.KECHAIN_FORCE_ENV_USE))
+            self.assertEqual(get_project().name, TEST_SCOPE_NAME)
 
-        # os.environ['KECHAIN_SCOPE'] = TEST_SCOPE_NAME
-        with self.assertRaises(APIError):
-            _ = get_project(url='http://whatever', token=PSEUDO_TOKEN)
-
-        # teardown
-        os.unsetenv('KECHAIN_URL')
-        os.unsetenv('KECHAIN_TOKEN')
-        os.unsetenv('KECHAIN_SCOPE')
-        os.unsetenv('KECHAIN_FORCE_ENV_USE')
-        for k, v in saved_environment.items():
-            os.environ[k] = v
+    def test_get_project__force_env_use__other_things_provided(self):
+        self.env.update(dict(KECHAIN_URL=TEST_URL,
+                             KECHAIN_TOKEN=TEST_TOKEN,
+                             KECHAIN_SCOPE_ID=TEST_SCOPE_ID,
+                             KECHAIN_FORCE_ENV_USE='True'))
+        with self.env:
+            self.assertTrue(env.bool(KechainEnv.KECHAIN_FORCE_ENV_USE))
+            self.assertEqual(get_project(url='http://whatever', token=PSEUDO_TOKEN).name, TEST_SCOPE_NAME)
 
     def test_test_get_project_with_scope_id__not_for_travis(self):
         project = get_project(TEST_URL, token=TEST_TOKEN, scope_id=TEST_SCOPE_ID)
@@ -59,21 +76,13 @@ class TestGetProjectHelperNotForTravis(TestBetamax):
 
     def test_get_project_from_env__not_for_travis(self):
         # setup
-        saved_environment = dict(os.environ)
-        os.environ['KECHAIN_URL'] = TEST_URL
-        os.environ['KECHAIN_TOKEN'] = TEST_TOKEN
-        os.environ['KECHAIN_SCOPE'] = TEST_SCOPE_NAME
+        self.env.update(dict(KECHAIN_URL=TEST_URL,
+                             KECHAIN_TOKEN=TEST_TOKEN,
+                             KECHAIN_SCOPE=TEST_SCOPE_NAME))
 
-        # do test
-        project = get_project()
-        self.assertEqual(project.name, os.environ['KECHAIN_SCOPE'])
-
-        # teardown
-        os.unsetenv('KECHAIN_URL')
-        os.unsetenv('KECHAIN_TOKEN')
-        os.unsetenv('KECHAIN_SCOPE')
-        for k, v in saved_environment.items():
-            os.environ[k] = v
+        with self.env:
+            project = get_project()
+            self.assertEqual(project.name, self.env['KECHAIN_SCOPE'])
 
 
 class TestGetProjectHelper(TestBetamax):

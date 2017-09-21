@@ -1,8 +1,13 @@
-import sys
 from unittest import TestCase
 
 import os
+import six
 from betamax import Betamax
+
+if six.PY2:
+    from test.test_support import EnvironmentVarGuard
+elif six.PY3:
+    from test.support import EnvironmentVarGuard
 
 from pykechain import Client
 from tests.utils import TEST_TOKEN, TEST_URL, TEST_SCOPE_NAME
@@ -21,9 +26,10 @@ class TestBetamax(TestCase):
         return '{0}.{1}'.format(cls.__name__, test)
 
     def setUp(self):
+        # use self.env.set('var', 'value') and with self.env: ... to use custom envvars
+        self.env = EnvironmentVarGuard()
+
         self.client = Client(url=TEST_URL)
-        # for debugging:
-        # print('--> ENVIRONMENT VARS: {}'.format(os.environ))
 
         if TEST_TOKEN:
             self.client.login(token=TEST_TOKEN)
@@ -38,7 +44,8 @@ class TestBetamax(TestCase):
 
     def assertRaisesRegex(self, expected_exception, expected_regex,
                           *args, **kwargs):
-        if sys.version_info.major < 3:
+
+        if six.PY2:
             return self.assertRaisesRegexp(expected_exception, expected_regex, *args, **kwargs)
         else:
             return super(__class__, self).assertRaisesRegex(expected_exception, expected_regex,
