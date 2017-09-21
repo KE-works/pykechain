@@ -1,6 +1,7 @@
 from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
 
 import requests
+import warnings
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
 
@@ -105,7 +106,9 @@ class Client(object):
         >>> client = Client().from_env()
 
         """
-        env.read_envfile(env_filename)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            env.read_envfile(env_filename)
         client = cls(url=env(KechainEnv.KECHAIN_URL))
 
         if env(KechainEnv.KECHAIN_TOKEN, None):
