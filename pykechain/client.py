@@ -107,7 +107,7 @@ class Client(object):
 
         """
         with warnings.catch_warnings():
-            warnings.simplefilter(UserWarning)
+            warnings.simplefilter("ignore", UserWarning)
             env.read_envfile(env_filename)
         client = cls(url=env(KechainEnv.KECHAIN_URL))
 
