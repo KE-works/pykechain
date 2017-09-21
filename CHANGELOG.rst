@@ -3,6 +3,11 @@ Change Log
 
 pykechain changelog
 
+1.12.3 (21SEP17)
+----------------
+ * Fixing the warning: 'could not any envfile' from envparse. Which is suppressed for cosmetics. It is advised to provide a pathname for the envfile when you want to load the environment variables from an envfile. (#195)
+ * Fixed tests for the envparse warning and refactored the tests to better deal with in-test settings of the environment.
+
 1.12.2 (15SEP17)
 ----------------
  * Removed a logical error in the checking of the existing of the environment variables
