@@ -1,6 +1,10 @@
 KE-chain Python SDK
 ===================
 
+.. image:: https://badges.gitter.im/KE-works/pykechain.svg
+   :alt: Join the chat at https://gitter.im/KE-works/pykechain
+   :target: https://gitter.im/KE-works/pykechain?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 .. image:: https://img.shields.io/pypi/v/pykechain.svg
     :target: https://pypi.python.org/pypi/pykechain
     :alt: Version
