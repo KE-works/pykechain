@@ -29,6 +29,9 @@ KE-chain Python SDK
     :target: https://www.codacy.com/app/KE-works/pykechain
     :alt: Code Quality from Codacy
 
+.. image:: https://badges.gitter.im/KE-works/pykechain.svg
+   :alt: Join the chat at https://gitter.im/KE-works/pykechain
+   :target: https://gitter.im/KE-works/pykechain?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 About pykechain
 ---------------
