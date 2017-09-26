@@ -1,12 +1,12 @@
 import json
 import uuid
 from datetime import datetime
+from unittest import skip
 
 import pytz
 import requests
 import warnings
 
-from unittest import skip
 from pykechain.enums import Category, ActivityType, ActivityStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import Part
@@ -306,6 +306,23 @@ class TestActivities(TestBetamax):
             self.assertIsInstance(part, Part)
             self.assertTrue(part.category == Category.INSTANCE)
 
+    # in 1.12
+    def test_retrieve_children_of_subprocess_with_arguments(self):
+        subprocess = self.project.activity(name='Subprocess')  # type: Activity
+        children = subprocess.children(name__icontains='task')
+        self.assertTrue(len(children) >= 1)
+        for child in children:
+            self.assertEqual(child._json_data.get('container'), subprocess.id)
+
+    def test_retrieve_siblings_of_a_task_in_a_subprocess_with_arguments(self):
+        task = self.project.activity(name='SubTask')  # type: Activity
+        siblings = task.siblings(name__icontains='sub')
+
+        self.assertTrue(task.id in [sibling.id for sibling in siblings])
+        self.assertTrue(len(siblings) >= 1)
+
+
+class TestActivitiesCustomisation(TestBetamax):
     # updated and new in 1.9
     @skip('KE-chain deprecated the inspector components')
     def test_customize_activity_with_widget_config(self):

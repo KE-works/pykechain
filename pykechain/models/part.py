@@ -107,10 +107,11 @@ class Part(Base):
         else:
             return None
 
-    def children(self):
-        # type: () -> Any
+    def children(self, **kwargs):
+        # type: (Any) -> Any
         """Retrieve the children of this `Part` as `Partset`.
 
+        :param kwargs: Additional search arguments to search for, check `pykechain.Client.parts` for additional info
         :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no children
         :raises: APIError
 
@@ -119,20 +120,25 @@ class Part(Base):
 
         >>> bike = project.part('Bike')
         >>> direct_descendants_of_bike = bike.children()
-        """
-        return self._client.parts(parent=self.id, category=self.category)
 
-    def siblings(self):
-        # type: () -> Any
+        An example with providing additional part search parameters 'name__icontains'
+        >>> bike = project.part('Bike')
+        >>> wheel_children_of_bike = bike.children(name__icontains='wheel')
+        """
+        return self._client.parts(parent=self.id, category=self.category, **kwargs)
+
+    def siblings(self, **kwargs):
+        # type: (Any) -> Any
         """Retrieve the siblings of this `Part` as `Partset`.
 
         Siblings are other Parts sharing the same parent of this `Part`
 
+        :param kwargs: Additional search arguments to search for, check `pykechain.Client.parts` for additional info
         :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no siblings
         :raises: APIError
         """
         if self.parent_id:
-            return self._client.parts(parent=self.parent_id, category=self.category)
+            return self._client.parts(parent=self.parent_id, category=self.category, **kwargs)
         else:
             from pykechain.models.partset import PartSet
             return PartSet(parts=[])
@@ -159,7 +165,7 @@ class Part(Base):
         else:
             raise NotFoundError("Part {} has no model".format(self.name))
 
-    def instances(self):
+    def instances(self, **kwargs):
         """
         Retrieve the instances of this `Part` as a `PartSet`.
 
@@ -167,6 +173,7 @@ class Part(Base):
         moodel. If there are no instances (only possible if the multiplicity is `Multiplicity.ZERO_MANY` than a
         NotFoundError is returned
 
+        :param kwargs: Additional search arguments to search for, check `pykechain.Client.parts` for additional info
         :return: pykechain.models.PartSet
         :raises: NotFoundError
 
@@ -175,9 +182,14 @@ class Part(Base):
         >>> wheel_model = project.model('Wheel')
         >>> wheel_instance_set = wheel_model.instances()
 
+        An example with retrieving the front wheels only using the 'name__contains' search argument.
+
+        >>> wheel_model = project.model('Wheel')
+        >>> front_wheel_instances = wheel_model.instances(name__contains='Front')
+
         """
         if self.category == Category.MODEL:
-            return self._client.parts(model=self, category=Category.INSTANCE)
+            return self._client.parts(model=self, category=Category.INSTANCE, **kwargs)
         else:
             raise NotFoundError("Part {} has no instances or is not a model".format(self.name))
 
