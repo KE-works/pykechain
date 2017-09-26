@@ -301,6 +301,21 @@ class TestParts(TestBetamax):
         for prop in bike.properties:
             self.assertTrue(prop.name in bike_properties)
 
+    # new in 1.12
+    def test_retrieve_children_of_part_with_additional_arguments(self):
+        bike = self.project.part('Bike')  # type:Part
+        self.assertIsInstance(bike, Part)
+        children_of_bike = bike.children(name__icontains='Wheel')
+        self.assertIsInstance(children_of_bike, PartSet)
+        self.assertTrue(len(children_of_bike) >= 1)  # eg. Wheels ...
+
+    def test_retrieve_siblings_of_part_with_additional_arguments(self):
+        """Test if the siblings of a part is the same as the children of the parent of the part"""
+        frame = self.project.part('Frame')  # type:Part
+        siblings_of_frame = frame.siblings(name__icontains='Wheel')
+        self.assertIsInstance(siblings_of_frame, PartSet)
+        self.assertTrue(len(siblings_of_frame) >= 1)  # eg. Wheels ...
+
 
 class TestPartUpdate(TestBetamax):
     # updated in 1.9

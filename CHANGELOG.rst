@@ -6,7 +6,7 @@ pykechain changelog
 1.12.4 (26SEP17)
 ----------------
  * Fixed a bug in the customization code by which the activity was incorrectly updated after a correctly saved customization to the KE-chain server. In some cases the incorrect customisation was retrieved on name basis, which may resulted in an error raised. Thansk to @raduiordache for finding it (#200)
- * Added `**kwargs` to the `Part.children()`, `Activity.children()`, and `Activity.siblings()` methods. This will enable more comprehensive searches, eg. by the name of children using `Activity.children(name='Some childs name')` (#199)
+ * Added `**kwargs` to the `Part.children()`, `Part.siblings()`, `Part.instances()`, `Activity.children()`, and `Activity.siblings()` methods. This will enable more comprehensive searches, eg. by the name of children using `Activity.children(name='Some childs name')` (#199)
 
 1.12.3 (21SEP17)
 ----------------

@@ -108,12 +108,13 @@ class Activity(Base):
                                 "as this task exist on top level.".format(self.name))
         return self._client.activity(pk=subprocess_id, scope=self._json_data['scope']['id'])
 
-    def children(self):
+    def children(self, **kwargs):
         """Retrieve the direct activities of this subprocess.
 
         It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the direct descending level.
         Only when the activity is a Subprocess, otherwise it raises a NotFoundError
 
+        :param kwargs: Additional search arguments, check `pykechain.Client.activities` for additional info
         :return: list of activities
         :raises: NotFoundError when this task is not of type `ActivityType.SUBPROCESS`
 
@@ -122,19 +123,25 @@ class Activity(Base):
         >>> subprocess = project.subprocess('Subprocess')
         >>> children = subprocess.children()
 
+        Example searching for children of a subprocess which contains a name (icontains searches case insensitive
+
+        >>> subprocess = project.subprocess('Subprocess')
+        >>> children = subprocess.children(name__icontains='more work')
+
         """
         if self.activity_type != ActivityType.SUBPROCESS:
             raise NotFoundError("Only subprocesses can have children, please choose a subprocess instead of a '{}' "
                                 "(activity '{}')".format(self.activity_type, self.name))
 
-        return self._client.activities(container=self.id, scope=self._json_data['scope']['id'])
+        return self._client.activities(container=self.id, scope=self._json_data['scope']['id'], **kwargs)
 
-    def siblings(self):
+    def siblings(self, **kwargs):
         """Retrieve the other activities that also belong to the subprocess.
 
         It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the level of the current task.
         This also works if the activity is of type `ActivityType.SUBPROCESS`.
 
+        :param kwargs: Additional search arguments, check `pykechain.Client.activities` for additional info
         :return: list of activities
 
         Example
@@ -142,9 +149,13 @@ class Activity(Base):
         >>> task = project.activity('Some Task')
         >>> siblings = task.siblings()
 
+        Example for siblings containing certain words in the task name
+        >>> task = project.activity('Some Task')
+        >>> siblings = task.siblings(name__contains='Another Task')
+
         """
         container_id = self._json_data.get('container')
-        return self._client.activities(container=container_id, scope=self._json_data['scope']['id'])
+        return self._client.activities(container=container_id, scope=self._json_data['scope']['id'], **kwargs)
 
     def create(self, *args, **kwargs):
         """Create a new activity belonging to this subprocess.
