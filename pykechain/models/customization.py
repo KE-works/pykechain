@@ -97,7 +97,7 @@ class ExtCustomization(CustomizationBase):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not save customization ({})".format(response))
         else:
-            self.activity = self._client.scope(self.activity.scope["name"]).activity(self.activity.name)
+            self.activity = self._client.scope(pk=self.activity.scope["id"]).activity(pk=self.activity.id)
 
     def _add_widget(self, widget):
         """
