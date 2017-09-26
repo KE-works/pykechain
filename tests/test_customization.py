@@ -145,7 +145,7 @@ class TestExtCustomization(TestBetamax):
         Test if all widgets can be deleted
         """
         customization = self.activity_2.customization()
-        part = self.activity_1.parts()[0]
+        part = self.activity_2.parts()[0]
 
         customization.add_property_grid_widget(part)
 
