@@ -3,6 +3,11 @@ Change Log
 
 pykechain changelog
 
+1.12.4 (26SEP17)
+----------------
+ * Fixed a bug in the customization code by which the activity was incorrectly updated after a correctly saved customization to the KE-chain server. In some cases the incorrect customisation was retrieved on name basis, which may resulted in an error raised. Thansk to @raduiordache for finding it (#200)
+ * Added `**kwargs` to the `Part.children()`, `Activity.children()`, and `Activity.siblings()` methods. This will enable more comprehensive searches, eg. by the name of children using `Activity.children(name='Some childs name')` (#199)
+
 1.12.3 (21SEP17)
 ----------------
  * Fixing the warning: 'could not any envfile' from envparse. Which is suppressed for cosmetics. It is advised to provide a pathname for the envfile when you want to load the environment variables from an envfile. (#195)
