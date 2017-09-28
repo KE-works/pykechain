@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+1.12.6 (28SEP17)
+----------------
+ * fixed a bug in the `models.customisation`. After a succesfull save of a customisation to an activity, the activity could not be retrieved from KE-chain if the activity was part of a closed scope (#205)
+
 1.12.5 (28SEP17)
 ----------------
  * the `get_project()` helper method will now retrieve a scope a status other than 'ACTIVE' only (#203)
