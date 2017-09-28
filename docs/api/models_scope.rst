@@ -1,7 +1,7 @@
 
 
-pykechain.models.Scope
-======================
+models.Scope
+============
 
 .. autoclass:: pykechain.models.Scope
    :members:

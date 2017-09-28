@@ -1,7 +1,7 @@
 
 
-pykechain.enums
-===============
+enums
+=====
 
 .. automodule:: pykechain.enums
    :members:
