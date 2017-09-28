@@ -86,6 +86,14 @@ class ActivityStatus(Enum):
     COMPLETED = 'COMPLETED'
 
 
+class ScopeStatus(Enum):
+    """The various status of a scope."""
+
+    ACTIVE = 'ACTIVE'
+    CLOSED = 'CLOSED'
+    TEMPLATE = 'TEMPLATE'
+
+
 class KechainEnv(Enum):
     """Environment variables that can be set for pykechain."""
 
@@ -96,3 +104,4 @@ class KechainEnv(Enum):
     KECHAIN_PASSWORD = 'KECHAIN_PASSWORD'
     KECHAIN_SCOPE = 'KECHAIN_SCOPE'
     KECHAIN_SCOPE_ID = 'KECHAIN_SCOPE_ID'
+    KECHAIN_SCOPE_STATUS = 'KECHAIN_SCOPE_STATUS'

@@ -2,12 +2,12 @@ import os
 from envparse import env
 
 from pykechain.client import Client
-from pykechain.enums import KechainEnv as kecenv
+from pykechain.enums import KechainEnv as kecenv, ScopeStatus
 from pykechain.exceptions import ClientError
 
 
 def get_project(url=None, username=None, password=None, token=None, scope=None, scope_id=None,
-                env_filename=None):
+                env_filename=None, status=ScopeStatus.ACTIVE):
     """
     Retrieve and return the KE-chain project to be used throughout an app.
 
@@ -20,13 +20,16 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
     when the environment variable KECHAIN_FORCE_ENV_USE is set to true, (or ok, on, 1, yes) then the use of
     environmentvariables for the retrieval of the scope are enforced. The following environment variables can be set::
 
-        KECHAIN_URL         - full url of KE-chain where to connect to eg: 'https://<some>.ke-chain.com'
-        KECHAIN_TOKEN       - authentication token for the KE-chain user provided from KE-chain user account control
-        KECHAIN_USERNAME    - the username for the credentials
-        KECHAIN_PASSWORD    - the password for the credentials
-        KECHAIN_SCOPE       - the name of the project / scope. Should be unique, otherwise use scope_id
-        KECHAIN_SCOPE_ID    - the UUID of the project / scope.
+        KECHAIN_URL           - full url of KE-chain where to connect to eg: 'https://<some>.ke-chain.com'
+        KECHAIN_TOKEN         - authentication token for the KE-chain user provided from KE-chain user account control
+        KECHAIN_USERNAME      - the username for the credentials
+        KECHAIN_PASSWORD      - the password for the credentials
+        KECHAIN_SCOPE         - the name of the project / scope. Should be unique, otherwise use scope_id
+        KECHAIN_SCOPE_ID      - the UUID of the project / scope.
         KECHAIN_FORCE_ENV_USE - set to 'true', '1', 'ok', or 'yes' to always use the environment variables.
+        KECHAIN_SCOPE_STATUS  - the status of the Scope to retrieve, defaults to None to retrieve all scopes
+
+    .. versionadded:: 1.12
 
     :param url: (optional) url of KE-chain
     :param username: (optional) username for authentication (together with password, if not token)
@@ -35,6 +38,7 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
     :param scope: (optional) name of the scope to retrieve from KE-chain.
     :param scope_id: (optional) UUID of the scope to retrieve and return from KE-chain
     :param env_filename: (optional) name of the environment filename to bootstrap the Client
+    :param status: (optional) status of the scope to retrieve, defaults to `Scopestatus.ACTIVE`
     :return: pykechain.models.Scope
     :raises: NotFoundError, ClientError, APIError
 
@@ -89,6 +93,7 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
         client = Client.from_env(env_filename=env_filename)
         scope_id = env(kecenv.KECHAIN_SCOPE_ID, default=None)
         scope = env(kecenv.KECHAIN_SCOPE, default=None)
+        status = env(kecenv.KECHAIN_SCOPE_STATUS, default=None)
     elif (url and ((username and password) or (token)) and (scope or scope_id)) and \
             not env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False):
         client = Client(url=url)
@@ -98,6 +103,6 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
                           "See documentation of `pykechain.get_project()`")
 
     if scope_id:
-        return client.scope(pk=scope_id)
+        return client.scope(pk=scope_id, status=status)
     else:
-        return client.scope(name=scope)
+        return client.scope(name=scope, status=status)

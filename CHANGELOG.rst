@@ -3,6 +3,11 @@ Change Log
 
 pykechain changelog
 
+1.12.5 (28SEP17)
+----------------
+ * the `get_project()` helper method will now retrieve a scope a status other than 'ACTIVE' only (#203)
+ * updated the documentation to fix wrongly formatted examples.
+
 1.12.4 (26SEP17)
 ----------------
  * Fixed a bug in the customization code by which the activity was incorrectly updated after a correctly saved customization to the KE-chain server. In some cases the incorrect customisation was retrieved on name basis, which may resulted in an error raised. Thansk to @raduiordache for finding it (#200)

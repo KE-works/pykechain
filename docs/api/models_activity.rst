@@ -1,7 +1,7 @@
 
 
-pykechain.models.Activity and Customizations
-============================================
+models.Activity and Customizations
+==================================
 
 pykechain.models.Activity
 -------------------------

@@ -1,7 +1,7 @@
 
 
-pykechain.Client
-================
+Client
+======
 
 .. autoclass:: pykechain.Client
    :members:

@@ -1,7 +1,7 @@
 
 
-pykechain.helpers
-=================
+helpers
+=======
 
 .. automodule:: pykechain.helpers
    :members:

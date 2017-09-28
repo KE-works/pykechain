@@ -1,7 +1,7 @@
 
 
-pykechain.exceptions
-====================
+exceptions
+==========
 
 .. automodule:: pykechain.exceptions
     :members:
