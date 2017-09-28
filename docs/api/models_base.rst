@@ -1,7 +1,7 @@
 
 
-pykechain.models.Base
-=====================
+models.Base
+===========
 
 This is the baseclass for all pykechain models.
 

@@ -1,7 +1,7 @@
 
 
-pykechain.models.Partset and Part
-=================================
+models.Part and PartSet
+=======================
 
 .. autoclass:: pykechain.models.PartSet
 

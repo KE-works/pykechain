@@ -122,8 +122,10 @@ class Part(Base):
         >>> direct_descendants_of_bike = bike.children()
 
         An example with providing additional part search parameters 'name__icontains'
+
         >>> bike = project.part('Bike')
         >>> wheel_children_of_bike = bike.children(name__icontains='wheel')
+
         """
         return self._client.parts(parent=self.id, category=self.category, **kwargs)
 
