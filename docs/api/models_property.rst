@@ -1,8 +1,7 @@
 
 
-pykechain.models.Property
-=========================
-
+models.Property
+===============
 
 .. autoclass:: pykechain.models.Property
    :members:

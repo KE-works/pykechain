@@ -5,7 +5,7 @@ import warnings
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
 
-from pykechain.enums import Category, KechainEnv
+from pykechain.enums import Category, KechainEnv, ScopeStatus
 from .__about__ import version
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError, IllegalArgumentError
 from .models import Scope, Activity, Part, PartSet, Property
@@ -129,10 +129,12 @@ class Client(object):
         Examples
         --------
         Using Token Authentication (retrieve user Token from the KE-chain instance)
+
         >>> client = Client()
         >>> client.login(token='<some-super-long-secret-token>')
 
         Using Basic authentications (Username/Password)
+
         >>> client = Client()
         >>> client.login(username='user', password='pw')
 
@@ -178,7 +180,7 @@ class Client(object):
 
         return self.last_response
 
-    def scopes(self, name=None, pk=None, status='ACTIVE'):
+    def scopes(self, name=None, pk=None, status=ScopeStatus.ACTIVE):
         # type: (Optional[str], Optional[str], Optional[str]) -> List[Scope]
         """Return all scopes visible / accessible for the logged in user.
 
