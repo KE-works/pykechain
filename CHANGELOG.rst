@@ -8,11 +8,11 @@ pykechain changelog
 1.12.8 (2OCT17)
 ---------------
  * Fixed a bug where the scope object was ambigously retrieved during the edit assignees of an activity action. It failed when the scope was closed. Thanks to @raduiordache for its find! (#211)
+ * Updated dependent versions for development for tox to 2.9.1 and Sphinx to 1.6.4 (#198, #209)
 
 1.12.7 (2OCT17)
 ---------------
  * Fixed a bug where a model without an instance raises an incorrect Error. Now it will raise a `NotFoundError` (#207).
- * Updated dependent versions for development for tox to 2.9.1 and Sphinx to 1.6.4 (#198, #209)
 
 1.12.6 (28SEP17)
 ----------------
