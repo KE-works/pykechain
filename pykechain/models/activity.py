@@ -238,7 +238,7 @@ class Activity(Base):
 
         if assignees:
             if isinstance(assignees, list):
-                project = self._client.scope(self._json_data['scope']['name'])
+                project = self._client.scope(pk=self.scope.get('id'), status=None)
                 members_list = [member['username'] for member in project._json_data['members']]
                 for assignee in assignees:
                     if assignee not in members_list:
