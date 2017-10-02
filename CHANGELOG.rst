@@ -6,6 +6,7 @@ pykechain changelog
 1.12.7 (2OKT17)
 ---------------
  * Fixed a bug where a model without an instance raises an incorrect Error. Now it will raise a `NotFoundError` (#207).
+ * Updated dependent versions for development for tox to 2.9.1 and Sphinx to 1.6.4 (#198, #209)
 
 1.12.6 (28SEP17)
 ----------------
