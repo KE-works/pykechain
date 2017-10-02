@@ -152,6 +152,8 @@ class Part(Base):
         For instance, you can get the part model of a part instance. But trying to get the model of a part that
         has no model, like a part model, will raise a NotFoundError.
 
+        .. versionadded:: 1.8
+
         :return: pykechain.models.Part
         :raises: NotFoundError
 
@@ -175,6 +177,8 @@ class Part(Base):
         moodel. If there are no instances (only possible if the multiplicity is `Multiplicity.ZERO_MANY` than a
         NotFoundError is returned
 
+        .. versionadded:: 1.8
+
         :param kwargs: Additional search arguments to search for, check `pykechain.Client.parts` for additional info
         :return: pykechain.models.PartSet
         :raises: NotFoundError
@@ -193,7 +197,7 @@ class Part(Base):
         if self.category == Category.MODEL:
             return self._client.parts(model=self, category=Category.INSTANCE, **kwargs)
         else:
-            raise NotFoundError("Part {} has no instances or is not a model".format(self.name))
+            raise NotFoundError("Part {} is not a model".format(self.name))
 
     def instance(self):
         """
@@ -207,9 +211,11 @@ class Part(Base):
         instances_list = list(self.instances())
         if len(instances_list) == 1:
             return instances_list[0]
-        else:
+        elif len(instances_list) > 1:
             raise MultipleFoundError("Part {} has more than a single instance. "
                                      "Use the `Part.instances()` method".format(self.name))
+        else:
+            raise NotFoundError("Part {} has no instance".format(self.name))
 
     def proxy_model(self):
         """
@@ -507,6 +513,8 @@ class Part(Base):
     def as_dict(self):
         """
         Retrieve the properties of a part inside a dict in this structure: {property_name: property_value}.
+
+        .. versionadded:: 1.9
 
         Example
         -------
