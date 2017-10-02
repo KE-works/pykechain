@@ -451,6 +451,13 @@ class TestPartCreateWithProperties(TestBetamax):
         with self.assertRaises(MultipleFoundError):
             wheel_model.instance()
 
+    # test added in 1.12.7
+    def test_get_single_instance_of_a_model_without_instances_raises_notfounderror(self):
+        model_without_instances = self.project.model(name='model_without_instances')
+
+        with self.assertRaises(NotFoundError):
+            model_without_instances.instance()
+
     # new in 1.10
     def test_reorder_properties_using_names(self):
         # Retrieve the front fork model
