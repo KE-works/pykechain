@@ -3,32 +3,36 @@ Change Log
 
 pykechain changelog
 
+1.12.7 (2OKT17)
+---------------
+ * Fixed a bug where a model without an instance raises an incorrect Error. Now it will raise a `NotFoundError` (#207).
+
 1.12.6 (28SEP17)
 ----------------
- * fixed a bug in the `models.customisation`. After a succesfull save of a customisation to an activity, the activity could not be retrieved from KE-chain if the activity was part of a closed scope (#205)
+ * Fixed a bug in the `models.customisation`. After a succesfull save of a customisation to an activity, the activity could not be retrieved from KE-chain if the activity was part of a closed scope (#205).
 
 1.12.5 (28SEP17)
 ----------------
- * the `get_project()` helper method will now retrieve a scope a status other than 'ACTIVE' only (#203)
- * updated the documentation to fix wrongly formatted examples.
+ * The `get_project()` helper method will now retrieve a scope a status other than 'ACTIVE' only (#203).
+ * Updated the documentation to fix wrongly formatted examples.
 
 1.12.4 (26SEP17)
 ----------------
- * Fixed a bug in the customization code by which the activity was incorrectly updated after a correctly saved customization to the KE-chain server. In some cases the incorrect customisation was retrieved on name basis, which may resulted in an error raised. Thansk to @raduiordache for finding it (#200)
- * Added `**kwargs` to the `Part.children()`, `Part.siblings()`, `Part.instances()`, `Activity.children()`, and `Activity.siblings()` methods. This will enable more comprehensive searches, eg. by the name of children using `Activity.children(name='Some childs name')` (#199)
+ * Fixed a bug in the customization code by which the activity was incorrectly updated after a correctly saved customization to the KE-chain server. In some cases the incorrect customisation was retrieved on name basis, which may resulted in an error raised. Thanks to @raduiordache for finding it (#200).
+ * Added `**kwargs` to the `Part.children()`, `Part.siblings()`, `Part.instances()`, `Activity.children()`, and `Activity.siblings()` methods. This will enable more comprehensive searches, eg. by the name of children using `Activity.children(name='Some childs name')` (#199).
 
 1.12.3 (21SEP17)
 ----------------
- * Fixing the warning: 'could not any envfile' from envparse. Which is suppressed for cosmetics. It is advised to provide a pathname for the envfile when you want to load the environment variables from an envfile. (#195)
+ * Fixing the warning: 'could not any envfile' from envparse. Which is suppressed for cosmetics. It is advised to provide a pathname for the envfile when you want to load the environment variables from an envfile (#195).
  * Fixed tests for the envparse warning and refactored the tests to better deal with in-test settings of the environment.
 
 1.12.2 (15SEP17)
 ----------------
- * Removed a logical error in the checking of the existing of the environment variables
+ * Removed a logical error in the checking of the existing of the environment variables.
 
 1.12.1 (15SEP17)
 ----------------
- * Added the ability to enforce the use of environment variables when the KECHAIN_FORCE_ENV_USE is set to a true value in the environment. Altered documentation and altered tests for that (#193)
+ * Added the ability to enforce the use of environment variables when the KECHAIN_FORCE_ENV_USE is set to a true value in the environment. Altered documentation and altered tests for that (#193).
 
 1.12 (14SEP17)
 --------------
@@ -38,9 +42,9 @@ pykechain changelog
     >>> project = get_project(url='http://localhost:8000', username='foo', password='bar', scope='Bike Project')
     >>> print(project.name)
 
- * Added additional checks for the `Client` to check if the url provided is correct (#185)
- * Improved the state of the project on codacy, a nice code quality monitor, from B to A grade. Removed over 100 insecure code elements, according to codacy. See: https://www.codacy.com/app/KE-works/pykechain/dashboard (#187)
- * Updated dependent versions of pyopenssl to 1.1.2 (#188), pytest to 3.2.2 (#183) and tox to 2.8.2 (#184)
+ * Added additional checks for the `Client` to check if the url provided is correct (#185).
+ * Improved the state of the project on codacy, a nice code quality monitor, from B to A grade. Removed over 100 insecure code elements, according to codacy. See: https://www.codacy.com/app/KE-works/pykechain/dashboard (#187).
+ * Updated dependent versions of pyopenssl to 1.1.2 (#188), pytest to 3.2.2 (#183) and tox to 2.8.2 (#184).
  * Updated coverage of the files to internal standards. The critical models are now 100% tested such as the `Client`, `Activity` and `Part`. (#190) see: https://coveralls.io/github/KE-works/pykechain.
 
 1.11.1 (4SEP17)
