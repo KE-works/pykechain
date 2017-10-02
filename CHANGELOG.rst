@@ -3,7 +3,13 @@ Change Log
 
 pykechain changelog
 
-1.12.7 (2OKT17)
+.. note:: We have many point releases for release 1.12 as we are actively working on project that require timely updates of found bugs. Pykechain only gets better with every point release.
+
+1.12.8 (2OCT17)
+---------------
+ * Fixed a bug where the scope object was ambigously retrieved during the edit assignees of an activity action. It failed when the scope was closed. Thanks to @raduiordache for its find! (#211)
+
+1.12.7 (2OCT17)
 ---------------
  * Fixed a bug where a model without an instance raises an incorrect Error. Now it will raise a `NotFoundError` (#207).
 
