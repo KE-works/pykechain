@@ -20,10 +20,32 @@ class Activity(Base):
         """Construct an Activity from a json object."""
         super(Activity, self).__init__(json, **kwargs)
 
-        self.scope = json.get('scope', dict())
-        self.scope_id = self.scope.get('id')
+        self.scope = json.get('scope', None)
         self.activity_type = json.get('activity_class', None)
         self.status = json.get('status', None)
+
+    @property
+    def scope_id(self):
+        """
+        ID of the scope this Activity belongs to.
+
+        This property will always produce a scope_id, even when the scope object was not included in an earlier
+        response.
+
+        :return: the scope id (uuid string)
+        """
+        """"""
+        if self.scope:
+            scope_id = self.scope and self.scope.get('id')
+        else:
+            pseudo_self = self._client.activity(pk=self.id, fields="id,scope")
+            if pseudo_self.scope and pseudo_self.scope.get('id'):
+                self.scope = pseudo_self.scope
+                scope_id = self.scope.get('id')
+            else:
+                raise NotFoundError("This activity '{}'({}) does not belong to a scope, something is weird!".
+                                    format(self.name, self.id))
+        return scope_id
 
     def parts(self, *args, **kwargs):
         """Retrieve parts belonging to this activity.
@@ -248,7 +270,7 @@ class Activity(Base):
 
         if assignees:
             if isinstance(assignees, list):
-                project = self._client.scope(pk=self.scope.get('id'), status=None)
+                project = self._client.scope(pk=self.scope_id, status=None)
                 members_list = [member['username'] for member in project._json_data['members']]
                 for assignee in assignees:
                     if assignee not in members_list:
