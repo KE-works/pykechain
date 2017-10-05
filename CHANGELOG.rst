@@ -8,6 +8,7 @@ pykechain changelog
 1.12.9 (5OCT17)
 ---------------
  * Improved scope control for activity queries. Will ensure that the scope_id of an acitivity is properly retrieved and checked for in case of subqueries such as `Activity.children()`, `siblings`, `subprocess`.
+ * Updated dependent versions for development: pytest updated to 3.2.3 (#215)
 
 1.12.8 (2OCT17)
 ---------------
