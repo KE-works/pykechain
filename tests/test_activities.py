@@ -321,6 +321,16 @@ class TestActivities(TestBetamax):
         self.assertTrue(task.id in [sibling.id for sibling in siblings])
         self.assertTrue(len(siblings) >= 1)
 
+    # in 1.12.9
+    def test_activity_without_scope_id_will_fix_itself(self):
+        specify_wheel_diam_cripled = self.project.activity(name='Specify wheel diameter', fields='id,name,status')
+        self.assertFalse(specify_wheel_diam_cripled.scope)
+
+        # now the self-healing will beging
+        self.assertEqual(specify_wheel_diam_cripled.scope_id, self.project.id)
+
+
+
 
 class TestActivitiesCustomisation(TestBetamax):
     # updated and new in 1.9
