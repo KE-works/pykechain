@@ -20,7 +20,8 @@ class Activity(Base):
         """Construct an Activity from a json object."""
         super(Activity, self).__init__(json, **kwargs)
 
-        self.scope = json.get('scope')
+        self.scope = json.get('scope', dict())
+        self.scope_id = self.scope.get('id')
         self.activity_type = json.get('activity_class', None)
         self.status = json.get('status', None)
 
@@ -103,10 +104,13 @@ class Activity(Base):
 
         """
         subprocess_id = self._json_data.get('container')
+        if not self.scope_id:
+            raise NotFoundError("This activity does not contain a scope record (missing scope_id): '{}'".
+                                format(self.scope))
         if subprocess_id == self._json_data.get('root_container'):
             raise NotFoundError("Cannot find subprocess for this task '{}', "
                                 "as this task exist on top level.".format(self.name))
-        return self._client.activity(pk=subprocess_id, scope=self._json_data['scope']['id'])
+        return self._client.activity(pk=subprocess_id, scope=self.scope_id)
 
     def children(self, **kwargs):
         """Retrieve the direct activities of this subprocess.
@@ -129,11 +133,14 @@ class Activity(Base):
         >>> children = subprocess.children(name__icontains='more work')
 
         """
+        if not self.scope_id:
+            raise NotFoundError("This activity does not contain a scope record (missing scope_id): '{}'".
+                                format(self.scope))
         if self.activity_type != ActivityType.SUBPROCESS:
             raise NotFoundError("Only subprocesses can have children, please choose a subprocess instead of a '{}' "
                                 "(activity '{}')".format(self.activity_type, self.name))
 
-        return self._client.activities(container=self.id, scope=self._json_data['scope']['id'], **kwargs)
+        return self._client.activities(container=self.id, scope=self.scope_id, **kwargs)
 
     def siblings(self, **kwargs):
         """Retrieve the other activities that also belong to the subprocess.
@@ -155,7 +162,10 @@ class Activity(Base):
 
         """
         container_id = self._json_data.get('container')
-        return self._client.activities(container=container_id, scope=self._json_data['scope']['id'], **kwargs)
+        if not self.scope_id:
+            raise NotFoundError("This activity does not contain a scope record (missing scope_id): '{}'".
+                                format(self.scope))
+        return self._client.activities(container=container_id, scope=self.scope_id, **kwargs)
 
     def create(self, *args, **kwargs):
         """Create a new activity belonging to this subprocess.
