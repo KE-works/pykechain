@@ -34,7 +34,6 @@ class Activity(Base):
 
         :return: the scope id (uuid string)
         """
-        """"""
         if self.scope:
             scope_id = self.scope and self.scope.get('id')
         else:
