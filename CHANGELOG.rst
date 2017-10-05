@@ -5,6 +5,10 @@ pykechain changelog
 
 .. note:: We have many point releases for release 1.12 as we are actively working on project that require timely updates of found bugs. Pykechain only gets better with every point release.
 
+1.12.9 (5OCT17)
+---------------
+ * Improved scope control for activity queries. Will ensure that the scope_id of an acitivity is properly retrieved and checked for in case of subqueries such as `Activity.children()`, `siblings`, `subprocess`.
+
 1.12.8 (2OCT17)
 ---------------
  * Fixed a bug where the scope object was ambigously retrieved during the edit assignees of an activity action. It failed when the scope was closed. Thanks to @raduiordache for its find! (#211)
