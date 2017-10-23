@@ -21,7 +21,7 @@ matplotlib==2.0.2
 tox==2.9.1
 
 # code style
-flake8==3.4.1
+flake8==3.5.0
 pydocstyle==2.0.0
 mypy==0.521
 
