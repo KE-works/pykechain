@@ -180,6 +180,22 @@ class Client(object):
 
         return self.last_response
 
+    def reload(self, obj):
+        """Reload an object from server. This method is immutable and will return a new object.
+
+        :param obj: object to reload
+        :return: a new object
+        :raises: NotFoundError
+        """
+        r = self._request('GET', obj._json_data['url'])
+
+        if r.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not reload object")
+
+        data = r.json()
+
+        return obj.__class__(data['results'][0], client=self)
+
     def scopes(self, name=None, pk=None, status=ScopeStatus.ACTIVE):
         # type: (Optional[str], Optional[str], Optional[str]) -> List[Scope]
         """Return all scopes visible / accessible for the logged in user.
