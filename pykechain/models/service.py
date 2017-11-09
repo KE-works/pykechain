@@ -94,7 +94,7 @@ class Service(Base):
 
     def delete(self):
         # type: () -> None
-        """Delete this service
+        """Delete this service.
 
         :return: None
         :raises: APIError if delete was not succesfull
