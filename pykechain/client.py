@@ -5,7 +5,8 @@ import warnings
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
 
-from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType
+from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion
+from pykechain.models.service import Service, ServiceExecution
 from .__about__ import version
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError, IllegalArgumentError
 from .models import Scope, Activity, Part, PartSet, Property
@@ -23,6 +24,16 @@ API_PATH = {
     'property_download': 'api/properties/{property_id}/download',
     'widgets_config': 'api/widget_config.json',
     'widget_config': 'api/widget_config/{widget_config_id}.json',
+    'services': 'api/services.json',
+    'service': 'api/services/{service_id}.json',
+    'service_execute': 'api/services/{service_id}/execute',
+    'service_upload': 'api/services/{service_id}/upload',
+    'service_download': 'api/services/{service_id}/download',
+    'service_executions': 'api/service_executions.json',
+    'service_execution': 'api/service_executions/{service_execution_id}.json',
+    'service_execution_terminate': 'api/service_executions/{service_execution_id}/terminate',
+    'service_execution_notebook_url': 'api/service_executions/{service_execution_id}/notebook_url',
+    'service_execution_log': 'api/service_executions/{service_execution_id}/log',
     'users': 'api/users.json'
 }
 
@@ -199,8 +210,8 @@ class Client(object):
 
         return obj.__class__(data['results'][0], client=self)
 
-    def scopes(self, name=None, pk=None, status=ScopeStatus.ACTIVE):
-        # type: (Optional[str], Optional[str], Optional[str]) -> List[Scope]
+    def scopes(self, name=None, pk=None, status=ScopeStatus.ACTIVE, **kwargs):
+        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Scope]
         """Return all scopes visible / accessible for the logged in user.
 
         :param name: if provided, filter the search for a scope/project by name
@@ -223,11 +234,15 @@ class Client(object):
         >>> last_request = client.last_request  # doctest: Ellipsis
         ...
         """
-        response = self._request('GET', self._build_url('scopes'), params={
+        request_params = {
             'name': name,
             'id': pk,
-            'status': status
-        })
+            'status': status,
+        }
+        if kwargs:
+            request_params.update(**kwargs)
+
+        response = self._request('GET', self._build_url('scopes'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve scopes")
@@ -267,6 +282,7 @@ class Client(object):
             'name': name,
             'scope': scope
         }
+
         if kwargs:
             request_params.update(**kwargs)
 
@@ -419,8 +435,8 @@ class Client(object):
 
         return _parts[0]
 
-    def properties(self, name=None, pk=None, category=Category.INSTANCE):
-        # type: (Optional[str], Optional[str], Optional[str]) -> List[Property]
+    def properties(self, name=None, pk=None, category=Category.INSTANCE, **kwargs):
+        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Property]
         """Retrieve properties.
 
         :param name: name to limit the search for.
@@ -429,11 +445,15 @@ class Client(object):
         :return: :obj:`list` of :obj:`Property`
         :raises: NotFoundError
         """
-        response = self._request('GET', self._build_url('properties'), params={
+        request_params = {
             'name': name,
             'id': pk,
             'category': category
-        })
+        }
+        if kwargs:
+            request_params.update(**kwargs)
+
+        response = self._request('GET', self._build_url('properties'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve properties")
@@ -441,6 +461,112 @@ class Client(object):
         data = response.json()
 
         return [Property.create(p, client=self) for p in data['results']]
+
+    def services(self, name=None, pk=None, scope=None, **kwargs):
+        """
+        Retrieve Services.
+
+        :param name: (optional) name to limit the search for
+        :param pk: (optional) primary key or id (UUID) of the service to search for
+        :param scope: (optional) id (UUID) of the scope to search in
+        :param kwargs: (optional) additional search keyword arguments
+        :return: list of Service objects
+        :raises: NotFoundError
+        """
+        request_params = {
+            'name': name,
+            'id': pk,
+            'scope': scope
+        }
+        if kwargs:
+            request_params.update(**kwargs)
+
+        response = self._request('GET', self._build_url('services'), params=request_params)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve properties")
+
+        data = response.json()
+        return [Service(service, client=self) for service in data['results']]
+
+    def service(self, name=None, pk=None, scope=None, **kwargs):
+        """
+        Retrieve single KE-chain Service.
+
+        Uses the same interface as the `services` method but returns only a single pykechain `Service` instance.
+
+        :param name: (optional) name to limit the search for
+        :param pk: (optional) primary key or id (UUID) of the service to search for
+        :param scope: (optional) id (UUID) of the scope to search in
+        :param kwargs: (optional) additional search keyword arguments
+        :return: single Service object
+        :raises: NotFoundError, MultipleFoundError
+        """
+        _services = self.services(name=name, pk=pk, scope=scope, **kwargs)
+
+        if len(_services) == 0:
+            raise NotFoundError("No service fits criteria")
+        if len(_services) != 1:
+            raise MultipleFoundError("Multiple services fit criteria")
+
+        return _services[0]
+
+    def service_executions(self, name=None, pk=None, scope=None, service=None, **kwargs):
+        """
+        Retrieve Service Executions.
+
+        :param name: (optional) name to limit the search for
+        :param pk: (optional) primary key or id (UUID) of the service execution to search for
+        :param scope: (optional) id (UUID) of the scope to search in
+        :param service: (optional) id (UUID) of the service to search the service executions for
+        :param kwargs: (optional) additional search keyword arguments
+        :return: list of ServiceExecution objects
+        :raises: NotFoundError
+        """
+        request_params = {
+            'name': name,
+            'id': pk,
+            'service': service,
+            'scope': scope
+        }
+        if kwargs:
+            request_params.update(**kwargs)
+
+        r = self._request('GET', self._build_url('service_executions'), params=request_params)
+
+        if r.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve properties")
+
+        data = r.json()
+        return [ServiceExecution(service_exeuction, client=self) for service_exeuction in data['results']]
+
+    def service_execution(self, name=None, pk=None, scope=None, service=None, **kwargs):
+        """
+        Retrieve single KE-chain ServiceExecution.
+
+        Uses the same interface as the `service_executions` method but returns only a single
+        pykechain `ServiceExecution` instance.
+
+        :param name: (optional) name to limit the search for
+        :param pk: (optional) primary key or id (UUID) of the service execution to search for
+        :param scope: (optional) id (UUID) of the scope to search in
+        :param service: (optional) id (UUID) of the service to search the service executions for
+        :param kwargs: (optional) additional search keyword arguments
+        :return: list of ServiceExecution objects
+        :raises: NotFoundError
+        """
+        _service_executions = self.service_executions(name=name, pk=pk, scope=scope, service=service, **kwargs)
+
+        if len(_service_executions) == 0:
+            raise NotFoundError("No service fits criteria")
+        if len(_service_executions) != 1:
+            raise MultipleFoundError("Multiple services fit criteria")
+
+        return _service_executions[0]
+
+    #
+    # Creators
+    #
 
     def create_activity(self, process, name, activity_class="UserTask"):
         """Create a new activity.
@@ -579,3 +705,60 @@ class Client(object):
         model.properties.append(prop)
 
         return prop
+
+    def create_service(self, name, scope, description=None, version=None,
+                       service_type=ServiceType.PYTHON_SCRIPT,
+                       environment_version=ServiceEnvironmentVersion.PYTHON_3_5,
+                       pkg_path=None):
+        """
+        Create a Service.
+
+        A service can be created only providing the name (and scope). Other information can be added later.
+        If you provide a path to the `kecpkg` (or python script) to upload (pkg_path) on createion,
+        this `kecpkg` will be uploaded in one go. If the later fails, the service is still there, and the package is
+        not uploaded.
+
+        :param name: Name of the service
+        :param scope: Scope where the create the Service under
+        :param description: (optional) description of the Service
+        :param version: (optional) version information of the Service
+        :param service_type: (optional) service type of the service (refer to ServiceType), defaults to `PYTHON_SCRIPT`
+        :param environment_version: (optional) execution environment of the service (refer to
+         ServiceEnvironmentVersion), defaults to `PYTHON_3_5`
+        :param pkg_path: (optional) full path name to the `kecpkg` (or python script) to upload.
+        :return: None
+        :raises APIError: In case of failure of the creation or failure to upload the pkg_path.
+        :raises OSError: In case of failure to locate the pkg_path.
+        """
+        if service_type not in ServiceType.values():
+            raise IllegalArgumentError("The type should be of one of {}".format(ServiceType.values()))
+
+        if environment_version not in ServiceEnvironmentVersion.values():
+            raise IllegalArgumentError("The environment version should be of one of {}".
+                                       format(ServiceEnvironmentVersion.values()))
+
+        data = {
+            "name": name,
+            "scope": scope,
+            "description": description,
+            "script_type": service_type,
+            "script_version": version,
+            "env_version": environment_version,
+        }
+
+        response = self._request('POST', self._build_url('services'),
+                                 data=data)
+
+        if response.status_code != requests.codes.created:
+            raise APIError("Could not create service ({})".format((response, response.json())))
+
+        service = Service(response.json().get('results')[0], client=self)
+
+        if pkg_path:
+            # upload the package
+            service.upload(pkg_path)
+
+        # refresh service contents in place
+        service.refresh()
+
+        return service

@@ -3,7 +3,12 @@ Change Log
 
 pykechain changelog
 
-.. note:: We have many point releases for release 1.12 as we are actively working on project that require timely updates of found bugs. Pykechain only gets better with every point release.
+1.13 (Scheduled: 10NOV17)
+-------------------------
+ * Added Service and ServiceExecution concepts to pykechain (#231). This includes the ability to retrieve, edit and upload kecpkg files to KE-chain services. Also the retrieve, terminate, and download log results for ServiceExecutions (associated to Service's) are available. This brings pykechain in line with the full abilities in KE-chain 2 SIM release (31OKT17) (SIM module license needed).
+ * Added additional keywords arguments in the scope and activity searchers. You can now kraft complex search queries to the KE-chain API (#231)
+ * Added additional tests and improved documentation for Service and ServiceExecution models.
+ * updated dependent versions for development only: matplotlib (2.1.0), nbsphinx (0.2.16), flake8 (3.5.0), sphinx (1.6.5), mypy (0.540), pydocstyle (2.1.1)
 
 1.12.9 (5OCT17)
 ---------------

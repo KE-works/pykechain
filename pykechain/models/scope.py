@@ -69,6 +69,51 @@ class Scope(Base):
         """
         return self._client.create_activity(self.process, *args, **kwargs)
 
+    def services(self, *args, **kwargs):
+        """Retrieve services belonging to this scope.
+
+        See :class:`pykechain.Client.services` for available parameters.
+
+        .. versionadded:: 1.13
+        """
+        return self._client.services(*args, scope=self.id, **kwargs)
+
+    def create_service(self, *args, **kwargs):
+        """Create a service to current scope.
+
+        See :class:`pykechain.Client.create_service` for available parameters.
+
+        .. versionadded:: 1.13
+        """
+        return self._client.create_service(*args, scope=self.id, **kwargs)
+
+    def service(self, *args, **kwargs):
+        """Retrieve a single service belonging to this scope.
+
+        See :class:`pykechain.Client.service` for available parameters.
+
+        .. versionadded:: 1.13
+        """
+        return self._client.service(*args, scope=self.id, **kwargs)
+
+    def service_executions(self, *args, **kwargs):
+        """Retrieve services belonging to this scope.
+
+        See :class:`pykechain.Client.service_executions` for available parameters.
+
+        .. versionadded:: 1.13
+        """
+        return self._client.service_executions(*args, scope=self.id, **kwargs)
+
+    def service_execution(self, *args, **kwargs):
+        """Retrieve a single service execution belonging to this scope.
+
+        See :class:`pykechain.Client.service_execution` for available parameters.
+
+        .. versionadded:: 1.13
+        """
+        return self._client.service_execution(*args, scope=self.id, **kwargs)
+
     def members(self, is_manager=None):
         """
         Retrieve members of the scope.
