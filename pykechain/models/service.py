@@ -6,7 +6,11 @@ from pykechain.models import Base
 
 
 class Service(Base):
-    """A virtual object representing a KE-chain scope."""
+    """
+    A virtual object representing a KE-chain scope.
+
+    .. versionadded:: 1.13
+    """
 
     def __init__(self, json, **kwargs):
         """Construct a scope from provided json data."""
@@ -19,7 +23,11 @@ class Service(Base):
         return "<pyke Service '{}' id {}>".format(self.name, self.id[-8:])
 
     def refresh(self):
-        """Refresh the Service from KE-chain."""
+        """
+        Refresh the Service from KE-chain.
+
+        .. versionadded:: 1.13
+        """
         fresh_service = self._client.service(pk=self.id)
         self.__dict__.update(fresh_service.__dict__)
 
@@ -28,6 +36,8 @@ class Service(Base):
         Execute the service.
 
         For interactive (notebook) service execution, set interactive to True, defaults to False
+
+        .. versionadded:: 1.13
 
         :param interactive: (optional) True if the notebook service should execute in interactive mode
         :return: ServiceExecution when succesfull
@@ -42,7 +52,19 @@ class Service(Base):
         return ServiceExecution(json=data.get('results')[0], client=self._client)
 
     def edit(self, name=None, description=None, version=None, **kwargs):
-        """Edit service details."""
+        """
+        Edit Service details.
+
+        .. versionadded:: 1.13
+
+        :param name: (optional) name of the service to change
+        :param description: (optional) description of the service
+        :param version: (optional) version number of the service
+        :param kwargs: (optional) additional keyword arguments to change
+        :return: None
+        :raises IllegalArgumentError: when you provide an illegal argument
+        :raises APIError: if the service could not be updated
+        """
         update_dict = {'id': self.id}
         if name:
             if not isinstance(name, str):
@@ -70,10 +92,33 @@ class Service(Base):
         if version:
             self.version = version
 
+    def delete(self):
+        # type: () -> None
+        """Delete this service
+
+        :return: None
+        :raises: APIError if delete was not succesfull
+        """
+        response = self._client._request('DELETE', self._client._build_url('service', service_id=self.id))
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            raise APIError("Could not delete service: {} with id {}".format(self.name, self.id))
+
     def upload(self, pkg_path=None):
-        """Upload a python script to the service."""
+        """
+        Upload a python script (or kecpkg) to the service.
+
+        .. versionadded:: 1.13
+
+        :param pkg_path: path to the python script or kecpkg to upload
+        :return: None
+        :raises APIError: if the python package could not be uploaded.
+        :raises OSError: if the python package could not be located on disk
+        """
         if os.path.exists(pkg_path):
             self._upload(pkg_path=pkg_path)
+        else:
+            raise OSError("Could not locate python package to upload in '{}'".format(pkg_path))
 
     def _upload(self, pkg_path):
         url = self._client._build_url('service_upload', service_id=self.id)
@@ -89,6 +134,8 @@ class Service(Base):
         Save the kecpkg service script to an (optional) target dir.
 
         Retains the filename of the service as known in KE-chain.
+
+        .. versionadded:: 1.13
 
         :param target_dir: (optional) target dir. If not provided will save to current working directory.
         :return: None
@@ -111,6 +158,8 @@ class Service(Base):
         """
         Retrieve the executions related to the current service.
 
+        .. versionadded:: 1.13
+
         :param kwargs: additional search keyword arguments to limit the search even futher
         :return: list of ServiceExecutions related to the current server
         """
@@ -118,7 +167,11 @@ class Service(Base):
 
 
 class ServiceExecution(Base):
-    """A virtual object representing a KE-chain scope."""
+    """
+    A virtual object representing a KE-chain scope.
+
+    .. versionadded:: 1.13
+    """
 
     def __init__(self, json, **kwargs):
         """Construct a scope from provided json data."""
@@ -140,6 +193,8 @@ class ServiceExecution(Base):
         """
         Terminate the Service execution.
 
+        .. versionadded:: 1.13
+
         :param silent: suppress errors, terminate silently (also when status not completed)
         :return:
         """
@@ -149,15 +204,19 @@ class ServiceExecution(Base):
         if response.status_code != requests.codes.accepted:
             raise APIError("Could not execute service '{}': {}".format(self, response))
 
-    def get_log(self, target_dir=None):
+    def get_log(self, target_dir=None, log_filename='log.txt'):
         """
         Retrieve the log of the service execution.
 
-        :param target_dir:
-        :return:
+        .. versionadded:: 1.13
+
+        :param target_dir: (optional) directory path name where the store the log.txt to.
+        :param log_filename: (optional) log filename to write the log to, defaults to `log.txt`.
+        :return: None
+        :raises APIError: if the logfile could not be found.
+        :raises OSError: if the file could not be written.
         """
-        filename = 'log.txt'
-        full_path = os.path.join(target_dir or os.getcwd(), filename)
+        full_path = os.path.join(target_dir or os.getcwd(), log_filename)
 
         url = self._client._build_url('service_execution_log', service_execution_id=self.id)
         response = self._client._request('GET', url)
@@ -172,8 +231,10 @@ class ServiceExecution(Base):
         """
         Get the url of the notebook, if the notebook is executed in interactive mode.
 
+        .. versionadded:: 1.13
+
         :return: full url to the interactive running notebook
-        :raise: APIError when the url cannot be retrieved
+        :raises APIError: when the url cannot be retrieved
         """
         url = self._client._build_url('service_execution_notebook_url', service_execution_id=self.id)
         response = self._client._request('GET', url, params=dict(format='json'))

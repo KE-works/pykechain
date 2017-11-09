@@ -5,7 +5,7 @@ import warnings
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
 
-from pykechain.enums import Category, KechainEnv, ScopeStatus
+from pykechain.enums import Category, KechainEnv, ScopeStatus, ServiceType, ServiceEnvironmentVersion
 from pykechain.models.service import Service, ServiceExecution
 from .__about__ import version
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError, IllegalArgumentError
@@ -682,3 +682,60 @@ class Client(object):
         model.properties.append(prop)
 
         return prop
+
+    def create_service(self, name, scope, description=None, version=None,
+                       service_type=ServiceType.PYTHON_SCRIPT,
+                       environment_version=ServiceEnvironmentVersion.PYTHON_3_5,
+                       pkg_path=None):
+        """
+        Create a Service.
+
+        A service can be created only providing the name (and scope). Other information can be added later.
+        If you provide a path to the `kecpkg` (or python script) to upload (pkg_path) on createion,
+        this `kecpkg` will be uploaded in one go. If the later fails, the service is still there, and the package is
+        not uploaded.
+
+        :param name: Name of the service
+        :param scope: Scope where the create the Service under
+        :param description: (optional) description of the Service
+        :param version: (optional) version information of the Service
+        :param service_type: (optional) service type of the service (refer to ServiceType), defaults to `PYTHON_SCRIPT`
+        :param environment_version: (optional) execution environment of the service (refer to
+         ServiceEnvironmentVersion), defaults to `PYTHON_3_5`
+        :param pkg_path: (optional) full path name to the `kecpkg` (or python script) to upload.
+        :return: None
+        :raises APIError: In case of failure of the creation or failure to upload the pkg_path.
+        :raises OSError: In case of failure to locate the pkg_path.
+        """
+        if service_type not in ServiceType.values():
+            raise IllegalArgumentError("The type should be of one of {}".format(ServiceType.values()))
+
+        if environment_version not in ServiceEnvironmentVersion.values():
+            raise IllegalArgumentError("The environment version should be of one of {}".
+                                       format(ServiceEnvironmentVersion.values()))
+
+        data = {
+            "name": name,
+            "scope": scope,
+            "description": description,
+            "script_type": service_type,
+            "script_version": version,
+            "env_version": environment_version,
+        }
+
+        response = self._request('POST', self._build_url('services'),
+                                 data=data)
+
+        if response.status_code != requests.codes.created:
+            raise APIError("Could not create service ({})".format((response, response.json())))
+
+        service = Service(response.json().get('results')[0], client=self)
+
+        if pkg_path:
+            # upload the package
+            service.upload(pkg_path)
+
+        # refresh service contents in place
+        service.refresh()
+
+        return service
