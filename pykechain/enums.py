@@ -94,14 +94,14 @@ class ScopeStatus(Enum):
     TEMPLATE = 'TEMPLATE'
 
 
-class ServiceTypes(Enum):
+class ServiceType(Enum):
     """The file types of sim script."""
 
     PYTHON_SCRIPT = 'PYTHON SCRIPT'
     NOTEBOOK = 'NOTEBOOK'
 
 
-class ServiceEnvironmentVersions(Enum):
+class ServiceEnvironmentVersion(Enum):
     """The acceptable versions of python where services run on."""
 
     PYTHON_2_7 = '2.7'

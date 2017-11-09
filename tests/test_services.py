@@ -1,13 +1,12 @@
 import time
 
-import sys
-
 import pytest
 
 from pykechain.enums import ServiceExecutionStatus
+from pykechain.exceptions import NotFoundError
 from tests.classes import TestBetamax
 
-
+# new in 1.13
 class TestServices(TestBetamax):
     def test_retrieve_services(self):
         self.assertTrue(self.client.services())
@@ -67,8 +66,19 @@ class TestServices(TestBetamax):
         # destroy
         service.edit(version=version_before)
 
+    def test_create_and_delete_service(self):
+        service_name = 'new service'
+        new_service = self.client.create_service(service_name, scope=self.project.id)
 
-class TestServiceExecutions(TestBetamax):
+        self.assertTrue(new_service.name, service_name)
+        self.assertTrue(new_service)
+
+        # destroy
+        new_service.delete()
+        with self.assertRaisesRegex(NotFoundError, 'No service fits criteria'):
+            self.client.service(pk=new_service.id)
+
+# new in 1.13class TestServiceExecutions(TestBetamax):
     def test_retrieve_service_executions(self):
         self.assertTrue(self.client.service_executions())
 
