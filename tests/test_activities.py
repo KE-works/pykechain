@@ -329,7 +329,10 @@ class TestActivities(TestBetamax):
         # now the self-healing will beging
         self.assertEqual(specify_wheel_diam_cripled.scope_id, self.project.id)
 
-
+    # in 1.13
+    def test_create_activity_with_incorrect_activity_class_fails(self):
+        with self.assertRaisesRegex(IllegalArgumentError, 'Please provide accepted activity_class (provided:'):
+            self.project.create_activity(name='New', activity_class='Activity')
 
 
 class TestActivitiesCustomisation(TestBetamax):
