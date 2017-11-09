@@ -187,10 +187,13 @@ class Client(object):
         :return: a new object
         :raises: NotFoundError
         """
-        r = self._request('GET', obj._json_data['url'])
+        if not obj._json_data.get('url'):
+            raise NotFoundError("Could not reload object, there is no url for object '{}' configured".format(obj)
+            
+        response = self._request('GET', obj._json_data.get('url'))
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not reload object")
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not reload object ({})".format(response))
 
         data = r.json()
 
