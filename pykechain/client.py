@@ -211,7 +211,7 @@ class Client(object):
         return obj.__class__(data['results'][0], client=self)
 
     def scopes(self, name=None, pk=None, status=ScopeStatus.ACTIVE, **kwargs):
-        # type: (Optional[str], Optional[str], Optional[str]) -> List[Scope]
+        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Scope]
         """Return all scopes visible / accessible for the logged in user.
 
         :param name: if provided, filter the search for a scope/project by name
@@ -282,7 +282,7 @@ class Client(object):
             'name': name,
             'scope': scope
         }
-        
+
         if kwargs:
             request_params.update(**kwargs)
 
