@@ -5,7 +5,7 @@ import warnings
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
 
-from pykechain.enums import Category, KechainEnv, ScopeStatus
+from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType
 from .__about__ import version
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError, IllegalArgumentError
 from .models import Scope, Activity, Part, PartSet, Property
@@ -450,6 +450,9 @@ class Client(object):
         :param activity_class: type of activity: UserTask (default) or Subprocess
         :return: Activity
         """
+        if activity_class and activity_class not in ActivityType.values():
+            raise IllegalArgumentError("Please provide accepted activity_class (provided:{} accepted:{})".
+                                       format(activity_class, ActivityType.values()))
         data = {
             "name": name,
             "process": process,
