@@ -191,8 +191,27 @@ class Client(object):
 
         return self.last_response
 
+    def reload(self, obj):
+        """Reload an object from server. This method is immutable and will return a new object.
+
+        :param obj: object to reload
+        :return: a new object
+        :raises: NotFoundError
+        """
+        if not obj._json_data.get('url'):
+            raise NotFoundError("Could not reload object, there is no url for object '{}' configured".format(obj))
+
+        response = self._request('GET', obj._json_data.get('url'))
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not reload object ({})".format(response))
+
+        data = response.json()
+
+        return obj.__class__(data['results'][0], client=self)
+
     def scopes(self, name=None, pk=None, status=ScopeStatus.ACTIVE, **kwargs):
-        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Scope]
+        # type: (Optional[str], Optional[str], Optional[str]) -> List[Scope]
         """Return all scopes visible / accessible for the logged in user.
 
         :param name: if provided, filter the search for a scope/project by name
@@ -223,12 +242,12 @@ class Client(object):
         if kwargs:
             request_params.update(**kwargs)
 
-        r = self._request('GET', self._build_url('scopes'), params=request_params)
+        response = self._request('GET', self._build_url('scopes'), params=request_params)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
+        if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve scopes")
 
-        data = r.json()
+        data = response.json()
 
         return [Scope(s, client=self) for s in data['results']]
 
@@ -263,15 +282,16 @@ class Client(object):
             'name': name,
             'scope': scope
         }
+        
         if kwargs:
             request_params.update(**kwargs)
 
-        r = self._request('GET', self._build_url('activities'), params=request_params)
+        response = self._request('GET', self._build_url('activities'), params=request_params)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve activities. Server responded with {}".format(str(r)))
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve activities. Server responded with {}".format(str(response)))
 
-        data = r.json()
+        data = response.json()
 
         return [Activity(a, client=self) for a in data['results']]
 
@@ -358,12 +378,12 @@ class Client(object):
         if kwargs:
             request_params.update(**kwargs)
 
-        r = self._request('GET', self._build_url('parts'), params=request_params)
+        response = self._request('GET', self._build_url('parts'), params=request_params)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
+        if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve parts")
 
-        data = r.json()
+        data = response.json()
 
         part_results = data['results']
 
@@ -372,8 +392,8 @@ class Client(object):
                 # respect the limit if set to > 0
                 if limit and len(part_results) >= limit:
                     break
-                r = self._request('GET', data['next'])
-                data = r.json()
+                response = self._request('GET', data['next'])
+                data = response.json()
                 part_results.extend(data['results'])
 
         return PartSet((Part(p, client=self) for p in part_results))
@@ -433,12 +453,12 @@ class Client(object):
         if kwargs:
             request_params.update(**kwargs)
 
-        r = self._request('GET', self._build_url('properties'), params=request_params)
+        response = self._request('GET', self._build_url('properties'), params=request_params)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
+        if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve properties")
 
-        data = r.json()
+        data = response.json()
 
         return [Property.create(p, client=self) for p in data['results']]
 
@@ -461,9 +481,9 @@ class Client(object):
         if kwargs:
             request_params.update(**kwargs)
 
-        r = self._request('GET', self._build_url('services'), params=request_params)
+        response = self._request('GET', self._build_url('services'), params=request_params)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
+        if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve properties")
 
         data = r.json()
@@ -562,24 +582,24 @@ class Client(object):
             "activity_class": activity_class
         }
 
-        r = self._request('POST', self._build_url('activities'), data=data)
+        response = self._request('POST', self._build_url('activities'), data=data)
 
-        if r.status_code != requests.codes.created:  # pragma: no cover
+        if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create activity")
 
-        data = r.json()
+        data = response.json()
 
         return Activity(data['results'][0], client=self)
 
     def _create_part(self, action, data):
-        r = self._request('POST', self._build_url('parts'),
-                          params={"select_action": action},
-                          data=data)
+        response = self._request('POST', self._build_url('parts'),
+                                 params={"select_action": action},
+                                 data=data)
 
-        if r.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create part, {}: {}".format(str(r), r.content))
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create part, {}: {}".format(str(response), response.content))
 
-        return Part(r.json()['results'][0], client=self)
+        return Part(response.json()['results'][0], client=self)
 
     def create_part(self, parent, model, name=None):
         """Create a new part instance from a given model under a given parent.
@@ -671,13 +691,13 @@ class Client(object):
             "value": default_value
         }
 
-        r = self._request('POST', self._build_url('properties'),
-                          data=data)
+        response = self._request('POST', self._build_url('properties'),
+                                 data=data)
 
-        if r.status_code != requests.codes.created:
+        if response.status_code != requests.codes.created:
             raise APIError("Could not create property")
 
-        prop = Property.create(r.json()['results'][0], client=self)
+        prop = Property.create(response.json()['results'][0], client=self)
 
         model.properties.append(prop)
 

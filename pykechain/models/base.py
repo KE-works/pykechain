@@ -14,8 +14,15 @@ class Base(object):
     def __repr__(self):  # pragma: no cover
         return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.name, self.id[-8:])
 
+
     def __eq__(self, other):  # pragma: no cover
         if hasattr(self, 'id') and hasattr(other, 'id'):
             return self.id == other.id
         else:
             return self == other
+
+    def refresh(self):
+        # type: () -> None
+        """Refresh the object in place."""
+        src = self._client.reload(self)
+        self.__dict__.update(src.__dict__)
