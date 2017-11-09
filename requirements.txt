@@ -10,19 +10,19 @@ pytest==3.2.3
 betamax==0.8.0
 
 # documentation
-Sphinx==1.6.4
+Sphinx==1.6.5
 nbsphinx==0.2.16
 
 # data science
 jupyter==1.0.0
-matplotlib==2.0.2
+matplotlib==2.1.0
 
 # integration
 tox==2.9.1
 
 # code style
 flake8==3.4.1
-pydocstyle==2.0.0
+pydocstyle==2.1.1
 mypy==0.521
 
 # to fix connection issues
