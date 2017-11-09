@@ -188,7 +188,7 @@ class Client(object):
         :raises: NotFoundError
         """
         if not obj._json_data.get('url'):
-            raise NotFoundError("Could not reload object, there is no url for object '{}' configured".format(obj)
+            raise NotFoundError("Could not reload object, there is no url for object '{}' configured".format(obj))
             
         response = self._request('GET', obj._json_data.get('url'))
 
