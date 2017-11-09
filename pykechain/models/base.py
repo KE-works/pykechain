@@ -1,5 +1,3 @@
-
-
 class Base(object):
     """Base model connecting retrieved data to a KE-chain client."""
 
