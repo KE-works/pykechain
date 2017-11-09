@@ -1,4 +1,5 @@
 import time
+from typing import Any  # flake8: noqa
 
 import os
 import requests
@@ -36,12 +37,12 @@ class Service(Base):
         :return: ServiceExecution when succesfull
         """
         url = self._client._build_url('service_execute', service_id=self.id)
-        r = self._client._request('GET', url, params=dict(interactive=interactive, format='json'))
+        response = self._client._request('GET', url, params=dict(interactive=interactive, format='json'))
 
-        if r.status_code != requests.codes.accepted:
-            raise APIError("Could not execute service '{}': {}".format(self, (r.status_code, r.json())))
+        if response.status_code != requests.codes.accepted:
+            raise APIError("Could not execute service '{}': {}".format(self, (response.status_code, response.json())))
 
-        data = r.json()
+        data = response.json()
         return ServiceExecution(json=data.get('results')[0], client=self._client)
 
     def edit(self, name=None, description=None, version=None, **kwargs):
@@ -62,10 +63,11 @@ class Service(Base):
 
         if kwargs:  # pragma: no cover
             update_dict.update(**kwargs)
-        r = self._client._request('PUT', self._client._build_url('service', service_id=self.id), json=update_dict)
+        response = self._client._request('PUT',
+                                         self._client._build_url('service', service_id=self.id), json=update_dict)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Service ({})".format(r))
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Service ({})".format(response))
 
         if name:
             self.name = name
@@ -80,27 +82,43 @@ class Service(Base):
     def _upload(self, pkg_path):
         url = self._client._build_url('service_upload', service_id=self.id)
 
-        r = self._client._request('POST', url,
-                                  files={'attachment': (os.path.basename(pkg_path), open(pkg_path, 'rb'))})
+        response = self._client._request('POST', url,
+                                         files={'attachment': (os.path.basename(pkg_path), open(pkg_path, 'rb'))})
 
-        if r.status_code != requests.codes.ok:
+        if response.status_code != requests.codes.ok:
             raise APIError("Could not upload service script file (or kecpkg)")
 
     def save_as(self, target_dir=None):
+        """
+        Save the kecpkg service script to an (optional) target dir.
+
+        Retains the filename of the service as known in KE-chain.
+
+        :param target_dir: (optional) target dir. If not provided will save to current working directory.
+        :return: None
+        :raises: APIError, if unable to download the service
+        :raises: OSError, if unable to save the service kecpkg file to disk.
+        """
         filename = self._json_data.get('script_file_name')
         full_path = os.path.join(target_dir or os.getcwd(), filename)
 
         url = self._client._build_url('service_download', service_id=self.id)
         response = self._client._request('GET', url)
         if response.status_code != requests.codes.ok:
-            raise APIError("Could not download service script file")
+            raise APIError("Could not download service script file ({})".format(response))
 
         with open(full_path, 'w+b') as f:
             for chunk in response:
                 f.write(chunk)
 
-    def get_executions(self):
-        return self._client.service_executions(service=self.id, scope=self.scope_id)
+    def get_executions(self, **kwargs):
+        """
+        Retrieve the executions related to the current service.
+
+        :param kwargs: additional search keyword arguments to limit the search even futher
+        :return: list of ServiceExecutions related to the current server
+        """
+        return self._client.service_executions(service=self.id, scope=self.scope_id, **kwargs)
 
 
 class ServiceExecution(Base):
@@ -131,10 +149,10 @@ class ServiceExecution(Base):
         :return:
         """
         url = self._client._build_url('service_execution_terminate', service_execution_id=self.id)
-        r = self._client._request('GET', url, params=dict(format='json'))
+        response = self._client._request('GET', url, params=dict(format='json'))
 
-        if r.status_code != requests.codes.accepted:
-            raise APIError("Could not execute service '{}': {}".format(self, r.json()))
+        if response.status_code != requests.codes.accepted:
+            raise APIError("Could not execute service '{}': {}".format(self, response))
 
     def get_log(self, target_dir=None):
         """
@@ -163,11 +181,11 @@ class ServiceExecution(Base):
         :raise: APIError when the url cannot be retrieved
         """
         url = self._client._build_url('service_execution_notebook_url', service_execution_id=self.id)
-        r = self._client._request('GET', url, params=dict(format='json'))
+        response = self._client._request('GET', url, params=dict(format='json'))
 
-        if r.status_code != requests.codes.ok:
-            raise APIError("Could not retrieve notebook url '{}': {}".format(self, r))
+        if response.status_code != requests.codes.ok:
+            raise APIError("Could not retrieve notebook url '{}': {}".format(self, response))
 
-        data = r.json()
+        data = response.json()
         url = data.get('results')[0].get('url')
         return url

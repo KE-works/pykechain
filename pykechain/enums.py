@@ -95,26 +95,23 @@ class ScopeStatus(Enum):
 
 
 class ServiceTypes(Enum):
-    """
-    The file types of sim script.
-    """
+    """The file types of sim script."""
+
     PYTHON_SCRIPT = 'PYTHON SCRIPT'
     NOTEBOOK = 'NOTEBOOK'
 
 
 class ServiceEnvironmentVersions(Enum):
-    """
-    The acceptable versions of python where services run on.
-    """
+    """The acceptable versions of python where services run on."""
+
     PYTHON_2_7 = '2.7'
     PYTHON_3_5 = '3.5'
     PYTHON_3_5_NOTEBOOKS = '3.5_notebook'
 
 
 class ServiceExecutionStatus(Enum):
-    """
-    The acceptable states of a running service.
-    """
+    """The acceptable states of a running service."""
+
     LOADING = 'LOADING'
     RUNNING = 'RUNNING'
     COMPLETED = 'COMPLETED'

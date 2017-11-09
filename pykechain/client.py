@@ -192,7 +192,7 @@ class Client(object):
         return self.last_response
 
     def scopes(self, name=None, pk=None, status=ScopeStatus.ACTIVE, **kwargs):
-        # type: (Optional[str], Optional[str], Optional[str]) -> List[Scope]
+        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Scope]
         """Return all scopes visible / accessible for the logged in user.
 
         :param name: if provided, filter the search for a scope/project by name
@@ -416,7 +416,7 @@ class Client(object):
         return _parts[0]
 
     def properties(self, name=None, pk=None, category=Category.INSTANCE, **kwargs):
-        # type: (Optional[str], Optional[str], Optional[str]) -> List[Property]
+        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Property]
         """Retrieve properties.
 
         :param name: name to limit the search for.
@@ -443,7 +443,16 @@ class Client(object):
         return [Property.create(p, client=self) for p in data['results']]
 
     def services(self, name=None, pk=None, scope=None, **kwargs):
+        """
+        Retrieve Services.
 
+        :param name: (optional) name to limit the search for
+        :param pk: (optional) primary key or id (UUID) of the service to search for
+        :param scope: (optional) id (UUID) of the scope to search in
+        :param kwargs: (optional) additional search keyword arguments
+        :return: list of Service objects
+        :raises: NotFoundError
+        """
         request_params = {
             'name': name,
             'id': pk,
@@ -461,6 +470,18 @@ class Client(object):
         return [Service(service, client=self) for service in data['results']]
 
     def service(self, name=None, pk=None, scope=None, **kwargs):
+        """
+        Retrieve single KE-chain Service.
+
+        Uses the same interface as the `services` method but returns only a single pykechain `Service` instance.
+
+        :param name: (optional) name to limit the search for
+        :param pk: (optional) primary key or id (UUID) of the service to search for
+        :param scope: (optional) id (UUID) of the scope to search in
+        :param kwargs: (optional) additional search keyword arguments
+        :return: single Service object
+        :raises: NotFoundError, MultipleFoundError
+        """
         _services = self.services(name=name, pk=pk, scope=scope, **kwargs)
 
         if len(_services) == 0:
@@ -471,6 +492,17 @@ class Client(object):
         return _services[0]
 
     def service_executions(self, name=None, pk=None, scope=None, service=None, **kwargs):
+        """
+        Retrieve Service Executions.
+
+        :param name: (optional) name to limit the search for
+        :param pk: (optional) primary key or id (UUID) of the service execution to search for
+        :param scope: (optional) id (UUID) of the scope to search in
+        :param service: (optional) id (UUID) of the service to search the service executions for
+        :param kwargs: (optional) additional search keyword arguments
+        :return: list of ServiceExecution objects
+        :raises: NotFoundError
+        """
         request_params = {
             'name': name,
             'id': pk,
@@ -488,8 +520,22 @@ class Client(object):
         data = r.json()
         return [ServiceExecution(service_exeuction, client=self) for service_exeuction in data['results']]
 
-    def service_execution(self, name=None, pk=None, scope=None, **kwargs):
-        _service_executions = self.service_executions(name=name, pk=pk, scope=scope, **kwargs)
+    def service_execution(self, name=None, pk=None, scope=None, service=None, **kwargs):
+        """
+        Retrieve single KE-chain ServiceExecution.
+
+        Uses the same interface as the `service_executions` method but returns only a single
+        pykechain `ServiceExecution` instance.
+
+        :param name: (optional) name to limit the search for
+        :param pk: (optional) primary key or id (UUID) of the service execution to search for
+        :param scope: (optional) id (UUID) of the scope to search in
+        :param service: (optional) id (UUID) of the service to search the service executions for
+        :param kwargs: (optional) additional search keyword arguments
+        :return: list of ServiceExecution objects
+        :raises: NotFoundError
+        """
+        _service_executions = self.service_executions(name=name, pk=pk, scope=scope, service=service, **kwargs)
 
         if len(_service_executions) == 0:
             raise NotFoundError("No service fits criteria")
