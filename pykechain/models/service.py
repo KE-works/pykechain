@@ -7,7 +7,7 @@ from pykechain.models import Base
 
 class Service(Base):
     """
-    A virtual object representing a KE-chain scope.
+    A virtual object representing a KE-chain Service.
 
     .. versionadded:: 1.13
     """
@@ -22,25 +22,16 @@ class Service(Base):
     def __repr__(self):  # pragma: no cover
         return "<pyke Service '{}' id {}>".format(self.name, self.id[-8:])
 
-    def refresh(self):
-        """
-        Refresh the Service from KE-chain.
-
-        .. versionadded:: 1.13
-        """
-        fresh_service = self._client.service(pk=self.id)
-        self.__dict__.update(fresh_service.__dict__)
-
     def execute(self, interactive=False):
         """
         Execute the service.
 
-        For interactive (notebook) service execution, set interactive to True, defaults to False
+        For interactive (notebook) service execution, set interactive to True, defaults to False.
 
         .. versionadded:: 1.13
 
-        :param interactive: (optional) True if the notebook service should execute in interactive mode
-        :return: ServiceExecution when succesfull
+        :param interactive: (optional) True if the notebook service should execute in interactive mode.
+        :return: ServiceExecution when succesfull.
         """
         url = self._client._build_url('service_execute', service_id=self.id)
         response = self._client._request('GET', url, params=dict(interactive=interactive, format='json'))
@@ -57,13 +48,13 @@ class Service(Base):
 
         .. versionadded:: 1.13
 
-        :param name: (optional) name of the service to change
-        :param description: (optional) description of the service
-        :param version: (optional) version number of the service
-        :param kwargs: (optional) additional keyword arguments to change
+        :param name: (optional) name of the service to change.
+        :param description: (optional) description of the service.
+        :param version: (optional) version number of the service.
+        :param kwargs: (optional) additional keyword arguments to change.
         :return: None
-        :raises IllegalArgumentError: when you provide an illegal argument
-        :raises APIError: if the service could not be updated
+        :raises IllegalArgumentError: when you provide an illegal argument.
+        :raises APIError: if the service could not be updated.
         """
         update_dict = {'id': self.id}
         if name:
@@ -97,7 +88,7 @@ class Service(Base):
         """Delete this service.
 
         :return: None
-        :raises: APIError if delete was not succesfull
+        :raises APIError: if delete was not succesfull.
         """
         response = self._client._request('DELETE', self._client._build_url('service', service_id=self.id))
 
@@ -110,10 +101,10 @@ class Service(Base):
 
         .. versionadded:: 1.13
 
-        :param pkg_path: path to the python script or kecpkg to upload
+        :param pkg_path: path to the python script or kecpkg to upload.
         :return: None
         :raises APIError: if the python package could not be uploaded.
-        :raises OSError: if the python package could not be located on disk
+        :raises OSError: if the python package could not be located on disk.
         """
         if os.path.exists(pkg_path):
             self._upload(pkg_path=pkg_path)
@@ -139,8 +130,8 @@ class Service(Base):
 
         :param target_dir: (optional) target dir. If not provided will save to current working directory.
         :return: None
-        :raises: APIError, if unable to download the service
-        :raises: OSError, if unable to save the service kecpkg file to disk.
+        :raises APIError: if unable to download the service.
+        :raises OSError: if unable to save the service kecpkg file to disk.
         """
         filename = self._json_data.get('script_file_name')
         full_path = os.path.join(target_dir or os.getcwd(), filename)
@@ -160,15 +151,15 @@ class Service(Base):
 
         .. versionadded:: 1.13
 
-        :param kwargs: additional search keyword arguments to limit the search even futher
-        :return: list of ServiceExecutions related to the current server
+        :param kwargs: additional search keyword arguments to limit the search even futher.
+        :return: list of ServiceExecutions associated to the current service.
         """
         return self._client.service_executions(service=self.id, scope=self.scope_id, **kwargs)
 
 
 class ServiceExecution(Base):
     """
-    A virtual object representing a KE-chain scope.
+    A virtual object representing a KE-chain Service Execution.
 
     .. versionadded:: 1.13
     """
@@ -184,19 +175,15 @@ class ServiceExecution(Base):
     def __repr__(self):  # pragma: no cover
         return "<pyke ServiceExecution '{}' id {}>".format(self.name, self.id[-8:])
 
-    def refresh(self):
-        """Refresh the service execution from KE-chain."""
-        refreshed = self._client.service_execution(pk=self.id)
-        self.__dict__.update(refreshed.__dict__)
-
     def terminate(self):
         """
         Terminate the Service execution.
 
         .. versionadded:: 1.13
 
-        :param silent: suppress errors, terminate silently (also when status not completed)
-        :return:
+        :param silent: suppress errors, terminate silently (also when status not completed).
+        :return: None
+        :raises APIError: When the service execution could not be terminated.
         """
         url = self._client._build_url('service_execution_terminate', service_execution_id=self.id)
         response = self._client._request('GET', url, params=dict(format='json'))
@@ -233,8 +220,8 @@ class ServiceExecution(Base):
 
         .. versionadded:: 1.13
 
-        :return: full url to the interactive running notebook
-        :raises APIError: when the url cannot be retrieved
+        :return: full url to the interactive running notebook.
+        :raises APIError: when the url cannot be retrieved.
         """
         url = self._client._build_url('service_execution_notebook_url', service_execution_id=self.id)
         response = self._client._request('GET', url, params=dict(format='json'))
