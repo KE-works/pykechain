@@ -1,5 +1,3 @@
-
-
 class Base(object):
     """Base model connecting retrieved data to a KE-chain client."""
 
@@ -13,7 +11,6 @@ class Base(object):
 
     def __repr__(self):  # pragma: no cover
         return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.name, self.id[-8:])
-
 
     def __eq__(self, other):  # pragma: no cover
         if hasattr(self, 'id') and hasattr(other, 'id'):
