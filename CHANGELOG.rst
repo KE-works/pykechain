@@ -3,12 +3,14 @@ Change Log
 
 pykechain changelog
 
-1.13 (Scheduled: 10NOV17)
--------------------------
- * Added Service and ServiceExecution concepts to pykechain (#231). This includes the ability to retrieve, edit and upload kecpkg files to KE-chain services. Also the retrieve, terminate, and download log results for ServiceExecutions (associated to Service's) are available. This brings pykechain in line with the full abilities in KE-chain 2 SIM release (31OKT17) (SIM module license needed).
- * Added additional keywords arguments in the scope and activity searchers. You can now kraft complex search queries to the KE-chain API (#231)
- * Added additional tests and improved documentation for Service and ServiceExecution models.
- * updated dependent versions for development only: matplotlib (2.1.0), nbsphinx (0.2.16), flake8 (3.5.0), sphinx (1.6.5), mypy (0.540), pydocstyle (2.1.1)
+1.13 (9NOV17)
+-------------
+ * Added `Service` and `ServiceExecution` models to pykechain (#231). This includes the ability to `create`, `retrieve`, `edit`, `destroy` and `upload` kecpkg files to KE-chain. Also the `retrieve`, `terminate`, and `download log` results for `ServiceExecution`s (which are associated to `Service`s) are available. This brings `pykechain` in line with the full abilities in KE-chain 2 SIM release (31OKT17) (SIM module license needed). Also see the PyPI package `kecpkg-tools` from KE-works to help you smoothen the workflow of creating custom KE-chain supported python packages (`kecpkg`) that can be executed by the KE-chain SIM module.
+ * Added additional keywords arguments in the scope and activity searchers. You can now craft complex search queries to the KE-chain API (#231)
+ * Prevented the creation of Activities with incorrect activity_class. This is now prevented in pykechain (#225)
+ * Added an option for all models to `reload` (will return a new object) and `refresh` (will update in place). (#232)
+ * Added additional tests and improved documentation for `Service` and `ServiceExecution` models.
+ * updated dependent versions for development: matplotlib (2.1.0), nbsphinx (0.2.16), flake8 (3.5.0), sphinx (1.6.5), mypy (0.540), pydocstyle (2.1.1)
 
 1.12.9 (5OCT17)
 ---------------
