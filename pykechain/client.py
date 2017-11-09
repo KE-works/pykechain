@@ -486,7 +486,7 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve properties")
 
-        data = r.json()
+        data = response.json()
         return [Service(service, client=self) for service in data['results']]
 
     def service(self, name=None, pk=None, scope=None, **kwargs):
