@@ -2,7 +2,7 @@ import os
 import requests
 
 from pykechain.exceptions import APIError, IllegalArgumentError
-from pykechain.models import Base
+from pykechain.models.base import Base
 
 
 class Service(Base):
