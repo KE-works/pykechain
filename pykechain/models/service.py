@@ -138,7 +138,7 @@ class ServiceExecution(Base):
 
     def refresh(self):
         """Refresh the service execution from KE-chain."""
-        refreshed = self._client.service_execution(pk=self.id, _dc=str(time.time()))
+        refreshed = self._client.service_execution(pk=self.id)
         self.__dict__.update(refreshed.__dict__)
 
     def terminate(self):

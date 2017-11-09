@@ -2,6 +2,8 @@ import time
 
 import sys
 
+import pytest
+
 from pykechain.enums import ServiceExecutionStatus
 from tests.classes import TestBetamax
 
@@ -23,6 +25,8 @@ class TestServices(TestBetamax):
         self.assertTrue(service)
         self.assertEqual(service.name, service_name)
 
+    @pytest.mark.skipif("os.getenv('TRAVIS', False)",
+                        reason="Skipping tests when using Travis, as Service Execution cannot be provided")
     def test_debug_service_execute(self):
         service_name = 'Debug pykechain'
         service = self.client.service(name=service_name)
@@ -75,6 +79,8 @@ class TestServiceExecutions(TestBetamax):
 
         self.assertEqual(self.client.service_execution(pk=service_execution_1.id), service_execution_1)
 
+    @pytest.mark.skipif("os.getenv('TRAVIS', False)",
+                        reason="Skipping tests when using Travis, as Service Execution cannot be provided")
     def test_debug_service_execution_terminate(self):
         service_name = 'Debug pykechain with 10s load'
         service = self.client.service(name=service_name)
