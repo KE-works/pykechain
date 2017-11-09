@@ -1,6 +1,3 @@
-import time
-from typing import Any  # flake8: noqa
-
 import os
 import requests
 
@@ -12,7 +9,6 @@ class Service(Base):
     """A virtual object representing a KE-chain scope."""
 
     def __init__(self, json, **kwargs):
-        # type: (dict, **Any) -> None
         """Construct a scope from provided json data."""
         super(Service, self).__init__(json, **kwargs)
 
@@ -125,7 +121,6 @@ class ServiceExecution(Base):
     """A virtual object representing a KE-chain scope."""
 
     def __init__(self, json, **kwargs):
-        # type: (dict, **Any) -> None
         """Construct a scope from provided json data."""
         super(ServiceExecution, self).__init__(json, **kwargs)
 
