@@ -9,6 +9,7 @@ from .property_attachment import AttachmentProperty
 from .property_selectlist import SelectListProperty
 from .property_reference import ReferenceProperty
 from .partset import PartSet
+from .service import Service, ServiceExecution
 
 __all__ = (
     'Base',
@@ -20,4 +21,6 @@ __all__ = (
     'AttachmentProperty',
     'SelectListProperty',
     'ReferenceProperty',
+    'Service',
+    'ServiceExecution'
 )
