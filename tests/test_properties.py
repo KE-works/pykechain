@@ -42,6 +42,15 @@ class TestProperties(TestBetamax):
 
         self.assertEqual(bike.id, bike2.id)
 
+    def test_create_reference_property(self):
+        bike = self.project.model('Bike')
+        frame = self.project.model('Frame')
+
+        new_ref_property = self.client.create_property(model=bike, name='Reference Property test',
+                                                       property_type='REFERENCE')
+
+        print('did it work?')
+
     def test_create_and_delete_property_model(self):
         # Retrieve the bike model
         bike = self.project.model('Bike')
