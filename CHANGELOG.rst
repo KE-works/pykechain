@@ -3,6 +3,12 @@ Change Log
 
 pykechain changelog
 
+1.13.1 (16NOV17)
+----------------
+ * Added additional xtypes to the list of allowed xtypes in the customizations in order to support our new widgets. (#240)
+ * updated dependent versions for development: pytest (3.2.5)
+
+
 1.13 (9NOV17)
 -------------
  * Added `Service` and `ServiceExecution` models to pykechain (#231). This includes the ability to `create`, `retrieve`, `edit`, `destroy` and `upload` kecpkg files to KE-chain. Also the `retrieve`, `terminate`, and `download log` results for `ServiceExecution`s (which are associated to `Service`s) are available. This brings `pykechain` in line with the full abilities in KE-chain 2 SIM release (31OKT17) (SIM module license needed). Also see the PyPI package `kecpkg-tools` from KE-works to help you smoothen the workflow of creating custom KE-chain supported python packages (`kecpkg`) that can be executed by the KE-chain SIM module.
