@@ -77,6 +77,17 @@ class ComponentXType(Enum):
     PAGINATEDSUPERGRID = "paginatedSuperGrid"
     FILTEREDGRID = "filteredGrid"
     DISPLAYFIELD = "displayfield"
+    # in 1.13.1
+    PROPERTYATTACHMENTPREVIEWER = "propertyAttachmentViewer"
+    HTMLPANEL = "htmlPanel"
+    EXECUTESERVICE = "executeService"
+    NOTEBOOKPANEL = "notebookPanel"
+
+    # for RND
+    BUTTON = "button"
+    MODELVIEWER = "modelViewer"
+    CSVGRID = "csvGrid"
+    JSONTREE = "jsonTree"
 
 
 class ActivityStatus(Enum):
