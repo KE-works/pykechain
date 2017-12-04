@@ -117,8 +117,8 @@ class Service(Base):
         response = self._client._request('POST', url,
                                          files={'attachment': (os.path.basename(pkg_path), open(pkg_path, 'rb'))})
 
-        if response.status_code != requests.codes.ok:
-            raise APIError("Could not upload service script file (or kecpkg)")
+        if response.status_code != requests.codes.accepted:
+            raise APIError("Could not upload service script file (or kecpkg) ({})".format(response))
 
     def save_as(self, target_dir=None):
         """

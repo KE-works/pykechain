@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+1.13.2 (4DEC17)
+---------------
+ * A wrong statuscode check prevented the upload of a script to complete fully in pykechain. The script is properly uploaded, but pykechain checked against wrong code (#246).
+
 1.13.1 (16NOV17)
 ----------------
  * Added additional xtypes to the list of allowed xtypes in the customizations in order to support our new widgets. (#240)
