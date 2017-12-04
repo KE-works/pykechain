@@ -6,6 +6,7 @@ pykechain changelog
 1.13.2 (4DEC17)
 ---------------
  * A wrong statuscode check prevented the upload of a script to complete fully in pykechain. The script is properly uploaded, but pykechain checked against wrong code (#246).
+ * updated dependent versions for development: pyopenssl (17.5.0), pytest (3.3.0), nbsphinx (0.2.18)
 
 1.13.1 (16NOV17)
 ----------------
