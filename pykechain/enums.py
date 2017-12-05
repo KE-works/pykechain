@@ -39,7 +39,7 @@ class Multiplicity(Enum):
 
 class Category(Enum):
     """The various categories of Parts that are accepted by KE-chain.
-    
+
     :cvar INSTANCE: Category of Instance
     :cvar MODEL: Category of Model
     """
@@ -50,7 +50,7 @@ class Category(Enum):
 
 class Classification(Enum):
     """The various classification of Parts that are accepted by KE-chain.
-    
+
     :cvar PRODUCT: Classification of the part object is Product
     :cvar MODEL: Classification of the part object is Model
     """
@@ -61,7 +61,7 @@ class Classification(Enum):
 
 class PropertyType(Enum):
     """The various property types that are accepted by KE-chain.
-    
+
     :cvar FLOAT_VALUE: floating point number property (with digits)
     :cvar INT_VALUE: integer property (whole number)
     :cvar TEXT_VALUE: text property (long text, may span multiple lines)
@@ -86,7 +86,7 @@ class PropertyType(Enum):
 
 class ActivityType(Enum):
     """The various Activity types that are accepted by KE-chain.
-    
+
     :cvar USERTASK: a normal usertask
     :cvar SUBPROCESS: a subprocess (container) containing other tasks
     :cvar SERVICETASK: a service taks (this concept is only availabe in RND KE-chain and will be deprecated)
@@ -99,7 +99,7 @@ class ActivityType(Enum):
 
 class ComponentXType(Enum):
     """The various inspectortypes supported in the customized task in KE-chain.
-    
+
     :cvar PANEL: panel
     :cvar TOOLBAR: toolbar
     :cvar PROPERTYGRID: propertyGrid
@@ -139,7 +139,7 @@ class ComponentXType(Enum):
 
 class ActivityStatus(Enum):
     """The various Activity statuses that are accepted by KE-chain.
-    
+
     :cvar OPEN: status of activity is open
     :cvar COMPLETED: status of activity is completed
     """
@@ -150,7 +150,7 @@ class ActivityStatus(Enum):
 
 class ScopeStatus(Enum):
     """The various status of a scope.
-    
+
     :cvar ACTIVE: Status of a scope is active (default)
     :cvar CLOSED: Status of a scope is closed
     :cvar TEMPLATE: Status of a scope is a template (not actively used)
@@ -163,9 +163,9 @@ class ScopeStatus(Enum):
 
 class ServiceType(Enum):
     """The file types of sim script.
-    
+
     :cvar PYTHON_SCRIPT: service is a python script
-    :cvar NOTEBOOK: service is a jupyter notebook    
+    :cvar NOTEBOOK: service is a jupyter notebook
     """
 
     PYTHON_SCRIPT = 'PYTHON SCRIPT'
@@ -174,10 +174,10 @@ class ServiceType(Enum):
 
 class ServiceEnvironmentVersion(Enum):
     """The acceptable versions of python where services run on.
-    
+
     :cvar PYTHON_2_7: Service execution environment is a python 2.7 container
     :cvar PYTHON_3_5: Service execution environment is a python 3.5 container
-    :cvar PYTHON_3_5_NOTEBOOKS: execution environment is a python 3.5 container with jupyter notebook preinstalled 
+    :cvar PYTHON_3_5_NOTEBOOKS: execution environment is a python 3.5 container with jupyter notebook preinstalled
     """
 
     PYTHON_2_7 = '2.7'
@@ -187,7 +187,7 @@ class ServiceEnvironmentVersion(Enum):
 
 class ServiceExecutionStatus(Enum):
     """The acceptable states of a running service.
-    
+
     :cvar LOADING: Execution is in LOADING state (next RUNNING, FAILED)
     :cvar RUNNING: Execution is in RUNNING state (next COMPLETED, FAILED, TERMINATING)
     :cvar COMPLETED: Execution is in COMPLETED state
@@ -206,7 +206,7 @@ class ServiceExecutionStatus(Enum):
 
 class KechainEnv(Enum):
     """Environment variables that can be set for pykechain.
-    
+
     :cvar KECHAIN_URL: full url of KE-chain where to connect to eg: 'https://<some>.ke-chain.com'
     :cvar KECHAIN_TOKEN: authentication token for the KE-chain user provided from KE-chain user account control
     :cvar KECHAIN_USERNAME: the username for the credentials
