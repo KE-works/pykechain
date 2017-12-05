@@ -3,6 +3,11 @@ Change Log
 
 pykechain changelog
 
+1.13.3 (5DEC17)
+---------------
+ * added the 'type' attribute to a property (#248)
+ * updated the enums documentation to include all the possible enums available (#247)
+
 1.13.2 (4DEC17)
 ---------------
  * A wrong statuscode check prevented the upload of a script to complete fully in pykechain. The script is properly uploaded, but pykechain checked against wrong code (#246).
