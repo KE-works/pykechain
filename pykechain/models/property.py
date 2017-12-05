@@ -8,7 +8,10 @@ from pykechain.models.base import Base
 
 
 class Property(Base):
-    """A virtual object representing a KE-chain property."""
+    """A virtual object representing a KE-chain property.
+
+    :cvar type: The property type of the property. One of the types described in `pykechain.enums.PropertyType`
+    """
 
     def __init__(self, json, **kwargs):
         # type: (dict, **Any) -> None
@@ -17,6 +20,7 @@ class Property(Base):
 
         self._output = json.get('output')
         self._value = json.get('value')
+        self.type = json.get('property_type')
 
     @property
     def output(self):

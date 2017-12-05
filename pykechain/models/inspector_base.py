@@ -101,7 +101,7 @@ class Customization(InspectorComponent):
 
         :param json: (optional) provide a Customization json, will be validated
         :ivar components: list of components
-        :raises ValueError, InspectorComponentError
+        :raises: ValueError, InspectorComponentError
         """
         self.components = []
         if json:
