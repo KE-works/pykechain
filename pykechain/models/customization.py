@@ -4,7 +4,7 @@ from jsonschema import validate
 from pykechain.enums import ComponentXType, Category
 from pykechain.exceptions import APIError
 
-uuid_pattern = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+uuid_pattern = r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 uuid_string = {"type": "string", "pattern": uuid_pattern}
 component_json_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
