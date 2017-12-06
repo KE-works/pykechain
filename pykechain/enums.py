@@ -71,13 +71,20 @@ class PropertyType(Enum):
     :cvar BOOLEAN_VALUE: a boolean value property (True/False)
     :cvar CHAR_VALUE: a charfield property (single line text)
     :cvar ATTACHMENT_VALUE: an attachment property
+
+    .. versionadded:: 1.14
+    :cvar SINGLE_SELECT_VALUE: single select list property (choose from a list)
+    :cvar REFERENCES_VALUE: a multi reference property, a UUID value refering to other parts
+
     """
 
     FLOAT_VALUE = "FLOAT_VALUE"
     INT_VALUE = "INT_VALUE"
     TEXT_VALUE = "TEXT_VALUE"
     LINK_VALUE = "LINK_VALUE"
+    SINGLE_SELECT_VALUE = 'SINGLE_SELECT_VALUE'
     REFERENCE_VALUE = "REFERENCE_VALUE"
+    REFERENCES_VALUE = "REFERENCES_VALUE"
     DATETIME_VALUE = "DATETIME_VALUE"
     BOOLEAN_VALUE = "BOOLEAN_VALUE"
     CHAR_VALUE = "CHAR_VALUE"

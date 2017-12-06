@@ -3,6 +3,7 @@ from typing import Any, AnyStr  # flake8: noqa
 import requests
 from six import text_type
 
+from pykechain.enums import PropertyType
 from pykechain.exceptions import APIError
 from pykechain.models.base import Base
 
@@ -83,15 +84,18 @@ class Property(Base):
         """
         property_type = json.get('property_type')
 
-        if property_type == 'ATTACHMENT_VALUE':
+        if property_type == PropertyType.ATTACHMENT_VALUE:
             from .property_attachment import AttachmentProperty
             return AttachmentProperty(json, **kwargs)
-        elif property_type == 'SINGLE_SELECT_VALUE':
+        elif property_type == PropertyType.SINGLE_SELECT_VALUE:
             from .property_selectlist import SelectListProperty
             return SelectListProperty(json, **kwargs)
-        elif property_type == 'REFERENCE_VALUE':
+        elif property_type == PropertyType.REFERENCE_VALUE:
             from .property_reference import ReferenceProperty
             return ReferenceProperty(json, **kwargs)
+        elif property_type == PropertyType.REFERENCES_VALUE:
+            from .property_multi_reference import MultiReferenceProperty
+            return MultiReferenceProperty(json, **kwargs)
         else:
             return Property(json, **kwargs)
 
