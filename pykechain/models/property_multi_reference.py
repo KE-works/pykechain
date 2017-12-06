@@ -2,6 +2,7 @@ from six import text_type
 
 from pykechain.models.part import Part
 from pykechain.models.property import Property
+from pykechain.utils import is_uuid
 
 
 class MultiReferenceProperty(Property):
@@ -68,7 +69,7 @@ class MultiReferenceProperty(Property):
             for item in value:
                 if isinstance(item, Part):
                     item = item.id
-                elif isinstance(item, text_type):
+                elif isinstance(item, text_type) and is_uuid(item):
                     # tested against a six.text_type (found in the requests' urllib3 package) for unicode conversion in py27
                     pass  # item = item
                 else:
@@ -76,7 +77,8 @@ class MultiReferenceProperty(Property):
         elif isinstance(value, type(None)):
             value = None
         else:
-            raise ValueError("Reference must be a list (or tuple) of Part, Part id or None. type: {}".format(type(value)))
+            raise ValueError(
+                "Reference must be a list (or tuple) of Part, Part id or None. type: {}".format(type(value)))
 
         # we replace the current choices!
         self._value = self._put_value(value)
