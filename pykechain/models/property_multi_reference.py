@@ -70,7 +70,8 @@ class MultiReferenceProperty(Property):
                 if isinstance(item, Part):
                     item = item.id
                 elif isinstance(item, text_type) and is_uuid(item):
-                    # tested against a six.text_type (found in the requests' urllib3 package) for unicode conversion in py27
+                    # tested against a six.text_type (found in the requests' urllib3 package) for unicode
+                    # conversion in py27
                     pass  # item = item
                 else:
                     raise ValueError("Reference must be a Part, Part id or None. type: {}".format(type(item)))
