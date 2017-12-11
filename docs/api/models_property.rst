@@ -15,5 +15,8 @@ pykechain Property Types
 .. autoclass:: pykechain.models.ReferenceProperty
    :members:
 
+.. autoclass:: pykechain.models.MultiReferenceProperty
+   :members:
+
 .. autoclass:: pykechain.models.SelectListProperty
    :members:
