@@ -6,7 +6,10 @@ from pykechain.utils import is_uuid
 
 
 class MultiReferenceProperty(Property):
-    """A virtual object representing a KE-chain multi-references property."""
+    """A virtual object representing a KE-chain multi-references property.
+
+    .. versionadded:: 1.14
+    """
 
     def __init__(self, json, **kwargs):
         """Construct a MultiReferenceProperty from a json object."""
