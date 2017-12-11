@@ -5,7 +5,8 @@ import warnings
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
 
-from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion
+from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
+    PropertyType
 from pykechain.models.service import Service, ServiceExecution
 from .__about__ import version
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError, IllegalArgumentError
@@ -686,19 +687,21 @@ class Client(object):
         if model.category != Category.MODEL:
             raise IllegalArgumentError("The model should be of category MODEL")
 
+        if property_type not in PropertyType.values():
+            property_type = "{}_VALUE".format(property_type.upper())
+
         data = {
             "name": name,
             "part": model.id,
             "description": description,
-            "property_type": property_type.upper() + '_VALUE',
+            "property_type": property_type,
             "value": default_value
         }
 
-        response = self._request('POST', self._build_url('properties'),
-                                 data=data)
+        response = self._request('POST', self._build_url('properties'), data=data)
 
         if response.status_code != requests.codes.created:
-            raise APIError("Could not create property")
+            raise APIError("Could not create property: {}, {}".format(response, response.data))
 
         prop = Property.create(response.json()['results'][0], client=self)
 
