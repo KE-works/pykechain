@@ -17,7 +17,7 @@ def find(iterable, predicate):
 
 def is_uuid(value):
     # type: (AnyStr) -> bool
-    """Check if the string value is a proper UUID string"""
+    """Check if the string value is a proper UUID string."""
     if re.match(UUID_REGEX_PATTERN, str(value)):
         return True
     else:
