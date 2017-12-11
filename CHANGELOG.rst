@@ -7,6 +7,7 @@ pykechain changelog
 1.14.0 (11DEC17)
 ----------------
  * In preparation for the release of KE-chain 2.7.0-132, we added support for multireference properties in pykechain. Pykechain 1.14 is compatible with both older versions of KE-chain as well as the ones supporting multireference properties. The main difference is that you need to provide a list of `Part`s or `part_id`s instead of a single `Part` or `part_id`. It will override the value in KE-chain fully, no adding or substraction methods are provided, you need to do that in your own code.
+ * Updated documentation for the `MultiReferenceProperty`.
  * updated dependent versions for development: pytest (3.3.1)
 
 1.13.3 (5DEC17)
