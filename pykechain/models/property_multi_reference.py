@@ -9,7 +9,6 @@ class MultiReferenceProperty(Property):
     """A virtual object representing a KE-chain multi-references property."""
 
     def __init__(self, json, **kwargs):
-        # type: (dict, **Any) -> None
         """Construct a MultiReferenceProperty from a json object."""
         super(MultiReferenceProperty, self).__init__(json, **kwargs)
 
