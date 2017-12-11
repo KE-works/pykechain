@@ -28,32 +28,33 @@ class MultiReferenceProperty(Property):
         Get the wheel reference property
 
         >>> part = project.part('Bike')
-        >>> material_ref_property = part.property('Material Selection')
-        >>> isinstance(material_ref_property, ReferenceProperty)
+        >>> wheels_ref_property = part.property('Wheels')
+        >>> isinstance(wheels_ref_property, MultiReferenceProperty)
         True
 
-        The value either returns a Part or is None if not set (yet)
+        The value returns a list of Parts or is an empty list
 
-        >>> type(material_ref_property.value) in (Part, None)
+        >>> type(wheels_ref_property.value) in (list, tuple)
         True
 
-        Get the selection of material instances containing the word material (icontains is for case-insensitive)
+        Get the selection of wheel instances:
 
-        >>> material_choices = project.parts(icontains='material')
+        >>> wheel_choices = wheels_ref_property.choices()
 
-        Choose random material option
+        Choose random wheel from the wheel_choices:
 
         >>> from random import choice
-        >>> chosen_material = choice(material_choices)
+        >>> wheel_choice_1 = choice(wheel_choices)
+        >>> wheel_choice_2 = choice(wheel_choices)
 
-        Set chosen material
-        1: provide the part
+        Set chosen wheel
+        1: provide a single wheel:
 
-        >>> material_ref_property.value = chosen_material
+        >>> wheels_ref_property.value = [wheel_choice_1]
 
-        2: provide the id
+        2: provide multiple wheels:
 
-        >>> material_ref_property.value = chosen_material.id
+        >>> wheels_ref_property.value = [wheel_choice_1, wheel_choice_2]
 
         """
         if not self._value:
@@ -84,7 +85,7 @@ class MultiReferenceProperty(Property):
         self._value = self._put_value(value)
 
     def choices(self):
-        """Retrieve the parts that you can reference for this `ReferenceProperty`.
+        """Retrieve the parts that you can reference for this `MultiReferenceProperty`.
 
         :return: the parts that can be referenced as :class:`pykechain.model.PartSet`.
         :raises: PropertyTypeError
@@ -92,7 +93,7 @@ class MultiReferenceProperty(Property):
         Example
         -------
 
-        >>> property = project.part('Bike').property('RefTest')
+        >>> property = project.part('Bike').property('a_multi_reference_property')
         >>> reference_part_choices = property.choices()
 
         """
