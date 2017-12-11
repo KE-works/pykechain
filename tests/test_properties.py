@@ -1,5 +1,6 @@
 from random import randrange
 
+from pykechain.enums import PropertyType
 from pykechain.exceptions import NotFoundError, APIError
 from pykechain.models import Property
 from tests.classes import TestBetamax
@@ -47,7 +48,7 @@ class TestProperties(TestBetamax):
         frame = self.project.model('Frame')
 
         new_ref_property = self.client.create_property(model=bike, name='Reference Property test',
-                                                       property_type='REFERENCE')
+                                                       property_type=PropertyType.REFERENCE_VALUE)
 
         print('did it work?')
 
