@@ -15,7 +15,7 @@ nbsphinx==0.2.18
 
 # data science
 jupyter==1.0.0
-matplotlib==2.1.0
+matplotlib==2.1.1
 
 # integration
 tox==2.9.1
