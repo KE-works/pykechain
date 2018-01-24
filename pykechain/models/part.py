@@ -254,9 +254,15 @@ class Part(Base):
         # type: (Part, **Any) -> Part
         """Add a new child to this part.
 
-        This can only act on instances
+        This can only act on instances.
+
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
 
         :param model: model to use for the child
+        :param kwargs: (optional) additional keyword=value arguments
         :return: :class:`pykechain.models.Part`
         :raises: APIError
 
@@ -276,7 +282,13 @@ class Part(Base):
         # type: (Part, **Any) -> Part
         """Add a new instance of this model to a part.
 
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
+
         :param parent: part to add the new instance to
+        :param kwargs: (optional) additional keyword=value arguments
         :return: :class:`pykechain.models.Part`
         :raises: APIError
 
@@ -296,25 +308,38 @@ class Part(Base):
         # type: (*Any, **Any) -> Part
         """Add a new child model to this model.
 
-        See :class:`pykechain.Client.create_model` for available parameters.
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
 
-        :return: Part
+        :param parent: parent model
+        :param name: new model name
+        :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N
+        :param kwargs: (optional) additional keyword=value arguments
+        :return: Part (category = model)
         """
         if self.category != Category.MODEL:
             raise APIError("Part should be of category MODEL")
 
         return self._client.create_model(self, *args, **kwargs)
 
-    def add_proxy_to(self, parent, name, multiplicity=Multiplicity.ONE_MANY):
-        # type: (Any, AnyStr, Any) -> Part
+    def add_proxy_to(self, parent, name, multiplicity=Multiplicity.ONE_MANY, **kwargs):
+        # type: (Any, AnyStr, Any, **Any) -> Part
         """Add this model as a proxy to another parent model.
 
         This will add the current model as a proxy model to another parent model. It ensure that it will copy the
         whole subassembly to the 'parent' model.
 
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
+
         :param name: Name of the new proxy model
         :param parent: parent of the
         :param multiplicity: the multiplicity of the new proxy model (default ONE_MANY)
+        :param kwargs: (optional) additional keyword=value arguments
         :return: Part (self)
 
         Examples
@@ -328,7 +353,7 @@ class Part(Base):
         >>> new_wheel_model.add_proxy_to(bike_model, "Wheel", multiplicity=Multiplicity.ONE_MANY)
 
         """
-        return self._client.create_proxy_model(self, parent, name, multiplicity)
+        return self._client.create_proxy_model(self, parent, name, multiplicity, **kwargs)
 
     def add_property(self, *args, **kwargs):
         # type: (*Any, **Any) -> Property
@@ -336,6 +361,12 @@ class Part(Base):
 
         See :class:`pykechain.Client.create_property` for available parameters.
 
+        :param model: parent model
+        :param name: property model name
+        :param description: property model description (optional)
+        :param property_type: choose between FLOAT, INT, TEXT, LINK, REFERENCE, DATETIME, BOOLEAN, CHAR, ATTACHMENT
+                              or SINGLE_SELECT
+        :param default_value: default value used for part instances
         :return: Property
         """
         if self.category != Category.MODEL:
@@ -356,11 +387,16 @@ class Part(Base):
             raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
 
     def edit(self, name=None, description=None, **kwargs):
-        # type: (AnyStr, AnyStr, Any) -> None
+        # type: (AnyStr, AnyStr, **Any) -> None
         """
         Edit the details of a part (model or instance).
 
         For an instance you can edit the Part instance name and the part instance description
+
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
 
         :param name: optional name of the part to edit
         :param description: (optional) description of the part
@@ -432,6 +468,11 @@ class Part(Base):
         """
         Edit part name and property values in one go.
 
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
+
         :param name: new part name (defined as a string)
         :param update_dict: dictionary with keys being property names (str) and values being property values
         :param bulk: True to use the bulk_update_properties API endpoint for KE-chain versions later then 2.1.0b
@@ -446,8 +487,6 @@ class Part(Base):
         >>> bike.update(name='Good name', update_dict={'Gears': 11, 'Total Height': 56.3}, bulk=True)
 
         """
-        # new for 1.5 and KE-chain 2 (released after 14 march 2017) is the 'bulk_update_properties' action on the api
-        # lets first use this one.
         # dict(name=name, properties=json.dumps(update_dict))) with property ids:value
         action = 'bulk_update_properties'
 
@@ -477,6 +516,11 @@ class Part(Base):
         """
         Add a part and update its properties in one go.
 
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
+
         :param model: model of the part which to add a new instance, should follow the model tree in KE-chain
         :param name: (optional) name provided for the new instance as string otherwise use the name of the model
         :param update_dict: dictionary with keys being property names (str) or property_id (from the property models)
@@ -493,7 +537,6 @@ class Part(Base):
         >>> bike.add_with_properties(wheel_model, 'Wooden Wheel', {'Spokes': 11, 'Material': 'Wood'})
 
         """
-        # TODO: add test coverage for this method
         if self.category != Category.INSTANCE:
             raise APIError("Part should be of category INSTANCE")
         name = name or model.name
@@ -506,7 +549,6 @@ class Part(Base):
             else:
                 properties_update_dict[model.property(prop_name_or_id).id] = property_value
 
-        # TODO: add bulk = False flags such that is used the old API (sequential)
         if bulk:
             r = self._client._request('POST', self._client._build_url('parts'),
                                       data=dict(
