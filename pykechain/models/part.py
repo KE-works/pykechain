@@ -448,14 +448,12 @@ class Part(Base):
 
         url = self._client._build_url('part', part_id=self.id)
 
-        update_dict_element = next(iter(update_dict.keys()))
-
-        if is_uuid(update_dict_element):
-            request_body = dict([(property_id, property_value)
-                                 for property_id, property_value in update_dict.items()])
-        else:
-            request_body = dict([(self.property(property_name).id, property_value)
-                                 for property_name, property_value in update_dict.items()])
+        request_body = dict()
+        for prop_name_or_id, property_value in update_dict.items():
+            if is_uuid(prop_name_or_id):
+                request_body[prop_name_or_id] = property_value
+            else:
+                request_body[self.property(prop_name_or_id).id] = property_value
 
         if bulk and len(update_dict.keys()) > 1:
             if name:
