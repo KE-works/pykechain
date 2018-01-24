@@ -66,15 +66,16 @@ class PropertyType(Enum):
     :cvar INT_VALUE: integer property (whole number)
     :cvar TEXT_VALUE: text property (long text, may span multiple lines)
     :cvar LINK_VALUE: url property
-    :cvar REFERENCE_VALUE: reference property, a UUID value refering to other parts
+    :cvar REFERENCE_VALUE: reference property, a UUID value referring to other parts
     :cvar DATETIME_VALUE: a datetime value property
     :cvar BOOLEAN_VALUE: a boolean value property (True/False)
     :cvar CHAR_VALUE: a charfield property (single line text)
     :cvar ATTACHMENT_VALUE: an attachment property
 
     .. versionadded:: 1.14
+
     :cvar SINGLE_SELECT_VALUE: single select list property (choose from a list)
-    :cvar REFERENCES_VALUE: a multi reference property, a UUID value refering to other parts
+    :cvar REFERENCES_VALUE: a multi reference property, a UUID value referring to other parts
 
     """
 
