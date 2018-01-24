@@ -1,3 +1,5 @@
+from typing import Any
+
 from pykechain.exceptions import APIError
 from pykechain.models.property import Property
 
