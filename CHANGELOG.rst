@@ -5,6 +5,8 @@ pykechain changelog
 
 1.14.2 (24JAN18)
 ----------------
+ * enabled to use of property model UUID in the `Part.add_with_properties()` next to using property names. (#258)
+ * enabled to search for properties using UUID next to using property names. This is provided for you in `Part.property()`.
  * updated dependent versions for development: pytest (3.3.2), sphinx (1.6.6), nbsphinx (0.3.1), matplotlib (2.1.2), mypy (0.560)
 
 1.14.1 (24JAN18)

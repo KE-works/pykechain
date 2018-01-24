@@ -113,7 +113,7 @@ class Property(Base):
         Example
         -------
         >>> front_fork = project.part('Front Fork')
-        >>> color_property = front_fork.property(name='Color')
+        >>> color_property = front_fork.property(name_or_id='Color')
         >>> color_property.edit(name='Shade', description='Could also be called tint, depending on mixture',
         >>> unit='RGB')
 

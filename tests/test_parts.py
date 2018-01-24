@@ -1,6 +1,7 @@
 from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import Part, PartSet
+from pykechain.utils import is_uuid
 from tests.classes import TestBetamax
 
 
@@ -386,7 +387,7 @@ class TestPartUpdate(TestBetamax):
         for prop_name, prop_value in saved_front_fork_properties.items():
             front_fork.property(prop_name).value = prop_value
 
-    # new in 1.15
+    # new in 1.14.1
     def test_part_update_with_property_ids(self):
         # setup
         front_fork = self.project.part('Front Fork')  # type: Part
@@ -428,7 +429,7 @@ class TestPartCreateWithProperties(TestBetamax):
 
         new_wheel.delete()
 
-    def test_create_part_with_properties_with_bulk(self):
+    def test_create_part_with_properties_names_with_bulk(self):
         """Test create a part with the properties when bulk = False for old API compatibility"""
         parent = self.project.part('Bike')  # type: Part
         wheel_model = self.project.model('Wheel')  # type: Part
@@ -446,6 +447,28 @@ class TestPartCreateWithProperties(TestBetamax):
 
         new_wheel.delete()
 
+    def test_create_part_with_properties_ids_with_bulk(self):
+        """Test create a part with the properties when bulk = False for old API compatibility"""
+        parent = self.project.part('Bike')  # type: Part
+        wheel_model = self.project.model('Wheel')  # type: Part
+
+        update_dict = {
+            wheel_model.property('Diameter').id : 42.43,
+            wheel_model.property('Spokes').id: 42,
+            wheel_model.property('Rim Material').id: 'Unobtanium'
+        }
+
+        # check if the keys are really a UUID
+        self.assertTrue(any([is_uuid(key) for key in update_dict.keys()]))
+
+        new_wheel = parent.add_with_properties(wheel_model, "Fresh Wheel", update_dict=update_dict, bulk=True)
+
+        self.assertEqual(type(new_wheel), Part)
+        self.assertTrue(new_wheel.property('Diameter'), 42.43)
+
+        new_wheel.delete()
+
+class TestPartRetrieve(TestBetamax):
     # 1.8
     def test_get_instances_of_a_model(self):
         wheel_model = self.project.model('Wheel')
@@ -480,6 +503,7 @@ class TestPartCreateWithProperties(TestBetamax):
         with self.assertRaises(NotFoundError):
             model_without_instances.instance()
 
+class TestPartsReorderProperties(TestBetamax):
     # new in 1.10
     def test_reorder_properties_using_names(self):
         # Retrieve the front fork model
