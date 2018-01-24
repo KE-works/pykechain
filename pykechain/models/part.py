@@ -58,13 +58,11 @@ class Part(Base):
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
         self.multiplicity = json.get('multiplicity', None)
 
-    def property(self, name):
+    def property(self, name_or_id):
         # type: (str) -> Property
         """Retrieve the property with name belonging to this part.
 
-        If you need to retrieve the property using eg. the id, use :meth:`pykechain.Client.properties`.
-
-        :param name: property name to search for
+        :param name_or_id: property name or property UUID to search for
         :return: a single :class:`pykechain.models.Property`
         :raises: NotFoundError
 
@@ -79,11 +77,19 @@ class Part(Base):
         >>> gears = part.property('Gears')
         >>> gears.value
         6
+
+        >>> gears = part.property('123e4567-e89b-12d3-a456-426655440000')
+        >>> gears.value
+        6
+
         """
-        found = find(self.properties, lambda p: name == p.name)
+        if is_uuid(name_or_id):
+            found = find(self.properties, lambda p: name_or_id == p.id)
+        else:
+            found = find(self.properties, lambda p: name_or_id == p.name)
 
         if not found:
-            raise NotFoundError("Could not find property with name {}".format(name))
+            raise NotFoundError("Could not find property with name {}".format(name_or_id))
 
         return found
 
@@ -473,7 +479,8 @@ class Part(Base):
 
         :param model: model of the part which to add a new instance, should follow the model tree in KE-chain
         :param name: (optional) name provided for the new instance as string otherwise use the name of the model
-        :param update_dict: dictionary with keys being property names (str) and values being property values
+        :param update_dict: dictionary with keys being property names (str) or property_id (from the property models)
+                            and values being property values
         :param bulk: True to use the bulk_update_properties API endpoint for KE-chain versions later then 2.1.0b
         :param kwargs: (optional) additional keyword arguments that will be passed inside the update request
         :return: :class:`pykechain.models.Part`
@@ -492,8 +499,13 @@ class Part(Base):
         name = name or model.name
         action = 'new_instance_with_properties'
 
-        properties_update_dict = dict([(model.property(property_name).id, property_value)
-                                       for property_name, property_value in update_dict.items()])
+        properties_update_dict = dict()
+        for prop_name_or_id, property_value in update_dict.items():
+            if is_uuid(prop_name_or_id):
+                properties_update_dict[prop_name_or_id] = property_value
+            else:
+                properties_update_dict[model.property(prop_name_or_id).id] = property_value
+
         # TODO: add bulk = False flags such that is used the old API (sequential)
         if bulk:
             r = self._client._request('POST', self._client._build_url('parts'),
@@ -561,7 +573,7 @@ class Part(Base):
 
         for prop in property_list:
             if isinstance(prop, (str, text_type)):
-                order_dict[self.property(name=prop).id] = property_list.index(prop)
+                order_dict[self.property(name_or_id=prop).id] = property_list.index(prop)
             else:
                 order_dict[prop.id] = property_list.index(prop)
 

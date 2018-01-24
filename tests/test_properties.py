@@ -11,10 +11,20 @@ class TestProperties(TestBetamax):
 
         self.assertTrue(len(properties) > 0)
 
-    def test_get_property(self):
+    def test_get_property_by_name(self):
         bike = self.project.part('Bike')
+        # retrieve the property Gears directly via an API call
+        gears_property = self.project._client.properties(name='Gears', category='INSTANCE')[0]
 
-        self.assertEqual(bike.property('Gears').value, 10)
+        self.assertEqual(bike.property('Gears'), gears_property)
+
+    def test_get_property_by_uuid(self):
+        bike = self.project.part('Bike')
+        gears_id = bike.property('Gears').id
+        # retrieve the property Gears directly via an API call
+        gears_property = self.project._client.properties(name='Gears', category='INSTANCE')[0]
+
+        self.assertEqual(bike.property(gears_id), gears_property)
 
     def test_get_invalid_property(self):
         bike = self.project.part('Bike')
@@ -86,10 +96,10 @@ class TestProperties(TestBetamax):
     # 1.11
     def test_edit_property_model_name(self):
         bike_model = self.project.model('Bike')
-        gears_property = bike_model.property(name='Gears')
+        gears_property = bike_model.property(name_or_id='Gears')
         gears_old_name = gears_property.name
         gears_property.edit(name='Cogs')
-        gears_property_u = bike_model.property(name='Cogs')
+        gears_property_u = bike_model.property(name_or_id='Cogs')
 
         self.assertEqual(gears_property.id, gears_property_u.id)
         self.assertEqual(gears_property.name, gears_property_u.name)
@@ -102,12 +112,12 @@ class TestProperties(TestBetamax):
 
     def test_edit_property_model_description(self):
         bike_model = self.project.model('Bike')
-        gears_property = bike_model.property(name='Gears')
+        gears_property = bike_model.property(name_or_id='Gears')
         gears_old_description = str(gears_property._json_data.get('description'))
 
         new_description = 'Cogs, definitely cogs.'
         gears_property.edit(description=new_description)
-        gears_property_u = bike_model.property(name='Gears')
+        gears_property_u = bike_model.property(name_or_id='Gears')
 
         self.assertEqual(gears_property.id, gears_property_u.id)
         with self.assertRaises(TypeError):
@@ -118,13 +128,13 @@ class TestProperties(TestBetamax):
 
     def test_edit_property_model_unit(self):
         front_fork_model = self.project.model('Front Fork')
-        height_property = front_fork_model.property(name='Height (mm)')
+        height_property = front_fork_model.property(name_or_id='Height (mm)')
         height_old_unit = str(height_property._json_data.get('unit'))
         new_unit = 'm'
 
         height_property.edit(unit=new_unit)
 
-        height_property_u = front_fork_model.property(name='Height (mm)')
+        height_property_u = front_fork_model.property(name_or_id='Height (mm)')
         self.assertEqual(height_property.id, height_property_u.id)
 
         with self.assertRaises(TypeError):
