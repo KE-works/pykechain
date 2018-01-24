@@ -619,8 +619,6 @@ class Client(object):
         :param parent: parent part instance
         :param model: target part model
         :param name: new part name
-        :param suppress_kevents: (optional) if set to True, no kevents are send out by the backend to update
-                                 the frontend (defaults to False)
         :param kwargs: (optional) additional keyword=value arguments
         :return: Part (category = instance)
         """
