@@ -11,6 +11,25 @@ class SelectListProperty(Property):
         self._options = self._json_data.get('options').get('value_choices')
 
     @property
+    def value(self):
+        # type: () -> Any
+        """Retrieve the data value of a property.
+
+        Setting this value will immediately update the property in KE-chain. The value should be in the list of options.
+        """
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        # type: (Any) -> None
+        if value not in self.options:
+            raise APIError('The new value `{}` of the single select list property should be in the list of '
+                           'options `{}`'.format(value, self.options))
+        if self._put_value(value):
+            self._value = value
+            self._json_data['value'] = value
+
+    @property
     def options(self):
         """List of options of this property to select from."""
         return self._options
