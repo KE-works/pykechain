@@ -64,3 +64,16 @@ class TestSelectListProperty(TestBetamax):
 
         with self.assertRaises(APIError):
             sellist_property.options = [1, 3.14]
+
+    # in 1.15
+    def test_value_not_in_options_raises_error(self):
+        sellist_model = self.project.model('Model')
+        sellist_part_instance = self.project.parts(model=sellist_model)
+        sellist_part_instance = sellist_part_instance[0]
+        self.assertEqual(sellist_part_instance.category ,'INSTANCE')
+
+        sellist_property = sellist_part_instance.property('a_select_list_property')
+        #set_value = sellist_property.value
+
+        with self.assertRaises(APIError):
+            sellist_property.value = 'Some illegal value that is not inside the list of options for sure'
