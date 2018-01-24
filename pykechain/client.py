@@ -594,7 +594,11 @@ class Client(object):
 
         return Activity(data['results'][0], client=self)
 
-    def _create_part(self, action, data):
+    def _create_part(self, action, data, **kwargs):
+        # prepare url query parameters
+        query_params = kwargs
+        query_params['select_action'] = action
+
         response = self._request('POST', self._build_url('parts'),
                                  params={"select_action": action},
                                  data=data)
@@ -604,12 +608,20 @@ class Client(object):
 
         return Part(response.json()['results'][0], client=self)
 
-    def create_part(self, parent, model, name=None):
+    def create_part(self, parent, model, name=None, **kwargs):
         """Create a new part instance from a given model under a given parent.
+
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
 
         :param parent: parent part instance
         :param model: target part model
         :param name: new part name
+        :param suppress_kevents: (optional) if set to True, no kevents are send out by the backend to update
+                                 the frontend (defaults to False)
+        :param kwargs: (optional) additional keyword=value arguments
         :return: Part (category = instance)
         """
         if parent.category != Category.INSTANCE:
@@ -626,14 +638,20 @@ class Client(object):
             "model": model.id
         }
 
-        return self._create_part("new_instance", data)
+        return self._create_part(action="new_instance", data=data, **kwargs)
 
-    def create_model(self, parent, name, multiplicity='ZERO_MANY'):
+    def create_model(self, parent, name, multiplicity='ZERO_MANY', **kwargs):
         """Create a new child model under a given parent.
+
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
 
         :param parent: parent model
         :param name: new model name
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N
+        :param kwargs: (optional) additional keyword=value arguments
         :return: Part (category = model)
         """
         if parent.category != Category.MODEL:
@@ -645,17 +663,23 @@ class Client(object):
             "multiplicity": multiplicity
         }
 
-        return self._create_part("create_child_model", data)
+        return self._create_part(action="create_child_model", data=data, **kwargs)
 
-    def create_proxy_model(self, model, parent, name, multiplicity='ZERO_MANY'):
+    def create_proxy_model(self, model, parent, name, multiplicity='ZERO_MANY', **kwargs):
         """Add this model as a proxy to another parent model.
 
         This will add a model as a proxy model to another parent model. It ensure that it will copy the
         whole subassembly to the 'parent' model.
 
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
+
         :param name: Name of the new proxy model
         :param parent: parent of the
         :param multiplicity: the multiplicity of the new proxy model (default ONE_MANY)
+        :param kwargs: (optional) additional keyword=value arguments
         :return: the new proxy model part
         """
         if model.category != Category.MODEL:
@@ -670,7 +694,7 @@ class Client(object):
             "multiplicity": multiplicity
         }
 
-        return self._create_part('create_proxy_model', data)
+        return self._create_part(action='create_proxy_model', data=data, **kwargs)
 
     def create_property(self, model, name, description=None, property_type='CHAR', default_value=None):
         """Create a new property model under a given model.
@@ -678,8 +702,8 @@ class Client(object):
         :param model: parent model
         :param name: property model name
         :param description: property model description (optional)
-        :param property_type: choose between FLOAT, INT, TEXT, LINK, REFERENCE, DATETIME, BOOLEAN, CHAR, ATTACHMENT or
-         SINGLE_SELECT
+        :param property_type: choose between FLOAT, INT, TEXT, LINK, REFERENCE, DATETIME, BOOLEAN, CHAR, ATTACHMENT
+                              or SINGLE_SELECT
         :param default_value: default value used for part instances
         :return: Property
         """
