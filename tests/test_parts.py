@@ -386,6 +386,28 @@ class TestPartUpdate(TestBetamax):
         for prop_name, prop_value in saved_front_fork_properties.items():
             front_fork.property(prop_name).value = prop_value
 
+    # new in 1.15
+    def test_part_update_with_property_ids(self):
+        # setup
+        front_fork = self.project.part('Front Fork')  # type: Part
+        saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
+
+        update_dict = dict()
+        for p in front_fork.properties:
+            if p.name == 'Color':
+                update_dict[p.id] = 'Green'
+            elif p.name == 'Material':
+                update_dict[p.id] = 'Titanium'
+            elif p.name == 'Height (mm)':
+                update_dict[p.id] = '42'
+
+        # do tests
+        front_fork.update(update_dict=update_dict, use_ids=True)
+
+        # tearDown
+        for prop_name, prop_value in saved_front_fork_properties.items():
+            front_fork.property(prop_name).value = prop_value
+
 
 class TestPartCreateWithProperties(TestBetamax):
     def test_create_part_with_properties_no_bulk(self):
