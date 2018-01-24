@@ -8,7 +8,7 @@ from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import NotFoundError, APIError, MultipleFoundError, IllegalArgumentError
 from pykechain.models.base import Base
 from pykechain.models.property import Property
-from pykechain.utils import find
+from pykechain.utils import find, is_uuid
 
 
 class Part(Base):
@@ -423,15 +423,13 @@ class Part(Base):
 
         return ''.join(html)
 
-    def update(self, name=None, update_dict=None, bulk=True, use_ids=False, **kwargs):
+    def update(self, name=None, update_dict=None, bulk=True, **kwargs):
         """
         Edit part name and property values in one go.
 
         :param name: new part name (defined as a string)
-        :param update_dict: dictionary with keys being property names (str) or property ids and values being property
-                            values
+        :param update_dict: dictionary with keys being property names (str) and values being property values
         :param bulk: True to use the bulk_update_properties API endpoint for KE-chain versions later then 2.1.0b
-        :param use_ids: True to use the ids of properties as keys inside update_dict
         :param kwargs: (optional) additional keyword arguments that will be passed inside the update request
         :return: :class:`pykechain.models.Part`
         :raises: APIError, Raises `NotFoundError` when the property name is not a valid property of this part
@@ -449,12 +447,15 @@ class Part(Base):
         action = 'bulk_update_properties'
 
         url = self._client._build_url('part', part_id=self.id)
-        if not use_ids:
-            request_body = dict([(self.property(property_name).id, property_value)
-                                 for property_name, property_value in update_dict.items()])
-        else:
+
+        update_dict_element = next(iter(update_dict.keys()))
+
+        if is_uuid(update_dict_element):
             request_body = dict([(property_id, property_value)
                                  for property_id, property_value in update_dict.items()])
+        else:
+            request_body = dict([(self.property(property_name).id, property_value)
+                                 for property_name, property_value in update_dict.items()])
 
         if bulk and len(update_dict.keys()) > 1:
             if name:
