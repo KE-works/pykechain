@@ -1,5 +1,3 @@
-from typing import Any
-
 from pykechain.exceptions import APIError
 from pykechain.models.property import Property
 
@@ -14,7 +12,6 @@ class SelectListProperty(Property):
 
     @property
     def value(self):
-        # type: () -> Any
         """Retrieve the data value of a property.
 
         Setting this value will immediately update the property in KE-chain. The value should be in the list of options.
@@ -23,7 +20,6 @@ class SelectListProperty(Property):
 
     @value.setter
     def value(self, value):
-        # type: (Any) -> None
         if value not in self.options:
             raise APIError('The new value `{}` of the single select list property should be in the list of '
                            'options `{}`'.format(value, self.options))
