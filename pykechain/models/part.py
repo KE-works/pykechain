@@ -1,14 +1,13 @@
 import json
-from typing import Any, AnyStr  # flake8: noqa
-
 import requests
 from six import text_type
+from typing import Any, AnyStr  # flake8: noqa
 
 from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import NotFoundError, APIError, MultipleFoundError, IllegalArgumentError
 from pykechain.models.base import Base
 from pykechain.models.property import Property
-from pykechain.utils import find
+from pykechain.utils import find, is_uuid
 
 
 class Part(Base):
@@ -447,8 +446,13 @@ class Part(Base):
         action = 'bulk_update_properties'
 
         url = self._client._build_url('part', part_id=self.id)
-        request_body = dict([(self.property(property_name).id, property_value)
-                             for property_name, property_value in update_dict.items()])
+
+        request_body = dict()
+        for prop_name_or_id, property_value in update_dict.items():
+            if is_uuid(prop_name_or_id):
+                request_body[prop_name_or_id] = property_value
+            else:
+                request_body[self.property(prop_name_or_id).id] = property_value
 
         if bulk and len(update_dict.keys()) > 1:
             if name:

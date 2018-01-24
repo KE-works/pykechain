@@ -3,6 +3,13 @@ Change Log
 
 pykechain changelog
 
+1.14.2 (24JAN18)
+----------------
+ * updated dependent versions for development: pytest (3.3.2), sphinx (1.6.6), nbsphinx (0.3.1), matplotlib (2.1.2), mypy (0.560)
+
+1.14.1 (24JAN18)
+----------------
+ * The `Part.update()` is now considerate if you provide the property UUIDs inside the `update_dict` as well as property names. You can even mix UUIDs and property names together. (#263) Thanks to @raduiordache
 
 1.14.0 (11DEC17)
 ----------------
