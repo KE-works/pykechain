@@ -359,14 +359,13 @@ class Part(Base):
         # type: (*Any, **Any) -> Property
         """Add a new property to this model.
 
-        See :class:`pykechain.Client.create_property` for available parameters.
-
         :param model: parent model
         :param name: property model name
         :param description: property model description (optional)
         :param property_type: choose between FLOAT, INT, TEXT, LINK, REFERENCE, DATETIME, BOOLEAN, CHAR, ATTACHMENT
                               or SINGLE_SELECT
         :param default_value: default value used for part instances
+        :param kwargs: (optional) additional keyword=value arguments
         :return: Property
         """
         if self.category != Category.MODEL:
