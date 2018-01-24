@@ -1,8 +1,7 @@
 import json
-from typing import Any, AnyStr  # flake8: noqa
-
 import requests
 from six import text_type
+from typing import Any, AnyStr  # flake8: noqa
 
 from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import NotFoundError, APIError, MultipleFoundError, IllegalArgumentError
