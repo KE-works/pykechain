@@ -6,7 +6,7 @@ pykechain changelog
 
 1.14.1 (24JAN18)
 ----------------
- * The `Part.update()` is now considerate if you provide the property UUIDs inside the `update_dict` as well as property names. You can even mix UUIDs and property names together. (#263) Thanks to @radyiordache
+ * The `Part.update()` is now considerate if you provide the property UUIDs inside the `update_dict` as well as property names. You can even mix UUIDs and property names together. (#263) Thanks to @raduiordache
 
 1.14.0 (11DEC17)
 ----------------
