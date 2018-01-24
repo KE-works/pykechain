@@ -59,7 +59,6 @@ class Part(Base):
         self.multiplicity = json.get('multiplicity', None)
 
     def property(self, name_or_id):
-        # type: (str) -> Property
         """Retrieve the property with name belonging to this part.
 
         :param name_or_id: property name or property UUID to search for
@@ -83,13 +82,14 @@ class Part(Base):
         6
 
         """
+        found = None
         if is_uuid(name_or_id):
             found = find(self.properties, lambda p: name_or_id == p.id)
         else:
             found = find(self.properties, lambda p: name_or_id == p.name)
 
         if not found:
-            raise NotFoundError("Could not find property with name {}".format(name_or_id))
+            raise NotFoundError("Could not find property with name or id {}".format(name_or_id))
 
         return found
 
