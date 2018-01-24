@@ -402,7 +402,7 @@ class TestPartUpdate(TestBetamax):
                 update_dict[p.id] = '42'
 
         # do tests
-        front_fork.update(update_dict=update_dict, use_ids=True)
+        front_fork.update(update_dict=update_dict)
 
         # tearDown
         for prop_name, prop_value in saved_front_fork_properties.items():
