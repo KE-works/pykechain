@@ -4,6 +4,10 @@ Change Log
 pykechain changelog
 
 
+1.14.1 (24JAN18)
+----------------
+ * The `Part.update()` is now considerate if you provide the property UUIDs inside the `update_dict` as well as property names. You can even mix UUIDs and property names together. (#263) Thanks to @radyiordache
+
 1.14.0 (11DEC17)
 ----------------
  * In preparation for the release of KE-chain 2.7.0-132, we added support for multireference properties in pykechain. Pykechain 1.14 is compatible with both older versions of KE-chain as well as the ones supporting multireference properties. The main difference is that you need to provide a list of `Part`s or `part_id`s instead of a single `Part` or `part_id`. It will override the value in KE-chain fully, no adding or substraction methods are provided, you need to do that in your own code.
