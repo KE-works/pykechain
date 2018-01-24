@@ -89,7 +89,7 @@ class Client(object):
         """Create a client from environment variable settings.
 
         :param basestring env_filename: filename of the environment file, defaults to '.env' in the local dir (or parent dir)
-        :return: :py:class:`pykechain.Client`
+        :return: :class:`pykechain.Client`
 
         Example
         -------
@@ -685,7 +685,11 @@ class Client(object):
 
         return Activity(data['results'][0], client=self)
 
-    def _create_part(self, action, data):
+    def _create_part(self, action, data, **kwargs):
+        # prepare url query parameters
+        query_params = kwargs
+        query_params['select_action'] = action
+
         response = self._request('POST', self._build_url('parts'),
                                  params={"select_action": action},
                                  data=data)
@@ -695,8 +699,13 @@ class Client(object):
 
         return Part(response.json()['results'][0], client=self)
 
-    def create_part(self, parent, model, name=None):
+    def create_part(self, parent, model, name=None, **kwargs):
         """Create a new part instance from a given model under a given parent.
+
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
 
         :param parent: parent part instance of the new instance
         :type parent: :class:`models.Part`
@@ -704,6 +713,8 @@ class Client(object):
         :type model: :class:`models.Part`
         :param name: new part name
         :type name: basestring
+        :param kwargs: (optional) additional keyword=value arguments
+        :return: Part (category = instance)
         :return: :class:`models.Part` with category `INSTANCE`
         :raises APIError: if the `Part` could not be created
         """
@@ -721,17 +732,26 @@ class Client(object):
             "model": model.id
         }
 
-        return self._create_part("new_instance", data)
+        return self._create_part(action="new_instance", data=data, **kwargs)
 
-    def create_model(self, parent, name, multiplicity='ZERO_MANY'):
+    def create_model(self, parent, name, multiplicity='ZERO_MANY', **kwargs):
         """Create a new child model under a given parent.
 
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
+
+        :param parent: parent model
+        :param name: new model name
         :param parent: parent part instance
         :type parent: :class:`models.Part`
         :param name: new part name
         :type name: basestring
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N
         :type multiplicity: basestring
+        :param kwargs: (optional) additional keyword=value arguments
+        :type kwargs: dict
         :return: :class:`models.Part` with category `MODEL`
         :raises APIError: if the `Part` could not be created
         """
@@ -744,13 +764,18 @@ class Client(object):
             "multiplicity": multiplicity
         }
 
-        return self._create_part("create_child_model", data)
+        return self._create_part(action="create_child_model", data=data, **kwargs)
 
-    def create_proxy_model(self, model, parent, name, multiplicity='ZERO_MANY'):
+    def create_proxy_model(self, model, parent, name, multiplicity='ZERO_MANY', **kwargs):
         """Add this model as a proxy to another parent model.
 
         This will add a model as a proxy model to another parent model. It ensure that it will copy the
         whole subassembly to the 'parent' model.
+
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
 
         :param model: the catalog proxy model the new proxied model should be based upon
         :type model: :class:`models.Part`
@@ -760,6 +785,8 @@ class Client(object):
         :type name: basestring
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N, default is `ZERO_MANY`
         :type multiplicity: basestring
+        :param kwargs: (optional) additional keyword=value arguments
+        :type kwargs: dict
         :return: the new proxy :class:`models.Part` with category `MODEL`
         :raises APIError: if the `Part` could not be created
         """
@@ -775,7 +802,7 @@ class Client(object):
             "multiplicity": multiplicity
         }
 
-        return self._create_part('create_proxy_model', data)
+        return self._create_part(action='create_proxy_model', data=data, **kwargs)
 
     def create_property(self, model, name, description=None, property_type='CHAR', default_value=None):
         """Create a new property model under a given model.
@@ -791,6 +818,8 @@ class Client(object):
         :type property_type: basestring or None
         :param default_value: default value used for part instances when creating a model.
         :type default_value: any
+        :param kwargs: (optional) additional keyword=value arguments
+        :type kwargs: dict
         :return: a :class:`models.Property` with category `MODEL`
         :raises APIError: if the `Property` model could not be created
         """
