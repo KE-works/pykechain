@@ -5,7 +5,14 @@ from pykechain.models.inspector_base import InspectorComponent
 
 
 class HtmlPanel(InspectorComponent):
-    """HTML Panel Component for the inspector."""
+    """HTML Panel Component for the inspector.
+
+    .. warning::
+
+       The use of `InspectorComponents` and `Customization` object is deprecated in November 2017. For
+       KE-chain releases later than 2.5, please use the :func:`Activity.customization()` method to retrieve
+       the newer type customization.
+    """
 
     def __init__(self, json=None, html=None, title=None, **kwargs):
         """
@@ -31,7 +38,14 @@ class HtmlPanel(InspectorComponent):
 
 
 class PropertyGrid(InspectorComponent):
-    """PropertyGrid component."""
+    """PropertyGrid component.
+
+    .. warning::
+
+       The use of `InspectorComponents` and `Customization` object is deprecated in November 2017. For
+       KE-chain releases later than 2.5, please use the :func:`Activity.customization()` method to retrieve
+       the newer type customization.
+    """
 
     def __init__(self, json=None, part=None, title=None, **kwargs):
         """
@@ -62,7 +76,14 @@ class PropertyGrid(InspectorComponent):
 
 
 class SuperGrid(InspectorComponent):
-    """The SuperGrid component."""
+    """The SuperGrid component.
+
+    .. warning::
+
+       The use of `InspectorComponents` and `Customization` object is deprecated in November 2017. For
+       KE-chain releases later than 2.5, please use the :func:`Activity.customization()` method to retrieve
+       the newer type customization.
+    """
 
     def __init__(self, json=None, parent=None, model=None, activity_id=None, title=None, **kwargs):
         """
@@ -135,6 +156,12 @@ class SuperGrid(InspectorComponent):
 
 class FilteredGrid(InspectorComponent):
     """Filtered and Paginated Grid component for a task customization in KE-chain 2.
+
+    .. warning::
+
+       The use of `InspectorComponents` and `Customization` object is deprecated in November 2017. For
+       KE-chain releases later than 2.5, please use the :func:`Activity.customization()` method to retrieve
+       the newer type customization.
 
     Example json for the configuration::
 
@@ -219,7 +246,13 @@ class PaginatedGrid(InspectorComponent):
     """
     Paginated Grid component for a task customization in KE-chain 2.
 
-    Example JSON defenition::
+    .. warning::
+
+       The use of `InspectorComponents` and `Customization` object is deprecated in November 2017. For
+       KE-chain releases later than 2.5, please use the :func:`Activity.customization()` method to retrieve
+       the newer type customization.
+
+    Example JSON definition::
 
         {
             "components": [{

@@ -47,7 +47,14 @@ widgetconfig_json_schema = {
 
 
 class InspectorComponent(object):
-    """Inspector Base Component for a customization."""
+    """Inspector Base Component for a customization.
+
+    .. warning::
+
+       The use of `InspectorComponents` and `Customization` object is deprecated in November 2017. For
+       KE-chain releases later than 2.5, please use the :func:`Activity.customization()` method to retrieve
+       the newer type customization.
+    """
 
     def __init__(self, json=None, **kwargs):
         """
@@ -94,7 +101,15 @@ class InspectorComponent(object):
 
 
 class Customization(InspectorComponent):
-    """Customization wrapper object."""
+    """Customization wrapper object.
+
+    .. warning::
+
+       The use of `InspectorComponents` and `Customization` object is deprecated in November 2017. For
+       KE-chain releases later than 2.5, please use the :func:`Activity.customization()` method to retrieve
+       the newer type customization.
+
+    """
 
     def __init__(self, json=None, **kwargs):
         """Make a new Customization object that wraps the various components.

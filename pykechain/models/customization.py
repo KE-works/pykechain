@@ -50,7 +50,10 @@ widgetconfig_json_schema = {
 
 
 class CustomizationBase(object):
-    """Base class for customization objects."""
+    """Base class for customization objects.
+
+    :cvar activity: the :class:`Activity`
+    """
 
     def __init__(self, activity, client):
         """Initialize the Base class for customization objects."""
@@ -106,7 +109,8 @@ class ExtCustomization(CustomizationBase):
 
         Will save the widget to KE-chain.
 
-        :param widget: The widget to be added
+        :param widget: The widget (specific json dict) to be added
+        :type widget: dict
         """
         widgets = self.widgets()
         widgets += [widget]
@@ -116,8 +120,7 @@ class ExtCustomization(CustomizationBase):
         """
         Get the Ext JS specific customization from the activity.
 
-        :return: The Ext JS specific customization
-        :rtype: list of widgets
+        :return: The Ext JS specific customization in `list(dict)` form
         """
         customization = self.activity._json_data.get('customization')
 
@@ -130,7 +133,11 @@ class ExtCustomization(CustomizationBase):
         """
         Delete widgets by index.
 
+        The widgets are saved to KE-chain.
+
         :param index: The index of the widget to be deleted in the self.widgets
+        :type index: int
+        :raises ValueError: if the customization has no widgets
         """
         widgets = self.widgets()
         if len(widgets) is 0:
@@ -139,7 +146,10 @@ class ExtCustomization(CustomizationBase):
         self._save_customization(widgets)
 
     def delete_all_widgets(self):
-        """Delete all widgets."""
+        """Delete all widgets.
+
+        :raises APIError: if the widgets could not be deleted.
+        """
         self._save_customization([])
 
     def add_json_widget(self, config):
@@ -149,22 +159,29 @@ class ExtCustomization(CustomizationBase):
         The configuration json provided must be interpretable by KE-chain. The json will be validated
         against the widget json schema.
 
+        The widget will be saved to KE-chain.
+
         :param config: The json configuration of the widget
+        :type config: dict
         """
         validate(config, component_json_schema)
         self._add_widget(dict(config=config, name="jsonWidget"))
 
     def add_property_grid_widget(self, part_instance, max_height=None, custom_title=None):
         """
-        Add an Ext JS property grid widget to the customization.
+        Add an KE-chain Property Grid widget to the customization.
+
+        The widget will be saved to KE-chain.
 
         :param part_instance: The part instance on which the property grid will be based
+        :type part_instance: :class:`Part`
         :param max_height: The max height of the property grid in pixels
+        :type max_height: int or None
         :param custom_title: A custom title for the property grid
                  - None (default): Part instance name
                  - String value: Custom title
                  - False: No title
-        :return: None
+        :type custom_title: basestring or None
         """
         # Declare property grid config
         config = {
