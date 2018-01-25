@@ -195,7 +195,8 @@ class Client(object):
     def reload(self, obj):
         """Reload an object from server. This method is immutable and will return a new object.
 
-        :param any obj: object to reload
+        :param obj: object to reload
+        :type obj: :py:obj:`obj`
         :return: a new object
         :raises NotFoundError: if original object is not found or deleted in the mean time
         """

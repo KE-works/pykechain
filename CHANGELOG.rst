@@ -12,6 +12,7 @@ pykechain changelog
  * The `Part.update()` is now considerate if you provide the property UUIDs inside the `update_dict` as well as property names. You can even mix UUIDs and property names together. (#263) Thanks to @raduiordache
  * updated dependent versions for development: pytest (3.3.2), sphinx (1.6.6), nbsphinx (0.3.1), matplotlib (2.1.2), mypy (0.560)
  * updated documentation with additional crosslinks and better references.
+ * added source code to all API documentation
 
 1.14.0 (11DEC17)
 ----------------

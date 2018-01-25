@@ -31,7 +31,9 @@ class Service(Base):
         .. versionadded:: 1.13
 
         :param interactive: (optional) True if the notebook service should execute in interactive mode.
-        :return: ServiceExecution when succesfull.
+        :type interactive: bool or None
+        :return: ServiceExecution when successful.
+        :raises APIError: when unable to execute
         """
         url = self._client._build_url('service_execute', service_id=self.id)
         response = self._client._request('GET', url, params=dict(interactive=interactive, format='json'))
@@ -49,10 +51,13 @@ class Service(Base):
         .. versionadded:: 1.13
 
         :param name: (optional) name of the service to change.
+        :type name: basestring or None
         :param description: (optional) description of the service.
+        :type description: basestring or None
         :param version: (optional) version number of the service.
+        :type version: basestring or None
         :param kwargs: (optional) additional keyword arguments to change.
-        :return: None
+        :type kwargs: dict or None
         :raises IllegalArgumentError: when you provide an illegal argument.
         :raises APIError: if the service could not be updated.
         """
@@ -87,7 +92,6 @@ class Service(Base):
         # type: () -> None
         """Delete this service.
 
-        :return: None
         :raises APIError: if delete was not succesfull.
         """
         response = self._client._request('DELETE', self._client._build_url('service', service_id=self.id))
@@ -95,14 +99,14 @@ class Service(Base):
         if response.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete service: {} with id {}".format(self.name, self.id))
 
-    def upload(self, pkg_path=None):
+    def upload(self, pkg_path):
         """
         Upload a python script (or kecpkg) to the service.
 
         .. versionadded:: 1.13
 
         :param pkg_path: path to the python script or kecpkg to upload.
-        :return: None
+        :type pkg_path: basestring
         :raises APIError: if the python package could not be uploaded.
         :raises OSError: if the python package could not be located on disk.
         """
@@ -129,7 +133,7 @@ class Service(Base):
         .. versionadded:: 1.13
 
         :param target_dir: (optional) target dir. If not provided will save to current working directory.
-        :return: None
+        :type target_dir: basestring or None
         :raises APIError: if unable to download the service.
         :raises OSError: if unable to save the service kecpkg file to disk.
         """
@@ -151,7 +155,8 @@ class Service(Base):
 
         .. versionadded:: 1.13
 
-        :param kwargs: additional search keyword arguments to limit the search even futher.
+        :param kwargs: (optional) additional search keyword arguments to limit the search even futher.
+        :type kwargs: dict
         :return: list of ServiceExecutions associated to the current service.
         """
         return self._client.service_executions(service=self.id, scope=self.scope_id, **kwargs)
@@ -181,8 +186,7 @@ class ServiceExecution(Base):
 
         .. versionadded:: 1.13
 
-        :param silent: suppress errors, terminate silently (also when status not completed).
-        :return: None
+        :return: None if the termination request was succesfull
         :raises APIError: When the service execution could not be terminated.
         """
         url = self._client._build_url('service_execution_terminate', service_execution_id=self.id)
@@ -198,8 +202,9 @@ class ServiceExecution(Base):
         .. versionadded:: 1.13
 
         :param target_dir: (optional) directory path name where the store the log.txt to.
+        :type target_dir: basestring or None
         :param log_filename: (optional) log filename to write the log to, defaults to `log.txt`.
-        :return: None
+        :type log_filename: basestring or None
         :raises APIError: if the logfile could not be found.
         :raises OSError: if the file could not be written.
         """
@@ -220,7 +225,7 @@ class ServiceExecution(Base):
 
         .. versionadded:: 1.13
 
-        :return: full url to the interactive running notebook.
+        :return: full url to the interactive running notebook as `basestring`
         :raises APIError: when the url cannot be retrieved.
         """
         url = self._client._build_url('service_execution_notebook_url', service_execution_id=self.id)
