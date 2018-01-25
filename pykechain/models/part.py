@@ -651,7 +651,7 @@ class Part(Base):
             raise APIError("Part should be of category MODEL")
         if not isinstance(property_list, list):
             raise IllegalArgumentError('Expected a list of strings or Property() objects, got a {} object'.
-                            format(type(property_list)))
+                                       format(type(property_list)))
 
         order_dict = dict()
 

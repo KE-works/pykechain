@@ -6,6 +6,7 @@ T = TypeVar('T')
 
 UUID_REGEX_PATTERN = r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 
+
 def find(iterable, predicate):
     # type: (Iterable[T], Callable[[T], bool]) -> Optional[T]
     """Return the first item in the iterable that matches the predicate function."""
@@ -14,6 +15,7 @@ def find(iterable, predicate):
             return i
 
     return None
+
 
 def is_uuid(value):
     # type: (AnyStr) -> bool

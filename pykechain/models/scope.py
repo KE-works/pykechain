@@ -1,9 +1,10 @@
 from typing import Any  # flake8: noqa
+
 import requests
 
 from pykechain.enums import Multiplicity
-from pykechain.models.base import Base
 from pykechain.exceptions import APIError, NotFoundError
+from pykechain.models.base import Base
 
 
 class Scope(Base):
@@ -211,4 +212,3 @@ class Scope(Base):
                 raise NotFoundError("User {} does not exist".format(user))
         else:
             raise TypeError("User {} should be defined as a string".format(user))
-
