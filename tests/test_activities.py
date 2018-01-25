@@ -9,7 +9,7 @@ import warnings
 
 from pykechain.enums import Category, ActivityType, ActivityStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
-from pykechain.models import Part
+from pykechain.models import Part, Activity
 from pykechain.models.inspector_base import Customization
 from pykechain.models.inspectors import SuperGrid, PropertyGrid
 from tests.classes import TestBetamax

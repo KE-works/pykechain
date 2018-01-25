@@ -10,6 +10,8 @@ pykechain changelog
  * enabled to use of property model UUID in the `Part.add_with_properties()` next to using property names. (#258)
  * enabled to search for properties using UUID next to using property names. This is provided for you in `Part.property()`.
  * The `Part.update()` is now considerate if you provide the property UUIDs inside the `update_dict` as well as property names. You can even mix UUIDs and property names together. (#263) Thanks to @raduiordache
+ * functions and methods that check if the correct type was provided to the method as arguments that raised `TypeError` before, are now raising `IllegalArgumentError`.
+ * The `Activity.customize()` method and the `InspectorComponents` are now deprecated (since Nov 17) and will raise deprecation errors when called. Use `Activity.customization()` to retrieve the new activity Customization objects.
  * updated dependent versions for development: pytest (3.3.2), sphinx (1.6.6), nbsphinx (0.3.1), matplotlib (2.1.2), mypy (0.560)
  * updated documentation with additional crosslinks and better references.
  * added source code to all API documentation

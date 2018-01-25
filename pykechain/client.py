@@ -88,7 +88,8 @@ class Client(object):
         # type: (Optional[str]) -> Client
         """Create a client from environment variable settings.
 
-        :param basestring env_filename: filename of the environment file, defaults to '.env' in the local dir (or parent dir)
+        :param basestring env_filename: filename of the environment file, defaults to '.env' in the local dir
+                                        (or parent dir)
         :return: :class:`pykechain.Client`
 
         Example
@@ -819,8 +820,6 @@ class Client(object):
         :type property_type: basestring or None
         :param default_value: default value used for part instances when creating a model.
         :type default_value: any
-        :param kwargs: (optional) additional keyword=value arguments
-        :type kwargs: dict
         :return: a :class:`models.Property` with category `MODEL`
         :raises APIError: if the `Property` model could not be created
         """

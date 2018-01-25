@@ -52,7 +52,7 @@ class Classification(Enum):
     """The various classification of Parts that are accepted by KE-chain.
 
     :cvar PRODUCT: Classification of the part object is Product
-    :cvar MODEL: Classification of the part object is Model
+    :cvar CATALOG: Classification of the part object is a CATALOG
     """
 
     PRODUCT = "PRODUCT"
