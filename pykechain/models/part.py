@@ -627,7 +627,7 @@ class Part(Base):
 
     def order_properties(self, property_list=None):
         """
-        Order the properties of a part model using a list of property objects or property names or property id's
+        Order the properties of a part model using a list of property objects or property names or property id's.
 
         :param property_list: ordered list of property names (basestring) or property id's (uuid)
         :type property_list: list(basestring)
