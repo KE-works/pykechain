@@ -633,6 +633,7 @@ class Part(Base):
         :type property_list: list(basestring)
         :returns: the :class:`Part` with the reordered list of properties
         :raises APIError: when an Error occurs
+        :raises IllegalArgumentError: When provided a wrong argument
 
         Examples
         --------
@@ -649,7 +650,7 @@ class Part(Base):
         if self.category != Category.MODEL:
             raise APIError("Part should be of category MODEL")
         if not isinstance(property_list, list):
-            raise TypeError('Expected a list of strings or Property() objects, got a {} object'.
+            raise IllegalArgumentError('Expected a list of strings or Property() objects, got a {} object'.
                             format(type(property_list)))
 
         order_dict = dict()

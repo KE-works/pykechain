@@ -119,6 +119,7 @@ class Scope(Base):
         Retrieve members of the scope.
 
         :param is_manager: (optional) set to True to return only Scope members that are also managers.
+        :type is_manager: bool
         :return: List of members (usernames)
 
         Examples
@@ -140,6 +141,8 @@ class Scope(Base):
         You may only edit the list of members if the pykechain credentials allow this.
 
         :param member: single username to be added to the scope list of members
+        :type member: basestring
+        :raises APIError: when unable to update the scope member
         """
         select_action = 'add_member'
 
@@ -149,7 +152,9 @@ class Scope(Base):
         """
         Remove a single member to the scope.
 
-        :param member: single username to be removed to the scope list of members
+        :param member: single username to be removed from the scope list of members
+        :type member: basestring
+        :raises APIError: when unable to update the scope member
         """
         select_action = 'remove_member'
 
@@ -160,6 +165,8 @@ class Scope(Base):
         Add a single manager to the scope.
 
         :param manager: single username to be added to the scope list of managers
+        :type manager: basestring
+        :raises APIError: when unable to update the scope manager
         """
         select_action = 'add_manager'
 
@@ -169,7 +176,9 @@ class Scope(Base):
         """
         Remove a single manager to the scope.
 
-        :param manager: single username to be removed to the scope list of managers
+        :param manager: single username to be added to the scope list of managers
+        :type manager: basestring
+        :raises APIError: when unable to update the scope manager
         """
         select_action = 'remove_manager'
 
@@ -180,8 +189,12 @@ class Scope(Base):
         Update the Project Team of the Scope. Updates include addition or removing of managers or members.
 
         :param select_action: type of action to be applied
+        :type select_action: basestring
         :param user: the username of the user to which the action applies to
+        :type user: basestring
         :param user_type: the type of the user (member or manager)
+        :type user_type: basestring
+        :raises APIError: When unable to update the scope project team.
         """
         if isinstance(user, str):
             users = self._client._retrieve_users()

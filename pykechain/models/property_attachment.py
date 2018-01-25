@@ -39,7 +39,7 @@ class AttachmentProperty(Property):
     def clear(self):
         """Clear the attachment from the attachment field.
 
-        :raises: APIError if not possible to remove the attachment
+        :raises APIError: if unable to remove the attachment
         """
         if self._put_value(None) is None:
             self._value = None
@@ -48,8 +48,9 @@ class AttachmentProperty(Property):
     def json_load(self):
         """Download the data from the attachment and deserialise the contained json.
 
-        :return: deserialised json data
-        :raises: APIError, JSONDecodeError
+        :return: deserialised json data as :class:`dict`
+        :raises APIError: When unable to retrieve the json from KE-chain
+        :raises JSONDecodeError: When there was a problem in deserialising the json
 
         Example
         -------
@@ -63,8 +64,15 @@ class AttachmentProperty(Property):
     def upload(self, data, **kwargs):
         """Upload a file to the attachment property.
 
+        When providing a :class:`matplotlib.figure.Figure` object as data, the figure is uploaded as PNG.
+        For this, `matplotlib`_ should be installed.
+
         :param filename: File path
-        :raises: APIError
+        :type filename: basestring
+        :raises APIError: When unable to upload the file to KE-chain
+        :raises OSError: When the path to the file is incorrect or file could not be found
+
+        .. _matplotlib: https://matplotlib.org/
         """
         try:
             import matplotlib.figure
@@ -85,7 +93,9 @@ class AttachmentProperty(Property):
         """Download the attachment to a file.
 
         :param filename: File path
-        :raises: APIError
+        :type filename: basestring
+        :raises APIError: When unable to download the data
+        :raises OSError: When unable to save the data to disk
         """
         with open(filename, 'w+b') as f:
             for chunk in self._download():

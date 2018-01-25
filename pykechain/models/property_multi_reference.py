@@ -24,7 +24,8 @@ class MultiReferenceProperty(Property):
         You can set the reference with a Part, Part id or None value.
         Ensure that the model of the provided part, matches the configured model
 
-        :return: Part or None
+        :return: a :class:`Part` or None
+        :raises APIError: When unable to find the associated :class:`Part`
 
         Example
         -------
@@ -90,8 +91,11 @@ class MultiReferenceProperty(Property):
     def choices(self):
         """Retrieve the parts that you can reference for this `MultiReferenceProperty`.
 
-        :return: the parts that can be referenced as :class:`pykechain.model.PartSet`.
-        :raises: PropertyTypeError
+        This method makes 2 API calls: 1) to retrieve the referenced model, and 2) to retrieve the instances of
+        that model.
+
+        :return: the :class:`Part`'s that can be referenced as a :class:`~pykechain.model.PartSet`.
+        :raises APIError: When unable to load and provide the choices
 
         Example
         -------
