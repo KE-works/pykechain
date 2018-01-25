@@ -32,7 +32,10 @@ class Activity(Base):
         This property will always produce a scope_id, even when the scope object was not included in an earlier
         response.
 
+        When the :class:`Scope` is not included in this task, it will make an additional call to the KE-chain API.
+
         :return: the scope id (uuid string)
+        :raises NotFoundError: if the scope could not be found
         """
         if self.scope:
             scope_id = self.scope and self.scope.get('id')
@@ -67,15 +70,15 @@ class Activity(Base):
     def associated_parts(self, *args, **kwargs):
         """Retrieve models and instances belonging to this activity.
 
-        This is a convenience method for the `Activity.parts()` method, which is used to retrieve both the
+        This is a convenience method for the :func:`Activity.parts()` method, which is used to retrieve both the
         `Category.MODEL` as well as the `Category.INSTANCE` in a tuple.
 
         If you want to retrieve only the models associated to this task it is better to use:
             `task.parts(category=Category.MODEL)`.
 
-        See :class:`pykechain.Client.parts` for additional available parameters.
+        See :func:`pykechain.Client.parts` for additional available parameters.
 
-        :returns: Tuple(models PartSet, instances PartSet)
+        :returns: a tuple(models of :class:`PartSet`, instances of :class:`PartSet`)
 
         Example
         -------
@@ -89,9 +92,13 @@ class Activity(Base):
     def configure(self, inputs, outputs):
         """Configure activity input and output.
 
+        You need to provide a list of input and output :class:`Property`. Does not work with lists of propery id's.
+
         :param inputs: iterable of input property models
+        :type inputs: list(:class:`Property`)
         :param outputs: iterable of output property models
-        :raises: APIError
+        :type outputs: list(:class:`Property`)
+        :raises APIError: when unable to configure the activity
         """
         url = self._client._build_url('activity', activity_id=self.id)
 
@@ -104,7 +111,10 @@ class Activity(Base):
             raise APIError("Could not configure activity")
 
     def delete(self):
-        """Delete this activity."""
+        """Delete this activity.
+
+        :raises APIError: when unable to delete the activity
+        """
         r = self._client._request('DELETE', self._client._build_url('activity', activity_id=self.id))
 
         if r.status_code != requests.codes.no_content:
@@ -113,10 +123,11 @@ class Activity(Base):
     def subprocess(self):
         """Retrieve the subprocess in which this activity is defined.
 
-        If this is a task on top level, it raises NotFounderror
+        If this is a task on top level, it raises NotFounderror.
 
-        :return: subprocess `Activity`
-        :raises: NotFoundError when it is a task in the top level of a project
+        :return: a subprocess :class:`Activity`
+        :raises NotFoundError: when it is a task in the top level of a project
+        :raises APIError: when other error occurs
 
         Example
         -------
@@ -125,9 +136,6 @@ class Activity(Base):
 
         """
         subprocess_id = self._json_data.get('container')
-        if not self.scope_id:
-            raise NotFoundError("This activity does not contain a scope record (missing scope_id): '{}'".
-                                format(self.scope))
         if subprocess_id == self._json_data.get('root_container'):
             raise NotFoundError("Cannot find subprocess for this task '{}', "
                                 "as this task exist on top level.".format(self.name))
@@ -139,9 +147,10 @@ class Activity(Base):
         It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the direct descending level.
         Only when the activity is a Subprocess, otherwise it raises a NotFoundError
 
-        :param kwargs: Additional search arguments, check `pykechain.Client.activities` for additional info
-        :return: list of activities
-        :raises: NotFoundError when this task is not of type `ActivityType.SUBPROCESS`
+        :param kwargs: Additional search arguments, check :func:`pykechain.Client.activities` for additional info
+        :type kwargs: dict or None
+        :return: a list of :class:`Activity`
+        :raises NotFoundError: when this task is not of type `ActivityType.SUBPROCESS`
 
         Example
         -------
@@ -154,9 +163,6 @@ class Activity(Base):
         >>> children = subprocess.children(name__icontains='more work')
 
         """
-        if not self.scope_id:
-            raise NotFoundError("This activity does not contain a scope record (missing scope_id): '{}'".
-                                format(self.scope))
         if self.activity_type != ActivityType.SUBPROCESS:
             raise NotFoundError("Only subprocesses can have children, please choose a subprocess instead of a '{}' "
                                 "(activity '{}')".format(self.activity_type, self.name))
@@ -169,8 +175,9 @@ class Activity(Base):
         It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the level of the current task.
         This also works if the activity is of type `ActivityType.SUBPROCESS`.
 
-        :param kwargs: Additional search arguments, check `pykechain.Client.activities` for additional info
-        :return: list of activities
+        :param kwargs: Additional search arguments, check :func:`pykechain.Client.activities` for additional info
+        :type kwargs: dict or None
+        :return: list of :class:`Activity`
 
         Example
         -------
@@ -183,15 +190,15 @@ class Activity(Base):
 
         """
         container_id = self._json_data.get('container')
-        if not self.scope_id:
-            raise NotFoundError("This activity does not contain a scope record (missing scope_id): '{}'".
-                                format(self.scope))
         return self._client.activities(container=container_id, scope=self.scope_id, **kwargs)
 
     def create(self, *args, **kwargs):
         """Create a new activity belonging to this subprocess.
 
-        See :class:`pykechain.Client.create_activity` for available parameters.
+        See :func:`pykechain.Client.create_activity` for available parameters.
+
+        :raises IllegalArgumentError: if the `Activity` is not a `SUBPROCESS`.
+        :raises APIError: if an Error occurs.
         """
         if self.activity_type != ActivityType.SUBPROCESS:
             raise IllegalArgumentError("One can only create a task under a subprocess.")
@@ -201,37 +208,50 @@ class Activity(Base):
         """Edit the details of an activity.
 
         :param name: (optionally) edit the name of the activity
+        :type name: basestring or None
         :param description: (optionally) edit the description of the activity
+        :type description: basestring or None
         :param start_date: (optionally) edit the start date of the activity as a datetime object (UTC time/timezone
                             aware preferred)
+        :type start_date: datetime or None
         :param due_date: (optionally) edit the due_date of the activity as a datetime object (UTC time/timzeone
                             aware preferred)
+        :type due_date: datetime or None
         :param assignees: (optionally) edit the assignees of the activity as a list, will overwrite all assignees
-        :param status: (optionally) edit the status of the activity as a string
+        :type assignees: list(basestring) or None
+        :param status: (optionally) edit the status of the activity as a string based
+                       on :class:`~pykechain.enums.ActivityType`
+        :type status: basestring or None
 
-        :return: None
-        :raises: NotFoundError, TypeError, APIError
+        :raises NotFoundError: if a `username` in the list of assignees is not in the list of scope members
+        :raises IllegalArgumentError: if the type of the inputs is not correct
+        :raises APIError: if another Error occurs
+        :warns: UserWarning - When a naive datetime is provided. Defaults to UTC.
 
         Example
         -------
         >>> from datetime import datetime
-        >>> specify_wheel_diameter = project.activity('Specify wheel diameter')
-        >>> specify_wheel_diameter.edit(name='Specify wheel diameter and circumference',
-        ...                             description='The diameter and circumference are specified in inches',
-        ...                             start_date=datetime.utcnow(),  # naive time is interpreted as UTC time
-        ...                             assignee='testuser')
+        >>> my_task = project.activity('Specify the wheel diameter')
+        >>> my_task.edit(name='Specify wheel diameter and circumference',
+        ...              description='The diameter and circumference are specified in inches',
+        ...              start_date=datetime.utcnow(),  # naive time is interpreted as UTC time
+        ...              assignee='testuser')
 
-        If we want to provide timezone aware datetime objects we can use the 3rd party convenience library `pytz`.
+        If we want to provide timezone aware datetime objects we can use the 3rd party convenience library :mod:`pytz`.
         Mind that we need to fetch the timezone first and use `<timezone>.localize(<your datetime>)` to make it
-        work correctly. Using datetime(2017,6,1,23,59,0 tzinfo=<tz>) does NOT work for most timezones with a
-        daylight saving time. Check the pytz documentation.
-        (see http://pythonhosted.org/pytz/#localized-times-and-date-arithmetic)
+        work correctly.
+
+        Using `datetime(2017,6,1,23,59,0 tzinfo=<tz>)` does NOT work for most timezones with a
+        daylight saving time. Check the `pytz <http://pythonhosted.org/pytz/#localized-times-and-date-arithmetic>`_
+        documentation.
+
+        To make it work using :mod:`pytz` and timezone aware :mod:`datetime` see the following example::
 
         >>> import pytz
         >>> start_date_tzaware = datetime.now(pytz.utc)
         >>> mytimezone = pytz.timezone('Europe/Amsterdam')
         >>> due_date_tzaware = mytimezone.localize(datetime(2019, 10, 27, 23, 59, 0))
-        >>> specify_wheel_diameter.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
+        >>> my_task.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
 
         """
         update_dict = {'id': self.id}
@@ -240,14 +260,14 @@ class Activity(Base):
                 update_dict.update({'name': name})
                 self.name = name
             else:
-                raise TypeError('Name should be a string')
+                raise IllegalArgumentError('Name should be a string')
 
         if description:
             if isinstance(description, (str, text_type)):
                 update_dict.update({'description': description})
                 self.description = description
             else:
-                raise TypeError('Description should be a string')
+                raise IllegalArgumentError('Description should be a string')
 
         if start_date:
             if isinstance(start_date, datetime.datetime):
@@ -256,7 +276,7 @@ class Activity(Base):
                                   "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
                 update_dict.update({'start_date': start_date.isoformat(sep='T')})
             else:
-                raise TypeError('Start date should be a datetime.datetime() object')
+                raise IllegalArgumentError('Start date should be a datetime.datetime() object')
 
         if due_date:
             if isinstance(due_date, datetime.datetime):
@@ -265,7 +285,7 @@ class Activity(Base):
                                   "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
                 update_dict.update({'due_date': due_date.isoformat(sep='T')})
             else:
-                raise TypeError('Due date should be a datetime.datetime() object')
+                raise IllegalArgumentError('Due date should be a datetime.datetime() object')
 
         if assignees:
             if isinstance(assignees, list):
@@ -276,13 +296,13 @@ class Activity(Base):
                         raise NotFoundError("Assignee '{}' should be a member of the scope".format(assignee))
                 update_dict.update({'assignees': assignees})
             else:
-                raise TypeError('Assignees should be a list')
+                raise IllegalArgumentError('Assignees should be a list')
 
         if status:
             if isinstance(status, (str, text_type)):
                 update_dict.update({'status': status})
             else:
-                raise TypeError('Status should be a string')
+                raise IllegalArgumentError('Status should be a string')
 
         url = self._client._build_url('activity', activity_id=self.id)
         r = self._client._request('PUT', url, json=update_dict)
@@ -304,13 +324,16 @@ class Activity(Base):
 
         .. warning::
 
-           The use of `InspectorComponents` and `Customization` object will become deprecated in November 2017. For
+           The use of `InspectorComponents` and `Customization` object is deprecated in November 2017. For
            KE-chain releases later than 2.5, please use the `activity.customization()` method to retrieve the newer
            type customization.
 
         :param config: the `InspectorComponent` or raw inspector json (as python dict) to be used in customization
-        :return: None
-        :raises: InspectorComponentError if the customisation is provided incorrectly.
+        :type config: dict
+        :raises InspectorComponentError: if the customisation is provided incorrectly.
+        :raises IllegalArgumentError: when the configuration is incorrectly provided
+        :raises DeprecationError: When the configuration is provided in a deprecated format
+        :raises APIError: When an Error occurs in the communication with KE-chain
 
         Example
         -------
@@ -331,15 +354,13 @@ class Activity(Base):
             deprecated_customizations = Customization(json=config)
             deprecated_customizations.validate()
         elif isinstance(config, (Customization, InspectorComponent)):
-            # TODO(JB): ensure that the deprecation warning will come into effect in November 2017 (pykechain 1.14/1.15)
-            warnings.warn("The definition of customization widgets has changed in KE-chain version 2.5. The use "
-                          "of Customization and InspectorComponents will be deprecated in November 2017",
-                          PendingDeprecationWarning)
-            config.validate()
-            deprecated_customizations = config
+            raise DeprecationWarning("The definition of customization widgets has changed in KE-chain version 2.5. "
+                                     "The use of Customization and InspectorComponents is deprecated in November 2017")
+            # config.validate()
+            # deprecated_customizations = config
         else:
-            raise Exception("Need to provide either a dictionary or Customization as input, got: '{}'".
-                            format(type(config)))
+            raise IllegalArgumentError("Need to provide either a dictionary or Customization as input, got: '{}'".
+                                       format(type(config)))
 
         activity_widget_config = self._json_data.get('widget_config')
         # When an activity has been costumized at least once before, then its widget config already exists
@@ -368,7 +389,7 @@ class Activity(Base):
 
         .. versionadded:: 1.11
 
-        :return: An ExtCustomization instance
+        :return: An instance of :class:`customization.ExtCustomization`
 
         Example
         -------

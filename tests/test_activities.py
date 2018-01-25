@@ -86,8 +86,8 @@ class TestActivities(TestBetamax):
         self.assertEqual(specify_wd.name, specify_wd_u.name)
         self.assertEqual(specify_wd.name, 'Specify wheel diameter - updated')
 
-        # Added to improve coverage. Assert whether TypeError is raised when 'name' is not a string object.
-        with self.assertRaises(TypeError):
+        # Added to improve coverage. Assert whether IllegalArgumentError is raised when 'name' is not a string object.
+        with self.assertRaises(IllegalArgumentError):
             specify_wd.edit(name=True)
 
         specify_wd.edit(name='Specify wheel diameter')
@@ -98,8 +98,9 @@ class TestActivities(TestBetamax):
 
         self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
 
-        # Added to improve coverage. Assert whether TypeError is raised when 'description' is not a string object.
-        with self.assertRaises(TypeError):
+        # Added to improve coverage. Assert whether IllegalArgumentError is raised when 'description' is
+        # not a string object.
+        with self.assertRaises(IllegalArgumentError):
             specify_wd.edit(description=42)
 
         specify_wd.edit(description='This task has a cool description')
@@ -118,12 +119,12 @@ class TestActivities(TestBetamax):
 
         self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
 
-        # Added to improve coverage. Assert whether TypeError is raised when 'start_date' and 'due_date are not
-        # datetime objects
-        with self.assertRaises(TypeError):
+        # Added to improve coverage. Assert whether IllegalArgumentError is raised when 'start_date' and
+        # 'due_date are not datetime objects
+        with self.assertRaises(IllegalArgumentError):
             specify_wd.edit(start_date='All you need is love')
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(IllegalArgumentError):
             specify_wd.edit(due_date='Love is all you need')
 
         specify_wd_u = self.project.activity('Specify wheel diameter')
@@ -167,7 +168,7 @@ class TestActivities(TestBetamax):
 
         # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
         # scope members
-        with self.assertRaises(TypeError):
+        with self.assertRaises(IllegalArgumentError):
             specify_wd.edit(assignees='Not Member')
 
         specify_wd.edit(assignees=original_assignee)
@@ -179,8 +180,8 @@ class TestActivities(TestBetamax):
 
         specify_wd.edit(status=ActivityStatus.COMPLETED)
 
-        # Added to improve coverage. Assert whether TypeError is raised when 'status' is not a string
-        with self.assertRaises(TypeError):
+        # Added to improve coverage. Assert whether IllegalArgumentError is raised when 'status' is not a string
+        with self.assertRaises(IllegalArgumentError):
             specify_wd.edit(status=True)
 
         # If the status is not part of Enums.Status then it should raise an APIError
