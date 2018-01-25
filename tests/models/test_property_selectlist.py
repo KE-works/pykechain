@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pykechain.exceptions import APIError
+from pykechain.exceptions import APIError, IllegalArgumentError
 from tests.classes import TestBetamax
 
 
@@ -33,22 +33,22 @@ class TestSelectListProperty(TestBetamax):
     def test_illegal_options_are_not_set(self):
         """Test for secveral illegal lists to be set"""
         sellist_model = self.project.model('Model').property('a_select_list_property')
-        with self.assertRaises(APIError):
+        with self.assertRaises(IllegalArgumentError):
             # not a list
             sellist_model.options = 1
 
-        with self.assertRaises(APIError):
+        with self.assertRaises(IllegalArgumentError):
             sellist_model.options = None
 
-        with self.assertRaises(APIError):
+        with self.assertRaises(IllegalArgumentError):
             # set
             sellist_model.options = set((1, 2))
 
-        with self.assertRaises(APIError):
+        with self.assertRaises(IllegalArgumentError):
             # dict
             sellist_model.options = {}
 
-        with self.assertRaises(APIError):
+        with self.assertRaises(IllegalArgumentError):
             # tuple
             sellist_model.options = (1,)
 
@@ -62,7 +62,7 @@ class TestSelectListProperty(TestBetamax):
         sellist_property = sellist_part_instance.property('a_select_list_property')
         self.assertTrue(hasattr(sellist_property, 'options'))
 
-        with self.assertRaises(APIError):
+        with self.assertRaises(IllegalArgumentError):
             sellist_property.options = [1, 3.14]
 
     # in 1.15

@@ -1,6 +1,6 @@
 from random import randrange
 
-from pykechain.exceptions import NotFoundError, APIError
+from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models import Property
 from tests.classes import TestBetamax
 
@@ -105,7 +105,7 @@ class TestProperties(TestBetamax):
         self.assertEqual(gears_property.name, gears_property_u.name)
         self.assertEqual(gears_property.name, 'Cogs')
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(IllegalArgumentError):
             gears_property.edit(name=True)
         # teardown
         gears_property.edit(name=gears_old_name)
@@ -120,7 +120,7 @@ class TestProperties(TestBetamax):
         gears_property_u = bike_model.property(name_or_id='Gears')
 
         self.assertEqual(gears_property.id, gears_property_u.id)
-        with self.assertRaises(TypeError):
+        with self.assertRaises(IllegalArgumentError):
             gears_property.edit(description=True)
 
         # teardown
@@ -137,7 +137,7 @@ class TestProperties(TestBetamax):
         height_property_u = front_fork_model.property(name_or_id='Height (mm)')
         self.assertEqual(height_property.id, height_property_u.id)
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(IllegalArgumentError):
             height_property.edit(unit=4)
 
         # teardown

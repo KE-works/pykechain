@@ -584,7 +584,7 @@ class TestPartsReorderProperties(TestBetamax):
         # Instantiate a wrong list that will be used to reorder the properties.
         desired_order_list = 'Material Height (mm) Color'
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(IllegalArgumentError):
             front_fork_model.order_properties(property_list=desired_order_list)
 
     def test_reorder_properties_of_instance(self):

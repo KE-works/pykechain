@@ -43,7 +43,7 @@ class Client(object):
 
     :ivar last_request: last executed request. Which is of type `requests.Request`_
     :ivar last_response: last executed response. Which is of type `requests.Response`_
-    :ivar last_url: last called api url
+    :ivar str last_url: last called api url
 
     .. _requests.Request: http://docs.python-requests.org/en/master/api/#requests.Request
     .. _requests.Response: http://docs.python-requests.org/en/master/api/#requests.Response
@@ -53,8 +53,8 @@ class Client(object):
         # type: (str, bool) -> None
         """Create a KE-chain client with given settings.
 
-        :param url: the url of the KE-chain instance to connect to (defaults to http://localhost:8000)
-        :param check_certificates: if to check TLS/SSL Certificates. Defaults to True
+        :param basestring url: the url of the KE-chain instance to connect to (defaults to http://localhost:8000)
+        :param bool check_certificates: if to check TLS/SSL Certificates. Defaults to True
 
         Examples
         --------
@@ -88,7 +88,7 @@ class Client(object):
         # type: (Optional[str]) -> Client
         """Create a client from environment variable settings.
 
-        :param env_filename: filename of the environment file, defaults to '.env' in the local dir (or parent dir)
+        :param basestring env_filename: filename of the environment file, defaults to '.env' in the local dir (or parent dir)
         :return: :class:`pykechain.Client`
 
         Example
@@ -133,9 +133,9 @@ class Client(object):
         # type: (Optional[str], Optional[str], Optional[str]) -> None
         """Login into KE-chain with either username/password or token.
 
-        :param username: username for your user from KE-chain
-        :param password: password for your user from KE-chain
-        :param token: user authentication token retrieved from KE-chain
+        :param basestring username: username for your user from KE-chain
+        :param basestring password: password for your user from KE-chain
+        :param basestring token: user authentication token retrieved from KE-chain
 
         Examples
         --------
@@ -169,7 +169,8 @@ class Client(object):
         """
         Retrieve user objects of the entire administration.
 
-        :return: `list` of :obj:`User`
+        :return: list of dictionary with users information
+        :rtype: list(dict)
         -------
 
         """
@@ -195,8 +196,9 @@ class Client(object):
         """Reload an object from server. This method is immutable and will return a new object.
 
         :param obj: object to reload
+        :type obj: :py:obj:`obj`
         :return: a new object
-        :raises: NotFoundError
+        :raises NotFoundError: if original object is not found or deleted in the mean time
         """
         if not obj._json_data.get('url'):
             raise NotFoundError("Could not reload object, there is no url for object '{}' configured".format(obj))
@@ -214,11 +216,20 @@ class Client(object):
         # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Scope]
         """Return all scopes visible / accessible for the logged in user.
 
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
         :param name: if provided, filter the search for a scope/project by name
+        :type name: basestring or None
         :param pk: if provided, filter the search by scope_id
+        :type pk: basestring or None
         :param status: if provided, filter the search for the status. eg. 'ACTIVE', 'TEMPLATE', 'LIBRARY'
-        :return: :obj:`list` of :obj:`Scope`
-        :raises: NotFoundError
+        :type status: basestring or None
+        :param kwargs: optional additional search arguments
+        :type kwargs: dict or None
+        :return: list of `Scopes`
+        :rtype: list(:class:`models.Scope`)
+        :raises NotFoundError: if no scopes are not found.
 
         Example
         -------
@@ -255,8 +266,12 @@ class Client(object):
         # type: (*Any, **Any) -> Scope
         """Return a single scope based on the provided name.
 
-        :return: a single :obj:`Scope`
-        :raises: NotFoundError, MultipleFoundError
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
+        :return: a single :class:`models.Scope`
+        :raises NotFoundError: When no `Scope` is found
+        :raises MultipleFoundError: When more than a single `Scope` is found
         """
         _scopes = self.scopes(*args, **kwargs)
 
@@ -269,13 +284,19 @@ class Client(object):
 
     def activities(self, name=None, pk=None, scope=None, **kwargs):
         # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Activity]
-        """Search on activities with optional name filter.
+        """Search for activities with optional name, pk and scope filter.
+
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
 
         :param pk: id (primary key) of the activity to retrieve
+        :type pk: basestring or None
         :param name: filter the activities by name
+        :type name: basestring or None
         :param scope: filter by scope id
-        :return: :obj:`list` of :obj:`Activity`
-        :raises: NotFoundError
+        :type scope: basestring or None
+        :return: list of :class:`models.Activity`
+        :raises NotFoundError: If no `Activities` are found
         """
         request_params = {
             'id': pk,
@@ -299,9 +320,18 @@ class Client(object):
         # type: (*Any, **Any) -> Activity
         """Search for a single activity.
 
-        :param name: Name of the activity to search
-        :return: a single :obj:`Activity`
-        :raises: NotFoundError, MultipleFoundError
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
+        :param pk: id (primary key) of the activity to retrieve
+        :type pk: basestring or None
+        :param name: filter the activities by name
+        :type name: basestring or None
+        :param scope: filter by scope id
+        :type scope: basestring or None
+        :return: a single :class:`models.Activity`
+        :raises NotFoundError: When no `Activity` is found
+        :raises MultipleFoundError: When more than a single `Activity` is found
         """
         _activities = self.activities(*args, **kwargs)
 
@@ -326,19 +356,33 @@ class Client(object):
         # type: (...) -> PartSet
         """Retrieve multiple KE-chain parts.
 
+        If no parameters are provided, all parts are retrieved.
+
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
         :param name: filter on name
+        :type name: basestring or None
         :param pk: filter on primary key
+        :type pk: basestring or None
         :param model: filter on model_id
+        :type model: basestring or None
         :param category: filter on category (INSTANCE, MODEL, None)
+        :type category: basestring or None
         :param bucket: filter on bucket_id
+        :type bucket: basestring or None
         :param parent: filter on the parent_id, returns all childrent of the parent_id
+        :type parent: basestring or None
         :param activity: filter on activity_id
+        :type activity: basestring or None
         :param limit: limit the return to # items (default unlimited, so return all results)
+        :type limit: int or None
         :param batch: limit the batch size to # items (defaults to 100 items per batch)
-        :param kwargs: additional keyword, value arguments for the api with are passed to the /parts/ api as filters
-                       please refer to the full KE-chain 2 REST API documentation.
-        :return: :obj:`PartSet`
-        :raises: NotFoundError
+        :type batch: int or None
+        :param kwargs: additional `keyword=value` arguments for the api
+        :type kwargs: dict or None
+        :return: :class:`models.PartSet` which is an iterator of :class:`models.Part`
+        :raises NotFoundError: If no `Part` is found
 
         Examples
         --------
@@ -402,10 +446,15 @@ class Client(object):
         # type: (*Any, **Any) -> Part
         """Retrieve single KE-chain part.
 
-        Uses the same interface as the `part` method but returns only a single pykechain `Part` instance.
+        Uses the same interface as the :func:`parts` method but returns only a single pykechain :class:`models.Part`
+        instance.
 
-        :return: a single :obj:`Part`
-        :raises: NotFoundError, MultipleFoundError
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
+        :return: a single :class:`models.Part`
+        :raises NotFoundError: When no `Part` is found
+        :raises MultipleFoundError: When more than a single `Part` is found
         """
         _parts = self.parts(*args, **kwargs)
 
@@ -420,10 +469,15 @@ class Client(object):
         # type: (*Any, **Any) -> Part
         """Retrieve single KE-chain part model.
 
-        Uses the same interface as the `part` method but returns only a single pykechain `Part` instance.
+        Uses the same interface as the :func:`part` method but returns only a single pykechain
+        :class:`models.Part` instance of category `MODEL`.
 
-        :return: a single :obj:`Part`
-        :raises: NotFoundError, MultipleFoundError
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
+        :return: a single :class:`models.Part`
+        :raises NotFoundError: When no `Part` is found
+        :raises MultipleFoundError: When more than a single `Part` is found
         """
         kwargs['category'] = Category.MODEL
         _parts = self.parts(*args, **kwargs)
@@ -439,11 +493,19 @@ class Client(object):
         # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Property]
         """Retrieve properties.
 
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
         :param name: name to limit the search for.
+        :type name: basestring or None
         :param pk: primary key or id (UUID) of the property to search for
+        :type pk: basestring or None
         :param category: filter the properties by category. Defaults to INSTANCE. Other options MODEL or None
-        :return: :obj:`list` of :obj:`Property`
-        :raises: NotFoundError
+        :type category: basestring or None
+        :param kwargs: (optional) additional search keyword arguments
+        :type kwargs: dict or None
+        :return: list of :class:`models.Property`
+        :raises NotFoundError: When no `Property` is found
         """
         request_params = {
             'name': name,
@@ -466,12 +528,19 @@ class Client(object):
         """
         Retrieve Services.
 
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
         :param name: (optional) name to limit the search for
+        :type name: basestring or None
         :param pk: (optional) primary key or id (UUID) of the service to search for
+        :type pk: basestring or None
         :param scope: (optional) id (UUID) of the scope to search in
+        :type scope: basestring or None
         :param kwargs: (optional) additional search keyword arguments
-        :return: list of Service objects
-        :raises: NotFoundError
+        :type kwargs: dict or None
+        :return: list of :class:`models.Service` objects
+        :raises NotFoundError: When no `Service` objects are found
         """
         request_params = {
             'name': name,
@@ -493,14 +562,20 @@ class Client(object):
         """
         Retrieve single KE-chain Service.
 
-        Uses the same interface as the `services` method but returns only a single pykechain `Service` instance.
+        Uses the same interface as the :func:`services` method but returns only a single pykechain
+        :class:`models.Service` instance.
 
         :param name: (optional) name to limit the search for
+        :type name: basestring or None
         :param pk: (optional) primary key or id (UUID) of the service to search for
+        :type pk: basestring or None
         :param scope: (optional) id (UUID) of the scope to search in
+        :type scope: basestring or None
         :param kwargs: (optional) additional search keyword arguments
-        :return: single Service object
-        :raises: NotFoundError, MultipleFoundError
+        :type kwargs: dict or None
+        :return: a single :class:`models.Service` object
+        :raises NotFoundError: When no `Service` object is found
+        :raises MultipleFoundError: When more than a single `Service` object is found
         """
         _services = self.services(name=name, pk=pk, scope=scope, **kwargs)
 
@@ -515,13 +590,19 @@ class Client(object):
         """
         Retrieve Service Executions.
 
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
         :param name: (optional) name to limit the search for
-        :param pk: (optional) primary key or id (UUID) of the service execution to search for
+        :type name: basestring or None
+        :param pk: (optional) primary key or id (UUID) of the service to search for
+        :type pk: basestring or None
         :param scope: (optional) id (UUID) of the scope to search in
-        :param service: (optional) id (UUID) of the service to search the service executions for
+        :type scope: basestring or None
         :param kwargs: (optional) additional search keyword arguments
-        :return: list of ServiceExecution objects
-        :raises: NotFoundError
+        :type kwargs: dict or None
+        :return: a single :class:`models.ServiceExecution` object
+        :raises NotFoundError: When no `ServiceExecution` object is found
         """
         request_params = {
             'name': name,
@@ -544,16 +625,23 @@ class Client(object):
         """
         Retrieve single KE-chain ServiceExecution.
 
-        Uses the same interface as the `service_executions` method but returns only a single
-        pykechain `ServiceExecution` instance.
+        Uses the same interface as the :func:`service_executions` method but returns only a single
+        pykechain :class:`models.ServiceExecution` instance.
+
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
 
         :param name: (optional) name to limit the search for
-        :param pk: (optional) primary key or id (UUID) of the service execution to search for
+        :type name: basestring or None
+        :param pk: (optional) primary key or id (UUID) of the service to search for
+        :type pk: basestring or None
         :param scope: (optional) id (UUID) of the scope to search in
-        :param service: (optional) id (UUID) of the service to search the service executions for
+        :type scope: basestring or None
         :param kwargs: (optional) additional search keyword arguments
-        :return: list of ServiceExecution objects
-        :raises: NotFoundError
+        :type kwargs: dict or None
+        :return: a single :class:`models.ServiceExecution` object
+        :raises NotFoundError: When no `ServiceExecution` object is found
+        :raises MultipleFoundError: When more than a single `ServiceExecution` object is found
         """
         _service_executions = self.service_executions(name=name, pk=pk, scope=scope, service=service, **kwargs)
 
@@ -572,9 +660,13 @@ class Client(object):
         """Create a new activity.
 
         :param process: parent process id
+        :type process: basestring
         :param name: new activity name
+        :type name: basestring
         :param activity_class: type of activity: UserTask (default) or Subprocess
-        :return: Activity
+        :type activity_class: basestring
+        :return: the created :class:`models.Activity`
+        :raises APIError: When the object could not be created
         """
         if activity_class and activity_class not in ActivityType.values():
             raise IllegalArgumentError("Please provide accepted activity_class (provided:{} accepted:{})".
@@ -616,14 +708,19 @@ class Client(object):
         against a trade-off that someone looking at the frontend won't notice any changes unless the page
         is refreshed.
 
-        :param parent: parent part instance
-        :param model: target part model
+        :param parent: parent part instance of the new instance
+        :type parent: :class:`models.Part`
+        :param model: target part model on which the new instance is based
+        :type model: :class:`models.Part`
         :param name: new part name
+        :type name: basestring
         :param kwargs: (optional) additional keyword=value arguments
         :return: Part (category = instance)
+        :return: :class:`models.Part` with category `INSTANCE`
+        :raises APIError: if the `Part` could not be created
         """
         if parent.category != Category.INSTANCE:
-            raise APIError("The parent should be an instance")
+            raise APIError("The parent should be an category 'INSTANCE'")
         if model.category != Category.MODEL:
             raise APIError("The models should be of category 'MODEL'")
 
@@ -648,9 +745,16 @@ class Client(object):
 
         :param parent: parent model
         :param name: new model name
+        :param parent: parent part instance
+        :type parent: :class:`models.Part`
+        :param name: new part name
+        :type name: basestring
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N
+        :type multiplicity: basestring
         :param kwargs: (optional) additional keyword=value arguments
-        :return: Part (category = model)
+        :type kwargs: dict
+        :return: :class:`models.Part` with category `MODEL`
+        :raises APIError: if the `Part` could not be created
         """
         if parent.category != Category.MODEL:
             raise APIError("The parent should be a model")
@@ -674,11 +778,18 @@ class Client(object):
         against a trade-off that someone looking at the frontend won't notice any changes unless the page
         is refreshed.
 
-        :param name: Name of the new proxy model
-        :param parent: parent of the
-        :param multiplicity: the multiplicity of the new proxy model (default ONE_MANY)
+        :param model: the catalog proxy model the new proxied model should be based upon
+        :type model: :class:`models.Part`
+        :param parent: parent part instance
+        :type parent: :class:`models.Part`
+        :param name: new part name
+        :type name: basestring
+        :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N, default is `ZERO_MANY`
+        :type multiplicity: basestring
         :param kwargs: (optional) additional keyword=value arguments
-        :return: the new proxy model part
+        :type kwargs: dict
+        :return: the new proxy :class:`models.Part` with category `MODEL`
+        :raises APIError: if the `Part` could not be created
         """
         if model.category != Category.MODEL:
             raise IllegalArgumentError("The model should be of category MODEL")
@@ -698,12 +809,20 @@ class Client(object):
         """Create a new property model under a given model.
 
         :param model: parent model
+        :type model: :class:`models.Part`
         :param name: property model name
+        :type name: basestring
         :param description: property model description (optional)
-        :param property_type: choose between FLOAT, INT, TEXT, LINK, REFERENCE, DATETIME, BOOLEAN, CHAR, ATTACHMENT
-                              or SINGLE_SELECT
-        :param default_value: default value used for part instances
-        :return: Property
+        :type description: basestring or None
+        :param property_type: choose between FLOAT, INT, TEXT, LINK, REFERENCE, DATETIME, BOOLEAN, CHAR,
+                              ATTACHMENT or SINGLE_SELECT
+        :type property_type: basestring or None
+        :param default_value: default value used for part instances when creating a model.
+        :type default_value: any
+        :param kwargs: (optional) additional keyword=value arguments
+        :type kwargs: dict
+        :return: a :class:`models.Property` with category `MODEL`
+        :raises APIError: if the `Property` model could not be created
         """
         if model.category != Category.MODEL:
             raise IllegalArgumentError("The model should be of category MODEL")
@@ -736,21 +855,29 @@ class Client(object):
         Create a Service.
 
         A service can be created only providing the name (and scope). Other information can be added later.
-        If you provide a path to the `kecpkg` (or python script) to upload (pkg_path) on createion,
+        If you provide a path to the `kecpkg` (or python script) to upload (`pkg_path`) on creation,
         this `kecpkg` will be uploaded in one go. If the later fails, the service is still there, and the package is
         not uploaded.
 
         :param name: Name of the service
+        :type name: basestring
         :param scope: Scope where the create the Service under
+        :type scope: :class:`models.Scope`
         :param description: (optional) description of the Service
+        :type description: basestring or None
         :param version: (optional) version information of the Service
-        :param service_type: (optional) service type of the service (refer to ServiceType), defaults to `PYTHON_SCRIPT`
+        :type version: basestring or None
+        :param service_type: (optional) service type of the service (refer to :class:`pykechain.enums.ServiceType`),
+                             defaults to `PYTHON_SCRIPT`
+        :type service_type: basestring or None
         :param environment_version: (optional) execution environment of the service (refer to
-         ServiceEnvironmentVersion), defaults to `PYTHON_3_5`
-        :param pkg_path: (optional) full path name to the `kecpkg` (or python script) to upload.
-        :return: None
-        :raises APIError: In case of failure of the creation or failure to upload the pkg_path.
-        :raises OSError: In case of failure to locate the pkg_path.
+         :class:`pykechain.enums.ServiceEnvironmentVersion`), defaults to `PYTHON_3_5`
+        :type environment_version: basestring or None
+        :param pkg_path: (optional) full path name to the `kecpkg` (or python script) to upload
+        :type pkg_path: basestring or None
+        :return: the created :class:`models.Service`
+        :raises APIError: In case of failure of the creation or failure to upload the pkg_path
+        :raises OSError: In case of failure to locate the `pkg_path`
         """
         if service_type not in ServiceType.values():
             raise IllegalArgumentError("The type should be of one of {}".format(ServiceType.values()))

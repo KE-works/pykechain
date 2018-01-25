@@ -3,15 +3,16 @@ Change Log
 
 pykechain changelog
 
-1.14.2 (24JAN18)
+1.15.0 (24JAN18)
 ----------------
+ * added ability to provide additional `keyword=value` arguments to many of the part and property methods that either create parts or update properties (#260). This facilitates the use of `suppress_kevents=True` that you might want to use for a backend performance boost. This is a trade-off that the frontend will not be informed of any property updates or new parts until after a reload of the page in the KE-chain frontend application. When you *can use* `suppress_kevents=True` in the method, it is documented in the function. This can be found in de `Developer API docs <http://pykechain.readthedocs.io/en/latest/developer_api.html>`_. Examples of functions that can handle the `supress_kevents=True` as additional `keyword=value` argument are: `Client.create_part()`, `Client.create_model()`, `Part.add()`, `Part.update()`, `Part.edit()` and more like these.
+ * added validation of a single select list. The value is not set when it is not in the list of options (#259).
  * enabled to use of property model UUID in the `Part.add_with_properties()` next to using property names. (#258)
  * enabled to search for properties using UUID next to using property names. This is provided for you in `Part.property()`.
- * updated dependent versions for development: pytest (3.3.2), sphinx (1.6.6), nbsphinx (0.3.1), matplotlib (2.1.2), mypy (0.560)
-
-1.14.1 (24JAN18)
-----------------
  * The `Part.update()` is now considerate if you provide the property UUIDs inside the `update_dict` as well as property names. You can even mix UUIDs and property names together. (#263) Thanks to @raduiordache
+ * updated dependent versions for development: pytest (3.3.2), sphinx (1.6.6), nbsphinx (0.3.1), matplotlib (2.1.2), mypy (0.560)
+ * updated documentation with additional crosslinks and better references.
+ * added source code to all API documentation
 
 1.14.0 (11DEC17)
 ----------------
@@ -33,7 +34,6 @@ pykechain changelog
 ----------------
  * Added additional xtypes to the list of allowed xtypes in the customizations in order to support our new widgets. (#240)
  * updated dependent versions for development: pytest (3.2.5)
-
 
 1.13 (9NOV17)
 -------------

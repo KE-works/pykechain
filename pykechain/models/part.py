@@ -1,7 +1,8 @@
 import json
+from typing import Any, AnyStr  # flake8: noqa
+
 import requests
 from six import text_type
-from typing import Any, AnyStr  # flake8: noqa
 
 from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import NotFoundError, APIError, MultipleFoundError, IllegalArgumentError
@@ -13,11 +14,12 @@ from pykechain.utils import find, is_uuid
 class Part(Base):
     """A virtual object representing a KE-chain part.
 
-    :cvar category: The category of the part, either 'MODEL' or 'INSTANCE' (use `pykechain.enums.Category`)
-    :cvar parent_id: The UUID of the parent of this part
-    :cvar properties: The list of `pykechain.models.Property` objects belonging to this part.
-    :cvar multiplicity: The multiplicity of the part being one of the following options: ZERO_ONE, ONE, ZERO_MANY,
-                        ONE_MANY, (reserved) M_N
+    :cvar basestring category: The category of the part, either 'MODEL' or 'INSTANCE'
+                               (use :class:`pykechain.enums.Category`)
+    :cvar basestring parent_id: The UUID of the parent of this part
+    :cvar properties: The list of :class:`Property` objects belonging to this part.
+    :cvar basestring multiplicity: The multiplicity of the part being one of the following options:
+                                   ZERO_ONE, ONE, ZERO_MANY, ONE_MANY, (reserved) M_N
 
     Examples
     --------
@@ -50,7 +52,11 @@ class Part(Base):
 
     def __init__(self, json, **kwargs):
         # type: (dict, **Any) -> None
-        """Construct a part from provided json data."""
+        """Construct a part from a KE-chain 2 json response.
+
+        :param json: the json response to construct the :class:`Part` from
+        :type json: dict
+        """
         super(Part, self).__init__(json, **kwargs)
 
         self.category = json.get('category')
@@ -59,11 +65,12 @@ class Part(Base):
         self.multiplicity = json.get('multiplicity', None)
 
     def property(self, name_or_id):
-        """Retrieve the property with name belonging to this part.
+        """Retrieve the property belonging to this part based on its name or uuid.
 
         :param name_or_id: property name or property UUID to search for
-        :return: a single :class:`pykechain.models.Property`
-        :raises: NotFoundError
+        :type name_or_id: basestring
+        :return: a single :class:`Property`
+        :raises NotFoundError: if the `Property` is not part of the `Part`
 
         Example
         -------
@@ -97,8 +104,8 @@ class Part(Base):
         # type: () -> Any
         """Retrieve the parent of this `Part`.
 
-        :return: the parent `Part`s as :class:`pykechain.model.Part`.
-        :raises: APIError
+        :return: the parent :class:`Part` of this part
+        :raises APIError: if an Error occurs
 
         Example
         -------
@@ -116,9 +123,11 @@ class Part(Base):
         # type: (Any) -> Any
         """Retrieve the children of this `Part` as `Partset`.
 
-        :param kwargs: Additional search arguments to search for, check `pykechain.Client.parts` for additional info
-        :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no children
-        :raises: APIError
+        :param kwargs: Additional search arguments to search for, check :class:`pykechain.Client.parts`
+                       for additional info
+        :type kwargs: dict
+        :return: a set of `Parts` as a :class:`PartSet`. Will be empty if no children.
+        :raises APIError: When an error occurs.
 
         Example
         -------
@@ -140,9 +149,11 @@ class Part(Base):
 
         Siblings are other Parts sharing the same parent of this `Part`
 
-        :param kwargs: Additional search arguments to search for, check `pykechain.Client.parts` for additional info
-        :return: a set of `Part`s as :class:`pykechain.model.PartSet`. Will be empty if no siblings
-        :raises: APIError
+        :param kwargs: Additional search arguments to search for, check :class:`pykechain.Client.parts`
+                       for additional info
+        :type kwargs: dict
+        :return: a set of `Parts` as a :class:`PartSet`. Will be empty if no siblings.
+        :raises APIError: When an error occurs.
         """
         if self.parent_id:
             return self._client.parts(parent=self.parent_id, category=self.category, **kwargs)
@@ -155,12 +166,12 @@ class Part(Base):
         Retrieve the model of this `Part` as `Part`.
 
         For instance, you can get the part model of a part instance. But trying to get the model of a part that
-        has no model, like a part model, will raise a NotFoundError.
+        has no model, like a part model, will raise a :exc:`NotFoundError`.
 
         .. versionadded:: 1.8
 
-        :return: pykechain.models.Part
-        :raises: NotFoundError
+        :return: the model of this part instance as :class:`Part` with category `MODEL`
+        :raises NotFoundError: if no model found
 
         Example
         -------
@@ -179,14 +190,13 @@ class Part(Base):
         Retrieve the instances of this `Part` as a `PartSet`.
 
         For instance, if you have a model part, you can get the list of instances that are created based on this
-        moodel. If there are no instances (only possible if the multiplicity is `Multiplicity.ZERO_MANY` than a
-        NotFoundError is returned
+        moodel. If there are no instances (only possible if the multiplicity is :attr:`enums.Multiplicity.ZERO_MANY`)
+        than a :exc:`NotFoundError` is returned
 
         .. versionadded:: 1.8
 
-        :param kwargs: Additional search arguments to search for, check `pykechain.Client.parts` for additional info
-        :return: pykechain.models.PartSet
-        :raises: NotFoundError
+        :return: the instances of this part model :class:`PartSet` with category `INSTANCE`
+        :raises NotFoundError: if no instances found
 
         Example
         -------
@@ -208,10 +218,11 @@ class Part(Base):
         """
         Retrieve the single (expected) instance of this 'Part' (of `Category.MODEL`) as a 'Part'.
 
-        See `Part.instances()` method for documentation.
+        See :func:`Part.instances()` method for documentation.
 
-        :return: pykechain.models.Part
-        :raises: NotFoundError, MultipleFoundError
+        :return: :class:`Part` with category `INSTANCE`
+        :raises NotFoundError: if the instance does not exist
+        :raises MultipleFoundError: if there are more than a single instance returned
         """
         instances_list = list(self.instances())
         if len(instances_list) == 1:
@@ -227,10 +238,10 @@ class Part(Base):
         Retrieve the proxy model of this proxied `Part` as a `Part`.
 
         Allows you to retrieve the model of a proxy. But trying to get the catalog model of a part that
-        has no proxy, will raise an NotFoundError. Only models can have a proxy.
+        has no proxy, will raise an :exc:`NotFoundError`. Only models can have a proxy.
 
-        :return: pykechain.models.Part
-        :raises: NotFoundError
+        :return: :class:`Part` with category `MODEL` and from which the current part is proxied
+        :raises NotFoundError: When no proxy model is found
 
         Example
         -------
@@ -252,19 +263,21 @@ class Part(Base):
 
     def add(self, model, **kwargs):
         # type: (Part, **Any) -> Part
-        """Add a new child to this part.
+        """Add a new child instance, based on a model, to this part.
 
-        This can only act on instances.
+        This can only act on instances. It needs a model from which to create the child instance.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
         additional keyword=value argument to this method. This will improve performance of the backend
         against a trade-off that someone looking at the frontend won't notice any changes unless the page
         is refreshed.
 
-        :param model: model to use for the child
+        :type kwargs: dict or None
+        :type model: :class:`Part`
         :param kwargs: (optional) additional keyword=value arguments
-        :return: :class:`pykechain.models.Part`
-        :raises: APIError
+        :type kwargs: dict
+        :return: :class:`Part` with category `INSTANCE`.
+        :raises APIError: if unable to add the new child instance
 
         Example
         -------
@@ -282,15 +295,22 @@ class Part(Base):
         # type: (Part, **Any) -> Part
         """Add a new instance of this model to a part.
 
+        This works if the current part is a model and an instance of this model is to be added
+        to a part instances in the tree.
+
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
         additional keyword=value argument to this method. This will improve performance of the backend
         against a trade-off that someone looking at the frontend won't notice any changes unless the page
         is refreshed.
 
         :param parent: part to add the new instance to
+        :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
+        :type kwargs: dict or None
+        :type parent: :class:`Part`
         :param kwargs: (optional) additional keyword=value arguments
-        :return: :class:`pykechain.models.Part`
-        :raises: APIError
+        :type kwargs: dict
+        :return: :class:`Part` with category `INSTANCE`
+        :raises APIError: if unable to add the new child instance
 
         Example
         -------
@@ -313,11 +333,7 @@ class Part(Base):
         against a trade-off that someone looking at the frontend won't notice any changes unless the page
         is refreshed.
 
-        :param parent: parent model
-        :param name: new model name
-        :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N
-        :param kwargs: (optional) additional keyword=value arguments
-        :return: Part (category = model)
+        :return: a :class:`Part` of category `MODEL`
         """
         if self.category != Category.MODEL:
             raise APIError("Part should be of category MODEL")
@@ -337,10 +353,15 @@ class Part(Base):
         is refreshed.
 
         :param name: Name of the new proxy model
-        :param parent: parent of the
+        :type name: basestring
+        :param parent: parent of the to be proxied model
+        :type parent: :class:`Part`
         :param multiplicity: the multiplicity of the new proxy model (default ONE_MANY)
-        :param kwargs: (optional) additional keyword=value arguments
-        :return: Part (self)
+        :type multiplicity: basestring or None
+        :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
+        :type kwargs: dict or None
+        :return: the new proxied :class:`Part`.
+        :raises APIError: in case an Error occurs
 
         Examples
         --------
@@ -359,14 +380,10 @@ class Part(Base):
         # type: (*Any, **Any) -> Property
         """Add a new property to this model.
 
-        :param model: parent model
-        :param name: property model name
-        :param description: property model description (optional)
-        :param property_type: choose between FLOAT, INT, TEXT, LINK, REFERENCE, DATETIME, BOOLEAN, CHAR, ATTACHMENT
-                              or SINGLE_SELECT
-        :param default_value: default value used for part instances
-        :param kwargs: (optional) additional keyword=value arguments
-        :return: Property
+        See :class:`pykechain.Client.create_property` for available parameters.
+
+        :return: :class:`Property`
+        :raises APIError: in case an Error occurs
         """
         if self.category != Category.MODEL:
             raise APIError("Part should be of category MODEL")
@@ -378,7 +395,7 @@ class Part(Base):
         """Delete this part.
 
         :return: None
-        :raises: APIError if delete was not succesfull
+        :raises APIError: in case an Error occurs
         """
         r = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
 
@@ -390,7 +407,8 @@ class Part(Base):
         """
         Edit the details of a part (model or instance).
 
-        For an instance you can edit the Part instance name and the part instance description
+        For an instance you can edit the Part instance name and the part instance description. To alter the values
+        of properties use :func:`Part.update()`.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
         additional keyword=value argument to this method. This will improve performance of the backend
@@ -399,9 +417,12 @@ class Part(Base):
 
         :param name: optional name of the part to edit
         :param description: (optional) description of the part
+        :type description: basestring or None
         :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
-        :return: None
-        :raises: APIError
+        :type kwargs: dict or None
+        :return: the updated object if successful
+        :raises IllegalArgumentError: when the type or value of an argument provided is incorrect
+        :raises APIError: in case an Error occurs
 
         Example
         -------
@@ -473,11 +494,18 @@ class Part(Base):
         is refreshed.
 
         :param name: new part name (defined as a string)
-        :param update_dict: dictionary with keys being property names (str) and values being property values
+        :type name: basestring or None
+        :param update_dict: dictionary with keys being property names (str) or property ids (uuid)
+                            and values being property values
+        :type update_dict: dict
         :param bulk: True to use the bulk_update_properties API endpoint for KE-chain versions later then 2.1.0b
+        :type bulk: boolean or None
         :param kwargs: (optional) additional keyword arguments that will be passed inside the update request
-        :return: :class:`pykechain.models.Part`
-        :raises: APIError, Raises `NotFoundError` when the property name is not a valid property of this part
+        :type kwargs: dict or None
+        :return: the updated :class:`Part`
+        :raises NotFoundError: when the property name is not a valid property of this part
+        :raises IllegalArgumentError: when the type or value of an argument provided is incorrect
+        :raises APIError: in case an Error occurs
 
         Example
         -------
@@ -521,13 +549,19 @@ class Part(Base):
         is refreshed.
 
         :param model: model of the part which to add a new instance, should follow the model tree in KE-chain
+        :type model: :class:`Part`
         :param name: (optional) name provided for the new instance as string otherwise use the name of the model
+        :type name: basestring or None
         :param update_dict: dictionary with keys being property names (str) or property_id (from the property models)
                             and values being property values
+        :type update_dict: dict or None
         :param bulk: True to use the bulk_update_properties API endpoint for KE-chain versions later then 2.1.0b
+        :type bulk: boolean or None
         :param kwargs: (optional) additional keyword arguments that will be passed inside the update request
-        :return: :class:`pykechain.models.Part`
-        :raises: APIError, Raises `NotFoundError` when the property name is not a valid property of this part
+        :type kwargs: dict or None
+        :return: the newly created :class:`Part`
+        :raises NotFoundError: when the property name is not a valid property of this part
+        :raises APIError: in case an Error occurs
 
         Examples
         --------
@@ -573,6 +607,9 @@ class Part(Base):
 
         .. versionadded:: 1.9
 
+        :returns: the values of the properties as a `dict`
+        :rtype: dict
+
         Example
         -------
         >>> front_wheel = client.scope('Bike Project').part('Front Wheel')
@@ -590,7 +627,13 @@ class Part(Base):
 
     def order_properties(self, property_list=None):
         """
-        Order the properties of a part model using a list of property objects or property names.
+        Order the properties of a part model using a list of property objects or property names or property id's.
+
+        :param property_list: ordered list of property names (basestring) or property id's (uuid)
+        :type property_list: list(basestring)
+        :returns: the :class:`Part` with the reordered list of properties
+        :raises APIError: when an Error occurs
+        :raises IllegalArgumentError: When provided a wrong argument
 
         Examples
         --------
@@ -607,7 +650,7 @@ class Part(Base):
         if self.category != Category.MODEL:
             raise APIError("Part should be of category MODEL")
         if not isinstance(property_list, list):
-            raise TypeError('Expected a list of strings or Property() objects, got a {} object'.
+            raise IllegalArgumentError('Expected a list of strings or Property() objects, got a {} object'.
                             format(type(property_list)))
 
         order_dict = dict()
