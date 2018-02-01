@@ -6,7 +6,9 @@ from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
 
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion
+from pykechain.models.activity2 import Activity2
 from pykechain.models.service import Service, ServiceExecution
+from pykechain.utils import is_uuid
 from .__about__ import version
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError, IllegalArgumentError
 from .models import Scope, Activity, Part, PartSet, Property
@@ -35,6 +37,11 @@ API_PATH = {
     'service_execution_notebook_url': 'api/service_executions/{service_execution_id}/notebook_url',
     'service_execution_log': 'api/service_executions/{service_execution_id}/log',
     'users': 'api/users.json'
+}
+
+API_EXTRA_PARAMS = {
+    'activity': {'fields': '__all__'},  # id,name,scope,status,classification,activity_type,parent_id'},
+    'activities': {'fields': '__all__'}  # 'id,name,scope,status,classification,activity_type,parent_id'}
 }
 
 
@@ -305,6 +312,9 @@ class Client(object):
             'scope': scope
         }
 
+        # update the fields query params
+        request_params.update(API_EXTRA_PARAMS['activity'])
+
         if kwargs:
             request_params.update(**kwargs)
 
@@ -315,7 +325,7 @@ class Client(object):
 
         data = response.json()
 
-        return [Activity(a, client=self) for a in data['results']]
+        return [Activity2(a, client=self) for a in data['results']]
 
     def activity(self, *args, **kwargs):
         # type: (*Any, **Any) -> Activity
@@ -657,35 +667,44 @@ class Client(object):
     # Creators
     #
 
-    def create_activity(self, process, name, activity_class="UserTask"):
+    def create_activity(self, parent, name, activity_type=ActivityType.TASK):
         """Create a new activity.
 
-        :param process: parent process id
-        :type process: basestring
+        :param parent: parent under which to create the activity
+        :type parent: basestring or :class:`models.Activity2`
         :param name: new activity name
         :type name: basestring
-        :param activity_class: type of activity: UserTask (default) or Subprocess
-        :type activity_class: basestring
-        :return: the created :class:`models.Activity`
+        :param activity_type: type of activity: TASK (default) or PROCESS
+        :type activity_type: basestring
+        :return: the created :class:`models.Activity2`
         :raises APIError: When the object could not be created
+        :raises IllegalArgumentError: When an incorrect activitytype or parent is provided
         """
-        if activity_class and activity_class not in ActivityType.values():
-            raise IllegalArgumentError("Please provide accepted activity_class (provided:{} accepted:{})".
-                                       format(activity_class, ActivityType.values()))
+        if activity_type and activity_type not in ActivityType.values():
+            raise IllegalArgumentError("Please provide accepted activity_type (provided:{} accepted:{})".
+                                       format(activity_type, ActivityType.values()))
+        if isinstance(parent, (Activity, Activity2)):
+            parent = parent.id
+        elif is_uuid(parent):
+            parent = parent
+        else:
+            raise IllegalArgumentError("Please provide either an activity object or a UUID")
+
         data = {
             "name": name,
-            "process": process,
-            "activity_class": activity_class
+            "parent_id": parent,
+            "activity_type": activity_type
         }
 
-        response = self._request('POST', self._build_url('activities'), data=data)
+        response = self._request('POST', self._build_url('activities'), data=data,
+                                 params=API_EXTRA_PARAMS['activities'])
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create activity")
 
         data = response.json()
 
-        return Activity(data['results'][0], client=self)
+        return Activity2(data['results'][0], client=self)
 
     def _create_part(self, action, data, **kwargs):
         # prepare url query parameters
