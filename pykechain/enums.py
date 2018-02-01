@@ -76,7 +76,6 @@ class PropertyType(Enum):
 
     :cvar SINGLE_SELECT_VALUE: single select list property (choose from a list)
     :cvar REFERENCES_VALUE: a multi reference property, a UUID value referring to other parts
-
     """
 
     FLOAT_VALUE = "FLOAT_VALUE"
@@ -95,14 +94,40 @@ class PropertyType(Enum):
 class ActivityType(Enum):
     """The various Activity types that are accepted by KE-chain.
 
-    :cvar USERTASK: a normal usertask
-    :cvar SUBPROCESS: a subprocess (container) containing other tasks
-    :cvar SERVICETASK: a service taks (this concept is only availabe in RND KE-chain and will be deprecated)
+    .. versionadded: 2.0
+
+    :cvar TASK: a normal task
+    :cvar PROCESS: a subprocess (container) containing other tasks
     """
 
-    USERTASK = "UserTask"
-    SERVICETASK = "ServiceTask"  # RND code only
-    SUBPROCESS = "Subprocess"
+    PROCESS = 'PROCESS'
+    TASK = 'TASK'
+
+
+class ActivityClassification(Enum):
+    """The classification of Activities that are accepted by KE-chain.
+
+    .. versionadded:: 2.0
+
+    :cvar WORKFLOW: Classification of the activity is WORKFLOW
+    :cvar CATALOG: Classification of the activity is CATALOG
+    """
+
+    WORKFLOW = 'WORKFLOW'
+    CATALOG = 'CATALOG'
+
+
+class ActivityRootNames(Enum):
+    """The classification of Activities that are accepted by KE-chain.
+
+    .. versionadded:: 2.0
+
+    :cvar WORKFLOW_ROOT: Root of the activity is WORKFLOW_ROOT
+    :cvar CATALOG_ROOT: Root of the activity is CATALOG_ROOT (below are CATALOG tasks)
+    """
+
+    WORKFLOW_ROOT = 'WORKFLOW_ROOT'
+    CATALOG_ROOT = 'CATALOG_ROOT'
 
 
 class ComponentXType(Enum):

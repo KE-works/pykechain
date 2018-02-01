@@ -16,7 +16,7 @@ class Scope(Base):
         super(Scope, self).__init__(json, **kwargs)
 
         self.bucket = json.get('bucket', {})
-        self.process = json.get('process')
+        self.workflow_root = json.get('workflow_root_id')
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Scope '{}' id {}>".format(self.name, self.id[-8:])
@@ -68,7 +68,7 @@ class Scope(Base):
 
         See :class:`pykechain.Client.create_activity` for available parameters.
         """
-        return self._client.create_activity(self.process, *args, **kwargs)
+        return self._client.create_activity(self.workflow_root, *args, **kwargs)
 
     def services(self, *args, **kwargs):
         """Retrieve services belonging to this scope.

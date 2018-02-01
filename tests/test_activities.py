@@ -15,6 +15,7 @@ from pykechain.models.inspectors import SuperGrid, PropertyGrid
 from tests.classes import TestBetamax
 
 ISOFORMAT = "%Y-%m-%dT%H:%M:%SZ"
+ISOFORMAT_HIGHPRECISION = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 class TestActivities(TestBetamax):
@@ -42,7 +43,7 @@ class TestActivities(TestBetamax):
     def test_create_activity(self):
         project = self.project
 
-        subprocess = project.create_activity('Random', activity_class='Subprocess')
+        subprocess = project.create_activity('Random', activity_type='PROCESS')
 
         self.assertEqual(subprocess.name, 'Random')
 
@@ -54,7 +55,7 @@ class TestActivities(TestBetamax):
             subprocess.delete()
 
     def test_create_activity_under_task(self):
-        task = self.project.activity('Customized task')
+        task = self.project.activity('Specify wheel diameter')
 
         with self.assertRaises(IllegalArgumentError):
             task.create('This cannot happen')
@@ -108,8 +109,8 @@ class TestActivities(TestBetamax):
     def test_edit_activity_naive_dates(self):
         specify_wd = self.project.activity('Specify wheel diameter')
 
-        old_start, old_due = datetime.strptime(specify_wd._json_data.get('start_date'), ISOFORMAT), \
-                             datetime.strptime(specify_wd._json_data.get('due_date'), ISOFORMAT)
+        old_start, old_due = datetime.strptime(specify_wd._json_data.get('start_date'), ISOFORMAT_HIGHPRECISION), \
+                             datetime.strptime(specify_wd._json_data.get('due_date'), ISOFORMAT_HIGHPRECISION)
         start_time = datetime(2000, 1, 1, 0, 0, 0)
         due_time = datetime(2019, 12, 31, 0, 0, 0)
 
@@ -137,8 +138,8 @@ class TestActivities(TestBetamax):
         specify_wd = self.project.activity('Specify wheel diameter')
 
         # save old values
-        old_start, old_due = datetime.strptime(specify_wd._json_data.get('start_date'), ISOFORMAT), \
-                             datetime.strptime(specify_wd._json_data.get('due_date'), ISOFORMAT)
+        old_start, old_due = datetime.strptime(specify_wd._json_data.get('start_date'), ISOFORMAT_HIGHPRECISION), \
+                             datetime.strptime(specify_wd._json_data.get('due_date'), ISOFORMAT_HIGHPRECISION)
 
         startdate = datetime.now(pytz.utc)
         duedate = datetime(2019, 1, 1, 0, 0, 0, tzinfo=pytz.timezone('Europe/Amsterdam'))
@@ -198,8 +199,8 @@ class TestActivities(TestBetamax):
         specify_wd = self.project.activity('Specify wheel diameter')
 
         # save old values
-        old_start, old_due = datetime.strptime(specify_wd._json_data.get('start_date'), ISOFORMAT), \
-                             datetime.strptime(specify_wd._json_data.get('due_date'), ISOFORMAT)
+        old_start, old_due = datetime.strptime(specify_wd._json_data.get('start_date'), ISOFORMAT_HIGHPRECISION), \
+                             datetime.strptime(specify_wd._json_data.get('due_date'), ISOFORMAT_HIGHPRECISION)
         naive_duedate = datetime(2017, 6, 5, 5, 0, 0)
         with warnings.catch_warnings(record=False) as w:
             warnings.simplefilter("ignore")
@@ -218,8 +219,8 @@ class TestActivities(TestBetamax):
         # setup
         specify_wd = self.project.activity('Specify wheel diameter')
         # save old values
-        old_start, old_due = datetime.strptime(specify_wd._json_data.get('start_date'), ISOFORMAT), \
-                             datetime.strptime(specify_wd._json_data.get('due_date'), ISOFORMAT)
+        old_start, old_due = datetime.strptime(specify_wd._json_data.get('start_date'), ISOFORMAT_HIGHPRECISION), \
+                             datetime.strptime(specify_wd._json_data.get('due_date'), ISOFORMAT_HIGHPRECISION)
 
         tz = pytz.timezone('Europe/Amsterdam')
         tzaware_due = tz.localize(datetime(2017, 7, 1))
@@ -238,38 +239,38 @@ class TestActivities(TestBetamax):
             warnings.simplefilter("ignore")
             specify_wd.edit(start_date=old_start, due_date=old_due)
 
-    # 1.8
-    def test_retrieve_subprocess_of_task(self):
+    # 2.0 new activity
+    def test_retrieve_parent_of_task(self):
         task = self.project.activity(name='SubTask')
-        subprocess = task.subprocess()  # type Activity
-        self.assertEqual(subprocess.activity_type, ActivityType.SUBPROCESS)
+        subprocess = task.parent()  # type Activity
+        self.assertEqual(subprocess.activity_type, ActivityType.PROCESS)
 
-    def test_retrieve_subprocess_of_a_toplevel_task(self):
+    def test_retrieve_parent_of_a_toplevel_task_returns_workflow_root_id(self):
         task = self.project.activity('Specify wheel diameter')
-        with self.assertRaises(NotFoundError):
-            subprocess = task.subprocess()
+        parent = task.parent()
+        self.assertEqual(self.project._json_data.get('workflow_root_id'), parent.id)
 
-    def test_retrieve_children_of_subprocess(self):
+    def test_retrieve_children_of_parent(self):
         subprocess = self.project.activity(name='Subprocess')  # type: Activity
         children = subprocess.children()
         self.assertTrue(len(children) >= 1)
         for child in children:
-            self.assertEqual(child._json_data.get('container'), subprocess.id)
+            self.assertEqual(child._json_data.get('parent_id'), subprocess.id)
 
-    def test_retrieve_children_of_task(self):
-        task = self.project.activity(name='SubTask')
+    def test_retrieve_children_of_task_fails_for_task(self):
+        task = self.project.activity(name='Specify wheel diameter')
         with self.assertRaises(NotFoundError):
             task.children()
 
     def test_retrieve_activity_by_id(self):
-        task = self.project.activity(name='SubTask')  # type: Activity
+        task = self.project.activity(name='Subprocess')  # type: Activity
 
         task_by_id = self.client.activity(pk=task.id)
 
         self.assertEqual(task.id, task_by_id.id)
 
     def test_retrieve_siblings_of_a_task_in_a_subprocess(self):
-        task = self.project.activity(name='SubTask')  # type: Activity
+        task = self.project.activity(name='Subprocess')  # type: Activity
         siblings = task.siblings()
 
         self.assertTrue(task.id in [sibling.id for sibling in siblings])
@@ -313,7 +314,7 @@ class TestActivities(TestBetamax):
         children = subprocess.children(name__icontains='task')
         self.assertTrue(len(children) >= 1)
         for child in children:
-            self.assertEqual(child._json_data.get('container'), subprocess.id)
+            self.assertEqual(child._json_data.get('parent_id'), subprocess.id)
 
     def test_retrieve_siblings_of_a_task_in_a_subprocess_with_arguments(self):
         task = self.project.activity(name='SubTask')  # type: Activity
@@ -332,8 +333,8 @@ class TestActivities(TestBetamax):
 
     # in 1.13
     def test_create_activity_with_incorrect_activity_class_fails(self):
-        with self.assertRaisesRegex(IllegalArgumentError, 'Please provide accepted activity_class'):
-            self.project.create_activity(name='New', activity_class='Activity')
+        with self.assertRaisesRegex(IllegalArgumentError, 'Please provide accepted activity_type'):
+            self.project.create_activity(name='New', activity_type='DEFUNCTActivity')
 
 
 class TestActivitiesCustomisation(TestBetamax):
