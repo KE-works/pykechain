@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+2.0.0 (UNRELEASED)
+------------------
+ * revamped the activity API endpoints and functionality to work with the new WIM2 implementation of KE-chain 2.8 (FEB18)
+
 1.15.0 (25JAN18)
 ----------------
  * added ability to provide additional `keyword=value` arguments to many of the part and property methods that either create parts or update properties (#260). This facilitates the use of `suppress_kevents=True` that you might want to use for a backend performance boost. This is a trade-off that the frontend will not be informed of any property updates or new parts until after a reload of the page in the KE-chain frontend application. When you *can use* `suppress_kevents=True` in the method, it is documented in the function. This can be found in de `Developer API docs <http://pykechain.readthedocs.io/en/latest/developer_api.html>`_. Examples of functions that can handle the `supress_kevents=True` as additional `keyword=value` argument are: `Client.create_part()`, `Client.create_model()`, `Part.add()`, `Part.update()`, `Part.edit()` and more like these.
