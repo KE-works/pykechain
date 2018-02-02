@@ -5,7 +5,8 @@ pykechain changelog
 
 1.15.1 (2FEB18)
 ---------------
- * The `Part.property()` method was slightly changed in 1.15 (the argument name was `name` and became `name_or_id`). This is reverted to `name` to be compatbile with older pykechain releases. (#271)
+ * The `Part.property()` method was slightly changed in 1.15 (the argument name was `name` and became `name_or_id`). This is reverted to `name` to be compatible with older pykechain releases. (#271)
+ * Updated dependent versions for development: pytest (3.4.0)
 
 1.15.0 (25JAN18)
 ----------------
