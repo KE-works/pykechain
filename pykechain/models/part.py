@@ -64,11 +64,11 @@ class Part(Base):
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
         self.multiplicity = json.get('multiplicity', None)
 
-    def property(self, name_or_id):
+    def property(self, name):
         """Retrieve the property belonging to this part based on its name or uuid.
 
-        :param name_or_id: property name or property UUID to search for
-        :type name_or_id: basestring
+        :param name: property name or property UUID to search for
+        :type name: basestring
         :return: a single :class:`Property`
         :raises NotFoundError: if the `Property` is not part of the `Part`
 
@@ -90,13 +90,13 @@ class Part(Base):
 
         """
         found = None
-        if is_uuid(name_or_id):
-            found = find(self.properties, lambda p: name_or_id == p.id)
+        if is_uuid(name):
+            found = find(self.properties, lambda p: name == p.id)
         else:
-            found = find(self.properties, lambda p: name_or_id == p.name)
+            found = find(self.properties, lambda p: name == p.name)
 
         if not found:
-            raise NotFoundError("Could not find property with name or id {}".format(name_or_id))
+            raise NotFoundError("Could not find property with name or id {}".format(name))
 
         return found
 
@@ -657,7 +657,7 @@ class Part(Base):
 
         for prop in property_list:
             if isinstance(prop, (str, text_type)):
-                order_dict[self.property(name_or_id=prop).id] = property_list.index(prop)
+                order_dict[self.property(name=prop).id] = property_list.index(prop)
             else:
                 order_dict[prop.id] = property_list.index(prop)
 
