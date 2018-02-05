@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+1.15.2 (5FEB18)
+---------------
+ * The Multireference property incorrectly expanded the response from the server and could not retrieve the selected part id's. (#274)
+
 1.15.1 (2FEB18)
 ---------------
  * The `Part.property()` method was slightly changed in 1.15 (the argument name was `name` and became `name_or_id`). This is reverted to `name` to be compatible with older pykechain releases. (#271)
