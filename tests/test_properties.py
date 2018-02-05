@@ -128,13 +128,13 @@ class TestProperties(TestBetamax):
 
     def test_edit_property_model_unit(self):
         front_fork_model = self.project.model('Front Fork')
-        height_property = front_fork_model.property(name='Height (mm)')
+        height_property = front_fork_model.property(name='Height')
         height_old_unit = str(height_property._json_data.get('unit'))
         new_unit = 'm'
 
         height_property.edit(unit=new_unit)
 
-        height_property_u = front_fork_model.property(name='Height (mm)')
+        height_property_u = front_fork_model.property(name='Height')
         self.assertEqual(height_property.id, height_property_u.id)
 
         with self.assertRaises(IllegalArgumentError):

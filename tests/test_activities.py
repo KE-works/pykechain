@@ -1,5 +1,3 @@
-import json
-import uuid
 from datetime import datetime
 from unittest import skip
 
@@ -10,8 +8,6 @@ import warnings
 from pykechain.enums import Category, ActivityType, ActivityStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import Part, Activity
-from pykechain.models.inspector_base import Customization
-from pykechain.models.inspectors import SuperGrid, PropertyGrid
 from tests.classes import TestBetamax
 
 ISOFORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -152,10 +148,13 @@ class TestActivities(TestBetamax):
         specify_wd.edit(start_date=old_start, due_date=old_due)
 
     def test_edit_activity_assignee(self):
-        specify_wd = self.project.activity('Specify wheel diameter')
-        original_assignee = specify_wd._json_data.get('assignees', ['testuser', 'testmanager'])
+        specify_wd = self.project.activity('Specify wheel diameter')  # type: Activity2
+        original_assignee_ids = specify_wd._json_data.get('assignee_ids')
 
-        specify_wd.edit(assignees=['pykechain'])
+        #pykechain_user = self.client.user(username='pykechain')
+        test_user = self.client.user(username='testuser')
+
+        specify_wd.edit(assignee_ids=[test_user.id])
 
         specify_wd = self.project.activity('Specify wheel diameter')
         self.assertEqual(['pykechain'], specify_wd._json_data.get('assignees'))
@@ -165,14 +164,14 @@ class TestActivities(TestBetamax):
         # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
         # scope members
         with self.assertRaises(NotFoundError):
-            specify_wd.edit(assignees=['Not Member'])
+            specify_wd.edit(assignee_ids=[-100])
 
         # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
         # scope members
         with self.assertRaises(IllegalArgumentError):
-            specify_wd.edit(assignees='Not Member')
+            specify_wd.edit(assignee_ids='this should have been a list')
 
-        specify_wd.edit(assignees=original_assignee)
+        specify_wd.edit(assignee_ids=original_assignee_ids)
 
     # 1.10.0
     def test_edit_activity_status(self):
@@ -382,35 +381,6 @@ class TestActivitiesCustomisation(TestBetamax):
         self.assertTrue(new_task._json_data['widget_config']['config'] is not None)
 
         # Delete it
-        new_task.delete()
-
-    @skip('KE-chain deprecated the inspector components')
-    def test_customize_activity_with_inspectorcomponent(self):
-        # Create the activity to be freshly customized
-        new_task = self.project.create_activity('New task (test_customize_activity_with_insp_component)')
-
-        customization = Customization()
-        supergrid = SuperGrid(parent=str(uuid.uuid4()), model=str(uuid.uuid4()))
-        customization.add_component(supergrid)
-
-        # set as new customization in the task
-        new_task.customize(customization)
-
-        # retrieve and make another oene
-        new_task2 = self.project.activity(new_task.name)
-
-        propertygrid = PropertyGrid(part=str(uuid.uuid4()), title="new name")
-        customization = Customization()
-        customization.add_component(propertygrid)
-        new_task2.customize(customization)
-
-        self.assertTrue(new_task._json_data['widget_config']['config'] is not None)
-        self.assertTrue(new_task2._json_data['widget_config']['config'] is not None)
-
-        # the customization from the activity still validates
-        Customization(json.loads(new_task2._json_data['widget_config']['config'])).validate()
-
-        # teardown
         new_task.delete()
 
     def test_wrong_customization(self):
