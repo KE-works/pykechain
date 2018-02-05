@@ -7,6 +7,10 @@ pykechain changelog
 ------------------
  * revamped the activity API endpoints and functionality to work with the new WIM2 implementation of KE-chain 2.8 (FEB18)
 
+1.15.2 (5FEB18)
+---------------
+ * Fixed a bug where the `MultiReference` property could not retrieve parts through the API based on the value of the `MultiReference` property as it incorrectly retrieved the 'id' from the value list (#274). Thanks to @raduiordache!
+
 1.15.1 (2FEB18)
 ---------------
  * The `Part.property()` method was slightly changed in 1.15 (the argument name was `name` and became `name_or_id`). This is reverted to `name` to be compatible with older pykechain releases. (#271)
