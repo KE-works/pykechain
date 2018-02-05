@@ -5,6 +5,7 @@ import requests
 from pykechain.enums import Multiplicity
 from pykechain.exceptions import APIError, NotFoundError
 from pykechain.models.base import Base
+from pykechain.models.user import User
 
 
 class Scope(Base):

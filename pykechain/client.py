@@ -8,6 +8,7 @@ from requests.compat import urljoin, urlparse  # type: ignore
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion
 from pykechain.models.activity2 import Activity2
 from pykechain.models.service import Service, ServiceExecution
+from pykechain.models.user import User
 from pykechain.utils import is_uuid
 from .__about__ import version
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError, IllegalArgumentError
@@ -175,7 +176,7 @@ class Client(object):
 
     def _retrieve_users(self):
         """
-        Retrieve user objects of the entire administration.
+        Retrieve user objects of the entire KE-chain world.
 
         :return: list of dictionary with users information
         :rtype: list(dict)
@@ -662,6 +663,32 @@ class Client(object):
             raise MultipleFoundError("Multiple services fit criteria")
 
         return _service_executions[0]
+
+    def users(self, username=None, pk=None, **kwargs):
+        request_params = {
+            'username': username,
+            'pk': pk,
+        }
+        if kwargs:
+            request_params.update(**kwargs)
+
+        r = self._request('GET', self._build_url('users'), params=request_params)
+
+        if r.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve properties")
+
+        data = r.json()
+        return [User(user, client=self) for user in data['results']]
+
+    def user(self, username=None, pk=None, **kwargs):
+        _users = self.users(username=username, pk=pk, **kwargs)
+
+        if len(_users) == 0:
+            raise NotFoundError("No user criteria")
+        if len(_users) != 1:
+            raise MultipleFoundError("Multiple users fit criteria")
+
+        return _users[0]
 
     #
     # Creators
