@@ -5,7 +5,7 @@ pykechain changelog
 
 1.15.2 (5FEB18)
 ---------------
- * The Multireference property incorrectly expanded the response from the server and could not retrieve the selected part id's. (#274)
+ * Fixed a bug where the `MultiReference` property could not retrieve parts through the API based on the value of the `MultiReference` property as it incorrectly retrieved the 'id' from the value list (#274). Thanks to @raduiordache!
 
 1.15.1 (2FEB18)
 ---------------
@@ -18,7 +18,7 @@ pykechain changelog
  * added validation of a single select list. The value is not set when it is not in the list of options (#259).
  * enabled to use of property model UUID in the `Part.add_with_properties()` next to using property names. (#258)
  * enabled to search for properties using UUID next to using property names. This is provided for you in `Part.property()`.
- * The `Part.update()` is now considerate if you provide the property UUIDs inside the `update_dict` as well as property names. You can even mix UUIDs and property names together. (#263) Thanks to @raduiordache
+ * The `Part.update()` is now considerate if you provide the property UUIDs inside the `update_dict` as well as property names. You can even mix UUIDs and property names together. (#263) Thanks to @raduiordache.
  * functions and methods that check if the correct type was provided to the method as arguments that raised `TypeError` before, are now raising `IllegalArgumentError`.
  * The `Activity.customize()` method and the `InspectorComponents` are now deprecated (since Nov 17) and will raise deprecation errors when called. Use `Activity.customization()` to retrieve the new activity Customization objects.
  * updated dependent versions for development: pytest (3.3.2), sphinx (1.6.6), nbsphinx (0.3.1), matplotlib (2.1.2), mypy (0.560)
