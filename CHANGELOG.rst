@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+1.15.3 (8FEB18)
+---------------
+ * Fixed a bug where the `MultiReference` property only provided back the 'last' `Part` in the internal value due to the way a library parses a list. Fixed that and added tests (#276). Thanks again to @raduiordache.
+
 1.15.2 (5FEB18)
 ---------------
  * Fixed a bug where the `MultiReference` property could not retrieve parts through the API based on the value of the `MultiReference` property as it incorrectly retrieved the 'id' from the value list (#274). Thanks to @raduiordache!
