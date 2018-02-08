@@ -50,7 +50,7 @@ class TestMultiReferenceProperty(TestBetamax):
         model_instance = self.project.part('Instance of Model')
         multi_ref_prop = model_instance.property(name='part reference field')
 
-        all_parts = multi_ref_prop.value
-        print(all_parts)
+        all_referred_parts = multi_ref_prop.value
+        self.assertEqual(len(all_referred_parts), len(multi_ref_prop._value))
 
 
