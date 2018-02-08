@@ -8,6 +8,7 @@ from six import text_type
 from pykechain.enums import Category, ActivityType
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
+from pykechain.models.user import User
 
 
 class Activity(Base):

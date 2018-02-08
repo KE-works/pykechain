@@ -17,17 +17,26 @@ class TestScopes(TestBetamax):
 
     # 1.11+
     def test_retrieve_scope_members(self):
-        scope_managers = ['pykechain', 'testmanager', 'jochem.berends']
-        scope_members = scope_managers + ['testuser']
+        scope_managers = ['testmanager']
+        scope_members = scope_managers + ['anotheruser', 'testuser']
+
+        self.project.add_manager('testmanager')
+        self.project.add_member('anotheruser')
+        self.project.add_member('testuser')
+
+        self.project.refresh()
 
         members_usernames = [member['username'] for member in self.project.members()]
         managers_usernames = [manager['username'] for manager in self.project.members(is_manager=True)]
 
-        self.assertListEqual(sorted(scope_members), sorted(members_usernames))
-        self.assertListEqual(sorted(scope_managers), sorted(managers_usernames))
+        self.assertSetEqual(set(scope_members), set(members_usernames))
+        self.assertSetEqual(set(scope_managers), set(managers_usernames))
+
+        # teardown
+        self.project.remove_member('anotheruser')
 
     def test_add_member(self):
-        member_to_be_added = 'superuser'
+        member_to_be_added = 'anotheruser'
         # testing
         self.project.add_member(member_to_be_added)
         self.project = self.client.scope(pk=self.project.id)
@@ -47,7 +56,7 @@ class TestScopes(TestBetamax):
             self.project.add_member(member_to_be_added)
 
     def test_remove_member(self):
-        member_to_be_removed = 'superuser'
+        member_to_be_removed = 'anotheruser'
         # setUp
         self.project.add_member(member_to_be_removed)
         # testing
@@ -57,7 +66,7 @@ class TestScopes(TestBetamax):
         self.assertTrue(member_to_be_removed not in [member['username'] for member in project_members])
 
     def test_add_manager(self):
-        manager_to_be_added = 'superuser'
+        manager_to_be_added = 'anotheruser'
         # testing
         self.project.add_manager(manager_to_be_added)
         self.project = self.client.scope(pk=self.project.id)
@@ -67,7 +76,7 @@ class TestScopes(TestBetamax):
         self.project.remove_member(manager_to_be_added)
 
     def test_remove_manager(self):
-        manager_to_be_removed = 'superuser'
+        manager_to_be_removed = 'anotheruser'
         # setUp
         self.project.add_manager(manager_to_be_removed)
         # testing
