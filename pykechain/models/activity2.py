@@ -1,8 +1,13 @@
-import warnings
+import datetime
 
-from pykechain.enums import ActivityType
-from pykechain.exceptions import NotFoundError, IllegalArgumentError
-from pykechain.models import Base, Activity
+import requests
+import warnings
+from six import text_type
+
+
+from pykechain.enums import ActivityType, ActivityStatus
+from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
+from pykechain.models import Activity
 
 
 class Activity2(Activity):
@@ -20,6 +25,13 @@ class Activity2(Activity):
         self.status = json.get('status', None)
         self.classification = json.get('classification', None)
         self.activity_type = json.get('activity_type', None)
+
+    def refresh(self):
+        # type: () -> None
+        """Refresh the object in place."""
+        from pykechain.client import API_EXTRA_PARAMS
+        src = self._client.reload(self, extra_params=API_EXTRA_PARAMS['activity'])
+        self.__dict__.update(src.__dict__)
 
     def create(self, *args, **kwargs):
         """Create a new activity belonging to this subprocess.
@@ -52,7 +64,7 @@ class Activity2(Activity):
 
     def parent(self):
         parent_id = self._json_data.get('parent_id')
-        if parent_id== None:
+        if parent_id == None:
             raise NotFoundError("Cannot find subprocess for this task '{}', "
                                 "as this task exist on top level.".format(self.name))
         return self._client.activity(pk=parent_id, scope=self.scope_id)
@@ -85,8 +97,8 @@ class Activity2(Activity):
 
         return self._client.activities(parent_id=self.id, scope=self.scope_id, **kwargs)
 
-
-    def edit(self, name=None, description=None, start_date=None, due_date=None, assignee_ids=None, status=None):
+    def edit(self, name=None, description=None, start_date=None, due_date=None, assignees=None, assignees_ids=None,
+             status=None):
         """Edit the details of an activity.
 
         :param name: (optionally) edit the name of the activity
@@ -99,7 +111,11 @@ class Activity2(Activity):
         :param due_date: (optionally) edit the due_date of the activity as a datetime object (UTC time/timzeone
                             aware preferred)
         :type due_date: datetime or None
-        :param assignee_ids: (optionally) edit the assignees of the activity as a list, will overwrite all assignees
+        :param assignees: (optionally) edit the assignees (usernames) of the activity as a list, will overwrite all
+                          assignees
+        :type assignees: list(basestring) or None
+        :param assignees_ids: (optionally) edit the assignees (user id's) of the activity as a list, will overwrite all
+                             assignees
         :type assignees_ids: list(basestring) or None
         :param status: (optionally) edit the status of the activity as a string based
                        on :class:`~pykechain.enums.ActivityType`
@@ -136,10 +152,75 @@ class Activity2(Activity):
         >>> my_task.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
 
         """
-        super(Activity2, self).edit(name=name, description=description, start_date=start_date, due_date=due_date,
-                                    assignees=assignee_ids, status=status)
+
+        update_dict = {'id': self.id}
+        if name:
+            if isinstance(name, (str, text_type)):
+                update_dict.update({'name': name})
+                self.name = name
+            else:
+                raise IllegalArgumentError('Name should be a string')
+
+        if description:
+            if isinstance(description, (str, text_type)):
+                update_dict.update({'description': description})
+                self.description = description
+            else:
+                raise IllegalArgumentError('Description should be a string')
+
+        if start_date:
+            if isinstance(start_date, datetime.datetime):
+                if not start_date.tzinfo:
+                    warnings.warn("The startdate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
+                update_dict.update({'start_date': start_date.isoformat(sep='T')})
+            else:
+                raise IllegalArgumentError('Start date should be a datetime.datetime() object')
+
+        if due_date:
+            if isinstance(due_date, datetime.datetime):
+                if not due_date.tzinfo:
+                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
+                update_dict.update({'due_date': due_date.isoformat(sep='T')})
+            else:
+                raise IllegalArgumentError('Due date should be a datetime.datetime() object')
+
+        if isinstance(assignees_ids, (list, tuple)):
+            users = self._client.users()
+            update_assignees_ids = [u.id for u in users if u.id in assignees_ids]
+        elif isinstance(assignees, (list, tuple)):
+            users = self._client.users()
+            update_assignees_ids = [u.id for u in users if u.username in assignees]
+        else:
+            raise IllegalArgumentError("Provide the usernames either as list of usernames of user id's")
+
+        if update_assignees_ids:
+            if isinstance(update_assignees_ids, list):
+                project = self._client.scope(pk=self.scope_id, status=None)
+                member_ids_list = [member['id'] for member in project._json_data['members']]
+                for assignee_id in update_assignees_ids:
+                    if assignee_id not in member_ids_list:
+                        raise NotFoundError("Assignee '{}' should be a member of the project".format(assignee_id))
+                update_dict.update({'assignees_ids': update_assignees_ids})
+            else:
+                raise IllegalArgumentError('Assignees should be a list')
+
+        if status:
+            if isinstance(status, (str, text_type)) and status in ActivityStatus.values():
+                update_dict.update({'status': status})
+            else:
+                raise IllegalArgumentError('Status should be a string and in the list of acceptable '
+                                           'status strings: {}'.format(ActivityStatus.values()))
+
+        url = self._client._build_url('activity', activity_id=self.id)
+        r = self._client._request('PUT', url, json=update_dict)
+
+        if r.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Activity ({})".format(r))
+
+        self.refresh()
 
     def customize(self, config):
         """Deprecated function of customize."""
         raise DeprecationWarning('This function is deprecated')
-

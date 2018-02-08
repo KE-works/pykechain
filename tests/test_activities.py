@@ -154,24 +154,24 @@ class TestActivities(TestBetamax):
         #pykechain_user = self.client.user(username='pykechain')
         test_user = self.client.user(username='testuser')
 
-        specify_wd.edit(assignee_ids=[test_user.id])
+        specify_wd.edit(assignees_ids=[test_user.id])
+        specify_wd.refresh()
 
-        specify_wd = self.project.activity('Specify wheel diameter')
-        self.assertEqual(['pykechain'], specify_wd._json_data.get('assignees'))
+        self.assertEqual(['testuser'], specify_wd._json_data.get('assignees_names'))
 
         self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
 
         # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
         # scope members
         with self.assertRaises(NotFoundError):
-            specify_wd.edit(assignee_ids=[-100])
+            specify_wd.edit(assignees_ids=[-100])
 
         # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
         # scope members
         with self.assertRaises(IllegalArgumentError):
-            specify_wd.edit(assignee_ids='this should have been a list')
+            specify_wd.edit(assignees_ids='this should have been a list')
 
-        specify_wd.edit(assignee_ids=original_assignee_ids)
+        specify_wd.edit(assignees_ids=original_assignee_ids)
 
     # 1.10.0
     def test_edit_activity_status(self):

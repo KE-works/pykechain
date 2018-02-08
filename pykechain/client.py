@@ -201,18 +201,20 @@ class Client(object):
 
         return self.last_response
 
-    def reload(self, obj):
+    def reload(self, obj, extra_params=None):
         """Reload an object from server. This method is immutable and will return a new object.
 
         :param obj: object to reload
         :type obj: :py:obj:`obj`
+        :param extra_params: additional object specific extra query string params (eg for activity)
+        :type extra_params: dict
         :return: a new object
         :raises NotFoundError: if original object is not found or deleted in the mean time
         """
         if not obj._json_data.get('url'):
             raise NotFoundError("Could not reload object, there is no url for object '{}' configured".format(obj))
 
-        response = self._request('GET', obj._json_data.get('url'))
+        response = self._request('GET', obj._json_data.get('url'), params=extra_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not reload object ({})".format(response))

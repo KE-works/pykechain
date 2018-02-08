@@ -1,4 +1,4 @@
-from pykechain.enums import Category
+from pykechain.enums import Category, Multiplicity
 from pykechain.exceptions import NotFoundError, MultipleFoundError
 from pykechain.models import PartSet
 from tests.classes import TestBetamax
@@ -34,7 +34,12 @@ class TestPartRetrieve(TestBetamax):
 
     # test added in 1.12.7
     def test_get_single_instance_of_a_model_without_instances_raises_notfounderror(self):
-        model_without_instances = self.project.model(name='model_without_instances')
+        catalog = self.project.model(name='Catalog')
+        model_without_instances = self.project.create_model(parent=catalog, name='model_without_instances',
+                                                           multiplicity=Multiplicity.ZERO_ONE)
 
         with self.assertRaises(NotFoundError):
             model_without_instances.instance()
+
+        #teardown
+        model_without_instances.delete()
