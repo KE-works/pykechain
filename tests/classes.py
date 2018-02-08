@@ -10,7 +10,7 @@ elif six.PY3:
     from test.support import EnvironmentVarGuard
 
 from pykechain import Client
-from tests.utils import TEST_TOKEN, TEST_URL, TEST_SCOPE_NAME
+from tests.utils import TEST_TOKEN, TEST_URL, TEST_SCOPE_NAME, TEST_RECORD_CASSETTES
 
 with Betamax.configure() as config:
     config.cassette_library_dir = os.path.join(os.path.dirname(__file__), 'cassettes')
@@ -35,8 +35,12 @@ class TestBetamax(TestCase):
             self.client.login(token=TEST_TOKEN)
 
         self.recorder = Betamax(session=self.client.session)
-        self.recorder.use_cassette(self.cassette_name)
-        self.recorder.start()
+
+        if TEST_RECORD_CASSETTES:
+            self.recorder.use_cassette(self.cassette_name)
+            self.recorder.start()
+        else:
+            self.recorder.config.record_mode = None
         self.project = self.client.scope(TEST_SCOPE_NAME)
 
     def tearDown(self):
