@@ -44,3 +44,13 @@ class TestReferenceProperty(TestBetamax):
         self.assertEqual(instances_of_wheel_model._parts[0].id, reference_property_parts[0].id)
         self.assertEqual(instances_of_wheel_model._parts[1].id, reference_property_parts[1].id)
 
+class TestMultiReferenceProperty(TestBetamax):
+    def test_value_if_multi_ref_gives_back_all_parts(self):
+        """because of #276 problem"""
+        model_instance = self.project.part('Instance of Model')
+        multi_ref_prop = model_instance.property(name='part reference field')
+
+        all_referred_parts = multi_ref_prop.value
+        self.assertEqual(len(all_referred_parts), len(multi_ref_prop._value))
+
+

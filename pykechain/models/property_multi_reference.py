@@ -64,7 +64,8 @@ class MultiReferenceProperty(Property):
         if not self._value:
             return None
         if not self._cached_values and isinstance(self._value, (list, tuple)):
-            self._cached_values = list(self._client.parts(id__in=[v.get('id') for v in self._value]))
+            ids = [v.get('id') for v in self._value]
+            self._cached_values = list(self._client.parts(id__in=','.join(ids)))
         return self._cached_values
 
     @value.setter
