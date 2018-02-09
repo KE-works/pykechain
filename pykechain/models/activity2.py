@@ -186,16 +186,21 @@ class Activity2(Activity):
             else:
                 raise IllegalArgumentError('Due date should be a datetime.datetime() object')
 
-        if isinstance(assignees_ids, (list, tuple)):
-            users = self._client.users()
-            update_assignees_ids = [u.id for u in users if u.id in assignees_ids]
-        elif isinstance(assignees, (list, tuple)):
-            users = self._client.users()
-            update_assignees_ids = [u.id for u in users if u.username in assignees]
-        else:
-            raise IllegalArgumentError("Provide the usernames either as list of usernames of user id's")
+        if isinstance(assignees_ids, (list, tuple)) or isinstance(assignees, (list, tuple)):
+            update_assignees_ids = []
+            if isinstance(assignees_ids, (list, tuple)):
+                users = self._client.users()
+                update_assignees_ids = [u.id for u in users if u.id in assignees_ids]
+                if len(update_assignees_ids) != len(assignees_ids):
+                    raise NotFoundError("All assignees should be a member of the project")
+            elif isinstance(assignees, (list, tuple)):
+                users = self._client.users()
+                update_assignees_ids = [u.id for u in users if u.username in assignees]
+                if len(update_assignees_ids) != len(assignees):
+                    raise NotFoundError("All assignees should be a member of the project")
+            else:
+                raise IllegalArgumentError("Provide the usernames either as list of usernames of user id's")
 
-        if update_assignees_ids:
             if isinstance(update_assignees_ids, list):
                 project = self._client.scope(pk=self.scope_id, status=None)
                 member_ids_list = [member['id'] for member in project._json_data['members']]
@@ -203,8 +208,8 @@ class Activity2(Activity):
                     if assignee_id not in member_ids_list:
                         raise NotFoundError("Assignee '{}' should be a member of the project".format(assignee_id))
                 update_dict.update({'assignees_ids': update_assignees_ids})
-            else:
-                raise IllegalArgumentError('Assignees should be a list')
+        elif assignees_ids or assignees:
+            raise IllegalArgumentError("If assignees_ids or assignees are provided, they should be a list or tuple")
 
         if status:
             if isinstance(status, (str, text_type)) and status in ActivityStatus.values():
