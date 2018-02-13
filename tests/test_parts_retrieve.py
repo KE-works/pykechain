@@ -34,7 +34,7 @@ class TestPartRetrieve(TestBetamax):
 
     # test added in 1.12.7
     def test_get_single_instance_of_a_model_without_instances_raises_notfounderror(self):
-        catalog = self.project.model(name='Catalog')
+        catalog = self.project.model(name='Catalog container')
         model_without_instances = self.project.create_model(parent=catalog, name='model_without_instances',
                                                            multiplicity=Multiplicity.ZERO_ONE)
 

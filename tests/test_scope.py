@@ -17,8 +17,10 @@ class TestScopes(TestBetamax):
 
     # 1.11+
     def test_retrieve_scope_members(self):
-        scope_managers = ['testmanager']
-        scope_members = scope_managers + ['anotheruser', 'testuser']
+        original_scope_members = [u.get('username') for u in self.project.members()]
+        original_scope_managers = [u.get('username') for u in self.project.members(is_manager=True)]
+        scope_managers = original_scope_managers + ['testmanager']
+        scope_members = original_scope_members + ['anotheruser', 'testuser']
 
         self.project.add_manager('testmanager')
         self.project.add_member('anotheruser')

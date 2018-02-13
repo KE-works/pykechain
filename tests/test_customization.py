@@ -117,15 +117,19 @@ class TestExtCustomization(TestBetamax):
         customization = self.activity_2.customization()
         part = self.activity_1.parts()[0]
 
+        widget_count = len(customization.widgets())
+
         customization.add_property_grid_widget(part)
 
-        self.assertEqual(len(customization.widgets()), 2, "The customization should have 2 widget")
+        self.assertEqual(len(customization.widgets()), widget_count+1,
+                         "The customization should have {} widget".format(widget_count+1))
         self.assertTrue(customization.widgets()[1]["name"] == "propertyGridWidget",
                         "The second widget should be a propertyGridWidget")
 
-        customization.delete_widget(1)
+        customization.delete_widget(widget_count)
 
-        self.assertEqual(len(customization.widgets()), 1, "The customization should have 1 widget")
+        self.assertEqual(len(customization.widgets()), widget_count,
+                         "The customization should have {} widget".format(widget_count))
         self.assertTrue(customization.widgets()[0]["name"] == "jsonWidget",
                         "The first widget should be a jsonWidget")
 
@@ -146,11 +150,13 @@ class TestExtCustomization(TestBetamax):
         """
         customization = self.activity_2.customization()
         part = self.activity_2.parts()[0]
+        widget_count = len(customization.widgets())
 
         customization.add_property_grid_widget(part)
 
-        self.assertEqual(len(customization.widgets()), 2, "The customization should have 2 widget")
-        self.assertTrue(customization.widgets()[1]["name"] == "propertyGridWidget",
+        self.assertEqual(len(customization.widgets()), widget_count+1,
+                         "The customization should have {} widget".format(widget_count+1))
+        self.assertTrue(customization.widgets()[widget_count]["name"] == "propertyGridWidget",
                         "The second widget should be a propertyGridWidget")
 
         customization.delete_all_widgets()
