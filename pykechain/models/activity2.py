@@ -4,7 +4,6 @@ import requests
 import warnings
 from six import text_type
 
-
 from pykechain.enums import ActivityType, ActivityStatus
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
 from pykechain.models import Activity

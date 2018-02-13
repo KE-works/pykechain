@@ -5,7 +5,6 @@ import requests
 from pykechain.enums import Multiplicity
 from pykechain.exceptions import APIError, NotFoundError
 from pykechain.models.base import Base
-from pykechain.models.user import User
 
 
 class Scope(Base):
@@ -17,6 +16,9 @@ class Scope(Base):
         super(Scope, self).__init__(json, **kwargs)
 
         self.bucket = json.get('bucket', {})
+        # wim1:
+        self.process = json.get('process')
+        # wim2:
         self.workflow_root = json.get('workflow_root_id')
 
     def __repr__(self):  # pragma: no cover
@@ -69,6 +71,9 @@ class Scope(Base):
 
         See :class:`pykechain.Client.create_activity` for available parameters.
         """
+        # FIXME: wim1
+        # wim1:
+        #   return self._client.create_activity(self.process, *args, **kwargs)
         return self._client.create_activity(self.workflow_root, *args, **kwargs)
 
     def services(self, *args, **kwargs):
