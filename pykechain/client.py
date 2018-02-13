@@ -37,7 +37,8 @@ API_PATH = {
     'service_execution_terminate': 'api/service_executions/{service_execution_id}/terminate',
     'service_execution_notebook_url': 'api/service_executions/{service_execution_id}/notebook_url',
     'service_execution_log': 'api/service_executions/{service_execution_id}/log',
-    'users': 'api/users.json'
+    'users': 'api/users.json',
+    'versions': 'api/versions.json'
 }
 
 API_EXTRA_PARAMS = {
@@ -84,6 +85,7 @@ class Client(object):
         self.last_request = None  # type: Optional[requests.PreparedRequest]
         self.last_response = None  # type: Optional[requests.Response]
         self.last_url = None  # type: Optional[str]
+        self._app_versions = None  # type: Optional[List[dict]]
 
         if not check_certificates:
             self.session.verify = False
@@ -200,6 +202,27 @@ class Client(object):
             raise ForbiddenError(self.last_response.json()['results'][0]['detail'])
 
         return self.last_response
+
+    @property
+    def app_versions(self):
+        if not self._app_versions:
+            app_versions_url = self._build_url('versions')
+
+            response = self._request('GET', app_versions_url)
+
+            if response.status_code == requests.codes.not_found:
+                self.versions = []
+            elif response.status_code == requests.codes.forbidden:
+                raise ForbiddenError(response.json()['results'][0]['detail'])
+            elif response.status_code != requests.codes.ok:
+                raise APIError("Could not retrieve app versions: {}".format(response))
+            self._app_versions = response.json()
+        else:
+            return self._app_versions
+
+    def is_version(self, app=None, label=None, version=None, major=None, minor=None, patch=None):
+        """Determines if the app if the right version."""
+        pass
 
     def reload(self, obj, extra_params=None):
         """Reload an object from server. This method is immutable and will return a new object.
