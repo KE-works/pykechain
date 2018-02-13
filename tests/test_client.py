@@ -83,3 +83,9 @@ class TestClientLive(TestBetamax):
 
         with self.assertRaises(ForbiddenError):
             self.client.parts()
+
+
+class TestClientAppVersions(TestBetamax):
+    def test_retrieve_versions(self):
+        """Test to retrieve the app versions from KE-chain"""
+        print(self.project._client.app_versions)
