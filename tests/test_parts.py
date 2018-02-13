@@ -146,20 +146,20 @@ class TestParts(TestBetamax):
 
     def test_retrieve_part_without_parent_id(self):
         # only the root does not have a parent_id
-        product_root_node = self.project.part(name='Product', classification=Classification.PRODUCT)
+        product_root_node = self.project.part(name='Product container', classification=Classification.PRODUCT)
         root_node = product_root_node.parent()
         self.assertTrue(hasattr(root_node, 'parent_id'))
         self.assertIsNone(root_node.parent_id)
 
     def test_retrieve_parent_of_part_without_parent_id(self):
         # only the root does not have a parent_id
-        product_root_node = self.project.part(name='Product', classification=Classification.PRODUCT)
+        product_root_node = self.project.part(name='Product container', classification=Classification.PRODUCT)
         root_node = product_root_node.parent()
         parent_of_root_node = root_node.parent()
         self.assertIsNone(parent_of_root_node)
 
     def test_retrieve_siblings_of_part_without_parent_id(self):
-        product_root_node = self.project.part(name='Product', classification=Classification.PRODUCT)
+        product_root_node = self.project.part(name='Product container', classification=Classification.PRODUCT)
         root_node = product_root_node.parent()
         siblings_of_root_node = root_node.siblings()
         self.assertIsInstance(siblings_of_root_node, PartSet)
@@ -226,7 +226,7 @@ class TestParts(TestBetamax):
         pedal_model.delete()
 
     def test_add_proxy_to(self):
-        catalog_container = self.project.model('Catalog')
+        catalog_container = self.project.model('Catalog container')
         bearing_catalog_model = catalog_container.add_model('Bearing', multiplicity=Multiplicity.ZERO_MANY)
         wheel_model = self.project.model('Wheel')
 
@@ -264,7 +264,7 @@ class TestParts(TestBetamax):
         self.assertEqual(front_fork_model.id, front_fork_retrieved_model.id)
 
     def test_retrieve_catalog_model_of_proxy(self):
-        catalog_container = self.project.model('Catalog')
+        catalog_container = self.project.model('Catalog container')
         bearing_catalog_model = catalog_container.add_model('Bearing', multiplicity=Multiplicity.ZERO_MANY)
         wheel_model = self.project.model('Wheel')
 

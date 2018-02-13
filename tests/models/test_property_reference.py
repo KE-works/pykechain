@@ -1,50 +1,48 @@
 from tests.classes import TestBetamax
 
 
-class TestReferenceProperty(TestBetamax):
+class TestMultiReferenceProperty(TestBetamax):
     def setUp(self):
-        super(TestReferenceProperty, self).setUp()
+        super(TestMultiReferenceProperty, self).setUp()
 
-        self.ref = self.project.part('Bike').property('RefTest')
+        self.mref_prop = self.project.part('Bike').property('RefTest') # type: MultiReferenceProperty
 
     def test_set_invalid_reference_value(self):
         with self.assertRaises(ValueError):
-            self.ref.value = 0
+            self.mref_prop.value = 0
 
         with self.assertRaises(ValueError):
-            self.ref.value = False
+            self.mref_prop.value = False
 
         with self.assertRaises(ValueError):
-            self.ref.value = [1, 2, 3]
+            self.mref_prop.value = [1, 2, 3]
 
     def test_set_reference_to_part(self):
         wheel = self.project.part('Front Wheel')
 
-        self.ref.value = wheel
-
-        self.assertEqual(self.ref.value.name, 'Front Wheel')
+        self.mref_prop.value = [wheel]
+        self.assertEqual(self.mref_prop.value[0].name, 'Front Wheel')
 
     def test_set_reference_to_part_id(self):
         wheel = self.project.part('Front Wheel')
 
-        self.ref.value = wheel.id
+        self.mref_prop.value = [wheel.id]
 
-        self.assertEqual(self.ref.value.name, 'Front Wheel')
+        self.assertEqual(self.mref_prop.value[0].name, 'Front Wheel')
 
     def test_delete_reference(self):
-        self.ref.value = None
+        self.mref_prop.value = None
 
-        self.assertIsNone(self.ref.value)
+        self.assertIsNone(self.mref_prop.value)
 
     def test_retrieve_parts(self):
-        reference_property_parts = self.ref.choices()
+        reference_property_parts = self.mref_prop.choices()
         wheel_model = self.project.model('Wheel')
         instances_of_wheel_model = self.project.parts(model=wheel_model)
         self.assertEqual(len(reference_property_parts), len(instances_of_wheel_model))
         self.assertEqual(instances_of_wheel_model._parts[0].id, reference_property_parts[0].id)
         self.assertEqual(instances_of_wheel_model._parts[1].id, reference_property_parts[1].id)
 
-class TestMultiReferenceProperty(TestBetamax):
     def test_value_if_multi_ref_gives_back_all_parts(self):
         """because of #276 problem"""
         model_instance = self.project.part('Instance of Model')
