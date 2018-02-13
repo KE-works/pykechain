@@ -76,6 +76,7 @@ class PropertyType(Enum):
 
     :cvar SINGLE_SELECT_VALUE: single select list property (choose from a list)
     :cvar REFERENCES_VALUE: a multi reference property, a UUID value referring to other parts
+
     """
 
     FLOAT_VALUE = "FLOAT_VALUE"
@@ -94,14 +95,25 @@ class PropertyType(Enum):
 class ActivityType(Enum):
     """The various Activity types that are accepted by KE-chain.
 
-    .. versionadded: 2.0
+    .. versionadded:: 2.0
 
     :cvar TASK: a normal task
     :cvar PROCESS: a subprocess (container) containing other tasks
-    """
 
+    For WIM version 1:
+
+    :cvar USERTASK: a normal usertask
+    :cvar SUBPROCESS: a subprocess (container) containing other tasks
+    :cvar SERVICETASK: a service taks (this concept is only availabe in RND KE-chain and will be deprecated)
+    """
+    # WIM2:
     PROCESS = 'PROCESS'
     TASK = 'TASK'
+
+    # WIM1:
+    USERTASK = "UserTask"
+    SERVICETASK = "ServiceTask"  # RND code only
+    SUBPROCESS = "Subprocess"
 
 
 class ActivityClassification(Enum):

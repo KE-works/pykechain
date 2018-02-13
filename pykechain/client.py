@@ -214,6 +214,7 @@ class Client(object):
         if not obj._json_data.get('url'):
             raise NotFoundError("Could not reload object, there is no url for object '{}' configured".format(obj))
 
+        # TODO: only for WIM2 add extra params, however we can leave this here as they are just passthrough
         response = self._request('GET', obj._json_data.get('url'), params=extra_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
@@ -315,6 +316,7 @@ class Client(object):
             'scope': scope
         }
 
+        # TODO: only for WIM2 extra params are added
         # update the fields query params
         request_params.update(API_EXTRA_PARAMS['activity'])
 
@@ -327,7 +329,9 @@ class Client(object):
             raise NotFoundError("Could not retrieve activities. Server responded with {}".format(str(response)))
 
         data = response.json()
-
+        # WIM1
+        # return [Activity(a, client=self) for a in data['results']]
+        # WIM2:
         return [Activity2(a, client=self) for a in data['results']]
 
     def activity(self, *args, **kwargs):
@@ -696,8 +700,43 @@ class Client(object):
     # Creators
     #
 
+    # WIM1
+    # def create_activity(self, process, name, activity_class="UserTask"):
+    #     """Create a new activity.
+    #
+    #     :param process: parent process id
+    #     :type process: basestring
+    #     :param name: new activity name
+    #     :type name: basestring
+    #     :param activity_class: type of activity: UserTask (default) or Subprocess
+    #     :type activity_class: basestring
+    #     :return: the created :class:`models.Activity`
+    #     :raises APIError: When the object could not be created
+    #     """
+    #     if activity_class and activity_class not in ActivityType.values():
+    #         raise IllegalArgumentError("Please provide accepted activity_class (provided:{} accepted:{})".
+    #                                    format(activity_class, ActivityType.values()))
+    #     data = {
+    #         "name": name,
+    #         "process": process,
+    #         "activity_class": activity_class
+    #     }
+    #
+    #     response = self._request('POST', self._build_url('activities'), data=data)
+    #
+    #     if response.status_code != requests.codes.created:  # pragma: no cover
+    #         raise APIError("Could not create activity")
+    #
+    #     data = response.json()
+    #
+    #     return Activity(data['results'][0], client=self)
+
+    # WIM2
     def create_activity(self, parent, name, activity_type=ActivityType.TASK):
         """Create a new activity.
+
+        In WIM1 the type in the activity is called activity_class
+        In WIM2 the type of the activity is called activity_type
 
         :param parent: parent under which to create the activity
         :type parent: basestring or :class:`models.Activity2`
@@ -709,6 +748,8 @@ class Client(object):
         :raises APIError: When the object could not be created
         :raises IllegalArgumentError: When an incorrect activitytype or parent is provided
         """
+        # WIM1: activity_class, WIM2: activity_class
+
         if activity_type and activity_type not in ActivityType.values():
             raise IllegalArgumentError("Please provide accepted activity_type (provided:{} accepted:{})".
                                        format(activity_type, ActivityType.values()))
@@ -718,6 +759,14 @@ class Client(object):
             parent = parent
         else:
             raise IllegalArgumentError("Please provide either an activity object or a UUID")
+
+        # FIXME: WIM1 and WIM2 switch
+        # in WIM1:
+        # data = {
+        #     "name": name,
+        #     "process": process,
+        #     "activity_class": activity_class
+        # }
 
         data = {
             "name": name,
@@ -733,6 +782,9 @@ class Client(object):
 
         data = response.json()
 
+        # FIXME: WIM1
+        # return Activity(data['results'][0], client=self)
+        # WIM2:
         return Activity2(data['results'][0], client=self)
 
     def _create_part(self, action, data, **kwargs):

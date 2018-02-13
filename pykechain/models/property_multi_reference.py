@@ -1,6 +1,5 @@
 from six import text_type
 
-from pykechain.enums import Category
 from pykechain.models.part import Part
 from pykechain.models.property import Property
 from pykechain.utils import is_uuid
@@ -83,7 +82,7 @@ class MultiReferenceProperty(Property):
                 else:
                     raise ValueError("Reference must be a Part, Part id or None. type: {}".format(type(item)))
         elif isinstance(value, type(None)):
-            #clear out the list
+            # clear out the list
             value_to_set = None
         else:
             raise ValueError(
@@ -112,7 +111,7 @@ class MultiReferenceProperty(Property):
         # in the reference property of the model the value is set to the ID of the model from which we can choose parts
         model_parent_part = self.part.model()  # makes single part call
         property_model = model_parent_part.property(self.name)
-        referenced_model = property_model.value and property_model.value[0] # list of seleceted models is always 1
+        referenced_model = property_model.value and property_model.value[0]  # list of seleceted models is always 1
         possible_choices = self._client.parts(model=referenced_model)  # makes multiple parts call
 
         return possible_choices

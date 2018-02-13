@@ -1,5 +1,6 @@
 from .base import Base
 
+
 class User(Base):
     """A virtual object representing a KE-chain user."""
 
