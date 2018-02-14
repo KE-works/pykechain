@@ -137,7 +137,7 @@ class ComponentXType(Enum):
     HTMLPANEL = "htmlPanel"
     EXECUTESERVICE = "executeService"
     NOTEBOOKPANEL = "notebookPanel"
-    # Issue 279:
+    # Issue #279:
     ACTIVITYNAVIGATIONBAR = "activityNavigationBar"
 
     # for RND

@@ -178,25 +178,25 @@ class ExtCustomization(CustomizationBase):
         :param emphasize_new_instance:
         :type emphasize_new_instance: bool
         :param emphasize_edit:
-        :type emphasize_new_instance: bool
+        :type emphasize_edit: bool
         :param new_instance:
-        :type emphasize_new_instance: bool
+        :type new_instance: bool
         :param incomplete_rows:
-        :type emphasize_new_instance: bool
+        :type incomplete_rows: bool
         :param export:
-        :type emphasize_new_instance: bool
+        :type export: bool
         :param edit:
-        :type emphasize_new_instance: bool
+        :type edit: bool
         :param delete:
-        :type emphasize_new_instance: bool
+        :type delete: bool
         :param part_model: The part model based on which all instances will be shown.
         :type parent_part_instance: :class:`Part`
         :param parent_part_instance: The parent part instance for which the instances will be shown or to which new
         instances will be added.
         :type parent_part_instance: :class:`Part`
-        :param max_height: The max height of the property grid in pixels
+        :param max_height: The max height of the supergrid in pixels
         :type max_height: int or None
-        :param custom_title: A custom title for the property grid
+        :param custom_title: A custom title for the supergrid
                  - None (default): Part instance name
                  - String value: Custom title
                  - False: No title
