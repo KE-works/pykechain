@@ -211,18 +211,61 @@ class Client(object):
             response = self._request('GET', app_versions_url)
 
             if response.status_code == requests.codes.not_found:
-                self.versions = []
+                self._app_versions = []
             elif response.status_code == requests.codes.forbidden:
                 raise ForbiddenError(response.json()['results'][0]['detail'])
             elif response.status_code != requests.codes.ok:
                 raise APIError("Could not retrieve app versions: {}".format(response))
-            self._app_versions = response.json()
-        else:
-            return self._app_versions
+            self._app_versions = response.json().get('results')
 
-    def is_version(self, app=None, label=None, version=None, major=None, minor=None, patch=None):
-        """Determines if the app if the right version."""
-        pass
+        return self._app_versions
+
+    def match_app_version(self, app=None, label=None, version=None):
+        """Determines if the app if the right version.
+
+        Checks if a KE-chain app matches a version comparison. Uses the `semver` matcher to check.
+
+        `match("2.0.0", ">=1.0.0")` => `True`
+        `match("1.0.0", ">1.0.0")` => `False`
+
+        :param app: (optional) appname eg. 'kechain.core.wim'
+        :type app: basestring or None
+        :param label: (optional) app label (last part of the app name) eb 'wim'
+        :type label: basestring or None
+        :param match_version: semantic version string to match appname version against eg '2.0.0' or '>=2.0.0'
+        :type match_version: basestring
+        :return: True if the version of the app matches against the match_version, otherwise False
+        :raises IllegalArgumentError: if no app nor a label is provided
+        :raises NotFoundError: if the app is not found
+        :raises ValueError: if the version provided is not parseable by semver,
+                            should contain (<operand><major>.<minor>.<patch) where <operand> is '>,<,>=,<=,=='
+
+        Examples::
+
+        >>> client.match_app_version(label='wim', version=">=1.99")
+        >>> True
+
+        >>> client.match_app_version(app='kechain2.core.pim', version=">=1.0.0")
+        >>> True
+
+        """
+        if not app or not label and not (app and label):
+            target_app = [a for a in self.app_versions if a.get('app') == app or a.get('label') == label]
+            if not target_app:
+                raise NotFoundError("Could not find the app or label provided")
+        else:
+            raise IllegalArgumentError("Please provide either app or label")
+
+        if not version:
+            raise IllegalArgumentError("Please provide semantic version string including operand eg: `>=1.0.0`")
+
+        app_version = target_app[0].get('version')
+
+        if target_app and app_version and version:
+            import semver
+            return semver.match(app_version, version)
+        elif not app_version:
+            raise NotFoundError("No version found on the app '{}'".format(target_app[0].get('app')))
 
     def reload(self, obj, extra_params=None):
         """Reload an object from server. This method is immutable and will return a new object.
