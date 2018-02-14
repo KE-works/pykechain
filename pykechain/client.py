@@ -5,7 +5,8 @@ import warnings
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
 
-from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion
+from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
+    WIMCompatibleActivityTypes
 from pykechain.models.activity2 import Activity2
 from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.user import User
@@ -53,6 +54,7 @@ class Client(object):
     :ivar last_request: last executed request. Which is of type `requests.Request`_
     :ivar last_response: last executed response. Which is of type `requests.Response`_
     :ivar str last_url: last called api url
+    :ivar app_versions: a list of the versions of the internal KE-chain 'app' modules
 
     .. _requests.Request: http://docs.python-requests.org/en/master/api/#requests.Request
     .. _requests.Response: http://docs.python-requests.org/en/master/api/#requests.Response
@@ -216,11 +218,12 @@ class Client(object):
                 raise ForbiddenError(response.json()['results'][0]['detail'])
             elif response.status_code != requests.codes.ok:
                 raise APIError("Could not retrieve app versions: {}".format(response))
-            self._app_versions = response.json().get('results')
+            else:
+                self._app_versions = response.json().get('results')
 
         return self._app_versions
 
-    def match_app_version(self, app=None, label=None, version=None):
+    def match_app_version(self, app=None, label=None, version=None, default=False):
         """Determines if the app if the right version.
 
         Checks if a KE-chain app matches a version comparison. Uses the `semver` matcher to check.
@@ -232,8 +235,11 @@ class Client(object):
         :type app: basestring or None
         :param label: (optional) app label (last part of the app name) eb 'wim'
         :type label: basestring or None
-        :param match_version: semantic version string to match appname version against eg '2.0.0' or '>=2.0.0'
-        :type match_version: basestring
+        :param version: semantic version string to match appname version against eg '2.0.0' or '>=2.0.0'
+        :type version: basestring
+        :param default: (optional) boolean to return if the version of the app is set but the app found. Set to None
+                        to return a NotFoundError when a version if not found in the app.
+        :type default: bool or None
         :return: True if the version of the app matches against the match_version, otherwise False
         :raises IllegalArgumentError: if no app nor a label is provided
         :raises NotFoundError: if the app is not found
@@ -251,8 +257,10 @@ class Client(object):
         """
         if not app or not label and not (app and label):
             target_app = [a for a in self.app_versions if a.get('app') == app or a.get('label') == label]
-            if not target_app:
+            if not target_app and not isinstance(default, bool):
                 raise NotFoundError("Could not find the app or label provided")
+            elif not target_app and isinstance(default, bool):
+                return default
         else:
             raise IllegalArgumentError("Please provide either app or label")
 
@@ -265,7 +273,10 @@ class Client(object):
             import semver
             return semver.match(app_version, version)
         elif not app_version:
-            raise NotFoundError("No version found on the app '{}'".format(target_app[0].get('app')))
+            if isinstance(default, bool):
+                return default
+            else:
+                raise NotFoundError("No version found on the app '{}'".format(target_app[0].get('app')))
 
     def reload(self, obj, extra_params=None):
         """Reload an object from server. This method is immutable and will return a new object.
@@ -280,7 +291,6 @@ class Client(object):
         if not obj._json_data.get('url'):
             raise NotFoundError("Could not reload object, there is no url for object '{}' configured".format(obj))
 
-        # TODO: only for WIM2 add extra params, however we can leave this here as they are just passthrough
         response = self._request('GET', obj._json_data.get('url'), params=extra_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
@@ -382,9 +392,11 @@ class Client(object):
             'scope': scope
         }
 
-        # TODO: only for WIM2 extra params are added
         # update the fields query params
-        request_params.update(API_EXTRA_PARAMS['activity'])
+
+        # for 'kechain.core.wim >= 2.0.0' add additional API params
+        if self.match_app_version(label='wim', version='>=2.0.0', default=False):
+            request_params.update(API_EXTRA_PARAMS['activity'])
 
         if kwargs:
             request_params.update(**kwargs)
@@ -395,10 +407,14 @@ class Client(object):
             raise NotFoundError("Could not retrieve activities. Server responded with {}".format(str(response)))
 
         data = response.json()
-        # WIM1
-        # return [Activity(a, client=self) for a in data['results']]
-        # WIM2:
-        return [Activity2(a, client=self) for a in data['results']]
+
+        # for 'kechain.core.wim >= 2.0.0' we return Activity2, otherwise Activity1
+        if self.match_app_version(label='wim', version='<2.0.0', default=True):
+            # WIM1
+            return [Activity(a, client=self) for a in data['results']]
+        else:
+            # WIM2
+            return [Activity2(a, client=self) for a in data['results']]
 
     def activity(self, *args, **kwargs):
         # type: (*Any, **Any) -> Activity
@@ -766,42 +782,77 @@ class Client(object):
     # Creators
     #
 
-    # WIM1
-    # def create_activity(self, process, name, activity_class="UserTask"):
-    #     """Create a new activity.
-    #
-    #     :param process: parent process id
-    #     :type process: basestring
-    #     :param name: new activity name
-    #     :type name: basestring
-    #     :param activity_class: type of activity: UserTask (default) or Subprocess
-    #     :type activity_class: basestring
-    #     :return: the created :class:`models.Activity`
-    #     :raises APIError: When the object could not be created
-    #     """
-    #     if activity_class and activity_class not in ActivityType.values():
-    #         raise IllegalArgumentError("Please provide accepted activity_class (provided:{} accepted:{})".
-    #                                    format(activity_class, ActivityType.values()))
-    #     data = {
-    #         "name": name,
-    #         "process": process,
-    #         "activity_class": activity_class
-    #     }
-    #
-    #     response = self._request('POST', self._build_url('activities'), data=data)
-    #
-    #     if response.status_code != requests.codes.created:  # pragma: no cover
-    #         raise APIError("Could not create activity")
-    #
-    #     data = response.json()
-    #
-    #     return Activity(data['results'][0], client=self)
+    def create_activity(self, *args, **kwargs):
+        """Shimy shim shim"""
+        if self.match_app_version(label='wim', version='<2.0.0', default=True):
+            # for wim1
+            if 'activity_type' in kwargs:
+                activity_type = kwargs.pop('activity_type')
+                if activity_type not in ActivityType.values():
+                    raise IllegalArgumentError(
+                        "Please provide accepted activity_type: '{}' not allowed".format(activity_type))
+                kwargs['activity_class'] = WIMCompatibleActivityTypes.get(activity_type)
+            if 'parent' in kwargs:
+                kwargs['process'] = kwargs.pop('parent')
+            return self._create_activity1(*args, **kwargs)
+        else:
+            # for wim2
+            # make old calls compatible with WIM2
+            if 'activity_class' in kwargs:
+                activity_class = kwargs.pop('activity_class')
+                if activity_class not in ActivityType.values():
+                    raise IllegalArgumentError(
+                        "Please provide accepted activity_type: '{}' not allowed".format(activity_class))
+                kwargs['activity_type'] = WIMCompatibleActivityTypes.get(activity_class)
+            if 'process' in kwargs:
+                kwargs['parent'] = kwargs.pop('process')
+            return self._create_activity2(*args, **kwargs)
 
-    # WIM2
-    def create_activity(self, parent, name, activity_type=ActivityType.TASK):
+    # WIM1
+    def _create_activity1(self, process, name, activity_class="UserTask"):
         """Create a new activity.
 
-        In WIM1 the type in the activity is called activity_class
+        :param process: parent process id
+        :type process: basestring
+        :param name: new activity name
+        :type name: basestring
+        :param activity_class: type of activity: UserTask (default) or Subprocess
+        :type activity_class: basestring
+        :return: the created :class:`models.Activity`
+        :raises APIError: When the object could not be created
+        """
+        if self.match_app_version(label='wim', version='>=2.0.0', default=False):
+            raise APIError('This method is only compatible with versions of KE-chain where the internal `wim` module '
+                           'has a version <=2.0.0. Use the `Client.create_activity2()` method.')
+
+        if activity_class and activity_class not in ActivityType.values():
+            raise IllegalArgumentError(
+                "Please provide accepted activity_class (provided:{} accepted:{})".format(
+                    activity_class, (ActivityType.USERTASK, ActivityType.SUBPROCESS, ActivityType.SERVICETASK)))
+        data = {
+            "name": name,
+            "process": process,
+            "activity_class": activity_class
+        }
+
+        response = self._request('POST', self._build_url('activities'), data=data)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create activity")
+
+        data = response.json()
+
+        return Activity(data['results'][0], client=self)
+
+    # WIM2
+    def _create_activity2(self, parent, name, activity_type=ActivityType.TASK):
+        """Create a new activity.
+
+        .. important::
+            This function creates activities for KE-chain versions later than 2.9.0-135
+            In effect where the module 'wim' has version '>=2.0.0'.
+            The version of 'wim' in KE-chain can be found in the property :attr:`Client.app_versions`
+
         In WIM2 the type of the activity is called activity_type
 
         :param parent: parent under which to create the activity
@@ -814,7 +865,10 @@ class Client(object):
         :raises APIError: When the object could not be created
         :raises IllegalArgumentError: When an incorrect activitytype or parent is provided
         """
-        # WIM1: activity_class, WIM2: activity_class
+        # WIM1: activity_class, WIM2: activity_type
+        if self.match_app_version(label='wim', version='<2.0.0', default=True):
+            raise APIError('This method is only compatible with versions of KE-chain where the internal `wim` module '
+                           'has a version >=2.0.0. Use the `Client.create_activity()` method.')
 
         if activity_type and activity_type not in ActivityType.values():
             raise IllegalArgumentError("Please provide accepted activity_type (provided:{} accepted:{})".
@@ -825,14 +879,6 @@ class Client(object):
             parent = parent
         else:
             raise IllegalArgumentError("Please provide either an activity object or a UUID")
-
-        # FIXME: WIM1 and WIM2 switch
-        # in WIM1:
-        # data = {
-        #     "name": name,
-        #     "process": process,
-        #     "activity_class": activity_class
-        # }
 
         data = {
             "name": name,
@@ -848,9 +894,6 @@ class Client(object):
 
         data = response.json()
 
-        # FIXME: WIM1
-        # return Activity(data['results'][0], client=self)
-        # WIM2:
         return Activity2(data['results'][0], client=self)
 
     def _create_part(self, action, data, **kwargs):
