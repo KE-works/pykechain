@@ -16,9 +16,10 @@ class Scope(Base):
         super(Scope, self).__init__(json, **kwargs)
 
         self.bucket = json.get('bucket', {})
-        # wim1:
+
+        # for 'kechain2.core.wim <2.0.0'
         self.process = json.get('process')
-        # wim2:
+        # for 'kechain2.core.wim >=2.0.0'
         self.workflow_root = json.get('workflow_root_id')
 
     def __repr__(self):  # pragma: no cover
@@ -71,10 +72,10 @@ class Scope(Base):
 
         See :class:`pykechain.Client.create_activity` for available parameters.
         """
-        # FIXME: wim1
-        # wim1:
-        #   return self._client.create_activity(self.process, *args, **kwargs)
-        return self._client.create_activity(self.workflow_root, *args, **kwargs)
+        if self._client.match_app_version(label='wim', version='<2.0.0', default=True):
+            return self._client.create_activity(self.process, *args, **kwargs)
+        else:
+            return self._client.create_activity(self.workflow_root, *args, **kwargs)
 
     def services(self, *args, **kwargs):
         """Retrieve services belonging to this scope.

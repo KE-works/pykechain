@@ -115,6 +115,16 @@ class ActivityType(Enum):
     SERVICETASK = "ServiceTask"  # RND code only
     SUBPROCESS = "Subprocess"
 
+WIMCompatibleActivityTypes = dict(
+    # backwards pykechain script compatible with wim2
+    # from WIM1 to WIM2:
+    USERTASK = "TASK",
+    SUBPROCESS = "PROCESS",
+
+    # forwarde pykechain scripts made for wim2, compatible with wim1
+    # from WIM2 to WIM1:
+    PROCESS = 'Subprocess',
+    TASK = 'UserTask')
 
 class ActivityClassification(Enum):
     """The classification of Activities that are accepted by KE-chain.

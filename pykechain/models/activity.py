@@ -5,7 +5,7 @@ import requests
 import warnings
 from six import text_type
 
-from pykechain.enums import Category, ActivityType
+from pykechain.enums import Category, ActivityType, ActivityStatus
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
 from pykechain.models.user import User
@@ -298,7 +298,7 @@ class Activity(Base):
                 raise IllegalArgumentError('Assignees should be a list')
 
         if status:
-            if isinstance(status, (str, text_type)):
+            if isinstance(status, (str, text_type)) and status in ActivityStatus.values():
                 update_dict.update({'status': status})
             else:
                 raise IllegalArgumentError('Status should be a string')
