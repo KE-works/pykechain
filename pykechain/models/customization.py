@@ -2,7 +2,7 @@ import requests
 from jsonschema import validate
 
 from pykechain.enums import ComponentXType, Category
-from pykechain.exceptions import APIError
+from pykechain.exceptions import APIError, IllegalArgumentError
 
 uuid_pattern = r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 uuid_string = {"type": "string", "pattern": uuid_pattern}
@@ -166,6 +166,111 @@ class ExtCustomization(CustomizationBase):
         """
         validate(config, component_json_schema)
         self._add_widget(dict(config=config, name="jsonWidget"))
+
+    def add_super_grid_widget(self, part_model, delete=False, edit=True, export=True, incomplete_rows=True,
+                              new_instance=False, parent_part_instance=None, max_height=None, custom_title=None,
+                              emphasize_edit=False, emphasize_new_instance=True):
+        """
+        Add an KE-chain superGrid (e.g. basic table) widget to the customization.
+
+        The widget will be saved to KE-chain.
+
+        :param emphasize_new_instance:
+        :type emphasize_new_instance: bool
+        :param emphasize_edit:
+        :type emphasize_new_instance: bool
+        :param new_instance:
+        :type emphasize_new_instance: bool
+        :param incomplete_rows:
+        :type emphasize_new_instance: bool
+        :param export:
+        :type emphasize_new_instance: bool
+        :param edit:
+        :type emphasize_new_instance: bool
+        :param delete:
+        :type emphasize_new_instance: bool
+        :param part_model: The part model based on which all instances will be shown.
+        :type parent_part_instance: :class:`Part`
+        :param parent_part_instance: The parent part instance for which the instances will be shown or to which new
+        instances will be added.
+        :type parent_part_instance: :class:`Part`
+        :param max_height: The max height of the property grid in pixels
+        :type max_height: int or None
+        :param custom_title: A custom title for the property grid
+                 - None (default): Part instance name
+                 - String value: Custom title
+                 - False: No title
+        :type custom_title: basestring or None
+        """
+        # Assertions
+        if not (new_instance and bool(parent_part_instance)):
+            raise IllegalArgumentError("If you want to allow the creation of new part instances, you must specify a "
+                                       "parent_part_instance")
+
+        # Declare supergrid config
+        config = {
+            "xtype": ComponentXType.SUPERGRID,
+            "filter": {
+                "activity_id": str(self.activity.id),
+                "model": str(part_model.id)
+            },
+            "viewModel": {
+                "data": {
+                    "actions": {
+                        "delete": delete,
+                        "edit": edit,
+                        "export": export,
+                        "incompleteRows": incomplete_rows,
+                        "newInstance": new_instance
+                    },
+                    "ui": {
+                        "newInstance": "primary-action" if emphasize_new_instance else "default-toolbar",
+                        "edit": "primary-action" if emphasize_edit else "default-toolbar"
+                    }
+                }
+            }
+        }
+
+        # Add parent to filter if added.
+        if parent_part_instance:
+            config['filter']["parent"] = str(parent_part_instance.id)
+
+        # Add max height and custom title
+        if max_height:
+            config['maxHeight'] = max_height
+
+        if custom_title is None:
+            show_title_value = "Default"
+            title = part_model.name
+        elif custom_title:
+            show_title_value = "Custom Title"
+            title = str(custom_title)
+        else:
+            show_title_value = "No title"
+            title = None
+        config["title"] = title
+
+        # Declare the meta info for the supergrid
+        meta = {
+            "parentInstanceId": str(parent_part_instance.id),
+            "editButtonUi": "primary-action" if emphasize_edit else "default-toolbar",
+            "customHeight": max_height if max_height else 500,
+            "primaryAddUiValue": emphasize_new_instance,
+            "activityId": str(self.activity.id),
+            "customTitle": title,
+            "primaryEditUiValue": emphasize_edit,
+            "downloadButtonVisible": export,
+            "addButtonUi": "primary-action" if emphasize_new_instance else "default-toolbar",
+            "deleteButtonVisible": delete,
+            "incompleteRowsButtonVisible": incomplete_rows,
+            "addButtonVisible": new_instance,
+            "showTitleValue": show_title_value,
+            "partModelId": str(part_model.id),
+            "editButtonVisible": edit,
+            "showHeightValue": "Custom max height" if max_height else "Auto",
+        }
+
+        self._add_widget(dict(config=config, meta=meta, name='superGridWidget'))
 
     def add_property_grid_widget(self, part_instance, max_height=None, custom_title=None):
         """
