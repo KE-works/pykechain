@@ -254,8 +254,8 @@ class Activity2(Activity):
         """
         url = self._client._build_url('activity', activity_id='{}/update_associations'.format(self.id))
 
-        if not all([p.category==Category.MODEL for p in inputs]) and \
-                not all([p.category==Category.MODEL for p in outputs]):
+        if not all([p._json_data.get('category')==Category.MODEL for p in inputs]) and \
+                not all([p._json_data.get('category')==Category.MODEL for p in outputs]):
             raise IllegalArgumentError('All Properties need to be of category MODEL to configure a task')
 
         r = self._client._request('PUT', url, json={
