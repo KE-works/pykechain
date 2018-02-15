@@ -69,9 +69,9 @@ class Scope(Base):
         See :class:`pykechain.Client.activity` for available parameters.
         """
         if self._client.match_app_version(label='wim', version='<2.0.0', default=True):
-            return self._client.activities(*args, scope=self.id, **kwargs)
+            return self._client.activity(*args, scope=self.id, **kwargs)
         else:
-            return self._client.activities(*args, scope_id=self.id, **kwargs)
+            return self._client.activity(*args, scope_id=self.id, **kwargs)
 
     def create_activity(self, *args, **kwargs):
         """Create a new activity belonging to this scope.
