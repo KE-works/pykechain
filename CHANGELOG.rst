@@ -7,6 +7,10 @@ pykechain changelog
 ------------------
  * revamped the activity API endpoints and functionality to work with the new WIM2 implementation of KE-chain 2.8 (FEB18)
 
+1.15.4 (15FEB18)
+----------------
+ * Fixed an issues where the `MultiReference` property did not provide the correct choices. Also fixed a bug where the setting of the value is now performed more robust. (#282)
+
 1.15.3 (8FEB18)
 ---------------
  * Fixed a bug where the `MultiReference` property only provided back the 'last' `Part` in the internal value due to the way a library parses a list. Fixed that and added tests (#276). Thanks again to @raduiordache.
