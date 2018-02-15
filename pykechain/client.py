@@ -207,6 +207,7 @@ class Client(object):
 
     @property
     def app_versions(self):
+        """List of the versions of the internal KE-chain 'app' modules."""
         if not self._app_versions:
             app_versions_url = self._build_url('versions')
 
@@ -224,12 +225,20 @@ class Client(object):
         return self._app_versions
 
     def match_app_version(self, app=None, label=None, version=None, default=False):
-        """Determines if the app if the right version.
+        """Match app version against a semantic version string.
 
         Checks if a KE-chain app matches a version comparison. Uses the `semver` matcher to check.
 
         `match("2.0.0", ">=1.0.0")` => `True`
         `match("1.0.0", ">1.0.0")` => `False`
+
+        Examples
+        --------
+        >>> client.match_app_version(label='wim', version=">=1.99")
+        >>> True
+
+        >>> client.match_app_version(app='kechain2.core.pim', version=">=1.0.0")
+        >>> True
 
         :param app: (optional) appname eg. 'kechain.core.wim'
         :type app: basestring or None
@@ -245,14 +254,6 @@ class Client(object):
         :raises NotFoundError: if the app is not found
         :raises ValueError: if the version provided is not parseable by semver,
                             should contain (<operand><major>.<minor>.<patch) where <operand> is '>,<,>=,<=,=='
-
-        Examples::
-
-        >>> client.match_app_version(label='wim', version=">=1.99")
-        >>> True
-
-        >>> client.match_app_version(app='kechain2.core.pim', version=">=1.0.0")
-        >>> True
 
         """
         if not app or not label and not (app and label):
@@ -585,7 +586,7 @@ class Client(object):
         if len(_parts) == 0:
             raise NotFoundError("No model fits criteria")
         if len(_parts) != 1:
-            raise MultipleFoundError("Multiple model fit criteria")
+            raise MultipleFoundError("Multiple models fit criteria")
 
         return _parts[0]
 
@@ -653,7 +654,7 @@ class Client(object):
         response = self._request('GET', self._build_url('services'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve properties")
+            raise NotFoundError("Could not retrieve services")
 
         data = response.json()
         return [Service(service, client=self) for service in data['results']]
@@ -699,6 +700,8 @@ class Client(object):
         :type pk: basestring or None
         :param scope: (optional) id (UUID) of the scope to search in
         :type scope: basestring or None
+        :param service: (optional) service UUID to filter on
+        :type service: basestring or None
         :param kwargs: (optional) additional search keyword arguments
         :type kwargs: dict or None
         :return: a single :class:`models.ServiceExecution` object
@@ -753,6 +756,20 @@ class Client(object):
         return _service_executions[0]
 
     def users(self, username=None, pk=None, **kwargs):
+        """
+        Users of KE-chain.
+
+        Provide a list of :class:`User`s of KE-chain. You can filter on username or id or any other advanced filter.
+
+        :param username: (optional) username to filter
+        :type username: basestring or None
+        :param pk: (optional) id of the user to filter
+        :type pk: basestring or None
+        :param kwargs: Additional filtering keyword=value arguments
+        :type kwargs: dict or None
+        :return: List of :class:`Users`
+        :raises NotFoundError: when a user could not be found
+        """
         request_params = {
             'username': username,
             'pk': pk,
@@ -763,12 +780,27 @@ class Client(object):
         r = self._request('GET', self._build_url('users'), params=request_params)
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve properties")
+            raise NotFoundError("Could not find users: '{}'".format(r.json()))
 
         data = r.json()
         return [User(user, client=self) for user in data['results']]
 
     def user(self, username=None, pk=None, **kwargs):
+        """
+        User of KE-chain.
+
+        Provides single user of :class:`User`s of KE-chain. You can filter on username or id or any other advanced filter.
+
+        :param username: (optional) username to filter
+        :type username: basestring or None
+        :param pk: (optional) id of the user to filter
+        :type pk: basestring or None
+        :param kwargs: Additional filtering keyword=value arguments
+        :type kwargs: dict or None
+        :return: List of :class:`Users`
+        :raises NotFoundError: when a user could not be found
+        :raises MultipleFoundError: when more than a single user can be found
+        """
         _users = self.users(username=username, pk=pk, **kwargs)
 
         if len(_users) == 0:
@@ -783,7 +815,20 @@ class Client(object):
     #
 
     def create_activity(self, *args, **kwargs):
-        """Shimy shim shim"""
+        """
+        Create a new activity.
+
+        .. important::
+            This is a shim function that based on the implementation of KE-chain will determine to create
+            the activity using the legacy WIM API (KE-chain < 2.9.0) or the newer WIM2 API (KE-chain >= 2.9.0).
+            It will either return a :class:`Activity` or a :class:`Activity2`.
+
+        :param args:
+        :param kwargs:
+        :return: the created :class:`models.Activity` or :class:`models.Activity2`
+        :raises APIError: When the object could not be created
+        :raises IllegalArgumentError: When the provided arguments are incompatible with the WIM API implementation.
+        """
         if self.match_app_version(label='wim', version='<2.0.0', default=True):
             # for wim1
             if 'activity_type' in kwargs:

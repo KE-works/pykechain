@@ -16,7 +16,6 @@ class Activity2(Activity):
     """
 
     def __init__(self, json, **kwargs):
-        # type: (dict, **Any) -> None
         """Construct an Activity from a json object."""
         super(Activity2, self).__init__(json, **kwargs)
 
@@ -37,7 +36,7 @@ class Activity2(Activity):
 
         See :func:`pykechain.Client.create_activity` for available parameters.
 
-        :raises IllegalArgumentError: if the `Activity` is not a `SUBPROCESS`.
+        :raises IllegalArgumentError: if the `Activity2` is not a `PROCESS`.
         :raises APIError: if an Error occurs.
         """
         if self.activity_type != ActivityType.PROCESS:
@@ -47,24 +46,37 @@ class Activity2(Activity):
     def subprocess(self):
         """Retrieve the subprocess in which this activity is defined.
 
+        .. warning::
+            This method is deprecated for newer releases of KE-chain (version 2.9.0 and higher). Please
+            use the :func:`Activity2.parent()` method.
+
         If this is a task on top level, it raises NotFounderror.
 
-        :return: a subprocess :class:`Activity`
+        :return: a subprocess :class:`Activity2`
+        :raises NotFoundError: when it is a task in the top level of a project
+        :raises APIError: when other error occurs
+
+        """
+        warnings.warn('Subprocess function is outdated in KE-chain 2.9.0, use `Acitivity2.parent()` method')
+        return self.parent()
+
+    def parent(self):
+        """Retrieve the parent in which this activity is defined.
+
+        If this is a task on top level, it raises NotFounderror.
+
+        :return: a :class:`Activity2`
         :raises NotFoundError: when it is a task in the top level of a project
         :raises APIError: when other error occurs
 
         Example
         -------
         >>> task = project.activity('Subtask')
-        >>> subprocess = task.subprocess()
+        >>> parent_of_task = task.parent()
 
         """
-        warnings.warn('Subprocess function is outdated in KE-chain 2.8, use parent')
-        return self.parent()
-
-    def parent(self):
         parent_id = self._json_data.get('parent_id')
-        if parent_id == None:
+        if parent_id is None:
             raise NotFoundError("Cannot find subprocess for this task '{}', "
                                 "as this task exist on top level.".format(self.name))
         return self._client.activity(pk=parent_id, scope=self.scope_id)
@@ -82,12 +94,12 @@ class Activity2(Activity):
 
         Example
         -------
-        >>> subprocess = project.subprocess('Subprocess')
+        >>> parent = project.parent('Subprocess')
         >>> children = subprocess.children()
 
         Example searching for children of a subprocess which contains a name (icontains searches case insensitive
 
-        >>> subprocess = project.subprocess('Subprocess')
+        >>> parent = project.parent('Subprocess')
         >>> children = subprocess.children(name__icontains='more work')
 
         """
@@ -152,7 +164,6 @@ class Activity2(Activity):
         >>> my_task.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
 
         """
-
         update_dict = {'id': self.id}
         if name:
             if isinstance(name, (str, text_type)):
@@ -226,6 +237,6 @@ class Activity2(Activity):
 
         self.refresh()
 
-    def customize(self, config):
-        """Deprecated function of customize."""
+    def customize(self, config):  # noqa: D401
+        """Method is deprecated."""
         raise DeprecationWarning('This function is deprecated')
