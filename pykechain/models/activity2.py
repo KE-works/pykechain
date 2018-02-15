@@ -240,3 +240,24 @@ class Activity2(Activity):
     def customize(self, config):  # noqa: D401
         """Method is deprecated."""
         raise DeprecationWarning('This function is deprecated')
+
+    def configure(self, inputs, outputs):
+        """Configure activity input and output.
+
+        You need to provide a list of input and output :class:`Property`. Does not work with lists of propery id's.
+
+        :param inputs: iterable of input property models
+        :type inputs: list(:class:`Property`)
+        :param outputs: iterable of output property models
+        :type outputs: list(:class:`Property`)
+        :raises APIError: when unable to configure the activity
+        """
+        url = self._client._build_url('activity', activity_id='{}/update_associations'.format(self.id))
+
+        r = self._client._request('PUT', url, json={
+            'inputs': [p.id for p in inputs],
+            'outputs': [p.id for p in outputs]
+        })
+
+        if r.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not configure activity")
