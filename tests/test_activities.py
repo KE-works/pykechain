@@ -1,5 +1,5 @@
 from datetime import datetime
-from unittest import skip
+from unittest import skip, skipIf
 
 import pytz
 import requests
@@ -9,6 +9,7 @@ from pykechain.enums import Category, ActivityType, ActivityStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import Part, Activity
 from tests.classes import TestBetamax
+from tests.utils import TEST_FLAG_IS_WIM2
 
 ISOFORMAT = "%Y-%m-%dT%H:%M:%SZ"
 ISOFORMAT_HIGHPRECISION = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -147,32 +148,6 @@ class TestActivities(TestBetamax):
         # teardown
         specify_wd.edit(start_date=old_start, due_date=old_due)
 
-    def test_edit_activity_assignee(self):
-        specify_wd = self.project.activity('Specify wheel diameter')  # type: Activity2
-        original_assignee_ids = specify_wd._json_data.get('assignee_ids') or []
-
-        #pykechain_user = self.client.user(username='pykechain')
-        test_user = self.client.user(username='testuser')
-
-        specify_wd.edit(assignees_ids=[test_user.id])
-        specify_wd.refresh()
-
-        self.assertEqual(['testuser'], specify_wd._json_data.get('assignees_names'))
-
-        self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
-
-        # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
-        # scope members
-        with self.assertRaises(NotFoundError):
-            specify_wd.edit(assignees_ids=[-100])
-
-        # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
-        # scope members
-        with self.assertRaises(IllegalArgumentError):
-            specify_wd.edit(assignees_ids='this should have been a list')
-
-        specify_wd.edit(assignees_ids=original_assignee_ids)
-
     # 1.10.0
     def test_edit_activity_status(self):
         specify_wd = self.project.activity('Specify wheel diameter')
@@ -246,24 +221,6 @@ class TestActivities(TestBetamax):
             warnings.simplefilter("ignore")
             specify_wd.edit(start_date=old_start, due_date=old_due)
 
-    # 2.0 new activity
-    def test_retrieve_parent_of_task(self):
-        task = self.project.activity(name='SubTask')
-        subprocess = task.parent()  # type Activity
-        self.assertEqual(subprocess.activity_type, ActivityType.PROCESS)
-
-    def test_retrieve_parent_of_a_toplevel_task_returns_workflow_root_id(self):
-        task = self.project.activity('Specify wheel diameter')
-        parent = task.parent()
-        self.assertEqual(self.project._json_data.get('workflow_root_id'), parent.id)
-
-    def test_retrieve_children_of_parent(self):
-        subprocess = self.project.activity(name='Subprocess')  # type: Activity
-        children = subprocess.children()
-        self.assertTrue(len(children) >= 1)
-        for child in children:
-            self.assertEqual(child._json_data.get('parent_id'), subprocess.id)
-
     def test_retrieve_children_of_task_fails_for_task(self):
         task = self.project.activity(name='Specify wheel diameter')
         with self.assertRaises(NotFoundError):
@@ -316,12 +273,6 @@ class TestActivities(TestBetamax):
             self.assertTrue(part.category == Category.INSTANCE)
 
     # in 1.12
-    def test_retrieve_children_of_subprocess_with_arguments(self):
-        subprocess = self.project.activity(name='Subprocess')  # type: Activity
-        children = subprocess.children(name__icontains='task')
-        self.assertTrue(len(children) >= 1)
-        for child in children:
-            self.assertEqual(child._json_data.get('parent_id'), subprocess.id)
 
     def test_retrieve_siblings_of_a_task_in_a_subprocess_with_arguments(self):
         task = self.project.activity(name='SubTask')  # type: Activity
@@ -401,3 +352,81 @@ class TestActivitiesCustomisation(TestBetamax):
 
         # teardown
         new_task.delete()
+
+
+@skipIf(TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 1, expected to fail on newer WIM")
+class TestActivity1SpecificTests(TestBetamax):
+    def test_edit_activity1_assignee(self):
+        specify_wd = self.project.activity('Specify wheel diameter')
+        original_assignee = specify_wd._json_data.get('assignees', ['testuser', 'testmanager'])
+
+        specify_wd.edit(assignees=['pykechain'])
+
+        specify_wd.refresh()  # = self.project.activity('Specify wheel diameter')
+        self.assertEqual(['pykechain'], specify_wd._json_data.get('assignees'))
+
+        # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
+        # scope members
+        with self.assertRaises(NotFoundError):
+            specify_wd.edit(assignees=['Not Member'])
+
+        # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
+        # scope members
+        with self.assertRaises(IllegalArgumentError):
+            specify_wd.edit(assignees='Not Member')
+
+        specify_wd.edit(assignees=original_assignee)
+
+
+@skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
+class TestActivity2SpecificTests(TestBetamax):
+    # 2.0 new activity
+    def test_edit_activity2_assignee(self):
+        specify_wd = self.project.activity('Specify wheel diameter')  # type: Activity2
+        original_assignee_ids = specify_wd._json_data.get('assignee_ids') or []
+
+        # pykechain_user = self.client.user(username='pykechain')
+        test_user = self.client.user(username='testuser')
+
+        specify_wd.edit(assignees_ids=[test_user.id])
+        specify_wd.refresh()
+
+        self.assertEqual(['testuser'], specify_wd._json_data.get('assignees_names'))
+
+        self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
+
+        # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
+        # scope members
+        with self.assertRaises(NotFoundError):
+            specify_wd.edit(assignees_ids=[-100])
+
+        # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
+        # scope members
+        with self.assertRaises(IllegalArgumentError):
+            specify_wd.edit(assignees_ids='this should have been a list')
+
+        specify_wd.edit(assignees_ids=original_assignee_ids)
+
+    def test_activity2_retrieve_parent_of_task(self):
+        task = self.project.activity(name='SubTask')
+        subprocess = task.parent()  # type Activity
+        self.assertEqual(subprocess.activity_type, ActivityType.PROCESS)
+
+    def test_activity2_retrieve_parent_of_a_toplevel_task_returns_workflow_root_id(self):
+        task = self.project.activity('Specify wheel diameter')
+        parent = task.parent()
+        self.assertEqual(self.project._json_data.get('workflow_root_id'), parent.id)
+
+    def test_activity2_retrieve_children_of_parent(self):
+        subprocess = self.project.activity(name='Subprocess')  # type: Activity
+        children = subprocess.children()
+        self.assertTrue(len(children) >= 1)
+        for child in children:
+            self.assertEqual(child._json_data.get('parent_id'), subprocess.id)
+
+    def test_activity2_retrieve_children_of_subprocess_with_arguments(self):
+        subprocess = self.project.activity(name='Subprocess')  # type: Activity
+        children = subprocess.children(name__icontains='task')
+        self.assertTrue(len(children) >= 1)
+        for child in children:
+            self.assertEqual(child._json_data.get('parent_id'), subprocess.id)
