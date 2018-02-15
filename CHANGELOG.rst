@@ -7,6 +7,8 @@ pykechain changelog
 ------------------
  * RC1: revamped the activity API endpoints and functionality to work with the new WIM2 implementation of KE-chain 2.8 (FEB18)
  * RC2: fixed the way you limit the scope search in Scope.activities() and Scope.activity()
+ * RC3: -
+ * RC4: project.activity now returns 1 activity
 
 1.15.4 (15FEB18)
 ----------------
