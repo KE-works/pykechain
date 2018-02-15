@@ -20,7 +20,7 @@ class TestServices(TestBetamax):
         self.assertEqual(self.client.service(pk=service_1.id), service_1)
 
     def test_retrieve_service_by_name(self):
-        service_name = 'Service Gears - Successful'
+        service_name = 'Debug pykechain'
         service = self.client.service(name=service_name)
         self.assertTrue(service)
         self.assertEqual(service.name, service_name)
@@ -28,7 +28,7 @@ class TestServices(TestBetamax):
     @pytest.mark.skipif("os.getenv('TRAVIS', False)",
                         reason="Skipping tests when using Travis, as Service Execution cannot be provided")
     def test_debug_service_execute(self):
-        service_name = 'Service Gears - Successful'
+        service_name = 'Debug pykechain'
         service = self.client.service(name=service_name)
 
         service_execution = service.execute()
@@ -43,7 +43,7 @@ class TestServices(TestBetamax):
                          "running the tests")
 
     def test_update_service(self):
-        service_name = 'Service Gears - Successful'
+        service_name = 'Debug pykechain'
         service = self.client.service(name=service_name)
         version_before = str(service.version)
 
@@ -55,7 +55,7 @@ class TestServices(TestBetamax):
         service.edit(version=version_before)
 
     def test_service_refresh_from_kechain(self):
-        service_name = 'Service Gears - Successful'
+        service_name = 'Debug pykechain'
         service = self.client.service(name=service_name)
         version_before = str(service.version)
 
@@ -93,7 +93,7 @@ class TestServices(TestBetamax):
     @pytest.mark.skipif("os.getenv('TRAVIS', False)",
                         reason="Skipping tests when using Travis, as Service Execution cannot be provided")
     def test_debug_service_execution_terminate(self):
-        service_name = 'Service Gears - Successful'
+        service_name = 'Debug pykechain'
         service = self.client.service(name=service_name)
 
         service_execution = service.execute()

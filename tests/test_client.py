@@ -1,7 +1,9 @@
-from unittest import TestCase
+from unittest import TestCase, skipIf
 
 import six
 import warnings
+
+from tests.utils import TEST_FLAG_IS_WIM2
 
 if six.PY2:
     from test.test_support import EnvironmentVarGuard
@@ -85,14 +87,15 @@ class TestClientLive(TestBetamax):
             self.client.parts()
 
 
+@skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
 class TestClientAppVersions(TestBetamax):
     def test_retrieve_versions(self):
         """Test to retrieve the app versions from KE-chain"""
         app_versions = self.project._client.app_versions
         self.assertTrue(isinstance(app_versions, list))
         self.assertTrue(isinstance(app_versions[0], dict))
-        self.assertTrue(set(app_versions[0].keys()), {'app','label','version','major','minor','patch','prerelease'})
-
+        self.assertTrue(set(app_versions[0].keys()),
+                        {'app', 'label', 'version', 'major', 'minor', 'patch', 'prerelease'})
 
     def test_compare_versions(self):
         """Multitest to check all the matchings versions"""

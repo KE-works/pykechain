@@ -60,6 +60,7 @@ class Activity2(Activity):
 
         """
         warnings.warn('Subprocess function is outdated in KE-chain 2.8, use parent')
+        return self.parent()
 
     def parent(self):
         parent_id = self._json_data.get('parent_id')
