@@ -4,7 +4,7 @@ import requests
 import warnings
 from six import text_type
 
-from pykechain.enums import ActivityType, ActivityStatus
+from pykechain.enums import ActivityType, ActivityStatus, Category
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
 from pykechain.models import Activity
 
@@ -253,6 +253,10 @@ class Activity2(Activity):
         :raises APIError: when unable to configure the activity
         """
         url = self._client._build_url('activity', activity_id='{}/update_associations'.format(self.id))
+
+        if not all([p.category==Category.MODEL for p in inputs]) and \
+                not all([p.category==Category.MODEL for p in outputs]):
+            raise IllegalArgumentError('All Properties need to be of category MODEL to configure a task')
 
         r = self._client._request('PUT', url, json={
             'inputs': [p.id for p in inputs],
