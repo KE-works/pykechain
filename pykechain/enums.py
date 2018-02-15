@@ -106,6 +106,7 @@ class ActivityType(Enum):
     :cvar SUBPROCESS: a subprocess (container) containing other tasks
     :cvar SERVICETASK: a service taks (this concept is only availabe in RND KE-chain and will be deprecated)
     """
+
     # WIM2:
     PROCESS = 'PROCESS'
     TASK = 'TASK'
@@ -114,6 +115,7 @@ class ActivityType(Enum):
     USERTASK = "UserTask"
     SERVICETASK = "ServiceTask"  # RND code only
     SUBPROCESS = "Subprocess"
+
 
 WIMCompatibleActivityTypes = {
     # backwards pykechain script compatible with wim2
@@ -125,6 +127,7 @@ WIMCompatibleActivityTypes = {
     # from WIM2 to WIM1:
     ActivityType.PROCESS: ActivityType.SUBPROCESS,
     ActivityType.TASK: ActivityType.USERTASK}
+
 
 class ActivityClassification(Enum):
     """The classification of Activities that are accepted by KE-chain.
