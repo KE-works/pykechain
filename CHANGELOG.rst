@@ -9,6 +9,7 @@ pykechain changelog
  * RC2: fixed the way you limit the scope search in Scope.activities() and Scope.activity()
  * RC3: -
  * RC4: project.activity now returns 1 activity
+ * RC5: added configure method to the Activity2 object. Added additional Property=MODEL checks
 
 1.15.4 (15FEB18)
 ----------------
