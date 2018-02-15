@@ -14,4 +14,4 @@ TEST_SCOPE_NAME = env('TEST_SCOPE_NAME', default='Bike Project (pykechain testin
 TEST_RECORD_CASSETTES = env.bool('TEST_RECORD_CASSETTES', default=True)
 
 # flags for altering testing behaviour (to skip test) for major API changes requiring different tests.
-TEST_FLAG_IS_WIM2 = env.bool('TEST_FLAG_IS_WIM2', default=True)
+TEST_FLAG_IS_WIM2 = env.bool('TEST_FLAG_IS_WIM2', default=False)
