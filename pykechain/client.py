@@ -833,7 +833,7 @@ class Client(object):
             # for wim1
             if 'activity_type' in kwargs:
                 warnings.warn('For WIM versions 1, you need to ensure to use `activity_class`. Update your code; '
-                              'This will be deprecated in APR2018.', PendingDeprecationWarning)
+                              'This will be deprecated in APR2018.')
                 activity_type = kwargs.pop('activity_type')
                 if activity_type not in ActivityType.values():
                     raise IllegalArgumentError(
@@ -841,7 +841,7 @@ class Client(object):
                 kwargs['activity_class'] = WIMCompatibleActivityTypes.get(activity_type)
             if 'parent' in kwargs:
                 warnings.warn('For WIM versions 1, you need to ensure to use `process`. Update your code; '
-                              'This will be deprecated in APR2018.', PendingDeprecationWarning)
+                              'This will be deprecated in APR2018.')
                 kwargs['process'] = kwargs.pop('parent')
             return self._create_activity1(*args, **kwargs)
         else:
@@ -849,7 +849,7 @@ class Client(object):
             # make old calls compatible with WIM2
             if 'activity_class' in kwargs:
                 warnings.warn('For WIM versions 2, you need to ensure to use `activity_type`. Update your code; '
-                              'This will be deprecated in APR2018.', PendingDeprecationWarning)
+                              'This will be deprecated in APR2018.')
                 activity_class = kwargs.pop('activity_class')
                 if activity_class not in ActivityType.values():
                     raise IllegalArgumentError(
@@ -857,7 +857,7 @@ class Client(object):
                 kwargs['activity_type'] = WIMCompatibleActivityTypes.get(activity_class)
             if 'process' in kwargs:
                 warnings.warn('For WIM versions 2, you need to ensure to use `parent` instead of `process`. Update '
-                              'your code; This will be deprecated in APR2018.', PendingDeprecationWarning)
+                              'your code; This will be deprecated in APR2018.')
                 kwargs['parent'] = kwargs.pop('process')
             return self._create_activity2(*args, **kwargs)
 
