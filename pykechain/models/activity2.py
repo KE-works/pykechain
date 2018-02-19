@@ -58,7 +58,7 @@ class Activity2(Activity):
         :raises APIError: when other error occurs
 
         """
-        warnings.warn('Subprocess function is outdated in KE-chain 2.9.0, use `Acitivity2.parent()` method')
+        warnings.warn('Subprocess function is outdated in KE-chain 2.9.0, use `Activity2.parent()` method')
         return self.parent()
 
     def parent(self):
