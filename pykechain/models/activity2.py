@@ -240,6 +240,7 @@ class Activity2(Activity):
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Activity ({})".format(r))
+        print('-D- response: `{}`'.format(r.status_code, r.contents))
 
         self.refresh()
 
