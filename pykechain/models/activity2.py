@@ -201,11 +201,13 @@ class Activity2(Activity):
         if isinstance(assignees_ids, (list, tuple)) or isinstance(assignees, (list, tuple)):
             update_assignees_ids = []
             if isinstance(assignees_ids, (list, tuple)):
+                print('-D- assignees_ids: {}'.format(assignees_ids))
                 users = self._client.users()
                 update_assignees_ids = [u.id for u in users if u.id in assignees_ids]
                 if len(update_assignees_ids) != len(assignees_ids):
                     raise NotFoundError("All assignees should be a member of the project")
             elif isinstance(assignees, (list, tuple)):
+                print('-D- assignees: {}'.format(assignees))
                 users = self._client.users()
                 update_assignees_ids = [u.id for u in users if u.username in assignees]
                 if len(update_assignees_ids) != len(assignees):
@@ -231,6 +233,9 @@ class Activity2(Activity):
                                            'status strings: {}'.format(ActivityStatus.values()))
 
         url = self._client._build_url('activity', activity_id=self.id)
+
+        print('-D- URL called: PUT: `{}`'.format(url))
+        print('-D- contents: json=`{}`'.format(update_dict))
         r = self._client._request('PUT', url, json=update_dict)
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
