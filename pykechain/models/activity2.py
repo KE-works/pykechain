@@ -7,6 +7,7 @@ from six import text_type
 from pykechain.enums import ActivityType, ActivityStatus, Category
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
 from pykechain.models import Activity
+from pykechain.utils import is_uuid
 
 
 class Activity2(Activity):
@@ -252,15 +253,27 @@ class Activity2(Activity):
         :type outputs: list(:class:`Property`)
         :raises APIError: when unable to configure the activity
         """
+
+        def _get_propertyset(proplist):
+            """Make it into a unique list of properties to configure for either inputs or outputs."""
+            from pykechain.models import Property
+            propertyset = []
+            for property in proplist:
+                if isinstance(property, Property):
+                    propertyset.append(property.id)
+                elif is_uuid(property):
+                    propertyset.append(property)
+            return list(set(propertyset))
+
         url = self._client._build_url('activity', activity_id='{}/update_associations'.format(self.id))
 
-        if not all([p._json_data.get('category')==Category.MODEL for p in inputs]) and \
-                not all([p._json_data.get('category')==Category.MODEL for p in outputs]):
+        if not all([p._json_data.get('category') == Category.MODEL for p in inputs]) and \
+                not all([p._json_data.get('category') == Category.MODEL for p in outputs]):
             raise IllegalArgumentError('All Properties need to be of category MODEL to configure a task')
 
         r = self._client._request('PUT', url, json={
-            'inputs': [p.id for p in inputs],
-            'outputs': [p.id for p in outputs]
+            'inputs': _get_propertyset(inputs),
+            'outputs': _get_propertyset(outputs)
         })
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
