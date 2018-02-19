@@ -850,7 +850,6 @@ class Client(object):
             if 'activity_class' in kwargs:
                 warnings.warn('For WIM versions 2, you need to ensure to use `activity_type`. Update your code; '
                               'This will be deprecated in APR2018.', PendingDeprecationWarning)
-
                 activity_class = kwargs.pop('activity_class')
                 if activity_class not in ActivityType.values():
                     raise IllegalArgumentError(
