@@ -51,9 +51,9 @@ class Activity(Base):
     # predicates
     #
 
-    def is_root(self):
+    def is_rootlevel(self):
         """
-        Determine if Activity is a root level activity.
+        Determine if Activity is at the root level of a project.
 
         :return: Return True if it is a root level activity, otherwise return False
         :rtype: bool
