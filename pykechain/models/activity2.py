@@ -37,9 +37,9 @@ class Activity2(Activity):
     # predicates
     #
 
-    def is_root(self):
+    def is_rootlevel(self):
         """
-        Determine if Activity is a root level activity.
+        Determine if the Activity is at the root level of a project.
 
         It will look for the name of the parent which should be either ActivityRootNames.WORKFLOW_ROOT or
         ActivityRootNames.CATALOG_ROOT. If the name of the parent cannot be found an additional API call is made
@@ -48,6 +48,10 @@ class Activity2(Activity):
         :return: Return True if it is a root level activity, otherwise return False
         :rtype: bool
         """
+        # when the activity itself is a root, than return False immediately
+        if self.is_root():
+            return False
+
         parent_name = None
         parent_dict = self._json_data.get('parent_id_name')
 
@@ -103,6 +107,36 @@ class Activity2(Activity):
         :rtype: bool
         """
         return self.classification == ActivityClassification.CATALOG
+
+    def is_workflow_root(self):
+        """
+        Determine if the classification of the Activity is of ActivityClassification.WORKFLOW and a ROOT object.
+
+        :return: Return True if it is a root workflow classification activity, otherwise return False
+        :rtype: bool
+        """
+        return self.is_root and self.is_workflow()
+
+    def is_catalog_root(self):
+        """
+        Determine if the classification of the Activity is of ActivityClassification.CATALOG and a ROOT object.
+
+        :return: Return True if it is a root catalog classification activity, otherwise return False
+        :rtype: bool
+        """
+        return self.is_root and self.is_catalog()
+
+    def is_root(self):
+        """
+        Determine if the Activity is a ROOT object.
+
+        If you want to determine if it is also a workflow or a catalog root, use :func:`Activity.is_workflow_root()`
+        or :func:`Activity.is_catalog_root()` methods.
+
+        :return: Return True if it is a root object, otherwise return False
+        :rtype: bool
+        """
+        return self.name in ActivityRootNames.values()
 
     #
     # methods

@@ -380,12 +380,12 @@ class TestActivity1SpecificTests(TestBetamax):
     def test_root_activity1_is_root(self):
         specify_wd = self.project.activity('Specify wheel diameter')
 
-        self.assertTrue(specify_wd.is_root())
+        self.assertTrue(specify_wd.is_rootlevel())
 
     def test_subtask_activity1_is_not_root(self):
         subprocess_subtask = self.project.activity('SubTask')
 
-        self.assertFalse(subprocess_subtask.is_root())
+        self.assertFalse(subprocess_subtask.is_rootlevel())
         self.assertTrue(subprocess_subtask.subprocess())
 
     def test_activity1_is_task(self):
@@ -458,6 +458,12 @@ class TestActivity2SpecificTests(TestBetamax):
         parent = task.parent()
         self.assertEqual(self.project._json_data.get('workflow_root_id'), parent.id)
 
+    def test_activity2_test_workflow_root_object(self):
+        workflow_root = self.project.activity(id=self.project._json_data.get('workflow_root_id'))
+
+        self.assertTrue(workflow_root.is_root())
+        self.assertTrue(workflow_root.is_workflow_root())
+
     def test_activity2_retrieve_children_of_parent(self):
         subprocess = self.project.activity(name='Subprocess')  # type: Activity
         children = subprocess.children()
@@ -472,15 +478,15 @@ class TestActivity2SpecificTests(TestBetamax):
         for child in children:
             self.assertEqual(child._json_data.get('parent_id'), subprocess.id)
 
-    def test_root_activity2_is_root(self):
+    def test_rootlevel_activity2_is_rootlevel(self):
         specify_wd = self.project.activity('Specify wheel diameter')
 
-        self.assertTrue(specify_wd.is_root())
+        self.assertTrue(specify_wd.is_rootlevel())
 
-    def test_subtask_activity2_is_not_root(self):
+    def test_subtask_activity2_is_not_rootlevel(self):
         subprocess_subtask = self.project.activity('SubTask')
 
-        self.assertFalse(subprocess_subtask.is_root())
+        self.assertFalse(subprocess_subtask.is_rootlevel())
         self.assertTrue(subprocess_subtask.subprocess())
 
     def test_activity2_is_task(self):
