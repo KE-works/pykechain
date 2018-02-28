@@ -5,7 +5,7 @@ import warnings
 from requests import Response
 from six import text_type
 
-from pykechain.enums import ActivityType, ActivityStatus, Category
+from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
 from pykechain.models import Activity
 from pykechain.utils import is_uuid
@@ -32,6 +32,81 @@ class Activity2(Activity):
         from pykechain.client import API_EXTRA_PARAMS
         src = self._client.reload(self, extra_params=API_EXTRA_PARAMS['activity'])
         self.__dict__.update(src.__dict__)
+
+    #
+    # predicates
+    #
+
+    def is_root(self):
+        """
+        Determine if Activity is a root level activity.
+
+        It will look for the name of the parent which should be either ActivityRootNames.WORKFLOW_ROOT or
+        ActivityRootNames.CATALOG_ROOT. If the name of the parent cannot be found an additional API call is made
+        to retrieve the parent object (based on the `parent_id` in the json_data).
+
+        :return: Return True if it is a root level activity, otherwise return False
+        :rtype: bool
+        """
+        parent_name = None
+        parent_dict = self._json_data.get('parent_id_name')
+
+        if parent_dict and 'name' in parent_dict:
+            parent_name = parent_dict.get('name')
+        if not parent_dict:
+            parent_name = self._client.activity(id=self._json_data.get('parent_id')).name
+        if parent_name in ActivityRootNames.values():
+            return True
+        return False
+
+    def is_task(self):
+        """
+        Determine if the Activity is of ActivityType.TASK.
+
+        :return: Return True if it is a task, otherwise return False
+        :rtype: bool
+        """
+        return self.activity_type == ActivityType.TASK
+
+    def is_subprocess(self):
+        """
+        Determine if the Activity is of ActivityType.PROCESS.
+
+        :return: Return True if it is a subprocess, otherwise return False
+        :rtype: bool
+        """
+        return self.is_process()
+
+    def is_process(self):
+        """
+        Determine if the Activity is of ActivityType.PROCESS.
+
+        :return: Return True if it is a process, otherwise return False
+        :rtype: bool
+        """
+        return self.activity_type == ActivityType.PROCESS
+
+    def is_workflow(self):
+        """
+        Determine if the classification of the Activity is of ActivityClassification.WORKFLOW.
+
+        :return: Return True if it is a workflow classification activity, otherwise return False
+        :rtype: bool
+        """
+        return self.classification == ActivityClassification.WORKFLOW
+
+    def is_catalog(self):
+        """
+        Determine if the classification of the Activity is of ActivityClassification.CATALOG.
+
+        :return: Return True if it is a catalog classification activity, otherwise return False
+        :rtype: bool
+        """
+        return self.classification == ActivityClassification.CATALOG
+
+    #
+    # methods
+    #
 
     def create(self, *args, **kwargs):
         """Create a new activity belonging to this subprocess.

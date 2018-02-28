@@ -377,6 +377,47 @@ class TestActivity1SpecificTests(TestBetamax):
 
         specify_wd.edit(assignees=original_assignee)
 
+    def test_root_activity1_is_root(self):
+        specify_wd = self.project.activity('Specify wheel diameter')
+
+        self.assertTrue(specify_wd.is_root())
+
+    def test_subtask_activity1_is_not_root(self):
+        subprocess_subtask = self.project.activity('SubTask')
+
+        self.assertFalse(subprocess_subtask.is_root())
+        self.assertTrue(subprocess_subtask.subprocess())
+
+    def test_activity1_is_task(self):
+        specify_wd = self.project.activity('Specify wheel diameter')
+
+        self.assertTrue(specify_wd.is_task())
+        self.assertFalse(specify_wd.is_subprocess())
+
+    def test_activity1_is_subprocess(self):
+        subprocess = self.project.activity('Subprocess')
+
+        self.assertTrue(subprocess.is_subprocess())
+        self.assertFalse(subprocess.is_task())
+
+    def test_activity1_is_configured_not_customised(self):
+        specify_wd = self.project.activity('Specify wheel diameter')
+
+        self.assertTrue(specify_wd.is_configured())
+        self.assertFalse(specify_wd.is_customized())
+
+    def test_unconfigured_subtask_activity1_is_not_configured(self):
+        subprocess_subtask = self.project.activity('SubTask')
+
+        self.assertFalse(subprocess_subtask.is_configured())
+        self.assertFalse(subprocess_subtask.is_customized())
+
+    def test_activity1_is_configured_and_customised(self):
+        customized_task = self.project.activity('Customized task')
+
+        self.assertTrue(customized_task.is_configured())
+        self.assertTrue(customized_task.is_customized())
+
 
 @skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
 class TestActivity2SpecificTests(TestBetamax):
@@ -430,3 +471,44 @@ class TestActivity2SpecificTests(TestBetamax):
         self.assertTrue(len(children) >= 1)
         for child in children:
             self.assertEqual(child._json_data.get('parent_id'), subprocess.id)
+
+    def test_root_activity2_is_root(self):
+        specify_wd = self.project.activity('Specify wheel diameter')
+
+        self.assertTrue(specify_wd.is_root())
+
+    def test_subtask_activity2_is_not_root(self):
+        subprocess_subtask = self.project.activity('SubTask')
+
+        self.assertFalse(subprocess_subtask.is_root())
+        self.assertTrue(subprocess_subtask.subprocess())
+
+    def test_activity2_is_task(self):
+        specify_wd = self.project.activity('Specify wheel diameter')
+
+        self.assertTrue(specify_wd.is_task())
+        self.assertFalse(specify_wd.is_subprocess())
+
+    def test_activity2_is_subprocess(self):
+        subprocess = self.project.activity('Subprocess')
+
+        self.assertTrue(subprocess.is_subprocess())
+        self.assertFalse(subprocess.is_task())
+
+    def test_activity2_is_configured_not_customised(self):
+        specify_wd = self.project.activity('Specify wheel diameter')
+
+        self.assertTrue(specify_wd.is_configured())
+        self.assertFalse(specify_wd.is_customized())
+
+    def test_unconfigured_subtask_activity2_is_not_configured(self):
+        subprocess_subtask = self.project.activity('SubTask')
+
+        self.assertFalse(subprocess_subtask.is_configured())
+        self.assertFalse(subprocess_subtask.is_customized())
+
+    def test_activity2_is_configured_and_customised(self):
+        customized_task = self.project.activity('Customized task')
+
+        self.assertTrue(customized_task.is_configured())
+        self.assertTrue(customized_task.is_customized())

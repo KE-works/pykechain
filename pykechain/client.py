@@ -246,8 +246,8 @@ class Client(object):
         :type label: basestring or None
         :param version: semantic version string to match appname version against eg '2.0.0' or '>=2.0.0'
         :type version: basestring
-        :param default: (optional) boolean to return if the version of the app is set but the app found. Set to None
-                        to return a NotFoundError when a version if not found in the app.
+        :param default: (optional) boolean to return if the version of the app is not set but the app found.
+                        Set to None to return a NotFoundError when a version if not found in the app.
         :type default: bool or None
         :return: True if the version of the app matches against the match_version, otherwise False
         :raises IllegalArgumentError: if no app nor a label is provided

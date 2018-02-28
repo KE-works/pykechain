@@ -147,7 +147,7 @@ class Part(Base):
         # type: (Any) -> Any
         """Retrieve the siblings of this `Part` as `Partset`.
 
-        Siblings are other Parts sharing the same parent of this `Part`
+        Siblings are other Parts sharing the same parent of this `Part`, including the part itself.
 
         :param kwargs: Additional search arguments to search for, check :class:`pykechain.Client.parts`
                        for additional info
