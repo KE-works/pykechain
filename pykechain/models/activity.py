@@ -8,7 +8,6 @@ from six import text_type
 from pykechain.enums import Category, ActivityType, ActivityStatus
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
-from pykechain.models.user import User
 
 
 class Activity(Base):
@@ -47,6 +46,76 @@ class Activity(Base):
                 raise NotFoundError("This activity '{}'({}) does not belong to a scope, something is weird!".
                                     format(self.name, self.id))
         return scope_id
+
+    #
+    # predicates
+    #
+
+    def is_root(self):
+        """
+        Determine if Activity is a root level activity.
+
+        :return: Return True if it is a root level activity, otherwise return False
+        :rtype: bool
+        """
+        container_id = self._json_data.get('container')
+        if container_id:
+            return container_id == self._json_data.get('root_container')
+        else:
+            return False
+
+    def is_task(self):
+        """
+        Determine if the Activity is of ActivityType.USERTASK.
+
+        :return: Return True if it is a task, otherwise return False
+        :rtype: bool
+        """
+        return self.activity_type == ActivityType.USERTASK
+
+    def is_subprocess(self):
+        """
+        Determine if the Activity is of ActivityType.SUBPROCESS.
+
+        :return: Return True if it is a subprocess, otherwise return False
+        :rtype: bool
+        """
+        return self.activity_type == ActivityType.SUBPROCESS
+
+    def is_configured(self):
+        """
+        Determine if the Activity is configured with input and output properties.
+
+        Makes an additional lightweight call to the API to determine if any associated models are there.
+
+        :return: Return True if it is configured, otherwise return False
+        :rtype: bool
+        """
+        # check configured based on if we get at least 1 part back
+        associated_models = self.parts(category=Category.MODEL, limit=1)
+        if associated_models:
+            return True
+        else:
+            return False
+
+    def is_customized(self):
+        """
+        Determine if the Activity is customized.
+
+        In other words if it has a customization. Use can use the :func:`Activity.customization()` to retrieve
+        the customization object and configure the task.
+
+        :return: Return True if it is customized, otherwise return False
+        :rtype: bool
+        """
+        if self._json_data.get('customization', False):
+            return True
+        else:
+            return False
+
+    #
+    # Searchers and retrievers
+    #
 
     def parts(self, *args, **kwargs):
         """Retrieve parts belonging to this activity.
@@ -171,8 +240,8 @@ class Activity(Base):
     def siblings(self, **kwargs):
         """Retrieve the other activities that also belong to the subprocess.
 
-        It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the level of the current task.
-        This also works if the activity is of type `ActivityType.SUBPROCESS`.
+        It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the level of the current task, including
+        itself. This also works if the activity is of type `ActivityType.SUBPROCESS`.
 
         :param kwargs: Additional search arguments, check :func:`pykechain.Client.activities` for additional info
         :type kwargs: dict or None
