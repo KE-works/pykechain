@@ -64,7 +64,7 @@ class PropertyType(Enum):
 
     :cvar CHAR_VALUE: a charfield property (single line text)
     :cvar TEXT_VALUE: text property (long text, may span multiple lines)
-    :cvar BOOLEAN_VALUE: a boolean value property (True/False)\
+    :cvar BOOLEAN_VALUE: a boolean value property (True/False)
     :cvar INT_VALUE: integer property (whole number)
     :cvar FLOAT_VALUE: floating point number property (with digits)
     :cvar DATETIME_VALUE: a datetime value property
