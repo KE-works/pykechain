@@ -78,7 +78,7 @@ class PropertyType(Enum):
     :cvar REFERENCES_VALUE: a multi reference property, a list of UUID values referring to other part models
 
     """
-    
+
     CHAR_VALUE = "CHAR_VALUE"
     TEXT_VALUE = "TEXT_VALUE"
     BOOLEAN_VALUE = "BOOLEAN_VALUE"
