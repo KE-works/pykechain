@@ -7,6 +7,7 @@ from pykechain.enums import ServiceExecutionStatus
 from pykechain.exceptions import NotFoundError
 from tests.classes import TestBetamax
 
+
 # new in 1.13
 class TestServices(TestBetamax):
     def test_retrieve_services(self):
@@ -67,9 +68,8 @@ class TestServices(TestBetamax):
         # destroy
         service.edit(version=version_before)
 
-    @skip('Due to KEC-17270 this is a bug for the pykechain user')
     def test_create_and_delete_service(self):
-        service_name = 'new service'
+        service_name = 'Test service creation'
         new_service = self.client.create_service(service_name, scope=self.project.id)
 
         self.assertTrue(new_service.name, service_name)
