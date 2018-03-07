@@ -24,7 +24,7 @@ class SelectListProperty(Property):
 
     @value.setter
     def value(self, value):
-        if value not in self.options:
+        if value not in self.options and value is not None:
             raise APIError('The new value `{}` of the single select list property should be in the list of '
                            'options `{}`'.format(value, self.options))
         if self._put_value(value):
