@@ -3,8 +3,8 @@ from unittest import skip
 
 import pytest
 
-from pykechain.enums import ServiceExecutionStatus
-from pykechain.exceptions import NotFoundError
+from pykechain.enums import ServiceExecutionStatus, ServiceType
+from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from tests.classes import TestBetamax
 
 
@@ -12,6 +12,19 @@ from tests.classes import TestBetamax
 class TestServices(TestBetamax):
     def test_retrieve_services(self):
         self.assertTrue(self.project.services())
+
+    def test_retrieve_services_with_kwargs(self):
+        # setUp
+        retrieved_services_with_kwargs = self.project.services(env_version="3.5")
+
+        # testing
+        self.assertTrue(retrieved_services_with_kwargs)
+        for service in retrieved_services_with_kwargs:
+            self.assertEqual(service._json_data['env_version'], '3.5')
+
+    def test_retrieve_service_but_found_multiple(self):
+        with self.assertRaises(MultipleFoundError):
+            self.project.service(script_type=ServiceType.PYTHON_SCRIPT)
 
     def test_retrieve_single_service(self):
         services = self.project.services()
@@ -80,9 +93,25 @@ class TestServices(TestBetamax):
         with self.assertRaisesRegex(NotFoundError, 'No service fits criteria'):
             self.project.service(pk=new_service.id)
 
+    def test_create_service_with_wrong_service_type(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.project.create_service(name='This service type does not exist', service_type='RUBY_SCRIPT')
+
+    def test_create_service_with_wrong_environment_version(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.project.create_service(name='This env version does not exist', environment_version='0.0')
+
 # new in 1.13class TestServiceExecutions(TestBetamax):
     def test_retrieve_service_executions(self):
         self.assertTrue(self.project.service_executions())
+
+    def test_retrieve_service_executions_with_kwargs(self):
+        # setUp
+        limit = 15
+        retrieved_executions_with_kwargs = self.project.service_executions(limit=limit)
+
+        # testing
+        self.assertEqual(len(retrieved_executions_with_kwargs),limit)
 
     def test_retrieve_single_service_execution(self):
         service_executions = self.project.service_executions()
@@ -90,6 +119,18 @@ class TestServices(TestBetamax):
         service_execution_1 = service_executions[0]
 
         self.assertEqual(self.project.service_execution(pk=service_execution_1.id), service_execution_1)
+
+    def test_retrieve_single_service_execution_but_found_none(self):
+        with self.assertRaises(NotFoundError):
+            self.project.service_execution(username='No service execution as this user does not exist')
+
+    def test_retrieve_single_service_execution_but_found_multiple(self):
+        # setUp
+        service = self.project.service(name='Debug pykechain')
+
+        # testing
+        with self.assertRaises(MultipleFoundError):
+            self.project.service_execution(service=service.id)
 
     @pytest.mark.skipif("os.getenv('TRAVIS', False)",
                         reason="Skipping tests when using Travis, as Service Execution cannot be provided")

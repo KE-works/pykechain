@@ -201,7 +201,7 @@ class Client(object):
         :return: a new object
         :raises NotFoundError: if original object is not found or deleted in the mean time
         """
-        if not obj._json_data.get('url'):
+        if not obj._json_data.get('url'): # pragma: no cover
             raise NotFoundError("Could not reload object, there is no url for object '{}' configured".format(obj))
 
         response = self._request('GET', obj._json_data.get('url'))
@@ -554,7 +554,7 @@ class Client(object):
         response = self._request('GET', self._build_url('services'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve properties")
+            raise NotFoundError("Could not retrieve services")
 
         data = response.json()
         return [Service(service, client=self) for service in data['results']]
@@ -600,6 +600,7 @@ class Client(object):
         :type pk: basestring or None
         :param scope: (optional) id (UUID) of the scope to search in
         :type scope: basestring or None
+        :param service: (optional) service to search for
         :param kwargs: (optional) additional search keyword arguments
         :type kwargs: dict or None
         :return: a single :class:`models.ServiceExecution` object
@@ -617,7 +618,7 @@ class Client(object):
         r = self._request('GET', self._build_url('service_executions'), params=request_params)
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve properties")
+            raise NotFoundError("Could not retrieve service executions")
 
         data = r.json()
         return [ServiceExecution(service_exeuction, client=self) for service_exeuction in data['results']]
@@ -647,9 +648,9 @@ class Client(object):
         _service_executions = self.service_executions(name=name, pk=pk, scope=scope, service=service, **kwargs)
 
         if len(_service_executions) == 0:
-            raise NotFoundError("No service fits criteria")
+            raise NotFoundError("No service execution fits criteria")
         if len(_service_executions) != 1:
-            raise MultipleFoundError("Multiple services fit criteria")
+            raise MultipleFoundError("Multiple service executions fit criteria")
 
         return _service_executions[0]
 
@@ -696,7 +697,7 @@ class Client(object):
                                  params={"select_action": action},
                                  data=data)
 
-        if response.status_code != requests.codes.created:  # pragma: no cover
+        if response.status_code != requests.codes.created:
             raise APIError("Could not create part, {}: {}".format(str(response), response.content))
 
         return Part(response.json()['results'][0], client=self)
@@ -721,9 +722,9 @@ class Client(object):
         :raises APIError: if the `Part` could not be created
         """
         if parent.category != Category.INSTANCE:
-            raise APIError("The parent should be an category 'INSTANCE'")
+            raise IllegalArgumentError("The parent should be an category 'INSTANCE'")
         if model.category != Category.MODEL:
-            raise APIError("The models should be of category 'MODEL'")
+            raise IllegalArgumentError("The models should be of category 'MODEL'")
 
         if not name:
             name = model.name
@@ -758,7 +759,7 @@ class Client(object):
         :raises APIError: if the `Part` could not be created
         """
         if parent.category != Category.MODEL:
-            raise APIError("The parent should be a model")
+            raise IllegalArgumentError("The parent should be of category 'MODEL'")
 
         data = {
             "name": name,
@@ -772,7 +773,7 @@ class Client(object):
         """Add this model as a proxy to another parent model.
 
         This will add a model as a proxy model to another parent model. It ensure that it will copy the
-        whole subassembly to the 'parent' model.
+        whole sub-assembly to the 'parent' model.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
         additional keyword=value argument to this method. This will improve performance of the backend
@@ -897,7 +898,7 @@ class Client(object):
         response = self._request('POST', self._build_url('services'),
                                  data=data)
 
-        if response.status_code != requests.codes.created:
+        if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create service ({})".format((response, response.json())))
 
         service = Service(response.json().get('results')[0], client=self)
