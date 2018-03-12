@@ -323,3 +323,48 @@ class ExtCustomization(CustomizationBase):
         }
 
         self._add_widget(dict(config=config, meta=meta, name='propertyGridWidget'))
+
+    def add_text_widget(self, text=None, custom_title=None, collapsible=False):
+        """
+        Add an KE-chain Property Text widget to the customization.
+
+        The widget will be saved to KE-chain.
+
+        :param text: The text that will be shown by the widget.
+        :type text: basestring or None
+        :param custom_title: A custom title for the text panel
+                 - None (default): No title
+                 - String value: Custom title
+        :type custom_title: basestring or None
+        :param collapsible: A boolean to decide whether the panel is collapsible or not
+        :type collapsible: bool
+        """
+        # Declare text widget config
+        config = {
+            "xtype": ComponentXType.HTMLPANEL,
+            "filter": {
+                "activity_id": str(self.activity.id),
+            }
+        }
+
+        # Add text and custom title
+        if text:
+            config['html'] = text
+        if custom_title:
+            show_title_value = "Custom Title"
+            title = custom_title
+        else:
+            show_title_value = "No Title"
+            title = None
+        config['collapsible'] = collapsible
+        config['title'] = title
+        # Declare the meta info for the property grid
+        meta = {
+            "activityId": str(self.activity.id),
+            "customTitle": title,
+            "collapsible": collapsible,
+            "html": text,
+            "showTitleValue": show_title_value
+        }
+
+        self._add_widget(dict(config=config, meta=meta, name='htmlWidget'))
