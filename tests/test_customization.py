@@ -13,7 +13,6 @@ class TestExtCustomization(TestBetamax):
         self.models, self.instances = self.widgets_test_task.associated_parts()
 
     def tearDown(self):
-        super(TestExtCustomization, self).tearDown()
         self.customization.delete_all_widgets()
 
     def test_get_customization_of_non_customized_task(self):
@@ -141,3 +140,9 @@ class TestExtCustomization(TestBetamax):
         self.assertFalse('html' in widgets[1]['config'].keys())
         self.assertFalse(widgets[1]['config']['title'])
         self.assertFalse(widgets[1]['config']['collapsible'])
+
+    # def test_add_super_grid_widget(self):
+    #     """
+    #     Test if a Super Grid Widget can be added
+    #     """
+    #     self.customization.add_super_grid_widget()
