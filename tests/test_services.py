@@ -9,6 +9,10 @@ from tests.classes import TestBetamax
 
 # new in 1.13
 class TestServices(TestBetamax):
+    def setUp(self):
+        super(TestServices, self).setUp()
+        self.target_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/'))
+
     def test_retrieve_services(self):
         self.assertTrue(self.project.services())
 
@@ -146,22 +150,23 @@ class TestServices(TestBetamax):
 
     def test_save_service_script(self):
         # setUp
-        service_name = 'Debug pykechain'
+        service_name = 'Test save service script'
         service = self.project.service(name=service_name)
-        target_dir = os.path.join(os.getcwd(), 'files', 'downloaded')
+        target_dir = os.path.join(self.target_dir, 'tests', 'files', 'downloaded')
 
         # testing
         service.save_as(target_dir=target_dir)
-        self.assertEqual(len(os.listdir(target_dir)), 1)
+        self.assertEqual(len(os.listdir(target_dir)), 2)
 
         # tearDown
-        path_to_saved_file = os.path.join(target_dir, os.listdir(target_dir)[0])
-        os.remove(path_to_saved_file)
+        path_to_saved_file = os.path.join(target_dir, 'test_save_script.py')
+        if os.path.exists(path_to_saved_file):
+            os.remove(path_to_saved_file)
 
     def test_upload_script_to_service(self):
         # setUp
         service_to_upload = self.project.create_service(name='Test upload script to service')
-        upload_path = os.path.join(os.getcwd(), 'files', 'uploaded', 'test_upload_script.py')
+        upload_path = os.path.join(self.target_dir, 'tests', 'files', 'uploaded', 'test_upload_script.py')
 
         # testing
         service_to_upload.upload(pkg_path=upload_path)
@@ -174,7 +179,7 @@ class TestServices(TestBetamax):
     def test_upload_script_to_service_with_wrong_path(self):
         # setUp
         service_to_upload = self.project.create_service(name='Test upload wrong path script to service')
-        upload_path = os.path.join(os.getcwd(), 'files', 'uploaded', 'this_file_does_exists.not')
+        upload_path = os.path.join(self.target_dir, 'tests', 'files', 'uploaded', 'this_file_does_exists.not')
 
         # testing
         with self.assertRaises(OSError):
@@ -193,7 +198,7 @@ class TestServices(TestBetamax):
         retrieved_executions_with_kwargs = self.project.service_executions(limit=limit)
 
         # testing
-        self.assertEqual(len(retrieved_executions_with_kwargs),limit)
+        self.assertEqual(len(retrieved_executions_with_kwargs), limit)
 
     def test_retrieve_single_service_execution(self):
         service_executions = self.project.service_executions()
@@ -237,7 +242,7 @@ class TestServices(TestBetamax):
         service_name = 'Debug pykechain'
         service = self.project.service(name=service_name)
         last_service_execution = service.get_executions()[0]
-        target_dir = os.path.join(os.getcwd(), 'files', 'downloaded')
+        target_dir = os.path.join(self.target_dir, 'tests', 'files', 'downloaded')
 
         # testing
         last_service_execution.get_log(target_dir=target_dir)
