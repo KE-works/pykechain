@@ -1,6 +1,5 @@
 import time
-from unittest import skip
-
+import os
 import pytest
 
 from pykechain.enums import ServiceExecutionStatus, ServiceType
@@ -57,16 +56,52 @@ class TestServices(TestBetamax):
                          "running the tests")
 
     def test_update_service(self):
+        # setUp
         service_name = 'Debug pykechain'
         service = self.project.service(name=service_name)
         version_before = str(service.version)
-
+        name_before = service_name
+        name_after = 'Pykechain needs no debugging'
+        description_before = str(service._json_data['description'])
+        description_after = 'Pykechain is way too good for that'
         version_after = '-latest'
-        service.edit(version=version_after)
+
+        # testing
+        service.edit(name=name_after, description=description_after, version=version_after)
+        service.refresh()
+        self.assertEqual(service.name, name_after)
+        self.assertEqual(service._json_data['description'], description_after)
         self.assertEqual(service.version, version_after)
 
-        # destroy
-        service.edit(version=version_before)
+        # tearDown
+        service.edit(name=name_before, description=description_before, version=version_before)
+
+    def test_update_service_incorrect_name(self):
+        # setUp
+        service_name = 'Test incorrect update of services'
+        service = self.project.service(name=service_name)
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            service.edit(name=1234)
+
+    def test_update_service_incorrect_description(self):
+        # setUp
+        service_name = 'Test incorrect update of services'
+        service = self.project.service(name=service_name)
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            service.edit(description=True)
+
+    def test_update_service_incorrect_version(self):
+        # setUp
+        service_name = 'Test incorrect update of services'
+        service = self.project.service(name=service_name)
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            service.edit(version=['2.0'])
 
     def test_service_refresh_from_kechain(self):
         service_name = 'Debug pykechain'
@@ -80,6 +115,14 @@ class TestServices(TestBetamax):
 
         # destroy
         service.edit(version=version_before)
+
+    def test_get_executions_of_service(self):
+        # setUp
+        service_name = 'Debug pykechain'
+        service = self.project.service(name=service_name)
+
+        # testing
+        self.assertTrue(service.get_executions())
 
     def test_create_and_delete_service(self):
         service_name = 'Test service creation'
@@ -100,6 +143,45 @@ class TestServices(TestBetamax):
     def test_create_service_with_wrong_environment_version(self):
         with self.assertRaises(IllegalArgumentError):
             self.project.create_service(name='This env version does not exist', environment_version='0.0')
+
+    def test_save_service_script(self):
+        # setUp
+        service_name = 'Debug pykechain'
+        service = self.project.service(name=service_name)
+        target_dir = os.path.join(os.getcwd(), 'files', 'downloaded')
+
+        # testing
+        service.save_as(target_dir=target_dir)
+        self.assertEqual(len(os.listdir(target_dir)), 1)
+
+        # tearDown
+        path_to_saved_file = os.path.join(target_dir, os.listdir(target_dir)[0])
+        os.remove(path_to_saved_file)
+
+    def test_upload_script_to_service(self):
+        # setUp
+        service_to_upload = self.project.create_service(name='Test upload script to service')
+        upload_path = os.path.join(os.getcwd(), 'files', 'uploaded', 'test_upload_script.py')
+
+        # testing
+        service_to_upload.upload(pkg_path=upload_path)
+        service_to_upload.refresh()
+        self.assertEqual(service_to_upload._json_data['script_file_name'], 'test_upload_script.py')
+
+        # tearDown
+        service_to_upload.delete()
+
+    def test_upload_script_to_service_with_wrong_path(self):
+        # setUp
+        service_to_upload = self.project.create_service(name='Test upload wrong path script to service')
+        upload_path = os.path.join(os.getcwd(), 'files', 'uploaded', 'this_file_does_exists.not')
+
+        # testing
+        with self.assertRaises(OSError):
+            service_to_upload.upload(pkg_path=upload_path)
+
+        # tearDown
+        service_to_upload.delete()
 
 # new in 1.13class TestServiceExecutions(TestBetamax):
     def test_retrieve_service_executions(self):
@@ -149,3 +231,19 @@ class TestServices(TestBetamax):
         self.assertFalse(service_execution.status == ServiceExecutionStatus.FAILED,
                          "The service execution is status 'FAILED', please upload working debugging scripts before "
                          "running the tests")
+
+    def test_log_of_service_execution(self):
+        # setUp
+        service_name = 'Debug pykechain'
+        service = self.project.service(name=service_name)
+        last_service_execution = service.get_executions()[0]
+        target_dir = os.path.join(os.getcwd(), 'files', 'downloaded')
+
+        # testing
+        last_service_execution.get_log(target_dir=target_dir)
+        log_file = os.path.join(target_dir, 'log.txt')
+        self.assertTrue(log_file)
+
+        # tearDown
+        if os.path.exists(log_file):
+            os.remove(log_file)
