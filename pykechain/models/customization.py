@@ -168,7 +168,7 @@ class ExtCustomization(CustomizationBase):
         self._add_widget(dict(config=config, name="jsonWidget"))
 
     def add_super_grid_widget(self, part_model, delete=False, edit=True, export=True, incomplete_rows=True,
-                              new_instance=False, parent_part_instance=None, max_height=None, custom_title=None,
+                              new_instance=False, parent_part_instance=None, max_height=None, custom_title=False,
                               emphasize_edit=False, emphasize_new_instance=True):
         """
         Add an KE-chain superGrid (e.g. basic table) widget to the customization.
@@ -197,13 +197,13 @@ class ExtCustomization(CustomizationBase):
         :param max_height: The max height of the supergrid in pixels
         :type max_height: int or None
         :param custom_title: A custom title for the supergrid
-                 - None (default): Part instance name
+                 - False (default): Part instance name
                  - String value: Custom title
-                 - False: No title
+                 - None: No title
         :type custom_title: basestring or None
         """
         # Assertions
-        if not (new_instance and bool(parent_part_instance)):
+        if not parent_part_instance and new_instance:
             raise IllegalArgumentError("If you want to allow the creation of new part instances, you must specify a "
                                        "parent_part_instance")
 
@@ -234,25 +234,28 @@ class ExtCustomization(CustomizationBase):
         # Add parent to filter if added.
         if parent_part_instance:
             config['filter']["parent"] = str(parent_part_instance.id)
-
+            parent_instance_id = str(parent_part_instance.id)
+        else:
+            parent_instance_id = None
         # Add max height and custom title
         if max_height:
             config['maxHeight'] = max_height
 
-        if custom_title is None:
+        if custom_title is False:
             show_title_value = "Default"
             title = part_model.name
-        elif custom_title:
-            show_title_value = "Custom Title"
-            title = str(custom_title)
-        else:
+        elif custom_title is None:
             show_title_value = "No title"
             title = None
+        else:
+            show_title_value = "Custom Title"
+            title = str(custom_title)
         config["title"] = title
+        config["showTitleValue"] = show_title_value
 
         # Declare the meta info for the supergrid
         meta = {
-            "parentInstanceId": str(parent_part_instance.id),
+            "parentInstanceId": parent_instance_id,
             "editButtonUi": "primary-action" if emphasize_edit else "default-toolbar",
             "customHeight": max_height if max_height else 500,
             "primaryAddUiValue": emphasize_new_instance,

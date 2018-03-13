@@ -1,4 +1,5 @@
 from pykechain.models.customization import ExtCustomization
+from pykechain.exceptions import IllegalArgumentError
 from tests.classes import TestBetamax
 
 
@@ -12,9 +13,6 @@ class TestExtCustomization(TestBetamax):
         self.customization = self.widgets_test_task.customization()
         self.models, self.instances = self.widgets_test_task.associated_parts()
 
-    # def tearDown(self):
-    #     self.customization.delete_all_widgets()
-
     def test_get_customization_of_non_customized_task(self):
         """
         Test if an activity has a customization
@@ -25,6 +23,8 @@ class TestExtCustomization(TestBetamax):
         self.assertEqual(self.customization.activity.id, self.widgets_test_task.id,
                          "The activity id of the customization object should be the same as the id of the activity")
         self.assertTrue(len(self.customization.widgets()) == 0, "The customizations should have no widgets")
+
+        # tearDown
         self.customization.delete_all_widgets()
 
     def test_add_json_widget(self):
@@ -36,6 +36,8 @@ class TestExtCustomization(TestBetamax):
         self.assertEqual(len(self.customization.widgets()), 1, "The customization should have 1 widget")
         self.assertTrue(self.customization.widgets()[0]["name"] == "jsonWidget",
                         "The first widget should be a jsonWidget")
+
+        # tearDown
         self.customization.delete_all_widgets()
 
     def test_add_property_grid_widget(self):
@@ -47,6 +49,8 @@ class TestExtCustomization(TestBetamax):
         self.assertEqual(len(self.customization.widgets()), 1, "The customization should have 1 widget")
         self.assertTrue(self.customization.widgets()[0]["name"] == "propertyGridWidget",
                         "The first widget should be a propertyGridWidget")
+
+        # tearDown
         self.customization.delete_all_widgets()
 
     def test_add_property_grid_widget_with_max_height(self):
@@ -60,6 +64,8 @@ class TestExtCustomization(TestBetamax):
                         "The first widget should be a propertyGridWidget")
         self.assertEqual(self.customization.widgets()[0]["config"]["maxHeight"], 20,
                          "The max height property of the config should be 20")
+
+        # tearDown
         self.customization.delete_all_widgets()
 
     def test_add_property_grid_widget_with_custom_title(self):
@@ -75,6 +81,8 @@ class TestExtCustomization(TestBetamax):
                         "The first widget should be a propertyGridWidget")
         self.assertTrue(self.customization.widgets()[0]["config"]["title"] == custom_title,
                         "The title property of the config should be {}".format(custom_title))
+
+        # tearDown
         self.customization.delete_all_widgets()
 
     def test_add_property_grid_widget_with_no_title(self):
@@ -88,6 +96,8 @@ class TestExtCustomization(TestBetamax):
                         "The first widget should be a propertyGridWidget")
         self.assertEqual(self.customization.widgets()[0]["config"]["title"], None,
                          "The config should be not have a title property")
+
+        # tearDown
         self.customization.delete_all_widgets()
 
     def test_delete_a_widget(self):
@@ -106,6 +116,8 @@ class TestExtCustomization(TestBetamax):
         self.assertEqual(len(self.customization.widgets()), 1, "The customization should have 1 widget")
         self.assertTrue(self.customization.widgets()[0]["name"] == "propertyGridWidget",
                         "The first widget should be a propertyGridWidget")
+
+        # tearDown
         self.customization.delete_all_widgets()
 
     def test_raise_error_when_delete_a_widget_of_empty_customization(self):
@@ -116,6 +128,8 @@ class TestExtCustomization(TestBetamax):
 
         with self.assertRaises(ValueError):
             self.customization.delete_widget(0)
+
+        # tearDown
         self.customization.delete_all_widgets()
 
     def test_delete_all_widgets(self):
@@ -130,6 +144,8 @@ class TestExtCustomization(TestBetamax):
         self.customization.delete_all_widgets()
 
         self.assertEqual(len(self.customization.widgets()), 0, "The customization should have no widgets")
+
+        # tearDown
         self.customization.delete_all_widgets()
 
     def test_add_text_widget(self):
@@ -149,10 +165,34 @@ class TestExtCustomization(TestBetamax):
         self.assertFalse('html' in widgets[1]['config'].keys())
         self.assertFalse(widgets[1]['config']['title'])
         self.assertFalse(widgets[1]['config']['collapsible'])
+
+        # tearDown
         self.customization.delete_all_widgets()
 
-    # def test_add_super_grid_widget(self):
-    #     """
-    #     Test if a Super Grid Widget can be added
-    #     """
-    #     self.customization.add_super_grid_widget()
+    def test_add_super_grid_widget(self):
+        """
+        Test if a Super Grid Widget can be added
+        """
+        part_model = [model for model in self.models if model.name == 'Spoke'][0]
+        parent_instance = [instance for instance in self.instances if instance.name == 'Front Wheel'][0]
+        self.customization.add_super_grid_widget(part_model=part_model, parent_part_instance=parent_instance,
+                                                 max_height=800, custom_title='This grid has title, height and parent',
+                                                 new_instance=True, emphasize_new_instance=True, emphasize_edit=True)
+        self.customization.add_super_grid_widget(part_model=part_model, custom_title=None, delete=True, edit=False,
+                                                 export=False, incomplete_rows=False)
+        self.customization.add_super_grid_widget(part_model=part_model)
+        with self.assertRaises(IllegalArgumentError):
+            self.customization.add_super_grid_widget(part_model=part_model, new_instance=True)
+
+        widgets = self.customization.widgets()
+        self.assertEqual(len(widgets), 3, "The customization should have 3 super grid widgets")
+        self.assertTrue(widgets[0]['name'] == "superGridWidget")
+        self.assertTrue(widgets[0]['config']['title'] == 'This grid has title, height and parent')
+        self.assertTrue(widgets[0]['config']['maxHeight'] == 800)
+
+        self.assertFalse(widgets[1]['config']['title'])
+
+        self.assertTrue(widgets[2]['config']['title'] == part_model.name)
+
+        # tearDown
+        self.customization.delete_all_widgets()
