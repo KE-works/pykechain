@@ -1,5 +1,6 @@
 from pykechain.models.customization import ExtCustomization
 from pykechain.exceptions import IllegalArgumentError
+from pykechain.enums import SortTable
 from tests.classes import TestBetamax
 
 
@@ -12,6 +13,7 @@ class TestExtCustomization(TestBetamax):
         self.widgets_test_task = self.project.activity(name='Task to test all widgets')
         self.customization = self.widgets_test_task.customization()
         self.models, self.instances = self.widgets_test_task.associated_parts()
+        self.customization.delete_all_widgets()
 
     def test_get_customization_of_non_customized_task(self):
         """
@@ -173,16 +175,23 @@ class TestExtCustomization(TestBetamax):
         """
         Test if a Super Grid Widget can be added
         """
+        self.customization.delete_all_widgets()
+
         part_model = [model for model in self.models if model.name == 'Spoke'][0]
+        sort_property = part_model.property(name='Length')
         parent_instance = [instance for instance in self.instances if instance.name == 'Front Wheel'][0]
+        wrong_sort_property = parent_instance.model().property(name='Diameter')
         self.customization.add_super_grid_widget(part_model=part_model, parent_part_instance=parent_instance,
                                                  max_height=800, custom_title='This grid has title, height and parent',
                                                  new_instance=True, emphasize_new_instance=True, emphasize_edit=True)
         self.customization.add_super_grid_widget(part_model=part_model, custom_title=None, delete=True, edit=False,
-                                                 export=False, incomplete_rows=False)
-        self.customization.add_super_grid_widget(part_model=part_model)
+                                                 export=False, incomplete_rows=False, sort_property=sort_property)
+        self.customization.add_super_grid_widget(part_model=part_model, sort_property=sort_property,
+                                                 sort_direction=SortTable.DESCENDING)
         with self.assertRaises(IllegalArgumentError):
             self.customization.add_super_grid_widget(part_model=part_model, new_instance=True)
+        with self.assertRaises(IllegalArgumentError):
+            self.customization.add_super_grid_widget(part_model=part_model, sort_property=wrong_sort_property)
 
         widgets = self.customization.widgets()
         self.assertEqual(len(widgets), 3, "The customization should have 3 super grid widgets")
@@ -196,3 +205,7 @@ class TestExtCustomization(TestBetamax):
 
         # tearDown
         self.customization.delete_all_widgets()
+
+    # def test_add_paginated_grid(self):
+    #     widgets = self.customization.widgets()
+    #     print()

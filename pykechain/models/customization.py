@@ -1,7 +1,7 @@
 import requests
 from jsonschema import validate
 
-from pykechain.enums import ComponentXType, Category
+from pykechain.enums import ComponentXType, Category, SortTable
 from pykechain.exceptions import APIError, IllegalArgumentError
 
 uuid_pattern = r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
@@ -169,7 +169,8 @@ class ExtCustomization(CustomizationBase):
 
     def add_super_grid_widget(self, part_model, delete=False, edit=True, export=True, incomplete_rows=True,
                               new_instance=False, parent_part_instance=None, max_height=None, custom_title=False,
-                              emphasize_edit=False, emphasize_new_instance=True):
+                              emphasize_edit=False, emphasize_new_instance=True, sort_property=None,
+                              sort_direction=SortTable.ASCENDING):
         """
         Add an KE-chain superGrid (e.g. basic table) widget to the customization.
 
@@ -201,12 +202,20 @@ class ExtCustomization(CustomizationBase):
                  - String value: Custom title
                  - None: No title
         :type custom_title: basestring or None
+        :param sort_property: The property model on which the part instances are being sorted on
+        :type sort_property: :class:`Property`
+        :param sort_direction: The direction on which the values of property instances are being sorted on
+        :type sort_direction: basestring (see enums)
+                  - ASC (default): Sort in ascending order
+                  - DESC: Sort in descending order
         """
         # Assertions
         if not parent_part_instance and new_instance:
             raise IllegalArgumentError("If you want to allow the creation of new part instances, you must specify a "
                                        "parent_part_instance")
-
+        if sort_property and sort_property.part.id != part_model.id:
+            raise IllegalArgumentError("If you want to sort on a property, then sort_property must be located under "
+                                       "part_model")
         # Declare supergrid config
         config = {
             "xtype": ComponentXType.SUPERGRID,
@@ -223,6 +232,10 @@ class ExtCustomization(CustomizationBase):
                         "incompleteRows": incomplete_rows,
                         "newInstance": new_instance
                     },
+                    "sorters": [{
+                        "direction": sort_direction,
+                        "property": sort_property.id
+                    }] if sort_property else [],
                     "ui": {
                         "newInstance": "primary-action" if emphasize_new_instance else "default-toolbar",
                         "edit": "primary-action" if emphasize_edit else "default-toolbar"
@@ -250,6 +263,7 @@ class ExtCustomization(CustomizationBase):
         else:
             show_title_value = "Custom Title"
             title = str(custom_title)
+
         config["title"] = title
         config["showTitleValue"] = show_title_value
 
@@ -271,6 +285,8 @@ class ExtCustomization(CustomizationBase):
             "partModelId": str(part_model.id),
             "editButtonVisible": edit,
             "showHeightValue": "Custom max height" if max_height else "Auto",
+            'sortDirection': sort_direction,
+            'sortedColumn': sort_property.id if sort_property else None
         }
 
         self._add_widget(dict(config=config, meta=meta, name='superGridWidget'))
@@ -371,3 +387,5 @@ class ExtCustomization(CustomizationBase):
         }
 
         self._add_widget(dict(config=config, meta=meta, name='htmlWidget'))
+
+    # def add_

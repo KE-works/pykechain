@@ -235,3 +235,14 @@ class KechainEnv(Enum):
     KECHAIN_SCOPE = 'KECHAIN_SCOPE'
     KECHAIN_SCOPE_ID = 'KECHAIN_SCOPE_ID'
     KECHAIN_SCOPE_STATUS = 'KECHAIN_SCOPE_STATUS'
+
+
+class SortTable(Enum):
+    """The acceptable sorting options for a grid/table
+
+    :cvar ASCENDING: Table is sorted in ASCENDING ORDER
+    :cvar DESCENDING: Table is sorted in DESCENDING ORDER
+    """
+
+    ASCENDING = 'ASC'
+    DESCENDING = 'DESC'
