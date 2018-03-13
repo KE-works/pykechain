@@ -259,7 +259,7 @@ class ExtCustomization(CustomizationBase):
             title = part_model.name
         elif custom_title is None:
             show_title_value = "No title"
-            title = None
+            title = str()
         else:
             show_title_value = "Custom Title"
             title = str(custom_title)
@@ -388,4 +388,137 @@ class ExtCustomization(CustomizationBase):
 
         self._add_widget(dict(config=config, meta=meta, name='htmlWidget'))
 
-    # def add_
+    def add_paginated_grid_widget(self, part_model, delete=False, edit=True, export=True,
+                                  new_instance=False, parent_part_instance=None, max_height=None, custom_title=False,
+                                  emphasize_edit=False, emphasize_new_instance=True, sort_property=None,
+                                  sort_direction=SortTable.ASCENDING, page_size=25, collapse_filters=False):
+        """
+        Add an KE-chain superGrid (e.g. basic table) widget to the customization.
+
+        The widget will be saved to KE-chain.
+
+        :param emphasize_new_instance:
+        :type emphasize_new_instance: bool
+        :param emphasize_edit:
+        :type emphasize_edit: bool
+        :param new_instance:
+        :type new_instance: bool
+        :param incomplete_rows:
+        :type incomplete_rows: bool
+        :param export:
+        :type export: bool
+        :param edit:
+        :type edit: bool
+        :param delete:
+        :type delete: bool
+        :param part_model: The part model based on which all instances will be shown.
+        :type parent_part_instance: :class:`Part`
+        :param parent_part_instance: The parent part instance for which the instances will be shown or to which new
+        instances will be added.
+        :type parent_part_instance: :class:`Part`
+        :param max_height: The max height of the supergrid in pixels
+        :type max_height: int or None
+        :param custom_title: A custom title for the supergrid
+                 - False (default): Part instance name
+                 - String value: Custom title
+                 - None: No title
+        :type custom_title: basestring or None
+        :param sort_property: The property model on which the part instances are being sorted on
+        :type sort_property: :class:`Property`
+        :param sort_direction: The direction on which the values of property instances are being sorted on
+        :type sort_direction: basestring (see enums)
+                  - ASC (default): Sort in ascending order
+                  - DESC: Sort in descending order
+        """
+        # Assertions
+        if not parent_part_instance and new_instance:
+            raise IllegalArgumentError("If you want to allow the creation of new part instances, you must specify a "
+                                       "parent_part_instance")
+        if sort_property and sort_property.part.id != part_model.id:
+            raise IllegalArgumentError("If you want to sort on a property, then sort_property must be located under "
+                                       "part_model")
+
+        # Add parent to filter if added.
+        if parent_part_instance:
+            parent_instance_id = str(parent_part_instance.id)
+        else:
+            parent_instance_id = None
+
+        # Add custom title
+        if custom_title is False:
+            show_title_value = "Default"
+            title = part_model.name
+        elif custom_title is None:
+            show_title_value = "No title"
+            title = ' '
+        else:
+            show_title_value = "Custom Title"
+            title = str(custom_title)
+
+        # Set the collapse filters value:
+        if collapse_filters:
+            collapse_filters_value = "Collapsed"
+        else:
+            collapse_filters_value = "Expanded"
+
+        # Declare paginated grid config
+        config = {
+            "xtype": ComponentXType.FILTEREDGRID,
+            "filter": {
+                "activity_id": str(self.activity.id),
+            },
+            "grid": {
+                "viewModel": {
+                    "data": {
+                        "actions": {
+                            "delete": delete,
+                            "edit": edit,
+                            "export": export,
+                            "newInstance": new_instance
+                        },
+                        "sorters": [{
+                            "direction": sort_direction,
+                            "property": sort_property.id
+                        }] if sort_property else [],
+                        "ui": {
+                            "newInstance": "primary-action" if emphasize_new_instance else "default-toolbar",
+                            "edit": "primary-action" if emphasize_edit else "default-toolbar"
+                        },
+                        "pageSize": page_size
+                    }
+                },
+                "xtype": ComponentXType.PAGINATEDSUPERGRID,
+                "title": title,
+                "showTitleValue": show_title_value,
+            },
+            "maxHeight": max_height if max_height else None,
+            "parentInstanceId": parent_instance_id,
+            "partModelId": part_model.id,
+            "collapseFilters": collapse_filters
+        }
+
+        # Declare the meta info for the paginatedgrid
+        meta = {
+            "parentInstanceId": parent_instance_id,
+            "editButtonUi": "primary-action" if emphasize_edit else "default-toolbar",
+            "editButtonVisible": edit,
+            "customHeight": max_height if max_height else 500,
+            "primaryAddUiValue": emphasize_new_instance,
+            "activityId": str(self.activity.id),
+            "customTitle": title,
+            "primaryEditUiValue": emphasize_edit,
+            "downloadButtonVisible": export,
+            "addButtonUi": "primary-action" if emphasize_new_instance else "default-toolbar",
+            "deleteButtonVisible": delete,
+            "addButtonVisible": new_instance,
+            "showTitleValue": show_title_value,
+            "partModelId": str(part_model.id),
+            "showHeightValue": "Custom max height" if max_height else "Auto",
+            "sortDirection": sort_direction,
+            "sortedColumn": sort_property.id if sort_property else None,
+            "collapseFilters": collapse_filters,
+            "showCollapseFiltersValue": collapse_filters_value,
+            "customPageSize": page_size
+        }
+
+        self._add_widget(dict(config=config, meta=meta, name='filteredGridWidget'))

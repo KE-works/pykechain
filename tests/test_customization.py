@@ -175,8 +175,6 @@ class TestExtCustomization(TestBetamax):
         """
         Test if a Super Grid Widget can be added
         """
-        self.customization.delete_all_widgets()
-
         part_model = [model for model in self.models if model.name == 'Spoke'][0]
         sort_property = part_model.property(name='Length')
         parent_instance = [instance for instance in self.instances if instance.name == 'Front Wheel'][0]
@@ -206,6 +204,32 @@ class TestExtCustomization(TestBetamax):
         # tearDown
         self.customization.delete_all_widgets()
 
-    # def test_add_paginated_grid(self):
-    #     widgets = self.customization.widgets()
-    #     print()
+    def test_add_paginated_grid(self):
+        part_model = [model for model in self.models if model.name == 'Spoke'][0]
+        sort_property = part_model.property(name='Length')
+        parent_instance = [instance for instance in self.instances if instance.name == 'Front Wheel'][0]
+        wrong_sort_property = parent_instance.model().property(name='Diameter')
+        self.customization.add_paginated_grid_widget(part_model=part_model, parent_part_instance=parent_instance,
+                                                     max_height=800, custom_title='Grid has title, height and parent',
+                                                     new_instance=True, emphasize_new_instance=True, emphasize_edit=True)
+        self.customization.add_paginated_grid_widget(part_model=part_model, custom_title=None, delete=True, edit=False,
+                                                     export=False, sort_property=sort_property, page_size=2)
+        self.customization.add_paginated_grid_widget(part_model=part_model, sort_property=sort_property,
+                                                     sort_direction=SortTable.DESCENDING, collapse_filters=True)
+        with self.assertRaises(IllegalArgumentError):
+            self.customization.add_paginated_grid_widget(part_model=part_model, new_instance=True)
+        with self.assertRaises(IllegalArgumentError):
+            self.customization.add_paginated_grid_widget(part_model=part_model, sort_property=wrong_sort_property)
+
+        widgets = self.customization.widgets()
+        self.assertEqual(len(widgets), 3, "The customization should have 3 super grid widgets")
+        self.assertTrue(widgets[0]['name'] == "filteredGridWidget")
+        self.assertTrue(widgets[0]['config']['grid']['title'] == 'Grid has title, height and parent')
+        self.assertTrue(widgets[0]['config']['maxHeight'] == 800)
+
+        self.assertTrue(widgets[1]['config']['grid']['title'] == ' ')
+
+        self.assertTrue(widgets[2]['config']['grid']['title'] == part_model.name)
+
+        # tearDown
+        self.customization.delete_all_widgets()
