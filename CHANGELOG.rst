@@ -3,8 +3,10 @@ Change Log
 
 pykechain changelog
 
-1.xx.0 (UNRELEASED)
+1.16.0 (14MAR18)
 ------------------
+This is the last release in preparation for the WIM2 release of KE-chain and consequently pykechain. In the next version of pykechain, some backward incompatible changes will happen. A migration path is provided as well.
+
  * Implemented new functions for adding the following widgets: `Basic table`, `Paginated table`, `JSON`, `Script`, `Notebook`, `Text`, `Attachment viewer` and `Navigation Bar`. (#280)
  * Added two new enums (`SortTable` and `NavigationBarAlignment`) which can be used when adding new widgets. (#280)
  * Added additional enums `WidgetNames` for the proper names of the widgets in the customisation dialog in KE-chain (#280)
