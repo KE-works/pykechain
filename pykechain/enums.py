@@ -147,6 +147,17 @@ class ComponentXType(Enum):
     JSONTREE = "jsonTree"
 
 
+class WidgetNames(Enum):
+    """The various Names of the Widget that can be configured."""
+    SUPERGRIDWIDGET = 'superGridWidget'
+    PROPERTYGRIDWIDGET = 'propertyGridWidget'
+    HTMLWIDGET = 'htmlWidget'
+    FILTEREDGRIDWIDGET = 'filteredGridWidget'
+    SERVICEWIDGET = 'serviceWidget'
+    NOTEBOOKWIDGET = 'notebookWidget'
+    ATTACHMENTVIEWERWIDGET = 'attachmentViewerWidget'
+    TASKNAVIGATIONBARWIDGET = 'taskNavigationBarWidget'
+
 class ActivityStatus(Enum):
     """The various Activity statuses that are accepted by KE-chain.
 

@@ -2,12 +2,12 @@ import requests
 from jsonschema import validate
 from six import text_type
 
-from pykechain.enums import ComponentXType, Category, SortTable, PropertyType, NavigationBarAlignment
+from pykechain.enums import ComponentXType, Category, SortTable, PropertyType, NavigationBarAlignment, WidgetNames
 from pykechain.exceptions import APIError, IllegalArgumentError
-from pykechain.models.service import Service
+from pykechain.models.activity import Activity
 from pykechain.models.part import Part
 from pykechain.models.property import Property
-from pykechain.models.activity import Activity
+from pykechain.models.service import Service
 from pykechain.utils import is_uuid
 
 uuid_pattern = r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
@@ -182,19 +182,20 @@ class ExtCustomization(CustomizationBase):
 
         The widget will be saved to KE-chain.
 
-        :param emphasize_new_instance:
+        :param emphasize_new_instance: Emphasize the New instance button (default True)
         :type emphasize_new_instance: bool
-        :param emphasize_edit:
+        :param emphasize_edit: Emphasize the Edit button (default False)
         :type emphasize_edit: bool
-        :param new_instance:
+        :param new_instance: Show or hide the New instance button (default False). You need to provide a
+                             `parent_part_instance` in order for this to work.
         :type new_instance: bool
-        :param incomplete_rows:
+        :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
         :type incomplete_rows: bool
-        :param export:
+        :param export: Show or hide the Export Grid button (default True)
         :type export: bool
-        :param edit:
+        :param edit: Show or hide the Edit button (default True)
         :type edit: bool
-        :param delete:
+        :param delete: Show or hide the Delete button (default False)
         :type delete: bool
         :param part_model: The part model based on which all instances will be shown.
         :type parent_part_instance: :class:`Part` or UUID
@@ -207,13 +208,14 @@ class ExtCustomization(CustomizationBase):
                  - False (default): Part instance name
                  - String value: Custom title
                  - None: No title
-        :type custom_title: basestring or None
+        :type custom_title: bool or basestring or None
         :param sort_property: The property model on which the part instances are being sorted on
         :type sort_property: :class:`Property` or UUID
-        :param sort_direction: The direction on which the values of property instances are being sorted on
-        :type sort_direction: basestring (see enums)
-                  - ASC (default): Sort in ascending order
-                  - DESC: Sort in descending order
+        :param sort_direction: The direction on which the values of property instances are being sorted on:
+                               - ASC (default): Sort in ascending order
+                               - DESC: Sort in descending order
+        :type sort_direction: basestring (see :class:`enums.SortTable`)
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
         # Check whether the part_model is uuid type or class `Part`
         if isinstance(part_model, Part):
@@ -322,13 +324,13 @@ class ExtCustomization(CustomizationBase):
             "partModelId": part_model_id,
             "editButtonVisible": edit,
             "showHeightValue": "Custom max height" if max_height else "Auto",
-            'sortDirection': sort_direction,
-            'sortedColumn': sort_property_id if sort_property_id else None
+            "sortDirection": sort_direction,
+            "sortedColumn": sort_property_id if sort_property_id else None
         }
 
-        self._add_widget(dict(config=config, meta=meta, name='superGridWidget'))
+        self._add_widget(dict(config=config, meta=meta, name=WidgetNames.SUPERGRIDWIDGET))
 
-    def add_property_grid_widget(self, part_instance, max_height=None, custom_title=None):
+    def add_property_grid_widget(self, part_instance, max_height=None, custom_title=False):
         """
         Add a KE-chain Property Grid widget to the customization.
 
@@ -339,10 +341,11 @@ class ExtCustomization(CustomizationBase):
         :param max_height: The max height of the property grid in pixels
         :type max_height: int or None
         :param custom_title: A custom title for the property grid
-                 - None (default): Part instance name
+                 - False (default): Part instance name
                  - String value: Custom title
-                 - False: No title
-        :type custom_title: basestring or None
+                 - None: No title
+        :type custom_title: bool or basestring or None
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
         # Check whether the parent_part_instance is uuid type or class `Part`
         if isinstance(part_instance, Part):
@@ -366,15 +369,17 @@ class ExtCustomization(CustomizationBase):
         # Add max height and custom title
         if max_height:
             config['maxHeight'] = max_height
-        if custom_title is None:
+
+        if custom_title is False:
             show_title_value = "Default"
             title = part_instance.name
-        elif custom_title:
+        elif custom_title is None:
+            show_title_value = "No title"
+            title = str()
+        else:
             show_title_value = "Custom Title"
             title = str(custom_title)
-        else:
-            show_title_value = "No title"
-            title = None
+
         config["title"] = title
 
         # Declare the meta info for the property grid
@@ -387,7 +392,7 @@ class ExtCustomization(CustomizationBase):
             "showTitleValue": show_title_value
         }
 
-        self._add_widget(dict(config=config, meta=meta, name='propertyGridWidget'))
+        self._add_widget(dict(config=config, meta=meta, name=WidgetNames.PROPERTYGRIDWIDGET))
 
     def add_text_widget(self, text=None, custom_title=None, collapsible=False):
         """
@@ -403,6 +408,7 @@ class ExtCustomization(CustomizationBase):
         :type custom_title: basestring or None
         :param collapsible: A boolean to decide whether the panel is collapsible or not
         :type collapsible: bool
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
         # Declare text widget config
         config = {
@@ -432,7 +438,7 @@ class ExtCustomization(CustomizationBase):
             "showTitleValue": show_title_value
         }
 
-        self._add_widget(dict(config=config, meta=meta, name='htmlWidget'))
+        self._add_widget(dict(config=config, meta=meta, name=WidgetNames.HTMLWIDGET))
 
     def add_paginated_grid_widget(self, part_model, delete=False, edit=True, export=True,
                                   new_instance=False, parent_part_instance=None, max_height=None, custom_title=False,
@@ -443,40 +449,44 @@ class ExtCustomization(CustomizationBase):
 
         The widget will be saved to KE-chain.
 
-        :param emphasize_new_instance:
+        :param emphasize_new_instance: Emphasize the New instance button (default True)
         :type emphasize_new_instance: bool
-        :param emphasize_edit:
+        :param emphasize_edit: Emphasize the Edit button (default False)
         :type emphasize_edit: bool
-        :param new_instance:
+        :param new_instance: Show or hide the New instance button (default False). You need to provide a
+                             `parent_part_instance` in order for this to work.
         :type new_instance: bool
-        :param export:
+        :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
+        :type incomplete_rows: bool
+        :param export: Show or hide the Export Grid button (default True)
         :type export: bool
-        :param edit:
+        :param edit: Show or hide the Edit button (default True)
         :type edit: bool
-        :param delete:
+        :param delete: Show or hide the Delete button (default False)
         :type delete: bool
         :param page_size: Number of parts that will be shown per page in the grid.
         :type page_size: int
-        :param collapse_filters:
+        :param collapse_filters: Hide or show the filters pane (default False)
         :type collapse_filters: bool
         :param part_model: The part model based on which all instances will be shown.
         :type parent_part_instance: :class:`Part` or UUID
         :param parent_part_instance: The parent part instance for which the instances will be shown or to which new
         instances will be added.
         :type parent_part_instance: :class:`Part` or UUID
-        :param max_height: The max height of the paginatedGrid in pixels
+        :param max_height: The max height of the paginated grid in pixels
         :type max_height: int or None
-        :param custom_title: A custom title for the paginatedGrid
+        :param custom_title: A custom title for the paginated grid
                  - False (default): Part instance name
                  - String value: Custom title
                  - None: No title
-        :type custom_title: basestring or None
+        :type custom_title: bool or basestring or None
         :param sort_property: The property model on which the part instances are being sorted on
         :type sort_property: :class:`Property` or UUID
-        :param sort_direction: The direction on which the values of property instances are being sorted on
-        :type sort_direction: basestring (see enums)
-                  - ASC (default): Sort in ascending order
-                  - DESC: Sort in descending order
+        :param sort_direction: The direction on which the values of property instances are being sorted on:
+                               - ASC (default): Sort in ascending order
+                               - DESC: Sort in descending order
+        :type sort_direction: basestring (see :class:`enums.SortTable`)
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
         # Check whether the part_model is uuid type or class `Part`
         if isinstance(part_model, Part):
@@ -597,7 +607,7 @@ class ExtCustomization(CustomizationBase):
             "customPageSize": page_size
         }
 
-        self._add_widget(dict(config=config, meta=meta, name='filteredGridWidget'))
+        self._add_widget(dict(config=config, meta=meta, name=WidgetNames.FILTEREDGRIDWIDGET))
 
     def add_script_widget(self, script, custom_title=False, custom_button_text=False, emphasize_run=True):
         """
@@ -611,15 +621,15 @@ class ExtCustomization(CustomizationBase):
                  - False (default): Script name
                  - String value: Custom title
                  - None: No title
-        :type emphasize_run: basestring or None
-        :param custom_button_text: basestring or None
-                :param custom_title: A custom text for the button linked to the script
+        :type custom_title: bool or basestring or None
+        :param custom_button_text: A custom text for the button linked to the script
                  - False (default): Script name
                  - String value: Custom title
                  - None: No title
-        :type custom_button_text: basestring or None
-        :param emphasize_run:
+        :type custom_button_text: bool or basestring or None
+        :param emphasize_run: Emphasize the run button (default True)
         :type emphasize_run: bool
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
         # Check whether the script is uuid type or class `Service`
         if isinstance(script, Service):
@@ -662,7 +672,7 @@ class ExtCustomization(CustomizationBase):
                 }
             },
             'title': title,
-            'xtype': 'executeService',
+            'xtype': ComponentXType.EXECUTESERVICE,
             'customButtonText': button_text
         }
 
@@ -676,7 +686,7 @@ class ExtCustomization(CustomizationBase):
             'showTitleValue': show_title_value
         }
 
-        self._add_widget(dict(config=config, meta=meta, name='serviceWidget'))
+        self._add_widget(dict(config=config, meta=meta, name=WidgetNames.SERVICEWIDGET))
 
     def add_notebook_widget(self, notebook, custom_title=False, height=None):
         """
@@ -690,8 +700,10 @@ class ExtCustomization(CustomizationBase):
                  - False (default): Notebook name
                  - String value: Custom title
                  - None: No title
+        :type custom_title: bool or basestring or None
         :param height: The height of the Notebook in pixels
         :type height: int or None
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
         # Check whether the script is uuid type or class `Service`
         if isinstance(notebook, Service):
@@ -719,7 +731,7 @@ class ExtCustomization(CustomizationBase):
             'title': title,
             'showTitleValue': show_title_value,
             'height': height if height else 800,
-            'xtype': 'notebookPanel',
+            'xtype': ComponentXType.NOTEBOOKPANEL,
             'serviceId': notebook_id
         }
 
@@ -731,7 +743,7 @@ class ExtCustomization(CustomizationBase):
             'serviceId': notebook_id
         }
 
-        self._add_widget(dict(config=config, meta=meta, name='notebookWidget'))
+        self._add_widget(dict(config=config, meta=meta, name=WidgetNames.NOTEBOOKWIDGET))
 
     def add_attachment_viewer_widget(self, attachment_property, custom_title=False, height=None):
         """
@@ -745,8 +757,10 @@ class ExtCustomization(CustomizationBase):
                  - False (default): Notebook name
                  - String value: Custom title
                  - None: No title
+        :type custom_title: bool or basestring or None
         :param height: The height of the Notebook in pixels
         :type height: int or None
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
         # Check whether the attachment property is uuid type or class `Property`
         if isinstance(attachment_property, Property):
@@ -785,7 +799,7 @@ class ExtCustomization(CustomizationBase):
         config = {
             'propertyId': attachment_property_id,
             'showTitleValue': show_title_value,
-            'xtype': 'propertyAttachmentViewer',
+            'xtype': ComponentXType.PROPERTYATTACHMENTPREVIEWER,
             'title': title,
             'filter': {
                 'activity_id': str(self.activity.id)
@@ -802,7 +816,7 @@ class ExtCustomization(CustomizationBase):
             'customTitle': title
         }
 
-        self._add_widget(dict(config=config, meta=meta, name='attachmentViewerWidget'))
+        self._add_widget(dict(config=config, meta=meta, name=WidgetNames.ATTACHMENTVIEWERWIDGET))
 
     def add_navigation_bar_widget(self, activities, alignment=NavigationBarAlignment.CENTER):
         """
@@ -818,9 +832,11 @@ class ExtCustomization(CustomizationBase):
               - activityId: class `Activity` or UUID
         :type activities: list
         :param alignment: The alignment of the buttons inside navigation bar
-        :type alignment: basestring (see enums)
-              - center (default): Center aligned
-              - start: left aligned
+                          - center (default): Center aligned
+                          - start: left aligned
+        :type alignment: basestring (see :class:`enums.NavigationBarAlignment`)
+
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
         # Loop through the list of activities
         set_of_expected_keys = {'activityId', 'customText', 'emphasize'}
@@ -847,7 +863,7 @@ class ExtCustomization(CustomizationBase):
         # Declare navigation bar widget config
         config = {
             'alignment': alignment,
-            'xtype': 'activityNavigationBar',
+            'xtype': ComponentXType.ACTIVITYNAVIGATIONBAR,
             'filter': {
                 'activity_id': str(self.activity.id)
             },
@@ -865,4 +881,4 @@ class ExtCustomization(CustomizationBase):
             'taskButtons': activities
         }
 
-        self._add_widget(dict(config=config, meta=meta, name='taskNavigationBarWidget'))
+        self._add_widget(dict(config=config, meta=meta, name=WidgetNames.TASKNAVIGATIONBARWIDGET))
