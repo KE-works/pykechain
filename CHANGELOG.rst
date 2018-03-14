@@ -8,6 +8,11 @@ pykechain changelog
 * updated the documentation regarding Property Types. (#293)
 * fixed the enums so they now work correctly for each PropertyType. (#293)
 * wrote a test that tests each property type (we didn't have this before). (#293)
+* implemented new functions for adding the following widgets: Basic table, Paginated table, JSON, Script, Notebook,
+Text, Attachment viewer and Navigation Bar. (#296)
+* added two new enums (SortTable and NavigationBarAlignment) which can be used when adding new widgets. (#296)
+* added a new function called `Client.property()`, which allows the user to retrieve one property. (#296)
+* improved the overall test coverage for `ExtCustomization` class to 100%.
 
 1.15.4 (15FEB18)
 ----------------
