@@ -38,7 +38,7 @@ class Service(Base):
         url = self._client._build_url('service_execute', service_id=self.id)
         response = self._client._request('GET', url, params=dict(interactive=interactive, format='json'))
 
-        if response.status_code != requests.codes.accepted:
+        if response.status_code != requests.codes.accepted:  # pragma: no cover
             raise APIError("Could not execute service '{}': {}".format(self, (response.status_code, response.json())))
 
         data = response.json()
@@ -121,7 +121,7 @@ class Service(Base):
         response = self._client._request('POST', url,
                                          files={'attachment': (os.path.basename(pkg_path), open(pkg_path, 'rb'))})
 
-        if response.status_code != requests.codes.accepted:
+        if response.status_code != requests.codes.accepted:  # pragma: no cover
             raise APIError("Could not upload service script file (or kecpkg) ({})".format(response))
 
     def save_as(self, target_dir=None):
@@ -142,7 +142,7 @@ class Service(Base):
 
         url = self._client._build_url('service_download', service_id=self.id)
         response = self._client._request('GET', url)
-        if response.status_code != requests.codes.ok:
+        if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not download service script file ({})".format(response))
 
         with open(full_path, 'w+b') as f:
@@ -155,7 +155,7 @@ class Service(Base):
 
         .. versionadded:: 1.13
 
-        :param kwargs: (optional) additional search keyword arguments to limit the search even futher.
+        :param kwargs: (optional) additional search keyword arguments to limit the search even further.
         :type kwargs: dict
         :return: list of ServiceExecutions associated to the current service.
         """
@@ -186,13 +186,13 @@ class ServiceExecution(Base):
 
         .. versionadded:: 1.13
 
-        :return: None if the termination request was succesfull
+        :return: None if the termination request was successful
         :raises APIError: When the service execution could not be terminated.
         """
         url = self._client._build_url('service_execution_terminate', service_execution_id=self.id)
         response = self._client._request('GET', url, params=dict(format='json'))
 
-        if response.status_code != requests.codes.accepted:
+        if response.status_code != requests.codes.accepted:  # pragma: no cover
             raise APIError("Could not execute service '{}': {}".format(self, response))
 
     def get_log(self, target_dir=None, log_filename='log.txt'):
@@ -212,7 +212,7 @@ class ServiceExecution(Base):
 
         url = self._client._build_url('service_execution_log', service_execution_id=self.id)
         response = self._client._request('GET', url)
-        if response.status_code != requests.codes.ok:
+        if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not download service execution log")
 
         with open(full_path, 'w+b') as f:

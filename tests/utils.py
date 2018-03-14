@@ -1,8 +1,11 @@
+from contextlib import contextmanager
+
+import os
+import six
 from envparse import Env
 
 # reads a local .env file with the TEST_TOKEN=<user token>
 # ensure that this file is not commited to github (never ever)
-
 env = Env()
 env.read_envfile()
 
@@ -15,3 +18,26 @@ TEST_RECORD_CASSETTES = env.bool('TEST_RECORD_CASSETTES', default=True)
 
 # flags for altering testing behaviour (to skip test) for major API changes requiring different tests.
 TEST_FLAG_IS_WIM2 = env.bool('TEST_FLAG_IS_WIM2', default=False)
+
+
+@contextmanager
+def temp_chdir(cwd=None):
+    if six.PY3:
+        from tempfile import TemporaryDirectory
+        with TemporaryDirectory() as tempwd:
+            origin = cwd or os.getcwd()
+            os.chdir(tempwd)
+
+            try:
+                yield tempwd if os.path.exists(tempwd) else ''
+            finally:
+                os.chdir(origin)
+    else:
+        from tempfile import mkdtemp
+        tempwd = mkdtemp()
+        origin = cwd or os.getcwd()
+        os.chdir(tempwd)
+        try:
+            yield tempwd if os.path.exists(tempwd) else ''
+        finally:
+            os.chdir(origin)

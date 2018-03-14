@@ -180,7 +180,7 @@ class Client(object):
 
     def _retrieve_users(self):
         """
-        Retrieve user objects of the entire KE-chain world.
+        Retrieve user objects of the entire administration.
 
         :return: list of dictionary with users information
         :rtype: list(dict)
@@ -289,7 +289,7 @@ class Client(object):
         :return: a new object
         :raises NotFoundError: if original object is not found or deleted in the mean time
         """
-        if not obj._json_data.get('url'):
+        if not obj._json_data.get('url'): # pragma: no cover
             raise NotFoundError("Could not reload object, there is no url for object '{}' configured".format(obj))
 
         response = self._request('GET', obj._json_data.get('url'), params=extra_params)
@@ -394,7 +394,6 @@ class Client(object):
         }
 
         # update the fields query params
-
         # for 'kechain.core.wim >= 2.0.0' add additional API params
         if self.match_app_version(label='wim', version='>=2.0.0', default=False):
             request_params.update(API_EXTRA_PARAMS['activity'])
@@ -590,6 +589,29 @@ class Client(object):
 
         return _parts[0]
 
+    def property(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Property
+        """Retrieve single KE-chain Property.
+
+        Uses the same interface as the :func:`properties` method but returns only a single pykechain :class:
+        `models.Property` instance.
+
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
+        :return: a single :class:`models.Property`
+        :raises NotFoundError: When no `Property` is found
+        :raises MultipleFoundError: When more than a single `Property` is found
+        """
+        _properties = self.properties(*args, **kwargs)
+
+        if len(_properties) == 0:
+            raise NotFoundError("No property fits criteria")
+        if len(_properties) != 1:
+            raise MultipleFoundError("Multiple properties fit criteria")
+
+        return _properties[0]
+
     def properties(self, name=None, pk=None, category=Category.INSTANCE, **kwargs):
         # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Property]
         """Retrieve properties.
@@ -719,7 +741,7 @@ class Client(object):
         r = self._request('GET', self._build_url('service_executions'), params=request_params)
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve properties")
+            raise NotFoundError("Could not retrieve service executions")
 
         data = r.json()
         return [ServiceExecution(service_exeuction, client=self) for service_exeuction in data['results']]
@@ -749,9 +771,9 @@ class Client(object):
         _service_executions = self.service_executions(name=name, pk=pk, scope=scope, service=service, **kwargs)
 
         if len(_service_executions) == 0:
-            raise NotFoundError("No service fits criteria")
+            raise NotFoundError("No service execution fits criteria")
         if len(_service_executions) != 1:
-            raise MultipleFoundError("Multiple services fit criteria")
+            raise MultipleFoundError("Multiple service executions fit criteria")
 
         return _service_executions[0]
 
@@ -872,6 +894,7 @@ class Client(object):
         :param activity_class: type of activity: UserTask (default) or Subprocess
         :type activity_class: basestring
         :return: the created :class:`models.Activity`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: When the object could not be created
         """
         if self.match_app_version(label='wim', version='>=2.0.0', default=False):
@@ -958,7 +981,7 @@ class Client(object):
                                  params={"select_action": action},
                                  data=data)
 
-        if response.status_code != requests.codes.created:  # pragma: no cover
+        if response.status_code != requests.codes.created:
             raise APIError("Could not create part, {}: {}".format(str(response), response.content))
 
         return Part(response.json()['results'][0], client=self)
@@ -980,12 +1003,13 @@ class Client(object):
         :param kwargs: (optional) additional keyword=value arguments
         :return: Part (category = instance)
         :return: :class:`models.Part` with category `INSTANCE`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
         if parent.category != Category.INSTANCE:
-            raise APIError("The parent should be an category 'INSTANCE'")
+            raise IllegalArgumentError("The parent should be an category 'INSTANCE'")
         if model.category != Category.MODEL:
-            raise APIError("The models should be of category 'MODEL'")
+            raise IllegalArgumentError("The models should be of category 'MODEL'")
 
         if not name:
             name = model.name
@@ -1017,10 +1041,11 @@ class Client(object):
         :param kwargs: (optional) additional keyword=value arguments
         :type kwargs: dict
         :return: :class:`models.Part` with category `MODEL`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
         if parent.category != Category.MODEL:
-            raise APIError("The parent should be a model")
+            raise IllegalArgumentError("The parent should be of category 'MODEL'")
 
         data = {
             "name": name,
@@ -1034,7 +1059,7 @@ class Client(object):
         """Add this model as a proxy to another parent model.
 
         This will add a model as a proxy model to another parent model. It ensure that it will copy the
-        whole subassembly to the 'parent' model.
+        whole sub-assembly to the 'parent' model.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
         additional keyword=value argument to this method. This will improve performance of the backend
@@ -1052,6 +1077,7 @@ class Client(object):
         :param kwargs: (optional) additional keyword=value arguments
         :type kwargs: dict
         :return: the new proxy :class:`models.Part` with category `MODEL`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
         if model.category != Category.MODEL:
@@ -1083,6 +1109,7 @@ class Client(object):
         :param default_value: default value used for part instances when creating a model.
         :type default_value: any
         :return: a :class:`models.Property` with category `MODEL`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Property` model could not be created
         """
         if model.category != Category.MODEL:
@@ -1092,7 +1119,7 @@ class Client(object):
             "name": name,
             "part": model.id,
             "description": description,
-            "property_type": property_type.upper() + '_VALUE',
+            "property_type": property_type.upper(),
             "value": default_value
         }
 
@@ -1137,6 +1164,7 @@ class Client(object):
         :param pkg_path: (optional) full path name to the `kecpkg` (or python script) to upload
         :type pkg_path: basestring or None
         :return: the created :class:`models.Service`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: In case of failure of the creation or failure to upload the pkg_path
         :raises OSError: In case of failure to locate the `pkg_path`
         """
@@ -1159,7 +1187,7 @@ class Client(object):
         response = self._request('POST', self._build_url('services'),
                                  data=data)
 
-        if response.status_code != requests.codes.created:
+        if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create service ({})".format((response, response.json())))
 
         service = Service(response.json().get('results')[0], client=self)

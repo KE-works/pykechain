@@ -11,6 +11,27 @@ pykechain changelog
  * RC4: project.activity now returns 1 activity
  * RC5: added configure method to the Activity2 object. Added additional Property=MODEL checks
 
+1.16.0 (14MAR18)
+------------------
+This is the last release in preparation for the WIM2 release of KE-chain and consequently pykechain. In the next version of pykechain, some backward incompatible changes will happen. A migration path is provided as well.
+
+ * Implemented new functions for adding the following widgets: `Basic table`, `Paginated table`, `JSON`, `Script`, `Notebook`, `Text`, `Attachment viewer` and `Navigation Bar`. (#280)
+ * Added two new enums (`SortTable` and `NavigationBarAlignment`) which can be used when adding new widgets. (#280)
+ * Added additional enums `WidgetNames` for the proper names of the widgets in the customisation dialog in KE-chain (#280)
+ * Updated the documentation regarding Property Types. (#280)
+ * Fixed the enums so they now work correctly for each `PropertyType`. (#280)
+ * Wrote a test that tests each property type (we didn't have this before). This will increase the test coverage to ~95% for KE-chain. (#280)
+ * Added a new function called `Client.property()`, which allows the user to retrieve one property. (#296)
+ * Improved the overall test coverage for `ExtCustomization` class to 100%.
+ * increased the coverage of `MultiReference` property tests to 100%. (#296)
+ * increased the coverage of `SelectListProperty` tests to 100%. (#296)
+ * setting the value of a `SelectListProperty` instance to None empties it.
+ * increased the coverage of `Scope` tests to 100%. (#296)
+ * increased the coverage of `Client` tests to 99%. (#296)
+ * increased the coverage of `Service` tests to 90%. (#296)
+ * Updated dependent versions for development: betamax (0.8.1), twine (1.10.0), matplotlib (2.2.0), pytest (3.4.2), mypy (0.570), sphinx (1.7.1)
+
+
 1.15.4 (15FEB18)
 ----------------
  * Fixed an issues where the `MultiReference` property did not provide the correct choices. Also fixed a bug where the setting of the value is now performed more robust. (#282)
