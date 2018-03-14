@@ -62,34 +62,34 @@ class Classification(Enum):
 class PropertyType(Enum):
     """The various property types that are accepted by KE-chain.
 
-    :cvar FLOAT_VALUE: floating point number property (with digits)
-    :cvar INT_VALUE: integer property (whole number)
-    :cvar TEXT_VALUE: text property (long text, may span multiple lines)
-    :cvar LINK_VALUE: url property
-    :cvar REFERENCE_VALUE: reference property, a UUID value referring to other parts
-    :cvar DATETIME_VALUE: a datetime value property
-    :cvar BOOLEAN_VALUE: a boolean value property (True/False)
     :cvar CHAR_VALUE: a charfield property (single line text)
+    :cvar TEXT_VALUE: text property (long text, may span multiple lines)
+    :cvar BOOLEAN_VALUE: a boolean value property (True/False)
+    :cvar INT_VALUE: integer property (whole number)
+    :cvar FLOAT_VALUE: floating point number property (with digits)
+    :cvar DATETIME_VALUE: a datetime value property
     :cvar ATTACHMENT_VALUE: an attachment property
+    :cvar LINK_VALUE: url property
+    :cvar REFERENCE_VALUE: a reference property, a UUID value referring to other part model
 
     .. versionadded:: 1.14
 
     :cvar SINGLE_SELECT_VALUE: single select list property (choose from a list)
-    :cvar REFERENCES_VALUE: a multi reference property, a UUID value referring to other parts
+    :cvar REFERENCES_VALUE: a multi reference property, a list of UUID values referring to other part models
 
     """
 
-    FLOAT_VALUE = "FLOAT_VALUE"
-    INT_VALUE = "INT_VALUE"
+    CHAR_VALUE = "CHAR_VALUE"
     TEXT_VALUE = "TEXT_VALUE"
+    BOOLEAN_VALUE = "BOOLEAN_VALUE"
+    INT_VALUE = "INT_VALUE"
+    FLOAT_VALUE = "FLOAT_VALUE"
+    DATETIME_VALUE = "DATETIME_VALUE"
+    ATTACHMENT_VALUE = "ATTACHMENT_VALUE"
     LINK_VALUE = "LINK_VALUE"
     SINGLE_SELECT_VALUE = 'SINGLE_SELECT_VALUE'
-    REFERENCE_VALUE = "REFERENCE_VALUE"
+    REFERENCE_VALUE = 'REFERENCE_VALUE'
     REFERENCES_VALUE = "REFERENCES_VALUE"
-    DATETIME_VALUE = "DATETIME_VALUE"
-    BOOLEAN_VALUE = "BOOLEAN_VALUE"
-    CHAR_VALUE = "CHAR_VALUE"
-    ATTACHMENT_VALUE = "ATTACHMENT_VALUE"
 
 
 class ActivityType(Enum):
