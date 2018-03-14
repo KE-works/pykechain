@@ -95,14 +95,64 @@ class PropertyType(Enum):
 class ActivityType(Enum):
     """The various Activity types that are accepted by KE-chain.
 
+    .. versionadded:: 2.0
+
+    :cvar TASK: a normal task
+    :cvar PROCESS: a subprocess (container) containing other tasks
+
+    For WIM version 1:
+
     :cvar USERTASK: a normal usertask
     :cvar SUBPROCESS: a subprocess (container) containing other tasks
     :cvar SERVICETASK: a service taks (this concept is only availabe in RND KE-chain and will be deprecated)
     """
 
+    # WIM2:
+    PROCESS = 'PROCESS'
+    TASK = 'TASK'
+
+    # WIM1:
     USERTASK = "UserTask"
     SERVICETASK = "ServiceTask"  # RND code only
     SUBPROCESS = "Subprocess"
+
+
+WIMCompatibleActivityTypes = {
+    # backwards pykechain script compatible with wim2
+    # from WIM1 to WIM2:
+    ActivityType.USERTASK: ActivityType.TASK,
+    ActivityType.SUBPROCESS: ActivityType.PROCESS,
+
+    # forwarde pykechain scripts made for wim2, compatible with wim1
+    # from WIM2 to WIM1:
+    ActivityType.PROCESS: ActivityType.SUBPROCESS,
+    ActivityType.TASK: ActivityType.USERTASK}
+
+
+class ActivityClassification(Enum):
+    """The classification of Activities that are accepted by KE-chain.
+
+    .. versionadded:: 2.0
+
+    :cvar WORKFLOW: Classification of the activity is WORKFLOW
+    :cvar CATALOG: Classification of the activity is CATALOG
+    """
+
+    WORKFLOW = 'WORKFLOW'
+    CATALOG = 'CATALOG'
+
+
+class ActivityRootNames(Enum):
+    """The classification of Activities that are accepted by KE-chain.
+
+    .. versionadded:: 2.0
+
+    :cvar WORKFLOW_ROOT: Root of the activity is WORKFLOW_ROOT
+    :cvar CATALOG_ROOT: Root of the activity is CATALOG_ROOT (below are CATALOG tasks)
+    """
+
+    WORKFLOW_ROOT = 'WORKFLOW_ROOT'
+    CATALOG_ROOT = 'CATALOG_ROOT'
 
 
 class ComponentXType(Enum):

@@ -16,7 +16,11 @@ class Scope(Base):
         super(Scope, self).__init__(json, **kwargs)
 
         self.bucket = json.get('bucket', {})
+
+        # for 'kechain2.core.wim <2.0.0'
         self.process = json.get('process')
+        # for 'kechain2.core.wim >=2.0.0'
+        self.workflow_root = json.get('workflow_root_id')
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Scope '{}' id {}>".format(self.name, self.id[-8:])
@@ -54,21 +58,30 @@ class Scope(Base):
 
         See :class:`pykechain.Client.activities` for available parameters.
         """
-        return self._client.activities(*args, scope=self.id, **kwargs)
+        if self._client.match_app_version(label='wim', version='<2.0.0', default=True):
+            return self._client.activities(*args, scope=self.id, **kwargs)
+        else:
+            return self._client.activities(*args, scope_id=self.id, **kwargs)
 
     def activity(self, *args, **kwargs):
         """Retrieve a single activity belonging to this scope.
 
         See :class:`pykechain.Client.activity` for available parameters.
         """
-        return self._client.activity(*args, scope=self.id, **kwargs)
+        if self._client.match_app_version(label='wim', version='<2.0.0', default=True):
+            return self._client.activity(*args, scope=self.id, **kwargs)
+        else:
+            return self._client.activity(*args, scope_id=self.id, **kwargs)
 
     def create_activity(self, *args, **kwargs):
         """Create a new activity belonging to this scope.
 
         See :class:`pykechain.Client.create_activity` for available parameters.
         """
-        return self._client.create_activity(self.process, *args, **kwargs)
+        if self._client.match_app_version(label='wim', version='<2.0.0', default=True):
+            return self._client.create_activity(self.process, *args, **kwargs)
+        else:
+            return self._client.create_activity(self.workflow_root, *args, **kwargs)
 
     def services(self, *args, **kwargs):
         """Retrieve services belonging to this scope.

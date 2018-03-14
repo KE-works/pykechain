@@ -1,7 +1,6 @@
-from pykechain.enums import Multiplicity, Category
+from pykechain.enums import Multiplicity, Category, Classification
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import Part, PartSet
-from pykechain.utils import is_uuid
 from tests.classes import TestBetamax
 
 
@@ -26,10 +25,9 @@ class TestParts(TestBetamax):
             self.project.part()
 
     def test_retrieve_models(self):
-        project = self.client.scope('Bike Project (pykechain testing)')
-        wheel = project.model('Wheel')
+        wheel = self.project.model('Wheel')
 
-        self.assertTrue(project.parts(model=wheel))
+        self.assertTrue(self.project.parts(model=wheel))
 
     def test_retrieve_model_unknown(self):
         with self.assertRaises(NotFoundError):
@@ -58,10 +56,8 @@ class TestParts(TestBetamax):
             self.client.create_model(name='Multiplicity does not exist', parent=bike_model, multiplicity='TEN')
 
     def test_part_add_delete_part(self):
-        project = self.client.scope('Bike Project (pykechain testing)')
-
-        bike = project.part('Bike')
-        wheel_model = project.model('Wheel')
+        bike = self.project.part('Bike')
+        wheel_model = self.project.model('Wheel')
 
         wheel = bike.add(wheel_model, name='Test Wheel')
         wheel.delete()
@@ -118,7 +114,7 @@ class TestParts(TestBetamax):
         # This test has the purpose of testing of whether APIErrors are raised when illegal operations are
         # performed (e.g. operation that should be performed on part instances but instead are being performed
         # on part models and vice versa)
-        project = self.client.scope('Bike Project (pykechain testing)')
+        project = self.project
 
         bike_model = project.model('Bike')
         bike_instance = project.part('Bike')
@@ -200,21 +196,21 @@ class TestParts(TestBetamax):
 
     def test_retrieve_part_without_parent_id(self):
         # only the root does not have a parent_id
-        ROOT_NODE_ID = 'f521333e-a1ed-4e65-b166-999f91a38cf1'
-        root_node = self.project.part(pk=ROOT_NODE_ID)  # type: Part
+        product_root_node = self.project.part(name='Product container', classification=Classification.PRODUCT)
+        root_node = product_root_node.parent()
         self.assertTrue(hasattr(root_node, 'parent_id'))
         self.assertIsNone(root_node.parent_id)
 
     def test_retrieve_parent_of_part_without_parent_id(self):
         # only the root does not have a parent_id
-        ROOT_NODE_ID = 'f521333e-a1ed-4e65-b166-999f91a38cf1'
-        root_node = self.project.part(pk=ROOT_NODE_ID)  # type: Part
-        parent_of_rootnode = root_node.parent()
-        self.assertIsNone(parent_of_rootnode)
+        product_root_node = self.project.part(name='Product container', classification=Classification.PRODUCT)
+        root_node = product_root_node.parent()
+        parent_of_root_node = root_node.parent()
+        self.assertIsNone(parent_of_root_node)
 
     def test_retrieve_siblings_of_part_without_parent_id(self):
-        ROOT_NODE_ID = 'f521333e-a1ed-4e65-b166-999f91a38cf1'
-        root_node = self.project.part(pk=ROOT_NODE_ID)  # type: Part
+        product_root_node = self.project.part(name='Product container', classification=Classification.PRODUCT)
+        root_node = product_root_node.parent()
         siblings_of_root_node = root_node.siblings()
         self.assertIsInstance(siblings_of_root_node, PartSet)
         self.assertEqual(len(siblings_of_root_node), 0)
@@ -318,16 +314,41 @@ class TestParts(TestBetamax):
         self.assertEqual(front_fork_model.id, front_fork_retrieved_model.id)
 
     def test_retrieve_catalog_model_of_proxy(self):
-        catalog_model = self.project.model('Model')
-        proxy_catalog_model = self.project.model('Proxy based on catalog model')
-        retrieved_catalog_model = proxy_catalog_model.proxy_model()
+        catalog_container = self.project.model('Catalog container')
+        bearing_catalog_model = catalog_container.add_model('Bearing', multiplicity=Multiplicity.ZERO_MANY)
+        wheel_model = self.project.model('Wheel')
 
+        # add proxy model to product Bike > Wheel based on catalog model 'Bearing'
+        bearing_proxy_model = bearing_catalog_model.add_proxy_to(wheel_model, 'Bearing', Multiplicity.ZERO_ONE)
+
+        self.assertTrue(bearing_proxy_model.category, Category.MODEL)
+        self.assertTrue(bearing_proxy_model.parent(), wheel_model)
+
+        # the call to test here
+        re_retrieved_bearing_catalog_model = self.project.model('Bearing', classification=Classification.CATALOG)
+        self.assertEqual(bearing_catalog_model, re_retrieved_bearing_catalog_model)
+
+        # teardown
+        all_bearing_proxies = self.project.parts(name='Bearing', category=Category.MODEL, parent=wheel_model.id)
+        self.assertGreaterEqual(len(all_bearing_proxies), 1)
+        for bearing_proxy in all_bearing_proxies:
+            bearing_proxy.delete()
+
+        all_bearing_catalog_models = self.project.parts(name='Bearing', category=Category.MODEL)
+        self.assertGreaterEqual(len(all_bearing_catalog_models), 1)
+        for bearing_catalog_model in all_bearing_catalog_models:
+            bearing_catalog_model.delete()
+
+        all_bearing_models = self.project.parts(name='Bearing', category=Category.MODEL)
+        self.assertEqual(len(all_bearing_models), 0)
+
+    def test_retrieve_non_existent_proxies_of_a_catalog_model_raises_error(self):
         # Added to improve coverage. Assert whether NotFoundError is raised when proxy_model() method is applied to
         # a part that is not a proxy
+        catalog_model = self.project.model('Model', classification=Classification.CATALOG)
         with self.assertRaises(NotFoundError):
             catalog_model.proxy_model()
 
-        self.assertEqual(catalog_model.id, retrieved_catalog_model.id)
 
     def test_retrieve_proxy_of_instance(self):
         instance = self.project.part('Rear Wheel')
@@ -368,281 +389,3 @@ class TestParts(TestBetamax):
         self.assertTrue(len(siblings_of_frame) >= 1)  # eg. Wheels ...
 
 
-class TestPartUpdate(TestBetamax):
-    # updated in 1.9
-    def test_part_update_with_dictionary_without_name(self):
-        # setup
-        front_fork = self.project.part('Front Fork')  # type: Part
-        saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
-
-        # do tests
-        update_dict = {
-            'Material': 'Adamantium',
-            'Height (mm)': 432.1,
-            'Color': 'Earth Blue (new)'
-        }
-        front_fork.update(update_dict=update_dict)
-        refreshed_front_fork = self.project.part(pk=front_fork.id)
-
-        for prop in refreshed_front_fork.properties:
-            self.assertIn(prop.name , update_dict, "property with {} should be in the update dict".format(prop.name))
-            self.assertEqual(update_dict[prop.name] ,prop.value, "property {} with value {} did not match contents " \
-                                                         "with KEC".format(prop.name, prop.value))
-
-        # tearDown
-        for prop_name, prop_value in saved_front_fork_properties.items():
-            front_fork.property(prop_name).value = prop_value
-
-    # new in 1.9
-    def test_part_update_with_dictionary_including_name(self):
-        # setup
-        front_fork = self.project.part('Front Fork')  # type: Part
-        saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
-
-        # do tests
-        update_dict = {
-            'Material': 'Adamantium',
-            'Height (mm)': 432.1,
-            'Color': 'Earth Blue (new)'
-        }
-        front_fork.update(name='Better front fork', update_dict=update_dict)
-        refreshed_front_fork = self.project.part(pk=front_fork.id)
-        self.assertEqual(refreshed_front_fork.name, 'Better front fork')
-        for prop in refreshed_front_fork.properties:
-            self.assertIn(prop.name , update_dict, "property with {} should be in the update dict".format(prop.name))
-            self.assertEqual(update_dict[prop.name] ,prop.value, "property {} with value {} did not match contents " \
-                                                         "with KEC".format(prop.name, prop.value))
-
-        with self.assertRaises(IllegalArgumentError):
-            front_fork.update(name=12, update_dict=update_dict)
-
-        # tearDown
-        for prop_name, prop_value in saved_front_fork_properties.items():
-            front_fork.property(prop_name).value = prop_value
-        refreshed_front_fork.edit(name='Front Fork')
-
-    def test_part_update_with_missing_property(self):
-        # setup
-        front_fork = self.project.part('Front Fork')  # type: Part
-        saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
-
-        # do tests
-        update_dict = {
-            'Unknown Property': 'Woot!'
-        }
-        with self.assertRaises(NotFoundError):
-            front_fork.update(update_dict=update_dict)
-
-        # tearDown
-        for prop_name, prop_value in saved_front_fork_properties.items():
-            front_fork.property(prop_name).value = prop_value
-
-    # new in 1.14.1
-    def test_part_update_with_property_ids(self):
-        # setup
-        front_fork = self.project.part('Front Fork')  # type: Part
-        saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
-
-        update_dict = dict()
-        for p in front_fork.properties:
-            if p.name == 'Color':
-                update_dict[p.id] = 'Green'
-            elif p.name == 'Material':
-                update_dict[p.id] = 'Titanium'
-            elif p.name == 'Height (mm)':
-                update_dict[p.id] = '42'
-
-        # do tests
-        front_fork.update(update_dict=update_dict)
-
-        # tearDown
-        for prop_name, prop_value in saved_front_fork_properties.items():
-            front_fork.property(prop_name).value = prop_value
-
-
-class TestPartCreateWithProperties(TestBetamax):
-    def test_create_part_with_properties_no_bulk(self):
-        """Test create a part with the properties when bulk = False for old API compatibility"""
-        parent = self.project.part('Bike')  # type: Part
-        wheel_model = self.project.model('Wheel')  # type: Part
-
-        update_dict = {
-            'Diameter': 42.42,
-            'Spokes': 42,
-            'Rim Material': 'Unobtanium'
-        }
-
-        new_wheel = parent.add_with_properties(wheel_model, "Fresh Wheel", update_dict=update_dict, bulk=False)
-
-        self.assertEqual(type(new_wheel), Part)
-        self.assertTrue(new_wheel.property('Diameter'), 42.42)
-
-        new_wheel.delete()
-
-    def test_create_part_with_properties_names_with_bulk(self):
-        """Test create a part with the properties when bulk = False for old API compatibility"""
-        parent = self.project.part('Bike')  # type: Part
-        wheel_model = self.project.model('Wheel')  # type: Part
-
-        update_dict = {
-            'Diameter': 42.43,
-            'Spokes': 42,
-            'Rim Material': 'Unobtanium'
-        }
-
-        new_wheel = parent.add_with_properties(wheel_model, "Fresh Wheel", update_dict=update_dict, bulk=True)
-
-        self.assertEqual(type(new_wheel), Part)
-        self.assertTrue(new_wheel.property('Diameter'), 42.43)
-
-        new_wheel.delete()
-
-    def test_create_part_with_properties_ids_with_bulk(self):
-        """Test create a part with the properties when bulk = False for old API compatibility"""
-        parent = self.project.part('Bike')  # type: Part
-        wheel_model = self.project.model('Wheel')  # type: Part
-
-        update_dict = {
-            wheel_model.property('Diameter').id : 42.43,
-            wheel_model.property('Spokes').id: 42,
-            wheel_model.property('Rim Material').id: 'Unobtanium'
-        }
-
-        # check if the keys are really a UUID
-        self.assertTrue(any([is_uuid(key) for key in update_dict.keys()]))
-
-        new_wheel = parent.add_with_properties(wheel_model, "Fresh Wheel", update_dict=update_dict, bulk=True)
-
-        self.assertEqual(type(new_wheel), Part)
-        self.assertTrue(new_wheel.property('Diameter'), 42.43)
-
-        new_wheel.delete()
-
-class TestPartRetrieve(TestBetamax):
-    # 1.8
-    def test_get_instances_of_a_model(self):
-        wheel_model = self.project.model('Wheel')
-        wheel_instances = wheel_model.instances()
-
-        self.assertIsInstance(wheel_instances, PartSet)
-        for wheel_instance in wheel_instances:
-            self.assertEqual(wheel_instance.category, Category.INSTANCE)
-            self.assertEqual(wheel_instance.model().id, wheel_model.id)
-
-    def test_get_instances_of_an_instances_raises_notfound(self):
-        wheel_instance = self.project.part('Rear Wheel', category=Category.INSTANCE)
-        with self.assertRaises(NotFoundError):
-            wheel_instance.instances()
-
-    def test_get_single_instance_of_a_model(self):
-        bike_model = self.project.model('Bike')
-        bike_instance = bike_model.instance()
-
-        self.assertEqual(bike_instance.category, Category.INSTANCE)
-
-    def test_get_single_instance_of_a_multiplicity_model_raises_multiplefounderror(self):
-        wheel_model = self.project.model('Wheel')
-
-        with self.assertRaises(MultipleFoundError):
-            wheel_model.instance()
-
-    # test added in 1.12.7
-    def test_get_single_instance_of_a_model_without_instances_raises_notfounderror(self):
-        model_without_instances = self.project.model(name='model_without_instances')
-
-        with self.assertRaises(NotFoundError):
-            model_without_instances.instance()
-
-class TestPartsReorderProperties(TestBetamax):
-    # new in 1.10
-    def test_reorder_properties_using_names(self):
-        # Retrieve the front fork model
-        front_fork_model = self.project.model('Front Fork')
-
-        # Sort the properties of the front fork model based on their original order
-        original_sorted_list_of_props = sorted(front_fork_model.properties, key=lambda k: k._json_data['order'])
-
-        # Make a new list with only the names of the properties sorted by order. This will later be used to
-        # reverse the order to the initial status
-        original_list_of_prop_names = [prop.name for prop in original_sorted_list_of_props]
-
-        # Instantiate the list that will be used to reorder the properties
-        desired_order_list = ['Material', 'Height (mm)', 'Color']
-
-        # Make the call to re-order the properties according to the above list
-        front_fork_model.order_properties(property_list=desired_order_list)
-
-        # Re-retrieve the front fork model
-        front_fork_model = self.project.model('Front Fork')
-
-        # Do the same steps as above. This will be used to check whether the action performed correctly.
-        new_sorted_list_of_props = sorted(front_fork_model.properties, key=lambda k: k._json_data['order'])
-        new_list_of_prop_names = [prop.name for prop in new_sorted_list_of_props]
-
-        # Check the new list with the desired one
-        self.assertEqual(desired_order_list, new_list_of_prop_names)
-
-        # Return the front fork model to the initial status
-        front_fork_model.order_properties(property_list=original_list_of_prop_names)
-
-    def test_reorder_properties_using_objects(self):
-        # Retrieve the front fork model
-        front_fork_model = self.project.model('Front Fork')
-
-        # Sort the properties of the front fork model based on their original order
-        original_sorted_list_of_props = sorted(front_fork_model.properties, key=lambda k: k._json_data['order'])
-
-        # Instantiate the list that will be used to reorder the properties
-        desired_order_list = [front_fork_model.property('Material'),
-                              front_fork_model.property('Height (mm)'),
-                              front_fork_model.property('Color')]
-
-        # Make the call to re-order the properties according to the above list
-        front_fork_model.order_properties(property_list=desired_order_list)
-
-        # Re-retrieve the front fork model
-        front_fork_model = self.project.model('Front Fork')
-
-        # Create a list of property id's, after the properties have been sorted.
-        # This will be used to check whether the action performed correctly.
-        new_sorted_list_of_props = sorted(front_fork_model.properties, key=lambda k: k._json_data['order'])
-        new_list_of_prop_ids = [prop.id for prop in new_sorted_list_of_props]
-
-        # Create a list of property id's, based on the desired order.
-        desired_order_list_ids = [prop.id for prop in desired_order_list]
-
-        # Check the new list with the desired one
-        self.assertEqual(desired_order_list_ids, new_list_of_prop_ids)
-
-        # Return the front fork model to the initial status
-        front_fork_model.order_properties(property_list=original_sorted_list_of_props)
-
-    def test_reorder_wrong_properties(self):
-        # Retrieve the front fork model
-        front_fork_model = self.project.model('Front Fork')
-
-        # Instantiate a wrong list that will be used to reorder the properties.
-        desired_order_list = ['Material', 'Height (mm)', 'Color', 'Width (mm)']
-
-        with self.assertRaises(NotFoundError):
-            front_fork_model.order_properties(property_list=desired_order_list)
-
-    def test_reorder_not_list(self):
-        # Retrieve the front fork model
-        front_fork_model = self.project.model('Front Fork')
-
-        # Instantiate a wrong list that will be used to reorder the properties.
-        desired_order_list = 'Material Height (mm) Color'
-
-        with self.assertRaises(IllegalArgumentError):
-            front_fork_model.order_properties(property_list=desired_order_list)
-
-    def test_reorder_properties_of_instance(self):
-        # Retrieve the front fork model
-        front_fork_instance = self.project.part(name='Front Fork', category='INSTANCE')
-
-        # Instantiate a list that will be used to reorder the properties.
-        desired_order_list = ['Material', 'Height (mm)', 'Color']
-
-        with self.assertRaises(APIError):
-            front_fork_instance.order_properties(property_list=desired_order_list)

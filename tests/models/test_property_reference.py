@@ -129,10 +129,10 @@ class TestMultiReferenceProperty(TestBetamax):
         value_of_multi_ref = self.ref.value
 
         # testing
-        self.assertEqual(value_of_multi_ref, None)
+        self.assertEqual(None, value_of_multi_ref)
 
     def test_multi_ref_choices(self):
         # testing
         possible_options = self.ref.choices()
-        self.assertEqual(len(possible_options), 2)
+        self.assertEqual(2, len(possible_options))
 

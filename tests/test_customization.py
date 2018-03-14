@@ -100,7 +100,7 @@ class TestExtCustomization(TestBetamax):
         self.assertEqual(len(self.customization.widgets()), 1, "The customization should have 1 widget")
         self.assertTrue(self.customization.widgets()[0]["name"] == "propertyGridWidget",
                         "The first widget should be a propertyGridWidget")
-        self.assertEqual(self.customization.widgets()[0]["config"]["title"], None,
+        self.assertEqual(self.customization.widgets()[0]["config"]["title"], self.instances[0].name,
                          "The config should be not have a title property")
 
         # tearDown

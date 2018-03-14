@@ -1,15 +1,13 @@
 import datetime
-import json
 from typing import Any  # flake8: noqa
 
 import requests
 import warnings
 from six import text_type
 
-from pykechain.enums import Category, ActivityType
+from pykechain.enums import Category, ActivityType, ActivityStatus
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
-from pykechain.models.inspector_base import Customization, InspectorComponent
 
 
 class Activity(Base):
@@ -48,6 +46,76 @@ class Activity(Base):
                 raise NotFoundError("This activity '{}'({}) does not belong to a scope, something is weird!".
                                     format(self.name, self.id))
         return scope_id
+
+    #
+    # predicates
+    #
+
+    def is_rootlevel(self):
+        """
+        Determine if Activity is at the root level of a project.
+
+        :return: Return True if it is a root level activity, otherwise return False
+        :rtype: bool
+        """
+        container_id = self._json_data.get('container')
+        if container_id:
+            return container_id == self._json_data.get('root_container')
+        else:
+            return False
+
+    def is_task(self):
+        """
+        Determine if the Activity is of ActivityType.USERTASK.
+
+        :return: Return True if it is a task, otherwise return False
+        :rtype: bool
+        """
+        return self.activity_type == ActivityType.USERTASK
+
+    def is_subprocess(self):
+        """
+        Determine if the Activity is of ActivityType.SUBPROCESS.
+
+        :return: Return True if it is a subprocess, otherwise return False
+        :rtype: bool
+        """
+        return self.activity_type == ActivityType.SUBPROCESS
+
+    def is_configured(self):
+        """
+        Determine if the Activity is configured with input and output properties.
+
+        Makes an additional lightweight call to the API to determine if any associated models are there.
+
+        :return: Return True if it is configured, otherwise return False
+        :rtype: bool
+        """
+        # check configured based on if we get at least 1 part back
+        associated_models = self.parts(category=Category.MODEL, limit=1)
+        if associated_models:
+            return True
+        else:
+            return False
+
+    def is_customized(self):
+        """
+        Determine if the Activity is customized.
+
+        In other words if it has a customization. Use can use the :func:`Activity.customization()` to retrieve
+        the customization object and configure the task.
+
+        :return: Return True if it is customized, otherwise return False
+        :rtype: bool
+        """
+        if self._json_data.get('customization', False):
+            return True
+        else:
+            return False
+
+    #
+    # Searchers and retrievers
+    #
 
     def parts(self, *args, **kwargs):
         """Retrieve parts belonging to this activity.
@@ -172,8 +240,8 @@ class Activity(Base):
     def siblings(self, **kwargs):
         """Retrieve the other activities that also belong to the subprocess.
 
-        It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the level of the current task.
-        This also works if the activity is of type `ActivityType.SUBPROCESS`.
+        It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the level of the current task, including
+        itself. This also works if the activity is of type `ActivityType.SUBPROCESS`.
 
         :param kwargs: Additional search arguments, check :func:`pykechain.Client.activities` for additional info
         :type kwargs: dict or None
@@ -299,7 +367,7 @@ class Activity(Base):
                 raise IllegalArgumentError('Assignees should be a list')
 
         if status:
-            if isinstance(status, (str, text_type)):
+            if isinstance(status, (str, text_type)) and status in ActivityStatus.values():
                 update_dict.update({'status': status})
             else:
                 raise IllegalArgumentError('Status should be a string')
@@ -318,70 +386,6 @@ class Activity(Base):
             self._json_data['due_date'] = str(due_date)
         if start_date:
             self._json_data['start_date'] = str(start_date)
-
-    def customize(self, config):  # pragma: no cover
-        """Customize an activity.
-
-        .. warning::
-
-           The use of `InspectorComponents` and `Customization` object is deprecated in November 2017. For
-           KE-chain releases later than 2.5, please use the `activity.customization()` method to retrieve the newer
-           type customization.
-
-        :param config: the `InspectorComponent` or raw inspector json (as python dict) to be used in customization
-        :type config: dict
-        :raises InspectorComponentError: if the customisation is provided incorrectly.
-        :raises IllegalArgumentError: when the configuration is incorrectly provided
-        :raises DeprecationError: When the configuration is provided in a deprecated format
-        :raises APIError: When an Error occurs in the communication with KE-chain
-
-        Example
-        -------
-        >>> my_activity = self.project.activity('Customizable activity')
-        >>> my_activity.customize(config =
-        ...                          {"components":
-        ...                              [{"xtype": "superGrid",
-        ...                                "filter":
-        ...                                    {"parent": "e5106946-40f7-4b49-ae5e-421450857911",
-        ...                                     "model": "edc8eba0-47c5-415d-8727-6d927543ee3b"
-        ...                                    }
-        ...                              }]
-        ...                          }
-        ...                      )
-
-        """
-        if isinstance(config, dict):
-            deprecated_customizations = Customization(json=config)
-            deprecated_customizations.validate()
-        elif isinstance(config, (Customization, InspectorComponent)):
-            raise DeprecationWarning("The definition of customization widgets has changed in KE-chain version 2.5. "
-                                     "The use of Customization and InspectorComponents is deprecated in November 2017")
-            # config.validate()
-            # deprecated_customizations = config
-        else:
-            raise IllegalArgumentError("Need to provide either a dictionary or Customization as input, got: '{}'".
-                                       format(type(config)))
-
-        activity_widget_config = self._json_data.get('widget_config')
-        # When an activity has been costumized at least once before, then its widget config already exists
-        if activity_widget_config:
-            widget_config_id = activity_widget_config['id']
-            request_update_dict = {'id': widget_config_id, 'config': json.dumps(deprecated_customizations.as_dict(),
-                                                                                indent=2)}
-            url = self._client._build_url('widget_config', widget_config_id=widget_config_id)
-            r = self._client._request('PUT', url, json=request_update_dict)
-        # When an activity was not customized before, then there is no widget config and a new one must be created for
-        # that activity
-        else:
-            r = self._client._request('POST', self._client._build_url('widgets_config'),
-                                      data=dict(
-                                          activity=self.id,
-                                          config=json.dumps(deprecated_customizations.as_dict(), indent=2))
-                                      )
-
-        if r.status_code in (requests.codes.ok, requests.codes.created):
-            self._json_data['widget_config'] = {'id': r.json()['results'][0].get('id'),
-                                                'config': json.dumps(deprecated_customizations.as_dict(), indent=2)}
 
     def customization(self):
         """
