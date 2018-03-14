@@ -668,6 +668,7 @@ class Client(object):
         :param activity_class: type of activity: UserTask (default) or Subprocess
         :type activity_class: basestring
         :return: the created :class:`models.Activity`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: When the object could not be created
         """
         if activity_class and activity_class not in ActivityType.values():
@@ -719,6 +720,7 @@ class Client(object):
         :param kwargs: (optional) additional keyword=value arguments
         :return: Part (category = instance)
         :return: :class:`models.Part` with category `INSTANCE`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
         if parent.category != Category.INSTANCE:
@@ -756,6 +758,7 @@ class Client(object):
         :param kwargs: (optional) additional keyword=value arguments
         :type kwargs: dict
         :return: :class:`models.Part` with category `MODEL`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
         if parent.category != Category.MODEL:
@@ -791,6 +794,7 @@ class Client(object):
         :param kwargs: (optional) additional keyword=value arguments
         :type kwargs: dict
         :return: the new proxy :class:`models.Part` with category `MODEL`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
         if model.category != Category.MODEL:
@@ -822,6 +826,7 @@ class Client(object):
         :param default_value: default value used for part instances when creating a model.
         :type default_value: any
         :return: a :class:`models.Property` with category `MODEL`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Property` model could not be created
         """
         if model.category != Category.MODEL:
@@ -876,6 +881,7 @@ class Client(object):
         :param pkg_path: (optional) full path name to the `kecpkg` (or python script) to upload
         :type pkg_path: basestring or None
         :return: the created :class:`models.Service`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: In case of failure of the creation or failure to upload the pkg_path
         :raises OSError: In case of failure to locate the `pkg_path`
         """

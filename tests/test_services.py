@@ -1,13 +1,15 @@
 import time
+
 import os
 import pytest
 
 from pykechain.enums import ServiceExecutionStatus, ServiceType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from tests.classes import TestBetamax
-
-
 # new in 1.13
+from tests.utils import temp_chdir
+
+
 class TestServices(TestBetamax):
     def setUp(self):
         super(TestServices, self).setUp()
@@ -152,16 +154,10 @@ class TestServices(TestBetamax):
         # setUp
         service_name = 'Test save service script'
         service = self.project.service(name=service_name)
-        target_dir = os.path.join(self.target_dir, 'tests', 'files', 'downloaded')
 
-        # testing
-        service.save_as(target_dir=target_dir)
-        self.assertEqual(len(os.listdir(target_dir)), 2)
-
-        # tearDown
-        path_to_saved_file = os.path.join(target_dir, 'test_save_script.py')
-        if os.path.exists(path_to_saved_file):
-            os.remove(path_to_saved_file)
+        with temp_chdir() as target_dir:
+            service.save_as(target_dir=target_dir)
+            self.assertEqual(len(os.listdir(target_dir)), 1)
 
     def test_upload_script_to_service(self):
         # setUp
@@ -188,7 +184,7 @@ class TestServices(TestBetamax):
         # tearDown
         service_to_upload.delete()
 
-# new in 1.13class TestServiceExecutions(TestBetamax):
+    # new in 1.13class TestServiceExecutions(TestBetamax):
     def test_retrieve_service_executions(self):
         self.assertTrue(self.project.service_executions())
 
@@ -242,13 +238,8 @@ class TestServices(TestBetamax):
         service_name = 'Debug pykechain'
         service = self.project.service(name=service_name)
         last_service_execution = service.get_executions()[0]
-        target_dir = os.path.join(self.target_dir, 'tests', 'files', 'downloaded')
 
-        # testing
-        last_service_execution.get_log(target_dir=target_dir)
-        log_file = os.path.join(target_dir, 'log.txt')
-        self.assertTrue(log_file)
-
-        # tearDown
-        if os.path.exists(log_file):
-            os.remove(log_file)
+        with temp_chdir() as target_dir:
+            last_service_execution.get_log(target_dir=target_dir)
+            log_file = os.path.join(target_dir, 'log.txt')
+            self.assertTrue(log_file)
