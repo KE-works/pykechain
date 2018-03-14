@@ -49,6 +49,14 @@ class TestParts(TestBetamax):
         with self.assertRaises(NotImplementedError):
             part_set['testing']
 
+    def test_wrongly_create_model(self):
+        # setUp
+        bike_model = self.project.model(name='Bike')
+
+        # testing
+        with self.assertRaises(APIError):
+            self.client.create_model(name='Multiplicity does not exist', parent=bike_model, multiplicity='TEN')
+
     def test_part_add_delete_part(self):
         project = self.client.scope('Bike Project (pykechain testing)')
 
@@ -63,6 +71,48 @@ class TestParts(TestBetamax):
 
         with self.assertRaises(APIError):
             bike.delete()
+
+    def test_create_part_where_parent_is_model(self):
+        # setUp
+        bike_model = self.project.model(name='Bike')
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            self.client.create_part(name='Parent should be instance', parent=bike_model, model=bike_model)
+
+    def test_create_part_where_model_is_instance(self):
+        # setUp
+        bike_instance = self.project.part(name='Bike')
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            self.client.create_part(name='Model should not be instance', parent=bike_instance, model=bike_instance)
+
+    def test_create_model_where_parent_is_instance(self):
+        # setUp
+        bike_instance = self.project.part(name='Bike')
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            self.client.create_model(name='Parent should be model', parent=bike_instance, multiplicity=Multiplicity.ONE)
+
+    def test_create_proxy_model_where_model_is_instance(self):
+        # setUp
+        bike_instance = self.project.part(name='Bike')
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            self.client.create_proxy_model(name='Model should not be instance', model=bike_instance,
+                                           parent=bike_instance)
+
+    def test_create_proxy_model_where_parent_is_instance(self):
+        # setUp
+        bike_instance = self.project.part(name='Bike')
+        bike_model = self.project.model(name='Bike')
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            self.client.create_proxy_model(name='Parent should not be instance', model=bike_model, parent=bike_instance)
 
     def test_add_to_wrong_categories(self):
         # This test has the purpose of testing of whether APIErrors are raised when illegal operations are

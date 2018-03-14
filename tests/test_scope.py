@@ -7,6 +7,11 @@ class TestScopes(TestBetamax):
     def test_retrieve_scopes(self):
         self.assertTrue(self.client.scopes())
 
+    def test_retrieve_scope_with_kwargs(self):
+        retrieve_scopes_with_kwargs = self.client.scopes(name__startswith='Bike')
+        self.assertTrue(retrieve_scopes_with_kwargs)
+        self.assertEqual(len(retrieve_scopes_with_kwargs), 1)
+
     def test_retrieve_single_unknown(self):
         with self.assertRaises(NotFoundError):
             self.client.scope('123lladadwd')
