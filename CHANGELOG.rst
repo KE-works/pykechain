@@ -13,6 +13,7 @@ pykechain changelog
  * Wrote a test that tests each property type (we didn't have this before). This will increase the test coverage to ~95% for KE-chain. (#280)
  * Added a new function called `Client.property()`, which allows the user to retrieve one property. (#296)
  * Improved the overall test coverage for `ExtCustomization` class to 100%.
+ * Updated dependent versions for development: betamax (0.8.1), twine (1.10.0), matplotlib (2.2.0), pytest (3.4.2), mypy (0.570), sphinx (1.7.1)
 
 1.15.4 (15FEB18)
 ----------------
