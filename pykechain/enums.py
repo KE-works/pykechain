@@ -148,7 +148,18 @@ class ComponentXType(Enum):
 
 
 class WidgetNames(Enum):
-    """The various Names of the Widget that can be configured."""
+    """The various Names of the Widget that can be configured.
+    
+    :cvar SUPERGRIDWIDGET: superGridWidget
+    :cvar PROPERTYGRIDWIDGET: propertyGridWidget
+    :cvar HTMLWIDGET: htmlWidget
+    :cvar FILTEREDGRIDWIDGET: filteredGridWidget
+    :cvar SERVICEWIDGET: serviceWidget
+    :cvar NOTEBOOKWIDGET: notebookWidget
+    :cvar ATTACHMENTVIEWERWIDGET: attachmentViewerWidget
+    :cvar TASKNAVIGATIONBARWIDGET: taskNavigationBarWidget
+    """
+
     SUPERGRIDWIDGET = 'superGridWidget'
     PROPERTYGRIDWIDGET = 'propertyGridWidget'
     HTMLWIDGET = 'htmlWidget'
@@ -157,6 +168,7 @@ class WidgetNames(Enum):
     NOTEBOOKWIDGET = 'notebookWidget'
     ATTACHMENTVIEWERWIDGET = 'attachmentViewerWidget'
     TASKNAVIGATIONBARWIDGET = 'taskNavigationBarWidget'
+
 
 class ActivityStatus(Enum):
     """The various Activity statuses that are accepted by KE-chain.
