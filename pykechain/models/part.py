@@ -147,7 +147,7 @@ class Part(Base):
         # type: (Any) -> Any
         """Retrieve the siblings of this `Part` as `Partset`.
 
-        Siblings are other Parts sharing the same parent of this `Part`
+        Siblings are other Parts sharing the same parent of this `Part`, including the part itself.
 
         :param kwargs: Additional search arguments to search for, check :class:`pykechain.Client.parts`
                        for additional info
@@ -449,7 +449,6 @@ class Part(Base):
                 raise IllegalArgumentError("description should be provided as a string")
             update_dict.update({'description': description})
 
-        # TODO: What else can we edit? Don't know how to test for it, so for now I have decide to skip it in the tests
         if kwargs:  # pragma: no cover
             update_dict.update(**kwargs)
         r = self._client._request('PUT', self._client._build_url('part', part_id=self.id), json=update_dict)

@@ -30,3 +30,6 @@ PyOpenSSL==17.5.0; python_version <= '2.7'
 
 # for package management (uploads)
 twine==1.10.0
+
+# for version comparison
+semver=2.7.9

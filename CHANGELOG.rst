@@ -3,6 +3,14 @@ Change Log
 
 pykechain changelog
 
+2.0.0 (UNRELEASED)
+------------------
+ * RC1: revamped the activity API endpoints and functionality to work with the new WIM2 implementation of KE-chain 2.8 (FEB18)
+ * RC2: fixed the way you limit the scope search in Scope.activities() and Scope.activity()
+ * RC3: -
+ * RC4: project.activity now returns 1 activity
+ * RC5: added configure method to the Activity2 object. Added additional Property=MODEL checks
+
 1.16.0 (14MAR18)
 ------------------
 This is the last release in preparation for the WIM2 release of KE-chain and consequently pykechain. In the next version of pykechain, some backward incompatible changes will happen. A migration path is provided as well.
@@ -22,6 +30,7 @@ This is the last release in preparation for the WIM2 release of KE-chain and con
  * increased the coverage of `Client` tests to 99%. (#296)
  * increased the coverage of `Service` tests to 90%. (#296)
  * Updated dependent versions for development: betamax (0.8.1), twine (1.10.0), matplotlib (2.2.0), pytest (3.4.2), mypy (0.570), sphinx (1.7.1)
+
 
 1.15.4 (15FEB18)
 ----------------
