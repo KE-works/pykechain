@@ -2,7 +2,6 @@ import datetime
 
 import requests
 import warnings
-from requests import Response
 from six import text_type
 
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames
@@ -346,7 +345,7 @@ class Activity2(Activity):
 
         print('-D- URL called: PUT: `{}`'.format(url))
         print('-D- contents: json=`{}`'.format(update_dict))
-        r = self._client._request('PUT', url, json=update_dict)  # type: Response
+        r = self._client._request('PUT', url, json=update_dict)
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Activity ({})".format(r))
