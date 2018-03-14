@@ -12,6 +12,17 @@ class TestProperties(TestBetamax):
 
         self.assertTrue(len(properties) > 0)
 
+    def test_retrieve_properties_with_kwargs(self):
+        # setUp
+        bike = self.client.part(name='Bike')
+        properties_with_kwargs = self.client.properties(part_id=bike.id)
+
+        self.assertTrue(properties_with_kwargs)
+
+        # testing
+        for prop in properties_with_kwargs:
+            self.assertEqual(prop.part.id, bike.id)
+
     def test_retrieve_property(self):
         prop = self.client.property(name='Test retrieve one property')
 
@@ -80,6 +91,14 @@ class TestProperties(TestBetamax):
         # Check whether it still has the property model that has just been deleted
         with self.assertRaises(NotFoundError):
             updated_bike.property('New property')
+
+    def test_create_property_where_model_is_instance(self):
+        # setUp
+        bike_instance = self.project.part(name='Bike')
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            self.client.create_property(name='Properties are created on models only', model=bike_instance)
 
     def test_wrongly_creation_of_property(self):
         # These actions should not be possible. This test is of course, expecting APIErrors to be raised
