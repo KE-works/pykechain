@@ -3,6 +3,12 @@ Change Log
 
 pykechain changelog
 
+1.xx.0 (UNRELEASED)
+------------------
+* updated the documentation regarding Property Types. (#293)
+* fixed the enums so they now work correctly for each PropertyType. (#293)
+* wrote a test that tests each property type (we didn't have this before). (#293)
+
 1.15.4 (15FEB18)
 ----------------
  * Fixed an issues where the `MultiReference` property did not provide the correct choices. Also fixed a bug where the setting of the value is now performed more robust. (#282)

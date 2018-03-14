@@ -831,7 +831,7 @@ class Client(object):
             "name": name,
             "part": model.id,
             "description": description,
-            "property_type": property_type.upper() + '_VALUE',
+            "property_type": property_type.upper(),
             "value": default_value
         }
 

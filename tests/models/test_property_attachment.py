@@ -54,6 +54,8 @@ class TestAttachment(TestBetamax):
 
         # testing
         self.assertTrue(plot_attach_u.value.find('requirements.txt'))
+
+        # teardown
         plot_attach.clear()
         self.assertEqual(plot_attach.value, None)
         self.assertEqual(plot_attach._value, None)
