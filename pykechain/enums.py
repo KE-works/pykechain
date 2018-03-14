@@ -149,7 +149,7 @@ class ComponentXType(Enum):
 
 class WidgetNames(Enum):
     """The various Names of the Widget that can be configured.
-    
+
     :cvar SUPERGRIDWIDGET: superGridWidget
     :cvar PROPERTYGRIDWIDGET: propertyGridWidget
     :cvar HTMLWIDGET: htmlWidget
