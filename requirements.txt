@@ -6,16 +6,16 @@ envparse==0.2.0
 jsonschema==2.6.0
 
 # testing
-pytest==3.4.0
+pytest==3.4.2
 betamax==0.8.1
 
 # documentation
-Sphinx==1.6.7
+Sphinx==1.7.1
 nbsphinx==0.3.1
 
 # data science
 jupyter==1.0.0
-matplotlib==2.1.2
+matplotlib==2.2.0
 
 # integration
 tox==2.9.1
@@ -23,10 +23,10 @@ tox==2.9.1
 # code style
 flake8==3.5.0
 pydocstyle==2.1.1
-mypy==0.560
+mypy==0.570
 
 # to fix connection issues
 PyOpenSSL==17.5.0; python_version <= '2.7'
 
 # for package management (uploads)
-twine==1.9.1
+twine==1.10.0
