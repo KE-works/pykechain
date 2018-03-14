@@ -5,9 +5,14 @@ pykechain changelog
 
 1.xx.0 (UNRELEASED)
 ------------------
-* updated the documentation regarding Property Types. (#293)
-* fixed the enums so they now work correctly for each PropertyType. (#293)
-* wrote a test that tests each property type (we didn't have this before). (#293)
+ * Implemented new functions for adding the following widgets: `Basic table`, `Paginated table`, `JSON`, `Script`, `Notebook`, `Text`, `Attachment viewer` and `Navigation Bar`. (#280)
+ * Added two new enums (`SortTable` and `NavigationBarAlignment`) which can be used when adding new widgets. (#280)
+ * Added additional enums `WidgetNames` for the proper names of the widgets in the customisation dialog in KE-chain (#280)
+ * Updated the documentation regarding Property Types. (#280)
+ * Fixed the enums so they now work correctly for each `PropertyType`. (#280)
+ * Wrote a test that tests each property type (we didn't have this before). This will increase the test coverage to ~95% for KE-chain. (#280)
+ * Added a new function called `Client.property()`, which allows the user to retrieve one property. (#296)
+ * Improved the overall test coverage for `ExtCustomization` class to 100%.
 
 1.15.4 (15FEB18)
 ----------------

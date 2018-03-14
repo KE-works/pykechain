@@ -490,6 +490,29 @@ class Client(object):
 
         return _parts[0]
 
+    def property(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Property
+        """Retrieve single KE-chain Property.
+
+        Uses the same interface as the :func:`properties` method but returns only a single pykechain :class:
+        `models.Property` instance.
+
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
+        :return: a single :class:`models.Property`
+        :raises NotFoundError: When no `Property` is found
+        :raises MultipleFoundError: When more than a single `Property` is found
+        """
+        _properties = self.properties(*args, **kwargs)
+
+        if len(_properties) == 0:
+            raise NotFoundError("No property fits criteria")
+        if len(_properties) != 1:
+            raise MultipleFoundError("Multiple properties fit criteria")
+
+        return _properties[0]
+
     def properties(self, name=None, pk=None, category=Category.INSTANCE, **kwargs):
         # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Property]
         """Retrieve properties.
