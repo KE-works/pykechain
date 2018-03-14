@@ -137,12 +137,37 @@ class ComponentXType(Enum):
     HTMLPANEL = "htmlPanel"
     EXECUTESERVICE = "executeService"
     NOTEBOOKPANEL = "notebookPanel"
+    # Issue #279:
+    ACTIVITYNAVIGATIONBAR = "activityNavigationBar"
 
     # for RND
     BUTTON = "button"
     MODELVIEWER = "modelViewer"
     CSVGRID = "csvGrid"
     JSONTREE = "jsonTree"
+
+
+class WidgetNames(Enum):
+    """The various Names of the Widget that can be configured.
+
+    :cvar SUPERGRIDWIDGET: superGridWidget
+    :cvar PROPERTYGRIDWIDGET: propertyGridWidget
+    :cvar HTMLWIDGET: htmlWidget
+    :cvar FILTEREDGRIDWIDGET: filteredGridWidget
+    :cvar SERVICEWIDGET: serviceWidget
+    :cvar NOTEBOOKWIDGET: notebookWidget
+    :cvar ATTACHMENTVIEWERWIDGET: attachmentViewerWidget
+    :cvar TASKNAVIGATIONBARWIDGET: taskNavigationBarWidget
+    """
+
+    SUPERGRIDWIDGET = 'superGridWidget'
+    PROPERTYGRIDWIDGET = 'propertyGridWidget'
+    HTMLWIDGET = 'htmlWidget'
+    FILTEREDGRIDWIDGET = 'filteredGridWidget'
+    SERVICEWIDGET = 'serviceWidget'
+    NOTEBOOKWIDGET = 'notebookWidget'
+    ATTACHMENTVIEWERWIDGET = 'attachmentViewerWidget'
+    TASKNAVIGATIONBARWIDGET = 'taskNavigationBarWidget'
 
 
 class ActivityStatus(Enum):
@@ -233,3 +258,25 @@ class KechainEnv(Enum):
     KECHAIN_SCOPE = 'KECHAIN_SCOPE'
     KECHAIN_SCOPE_ID = 'KECHAIN_SCOPE_ID'
     KECHAIN_SCOPE_STATUS = 'KECHAIN_SCOPE_STATUS'
+
+
+class SortTable(Enum):
+    """The acceptable sorting options for a grid/table.
+
+    :cvar ASCENDING: Table is sorted in ASCENDING ORDER
+    :cvar DESCENDING: Table is sorted in DESCENDING ORDER
+    """
+
+    ASCENDING = 'ASC'
+    DESCENDING = 'DESC'
+
+
+class NavigationBarAlignment(Enum):
+    """The acceptable alignment options for a Navigation Bar Widget.
+
+    :cvar START: Buttons are aligned to the left
+    :cvar CENTER: Buttons are aligned to the center
+    """
+
+    START = 'start'
+    CENTER = 'center'
