@@ -62,34 +62,34 @@ class Classification(Enum):
 class PropertyType(Enum):
     """The various property types that are accepted by KE-chain.
 
-    :cvar FLOAT_VALUE: floating point number property (with digits)
-    :cvar INT_VALUE: integer property (whole number)
-    :cvar TEXT_VALUE: text property (long text, may span multiple lines)
-    :cvar LINK_VALUE: url property
-    :cvar REFERENCE_VALUE: reference property, a UUID value referring to other parts
-    :cvar DATETIME_VALUE: a datetime value property
-    :cvar BOOLEAN_VALUE: a boolean value property (True/False)
     :cvar CHAR_VALUE: a charfield property (single line text)
+    :cvar TEXT_VALUE: text property (long text, may span multiple lines)
+    :cvar BOOLEAN_VALUE: a boolean value property (True/False)
+    :cvar INT_VALUE: integer property (whole number)
+    :cvar FLOAT_VALUE: floating point number property (with digits)
+    :cvar DATETIME_VALUE: a datetime value property
     :cvar ATTACHMENT_VALUE: an attachment property
+    :cvar LINK_VALUE: url property
+    :cvar REFERENCE_VALUE: a reference property, a UUID value referring to other part model
 
     .. versionadded:: 1.14
 
     :cvar SINGLE_SELECT_VALUE: single select list property (choose from a list)
-    :cvar REFERENCES_VALUE: a multi reference property, a UUID value referring to other parts
+    :cvar REFERENCES_VALUE: a multi reference property, a list of UUID values referring to other part models
 
     """
 
-    FLOAT_VALUE = "FLOAT_VALUE"
-    INT_VALUE = "INT_VALUE"
+    CHAR_VALUE = "CHAR_VALUE"
     TEXT_VALUE = "TEXT_VALUE"
+    BOOLEAN_VALUE = "BOOLEAN_VALUE"
+    INT_VALUE = "INT_VALUE"
+    FLOAT_VALUE = "FLOAT_VALUE"
+    DATETIME_VALUE = "DATETIME_VALUE"
+    ATTACHMENT_VALUE = "ATTACHMENT_VALUE"
     LINK_VALUE = "LINK_VALUE"
     SINGLE_SELECT_VALUE = 'SINGLE_SELECT_VALUE'
-    REFERENCE_VALUE = "REFERENCE_VALUE"
+    REFERENCE_VALUE = 'REFERENCE_VALUE'
     REFERENCES_VALUE = "REFERENCES_VALUE"
-    DATETIME_VALUE = "DATETIME_VALUE"
-    BOOLEAN_VALUE = "BOOLEAN_VALUE"
-    CHAR_VALUE = "CHAR_VALUE"
-    ATTACHMENT_VALUE = "ATTACHMENT_VALUE"
 
 
 class ActivityType(Enum):
@@ -187,12 +187,37 @@ class ComponentXType(Enum):
     HTMLPANEL = "htmlPanel"
     EXECUTESERVICE = "executeService"
     NOTEBOOKPANEL = "notebookPanel"
+    # Issue #279:
+    ACTIVITYNAVIGATIONBAR = "activityNavigationBar"
 
     # for RND
     BUTTON = "button"
     MODELVIEWER = "modelViewer"
     CSVGRID = "csvGrid"
     JSONTREE = "jsonTree"
+
+
+class WidgetNames(Enum):
+    """The various Names of the Widget that can be configured.
+
+    :cvar SUPERGRIDWIDGET: superGridWidget
+    :cvar PROPERTYGRIDWIDGET: propertyGridWidget
+    :cvar HTMLWIDGET: htmlWidget
+    :cvar FILTEREDGRIDWIDGET: filteredGridWidget
+    :cvar SERVICEWIDGET: serviceWidget
+    :cvar NOTEBOOKWIDGET: notebookWidget
+    :cvar ATTACHMENTVIEWERWIDGET: attachmentViewerWidget
+    :cvar TASKNAVIGATIONBARWIDGET: taskNavigationBarWidget
+    """
+
+    SUPERGRIDWIDGET = 'superGridWidget'
+    PROPERTYGRIDWIDGET = 'propertyGridWidget'
+    HTMLWIDGET = 'htmlWidget'
+    FILTEREDGRIDWIDGET = 'filteredGridWidget'
+    SERVICEWIDGET = 'serviceWidget'
+    NOTEBOOKWIDGET = 'notebookWidget'
+    ATTACHMENTVIEWERWIDGET = 'attachmentViewerWidget'
+    TASKNAVIGATIONBARWIDGET = 'taskNavigationBarWidget'
 
 
 class ActivityStatus(Enum):
@@ -283,3 +308,25 @@ class KechainEnv(Enum):
     KECHAIN_SCOPE = 'KECHAIN_SCOPE'
     KECHAIN_SCOPE_ID = 'KECHAIN_SCOPE_ID'
     KECHAIN_SCOPE_STATUS = 'KECHAIN_SCOPE_STATUS'
+
+
+class SortTable(Enum):
+    """The acceptable sorting options for a grid/table.
+
+    :cvar ASCENDING: Table is sorted in ASCENDING ORDER
+    :cvar DESCENDING: Table is sorted in DESCENDING ORDER
+    """
+
+    ASCENDING = 'ASC'
+    DESCENDING = 'DESC'
+
+
+class NavigationBarAlignment(Enum):
+    """The acceptable alignment options for a Navigation Bar Widget.
+
+    :cvar START: Buttons are aligned to the left
+    :cvar CENTER: Buttons are aligned to the center
+    """
+
+    START = 'start'
+    CENTER = 'center'

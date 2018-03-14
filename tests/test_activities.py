@@ -38,18 +38,22 @@ class TestActivities(TestBetamax):
         self.assertEqual(len(parts), 2)
 
     def test_create_activity(self):
+        # set up
         project = self.project
 
-        subprocess = project.create_activity('Random', activity_type='PROCESS')
+        subprocess = project.create_activity('Test subprocess creation', activity_type='PROCESS')
+        self.assertEqual(subprocess.name, 'Test subprocess creation')
 
-        self.assertEqual(subprocess.name, 'Random')
+        task = subprocess.create('Test task creation')
+        self.assertEqual(task.name, 'Test task creation')
 
-        task = subprocess.create('Another')
-
+        # teardown
         subprocess.delete()
 
-        with self.assertRaises(APIError):
-            subprocess.delete()
+        with self.assertRaises(NotFoundError):
+            project.activity(name='Test subprocess creation')
+        with self.assertRaises(NotFoundError):
+            project.activity(name='Test task creation')
 
     def test_create_activity_under_task(self):
         task = self.project.activity('Specify wheel diameter')
@@ -58,20 +62,29 @@ class TestActivities(TestBetamax):
             task.create('This cannot happen')
 
     def test_configure_activity(self):
+        # setup
         project = self.project
 
         bike = project.model('Bike')
         wheel = project.model('Wheel')
 
-        task = project.create_activity('Random')
+        task = project.create_activity('Test activity configuration')
 
-        task.configure([
-            bike.property('Gears'),
-            bike.property('Total height')
-        ], [
-            wheel.property('Spokes')
-        ])
+        task.configure(
+            inputs=[
+                bike.property('Gears'),
+                bike.property('Total height')
+            ],
+            outputs=[
+                wheel.property('Spokes')
+            ])
 
+        associated_models, associated_instances = task.associated_parts()
+
+        self.assertEqual(len(associated_models), 2)
+        self.assertEqual(len(associated_instances), 3)
+
+        # teardown
         task.delete()
 
     # new in 1.7

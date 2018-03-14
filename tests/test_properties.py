@@ -2,6 +2,7 @@ from random import randrange
 
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models import Property
+from pykechain.enums import PropertyType
 from tests.classes import TestBetamax
 
 
@@ -10,6 +11,22 @@ class TestProperties(TestBetamax):
         properties = self.client.properties('Diameter')
 
         self.assertTrue(len(properties) > 0)
+
+    def test_retrieve_properties_with_kwargs(self):
+        # setUp
+        bike = self.client.part(name='Bike')
+        properties_with_kwargs = self.client.properties(part_id=bike.id)
+
+        self.assertTrue(properties_with_kwargs)
+
+        # testing
+        for prop in properties_with_kwargs:
+            self.assertEqual(prop.part.id, bike.id)
+
+    def test_retrieve_property(self):
+        prop = self.client.property(name='Test retrieve one property')
+
+        self.assertTrue(prop)
 
     def test_get_property_by_name(self):
         bike = self.project.part('Bike')
@@ -74,6 +91,14 @@ class TestProperties(TestBetamax):
         # Check whether it still has the property model that has just been deleted
         with self.assertRaises(NotFoundError):
             updated_bike.property('New property')
+
+    def test_create_property_where_model_is_instance(self):
+        # setUp
+        bike_instance = self.project.part(name='Bike')
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            self.client.create_property(name='Properties are created on models only', model=bike_instance)
 
     def test_wrongly_creation_of_property(self):
         # These actions should not be possible. This test is of course, expecting APIErrors to be raised
@@ -159,3 +184,32 @@ class TestProperties(TestBetamax):
 
         # teardown
         gears.value = old_value
+
+    # 1.16
+    def test_creation_of_all_property_model_types(self):
+        # set up
+        bike_model = self.project.model(name='Bike')
+
+        # create a property model for each property type
+        single_line_text = bike_model.add_property(name='Single line text', property_type=PropertyType.CHAR_VALUE)
+        multi_line_text = bike_model.add_property(name='Multi line text', property_type=PropertyType.TEXT_VALUE)
+        integer = bike_model.add_property(name='Integer', property_type=PropertyType.INT_VALUE)
+        decimal = bike_model.add_property(name='Float', property_type=PropertyType.FLOAT_VALUE)
+        boolean = bike_model.add_property(name='Boolean', property_type=PropertyType.BOOLEAN_VALUE)
+        datetime = bike_model.add_property(name='Datetime', property_type=PropertyType.DATETIME_VALUE)
+        attachment = bike_model.add_property(name='Attachment', property_type=PropertyType.ATTACHMENT_VALUE)
+        link = bike_model.add_property(name='Link', property_type=PropertyType.LINK_VALUE)
+        single_select = bike_model.add_property(name='Single select', property_type=PropertyType.SINGLE_SELECT_VALUE)
+        reference = bike_model.add_property(name='Reference', property_type=PropertyType.REFERENCES_VALUE)
+
+        # teardown
+        single_line_text.delete()
+        multi_line_text.delete()
+        integer.delete()
+        decimal.delete()
+        boolean.delete()
+        datetime.delete()
+        attachment.delete()
+        link.delete()
+        single_select.delete()
+        reference.delete()
