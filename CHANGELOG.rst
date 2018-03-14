@@ -8,6 +8,12 @@ pykechain changelog
 * updated the documentation regarding Property Types. (#293)
 * fixed the enums so they now work correctly for each PropertyType. (#293)
 * wrote a test that tests each property type (we didn't have this before). (#293)
+* increased the coverage of `MultiReference` property tests to 100%. (#296)
+* increased the coverage of `SelectListProperty` tests to 100%. (#296)
+* setting the value of a `SelectListProperty` instance to None empties it.
+* increased the coverage of `Scope` tests to 100%. (#296)
+* increased the coverage of `Client` tests to 99%. (#296)
+* increased the coverage of `Service` tests to 90%. (#296)
 
 1.15.4 (15FEB18)
 ----------------
