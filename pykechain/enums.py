@@ -246,3 +246,14 @@ class SortTable(Enum):
 
     ASCENDING = 'ASC'
     DESCENDING = 'DESC'
+
+
+class NavigationBarAlignment(Enum):
+    """The acceptable alignment options for a Navigation Bar Widget.
+
+    :cvar START: Buttons are aligned to the left
+    :cvar CENTER: Buttons are aligned to the center
+    """
+
+    START = 'start'
+    CENTER = 'center'

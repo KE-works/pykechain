@@ -11,6 +11,11 @@ class TestProperties(TestBetamax):
 
         self.assertTrue(len(properties) > 0)
 
+    def test_retrieve_property(self):
+        prop = self.client.property(name='Test retrieve one property')
+
+        self.assertTrue(prop)
+
     def test_get_property_by_name(self):
         bike = self.project.part('Bike')
         # retrieve the property Gears directly via an API call
