@@ -330,3 +330,31 @@ class NavigationBarAlignment(Enum):
 
     START = 'start'
     CENTER = 'center'
+
+
+class PaperSize(Enum):
+    """The acceptable paper sizes options for a downloaded PDF.
+
+    :cvar A0: Paper of size A0
+    :cvar A1: Paper of size A1
+    :cvar A2: Paper of size A2
+    :cvar A3: Paper of size A3
+    :cvar A4: Paper of size A4
+    """
+
+    A0 = 'a0paper'
+    A1 = 'a1paper'
+    A2 = 'a2paper'
+    A3 = 'a3paper'
+    A4 = 'a4paper'
+
+
+class PaperOrientation(Enum):
+    """The acceptable paper orientation options for a downloaded PDF.
+
+    :cvar PORTRAIT: Paper of orientation 'portrait'
+    :cvar LANDSCAPE: Paper of orientation 'landscape'
+    """
+
+    PORTRAIT = 'portrait'
+    LANDSCAPE = 'landscape'
