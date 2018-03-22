@@ -1,10 +1,12 @@
 import datetime
+import os
 
 import requests
 import warnings
 from six import text_type
 
-from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames
+from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
+    PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
 from pykechain.models import Activity
 from pykechain.utils import is_uuid
@@ -392,3 +394,49 @@ class Activity2(Activity):
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not configure activity")
+
+    def download_as_pdf(self, target_dir=None, pdf_filename=None, paper_size=PaperSize.A4,
+                        paper_orientation=PaperOrientation.PORTRAIT):
+        """
+        Retrieve the PDF of the Activity.
+
+        .. versionadded:: 2.1
+
+        :param target_dir: (optional) directory path name where the store the log.txt to.
+        :type target_dir: basestring or None
+        :param pdf_filename: (optional) log filename to write the log to, defaults to `log.txt`.
+        :type pdf_filename: basestring or None
+        :param paper_size: The size of the paper to which the PDF is downloaded:
+                               - a4paper (default): A4 paper size
+                               - a3paper: A3 paper size
+                               - a2paper: A2 paper size
+                               - a1paper: A1 paper size
+                               - a0paper: A0 paper size
+        :type paper_size: basestring (see :class:`enums.PaperSize`)
+        :param paper_orientation: The orientation of the paper to which the PDF is downloaded:
+                               - portrait (default): portrait orientation
+                               - landscape: landscape orientation
+        :type paper_size: basestring (see :class:`enums.PaperOrientation`)
+        :raises APIError: if the pdf file could not be found.
+        :raises OSError: if the file could not be written.
+        """
+        if not pdf_filename:
+            pdf_filename = self.name + '.pdf'
+        if not pdf_filename.endswith('.pdf'):
+            pdf_filename += '.pdf'
+
+        full_path = os.path.join(target_dir or os.getcwd(), pdf_filename)
+
+        request_params = {
+            'papersize': paper_size,
+            'orientation': paper_orientation
+        }
+
+        url = self._client._build_url('activity_export', activity_id=self.id)
+        response = self._client._request('GET', url, params=request_params)
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not download PDF of activity {}".format(self.name))
+
+        with open(full_path, 'wb') as f:
+            for chunk in response.iter_content(1024):
+                f.write(chunk)
