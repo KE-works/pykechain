@@ -58,7 +58,7 @@ widgetconfig_json_schema = {
 class CustomizationBase(object):
     """Base class for customization objects.
 
-    :cvar activity: the :class:`Activity`
+    :cvar activity: an instance of `Activity`
     """
 
     def __init__(self, activity, client):
@@ -187,7 +187,7 @@ class ExtCustomization(CustomizationBase):
         :param emphasize_edit: Emphasize the Edit button (default False)
         :type emphasize_edit: bool
         :param new_instance: Show or hide the New instance button (default False). You need to provide a
-                             `parent_part_instance` in order for this to work.
+            `parent_part_instance` in order for this to work.
         :type new_instance: bool
         :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
         :type incomplete_rows: bool
@@ -200,22 +200,23 @@ class ExtCustomization(CustomizationBase):
         :param part_model: The part model based on which all instances will be shown.
         :type parent_part_instance: :class:`Part` or UUID
         :param parent_part_instance: The parent part instance for which the instances will be shown or to which new
-        instances will be added.
+            instances will be added.
         :type parent_part_instance: :class:`Part` or UUID
         :param max_height: The max height of the supergrid in pixels
         :type max_height: int or None
-        :param custom_title: A custom title for the supergrid
-                 - False (default): Part instance name
-                 - String value: Custom title
-                 - None: No title
+        :param custom_title: A custom title for the supergrid::
+            * False (default): Part instance name
+            * String value: Custom title
+            * None: No title
         :type custom_title: bool or basestring or None
         :param sort_property: The property model on which the part instances are being sorted on
         :type sort_property: :class:`Property` or UUID
         :param sort_direction: The direction on which the values of property instances are being sorted on:
-                               - ASC (default): Sort in ascending order
-                               - DESC: Sort in descending order
+            * ASC (default): Sort in ascending order
+            * DESC: Sort in descending order
         :type sort_direction: basestring (see :class:`enums.SortTable`)
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+
         """
         # Check whether the part_model is uuid type or class `Part`
         if isinstance(part_model, Part):
@@ -340,10 +341,10 @@ class ExtCustomization(CustomizationBase):
         :type part_instance: :class:`Part` or UUID
         :param max_height: The max height of the property grid in pixels
         :type max_height: int or None
-        :param custom_title: A custom title for the property grid
-                 - False (default): Part instance name
-                 - String value: Custom title
-                 - None: No title
+        :param custom_title: A custom title for the property grid::
+            * False (default): Part instance name
+            * String value: Custom title
+            * None: No title
         :type custom_title: bool or basestring or None
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
@@ -402,9 +403,9 @@ class ExtCustomization(CustomizationBase):
 
         :param text: The text that will be shown by the widget.
         :type text: basestring or None
-        :param custom_title: A custom title for the text panel
-                 - None (default): No title
-                 - String value: Custom title
+        :param custom_title: A custom title for the text panel::
+            * None (default): No title
+            * String value: Custom title
         :type custom_title: basestring or None
         :param collapsible: A boolean to decide whether the panel is collapsible or not
         :type collapsible: bool
@@ -454,7 +455,7 @@ class ExtCustomization(CustomizationBase):
         :param emphasize_edit: Emphasize the Edit button (default False)
         :type emphasize_edit: bool
         :param new_instance: Show or hide the New instance button (default False). You need to provide a
-                             `parent_part_instance` in order for this to work.
+            `parent_part_instance` in order for this to work.
         :type new_instance: bool
         :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
         :type incomplete_rows: bool
@@ -471,20 +472,20 @@ class ExtCustomization(CustomizationBase):
         :param part_model: The part model based on which all instances will be shown.
         :type parent_part_instance: :class:`Part` or UUID
         :param parent_part_instance: The parent part instance for which the instances will be shown or to which new
-        instances will be added.
+            instances will be added.
         :type parent_part_instance: :class:`Part` or UUID
         :param max_height: The max height of the paginated grid in pixels
         :type max_height: int or None
-        :param custom_title: A custom title for the paginated grid
-                 - False (default): Part instance name
-                 - String value: Custom title
-                 - None: No title
+        :param custom_title: A custom title for the paginated grid::
+            * False (default): Part instance name
+            * String value: Custom title
+            * None: No title
         :type custom_title: bool or basestring or None
         :param sort_property: The property model on which the part instances are being sorted on
         :type sort_property: :class:`Property` or UUID
-        :param sort_direction: The direction on which the values of property instances are being sorted on:
-                               - ASC (default): Sort in ascending order
-                               - DESC: Sort in descending order
+        :param sort_direction: The direction on which the values of property instances are being sorted on::
+            * ASC (default): Sort in ascending order
+            * DESC: Sort in descending order
         :type sort_direction: basestring (see :class:`enums.SortTable`)
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
@@ -618,14 +619,14 @@ class ExtCustomization(CustomizationBase):
         :param script: The Script to which the button will be coupled and will be ran when the button is pressed.
         :type script: :class:`Service` or UUID
         :param custom_title: A custom title for the script widget
-                 - False (default): Script name
-                 - String value: Custom title
-                 - None: No title
+            * False (default): Script name
+            * String value: Custom title
+            * None: No title
         :type custom_title: bool or basestring or None
         :param custom_button_text: A custom text for the button linked to the script
-                 - False (default): Script name
-                 - String value: Custom title
-                 - None: No title
+            * False (default): Script name
+            * String value: Custom title
+            * None: No title
         :type custom_button_text: bool or basestring or None
         :param emphasize_run: Emphasize the run button (default True)
         :type emphasize_run: bool
@@ -697,9 +698,9 @@ class ExtCustomization(CustomizationBase):
         :param notebook: The Notebook to which the button will be coupled and will start when the button is pressed.
         :type notebook: :class:`Service` or UUID
         :param custom_title: A custom title for the notebook widget
-                 - False (default): Notebook name
-                 - String value: Custom title
-                 - None: No title
+            * False (default): Notebook name
+            * String value: Custom title
+            * None: No title
         :type custom_title: bool or basestring or None
         :param height: The height of the Notebook in pixels
         :type height: int or None
@@ -754,9 +755,9 @@ class ExtCustomization(CustomizationBase):
         :param attachment_property: The Attachment Property to which the Viewer will be connected to.
         :type attachment_property: :class:`Property` or UUID
         :param custom_title: A custom title for the attachment viewer widget
-                 - False (default): Notebook name
-                 - String value: Custom title
-                 - None: No title
+            * False (default): Notebook name
+            * String value: Custom title
+            * None: No title
         :type custom_title: bool or basestring or None
         :param height: The height of the Notebook in pixels
         :type height: int or None
@@ -825,15 +826,14 @@ class ExtCustomization(CustomizationBase):
         The widget will be saved to KE-chain.
 
         :param activities: List of activities. Each activity must be a Python dict(), with the following keys:
-              - customText: A custom text for each button in the attachment viewer widget
-                 - None (default): Task name
-                 - String value: Custom text
-              - emphasize: bool which determines if the button should stand-out or not - default(False)
-              - activityId: class `Activity` or UUID
+            * customText: A custom text for each button in the attachment viewer widget: None (default): Task name;
+            a String value: Custom text
+            * emphasize: bool which determines if the button should stand-out or not - default(False)
+            * activityId: class `Activity` or UUID
         :type activities: list
         :param alignment: The alignment of the buttons inside navigation bar
-                          - center (default): Center aligned
-                          - start: left aligned
+            * center (default): Center aligned
+            * start: left aligned
         :type alignment: basestring (see :class:`enums.NavigationBarAlignment`)
 
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.

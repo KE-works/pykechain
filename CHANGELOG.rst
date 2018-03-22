@@ -4,12 +4,12 @@ Change Log
 pykechain changelog
 
 2.0.0 (14MAR18)
-------------------
+---------------
 
 This is a major release of pykechain, adding support for the legacy version of the Workflow Information Module (WIM) in KE-chain as well as the new version WIM2. Based on the version number of the WIM, either an `Activity` or an `Activity2` class is provided.
 
 Major differences
-=================
+~~~~~~~~~~~~~~~~~
 
 The main diferences in the concepts between WIM1 `Activity` and WIM2 `Activity2` are:
 
@@ -19,7 +19,7 @@ The main diferences in the concepts between WIM1 `Activity` and WIM2 `Activity2`
  * In WIM1, the assignees where to be assigned using usernames, in WIM2 user_ids need to be provided. For the sake of compatibility pykechain helps you in this. You can provide usernames to a `Activity2.edit()` and it is automatically translated in user_ids with additional calls to KE-chain.
 
 Other changes
-=============
+~~~~~~~~~~~~~
 
  * Revamped the activity API endpoints and functionality to work with the new WIM2 implementation of KE-chain 2.10 (MAR18)
  * Added a number of predicated on the `Activity` object to simplify the introspection of the Activity, eg. `is_rootlevel`, `is_root`, `is_workflow`...
@@ -30,12 +30,12 @@ Other changes
  * Fixed the way you limit the scope search in Scope.activities() and Scope.activity()
 
 Backward incompatible changes
-=============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Deprecated the 'inspector components' including its base classes.
  * Deprecated the 'single reference property', which is replaced by the `MultiReference` property.
 
 Pending Deprecation Warnings
-============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * In May 2018 we will deprecate the support of WIM1 in pykechain. `PendingDeprecationWarnings` are in place when you use WIM1 `Activity`.
 
 1.16.0 (14MAR18)
