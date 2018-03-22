@@ -6,7 +6,7 @@ from six import text_type
 
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
-from pykechain.models import Activity
+from pykechain.models.activity import Activity
 from pykechain.utils import is_uuid
 
 
