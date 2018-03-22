@@ -19,9 +19,9 @@ class TestPartUpdate(TestBetamax):
         refreshed_front_fork = self.project.part(pk=front_fork.id)
 
         for prop in refreshed_front_fork.properties:
-            self.assertIn(prop.name , update_dict, "property with {} should be in the update dict".format(prop.name))
-            self.assertEqual(update_dict[prop.name] ,prop.value, "property {} with value {} did not match contents " \
-                                                         "with KEC".format(prop.name, prop.value))
+            self.assertIn(prop.name, update_dict, "property with {} should be in the update dict".format(prop.name))
+            self.assertEqual(update_dict[prop.name], prop.value, "property {} with value {} did not match contents "
+                                                                 "with KEC".format(prop.name, prop.value))
 
         # tearDown
         for prop_name, prop_value in saved_front_fork_properties.items():
@@ -43,9 +43,9 @@ class TestPartUpdate(TestBetamax):
         refreshed_front_fork = self.project.part(pk=front_fork.id)
         self.assertEqual(refreshed_front_fork.name, 'Better front fork')
         for prop in refreshed_front_fork.properties:
-            self.assertIn(prop.name , update_dict, "property with {} should be in the update dict".format(prop.name))
-            self.assertEqual(update_dict[prop.name] ,prop.value, "property {} with value {} did not match contents " \
-                                                         "with KEC".format(prop.name, prop.value))
+            self.assertIn(prop.name, update_dict, "property with {} should be in the update dict".format(prop.name))
+            self.assertEqual(update_dict[prop.name], prop.value, "property {} with value {} did not match contents "
+                                                                 "with KEC".format(prop.name, prop.value))
 
         with self.assertRaises(IllegalArgumentError):
             front_fork.update(name=12, update_dict=update_dict)

@@ -4,12 +4,13 @@ from unittest import skip, skipIf
 import pytz
 import requests
 import warnings
+import os
 
 from pykechain.enums import Category, ActivityType, ActivityStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import Part, Activity
 from tests.classes import TestBetamax
-from tests.utils import TEST_FLAG_IS_WIM2
+from tests.utils import TEST_FLAG_IS_WIM2, temp_chdir
 
 ISOFORMAT = "%Y-%m-%dT%H:%M:%SZ"
 ISOFORMAT_HIGHPRECISION = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -531,3 +532,17 @@ class TestActivity2SpecificTests(TestBetamax):
 
         self.assertTrue(customized_task.is_configured())
         self.assertTrue(customized_task.is_customized())
+
+    def test_activity2_download_as_pdf(self):
+        # setUp
+        activity_name = 'test'
+        activity = self.project.activity(name=activity_name)
+
+        # testing
+        with temp_chdir() as target_dir:
+            activity.download_as_pdf(target_dir=target_dir, pdf_filename='pdf_file')
+            activity.download_as_pdf(target_dir=target_dir)
+            pdf_file = os.path.join(target_dir, 'pdf_file.pdf')
+            pdf_file_called_after_activity = os.path.join(target_dir, activity_name + '.pdf')
+            self.assertTrue(pdf_file)
+            self.assertTrue(pdf_file_called_after_activity)
