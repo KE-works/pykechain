@@ -3,6 +3,7 @@
 from .base import Base
 from .scope import Scope
 from .activity import Activity
+from .activity2 import Activity2
 from .part import Part
 from .property import Property
 from .property_attachment import AttachmentProperty
@@ -16,6 +17,7 @@ __all__ = (
     'Base',
     'Scope',
     'Activity',
+    'Activity2',
     'Part',
     'PartSet',
     'Property',
