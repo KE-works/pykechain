@@ -667,14 +667,22 @@ class Part(Base):
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not reorder properties")
 
-    def descendants_tree(self):
+    def descendants_tree(self, batch=200):
         """
+        Retrieves the descendants of a specific part in a list of dicts. Each descendant is a dictionary with the
+        key the name of the part and the value the Part itself. Each Part has a 'children' field which is a list of
+        dicts.
+        :param batch: Number of Parts to be retrieved in a batch
+        :type batch: int (defaults to 200)
+        :returns: list of `Parts` with `children`
 
-        Returns
+        Examples
         -------
+        >>> bike = client.part('Bike')
+        >>> bike.descendants_tree(batch=150)
 
         """
-        descendants_flat_list = list(self._client.parts(pk=self.id, descendants='children', batch=200))
+        descendants_flat_list = list(self._client.parts(pk=self.id, descendants='children', batch=batch))
 
         has_parent = set()
         descendants_with_children = {}
@@ -688,10 +696,6 @@ class Part(Base):
                         descendants_with_children[child.name] = child
                         descendants_with_children[parent.name].children[child.name] = descendants_with_children[child.name]
                     has_parent.add(child.name)
-        # descendants_with_children = []
-        # for key, value in all_items.items():
-        #     descendants_with_children.append({key: value})
-        # nested_descendants_dict[self.name] = all_items[self.name]
 
         return descendants_with_children
 
