@@ -669,14 +669,16 @@ class Part(Base):
 
     def descendants_tree(self, batch=200):
         """
-        Retrieves the descendants of a specific part in a list of dicts. Each descendant is a dictionary with the
-        key the name of the part and the value the Part itself. Each Part has a 'children' field which is a list of
-        dicts.
+        Retrieve the descendants of a specific part in a list of dicts.
+
+        Each descendant is a dictionary with the key the name of the part and the value the `Part` itself. Each `Part`
+        has a 'children' field which is a list of dicts containing the direct children (and so on).
+
         :param batch: Number of Parts to be retrieved in a batch
         :type batch: int (defaults to 200)
         :returns: list of `Parts` with `children`
 
-        Examples
+        Example
         -------
         >>> bike = client.part('Bike')
         >>> bike.descendants_tree(batch=150)
