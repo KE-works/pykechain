@@ -666,3 +666,32 @@ class Part(Base):
                                   ))
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not reorder properties")
+
+    def descendants_tree(self):
+        """
+
+        Returns
+        -------
+
+        """
+        descendants_flat_list = list(self._client.parts(pk=self.id, descendants='children', batch=200))
+
+        has_parent = set()
+        descendants_with_children = {}
+        for parent in descendants_flat_list:
+            parent.children = dict()
+            for child in descendants_flat_list:
+                if child.parent_id == parent.id:
+                    if parent.name not in descendants_with_children:
+                        descendants_with_children[parent.name] = parent
+                    if child.name not in descendants_with_children:
+                        descendants_with_children[child.name] = child
+                        descendants_with_children[parent.name].children[child.name] = descendants_with_children[child.name]
+                    has_parent.add(child.name)
+        # descendants_with_children = []
+        # for key, value in all_items.items():
+        #     descendants_with_children.append({key: value})
+        # nested_descendants_dict[self.name] = all_items[self.name]
+
+        return descendants_with_children
+
