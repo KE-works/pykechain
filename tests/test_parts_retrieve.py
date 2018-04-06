@@ -41,5 +41,5 @@ class TestPartRetrieve(TestBetamax):
         with self.assertRaises(NotFoundError):
             model_without_instances.instance()
 
-        #teardown
+        # tearDown
         model_without_instances.delete()

@@ -395,7 +395,7 @@ class ExtCustomization(CustomizationBase):
 
         self._add_widget(dict(config=config, meta=meta, name=WidgetNames.PROPERTYGRIDWIDGET))
 
-    def add_text_widget(self, text=None, custom_title=None, collapsible=False):
+    def add_text_widget(self, text=None, custom_title=None, collapsible=True, collapsed=False):
         """
         Add a KE-chain Text widget to the customization.
 
@@ -407,7 +407,9 @@ class ExtCustomization(CustomizationBase):
             * None (default): No title
             * String value: Custom title
         :type custom_title: basestring or None
-        :param collapsible: A boolean to decide whether the panel is collapsible or not
+        :param collapsible: A boolean to decide whether the panel is collapsible or not (default True)
+        :type collapsible: bool
+        :param collapsed: A boolean to decide whether the panel is collapsed or not (default False)
         :type collapsible: bool
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
@@ -429,12 +431,18 @@ class ExtCustomization(CustomizationBase):
             show_title_value = "No Title"
             title = None
         config['collapsible'] = collapsible
+        # A widget can only be collapsed if it is collapsible in the first place
+        if collapsible:
+            config['collapsed'] = collapsed
+        else:
+            config['collapsed'] = False
         config['title'] = title
         # Declare the meta info for the property grid
         meta = {
             "activityId": str(self.activity.id),
             "customTitle": title,
             "collapsible": collapsible,
+            "collapsed": collapsed,
             "html": text,
             "showTitleValue": show_title_value
         }
