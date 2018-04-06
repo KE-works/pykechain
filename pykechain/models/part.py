@@ -63,6 +63,7 @@ class Part(Base):
         self.parent_id = json['parent'].get('id') if 'parent' in json and json.get('parent') else None
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
         self.multiplicity = json.get('multiplicity', None)
+        self._cached_children = None
 
     def property(self, name):
         """Retrieve the property belonging to this part based on its name or uuid.
@@ -119,6 +120,7 @@ class Part(Base):
         else:
             return None
 
+
     def children(self, **kwargs):
         # type: (Any) -> Any
         """Retrieve the children of this `Part` as `Partset`.
@@ -141,7 +143,9 @@ class Part(Base):
         >>> wheel_children_of_bike = bike.children(name__icontains='wheel')
 
         """
-        return self._client.parts(parent=self.id, category=self.category, **kwargs)
+        if not self._cached_children:
+            self._cached_children = self._client.parts(parent=self.id, category=self.category, **kwargs)
+        return self._cached_children
 
     def siblings(self, **kwargs):
         # type: (Any) -> Any
@@ -667,21 +671,23 @@ class Part(Base):
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not reorder properties")
 
-    def descendants_tree(self, batch=200):
+    def populate_descendants(self, batch=200):
         """
-        Retrieve the descendants of a specific part in a list of dicts.
+        Retrieve the descendants of a specific part in a list of dicts and populate the :func:`Part.children()` method.
 
-        Each descendant is a dictionary with the key the name of the part and the value the `Part` itself. Each `Part`
-        has a 'children' field which is a list of dicts containing the direct children (and so on).
+        Each `Part` has a :func:`Part.children()` method to retrieve the children on the go. This function
+        prepopulates the children and the children's children with its children in one call, making the traversal
+        through the parttree blazingly fast.
 
         :param batch: Number of Parts to be retrieved in a batch
         :type batch: int (defaults to 200)
         :returns: list of `Parts` with `children`
+        :raises APIError: if you cannot create the children tree.
 
         Example
         -------
         >>> bike = client.part('Bike')
-        >>> bike.descendants_tree(batch=150)
+        >>> bike.populate_descendants(batch=150)
 
         """
         descendants_flat_list = list(self._client.parts(pk=self.id, descendants='children', batch=batch))
@@ -689,15 +695,14 @@ class Part(Base):
         has_parent = set()
         descendants_with_children = {}
         for parent in descendants_flat_list:
-            parent.children = dict()
+            parent._cached_children = list()
             for child in descendants_flat_list:
                 if child.parent_id == parent.id:
                     if parent.name not in descendants_with_children:
                         descendants_with_children[parent.name] = parent
                     if child.name not in descendants_with_children:
                         descendants_with_children[child.name] = child
-                        descendants_with_children[parent.name].children[child.name] = descendants_with_children[child.name]
+                        descendants_with_children[parent.name]._cached_children[child.name] = \
+                            descendants_with_children[child.name]
                     has_parent.add(child.name)
-
-        return descendants_with_children
 

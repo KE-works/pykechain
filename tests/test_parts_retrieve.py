@@ -48,9 +48,8 @@ class TestPartRetrieve(TestBetamax):
     def test_get_parts_with_descendants_tree(self):
         # setUp
         bike_part = self.project.part(name='Bike')
-        descendants_of_bike = bike_part.descendants_tree()
+        descendants_of_bike = bike_part.populate_descendants()
 
         # testing
-        self.assertEqual(len(descendants_of_bike), 13)
-        self.assertEqual(len(descendants_of_bike['Bike'].children), 5)
+        self.assertEqual(len(bike_part._cached_children), 5)
 
