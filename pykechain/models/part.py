@@ -692,17 +692,10 @@ class Part(Base):
         """
         descendants_flat_list = list(self._client.parts(pk=self.id, descendants='children', batch=batch))
 
-        has_parent = set()
-        descendants_with_children = {}
         for parent in descendants_flat_list:
             parent._cached_children = list()
             for child in descendants_flat_list:
                 if child.parent_id == parent.id:
-                    if parent.name not in descendants_with_children:
-                        descendants_with_children[parent.name] = parent
-                    if child.name not in descendants_with_children:
-                        descendants_with_children[child.name] = child
-                        descendants_with_children[parent.name]._cached_children[child.name] = \
-                            descendants_with_children[child.name]
-                    has_parent.add(child.name)
+                    parent._cached_children.append(child)
 
+        self._cached_children = descendants_flat_list[0]._cached_children
