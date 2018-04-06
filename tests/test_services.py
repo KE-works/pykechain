@@ -239,6 +239,7 @@ class TestServices(TestBetamax):
         service = self.project.service(name=service_name)
         last_service_execution = service.get_executions()[0]
 
+        # testing
         with temp_chdir() as target_dir:
             last_service_execution.get_log(target_dir=target_dir)
             log_file = os.path.join(target_dir, 'log.txt')

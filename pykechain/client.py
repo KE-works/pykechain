@@ -20,6 +20,7 @@ API_PATH = {
     'scope': 'api/scopes/{scope_id}.json',
     'activities': 'api/activities.json',
     'activity': 'api/activities/{activity_id}.json',
+    'activity_export': 'api/activities/{activity_id}/export',
     'parts': 'api/parts.json',
     'part': 'api/parts/{part_id}.json',
     'properties': 'api/properties.json',

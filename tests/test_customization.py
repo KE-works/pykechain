@@ -95,13 +95,13 @@ class TestExtCustomization(TestBetamax):
         """
         Test if a Property Grid Widget can be added to the customization without a title
         """
-        self.customization.add_property_grid_widget(self.instances[0], None, False)
+        self.customization.add_property_grid_widget(self.instances[0], max_height=None, custom_title=None)
 
         self.assertEqual(len(self.customization.widgets()), 1, "The customization should have 1 widget")
         self.assertTrue(self.customization.widgets()[0]["name"] == "propertyGridWidget",
                         "The first widget should be a propertyGridWidget")
-        self.assertEqual(self.customization.widgets()[0]["config"]["title"], self.instances[0].name,
-                         "The config should be not have a title property")
+        self.assertEqual(self.customization.widgets()[0]["config"]["title"], str(),
+                         "The config should not have a title")
 
         # tearDown
         self.customization.delete_all_widgets()
@@ -160,17 +160,19 @@ class TestExtCustomization(TestBetamax):
         """
         self.customization.add_text_widget(text='This widget has text', custom_title='This widget also has title',
                                            collapsible=True)
-        self.customization.add_text_widget()
+        self.customization.add_text_widget(collapsible=False, collapsed=True)
         widgets = self.customization.widgets()
         self.assertEqual(len(widgets), 2, "The customization should have 2 widgets")
         self.assertTrue(widgets[0]['name'] == 'htmlWidget')
         self.assertTrue(widgets[0]['config']['html'] == 'This widget has text')
         self.assertTrue(widgets[0]['config']['title'] == 'This widget also has title')
         self.assertTrue(widgets[0]['config']['collapsible'])
+        self.assertFalse(widgets[0]['config']['collapsed'])
 
         self.assertFalse('html' in widgets[1]['config'].keys())
         self.assertFalse(widgets[1]['config']['title'])
         self.assertFalse(widgets[1]['config']['collapsible'])
+        self.assertFalse(widgets[1]['config']['collapsed'])
 
         # tearDown
         self.customization.delete_all_widgets()

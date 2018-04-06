@@ -3,6 +3,15 @@ Change Log
 
 pykechain changelog
 
+
+2.1.0 (UNRELEASED)
+------------------
+ * We added an optimisation to the `Part`. When you use the `Part.children()` method, the children are cached for later re-retrieval. In order to boost performance even more, you can use the `Part.populate_descendants()` function to pre-populate all children for the whole subparttree inside the `Part`. You can easily then access its children without further expensive API calls. (#306)
+ * We brought the capabilities of the Text Widget up to specification with the KE-chain 2.10 release. We can now also provide and set the collapsed initial state of the text widget (#310). Thanks to @raduiordache.
+ * We added a function to download an activity as PDF (#286). Thanks to @raduiordache.
+ * Updated dependent versions for development: pytest (3.5.0), mypy (0.580), nbsphinx (0.3.2), tox (3.0.0), matplotlin (2.2.2), twine (1.11.0), shpinx (1.7.2)
+
+
 2.0.0 (14MAR18)
 ---------------
 
