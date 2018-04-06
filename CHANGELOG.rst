@@ -4,7 +4,7 @@ Change Log
 pykechain changelog
 
 
-2.1.0 (UNRELEASED)
+2.1.0 (6APR18)
 ------------------
  * We added an optimisation to the `Part`. When you use the `Part.children()` method, the children are cached for later re-retrieval. In order to boost performance even more, you can use the `Part.populate_descendants()` function to pre-populate all children for the whole subparttree inside the `Part`. You can easily then access its children without further expensive API calls. (#306)
  * We brought the capabilities of the Text Widget up to specification with the KE-chain 2.10 release. We can now also provide and set the collapsed initial state of the text widget (#310). Thanks to @raduiordache.
