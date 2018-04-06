@@ -36,10 +36,20 @@ class TestPartRetrieve(TestBetamax):
     def test_get_single_instance_of_a_model_without_instances_raises_notfounderror(self):
         catalog = self.project.model(name='Catalog container')
         model_without_instances = self.project.create_model(parent=catalog, name='model_without_instances',
-                                                           multiplicity=Multiplicity.ZERO_ONE)
+                                                            multiplicity=Multiplicity.ZERO_ONE)
 
         with self.assertRaises(NotFoundError):
             model_without_instances.instance()
 
         # tearDown
         model_without_instances.delete()
+
+    # test added in 2.1
+    def test_get_parts_with_descendants_tree(self):
+        # setUp
+        bike_part = self.project.part(name='Bike')
+        bike_part.populate_descendants()
+
+        # testing
+        self.assertEqual(len(bike_part._cached_children), 5)
+
