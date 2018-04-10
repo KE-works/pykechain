@@ -125,6 +125,12 @@ class Part(Base):
         # type: (Any) -> Any
         """Retrieve the children of this `Part` as `Partset`.
 
+        When you call the :func:`Part.children()` method without any additional filtering options for the children,
+        the children are cached to help speed up subsequent calls to retrieve the children.
+
+        When you *do provide* additional keyword arguments (kwargs) that act as a specific children filter, the
+        cached children are not used and a separate API call is made to retrieve only those children.
+
         :param kwargs: Additional search arguments to search for, check :class:`pykechain.Client.parts`
                        for additional info
         :type kwargs: dict
@@ -134,18 +140,26 @@ class Part(Base):
         Example
         -------
 
+        A normal call, which caches all children of the bike. If you call `bike.children` twice only 1 API call is made.
+
         >>> bike = project.part('Bike')
         >>> direct_descendants_of_bike = bike.children()
 
-        An example with providing additional part search parameters 'name__icontains'
+        An example with providing additional part search parameters 'name__icontains'. Children are retrieved from the
+        API, not the bike's internal (already cached in previous example) cache.
 
         >>> bike = project.part('Bike')
         >>> wheel_children_of_bike = bike.children(name__icontains='wheel')
 
         """
-        if not self._cached_children:
-            self._cached_children = self._client.parts(parent=self.id, category=self.category, **kwargs)
-        return self._cached_children
+        if not kwargs:
+            # no kwargs provided is the default, we aim to cache it.
+            if not self._cached_children:
+                self._cached_children = self._client.parts(parent=self.id, category=self.category)
+            return self._cached_children
+        else:
+            # if kwargs are provided, we assume no use of cache as specific filtering on the children is performed.
+            return self._client.parts(parent=self.id, category=self.category, **kwargs)
 
     def siblings(self, **kwargs):
         # type: (Any) -> Any
@@ -678,6 +692,8 @@ class Part(Base):
         Each `Part` has a :func:`Part.children()` method to retrieve the children on the go. This function
         prepopulates the children and the children's children with its children in one call, making the traversal
         through the parttree blazingly fast.
+
+        .. versionadded:: 2.1
 
         :param batch: Number of Parts to be retrieved in a batch
         :type batch: int (defaults to 200)
