@@ -8,6 +8,7 @@ from pykechain.enums import PropertyType
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models.base import Base
 from pykechain.models.validators.validator_schemas import options_json_schema
+from pykechain.models.validators.validators_base import PropertyValidator
 
 
 class Property(Base):
@@ -28,6 +29,8 @@ class Property(Base):
 
         if self._options:
             validate(self._options, options_json_schema)
+            if self._options.get('validators'):
+                self.__parse_validators()
 
     @property
     def output(self):
@@ -163,3 +166,45 @@ class Property(Base):
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Property ({})".format(r))
+
+    def __parse_validators(self):
+        """Parses the validator in the options to validators"""
+        self._validators = []
+        validators_json = self._options.get('validators')
+        for validator_json in validators_json:
+            self._validators.append(PropertyValidator.parse(json=validator_json))
+
+    def __dump_validators(self):
+        """Dumps the validators as json inside the _options dictionary with the key 'validators'"""
+
+        if hasattr(self, '_validators'):
+            validators_json = []
+            for validator in self._validators:
+                if isinstance(validator, PropertyValidator):
+                    validators_json.append(validator.as_json())
+                else:
+                    raise APIError("validator is not a PropertyValidator: '{}'".format(validator))
+            if self._options == dict(validators=validators_json):
+                #no change
+                pass
+            else:
+                new_options = dict(validators=validators_json)
+                validate(new_options, options_json_schema)
+                self._options = dict(validators=validators_json)
+
+
+    @property
+    def is_valid(self):
+        if not hasattr(self, '_validators'):
+            return None
+        else:
+            return all([validator.is_valid(self._value) for validator in getattr(self, '_validators')])
+
+    @property
+    def is_invalid(self):
+        if self.is_valid is not None:
+            return not self.is_valid
+        else:
+            return None
+
+

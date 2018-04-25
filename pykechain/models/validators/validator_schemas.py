@@ -1,6 +1,5 @@
 from pykechain.enums import PropertyVTypes
 
-# vtypes = ['numericRangeValidator', 'booleanFieldValidator', 'requiredFieldValidator']
 effects_jsonschema_stub = {
     "type": "object",
     "additionalProperties": False,
@@ -8,9 +7,9 @@ effects_jsonschema_stub = {
     "properties": {
         "effect": {"type": ["string", "null"]},
         "config": {"type": "object"}
-
     }
 }
+
 validator_jsonschema_stub = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -26,19 +25,26 @@ validator_jsonschema_stub = {
                 "on_invalid": {"type": "array", "items": effects_jsonschema_stub}
             }
         }
-
     }
 }
+
 validators_options_json_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "Validators JSON schema",
     "type": "array",
     "items": validator_jsonschema_stub
 }
+
 options_json_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "Toplevel Property Options JSON schema",
     "type": "object",
     "additionalProperties": True,
-    "properties": {"validators": validators_options_json_schema}
+    "properties": {
+        # Validators
+        "validators": validators_options_json_schema,
+
+        # Single Select Lists
+        "value_choices": {"type": "array"}
+    }
 }

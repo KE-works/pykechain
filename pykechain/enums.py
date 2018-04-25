@@ -380,6 +380,7 @@ class PropertyVTypes(Enum):
     REQUIREDFIELD = 'requiredFieldValidator'
     EVENNUMBER = 'evenNumberValidator'
     ODDNUMBER = 'oddNumberValidator'
+    REGEXSTRING = 'regexStringValidator'
 
 
 class ValidatorEffectTypes(Enum):
