@@ -358,3 +358,25 @@ class PaperOrientation(Enum):
 
     PORTRAIT = 'portrait'
     LANDSCAPE = 'landscape'
+
+
+class PropertyVTypes(Enum):
+    """The VTypes (or validator types) that are allowed in the json.
+
+    This corresponds to the various validator classes which SHOULD be named:
+       `vtype[0].upper() + vtype[1:]`
+       eg: 'numbericRangeValidator' has an implementation class of 'NumericRangeValidator'
+    """
+    NONEVALIDATOR = 'noneValidator'
+    NUMERICRANGE = 'numericRangeValidator'
+    BOOLEANFIELD = 'booleanFieldValidator'
+    REQUIREDFIELD = 'requiredFieldValidator'
+    EVENNUMBER = 'evenNumberValidator'
+    ODDNUMBER = 'oddNumberValidator'
+
+class ValidatorEffectTypes(Enum):
+    NONE_EFFECT = 'noneEffect'
+    VISUALEFFECT = 'visualEffect'
+    TEXT_EFFECT = 'textEffect'
+    ERRORTEXT_EFFECT = 'errorTextEffect'
+    HELPTEXT_EFFECT = 'helpTextEffect'
