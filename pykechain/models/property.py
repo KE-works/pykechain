@@ -1,11 +1,13 @@
 from typing import Any, AnyStr  # flake8: noqa
 
 import requests
+from jsonschema import validate
 from six import text_type
 
 from pykechain.enums import PropertyType
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models.base import Base
+from pykechain.models.validators.validator_schemas import options_json_schema
 
 
 class Property(Base):
@@ -21,7 +23,11 @@ class Property(Base):
 
         self._output = json.get('output')
         self._value = json.get('value')
+        self._options = json.get('options')
         self.type = json.get('property_type')
+
+        if self._options:
+            validate(self._options, options_json_schema)
 
     @property
     def output(self):
