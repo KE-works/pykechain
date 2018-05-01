@@ -198,7 +198,8 @@ class Property(Base):
         if not hasattr(self, '_validators'):
             return None
         else:
-            return all([validator.is_valid(self._value) for validator in getattr(self, '_validators')])
+            self.validate(reason=False)
+            return all(self._validation_results)
 
     @property
     def is_invalid(self):
@@ -207,4 +208,15 @@ class Property(Base):
         else:
             return None
 
+    def validate(self, reason=True):
+        """Returns the validation results and include an (optional) reason."""
+        if not hasattr(self, '_validators'):
+            return None
+        else:
+            self._validation_results = [validator.is_valid(self._value) for validator in getattr(self, '_validators')]
+            self._validation_reasons = [validator.get_reason() for validator in getattr(self, '_validators')]
 
+        if reason:
+            return list(zip(self._validation_results, self._validation_reasons))
+        else:
+            return self._validation_results

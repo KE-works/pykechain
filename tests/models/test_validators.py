@@ -129,6 +129,7 @@ class TestValidatorJSON(TestCase):
 
     def test_validatoreffect_not_allows_additional_properties(self):
         v = {
+            'effect': '',
             'config': {},
             'additional_option': None
 
@@ -182,8 +183,33 @@ class TestValidatorParsing(TestCase):
             )
         )
 
-        val = PropertyValidator.parse(validator_json)
+        validator = PropertyValidator.parse(validator_json)
 
-        self.assertIsInstance(val, NumericRangeValidator)
-        self.assertTrue(val.validate_json)
+        self.assertIsInstance(validator, NumericRangeValidator)
+        self.assertTrue(validator.validate_json)
         pass
+
+
+class TestValidatorDumping(TestCase):
+
+    def test_valid_numeric_range_validator_dumped(self):
+        validator_json = dict(
+            vtype='numericRangeValidator',
+            config=dict(
+                minvalue=2,
+                maxvalue=10,
+                stepsize=2,
+                enforce_stepsize=False,
+                on_valid=[dict(effect="visualEffect", config=dict(applyCss="valid"))],
+                on_invalid=[dict(effect="visualEffect", config=dict(applyCss="invalid")),
+                            dict(effect="errorTextEffect",
+                                 config=dict(text="Range should be between 2 and 10 with step 2."))]
+            )
+        )
+
+        validator = PropertyValidator.parse(validator_json)
+        self.assertIsInstance(validator, NumericRangeValidator)
+
+        dumped_json = validator.as_json()
+        self.assertIsNone(validate(dumped_json, validator_jsonschema_stub))
+        self.assertIsNone(validator.validate_json())

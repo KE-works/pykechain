@@ -13,41 +13,38 @@ class NumericRangeValidator(PropertyValidator):
     def __init__(self, json=None, minvalue=None, maxvalue=None, stepsize=None, enforce_stepsize=False, **kwargs):
         super(NumericRangeValidator, self).__init__(json=json, **kwargs)
 
-        self.minvalue = minvalue or self._config.get('minvalue', -inf)
-        self.maxvalue = maxvalue or self._config.get('maxvalue', inf)
-        self.stepsize = stepsize or self._config.get('stepsize', None)
-        self.enforce_stepsize = enforce_stepsize or self._config.get('enforce_stepsize') or False
+        if minvalue:
+            self._config['minvalue'] = minvalue
+        if maxvalue:
+            self._config['maxvalue'] = maxvalue
+        if stepsize:
+            self._config['stepsize'] = stepsize
+        if enforce_stepsize:
+            self._config['enforce_stepsize'] = enforce_stepsize
 
-        if self._config.get('on_valid'):
-            self.on_valid = self._parse_effects(self._config.get('on_valid'))
-        else:
-            self.on_valid = kwargs.get('on_valid') or []
+        self.minvalue = self._config.get('minvalue', -inf)
+        self.maxvalue = self._config.get('maxvalue', inf)
+        self.stepsize = self._config.get('stepsize', None)
+        self.enforce_stepsize = self._config.get('enforce_stepsize') or False
 
-        if self._config.get('on_invalid'):
-            self.on_invalid = self._parse_effects(self._config.get('on_invalid'))
-        else:
-            self.on_invalid = kwargs.get('on_invalid') or []
+    def _logic(self, value=None):
+        basereason = "Value '{}' should be between {} and {}".format(value, self.minvalue, self.maxvalue)
+        self._validation_result, self._validation_reason = None, None
 
-    def __call__(self, value):
-        return self.logic(value)
-
-    def logic(self, value=None):
         if value is not None:
             self._validation_result = value >= self.minvalue and value <= self.maxvalue
-        else:
-            return None
+            if not self._validation_result:
+                self._validation_reason = basereason
+            else:
+                self._validation_reason = basereason.replace('should be', 'is')
+
         if self.stepsize != 1 and self.enforce_stepsize:
-            self._validation_result = (value - self.maxvalue) % self.stepsize == 0
+            self._validation_result = (value - self.maxvalue) % self.stepsize <= 1E-10
+            if not self._validation_result:
+                self._validation_reason = "Value '{}' is not in alignment with a stepsize of {}". \
+                    format(value, self.stepsize)
 
-        if self._validation_result is True:
-            for effect in self.on_valid:
-                effect()
-
-        if self._validation_result is False:
-            for effect in self.on_invalid:
-                effect()
-
-        return self._validation_result
+        return self._validation_result, self._validation_reason
 
 
 class RequiredFieldValidator(PropertyValidator):
@@ -65,14 +62,24 @@ class EvenNumberValidator(PropertyValidator):
 class OddNumberValidator(PropertyValidator):
     vtype = PropertyVTypes.ODDNUMBER
 
+
 class RegexStringValidator(PropertyValidator):
     vtype = PropertyVTypes.REGEXSTRING
 
     def __init__(self, json=None, pattern=None, **kwargs):
         super(RegexStringValidator, self).__init__(json=json, **kwargs)
 
-        self._pattern = pattern or self._config.get('pattern', None)
-        self._re = re.compile(self._pattern)
+        self.pattern = pattern or self._config.get('pattern', r'.*')
+        self._re = re.compile(self.pattern)
 
-    def logic(self, value=None):
-        re.match(self._re, value)
+    def _logic(self, value=None):
+        if value is None:
+            return None, None
+
+        basereason = "Value '{}' should match the regex pattern '{}'".format(value, self.pattern)
+
+        self._validation_result = re.match(self._re, value)
+        if not self._validation_result:
+            self._validation_reason = basereason
+
+        return self._validation_result, self._validation_reason
