@@ -1,7 +1,6 @@
-# Validators for the properties
-# live in Property.options; which is a json field array
+from __future__ import division
+
 import re
-from math import inf
 
 from pykechain.enums import PropertyVTypes
 from pykechain.models.validators.validators_base import PropertyValidator
@@ -22,8 +21,8 @@ class NumericRangeValidator(PropertyValidator):
         if enforce_stepsize is not None:
             self._config['enforce_stepsize'] = enforce_stepsize
 
-        self.minvalue = self._config.get('minvalue', -inf)
-        self.maxvalue = self._config.get('maxvalue', inf)
+        self.minvalue = self._config.get('minvalue', float('-inf'))
+        self.maxvalue = self._config.get('maxvalue', float('inf'))
         self.stepsize = self._config.get('stepsize', None)
         self.enforce_stepsize = self._config.get('enforce_stepsize', None)
 
@@ -40,7 +39,7 @@ class NumericRangeValidator(PropertyValidator):
 
         if self.stepsize != 1 and self.enforce_stepsize:
             # to account also for floating point stepsize checks: https://stackoverflow.com/a/30445184/246235
-            if self.minvalue == -inf:
+            if self.minvalue == float('-inf'):
                 self._validation_result = abs(value / self.stepsize -
                                               round(value / self.stepsize)) < 1E-6
             else:

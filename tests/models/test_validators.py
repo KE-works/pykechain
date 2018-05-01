@@ -1,5 +1,3 @@
-from unittest import TestCase
-
 from jsonschema import validate, ValidationError
 
 from pykechain.enums import PropertyVTypes
@@ -9,9 +7,10 @@ from pykechain.models.validators import PropertyValidator, ValidatorEffect, Visu
 from pykechain.models.validators.validator_schemas import options_json_schema, validator_jsonschema_stub, \
     effects_jsonschema_stub
 from pykechain.models.validators.validators import RegexStringValidator
+from tests.classes import SixTestCase
 
 
-class TestValidatorJSON(TestCase):
+class TestValidatorJSON(SixTestCase):
     def test_valid_numeric_range_validator_json(self):
         options = dict(
             validators=[dict(
@@ -141,13 +140,13 @@ class TestValidatorJSON(TestCase):
             validate(v, effects_jsonschema_stub)
 
 
-class TestPropertyValidatorClass(TestCase):
+class TestPropertyValidatorClass(SixTestCase):
     def test_propertyvalidator_produces_valid_json(self):
         pv = PropertyValidator()
         pv.validate_json()
 
 
-class TestValidatorEffects(TestCase):
+class TestValidatorEffects(SixTestCase):
     def test_validator_effect_produces_valid_json(self):
         ve = ValidatorEffect()
         ve.validate_json()
@@ -168,7 +167,7 @@ class TestValidatorEffects(TestCase):
         ve.validate_json()
 
 
-class TestValidatorParsing(TestCase):
+class TestValidatorParsing(SixTestCase):
 
     def test_valid_numeric_range_validator_json(self):
         validator_json = dict(
@@ -192,7 +191,7 @@ class TestValidatorParsing(TestCase):
         pass
 
 
-class TestValidatorDumping(TestCase):
+class TestValidatorDumping(SixTestCase):
 
     def test_valid_numeric_range_validator_dumped(self):
         validator_json = dict(
@@ -217,7 +216,7 @@ class TestValidatorDumping(TestCase):
         self.assertIsNone(validator.validate_json())
 
 
-class TestNumericRangeValidator(TestCase):
+class TestNumericRangeValidator(SixTestCase):
     def test_numeric_range_without_settings_validated_json(self):
         validator = NumericRangeValidator()
 
@@ -264,7 +263,8 @@ class TestNumericRangeValidator(TestCase):
         self.assertTrue(validator.is_valid(13))
         self.assertTrue(validator.is_invalid(16))
 
-class TestBooleanFieldValidator(TestCase):
+
+class TestBooleanFieldValidator(SixTestCase):
     def test_boolean_validator_without_settings(self):
         validator = BooleanFieldValidator()
         self.assertIsNone(validator.validate_json())
@@ -272,8 +272,7 @@ class TestBooleanFieldValidator(TestCase):
         self.assertDictEqual(validator.as_json(), {'config': {}, 'vtype': 'booleanFieldValidator'})
 
 
-
-class TestRegexValidator(TestCase):
+class TestRegexValidator(SixTestCase):
     def test_regex_validator_without_settings(self):
         validator = RegexStringValidator()
         self.assertIsNone(validator.validate_json())
@@ -286,7 +285,7 @@ class TestRegexValidator(TestCase):
         self.assertTrue(validator('mr cactus is tevree'))
 
 
-class TestPropertyWithValidator(TestCase):
+class TestPropertyWithValidator(SixTestCase):
 
     def test_property_without_validator(self):
         prop = Property(json={}, client=None)

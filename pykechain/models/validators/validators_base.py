@@ -1,5 +1,3 @@
-from functools import lru_cache
-
 from jsonschema import validate
 
 from pykechain.enums import PropertyVTypes, ValidatorEffectTypes
@@ -22,7 +20,7 @@ class BaseValidator(object):
         return validate(self._json, self.jsonschema)
 
     @classmethod
-    def parse(cls, json: dict):
+    def parse(cls, json):
         raise NotImplementedError
 
 
@@ -79,8 +77,8 @@ class PropertyValidator(BaseValidator):
 
     def as_json(self):
         new_json = dict(
-            vtype = self.vtype,
-            config = self._config
+            vtype=self.vtype,
+            config=self._config
         )
 
         if self.on_valid:
@@ -143,7 +141,6 @@ class PropertyValidator(BaseValidator):
         """
         return self._validation_reason
 
-    @lru_cache(25)
     def _logic(self, value=None):
         """Process the inner logic of the validator.
 

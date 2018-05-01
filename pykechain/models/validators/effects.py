@@ -51,9 +51,9 @@ class VisualEffect(ValidatorEffect):
 
 class ValidVisualEffect(VisualEffect):
     def __init__(self, json=None, applyCss='valid'):
-        super(__class__, self).__init__(json=json, applyCss=applyCss)
+        super(ValidVisualEffect, self).__init__(json=json, applyCss=applyCss)
 
 
 class InvalidVisualEffect(VisualEffect):
     def __init__(self, json=None, applyCss='invalid'):
-        super(__class__, self).__init__(json=json, applyCss=applyCss)
+        super(InvalidVisualEffect, self).__init__(json=json, applyCss=applyCss)
