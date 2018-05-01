@@ -10,22 +10,22 @@ from pykechain.models.validators.validators_base import PropertyValidator
 class NumericRangeValidator(PropertyValidator):
     vtype = PropertyVTypes.NUMERICRANGE
 
-    def __init__(self, json=None, minvalue=None, maxvalue=None, stepsize=None, enforce_stepsize=False, **kwargs):
+    def __init__(self, json=None, minvalue=None, maxvalue=None, stepsize=None, enforce_stepsize=None, **kwargs):
         super(NumericRangeValidator, self).__init__(json=json, **kwargs)
 
-        if minvalue:
+        if minvalue is not None:
             self._config['minvalue'] = minvalue
-        if maxvalue:
+        if maxvalue is not None:
             self._config['maxvalue'] = maxvalue
-        if stepsize:
+        if stepsize is not None:
             self._config['stepsize'] = stepsize
-        if enforce_stepsize:
+        if enforce_stepsize is not None:
             self._config['enforce_stepsize'] = enforce_stepsize
 
         self.minvalue = self._config.get('minvalue', -inf)
         self.maxvalue = self._config.get('maxvalue', inf)
         self.stepsize = self._config.get('stepsize', None)
-        self.enforce_stepsize = self._config.get('enforce_stepsize') or False
+        self.enforce_stepsize = self._config.get('enforce_stepsize', None)
 
     def _logic(self, value=None):
         basereason = "Value '{}' should be between {} and {}".format(value, self.minvalue, self.maxvalue)
@@ -39,7 +39,14 @@ class NumericRangeValidator(PropertyValidator):
                 self._validation_reason = basereason.replace('should be', 'is')
 
         if self.stepsize != 1 and self.enforce_stepsize:
-            self._validation_result = (value - self.maxvalue) % self.stepsize <= 1E-10
+            # to account also for floating point stepsize checks: https://stackoverflow.com/a/30445184/246235
+            if self.minvalue == -inf:
+                self._validation_result = abs(value/self.stepsize -
+                                              round(value/self.stepsize)) < 1E-6
+            else:
+                self._validation_result = abs((value-self.minvalue)/self.stepsize -
+                                              round((value-self.minvalue)/self.stepsize)) < 1E-6
+
             if not self._validation_result:
                 self._validation_reason = "Value '{}' is not in alignment with a stepsize of {}". \
                     format(value, self.stepsize)

@@ -22,10 +22,10 @@ class Property(Base):
         """Construct a Property from a json object."""
         super(Property, self).__init__(json, **kwargs)
 
-        self._output = json.get('output')
-        self._value = json.get('value')
-        self._options = json.get('options')
-        self.type = json.get('property_type')
+        self._output = json.get('output', None)
+        self._value = json.get('value', None)
+        self._options = json.get('options', None)
+        self.type = json.get('property_type', None)
 
         if self._options:
             validate(self._options, options_json_schema)

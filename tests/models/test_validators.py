@@ -3,6 +3,7 @@ from unittest import TestCase
 from jsonschema import validate, ValidationError
 
 from pykechain.enums import PropertyVTypes
+from pykechain.models import Property
 from pykechain.models.validators import PropertyValidator, ValidatorEffect, VisualEffect, ValidVisualEffect, \
     InvalidVisualEffect, NumericRangeValidator
 from pykechain.models.validators.validator_schemas import options_json_schema, validator_jsonschema_stub, \
@@ -213,3 +214,60 @@ class TestValidatorDumping(TestCase):
         dumped_json = validator.as_json()
         self.assertIsNone(validate(dumped_json, validator_jsonschema_stub))
         self.assertIsNone(validator.validate_json())
+
+
+class TestNumericRangeValidator(TestCase):
+    def test_numeric_range_without_settings_validated_json(self):
+        validator = NumericRangeValidator()
+
+        as_json = validator.as_json()
+        self.assertIsNone(validator.validate_json())
+        self.assertIsInstance(as_json, dict)
+        self.assertDictEqual(as_json, {'config': {}, 'vtype': 'numericRangeValidator'})
+
+    def test_numeric_range_validates_with_lower_bound(self):
+        validator = NumericRangeValidator(minvalue=0)
+        self.assertTrue(validator.is_valid(1))
+
+    def test_numeric_range_validates_with_max_bound(self):
+        validator = NumericRangeValidator(maxvalue=10)
+        self.assertTrue(validator.is_valid(1))
+
+    def test_numeric_range_validates_with_min_max_bound(self):
+        validator = NumericRangeValidator(maxvalue=10, minvalue=0)
+        self.assertTrue(validator.is_valid(1))
+
+    def test_numeric_range_invalidates_with_lower_bound(self):
+        validator = NumericRangeValidator(minvalue=0)
+        self.assertFalse(validator.is_valid(-1))
+
+    def test_numeric_range_invalidates_with_max_bound(self):
+        validator = NumericRangeValidator(maxvalue=0)
+        self.assertFalse(validator.is_valid(1))
+
+    def test_numeric_range_invalidates_with_min_max_bound(self):
+        validator = NumericRangeValidator(maxvalue=10, minvalue=0)
+        self.assertFalse(validator.is_valid(-1))
+
+    def test_numeric_range_validates_with_min_max_bound_float(self):
+        validator = NumericRangeValidator(maxvalue=10., minvalue=0.)
+        self.assertTrue(validator.is_valid(1.5))
+
+    def test_numeric_range_validates_with_stepsize_float(self):
+        validator = NumericRangeValidator(stepsize=0.2, enforce_stepsize=True)
+        self.assertTrue(validator.is_valid(1.2))
+        self.assertTrue(validator.is_invalid(1.3))
+
+    def test_numeric_range_validates_with_stepsize_int_with_minvalue(self):
+        validator = NumericRangeValidator(minvalue=11, stepsize=2, enforce_stepsize=True)
+        self.assertTrue(validator.is_valid(13))
+        self.assertTrue(validator.is_invalid(16))
+
+class TestPropertyWithValidator(TestCase):
+
+    def test_property_without_validator(self):
+
+        prop = Property(json={}, client=None)
+        self.assertIsNone(prop.is_valid)
+        self.assertIsNone(prop.is_invalid)
+        self.assertIsNone(prop.validate())
