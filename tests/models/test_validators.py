@@ -284,7 +284,6 @@ class TestRegexValidator(TestCase):
         validator = RegexStringValidator(pattern=r'.*')
 
         self.assertTrue(validator('mr cactus is tevree'))
-        print(validator.get_reason())
 
 
 class TestPropertyWithValidator(TestCase):
@@ -305,6 +304,17 @@ class TestPropertyWithValidator(TestCase):
         self.assertTrue(prop.is_valid)
         self.assertFalse(prop.is_invalid)
         self.assertTrue(prop.validate())
+
+    def test_property_with_numeric_range_validator_value_is_none(self):
+        prop_json = dict(
+            value=None,
+            options=dict(
+                validators=[NumericRangeValidator(minvalue=0, maxvalue=10).as_json()]
+            ))
+        prop = Property(json=prop_json, client=None)
+        self.assertIsNone(prop.is_valid)
+        self.assertIsNone(prop.is_invalid)
+        self.assertListEqual(prop.validate(), [(None, None)])
 
     def test_property_with_boolean_validator(self):
         pass

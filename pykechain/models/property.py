@@ -199,7 +199,10 @@ class Property(Base):
             return None
         else:
             self.validate(reason=False)
-            return all(self._validation_results)
+            if all([vr is None for vr in self._validation_results]):
+                return None
+            else:
+                return all(self._validation_results)
 
     @property
     def is_invalid(self):
