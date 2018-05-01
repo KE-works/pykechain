@@ -41,11 +41,11 @@ class NumericRangeValidator(PropertyValidator):
         if self.stepsize != 1 and self.enforce_stepsize:
             # to account also for floating point stepsize checks: https://stackoverflow.com/a/30445184/246235
             if self.minvalue == -inf:
-                self._validation_result = abs(value/self.stepsize -
-                                              round(value/self.stepsize)) < 1E-6
+                self._validation_result = abs(value / self.stepsize -
+                                              round(value / self.stepsize)) < 1E-6
             else:
-                self._validation_result = abs((value-self.minvalue)/self.stepsize -
-                                              round((value-self.minvalue)/self.stepsize)) < 1E-6
+                self._validation_result = abs((value - self.minvalue) / self.stepsize -
+                                              round((value - self.minvalue) / self.stepsize)) < 1E-6
 
             if not self._validation_result:
                 self._validation_reason = "Value '{}' is not in alignment with a stepsize of {}". \
@@ -76,7 +76,10 @@ class RegexStringValidator(PropertyValidator):
     def __init__(self, json=None, pattern=None, **kwargs):
         super(RegexStringValidator, self).__init__(json=json, **kwargs)
 
-        self.pattern = pattern or self._config.get('pattern', r'.*')
+        if pattern is not None:
+            self._config['pattern'] = pattern
+
+        self.pattern = self._config.get('pattern', r'.*')
         self._re = re.compile(self.pattern)
 
     def _logic(self, value=None):
@@ -88,5 +91,7 @@ class RegexStringValidator(PropertyValidator):
         self._validation_result = re.match(self._re, value)
         if not self._validation_result:
             self._validation_reason = basereason
+        else:
+            self._validation_reason = basereason.replace('should match', 'matches')
 
         return self._validation_result, self._validation_reason

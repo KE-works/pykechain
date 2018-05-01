@@ -5,9 +5,10 @@ from jsonschema import validate, ValidationError
 from pykechain.enums import PropertyVTypes
 from pykechain.models import Property
 from pykechain.models.validators import PropertyValidator, ValidatorEffect, VisualEffect, ValidVisualEffect, \
-    InvalidVisualEffect, NumericRangeValidator
+    InvalidVisualEffect, NumericRangeValidator, BooleanFieldValidator
 from pykechain.models.validators.validator_schemas import options_json_schema, validator_jsonschema_stub, \
     effects_jsonschema_stub
+from pykechain.models.validators.validators import RegexStringValidator
 
 
 class TestValidatorJSON(TestCase):
@@ -104,7 +105,7 @@ class TestValidatorJSON(TestCase):
         v = {
             'vtype': PropertyVTypes.NUMERICRANGE,
             'config': {
-                'on_valid': [{'effect': '', 'config':{}}]
+                'on_valid': [{'effect': '', 'config': {}}]
             }
         }
         validate(v, validator_jsonschema_stub)
@@ -124,7 +125,7 @@ class TestValidatorJSON(TestCase):
             validate(v, effects_jsonschema_stub)
 
     def test_validatoreffect_requires_config_property(self):
-        v = { 'effect': ''}
+        v = {'effect': ''}
         with self.assertRaisesRegex(ValidationError, "'config' is a required property"):
             validate(v, effects_jsonschema_stub)
 
@@ -263,11 +264,47 @@ class TestNumericRangeValidator(TestCase):
         self.assertTrue(validator.is_valid(13))
         self.assertTrue(validator.is_invalid(16))
 
+class TestBooleanFieldValidator(TestCase):
+    def test_boolean_validator_without_settings(self):
+        validator = BooleanFieldValidator()
+        self.assertIsNone(validator.validate_json())
+        self.assertIsInstance(validator.as_json(), dict)
+        self.assertDictEqual(validator.as_json(), {'config': {}, 'vtype': 'booleanFieldValidator'})
+
+
+
+class TestRegexValidator(TestCase):
+    def test_regex_validator_without_settings(self):
+        validator = RegexStringValidator()
+        self.assertIsNone(validator.validate_json())
+        self.assertIsInstance(validator.as_json(), dict)
+        self.assertDictEqual(validator.as_json(), {'config': {}, 'vtype': 'regexStringValidator'})
+
+    def test_regex_validator_with_pattern_match(self):
+        validator = RegexStringValidator(pattern=r'.*')
+
+        self.assertTrue(validator('mr cactus is tevree'))
+        print(validator.get_reason())
+
+
 class TestPropertyWithValidator(TestCase):
 
     def test_property_without_validator(self):
-
         prop = Property(json={}, client=None)
         self.assertIsNone(prop.is_valid)
         self.assertIsNone(prop.is_invalid)
         self.assertIsNone(prop.validate())
+
+    def test_property_with_numeric_range_validator(self):
+        prop_json = dict(
+            value=1,
+            options=dict(
+                validators=[NumericRangeValidator(minvalue=0, maxvalue=10).as_json()]
+            ))
+        prop = Property(json=prop_json, client=None)
+        self.assertTrue(prop.is_valid)
+        self.assertFalse(prop.is_invalid)
+        self.assertTrue(prop.validate())
+
+    def test_property_with_boolean_validator(self):
+        pass
