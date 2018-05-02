@@ -56,6 +56,19 @@ class NumericRangeValidator(PropertyValidator):
 class RequiredFieldValidator(PropertyValidator):
     vtype = PropertyVTypes.REQUIREDFIELD
 
+    def _logic(self, value=None):
+        basereason = "Value is required"
+        self._validation_result, self._validation_reason = None, None
+
+        if value is not None:
+            self._validation_result = True
+            self._validation_reason = "Value is provided"
+        else:
+            self._validation_result = False
+            self._validation_reason = basereason
+
+        return self._validation_result, self._validation_reason
+
 
 class BooleanFieldValidator(PropertyValidator):
     vtype = PropertyVTypes.BOOLEANFIELD

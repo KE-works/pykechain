@@ -6,7 +6,7 @@ from pykechain.models.validators import PropertyValidator, ValidatorEffect, Visu
     InvalidVisualEffect, NumericRangeValidator, BooleanFieldValidator
 from pykechain.models.validators.validator_schemas import options_json_schema, validator_jsonschema_stub, \
     effects_jsonschema_stub
-from pykechain.models.validators.validators import RegexStringValidator
+from pykechain.models.validators.validators import RegexStringValidator, RequiredFieldValidator
 from tests.classes import SixTestCase
 
 
@@ -270,6 +270,31 @@ class TestBooleanFieldValidator(SixTestCase):
         self.assertIsNone(validator.validate_json())
         self.assertIsInstance(validator.as_json(), dict)
         self.assertDictEqual(validator.as_json(), {'config': {}, 'vtype': 'booleanFieldValidator'})
+
+
+class TestRequiredFieldValidator(SixTestCase):
+    def test_requiredfield_validator_without_settings(self):
+        validator = RequiredFieldValidator()
+        self.assertIsNone(validator.validate_json())
+        self.assertIsInstance(validator.as_json(), dict)
+        self.assertDictEqual(validator.as_json(), {'config': {}, 'vtype': 'requiredFieldValidator'})
+
+    def test_requiredfield_validator_is_false_on_nonevalue(self):
+        validator = RequiredFieldValidator()
+        self.assertFalse(validator.is_valid(None))
+
+    def test_requiredfield_validator_is_true_on_value(self):
+        validator = RequiredFieldValidator()
+        self.assertTrue(validator.is_valid(1))
+        self.assertTrue(validator.is_valid(0))
+        self.assertTrue(validator.is_valid(0.0))
+        self.assertTrue(validator.is_valid(float('inf')))
+        self.assertTrue(validator.is_valid('string'))
+        self.assertTrue(validator.is_valid({'key': 'val'}))
+        self.assertTrue(validator.is_valid([1, 2, 3]))
+        self.assertTrue(validator.is_valid((1,)))
+        self.assertTrue(validator.is_valid({1, 2, 3}))
+        self.assertTrue(validator.is_valid(False))
 
 
 class TestRegexValidator(SixTestCase):
