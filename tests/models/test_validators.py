@@ -309,6 +309,28 @@ class TestRegexValidator(SixTestCase):
 
         self.assertTrue(validator('mr cactus is tevree'))
 
+    def test_regex_validator_without_pattern_match(self):
+        validator = RegexStringValidator()
+
+        # per default the regex string matches everything
+        self.assertEqual(validator.pattern, '.*')
+        self.assertTrue(validator('mr cactus is tevree'))
+
+    def test_regex_validator_fails_on_none_value(self):
+        validator = RegexStringValidator(pattern=r'.*')
+
+        self.assertFalse(validator.is_valid(None))
+
+    def test_regex_validator_complex_email_regex(self):
+        email_re = r'\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+'
+        validator = RegexStringValidator(pattern=email_re)
+
+        self.assertTrue(validator.is_valid('support@ke-works.com'))
+        self.assertFalse(validator.is_valid('___'))
+        self.assertIsNone(validator.is_valid(None))
+        self.assertFalse(validator.is_valid('user@domain'))
+
+
 
 class TestPropertyWithValidator(SixTestCase):
 
