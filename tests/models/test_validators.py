@@ -282,6 +282,7 @@ class TestRequiredFieldValidator(SixTestCase):
     def test_requiredfield_validator_is_false_on_nonevalue(self):
         validator = RequiredFieldValidator()
         self.assertFalse(validator.is_valid(None))
+        self.assertFalse(validator.is_valid(''))
 
     def test_requiredfield_validator_is_true_on_value(self):
         validator = RequiredFieldValidator()
@@ -329,7 +330,6 @@ class TestRegexValidator(SixTestCase):
         self.assertFalse(validator.is_valid('___'))
         self.assertIsNone(validator.is_valid(None))
         self.assertFalse(validator.is_valid('user@domain'))
-
 
 
 class TestPropertyWithValidator(SixTestCase):

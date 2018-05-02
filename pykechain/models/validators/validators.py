@@ -60,7 +60,7 @@ class RequiredFieldValidator(PropertyValidator):
         basereason = "Value is required"
         self._validation_result, self._validation_reason = None, None
 
-        if value is not None:
+        if value is not None and value != '':
             self._validation_result = True
             self._validation_reason = "Value is provided"
         else:
