@@ -6,6 +6,7 @@ from pykechain.models.validators.validator_schemas import validator_jsonschema_s
 
 class BaseValidator(object):
     jsonschema = None
+    accuracy = 1E-6
 
     def __init__(self, json=None, *args, **kwargs):
         self._json = json or dict(config=dict())

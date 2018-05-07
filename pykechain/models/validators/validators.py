@@ -47,10 +47,10 @@ class NumericRangeValidator(PropertyValidator):
             # to account also for floating point stepsize checks: https://stackoverflow.com/a/30445184/246235
             if self.minvalue == float('-inf'):
                 self._validation_result = abs(value / self.stepsize -
-                                              round(value / self.stepsize)) < 1E-6
+                                              round(value / self.stepsize)) < self.accuracy
             else:
                 self._validation_result = abs((value - self.minvalue) / self.stepsize -
-                                              round((value - self.minvalue) / self.stepsize)) < 1E-6
+                                              round((value - self.minvalue) / self.stepsize)) < self.accuracy
 
             if not self._validation_result:
                 self._validation_reason = "Value '{}' is not in alignment with a stepsize of {}". \
@@ -93,7 +93,7 @@ class EvenNumberValidator(PropertyValidator):
 
         basereason = "Value '{}' should be an even number".format(value)
 
-        self._validation_result = int(value) % 2 == 0
+        self._validation_result = value % 2 < self.accuracy
         if self._validation_result:
             self._validation_reason = basereason.replace("should be", "is")
             return self._validation_result
@@ -115,7 +115,7 @@ class OddNumberValidator(PropertyValidator):
 
         basereason = "Value '{}' should be a odd number".format(value)
 
-        self._validation_result = int(value) % 2 != 0
+        self._validation_result = int(value) % 2 > self.accuracy
         if self._validation_result:
             self._validation_reason = basereason.replace("should be", "is")
             return self._validation_result
@@ -126,6 +126,22 @@ class OddNumberValidator(PropertyValidator):
 
 class SingleReferenceValidator(PropertyValidator):
     vtype = PropertyVTypes.SINGLEREFERENCE
+
+    def _logic(self, value=None):
+        if value is None:
+            self._validation_result, self.validation_reason = None, "No reason"
+            return self._validation_result
+        if not isinstance(value, (list, tuple, set)):
+            self._validation_result, self.validation_reason = False, "Value should be a list, tuple or set"
+            return self._validation_result
+
+        self._validation_result = len(value) == 1 or len(value) == 0
+        if self._validation_result:
+            self._validation_reason = "A single or no value is selected"
+            return self._validation_result
+        else:
+            self._validation_reason = "More than a single instance is selected"
+            return self._validation_result
 
 
 class RegexStringValidator(PropertyValidator):

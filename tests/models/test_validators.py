@@ -388,11 +388,13 @@ class TestOddEvenNumberValidator(SixTestCase):
 
     def test_even_number_validator_float_invalid(self):
         validator = EvenNumberValidator()
-        self.assertFalse(validator.is_valid(3.99999999999))
+        self.assertFalse(validator.is_valid(3.99))
+        self.assertTrue(validator.is_valid(3.9999999999999999))  # rounding accuracy
 
     def test_odd_number_validator_float_invalud(self):
         validator = OddNumberValidator()
-        self.assertFalse(validator.is_valid(4.99999999999))
+        self.assertFalse(validator.is_valid(4.99))
+        self.assertTrue(validator.is_valid(4.9999999999999999))  # rounding accuracy
 
     def test_even_number_validator_invalid_input(self):
         validator = EvenNumberValidator()
@@ -412,11 +414,30 @@ class TestOddEvenNumberValidator(SixTestCase):
 
 
 class TestSingleReferenceValidator(SixTestCase):
-    def test_even_number_validator_without_settings(self):
+    def test_singlereference_validator_without_settings(self):
         validator = SingleReferenceValidator()
         self.assertIsNone(validator.validate_json())
         self.assertIsInstance(validator.as_json(), dict)
         self.assertDictEqual(validator.as_json(), {'config': {}, 'vtype': 'singleReferenceValidator'})
+
+    def test_singlereference_validator_is_valid(self):
+        validator = SingleReferenceValidator()
+        self.assertIsNone(validator.is_valid(None))
+        self.assertTrue(validator.is_valid(list()))
+        self.assertTrue(validator.is_valid(set()))
+        self.assertTrue(validator.is_valid(tuple()))
+        self.assertTrue(validator.is_valid(('first selection',)))
+
+    def test_singlereference_validator_is_invalid(self):
+        validator = SingleReferenceValidator()
+        self.assertFalse(validator.is_valid(["first", "second"]))
+        self.assertFalse(validator.is_valid((1, 2)))
+
+    def test_singlerefence_validator_is_invalid_with_invalid_values(self):
+        validator = SingleReferenceValidator()
+        self.assertFalse(validator.is_valid("a string"))
+        self.assertFalse(validator.is_valid(1.0))
+        self.assertFalse(validator.is_valid(dict()))
 
 
 class TestPropertyWithValidator(SixTestCase):
