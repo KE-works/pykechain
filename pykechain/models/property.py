@@ -86,10 +86,14 @@ class Property(Base):
             if not isinstance(validator, PropertyValidator):
                 raise IllegalArgumentError("Validator '{}' should be a PropertyValidator object".format(validator))
             validator.validate_json()
+
+        # set the internal validators list
         self._validators = list(set(validators))
+
+        # dump to _json options
         self.__dump_validators()
-        print('----saving options to KEC')
-        print(self._options)
+
+        # update the options to KE-chain backend
         self.edit(options=self._options)
 
     @property

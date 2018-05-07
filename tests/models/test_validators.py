@@ -499,3 +499,19 @@ class TestPropertyWithValidatorFromLiveServer(TestBetamax):
 
         # teardown
         numeric_range_prop_model.validators = saved_validators
+
+    def test_numeric_property_add_requiredvalidator_on_instance(self):
+        part_model = self.project.model(name='Model')
+        numeric_range_prop_instance = part_model.instance().property(name='numericrange')
+        saved_validators = numeric_range_prop_instance.validators
+
+        # test
+        validators = numeric_range_prop_instance.validators
+        validators.append(RequiredFieldValidator())
+        numeric_range_prop_instance.validators = validators
+
+        for validator in numeric_range_prop_instance.validators:
+            self.assertIsInstance(validator, (NumericRangeValidator, RequiredFieldValidator))
+
+        # teardown
+        numeric_range_prop_instance.validators = saved_validators
