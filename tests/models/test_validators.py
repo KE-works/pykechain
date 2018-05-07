@@ -263,6 +263,13 @@ class TestNumericRangeValidator(SixTestCase):
         self.assertTrue(validator.is_valid(13))
         self.assertTrue(validator.is_invalid(16))
 
+    def test_numeric_range_raises_exception_when_min_is_greater_than_max(self):
+        with self.assertRaisesRegex(Exception, 'should be smaller than the maxvalue'):
+            NumericRangeValidator(minvalue=11, maxvalue=-11)
+
+    def test_numeric_range_raises_exception_when_enforce_stepsize_without_stepsize(self):
+        with self.assertRaisesRegex(Exception, 'The stepsize should be provided when enforcing stepsize'):
+            NumericRangeValidator(stepsize=None, enforce_stepsize=True)
 
 class TestBooleanFieldValidator(SixTestCase):
     def test_boolean_validator_without_settings(self):

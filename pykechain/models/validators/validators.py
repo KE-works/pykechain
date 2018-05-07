@@ -26,6 +26,12 @@ class NumericRangeValidator(PropertyValidator):
         self.stepsize = self._config.get('stepsize', None)
         self.enforce_stepsize = self._config.get('enforce_stepsize', None)
 
+        if self.minvalue > self.maxvalue:
+            raise Exception('The minvalue ({}) should be smaller than the maxvalue ({}) of the numeric '
+                            'range validation'.format(self.minvalue, self.maxvalue))
+        if self.enforce_stepsize and self.stepsize is None:
+            raise Exception('The stepsize should be provided when enforcing stepsize')
+
     def _logic(self, value=None):
         basereason = "Value '{}' should be between {} and {}".format(value, self.minvalue, self.maxvalue)
         self._validation_result, self._validation_reason = None, None
