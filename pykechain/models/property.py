@@ -2,7 +2,7 @@ from typing import Any, AnyStr  # flake8: noqa
 
 import requests
 from jsonschema import validate
-from six import text_type
+from six import text_type, iteritems
 
 from pykechain.enums import PropertyType
 from pykechain.exceptions import APIError, IllegalArgumentError
@@ -14,7 +14,20 @@ from pykechain.models.validators.validators_base import PropertyValidator
 class Property(Base):
     """A virtual object representing a KE-chain property.
 
-    :cvar type: The property type of the property. One of the types described in :class:`pykechain.enums.PropertyType`
+    :ivar type: The property type of the property. One of the types described in :class:`pykechain.enums.PropertyType`
+    :type type: str
+    :ivar output: a boolean if the value is configured as an output (in an activity)
+    :type output: bool
+    :ivar part: The (parent) part in which this property is available
+    :type part: :class:`Part`
+    :ivar value: the property value, can be set as well as property
+    :type value: Any
+    :ivar validators: the list of validators that are available in the property
+    :type validators: list(PropertyValidator)
+    :ivar is_valid: if the property conforms to the validators
+    :type is_valid: bool
+    :ivar is_invalid: if the property does not conform to the validator
+    :type is_invalid: bool
     """
 
     def __init__(self, json, **kwargs):
@@ -58,6 +71,26 @@ class Property(Base):
         if self._put_value(value):
             self._value = value
             self._json_data['value'] = value
+
+    @property
+    def validators(self):
+        return self._validators
+
+    @validators.setter
+    def validators(self, validators):
+        # type: ((list, tuple)) -> None
+        if not isinstance(validators, (tuple, list)):
+            raise IllegalArgumentError('Should be a list or tuple with PropertyValidator objects, '
+                                       'got {}'.format(type(validators)))
+        for validator in validators:
+            if not isinstance(validator, PropertyValidator):
+                raise IllegalArgumentError("Validator '{}' should be a PropertyValidator object".format(validator))
+            validator.validate_json()
+        self._validators = list(set(validators))
+        self.__dump_validators()
+        print('----saving options to KEC')
+        print(self._options)
+        self.edit(options=self._options)
 
     @property
     def part(self):
@@ -121,7 +154,7 @@ class Property(Base):
         else:
             return Property(json, **kwargs)
 
-    def edit(self, name=None, description=None, unit=None):
+    def edit(self, name=None, description=None, unit=None, **kwargs):
         # type: (AnyStr, AnyStr, AnyStr) -> None
         """
         Edit the details of a property (model).
@@ -132,6 +165,8 @@ class Property(Base):
         :type description: basestring or None
         :param unit: (optional) new unit of the property
         :type unit: basestring or None
+        :param kwargs: (optional) additional kwargs to be edited (eg. options)
+        :type kwargs: dict or None
         :return: None
         :raises APIError: When unable to edit the property
         :raises IllegalArgumentError: when the type of the input is provided incorrect.
@@ -161,6 +196,10 @@ class Property(Base):
                 raise IllegalArgumentError("unit should be provided as a string, was provided as '{}'".
                                            format(type(unit)))
             update_dict.update({'unit': unit})
+        if kwargs:
+            # process the other kwargs in py27 style.
+            for key, value in iteritems(kwargs):
+                update_dict[key] = value
 
         r = self._client._request('PUT', self._client._build_url('property', property_id=self.id), json=update_dict)
 
@@ -168,15 +207,14 @@ class Property(Base):
             raise APIError("Could not update Property ({})".format(r))
 
     def __parse_validators(self):
-        """Parses the validator in the options to validators"""
+        """Parses the validator in the options to validators."""
         self._validators = []
         validators_json = self._options.get('validators')
         for validator_json in validators_json:
             self._validators.append(PropertyValidator.parse(json=validator_json))
 
     def __dump_validators(self):
-        """Dumps the validators as json inside the _options dictionary with the key 'validators'"""
-
+        """Dumps the validators as json inside the _options dictionary with the key `validators`."""
         if hasattr(self, '_validators'):
             validators_json = []
             for validator in self._validators:
@@ -185,13 +223,12 @@ class Property(Base):
                 else:
                     raise APIError("validator is not a PropertyValidator: '{}'".format(validator))
             if self._options == dict(validators=validators_json):
-                #no change
+                # no change
                 pass
             else:
                 new_options = dict(validators=validators_json)
                 validate(new_options, options_json_schema)
                 self._options = dict(validators=validators_json)
-
 
     @property
     def is_valid(self):
@@ -212,7 +249,18 @@ class Property(Base):
             return None
 
     def validate(self, reason=True):
-        """Returns the validation results and include an (optional) reason."""
+        """Returns the validation results and include an (optional) reason.
+
+        If reason keyword is true, the validation is returned for each validation
+        the [(<result: bool>, <reason:str>), ...].
+
+        :param reason: (optional) switch to indicate if the reason of the validation should be provided
+        :type reason: bool
+        :return: list of validation results [bool, bool, ...] or
+                 a list of validation results, reasons [(bool, str), ...]
+        :rtype: list(bool) or list((bool, str))
+        :raises Exception: for incorrect validators or incompatible values
+        """
         if not hasattr(self, '_validators'):
             return None
         else:

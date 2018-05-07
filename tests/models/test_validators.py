@@ -8,7 +8,7 @@ from pykechain.models.validators.validator_schemas import options_json_schema, v
     effects_jsonschema_stub
 from pykechain.models.validators.validators import RegexStringValidator, RequiredFieldValidator, EvenNumberValidator, \
     OddNumberValidator, SingleReferenceValidator
-from tests.classes import SixTestCase
+from tests.classes import SixTestCase, TestBetamax
 
 
 class TestValidatorJSON(SixTestCase):
@@ -472,3 +472,30 @@ class TestPropertyWithValidator(SixTestCase):
 
     def test_property_with_boolean_validator(self):
         pass
+
+class TestPropertyWithValidatorFromLiveServer(TestBetamax):
+
+    def test_numeric_property_with_validator_parses(self):
+        part_model = self.project.model(name='Model')
+        part_instance = part_model.instance()
+        numeric_range_prop_model = part_model.property(name='numericrange')
+        numeric_range_prop_instance = part_instance.property(name='numericrange')
+
+        self.assertIsInstance(numeric_range_prop_instance._validators, list)
+        self.assertIsInstance(numeric_range_prop_instance._validators[0], PropertyValidator)
+
+    def test_numeric_property_add_requiredvalidator_on_model(self):
+        part_model = self.project.model(name='Model')
+        numeric_range_prop_model = part_model.property(name='numericrange')
+        saved_validators = numeric_range_prop_model.validators
+
+        # test
+        validators = numeric_range_prop_model.validators
+        validators.append(RequiredFieldValidator())
+        numeric_range_prop_model.validators = validators
+
+        for validator in numeric_range_prop_model.validators:
+            self.assertIsInstance(validator, (NumericRangeValidator, RequiredFieldValidator))
+
+        # teardown
+        numeric_range_prop_model.validators = saved_validators
