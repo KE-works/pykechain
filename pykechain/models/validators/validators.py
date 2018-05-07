@@ -83,9 +83,49 @@ class BooleanFieldValidator(PropertyValidator):
 class EvenNumberValidator(PropertyValidator):
     vtype = PropertyVTypes.EVENNUMBER
 
+    def _logic(self, value=None):
+        if value is None:
+            self._validation_result, self.validation_reason = None, "No reason"
+            return self._validation_result
+        if not isinstance(value, (int, float)):
+            self._validation_result, self.validation_reason = False, "Value should be an integer, or float (floored)"
+            return self._validation_result
+
+        basereason = "Value '{}' should be an even number".format(value)
+
+        self._validation_result = int(value) % 2 == 0
+        if self._validation_result:
+            self._validation_reason = basereason.replace("should be", "is")
+            return self._validation_result
+        else:
+            self._validation_reason = basereason
+            return self._validation_result
+
 
 class OddNumberValidator(PropertyValidator):
     vtype = PropertyVTypes.ODDNUMBER
+
+    def _logic(self, value=None):
+        if value is None:
+            self._validation_result, self.validation_reason = None, "No reason"
+            return self._validation_result
+        if not isinstance(value, (int, float)):
+            self._validation_result, self.validation_reason = False, "Value should be an integer, or float (floored)"
+            return self._validation_result
+
+        basereason = "Value '{}' should be a odd number".format(value)
+
+        self._validation_result = int(value) % 2 != 0
+        if self._validation_result:
+            self._validation_reason = basereason.replace("should be", "is")
+            return self._validation_result
+        else:
+            self._validation_reason = basereason
+            return self._validation_result
+
+
+class SingleReferenceValidator(PropertyValidator):
+    vtype = PropertyVTypes.SINGLEREFERENCE
 
 
 class RegexStringValidator(PropertyValidator):

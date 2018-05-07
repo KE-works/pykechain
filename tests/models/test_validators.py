@@ -6,7 +6,8 @@ from pykechain.models.validators import PropertyValidator, ValidatorEffect, Visu
     InvalidVisualEffect, NumericRangeValidator, BooleanFieldValidator
 from pykechain.models.validators.validator_schemas import options_json_schema, validator_jsonschema_stub, \
     effects_jsonschema_stub
-from pykechain.models.validators.validators import RegexStringValidator, RequiredFieldValidator
+from pykechain.models.validators.validators import RegexStringValidator, RequiredFieldValidator, EvenNumberValidator, \
+    OddNumberValidator, SingleReferenceValidator
 from tests.classes import SixTestCase
 
 
@@ -271,6 +272,7 @@ class TestNumericRangeValidator(SixTestCase):
         with self.assertRaisesRegex(Exception, 'The stepsize should be provided when enforcing stepsize'):
             NumericRangeValidator(stepsize=None, enforce_stepsize=True)
 
+
 class TestBooleanFieldValidator(SixTestCase):
     def test_boolean_validator_without_settings(self):
         validator = BooleanFieldValidator()
@@ -337,6 +339,84 @@ class TestRegexValidator(SixTestCase):
         self.assertFalse(validator.is_valid('___'))
         self.assertIsNone(validator.is_valid(None))
         self.assertFalse(validator.is_valid('user@domain'))
+
+
+class TestOddEvenNumberValidator(SixTestCase):
+    def test_even_number_validator_without_settings(self):
+        validator = EvenNumberValidator()
+        self.assertIsNone(validator.validate_json())
+        self.assertIsInstance(validator.as_json(), dict)
+        self.assertDictEqual(validator.as_json(), {'config': {}, 'vtype': 'evenNumberValidator'})
+
+    def test_odd_number_validator_without_settings(self):
+        validator = OddNumberValidator()
+        self.assertIsNone(validator.validate_json())
+        self.assertIsInstance(validator.as_json(), dict)
+        self.assertDictEqual(validator.as_json(), {'config': {}, 'vtype': 'oddNumberValidator'})
+
+    def test_even_number_validator_is_valid(self):
+        validator = EvenNumberValidator()
+        self.assertTrue(validator.is_valid(2))
+
+    def test_odd_number_validator_is_valid(self):
+        validator = OddNumberValidator()
+        self.assertTrue(validator.is_valid(3))
+
+    def test_even_number_validator_is_invalid(self):
+        validator = EvenNumberValidator()
+        self.assertFalse(validator.is_valid(3))
+
+    def test_odd_number_validator_is_invalid(self):
+        validator = OddNumberValidator()
+        self.assertFalse(validator.is_valid(4))
+
+    def test_even_number_validator_is_none(self):
+        validator = EvenNumberValidator()
+        self.assertIsNone(validator.is_valid(None))
+
+    def test_odd_number_validator_is_none(self):
+        validator = OddNumberValidator()
+        self.assertIsNone(validator.is_valid(None))
+
+    def test_even_number_validator_float_valid(self):
+        validator = EvenNumberValidator()
+        self.assertTrue(validator.is_valid(4.0))
+
+    def test_odd_number_validator_float_valud(self):
+        validator = OddNumberValidator()
+        self.assertTrue(validator.is_valid(3.0))
+
+    def test_even_number_validator_float_invalid(self):
+        validator = EvenNumberValidator()
+        self.assertFalse(validator.is_valid(3.99999999999))
+
+    def test_odd_number_validator_float_invalud(self):
+        validator = OddNumberValidator()
+        self.assertFalse(validator.is_valid(4.99999999999))
+
+    def test_even_number_validator_invalid_input(self):
+        validator = EvenNumberValidator()
+        self.assertFalse(validator.is_valid(dict()))
+        self.assertFalse(validator.is_valid(list))
+        self.assertFalse(validator.is_valid(set()))
+        self.assertFalse(validator.is_valid(tuple()))
+        self.assertFalse(validator.is_valid("3"))
+
+    def test_odd_number_validator_invalid_input(self):
+        validator = OddNumberValidator()
+        self.assertFalse(validator.is_valid(dict()))
+        self.assertFalse(validator.is_valid(list))
+        self.assertFalse(validator.is_valid(set()))
+        self.assertFalse(validator.is_valid(tuple()))
+        self.assertFalse(validator.is_valid("3"))
+
+
+class TestSingleReferenceValidator(SixTestCase):
+    def test_even_number_validator_without_settings(self):
+        validator = SingleReferenceValidator()
+        self.assertIsNone(validator.validate_json())
+        self.assertIsInstance(validator.as_json(), dict)
+        self.assertDictEqual(validator.as_json(), {'config': {}, 'vtype': 'singleReferenceValidator'})
 
 
 class TestPropertyWithValidator(SixTestCase):

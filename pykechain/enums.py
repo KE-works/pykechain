@@ -381,6 +381,7 @@ class PropertyVTypes(Enum):
     EVENNUMBER = 'evenNumberValidator'
     ODDNUMBER = 'oddNumberValidator'
     REGEXSTRING = 'regexStringValidator'
+    SINGLEREFERENCE = 'singleReferenceValidator'
 
 
 class ValidatorEffectTypes(Enum):
