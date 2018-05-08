@@ -373,6 +373,8 @@ class PropertyVTypes(Enum):
     :cvar REQUIREDFIELD: requiredFieldValidator
     :cvar EVENNUMBER: evenNumberValidator
     :cvar ODDNUMBER: oddNumberValidator
+    :cvar REGEXSTRING: regexStringValidator
+    :cvar SINGLEREFERENCE: 'singleReferenceValidator'
     """
     NONEVALIDATOR = 'noneValidator'
     NUMERICRANGE = 'numericRangeValidator'

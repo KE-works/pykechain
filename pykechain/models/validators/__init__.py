@@ -12,5 +12,7 @@ from .validators import (
     RequiredFieldValidator,
     OddNumberValidator,
     EvenNumberValidator,
+    RegexStringValidator,
+    SingleReferenceValidator
 )
 from .validators_base import PropertyValidator, ValidatorEffect
