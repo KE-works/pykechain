@@ -358,3 +358,47 @@ class PaperOrientation(Enum):
 
     PORTRAIT = 'portrait'
     LANDSCAPE = 'landscape'
+
+
+class PropertyVTypes(Enum):
+    """The VTypes (or validator types) that are allowed in the json.
+
+    This corresponds to the various validator classes which SHOULD be named:
+       `vtype[0].upper() + vtype[1:]`
+       eg: 'numbericRangeValidator' has an implementation class of 'NumericRangeValidator'
+
+    :cvar NONEVALIDATOR: noneValidator - No validation is done
+    :cvar NUMERICRANGE: numericRangeValidator
+    :cvar BOOLEANFIELD: booleanFieldValidator
+    :cvar REQUIREDFIELD: requiredFieldValidator
+    :cvar EVENNUMBER: evenNumberValidator
+    :cvar ODDNUMBER: oddNumberValidator
+    :cvar REGEXSTRING: regexStringValidator
+    :cvar SINGLEREFERENCE: 'singleReferenceValidator'
+    """
+
+    NONEVALIDATOR = 'noneValidator'
+    NUMERICRANGE = 'numericRangeValidator'
+    BOOLEANFIELD = 'booleanFieldValidator'
+    REQUIREDFIELD = 'requiredFieldValidator'
+    EVENNUMBER = 'evenNumberValidator'
+    ODDNUMBER = 'oddNumberValidator'
+    REGEXSTRING = 'regexStringValidator'
+    SINGLEREFERENCE = 'singleReferenceValidator'
+
+
+class ValidatorEffectTypes(Enum):
+    """The effects that can be attached to a validator.
+
+    :cvar NONE_EFFECT: noneEffect
+    :cvar VISUALEFFECT: visualEffect
+    :cvar TEXT_EFFECT: textEffect
+    :cvar ERRORTEXT_EFFECT: errorTextEffect
+    :cvar HELPTEXT_EFFECT: helpTextEffect
+    """
+
+    NONE_EFFECT = 'noneEffect'
+    VISUALEFFECT = 'visualEffect'
+    TEXT_EFFECT = 'textEffect'
+    ERRORTEXT_EFFECT = 'errorTextEffect'
+    HELPTEXT_EFFECT = 'helpTextEffect'

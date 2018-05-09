@@ -1,6 +1,6 @@
+import os
 from unittest import TestCase
 
-import os
 import six
 from betamax import Betamax
 
@@ -17,8 +17,15 @@ with Betamax.configure() as config:
     config.define_cassette_placeholder('<API_URL>', TEST_URL)
     config.define_cassette_placeholder('<AUTH_TOKEN>', TEST_TOKEN)
 
+class SixTestCase(TestCase):
+    def assertRaisesRegex(self, expected_exception, expected_regex, *args, **kwargs):
 
-class TestBetamax(TestCase):
+        if six.PY2:
+            return self.assertRaisesRegexp(expected_exception, expected_regex, *args, **kwargs)
+        else:
+            return super(__class__, self).assertRaisesRegex(expected_exception, expected_regex, *args, **kwargs)
+
+class TestBetamax(SixTestCase):
     @property
     def cassette_name(self):
         cls = getattr(self, '__class__')
@@ -46,11 +53,4 @@ class TestBetamax(TestCase):
     def tearDown(self):
         self.recorder.stop()
 
-    def assertRaisesRegex(self, expected_exception, expected_regex,
-                          *args, **kwargs):
 
-        if six.PY2:
-            return self.assertRaisesRegexp(expected_exception, expected_regex, *args, **kwargs)
-        else:
-            return super(__class__, self).assertRaisesRegex(expected_exception, expected_regex,
-                                                            *args, **kwargs)
