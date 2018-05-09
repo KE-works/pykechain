@@ -1,4 +1,4 @@
-from typing import Any, AnyStr, Union, Tuple, Dict  # flake8: noqa
+from typing import Any, AnyStr, Union, Tuple, Dict  # flake8: noqa # pylint: disable=unused-import
 
 from jsonschema import validate
 

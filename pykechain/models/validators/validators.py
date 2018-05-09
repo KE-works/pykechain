@@ -1,7 +1,7 @@
 from __future__ import division
 
 import re
-from typing import Any, Union, Tuple  # flake8: noqa
+from typing import Any, Union, Tuple  # flake8: noqa # pylint: disable=unused-import
 
 from pykechain.enums import PropertyVTypes
 from pykechain.models.validators.validators_base import PropertyValidator
