@@ -323,8 +323,9 @@ class TestRegexValidator(SixTestCase):
         validator = RegexStringValidator()
 
         # per default the regex string matches everything
-        self.assertEqual(validator.pattern, '.*')
+        self.assertEqual(validator.pattern, '.+')
         self.assertTrue(validator('mr cactus is tevree'))
+        self.assertFalse(validator(''))
 
     def test_regex_validator_fails_on_none_value(self):
         validator = RegexStringValidator(pattern=r'.*')
@@ -391,7 +392,7 @@ class TestOddEvenNumberValidator(SixTestCase):
         self.assertFalse(validator.is_valid(3.99))
         self.assertTrue(validator.is_valid(3.9999999999999999))  # rounding accuracy
 
-    def test_odd_number_validator_float_invalud(self):
+    def test_odd_number_validator_float_invalid(self):
         validator = OddNumberValidator()
         self.assertFalse(validator.is_valid(4.99))
         self.assertTrue(validator.is_valid(4.9999999999999999))  # rounding accuracy
@@ -469,7 +470,7 @@ class TestPropertyWithValidator(SixTestCase):
         prop = Property(json=prop_json, client=None)
         self.assertIsNone(prop.is_valid)
         self.assertIsNone(prop.is_invalid)
-        self.assertListEqual(prop.validate(), [(None, None)])
+        self.assertListEqual([(None, "No reason")], prop.validate())
 
     def test_property_with_boolean_validator(self):
         pass

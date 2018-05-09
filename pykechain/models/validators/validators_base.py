@@ -1,3 +1,5 @@
+from typing import Any, AnyStr, Union, Tuple, Dict  # flake8: noqa
+
 from jsonschema import validate
 
 from pykechain.enums import PropertyVTypes, ValidatorEffectTypes
@@ -5,35 +7,57 @@ from pykechain.models.validators.validator_schemas import validator_jsonschema_s
 
 
 class BaseValidator(object):
-    jsonschema = None
+    """Base class for all Validators.
+
+    This is the base implementation for both the :class:`PropertyValidator` as well as the :class:`ValidatorEffect`.
+
+    :cvar jsonschema: jsonschema to validate the json representation of the Validatpr
+    :type jsonschema: dict
+    :cvar accuracy: default value used in comparison of floats, normally 1E-6
+    :type accuracy: float
+    """
+
+    jsonschema = None  # type: Union[Dict, None]
     accuracy = 1E-6
 
     def __init__(self, json=None, *args, **kwargs):
+        """Construct a base validator."""
         self._json = json or dict(config=dict())
         self._config = self._json.get('config', dict())
 
     def as_json(self):
-        """Parses the validator to a proper validator json"""
+        # type: () -> dict
+        """Parse the validator to a proper validator json."""
         return self._json
 
     def validate_json(self):
-        """validates the json representation of the validator against the validator jsonschema"""
+        # type: () -> Any
+        """Validate the json representation of the validator against the validator jsonschema."""
         return validate(self._json, self.jsonschema)
 
     @classmethod
     def parse(cls, json):
+        # type: (dict) -> Any
+        """Parse a json dict and return the correct subclass."""
         raise NotImplementedError
 
 
 class PropertyValidator(BaseValidator):
-    """Base class for all validators
+    """Base class for all property validators.
 
     If json is provided, the validator is instantiated based on that json.
+
+    :cvar vtype: Validator type, one of :class:`enum.PropertyVTypes`
+    :type vtype: basestring
+    :cvar jsonschema: jsonschema to validate the structure of the json representation of the effect against
+    :type jsonschema: dict
     """
-    vtype = PropertyVTypes.NONEVALIDATOR
+
+    vtype = PropertyVTypes.NONEVALIDATOR  # type: str
     jsonschema = validator_jsonschema_stub
 
     def __init__(self, json=None, *args, **kwargs):
+        """Construct a Propert Validator."""
         super(PropertyValidator, self).__init__(json=json, *args, **kwargs)
         self._json = json or {'vtype': self.vtype, 'config': {}}
         self._validation_result = None
@@ -51,7 +75,8 @@ class PropertyValidator(BaseValidator):
             self.on_invalid = kwargs.get('on_invalid') or []
 
     def _parse_effects(self, effects_json=None):
-        """Parses multiple effects from an effects(list) json"""
+        # type: (dict) -> Any
+        """Parse multiple effects from an effects(list) json."""
         if isinstance(effects_json, list):
             return [ValidatorEffect.parse(effect) for effect in effects_json]
         elif isinstance(effects_json, dict):
@@ -62,14 +87,24 @@ class PropertyValidator(BaseValidator):
 
     @classmethod
     def parse(cls, json):
-        """Parses the json and creates the proper ProperyValidator"""
+        # type: (Dict) -> Any
+        """Parse a json dict and return the correct subclass of :class:`PropertyValidator`.
+
+        It uses the 'effect' key to determine which :class:`PropertyValidator` to instantiate.
+        Please refer to :class:`enums.PropertyVTypes` for the supported effects.
+
+        :param json: dictionary containing the specific keys to parse into a :class:`PropertyValidator`
+        :type json: dict
+        :returns: the instantiated subclass of :class:`PropertyValidator`
+        :rtype: :class:`PropertyValidator` or subclass
+        """
         if 'vtype' in json:
             vtype = json.get('vtype')
             if vtype not in PropertyVTypes.values():
                 raise Exception("Validator unknown, incorrect json: '{}'".format(json))
 
             from pykechain.models.validators import validators
-            vtype_implementation_classname = vtype[0].upper() + vtype[1:]
+            vtype_implementation_classname = "{}{}".format(vtype[0].upper(), vtype[1:])  # type: ignore
             if hasattr(validators, vtype_implementation_classname):
                 return getattr(validators, vtype_implementation_classname)(json=json)
             else:
@@ -77,6 +112,12 @@ class PropertyValidator(BaseValidator):
         raise Exception("Validator unknown, incorrect json: '{}'".format(json))
 
     def as_json(self):
+        # type: () -> dict
+        """JSON representation of the effect.
+
+        :returns: a python dictionary, serializable as json of the effect
+        :rtype: dict
+        """
         new_json = dict(
             vtype=self.vtype,
             config=self._config
@@ -91,7 +132,8 @@ class PropertyValidator(BaseValidator):
         return self._json
 
     def __call__(self, value):
-        """This will trigger the validation of the validator.
+        # type: (Any) -> bool
+        """Trigger the validation of the validator.
 
         The reason may retrieved by the :func:`get_reason()` method.
 
@@ -111,7 +153,8 @@ class PropertyValidator(BaseValidator):
         return self._validation_result
 
     def is_valid(self, value):
-        """Checks if the validation against a value, returns a boolean.
+        # type: (Any) -> bool
+        """Check if the validation against a value, returns a boolean.
 
         This is the logical inverse of the :func:`is_invalid()` method.
 
@@ -123,7 +166,8 @@ class PropertyValidator(BaseValidator):
         return self.__call__(value)
 
     def is_invalid(self, value):
-        """Checks if the validation against a value, returns a boolean.
+        # type: (Any) -> bool
+        """Check if the validation against a value, returns a boolean.
 
         This is the logical inverse of the :func:`is_valid()` method.
 
@@ -135,7 +179,8 @@ class PropertyValidator(BaseValidator):
         return not self.is_valid(value)
 
     def get_reason(self):
-        """Retrieves the reason of the (in)validation.
+        # type: () -> AnyStr
+        """Retrieve the reason of the (in)validation.
 
         :return: reason text
         :rtype: basestring
@@ -143,26 +188,52 @@ class PropertyValidator(BaseValidator):
         return self._validation_reason
 
     def _logic(self, value=None):
+        # type: (Any) -> Tuple[Union[bool, None], str]
         """Process the inner logic of the validator.
 
         The validation results are returned as tuple (boolean (true/false), reasontext)
         """
         self._validation_result, self._validation_reason = None, 'No reason'
+        return self._validation_result, self._validation_reason
 
 
 class ValidatorEffect(BaseValidator):
+    """
+    A Validator Effect.
+
+    This is an effect that can be associated with the :attr:`PropertyValidator.on_valid` or
+    :attr:`PropertyValidator.on_invalid`. The effects associated are called based on the results of the
+    validation of the :class:`PropertyValidator`.
+
+    :cvar effect: Effect type
+    :cvar jsonschema: jsonschema to validate the structure of the json representation of the effect against
+    """
+
     effect = ValidatorEffectTypes.NONE_EFFECT
     jsonschema = effects_jsonschema_stub
 
     def __init__(self, json=None, *args, **kwargs):
+        """Construct a Validator Effect."""
         super(ValidatorEffect, self).__init__(json=json, *args, **kwargs)
         self._json = json or {'effect': self.effect, 'config': {}}
 
     def __call__(self, **kwargs):
+        """Execute the effect."""
         return True
 
     @classmethod
     def parse(cls, json):
+        # type: (dict) -> Any
+        """Parse a json dict and return the correct subclass of :class:`ValidatorEffect`.
+
+        It uses the 'effect' key to determine which :class:`ValidatorEffect` to instantiate.
+        Please refer to :class:`enums.ValidatorEffectTypes` for the supported effects.
+
+        :param json: dictionary containing the specific keys to parse into a :class:`ValidatorEffect`
+        :type json: dict
+        :returns: the instantiated subclass of :class:`ValidatorEffect`
+        :rtype: :class:`ValidatorEffect` or subclass
+        """
         effect = json.get('effect')
         if effect:
             from pykechain.models.validators import effects
@@ -174,6 +245,12 @@ class ValidatorEffect(BaseValidator):
         raise Exception("Effect unknown, incorrect json: '{}'".format(json))
 
     def as_json(self):
+        # type: () -> dict
+        """JSON representation of the effect.
+
+        :returns: a python dictionary, serializable as json of the effect
+        :rtype: dict
+        """
         self._json = dict(
             effect=self.effect,
             config=self._config

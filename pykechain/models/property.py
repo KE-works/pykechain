@@ -1,4 +1,4 @@
-from typing import Any, AnyStr  # flake8: noqa
+from typing import Any, AnyStr, Union, List  # flake8: noqa
 
 import requests
 from jsonschema import validate
@@ -41,7 +41,7 @@ class Property(Base):
         self.type = json.get('property_type', None)
 
         # set an empty internal validators variable
-        self._validators = []
+        self._validators = []  # type: List[Any]
 
         if self._options:
             validate(self._options, options_json_schema)
@@ -77,11 +77,16 @@ class Property(Base):
 
     @property
     def validators(self):
+        """Provide list of Validator objects.
+
+        :returns: list of :class:`PropertyValidator` objects
+        :rtype: list(PropertyValidator)
+        """
         return self._validators
 
     @validators.setter
     def validators(self, validators):
-        # type: ((list, tuple)) -> None
+        # type: (Union[list, tuple]) -> None
         if not isinstance(validators, (tuple, list)):
             raise IllegalArgumentError('Should be a list or tuple with PropertyValidator objects, '
                                        'got {}'.format(type(validators)))
@@ -111,6 +116,7 @@ class Property(Base):
         return self._client.part(pk=part_id, category=self._json_data['category'])
 
     def delete(self):
+        # type () -> ()
         """Delete this property.
 
         :return: None
@@ -162,7 +168,7 @@ class Property(Base):
             return Property(json, **kwargs)
 
     def edit(self, name=None, description=None, unit=None, **kwargs):
-        # type: (AnyStr, AnyStr, AnyStr) -> None
+        # type: (AnyStr, AnyStr, AnyStr, **Any) -> None
         """
         Edit the details of a property (model).
 
@@ -214,14 +220,14 @@ class Property(Base):
             raise APIError("Could not update Property ({})".format(r))
 
     def __parse_validators(self):
-        """Parses the validator in the options to validators."""
+        """Parse the validator in the options to validators."""
         self._validators = []
         validators_json = self._options.get('validators')
         for validator_json in validators_json:
             self._validators.append(PropertyValidator.parse(json=validator_json))
 
     def __dump_validators(self):
-        """Dumps the validators as json inside the _options dictionary with the key `validators`."""
+        """Dump the validators as json inside the _options dictionary with the key `validators`."""
         if hasattr(self, '_validators'):
             validators_json = []
             for validator in self._validators:
@@ -239,6 +245,16 @@ class Property(Base):
 
     @property
     def is_valid(self):
+        # type: () -> Union[bool, None]
+        """Determine if the value in the property is valid.
+
+        If the value of the property is validated as 'valid', than returns a True, otherwise a False.
+        When no validators are configured, returns a None. It checks against all configured validators
+        and returns a single boolean outcome.
+
+        :returns: True when the :ivar:`value` is valid
+        :rtype: bool or None
+        """
         if not hasattr(self, '_validators'):
             return None
         else:
@@ -250,16 +266,28 @@ class Property(Base):
 
     @property
     def is_invalid(self):
+        # type: () -> Union[bool, None]
+        """Determine if the value in the property is invalid.
+
+        If the value of the property is validated as 'invalid', than returns a True, otherwise a False.
+        When no validators are configured, returns a None. It checks against all configured validators
+        and returns a single boolean outcome.
+
+        :returns: True when the :ivar:`value` is invalid
+        :rtype: bool
+        """
         if self.is_valid is not None:
             return not self.is_valid
         else:
             return None
 
     def validate(self, reason=True):
-        """Returns the validation results and include an (optional) reason.
+        # type: (bool) -> list
+        """Return the validation results and include an (optional) reason.
 
         If reason keyword is true, the validation is returned for each validation
-        the [(<result: bool>, <reason:str>), ...].
+        the [(<result: bool>, <reason:str>), ...]. If reason is False, only a single list of validation results
+        for each configured validator is returned.
 
         :param reason: (optional) switch to indicate if the reason of the validation should be provided
         :type reason: bool
