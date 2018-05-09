@@ -446,7 +446,8 @@ class TestPropertyWithValidator(SixTestCase):
         prop = Property(json={}, client=None)
         self.assertIsNone(prop.is_valid)
         self.assertIsNone(prop.is_invalid)
-        self.assertIsNone(prop.validate())
+        self.assertEqual(prop._validators, list())
+        self.assertEqual(prop.validate(), list())
 
     def test_property_with_numeric_range_validator(self):
         prop_json = dict(
@@ -478,15 +479,15 @@ class TestPropertyWithValidatorFromLiveServer(TestBetamax):
     def test_numeric_property_with_validator_parses(self):
         part_model = self.project.model(name='Model')
         part_instance = part_model.instance()
-        numeric_range_prop_model = part_model.property(name='numericrange')
-        numeric_range_prop_instance = part_instance.property(name='numericrange')
+        numeric_range_prop_model = part_model.property(name='numericrange_validatortest')
+        numeric_range_prop_instance = part_instance.property(name='numericrange_validatortest')
 
         self.assertIsInstance(numeric_range_prop_instance._validators, list)
         self.assertIsInstance(numeric_range_prop_instance._validators[0], PropertyValidator)
 
     def test_numeric_property_add_requiredvalidator_on_model(self):
         part_model = self.project.model(name='Model')
-        numeric_range_prop_model = part_model.property(name='numericrange')
+        numeric_range_prop_model = part_model.property(name='numericrange_validatortest')
         saved_validators = numeric_range_prop_model.validators
 
         # test
@@ -502,7 +503,7 @@ class TestPropertyWithValidatorFromLiveServer(TestBetamax):
 
     def test_numeric_property_add_requiredvalidator_on_instance(self):
         part_model = self.project.model(name='Model')
-        numeric_range_prop_instance = part_model.instance().property(name='numericrange')
+        numeric_range_prop_instance = part_model.instance().property(name='numericrange_validatortest')
         saved_validators = numeric_range_prop_instance.validators
 
         # test

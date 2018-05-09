@@ -40,6 +40,9 @@ class Property(Base):
         self._options = json.get('options', None)
         self.type = json.get('property_type', None)
 
+        # set an empty internal validators variable
+        self._validators = []
+
         if self._options:
             validate(self._options, options_json_schema)
             if self._options.get('validators'):
@@ -265,11 +268,8 @@ class Property(Base):
         :rtype: list(bool) or list((bool, str))
         :raises Exception: for incorrect validators or incompatible values
         """
-        if not hasattr(self, '_validators'):
-            return None
-        else:
-            self._validation_results = [validator.is_valid(self._value) for validator in getattr(self, '_validators')]
-            self._validation_reasons = [validator.get_reason() for validator in getattr(self, '_validators')]
+        self._validation_results = [validator.is_valid(self._value) for validator in getattr(self, '_validators')]
+        self._validation_reasons = [validator.get_reason() for validator in getattr(self, '_validators')]
 
         if reason:
             return list(zip(self._validation_results, self._validation_reasons))
