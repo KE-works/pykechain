@@ -1,7 +1,6 @@
 from pykechain.enums import ValidatorEffectTypes
 from pykechain.models.validators.validators_base import ValidatorEffect
 
-from typing import Any, AnyStr  # flake8: noqa
 
 class TextEffect(ValidatorEffect):
     """A Text effect, that will set a text."""
