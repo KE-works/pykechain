@@ -706,7 +706,8 @@ class Part(Base):
         >>> bike.populate_descendants(batch=150)
 
         """
-        descendants_flat_list = list(self._client.parts(pk=self.id, descendants='children', batch=batch))
+        descendants_flat_list = list(self._client.parts(pk=self.id, category=self.category, descendants='children',
+                                                        batch=batch))
 
         for parent in descendants_flat_list:
             parent._cached_children = list()
