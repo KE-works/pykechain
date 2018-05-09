@@ -122,6 +122,9 @@ class Activity(Base):
 
         Without any arguments it retrieves the Instances related to this task only.
 
+        This call only returns the configured properties in an activity. So properties that are not configured
+        are not in the returned parts.
+
         See :class:`pykechain.Client.parts` for additional available parameters.
 
         Example
@@ -140,6 +143,9 @@ class Activity(Base):
 
         This is a convenience method for the :func:`Activity.parts()` method, which is used to retrieve both the
         `Category.MODEL` as well as the `Category.INSTANCE` in a tuple.
+
+        This call only returns the configured properties in an activity. So properties that are not configured
+        are not in the returned parts.
 
         If you want to retrieve only the models associated to this task it is better to use:
             `task.parts(category=Category.MODEL)`.
