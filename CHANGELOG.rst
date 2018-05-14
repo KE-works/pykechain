@@ -3,6 +3,11 @@ Change Log
 
 pykechain changelog
 
+2.2.0 (11MAY18)
+---------------
+ * We added support for validators to KE-chain. Validators objects are stored on a property and can be used to validate the value of a property. The validator objects are also visualised in the KE-chain frontend.
+
+
 2.1.1 (10APR18)
 ---------------
  * We fixed an issue with the caching of the children of a `Part` when you retrieve children with additional filters on it. (#312)
