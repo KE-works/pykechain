@@ -11,7 +11,9 @@ class BaseValidator(object):
 
     This is the base implementation for both the :class:`PropertyValidator` as well as the :class:`ValidatorEffect`.
 
-    :cvar jsonschema: jsonschema to validate the json representation of the Validatpr
+    .. versionadded:: 2.2
+
+    :cvar jsonschema: jsonschema to validate the json representation of the Validator
     :type jsonschema: dict
     :cvar accuracy: default value used in comparison of floats, normally 1E-6
     :type accuracy: float
@@ -47,7 +49,9 @@ class PropertyValidator(BaseValidator):
 
     If json is provided, the validator is instantiated based on that json.
 
-    :cvar vtype: Validator type, one of :class:`enum.PropertyVTypes`
+    .. versionadded:: 2.2
+
+    :cvar vtype: Validator type, one of :class:`pykechain.enums.PropertyVTypes`
     :type vtype: basestring
     :cvar jsonschema: jsonschema to validate the structure of the json representation of the effect against
     :type jsonschema: dict
@@ -57,7 +61,7 @@ class PropertyValidator(BaseValidator):
     jsonschema = validator_jsonschema_stub
 
     def __init__(self, json=None, *args, **kwargs):
-        """Construct a Propert Validator."""
+        """Construct a Property Validator."""
         super(PropertyValidator, self).__init__(json=json, *args, **kwargs)
         self._json = json or {'vtype': self.vtype, 'config': {}}
         self._validation_result = None
@@ -91,12 +95,12 @@ class PropertyValidator(BaseValidator):
         """Parse a json dict and return the correct subclass of :class:`PropertyValidator`.
 
         It uses the 'effect' key to determine which :class:`PropertyValidator` to instantiate.
-        Please refer to :class:`enums.PropertyVTypes` for the supported effects.
+        Please refer to :class:`pykechain.enums.PropertyVTypes` for the supported effects.
 
         :param json: dictionary containing the specific keys to parse into a :class:`PropertyValidator`
         :type json: dict
         :returns: the instantiated subclass of :class:`PropertyValidator`
-        :rtype: :class:`PropertyValidator` or subclass
+        :rtype: :class:`PropertyValidator` or subclass thereof
         """
         if 'vtype' in json:
             vtype = json.get('vtype')
@@ -205,7 +209,9 @@ class ValidatorEffect(BaseValidator):
     :attr:`PropertyValidator.on_invalid`. The effects associated are called based on the results of the
     validation of the :class:`PropertyValidator`.
 
-    :cvar effect: Effect type
+    .. versionadded:: 2.2
+
+    :cvar effect: Effect type, one of :class:`pykechain.enums.ValidatorEffectTypes`
     :cvar jsonschema: jsonschema to validate the structure of the json representation of the effect against
     """
 

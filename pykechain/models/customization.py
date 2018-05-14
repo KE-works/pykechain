@@ -58,7 +58,7 @@ widgetconfig_json_schema = {
 class CustomizationBase(object):
     """Base class for customization objects.
 
-    :cvar activity: an instance of `Activity`
+    :cvar activity: an instance of :class:`pykechain.models.Activity`
     """
 
     def __init__(self, activity, client):

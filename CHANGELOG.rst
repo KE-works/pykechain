@@ -5,7 +5,56 @@ pykechain changelog
 
 2.2.0 (11MAY18)
 ---------------
- * We added support for validators to KE-chain. Validators objects are stored on a property and can be used to validate the value of a property. The validator objects are also visualised in the KE-chain frontend.
+
+Major feature: Property validators
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * We added support for validators to KE-chain v2.12.0-139 and pykechain. Validators objects are stored on a property and can be used to validate the value of a property. The validator objects are also visualised in the KE-chain frontend. (#317)
+
+Validators have a representation in the frontend of KE-chain 2 (see also documentation on: https://support.ke-chain.com/). The validators are stored on the `Property` object and currently the following validators are implemented:
+
+ * :class:`NumericRangeValidator`: When you provide a range, the validate can check if the value of the property is within range. It can even check a stepsize. See the documentation for :class:`NumericRangeValidators`. A representation in KE-chain is available when the value does not conform to this range.
+ * :class:`RequiredFieldValidator`: When you add this to a property (model), the property validates when a value is provided. There is a representation in KE-chain frontend available.
+ * :class:`RegexStringValidator`: A special validation to check a string (eg textfield) against a regex pattern. There *no representation in KE-chain 2 in version v2.12.0-138*.
+ * :class:`OddNumberValidator` and :class:`EvenNumberValidator`: a validator that checks a numeric field (decimal or integer field) if it is an even or odd numer. There *no representation in KE-chain 2 in version v2.12.0-138*.
+ * :class:`SingleReferenceValidator`: a special validator that ensures that there can only be a single referenced part selected in a (multi) reference property.
+
+To validate the property object there are several new functions available. :meth:`Property.validate()` to validate all validators attached to the property using the :attr:`Property.value` as basis for the validation. You will be provided back a resulting list with all validations including their validation reason.
+
+To only check if the Property and its value conforms to the list of Validators, use the :attr:`Property.is_valid` and :attr:`Property.is_invalid` properties.
+
+To retrieve the :class:`PropertyValidator` objects that are stored on the `Property` use the property :meth:`Property.validators`. You can set a list of :class:`PropertyValidator` objects to this property aswell, which will be stored on the `Property` in KE-chain using an API call.
+
+To add validators to a property (model)::
+
+    >>> bike_model = project.model(name='Bike')  # type: Part
+    >>> electric_range = bike_model.property('electric_range')  # type: Property
+    >>> range = NumericRangeValidator(minvalue=0, maxvalue=100)  # instantiate a range validation between 0 and 100
+    >>> reqd = RequiredFieldValidator()  # instantiate a requiredFieldValidator
+    >>> electric_range.validators = [range, reqd]  # save the validators on the property to KE-chain
+
+To validate a value against a validator::
+
+    >>> bike = project.part(name='Bike')  # type: Part
+    >>> electric_range = bike.property('electric_range')  # type: Property
+    >>> electric_range.value
+    None
+    >>> electric_range.is_valid  # No value set, invalid according to the requiredFieldValidator
+    False
+    >>> electric_range.value = 50
+    >>> electric_range.is_valid  # Value is provided AND value is within the range (0, 100)
+    True
+    >>> electric_range.value = -1
+    >>> electric_range.is_valid  # However, the value itself is invalid according to the range validation
+    False
+    >>> electric_range.validate(reason=True)  # use the explicit validation
+    [(False, "Value '-1' should be between 0 and 100"), (True, "Value is provided")]
+
+
+For more documentation of Validators, please refer to the API documentation at: http://pykechain.readthedocs.io/en/latest/developer_api.html
+
+Fixes and improvememts
+~~~~~~~~~~~~~~~~~~~~~~
+ * A fix was made for the the `Part.populate_descendants()` to be working for part of category `MODEL` too. Thanks to a fix of @raduiordache (#320)
 
 
 2.1.1 (10APR18)

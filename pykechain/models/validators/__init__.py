@@ -1,4 +1,7 @@
-"""All validators and effect objects."""
+"""All validators and effect objects.
+
+.. versionadded:: 2.2
+"""
 
 from .effects import (
     TextEffect,

@@ -11,11 +11,14 @@ class NumericRangeValidator(PropertyValidator):
     """
     A numeric range validator, which validates a number between a range.
 
-    The range validates positively _including_ the minvalue and maxvalue.
+    The range validates positively upto and **including** the minvalue and maxvalue.
 
     An added ability is the check if the number conforms to a step within that range.
-    The validation checks for both integer and floats. The stepsize is only enforced when the `enforce_stepsize`
-    is set to True. This enforcement is accurate to an accuracy set in the :cvar:`accuracy`. (normally set to be 1E-6).
+    The validation checks for both integer and floats. The stepsize is only enforced when the :attr:`enforce_stepsize`
+    is set to `True`. This enforcement is accurate to an accuracy set in the :const:`.accuracy`
+    (normally set to be 1E-6).
+
+    .. versionadded:: 2.2
 
     :ivar minvalue: minimum value of the range
     :type minvalue: float or int
@@ -104,7 +107,9 @@ class RequiredFieldValidator(PropertyValidator):
     """
     Required field validator ensures that a value is provided.
 
-    Does validate all values. Does not validate None or '' (empty string).
+    Does validate all values. Does not validate `None` or `''` (empty string).
+
+    .. versionadded:: 2.2
 
     Examples
     --------
@@ -147,14 +152,19 @@ class BooleanFieldValidator(PropertyValidator):
 
 
 class EvenNumberValidator(PropertyValidator):
-    """An even number validator that validates True when the number is odd.
+    """An even number validator that validates `True` when the number is even.
+
+    Even numbers are scalar numbers which can be diveded by 2 and return a scalar. Floating point numbers are converted
+    to integer first. So `int(4.5)` = 4.
+
+    .. versionadded:: 2.2
 
     Example
     -------
     >>> validator = EvenNumberValidator()
-    >>> validator.is_valid(3)
+    >>> validator.is_valid(4)
     True
-    >>> validator.is_valid(3.5)  # float is converted to integer first
+    >>> validator.is_valid(4.5)  # float is converted to integer first
     True
 
     """
@@ -172,7 +182,7 @@ class EvenNumberValidator(PropertyValidator):
 
         basereason = "Value '{}' should be an even number".format(value)
 
-        self._validation_result = value % 2 < self.accuracy
+        self._validation_result = int(value) % 2 < self.accuracy
         if self._validation_result:
             self._validation_reason = basereason.replace("should be", "is")
             return self._validation_result, self._validation_reason
@@ -182,7 +192,7 @@ class EvenNumberValidator(PropertyValidator):
 
 
 class OddNumberValidator(PropertyValidator):
-    """A odd number validator that validates True when the number is odd.
+    """A odd number validator that validates `True` when the number is odd.
 
     Example
     -------
@@ -217,7 +227,10 @@ class OddNumberValidator(PropertyValidator):
 
 
 class SingleReferenceValidator(PropertyValidator):
-    """A single reference validator, ensuring that only a single reference is selected."""
+    """A single reference validator, ensuring that only a single reference is selected.
+
+    .. versionadded:: 2.2
+    """
 
     vtype = PropertyVTypes.SINGLEREFERENCE
 
@@ -244,20 +257,22 @@ class RegexStringValidator(PropertyValidator):
     A regular expression string validator.
 
     With a configured regex pattern, a string value is compared and matched against this pattern. If there is
-    a positive match, the validator validated correctly.
+    a positive match, the validator validates correctly.
 
     For more information on constructing regex strings, see the `python documentation`_, `regex101.com`_, or
     `regexr.com`_.
+
+    .. versionadded:: 2.2
 
     :ivar pattern: the regex pattern to which the provided value is matched against.
 
     Example
     -------
-    >>> validator = RegexStringValidator(pattern="Yes|Y|1|Ok")
+    >>> validator = RegexStringValidator(pattern=r"Yes|Y|1|Ok")
     >>> validator.is_valid("Yes")
     True
-    >>> validator.is_invalid("No")
-    True
+    >>> validator.is_valid("No")
+    False
 
     .. _python documentation: https://docs.python.org/2/library/re.html
     .. _regex101.com: https://regex101.com/
@@ -269,8 +284,8 @@ class RegexStringValidator(PropertyValidator):
     def __init__(self, json=None, pattern=None, **kwargs):
         """Construct an regex string validator effect.
 
-        If no pattern is provided than the regexstring '.+' will be used, which matches all provided text with
-        at least a single character. Does not match ''.
+        If no pattern is provided than the regexstring `'.+'` will be used, which matches all provided text with
+        at least a single character. Does not match `''` (empty string).
 
         :param json: (optional) dict (json) object to construct the object from
         :type json: dict

@@ -812,7 +812,7 @@ class Client(object):
         """
         User of KE-chain.
 
-        Provides single user of :class:`User`s of KE-chain. You can filter on username or id or any other advanced filter.
+        Provides single user of :class:`User` of KE-chain. You can filter on username or id or an advanced filter.
 
         :param username: (optional) username to filter
         :type username: basestring or None
@@ -820,7 +820,7 @@ class Client(object):
         :type pk: basestring or None
         :param kwargs: Additional filtering keyword=value arguments
         :type kwargs: dict or None
-        :return: List of :class:`Users`
+        :return: List of :class:`User`
         :raises NotFoundError: when a user could not be found
         :raises MultipleFoundError: when more than a single user can be found
         """

@@ -367,6 +367,8 @@ class PropertyVTypes(Enum):
        `vtype[0].upper() + vtype[1:]`
        eg: 'numbericRangeValidator' has an implementation class of 'NumericRangeValidator'
 
+    .. versionadded:: 2.2
+
     :cvar NONEVALIDATOR: noneValidator - No validation is done
     :cvar NUMERICRANGE: numericRangeValidator
     :cvar BOOLEANFIELD: booleanFieldValidator
@@ -389,6 +391,8 @@ class PropertyVTypes(Enum):
 
 class ValidatorEffectTypes(Enum):
     """The effects that can be attached to a validator.
+
+    .. versionadded:: 2.2
 
     :cvar NONE_EFFECT: noneEffect
     :cvar VISUALEFFECT: visualEffect

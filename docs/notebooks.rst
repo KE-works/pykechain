@@ -6,4 +6,4 @@ Jupyter Notebooks
     :glob:
     :maxdepth: 1
 
-    notebooks/*
+    notebooks/00_getting_started
