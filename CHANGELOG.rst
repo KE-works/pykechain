@@ -15,14 +15,14 @@ Validators have a representation in the frontend of KE-chain 2 (see also documen
  * :class:`NumericRangeValidator`: When you provide a range, the validate can check if the value of the property is within range. It can even check a stepsize. See the documentation for :class:`NumericRangeValidators`. A representation in KE-chain is available when the value does not conform to this range.
  * :class:`RequiredFieldValidator`: When you add this to a property (model), the property validates when a value is provided. There is a representation in KE-chain frontend available.
  * :class:`RegexStringValidator`: A special validation to check a string (eg textfield) against a regex pattern. There *no representation in KE-chain 2 in version v2.12.0-138*.
- * :class:`OddNumberValidator` and :class:`EvenNumberValidator`: a validator that checks a numeric field (decimal or integer field) if it is an even or odd numer. There *no representation in KE-chain 2 in version v2.12.0-138*.
+ * :class:`OddNumberValidator` and :class:`EvenNumberValidator`: a validator that checks a numeric field (decimal or integer field) if it is an even or odd number. There *no representation in KE-chain 2 in version v2.12.0-138*.
  * :class:`SingleReferenceValidator`: a special validator that ensures that there can only be a single referenced part selected in a (multi) reference property.
 
 To validate the property object there are several new functions available. :meth:`Property.validate()` to validate all validators attached to the property using the :attr:`Property.value` as basis for the validation. You will be provided back a resulting list with all validations including their validation reason.
 
 To only check if the Property and its value conforms to the list of Validators, use the :attr:`Property.is_valid` and :attr:`Property.is_invalid` properties.
 
-To retrieve the :class:`PropertyValidator` objects that are stored on the `Property` use the property :meth:`Property.validators`. You can set a list of :class:`PropertyValidator` objects to this property aswell, which will be stored on the `Property` in KE-chain using an API call.
+To retrieve the :class:`PropertyValidator` objects that are stored on the `Property` use the property :meth:`Property.validators`. You can set a list of :class:`PropertyValidator` objects to this property as well, which will be stored on the `Property` in KE-chain using an API call.
 
 To add validators to a property (model)::
 
@@ -52,7 +52,7 @@ To validate a value against a validator::
 
 For more documentation of Validators, please refer to the API documentation at: http://pykechain.readthedocs.io/en/latest/developer_api.html
 
-Fixes and improvememts
+Fixes and improvements
 ~~~~~~~~~~~~~~~~~~~~~~
  * A fix was made for the the `Part.populate_descendants()` to be working for part of category `MODEL` too. Thanks to a fix of @raduiordache (#320)
 
