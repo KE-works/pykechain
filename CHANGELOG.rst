@@ -3,7 +3,7 @@ Change Log
 
 pykechain changelog
 
-2.2.0 (11MAY18)
+2.2.0 (14MAY18)
 ---------------
 
 Major feature: Property validators
