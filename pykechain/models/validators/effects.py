@@ -3,7 +3,10 @@ from pykechain.models.validators.validators_base import ValidatorEffect
 
 
 class TextEffect(ValidatorEffect):
-    """A Text effect, that will set a text."""
+    """A Text effect, that will set a text.
+
+    .. versionadded:: 2.2
+    """
 
     effect = ValidatorEffectTypes.TEXT_EFFECT
 
@@ -28,7 +31,10 @@ class TextEffect(ValidatorEffect):
 
 
 class ErrorTextEffect(ValidatorEffect):
-    """A Errortext effect, that will set a text."""
+    """A Errortext effect, that will set a text.
+
+    .. versionadded:: 2.2
+    """
 
     effect = ValidatorEffectTypes.ERRORTEXT_EFFECT
 
@@ -46,7 +52,10 @@ class ErrorTextEffect(ValidatorEffect):
 
 
 class HelpTextEffect(ValidatorEffect):
-    """A Errortext effect, that will set a text."""
+    """A Errortext effect, that will set a text.
+
+    .. versionadded:: 2.2
+    """
 
     effect = ValidatorEffectTypes.HELPTEXT_EFFECT
 
@@ -65,6 +74,8 @@ class HelpTextEffect(ValidatorEffect):
 
 class VisualEffect(ValidatorEffect):
     """A visualeffect, to be processed by the frontend.
+
+    .. versionadded:: 2.2
 
     :ivar applyCss: css class to apply in case of this effect
     """
@@ -93,7 +104,10 @@ class VisualEffect(ValidatorEffect):
 
 
 class ValidVisualEffect(VisualEffect):
-    """Effect that may apply a css class when the result of the validator is valid."""
+    """Effect that may apply a css class when the result of the validator is valid.
+
+    .. versionadded:: 2.2
+    """
 
     def __init__(self, json=None, applyCss='valid', **kwargs):
         """Construct an valid visual effect.
@@ -107,7 +121,10 @@ class ValidVisualEffect(VisualEffect):
 
 
 class InvalidVisualEffect(VisualEffect):
-    """Effect that may apply a css class when the result of the validator is invalid."""
+    """Effect that may apply a css class when the result of the validator is invalid.
+
+    .. versionadded:: 2.2
+    """
 
     def __init__(self, json=None, applyCss='invalid', **kwargs):
         """Construct an invalid visual effect.

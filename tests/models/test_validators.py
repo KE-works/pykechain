@@ -381,21 +381,25 @@ class TestOddEvenNumberValidator(SixTestCase):
 
     def test_even_number_validator_float_valid(self):
         validator = EvenNumberValidator()
+        self.assertTrue(validator.is_valid(4.5))
         self.assertTrue(validator.is_valid(4.0))
+        self.assertTrue(validator.is_valid(3.9999999999999999))  # rounding accuracy
 
-    def test_odd_number_validator_float_valud(self):
+    def test_odd_number_validator_float_valid(self):
         validator = OddNumberValidator()
         self.assertTrue(validator.is_valid(3.0))
+        self.assertTrue(validator.is_valid(4.9999999999999999))  # rounding accuracy
 
     def test_even_number_validator_float_invalid(self):
         validator = EvenNumberValidator()
         self.assertFalse(validator.is_valid(3.99))
-        self.assertTrue(validator.is_valid(3.9999999999999999))  # rounding accuracy
+        self.assertFalse(validator.is_valid(5.5))
 
     def test_odd_number_validator_float_invalid(self):
         validator = OddNumberValidator()
         self.assertFalse(validator.is_valid(4.99))
-        self.assertTrue(validator.is_valid(4.9999999999999999))  # rounding accuracy
+        self.assertFalse(validator.is_valid(6.0))
+
 
     def test_even_number_validator_invalid_input(self):
         validator = EvenNumberValidator()
