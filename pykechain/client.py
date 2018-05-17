@@ -6,7 +6,7 @@ from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
 
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
-    WIMCompatibleActivityTypes
+    WIMCompatibleActivityTypes, PropertyType
 from pykechain.models.activity2 import Activity2
 from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.user import User
@@ -1095,7 +1095,7 @@ class Client(object):
 
         return self._create_part(action='create_proxy_model', data=data, **kwargs)
 
-    def create_property(self, model, name, description=None, property_type='CHAR', default_value=None):
+    def create_property(self, model, name, description=None, property_type=PropertyType.CHAR_VALUE, default_value=None):
         """Create a new property model under a given model.
 
         :param model: parent model
@@ -1115,7 +1115,8 @@ class Client(object):
         """
         if model.category != Category.MODEL:
             raise IllegalArgumentError("The model should be of category MODEL")
-
+        if not property_type.endswith('_VALUE'):
+            property_type += '_VALUE'
         data = {
             "name": name,
             "part": model.id,
