@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+2.2.1 (23MAY18)
+---------------
+ * We ensured that old pykechain code to create a property model when not using the `PropertyType` enums is still compatible with changes introduced in version 1.16.0 (MAR18). We improved the documentation for `Client.create_property()` and `enums.PropertyTypes`. Using 'CHAR' (pre 1.16 style) instead of 'CHAR_VALUE' (enum style) will result in a warning (with suggestion to change this) for old code and will be corrected. Using an invalid `property_type` will result in an `IllegalArgumentError`. (#326)
+
 2.2.0 (14MAY18)
 ---------------
 
@@ -54,7 +58,7 @@ For more documentation of Validators, please refer to the API documentation at: 
 
 Fixes and improvements
 ~~~~~~~~~~~~~~~~~~~~~~
- * A fix was made for the the `Part.populate_descendants()` to be working for part of category `MODEL` too. Thanks to a fix of @raduiordache (#320)
+ * A fix was made for the the `Part.populate_descendants()` to be working for part of category `MODEL` too. Thanks to a fix of @raduiordache. (#320)
 
 
 2.1.1 (10APR18)
@@ -109,7 +113,7 @@ This is the last release in preparation for the WIM2 release of KE-chain and con
 
  * Implemented new functions for adding the following widgets: `Basic table`, `Paginated table`, `JSON`, `Script`, `Notebook`, `Text`, `Attachment viewer` and `Navigation Bar`. (#280)
  * Added two new enums (`SortTable` and `NavigationBarAlignment`) which can be used when adding new widgets. (#280)
- * Added additional enums `WidgetNames` for the proper names of the widgets in the customisation dialog in KE-chain (#280)
+ * Added additional enums `WidgetNames` for the proper names of the widgets in the customisation dialog in KE-chain. (#280)
  * Updated the documentation regarding Property Types. (#280)
  * Fixed the enums so they now work correctly for each `PropertyType`. (#280)
  * Wrote a test that tests each property type (we didn't have this before). This will increase the test coverage to ~95% for KE-chain. (#280)

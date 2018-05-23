@@ -1122,7 +1122,11 @@ class Client(object):
         if not property_type.endswith('_VALUE'):
             warnings.warn("Please use the `PropertyType` enumeration to ensure providing correct "
                           "values to the backend.", UserWarning)
-            property_type += '_VALUE'
+            property_type = '{}_VALUE'.format(property_type.upper())
+
+        if property_type not in PropertyType.values():
+            raise IllegalArgumentError("Please provide a valid propertytype, please use one of `enums.PropertyType`. "
+                                       "Got: '{}'".format(property_type))
 
         data = {
             "name": name,
