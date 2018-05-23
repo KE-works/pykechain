@@ -1,7 +1,7 @@
+import warnings
 from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
 
 import requests
-import warnings
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
 
@@ -290,7 +290,7 @@ class Client(object):
         :return: a new object
         :raises NotFoundError: if original object is not found or deleted in the mean time
         """
-        if not obj._json_data.get('url'): # pragma: no cover
+        if not obj._json_data.get('url'):  # pragma: no cover
             raise NotFoundError("Could not reload object, there is no url for object '{}' configured".format(obj))
 
         response = self._request('GET', obj._json_data.get('url'), params=extra_params)
@@ -1098,14 +1098,17 @@ class Client(object):
     def create_property(self, model, name, description=None, property_type=PropertyType.CHAR_VALUE, default_value=None):
         """Create a new property model under a given model.
 
+        Use the :class:`enums.PropertyType` to select which property type to create to ensure that you
+        provide the correct values to the KE-chain backend. The default is a `PropertyType.CHAR_VALUE` which is a
+        single line text in KE-chain.
+
         :param model: parent model
         :type model: :class:`models.Part`
         :param name: property model name
         :type name: basestring
         :param description: property model description (optional)
         :type description: basestring or None
-        :param property_type: choose between FLOAT, INT, TEXT, LINK, REFERENCE, DATETIME, BOOLEAN, CHAR,
-                              ATTACHMENT or SINGLE_SELECT
+        :param property_type: choose one of the :class:`enums.PropertyType`, defaults to `PropertyType.CHAR_VALUE`.
         :type property_type: basestring or None
         :param default_value: default value used for part instances when creating a model.
         :type default_value: any
@@ -1115,8 +1118,12 @@ class Client(object):
         """
         if model.category != Category.MODEL:
             raise IllegalArgumentError("The model should be of category MODEL")
+
         if not property_type.endswith('_VALUE'):
+            warnings.warn("Please use the `PropertyType` enumeration to ensure providing correct "
+                          "values to the backend.", UserWarning)
             property_type += '_VALUE'
+
         data = {
             "name": name,
             "part": model.id,
