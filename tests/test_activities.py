@@ -535,7 +535,7 @@ class TestActivity2SpecificTests(TestBetamax):
 
     def test_activity2_download_as_pdf(self):
         # setUp
-        activity_name = 'test'
+        activity_name = 'Demo - PDF exporting'
         activity = self.project.activity(name=activity_name)
 
         # testing

@@ -391,7 +391,7 @@ class Activity2(Activity):
             raise APIError("Could not configure activity")
 
     def download_as_pdf(self, target_dir=None, pdf_filename=None, paper_size=PaperSize.A4,
-                        paper_orientation=PaperOrientation.PORTRAIT):
+                        paper_orientation=PaperOrientation.PORTRAIT, include_appendices=False):
         """
         Retrieve the PDF of the Activity.
 
@@ -412,6 +412,8 @@ class Activity2(Activity):
                                - portrait (default): portrait orientation
                                - landscape: landscape orientation
         :type paper_size: basestring (see :class:`enums.PaperOrientation`)
+        :param include_appendices: True if the PDF should contain appendices, False (default) if otherwise.
+        :type include_appendices: bool
         :raises APIError: if the pdf file could not be found.
         :raises OSError: if the file could not be written.
         """
@@ -424,7 +426,8 @@ class Activity2(Activity):
 
         request_params = {
             'papersize': paper_size,
-            'orientation': paper_orientation
+            'orientation': paper_orientation,
+            'appendices': include_appendices
         }
 
         url = self._client._build_url('activity_export', activity_id=self.id)
