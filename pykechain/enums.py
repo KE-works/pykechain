@@ -24,14 +24,12 @@ class Enum(object):
 class Multiplicity(Enum):
     """The various multiplicities that are accepted by KE-chain.
 
-    For more information on the representation in KE-chain, please consult the KE-chain `documentation`_
+    For more information on the representation in KE-chain, please consult the KE-chain `Part documentation`_.
 
     :cvar ZERO_ONE: Multiplicity 0 to 1
     :cvar ONE: Multiplicity 1
     :cvar ZERO_MANY: Multiplicity 0 to infinity
     :cvar ONE_MANY: Multiplicity 1 to infinity
-
-    .. _documentation: https://support.ke-chain.com/confluence/dosearchsite.action?queryString=concept%20part
     """
 
     ZERO_ONE = "ZERO_ONE"
@@ -44,12 +42,10 @@ class Multiplicity(Enum):
 class Category(Enum):
     """The various categories of Parts that are accepted by KE-chain.
 
-    For more information on the representation in KE-chain, please consult the KE-chain `documentation`_
+    For more information on the representation in KE-chain, please consult the KE-chain `Part documentation`_.
 
     :cvar INSTANCE: Category of Instance
     :cvar MODEL: Category of Model
-
-    .. _documentation: https://support.ke-chain.com/confluence/dosearchsite.action?queryString=concept+part
     """
 
     INSTANCE = "INSTANCE"
@@ -59,12 +55,12 @@ class Category(Enum):
 class Classification(Enum):
     """The various classification of Parts that are accepted by KE-chain.
 
-    For more information on the representation in KE-chain, please consult the KE-chain `documentation`_
+    For more information on the representation in KE-chain, please consult the KE-chain `Part documentation`_.
 
     :cvar PRODUCT: Classification of the part object is Product
     :cvar CATALOG: Classification of the part object is a CATALOG
 
-    .. _documentation: https://support.ke-chain.com/confluence/dosearchsite.action?queryString=concept+part
+    .. _Part documentation: https://support.ke-chain.com/confluence/dosearchsite.action?queryString=concept+part
     """
 
     PRODUCT = "PRODUCT"
@@ -74,7 +70,7 @@ class Classification(Enum):
 class PropertyType(Enum):
     """The various property types that are accepted by KE-chain.
 
-    For more information on the representation in KE-chain, please consult the KE-chain `documentation`_
+    For more information on the representation in KE-chain, please consult the KE-chain `Property documentation`_.
 
     :cvar CHAR_VALUE: a charfield property (single line text)
     :cvar TEXT_VALUE: text property (long text, may span multiple lines)
@@ -91,7 +87,7 @@ class PropertyType(Enum):
     :cvar SINGLE_SELECT_VALUE: single select list property (choose from a list)
     :cvar REFERENCES_VALUE: a multi reference property, a list of UUID values referring to other part models
 
-    .. _documentation: https://support.ke-chain.com/confluence/dosearchsite.action?queryString=concept+property
+    .. _Property documentation: https://support.ke-chain.com/confluence/dosearchsite.action?queryString=concept+property
     """
 
     CHAR_VALUE = "CHAR_VALUE"
