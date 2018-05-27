@@ -4,6 +4,7 @@ Change Log
 pykechain changelog
 
 2.2.2 (27MAY18)
+---------------
  * We fixed an issue with the pdf download option to ensure that the attachements property is passed as well in preparation for the async pdf downloader release in KE-chain 2.13.0-140 (#329). Found and fixed by @raduiordache; thanks!
 
 2.2.1 (23MAY18)
