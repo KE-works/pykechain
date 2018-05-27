@@ -3,6 +3,9 @@ Change Log
 
 pykechain changelog
 
+2.2.2 (27MAY18)
+ * We fixed an issue with the pdf download option to ensure that the attachements property is passed as well in preparation for the async pdf downloader release in KE-chain 2.13.0-140 (#329). Found and fixed by @raduiordache; thanks!
+
 2.2.1 (23MAY18)
 ---------------
  * We ensured that old pykechain code to create a property model when not using the `PropertyType` enums is still compatible with changes introduced in version 1.16.0 (MAR18). We improved the documentation for `Client.create_property()` and `enums.PropertyTypes`. Using 'CHAR' (pre 1.16 style) instead of 'CHAR_VALUE' (enum style) will result in a warning (with suggestion to change this) for old code and will be corrected. Using an invalid `property_type` will result in an `IllegalArgumentError`. (#326)
