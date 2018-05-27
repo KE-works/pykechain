@@ -349,7 +349,6 @@ class TestParts(TestBetamax):
         with self.assertRaises(NotFoundError):
             catalog_model.proxy_model()
 
-
     def test_retrieve_proxy_of_instance(self):
         instance = self.project.part('Rear Wheel')
 
