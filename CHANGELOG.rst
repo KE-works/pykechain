@@ -5,7 +5,8 @@ pykechain changelog
 
 2.2.3 (5JUN18)
 --------------
- * An issue was fixed in the `Activity.siblings()` function. It now returns the actual siblings (other children of the common parent (subprocess)) for WIM2 based Activities. Thanks to @bastiaanbeijer for finding it, thanks to @raduiordache for fixing it. (#332)
+ * An issue was fixed in the `Activity2.siblings()` function. It now returns the actual siblings (other children of the common parent (subprocess)) for WIM2 based Activities. Thanks to @bastiaanbeijer for finding it, thanks to @raduiordache for fixing it. (#332)
+ * Updated dependent versions for development: pytest (3.6.1), semver (2.8.0), pyopenssl (18.0.0), sphinx (1.7.5)
 
 2.2.2 (27MAY18)
 ---------------
