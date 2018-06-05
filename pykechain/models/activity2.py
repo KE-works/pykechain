@@ -1,8 +1,8 @@
 import datetime
 import os
+import warnings
 
 import requests
-import warnings
 from six import text_type
 
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
@@ -202,7 +202,7 @@ class Activity2(Activity):
         :param kwargs: Additional search arguments, check :func:`pykechain.Client.activities` for additional info
         :type kwargs: dict or None
         :return: a list of :class:`Activity2`
-        :raises NotFoundError: when this task is not of type `ActivityType.SUBPROCESS`
+        :raises NotFoundError: when this task is not of type `ActivityType.PROCESS`
 
         Example
         -------
@@ -220,6 +220,33 @@ class Activity2(Activity):
                                 "(activity '{}')".format(self.activity_type, self.name))
 
         return self._client.activities(parent_id=self.id, scope=self.scope_id, **kwargs)
+
+    def siblings(self, **kwargs):
+        """Retrieve the other activities that also belong to the parent.
+
+        It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the level of the current task, including
+        itself. This also works if the activity is of type `ActivityType.PROCESS`.
+
+        :param kwargs: Additional search arguments, check :func:`pykechain.Client.activities` for additional info
+        :type kwargs: dict or None
+        :return: list of :class:`Activity2`
+        :raises NotFoundError: when it is a task in the top level of a project
+
+        Example
+        -------
+        >>> task = project.activity('Some Task')
+        >>> siblings = task.siblings()
+
+        Example for siblings containing certain words in the task name
+        >>> task = project.activity('Some Task')
+        >>> siblings = task.siblings(name__contains='Another Task')
+
+        """
+        parent_id = self._json_data.get('parent_id')
+        if parent_id is None:
+            raise NotFoundError("Cannot find subprocess for this task '{}', "
+                                "as this task exist on top level.".format(self.name))
+        return self._client.activities(parent_id=parent_id, scope=self.scope_id, **kwargs)
 
     def edit(self, name=None, description=None, start_date=None, due_date=None, assignees=None, assignees_ids=None,
              status=None):

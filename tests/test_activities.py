@@ -252,7 +252,7 @@ class TestActivities(TestBetamax):
         siblings = task.siblings()
 
         self.assertTrue(task.id in [sibling.id for sibling in siblings])
-        self.assertTrue(len(siblings) >= 1)
+        self.assertTrue(len(siblings) == 7)
 
     def test_retrieve_part_associated_to_activities(self):
         task = self.project.activity('Specify wheel diameter')
@@ -293,7 +293,7 @@ class TestActivities(TestBetamax):
         siblings = task.siblings(name__icontains='sub')
 
         self.assertTrue(task.id in [sibling.id for sibling in siblings])
-        self.assertTrue(len(siblings) >= 1)
+        self.assertTrue(len(siblings) == 2)
 
     # in 1.12.9
     def test_activity_without_scope_id_will_fix_itself(self):
