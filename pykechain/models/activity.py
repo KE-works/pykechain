@@ -263,8 +263,8 @@ class Activity(Base):
         >>> siblings = task.siblings(name__contains='Another Task')
 
         """
-        container_id = self._json_data.get('container')
-        return self._client.activities(container=container_id, scope=self.scope_id, **kwargs)
+        parent_id = self._json_data.get('parent_id')
+        return self._client.activities(parent_id=parent_id, scope=self.scope_id, **kwargs)
 
     def create(self, *args, **kwargs):
         """Create a new activity belonging to this subprocess.
