@@ -392,7 +392,6 @@ class Activity2(Activity):
         :type outputs: list(:class:`Property`)
         :raises APIError: when unable to configure the activity
         """
-
         def _get_propertyset(proplist):
             """Make it into a unique list of properties to configure for either inputs or outputs."""
             from pykechain.models import Property
