@@ -974,9 +974,7 @@ class Client(object):
         return Activity2(data['results'][0], client=self)
 
     def _create_part(self, action, data, **kwargs):
-        """
-        Create a part internal core function.
-        """
+        """Create a part internal core function."""
         # suppress_kevents should be in the data (not the query_params)
         if 'suppress_kevents' in kwargs:
             data['suppress_kevents'] = kwargs.pop('suppress_kevents')
