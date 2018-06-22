@@ -122,7 +122,6 @@ class Part(Base):
 
 
     def children(self, **kwargs):
-        # type: (Any) -> Any
         """Retrieve the children of this `Part` as `Partset`.
 
         When you call the :func:`Part.children()` method without any additional filtering options for the children,
