@@ -5,7 +5,8 @@ pykechain changelog
 
 2.2.4 (22JUN18)
 ---------------
- * An issue was fixed where the `suppress_kevents` flag was not correctlye injected in the API request for all functions that created parts. (#340)
+ * An issue was fixed where the `suppress_kevents` flag was not correctly injected in the API request for all functions that created parts. (#340)
+ * Changed the way the cached children are stored when the `Part.children()` method is used. It is now cached as a `List` instead of a `Partset` and you can iterate over the `List` many times in your application. Thanks to Jelle Boersma for finding this. (#341)
  * Updated dependent versions for development: pytest (3.6.2), mypy (0.610), requests (2.19.1)
 
 2.2.3 (5JUN18)
