@@ -974,12 +974,17 @@ class Client(object):
         return Activity2(data['results'][0], client=self)
 
     def _create_part(self, action, data, **kwargs):
+        """Create a part internal core function."""
+        # suppress_kevents should be in the data (not the query_params)
+        if 'suppress_kevents' in kwargs:
+            data['suppress_kevents'] = kwargs.pop('suppress_kevents')
+
         # prepare url query parameters
         query_params = kwargs
         query_params['select_action'] = action
 
         response = self._request('POST', self._build_url('parts'),
-                                 params={"select_action": action},
+                                 params=query_params,  # {"select_action": action},
                                  data=data)
 
         if response.status_code != requests.codes.created:

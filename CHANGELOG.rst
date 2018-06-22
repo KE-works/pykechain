@@ -3,6 +3,12 @@ Change Log
 
 pykechain changelog
 
+2.2.4 (22JUN18)
+---------------
+ * An issue was fixed where the `suppress_kevents` flag was not correctly injected in the API request for all functions that created parts. (#340)
+ * Changed the way the cached children are stored when the `Part.children()` method is used. It is now cached as a `List` instead of a `Partset` and you can iterate over the `List` many times in your application. Thanks to Jelle Boersma for finding this. (#341)
+ * Updated dependent versions for development: pytest (3.6.2), mypy (0.610), requests (2.19.1)
+
 2.2.3 (5JUN18)
 --------------
  * An issue was fixed in the `Activity2.siblings()` function. It now returns the actual siblings (other children of the common parent (subprocess)) for WIM2 based Activities. Thanks to @bastiaanbeijer for finding it, thanks to @raduiordache for fixing it. (#332)

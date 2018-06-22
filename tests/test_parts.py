@@ -175,7 +175,7 @@ class TestParts(TestBetamax):
         bike = self.project.part('Bike')  # type:Part
         self.assertIsInstance(bike, Part)
         children_of_bike = bike.children()
-        self.assertIsInstance(children_of_bike, PartSet)
+        self.assertIsInstance(children_of_bike, (PartSet, list))
         self.assertTrue(len(children_of_bike) >= 1)  # eg. Wheels ...
 
     def test_retrieve_siblings_of_part(self):

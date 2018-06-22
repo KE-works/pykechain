@@ -122,19 +122,20 @@ class Part(Base):
 
 
     def children(self, **kwargs):
-        # type: (Any) -> Any
         """Retrieve the children of this `Part` as `Partset`.
 
         When you call the :func:`Part.children()` method without any additional filtering options for the children,
-        the children are cached to help speed up subsequent calls to retrieve the children.
+        the children are cached to help speed up subsequent calls to retrieve the children. The cached children are
+        returned as a list and not as a `Partset`.
 
         When you *do provide* additional keyword arguments (kwargs) that act as a specific children filter, the
-        cached children are not used and a separate API call is made to retrieve only those children.
+        cached children are _not_ used and a separate API call is made to retrieve only those children.
 
         :param kwargs: Additional search arguments to search for, check :class:`pykechain.Client.parts`
                        for additional info
         :type kwargs: dict
-        :return: a set of `Parts` as a :class:`PartSet`. Will be empty if no children.
+        :return: a set of `Parts` as a :class:`PartSet`. Will be empty if no children. Will be a `List` if the
+                 children are retrieved from the cached children.
         :raises APIError: When an error occurs.
 
         Example
@@ -155,7 +156,7 @@ class Part(Base):
         if not kwargs:
             # no kwargs provided is the default, we aim to cache it.
             if not self._cached_children:
-                self._cached_children = self._client.parts(parent=self.id, category=self.category)
+                self._cached_children = list(self._client.parts(parent=self.id, category=self.category))
             return self._cached_children
         else:
             # if kwargs are provided, we assume no use of cache as specific filtering on the children is performed.
