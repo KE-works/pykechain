@@ -387,4 +387,8 @@ class TestParts(TestBetamax):
         self.assertIsInstance(siblings_of_frame, PartSet)
         self.assertTrue(len(siblings_of_frame) >= 1)  # eg. Wheels ...
 
-
+    # new in 2.3
+    def test_move_part_model(self):
+        model_to_be_moved = self.project.model(name='Model to be moved')  # type:Part
+        target_parent = self.project.model('Bike')
+        model_to_be_moved.move(target_parent=target_parent, name='Yes, it works!')
