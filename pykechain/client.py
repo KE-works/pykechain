@@ -1100,7 +1100,8 @@ class Client(object):
 
         return self._create_part(action='create_proxy_model', data=data, **kwargs)
 
-    def create_property(self, model, name, description=None, property_type=PropertyType.CHAR_VALUE, default_value=None):
+    def create_property(self, model, name, description=None, property_type=PropertyType.CHAR_VALUE, default_value=None,
+                        unit=None):
         """Create a new property model under a given model.
 
         Use the :class:`enums.PropertyType` to select which property type to create to ensure that you
@@ -1138,7 +1139,8 @@ class Client(object):
             "part": model.id,
             "description": description,
             "property_type": property_type.upper(),
-            "value": default_value
+            "value": default_value,
+            "unit": unit
         }
 
         response = self._request('POST', self._build_url('properties'),

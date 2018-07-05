@@ -6,6 +6,7 @@ from six import text_type
 
 from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import NotFoundError, APIError, MultipleFoundError, IllegalArgumentError
+from pykechain.extra import move_part
 from pykechain.models.base import Base
 from pykechain.models.property import Property
 from pykechain.utils import find, is_uuid
@@ -717,3 +718,7 @@ class Part(Base):
                     parent._cached_children.append(child)
 
         self._cached_children = descendants_flat_list[0]._cached_children
+
+    def move(self, target_parent, name=None):
+        move_part(part=self, target_parent=target_parent, name=name)
+        print('eurika')
