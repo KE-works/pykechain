@@ -719,6 +719,10 @@ class Part(Base):
 
         self._cached_children = descendants_flat_list[0]._cached_children
 
+    def clone(self, **kwargs):
+        parent = self.parent()
+        return self._client._create_clone(parent, self, **kwargs)
+
     def move(self, target_parent, name=None, keep_original=True, include_children=True):
         """
         Move the `Part` model or `Part` instance to the target parent. The `Category` of parent and part must be the

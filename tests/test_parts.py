@@ -388,12 +388,125 @@ class TestParts(TestBetamax):
         self.assertTrue(len(siblings_of_frame) >= 1)  # eg. Wheels ...
 
     # new in 2.3
-    def test_move_part_model(self):
-        # model_to_be_moved = self.project.model(name='Model to be moved')  # type:Part
-        # target_parent = self.project.model('Bike')
-        # model_to_be_moved.move(target_parent=target_parent, name='Yes, it works!')
-        instance_to_be_moved = self.project.part(name='Instance to be moved')
-        target_parent = self.project.part('Frame')
-        instance_to_be_moved.move(target_parent=target_parent, name='Yahoooooo', keep_original=True,
-                                  include_children=True)
+    def test_clone_model(self):
+        # setUp
+        model_name = 'Seat'
+        seat = self.project.model(model_name)
+        seat.clone()
 
+        # testing
+        clone_seat_model = self.project.model('CLONE - {}'.format(model_name))
+        self.assertTrue(clone_seat_model)
+
+        # tearDown
+        clone_seat_model.delete()
+
+    def test_clone_instance(self):
+        instance_name = 'Front spoke 1'
+        spoke = self.project.part(instance_name)
+        spoke.clone()
+
+        # testing
+        clone_spoke_instance = self.project.part('CLONE - {}'.format(instance_name))
+        self.assertTrue(clone_spoke_instance)
+
+        # tearDown
+        clone_spoke_instance.delete()
+
+    def test_clone_instance_with_multiplicity_violation(self):
+        instance_name = 'Seat'
+        seat = self.project.part(instance_name)
+
+        # testing
+        with self.assertRaises(APIError):
+            seat.clone()
+
+    def test_clone_instance_with_sub_parts(self):
+        instance_name = 'Rear Wheel'
+        rear_wheel = self.project.part(instance_name)
+
+        # testing
+        with self.assertRaises(APIError):
+            rear_wheel.clone()
+
+    def test_move_part_model_given_name_keep_original_include_children(self):
+        # setUp
+        model_to_be_moved = self.project.model(name='Model to be moved')
+        model_target_parent = self.project.model('Bike')
+        model_to_be_moved.move(target_parent=model_target_parent, name='Moved model under Bike', keep_original=True,
+                               include_children=True)
+
+        moved_model = self.project.model(name='Moved model under Bike')
+        moved_model.populate_descendants()
+
+        # testing
+        self.assertTrue(moved_model)
+        self.assertEqual(moved_model.property('Property single text')._json_data['description'],
+                         'Description of Property single text')
+        self.assertEqual(moved_model.property('Property single text')._json_data['unit'], 'mm')
+        self.assertEqual(moved_model.property('Property decimal number').value, 33)
+        self.assertEqual(moved_model.property('Property single select list').options, ['a', 'b', 'c'])
+        self.assertEqual(len(moved_model.property('Property reference part').value), 1)
+        self.assertEqual(moved_model.property('Property reference part').value[0].name, 'Wheel')
+        self.assertTrue(moved_model.property('Property attachment').value)
+
+        self.assertEqual(len(moved_model._cached_children), 2)
+        sub_part_moved_model = [part for part in moved_model._cached_children
+                                if part.name == 'Sub-part model to be moved'][0]
+        self.assertEqual(len(sub_part_moved_model._cached_children), 1)
+
+        # tearDown
+        moved_model.delete()
+
+    def test_move_part_model_empty_name_keep_original_include_children(self):
+        # setUp
+        name_of_part = 'Model to be moved'
+        model_to_be_moved = self.project.model(name=name_of_part)
+        model_target_parent = self.project.model('Bike')
+        model_to_be_moved.move(target_parent=model_target_parent, keep_original=True, include_children=True)
+
+        moved_model = self.project.model(name='CLONE - {}'.format(name_of_part))
+
+        # testing
+        self.assertTrue(moved_model)
+
+        # tearDown
+        moved_model.delete()
+
+    def test_move_part_model_not_keep_original(self):
+        # setUp
+        name_of_part = 'Model to be moved'
+        original_model = self.project.model(name=name_of_part)
+        model_target_parent = self.project.model('Bike')
+        clone_of_original_model = original_model.clone()
+
+        self.assertEqual(clone_of_original_model.name, 'CLONE - {}'.format(name_of_part))
+
+        clone_of_original_model.move(target_parent=model_target_parent, name='New part under bike',
+                                     keep_original=False, include_children=True)
+
+        moved_model = self.project.model(name='New part under bike')
+
+        # testing
+        with self.assertRaises(NotFoundError):
+            self.project.model(name=clone_of_original_model.name)
+
+        # tearDown
+        moved_model.delete()
+
+    def test_move_part_model_not_include_children(self):
+        # setUp
+        name_of_part = 'Model to be moved'
+        model_to_be_moved = self.project.model(name=name_of_part)
+        model_target_parent = self.project.model('Bike')
+        model_to_be_moved.move(target_parent=model_target_parent, name='No children included',
+                               keep_original=True, include_children=False)
+
+        moved_model = self.project.model(name='No children included')
+
+        # testing
+        self.assertEqual(len(moved_model.properties), 5)
+        self.assertEqual(len(moved_model.children()), 0)
+
+        # tearDown
+        moved_model.delete()
