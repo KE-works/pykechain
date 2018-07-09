@@ -720,8 +720,7 @@ class Part(Base):
         self._cached_children = descendants_flat_list[0]._cached_children
 
     def move(self, target_parent, name=None, keep_original=True, include_children=True):
-        move_part(part=self, target_parent=target_parent, name=name, keep_original=keep_original,
-                  include_children=include_children)
+        move_part(part=self, target_parent=target_parent, name=name, include_children=include_children)
         if not keep_original:
             try:
                 self.delete()
