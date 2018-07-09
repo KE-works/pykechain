@@ -1061,6 +1061,43 @@ class Client(object):
 
         return self._create_part(action="create_child_model", data=data, **kwargs)
 
+    def _create_clone(self, parent, part, **kwargs):
+        """
+
+        Parameters
+        ----------
+        part
+        parent
+        kwargs
+
+        Returns
+        -------
+
+        """
+        if part.category == Category.MODEL:
+            action = 'clone_model'
+        else:
+            action = 'clone_instance'
+
+        data = {
+            "part": part.id,
+            "parent": parent.id
+        }
+        if 'suppress_kevents' in kwargs:
+            data['suppress_kevents'] = kwargs.pop('suppress_kevents')
+        # prepare url query parameters
+        query_params = kwargs
+        query_params['select_action'] = action
+
+        response = self._request('POST', self._build_url('parts'),
+                                 params=query_params,
+                                 data=data)
+
+        if response.status_code != requests.codes.created:
+            raise APIError("Could not clone part, {}: {}".format(str(response), response.content))
+
+        return Part(response.json()['results'][0], client=self)
+
     def create_proxy_model(self, model, parent, name, multiplicity='ZERO_MANY', **kwargs):
         """Add this model as a proxy to another parent model.
 
