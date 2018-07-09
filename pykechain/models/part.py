@@ -720,13 +720,38 @@ class Part(Base):
         self._cached_children = descendants_flat_list[0]._cached_children
 
     def move(self, target_parent, name=None, keep_original=True, include_children=True):
+        """
+        Move the `Part` model or `Part` instance to the target parent. The `Category` of parent and part must be the
+        same.
+
+        .. versionadded:: 2.3
+
+        :param target_parent: `Part` object under which the desired `Part` is copied/moved
+        :type target_parent: :class:`Part`
+        :param name: how the copied/moved top-level `Part` should be called
+        :type name: basestring
+        :param keep_original: True to just copy the `Part` under parent. False to move it.
+        :type keep_original: bool
+        :param include_children: True to copy/move also the descendants of `Part`.
+        :type include_children: bool
+
+        :raises APIError: if you cannot delete the `Part`.
+        :raises IllegalArgumentError: if part and target_parent have different `Category`
+
+        Example
+        -------
+        >>> model_to_move = client.model(name='Model to be moved')
+        >>> bike = client.model('Bike')
+        >>> model_to_move.move(target_parent=bike, name='Copied model', keep_original=False, include_children=True)
+
+        """
         move_part(part=self, target_parent=target_parent, name=name, include_children=include_children)
         if not keep_original:
             try:
-                self.delete()
-            except APIError:
-                if self.category == Category.INSTANCE:
+                if self.category == Category.MODEL:
+                    self.delete()
+                else:
                     model_of_part = self.model()
                     model_of_part.delete()
-                else:
-                    raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
+            except APIError:
+                raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
