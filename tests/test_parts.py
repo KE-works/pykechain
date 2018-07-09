@@ -392,8 +392,8 @@ class TestParts(TestBetamax):
         # model_to_be_moved = self.project.model(name='Model to be moved')  # type:Part
         # target_parent = self.project.model('Bike')
         # model_to_be_moved.move(target_parent=target_parent, name='Yes, it works!')
-        instance_to_be_moved = self.project.part(name='Instance to be moved')
-        target_parent = self.project.part('Bike')
-        instance_to_be_moved.move(target_parent=target_parent, name='Eurika!', keep_original=True,
+        instance_to_be_moved = self.project.model(name='ZA CLONE - Model to be moved')
+        target_parent = self.project.model('Frame')
+        instance_to_be_moved.move(target_parent=target_parent, name='Yey', keep_original=False,
                                   include_children=True)
 

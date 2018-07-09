@@ -11,7 +11,7 @@ __mapping_dictionary = dict()
 __edited_one_many = list()
 
 
-def move_part(part, target_parent, name=None, keep_original=True, include_children=True):
+def move_part(part, target_parent, name=None, include_children=True):
     """
 
     Parameters
@@ -19,7 +19,6 @@ def move_part(part, target_parent, name=None, keep_original=True, include_childr
     part
     target_parent
     name
-    keep_original
     include_children
 
     Returns
@@ -85,23 +84,23 @@ def move_part(part, target_parent, name=None, keep_original=True, include_childr
             # For each part, recursively run this function
             for sub_part in part._cached_children:
                 move_part(part=sub_part, target_parent=moved_part_model, name=sub_part.name,
-                          keep_original=keep_original, include_children=include_children)
+                          include_children=include_children)
 
     elif part.category == Category.INSTANCE and target_parent.category == Category.INSTANCE:
         part_model = part.model()
         target_parent_model = target_parent.model()
-        move_part(part=part_model, target_parent=target_parent_model, name=part_model.name, keep_original=keep_original,
+        move_part(part=part_model, target_parent=target_parent_model, name=part_model.name,
                   include_children=include_children)
 
         part.populate_descendants()
         move_part_instance(part_instance=part, target_parent=target_parent, part_model=part_model, name=name,
-                           keep_original=keep_original, include_children=include_children)
+                           include_children=include_children)
 
     else:
         raise IllegalArgumentError('part and target_parent must be both MODELS or both INSTANCES')
 
 
-def move_part_instance(part_instance, target_parent, part_model, name=None, keep_original=True, include_children=True):
+def move_part_instance(part_instance, target_parent, part_model, name=None, include_children=True):
     """
 
     Parameters
@@ -109,7 +108,6 @@ def move_part_instance(part_instance, target_parent, part_model, name=None, keep
     part_instance
     target_parent
     name
-    keep_original
     include_children
 
     Returns
@@ -142,7 +140,7 @@ def move_part_instance(part_instance, target_parent, part_model, name=None, keep
     if include_children:
         for sub_instance in part_instance._cached_children:
             move_part_instance(part_instance=sub_instance, target_parent=moved_instance, part_model=sub_instance.model(),
-                               name=sub_instance.name, keep_original=True, include_children=True)
+                               name=sub_instance.name, include_children=True)
 
     return
 
@@ -169,8 +167,7 @@ def update_part_with_properties(part_instance, moved_instance, name=None):
         else:
             if prop_instance.value:
                 attachment_name = prop_instance._json_data['value'].split('/')[-1]
-                moved_prop = [prop for prop in moved_instance.properties if prop.name == prop_instance.name and
-                              prop._json_data['order'] == prop_instance._json_data['order']][0]
+                moved_prop = __mapping_dictionary[prop_instance.id]
                 with temp_chdir() as target_dir:
                     full_path = os.path.join(target_dir or os.getcwd(), attachment_name)
                     prop_instance.save_as(filename=full_path)
