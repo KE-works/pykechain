@@ -6,7 +6,7 @@ from six import text_type
 
 from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import NotFoundError, APIError, MultipleFoundError, IllegalArgumentError
-from pykechain.extra import move_part
+from pykechain.extra_utils import move_part
 from pykechain.models.base import Base
 from pykechain.models.property import Property
 from pykechain.utils import find, is_uuid
@@ -719,6 +719,15 @@ class Part(Base):
 
         self._cached_children = descendants_flat_list[0]._cached_children
 
-    def move(self, target_parent, name=None):
-        move_part(part=self, target_parent=target_parent, name=name)
-        print('eurika')
+    def move(self, target_parent, name=None, keep_original=True, include_children=True):
+        move_part(part=self, target_parent=target_parent, name=name, keep_original=keep_original,
+                  include_children=include_children)
+        if not keep_original:
+            try:
+                self.delete()
+            except APIError:
+                if self.category == Category.INSTANCE:
+                    model_of_part = self.model()
+                    model_of_part.delete()
+                else:
+                    raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
