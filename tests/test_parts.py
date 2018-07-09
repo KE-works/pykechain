@@ -389,6 +389,11 @@ class TestParts(TestBetamax):
 
     # new in 2.3
     def test_move_part_model(self):
-        model_to_be_moved = self.project.model(name='Model to be moved')  # type:Part
-        target_parent = self.project.model('Bike')
-        model_to_be_moved.move(target_parent=target_parent, name='Yes, it works!')
+        # model_to_be_moved = self.project.model(name='Model to be moved')  # type:Part
+        # target_parent = self.project.model('Bike')
+        # model_to_be_moved.move(target_parent=target_parent, name='Yes, it works!')
+        instance_to_be_moved = self.project.part(name='Instance to be moved')
+        target_parent = self.project.part('Bike')
+        instance_to_be_moved.move(target_parent=target_parent, name='Eurika!', keep_original=True,
+                                  include_children=True)
+
