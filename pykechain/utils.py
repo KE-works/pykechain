@@ -39,7 +39,8 @@ def is_uuid(value):
 
 @contextmanager
 def temp_chdir(cwd=None):
-    """Create and return a temporary directory which you can use as a context manager.
+    """
+    Create and return a temporary directory which you can use as a context manager.
 
     When you are out of the context the temprorary disk gets erased.
 
