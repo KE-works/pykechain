@@ -25,6 +25,9 @@ def is_uuid(value):
     # type: (AnyStr) -> bool
     """Check if the string value is a proper UUID string.
 
+    UUID check is performed based on a regex pattern:
+        `r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"`
+
     :return: True if there is a match, otherwise False
     :rtype: bool
     """
@@ -36,6 +39,27 @@ def is_uuid(value):
 
 @contextmanager
 def temp_chdir(cwd=None):
+    """Create and return a temporary directory which you can use as a context manager.
+
+    When you are out of the context the temprorary disk gets erased.
+
+    .. versionadded:: 2.3
+
+    :param cwd: path to change working directory back to path when out of context
+    :type cwd: basestring or None
+    :return: in context a temporary directory
+
+    Example
+    -------
+
+    >>> with temp_chdir() as temp_dir:
+    >>>     # do things here
+    >>>     print(temp_dir)  # etc etc
+    ...
+    >>> # when moving out of the contexthere the temp_dir is destroyed
+    >>> pass
+
+    """
     if six.PY3:
         from tempfile import TemporaryDirectory
         with TemporaryDirectory() as tempwd:
