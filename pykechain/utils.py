@@ -56,7 +56,7 @@ def temp_chdir(cwd=None):
     >>>     # do things here
     >>>     print(temp_dir)  # etc etc
     ...
-    >>> # when moving out of the contexthere the temp_dir is destroyed
+    >>> # when moving out of the context the temp_dir is destroyed
     >>> pass
 
     """
