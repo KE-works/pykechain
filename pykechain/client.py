@@ -1,9 +1,9 @@
 import warnings
-from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
 
 import requests
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
+from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
 
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     WIMCompatibleActivityTypes, PropertyType
@@ -1064,16 +1064,14 @@ class Client(object):
     def _create_clone(self, parent, part, **kwargs):
         """
 
-        Parameters
-        ----------
-        part
-        parent
-        kwargs
+        .. versionadded:: 2.3
 
-        Returns
-        -------
-
+        :param parent:
+        :param part:
+        :param kwargs:
+        :return:
         """
+
         if part.category == Category.MODEL:
             action = 'clone_model'
         else:
@@ -1081,10 +1079,10 @@ class Client(object):
 
         data = {
             "part": part.id,
-            "parent": parent.id
+            "parent": parent.id,
+            "suppress_kevents": kwargs.pop('suppress_kevents', None)
         }
-        if 'suppress_kevents' in kwargs:
-            data['suppress_kevents'] = kwargs.pop('suppress_kevents')
+
         # prepare url query parameters
         query_params = kwargs
         query_params['select_action'] = action
@@ -1138,12 +1136,13 @@ class Client(object):
         return self._create_part(action='create_proxy_model', data=data, **kwargs)
 
     def create_property(self, model, name, description=None, property_type=PropertyType.CHAR_VALUE, default_value=None,
-                        unit=None):
+                        unit=None, options=None):
         """Create a new property model under a given model.
 
         Use the :class:`enums.PropertyType` to select which property type to create to ensure that you
         provide the correct values to the KE-chain backend. The default is a `PropertyType.CHAR_VALUE` which is a
         single line text in KE-chain.
+
 
         :param model: parent model
         :type model: :class:`models.Part`
@@ -1153,8 +1152,12 @@ class Client(object):
         :type description: basestring or None
         :param property_type: choose one of the :class:`enums.PropertyType`, defaults to `PropertyType.CHAR_VALUE`.
         :type property_type: basestring or None
-        :param default_value: default value used for part instances when creating a model.
+        :param default_value: (optional) default value used for part instances when creating a model.
         :type default_value: any
+        :param unit: (optional) unit of the property
+        :type unit: basestring or None
+        :param options: (optional) property options (eg. validators or 'single selectlist choices')
+        :type options: basestring or None
         :return: a :class:`models.Property` with category `MODEL`
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Property` model could not be created
@@ -1177,7 +1180,8 @@ class Client(object):
             "description": description,
             "property_type": property_type.upper(),
             "value": default_value,
-            "unit": unit
+            "unit": unit,
+            "options": options
         }
 
         response = self._request('POST', self._build_url('properties'),

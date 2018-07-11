@@ -737,7 +737,7 @@ class Part(Base):
         :type include_children: bool
         :param include_instances: True to copy also the instances of `Part` to ALL the instances of target_parent.
         :type include_instances: bool
-
+        :returns: copied :class:`Part` model.
         :raises IllegalArgumentError: if part and target_parent have different `Category` than MODEL
         :raises IllegalArgumentError: if part and target_parent are identical
 
@@ -754,10 +754,10 @@ class Part(Base):
         copied_model = relocate_model(part=self, target_parent=target_parent, name=name,
                                       include_children=include_children)
         if include_instances:
-            retrieve_instances_to_copied = list(self.instances())
-            retrieve_parent_instances = list(target_parent.instances())
-            for parent_instance in retrieve_parent_instances:
-                for instance in retrieve_instances_to_copied:
+            instances_to_be_copied = list(self.instances())
+            parent_instances = list(target_parent.instances())
+            for parent_instance in parent_instances:
+                for instance in instances_to_be_copied:
                     instance.populate_descendants()
                     move_part_instance(part_instance=instance, target_parent=parent_instance,
                                        part_model=self, name=instance.name, include_children=include_children)
@@ -830,7 +830,8 @@ class Part(Base):
         >>> instance_to_copy.copy_instance(target_parent=bike, name='Copied instance', include_children=True)
 
         """
-        if self.model().id == target_parent.model().id:
+        #TODO: refactor out the illegality check of the copy in the helpers
+        if self.model().id not in [ target_parent.model().id, ].append([c.id for c in self.children()]):
             raise IllegalArgumentError('Part and target_parent have the same model.')
         copied_instance = relocate_instance(part=self, target_parent=target_parent, name=name,
                                             include_children=include_children)
