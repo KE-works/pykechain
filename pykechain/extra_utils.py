@@ -11,7 +11,7 @@ __mapping_dictionary = dict()
 __edited_one_many = list()
 
 
-def move_part(part, target_parent, name=None, include_children=True):
+def relocate_model(part, target_parent, name=None, include_children=True):
     """
     Parameters
     ----------
@@ -82,17 +82,27 @@ def move_part(part, target_parent, name=None, include_children=True):
             part.populate_descendants()
             # For each part, recursively run this function
             for sub_part in part._cached_children:
-                move_part(part=sub_part, target_parent=moved_part_model, name=sub_part.name,
-                          include_children=include_children)
+                relocate_model(part=sub_part, target_parent=moved_part_model, name=sub_part.name,
+                               include_children=include_children)
+        return moved_part_model
+    else:
+        # Cannot add a model under an instance or vice versa
+        raise IllegalArgumentError('part and target_parent must be both MODELS')
 
-    elif part.category == Category.INSTANCE and target_parent.category == Category.INSTANCE:
+
+def relocate_instance(part, target_parent, name=None, include_children=True):
+    # First, if the user doesn't provide the name, then just use the default "Clone - ..." name
+    if not name:
+        name = "CLONE - {}".format(part.name)
+
+    if part.category == Category.INSTANCE and target_parent.category == Category.INSTANCE:
         # Initially the model of the part needs to be recreated under the model of the target_parent. Retrieve them.
         part_model = part.model()
         target_parent_model = target_parent.model()
 
         # Call the move_part() function for those models.
-        move_part(part=part_model, target_parent=target_parent_model, name=part_model.name,
-                  include_children=include_children)
+        relocate_model(part=part_model, target_parent=target_parent_model, name=part_model.name,
+                       include_children=include_children)
 
         # Populate the descendants of the Part (category=Instance), in order to avoid to retrieve children for every
         # level and save time. Only need it the children should be included.
@@ -100,12 +110,12 @@ def move_part(part, target_parent, name=None, include_children=True):
             part.populate_descendants()
 
         # This function will move the part instance under the target_parent instance, and its children if required.
-        move_part_instance(part_instance=part, target_parent=target_parent, part_model=part_model, name=name,
-                           include_children=include_children)
-
+        moved_instance = move_part_instance(part_instance=part, target_parent=target_parent, part_model=part_model,
+                                            name=name, include_children=include_children)
+        return moved_instance
     else:
         # Cannot add a model under an instance or vice versa
-        raise IllegalArgumentError('part and target_parent must be both MODELS or both INSTANCES')
+        raise IllegalArgumentError('part and target_parent must be both MODELS')
 
 
 def move_part_instance(part_instance, target_parent, part_model, name=None, include_children=True):
@@ -125,7 +135,7 @@ def move_part_instance(part_instance, target_parent, part_model, name=None, incl
     """
     # If no specific name has been required, then call in as Clone of the part_instance.
     if not name:
-        name = "CLONE - {}".format(part_instance.name)
+        name = part_instance.name
 
     # Retrieve the model of the future part to be created
     moved_model = __mapping_dictionary[part_model.id]
@@ -134,18 +144,18 @@ def move_part_instance(part_instance, target_parent, part_model, name=None, incl
     if moved_model.multiplicity == Multiplicity.ONE:
         # If multiplicity is 'Exactly 1', that means the instance was automatically created with the model, so just
         # retrieve it, map the original instance with the moved one and update the name and property values.
-        moved_instance = moved_model.instance()
+        moved_instance = moved_model.instances(parent_id=target_parent.id)[0]
         map_property_instances(part_instance, moved_instance)
         update_part_with_properties(part_instance, moved_instance, name=name)
     elif moved_model.multiplicity == Multiplicity.ONE_MANY:
         # If multiplicity is '1 or more', that means one instance has automatically been created with the model, so
         # retrieve it, map the original instance with the moved one and update the name and property values. Store
         # the model in a list, in case there are multiple instance those need to be recreated.
-        if moved_model.id not in __edited_one_many:
-            moved_instance = moved_model.instance()
+        if target_parent.id not in __edited_one_many:
+            moved_instance = moved_model.instances(parent_id=target_parent.id)[0]
             map_property_instances(part_instance, moved_instance)
             update_part_with_properties(part_instance, moved_instance, name=name)
-            __edited_one_many.append(moved_model.id)
+            __edited_one_many.append(target_parent.id)
         else:
             moved_instance = target_parent.add(name=part_instance.name, model=moved_model, suppress_kevents=True)
             map_property_instances(part_instance, moved_instance)
@@ -164,7 +174,7 @@ def move_part_instance(part_instance, target_parent, part_model, name=None, incl
             move_part_instance(part_instance=sub_instance, target_parent=moved_instance, part_model=sub_instance.model(),
                                name=sub_instance.name, include_children=True)
 
-    return
+    return moved_instance
 
 
 def update_part_with_properties(part_instance, moved_instance, name=None):
