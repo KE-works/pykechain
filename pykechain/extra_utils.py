@@ -1,9 +1,9 @@
 import os
+from operator import itemgetter
 
 from pykechain.enums import Category, PropertyType, Multiplicity
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.utils import temp_chdir
-
 # global variable
 __mapping_dictionary = None
 __edited_one_many = list()
@@ -11,7 +11,7 @@ __edited_one_many = list()
 
 def get_mapping_dictionary(clean=False):
     """
-    Get a temprorary helper to map some keys to some values. Mainly used in the relocation of parts and models.
+    Get a temporary helper to map some keys to some values. Mainly used in the relocation of parts and models.
     
     :param clean: (optional) boolean flag to reset the mapping dictionary  
     :return: singleton dictionary (persistent in the script) for mapping use.
@@ -21,9 +21,10 @@ def get_mapping_dictionary(clean=False):
         __mapping_dictionary = dict()
     return __mapping_dictionary
 
+
 def get_edited_one_many(clean=False):
     """
-    Get a temprorary helper to help relocating Parts with one to many relationships. 
+    Get a temporary helper to help relocating Parts with one to many relationships.
     Only used in the relocation of parts and models.
     
     :param clean: (optional) boolean flag to reset the mapping dictionary  
@@ -31,9 +32,8 @@ def get_edited_one_many(clean=False):
     """
     global __edited_one_many
     if not __edited_one_many or clean:
-        __edited_one_many = dict()
+        __edited_one_many = list()
     return __edited_one_many
-
 
 
 def relocate_model(part, target_parent, name=None, include_children=True):
@@ -45,6 +45,10 @@ def relocate_model(part, target_parent, name=None, include_children=True):
     :param include_children:
     :return:
     """
+    if target_parent.id in get_illegal_targets(part, include={part.id}):
+        raise IllegalArgumentError('cannot relocate part "{}" under target parent "{}", because the target is part of '
+                                   'its descendants'.format(part.name, target_parent.name))
+
     # First, if the user doesn't provide the name, then just use the default "Clone - ..." name
     if not name:
         name = "CLONE - {}".format(part.name)
@@ -62,9 +66,10 @@ def relocate_model(part, target_parent, name=None, include_children=True):
     # Map the current part model id with newly created part model Object
     get_mapping_dictionary().update({part.id: moved_part_model})
 
-    # TODO () Include the validators
     # Loop through properties and retrieve their type, description and unit
-    for prop in part.properties:
+    list_of_properties_sorted_by_order = part.properties
+    list_of_properties_sorted_by_order.sort(key=lambda x: x._json_data['order'])
+    for prop in list_of_properties_sorted_by_order:
         prop_type = prop._json_data.get('property_type')
         desc = prop._json_data.get('description')
         unit = prop._json_data.get('unit')
@@ -106,16 +111,20 @@ def relocate_model(part, target_parent, name=None, include_children=True):
 
 
 def get_illegal_targets(part, include):
-    l = include or list()
-    l.append([c.id for c in part.children()])
-    return l
+    """
+
+    :param part:
+    :param include:
+    :return:
+    """
+    list_of_illegal_targets = include or set()
+    for descendant in part.children(descendants='children'):
+        list_of_illegal_targets.add(descendant.id)
+    return list_of_illegal_targets
 
 
 def relocate_instance(part, target_parent, name=None, include_children=True):
     # First, if the user doesn't provide the name, then just use the default "Clone - ..." name
-    if target_parent.id in get_illegal_targets(part, include=[target_parent.id, part.id]):
-        raise IllegalArgumentError()
-
     if not name:
         name = "CLONE - {}".format(part.name)
 
@@ -211,13 +220,15 @@ def update_part_with_properties(part_instance, moved_instance, name=None):
     for prop_instance in part_instance.properties:
         # Do different magic if there is an attachment property and it has a value
         if prop_instance._json_data['property_type'] == PropertyType.ATTACHMENT_VALUE:
+            moved_prop = get_mapping_dictionary()[prop_instance.id]
             if prop_instance.value:
                 attachment_name = prop_instance._json_data['value'].split('/')[-1]
-                moved_prop = get_mapping_dictionary()[prop_instance.id]
                 with temp_chdir() as target_dir:
                     full_path = os.path.join(target_dir or os.getcwd(), attachment_name)
                     prop_instance.save_as(filename=full_path)
                     moved_prop.upload(full_path)
+            else:
+                moved_prop.clear()
         # For a reference value property, add the id's of the part referenced {property.id: [part1.id, part2.id, ...]},
         # if there is part referenced at all.
         elif prop_instance._json_data['property_type'] == PropertyType.REFERENCES_VALUE:

@@ -749,8 +749,6 @@ class Part(Base):
         >>>                          include_instances=True)
 
         """
-        if self.id == target_parent.id:
-            raise IllegalArgumentError('Cannot copy model "{}" with id "{}" under itself.'.format(self.name, self.id))
         copied_model = relocate_model(part=self, target_parent=target_parent, name=name,
                                       include_children=include_children)
         if include_instances:
@@ -790,8 +788,6 @@ class Part(Base):
         >>>                          include_instances=True)
 
         """
-        if self.id == target_parent.id:
-            raise IllegalArgumentError('Cannot move model "{}" with id "{}" under itself.'.format(self.name, self.id))
         if not name:
             name = self.name
         moved_model = relocate_model(part=self, target_parent=target_parent, name=name,
@@ -830,9 +826,6 @@ class Part(Base):
         >>> instance_to_copy.copy_instance(target_parent=bike, name='Copied instance', include_children=True)
 
         """
-        #TODO: refactor out the illegality check of the copy in the helpers
-        if self.model().id not in [ target_parent.model().id, ].append([c.id for c in self.children()]):
-            raise IllegalArgumentError('Part and target_parent have the same model.')
         copied_instance = relocate_instance(part=self, target_parent=target_parent, name=name,
                                             include_children=include_children)
         return copied_instance
@@ -860,8 +853,6 @@ class Part(Base):
         >>> instance_to_move.move_instance(target_parent=bike, name='Moved instance', include_children=True)
 
         """
-        if self.model().id == target_parent.model().id:
-            raise IllegalArgumentError('Part and target_parent have the same model.')
         if not name:
             name = self.name
         moved_instance = relocate_instance(part=self, target_parent=target_parent, name=name,

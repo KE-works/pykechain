@@ -512,11 +512,12 @@ class TestParts(TestBetamax):
         moved_model.delete()
 
     def test_move_model(self):
-        name_of_part = 'Test copy model'
+        name_of_part = 'CLONE - Model to be moved'
         model_to_be_moved = self.project.model(name=name_of_part)
-        model_target_parent = self.project.model('Seat')
+        model_target_parent = self.project.model('Spoke')
 
-        model_to_be_moved.move_model(target_parent=model_target_parent, name='Lala', include_children=True)
+        model_to_be_moved.move_model(target_parent=model_target_parent, name='bbbb', include_children=True,
+                                     include_instances=True)
 
     def test_move_instance(self):
         name_of_part = 'Test move instance'
@@ -526,11 +527,11 @@ class TestParts(TestBetamax):
         model_to_be_moved.move_instance(target_parent=model_target_parent, include_children=True)
 
     def test_copy_model(self):
-        name_of_part = 'Test copy model'
+        name_of_part = 'CLONE - Model to be moved'
         model_to_be_moved = self.project.model(name=name_of_part)
-        model_target_parent = self.project.model('Spoke')
+        model_target_parent = self.project.model('Seat')
 
-        model_moved = model_to_be_moved.copy_model(target_parent=model_target_parent, name='Yes yes',
+        model_moved = model_to_be_moved.copy_model(target_parent=model_target_parent, name='Yes oh yes yes',
                                                    include_children=True, include_instances=True)
 
     def test_copy_instance(self):
