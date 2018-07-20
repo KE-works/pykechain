@@ -1,3 +1,4 @@
+import json
 import warnings
 
 import requests
@@ -1183,9 +1184,12 @@ class Client(object):
             "unit": unit,
             "options": options
         }
-
-        response = self._request('POST', self._build_url('properties'),
-                                 data=data)
+        if options:
+            response = self._request('POST', self._build_url('properties'),
+                                     json=data)
+        else:
+            response = self._request('POST', self._build_url('properties'),
+                                     data=data)
 
         if response.status_code != requests.codes.created:
             raise APIError("Could not create property")
