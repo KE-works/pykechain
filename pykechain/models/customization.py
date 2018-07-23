@@ -171,7 +171,7 @@ class ExtCustomization(CustomizationBase):
         :type config: dict
         """
         validate(config, component_json_schema)
-        self._add_widget(dict(config=config, name="jsonWidget"))
+        self._add_widget(dict(config=config, name=WidgetNames.JSONWIDGET))
 
     def add_super_grid_widget(self, part_model, delete=False, edit=True, export=True, incomplete_rows=True,
                               new_instance=False, parent_part_instance=None, max_height=None, custom_title=False,
@@ -890,3 +890,4 @@ class ExtCustomization(CustomizationBase):
         }
 
         self._add_widget(dict(config=config, meta=meta, name=WidgetNames.TASKNAVIGATIONBARWIDGET))
+

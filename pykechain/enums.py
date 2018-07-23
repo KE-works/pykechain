@@ -219,6 +219,7 @@ class WidgetNames(Enum):
     :cvar NOTEBOOKWIDGET: notebookWidget
     :cvar ATTACHMENTVIEWERWIDGET: attachmentViewerWidget
     :cvar TASKNAVIGATIONBARWIDGET: taskNavigationBarWidget
+    :cvar JSONWIDGET: jsonWidget
     """
 
     SUPERGRIDWIDGET = 'superGridWidget'
@@ -229,6 +230,7 @@ class WidgetNames(Enum):
     NOTEBOOKWIDGET = 'notebookWidget'
     ATTACHMENTVIEWERWIDGET = 'attachmentViewerWidget'
     TASKNAVIGATIONBARWIDGET = 'taskNavigationBarWidget'
+    JSONWIDGET = 'jsonWidget'
 
 
 class ActivityStatus(Enum):
