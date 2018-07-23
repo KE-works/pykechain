@@ -419,3 +419,15 @@ class ValidatorEffectTypes(Enum):
     TEXT_EFFECT = 'textEffect'
     ERRORTEXT_EFFECT = 'errorTextEffect'
     HELPTEXT_EFFECT = 'helpTextEffect'
+
+
+class ShowColumnTypes(Enum):
+    """The columns that can be shown in a Property grid.
+
+    .. versionadded:: 2.3
+
+    :cvar UNIT: unit
+    :cvar DESCRIPTION: description
+    """
+    UNIT = 'unit'
+    DESCRIPTION = 'description'

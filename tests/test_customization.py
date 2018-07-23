@@ -1,6 +1,6 @@
 from pykechain.models.customization import ExtCustomization
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.enums import SortTable, NavigationBarAlignment
+from pykechain.enums import SortTable, NavigationBarAlignment, ShowColumnTypes
 from tests.classes import TestBetamax
 
 
