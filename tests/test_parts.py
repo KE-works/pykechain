@@ -429,53 +429,88 @@ class TestParts(TestBetamax):
         with self.assertRaises(APIError):
             rear_wheel.clone()
 
-    def test_move_part_model_given_name_keep_original_include_children(self):
+    def test_copy_part_model_given_name_include_children(self):
         # setUp
-        model_to_be_moved = self.project.model(name='Model to be moved')
+        model_to_be_copied = self.project.model(name='Model to be copied')
         model_target_parent = self.project.model('Bike')
-        model_to_be_moved.move(target_parent=model_target_parent, name='Moved model under Bike', keep_original=True,
-                               include_children=True)
-
-        moved_model = self.project.model(name='Moved model under Bike')
-        moved_model.populate_descendants()
+        model_to_be_copied.copy(target_parent=model_target_parent, name='Copied model under Bike',
+                                include_children=True, include_instances=False)
+        copied_model = self.project.model(name='Copied model under Bike')
+        copied_model.populate_descendants()
 
         # testing
-        self.assertTrue(moved_model)
-        self.assertEqual(moved_model.property('Property single text')._json_data['description'],
+        self.assertTrue(copied_model)
+        self.assertEqual(copied_model.property('Property single text')._json_data['description'],
                          'Description of Property single text')
-        self.assertEqual(moved_model.property('Property single text')._json_data['unit'], 'mm')
-        self.assertEqual(moved_model.property('Property decimal number').value, 33)
-        self.assertEqual(moved_model.property('Property single select list').options, ['a', 'b', 'c'])
-        self.assertEqual(len(moved_model.property('Property reference part').value), 1)
-        self.assertEqual(moved_model.property('Property reference part').value[0].name, 'Wheel')
-        self.assertTrue(moved_model.property('Property attachment').value)
+        self.assertEqual(copied_model.property('Property single text')._json_data['unit'], 'mm')
+        self.assertEqual(copied_model.property('Property decimal number').value, 33)
+        self.assertEqual(copied_model.property('Property single select list').options, ['a', 'b', 'c'])
+        self.assertEqual(len(copied_model.property('Property reference part').value), 1)
+        self.assertEqual(copied_model.property('Property reference part').value[0].name, 'Wheel')
 
-        self.assertEqual(len(moved_model._cached_children), 2)
-        sub_part_moved_model = [part for part in moved_model._cached_children
-                                if part.name == 'Sub-part model to be moved'][0]
+        self.assertEqual(len(copied_model._cached_children), 2)
+        sub_part_moved_model = [part for part in copied_model._cached_children
+                                if part.name == '0 or more part model'][0]
         self.assertEqual(len(sub_part_moved_model._cached_children), 1)
 
         # tearDown
-        moved_model.delete()
+        copied_model.delete()
 
-    def test_move_part_model_empty_name_keep_original_include_children(self):
+    def test_copy_part_model_include_instances(self):
         # setUp
-        name_of_part = 'Model to be moved'
-        model_to_be_moved = self.project.model(name=name_of_part)
+        name_of_part = 'Model to be copied'
+        model_to_be_copied = self.project.model(name=name_of_part)
         model_target_parent = self.project.model('Bike')
-        model_to_be_moved.move(target_parent=model_target_parent, keep_original=True, include_children=True)
+        model_to_be_copied.copy(target_parent=model_target_parent, name='New model', include_instances=True)
 
-        moved_model = self.project.model(name='CLONE - {}'.format(name_of_part))
+        bike_part = self.project.part('Bike')
+        copied_model = self.project.model(name='New model')
+
+        copied_instance = [child for child in bike_part.children() if child.name == 'Instance to be copied'][0]
+        copied_instance.populate_descendants()
 
         # testing
-        self.assertTrue(moved_model)
+        self.assertTrue(copied_instance)
+        self.assertEqual(copied_instance.name, 'Instance to be copied')
+        self.assertEqual(len(copied_instance.properties), 5)
+        self.assertEqual(copied_instance.property('Property single text').value, 'Instance text')
+        self.assertEqual(copied_instance.property('Property decimal number').value, 11)
+        self.assertEqual(copied_instance.property('Property single select list').value, 'c')
+
+        self.assertEqual(len(copied_instance._cached_children), 4)
+
+        exactly_1_part_instance = [part for part in copied_instance._cached_children if part.name == 'Exactly 1 part'][0]
+        self.assertEqual(exactly_1_part_instance.property('Property boolean').value, False)
+
+        part_instance_1 = [part for part in copied_instance._cached_children if part.name == 'Part instance 1'][0]
+        self.assertEqual(len(part_instance_1._cached_children), 1)
 
         # tearDown
-        moved_model.delete()
+        copied_model.delete()
 
-    def test_move_part_model_not_keep_original(self):
+    def test_copy_part_model_empty_name_not_include_children(self):
         # setUp
-        name_of_part = 'Model to be moved'
+        name_of_part = 'Model to be copied'
+        model_to_be_copied = self.project.model(name=name_of_part)
+        model_target_parent = self.project.model('Bike')
+        model_to_be_copied.copy(target_parent=model_target_parent, include_children=False,
+                                include_instances=False)
+
+        copied_model = self.project.model(name='CLONE - {}'.format(name_of_part))
+        copied_model.populate_descendants()
+
+        # testing
+        self.assertTrue(copied_model)
+        self.assertEqual(copied_model.name, 'CLONE - {}'.format(name_of_part))
+        self.assertEqual(len(copied_model.properties), 5)
+        self.assertEqual(len(copied_model._cached_children), 0)
+
+        # tearDown
+        copied_model.delete()
+
+    def test_move_part_model(self):
+        # setUp
+        name_of_part = 'Model to be copied'
         original_model = self.project.model(name=name_of_part)
         model_target_parent = self.project.model('Bike')
         clone_of_original_model = original_model.clone()
@@ -483,7 +518,7 @@ class TestParts(TestBetamax):
         self.assertEqual(clone_of_original_model.name, 'CLONE - {}'.format(name_of_part))
 
         clone_of_original_model.move(target_parent=model_target_parent, name='New part under bike',
-                                     keep_original=False, include_children=True)
+                                     include_children=True)
 
         moved_model = self.project.model(name='New part under bike')
 
@@ -494,49 +529,80 @@ class TestParts(TestBetamax):
         # tearDown
         moved_model.delete()
 
-    def test_move_part_model_not_include_children(self):
+    def test_copy_part_instance(self):
         # setUp
-        name_of_part = 'Model to be moved'
-        model_to_be_moved = self.project.model(name=name_of_part)
-        model_target_parent = self.project.model('Bike')
-        model_to_be_moved.move(target_parent=model_target_parent, name='No children included',
-                               keep_original=True, include_children=False)
+        name_of_part = 'Instance to be copied'
+        instance_to_be_copied = self.project.part(name=name_of_part)
+        instance_target_parent = self.project.part('Bike')
+        instance_to_be_copied.copy(target_parent=instance_target_parent, name='Copied instance', include_children=True)
 
-        moved_model = self.project.model(name='No children included')
+        copied_instance = self.project.part(name='Copied instance')
+        copied_instance.populate_descendants()
 
         # testing
-        self.assertEqual(len(moved_model.properties), 5)
-        self.assertEqual(len(moved_model.children()), 0)
+        self.assertTrue(copied_instance)
+        self.assertEqual(copied_instance.name, 'Copied instance')
+        self.assertEqual(len(copied_instance.properties), 5)
+        self.assertEqual(copied_instance.property('Property single text').value, 'Instance text')
+        self.assertEqual(copied_instance.property('Property decimal number').value, 11)
+        self.assertEqual(copied_instance.property('Property single select list').value, 'c')
+
+        self.assertEqual(len(copied_instance._cached_children), 4)
+
+        exactly_1_part_instance = [part for part in copied_instance._cached_children if part.name == 'Exactly 1 part'][0]
+        self.assertEqual(exactly_1_part_instance.property('Property boolean').value, False)
+
+        part_instance_1 = [part for part in copied_instance._cached_children if part.name == 'Part instance 1'][0]
+        self.assertEqual(len(part_instance_1._cached_children), 1)
 
         # tearDown
-        moved_model.delete()
+        copied_instance.model().delete()
 
-    def test_move_model(self):
-        name_of_part = 'CLONE - Model to be moved'
-        model_to_be_moved = self.project.model(name=name_of_part)
-        model_target_parent = self.project.model('Spoke')
+    def test_move_part_instance(self):
+        # setUp
+        name_of_part = 'Part instance 3'
+        original_instance = self.project.part(name=name_of_part)
+        instance_target_parent = self.project.part('Bike')
+        clone_of_original_instance = original_instance.clone()
 
-        model_to_be_moved.move_model(target_parent=model_target_parent, name='bbbb', include_children=True,
-                                     include_instances=True)
+        clone_of_original_instance.move(target_parent=instance_target_parent, name='Moved clone instance',
+                                        include_children=False)
 
-    def test_move_instance(self):
-        name_of_part = 'Test move instance'
-        model_to_be_moved = self.project.part(name=name_of_part)
-        model_target_parent = self.project.part('Seat')
+        moved_instance = self.project.part(name='Moved clone instance')
+        moved_instance.populate_descendants()
 
-        model_to_be_moved.move_instance(target_parent=model_target_parent, include_children=True)
+        # testing
+        with self.assertRaises(NotFoundError):
+            self.project.model(name=clone_of_original_instance.name)
 
-    def test_copy_model(self):
-        name_of_part = 'CLONE - Model to be moved'
-        model_to_be_moved = self.project.model(name=name_of_part)
-        model_target_parent = self.project.model('Seat')
+        self.assertTrue(moved_instance)
+        self.assertEqual(len(moved_instance.properties), 1)
+        self.assertEqual(moved_instance.property('Property multi-text').value, 'Yes yes oh yes')
 
-        model_moved = model_to_be_moved.copy_model(target_parent=model_target_parent, name='Yes oh yes yes',
-                                                   include_children=True, include_instances=True)
+        # tearDown
+        moved_instance.model().delete()
 
-    def test_copy_instance(self):
-        name_of_part = 'Test copy instance'
-        model_to_be_moved = self.project.part(name=name_of_part)
-        model_target_parent = self.project.part('Seat')
+    def test_copy_different_categories(self):
+        name_of_part = 'Model to be copied'
+        model = self.project.model(name=name_of_part)
+        target_instance = self.project.part(name='Bike')
 
-        model_to_be_moved.copy_instance(target_parent=model_target_parent, include_children=True)
+        with self.assertRaises(IllegalArgumentError):
+            model.copy(target_parent=target_instance)
+
+    def test_move_different_categories(self):
+        name_of_part = 'Model to be copied'
+        model = self.project.model(name=name_of_part)
+        target_instance = self.project.part(name='Bike')
+
+        with self.assertRaises(IllegalArgumentError):
+            model.move(target_parent=target_instance)
+
+    def test_copy_under_descendants(self):
+        name_of_part = 'Model to be copied'
+        model = self.project.model(name_of_part)
+        target_model = self.project.part(name='Exactly 1 part')
+
+        with self.assertRaises(IllegalArgumentError):
+            model.copy(target_parent=target_model)
+

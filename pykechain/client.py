@@ -1063,16 +1063,19 @@ class Client(object):
         return self._create_part(action="create_child_model", data=data, **kwargs)
 
     def _create_clone(self, parent, part, **kwargs):
-        """
+        """Create a new `Part` clone under the `Parent`.
 
         .. versionadded:: 2.3
 
-        :param parent:
-        :param part:
-        :param kwargs:
-        :return:
+        :param parent: parent part
+        :type parent: :class:`models.Part`
+        :param part: part to be cloned
+        :type part: :class:`models.Part`
+        :param kwargs: (optional) additional keyword=value arguments
+        :type kwargs: dict
+        :return: cloned :class:`models.Part`
+        :raises APIError: if the `Part` could not be cloned
         """
-
         if part.category == Category.MODEL:
             action = 'clone_model'
         else:
@@ -1181,7 +1184,7 @@ class Client(object):
             "description": description,
             "property_type": property_type.upper(),
             "value": default_value,
-            "unit": unit,
+            "unit": unit or '',
             "options": options
         }
         if options:
