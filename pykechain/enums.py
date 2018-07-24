@@ -429,5 +429,6 @@ class ShowColumnTypes(Enum):
     :cvar UNIT: unit
     :cvar DESCRIPTION: description
     """
+
     UNIT = 'unit'
     DESCRIPTION = 'description'

@@ -917,4 +917,3 @@ class ExtCustomization(CustomizationBase):
         }
 
         self._add_widget(dict(config=config, meta=meta, name=WidgetNames.TASKNAVIGATIONBARWIDGET))
-
