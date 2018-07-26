@@ -2,7 +2,8 @@ import requests
 from jsonschema import validate
 from six import text_type
 
-from pykechain.enums import ComponentXType, Category, SortTable, PropertyType, NavigationBarAlignment, WidgetNames
+from pykechain.enums import ComponentXType, Category, SortTable, PropertyType, NavigationBarAlignment, WidgetNames, \
+    ShowColumnTypes
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models.activity import Activity
 from pykechain.models.part import Part
@@ -171,7 +172,7 @@ class ExtCustomization(CustomizationBase):
         :type config: dict
         """
         validate(config, component_json_schema)
-        self._add_widget(dict(config=config, name="jsonWidget"))
+        self._add_widget(dict(config=config, name=WidgetNames.JSONWIDGET))
 
     def add_super_grid_widget(self, part_model, delete=False, edit=True, export=True, incomplete_rows=True,
                               new_instance=False, parent_part_instance=None, max_height=None, custom_title=False,
@@ -331,7 +332,8 @@ class ExtCustomization(CustomizationBase):
 
         self._add_widget(dict(config=config, meta=meta, name=WidgetNames.SUPERGRIDWIDGET))
 
-    def add_property_grid_widget(self, part_instance, max_height=None, custom_title=False):
+    def add_property_grid_widget(self, part_instance, max_height=None, custom_title=False, show_headers=True,
+                                 show_columns=None):
         """
         Add a KE-chain Property Grid widget to the customization.
 
@@ -346,6 +348,10 @@ class ExtCustomization(CustomizationBase):
             * String value: Custom title
             * None: No title
         :type custom_title: bool or basestring or None
+        :param show_headers: Show or hide the headers in the grid (default True)
+        :type show_headers: bool
+        :param show_columns: Columns to be hidden or shown (default to 'unit' and 'description')
+        :type show_columns: list
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
         # Check whether the parent_part_instance is uuid type or class `Part`
@@ -357,6 +363,19 @@ class ExtCustomization(CustomizationBase):
         else:
             raise IllegalArgumentError("When using the add_property_grid_widget, part_instance must be a "
                                        "Part or Part id. Type is: {}".format(type(part_instance)))
+        if not show_columns:
+            show_columns = list()
+
+        # Set the display_columns for the config
+        possible_columns = [ShowColumnTypes.DESCRIPTION, ShowColumnTypes.UNIT]
+        display_columns = dict()
+
+        for possible_column in possible_columns:
+            if possible_column in show_columns:
+                display_columns[possible_column] = True
+            else:
+                display_columns[possible_column] = False
+
         # Declare property grid config
         config = {
             "xtype": ComponentXType.PROPERTYGRID,
@@ -364,6 +383,12 @@ class ExtCustomization(CustomizationBase):
             "filter": {
                 "activity_id": str(self.activity.id),
                 "part": part_instance_id
+            },
+            "hideHeaders": not show_headers,
+            "viewModel": {
+                "data": {
+                    "displayColumns": display_columns
+                }
             }
         }
 
@@ -389,6 +414,8 @@ class ExtCustomization(CustomizationBase):
             "customHeight": max_height if max_height else None,
             "customTitle": title,
             "partInstanceId": part_instance_id,
+            "showColumns": show_columns,
+            "showHeaders": show_headers,
             "showHeightValue": "Custom max height" if max_height else "Auto",
             "showTitleValue": show_title_value
         }

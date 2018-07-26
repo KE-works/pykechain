@@ -1,0 +1,31 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+requests = "*"
+envparse = "*"
+jsonschema = "*"
+semver = "*"
+typing = "*"
+pykechain = {editable = true, path = "."}
+
+[dev-packages]
+pytest = "*"
+pytz = "*"
+six = "*"
+betamax = "*"
+nbsphinx = "*"
+jupyter = "*"
+matplotlib = "*"
+"flake8" = "*"
+pydocstyle = "*"
+mypy = "*"
+twine = "*"
+Sphinx = "*"
+tox = "*"
+pyOpenSSL = {version="*", markers="python_version <= '2.7'"}
+
+[requires]
+python_version = "3.6"

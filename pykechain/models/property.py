@@ -167,8 +167,7 @@ class Property(Base):
         else:
             return Property(json, **kwargs)
 
-    def edit(self, name=None, description=None, unit=None, **kwargs):
-        # type: (AnyStr, AnyStr, AnyStr, **Any) -> None
+    def edit(self, name=None, description=None, unit=None, options=None, **kwargs):
         """
         Edit the details of a property (model).
 
@@ -178,18 +177,32 @@ class Property(Base):
         :type description: basestring or None
         :param unit: (optional) new unit of the property
         :type unit: basestring or None
-        :param kwargs: (optional) additional kwargs to be edited (eg. options)
+        :param options: (options) new options of the property
+        :type options: dict
+        :param kwargs: (optional) additional kwargs to be edited
         :type kwargs: dict or None
         :return: None
         :raises APIError: When unable to edit the property
         :raises IllegalArgumentError: when the type of the input is provided incorrect.
 
-        Example
-        -------
+        Examples
+        --------
         >>> front_fork = project.part('Front Fork')
         >>> color_property = front_fork.property(name='Color')
         >>> color_property.edit(name='Shade', description='Could also be called tint, depending on mixture',
         >>> unit='RGB')
+
+        --------
+        >>> wheel_property_reference = self.project.model('Bike').property('Reference wheel')
+        >>> wheel_model = self.project.model('Wheel')
+        >>> diameter_property = wheel_model.property('Diameter')
+        >>> spokes_property = wheel_model.property('Spokes')
+        >>> prefilters = {'property_value': diameter_property.id + ":{}:lte".format(15)}
+        >>> propmodels_excl = [spokes_property.id]
+        >>> options = dict()
+        >>> options['prefilters'] = prefilters
+        >>> options['propmodels_excl'] = propmodels_excl
+        >>> wheel_property_reference.edit(options=options)
 
         """
         update_dict = {'id': self.id}
@@ -209,6 +222,11 @@ class Property(Base):
                 raise IllegalArgumentError("unit should be provided as a string, was provided as '{}'".
                                            format(type(unit)))
             update_dict.update({'unit': unit})
+        if options:
+            if not isinstance(options, dict):
+                raise IllegalArgumentError("options should be provided as a dict, was provided as '{}'".
+                                           format(type(options)))
+            update_dict.update({'options': options})
         if kwargs:
             # process the other kwargs in py27 style.
             for key, value in iteritems(kwargs):
