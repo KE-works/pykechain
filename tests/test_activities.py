@@ -10,7 +10,8 @@ from pykechain.enums import Category, ActivityType, ActivityStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import Part, Activity
 from tests.classes import TestBetamax
-from tests.utils import TEST_FLAG_IS_WIM2, temp_chdir
+from tests.utils import TEST_FLAG_IS_WIM2
+from pykechain.utils import temp_chdir
 
 ISOFORMAT = "%Y-%m-%dT%H:%M:%SZ"
 ISOFORMAT_HIGHPRECISION = "%Y-%m-%dT%H:%M:%S.%fZ"

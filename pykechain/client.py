@@ -1061,6 +1061,44 @@ class Client(object):
 
         return self._create_part(action="create_child_model", data=data, **kwargs)
 
+    def _create_clone(self, parent, part, **kwargs):
+        """Create a new `Part` clone under the `Parent`.
+
+        .. versionadded:: 2.3
+
+        :param parent: parent part
+        :type parent: :class:`models.Part`
+        :param part: part to be cloned
+        :type part: :class:`models.Part`
+        :param kwargs: (optional) additional keyword=value arguments
+        :type kwargs: dict
+        :return: cloned :class:`models.Part`
+        :raises APIError: if the `Part` could not be cloned
+        """
+        if part.category == Category.MODEL:
+            select_action = 'clone_model'
+        else:
+            select_action = 'clone_instance'
+
+        data = {
+            "part": part.id,
+            "parent": parent.id,
+            "suppress_kevents": kwargs.pop('suppress_kevents', None)
+        }
+
+        # prepare url query parameters
+        query_params = kwargs
+        query_params['select_action'] = select_action
+
+        response = self._request('POST', self._build_url('parts'),
+                                 params=query_params,
+                                 data=data)
+
+        if response.status_code != requests.codes.created:
+            raise APIError("Could not clone part, {}: {}".format(str(response), response.content))
+
+        return Part(response.json()['results'][0], client=self)
+
     def create_proxy_model(self, model, parent, name, multiplicity='ZERO_MANY', **kwargs):
         """Add this model as a proxy to another parent model.
 
@@ -1100,12 +1138,14 @@ class Client(object):
 
         return self._create_part(action='create_proxy_model', data=data, **kwargs)
 
-    def create_property(self, model, name, description=None, property_type=PropertyType.CHAR_VALUE, default_value=None):
+    def create_property(self, model, name, description=None, property_type=PropertyType.CHAR_VALUE, default_value=None,
+                        unit=None, options=None):
         """Create a new property model under a given model.
 
         Use the :class:`enums.PropertyType` to select which property type to create to ensure that you
         provide the correct values to the KE-chain backend. The default is a `PropertyType.CHAR_VALUE` which is a
         single line text in KE-chain.
+
 
         :param model: parent model
         :type model: :class:`models.Part`
@@ -1115,8 +1155,12 @@ class Client(object):
         :type description: basestring or None
         :param property_type: choose one of the :class:`enums.PropertyType`, defaults to `PropertyType.CHAR_VALUE`.
         :type property_type: basestring or None
-        :param default_value: default value used for part instances when creating a model.
+        :param default_value: (optional) default value used for part instances when creating a model.
         :type default_value: any
+        :param unit: (optional) unit of the property
+        :type unit: basestring or None
+        :param options: (optional) property options (eg. validators or 'single selectlist choices')
+        :type options: basestring or None
         :return: a :class:`models.Property` with category `MODEL`
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Property` model could not be created
@@ -1133,16 +1177,29 @@ class Client(object):
             raise IllegalArgumentError("Please provide a valid propertytype, please use one of `enums.PropertyType`. "
                                        "Got: '{}'".format(property_type))
 
+        # because the references value only accepts a single 'model_id' in the default value, we need to convert this
+        # to a single value from the list of values.
+        if property_type in (PropertyType.REFERENCE_VALUE, PropertyType.REFERENCES_VALUE) and \
+                isinstance(default_value, (list, tuple)) and default_value:
+            default_value = default_value[0]
+
         data = {
             "name": name,
             "part": model.id,
-            "description": description,
+            "description": description or '',
             "property_type": property_type.upper(),
-            "value": default_value
+            "value": default_value,
+            "unit": unit or '',
+            "options": options or {}
         }
 
+        # # We add options after the fact only if they are available, otherwise the options will be set to null in the
+        # # request and that can't be handled by KE-chain.
+        # if options:
+        #     data['options'] = options
+
         response = self._request('POST', self._build_url('properties'),
-                                 data=data)
+                                     json=data)
 
         if response.status_code != requests.codes.created:
             raise APIError("Could not create property")

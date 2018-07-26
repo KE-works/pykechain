@@ -7,7 +7,7 @@ from pykechain.enums import ServiceExecutionStatus, ServiceType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from tests.classes import TestBetamax
 # new in 1.13
-from tests.utils import temp_chdir
+from pykechain.utils import temp_chdir
 
 
 class TestServices(TestBetamax):
