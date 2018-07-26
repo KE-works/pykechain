@@ -5,9 +5,20 @@ pykechain changelog
 
 2.3.0 (26JUl18)
 ---------------
+* We added additional utilities to help pykechain script developers to `Part.copy()`, `Part.move()` and `Part.clone()` part models and part instances. (#343)
+
+For example; To move part models, their children (subtree) and their instances:
+
+    >>> model_to_move = project.model(name='Model to be moved')
+    >>> bike = project.model('Bike')
+    >>> model_moved = model_to_move.move(target_parent=bike, name='Moved model',
+    >>>                                  include_children=True,
+    >>>                                  include_instances=True)
+
  * We added show headers and show columns in the arguments of the property grid to align to KE-chain functionality of the widget. (#350)
  * We added the posibility to use a JSON widget to the list of allowed widgets. (#351)
  * We added the posibility to update the options of a reference property. (#352)
+ * Updated dependent versions for development: pytest (3.6.3), tox (3.1.2), sphinx (1.7.6), mypy (0.620)
 
 2.2.4 (22JUN18)
 ---------------
