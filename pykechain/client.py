@@ -1,9 +1,9 @@
 import warnings
+from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
 
 import requests
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
-from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
 
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     WIMCompatibleActivityTypes, PropertyType
@@ -1183,7 +1183,6 @@ class Client(object):
                 isinstance(default_value, (list, tuple)) and default_value:
             default_value = default_value[0]
 
-        import json
         data = {
             "name": name,
             "part": model.id,

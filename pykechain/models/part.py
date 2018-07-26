@@ -121,7 +121,6 @@ class Part(Base):
         else:
             return None
 
-
     def children(self, **kwargs):
         """Retrieve the children of this `Part` as `Partset`.
 
@@ -723,10 +722,18 @@ class Part(Base):
         """
         Clone a part.
 
-        See :class:`pykechain.Client._create_clone` for available parameters.
+        .. versionadded:: 2.3
 
-        :return: :class:`Part`
-        :raises APIError: in case an Error occurs
+        :param kwargs: (optional) additional keyword=value arguments
+        :type kwargs: dict
+        :return: cloned :class:`models.Part`
+        :raises APIError: if the `Part` could not be cloned
+
+        Example
+        -------
+        >>> bike = client.model('Bike')
+        >>> bike2 = bike.clone()
+
         """
         parent = self.parent()
         return self._client._create_clone(parent, self, **kwargs)
@@ -753,8 +760,9 @@ class Part(Base):
         -------
         >>> model_to_copy = client.model(name='Model to be copied')
         >>> bike = client.model('Bike')
-        >>> model_to_copy.copy_model(target_parent=bike, name='Copied model', include_children=True,
-        >>>                          include_instances=True)
+        >>> model_to_copy.copy(target_parent=bike, name='Copied model',
+        >>>                    include_children=True,
+        >>>                    include_instances=True)
 
         """
         if self.category == Category.MODEL and target_parent.category == Category.MODEL:
@@ -778,8 +786,6 @@ class Part(Base):
         else:
             raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category')
 
-
-
     def move(self, target_parent, name=None, include_children=True, include_instances=True):
         """
         Move the `Part` to target parent, both of them the same category.
@@ -802,8 +808,9 @@ class Part(Base):
         -------
         >>> model_to_move = client.model(name='Model to be moved')
         >>> bike = client.model('Bike')
-        >>> model_to_move.move_model(target_parent=bike, name='Moved model', include_children=True,
-        >>>                          include_instances=True)
+        >>> model_to_move.move(target_parent=bike, name='Moved model',
+        >>>                    include_children=True,
+        >>>                    include_instances=True)
 
         """
         if not name:
@@ -832,4 +839,3 @@ class Part(Base):
             return moved_instance
         else:
             raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category')
-
