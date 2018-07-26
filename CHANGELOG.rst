@@ -22,17 +22,6 @@ For example; To move part models, their children (subtree) and their instances:
 
 2.2.4 (22JUN18)
 ---------------
- * We added additional utilities to help pykechain script developers to `Part.copy()`, `Part.move()` and `Part.clone()` part models and part instances. (#343)
-
-For example; To move part models, their children (subtree) and their instances:
-
-    >>> model_to_move = project.model(name='Model to be moved')
-    >>> bike = project.model('Bike')
-    >>> model_moved = model_to_move.move(target_parent=bike, name='Moved model',
-    >>>                                  include_children=True,
-    >>>                                  include_instances=True)
-
-
  * An issue was fixed where the `suppress_kevents` flag was not correctly injected in the API request for all functions that created parts. (#340)
  * Changed the way the cached children are stored when the `Part.children()` method is used. It is now cached as a `List` instead of a `Partset` and you can iterate over the `List` many times in your application. Thanks to Jelle Boersma for finding this. (#341)
  * Updated dependent versions for development: pytest (3.6.2), mypy (0.610), requests (2.19.1)
