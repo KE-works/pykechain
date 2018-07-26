@@ -3,6 +3,7 @@ import os
 from pykechain.enums import PropertyType, Multiplicity
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.utils import temp_chdir
+
 # global variable
 __mapping_dictionary = None
 __edited_one_many = list()  # type: list
@@ -13,6 +14,7 @@ def get_mapping_dictionary(clean=False):
     Get a temporary helper to map some keys to some values. Mainly used in the relocation of parts and models.
 
     :param clean: (optional) boolean flag to reset the mapping dictionary
+    :type clean: bool
     :return: singleton dictionary (persistent in the script) for mapping use.
     """
     global __mapping_dictionary
@@ -28,6 +30,7 @@ def get_edited_one_many(clean=False):
     Only used in the relocation of parts and models.
 
     :param clean: (optional) boolean flag to reset the mapping dictionary
+    :type clean: bool
     :return: singleton dictionary (persistent in the script) for mapping use.
     """
     global __edited_one_many
@@ -50,7 +53,6 @@ def relocate_model(part, target_parent, name=None, include_children=True):
     :type name: basestring
     :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
     :type include_children: bool
-
     :return: moved :class: Part model.
     :raises IllegalArgumentError: if target_parent is descendant of part
     """
@@ -123,8 +125,8 @@ def get_illegal_targets(part, include):
     :type part: :class:`Part`
     :param include: `Set` object with id's to be avoided as target parent `Part`
     :type include: set
-
-    :return: 'List' object of illegal id's
+    :return: `List` object of illegal id's
+    :rtype: list
     """
     list_of_illegal_targets = include or set()
     for descendant in part.children(descendants='children'):
@@ -146,7 +148,6 @@ def relocate_instance(part, target_parent, name=None, include_children=True):
     :type name: basestring
     :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
     :type include_children: bool
-
     :return: moved :class: `Part` instance
     """
     # First, if the user doesn't provide the name, then just use the default "Clone - ..." name
@@ -187,7 +188,6 @@ def move_part_instance(part_instance, target_parent, part_model, name=None, incl
     :type name: basestring
     :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
     :type include_children: bool
-
     :return: moved :class: `Part` instance
     """
     # If no specific name has been required, then call in as Clone of the part_instance.
@@ -245,7 +245,6 @@ def update_part_with_properties(part_instance, moved_instance, name=None):
     :type moved_instance: :class:`Part`
     :param name: Name of the updated part
     :type name: basestring
-
     :return: moved :class: `Part` instance
     """
     # Instantiate and empty dictionary later used to map {property.id: property.value} in order to update the part
@@ -281,11 +280,13 @@ def map_property_instances(original_part, new_part):
     """
     Map the id of the original part with the `Part` object of the newly created one.
 
+    Updated the singleton `mapping dictionary` with the new mapping table values.
+
     :param original_part: `Part` object to be copied/moved
     :type original_part: :class:`Part`
     :param new_part: `Part` object copied/moved
     :type new_part: :class:`Part`
-    :return:
+    :return: None
     """
     # Map the original part with the new one
     get_mapping_dictionary()[original_part.id] = new_part
