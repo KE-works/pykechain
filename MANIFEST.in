@@ -5,6 +5,7 @@ include requirements.txt
 include tox.ini
 include mypy.ini
 include .env.template
+include Pipfile
 
 graft tests
 graft docs
