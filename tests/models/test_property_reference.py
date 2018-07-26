@@ -136,3 +136,27 @@ class TestMultiReferenceProperty(TestBetamax):
         possible_options = self.ref.choices()
         self.assertEqual(2, len(possible_options))
 
+    # new in 2.3
+    def test_add_filters_to_property(self):
+        # setUp
+        wheel_property_reference = self.project.model('Bike').property('Reference wheel')
+        wheel_model = self.project.model('Wheel')
+        diameter_property = wheel_model.property('Diameter')
+        spokes_property = wheel_model.property('Spokes')
+        prefilters = {'property_value': diameter_property.id + ":{}:lte".format(15)}
+        propmodels_excl = [spokes_property.id]
+        options = dict()
+        options['prefilters'] = prefilters
+        options['propmodels_excl'] = propmodels_excl
+
+        # testing
+        wheel_property_reference.edit(options=options)
+        wheel_property_reference = self.project.model('Bike').property('Reference wheel')
+        self.assertTrue('property_value' in wheel_property_reference._options['prefilters'] and
+                        wheel_property_reference._options['prefilters']['property_value'] ==
+                        diameter_property.id + ":{}:lte".format(15))
+        self.assertTrue(spokes_property.id in wheel_property_reference._options['propmodels_excl'])
+
+        # tearDown
+        empty_options = {'prefilters': {}, 'propmodels_excl': []}
+        wheel_property_reference.edit(options=empty_options)

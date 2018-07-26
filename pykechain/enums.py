@@ -219,6 +219,7 @@ class WidgetNames(Enum):
     :cvar NOTEBOOKWIDGET: notebookWidget
     :cvar ATTACHMENTVIEWERWIDGET: attachmentViewerWidget
     :cvar TASKNAVIGATIONBARWIDGET: taskNavigationBarWidget
+    :cvar JSONWIDGET: jsonWidget
     """
 
     SUPERGRIDWIDGET = 'superGridWidget'
@@ -229,6 +230,7 @@ class WidgetNames(Enum):
     NOTEBOOKWIDGET = 'notebookWidget'
     ATTACHMENTVIEWERWIDGET = 'attachmentViewerWidget'
     TASKNAVIGATIONBARWIDGET = 'taskNavigationBarWidget'
+    JSONWIDGET = 'jsonWidget'
 
 
 class ActivityStatus(Enum):
@@ -417,3 +419,16 @@ class ValidatorEffectTypes(Enum):
     TEXT_EFFECT = 'textEffect'
     ERRORTEXT_EFFECT = 'errorTextEffect'
     HELPTEXT_EFFECT = 'helpTextEffect'
+
+
+class ShowColumnTypes(Enum):
+    """The columns that can be shown in a Property grid.
+
+    .. versionadded:: 2.3
+
+    :cvar UNIT: unit
+    :cvar DESCRIPTION: description
+    """
+
+    UNIT = 'unit'
+    DESCRIPTION = 'description'
