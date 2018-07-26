@@ -1076,9 +1076,9 @@ class Client(object):
         :raises APIError: if the `Part` could not be cloned
         """
         if part.category == Category.MODEL:
-            action = 'clone_model'
+            select_action = 'clone_model'
         else:
-            action = 'clone_instance'
+            select_action = 'clone_instance'
 
         data = {
             "part": part.id,
@@ -1088,7 +1088,7 @@ class Client(object):
 
         # prepare url query parameters
         query_params = kwargs
-        query_params['select_action'] = action
+        query_params['select_action'] = select_action
 
         response = self._request('POST', self._build_url('parts'),
                                  params=query_params,
@@ -1177,6 +1177,13 @@ class Client(object):
             raise IllegalArgumentError("Please provide a valid propertytype, please use one of `enums.PropertyType`. "
                                        "Got: '{}'".format(property_type))
 
+        # because the references value only accepts a single 'model_id' in the default value, we need to convert this
+        # to a single value from the list of values.
+        if property_type in (PropertyType.REFERENCE_VALUE, PropertyType.REFERENCES_VALUE) and \
+                isinstance(default_value, (list, tuple)) and default_value:
+            default_value = default_value[0]
+
+        import json
         data = {
             "name": name,
             "part": model.id,
@@ -1184,14 +1191,15 @@ class Client(object):
             "property_type": property_type.upper(),
             "value": default_value,
             "unit": unit or '',
-            "options": options
         }
+
+        # We add options after the fact only if they are available, otherwise the options will be set to null in the
+        # request and that can't be handled by KE-chain.
         if options:
-            response = self._request('POST', self._build_url('properties'),
+            data['options'] = options
+
+        response = self._request('POST', self._build_url('properties'),
                                      json=data)
-        else:
-            response = self._request('POST', self._build_url('properties'),
-                                     data=data)
 
         if response.status_code != requests.codes.created:
             raise APIError("Could not create property")
