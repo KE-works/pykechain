@@ -1,6 +1,6 @@
 from pykechain.models.customization import ExtCustomization
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.enums import SortTable, NavigationBarAlignment
+from pykechain.enums import SortTable, NavigationBarAlignment, ShowColumnTypes
 from tests.classes import TestBetamax
 
 
@@ -102,6 +102,38 @@ class TestExtCustomization(TestBetamax):
                         "The first widget should be a propertyGridWidget")
         self.assertEqual(self.customization.widgets()[0]["config"]["title"], str(),
                          "The config should not have a title")
+
+        # tearDown
+        self.customization.delete_all_widgets()
+
+    def test_add_property_grid_widget_with_columns_and_headers(self):
+        """
+        Test if a Property Grid Widget can be added to the customization with our without columns and headers.
+        """
+        self.customization.add_property_grid_widget(self.instances[0], show_headers=False, show_columns=None)
+        self.customization.add_property_grid_widget(self.instances[0], show_headers=True,
+                                                    show_columns=[ShowColumnTypes.DESCRIPTION, ShowColumnTypes.UNIT])
+
+        self.assertEqual(len(self.customization.widgets()), 2, "The customization should have 2 widgets")
+        self.assertTrue(ShowColumnTypes.DESCRIPTION in
+                        self.customization.widgets()[0]["config"]["viewModel"]["data"]["displayColumns"] and
+                        not self.customization.widgets()[0]["config"]["viewModel"]["data"]["displayColumns"]
+                        [ShowColumnTypes.DESCRIPTION])
+        self.assertTrue(ShowColumnTypes.UNIT in
+                        self.customization.widgets()[0]["config"]["viewModel"]["data"]["displayColumns"] and
+                        not self.customization.widgets()[0]["config"]["viewModel"]["data"]["displayColumns"]
+                        [ShowColumnTypes.UNIT])
+        self.assertTrue(self.customization.widgets()[0]["config"]["hideHeaders"])
+
+        self.assertTrue(ShowColumnTypes.DESCRIPTION in
+                        self.customization.widgets()[1]["config"]["viewModel"]["data"]["displayColumns"] and
+                        self.customization.widgets()[1]["config"]["viewModel"]["data"]["displayColumns"]
+                        [ShowColumnTypes.DESCRIPTION])
+        self.assertTrue(ShowColumnTypes.UNIT in
+                        self.customization.widgets()[1]["config"]["viewModel"]["data"]["displayColumns"] and
+                        self.customization.widgets()[1]["config"]["viewModel"]["data"]["displayColumns"]
+                        [ShowColumnTypes.UNIT])
+        self.assertFalse(self.customization.widgets()[1]["config"]["hideHeaders"])
 
         # tearDown
         self.customization.delete_all_widgets()
