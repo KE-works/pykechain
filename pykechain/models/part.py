@@ -6,6 +6,7 @@ from six import text_type
 
 from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import NotFoundError, APIError, MultipleFoundError, IllegalArgumentError
+from pykechain.extra_utils import relocate_model, relocate_instance, move_part_instance
 from pykechain.models.base import Base
 from pykechain.models.property import Property
 from pykechain.utils import find, is_uuid
@@ -119,7 +120,6 @@ class Part(Base):
             return self._client.part(pk=self.parent_id, category=self.category)
         else:
             return None
-
 
     def children(self, **kwargs):
         """Retrieve the children of this `Part` as `Partset`.
@@ -717,3 +717,125 @@ class Part(Base):
                     parent._cached_children.append(child)
 
         self._cached_children = descendants_flat_list[0]._cached_children
+
+    def clone(self, **kwargs):
+        """
+        Clone a part.
+
+        .. versionadded:: 2.3
+
+        :param kwargs: (optional) additional keyword=value arguments
+        :type kwargs: dict
+        :return: cloned :class:`models.Part`
+        :raises APIError: if the `Part` could not be cloned
+
+        Example
+        -------
+        >>> bike = client.model('Bike')
+        >>> bike2 = bike.clone()
+
+        """
+        parent = self.parent()
+        return self._client._create_clone(parent, self, **kwargs)
+
+    def copy(self, target_parent, name=None, include_children=True, include_instances=True):
+        """
+        Copy the `Part` to target parent, both of them having the same category.
+
+        .. versionadded:: 2.3
+
+        :param target_parent: `Part` object under which the desired `Part` is copied
+        :type target_parent: :class:`Part`
+        :param name: how the copied top-level `Part` should be called
+        :type name: basestring
+        :param include_children: True to copy also the descendants of `Part`.
+        :type include_children: bool
+        :param include_instances: True to copy also the instances of `Part` to ALL the instances of target_parent.
+        :type include_instances: bool
+        :returns: copied :class:`Part` model.
+        :raises IllegalArgumentError: if part and target_parent have different `Category`
+        :raises IllegalArgumentError: if part and target_parent are identical
+
+        Example
+        -------
+        >>> model_to_copy = client.model(name='Model to be copied')
+        >>> bike = client.model('Bike')
+        >>> model_to_copy.copy(target_parent=bike, name='Copied model',
+        >>>                    include_children=True,
+        >>>                    include_instances=True)
+
+        """
+        if self.category == Category.MODEL and target_parent.category == Category.MODEL:
+            # Cannot add a model under an instance or vice versa
+            copied_model = relocate_model(part=self, target_parent=target_parent, name=name,
+                                          include_children=include_children)
+            if include_instances:
+                instances_to_be_copied = list(self.instances())
+                parent_instances = list(target_parent.instances())
+                for parent_instance in parent_instances:
+                    for instance in instances_to_be_copied:
+                        instance.populate_descendants()
+                        move_part_instance(part_instance=instance, target_parent=parent_instance,
+                                           part_model=self, name=instance.name, include_children=include_children)
+            return copied_model
+
+        elif self.category == Category.INSTANCE and target_parent.category == Category.INSTANCE:
+            copied_instance = relocate_instance(part=self, target_parent=target_parent, name=name,
+                                                include_children=include_children)
+            return copied_instance
+        else:
+            raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category')
+
+    def move(self, target_parent, name=None, include_children=True, include_instances=True):
+        """
+        Move the `Part` to target parent, both of them the same category.
+
+        .. versionadded:: 2.3
+
+        :param target_parent: `Part` object under which the desired `Part` is moved
+        :type target_parent: :class:`Part`
+        :param name: how the moved top-level `Part` should be called
+        :type name: basestring
+        :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
+        :type include_children: bool
+        :param include_instances: True to move also the instances of `Part` to ALL the instances of target_parent.
+        :type include_instances: bool
+        :returns: moved :class:`Part` model.
+        :raises IllegalArgumentError: if part and target_parent have different `Category`
+        :raises IllegalArgumentError: if target_parent is descendant of part
+
+        Example
+        -------
+        >>> model_to_move = client.model(name='Model to be moved')
+        >>> bike = client.model('Bike')
+        >>> model_to_move.move(target_parent=bike, name='Moved model',
+        >>>                    include_children=True,
+        >>>                    include_instances=True)
+
+        """
+        if not name:
+            name = self.name
+        if self.category == Category.MODEL and target_parent.category == Category.MODEL:
+            moved_model = relocate_model(part=self, target_parent=target_parent, name=name,
+                                         include_children=include_children)
+            if include_instances:
+                retrieve_instances_to_copied = list(self.instances())
+                retrieve_parent_instances = list(target_parent.instances())
+                for parent_instance in retrieve_parent_instances:
+                    for instance in retrieve_instances_to_copied:
+                        instance.populate_descendants()
+                        move_part_instance(part_instance=instance, target_parent=parent_instance,
+                                           part_model=self, name=instance.name, include_children=include_children)
+            self.delete()
+            return moved_model
+        elif self.category == Category.INSTANCE and target_parent.category == Category.INSTANCE:
+            moved_instance = relocate_instance(part=self, target_parent=target_parent, name=name,
+                                               include_children=include_children)
+            try:
+                self.delete()
+            except APIError:
+                model_of_instance = self.model()
+                model_of_instance.delete()
+            return moved_instance
+        else:
+            raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category')
