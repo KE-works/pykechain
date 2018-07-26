@@ -1187,16 +1187,17 @@ class Client(object):
         data = {
             "name": name,
             "part": model.id,
-            "description": description,
+            "description": description or '',
             "property_type": property_type.upper(),
             "value": default_value,
             "unit": unit or '',
+            "options": options or {}
         }
 
-        # We add options after the fact only if they are available, otherwise the options will be set to null in the
-        # request and that can't be handled by KE-chain.
-        if options:
-            data['options'] = options
+        # # We add options after the fact only if they are available, otherwise the options will be set to null in the
+        # # request and that can't be handled by KE-chain.
+        # if options:
+        #     data['options'] = options
 
         response = self._request('POST', self._build_url('properties'),
                                      json=data)
