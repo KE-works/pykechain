@@ -3,6 +3,12 @@ Change Log
 
 pykechain changelog
 
+2.3.0 (26JUl18)
+---------------
+ * We added show headers and show columns in the arguments of the property grid to align to KE-chain functionality of the widget. (#350)
+ * We added the posibility to use a JSON widget to the list of allowed widgets. (#351)
+ * We added the posibility to update the options of a reference property. (#352)
+
 2.2.4 (22JUN18)
 ---------------
  * We added additional utilities to help pykechain script developers to `Part.copy()`, `Part.move()` and `Part.clone()` part models and part instances. (#343)
