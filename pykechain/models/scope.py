@@ -274,7 +274,6 @@ class Scope(Base):
         >>> project.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
 
         """
-
         update_dict = {'id': self.id}
         if name:
             if isinstance(name, (str, text_type)):
