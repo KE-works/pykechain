@@ -8,6 +8,7 @@ from six import text_type
 from pykechain.enums import Multiplicity, ScopeStatus
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
+from pykechain.utils import is_uuid
 
 
 class Scope(Base):
@@ -229,7 +230,8 @@ class Scope(Base):
         else:
             raise TypeError("User {} should be defined as a string".format(user))
 
-    def edit(self, name=None, description=None, start_date=None, due_date=None, status=None):
+    def edit(self, name=None, description=None, start_date=None, due_date=None, status=None, tags=None, team=None,
+             options=None, **kwargs):
         """Edit the details of a scope.
 
         :param name: (optionally) edit the name of the scope
@@ -244,7 +246,12 @@ class Scope(Base):
         :type due_date: datetime or None
         :param status: (optionally) edit the status of the scope as a string based
         :type status: basestring or None
-
+        :param tags: (optionally) replace the tags on a scope, which is a list of strings ["one","two","three"]
+        :type tags: list of basestring or None
+        :param team: (optionally) add the scope to a team
+        :type team: UUIDstring or None
+        :param options: (optionally) custom options dictionary stored on the scope object
+        :type options: dict or None
         :raises IllegalArgumentError: if the type of the inputs is not correct
         :raises APIError: if another Error occurs
         :warns: UserWarning - When a naive datetime is provided. Defaults to UTC.
@@ -313,6 +320,24 @@ class Scope(Base):
             else:
                 raise IllegalArgumentError('Status should be a string and in the list of acceptable '
                                            'status strings: {}'.format(ScopeStatus.values()))
+
+        if tags:
+            if isinstance(tags, (list, tuple, set)):
+                update_dict.update({'tags': tags})
+            else:
+                raise IllegalArgumentError('tags should be a an array (list, tuple, set) of strings')
+
+        if team:
+            if isinstance(team, (str, text_type)) and is_uuid(team):
+                update_dict.update({'team': team})
+            else:
+                raise IllegalArgumentError("team should be the uuid of a team")
+
+        if options:
+            if isinstance(options, (dict,)):
+                update_dict.update({'options': options})
+            else:
+                raise IllegalArgumentError("options should be a dictionary")
 
         url = self._client._build_url('scope', scope_id=self.id)
 
