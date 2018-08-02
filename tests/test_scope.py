@@ -1,4 +1,7 @@
-from pykechain.exceptions import NotFoundError, MultipleFoundError
+import datetime
+
+from pykechain.enums import ScopeStatus
+from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from tests.classes import TestBetamax
 
 
@@ -20,7 +23,7 @@ class TestScopes(TestBetamax):
         with self.assertRaises(MultipleFoundError):
             self.client.scope()
 
-    # 1.11+
+    # 1.11
     def test_retrieve_scope_members(self):
         original_scope_members = [u.get('username') for u in self.project.members()]
         original_scope_managers = [u.get('username') for u in self.project.members(is_manager=True)]
@@ -95,3 +98,47 @@ class TestScopes(TestBetamax):
         self.assertTrue(manager_to_be_removed in [manager['username'] for manager in project_managers])
         # teardown
         self.project.remove_member(manager_to_be_removed)
+
+    # 2.4.0+
+    def test_edit_scope(self):
+        # setUp
+        new_scope_name = 'Pykechain testing (bike project)'
+        old_scope_name = self.project.name
+        new_scope_description = 'Project used to build a Bike. Part-time job is to also test Pykechain.'
+        old_scope_description = 'Project used to test Pykechain and push it to the limits'
+        new_start_date = datetime.datetime(2018, 12, 5, tzinfo=None)
+        old_start_date = datetime.datetime(2017, 4, 12)
+        new_due_date = datetime.datetime(2018, 12, 8, tzinfo=None)
+        old_due_date = datetime.datetime(2018, 4, 1)
+        old_status = ScopeStatus.ACTIVE
+
+        self.project.edit(name=new_scope_name, description=new_scope_description, start_date=new_start_date,
+                          due_date=new_due_date, status=ScopeStatus.CLOSED)
+
+        # testing
+        retrieved_project = self.client.scope(id=self.project.id, status=ScopeStatus.CLOSED)
+
+        self.assertTrue(retrieved_project.name == new_scope_name)
+        self.assertTrue(retrieved_project._json_data['text'] == new_scope_description)
+        self.assertTrue(retrieved_project._json_data['start_date'] == '2018-12-05T00:00:00Z')
+        self.assertTrue(retrieved_project._json_data['due_date'] == '2018-12-08T00:00:00Z')
+        self.assertTrue(retrieved_project._json_data['status'] == ScopeStatus.CLOSED)
+
+        with self.assertRaises(IllegalArgumentError):
+            self.project.edit(name=True)
+
+        with self.assertRaises(IllegalArgumentError):
+            self.project.edit(description=new_start_date)
+
+        with self.assertRaises(IllegalArgumentError):
+            self.project.edit(start_date='Yes, man!')
+
+        with self.assertRaises(IllegalArgumentError):
+            self.project.edit(due_date='Wrong')
+
+        with self.assertRaises(IllegalArgumentError):
+            self.project.edit(status='DEACTIVATED')
+
+        # tearDown
+        self.project.edit(name=old_scope_name, description=old_scope_description, start_date=old_start_date,
+                          due_date=old_due_date, status=old_status)
