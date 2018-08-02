@@ -5,7 +5,7 @@ pykechain changelog
 
 2.3.1 (2AUG18)
 --------------
- * The details of a scope can now be edited using `Scope.edit()` method.
+ * The details of a scope can now be edited using `Scope.edit()` method. This contains action already prepared for the KE-chain 2.16.0-143 release (Mid August). (#357)
 
    For example:
 
