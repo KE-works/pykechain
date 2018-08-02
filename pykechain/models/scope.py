@@ -1,10 +1,14 @@
+import datetime
+import warnings
 from typing import Any  # flake8: noqa
 
 import requests
+from six import text_type
 
-from pykechain.enums import Multiplicity
-from pykechain.exceptions import APIError, NotFoundError
+from pykechain.enums import Multiplicity, ScopeStatus
+from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
+from pykechain.utils import is_uuid
 
 
 class Scope(Base):
@@ -225,3 +229,119 @@ class Scope(Base):
                 raise NotFoundError("User {} does not exist".format(user))
         else:
             raise TypeError("User {} should be defined as a string".format(user))
+
+    def edit(self, name=None, description=None, start_date=None, due_date=None, status=None, tags=None, team=None,
+             options=None, **kwargs):
+        """Edit the details of a scope.
+
+        :param name: (optionally) edit the name of the scope
+        :type name: basestring or None
+        :param description: (optionally) edit the description of the scope
+        :type description: basestring or None
+        :param start_date: (optionally) edit the start date of the scope as a datetime object (UTC time/timezone
+                            aware preferred)
+        :type start_date: datetime or None
+        :param due_date: (optionally) edit the due_date of the scope as a datetime object (UTC time/timzeone
+                            aware preferred)
+        :type due_date: datetime or None
+        :param status: (optionally) edit the status of the scope as a string based
+        :type status: basestring or None
+        :param tags: (optionally) replace the tags on a scope, which is a list of strings ["one","two","three"]
+        :type tags: list of basestring or None
+        :param team: (optionally) add the scope to a team
+        :type team: UUIDstring or None
+        :param options: (optionally) custom options dictionary stored on the scope object
+        :type options: dict or None
+        :raises IllegalArgumentError: if the type of the inputs is not correct
+        :raises APIError: if another Error occurs
+        :warns: UserWarning - When a naive datetime is provided. Defaults to UTC.
+
+        Example
+        -------
+        >>> from datetime import datetime
+        >>> project.edit(name='New project name',
+        ...              description='Changing the description just because I can',
+        ...              start_date=datetime.utcnow(),  # naive time is interpreted as UTC time
+        ...              status=ScopeStatus.CLOSED)
+
+        If we want to provide timezone aware datetime objects we can use the 3rd party convenience library :mod:`pytz`.
+        Mind that we need to fetch the timezone first and use `<timezone>.localize(<your datetime>)` to make it
+        work correctly.
+
+        Using `datetime(2017,6,1,23,59,0 tzinfo=<tz>)` does NOT work for most timezones with a
+        daylight saving time. Check the `pytz <http://pythonhosted.org/pytz/#localized-times-and-date-arithmetic>`_
+        documentation.
+
+        To make it work using :mod:`pytz` and timezone aware :mod:`datetime` see the following example::
+
+        >>> import pytz
+        >>> start_date_tzaware = datetime.now(pytz.utc)
+        >>> mytimezone = pytz.timezone('Europe/Amsterdam')
+        >>> due_date_tzaware = mytimezone.localize(datetime(2019, 10, 27, 23, 59, 0))
+        >>> project.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
+
+        """
+        update_dict = {'id': self.id}
+        if name:
+            if isinstance(name, (str, text_type)):
+                update_dict.update({'name': name})
+                self.name = name
+            else:
+                raise IllegalArgumentError('Name should be a string')
+
+        if description:
+            if isinstance(description, (str, text_type)):
+                update_dict.update({'text': description})
+                self.text = description
+            else:
+                raise IllegalArgumentError('Description should be a string')
+
+        if start_date:
+            if isinstance(start_date, datetime.datetime):
+                if not start_date.tzinfo:
+                    warnings.warn("The startdate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
+                update_dict.update({'start_date': start_date.isoformat(sep='T')})
+            else:
+                raise IllegalArgumentError('Start date should be a datetime.datetime() object')
+
+        if due_date:
+            if isinstance(due_date, datetime.datetime):
+                if not due_date.tzinfo:
+                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
+                update_dict.update({'due_date': due_date.isoformat(sep='T')})
+            else:
+                raise IllegalArgumentError('Due date should be a datetime.datetime() object')
+
+        if status:
+            if isinstance(status, (str, text_type)) and status in ScopeStatus.values():
+                update_dict.update({'status': status})
+            else:
+                raise IllegalArgumentError('Status should be a string and in the list of acceptable '
+                                           'status strings: {}'.format(ScopeStatus.values()))
+
+        if tags:
+            if isinstance(tags, (list, tuple, set)):
+                update_dict.update({'tags': tags})
+            else:
+                raise IllegalArgumentError('tags should be a an array (list, tuple, set) of strings')
+
+        if team:
+            if isinstance(team, (str, text_type)) and is_uuid(team):
+                update_dict.update({'team': team})
+            else:
+                raise IllegalArgumentError("team should be the uuid of a team")
+
+        if options:
+            if isinstance(options, (dict,)):
+                update_dict.update({'options': options})
+            else:
+                raise IllegalArgumentError("options should be a dictionary")
+
+        url = self._client._build_url('scope', scope_id=self.id)
+
+        r = self._client._request('PUT', url, json=update_dict)
+
+        if r.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Scope ({})".format(r))

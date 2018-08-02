@@ -3,9 +3,23 @@ Change Log
 
 pykechain changelog
 
+2.3.1 (2AUG18)
+--------------
+ * The details of a scope can now be edited using `Scope.edit()` method. This contains action already prepared for the KE-chain 2.16.0-143 release (Mid August). (#357)
+
+   For example:
+
+    >>> from datetime import datetime
+    >>> project.edit(name='New project name',
+    ...              description='Changing the description just because I can',
+    ...              start_date=datetime.utcnow(),  # naive time is interpreted as UTC time
+    ...              status=ScopeStatus.CLOSED)
+
+ * Updated dependent versions for development: pytest (3.7.0)
+
 2.3.0 (26JUl18)
 ---------------
-* We added additional utilities to help pykechain script developers to `Part.copy()`, `Part.move()` and `Part.clone()` part models and part instances. (#343)
+ * We added additional utilities to help pykechain script developers to `Part.copy()`, `Part.move()` and `Part.clone()` part models and part instances. (#343)
 
 For example; To move part models, their children (subtree) and their instances:
 
