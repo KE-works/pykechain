@@ -64,8 +64,8 @@ class NumericRangeValidator(PropertyValidator):
         if enforce_stepsize is not None:
             self._config['enforce_stepsize'] = enforce_stepsize
 
-        self.minvalue = self._config.get('minvalue', float('-inf'))
-        self.maxvalue = self._config.get('maxvalue', float('inf'))
+        self.minvalue = self._config.get('minvalue', None) or float('-inf')
+        self.maxvalue = self._config.get('maxvalue', None) or float('inf')
         self.stepsize = self._config.get('stepsize', None)
         self.enforce_stepsize = self._config.get('enforce_stepsize', None)
 
