@@ -220,6 +220,10 @@ class WidgetNames(Enum):
     :cvar ATTACHMENTVIEWERWIDGET: attachmentViewerWidget
     :cvar TASKNAVIGATIONBARWIDGET: taskNavigationBarWidget
     :cvar JSONWIDGET: jsonWidget
+
+    # KE-chain 3 only
+    :cvar METAPANELWIDGET: metaPanelWidget
+    :cvar MULTICOLUMNWIDGET: multiColumnWidget
     """
 
     SUPERGRIDWIDGET = 'superGridWidget'
@@ -231,6 +235,23 @@ class WidgetNames(Enum):
     ATTACHMENTVIEWERWIDGET = 'attachmentViewerWidget'
     TASKNAVIGATIONBARWIDGET = 'taskNavigationBarWidget'
     JSONWIDGET = 'jsonWidget'
+    METAPANELWIDGET = 'metaPanelWidget'
+    MULTICOLUMNWIDGET = 'multiColumnWidget'
+
+
+default_metapanel_widget = dict(
+    name=WidgetNames.METAPANELWIDGET,
+    config=dict(),
+    meta=dict(
+        showAll=True,
+    ),
+)
+
+default_activity_customization = dict(
+    ext=dict(
+        widgets=[default_metapanel_widget]
+    )
+)
 
 
 class ActivityStatus(Enum):

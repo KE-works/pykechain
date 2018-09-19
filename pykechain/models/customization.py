@@ -13,7 +13,10 @@ from pykechain.utils import is_uuid
 
 uuid_pattern = r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 uuid_string = {"type": "string", "pattern": uuid_pattern}
-component_json_schema = {
+
+# deprecated as we are moving towards a 'meta' definition for the widgets in KE-chain 3
+# only for checking the jsonwidget
+component_jsonwidget_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "Component JSON Schema",
     "type": "object",
@@ -40,6 +43,18 @@ component_json_schema = {
     },
     "required": ["xtype"]
 }
+
+widget_json_stub = {
+    "title": "Widget JSON schema",
+    "type": "object",
+    "required": ["name", "meta"],
+    "properties": {
+        "name": {"type": "string", "enum": WidgetNames.values()},
+        "meta": {"type": "object"},
+        "config": {"type": "object"}
+    }
+}
+
 widgetconfig_json_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "WidgetConfig JSON",
@@ -49,7 +64,7 @@ widgetconfig_json_schema = {
             "type": "object",
             "widgets": {
                 "type": "array",
-                "items": component_json_schema
+                "items": widget_json_stub
             }
         }
     }
@@ -171,7 +186,7 @@ class ExtCustomization(CustomizationBase):
         :param config: The json configuration of the widget
         :type config: dict
         """
-        validate(config, component_json_schema)
+        validate(config, component_jsonwidget_schema)
         self._add_widget(dict(config=config, name=WidgetNames.JSONWIDGET))
 
     def add_super_grid_widget(self, part_model, delete=False, edit=True, export=True, incomplete_rows=True,
