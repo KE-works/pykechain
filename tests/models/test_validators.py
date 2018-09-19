@@ -229,8 +229,12 @@ class TestNumericRangeValidator(SixTestCase):
     def test_numeric_range_validates_with_lower_bound(self):
         validator = NumericRangeValidator(minvalue=0)
         self.assertTrue(validator.is_valid(1))
+        validator = NumericRangeValidator(minvalue=5)
+        self.assertTrue(validator.is_valid(6))
 
     def test_numeric_range_validates_with_max_bound(self):
+        validator = NumericRangeValidator(maxvalue=0)
+        self.assertTrue(validator.is_valid(-3))
         validator = NumericRangeValidator(maxvalue=10)
         self.assertTrue(validator.is_valid(1))
 
@@ -241,10 +245,14 @@ class TestNumericRangeValidator(SixTestCase):
     def test_numeric_range_invalidates_with_lower_bound(self):
         validator = NumericRangeValidator(minvalue=0)
         self.assertFalse(validator.is_valid(-1))
+        validator = NumericRangeValidator(minvalue=5)
+        self.assertFalse(validator.is_valid(2))
 
     def test_numeric_range_invalidates_with_max_bound(self):
         validator = NumericRangeValidator(maxvalue=0)
         self.assertFalse(validator.is_valid(1))
+        validator = NumericRangeValidator(maxvalue=5)
+        self.assertFalse(validator.is_valid(6))
 
     def test_numeric_range_invalidates_with_min_max_bound(self):
         validator = NumericRangeValidator(maxvalue=10, minvalue=0)
