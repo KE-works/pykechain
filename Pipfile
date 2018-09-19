@@ -28,4 +28,4 @@ tox = "*"
 pyOpenSSL = {version="*", markers="python_version <= '2.7'"}
 
 [requires]
-python_version = "3.6"
+python_version = "3"
