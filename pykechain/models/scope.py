@@ -329,7 +329,7 @@ class Scope(Base):
 
         if team:
             if isinstance(team, (str, text_type)) and is_uuid(team):
-                update_dict.update({'team': team})
+                update_dict.update({'team_id': team})
             else:
                 raise IllegalArgumentError("team should be the uuid of a team")
 
@@ -345,3 +345,5 @@ class Scope(Base):
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Scope ({})".format(r))
+        else:
+            self._json_data = r.json().get('results') and r.json().get('results')[0]
