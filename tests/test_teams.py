@@ -7,7 +7,7 @@ from tests.classes import TestBetamax
 class TestTeams(TestBetamax):
 
     def setUp(self):
-        super().setUp()
+        super(TestTeams, self).setUp()
         self.team = self.client.team(name='KE-works Team') # type: Team
 
     def test_retrieve_teams(self):
