@@ -77,5 +77,3 @@ class TestTeams(TestBetamax):
 
         #teardown
         self.project.edit(team=old_team.get('id'))
-
-

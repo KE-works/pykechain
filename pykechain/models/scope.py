@@ -30,6 +30,15 @@ class Scope(Base):
     def __repr__(self):  # pragma: no cover
         return "<pyke Scope '{}' id {}>".format(self.name, self.id[-8:])
 
+    @property
+    def team(self):
+        """Team to which the scope is assigned."""
+        team_dict = self._json_data.get('team')
+        if team_dict and team_dict.get('id'):
+            return self._client.team(id=team_dict.get('id'))
+        else:
+            return None
+
     def parts(self, *args, **kwargs):
         """Retrieve parts belonging to this scope.
 
