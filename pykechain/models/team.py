@@ -2,6 +2,7 @@ import requests
 
 from pykechain.enums import TeamRoles
 from pykechain.exceptions import IllegalArgumentError, APIError
+from pykechain.models.user import User
 from .base import Base
 
 
@@ -44,6 +45,12 @@ class Team(Base):
         :type role: basestring or None
         :raises IllegalArgumentError: when providing incorrect roles
         :return: list of dictionaries with members (pk, username, role, email)
+
+        Example
+        -------
+        >>> my_team = client.team(name='My own team')
+        >>> my_team.members()
+        [{"pk":1, "username"="first user", "role"="OWNER", "email":"email@address.com"}, ...]
         """
         if role and role not in TeamRoles.values():
             raise IllegalArgumentError("role should be one of `TeamRoles` {}, got '{}'".format(TeamRoles.values(),
@@ -55,7 +62,7 @@ class Team(Base):
         else:
             return member_list
 
-    def add_members(self, members=None, role=TeamRoles.MEMBER):
+    def add_members(self, users=None, role=TeamRoles.MEMBER):
         """Members to add to a team.
 
         :param members: list of members, either `User` objects or usernames
@@ -63,39 +70,64 @@ class Team(Base):
         :param role: (optional) role of the users to add (default `TeamRoles.MEMBER`)
         :type role: basestring
         :raises IllegalArgumentError: when providing incorrect roles
+
+        Example
+        -------
+        >>> my_team = client.team(name='My own team')
+        >>> other_user = client.users(name='That other person')
+        >>> myself = client.users(name='myself')
+        >>> my_team.add_members([myself], role=TeamRoles.MANAGER)
+        >>> my_team.add_members([other_user], role=TeamRoles.MEMBER)
+
         """
         if role and role not in TeamRoles.values():
             raise IllegalArgumentError("role should be one of `TeamRoles` {}, got '{}'".format(TeamRoles.values(),
                                                                                                role))
 
-        if not members or not isinstance(members, (list, tuple, set)):
-            raise IllegalArgumentError("Member should be a list of user_ids or `User` objects, got '{}'".
-                                       format(members))
+        if not users or not isinstance(users, (list, tuple, set)):
+            raise IllegalArgumentError("users should be a list of user_ids or `User` objects, got '{}'".
+                                       format(users))
 
         update_dict = dict(role=role)
 
-        if all(isinstance(member, int) for member in members):
-            update_dict['users'] = members
+        if all(isinstance(user, int) for user in users):
+            update_dict['users'] = users
+        elif all(isinstance(user, User) for user in users):
+            update_dict['users'] = [user.id for user in users]
+        else:
+            raise IllegalArgumentError("All users should be a list of user_ids or `User` objects, got '{}'".
+                                       format(users))
 
-        self._update('team_add_members',
-                     team_id=self.id,
-                     update_dict=update_dict)
+        self._update('team_add_members', team_id=self.id, update_dict=update_dict)
 
-    def remove_members(self, members=None):
+    def remove_members(self, users=None):
         """Members to add to a team.
 
         :param members: list of members, either `User` objects or usernames
         :type members: List of `User` or List of pk
         :raises IllegalArgumentError: when providing incorrect roles
+
+
+        Example
+        -------
+        >>> my_team = client.team(name='My own team')
+        >>> other_user = client.users(name='That other person')
+        >>> my_team.remove_members([other_user]R)
+
         """
-        if not members or not isinstance(members, (list, tuple, set)):
+        if not users or not isinstance(users, (list, tuple, set)):
             raise IllegalArgumentError("Member should be a list of user_ids or `User` objects, got '{}'".
-                                       format(members))
+                                       format(users))
 
         update_dict = dict()
 
-        if all(isinstance(member, int) for member in members):
-            update_dict['users'] = members
+        if all(isinstance(user, int) for user in users):
+            update_dict['users'] = users
+        elif all(isinstance(user, User) for user in users):
+            update_dict['users'] = [user.id for user in users]
+        else:
+            raise IllegalArgumentError("All users should be a list of user_ids or `User` objects, got '{}'".
+                                       format(users))
 
         self._update('team_remove_members',
                      update_dict=update_dict,
