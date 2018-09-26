@@ -321,6 +321,19 @@ class ServiceExecutionStatus(Enum):
     TERMINATED = 'TERMINATED'
 
 
+class TeamRoles(Enum):
+    """Roles that exist for a team member.
+
+    :cvar MEMBER: A normal team member
+    :cvar MANAGER: A team member that may manage the team (add or remove members, change team)
+    :cvar OWNER: The owner of a team
+    """
+
+    MEMBER = "MEMBER"
+    MANAGER = "MANAGER"
+    OWNER = "OWNER"
+
+
 class KechainEnv(Enum):
     """Environment variables that can be set for pykechain.
 

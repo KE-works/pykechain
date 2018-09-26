@@ -3,6 +3,11 @@ Change Log
 
 pykechain changelog
 
+2.4.0 (26SEP18)
+---------------
+ * Added the `Team` concept. You can now query the API to retrieve `Teams` using `client.team(name='My own team')`. You can also now `Team.add_members` and `Team.remove_members` with their `TeamRoles`. (#391)
+ * Updated dependent versions for development: twine (1.12.1)
+
 2.3.3 (24SEP18)
 ---------------
  * Fixed an issue with the `scope.edit()` method. It will handle now the assignment of the team with a `team_id` correctly. Thanks @stefan.vanderelst (#388)

@@ -8,6 +8,7 @@ from six import text_type
 from pykechain.enums import Multiplicity, ScopeStatus
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
+from pykechain.models.team import Team
 from pykechain.utils import is_uuid
 
 
@@ -256,8 +257,8 @@ class Scope(Base):
         :raises APIError: if another Error occurs
         :warns: UserWarning - When a naive datetime is provided. Defaults to UTC.
 
-        Example
-        -------
+        Examples
+        --------
         >>> from datetime import datetime
         >>> project.edit(name='New project name',
         ...              description='Changing the description just because I can',
@@ -279,6 +280,11 @@ class Scope(Base):
         >>> mytimezone = pytz.timezone('Europe/Amsterdam')
         >>> due_date_tzaware = mytimezone.localize(datetime(2019, 10, 27, 23, 59, 0))
         >>> project.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
+
+        To assign a scope to a team see the following example::
+
+        >>> my_team = client.team(name='My own team')
+        >>> project.edit(team=my_team)
 
         """
         update_dict = {'id': self.id}
@@ -330,6 +336,8 @@ class Scope(Base):
         if team:
             if isinstance(team, (str, text_type)) and is_uuid(team):
                 update_dict.update({'team_id': team})
+            elif isinstance(team, Team):
+                update_dict.update({'team_id': team.id})
             else:
                 raise IllegalArgumentError("team should be the uuid of a team")
 
