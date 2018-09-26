@@ -29,7 +29,7 @@ mypy==0.630; python_version >= '3.4'
 PyOpenSSL==18.0.0; python_version <= '2.7'
 
 # for package management (uploads)
-twine==1.11.0
+twine==1.12.1
 
 # for version comparison
 semver==2.8.0
