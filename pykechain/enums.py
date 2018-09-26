@@ -320,6 +320,7 @@ class ServiceExecutionStatus(Enum):
     TERMINATING = 'TERMINATING'
     TERMINATED = 'TERMINATED'
 
+
 class TeamRoles(Enum):
     """Roles that exist for a team member.
 
