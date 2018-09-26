@@ -328,6 +328,7 @@ class TeamRoles(Enum):
     :cvar MANAGER: A team member that may manage the team (add or remove members, change team)
     :cvar OWNER: The owner of a team
     """
+
     MEMBER = "MEMBER"
     MANAGER = "MANAGER"
     OWNER = "OWNER"
