@@ -3,6 +3,11 @@ Change Log
 
 pykechain changelog
 
+2.4.1 (26SEP18)
+---------------
+ * Added support for the `Scope.team` property. Will return a `Team` object if the project has a team associated to it, otherwise None. (#392)
+ * Included `Team` object in the API documentation.
+
 2.4.0 (26SEP18)
 ---------------
  * Added the `Team` concept. You can now query the API to retrieve `Teams` using `client.team(name='My own team')`. You can also now `Team.add_members` and `Team.remove_members` with their `TeamRoles`. (#391)
