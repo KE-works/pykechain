@@ -4,6 +4,7 @@ import requests
 
 from pykechain.enums import ScopeStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
+from pykechain.models import Team
 from tests.classes import TestBetamax
 
 
@@ -170,5 +171,11 @@ class TestScopes(TestBetamax):
 
         self.project.edit(team=saved_team_id)
         self.assertEqual(self.project._json_data.get('team').get('id'), saved_team_id)
+
+    def test_team_property_of_scope(self):
+        """Test for the property 'team' of a scope."""
+        team = self.project.team
+        self.assertIsInstance(team, Team)
+
 
 
