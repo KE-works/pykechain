@@ -25,6 +25,7 @@ mypy = "*"
 twine = "*"
 Sphinx = "*"
 tox = "*"
+coverage = "*"
 pyOpenSSL = {version="*", markers="python_version <= '2.7'"}
 
 [requires]
