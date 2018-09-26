@@ -1340,3 +1340,24 @@ class Client(object):
         service.refresh()
 
         return service
+
+    # def create_team(self, name, user, description=None, options=None, is_hidden=False):
+    #     """
+    #     Create a team.
+    #
+    #     ..versionadded: 2.4.0
+    #
+    #     To create a team, a :class:`User` (id or object) need to be passed for it to become owner. As most pykechain
+    #     enabled script are running inside the SIM environment in KE-chain, the user having the current connection
+    #     to the API is often not the user that needs to be part of the team to be created. The user provided will
+    #     become 'owner' of the team.
+    #
+    #     :param name: name of the team
+    #     :param user: user that will become owner of the team
+    #     :param description: (optional) description of the team
+    #     :param options: (optional) provide additional team advanced options (as dict)
+    #     :param is_hidden: (optional) if the team needs to be hidden (defaults to false)
+    #     :return: the created :class:`models.Team`
+    #     :raises IllegalArgumentError: When the provided arguments are incorrect
+    #     """
+    #     raise NotImplementedError
