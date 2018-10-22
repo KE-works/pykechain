@@ -42,3 +42,4 @@ class User(Base):
     @property
     def email(self):
         return self._json_data.get('email', '')
+    
