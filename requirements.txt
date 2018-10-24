@@ -21,7 +21,7 @@ matplotlib==3.0.0
 tox==3.4.0
 
 # code style
-flake8==3.5.0
+flake8==3.6.0
 pydocstyle==2.1.1
 mypy==0.630; python_version >= '3.4'
 
