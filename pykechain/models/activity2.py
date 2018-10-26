@@ -1,6 +1,8 @@
 import datetime
 import os
+import time
 import warnings
+from urllib.parse import urljoin
 
 import requests
 from six import text_type
@@ -461,6 +463,20 @@ class Activity2(Activity):
         response = self._client._request('GET', url, params=request_params)
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not download PDF of activity {}".format(self.name))
+
+        # If appendices are included, the request becomes asynchronous
+        if include_appendices:
+            data = response.json()
+
+            # Download the pdf async
+            url = urljoin(self._client.api_root, data['download_url'])
+
+            while True:
+                response = self._client._request('GET', url=url)
+
+                if response.status_code == requests.codes.ok:  # pragma: no cover
+                    break
+                time.sleep(2)
 
         with open(full_path, 'wb') as f:
             for chunk in response.iter_content(1024):
