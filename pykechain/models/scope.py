@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Any  # flake8: noqa
+from typing import Any  # noqa: F401
 
 import requests
 from six import text_type
