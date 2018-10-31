@@ -1,10 +1,9 @@
 import os
+import re
 from contextlib import contextmanager
+from typing import TypeVar, Iterable, Callable, Optional, AnyStr  # noqa: F401
 
 import six
-from typing import TypeVar, Iterable, Callable, Optional, AnyStr  # flake8: noqa
-
-import re
 
 T = TypeVar('T')
 
