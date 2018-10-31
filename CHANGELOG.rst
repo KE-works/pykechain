@@ -3,6 +3,27 @@ Change Log
 
 pykechain changelog
 
+2.4.1 (26SEP18)
+---------------
+ * Added support for the `Scope.team` property. Will return a `Team` object if the project has a team associated to it, otherwise None. (#392)
+ * Included `Team` object in the API documentation.
+
+2.4.0 (26SEP18)
+---------------
+ * Added the `Team` concept. You can now query the API to retrieve `Teams` using `client.team(name='My own team')`. You can also now `Team.add_members` and `Team.remove_members` with their `TeamRoles`. (#391)
+ * Updated dependent versions for development: twine (1.12.1)
+
+2.3.3 (24SEP18)
+---------------
+ * Fixed an issue with the `scope.edit()` method. It will handle now the assignment of the team with a `team_id` correctly. Thanks @stefan.vanderelst (#388)
+ * Updated dependent versions for development: tox (3.4.0), pytest (3.8.1), sphinx (1.8.1)
+
+2.3.2 (19SEP18)
+---------------
+ * The setting of the min and max value of the numeric range validator could not correctly deal with a value of None. That is fixed. Thanks to @JelleBoersma for the fix! (#382)
+ * Additional widgets are introduced in KE-chain or in the process of being introduced, so we updated the enumerations. In this process we also updated the jsonschema of the widget to check against before uploading a customization to KE-chain (#369)
+ * Updated dependent versions for development: tox (3.2.1), pytest (3.8.0), nbsphinx (0.3.5), sphinx (1.8.0), mypy (0.630) and matplotlib (3.0.0)
+
 2.3.1 (2AUG18)
 --------------
  * The details of a scope can now be edited using `Scope.edit()` method. This contains action already prepared for the KE-chain 2.16.0-143 release (Mid August). (#357)

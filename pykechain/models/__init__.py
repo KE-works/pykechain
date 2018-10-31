@@ -12,6 +12,8 @@ from .property_reference import ReferenceProperty
 from .property_multi_reference import MultiReferenceProperty
 from .partset import PartSet
 from .service import Service, ServiceExecution
+from .team import Team
+from .user import User
 
 __all__ = (
     'Base',
@@ -26,5 +28,7 @@ __all__ = (
     'ReferenceProperty',
     'MultiReferenceProperty',
     'Service',
-    'ServiceExecution'
+    'ServiceExecution',
+    'User',
+    'Team'
 )

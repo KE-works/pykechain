@@ -1,6 +1,6 @@
-from typing import Sized, Any, Iterable  # flake8: noqa
+from typing import Sized, Any, Iterable  # noqa: F401
 
-from pykechain.models.part import Part
+from pykechain.models.part import Part  # noqa: F401
 
 
 class PartSet(Sized):

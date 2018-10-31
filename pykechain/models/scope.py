@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Any  # flake8: noqa
+from typing import Any  # noqa: F401
 
 import requests
 from six import text_type
@@ -8,6 +8,7 @@ from six import text_type
 from pykechain.enums import Multiplicity, ScopeStatus
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
+from pykechain.models.team import Team
 from pykechain.utils import is_uuid
 
 
@@ -28,6 +29,15 @@ class Scope(Base):
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Scope '{}' id {}>".format(self.name, self.id[-8:])
+
+    @property
+    def team(self):
+        """Team to which the scope is assigned."""
+        team_dict = self._json_data.get('team')
+        if team_dict and team_dict.get('id'):
+            return self._client.team(id=team_dict.get('id'))
+        else:
+            return None
 
     def parts(self, *args, **kwargs):
         """Retrieve parts belonging to this scope.
@@ -256,8 +266,8 @@ class Scope(Base):
         :raises APIError: if another Error occurs
         :warns: UserWarning - When a naive datetime is provided. Defaults to UTC.
 
-        Example
-        -------
+        Examples
+        --------
         >>> from datetime import datetime
         >>> project.edit(name='New project name',
         ...              description='Changing the description just because I can',
@@ -279,6 +289,11 @@ class Scope(Base):
         >>> mytimezone = pytz.timezone('Europe/Amsterdam')
         >>> due_date_tzaware = mytimezone.localize(datetime(2019, 10, 27, 23, 59, 0))
         >>> project.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
+
+        To assign a scope to a team see the following example::
+
+        >>> my_team = client.team(name='My own team')
+        >>> project.edit(team=my_team)
 
         """
         update_dict = {'id': self.id}
@@ -329,7 +344,9 @@ class Scope(Base):
 
         if team:
             if isinstance(team, (str, text_type)) and is_uuid(team):
-                update_dict.update({'team': team})
+                update_dict.update({'team_id': team})
+            elif isinstance(team, Team):
+                update_dict.update({'team_id': team.id})
             else:
                 raise IllegalArgumentError("team should be the uuid of a team")
 
@@ -345,3 +362,5 @@ class Scope(Base):
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Scope ({})".format(r))
+        else:
+            self._json_data = r.json().get('results') and r.json().get('results')[0]

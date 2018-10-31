@@ -1,5 +1,5 @@
 import warnings
-from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
+from typing import Dict, Tuple, Optional, Any, List  # noqa: F401
 
 import requests
 from envparse import env
@@ -9,6 +9,7 @@ from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, Ser
     WIMCompatibleActivityTypes, PropertyType
 from pykechain.models.activity2 import Activity2
 from pykechain.models.service import Service, ServiceExecution
+from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.utils import is_uuid
 from .__about__ import version
@@ -40,6 +41,10 @@ API_PATH = {
     'service_execution_notebook_url': 'api/service_executions/{service_execution_id}/notebook_url',
     'service_execution_log': 'api/service_executions/{service_execution_id}/log',
     'users': 'api/users.json',
+    'teams': 'api/teams.json',
+    'team': 'api/teams/{team_id}.json',
+    'team_add_members': 'api/teams/{team_id}/add_members',
+    'team_remove_members': 'api/teams/{team_id}/remove_members',
     'versions': 'api/versions.json'
 }
 
@@ -827,11 +832,71 @@ class Client(object):
         _users = self.users(username=username, pk=pk, **kwargs)
 
         if len(_users) == 0:
-            raise NotFoundError("No user criteria")
+            raise NotFoundError("No user criteria matches")
         if len(_users) != 1:
             raise MultipleFoundError("Multiple users fit criteria")
 
         return _users[0]
+
+    def team(self, name=None, id=None, is_hidden=False, **kwargs):
+        """
+        Team of KE-chain.
+
+        Provides a team of :class:`Team` of KE-chain. You can filter on team name or provide id.
+
+        :param name: (optional) team name to filter
+        :type name: basestring or None
+        :param id: (optional) id of the user to filter
+        :type id: basestring or None
+        :param is_hidden: (optional) boolean to show non-hidden or hidden teams or both (None) (default is non-hidden)
+        :type is_hidden: bool or None
+        :param kwargs: Additional filtering keyword=value arguments
+        :type kwargs: dict or None
+        :return: List of :class:`Team`
+        :raises NotFoundError: when a user could not be found
+        :raises MultipleFoundError: when more than a single user can be found
+        """
+        _teams = self.teams(name=name, id=id, **kwargs)
+
+        if len(_teams) == 0:
+            raise NotFoundError("No team criteria matches")
+        if len(_teams) != 1:
+            raise MultipleFoundError("Multiple teams fit criteria")
+
+        return _teams[0]
+
+    def teams(self, name=None, id=None, is_hidden=False, **kwargs):
+        """
+        Teams of KE-chain.
+
+        Provide a list of :class:`Team`s of KE-chain. You can filter on teamname or id or any other advanced filter.
+
+        :param name: (optional) teamname to filter
+        :type name: basestring or None
+        :param id: (optional) id of the team to filter
+        :type id: basestring or None
+        :param is_hidden: (optional) boolean to show non-hidden or hidden teams or both (None) (default is non-hidden)
+        :type is_hidden: bool or None
+        :param kwargs: Additional filtering keyword=value arguments
+        :type kwargs: dict or None
+        :return: List of :class:`Teams`
+        :raises NotFoundError: when a team could not be found
+        """
+        request_params = {
+            'name': name,
+            'id': id,
+            'is_hidden': is_hidden
+        }
+        if kwargs:
+            request_params.update(**kwargs)
+
+        r = self._request('GET', self._build_url('teams'), params=request_params)
+
+        if r.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not find teams: '{}'".format(r.json()))
+
+        data = r.json()
+        return [Team(team, client=self) for team in data['results']]
 
     #
     # Creators
@@ -1199,7 +1264,7 @@ class Client(object):
         #     data['options'] = options
 
         response = self._request('POST', self._build_url('properties'),
-                                     json=data)
+                                 json=data)
 
         if response.status_code != requests.codes.created:
             raise APIError("Could not create property")
@@ -1275,3 +1340,24 @@ class Client(object):
         service.refresh()
 
         return service
+
+    # def create_team(self, name, user, description=None, options=None, is_hidden=False):
+    #     """
+    #     Create a team.
+    #
+    #     ..versionadded: 2.4.0
+    #
+    #     To create a team, a :class:`User` (id or object) need to be passed for it to become owner. As most pykechain
+    #     enabled script are running inside the SIM environment in KE-chain, the user having the current connection
+    #     to the API is often not the user that needs to be part of the team to be created. The user provided will
+    #     become 'owner' of the team.
+    #
+    #     :param name: name of the team
+    #     :param user: user that will become owner of the team
+    #     :param description: (optional) description of the team
+    #     :param options: (optional) provide additional team advanced options (as dict)
+    #     :param is_hidden: (optional) if the team needs to be hidden (defaults to false)
+    #     :return: the created :class:`models.Team`
+    #     :raises IllegalArgumentError: When the provided arguments are incorrect
+    #     """
+    #     raise NotImplementedError

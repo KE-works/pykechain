@@ -1,8 +1,8 @@
 import datetime
-from typing import Any  # flake8: noqa
+import warnings
+from typing import Any  # noqa: F401
 
 import requests
-import warnings
 from six import text_type
 
 from pykechain.enums import Category, ActivityType, ActivityStatus
@@ -160,8 +160,10 @@ class Activity(Base):
         >>> all_models, all_instances = task.associated_parts()
 
         """
-        return self.parts(category=Category.MODEL, *args, **kwargs), \
-               self.parts(category=Category.INSTANCE, *args, **kwargs)
+        return (
+            self.parts(category=Category.MODEL, *args, **kwargs),
+            self.parts(category=Category.INSTANCE, *args, **kwargs)
+        )
 
     def configure(self, inputs, outputs):
         """Configure activity input and output.

@@ -1,7 +1,10 @@
 import datetime
 
+import requests
+
 from pykechain.enums import ScopeStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
+from pykechain.models import Team
 from tests.classes import TestBetamax
 
 
@@ -99,7 +102,7 @@ class TestScopes(TestBetamax):
         # teardown
         self.project.remove_member(manager_to_be_removed)
 
-    # 2.4.0+
+    # 2.2.0+
     def test_edit_scope(self):
         # setUp
         new_scope_name = 'Pykechain testing (bike project)'
@@ -142,3 +145,37 @@ class TestScopes(TestBetamax):
         # tearDown
         self.project.edit(name=old_scope_name, description=old_scope_description, start_date=old_start_date,
                           due_date=old_due_date, status=old_status)
+
+    # v2.3.3
+    def test_edit_scope_team(self):
+        """Test capabilities of changing team scope."""
+
+        # setup
+        team_url = self.project._client._build_url('teams')
+
+        r = self.project._client._request('get',team_url, params=dict(name='KE-works Team'))
+        team_kew_id = r.json().get('results')[0].get('id')  # no iffer as it should fail hard when not a respcode =ok
+
+        r = self.project._client._request('get',team_url, params=dict(name='Team B'))
+        team_b_id = r.json().get('results')[0].get('id')
+
+        # save current team
+        team_dict = self.project._json_data.get('team')
+        saved_team_id = team_dict and team_dict.get('id')
+
+        self.project.edit(team=team_b_id)
+        self.assertEqual(self.project._json_data.get('team').get('id'), team_b_id)
+
+        self.project.edit(team=team_kew_id)
+        self.assertEqual(self.project._json_data.get('team').get('id'), team_kew_id)
+
+        self.project.edit(team=saved_team_id)
+        self.assertEqual(self.project._json_data.get('team').get('id'), saved_team_id)
+
+    def test_team_property_of_scope(self):
+        """Test for the property 'team' of a scope."""
+        team = self.project.team
+        self.assertIsInstance(team, Team)
+
+
+
