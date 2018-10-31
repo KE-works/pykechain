@@ -1,5 +1,5 @@
 import warnings
-from typing import Dict, Tuple, Optional, Any, List  # flake8: noqa
+from typing import Dict, Tuple, Optional, Any, List  # noqa: F401
 
 import requests
 from envparse import env
