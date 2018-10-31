@@ -1,12 +1,12 @@
 # basis
-requests==2.19.1
+requests==2.20.0
 envparse==0.2.0
 
 # json validation (inspector)
 jsonschema==2.6.0
 
 # testing
-pytest==3.8.1
+pytest==3.9.3
 betamax==0.8.1
 
 # documentation
@@ -15,15 +15,15 @@ nbsphinx==0.3.5
 
 # data science
 jupyter==1.0.0
-matplotlib==3.0.0
+matplotlib==3.0.1
 
 # integration
-tox==3.4.0
+tox==3.5.3
 
 # code style
-flake8==3.5.0
-pydocstyle==2.1.1
-mypy==0.630; python_version >= '3.4'
+flake8==3.6.0
+pydocstyle==3.0.0
+mypy==0.641; python_version >= '3.4'
 
 # to fix connection issues
 PyOpenSSL==18.0.0; python_version <= '2.7'
@@ -32,4 +32,4 @@ PyOpenSSL==18.0.0; python_version <= '2.7'
 twine==1.12.1
 
 # for version comparison
-semver==2.8.0
+semver==2.8.1

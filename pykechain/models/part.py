@@ -1,5 +1,5 @@
 import json
-from typing import Any, AnyStr  # flake8: noqa
+from typing import Any, AnyStr  # noqa: F401
 
 import requests
 from six import text_type
@@ -534,8 +534,6 @@ class Part(Base):
         """
         # dict(name=name, properties=json.dumps(update_dict))) with property ids:value
         action = 'bulk_update_properties'
-
-        url = self._client._build_url('part', part_id=self.id)
 
         request_body = dict()
         for prop_name_or_id, property_value in update_dict.items():
