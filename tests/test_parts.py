@@ -472,7 +472,7 @@ class TestParts(TestBetamax):
         # testing
         self.assertTrue(copied_instance)
         self.assertEqual(copied_instance.name, 'Instance to be copied')
-        self.assertEqual(len(copied_instance.properties), 5)
+        self.assertEqual(len(copied_instance.properties), 6)
         self.assertEqual(copied_instance.property('Property single text').value, 'Instance text')
         self.assertEqual(copied_instance.property('Property decimal number').value, 11)
         self.assertEqual(copied_instance.property('Property single select list').value, 'c')
@@ -502,7 +502,7 @@ class TestParts(TestBetamax):
         # testing
         self.assertTrue(copied_model)
         self.assertEqual(copied_model.name, 'CLONE - {}'.format(name_of_part))
-        self.assertEqual(len(copied_model.properties), 5)
+        self.assertEqual(len(copied_model.properties), 6)
         self.assertEqual(len(copied_model._cached_children), 0)
 
         # tearDown
@@ -542,7 +542,7 @@ class TestParts(TestBetamax):
         # testing
         self.assertTrue(copied_instance)
         self.assertEqual(copied_instance.name, 'Copied instance')
-        self.assertEqual(len(copied_instance.properties), 5)
+        self.assertEqual(len(copied_instance.properties), 6)
         self.assertEqual(copied_instance.property('Property single text').value, 'Instance text')
         self.assertEqual(copied_instance.property('Property decimal number').value, 11)
         self.assertEqual(copied_instance.property('Property single select list').value, 'c')
