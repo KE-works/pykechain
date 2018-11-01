@@ -547,3 +547,15 @@ class TestActivity2SpecificTests(TestBetamax):
             pdf_file_called_after_activity = os.path.join(target_dir, activity_name + '.pdf')
             self.assertTrue(pdf_file)
             self.assertTrue(pdf_file_called_after_activity)
+
+    def test_activity2_download_as_pdf_async(self):
+        activity_name = 'Demo - PDF exporting'
+        activity = self.project.activity(name=activity_name)
+
+        # testing
+        with temp_chdir() as target_dir:
+            activity.download_as_pdf(target_dir=target_dir, pdf_filename='pdf_file', include_appendices=True)
+            pdf_file = os.path.join(target_dir, 'pdf_file.pdf')
+            pdf_file_called_after_activity = os.path.join(target_dir, activity_name + '.pdf')
+            self.assertTrue(pdf_file)
+            self.assertTrue(pdf_file_called_after_activity)
