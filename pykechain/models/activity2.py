@@ -1,10 +1,13 @@
 import datetime
 import os
+import time
 import warnings
+from requests.compat import urljoin  # type: ignore
 
 import requests
 from six import text_type
 
+from pykechain.config import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
@@ -461,6 +464,31 @@ class Activity2(Activity):
         response = self._client._request('GET', url, params=request_params)
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not download PDF of activity {}".format(self.name))
+
+        # If appendices are included, the request becomes asynchronous
+
+        if include_appendices:
+            data = response.json()
+
+            # Download the pdf async
+            url = urljoin(self._client.api_root, data['download_url'])
+
+            count = 0
+
+            while count <= ASYNC_TIMEOUT_LIMIT:
+                response = self._client._request('GET', url=url)
+
+                if response.status_code == requests.codes.ok:  # pragma: no cover
+                    with open(full_path, 'wb') as f:
+                        for chunk in response.iter_content(1024):
+                            f.write(chunk)
+                    return
+
+                count += ASYNC_REFRESH_INTERVAL
+                time.sleep(ASYNC_REFRESH_INTERVAL)
+
+            raise APIError("Could not download PDF of activity {} within the time-out limit of {} "
+                           "seconds".format(self.name, ASYNC_TIMEOUT_LIMIT))
 
         with open(full_path, 'wb') as f:
             for chunk in response.iter_content(1024):
