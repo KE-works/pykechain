@@ -5,6 +5,7 @@ from .scope import Scope
 from .activity import Activity
 from .activity2 import Activity2
 from .part import Part
+from .part2 import Part2
 from .property import Property
 from .property_attachment import AttachmentProperty
 from .property_selectlist import SelectListProperty
@@ -21,6 +22,7 @@ __all__ = (
     'Activity',
     'Activity2',
     'Part',
+    'Part2',
     'PartSet',
     'Property',
     'AttachmentProperty',

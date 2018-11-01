@@ -27,9 +27,6 @@ class Scope(Base):
         # for 'kechain2.core.wim >=2.0.0'
         self.workflow_root = json.get('workflow_root_id')
 
-    def __repr__(self):  # pragma: no cover
-        return "<pyke Scope '{}' id {}>".format(self.name, self.id[-8:])
-
     @property
     def team(self):
         """Team to which the scope is assigned."""
