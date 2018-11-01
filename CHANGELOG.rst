@@ -3,7 +3,7 @@ Change Log
 
 pykechain changelog
 
-2.5.0 (UNRELEASED)
+2.5.0 (1NOV18)
 ------------------
  * Added the ability to set and retrieve the scope tags using the `Scope.tags` property (#367)
  * Added timezone, language and email to the user object. You can access this directly as a property on the `User` object (#378)
