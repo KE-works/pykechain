@@ -2,7 +2,7 @@ import datetime
 import os
 import time
 import warnings
-from requests.compat import urljoin
+from requests.compat import urljoin  # type: ignore
 
 import requests
 from six import text_type
