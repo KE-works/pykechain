@@ -39,6 +39,18 @@ class Scope(Base):
         else:
             return None
 
+    @property
+    def tags(self):
+        """
+        Tags of the scope.
+
+        A list of unique strings.
+
+        :return: list of tag strings
+        :rtype: list of str
+        """
+        return self._json_data.get('tags')
+
     def parts(self, *args, **kwargs):
         """Retrieve parts belonging to this scope.
 
@@ -304,7 +316,7 @@ class Scope(Base):
             else:
                 raise IllegalArgumentError('Name should be a string')
 
-        if description:
+        if isinstance(description, (str, text_type)):
             if isinstance(description, (str, text_type)):
                 update_dict.update({'text': description})
                 self.text = description
@@ -336,7 +348,7 @@ class Scope(Base):
                 raise IllegalArgumentError('Status should be a string and in the list of acceptable '
                                            'status strings: {}'.format(ScopeStatus.values()))
 
-        if tags:
+        if isinstance(tags, (list, tuple, set)):
             if isinstance(tags, (list, tuple, set)):
                 update_dict.update({'tags': tags})
             else:
@@ -350,8 +362,8 @@ class Scope(Base):
             else:
                 raise IllegalArgumentError("team should be the uuid of a team")
 
-        if options:
-            if isinstance(options, (dict,)):
+        if isinstance(options, dict):
+            if isinstance(options, dict):
                 update_dict.update({'options': options})
             else:
                 raise IllegalArgumentError("options should be a dictionary")

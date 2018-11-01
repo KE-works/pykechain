@@ -1,7 +1,5 @@
 import datetime
 
-import requests
-
 from pykechain.enums import ScopeStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from pykechain.models import Team
@@ -153,10 +151,10 @@ class TestScopes(TestBetamax):
         # setup
         team_url = self.project._client._build_url('teams')
 
-        r = self.project._client._request('get',team_url, params=dict(name='KE-works Team'))
+        r = self.project._client._request('get', team_url, params=dict(name='KE-works Team'))
         team_kew_id = r.json().get('results')[0].get('id')  # no iffer as it should fail hard when not a respcode =ok
 
-        r = self.project._client._request('get',team_url, params=dict(name='Team B'))
+        r = self.project._client._request('get', team_url, params=dict(name='Team B'))
         team_b_id = r.json().get('results')[0].get('id')
 
         # save current team
@@ -177,5 +175,26 @@ class TestScopes(TestBetamax):
         team = self.project.team
         self.assertIsInstance(team, Team)
 
+    def test_scope_tags(self):
+        """test to retrieve the tags for a scope"""
+        # setup
+        saved_tags = self.project.tags
 
+        # test
+        scope_tags = ['a', 'list', 'of-tags']
+        self.project.edit(tags=scope_tags)
+        self.assertListEqual(scope_tags, self.project.tags)
 
+        # teardown
+        self.project.edit(tags=saved_tags)
+
+    def test_scope_tags_may_be_emptied(self):
+        # setup
+        saved_tags = self.project.tags
+
+        # test
+        self.project.edit(tags=[])
+        self.assertListEqual(self.project.tags, [])
+
+        # teardown
+        self.project.edit(tags=saved_tags)
