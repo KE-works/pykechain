@@ -466,7 +466,6 @@ class Activity2(Activity):
             raise APIError("Could not download PDF of activity {}".format(self.name))
 
         # If appendices are included, the request becomes asynchronous
-        count = 0
 
         if include_appendices:
             data = response.json()
@@ -474,17 +473,22 @@ class Activity2(Activity):
             # Download the pdf async
             url = urljoin(self._client.api_root, data['download_url'])
 
-            while True:
+            count = 0
+
+            while count <= ASYNC_TIMEOUT_LIMIT:
                 response = self._client._request('GET', url=url)
 
                 if response.status_code == requests.codes.ok:  # pragma: no cover
-                    break
-                elif count > ASYNC_TIMEOUT_LIMIT:
-                    raise APIError("Could not download PDF of activity {} within the time-out limit of {} "
-                                   "seconds".format(self.name, ASYNC_TIMEOUT_LIMIT))
+                    with open(full_path, 'wb') as f:
+                        for chunk in response.iter_content(1024):
+                            f.write(chunk)
+                    return
 
                 count += ASYNC_REFRESH_INTERVAL
                 time.sleep(ASYNC_REFRESH_INTERVAL)
+
+            raise APIError("Could not download PDF of activity {} within the time-out limit of {} "
+                           "seconds".format(self.name, ASYNC_TIMEOUT_LIMIT))
 
         with open(full_path, 'wb') as f:
             for chunk in response.iter_content(1024):
