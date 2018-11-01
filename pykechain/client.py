@@ -8,6 +8,7 @@ from requests.compat import urljoin, urlparse  # type: ignore
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     WIMCompatibleActivityTypes, PropertyType
 from pykechain.models.activity2 import Activity2
+from pykechain.models.scope2 import Scope2
 from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.team import Team
 from pykechain.models.user import User
@@ -45,12 +46,29 @@ API_PATH = {
     'team': 'api/teams/{team_id}.json',
     'team_add_members': 'api/teams/{team_id}/add_members',
     'team_remove_members': 'api/teams/{team_id}/remove_members',
-    'versions': 'api/versions.json'
+    'versions': 'api/versions.json',
+
+    # PIM2
+    'scope2': 'api/v2/scopes/{scope_id}.json',
+    'scopes2': 'api/v2/scopes.json',
+    'parts2': 'api/v2/parts.json',
+    'part2': 'api/v2/parts/{part_id}.json',
+    'properties2': 'api/v2/properties.json',
+    'property2': 'api/v2/properties/{property_id}.json',
+    'property2_upload': 'api/v2/properties/{property_id}/upload',
+    'property2_download': 'api/v2/properties/{property_id}/download',
 }
 
+API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
+
 API_EXTRA_PARAMS = {
-    'activity': {'fields': '__all__'},  # id,name,scope,status,classification,activity_type,parent_id'},
-    'activities': {'fields': '__all__'}  # 'id,name,scope,status,classification,activity_type,parent_id'}
+    'activity': API_QUERY_PARAM_ALL_FIELDS,  # id,name,scope,status,classification,activity_type,parent_id'},
+    'activities': API_QUERY_PARAM_ALL_FIELDS,  # 'id,name,scope,status,classification,activity_type,parent_id'}
+    'scope2': API_QUERY_PARAM_ALL_FIELDS,
+    'part2': API_QUERY_PARAM_ALL_FIELDS,
+    'parts2': API_QUERY_PARAM_ALL_FIELDS,
+    'properties2': API_QUERY_PARAM_ALL_FIELDS,
+    'property2': API_QUERY_PARAM_ALL_FIELDS
 }
 
 
@@ -345,17 +363,29 @@ class Client(object):
             'id': pk,
             'status': status,
         }
+
+        if self.match_app_version(label='gscope', version='>=2.0.0', default=False):
+            request_params.update(API_EXTRA_PARAMS['scope2'])
+            url = self._build_url('scopes2')
+        else:
+            url = self._build_url('scopes')
+
         if kwargs:
             request_params.update(**kwargs)
 
-        response = self._request('GET', self._build_url('scopes'), params=request_params)
+        response = self._request('GET', url=url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve scopes")
 
         data = response.json()
 
-        return [Scope(s, client=self) for s in data['results']]
+        # for 'kechain.gcore.gscope >= 2.0.0 we return Scope2 otherwiser Scope
+        if self.match_app_version(label='gscope', version='>=2.0.0', default=False):
+            # Scope2
+            return [Scope2(s, client=self) for s in data['results']]
+        else:
+            return [Scope(s, client=self) for s in data['results']]
 
     def scope(self, *args, **kwargs):
         # type: (*Any, **Any) -> Scope
