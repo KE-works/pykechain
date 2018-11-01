@@ -5,6 +5,7 @@ pykechain changelog
 
 2.5.0 (UNRELEASED)
 ------------------
+ * Added the ability to set and retrieve the scope tags using the `Scope.tags` property (#367)
  * Added timezone, language and email to the user object. You can access this directly as a property on the `User` object (#378)
  * Ensured that you can now filter users on their name, username and email. (#373)
  * Added the possibility to generate a PDF from an activity even with attachments included. The later is an async process on the KE-chain server and pykechain uses a 'hint' to retrieve the PDF once it becomes available on the server. It has an timeout of 100 seconds. (#406)

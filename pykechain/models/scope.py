@@ -39,6 +39,18 @@ class Scope(Base):
         else:
             return None
 
+    @property
+    def tags(self):
+        """
+        Tags of the scope.
+
+        A list of unique strings.
+
+        :return: list of tag strings
+        :rtype: list of str
+        """
+        return self._json_data.get('tags')
+
     def parts(self, *args, **kwargs):
         """Retrieve parts belonging to this scope.
 
@@ -297,21 +309,21 @@ class Scope(Base):
 
         """
         update_dict = {'id': self.id}
-        if name:
+        if name is not None:
             if isinstance(name, (str, text_type)):
                 update_dict.update({'name': name})
                 self.name = name
             else:
                 raise IllegalArgumentError('Name should be a string')
 
-        if description:
+        if description is not None:  # isinstance(description, (str, text_type)):
             if isinstance(description, (str, text_type)):
                 update_dict.update({'text': description})
                 self.text = description
             else:
                 raise IllegalArgumentError('Description should be a string')
 
-        if start_date:
+        if start_date is not None:
             if isinstance(start_date, datetime.datetime):
                 if not start_date.tzinfo:
                     warnings.warn("The startdate '{}' is naive and not timezone aware, use pytz.timezone info. "
@@ -320,7 +332,7 @@ class Scope(Base):
             else:
                 raise IllegalArgumentError('Start date should be a datetime.datetime() object')
 
-        if due_date:
+        if due_date is not None:
             if isinstance(due_date, datetime.datetime):
                 if not due_date.tzinfo:
                     warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
@@ -329,20 +341,20 @@ class Scope(Base):
             else:
                 raise IllegalArgumentError('Due date should be a datetime.datetime() object')
 
-        if status:
+        if status is not None:
             if isinstance(status, (str, text_type)) and status in ScopeStatus.values():
                 update_dict.update({'status': status})
             else:
                 raise IllegalArgumentError('Status should be a string and in the list of acceptable '
                                            'status strings: {}'.format(ScopeStatus.values()))
 
-        if tags:
+        if tags is not None:
             if isinstance(tags, (list, tuple, set)):
                 update_dict.update({'tags': tags})
             else:
                 raise IllegalArgumentError('tags should be a an array (list, tuple, set) of strings')
 
-        if team:
+        if team is not None:
             if isinstance(team, (str, text_type)) and is_uuid(team):
                 update_dict.update({'team_id': team})
             elif isinstance(team, Team):
@@ -350,8 +362,8 @@ class Scope(Base):
             else:
                 raise IllegalArgumentError("team should be the uuid of a team")
 
-        if options:
-            if isinstance(options, (dict,)):
+        if options is not None:
+            if isinstance(options, dict):
                 update_dict.update({'options': options})
             else:
                 raise IllegalArgumentError("options should be a dictionary")
