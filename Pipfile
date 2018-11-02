@@ -9,12 +9,13 @@ envparse = "*"
 jsonschema = "*"
 semver = "*"
 typing = "*"
+pytz = "*"
+six = "*"
 pykechain = {editable = true, path = "."}
+pyOpenSSL = {version="*", markers="python_version <= '2.7'"}
 
 [dev-packages]
 pytest = "*"
-pytz = "*"
-six = "*"
 betamax = "*"
 nbsphinx = "*"
 jupyter = "*"
@@ -26,7 +27,6 @@ twine = "*"
 Sphinx = "*"
 tox = "*"
 coverage = "*"
-pyOpenSSL = {version="*", markers="python_version <= '2.7'"}
 
 [requires]
 python_version = "3"
