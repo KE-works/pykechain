@@ -50,8 +50,13 @@ API_PATH = {
 
     # PIM2
     'scope2': 'api/v2/scopes/{scope_id}.json',
+    'scope2_add_member': 'api/v2/scopes/{scope_id}/add_member',
+    'scope2_remove_member': 'api/v2/scopes/{scope_id}/remove_member',
+    'scope2_add_manager': 'api/v2/scopes/{scope_id}/add_manager',
+    'scope2_remove_manager': 'api/v2/scopes/{scope_id}/remove_manager',
     'scopes2': 'api/v2/scopes.json',
     'parts2': 'api/v2/parts.json',
+    'parts2_new_instance': 'api/v2/parts/new_instance',
     'part2': 'api/v2/parts/{part_id}.json',
     'properties2': 'api/v2/properties.json',
     'property2': 'api/v2/properties/{property_id}.json',
@@ -1068,7 +1073,7 @@ class Client(object):
 
         return Activity2(data['results'][0], client=self)
 
-    def _create_part(self, action, data, **kwargs):
+    def _create_part1(self, action, data, **kwargs):
         """Create a part internal core function."""
         # suppress_kevents should be in the data (not the query_params)
         if 'suppress_kevents' in kwargs:
@@ -1080,6 +1085,25 @@ class Client(object):
 
         response = self._request('POST', self._build_url('parts'),
                                  params=query_params,  # {"select_action": action},
+                                 data=data)
+
+        if response.status_code != requests.codes.created:
+            raise APIError("Could not create part, {}: {}".format(str(response), response.content))
+
+        return Part(response.json()['results'][0], client=self)
+
+    def _create_part2(self, action, data, **kwargs):
+        """Create a part for PIM 2 internal core function."""
+        # suppress_kevents should be in the data (not the query_params)
+        if 'suppress_kevents' in kwargs:
+            data['suppress_kevents'] = kwargs.pop('suppress_kevents')
+
+        # prepare url query parameters
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['parts2'])
+
+        response = self._request('POST', self._build_url('parts2_{}'.format(action)),
+                                 params=query_params,
                                  data=data)
 
         if response.status_code != requests.codes.created:
@@ -1107,6 +1131,8 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
+        if not isinstance(parent, Part) or not isinstance(model, Part):
+            raise IllegalArgumentError("The parent and model should be a 'Part' object")
         if parent.category != Category.INSTANCE:
             raise IllegalArgumentError("The parent should be an category 'INSTANCE'")
         if model.category != Category.MODEL:
@@ -1115,13 +1141,14 @@ class Client(object):
         if not name:
             name = model.name
 
-        data = {
-            "name": name,
-            "parent": parent.id,
-            "model": model.id
-        }
-
-        return self._create_part(action="new_instance", data=data, **kwargs)
+        if self.match_app_version(label="gpim", version=">=2.0.0"):
+            # PIM2
+            data = dict(name=name, parent_id=parent.id, model_id=model.id)
+            return self._create_part2(action="new_instance", data=data, **kwargs)
+        else:
+            # PIM1
+            data = dict(name=name, parent=parent.id, model=model.id)
+            return self._create_part1(action="new_instance", data=data, **kwargs)
 
     def create_model(self, parent, name, multiplicity='ZERO_MANY', **kwargs):
         """Create a new child model under a given parent.
@@ -1154,7 +1181,7 @@ class Client(object):
             "multiplicity": multiplicity
         }
 
-        return self._create_part(action="create_child_model", data=data, **kwargs)
+        return self._create_part1(action="create_child_model", data=data, **kwargs)
 
     def _create_clone(self, parent, part, **kwargs):
         """Create a new `Part` clone under the `Parent`.
@@ -1231,7 +1258,7 @@ class Client(object):
             "multiplicity": multiplicity
         }
 
-        return self._create_part(action='create_proxy_model', data=data, **kwargs)
+        return self._create_part1(action='create_proxy_model', data=data, **kwargs)
 
     def create_property(self, model, name, description=None, property_type=PropertyType.CHAR_VALUE, default_value=None,
                         unit=None, options=None):

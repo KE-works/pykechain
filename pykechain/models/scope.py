@@ -249,6 +249,16 @@ class Scope(Base):
         else:
             raise TypeError("User {} should be defined as a string".format(user))
 
+    def _edit(self, update_dict):
+        url = self._client._build_url('scope', scope_id=self.id)
+
+        r = self._client._request('PUT', url, json=update_dict)
+
+        if r.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Scope ({})".format(r))
+        else:
+            self._json_data = r.json().get('results') and r.json().get('results')[0]
+
     def edit(self, name=None, description=None, start_date=None, due_date=None, status=None, tags=None, team=None,
              options=None, **kwargs):
         """Edit the details of a scope.
@@ -365,11 +375,5 @@ class Scope(Base):
             else:
                 raise IllegalArgumentError("options should be a dictionary")
 
-        url = self._client._build_url('scope', scope_id=self.id)
-
-        r = self._client._request('PUT', url, json=update_dict)
-
-        if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Scope ({})".format(r))
-        else:
-            self._json_data = r.json().get('results') and r.json().get('results')[0]
+        # do the update itself in an abstracted function.
+        self._edit(update_dict)
