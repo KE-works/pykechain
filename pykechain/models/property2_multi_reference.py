@@ -5,7 +5,7 @@ from pykechain.models.property2 import Property2
 from pykechain.utils import is_uuid
 
 
-class MultiReferenceProperty(Property2):
+class MultiReferenceProperty2(Property2):
     """A virtual object representing a KE-chain multi-references property.
 
     .. versionadded:: 1.14
@@ -13,7 +13,7 @@ class MultiReferenceProperty(Property2):
 
     def __init__(self, json, **kwargs):
         """Construct a MultiReferenceProperty from a json object."""
-        super(MultiReferenceProperty, self).__init__(json, **kwargs)
+        super(MultiReferenceProperty2, self).__init__(json, **kwargs)
 
         self._cached_values = None
 
@@ -33,7 +33,7 @@ class MultiReferenceProperty(Property2):
 
         >>> part = project.part('Bike')
         >>> wheels_ref_property = part.property('Wheels')
-        >>> isinstance(wheels_ref_property, MultiReferenceProperty)
+        >>> isinstance(wheels_ref_property, MultiReferenceProperty2)
         True
 
         The value returns a list of Parts or is an empty list
