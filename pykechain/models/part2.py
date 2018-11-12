@@ -2,7 +2,7 @@ from typing import Any  # noqa: F401
 
 from pykechain.enums import Multiplicity, Category
 from pykechain.models import Part
-from pykechain.models.property import Property
+from pykechain.models.property2 import Property2
 
 
 class Part2(Part):
@@ -55,6 +55,7 @@ class Part2(Part):
 
         self.category = json.get('category')
         self.parent_id = json['parent'].get('id') if 'parent' in json and json.get('parent') else None
-        self.properties = [Property.create(p, client=self._client) for p in json['properties']]
         self.multiplicity = json.get('multiplicity', None)
         self._cached_children = None
+
+        self.properties = [Property2.create(p, client=self._client) for p in json['properties']]
