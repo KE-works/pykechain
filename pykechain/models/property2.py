@@ -2,7 +2,7 @@ import requests
 
 from pykechain.enums import PropertyType
 from pykechain.exceptions import APIError
-from pykechain.models import Property
+from pykechain.models.property import Property
 
 
 class Property2(Property):

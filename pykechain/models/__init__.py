@@ -11,6 +11,10 @@ from .property_attachment import AttachmentProperty
 from .property_selectlist import SelectListProperty
 from .property_reference import ReferenceProperty
 from .property_multi_reference import MultiReferenceProperty
+from .property2 import Property2
+from .property2_attachment import AttachmentProperty2
+from .property2_selectlist import SelectListProperty2
+from .property2_multi_reference import MultiReferenceProperty2
 from .partset import PartSet
 from .service import Service, ServiceExecution
 from .team import Team
@@ -29,6 +33,10 @@ __all__ = (
     'SelectListProperty',
     'ReferenceProperty',
     'MultiReferenceProperty',
+    'Property2',
+    'AttachmentProperty2',
+    'SelectListProperty2',
+    'MultiReferenceProperty2',
     'Service',
     'ServiceExecution',
     'User',
