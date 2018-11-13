@@ -1,9 +1,11 @@
 import datetime
+from unittest import skipIf
 
 from pykechain.enums import ScopeStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from pykechain.models import Team
 from tests.classes import TestBetamax
+from tests.utils import TEST_FLAG_IS_PIM2
 
 
 class TestScopes(TestBetamax):
@@ -25,6 +27,7 @@ class TestScopes(TestBetamax):
             self.client.scope()
 
     # 1.11
+    @skipIf(TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 1, expected to fail on new PIM2")
     def test_retrieve_scope_members(self):
         original_scope_members = [u.get('username') for u in self.project.members()]
         original_scope_managers = [u.get('username') for u in self.project.members(is_manager=True)]
@@ -121,8 +124,8 @@ class TestScopes(TestBetamax):
 
         self.assertTrue(retrieved_project.name == new_scope_name)
         self.assertTrue(retrieved_project._json_data['text'] == new_scope_description)
-        self.assertTrue(retrieved_project._json_data['start_date'] == '2018-12-05T00:00:00Z')
-        self.assertTrue(retrieved_project._json_data['due_date'] == '2018-12-08T00:00:00Z')
+        self.assertTrue(retrieved_project._json_data['start_date'] in ('2018-12-05T00:00:00Z', '2018-12-05T00:00:00+00:00'))
+        self.assertTrue(retrieved_project._json_data['due_date'] in ('2018-12-08T00:00:00Z', '2018-12-08T00:00:00+00:00'))
         self.assertTrue(retrieved_project._json_data['status'] == ScopeStatus.CLOSED)
 
         with self.assertRaises(IllegalArgumentError):
@@ -138,7 +141,7 @@ class TestScopes(TestBetamax):
             self.project.edit(due_date='Wrong')
 
         with self.assertRaises(IllegalArgumentError):
-            self.project.edit(status='DEACTIVATED')
+            self.project.edit(status='ILLEGAL_STATUS_WILL_CAUSE_ERR')
 
         # tearDown
         self.project.edit(name=old_scope_name, description=old_scope_description, start_date=old_start_date,
@@ -198,3 +201,7 @@ class TestScopes(TestBetamax):
 
         # teardown
         self.project.edit(tags=saved_tags)
+
+@skipIf(not TEST_FLAG_IS_PIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
+class TestScopes2SpecificTests(TestBetamax):
+    pass
