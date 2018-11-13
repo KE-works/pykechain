@@ -24,6 +24,15 @@ class Scope2(Scope):
         """Bucket of the scope is deprecated in version 2."""
         raise DeprecationWarning("Bucket has been deprecated in scope version 2")
 
+    @property
+    def team(self):
+        """Team to which the scope is assigned."""
+        team_dict = self._json_data.get('team_id_name')
+        if team_dict and team_dict.get('id'):
+            return self._client.team(id=team_dict.get('id'))
+        else:
+            return None
+
     def _update_scope_project_team(self, select_action, user, user_type):
         """
         Update the Project Team of the Scope. Updates include addition or removing of managers or members.
@@ -37,23 +46,29 @@ class Scope2(Scope):
         :raises APIError: When unable to update the scope project team.
         """
         if isinstance(user, str):
+            from pykechain.client import API_EXTRA_PARAMS
             users = self._client._retrieve_users()
             user_object = next((item for item in users['results'] if item["username"] == user), None)
             if user_object:
                 url = self._client._build_url('scope2_{}'.format(select_action), scope_id=self.id)
+
                 r = self._client._request('PUT', url,
+                                          params=API_EXTRA_PARAMS[__class__.__name__.lower()],
                                           data={'user_id': user_object['pk']})
                 if r.status_code != requests.codes.ok:  # pragma: no cover
                     raise APIError("Could not {} {} in Scope".format(select_action.split('_')[0], user_type))
+
+                self._json_data = r.json().get('results')[0]
             else:
                 raise NotFoundError("User {} does not exist".format(user))
         else:
             raise TypeError("User {} should be defined as a string".format(user))
 
     def _edit(self, update_dict):
+        from pykechain.client import API_EXTRA_PARAMS
         url = self._client._build_url('scope2', scope_id=self.id)
 
-        r = self._client._request('PUT', url, json=update_dict)
+        r = self._client._request('PUT', url, params=API_EXTRA_PARAMS[__class__.__name__.lower()], json=update_dict)
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Scope ({})".format(r))

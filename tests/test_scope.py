@@ -14,7 +14,7 @@ class TestScopes(TestBetamax):
         self.assertTrue(self.client.scopes())
 
     def test_retrieve_scope_with_kwargs(self):
-        retrieve_scopes_with_kwargs = self.client.scopes(name__startswith='Bike')
+        retrieve_scopes_with_kwargs = self.client.scopes(name__icontains='(pykechain testing)')
         self.assertTrue(retrieve_scopes_with_kwargs)
         self.assertEqual(len(retrieve_scopes_with_kwargs), 1)
 
@@ -161,17 +161,30 @@ class TestScopes(TestBetamax):
         team_b_id = r.json().get('results')[0].get('id')
 
         # save current team
-        team_dict = self.project._json_data.get('team')
-        saved_team_id = team_dict and team_dict.get('id')
+        if self.client.match_app_version(label="gpim", version=">=2.0.0"):
+            team_dict = self.project._json_data.get('team_id_name')
+            saved_team_id = team_dict and team_dict.get('id')
+        else:
+            team_dict = self.project._json_data.get('team')
+            saved_team_id = team_dict and team_dict.get('id')
 
         self.project.edit(team=team_b_id)
-        self.assertEqual(self.project._json_data.get('team').get('id'), team_b_id)
+        if self.client.match_app_version(label="gpim", version=">=2.0.0"):
+            self.assertEqual(self.project._json_data.get('team_id_name').get('id'), team_b_id)
+        else:
+            self.assertEqual(self.project._json_data.get('team').get('id'), team_b_id)
 
         self.project.edit(team=team_kew_id)
-        self.assertEqual(self.project._json_data.get('team').get('id'), team_kew_id)
+        if self.client.match_app_version(label="gpim", version=">=2.0.0"):
+            self.assertEqual(self.project._json_data.get('team_id_name').get('id'), team_kew_id)
+        else:
+            self.assertEqual(self.project._json_data.get('team').get('id'), team_kew_id)
 
         self.project.edit(team=saved_team_id)
-        self.assertEqual(self.project._json_data.get('team').get('id'), saved_team_id)
+        if self.client.match_app_version(label="gpim", version=">=2.0.0"):
+            self.assertEqual(self.project._json_data.get('team_id_name').get('id'), saved_team_id)
+        else:
+            self.assertEqual(self.project._json_data.get('team').get('id'), saved_team_id)
 
     def test_team_property_of_scope(self):
         """Test for the property 'team' of a scope."""
@@ -204,4 +217,24 @@ class TestScopes(TestBetamax):
 
 @skipIf(not TEST_FLAG_IS_PIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
 class TestScopes2SpecificTests(TestBetamax):
-    pass
+
+    def test_retrieve_scope2_members(self):
+        original_scope_members = [u.get('username') for u in self.project.members()]
+        original_scope_managers = [u.get('username') for u in self.project.members(is_manager=True)]
+        scope_managers = original_scope_managers + ['testmanager']
+        scope_members = original_scope_members + ['anotheruser', 'testuser']
+
+        self.project.add_manager('testmanager')
+        self.project.add_member('anotheruser')
+        self.project.add_member('testuser')
+
+        self.project.refresh()
+
+        members_usernames = [member['username'] for member in self.project.members()]
+        managers_usernames = [manager['username'] for manager in self.project.members(is_manager=True)]
+
+        self.assertSetEqual(set(scope_members), set(members_usernames))
+        self.assertSetEqual(set(scope_managers), set(managers_usernames))
+
+        # teardown
+        self.project.remove_member('anotheruser')

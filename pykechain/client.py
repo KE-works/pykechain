@@ -309,7 +309,13 @@ class Client(object):
                 raise NotFoundError("No version found on the app '{}'".format(target_app[0].get('app')))
 
     def reload(self, obj, extra_params=None):
-        """Reload an object from server. This method is immutable and will return a new object.
+        """Reload an object from server. The original object is immutable and it will return a new object.
+
+        The object will be refetched from KE-chain. If the object has a 'url' field the url will be taken from
+        that field (KE-chain version 2). If the object does not have an 'url' field it will be constructed based
+        on the class name and the id of the object itself. If `extra_params` are provided, these will be respected.
+        If additional API params are needed to be included (eg. for KE-chain 3/PIM2) these will be added/updated
+        automatically before the request continues.
 
         :param obj: object to reload
         :type obj: :py:obj:`obj`
@@ -318,10 +324,18 @@ class Client(object):
         :return: a new object
         :raises NotFoundError: if original object is not found or deleted in the mean time
         """
-        if not obj._json_data.get('url'):  # pragma: no cover
-            raise NotFoundError("Could not reload object, there is no url for object '{}' configured".format(obj))
+        if not obj._json_data.get('url'):
+            # build the url from the class name (in lower case) `obj.__class__.__name__.lower()`
+            # get the id from the `obj.id` which is normally a keyname `<class_name>_id` (without the '2' if so)
+            url = self._build_url(obj.__class__.__name__.lower(),
+                                  **{"{}_id".format(obj.__class__.__name__.lower().replace("2","")): obj.id})
+            extra_api_params = API_EXTRA_PARAMS.get(obj.__class__.__name__.lower())
+            # add the additional API params to the already provided extra params if they are provided.
+            extra_params = extra_params.update(**extra_api_params) if extra_params else extra_api_params
+        else:
+            url = obj._json_data.get('url')
 
-        response = self._request('GET', obj._json_data.get('url'), params=extra_params)
+        response = self._request('GET', url, params=extra_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not reload object ({})".format(response))
