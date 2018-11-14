@@ -35,13 +35,13 @@ class Property2(Property):
 
         # changed for PIM2
         if property_type == PropertyType.ATTACHMENT_VALUE:
-            from .property_attachment import AttachmentProperty2
+            from .property2_attachment import AttachmentProperty2
             return AttachmentProperty2(json, **kwargs)
         elif property_type == PropertyType.SINGLE_SELECT_VALUE:
-            from .property_selectlist import SelectListProperty2
+            from .property2_selectlist import SelectListProperty2
             return SelectListProperty2(json, **kwargs)
         elif property_type == PropertyType.REFERENCES_VALUE:
-            from .property_multi_reference import MultiReferenceProperty2
+            from .property2_multi_reference import MultiReferenceProperty2
             return MultiReferenceProperty2(json, **kwargs)
         else:
             return Property2(json, **kwargs)

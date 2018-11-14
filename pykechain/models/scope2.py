@@ -2,6 +2,7 @@ from typing import Any  # noqa: F401
 
 import requests
 
+from pykechain.enums import Multiplicity
 from pykechain.exceptions import APIError, NotFoundError
 from pykechain.models import Scope
 
@@ -74,3 +75,26 @@ class Scope2(Scope):
             raise APIError("Could not update Scope ({})".format(r))
         else:
             self._json_data = r.json().get('results') and r.json().get('results')[0]
+
+    def parts(self, *args, **kwargs):
+        """Retrieve parts belonging to this scope.
+
+        This uses
+
+        See :class:`pykechain.Client.parts` for available parameters.
+        """
+        return self._client.parts(*args,scope_id=self.id, **kwargs)
+
+    def part(self, *args, **kwargs):
+        """Retrieve a single part belonging to this scope.
+
+        See :class:`pykechain.Client.part` for available parameters.
+        """
+        return self._client.part(*args, scope_id=self.id, **kwargs)
+
+    def model(self, *args, **kwargs):
+        """Retrieve a single model belonging to this scope.
+
+        See :class:`pykechain.Client.model` for available parameters.
+        """
+        return self._client.model(*args, scope_id=self.id, **kwargs)

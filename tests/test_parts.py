@@ -1,7 +1,10 @@
+from unittest import skipIf
+
 from pykechain.enums import Multiplicity, Category, Classification
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import Part, PartSet
 from tests.classes import TestBetamax
+from tests.utils import TEST_FLAG_IS_PIM2
 
 
 class TestParts(TestBetamax):
@@ -35,7 +38,7 @@ class TestParts(TestBetamax):
 
     def test_retrieve_model_multiple(self):
         with self.assertRaises(MultipleFoundError):
-            self.client.model()
+            self.project.model()
 
     def test_part_set_iterator(self):
         for part in self.project.parts():
@@ -194,27 +197,6 @@ class TestParts(TestBetamax):
                           'sibling {} is appearing in the siblings method and not in the children of ' \
                           'parent method'.format(sibling))
 
-    def test_retrieve_part_without_parent_id(self):
-        # only the root does not have a parent_id
-        product_root_node = self.project.part(name='Product container', classification=Classification.PRODUCT)
-        root_node = product_root_node.parent()
-        self.assertTrue(hasattr(root_node, 'parent_id'))
-        self.assertIsNone(root_node.parent_id)
-
-    def test_retrieve_parent_of_part_without_parent_id(self):
-        # only the root does not have a parent_id
-        product_root_node = self.project.part(name='Product container', classification=Classification.PRODUCT)
-        root_node = product_root_node.parent()
-        parent_of_root_node = root_node.parent()
-        self.assertIsNone(parent_of_root_node)
-
-    def test_retrieve_siblings_of_part_without_parent_id(self):
-        product_root_node = self.project.part(name='Product container', classification=Classification.PRODUCT)
-        root_node = product_root_node.parent()
-        siblings_of_root_node = root_node.siblings()
-        self.assertIsInstance(siblings_of_root_node, PartSet)
-        self.assertEqual(len(siblings_of_root_node), 0)
-
     # new in 1.3+
     def test_kwargs_on_part_retrieval(self):
         # test that the additional kwargs are added to the query filter on the api
@@ -276,7 +258,7 @@ class TestParts(TestBetamax):
         pedal_model.delete()
 
     def test_add_proxy_to(self):
-        catalog_container = self.project.model('Catalog container')
+        catalog_container = self.project.model(name__startswith='Catalog')
         bearing_catalog_model = catalog_container.add_model('Bearing', multiplicity=Multiplicity.ZERO_MANY)
         wheel_model = self.project.model('Wheel')
 
@@ -312,6 +294,8 @@ class TestParts(TestBetamax):
             front_fork_model.model()
 
         self.assertEqual(front_fork_model.id, front_fork_retrieved_model.id)
+
+    ### UPTILL HERE PIM2 COMPATIBLE ###
 
     def test_retrieve_catalog_model_of_proxy(self):
         catalog_container = self.project.model('Catalog container')
@@ -479,7 +463,8 @@ class TestParts(TestBetamax):
 
         self.assertEqual(len(copied_instance._cached_children), 4)
 
-        exactly_1_part_instance = [part for part in copied_instance._cached_children if part.name == 'Exactly 1 part'][0]
+        exactly_1_part_instance = [part for part in copied_instance._cached_children if part.name == 'Exactly 1 part'][
+            0]
         self.assertEqual(exactly_1_part_instance.property('Property boolean').value, False)
 
         part_instance_1 = [part for part in copied_instance._cached_children if part.name == 'Part instance 1'][0]
@@ -549,7 +534,8 @@ class TestParts(TestBetamax):
 
         self.assertEqual(len(copied_instance._cached_children), 4)
 
-        exactly_1_part_instance = [part for part in copied_instance._cached_children if part.name == 'Exactly 1 part'][0]
+        exactly_1_part_instance = [part for part in copied_instance._cached_children if part.name == 'Exactly 1 part'][
+            0]
         self.assertEqual(exactly_1_part_instance.property('Property boolean').value, False)
 
         part_instance_1 = [part for part in copied_instance._cached_children if part.name == 'Part instance 1'][0]
@@ -606,3 +592,47 @@ class TestParts(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             model.copy(target_parent=target_model)
 
+
+@skipIf(TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 1, expected to fail on new PIM2")
+class TestPIM1SpecificPartTests(TestBetamax):
+    def test_retrieve_part_without_parent_id(self):
+        # only the root does not have a parent_id
+        product_root_node = self.project.part(name='Product container', classification=Classification.PRODUCT)
+        root_node = product_root_node.parent()
+        self.assertTrue(hasattr(root_node, 'parent_id'))
+        self.assertIsNone(root_node.parent_id)
+
+    def test_retrieve_parent_of_part_without_parent_id(self):
+        # only the root does not have a parent_id
+        product_root_node = self.project.part(name='Product container', classification=Classification.PRODUCT)
+        root_node = product_root_node.parent()
+        parent_of_root_node = root_node.parent()
+        self.assertIsNone(parent_of_root_node)
+
+    def test_retrieve_siblings_of_part_without_parent_id(self):
+        product_root_node = self.project.part(name='Product container', classification=Classification.PRODUCT)
+        root_node = product_root_node.parent()
+        siblings_of_root_node = root_node.siblings()
+        self.assertIsInstance(siblings_of_root_node, PartSet)
+        self.assertEqual(len(siblings_of_root_node), 0)
+
+
+@skipIf(not TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 2, expected to fail on older PIM2")
+class TestPIM2SpecificPartTests(TestBetamax):
+    def test_retrieve_part_without_parent_id(self):
+        # only the root does not have a parent_id
+        product_root_node = self.project.part(name='Product', classification=Classification.PRODUCT)
+        self.assertTrue(hasattr(product_root_node, 'parent_id'))
+        self.assertIsNone(product_root_node.parent_id)
+
+    def test_retrieve_parent_of_part_without_parent_id(self):
+        # only the root does not have a parent_id
+        product_root_node = self.project.part(name='Product', classification=Classification.PRODUCT)
+        root_node = product_root_node.parent()
+        self.assertIsNone(root_node)
+
+    def test_retrieve_siblings_of_part_without_parent_id(self):
+        product_root_node = self.project.part(name='Product', classification=Classification.PRODUCT)
+        siblings_of_root_node = product_root_node.siblings()
+        self.assertIsInstance(siblings_of_root_node, PartSet)
+        self.assertEqual(len(siblings_of_root_node), 0)
