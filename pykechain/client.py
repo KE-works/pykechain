@@ -7,6 +7,7 @@ from requests.compat import urljoin, urlparse  # type: ignore
 
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     WIMCompatibleActivityTypes, PropertyType
+from pykechain.models import Part2
 from pykechain.models.activity2 import Activity2
 from pykechain.models.scope2 import Scope2
 from pykechain.models.service import Service, ServiceExecution
@@ -57,6 +58,11 @@ API_PATH = {
     'scopes2': 'api/v2/scopes.json',
     'parts2': 'api/v2/parts.json',
     'parts2_new_instance': 'api/v2/parts/new_instance',
+    'parts2_create_child_model': 'api/v2/parts/create_child_model',
+    'parts2_create_proxy_model': 'api/v2/parts/create_proxy_model',
+    'parts2_clone_model': 'api/v2/parts/clone_model',
+    'parts2_clone_instance': 'api/v2/parts/clone_instance',
+    'parts2_export': 'api/v2/parts/export',
     'part2': 'api/v2/parts/{part_id}.json',
     'properties2': 'api/v2/properties.json',
     'property2': 'api/v2/properties/{property_id}.json',
@@ -328,7 +334,7 @@ class Client(object):
             # build the url from the class name (in lower case) `obj.__class__.__name__.lower()`
             # get the id from the `obj.id` which is normally a keyname `<class_name>_id` (without the '2' if so)
             url = self._build_url(obj.__class__.__name__.lower(),
-                                  **{"{}_id".format(obj.__class__.__name__.lower().replace("2","")): obj.id})
+                                  **{"{}_id".format(obj.__class__.__name__.lower().replace("2", "")): obj.id})
             extra_api_params = API_EXTRA_PARAMS.get(obj.__class__.__name__.lower())
             # add the additional API params to the already provided extra params if they are provided.
             extra_params = extra_params.update(**extra_api_params) if extra_params else extra_api_params
@@ -503,6 +509,7 @@ class Client(object):
               model=None,  # type: Optional[Part]
               category=Category.INSTANCE,  # type: Optional[str]
               bucket=None,  # type: Optional[str]
+              scope_id=None,  # type: Optional[str]
               parent=None,  # type: Optional[str]
               activity=None,  # type: Optional[str]
               limit=None,  # type: Optional[int]
@@ -524,9 +531,11 @@ class Client(object):
         :type model: basestring or None
         :param category: filter on category (INSTANCE, MODEL, None)
         :type category: basestring or None
-        :param bucket: filter on bucket_id
+        :param bucket: filter on bucket_id  # only relevant for KE-chain 2
         :type bucket: basestring or None
-        :param parent: filter on the parent_id, returns all childrent of the parent_id
+        :param scope_id: filter on scope_id # relevant for KE-chain 2 and 3
+        :type scope_id: basestring or None
+        :param parent: filter on the parent_id, returns all children of the parent_id
         :type parent: basestring or None
         :param activity: filter on activity_id
         :type activity: basestring or None
@@ -563,24 +572,37 @@ class Client(object):
         if limit and limit < batch:
             batch = limit
 
-        request_params = {
-            'id': pk,
-            'name': name,
-            'model': model.id if model else None,
-            'category': category,
-            'bucket': bucket,
-            'parent': parent,
-            'activity_id': activity,
-            'limit': batch
-        }
+        request_params = dict(
+            id=pk,
+            name=name,
+            category=category,
+            activity_id=activity,
+            limit=batch,
+            scope_id=scope_id
+        )
+
+        if self.match_app_version(label='gpim', version='>=2.0.0'):
+            request_params.update(dict(
+                parent_id=parent,
+                model_id=model.id if model else None,
+            ))
+            url = self._build_url('parts2')
+            request_params.update(API_EXTRA_PARAMS['parts2'])
+        else:
+            request_params.update(dict(
+                bucket=bucket,
+                parent=parent,
+                model=model.id if model else None
+            ))
+            url = self._build_url('parts')
 
         if kwargs:
             request_params.update(**kwargs)
 
-        response = self._request('GET', self._build_url('parts'), params=request_params)
+        response = self._request('GET', url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve parts")
+            raise NotFoundError("Could not retrieve parts: {}".format(response.content))
 
         data = response.json()
 
@@ -595,7 +617,10 @@ class Client(object):
                 data = response.json()
                 part_results.extend(data['results'])
 
-        return PartSet((Part(p, client=self) for p in part_results))
+        if self.match_app_version(label='gpim', version='>=2.0.0'):
+            return PartSet((Part2(p, client=self) for p in part_results))
+        else:
+            return PartSet((Part(p, client=self) for p in part_results))
 
     def part(self, *args, **kwargs):
         # type: (*Any, **Any) -> Part
@@ -1123,7 +1148,7 @@ class Client(object):
         if response.status_code != requests.codes.created:
             raise APIError("Could not create part, {}: {}".format(str(response), response.content))
 
-        return Part(response.json()['results'][0], client=self)
+        return Part2(response.json()['results'][0], client=self)
 
     def create_part(self, parent, model, name=None, **kwargs):
         """Create a new part instance from a given model under a given parent.
@@ -1189,13 +1214,12 @@ class Client(object):
         if parent.category != Category.MODEL:
             raise IllegalArgumentError("The parent should be of category 'MODEL'")
 
-        data = {
-            "name": name,
-            "parent": parent.id,
-            "multiplicity": multiplicity
-        }
-
-        return self._create_part1(action="create_child_model", data=data, **kwargs)
+        if self.match_app_version(label="gpim", version=">=2.0.0"):
+            data = dict(name=name, parent_id=parent.id, multiplicity=multiplicity)
+            return self._create_part2(action="create_child_model", data=data, **kwargs)
+        else:
+            data = dict(name=name, parent=parent.id, multiplicity=multiplicity)
+            return self._create_part1(action="create_child_model", data=data, **kwargs)
 
     def _create_clone(self, parent, part, **kwargs):
         """Create a new `Part` clone under the `Parent`.
@@ -1265,14 +1289,12 @@ class Client(object):
         if parent.category != Category.MODEL:
             raise IllegalArgumentError("The parent should be of category MODEL")
 
-        data = {
-            "name": name,
-            "model": model.id,
-            "parent": parent.id,
-            "multiplicity": multiplicity
-        }
-
-        return self._create_part1(action='create_proxy_model', data=data, **kwargs)
+        if self.match_app_version(label="gpim", version=">=2.0.0"):
+            data = dict(name=name, model_id=model.id, parent_id=parent.id, multiplicity=multiplicity)
+            return self._create_part2(action='create_proxy_model', data=data, **kwargs)
+        else:
+            data = dict(name=name, model=model.id, parent=parent.id, multiplicity=multiplicity)
+            return self._create_part1(action='create_proxy_model', data=data, **kwargs)
 
     def create_property(self, model, name, description=None, property_type=PropertyType.CHAR_VALUE, default_value=None,
                         unit=None, options=None):

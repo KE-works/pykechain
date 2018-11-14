@@ -215,7 +215,7 @@ class TestScopes(TestBetamax):
         # teardown
         self.project.edit(tags=saved_tags)
 
-@skipIf(not TEST_FLAG_IS_PIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
+@skipIf(not TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 1, expected to fail on new PIM2")
 class TestScopes2SpecificTests(TestBetamax):
 
     def test_retrieve_scope2_members(self):
