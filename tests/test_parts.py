@@ -370,10 +370,7 @@ class TestParts(TestBetamax):
         self.assertIsInstance(siblings_of_frame, PartSet)
         self.assertTrue(len(siblings_of_frame) >= 1)  # eg. Wheels ...
 
-    ### UPTILL HERE PIM2 COMPATIBLE ###
-
     # new in 2.3
-    @skip('fails due to KEC-19139 or KEC-19140')
     def test_clone_model(self):
         # setUp
         model_name = 'Seat'
@@ -387,7 +384,6 @@ class TestParts(TestBetamax):
         # tearDown
         clone_seat_model.delete()
 
-    @skip('fails due to KEC-19139 or KEC-19140')
     def test_clone_instance(self):
         instance_name = 'Front Wheel'
         wheel = self.project.part(instance_name)
@@ -400,7 +396,6 @@ class TestParts(TestBetamax):
         # tearDown
         clone_spoke_instance.delete()
 
-    @skip('fails due to KEC-19139 or KEC-19140')
     def test_clone_instance_with_multiplicity_violation(self):
         instance_name = 'Seat'
         seat = self.project.part(instance_name)
@@ -409,7 +404,7 @@ class TestParts(TestBetamax):
         with self.assertRaises(APIError):
             seat.clone()
 
-    @skip('fails due to KEC-19139 or KEC-19140')
+    @skipIf(TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 1, expected to fail on new PIM2")
     def test_clone_instance_with_sub_parts(self):
         instance_name = 'Rear Wheel'
         rear_wheel = self.project.part(instance_name)
@@ -418,6 +413,7 @@ class TestParts(TestBetamax):
         with self.assertRaises(APIError):
             rear_wheel.clone()
 
+class TestCopyAndMoveParts(TestBetamax):
     def test_copy_part_model_given_name_include_children(self):
         # setUp
         base = self.project.model(name__startswith='Catalog')
@@ -469,9 +465,6 @@ class TestParts(TestBetamax):
         # self.assertEqual(copied_model.property('Property reference part').value[0].name, 'Wheel')
 
         self.assertEqual(len(copied_model._cached_children), 2)
-        sub_part_moved_model = [part for part in copied_model._cached_children
-                                if part.name == '0 or more part model'][0]
-        self.assertEqual(len(sub_part_moved_model._cached_children), 1)
 
         # tearDown
         model_to_be_copied.delete()
@@ -479,13 +472,42 @@ class TestParts(TestBetamax):
 
     def test_copy_part_model_include_instances(self):
         # setUp
-        name_of_part = 'Model to be copied'
-        model_to_be_copied = self.project.model(name=name_of_part)
+        base = self.project.model(name__startswith='Catalog')
+        model_to_be_copied = self.project.create_model(
+            parent=base, name='Model to be Copied @ {}'.format(str(datetime.now())),
+            multiplicity=Multiplicity.ONE_MANY)  # type Part
+        p_char = model_to_be_copied.add_property(
+            name='Property single text',
+            description='Description of Property single text',
+            unit='mm',
+            property_type=PropertyType.CHAR_VALUE
+        )
+        p_decimal = model_to_be_copied.add_property(
+            name='Property decimal number',
+            default_value=33,
+            property_type=PropertyType.FLOAT_VALUE
+        )
+        p_single_select = model_to_be_copied.add_property(
+            name='Property single select list',
+            options=dict(value_choices=['a', 'b', 'c']),
+            property_type=PropertyType.SINGLE_SELECT_VALUE
+        )
+        sub_part1 = model_to_be_copied.add_model(
+            name="subpart 1",
+            multiplicity=Multiplicity.ONE
+        )
+        sub_part2 = model_to_be_copied.add_model(
+            name="subpart 2",
+            mulltiplicity=Multiplicity.ONE
+        )
         model_target_parent = self.project.model('Bike')
-        model_to_be_copied.copy(target_parent=model_target_parent, name='New model', include_instances=True)
-
+        copied_model = model_to_be_copied.copy(
+            target_parent=model_target_parent,
+            name='Copied model under Bike',
+            include_children=True,
+            include_instances=True
+        )
         bike_part = self.project.part('Bike')
-        copied_model = self.project.model(name='New model')
 
         copied_instance = [child for child in bike_part.children() if child.name == 'Instance to be copied'][0]
         copied_instance.populate_descendants()
