@@ -7,7 +7,7 @@ from requests.compat import urljoin, urlparse  # type: ignore
 
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     WIMCompatibleActivityTypes, PropertyType
-from pykechain.models import Part2
+from pykechain.models import Part2, Property2
 from pykechain.models.activity2 import Activity2
 from pykechain.models.scope2 import Scope2
 from pykechain.models.service import Service, ServiceExecution
@@ -65,6 +65,7 @@ API_PATH = {
     'parts2_export': 'api/v2/parts/export',
     'part2': 'api/v2/parts/{part_id}.json',
     'properties2': 'api/v2/properties.json',
+    'properties2_create_model': 'api/v2/properties/create_model',
     'property2': 'api/v2/properties/{property_id}.json',
     'property2_upload': 'api/v2/properties/{property_id}/upload',
     'property2_download': 'api/v2/properties/{property_id}/download',
@@ -1221,15 +1222,24 @@ class Client(object):
             data = dict(name=name, parent=parent.id, multiplicity=multiplicity)
             return self._create_part1(action="create_child_model", data=data, **kwargs)
 
-    def _create_clone(self, parent, part, **kwargs):
+    def _create_clone(self, parent, part, name=None, **kwargs):
         """Create a new `Part` clone under the `Parent`.
 
+        An optional name of the cloned part may be provided. If not provided the name will be set
+        to "CLONE - <part name>". (KE-chain 3 backends only)
+        An optional multiplicity, may be added as paremeter for the cloning of models. If not
+        provided the multiplicity of the part will be used.
+
         .. versionadded:: 2.3
+        .. versionchanged:: 3.0
+           Added the name parameter. Added option to add multiplicity as well.
 
         :param parent: parent part
         :type parent: :class:`models.Part`
         :param part: part to be cloned
         :type part: :class:`models.Part`
+        :param name: (optional) Name of the to be cloned part
+        :type name: basestring or None
         :param kwargs: (optional) additional keyword=value arguments
         :type kwargs: dict
         :return: cloned :class:`models.Part`
@@ -1239,20 +1249,38 @@ class Client(object):
             select_action = 'clone_model'
         else:
             select_action = 'clone_instance'
+        if not isinstance(part, Part) and not isinstance(parent, Part):
+            raise IllegalArgumentError("Either part and parent need to be of class `Part`. "
+                                       "We got: part: '{}' and parent '{}'".format(type(part), type(parent)))
 
-        data = {
-            "part": part.id,
-            "parent": parent.id,
-            "suppress_kevents": kwargs.pop('suppress_kevents', None)
-        }
+        if self.match_app_version(label="gpim", version=">=2.0.0"):
+            data = dict(
+                name=name or "CLONE - {}".format(part.name),
+                parent_id=parent.id,
+                suppress_kevents=kwargs.pop('suppress_kevents', None),
+            )
+            if part.category == Category.MODEL:
+                data.update(dict(
+                    multiplicity=kwargs.pop('multiplicity', part.multiplicity),
+                    model_id=part.id)
+                )
+            else:
+                data['instance_id'] = part.id
+            query_params = kwargs
+            query_params.update(API_EXTRA_PARAMS['parts2'])
+            url = self._build_url('parts2_{}'.format(select_action))
+        else:
+            data = dict(
+                part=part.id,
+                parent=parent.id,
+                suppress_kevents=kwargs.pop('suppress_kevents', None)
+            )
+            # prepare url query parameters
+            query_params = kwargs
+            query_params['select_action'] = select_action
+            url = self._build_url('parts')
 
-        # prepare url query parameters
-        query_params = kwargs
-        query_params['select_action'] = select_action
-
-        response = self._request('POST', self._build_url('parts'),
-                                 params=query_params,
-                                 data=data)
+        response = self._request('POST', url, params=query_params, data=data)
 
         if response.status_code != requests.codes.created:
             raise APIError("Could not clone part, {}: {}".format(str(response), response.content))
@@ -1297,15 +1325,18 @@ class Client(object):
             return self._create_part1(action='create_proxy_model', data=data, **kwargs)
 
     def create_property(self, model, name, description=None, property_type=PropertyType.CHAR_VALUE, default_value=None,
-                        unit=None, options=None):
+                        unit=None, options=None, **kwargs):
         """Create a new property model under a given model.
 
         Use the :class:`enums.PropertyType` to select which property type to create to ensure that you
         provide the correct values to the KE-chain backend. The default is a `PropertyType.CHAR_VALUE` which is a
         single line text in KE-chain.
 
+        .. versionchanged:: 3.0
+           Changed for KE-chan 3 backend. Added optional additional properties.
 
-        :param model: parent model
+
+        :param model: parent part model
         :type model: :class:`models.Part`
         :param name: property model name
         :type name: basestring
@@ -1326,10 +1357,10 @@ class Client(object):
         if model.category != Category.MODEL:
             raise IllegalArgumentError("The model should be of category MODEL")
 
-        if not property_type.endswith('_VALUE'):
-            warnings.warn("Please use the `PropertyType` enumeration to ensure providing correct "
-                          "values to the backend.", UserWarning)
-            property_type = '{}_VALUE'.format(property_type.upper())
+        # if not property_type.endswith('_VALUE'):
+        #     warnings.warn("Please use the `PropertyType` enumeration to ensure providing correct "
+        #                   "values to the backend.", UserWarning)
+        #     property_type = '{}_VALUE'.format(property_type.upper())
 
         if property_type not in PropertyType.values():
             raise IllegalArgumentError("Please provide a valid propertytype, please use one of `enums.PropertyType`. "
@@ -1341,28 +1372,46 @@ class Client(object):
                 isinstance(default_value, (list, tuple)) and default_value:
             default_value = default_value[0]
 
-        data = {
-            "name": name,
-            "part": model.id,
-            "description": description or '',
-            "property_type": property_type.upper(),
-            "value": default_value,
-            "unit": unit or '',
-            "options": options or {}
-        }
+        if self.match_app_version(label="gpim", version=">=2.0.0"):
+            data = dict(
+                name=name,
+                part_id=model.id,
+                description=description or '',
+                property_type=property_type.upper(),
+                value=default_value,
+                unit=unit or '',
+                value_options=options or {}
+            )
+            url = self._build_url('properties2_create_model')
+            query_params = kwargs
+            query_params.update(API_EXTRA_PARAMS['properties2'])
+        else:
+            data = dict(
+                name=name,
+                part=model.id,
+                description=description or '',
+                property_type=property_type.upper(),
+                value=default_value,
+                unit=unit or '',
+                options=options or {}
+            )
+            url = self._build_url('properties')
+            query_params = kwargs
 
         # # We add options after the fact only if they are available, otherwise the options will be set to null in the
         # # request and that can't be handled by KE-chain.
         # if options:
         #     data['options'] = options
 
-        response = self._request('POST', self._build_url('properties'),
-                                 json=data)
+        response = self._request('POST', url, params=query_params, json=data)
 
         if response.status_code != requests.codes.created:
-            raise APIError("Could not create property")
+            raise APIError("Could not create property, {}: {}".format(str(response), response.content))
 
-        prop = Property.create(response.json()['results'][0], client=self)
+        if self.match_app_version(label="gpim", version=">=2.0.0"):
+            prop = Property2.create(response.json()['results'][0], client=self)
+        else:
+            prop = Property.create(response.json()['results'][0], client=self)
 
         model.properties.append(prop)
 
