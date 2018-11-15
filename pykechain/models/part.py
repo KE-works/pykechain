@@ -706,19 +706,18 @@ class Part(Base):
 
         """
         descendants_flat_list = list(self._client.parts(
-            pk=self.id,
+            parent_id=self.id,
             category=self.category,
-            descendants='children',
             batch=batch)
         )
 
-        for parent in descendants_flat_list:
-            parent._cached_children = list()
-            for child in descendants_flat_list:
-                if child.parent_id == parent.id:
-                    parent._cached_children.append(child)
+        # for parent in descendants_flat_list:
+        #     parent._cached_children = list()
+        #     for child in descendants_flat_list:
+        #         if child.parent_id == parent.id:
+        #             parent._cached_children.append(child)
 
-        self._cached_children = descendants_flat_list[0]._cached_children
+        self._cached_children = descendants_flat_list
 
     def clone(self, **kwargs):
         """
