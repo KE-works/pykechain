@@ -22,7 +22,11 @@ class Scope2(Scope):
 
     @property
     def bucket(self):
-        """Bucket of the scope is deprecated in version 2."""
+        """Bucket of the scope is deprecated in version 2.
+
+        .. deprecated:: 3.0
+           A `bucket` is a deprecated concept in KE-chain 3 backends. Use `scope_id` instead.
+        """
         raise DeprecationWarning("Bucket has been deprecated in scope version 2")
 
     @property

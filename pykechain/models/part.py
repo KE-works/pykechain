@@ -705,8 +705,12 @@ class Part(Base):
         >>> bike.populate_descendants(batch=150)
 
         """
-        descendants_flat_list = list(self._client.parts(pk=self.id, category=self.category, descendants='children',
-                                                        batch=batch))
+        descendants_flat_list = list(self._client.parts(
+            pk=self.id,
+            category=self.category,
+            descendants='children',
+            batch=batch)
+        )
 
         for parent in descendants_flat_list:
             parent._cached_children = list()
@@ -720,7 +724,14 @@ class Part(Base):
         """
         Clone a part.
 
+        An optional name of the cloned part may be provided. If not provided the name will be set
+        to "CLONE - <part name>". (available for KE-chain 3 backends only)
+        An optional multiplicity, may be added as paremeter for the cloning of models. If not
+        provided the multiplicity of the part will be used. (available for KE-chain 3 backends only)
+
         .. versionadded:: 2.3
+        .. versionchanged:: 3.0
+           Added optional paramenters the name and multiplicity for KE-chain 3 backends.
 
         :param kwargs: (optional) additional keyword=value arguments
         :type kwargs: dict
@@ -729,8 +740,13 @@ class Part(Base):
 
         Example
         -------
-        >>> bike = client.model('Bike')
+        >>> bike = project.model('Bike')
         >>> bike2 = bike.clone()
+
+        For KE-chain 3 backends
+
+        >>> bike = project.model('Bike')
+        >>> bike2 = bike.clone(name='Trike', multiplicity=Multiplicity.ZERO_MANY)
 
         """
         parent = self.parent()
@@ -763,6 +779,9 @@ class Part(Base):
         >>>                    include_instances=True)
 
         """
+        if not isinstance(target_parent, Part):
+            raise IllegalArgumentError("`target_parent` needs to be a part, got '{}'".format(type(target_parent)))
+
         if self.category == Category.MODEL and target_parent.category == Category.MODEL:
             # Cannot add a model under an instance or vice versa
             copied_model = relocate_model(part=self, target_parent=target_parent, name=name,

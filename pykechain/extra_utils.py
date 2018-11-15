@@ -78,19 +78,32 @@ def relocate_model(part, target_parent, name=None, include_children=True):
     list_of_properties_sorted_by_order.sort(key=lambda x: x._json_data['order'])
     for prop in list_of_properties_sorted_by_order:
         prop_type = prop._json_data.get('property_type')
-        desc = prop._json_data.get('description')
+        description = prop._json_data.get('description', '')
         unit = prop._json_data.get('unit')
-        options = prop._json_data.get('options')
+
+        # For KE-chain 3 (PIM2) we have value_options instead of options.
+        if prop._client.match_app_version(label='gpim', version='>=2.0.0'):
+            options = prop._json_data.get('value_options')
+        else:
+            options = prop._json_data.get('options')
 
         # On "Part references" properties, the models referenced also need to be added
         if prop_type == PropertyType.REFERENCES_VALUE:
             referenced_part_ids = [referenced_part.id for referenced_part in prop.value]
-            moved_prop = moved_part_model.add_property(name=prop.name, description=desc, property_type=prop_type,
-                                                       default_value=referenced_part_ids)
+            moved_prop = moved_part_model.add_property(
+                name=prop.name,
+                description=description,
+                property_type=prop_type,
+                default_value=referenced_part_ids
+            )
 
         # On "Attachment" properties, attachments needs to be downloaded and re-uploaded to the new property.
         elif prop_type == PropertyType.ATTACHMENT_VALUE:
-            moved_prop = moved_part_model.add_property(name=prop.name, description=desc, property_type=prop_type)
+            moved_prop = moved_part_model.add_property(
+                name=prop.name,
+                description=description,
+                property_type=prop_type
+            )
             if prop.value:
                 attachment_name = prop._json_data['value'].split('/')[-1]
                 with temp_chdir() as target_dir:
@@ -100,8 +113,14 @@ def relocate_model(part, target_parent, name=None, include_children=True):
 
         # Other properties are quite straightforward
         else:
-            moved_prop = moved_part_model.add_property(name=prop.name, description=desc, property_type=prop_type,
-                                                       default_value=prop.value, unit=unit, options=options)
+            moved_prop = moved_part_model.add_property(
+                name=prop.name,
+                description=description,
+                property_type=prop_type,
+                default_value=prop.value,
+                unit=unit,
+                options=options
+            )
 
         # Map the current property model id with newly created property model Object
         get_mapping_dictionary()[prop.id] = moved_prop
@@ -112,8 +131,12 @@ def relocate_model(part, target_parent, name=None, include_children=True):
         part.populate_descendants()
         # For each part, recursively run this function
         for sub_part in part._cached_children:
-            relocate_model(part=sub_part, target_parent=moved_part_model, name=sub_part.name,
-                           include_children=include_children)
+            relocate_model(
+                part=sub_part,
+                target_parent=moved_part_model,
+                name=sub_part.name,
+                include_children=include_children
+            )
     return moved_part_model
 
 
