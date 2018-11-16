@@ -1285,7 +1285,11 @@ class Client(object):
         if response.status_code != requests.codes.created:
             raise APIError("Could not clone part, {}: {}".format(str(response), response.content))
 
-        return Part(response.json()['results'][0], client=self)
+        if self.match_app_version(label="gpim", version=">=2.0.0"):
+            return Part2(response.json()['results'][0], client=self)
+        else:
+            return Part(response.json()['results'][0], client=self)
+
 
     def create_proxy_model(self, model, parent, name, multiplicity='ZERO_MANY', **kwargs):
         """Add this model as a proxy to another parent model.

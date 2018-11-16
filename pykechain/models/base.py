@@ -22,8 +22,8 @@ class Base(object):
         else:
             return self == other
 
-    def refresh(self):
-        # type: () -> None
+    def refresh(self, json=None):
+        # type: (Optional[Any]) -> None
         """Refresh the object in place."""
         src = self._client.reload(self)
         self.__dict__.update(src.__dict__)

@@ -249,7 +249,13 @@ def move_part_instance(part_instance, target_parent, part_model, name=None, incl
 
     # If include_children is True, then recursively call this function for every descendant. Keep the name of the
     # original sub-instance.
+
     if include_children:
+        if part_instance._cached_children is None:
+            part_instance.populate_descendants()
+
+        assert part_instance._cached_children is not None, "wooot: pi {}, mi {}".format(part_instance, moved_instance)
+
         for sub_instance in part_instance._cached_children:
             move_part_instance(part_instance=sub_instance, target_parent=moved_instance,
                                part_model=sub_instance.model(),
@@ -296,6 +302,7 @@ def update_part_with_properties(part_instance, moved_instance, name=None):
             properties_id_dict[moved_prop_instance.id] = prop_instance.value
     # Update the name and property values in one go.
     moved_instance.update(name=str(name), update_dict=properties_id_dict, bulk=True, suppress_kevents=True)
+    moved_instance.populate_descendants()
     return moved_instance
 
 
@@ -317,5 +324,5 @@ def map_property_instances(original_part, new_part):
     # Do the same for each Property of original part instance, using the 'model' id and the get_mapping_dictionary
     for prop_original in original_part.properties:
         get_mapping_dictionary()[prop_original.id] = [prop_new for prop_new in new_part.properties if
-                                                      get_mapping_dictionary()[prop_original._json_data['model']].id ==
-                                                      prop_new._json_data['model']][0]
+                                                      get_mapping_dictionary()[prop_original.model_id].id ==
+                                                      prop_new.model_id][0]
