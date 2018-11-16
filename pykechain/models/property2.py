@@ -1,6 +1,6 @@
 import requests
 
-from pykechain.enums import PropertyType
+from pykechain.enums import PropertyType, Category
 from pykechain.exceptions import APIError
 from pykechain.models.property import Property
 
@@ -17,6 +17,17 @@ class Property2(Property):
             raise APIError("Could not update property value")
 
         return r.json()['results'][0]['value']
+
+    @property
+    def model_id(self):
+        """The model id of the property.
+
+        Returns None if the property is a model of its own. It will not return the model object.
+        """
+        if self.category == Category.MODEL:
+            return None
+        else:
+            return self._json_data.get('model_id')
 
     @classmethod
     def create(cls, json, **kwargs):

@@ -6,6 +6,7 @@ from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import Part
 from pykechain.models.property2 import Property2
+from pykechain.utils import is_uuid
 
 
 class Part2(Part):
@@ -148,6 +149,94 @@ class Part2(Part):
 
         if name:
             self.name = name
+
+    def update(self, name=None, update_dict=None, properties_fvalues=None, refresh=True, **kwargs):
+        """
+        Edit part name and property values in one go.
+
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
+
+        With KE-chain 3 backends you may now provide a whole set of properties to update using a `properties_fvalues`
+        list of dicts. This will be merged with the `update_dict` optionally provided.
+        The `properties_fvalues` list is a list of dicts containing at least the `id` and a `value`, but other keys
+        may provided as well in the single update eg. `value_options`. Example::
+            `properties_fvalues = [ {"id":<uuid of prop>, "value":<new_prop_value>}, {...}, ...]`
+
+        .. versionchanged:: 3.0
+           Added compatibility with KE-chain 3 backend. You may provide properties_fvalues as kwarg.
+           Bulk option removed.
+
+        :param name: new part name (defined as a string)
+        :type name: basestring or None
+        :param update_dict: dictionary with keys being property names (str) or property ids (uuid)
+                            and values being property values
+        :type update_dict: dict
+        :param properties_fvalues: (optional) keyword argument with raw list of properties update dicts
+        :type properties_fvalues: list of dict or None
+        :param refresh: refresh the part after succesfull completion, default to True
+        :type refresh: bool
+        :param kwargs: additional keyword-value arguments that will be passed into the part update request.
+        :type kwargs: dict or None
+
+        :return: the updated :class:`Part`
+        :raises NotFoundError: when the property name is not a valid property of this part
+        :raises IllegalArgumentError: when the type or value of an argument provided is incorrect
+        :raises APIError: in case an Error occurs
+
+        Example
+        -------
+
+        >>> bike = project.part('Bike')
+        >>> bike.update(name='Good name', update_dict={'Gears': 11, 'Total Height': 56.3})
+
+        Example with properties_fvalues: <pyke Part2 'Copied model under Bike' id 95d35be6>
+
+        >>> bike = project.part('Bike')
+        >>> bike.update(name='Good name',
+        ...             properties_fvalues=[{'id': '95d35be6...', 'value': 11},
+        ...                                 {'id': '7893cba4...', 'value': 56.3, 'value_options': {...}})
+
+        """
+        # dict(name=name, properties=json.dumps(update_dict))) with property ids:value
+        # action = 'bulk_update_properties'  # not for KEC3
+        if name and not isinstance(name, str):
+                raise IllegalArgumentError("Name of the part should be provided as a string")
+
+        if properties_fvalues and not isinstance(properties_fvalues, list):
+            raise IllegalArgumentError("optional `properties_fvalues` need to be provided as a list of dicts")
+
+        properties_fvalues = properties_fvalues or list()
+
+        for prop_name_or_id, property_value in update_dict.items():
+            updated_p = dict(
+                value=property_value
+            )
+            if is_uuid(prop_name_or_id):
+                updated_p['id'] = prop_name_or_id
+            else:
+                updated_p['id'] = self.property(prop_name_or_id).id
+            properties_fvalues.append(updated_p)
+
+        from pykechain.client import API_EXTRA_PARAMS
+        response = self._client._request(
+            'PUT', self._client._build_url('part2', part_id=self.id),
+            params=API_EXTRA_PARAMS['part2'],
+            json=dict(
+                name=name,
+                properties_fvalues=properties_fvalues,
+                **kwargs
+            )
+        )
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update the part '{}', got: '{}'".format(self, response.content))
+
+        # update local properties (without a call)
+        self._json_data = response.json()['results'][0]
+        self.properties = [Property2.create(p, client=self._client) for p in self._json_data['properties']]
 
     def delete(self):
         # type: () -> None

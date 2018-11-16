@@ -1,5 +1,5 @@
 from datetime import datetime
-from unittest import skipIf, skip
+from unittest import skipIf
 
 from pykechain.enums import Multiplicity, Category, Classification, PropertyType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
@@ -413,40 +413,53 @@ class TestParts(TestBetamax):
         with self.assertRaises(APIError):
             rear_wheel.clone()
 
+
 class TestCopyAndMoveParts(TestBetamax):
-    def test_copy_part_model_given_name_include_children(self):
-        # setUp
-        base = self.project.model(name__startswith='Catalog')
-        model_to_be_copied = self.project.create_model(
-            parent=base, name='Model to be Copied @ {}'.format(str(datetime.now())),
-            multiplicity=Multiplicity.ZERO_MANY)  # type Part
-        p_char = model_to_be_copied.add_property(
+
+    def setUp(self):
+        super(TestCopyAndMoveParts, self).setUp()
+        self.base = self.project.model(name__startswith='Catalog')
+        self.model_to_be_copied = self.project.create_model(
+            parent=self.base, name='Model to be Copied @ {} [TEST]'.format(str(datetime.now())),
+            multiplicity=Multiplicity.ONE_MANY)  # type Part
+        p_char = self.model_to_be_copied.add_property(
             name='Property single text',
             description='Description of Property single text',
             unit='mm',
             property_type=PropertyType.CHAR_VALUE
         )
-        p_decimal = model_to_be_copied.add_property(
+        p_decimal = self.model_to_be_copied.add_property(
             name='Property decimal number',
             default_value=33,
             property_type=PropertyType.FLOAT_VALUE
         )
-        p_single_select = model_to_be_copied.add_property(
+        p_single_select = self.model_to_be_copied.add_property(
             name='Property single select list',
             options=dict(value_choices=['a', 'b', 'c']),
             property_type=PropertyType.SINGLE_SELECT_VALUE
         )
-        sub_part1 = model_to_be_copied.add_model(
+        sub_part1 = self.model_to_be_copied.add_model(
             name="subpart 1",
-            multiplicity=Multiplicity.ZERO_ONE
+            multiplicity=Multiplicity.ONE
         )
-        sub_part2 = model_to_be_copied.add_model(
+        sub_part2 = self.model_to_be_copied.add_model(
             name="subpart 2",
-            mulltiplicity=Multiplicity.ZERO_ONE
+            multiplicity=Multiplicity.ONE
         )
 
+        self.model_target_parent = self.project.model('Bike')
+        self.instance_to_be_copied = self.model_to_be_copied.instances()[0]
+        self.instance_target_parent = self.model_to_be_copied.parent().instances()[0]
+
+    def tearDown(self):
+        self.model_to_be_copied.delete()
+        # deletable_models = self.project.parts(name__contains="[TEST]", category=Category.MODEL)
+        # [p.delete() for p in deletable_models]
+        super(TestCopyAndMoveParts, self).tearDown()
+
+    def test_copy_part_model_given_name_include_children(self):
         model_target_parent = self.project.model('Bike')
-        copied_model = model_to_be_copied.copy(
+        copied_model = self.model_to_be_copied.copy(
             target_parent=model_target_parent,
             name='Copied model under Bike',
             include_children=True,
@@ -467,41 +480,11 @@ class TestCopyAndMoveParts(TestBetamax):
         self.assertEqual(len(copied_model._cached_children), 2)
 
         # tearDown
-        model_to_be_copied.delete()
         copied_model.delete()
 
     def test_copy_part_model_include_instances(self):
-        # setUp
-        base = self.project.model(name__startswith='Catalog')
-        model_to_be_copied = self.project.create_model(
-            parent=base, name='Model to be Copied @ {}'.format(str(datetime.now())),
-            multiplicity=Multiplicity.ONE_MANY)  # type Part
-        p_char = model_to_be_copied.add_property(
-            name='Property single text',
-            description='Description of Property single text',
-            unit='mm',
-            property_type=PropertyType.CHAR_VALUE
-        )
-        p_decimal = model_to_be_copied.add_property(
-            name='Property decimal number',
-            default_value=33,
-            property_type=PropertyType.FLOAT_VALUE
-        )
-        p_single_select = model_to_be_copied.add_property(
-            name='Property single select list',
-            options=dict(value_choices=['a', 'b', 'c']),
-            property_type=PropertyType.SINGLE_SELECT_VALUE
-        )
-        sub_part1 = model_to_be_copied.add_model(
-            name="subpart 1",
-            multiplicity=Multiplicity.ONE
-        )
-        sub_part2 = model_to_be_copied.add_model(
-            name="subpart 2",
-            mulltiplicity=Multiplicity.ONE
-        )
         model_target_parent = self.project.model('Bike')
-        copied_model = model_to_be_copied.copy(
+        copied_model = self.model_to_be_copied.copy(
             target_parent=model_target_parent,
             name='Copied model under Bike',
             include_children=True,
@@ -509,44 +492,38 @@ class TestCopyAndMoveParts(TestBetamax):
         )
         bike_part = self.project.part('Bike')
 
-        copied_instance = [child for child in bike_part.children() if child.name == 'Instance to be copied'][0]
+        copied_instance = [child for child in bike_part.children() if 'to be Copied' in child.name][0]
         copied_instance.populate_descendants()
 
         # testing
         self.assertTrue(copied_instance)
-        self.assertEqual(copied_instance.name, 'Instance to be copied')
-        self.assertEqual(len(copied_instance.properties), 6)
-        self.assertEqual(copied_instance.property('Property single text').value, 'Instance text')
-        self.assertEqual(copied_instance.property('Property decimal number').value, 11)
-        self.assertEqual(copied_instance.property('Property single select list').value, 'c')
+        self.assertEqual(len(copied_instance.properties), 3)
+        self.assertTrue(copied_instance.property('Property single text'))
+        self.assertEqual(copied_instance.property('Property decimal number').value, 33)
+        self.assertEqual(copied_instance.property('Property single select list').value, None)
 
-        self.assertEqual(len(copied_instance._cached_children), 4)
-
-        exactly_1_part_instance = [part for part in copied_instance._cached_children if part.name == 'Exactly 1 part'][
-            0]
-        self.assertEqual(exactly_1_part_instance.property('Property boolean').value, False)
-
-        part_instance_1 = [part for part in copied_instance._cached_children if part.name == 'Part instance 1'][0]
-        self.assertEqual(len(part_instance_1._cached_children), 1)
+        self.assertEqual(len(copied_instance._cached_children), 2)
 
         # tearDown
         copied_model.delete()
 
     def test_copy_part_model_empty_name_not_include_children(self):
         # setUp
-        name_of_part = 'Model to be copied'
-        model_to_be_copied = self.project.model(name=name_of_part)
         model_target_parent = self.project.model('Bike')
-        model_to_be_copied.copy(target_parent=model_target_parent, include_children=False,
-                                include_instances=False)
+        name_of_part = 'Copied model under Bike'
+        copied_model = self.model_to_be_copied.copy(
+            target_parent=model_target_parent,
+            name=name_of_part,
+            include_children=False,
+            include_instances=False
+        )
 
-        copied_model = self.project.model(name='CLONE - {}'.format(name_of_part))
         copied_model.populate_descendants()
 
         # testing
         self.assertTrue(copied_model)
-        self.assertEqual(copied_model.name, 'CLONE - {}'.format(name_of_part))
-        self.assertEqual(len(copied_model.properties), 6)
+        self.assertEqual(copied_model.name, name_of_part)
+        self.assertEqual(len(copied_model.properties), 3)
         self.assertEqual(len(copied_model._cached_children), 0)
 
         # tearDown
@@ -554,14 +531,12 @@ class TestCopyAndMoveParts(TestBetamax):
 
     def test_move_part_model(self):
         # setUp
-        name_of_part = 'Model to be copied'
-        original_model = self.project.model(name=name_of_part)
         model_target_parent = self.project.model('Bike')
-        clone_of_original_model = original_model.clone()
+        clone_of_original_model = self.model_to_be_copied.clone()
+        self.assertEqual(clone_of_original_model.name, 'CLONE - {}'.format(self.model_to_be_copied.name))
 
-        self.assertEqual(clone_of_original_model.name, 'CLONE - {}'.format(name_of_part))
-
-        clone_of_original_model.move(target_parent=model_target_parent, name='New part under bike',
+        clone_of_original_model.move(target_parent=model_target_parent,
+                                     name='New part under bike',
                                      include_children=True)
 
         moved_model = self.project.model(name='New part under bike')
@@ -576,7 +551,7 @@ class TestCopyAndMoveParts(TestBetamax):
     def test_copy_part_instance(self):
         # setUp
         name_of_part = 'Instance to be copied'
-        instance_to_be_copied = self.project.part(name=name_of_part)
+        instance_to_be_copied = self.model_to_be_copied.instances()[0]
         instance_target_parent = self.project.part('Bike')
         instance_to_be_copied.copy(target_parent=instance_target_parent, name='Copied instance', include_children=True)
 
@@ -586,34 +561,37 @@ class TestCopyAndMoveParts(TestBetamax):
         # testing
         self.assertTrue(copied_instance)
         self.assertEqual(copied_instance.name, 'Copied instance')
-        self.assertEqual(len(copied_instance.properties), 6)
-        self.assertEqual(copied_instance.property('Property single text').value, 'Instance text')
-        self.assertEqual(copied_instance.property('Property decimal number').value, 11)
-        self.assertEqual(copied_instance.property('Property single select list').value, 'c')
+        self.assertEqual(len(copied_instance.properties), len(self.model_to_be_copied.properties))
+        self.assertEqual(copied_instance.property('Property single text').value, None)
+        self.assertEqual(copied_instance.property('Property decimal number').value, 33)
+        self.assertEqual(copied_instance.property('Property single select list').value, None)
 
-        self.assertEqual(len(copied_instance._cached_children), 4)
-
-        exactly_1_part_instance = [part for part in copied_instance._cached_children if part.name == 'Exactly 1 part'][
-            0]
-        self.assertEqual(exactly_1_part_instance.property('Property boolean').value, False)
-
-        part_instance_1 = [part for part in copied_instance._cached_children if part.name == 'Part instance 1'][0]
-        self.assertEqual(len(part_instance_1._cached_children), 1)
+        self.assertEqual(len(copied_instance._cached_children), 2)
 
         # tearDown
         copied_instance.model().delete()
 
     def test_move_part_instance(self):
         # setUp
-        name_of_part = 'Part instance 3'
-        original_instance = self.project.part(name=name_of_part)
-        instance_target_parent = self.project.part('Bike')
-        clone_of_original_instance = original_instance.clone()
+        multiplicity_model = self.model_to_be_copied.add_model(
+            name="multiplicity part",
+            multiplicity=Multiplicity.ZERO_MANY
+        )
+        multiplicity_part1 = self.instance_to_be_copied.add(
+            model=multiplicity_model,
+            name="multiplicity part instance 1",
+        )
+        multiplicity_part2 = self.instance_to_be_copied.add(
+            model=multiplicity_model,
+            name="multiplicity part instance 2",
+        )
 
-        clone_of_original_instance.move(target_parent=instance_target_parent, name='Moved clone instance',
+        clone_of_original_instance = multiplicity_part2.clone()
+
+        moved_instance = clone_of_original_instance.move(target_parent=self.project.part('Bike'),
+                                        name='Moved clone instance',
                                         include_children=False)
 
-        moved_instance = self.project.part(name='Moved clone instance')
         moved_instance.populate_descendants()
 
         # testing
@@ -621,35 +599,34 @@ class TestCopyAndMoveParts(TestBetamax):
             self.project.model(name=clone_of_original_instance.name)
 
         self.assertTrue(moved_instance)
-        self.assertEqual(len(moved_instance.properties), 1)
-        self.assertEqual(moved_instance.property('Property multi-text').value, 'Yes yes oh yes')
+        self.assertEqual(len(moved_instance.properties), 0)
+        # self.assertEqual(moved_instance.property('Property multi-text').value, 'Yes yes oh yes')
 
         # tearDown
         moved_instance.model().delete()
 
     def test_copy_different_categories(self):
-        name_of_part = 'Model to be copied'
-        model = self.project.model(name=name_of_part)
         target_instance = self.project.part(name='Bike')
 
-        with self.assertRaises(IllegalArgumentError):
-            model.copy(target_parent=target_instance)
+        with self.assertRaisesRegex(IllegalArgumentError, 'must have the same category'):
+            self.model_to_be_copied.copy(target_parent=target_instance)
 
     def test_move_different_categories(self):
-        name_of_part = 'Model to be copied'
-        model = self.project.model(name=name_of_part)
         target_instance = self.project.part(name='Bike')
 
-        with self.assertRaises(IllegalArgumentError):
-            model.move(target_parent=target_instance)
+        with self.assertRaisesRegex(IllegalArgumentError, 'must have the same category'):
+            self.model_to_be_copied.move(target_parent=target_instance)
 
+    @skipIf(TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 1, expected to fail on new PIM2")
     def test_copy_under_descendants(self):
-        name_of_part = 'Model to be copied'
-        model = self.project.model(name_of_part)
-        target_model = self.project.part(name='Exactly 1 part')
+        target_model = self.project.create_model(
+            name='Exactly 1 part',
+            parent=self.base,
+            multiplicity=Multiplicity.ONE
+        )
 
         with self.assertRaises(IllegalArgumentError):
-            model.copy(target_parent=target_model)
+            self.model_to_be_copied.copy(target_parent=target_model)
 
 
 @skipIf(TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 1, expected to fail on new PIM2")

@@ -546,11 +546,17 @@ class Part(Base):
             if name:
                 if not isinstance(name, str):
                     raise IllegalArgumentError("Name of the part should be provided as a string")
-            r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
-                                      data=dict(name=name, properties=json.dumps(request_body), **kwargs),
-                                      params=dict(select_action=action))
-            if r.status_code != requests.codes.ok:  # pragma: no cover
-                raise APIError('{}: {}'.format(str(r), r.content))
+            response = self._client._request('PUT',
+                                             self._client._build_url('part', part_id=self.id),
+                                             params=dict(select_action=action),
+                                             data=dict(name=name, properties=json.dumps(request_body), **kwargs))
+
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise APIError("Could not update the part '{}', got: '{}'".format(self, response.content))
+
+            # update local properties (without a call)
+            self._json_data = response.json()['results'][0]
+            self.properties = [Property.create(p, client=self._client) for p in self._json_data['properties']]
         else:
             for property_name, property_value in update_dict.items():
                 self.property(property_name).value = property_value
@@ -711,12 +717,6 @@ class Part(Base):
             batch=batch)
         )
 
-        # for parent in descendants_flat_list:
-        #     parent._cached_children = list()
-        #     for child in descendants_flat_list:
-        #         if child.parent_id == parent.id:
-        #             parent._cached_children.append(child)
-
         self._cached_children = descendants_flat_list
 
     def clone(self, **kwargs):
@@ -792,7 +792,8 @@ class Part(Base):
                     for instance in instances_to_be_copied:
                         instance.populate_descendants()
                         move_part_instance(part_instance=instance, target_parent=parent_instance,
-                                           part_model=self, name=instance.name, include_children=include_children)
+                                           part_model=self, name=instance.name,
+                                           include_children=include_children)
             return copied_model
 
         elif self.category == Category.INSTANCE and target_parent.category == Category.INSTANCE:

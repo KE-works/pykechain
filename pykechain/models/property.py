@@ -4,7 +4,7 @@ import requests
 from jsonschema import validate
 from six import text_type, iteritems
 
-from pykechain.enums import PropertyType
+from pykechain.enums import PropertyType, Category
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models.base import Base
 from pykechain.models.validators.validator_schemas import options_json_schema
@@ -16,6 +16,10 @@ class Property(Base):
 
     :ivar type: The property type of the property. One of the types described in :class:`pykechain.enums.PropertyType`
     :type type: str
+    :ivar category: The category of the property, either `Category.MODEL` of `Category.INSTANCE`
+    :type category: str
+    :ivar model: the id of the model (not the model object)
+    :type model: str
     :ivar output: a boolean if the value is configured as an output (in an activity)
     :type output: bool
     :ivar part: The (parent) part in which this property is available
@@ -39,6 +43,7 @@ class Property(Base):
         self._value = json.get('value', None)
         self._options = json.get('options', None)
         self.type = json.get('property_type', None)
+        self.category = json.get('category')
 
         # set an empty internal validators variable
         self._validators = []  # type: List[Any]
@@ -114,6 +119,18 @@ class Property(Base):
         part_id = self._json_data['part']
 
         return self._client.part(pk=part_id, category=self._json_data['category'])
+
+    @property
+    def model_id(self):
+        """The model id of the property.
+
+        Returns None if the property is a model of its own. It will not return the model.
+        """
+        if self.category == Category.MODEL:
+            return None
+        else:
+            return self._json_data.get('model')
+
 
     def delete(self):
         # type () -> ()
