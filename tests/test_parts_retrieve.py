@@ -34,7 +34,7 @@ class TestPartRetrieve(TestBetamax):
 
     # test added in 1.12.7
     def test_get_single_instance_of_a_model_without_instances_raises_notfounderror(self):
-        catalog = self.project.model(name='Catalog container')
+        catalog = self.project.model(name__startswith='Catalog')
         model_without_instances = self.project.create_model(parent=catalog, name='model_without_instances',
                                                             multiplicity=Multiplicity.ZERO_ONE)
 
@@ -53,6 +53,6 @@ class TestPartRetrieve(TestBetamax):
         bike_model.populate_descendants()
         # testing
         self.assertEqual(len(bike_part._cached_children), 5)
-        self.assertEqual(len(bike_model._cached_children), 5)
+        self.assertEqual(len(bike_model._cached_children), 4)
 
 
