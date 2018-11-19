@@ -150,6 +150,99 @@ class Part2(Part):
         if name:
             self.name = name
 
+    def add_with_properties(self, model, name=None, update_dict=None, properties_fvalues=None, refresh=True, **kwargs):
+        """
+        Add a part as a child of this part and update its properties in one go.
+
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
+
+        With KE-chain 3 backends you may now provide a whole set of properties to update using a `properties_fvalues`
+        list of dicts. This will be merged with the `update_dict` optionally provided.
+        The `properties_fvalues` list is a list of dicts containing at least the `id` and a `value`, but other keys
+        may provided as well in the single update eg. `value_options`. Example::
+            `properties_fvalues = [ {"id":<uuid of prop>, "value":<new_prop_value>}, {...}, ...]`
+
+        .. versionchanged:: 3.0
+           Added compatibility with KE-chain 3 backend. You may provide properties_fvalues as kwarg.
+           Bulk option removed.
+
+        :param model: model of the part which to add a new instance, should follow the model tree in KE-chain
+        :type model: :class:`Part`
+        :param name: (optional) name provided for the new instance as string otherwise use the name of the model
+        :type name: basestring or None
+        :param update_dict: dictionary with keys being property names (str) or property_id (from the property models)
+                            and values being property values
+        :type update_dict: dict or None
+        :param properties_fvalues: (optional) keyword argument with raw list of properties update dicts
+        :type properties_fvalues: list of dict or None
+        :param refresh: refresh the part after succesfull completion, default to True
+        :type refresh: bool
+        :param kwargs: (optional) additional keyword arguments that will be passed inside the update request
+        :type kwargs: dict or None
+        :return: the newly created :class:`Part`
+        :raises NotFoundError: when the property name is not a valid property of this part
+        :raises APIError: in case an Error occurs
+        :raised IllegalArgumentError: in case of illegal arguments.
+
+        Examples
+        --------
+        >>> bike = client.scope('Bike Project').part('Bike')
+        >>> wheel_model = client.scope('Bike Project').model('Wheel')
+        >>> bike.add_with_properties(wheel_model, 'Wooden Wheel', {'Spokes': 11, 'Material': 'Wood'})
+
+        """
+        if self.category != Category.INSTANCE:
+            raise APIError("Part should be of category INSTANCE")
+
+        if properties_fvalues and not isinstance(properties_fvalues, list):
+            raise IllegalArgumentError("optional `properties_fvalues` need to be provided as a list of dicts")
+
+        name = name or model.name
+        url = self._client._build_url('parts2_new_instance')
+
+        properties_fvalues = properties_fvalues or list()
+
+        for prop_name_or_id, property_value in update_dict.items():
+            updated_p = dict(
+                value=property_value
+            )
+            if is_uuid(prop_name_or_id):
+                updated_p['id'] = prop_name_or_id
+            else:
+                updated_p['id'] = model.property(prop_name_or_id).id
+            properties_fvalues.append(updated_p)
+
+        from pykechain.client import API_EXTRA_PARAMS
+        r = self._client._request(
+            'POST', url,
+            params=API_EXTRA_PARAMS['parts2'],
+            json=dict(
+                name=name,
+                model_id=model.id,
+                parent_id=self.id,
+                properties_fvalues=properties_fvalues,
+                **kwargs
+            )
+        )
+
+        if r.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError('{}: {}'.format(str(r), r.content))
+
+        self._cached_children = None
+        if refresh:
+            self.children()
+
+        return Part2(r.json()['results'][0], client=self._client)
+
+
+        # else:  # do the old way
+        #     new_part = self.add(model, name=name)  # type: Part
+        #     new_part.update(update_dict=update_dict, bulk=bulk)
+        #     return new_part
+
     def update(self, name=None, update_dict=None, properties_fvalues=None, refresh=True, **kwargs):
         """
         Edit part name and property values in one go.
@@ -203,7 +296,7 @@ class Part2(Part):
         # dict(name=name, properties=json.dumps(update_dict))) with property ids:value
         # action = 'bulk_update_properties'  # not for KEC3
         if name and not isinstance(name, str):
-                raise IllegalArgumentError("Name of the part should be provided as a string")
+            raise IllegalArgumentError("Name of the part should be provided as a string")
 
         if properties_fvalues and not isinstance(properties_fvalues, list):
             raise IllegalArgumentError("optional `properties_fvalues` need to be provided as a list of dicts")
