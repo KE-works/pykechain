@@ -231,6 +231,7 @@ class Part2(Part):
         if r.status_code != requests.codes.created:  # pragma: no cover
             raise APIError('{}: {}'.format(str(r), r.content))
 
+        # ensure that cached children are reset such that next call the children are refreshed
         self._cached_children = None
         if refresh:
             self.children()
