@@ -30,12 +30,10 @@ class Activity2(Activity):
         self.classification = json.get('classification', None)
         self.activity_type = json.get('activity_type', None)
 
-    def refresh(self):
-        # type: () -> None
+    def refresh(self, *args, **kwargs):
         """Refresh the object in place."""
         from pykechain.client import API_EXTRA_PARAMS
-        src = self._client.reload(self, extra_params=API_EXTRA_PARAMS['activity'])
-        self.__dict__.update(src.__dict__)
+        super(Activity2, self).refresh(extra_params=API_EXTRA_PARAMS['activity'])
 
     #
     # predicates

@@ -3,7 +3,7 @@ from typing import Any  # noqa: F401
 import requests
 from six import text_type
 
-from pykechain.enums import Multiplicity, Category
+from pykechain.enums import Category
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import Part
 from pykechain.models.property2 import Property2
@@ -56,7 +56,7 @@ class Part2(Part):
         :param json: the json response to construct the :class:`Part` from
         :type json: dict
         """
-        super(Part, self).__init__(json, **kwargs)
+        super(Part2, self).__init__(json, **kwargs)
 
         self.category = json.get('category')
         self.parent_id = json.get('parent_id', None)
@@ -251,7 +251,7 @@ class Part2(Part):
         #     new_part.update(update_dict=update_dict, bulk=bulk)
         #     return new_part
 
-    def update(self, name=None, update_dict={}, properties_fvalues=None, refresh=True, **kwargs):
+    def update(self, name=None, update_dict=None, properties_fvalues=None, refresh=True, **kwargs):
         """
         Edit part name and property values in one go.
 
@@ -274,7 +274,7 @@ class Part2(Part):
         :type name: basestring or None
         :param update_dict: dictionary with keys being property names (str) or property ids (uuid)
                             and values being property values
-        :type update_dict: dict
+        :type update_dict: dict or None
         :param properties_fvalues: (optional) keyword argument with raw list of properties update dicts
         :type properties_fvalues: list of dict or None
         :param refresh: refresh the part after succesfull completion, default to True
@@ -310,6 +310,7 @@ class Part2(Part):
             raise IllegalArgumentError("optional `properties_fvalues` need to be provided as a list of dicts")
 
         properties_fvalues = properties_fvalues or list()
+        update_dict = update_dict or dict()
 
         for prop_name_or_id, property_value in update_dict.items():
             updated_p = dict(
