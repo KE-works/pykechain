@@ -30,7 +30,6 @@ class Property2(Property):
 
         return response.json()['results'][0]['value']
 
-
     @property
     def model_id(self):
         """The model id of the Property.
@@ -89,7 +88,6 @@ class Property2(Property):
         super(Property2, self).refresh(json=json,
                                        url=self._client._build_url('property2', property_id=self.id),
                                        extra_params=API_EXTRA_PARAMS['property2'])
-
 
     def edit(self, name=None, description=None, unit=None, options=None, **kwargs):
         """
@@ -158,9 +156,9 @@ class Property2(Property):
 
         from pykechain.client import API_EXTRA_PARAMS
         response = self._client._request('PUT',
-                                  self._client._build_url('property2', property_id=self.id),
-                                  params=API_EXTRA_PARAMS['property2'],
-                                  json=update_dict)
+                                         self._client._build_url('property2', property_id=self.id),
+                                         params=API_EXTRA_PARAMS['property2'],
+                                         json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Property ({})".format(response))

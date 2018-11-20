@@ -1,4 +1,4 @@
-from typing import Any, AnyStr, Union, List  # noqa: F401
+from typing import Any, Union, List  # noqa: F401
 
 import requests
 from jsonschema import validate
