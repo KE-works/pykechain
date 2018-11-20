@@ -52,7 +52,7 @@ class TestPartRetrieve(TestBetamax):
         bike_model = self.project.model(name='Bike')
         bike_model.populate_descendants()
         # testing
-        self.assertEqual(len(bike_part._cached_children), 5)
-        self.assertEqual(len(bike_model._cached_children), 4)
+        self.assertEqual(5, len(bike_part._cached_children))
+        self.assertEqual(4, len(bike_model._cached_children))
 
 

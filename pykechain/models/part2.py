@@ -359,7 +359,8 @@ class Part2(Part):
         .. versionchanged:: 3.0
            For KE-chain 3 backend the `Part.update()` method is used with a properties_fvalues list of dicts.
 
-        :param property_list: ordered list of property names (basestring) or property id's (uuid)
+        :param property_list: ordered list of property names (basestring) or property id's (uuid) or
+                              a `Property` object.
         :type property_list: list(basestring)
         :returns: the :class:`Part` with the reordered list of properties
         :raises APIError: when an Error occurs
@@ -398,6 +399,8 @@ class Part2(Part):
             updated_p = {'order': order}
             if is_uuid(prop_name_or_id):
                 updated_p['id'] = prop_name_or_id
+            elif isinstance(prop_name_or_id, Property2):
+                updated_p['id'] = prop_name_or_id.id
             else:
                 updated_p['id'] = self.property(prop_name_or_id).id
             properties_fvalues.append(updated_p)
