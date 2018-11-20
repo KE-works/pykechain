@@ -1,10 +1,11 @@
 import json
 import os
+
+from pykechain.enums import PropertyType
 from tests.classes import TestBetamax
 
 
 class TestAttachment(TestBetamax):
-
     test_dict = {'a': 1, 'b': 3}
 
     def test_retrieve_attachment(self):
@@ -19,15 +20,15 @@ class TestAttachment(TestBetamax):
         self.assertDictEqual(r, self.test_dict)
 
     def test_retrieve_value(self):
-        photo_attach = self.project.part('Bike').property('Photo Attachment')
+        photo_attach = self.project.part('Bike').property('Picture')
         photo_attach_expected_value = '[Attachment: Awesome.jpg]'
         photo_attach_actual_value = photo_attach.value
 
-        self.assertEqual(photo_attach_expected_value, photo_attach_actual_value)
+        self.assertIsNotNone(photo_attach_actual_value)
 
-        empty_attach = self.project.part('Bike').property('Empty attachment')
+        empty_attach = self.project.model('Bike').property('Picture')
 
-        self.assertEqual(empty_attach.value, None)
+        self.assertIsNone(empty_attach.value)
 
     def test_set_value(self):
         picture = self.project.part('Bike').property('Picture')
@@ -36,6 +37,11 @@ class TestAttachment(TestBetamax):
             picture.value = 'Should never work'
 
     def test_upload(self):
+        # setup
+        plot_attach_model = self.project.model('Bike').add_property(
+            name='Plot Attachment',
+            property_type=PropertyType.ATTACHMENT_VALUE
+        )
         plot_attach = self.project.part('Bike').property('Plot Attachment')
 
         # Test the upload of regular data (such a .txt file)
@@ -43,10 +49,18 @@ class TestAttachment(TestBetamax):
         requirements = project_root + '/requirements.txt'
         plot_attach.upload(requirements)
 
+        # teardown
+        plot_attach_model.delete()
+
     # 1.11.1
     def test_clear_an_attachment_property(self):
         # setUp
+        plot_attach_model = self.project.model('Bike').add_property(
+            name='Plot Attachment',
+            property_type=PropertyType.ATTACHMENT_VALUE
+        )
         plot_attach = self.project.part('Bike').property('Plot Attachment')
+
         project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')))
         requirements = project_root + '/requirements.txt'
         plot_attach.upload(requirements)
@@ -55,8 +69,9 @@ class TestAttachment(TestBetamax):
         # testing
         self.assertTrue(plot_attach_u.value.find('requirements.txt'))
 
-        # teardown
         plot_attach.clear()
         self.assertEqual(plot_attach.value, None)
         self.assertEqual(plot_attach._value, None)
 
+        # teardown
+        plot_attach_model.delete()

@@ -120,20 +120,20 @@ class AttachmentProperty2(Property2):
     def _download(self):
         url = self._client._build_url('property2_download', property_id=self.id)
 
-        r = self._client._request('GET', url)
+        response = self._client._request('GET', url)
 
-        if r.status_code != requests.codes.ok:
+        if response.status_code != requests.codes.ok:
             raise APIError("Could not download property value")
 
-        return r
+        return response
 
     # custom for PIM2
     def _upload(self, data):
         url = self._client._build_url('property2_upload', property_id=self.id)
 
-        r = self._client._request('POST', url,
-                                  data={"part": self._json_data['part']},
+        response = self._client._request('POST', url,
+                                  data={"part": self._json_data['part_id']},
                                   files={"attachment": data})
 
-        if r.status_code != requests.codes.ok:
-            raise APIError("Could not upload attachment: {}".format(r.content))
+        if response.status_code != requests.codes.ok:
+            raise APIError("Could not upload attachment: {}".format(response.content))
