@@ -132,8 +132,8 @@ class AttachmentProperty2(Property2):
         url = self._client._build_url('property2_upload', property_id=self.id)
 
         response = self._client._request('POST', url,
-                                  data={"part": self._json_data['part_id']},
-                                  files={"attachment": data})
+                                         data={"part": self._json_data['part_id']},
+                                         files={"attachment": data})
 
         if response.status_code != requests.codes.ok:
             raise APIError("Could not upload attachment: {}".format(response.content))
