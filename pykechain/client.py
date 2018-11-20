@@ -1,5 +1,5 @@
 import warnings
-from typing import Dict, Tuple, Optional, Any, List  # noqa: F401
+from typing import Dict, Tuple, Optional, Any, List  # noqa: F401 pragma: no cover
 
 import requests
 from envparse import env
@@ -924,7 +924,7 @@ class Client(object):
 
         return _users[0]
 
-    def team(self, name=None, id=None, is_hidden=False, **kwargs):
+    def team(self, name=None, pk=None, is_hidden=False, **kwargs):
         """
         Team of KE-chain.
 
@@ -932,8 +932,8 @@ class Client(object):
 
         :param name: (optional) team name to filter
         :type name: basestring or None
-        :param id: (optional) id of the user to filter
-        :type id: basestring or None
+        :param pk: (optional) id of the user to filter
+        :type pk: basestring or None
         :param is_hidden: (optional) boolean to show non-hidden or hidden teams or both (None) (default is non-hidden)
         :type is_hidden: bool or None
         :param kwargs: Additional filtering keyword=value arguments
@@ -942,7 +942,7 @@ class Client(object):
         :raises NotFoundError: when a user could not be found
         :raises MultipleFoundError: when more than a single user can be found
         """
-        _teams = self.teams(name=name, id=id, **kwargs)
+        _teams = self.teams(name=name, pk=pk, **kwargs)
 
         if len(_teams) == 0:
             raise NotFoundError("No team criteria matches")
@@ -951,7 +951,7 @@ class Client(object):
 
         return _teams[0]
 
-    def teams(self, name=None, id=None, is_hidden=False, **kwargs):
+    def teams(self, name=None, pk=None, is_hidden=False, **kwargs):
         """
         Teams of KE-chain.
 
@@ -959,8 +959,8 @@ class Client(object):
 
         :param name: (optional) teamname to filter
         :type name: basestring or None
-        :param id: (optional) id of the team to filter
-        :type id: basestring or None
+        :param pk: (optional) id of the team to filter
+        :type pk: basestring or None
         :param is_hidden: (optional) boolean to show non-hidden or hidden teams or both (None) (default is non-hidden)
         :type is_hidden: bool or None
         :param kwargs: Additional filtering keyword=value arguments
@@ -970,7 +970,7 @@ class Client(object):
         """
         request_params = {
             'name': name,
-            'id': id,
+            'id': pk,
             'is_hidden': is_hidden
         }
         if kwargs:
@@ -1300,7 +1300,6 @@ class Client(object):
             return Part2(response.json()['results'][0], client=self)
         else:
             return Part(response.json()['results'][0], client=self)
-
 
     def create_proxy_model(self, model, parent, name, multiplicity='ZERO_MANY', **kwargs):
         """Add this model as a proxy to another parent model.
