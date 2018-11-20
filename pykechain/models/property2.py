@@ -50,9 +50,9 @@ class Property2(Property):
         :returns: The :class:`Part` associated to this property
         :raises APIError: if the `Part` is not found
         """
-        part_id = self._json_data['part_id']
+        part_id = self._json_data.get('part_id')
 
-        return self._client.part(pk=part_id, category=self._json_data['category'])
+        return self._client.part(pk=part_id, category=self._json_data.get('category'))
 
     @classmethod
     def create(cls, json, **kwargs):
