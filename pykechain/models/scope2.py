@@ -34,7 +34,7 @@ class Scope2(Scope):
         """Team to which the scope is assigned."""
         team_dict = self._json_data.get('team_id_name')
         if team_dict and team_dict.get('id'):
-            return self._client.team(id=team_dict.get('id'))
+            return self._client.team(pk=team_dict.get('id'))
         else:
             return None
 
