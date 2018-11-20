@@ -670,29 +670,6 @@ class Client(object):
 
         return _parts[0]
 
-    def property(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Property
-        """Retrieve single KE-chain Property.
-
-        Uses the same interface as the :func:`properties` method but returns only a single pykechain :class:
-        `models.Property` instance.
-
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
-
-        :return: a single :class:`models.Property`
-        :raises NotFoundError: When no `Property` is found
-        :raises MultipleFoundError: When more than a single `Property` is found
-        """
-        _properties = self.properties(*args, **kwargs)
-
-        if len(_properties) == 0:
-            raise NotFoundError("No property fits criteria")
-        if len(_properties) != 1:
-            raise MultipleFoundError("Multiple properties fit criteria")
-
-        return _properties[0]
-
     def properties(self, name=None, pk=None, category=Category.INSTANCE, **kwargs):
         # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Property]
         """Retrieve properties.
@@ -719,14 +696,44 @@ class Client(object):
         if kwargs:
             request_params.update(**kwargs)
 
-        response = self._request('GET', self._build_url('properties'), params=request_params)
+        if self.match_app_version(label='gpim', version='>=2.0.0'):
+            request_params.update(API_EXTRA_PARAMS['properties2'])
+            response = self._request('GET', self._build_url('properties2'), params=request_params)
+        else:
+            response = self._request('GET', self._build_url('properties'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve properties")
+            raise NotFoundError("Could not retrieve properties: '{}'".format(response.content))
 
         data = response.json()
 
-        return [Property.create(p, client=self) for p in data['results']]
+        if self.match_app_version(label='gpim', version='>=2.0.0'):
+            return [Property2.create(p, client=self) for p in data['results']]
+        else:
+            return [Property.create(p, client=self) for p in data['results']]
+
+    def property(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Property
+        """Retrieve single KE-chain Property.
+
+        Uses the same interface as the :func:`properties` method but returns only a single pykechain :class:
+        `models.Property` instance.
+
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
+        :return: a single :class:`models.Property`
+        :raises NotFoundError: When no `Property` is found
+        :raises MultipleFoundError: When more than a single `Property` is found
+        """
+        _properties = self.properties(*args, **kwargs)
+
+        if len(_properties) == 0:
+            raise NotFoundError("No property fits criteria")
+        if len(_properties) != 1:
+            raise MultipleFoundError("Multiple properties fit criteria")
+
+        return _properties[0]
 
     def services(self, name=None, pk=None, scope=None, **kwargs):
         """

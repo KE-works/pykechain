@@ -96,6 +96,24 @@ class Scope2(Scope):
         """
         return self._client.part(*args, scope_id=self.id, **kwargs)
 
+    def properties(self, *args, **kwargs):
+        """Retrieve properties belonging to this scope.
+
+        .. versionadded: 3.0
+
+        See :class:`pykechain.Client.properties` for available parameters.
+        """
+        return self._client.properties(*args, scope_id=self.id, **kwargs)
+
+    def property(self, *args, **kwargs):
+        """Retrieve a single property belonging to this scope.
+
+        .. versionadded: 3.0
+
+        See :class:`pykechain.Client.property` for available parameters.
+        """
+        return self._client.property(*args, scope_id=self.id, **kwargs)
+
     def model(self, *args, **kwargs):
         """Retrieve a single model belonging to this scope.
 
