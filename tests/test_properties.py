@@ -2,19 +2,19 @@ from random import randrange
 
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models import Property
-from pykechain.enums import PropertyType
+from pykechain.enums import PropertyType, Category
 from tests.classes import TestBetamax
 
 
 class TestProperties(TestBetamax):
     def test_retrieve_properties(self):
-        properties = self.client.properties('Diameter')
+        properties = self.project.properties('Diameter')
 
         self.assertTrue(len(properties) > 0)
 
     def test_retrieve_properties_with_kwargs(self):
         # setUp
-        bike = self.client.part(name='Bike')
+        bike = self.project.part(name='Bike')
         properties_with_kwargs = self.client.properties(part_id=bike.id)
 
         self.assertTrue(properties_with_kwargs)
@@ -24,14 +24,14 @@ class TestProperties(TestBetamax):
             self.assertEqual(prop.part.id, bike.id)
 
     def test_retrieve_property(self):
-        prop = self.client.property(name='Test retrieve one property')
+        prop = self.project.property(name='Cheap?', category=Category.MODEL)
 
         self.assertTrue(prop)
 
     def test_get_property_by_name(self):
         bike = self.project.part('Bike')
         # retrieve the property Gears directly via an API call
-        gears_property = self.project._client.properties(name='Gears', category='INSTANCE')[0]
+        gears_property = self.project.properties(name='Gears', category=Category.INSTANCE)[0]
 
         self.assertEqual(bike.property('Gears'), gears_property)
 
@@ -39,7 +39,7 @@ class TestProperties(TestBetamax):
         bike = self.project.part('Bike')
         gears_id = bike.property('Gears').id
         # retrieve the property Gears directly via an API call
-        gears_property = self.project._client.properties(name='Gears', category='INSTANCE')[0]
+        gears_property = self.project.properties(name='Gears', category=Category.INSTANCE)[0]
 
         self.assertEqual(bike.property(gears_id), gears_property)
 
@@ -106,7 +106,9 @@ class TestProperties(TestBetamax):
 
         # Test whether an integer property model can be created with an incorrect default value
         with self.assertRaises(APIError):
-            bike_model.add_property(name='Integer', property_type='INT', default_value='Why is there a string here?')
+            bike_model.add_property(name='Integer',
+                                    property_type=PropertyType.INT_VALUE,
+                                    default_value='Why is there a string here?')
 
     # 1.7.2
     def test_get_partmodel_of_propertymodel(self):
