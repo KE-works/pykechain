@@ -193,7 +193,8 @@ class TestProperties(TestBetamax):
         bike_model = self.project.model(name='Bike')
 
         # create a property model for each property type
-        no_value_property_type = bike_model.add_property(name='Not correct property type', property_type='CHAR')
+        no_value_property_type = bike_model.add_property(name='Not correct property type',
+                                                         property_type=PropertyType.CHAR_VALUE)
         no_property_type_specified = bike_model.add_property(name='No property type specified')
         single_line_text = bike_model.add_property(name='Single line text', property_type=PropertyType.CHAR_VALUE)
         multi_line_text = bike_model.add_property(name='Multi line text', property_type=PropertyType.TEXT_VALUE)
