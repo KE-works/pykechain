@@ -65,6 +65,13 @@ class Part2(Part):
 
         self.properties = [Property2.create(p, client=self._client) for p in json['properties']]
 
+    def refresh(self, json=None, url=None, extra_params=None):
+        """Refresh the object in place."""
+        from pykechain.client import API_EXTRA_PARAMS
+        super(Part2, self).refresh(json=json,
+                                   url=self._client._build_url('part2', part_id=self.id),
+                                   extra_params=API_EXTRA_PARAMS['part2'])
+
     def model(self):
         """
         Retrieve the model of this `Part` as `Part`.
@@ -127,16 +134,16 @@ class Part2(Part):
 
         """
         update_dict = {'id': self.id}
-        if name:
+        if name is not None:
             if not isinstance(name, text_type):
                 raise IllegalArgumentError("name should be provided as a string")
             update_dict.update({'name': name})
-        if description:
+        if description is not None:
             if not isinstance(description, text_type):
                 raise IllegalArgumentError("description should be provided as a string")
             update_dict.update({'description': description})
 
-        if kwargs:  # pragma: no cover
+        if kwargs is not None:  # pragma: no cover
             update_dict.update(**kwargs)
 
         from pykechain.client import API_EXTRA_PARAMS

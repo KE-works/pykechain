@@ -7,18 +7,26 @@ class TestMultiReferenceProperty(TestBetamax):
     def setUp(self):
         super(TestMultiReferenceProperty, self).setUp()
 
+        # reference Part target (model and 1 instance)
         self.ref_target_model = self.project.model(name__startswith='Catalog').add_model(
             name='target part',
             multiplicity=Multiplicity.ONE_MANY
         )
         self.ref_target = self.ref_target_model.instances()[0]
 
+        # reference property model (with a value pointing to a target part model
         self.ref_model = self.project.model('Bike').add_property(
             name='Test reference property',
             property_type=PropertyType.REFERENCES_VALUE,
             default_value=self.ref_target_model
         )
+        # reference property instance (holding the value
         self.ref = self.project.part('Bike').property('Test reference property')
+
+    def tearDown(self):
+        self.ref_target_model.delete()
+        self.ref_model.delete()
+        super(TestMultiReferenceProperty, self).tearDown()
 
     def test_referencing_a_model(self):
         # setUp
@@ -110,10 +118,23 @@ class TestMultiReferenceProperty(TestBetamax):
     # new in 2.3
     def test_add_filters_to_property(self):
         # setUp
-        wheel_property_reference = self.project.model('Bike').property('Reference wheel')
-        wheel_model = self.project.model('Wheel')
-        diameter_property = wheel_model.property('Diameter')
-        spokes_property = wheel_model.property('Spokes')
+        # wheel_property_reference = self.project.model('Bike').property('Reference wheel')
+        # wheel_model = self.project.model('Wheel')
+
+        # self.ref_target_model # part model
+        # self.ref_target # part instance
+
+        diameter_property = self.ref_target_model.add_property(
+            name='Diameter',
+            property_type=PropertyType.FLOAT_VALUE,
+            default_value=15.0
+        )
+        spokes_property = self.ref_target_model.add_property(
+            name='Spokes',
+            property_type=PropertyType.INT_VALUE,
+            default_value=10
+        )
+
         prefilters = {'property_value': diameter_property.id + ":{}:lte".format(15)}
         propmodels_excl = [spokes_property.id]
         options = dict()
@@ -121,13 +142,10 @@ class TestMultiReferenceProperty(TestBetamax):
         options['propmodels_excl'] = propmodels_excl
 
         # testing
-        wheel_property_reference.edit(options=options)
-        wheel_property_reference = self.project.model('Bike').property('Reference wheel')
-        self.assertTrue('property_value' in wheel_property_reference._options['prefilters'] and
-                        wheel_property_reference._options['prefilters']['property_value'] ==
-                        diameter_property.id + ":{}:lte".format(15))
-        self.assertTrue(spokes_property.id in wheel_property_reference._options['propmodels_excl'])
+        self.ref_model.edit(options=options)
+        self.ref_model.refresh()
 
-        # tearDown
-        empty_options = {'prefilters': {}, 'propmodels_excl': []}
-        wheel_property_reference.edit(options=empty_options)
+        self.assertTrue('property_value' in self.ref_model._options['prefilters'] and
+                        self.ref_model._options['prefilters']['property_value'] ==
+                        diameter_property.id + ":{}:lte".format(15))
+        self.assertTrue(spokes_property.id in self.ref_model._options['propmodels_excl'])

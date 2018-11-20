@@ -331,21 +331,21 @@ class Activity(Base):
 
         """
         update_dict = {'id': self.id}
-        if name:
+        if name is not None:
             if isinstance(name, (str, text_type)):
                 update_dict.update({'name': name})
                 self.name = name
             else:
                 raise IllegalArgumentError('Name should be a string')
 
-        if description:
+        if description is not None:
             if isinstance(description, (str, text_type)):
                 update_dict.update({'description': description})
                 self.description = description
             else:
                 raise IllegalArgumentError('Description should be a string')
 
-        if start_date:
+        if start_date is not None:
             if isinstance(start_date, datetime.datetime):
                 if not start_date.tzinfo:
                     warnings.warn("The startdate '{}' is naive and not timezone aware, use pytz.timezone info. "
@@ -354,7 +354,7 @@ class Activity(Base):
             else:
                 raise IllegalArgumentError('Start date should be a datetime.datetime() object')
 
-        if due_date:
+        if due_date is not None:
             if isinstance(due_date, datetime.datetime):
                 if not due_date.tzinfo:
                     warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
@@ -363,7 +363,7 @@ class Activity(Base):
             else:
                 raise IllegalArgumentError('Due date should be a datetime.datetime() object')
 
-        if assignees:
+        if assignees is not None:
             if isinstance(assignees, list):
                 project = self._client.scope(pk=self.scope_id, status=None)
                 members_list = [member['username'] for member in project._json_data['members']]
@@ -374,7 +374,7 @@ class Activity(Base):
             else:
                 raise IllegalArgumentError('Assignees should be a list')
 
-        if status:
+        if status is not None:
             if isinstance(status, (str, text_type)) and status in ActivityStatus.values():
                 update_dict.update({'status': status})
             else:
