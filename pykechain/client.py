@@ -1379,9 +1379,14 @@ class Client(object):
 
         # because the references value only accepts a single 'model_id' in the default value, we need to convert this
         # to a single value from the list of values.
-        if property_type in (PropertyType.REFERENCE_VALUE, PropertyType.REFERENCES_VALUE) and \
-                isinstance(default_value, (list, tuple)) and default_value:
-            default_value = default_value[0]
+        if property_type in (PropertyType.REFERENCE_VALUE, PropertyType.REFERENCES_VALUE) and default_value:
+            if isinstance(default_value, (list, tuple)):
+                default_value = default_value[0]
+            if isinstance(default_value, Part):
+                default_value = default_value.id
+            if not is_uuid(default_value):
+                raise IllegalArgumentError("Please provide a valid default_value being a `Part` of category `MODEL` "
+                                           "or a model uuid, got: '{}'".format(default_value))
 
         if self.match_app_version(label="gpim", version=">=2.0.0"):
             data = dict(

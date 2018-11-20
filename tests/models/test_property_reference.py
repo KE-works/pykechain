@@ -1,63 +1,24 @@
+from pykechain.enums import PropertyType, Multiplicity
 from tests.classes import TestBetamax
 from unittest import skip
-
-
-class TestReferenceProperty(TestBetamax):
-    @skip('KE-chain deprecated property type')
-    def setUp(self):
-        super(TestReferenceProperty, self).setUp()
-
-        self.ref = self.project.part('Bike').property('Test reference property')
-
-    @skip('KE-chain deprecated property type')
-    def test_set_invalid_reference_value(self):
-        with self.assertRaises(ValueError):
-            self.ref.value = 0
-
-        with self.assertRaises(ValueError):
-            self.ref.value = False
-
-        with self.assertRaises(ValueError):
-            self.ref.value = [1, 2, 3]
-
-    @skip('KE-chain deprecated property type')
-    def test_set_reference_to_part(self):
-        wheel = self.project.part('Front Wheel')
-
-        self.ref.value = [wheel]
-
-        self.assertEqual(self.ref[0].value.name, 'Front Wheel')
-
-    @skip('KE-chain deprecated property type')
-    def test_set_reference_to_part_id(self):
-        wheel = self.project.part('Front Wheel')
-
-        self.ref.value = [wheel.id]
-
-        self.assertEqual(self.ref.value[0].name, 'Front Wheel')
-
-    @skip('KE-chain deprecated property type')
-    def test_delete_reference(self):
-        self.ref.value = None
-
-        self.assertIsNone(self.ref.value)
-
-    @skip('KE-chain deprecated property type')
-    def test_retrieve_parts(self):
-        reference_property_parts = self.ref.choices()
-        wheel_model = self.project.model('Wheel')
-        instances_of_wheel_model = self.project.parts(model=wheel_model)
-        self.assertEqual(len(reference_property_parts), len(instances_of_wheel_model))
-        self.assertEqual(instances_of_wheel_model._parts[0].id, reference_property_parts[0].id)
-        self.assertEqual(instances_of_wheel_model._parts[1].id, reference_property_parts[1].id)
 
 
 class TestMultiReferenceProperty(TestBetamax):
     def setUp(self):
         super(TestMultiReferenceProperty, self).setUp()
 
-        self.ref = self.project.part('Bike').property('Test multi reference property')
-        self.ref_model = self.project.model('Bike').property('Test multi reference property')
+        self.ref_target_model = self.project.model(name__startswith='Catalog').add_model(
+            name='target part',
+            multiplicity=Multiplicity.ONE_MANY
+        )
+        self.ref_target = self.ref_target_model.instances()[0]
+
+        self.ref_model = self.project.model('Bike').add_property(
+            name='Test reference property',
+            property_type=PropertyType.REFERENCES_VALUE,
+            default_value=self.ref_target_model
+        )
+        self.ref = self.project.part('Bike').property('Test reference property')
 
     def test_referencing_a_model(self):
         # setUp
@@ -70,8 +31,11 @@ class TestMultiReferenceProperty(TestBetamax):
     def test_referencing_multiple_instances_using_parts(self):
         # setUp
         wheel_model = self.project.model('Wheel')
+        self.ref_model.value = [wheel_model]
         wheel_instances = wheel_model.instances()
         wheel_instances_list = [instance for instance in wheel_instances]
+
+        # set ref value
         self.ref.value = wheel_instances_list
 
         # testing
@@ -83,8 +47,11 @@ class TestMultiReferenceProperty(TestBetamax):
     def test_referencing_multiple_instances_using_ids(self):
         # setUp
         wheel_model = self.project.model('Wheel')
+        self.ref_model.value = [wheel_model]
         wheel_instances = wheel_model.instances()
         wheel_instances_list = [instance.id for instance in wheel_instances]
+
+        # set ref value
         self.ref.value = wheel_instances_list
 
         # testing
@@ -113,8 +80,12 @@ class TestMultiReferenceProperty(TestBetamax):
         """because of #276 problem"""
         # setUp
         wheel_model = self.project.model('Wheel')
+        self.ref_model.value = [wheel_model]
+
         wheel_instances = wheel_model.instances()
         wheel_instances_list = [instance.id for instance in wheel_instances]
+
+        # set ref value
         self.ref.value = wheel_instances_list
 
         # testing
@@ -134,7 +105,7 @@ class TestMultiReferenceProperty(TestBetamax):
     def test_multi_ref_choices(self):
         # testing
         possible_options = self.ref.choices()
-        self.assertEqual(2, len(possible_options))
+        self.assertEqual(1, len(possible_options))
 
     # new in 2.3
     def test_add_filters_to_property(self):
