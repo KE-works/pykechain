@@ -2,7 +2,6 @@ from typing import Any  # noqa: F401
 
 import requests
 
-from pykechain.enums import Multiplicity
 from pykechain.exceptions import APIError, NotFoundError
 from pykechain.models import Scope
 
@@ -42,8 +41,8 @@ class Scope2(Scope):
         """Refresh the object in place."""
         from pykechain.client import API_EXTRA_PARAMS
         super(Scope2, self).refresh(json=json,
-                                   url=self._client._build_url('scope2', scope_id=self.id),
-                                   extra_params=API_EXTRA_PARAMS['scope2'])
+                                    url=self._client._build_url('scope2', scope_id=self.id),
+                                    extra_params=API_EXTRA_PARAMS['scope2'])
 
     def _update_scope_project_team(self, select_action, user, user_type):
         """
@@ -94,7 +93,7 @@ class Scope2(Scope):
 
         See :class:`pykechain.Client.parts` for available parameters.
         """
-        return self._client.parts(*args,scope_id=self.id, **kwargs)
+        return self._client.parts(*args, scope_id=self.id, **kwargs)
 
     def part(self, *args, **kwargs):
         """Retrieve a single part belonging to this scope.

@@ -254,8 +254,6 @@ def move_part_instance(part_instance, target_parent, part_model, name=None, incl
         if part_instance._cached_children is None:
             part_instance.populate_descendants()
 
-        assert part_instance._cached_children is not None, "wooot: pi {}, mi {}".format(part_instance, moved_instance)
-
         for sub_instance in part_instance._cached_children:
             move_part_instance(part_instance=sub_instance, target_parent=moved_instance,
                                part_model=sub_instance.model(),
