@@ -38,6 +38,13 @@ class Scope2(Scope):
         else:
             return None
 
+    def refresh(self, json=None, url=None, extra_params=None):
+        """Refresh the object in place."""
+        from pykechain.client import API_EXTRA_PARAMS
+        super(Scope2, self).refresh(json=json,
+                                   url=self._client._build_url('scope2', scope_id=self.id),
+                                   extra_params=API_EXTRA_PARAMS['scope2'])
+
     def _update_scope_project_team(self, select_action, user, user_type):
         """
         Update the Project Team of the Scope. Updates include addition or removing of managers or members.

@@ -30,6 +30,7 @@ class Property2(Property):
 
         return response.json()['results'][0]['value']
 
+
     @property
     def model_id(self):
         """The model id of the Property.
@@ -82,6 +83,14 @@ class Property2(Property):
         else:
             return Property2(json, **kwargs)
 
+    def refresh(self, json=None, url=None, extra_params=None):
+        """Refresh the object in place."""
+        from pykechain.client import API_EXTRA_PARAMS
+        super(Property2, self).refresh(json=json,
+                                       url=self._client._build_url('property2', property_id=self.id),
+                                       extra_params=API_EXTRA_PARAMS['property2'])
+
+
     def edit(self, name=None, description=None, unit=None, options=None, **kwargs):
         """
         Edit the details of a property (model).
@@ -99,7 +108,7 @@ class Property2(Property):
         :return: None
         :raises APIError: When unable to edit the property
         :raises IllegalArgumentError: when the type of the input is provided incorrect.
-
+`
         Examples
         --------
         >>> front_fork = project.part('Front Fork')
@@ -121,28 +130,28 @@ class Property2(Property):
 
         """
         update_dict = {'id': self.id}
-        if name:
+        if name is not None:
             if not isinstance(name, (str, text_type)):
                 raise IllegalArgumentError(
                     "name should be provided as a string, was provided as '{}'".format(type(name)))
             update_dict.update({'name': name})
             self.name = name
-        if description:
+        if description is not None:
             if not isinstance(description, (str, text_type)):
                 raise IllegalArgumentError("description should be provided as a string, was provided as '{}'".
                                            format(type(description)))
             update_dict.update({'description': description})
-        if unit:
+        if unit is not None:
             if not isinstance(unit, (str, text_type)):
                 raise IllegalArgumentError("unit should be provided as a string, was provided as '{}'".
                                            format(type(unit)))
             update_dict.update({'unit': unit})
-        if options:
+        if options is not None:
             if not isinstance(options, dict):
                 raise IllegalArgumentError("options should be provided as a dict, was provided as '{}'".
                                            format(type(options)))
-            update_dict.update({'options': options})
-        if kwargs:
+            update_dict.update({'value_options': options})
+        if kwargs is not None:
             # process the other kwargs in py27 style.
             for key, value in iteritems(kwargs):
                 update_dict[key] = value

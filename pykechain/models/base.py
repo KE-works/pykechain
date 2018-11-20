@@ -22,8 +22,18 @@ class Base(object):
         else:
             return self == other
 
-    def refresh(self, json=None):
-        # type: (Optional[Any]) -> None
-        """Refresh the object in place."""
-        src = self._client.reload(self)
-        self.__dict__.update(src.__dict__)
+    def refresh(self, json=None, url=None, extra_params=None):
+        """Refresh the object in place.
+
+        :param json: (optional) json dictionary from a response from the server, will re-init object
+        :type json: None or dict
+        :param url: (optional) url to retrieve the object again, typically an identity url api/<service>/id
+        :type url: None or basestring
+        :param extra_params: (optional) additional paramenters (query params) for the request eg dict(fields='__all__')
+        :type extra_params: None or dict
+        """
+        if json and isinstance(json, dict):
+            self.__init__(json=json, client=self._client)
+        else:
+            src = self._client.reload(self, url=url, extra_params=extra_params)
+            self.__dict__.update(src.__dict__)

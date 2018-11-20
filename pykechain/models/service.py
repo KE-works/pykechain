@@ -62,20 +62,20 @@ class Service(Base):
         :raises APIError: if the service could not be updated.
         """
         update_dict = {'id': self.id}
-        if name:
+        if name is not None:
             if not isinstance(name, str):
                 raise IllegalArgumentError("name should be provided as a string")
             update_dict.update({'name': name})
-        if description:
+        if description is not None:
             if not isinstance(description, str):
                 raise IllegalArgumentError("description should be provided as a string")
             update_dict.update({'description': description})
-        if version:
+        if version is not None:
             if not isinstance(version, str):
                 raise IllegalArgumentError("description should be provided as a string")
             update_dict.update({'script_version': version})
 
-        if kwargs:  # pragma: no cover
+        if kwargs is not None:  # pragma: no cover
             update_dict.update(**kwargs)
         response = self._client._request('PUT',
                                          self._client._build_url('service', service_id=self.id), json=update_dict)

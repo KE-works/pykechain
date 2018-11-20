@@ -223,28 +223,28 @@ class Property(Base):
 
         """
         update_dict = {'id': self.id}
-        if name:
+        if name is not None:
             if not isinstance(name, (str, text_type)):
                 raise IllegalArgumentError(
                     "name should be provided as a string, was provided as '{}'".format(type(name)))
             update_dict.update({'name': name})
             self.name = name
-        if description:
+        if description is not None:
             if not isinstance(description, (str, text_type)):
                 raise IllegalArgumentError("description should be provided as a string, was provided as '{}'".
                                            format(type(description)))
             update_dict.update({'description': description})
-        if unit:
+        if unit is not None:
             if not isinstance(unit, (str, text_type)):
                 raise IllegalArgumentError("unit should be provided as a string, was provided as '{}'".
                                            format(type(unit)))
             update_dict.update({'unit': unit})
-        if options:
+        if options is not None:
             if not isinstance(options, dict):
                 raise IllegalArgumentError("options should be provided as a dict, was provided as '{}'".
                                            format(type(options)))
             update_dict.update({'options': options})
-        if kwargs:
+        if kwargs is not None:
             # process the other kwargs in py27 style.
             for key, value in iteritems(kwargs):
                 update_dict[key] = value

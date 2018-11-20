@@ -315,7 +315,7 @@ class Client(object):
             else:
                 raise NotFoundError("No version found on the app '{}'".format(target_app[0].get('app')))
 
-    def reload(self, obj, extra_params=None):
+    def reload(self, obj, url=None, extra_params=None):
         """Reload an object from server. The original object is immutable and it will return a new object.
 
         The object will be refetched from KE-chain. If the object has a 'url' field the url will be taken from
@@ -326,12 +326,14 @@ class Client(object):
 
         :param obj: object to reload
         :type obj: :py:obj:`obj`
+        :param url: (optional) url to use
+        :type url: basestring or None
         :param extra_params: additional object specific extra query string params (eg for activity)
         :type extra_params: dict
         :return: a new object
         :raises NotFoundError: if original object is not found or deleted in the mean time
         """
-        if not obj._json_data.get('url'):
+        if not url and not obj._json_data.get('url'):
             # build the url from the class name (in lower case) `obj.__class__.__name__.lower()`
             # get the id from the `obj.id` which is normally a keyname `<class_name>_id` (without the '2' if so)
             url = self._build_url(obj.__class__.__name__.lower(),
@@ -339,6 +341,8 @@ class Client(object):
             extra_api_params = API_EXTRA_PARAMS.get(obj.__class__.__name__.lower())
             # add the additional API params to the already provided extra params if they are provided.
             extra_params = extra_params.update(**extra_api_params) if extra_params else extra_api_params
+        elif url:
+            url = url
         else:
             url = obj._json_data.get('url')
 
