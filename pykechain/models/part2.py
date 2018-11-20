@@ -1,6 +1,7 @@
 from typing import Any  # noqa: F401
 
 import requests
+from six import text_type
 
 from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
@@ -127,11 +128,11 @@ class Part2(Part):
         """
         update_dict = {'id': self.id}
         if name:
-            if not isinstance(name, str):
+            if not isinstance(name, text_type):
                 raise IllegalArgumentError("name should be provided as a string")
             update_dict.update({'name': name})
         if description:
-            if not isinstance(description, str):
+            if not isinstance(description, text_type):
                 raise IllegalArgumentError("description should be provided as a string")
             update_dict.update({'description': description})
 
@@ -210,9 +211,9 @@ class Part2(Part):
                 value=property_value
             )
             if is_uuid(prop_name_or_id):
-                updated_p['id'] = prop_name_or_id
+                updated_p['model_id'] = prop_name_or_id
             else:
-                updated_p['id'] = model.property(prop_name_or_id).id
+                updated_p['model_id'] = model.property(prop_name_or_id).id
             properties_fvalues.append(updated_p)
 
         from pykechain.client import API_EXTRA_PARAMS
@@ -238,13 +239,12 @@ class Part2(Part):
 
         return Part2(r.json()['results'][0], client=self._client)
 
-
         # else:  # do the old way
         #     new_part = self.add(model, name=name)  # type: Part
         #     new_part.update(update_dict=update_dict, bulk=bulk)
         #     return new_part
 
-    def update(self, name=None, update_dict=None, properties_fvalues=None, refresh=True, **kwargs):
+    def update(self, name=None, update_dict={}, properties_fvalues=None, refresh=True, **kwargs):
         """
         Edit part name and property values in one go.
 
@@ -296,7 +296,7 @@ class Part2(Part):
         """
         # dict(name=name, properties=json.dumps(update_dict))) with property ids:value
         # action = 'bulk_update_properties'  # not for KEC3
-        if name and not isinstance(name, str):
+        if name and not isinstance(name, text_type):
             raise IllegalArgumentError("Name of the part should be provided as a string")
 
         if properties_fvalues and not isinstance(properties_fvalues, list):
@@ -309,20 +309,24 @@ class Part2(Part):
                 value=property_value
             )
             if is_uuid(prop_name_or_id):
-                updated_p['id'] = prop_name_or_id
+                updated_p['instance_id'] = prop_name_or_id
             else:
-                updated_p['id'] = self.property(prop_name_or_id).id
+                updated_p['instance_id'] = self.property(prop_name_or_id).id
             properties_fvalues.append(updated_p)
+
+        payload_json = dict(
+            properties_fvalues=properties_fvalues,
+            **kwargs
+        )
+
+        if name:
+            payload_json.update(name=name)
 
         from pykechain.client import API_EXTRA_PARAMS
         response = self._client._request(
             'PUT', self._client._build_url('part2', part_id=self.id),
             params=API_EXTRA_PARAMS['part2'],
-            json=dict(
-                name=name,
-                properties_fvalues=properties_fvalues,
-                **kwargs
-            )
+            json=payload_json
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
@@ -343,3 +347,59 @@ class Part2(Part):
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete part: {} with id {}: ({})".format(self.name, self.id, response))
+
+    def order_properties(self, property_list=None):
+        """
+        Order the properties of a part model using a list of property objects or property names or property id's.
+
+        For KE-chain 3 backends, the order can also directly provided as a unique integer for each property in the
+        `Part.update()` function if you provide the `properties_fvalues` list of dicts yourself. For more information
+        please refer to the `Part2.update()` documentation.
+
+        .. versionchanged:: 3.0
+           For KE-chain 3 backend the `Part.update()` method is used with a properties_fvalues list of dicts.
+
+        :param property_list: ordered list of property names (basestring) or property id's (uuid)
+        :type property_list: list(basestring)
+        :returns: the :class:`Part` with the reordered list of properties
+        :raises APIError: when an Error occurs
+        :raises IllegalArgumentError: When provided a wrong argument
+
+        Examples
+        --------
+        >>> front_fork = project.model('Front Fork')
+        >>> front_fork.order_properties(['Material', 'Height (mm)', 'Color'])
+
+        >>> front_fork = project.model('Front Fork')
+        >>> material = front_fork.property('Material')
+        >>> height = front_fork.property('Height (mm)')
+        >>> color = front_fork.property('Color')
+        >>> front_fork.order_properties([material, height, color])
+
+        Alternatively you may use the `Part.update()` function to directly alter the order of the properties and
+        eventually even more (defaut) model values.
+
+        >>> front_fork.update(properties_fvalues= [{'id': material.id, 'order':10},
+        ...                                        {'id': height.id, 'order': 20, 'value':13.37}
+        ...                                        {'id': color.id, 'order':  30, 'name': 'Colour'}])
+
+        """
+        # in KEC3 backend we can (re)use the part update endpoint with a properties_fvalues list of dicts
+        # properties_fvalues = [ {'model_id':<uuid>, 'order': <int> ]
+
+        if self.category != Category.MODEL:
+            raise APIError("Part should be of category MODEL")
+        if not isinstance(property_list, list):
+            raise IllegalArgumentError('Expected a list of strings or Property() objects, got a {} object'.
+                                       format(type(property_list)))
+
+        properties_fvalues = list()
+        for order, prop_name_or_id in enumerate(property_list):
+            updated_p = {'order': order}
+            if is_uuid(prop_name_or_id):
+                updated_p['id'] = prop_name_or_id
+            else:
+                updated_p['id'] = self.property(prop_name_or_id).id
+            properties_fvalues.append(updated_p)
+
+        return self.update(properties_fvalues=properties_fvalues)
