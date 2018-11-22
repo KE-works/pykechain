@@ -371,12 +371,12 @@ class Activity2(Activity):
 
         url = self._client._build_url('activity', activity_id=self.id)
 
-        r = self._client._request('PUT', url, json=update_dict)
+        response = self._client._request('PUT', url, json=update_dict)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Activity ({})".format(r))
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Activity ({})".format(response))
 
-        self.refresh()
+        self.refresh(json=response.json().get('results')[0])
 
     def customize(self, config):  # noqa: D401
         """Method is deprecated."""
@@ -410,13 +410,15 @@ class Activity2(Activity):
                 not all([p._json_data.get('category') == Category.MODEL for p in outputs]):
             raise IllegalArgumentError('All Properties need to be of category MODEL to configure a task')
 
-        r = self._client._request('PUT', url, json={
+        response = self._client._request('PUT', url, json={
             'inputs': _get_propertyset(inputs),
             'outputs': _get_propertyset(outputs)
         })
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
+        if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not configure activity")
+
+        self.refresh(json=response.json().get('results')[0])
 
     def download_as_pdf(self, target_dir=None, pdf_filename=None, paper_size=PaperSize.A4,
                         paper_orientation=PaperOrientation.PORTRAIT, include_appendices=False):

@@ -78,7 +78,7 @@ class TestClient(TestCase):
 
 class TestClientLive(TestBetamax):
     def test_login(self):
-        self.assertTrue(self.client.parts())
+        self.assertTrue(self.project.parts())
 
     def test_no_login(self):
         self.client.login('wrong', 'user')

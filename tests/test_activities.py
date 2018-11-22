@@ -252,8 +252,8 @@ class TestActivities(TestBetamax):
         task = self.project.activity(name='Subprocess')  # type: Activity
         siblings = task.siblings()
 
-        self.assertTrue(task.id in [sibling.id for sibling in siblings])
-        self.assertTrue(len(siblings) == 7)
+        self.assertIn(task.id, [sibling.id for sibling in siblings])
+        self.assertEqual(4, len(siblings))
 
     def test_retrieve_part_associated_to_activities(self):
         task = self.project.activity('Specify wheel diameter')
@@ -261,7 +261,7 @@ class TestActivities(TestBetamax):
 
         for part in parts:
             self.assertIsInstance(part, Part)
-            self.assertTrue(part.category == Category.INSTANCE)
+            self.assertEqual(part.category, Category.INSTANCE)
 
     def test_retrieve_part_models_associated_to_activities(self):
         task = self.project.activity('Specify wheel diameter')
@@ -269,7 +269,7 @@ class TestActivities(TestBetamax):
 
         for model in models:
             self.assertIsInstance(model, Part)
-            self.assertTrue(model.category == Category.MODEL)
+            self.assertEqual(model.category, Category.MODEL)
             if model.name == 'Bike':
                 self.assertTrue(not model.property('Gears').output)
             elif model.name == 'Front Fork':
@@ -281,11 +281,11 @@ class TestActivities(TestBetamax):
 
         for part in models:
             self.assertIsInstance(part, Part)
-            self.assertTrue(part.category == Category.MODEL)
+            self.assertEqual(part.category, Category.MODEL)
 
         for part in parts:
             self.assertIsInstance(part, Part)
-            self.assertTrue(part.category == Category.INSTANCE)
+            self.assertEqual(part.category, Category.INSTANCE)
 
     # in 1.12
 
@@ -293,8 +293,8 @@ class TestActivities(TestBetamax):
         task = self.project.activity(name='SubTask')  # type: Activity
         siblings = task.siblings(name__icontains='sub')
 
-        self.assertTrue(task.id in [sibling.id for sibling in siblings])
-        self.assertTrue(len(siblings) == 2)
+        self.assertIn(task.id, [sibling.id for sibling in siblings])
+        self.assertEqual(1, len(siblings))
 
     # in 1.12.9
     def test_activity_without_scope_id_will_fix_itself(self):
@@ -312,51 +312,6 @@ class TestActivities(TestBetamax):
 
 class TestActivitiesCustomisation(TestBetamax):
     # updated and new in 1.9
-    @skip('KE-chain deprecated the inspector components')
-    def test_customize_activity_with_widget_config(self):
-        # Retrieve the activity to be customized
-        activity_to_costumize = self.project.activity('Customized task')
-
-        # Create the widget config it should have now
-        widget_config = {'components': [{'xtype': 'superGrid', 'filter':
-            {'parent': 'e5106946-40f7-4b49-ae5e-421450857911',
-             'model': 'edc8eba0-47c5-415d-8727-6d927543ee3b'}}]}
-
-        # Customize it with a config
-        activity_to_costumize.customize(
-            config=widget_config)
-
-        # Re-retrieve it
-        activity_to_costumize = self.project.activity('Customized task')
-
-        # Check whether it's widget config has changed
-        self.assertTrue(activity_to_costumize._json_data['widget_config']['config'] != '{}')
-
-        # Change it back to an empty config
-        activity_to_costumize.customize(config={})
-
-    @skip('KE-chain deprecated the inspector components')
-    def test_customize_new_activity(self):
-        # Create the activity to be freshly customized
-        new_task = self.project.create_activity('New task')
-
-        # Customize it with a config
-        new_task.customize(
-            config={"components": [{
-                "xtype": "superGrid",
-                "filter": {
-                    "parent": "e5106946-40f7-4b49-ae5e-421450857911",
-                    "model": "edc8eba0-47c5-415d-8727-6d927543ee3b"}}]})
-
-        # Retrieve it again
-        new_task = self.project.activity('New task')
-
-        # Check whether it's widget config has changed
-        self.assertTrue(new_task._json_data['widget_config']['config'] is not None)
-
-        # Delete it
-        new_task.delete()
-
     def test_wrong_customization(self):
         # Set up
         new_task = self.project.create_activity('Task for wrong customization')
@@ -520,23 +475,26 @@ class TestActivity2SpecificTests(TestBetamax):
         specify_wd = self.project.activity('Specify wheel diameter')
 
         self.assertTrue(specify_wd.is_configured())
-        self.assertFalse(specify_wd.is_customized())
+        self.assertTrue(specify_wd.is_customized())  # always has a metapanel widget
 
     def test_unconfigured_subtask_activity2_is_not_configured(self):
         subprocess_subtask = self.project.activity('SubTask')
 
-        self.assertFalse(subprocess_subtask.is_configured())
-        self.assertFalse(subprocess_subtask.is_customized())
+        self.assertTrue(subprocess_subtask.is_configured())  # is configured in bikefixture
+        self.assertTrue(subprocess_subtask.is_customized())  # always has a metapanel widget
 
     def test_activity2_is_configured_and_customised(self):
-        customized_task = self.project.activity('Customized task')
+        customized_task = self.project.activity('Task - Form')
 
         self.assertTrue(customized_task.is_configured())
-        self.assertTrue(customized_task.is_customized())
+        self.assertTrue(customized_task.is_customized())  # always has a metapanel widget
+
+
+class TestActivityDownloadAsPDF(TestBetamax):
 
     def test_activity2_download_as_pdf(self):
         # setUp
-        activity_name = 'Demo - PDF exporting'
+        activity_name = 'Task - Form'
         activity = self.project.activity(name=activity_name)
 
         # testing
