@@ -4,9 +4,10 @@ from typing import Dict, Tuple, Optional, Any, List  # noqa: F401 pragma: no cov
 import requests
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
+from six import text_type
 
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
-    WIMCompatibleActivityTypes, PropertyType
+    WIMCompatibleActivityTypes, PropertyType, TeamRoles
 from pykechain.models import Part2, Property2
 from pykechain.models.activity2 import Activity2
 from pykechain.models.scope2 import Scope2
@@ -406,7 +407,7 @@ class Client(object):
         response = self._request('GET', url=url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve scopes")
+            raise NotFoundError("Could not retrieve scopes: '{}'".format(response.content))
 
         data = response.json()
 
@@ -1502,23 +1503,58 @@ class Client(object):
 
         return service
 
-    # def create_team(self, name, user, description=None, options=None, is_hidden=False):
-    #     """
-    #     Create a team.
-    #
-    #     ..versionadded: 2.4.0
-    #
-    #     To create a team, a :class:`User` (id or object) need to be passed for it to become owner. As most pykechain
-    #     enabled script are running inside the SIM environment in KE-chain, the user having the current connection
-    #     to the API is often not the user that needs to be part of the team to be created. The user provided will
-    #     become 'owner' of the team.
-    #
-    #     :param name: name of the team
-    #     :param user: user that will become owner of the team
-    #     :param description: (optional) description of the team
-    #     :param options: (optional) provide additional team advanced options (as dict)
-    #     :param is_hidden: (optional) if the team needs to be hidden (defaults to false)
-    #     :return: the created :class:`models.Team`
-    #     :raises IllegalArgumentError: When the provided arguments are incorrect
-    #     """
-    #     raise NotImplementedError
+    def create_team(self, name, user, description=None, options=None, is_hidden=False):
+        """
+        Create a team.
+
+        ..versionadded: 2.4.0
+
+        To create a team, a :class:`User` (id or object) need to be passed for it to become owner. As most pykechain
+        enabled script are running inside the SIM environment in KE-chain, the user having the current connection
+        to the API is often not the user that needs to be part of the team to be created. The user provided will
+        become 'owner' of the team.
+
+        :param name: name of the team
+        :param user: user that will become owner of the team
+        :param description: (optional) description of the team
+        :param options: (optional) provide additional team advanced options (as dict)
+        :param is_hidden: (optional) if the team needs to be hidden (defaults to false)
+        :return: the created :class:`models.Team`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
+        """
+        if not isinstance(name, text_type):
+            raise IllegalArgumentError('`name` should be string')
+        if not isinstance(description, text_type):
+            raise IllegalArgumentError('`description` should be string')
+        if options and not isinstance(options, dict):
+            raise IllegalArgumentError('`options` should be a dictionary')
+        if is_hidden and not isinstance(is_hidden, bool):
+            raise IllegalArgumentError('`is_hidden` should be a boolean')
+        if isinstance(user, text_type):
+            user = self.user(username=user)
+        elif isinstance(user, int):
+            user = self.user(pk=user)
+        elif isinstance(user, User):
+            pass
+        else:
+            raise IllegalArgumentError('the `user` is not of a type `User`, a `username` or a user id')
+
+        data = dict(
+            name=name,
+            description=description,
+            options=options,
+            is_hidden=is_hidden
+        )
+
+        url = self._build_url('teams')
+        response = self._request('POST', url, json=data)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create a team ({})".format((response, response.json())))
+
+        the_team = Team(response.json().get('results')[0])
+
+        the_team.add_members([user], role=TeamRoles.OWNER)
+        team_members = the_team.members()
+        the_team.remove_members([u for u in team_members if u!=user])
+

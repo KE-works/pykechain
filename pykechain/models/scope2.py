@@ -83,8 +83,8 @@ class Scope2(Scope):
 
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Scope ({})".format(r))
-        else:
-            self._json_data = r.json().get('results') and r.json().get('results')[0]
+
+        self.refresh(json=r.json().get('results')[0])
 
     def parts(self, *args, **kwargs):
         """Retrieve parts belonging to this scope.

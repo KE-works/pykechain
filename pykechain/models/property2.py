@@ -9,8 +9,33 @@ from pykechain.models.validators.validator_schemas import options_json_schema
 
 
 class Property2(Property):
+    """A virtual object representing a KE-chain property.
+
+    .. versionadded: 3.0
+       This is a `Property` to communicate with a KE-chain 3 backend.
+
+    :ivar type: The property type of the property. One of the types described in :class:`pykechain.enums.PropertyType`
+    :type type: str
+    :ivar category: The category of the property, either `Category.MODEL` of `Category.INSTANCE`
+    :type category: str
+    :ivar model: the id of the model (not the model object)
+    :type model: str
+    :ivar output: a boolean if the value is configured as an output (in an activity)
+    :type output: bool
+    :ivar part: The (parent) part in which this property is available
+    :type part: :class:`Part`
+    :ivar value: the property value, can be set as well as property
+    :type value: Any
+    :ivar validators: the list of validators that are available in the property
+    :type validators: list(PropertyValidator)
+    :ivar is_valid: if the property conforms to the validators
+    :type is_valid: bool
+    :ivar is_invalid: if the property does not conform to the validator
+    :type is_invalid: bool
+    """
 
     def __init__(self, json, **kwargs):
+        """Construct a Property from a json object."""
         super(Property2, self).__init__(json, **kwargs)
         self._options = json.get('value_options', None)
 
@@ -32,7 +57,7 @@ class Property2(Property):
 
     @property
     def model_id(self):
-        """The model id of the Property.
+        """Model id of the Property.
 
         Returns None if the property is a model of its own. It will not return the model object, only the uuid.
 
@@ -56,7 +81,6 @@ class Property2(Property):
 
     @classmethod
     def create(cls, json, **kwargs):
-        # type: (dict, **Any) -> Property
         """Create a property based on the json data.
 
         This method will attach the right class to a property, enabling the use of type-specific methods.
@@ -90,8 +114,7 @@ class Property2(Property):
                                        extra_params=API_EXTRA_PARAMS['property2'])
 
     def edit(self, name=None, description=None, unit=None, options=None, **kwargs):
-        """
-        Edit the details of a property (model).
+        """Edit the details of a property (model).
 
         :param name: (optional) new name of the property to edit
         :type name: basestring or None
@@ -106,7 +129,7 @@ class Property2(Property):
         :return: None
         :raises APIError: When unable to edit the property
         :raises IllegalArgumentError: when the type of the input is provided incorrect.
-`
+
         Examples
         --------
         >>> front_fork = project.part('Front Fork')
@@ -114,7 +137,6 @@ class Property2(Property):
         >>> color_property.edit(name='Shade', description='Could also be called tint, depending on mixture',
         >>> unit='RGB')
 
-        --------
         >>> wheel_property_reference = self.project.model('Bike').property('Reference wheel')
         >>> wheel_model = self.project.model('Wheel')
         >>> diameter_property = wheel_model.property('Diameter')

@@ -97,9 +97,7 @@ class Part2(Part):
             raise NotFoundError("Part {} has no model".format(self.name))
 
     def edit(self, name=None, description=None, **kwargs):
-        # type: (AnyStr, AnyStr, **Any) -> None
-        """
-        Edit the details of a part (model or instance).
+        """Edit the details of a part (model or instance).
 
         For an instance you can edit the Part instance name and the part instance description. To alter the values
         of properties use :func:`Part.update()`.
