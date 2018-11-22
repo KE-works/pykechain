@@ -135,4 +135,7 @@ class Team(Base):
 
     def scopes(self, **kwargs):
         """Scopes associated to the team."""
-        return self._client.scopes(team=self.id, **kwargs)
+        if self._client.match_app_version(label='gpim', version='>=2.0.0'):
+            return self._client.scopes(team_id=self.id, **kwargs)
+        else:
+            return self._client.scopes(team=self.id, **kwargs)

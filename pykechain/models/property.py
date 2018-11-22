@@ -122,7 +122,7 @@ class Property(Base):
 
     @property
     def model_id(self):
-        """The model id of the property.
+        """Model id of the property.
 
         Returns None if the property is a model of its own. It will not return the model.
         """
@@ -130,7 +130,6 @@ class Property(Base):
             return None
         else:
             return self._json_data.get('model')
-
 
     def delete(self):
         # type () -> ()

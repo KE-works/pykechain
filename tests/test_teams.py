@@ -8,7 +8,7 @@ class TestTeams(TestBetamax):
 
     def setUp(self):
         super(TestTeams, self).setUp()
-        self.team = self.client.team(name='KE-works Team') # type: Team
+        self.team = self.client.team(name='Team No.1') # type: Team
 
     def test_retrieve_teams(self):
         self.assertTrue(self.client.teams())
@@ -46,7 +46,6 @@ class TestTeams(TestBetamax):
         with self.assertRaisesRegex(IllegalArgumentError, 'role should be one of `TeamRoles`'):
             self.team.members(role="FOOBARROLE")
 
-
     def test_add_and_remove_member(self):
         members = self.team.members()
         a_user = self.client.user(username='anotheruser')
@@ -61,19 +60,16 @@ class TestTeams(TestBetamax):
 
         self.assertListEqual(self.team.members(), members)
 
-    def test_team_associated_scopes(self):
-        team_scopes = self.team.scopes()
-        self.assertEqual([t.id for t in team_scopes], [t.get('id') for t in self.team._json_data.get('scopes')])
-
     def test_add_scope_to_team(self):
         #setup
         old_team = self.project._json_data.get('team')
 
         self.project.edit(team=self.team.id)
-        self.assertEqual(self.project._json_data.get('team').get('id'), self.team.id)
+        self.assertEqual(self.project.team, self.team)
 
         # check
-        self.assertEqual([t.id for t in self.team.scopes()], [self.project.id])
+        team_scopes = self.team.scopes()
+        self.assertEqual([t.id for t in team_scopes], [self.project.id])
 
         #teardown
-        self.project.edit(team=old_team.get('id'))
+        self.project.edit(team=old_team and old_team.get('id') or None)
