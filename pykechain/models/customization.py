@@ -276,35 +276,63 @@ class ExtCustomization(CustomizationBase):
             raise IllegalArgumentError("If you want to sort on a property, then sort_property must be located under "
                                        "part_model")
         # Declare superGrid config
-        config = {
-            "xtype": ComponentXType.SUPERGRID,
-            "filter": {
-                "activity_id": str(self.activity.id),
-                "model": part_model_id
-            },
-            "viewModel": {
-                "data": {
-                    "actions": {
-                        "delete": delete,
-                        "edit": edit,
-                        "export": export,
-                        "incompleteRows": incomplete_rows,
-                        "newInstance": new_instance
-                    },
-                    "sorters": [{
-                        "direction": sort_direction,
-                        "property": sort_property_id
-                    }] if sort_property_id else [],
-                    "ui": {
-                        "newInstance": "primary-action" if emphasize_new_instance else "default-toolbar",
-                        "edit": "primary-action" if emphasize_edit else "default-toolbar"
+        if self._client.match_app_version(label='gpim', version='>=2.0.0'):
+            config = {
+                "xtype": ComponentXType.SUPERGRID,
+                "filter": {
+                    "activity_id": str(self.activity.id),
+                    "model_id": part_model_id
+                },
+                "viewModel": {
+                    "data": {
+                        "actions": {
+                            "delete": delete,
+                            "edit": edit,
+                            "export": export,
+                            "incompleteRows": incomplete_rows,
+                            "newInstance": new_instance
+                        },
+                        "sorters": [{
+                            "direction": sort_direction,
+                            "property": sort_property_id
+                        }] if sort_property_id else [],
+                        "ui": {
+                            "newInstance": "primary-action" if emphasize_new_instance else "default-toolbar",
+                            "edit": "primary-action" if emphasize_edit else "default-toolbar"
+                        }
                     }
                 }
             }
-        }
-
-        # Add parent to filter if added.
-        config['filter']["parent"] = parent_part_instance_id
+            # Add parent to filter if added.
+            config['filter']["parent_id"] = parent_part_instance_id
+        else:
+            config = {
+                "xtype": ComponentXType.SUPERGRID,
+                "filter": {
+                    "activity_id": str(self.activity.id),
+                    "model": part_model_id
+                },
+                "viewModel": {
+                    "data": {
+                        "actions": {
+                            "delete": delete,
+                            "edit": edit,
+                            "export": export,
+                            "incompleteRows": incomplete_rows,
+                            "newInstance": new_instance
+                        },
+                        "sorters": [{
+                            "direction": sort_direction,
+                            "property": sort_property_id
+                        }] if sort_property_id else [],
+                        "ui": {
+                            "newInstance": "primary-action" if emphasize_new_instance else "default-toolbar",
+                            "edit": "primary-action" if emphasize_edit else "default-toolbar"
+                        }
+                    }
+                }
+            }
+            config['filter']["parent"] = parent_part_instance_id
 
         # Add max height and custom title
         if max_height:
@@ -392,20 +420,36 @@ class ExtCustomization(CustomizationBase):
                 display_columns[possible_column] = False
 
         # Declare property grid config
-        config = {
-            "xtype": ComponentXType.PROPERTYGRID,
-            "category": Category.INSTANCE,
-            "filter": {
-                "activity_id": str(self.activity.id),
-                "part": part_instance_id
-            },
-            "hideHeaders": not show_headers,
-            "viewModel": {
-                "data": {
-                    "displayColumns": display_columns
+        if self._client.match_app_version(label='gpim', version='>=2.0.0'):
+            config = {
+                "xtype": ComponentXType.PROPERTYGRID,
+                "category": Category.INSTANCE,
+                "filter": {
+                    "activity_id": str(self.activity.id),
+                    "part_id": part_instance_id  # gpim
+                },
+                "hideHeaders": not show_headers,
+                "viewModel": {
+                    "data": {
+                        "displayColumns": display_columns
+                    }
                 }
             }
-        }
+        else:
+            config = {
+                "xtype": ComponentXType.PROPERTYGRID,
+                "category": Category.INSTANCE,
+                "filter": {
+                    "activity_id": str(self.activity.id),
+                    "part": part_instance_id
+                },
+                "hideHeaders": not show_headers,
+                "viewModel": {
+                    "data": {
+                        "displayColumns": display_columns
+                    }
+                }
+            }
 
         # Add max height and custom title
         if max_height:
@@ -492,38 +536,48 @@ class ExtCustomization(CustomizationBase):
         self._add_widget(dict(config=config, meta=meta, name=WidgetNames.HTMLWIDGET))
 
     def add_paginated_grid_widget(self, part_model, delete=False, edit=True, export=True,
-                                  new_instance=False, parent_part_instance=None, max_height=None, custom_title=False,
-                                  emphasize_edit=False, emphasize_new_instance=True, sort_property=None,
+                                  new_instance=False, clone_instance=False, parent_part_instance=None, max_height=None,
+                                  custom_title=False, emphasize_edit=False, emphasize_new_instance=True,
+                                  emphasize_clone_instance=False, sort_property=None,
                                   sort_direction=SortTable.ASCENDING, page_size=25, collapse_filters=False):
         """
         Add a KE-chain paginatedGrid (e.g. paginated table widget) to the customization.
 
         The widget will be saved to KE-chain.
 
-        :param emphasize_new_instance: Emphasize the New instance button (default True)
-        :type emphasize_new_instance: bool
-        :param emphasize_edit: Emphasize the Edit button (default False)
-        :type emphasize_edit: bool
         :param new_instance: Show or hide the New instance button (default False). You need to provide a
             `parent_part_instance` in order for this to work.
         :type new_instance: bool
-        :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
-        :type incomplete_rows: bool
-        :param export: Show or hide the Export Grid button (default True)
-        :type export: bool
+        :param clone_instance: Show or hide the Clone instance button (default False). You need to provide a
+            `parent_part_instance` in order for this to work.
+        :type clone_instance: bool
         :param edit: Show or hide the Edit button (default True)
         :type edit: bool
         :param delete: Show or hide the Delete button (default False)
         :type delete: bool
-        :param page_size: Number of parts that will be shown per page in the grid.
-        :type page_size: int
+
         :param collapse_filters: Hide or show the filters pane (default False)
         :type collapse_filters: bool
+        :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
+        :type incomplete_rows: bool
+        :param export: Show or hide the Export Grid button (default True)
+        :type export: bool
+
         :param part_model: The part model based on which all instances will be shown.
-        :type parent_part_instance: :class:`Part` or UUID
+        :param part_model: :class:`Part` or UUID
         :param parent_part_instance: The parent part instance for which the instances will be shown or to which new
             instances will be added.
         :type parent_part_instance: :class:`Part` or UUID
+
+        :param emphasize_new_instance: Emphasize the New instance button (default True)
+        :type emphasize_new_instance: bool
+        :param emphasize_edit: Emphasize the Edit button (default False)
+        :type emphasize_edit: bool
+        :param emphasize_clone_instance:  emphasize the Clone instance button (default False)
+        :type emphasize_clone_instance: bool
+
+        :param page_size: Number of parts that will be shown per page in the grid.
+        :type page_size: int
         :param max_height: The max height of the paginated grid in pixels
         :type max_height: int or None
         :param custom_title: A custom title for the paginated grid::
@@ -574,12 +628,12 @@ class ExtCustomization(CustomizationBase):
                                        "Property, Property id or None. Type is: {}".format(type(sort_property)))
 
         # Assertions
-        if not parent_part_instance and new_instance:
-            raise IllegalArgumentError("If you want to allow the creation of new part instances, you must specify a "
-                                       "parent_part_instance")
+        if not parent_part_instance and (new_instance or clone_instance):
+            raise IllegalArgumentError("If you want to allow the creation (or cloning) of new part instances, "
+                                       "you must specify a `parent_part_instance`")
         if sort_property and sort_property.part.id != part_model.id:
             raise IllegalArgumentError("If you want to sort on a property, then sort_property must be located under "
-                                       "part_model")
+                                       "`part_model`")
 
         # Add custom title
         if custom_title is False:
@@ -598,7 +652,6 @@ class ExtCustomization(CustomizationBase):
         else:
             collapse_filters_value = "Expanded"
 
-        # Declare paginatedGrid config
         config = {
             "xtype": ComponentXType.FILTEREDGRID,
             "filter": {
@@ -611,7 +664,8 @@ class ExtCustomization(CustomizationBase):
                             "delete": delete,
                             "edit": edit,
                             "export": export,
-                            "newInstance": new_instance
+                            "newInstance": new_instance,
+                            "cloneInstance": clone_instance
                         },
                         "sorters": [{
                             "direction": sort_direction,
@@ -619,7 +673,8 @@ class ExtCustomization(CustomizationBase):
                         }] if sort_property_id else [],
                         "ui": {
                             "newInstance": "primary-action" if emphasize_new_instance else "default-toolbar",
-                            "edit": "primary-action" if emphasize_edit else "default-toolbar"
+                            "edit": "primary-action" if emphasize_edit else "default-toolbar",
+                            "cloneInstance": "primary-action" if emphasize_clone_instance else "default-toolbar"
                         },
                         "pageSize": page_size
                     }
