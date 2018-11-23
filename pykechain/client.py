@@ -8,7 +8,7 @@ from requests.compat import urljoin, urlparse  # type: ignore
 from six import text_type
 
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
-    WIMCompatibleActivityTypes, PropertyType, TeamRoles
+    WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity
 from pykechain.models import Part2, Property2
 from pykechain.models.activity2 import Activity2
 from pykechain.models.scope2 import Scope2
@@ -1157,7 +1157,7 @@ class Client(object):
 
         response = self._request('POST', self._build_url('parts2_{}'.format(action)),
                                  params=query_params,
-                                 data=data)
+                                 json=data)
 
         if response.status_code != requests.codes.created:
             raise APIError("Could not create part, {}: {}".format(str(response), response.content))
@@ -1203,7 +1203,7 @@ class Client(object):
             data = dict(name=name, parent=parent.id, model=model.id)
             return self._create_part1(action="new_instance", data=data, **kwargs)
 
-    def create_model(self, parent, name, multiplicity='ZERO_MANY', **kwargs):
+    def create_model(self, parent, name, multiplicity=Multiplicity.ZERO_MANY, **kwargs):
         """Create a new child model under a given parent.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
@@ -1211,22 +1211,27 @@ class Client(object):
         against a trade-off that someone looking at the frontend won't notice any changes unless the page
         is refreshed.
 
-        :param parent: parent model
-        :param name: new model name
-        :param parent: parent part instance
+        :param parent: parent part instance or a part uuid
         :type parent: :class:`models.Part`
         :param name: new part name
         :type name: basestring
-        :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N
+        :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N  :class:`enums.Multiplicity`
         :type multiplicity: basestring
         :param kwargs: (optional) additional keyword=value arguments
         :type kwargs: dict
-        :return: :class:`models.Part` with category `MODEL`
+        :return: :class:`models.Part` with category `MODEL` (from :class:`enums.Category`)
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
         if parent.category != Category.MODEL:
             raise IllegalArgumentError("The parent should be of category 'MODEL'")
+
+        if isinstance(parent, Part):
+            parent = parent.id
+        elif is_uuid(parent):
+            parent = parent
+        else:
+            raise IllegalArgumentError("`parent` should be either a parent part or a uuid, got '{}'".format(parent))
 
         if self.match_app_version(label="gpim", version=">=2.0.0"):
             data = dict(name=name, parent_id=parent.id, multiplicity=multiplicity)
@@ -1234,6 +1239,87 @@ class Client(object):
         else:
             data = dict(name=name, parent=parent.id, multiplicity=multiplicity)
             return self._create_part1(action="create_child_model", data=data, **kwargs)
+
+    def create_model_with_properties(self, parent, name, multiplicity=Multiplicity.ZERO_MANY, properties_fvalues=None,
+                                     **kwargs):
+        """Create a model with its properties in a single API request.
+
+        With KE-chain 3 backends you may now provide a whole set of properties to create using a `properties_fvalues`
+        list of dicts.
+
+        The `properties_fvalues` list is a list of dicts containing at least the `name` and `property_type`,
+        but other keys may provided as well in the single update eg. `default_value` and `value_options`.
+
+        Possible keys in a property dictionary are: `name` (req'd), `property_type` (req'd), `description`, `unit`,
+        `value`, `value_options` (type: `dict`), `order` (type `int`).
+
+        .. note::
+           It is wise to provide an `order` to ensure that the properties are stored and retrieved in order.
+           It cannot be guaranteed that the order of properties is the exact sequence of the list provided.
+
+        .. versionadded:: 3.0
+           This version makes a model including properties in a single API call
+
+        :param parent: parent part instance or a part uuid
+        :type parent: :class:`models.Part2`
+        :param name: new part name
+        :type name: basestring
+        :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N of :class:`enums.Multiplicity`
+        :type multiplicity: basestring
+        :param kwargs: (optional) additional keyword=value arguments
+        :type kwargs: dict
+        :return: :class:`models.Part` with category `MODEL` (of :class:`enums.Category`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
+        :raises APIError: if the `Part` could not be created
+
+
+        Example:
+        --------
+        >>> properties_fvalues = [
+        ...     {"name": "char prop", "property_type": PropertyType.CHAR_VALUE, "order": 1},
+        ...     {"name": "number prop", "property_type": PropertyType.FLOAT_VALUE, "value": 3.14, "order": 2},
+        ...     {"name": "boolean_prop", "property_type": PropertyType.BOOLEAN_VALUE, "value": False,
+        ...      "value_options": {"validators": [RequiredFieldValidator().as_json()]}, "order":3}
+        ... ]
+        >>> new_model = project.create_model_with_properties(name='A new model', parent='<uuid>',
+        ...                                                  multiplicity=Multiplicity.ONE,
+        ...                                                  properties_fvalues=properties_fvalues)
+
+        """
+
+
+        if not self.match_app_version(label="gpim", version=">=2.0.0"):
+            # PIM1 world
+            raise ClientError("This function only works for KE-chain 3 backends.")
+
+        if isinstance(parent, Part):
+            pass
+        elif is_uuid(parent):
+            parent = self.model(id=parent)
+        else:
+            raise IllegalArgumentError("`parent` should be either a parent part or a uuid, got '{}'".format(parent))
+
+        if parent.category != Category.MODEL:
+            raise IllegalArgumentError("The parent should be of category 'MODEL'")
+
+        if isinstance(properties_fvalues, list):
+            required_new_property_keys = ['name', 'property_type']
+            for new_prop in properties_fvalues:
+                if not all(k in new_prop.keys() for k in required_new_property_keys):
+                    raise IllegalArgumentError("New property '{}' does not have a required field provided in the "
+                                               "`properties_fvalues` list")
+        else:
+            raise IllegalArgumentError("`properties_fvalues` need to be provided as a list of dicts")
+
+        data = dict(
+            name=name,
+            parent_id=parent.id,
+            multiplicity=multiplicity,
+            category=Category.MODEL,
+            properties_fvalues=properties_fvalues
+        )
+
+        return self._create_part2(action="create_child_model", data=data, **kwargs)
 
     def _create_clone(self, parent, part, name=None, **kwargs):
         """Create a new `Part` clone under the `Parent`.
@@ -1303,7 +1389,7 @@ class Client(object):
         else:
             return Part(response.json()['results'][0], client=self)
 
-    def create_proxy_model(self, model, parent, name, multiplicity='ZERO_MANY', **kwargs):
+    def create_proxy_model(self, model, parent, name, multiplicity=Multiplicity.ZERO_MANY, **kwargs):
         """Add this model as a proxy to another parent model.
 
         This will add a model as a proxy model to another parent model. It ensure that it will copy the

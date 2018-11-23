@@ -42,7 +42,7 @@ class Property2(Property):
         if self._options:
             validate(self._options, options_json_schema)
             if self._options.get('validators'):
-                self.__parse_validators()
+                self._parse_validators()
 
     def _put_value(self, value):
         url = self._client._build_url('property2', property_id=self.id)
