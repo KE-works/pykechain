@@ -1,6 +1,7 @@
 from jsonschema import validate, ValidationError
 
-from pykechain.enums import PropertyVTypes
+from pykechain.enums import PropertyVTypes, PropertyType
+from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Property
 from pykechain.models.validators import PropertyValidator, ValidatorEffect, VisualEffect, ValidVisualEffect, \
     InvalidVisualEffect, NumericRangeValidator, BooleanFieldValidator
@@ -489,43 +490,38 @@ class TestPropertyWithValidator(SixTestCase):
 
 class TestPropertyWithValidatorFromLiveServer(TestBetamax):
 
-    def test_numeric_property_with_validator_parses(self):
-        part_model = self.project.model(name='Model')
-        part_instance = part_model.instance()
-        numeric_range_prop_model = part_model.property(name='numericrange_validatortest')
-        numeric_range_prop_instance = part_instance.property(name='numericrange_validatortest')
+    def setUp(self):
+        super(TestPropertyWithValidatorFromLiveServer, self).setUp()
+        self.part_model = self.project.model(name='Model')
+        self.numeric_range_prop_model = self.part_model.add_property(name='numericrange_validatortest',
+                                                                     property_type=PropertyType.FLOAT_VALUE)
+        self.numeric_range_prop_model.validators = [NumericRangeValidator(min=0., max=42.)]
+        self.part = self.project.part(name__startswith='Catalog').add(self.part_model, name='Model Instance for tests')
+        self.numeric_range_prop_instance = self.part.property(name='numericrange_validatortest')
 
-        self.assertIsInstance(numeric_range_prop_instance._validators, list)
-        self.assertIsInstance(numeric_range_prop_instance._validators[0], PropertyValidator)
+    def tearDown(self):
+        self.numeric_range_prop_model.delete()
+        self.part.delete()
+        super(TestPropertyWithValidatorFromLiveServer, self).tearDown()
+
+    def test_numeric_property_with_validator_parses(self):
+        self.assertIsInstance(self.numeric_range_prop_instance._validators, list)
+        self.assertIsInstance(self.numeric_range_prop_instance._validators[0], PropertyValidator)
 
     def test_numeric_property_add_requiredvalidator_on_model(self):
-        part_model = self.project.model(name='Model')
-        numeric_range_prop_model = part_model.property(name='numericrange_validatortest')
-        saved_validators = numeric_range_prop_model.validators
-
         # test
-        validators = numeric_range_prop_model.validators
+        validators = self.numeric_range_prop_model.validators
         validators.append(RequiredFieldValidator())
-        numeric_range_prop_model.validators = validators
+        self.numeric_range_prop_model.validators = validators
 
-        for validator in numeric_range_prop_model.validators:
+        for validator in self.numeric_range_prop_model.validators:
             self.assertIsInstance(validator, (NumericRangeValidator, RequiredFieldValidator))
-
-        # teardown
-        numeric_range_prop_model.validators = saved_validators
 
     def test_numeric_property_add_requiredvalidator_on_instance(self):
-        part_model = self.project.model(name='Model')
-        numeric_range_prop_instance = part_model.instance().property(name='numericrange_validatortest')
-        saved_validators = numeric_range_prop_instance.validators
-
         # test
-        validators = numeric_range_prop_instance.validators
+        validators = self.numeric_range_prop_instance.validators
         validators.append(RequiredFieldValidator())
-        numeric_range_prop_instance.validators = validators
 
-        for validator in numeric_range_prop_instance.validators:
-            self.assertIsInstance(validator, (NumericRangeValidator, RequiredFieldValidator))
-
-        # teardown
-        numeric_range_prop_instance.validators = saved_validators
+        with self.assertRaisesRegex(IllegalArgumentError, "To update the list of validators, it can only work "
+                                                          "on `Property` of category 'MODEL'"):
+            self.numeric_range_prop_instance.validators = validators
