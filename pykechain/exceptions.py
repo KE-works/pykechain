@@ -1,4 +1,4 @@
-from requests import Response, RequestException
+from requests import Response
 
 
 class APIError(Exception):

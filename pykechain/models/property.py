@@ -93,7 +93,8 @@ class Property(Base):
     def validators(self, validators):
         # type: (Union[list, tuple]) -> None
         if self.category != Category.MODEL:
-            raise IllegalArgumentError("To update the list of validators, it can only work on `Property` of category 'MODEL'")
+            raise IllegalArgumentError("To update the list of validators, it can only work on "
+                                       "`Property` of category 'MODEL'")
 
         if not isinstance(validators, (tuple, list)):
             raise IllegalArgumentError('Should be a list or tuple with PropertyValidator objects, '
