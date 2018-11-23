@@ -83,10 +83,7 @@ class Service(Base):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Service ({})".format(response))
 
-        if name:
-            self.name = name
-        if version:
-            self.version = version
+        self.refresh(json=response.json()['results'][0])
 
     def delete(self):
         # type: () -> None
@@ -123,6 +120,8 @@ class Service(Base):
 
         if response.status_code != requests.codes.accepted:  # pragma: no cover
             raise APIError("Could not upload service script file (or kecpkg) ({})".format(response))
+
+        self.refresh(json=response.json()['results'][0])
 
     def save_as(self, target_dir=None):
         """

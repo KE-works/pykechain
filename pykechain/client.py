@@ -1,4 +1,5 @@
 import warnings
+from datetime import datetime
 from typing import Dict, Tuple, Optional, Any, List  # noqa: F401 pragma: no cover
 
 import requests
@@ -1439,8 +1440,7 @@ class Client(object):
 
     def create_service(self, name, scope, description=None, version=None,
                        service_type=ServiceType.PYTHON_SCRIPT,
-                       environment_version=ServiceEnvironmentVersion.PYTHON_3_5,
-                       pkg_path=None):
+                       environment_version=ServiceEnvironmentVersion.PYTHON_3_5, pkg_path=None):
         """
         Create a Service.
 
@@ -1477,17 +1477,19 @@ class Client(object):
             raise IllegalArgumentError("The environment version should be of one of {}".
                                        format(ServiceEnvironmentVersion.values()))
 
-        data = {
-            "name": name,
-            "scope": scope,
-            "description": description,
-            "script_type": service_type,
-            "script_version": version,
-            "env_version": environment_version,
-        }
+        version = version or '1.0'  # 'script_version': ['This field may not be null.']
+        description = description or ''  # 'description': ['This field may not be null.']
 
-        response = self._request('POST', self._build_url('services'),
-                                 data=data)
+        data = dict(
+            name=name,
+            scope=scope,  # not scope_id!
+            description=description,
+            script_type=service_type,
+            script_version=version,
+            env_version=environment_version
+        )
+
+        response = self._request('POST', self._build_url('services'), json=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create service ({})".format((response, response.json())))
@@ -1495,11 +1497,8 @@ class Client(object):
         service = Service(response.json().get('results')[0], client=self)
 
         if pkg_path:
-            # upload the package
+            # upload the package / refresh of the service will be done in the upload function
             service.upload(pkg_path)
-
-        # refresh service contents in place
-        service.refresh()
 
         return service
 
@@ -1556,5 +1555,6 @@ class Client(object):
 
         the_team.add_members([user], role=TeamRoles.OWNER)
         team_members = the_team.members()
-        the_team.remove_members([u for u in team_members if u!=user])
+        the_team.remove_members([u for u in team_members if u != user])
 
+        the_team.refresh()

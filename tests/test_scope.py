@@ -14,9 +14,9 @@ class TestScopes(TestBetamax):
         self.assertTrue(self.client.scopes())
 
     def test_retrieve_scope_with_kwargs(self):
-        retrieve_scopes_with_kwargs = self.client.scopes(name__icontains='(pykechain testing)')
+        retrieve_scopes_with_kwargs = self.client.scopes(name__icontains='Bike')
         self.assertTrue(retrieve_scopes_with_kwargs)
-        self.assertEqual(len(retrieve_scopes_with_kwargs), 1)
+        self.assertTrue(len(retrieve_scopes_with_kwargs) >= 1)
 
     def test_retrieve_single_unknown(self):
         with self.assertRaises(NotFoundError):
@@ -154,10 +154,10 @@ class TestScopes(TestBetamax):
         # setup
         team_url = self.project._client._build_url('teams')
 
-        r = self.project._client._request('get', team_url, params=dict(name='KE-works Team'))
+        r = self.project._client._request('get', team_url, params=dict(name='Team No.1'))
         team_kew_id = r.json().get('results')[0].get('id')  # no iffer as it should fail hard when not a respcode =ok
 
-        r = self.project._client._request('get', team_url, params=dict(name='Team B'))
+        r = self.project._client._request('get', team_url, params=dict(name='Second Team'))
         team_b_id = r.json().get('results')[0].get('id')
 
         # save current team
