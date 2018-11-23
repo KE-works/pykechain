@@ -109,7 +109,7 @@ class Team(Base):
         -------
         >>> my_team = client.team(name='My own team')
         >>> other_user = client.users(name='That other person')
-        >>> my_team.remove_members([other_user]R)
+        >>> my_team.remove_members([other_user])
 
         """
         if not users or not isinstance(users, (list, tuple, set)):

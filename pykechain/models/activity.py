@@ -178,12 +178,12 @@ class Activity(Base):
         """
         url = self._client._build_url('activity', activity_id=self.id)
 
-        r = self._client._request('PUT', url, params={'select_action': 'update_associations'}, json={
+        response = self._client._request('PUT', url, params={'select_action': 'update_associations'}, json={
             'inputs': [p.id for p in inputs],
             'outputs': [p.id for p in outputs]
         })
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
+        if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not configure activity")
 
     def delete(self):
@@ -191,9 +191,9 @@ class Activity(Base):
 
         :raises APIError: when unable to delete the activity
         """
-        r = self._client._request('DELETE', self._client._build_url('activity', activity_id=self.id))
+        response = self._client._request('DELETE', self._client._build_url('activity', activity_id=self.id))
 
-        if r.status_code != requests.codes.no_content:
+        if response.status_code != requests.codes.no_content:
             raise APIError("Could not delete activity: {} with id {}".format(self.name, self.id))
 
     def subprocess(self):
@@ -381,10 +381,10 @@ class Activity(Base):
                 raise IllegalArgumentError('Status should be a string')
 
         url = self._client._build_url('activity', activity_id=self.id)
-        r = self._client._request('PUT', url, json=update_dict)
+        response = self._client._request('PUT', url, json=update_dict)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Activity ({})".format(r))
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Activity ({})".format(response))
 
         if status:
             self._json_data['status'] = str(status)
