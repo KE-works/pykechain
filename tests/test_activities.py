@@ -489,7 +489,7 @@ class TestActivity2SpecificTests(TestBetamax):
         self.assertTrue(customized_task.is_configured())
         self.assertTrue(customized_task.is_customized())  # always has a metapanel widget
 
-
+@skip('Does not work in PIM2 until KEC-19193 is resolved')
 class TestActivityDownloadAsPDF(TestBetamax):
 
     def test_activity2_download_as_pdf(self):
