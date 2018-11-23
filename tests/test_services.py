@@ -232,14 +232,13 @@ class TestServiceExecutions(TestServiceSetup):
                         reason="Skipping tests when using Travis, as Service Execution cannot be provided")
     def test_debug_service_execution_terminate(self):
         service_execution = self.service.execute()
-        service_execution.refresh()
         self.assertEqual(service_execution.status, ServiceExecutionStatus.LOADING)
         time.sleep(2)
         service_execution.refresh()
         self.assertEqual(service_execution.status, ServiceExecutionStatus.RUNNING)
         service_execution.terminate()
 
-        self.assertFalse(service_execution.status == ServiceExecutionStatus.FAILED,
+        self.assertNotEqual(service_execution.status, ServiceExecutionStatus.FAILED,
                          "The service execution is status 'FAILED', please upload working debugging scripts before "
                          "running the tests")
 
