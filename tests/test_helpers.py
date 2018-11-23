@@ -16,6 +16,12 @@ PSEUDO_SCOPE_ID = 'eeb0937b-da50-4eb2-8d74-f36259cca96e'
 @pytest.mark.skipif("os.getenv('TRAVIS', False)",
                     reason="Skipping tests when using Travis, as not Auth can be provided")
 class TestGetProjectHelperNotForTravis(TestBetamax):
+    def setUp(self):
+        super(TestGetProjectHelperNotForTravis, self).setUp()
+        # unset all environment variables in the self.env protected env world
+        for kec_env in KechainEnv.values():
+            self.env.unset(kec_env)
+
     def test_get_project__not_for_travis(self):
         self.env.set(KechainEnv.KECHAIN_FORCE_ENV_USE, "false")
         with self.env:
