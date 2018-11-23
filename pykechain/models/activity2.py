@@ -463,7 +463,7 @@ class Activity2(Activity):
         url = self._client._build_url('activity_export', activity_id=self.id)
         response = self._client._request('GET', url, params=request_params)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not download PDF of activity {}".format(self.name))
+            raise APIError("Could not download PDF of activity '{}': '{}'".format(self.name, response.content))
 
         # If appendices are included, the request becomes asynchronous
 

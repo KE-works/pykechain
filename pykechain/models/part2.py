@@ -56,7 +56,8 @@ class Part2(Part):
         :param json: the json response to construct the :class:`Part` from
         :type json: dict
         """
-        super(Part2, self).__init__(json, **kwargs)
+        # we need to run the init of 'Base' instead of 'Part' as we do not need the instantiation of properties
+        super(Part, self).__init__(json, **kwargs)
 
         self.category = json.get('category')
         self.parent_id = json.get('parent_id', None)
@@ -315,9 +316,9 @@ class Part2(Part):
                 value=property_value
             )
             if is_uuid(prop_name_or_id):
-                updated_p['instance_id'] = prop_name_or_id
+                updated_p['id'] = prop_name_or_id
             else:
-                updated_p['instance_id'] = self.property(prop_name_or_id).id
+                updated_p['id'] = self.property(prop_name_or_id).id
             properties_fvalues.append(updated_p)
 
         payload_json = dict(
