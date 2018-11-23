@@ -1,5 +1,4 @@
 import warnings
-from datetime import datetime
 from typing import Dict, Tuple, Optional, Any, List  # noqa: F401 pragma: no cover
 
 import requests
@@ -1286,8 +1285,6 @@ class Client(object):
         ...                                                  properties_fvalues=properties_fvalues)
 
         """
-
-
         if not self.match_app_version(label="gpim", version=">=2.0.0"):
             # PIM1 world
             raise ClientError("This function only works for KE-chain 3 backends.")
