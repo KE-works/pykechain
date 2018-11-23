@@ -1227,9 +1227,9 @@ class Client(object):
             raise IllegalArgumentError("The parent should be of category 'MODEL'")
 
         if isinstance(parent, Part):
-            parent = parent.id
+            pass
         elif is_uuid(parent):
-            parent = parent
+            parent = self.model(id=parent)
         else:
             raise IllegalArgumentError("`parent` should be either a parent part or a uuid, got '{}'".format(parent))
 
