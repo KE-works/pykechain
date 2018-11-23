@@ -20,9 +20,6 @@ class Team(Base):
         self.name = self._json_data.get('name', '')
         self.id = self._json_data.get('id', '')
 
-    def __repr__(self):  # pragma: no cover
-        return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.name, self.id)
-
     def _update(self, resource, update_dict=None, params=None, **kwargs):
         """Update the object."""
         url = self._client._build_url(resource, **kwargs)
@@ -30,8 +27,8 @@ class Team(Base):
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update {} ({})".format(self.__class__.__name__, response.json().get('results')))
-        else:
-            self.refresh()
+
+        self.refresh(json=response.json().get('results')[0])
 
     def members(self, role=None):
         """Members of the team.
