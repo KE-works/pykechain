@@ -340,8 +340,8 @@ class Part2(Part):
             raise APIError("Could not update the part '{}', got: '{}'".format(self, response.content))
 
         # update local properties (without a call)
-        self._json_data = response.json()['results'][0]
-        self.properties = [Property2.create(p, client=self._client) for p in self._json_data['properties']]
+        self.refresh(json=response.json()['results'][0])
+        # self.properties = [Property2.create(p, client=self._client) for p in self._json_data['properties']]
 
     def delete(self):
         # type: () -> None

@@ -2,6 +2,7 @@ from typing import Any  # noqa: F401
 
 import requests
 
+from pykechain.enums import Multiplicity
 from pykechain.exceptions import APIError, NotFoundError
 from pykechain.models import Scope
 
@@ -126,3 +127,12 @@ class Scope2(Scope):
         See :class:`pykechain.Client.model` for available parameters.
         """
         return self._client.model(*args, scope_id=self.id, **kwargs)
+
+    def create_model_with_properties(self, parent, name, multiplicity=Multiplicity.ZERO_MANY,
+                                     properties_fvalues=None, **kwargs):
+        """Create a model with its properties in a single API request.
+
+        See :func:`pykechain.Client.create_model_with_properties()` for available parameters.
+        """
+        return self._client.create_model_with_properties(parent, name, multiplicity=Multiplicity.ZERO_MANY,
+                                                         properties_fvalues=properties_fvalues, **kwargs)

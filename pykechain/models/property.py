@@ -51,7 +51,7 @@ class Property(Base):
         if self._options:
             validate(self._options, options_json_schema)
             if self._options.get('validators'):
-                self.__parse_validators()
+                self._parse_validators()
 
     @property
     def output(self):
@@ -104,7 +104,7 @@ class Property(Base):
         self._validators = list(set(validators))
 
         # dump to _json options
-        self.__dump_validators()
+        self._dump_validators()
 
         # update the options to KE-chain backend
         self.edit(options=self._options)
@@ -253,14 +253,14 @@ class Property(Base):
         if r.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Property ({})".format(r))
 
-    def __parse_validators(self):
+    def _parse_validators(self):
         """Parse the validator in the options to validators."""
         self._validators = []
         validators_json = self._options.get('validators')
         for validator_json in validators_json:
             self._validators.append(PropertyValidator.parse(json=validator_json))
 
-    def __dump_validators(self):
+    def _dump_validators(self):
         """Dump the validators as json inside the _options dictionary with the key `validators`."""
         if hasattr(self, '_validators'):
             validators_json = []
