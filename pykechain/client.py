@@ -4,7 +4,7 @@ from typing import Dict, Tuple, Optional, Any, List  # noqa: F401 pragma: no cov
 import requests
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
-from six import text_type
+from six import text_type, string_types
 
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity
@@ -1604,15 +1604,15 @@ class Client(object):
         :return: the created :class:`models.Team`
         :raises IllegalArgumentError: When the provided arguments are incorrect
         """
-        if not isinstance(name, text_type):
+        if not isinstance(name, (string_types, text_type)):
             raise IllegalArgumentError('`name` should be string')
-        if not isinstance(description, text_type):
+        if not isinstance(description, (string_types, text_type)):
             raise IllegalArgumentError('`description` should be string')
         if options and not isinstance(options, dict):
             raise IllegalArgumentError('`options` should be a dictionary')
         if is_hidden and not isinstance(is_hidden, bool):
             raise IllegalArgumentError('`is_hidden` should be a boolean')
-        if isinstance(user, text_type):
+        if isinstance(user, (string_types, text_type)):
             user = self.user(username=user)
         elif isinstance(user, int):
             user = self.user(pk=user)

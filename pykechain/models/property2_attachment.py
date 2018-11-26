@@ -2,6 +2,7 @@ import io
 import json
 
 import requests
+from six import string_types, text_type
 
 from pykechain.exceptions import APIError
 from pykechain.models.property2 import Property2
@@ -84,7 +85,7 @@ class AttachmentProperty2(Property2):
         except ImportError:
             pass
 
-        if isinstance(data, str):
+        if isinstance(data, (string_types, text_type)):
             with open(data, 'rb') as fp:
                 self._upload(fp)
         else:

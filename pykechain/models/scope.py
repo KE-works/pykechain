@@ -1,9 +1,9 @@
 import datetime
 import warnings
-from typing import Any  # noqa: F401
 
 import requests
-from six import text_type
+from six import text_type, string_types
+from typing import Any  # noqa: F401
 
 from pykechain.enums import Multiplicity, ScopeStatus
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
@@ -233,15 +233,15 @@ class Scope(Base):
         :type user_type: basestring
         :raises APIError: When unable to update the scope project team.
         """
-        if isinstance(user, str):
+        if isinstance(user, (string_types, text_type)):
             users = self._client._retrieve_users()
             manager_object = next((item for item in users['results'] if item["username"] == user), None)
             if manager_object:
                 url = self._client._build_url('scope', scope_id=self.id)
                 response = self._client._request('PUT', url, params={'select_action': select_action},
-                                          data={
-                                              'user_id': manager_object['pk']
-                                          })
+                                                 data={
+                                                     'user_id': manager_object['pk']
+                                                 })
                 if response.status_code != requests.codes.ok:  # pragma: no cover
                     raise APIError("Could not {} {} in Scope".format(select_action.split('_')[0], user_type))
             else:

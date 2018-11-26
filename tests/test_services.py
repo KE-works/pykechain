@@ -1,15 +1,14 @@
-import time
-
 import os
+import time
 from unittest import skip
 
 import pytest
 
 from pykechain.enums import ServiceExecutionStatus, ServiceType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
-from tests.classes import TestBetamax
 # new in 1.13
 from pykechain.utils import temp_chdir
+from tests.classes import TestBetamax
 
 
 class TestServiceSetup(TestBetamax):
@@ -17,6 +16,7 @@ class TestServiceSetup(TestBetamax):
 
     :ivar service: service with a debug.py script
     """
+
     def _create_service(self, name=None):
         """Creates a service with name, and adds a test_upload_script.py (debugging)"""
         # setUp
@@ -39,6 +39,7 @@ class TestServiceSetup(TestBetamax):
     def tearDown(self):
         self.service.delete()
         super(TestServiceSetup, self).tearDown()
+
 
 class TestServices(TestBetamax):
     def _create_service(self, name=None):
@@ -130,8 +131,6 @@ class TestServices(TestBetamax):
 
 class TestServicesWithCustomUploadedService(TestServiceSetup):
 
-
-
     def test_update_service_incorrect_name(self):
         with self.assertRaises(IllegalArgumentError):
             self.service.edit(name=1234)
@@ -149,7 +148,6 @@ class TestServicesWithCustomUploadedService(TestServiceSetup):
         self.service.edit(version=version_after)
         self.service.refresh()
         self.assertEqual(self.service.version, version_after)
-
 
     def test_get_executions_of_service(self):
         self.assertTrue(len(self.service.get_executions()) >= 0)
@@ -198,6 +196,8 @@ class TestServicesWithCustomUploadedService(TestServiceSetup):
             self.service.upload(pkg_path=upload_path)
 
     # new in 1.13
+
+
 class TestServiceExecutions(TestServiceSetup):
     def test_retrieve_service_executions(self):
         self.assertTrue(self.project.service_executions())
@@ -242,8 +242,8 @@ class TestServiceExecutions(TestServiceSetup):
         service_execution.terminate()
 
         self.assertNotEqual(service_execution.status, ServiceExecutionStatus.FAILED,
-                         "The service execution is status 'FAILED', please upload working debugging scripts before "
-                         "running the tests")
+                            "The service execution is status 'FAILED', please upload working debugging scripts before "
+                            "running the tests")
 
     def test_log_of_service_execution(self):
         # setUp
