@@ -1,4 +1,5 @@
 from pykechain.enums import PropertyType, Multiplicity
+from pykechain.models import MultiReferenceProperty2
 from tests.classes import TestBetamax
 from unittest import skip
 
@@ -19,7 +20,7 @@ class TestMultiReferenceProperty(TestBetamax):
             name='Test reference property',
             property_type=PropertyType.REFERENCES_VALUE,
             default_value=self.ref_target_model
-        )
+        )  # type: MultiReferenceProperty
         # reference property instance (holding the value
         self.ref = self.project.part('Bike').property('Test reference property')
 
@@ -143,7 +144,6 @@ class TestMultiReferenceProperty(TestBetamax):
 
         # testing
         self.ref_model.edit(options=options)
-        self.ref_model.refresh()
 
         self.assertTrue('property_value' in self.ref_model._options['prefilters'] and
                         self.ref_model._options['prefilters']['property_value'] ==

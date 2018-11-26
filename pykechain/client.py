@@ -337,6 +337,7 @@ class Client(object):
         if not url and not obj._json_data.get('url'):
             # build the url from the class name (in lower case) `obj.__class__.__name__.lower()`
             # get the id from the `obj.id` which is normally a keyname `<class_name>_id` (without the '2' if so)
+
             url = self._build_url(obj.__class__.__name__.lower(),
                                   **{"{}_id".format(obj.__class__.__name__.lower().replace("2", "")): obj.id})
             extra_api_params = API_EXTRA_PARAMS.get(obj.__class__.__name__.lower())
