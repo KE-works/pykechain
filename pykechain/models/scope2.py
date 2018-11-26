@@ -64,13 +64,13 @@ class Scope2(Scope):
             if user_object:
                 url = self._client._build_url('scope2_{}'.format(select_action), scope_id=self.id)
 
-                r = self._client._request('PUT', url,
-                                          params=API_EXTRA_PARAMS[__class__.__name__.lower()],
+                response = self._client._request('PUT', url,
+                                          params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
                                           data={'user_id': user_object['pk']})
-                if r.status_code != requests.codes.ok:  # pragma: no cover
+                if response.status_code != requests.codes.ok:  # pragma: no cover
                     raise APIError("Could not {} {} in Scope".format(select_action.split('_')[0], user_type))
 
-                self._json_data = r.json().get('results')[0]
+                self._json_data = response.json().get('results')[0]
             else:
                 raise NotFoundError("User {} does not exist".format(user))
         else:
@@ -80,12 +80,12 @@ class Scope2(Scope):
         from pykechain.client import API_EXTRA_PARAMS
         url = self._client._build_url('scope2', scope_id=self.id)
 
-        r = self._client._request('PUT', url, params=API_EXTRA_PARAMS[__class__.__name__.lower()], json=update_dict)
+        response = self._client._request('PUT', url, params=API_EXTRA_PARAMS[self.__class__.__name__.lower()], json=update_dict)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Scope ({})".format(r))
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Scope ({})".format(response))
 
-        self.refresh(json=r.json().get('results')[0])
+        self.refresh(json=response.json().get('results')[0])
 
     def parts(self, *args, **kwargs):
         """Retrieve parts belonging to this scope.
@@ -134,5 +134,5 @@ class Scope2(Scope):
 
         See :func:`pykechain.Client.create_model_with_properties()` for available parameters.
         """
-        return self._client.create_model_with_properties(parent, name, multiplicity=Multiplicity.ZERO_MANY,
+        return self._client.create_model_with_properties(parent, name, multiplicity=multiplicity,
                                                          properties_fvalues=properties_fvalues, **kwargs)
