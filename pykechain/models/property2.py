@@ -185,7 +185,7 @@ class Property2(Property):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Property ({})".format(response))
 
-        self.__init__(json=response.json()['results'][0], client=self._client)
+        self.refresh(json=response.json()['results'][0])
 
     def delete(self):
         # type () -> ()
