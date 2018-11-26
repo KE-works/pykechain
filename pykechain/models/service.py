@@ -1,5 +1,6 @@
 import os
 import requests
+from six import string_types, text_type
 
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models.base import Base
@@ -63,15 +64,15 @@ class Service(Base):
         """
         update_dict = {'id': self.id}
         if name is not None:
-            if not isinstance(name, str):
+            if not isinstance(name, (string_types, text_type)):
                 raise IllegalArgumentError("name should be provided as a string")
             update_dict.update({'name': name})
         if description is not None:
-            if not isinstance(description, str):
+            if not isinstance(description, (string_types, text_type)):
                 raise IllegalArgumentError("description should be provided as a string")
             update_dict.update({'description': description})
         if version is not None:
-            if not isinstance(version, str):
+            if not isinstance(version, (string_types, text_type)):
                 raise IllegalArgumentError("description should be provided as a string")
             update_dict.update({'script_version': version})
 

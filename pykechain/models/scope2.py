@@ -1,6 +1,6 @@
-from typing import Any  # noqa: F401
-
 import requests
+from six import text_type, string_types
+from typing import Any  # noqa: F401
 
 from pykechain.enums import Multiplicity
 from pykechain.exceptions import APIError, NotFoundError
@@ -57,7 +57,7 @@ class Scope2(Scope):
         :type user_type: basestring
         :raises APIError: When unable to update the scope project team.
         """
-        if isinstance(user, str):
+        if isinstance(user, (string_types, text_type)):
             from pykechain.client import API_EXTRA_PARAMS
             users = self._client._retrieve_users()
             user_object = next((item for item in users['results'] if item["username"] == user), None)
@@ -65,8 +65,8 @@ class Scope2(Scope):
                 url = self._client._build_url('scope2_{}'.format(select_action), scope_id=self.id)
 
                 response = self._client._request('PUT', url,
-                                          params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
-                                          data={'user_id': user_object['pk']})
+                                                 params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
+                                                 data={'user_id': user_object['pk']})
                 if response.status_code != requests.codes.ok:  # pragma: no cover
                     raise APIError("Could not {} {} in Scope".format(select_action.split('_')[0], user_type))
 
@@ -80,7 +80,8 @@ class Scope2(Scope):
         from pykechain.client import API_EXTRA_PARAMS
         url = self._client._build_url('scope2', scope_id=self.id)
 
-        response = self._client._request('PUT', url, params=API_EXTRA_PARAMS[self.__class__.__name__.lower()], json=update_dict)
+        response = self._client._request('PUT', url, params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
+                                         json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Scope ({})".format(response))

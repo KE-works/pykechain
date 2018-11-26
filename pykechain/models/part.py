@@ -1,8 +1,8 @@
 import json
-from typing import Any, AnyStr  # noqa: F401
 
 import requests
-from six import text_type
+from six import text_type, string_types
+from typing import Any, AnyStr  # noqa: F401
 
 from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import NotFoundError, APIError, MultipleFoundError, IllegalArgumentError
@@ -460,11 +460,11 @@ class Part(Base):
         """
         update_dict = {'id': self.id}
         if name is not None:
-            if not isinstance(name, str):
+            if not isinstance(name, (string_types, text_type)):
                 raise IllegalArgumentError("name should be provided as a string")
             update_dict.update({'name': name})
         if description is not None:
-            if not isinstance(description, str):
+            if not isinstance(description, (string_types, text_type)):
                 raise IllegalArgumentError("description should be provided as a string")
             update_dict.update({'description': description})
 
@@ -544,7 +544,7 @@ class Part(Base):
 
         if bulk and len(update_dict.keys()) > 1:
             if name:
-                if not isinstance(name, str):
+                if not isinstance(name, (string_types, text_type)):
                     raise IllegalArgumentError("Name of the part should be provided as a string")
             response = self._client._request('PUT',
                                              self._client._build_url('part', part_id=self.id),
@@ -606,14 +606,14 @@ class Part(Base):
 
         if bulk:
             response = self._client._request('POST', self._client._build_url('parts'),
-                                      data=dict(
-                                          name=name,
-                                          model=model.id,
-                                          parent=self.id,
-                                          properties=json.dumps(properties_update_dict),
-                                          **kwargs
-                                      ),
-                                      params=dict(select_action=action))
+                                             data=dict(
+                                                 name=name,
+                                                 model=model.id,
+                                                 parent=self.id,
+                                                 properties=json.dumps(properties_update_dict),
+                                                 **kwargs
+                                             ),
+                                             params=dict(select_action=action))
 
             if response.status_code != requests.codes.created:  # pragma: no cover
                 raise APIError('{}: {}'.format(str(response), response.content))
@@ -684,9 +684,9 @@ class Part(Base):
                 order_dict[prop.id] = property_list.index(prop)
 
         response = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
-                                  data=dict(
-                                      property_order=json.dumps(order_dict)
-                                  ))
+                                         data=dict(
+                                             property_order=json.dumps(order_dict)
+                                         ))
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not reorder properties")
 

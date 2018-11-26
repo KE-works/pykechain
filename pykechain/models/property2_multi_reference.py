@@ -1,4 +1,4 @@
-from six import text_type
+from six import text_type, string_types
 
 from pykechain.models.part2 import Part2
 from pykechain.models.property2 import Property2
@@ -77,7 +77,7 @@ class MultiReferenceProperty2(Property2):
             for item in value:
                 if isinstance(item, Part2):
                     value_to_set.append(item.id)
-                elif isinstance(item, text_type) and is_uuid(item):
+                elif isinstance(item, (string_types, text_type)) and is_uuid(item):
                     # tested against a six.text_type (found in the requests' urllib3 package) for unicode
                     # conversion in py27
                     value_to_set.append(item)

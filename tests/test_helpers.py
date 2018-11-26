@@ -1,10 +1,13 @@
-import os
+import os  # noqa: F401 pragma: no cover
+from unittest import skipIf
+
 import pytest
+import six  # noqa: F401 pragma: no cover
 from envparse import env
 
 from pykechain import get_project
 from pykechain.enums import KechainEnv
-from pykechain.exceptions import ClientError, APIError
+from pykechain.exceptions import ClientError
 from tests.classes import TestBetamax
 from tests.utils import TEST_TOKEN, TEST_URL, TEST_SCOPE_NAME, TEST_SCOPE_ID
 
@@ -12,7 +15,7 @@ PSEUDO_TOKEN = 'aabbccddeeffgg0011223344556677889900'
 PSEUDO_PASSWORD = 'abc123!@#'
 PSEUDO_SCOPE_ID = 'eeb0937b-da50-4eb2-8d74-f36259cca96e'
 
-
+@skipIf(six.PY2, "Skipping test if the version of python is 2. Cannot handle the testcassettes and versions retrievals")
 @pytest.mark.skipif("os.getenv('TRAVIS', False)",
                     reason="Skipping tests when using Travis, as not Auth can be provided")
 class TestGetProjectHelperNotForTravis(TestBetamax):
@@ -21,6 +24,7 @@ class TestGetProjectHelperNotForTravis(TestBetamax):
         # unset all environment variables in the self.env protected env world
         for kec_env in KechainEnv.values():
             self.env.unset(kec_env)
+        del self.project
 
     def test_get_project__not_for_travis(self):
         self.env.set(KechainEnv.KECHAIN_FORCE_ENV_USE, "false")

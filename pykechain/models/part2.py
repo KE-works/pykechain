@@ -1,7 +1,6 @@
-from typing import Any  # noqa: F401
-
 import requests
-from six import text_type
+from six import text_type, string_types
+from typing import Any  # noqa: F401
 
 from pykechain.enums import Category
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
@@ -134,11 +133,11 @@ class Part2(Part):
         """
         update_dict = {'id': self.id}
         if name is not None:
-            if not isinstance(name, text_type):
+            if not isinstance(name, (string_types, text_type)):
                 raise IllegalArgumentError("name should be provided as a string")
             update_dict.update({'name': name})
         if description is not None:
-            if not isinstance(description, text_type):
+            if not isinstance(description, (string_types, text_type)):
                 raise IllegalArgumentError("description should be provided as a string")
             update_dict.update({'description': description})
 
@@ -147,9 +146,9 @@ class Part2(Part):
 
         from pykechain.client import API_EXTRA_PARAMS
         response = self._client._request('PUT',
-                                  self._client._build_url('part2', part_id=self.id),
-                                  params=API_EXTRA_PARAMS['part2'],
-                                  json=update_dict)
+                                         self._client._build_url('part2', part_id=self.id),
+                                         params=API_EXTRA_PARAMS['part2'],
+                                         json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Part ({})".format(response))
@@ -302,7 +301,7 @@ class Part2(Part):
         """
         # dict(name=name, properties=json.dumps(update_dict))) with property ids:value
         # action = 'bulk_update_properties'  # not for KEC3
-        if name and not isinstance(name, text_type):
+        if name and not isinstance(name, (string_types, text_type)):
             raise IllegalArgumentError("Name of the part should be provided as a string")
 
         if properties_fvalues and not isinstance(properties_fvalues, list):

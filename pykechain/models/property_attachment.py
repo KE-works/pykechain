@@ -1,7 +1,8 @@
+import io
 import json
 
-import io
 import requests
+from six import string_types, text_type
 
 from pykechain.exceptions import APIError
 from pykechain.models.property import Property
@@ -84,7 +85,7 @@ class AttachmentProperty(Property):
         except ImportError:
             pass
 
-        if isinstance(data, str):
+        if isinstance(data, (string_types, text_type)):
             with open(data, 'rb') as fp:
                 self._upload(fp)
         else:
@@ -116,8 +117,8 @@ class AttachmentProperty(Property):
         url = self._client._build_url('property_upload', property_id=self.id)
 
         response = self._client._request('POST', url,
-                                  data={"part": self._json_data['part']},
-                                  files={"attachment": data})
+                                         data={"part": self._json_data['part']},
+                                         files={"attachment": data})
 
         if response.status_code != requests.codes.ok:
             raise APIError("Could not upload attachment")

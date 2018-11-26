@@ -1,8 +1,7 @@
-from typing import Any, Union, List  # noqa: F401
-
 import requests
 from jsonschema import validate
 from six import text_type, iteritems
+from typing import Any, Union, List  # noqa: F401
 
 from pykechain.enums import PropertyType, Category
 from pykechain.exceptions import APIError, IllegalArgumentError
@@ -252,7 +251,8 @@ class Property(Base):
             for key, value in iteritems(kwargs):
                 update_dict[key] = value
 
-        response = self._client._request('PUT', self._client._build_url('property', property_id=self.id), json=update_dict)
+        response = self._client._request('PUT', self._client._build_url('property', property_id=self.id),
+                                         json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Property ({})".format(response))
