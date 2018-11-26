@@ -1,8 +1,6 @@
-import os  # noqa: F401 pragma: no cover
-from unittest import skipIf
+from unittest import skip
 
 import pytest
-import six  # noqa: F401 pragma: no cover
 from envparse import env
 
 from pykechain import get_project
@@ -15,7 +13,8 @@ PSEUDO_TOKEN = 'aabbccddeeffgg0011223344556677889900'
 PSEUDO_PASSWORD = 'abc123!@#'
 PSEUDO_SCOPE_ID = 'eeb0937b-da50-4eb2-8d74-f36259cca96e'
 
-@skipIf(six.PY2, "Skipping test if the version of python is 2. Cannot handle the testcassettes and versions retrievals")
+
+@skip("Cannot handle the testcassettes and versions retrievals")
 @pytest.mark.skipif("os.getenv('TRAVIS', False)",
                     reason="Skipping tests when using Travis, as not Auth can be provided")
 class TestGetProjectHelperNotForTravis(TestBetamax):

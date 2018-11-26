@@ -67,4 +67,5 @@ class TestBetamax(SixTestCase):
 
     def tearDown(self):
         self.recorder.stop()
+        del self.env
         del self.client
