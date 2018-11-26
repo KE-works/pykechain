@@ -416,9 +416,9 @@ class Part(Base):
         :return: None
         :raises APIError: in case an Error occurs
         """
-        r = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
+        response = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
 
-        if r.status_code != requests.codes.no_content:  # pragma: no cover
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
 
     def edit(self, name=None, description=None, **kwargs):
@@ -470,10 +470,10 @@ class Part(Base):
 
         if kwargs is not None:  # pragma: no cover
             update_dict.update(**kwargs)
-        r = self._client._request('PUT', self._client._build_url('part', part_id=self.id), json=update_dict)
+        response = self._client._request('PUT', self._client._build_url('part', part_id=self.id), json=update_dict)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Part ({})".format(r))
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Part ({})".format(response))
 
         if name:
             self.name = name
@@ -605,7 +605,7 @@ class Part(Base):
                 properties_update_dict[model.property(prop_name_or_id).id] = property_value
 
         if bulk:
-            r = self._client._request('POST', self._client._build_url('parts'),
+            response = self._client._request('POST', self._client._build_url('parts'),
                                       data=dict(
                                           name=name,
                                           model=model.id,
@@ -615,9 +615,9 @@ class Part(Base):
                                       ),
                                       params=dict(select_action=action))
 
-            if r.status_code != requests.codes.created:  # pragma: no cover
-                raise APIError('{}: {}'.format(str(r), r.content))
-            return Part(r.json()['results'][0], client=self._client)
+            if response.status_code != requests.codes.created:  # pragma: no cover
+                raise APIError('{}: {}'.format(str(response), response.content))
+            return Part(response.json()['results'][0], client=self._client)
         else:  # do the old way
             new_part = self.add(model, name=name)  # type: Part
             new_part.update(update_dict=update_dict, bulk=bulk)
@@ -683,11 +683,11 @@ class Part(Base):
             else:
                 order_dict[prop.id] = property_list.index(prop)
 
-        r = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
+        response = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
                                   data=dict(
                                       property_order=json.dumps(order_dict)
                                   ))
-        if r.status_code != requests.codes.ok:  # pragma: no cover
+        if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not reorder properties")
 
     def populate_descendants(self, batch=200):

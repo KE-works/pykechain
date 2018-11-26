@@ -105,21 +105,21 @@ class AttachmentProperty(Property):
     def _download(self):
         url = self._client._build_url('property_download', property_id=self.id)
 
-        r = self._client._request('GET', url)
+        response = self._client._request('GET', url)
 
-        if r.status_code != requests.codes.ok:
+        if response.status_code != requests.codes.ok:
             raise APIError("Could not download property value")
 
-        return r
+        return response
 
     def _upload(self, data):
         url = self._client._build_url('property_upload', property_id=self.id)
 
-        r = self._client._request('POST', url,
+        response = self._client._request('POST', url,
                                   data={"part": self._json_data['part']},
                                   files={"attachment": data})
 
-        if r.status_code != requests.codes.ok:
+        if response.status_code != requests.codes.ok:
             raise APIError("Could not upload attachment")
 
     def _upload_json(self, content, name='data.json'):

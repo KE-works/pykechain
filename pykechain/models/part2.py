@@ -146,13 +146,13 @@ class Part2(Part):
             update_dict.update(**kwargs)
 
         from pykechain.client import API_EXTRA_PARAMS
-        r = self._client._request('PUT',
+        response = self._client._request('PUT',
                                   self._client._build_url('part2', part_id=self.id),
                                   params=API_EXTRA_PARAMS['part2'],
                                   json=update_dict)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Part ({})".format(r))
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Part ({})".format(response))
 
         if name:
             self.name = name
@@ -223,7 +223,7 @@ class Part2(Part):
             properties_fvalues.append(updated_p)
 
         from pykechain.client import API_EXTRA_PARAMS
-        r = self._client._request(
+        response = self._client._request(
             'POST', url,
             params=API_EXTRA_PARAMS['parts2'],
             json=dict(
@@ -235,15 +235,15 @@ class Part2(Part):
             )
         )
 
-        if r.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError('{}: {}'.format(str(r), r.content))
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError('{}: {}'.format(str(response), response.content))
 
         # ensure that cached children are reset such that next call the children are refreshed
         self._cached_children = None
         if refresh:
             self.children()
 
-        return Part2(r.json()['results'][0], client=self._client)
+        return Part2(response.json()['results'][0], client=self._client)
 
         # else:  # do the old way
         #     new_part = self.add(model, name=name)  # type: Part

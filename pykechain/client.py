@@ -831,12 +831,12 @@ class Client(object):
         if kwargs:
             request_params.update(**kwargs)
 
-        r = self._request('GET', self._build_url('service_executions'), params=request_params)
+        response = self._request('GET', self._build_url('service_executions'), params=request_params)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
+        if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve service executions")
 
-        data = r.json()
+        data = response.json()
         return [ServiceExecution(service_exeuction, client=self) for service_exeuction in data['results']]
 
     def service_execution(self, name=None, pk=None, scope=None, service=None, **kwargs):
@@ -892,12 +892,12 @@ class Client(object):
         if kwargs:
             request_params.update(**kwargs)
 
-        r = self._request('GET', self._build_url('users'), params=request_params)
+        response = self._request('GET', self._build_url('users'), params=request_params)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not find users: '{}'".format(r.json()))
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not find users: '{}'".format(response.json()))
 
-        data = r.json()
+        data = response.json()
         return [User(user, client=self) for user in data['results']]
 
     def user(self, username=None, pk=None, **kwargs):
@@ -977,12 +977,12 @@ class Client(object):
         if kwargs:
             request_params.update(**kwargs)
 
-        r = self._request('GET', self._build_url('teams'), params=request_params)
+        response = self._request('GET', self._build_url('teams'), params=request_params)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not find teams: '{}'".format(r.json()))
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not find teams: '{}'".format(response.json()))
 
-        data = r.json()
+        data = response.json()
         return [Team(team, client=self) for team in data['results']]
 
     #

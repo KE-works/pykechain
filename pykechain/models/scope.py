@@ -238,11 +238,11 @@ class Scope(Base):
             manager_object = next((item for item in users['results'] if item["username"] == user), None)
             if manager_object:
                 url = self._client._build_url('scope', scope_id=self.id)
-                r = self._client._request('PUT', url, params={'select_action': select_action},
+                response = self._client._request('PUT', url, params={'select_action': select_action},
                                           data={
                                               'user_id': manager_object['pk']
                                           })
-                if r.status_code != requests.codes.ok:  # pragma: no cover
+                if response.status_code != requests.codes.ok:  # pragma: no cover
                     raise APIError("Could not {} {} in Scope".format(select_action.split('_')[0], user_type))
             else:
                 raise NotFoundError("User {} does not exist".format(user))
@@ -252,12 +252,12 @@ class Scope(Base):
     def _edit(self, update_dict):
         url = self._client._build_url('scope', scope_id=self.id)
 
-        r = self._client._request('PUT', url, json=update_dict)
+        response = self._client._request('PUT', url, json=update_dict)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Scope ({})".format(r))
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Scope ({})".format(response))
         else:
-            self._json_data = r.json().get('results') and r.json().get('results')[0]
+            self._json_data = response.json().get('results') and response.json().get('results')[0]
 
     def edit(self, name=None, description=None, start_date=None, due_date=None, status=None, tags=None, team=None,
              options=None, **kwargs):

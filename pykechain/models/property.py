@@ -142,20 +142,20 @@ class Property(Base):
         :return: None
         :raises APIError: if delete was not successful
         """
-        r = self._client._request('DELETE', self._client._build_url('property', property_id=self.id))
+        response = self._client._request('DELETE', self._client._build_url('property', property_id=self.id))
 
-        if r.status_code != requests.codes.no_content:  # pragma: no cover
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete property: {} with id {}".format(self.name, self.id))
 
     def _put_value(self, value):
         url = self._client._build_url('property', property_id=self.id)
 
-        r = self._client._request('PUT', url, json={'value': value})
+        response = self._client._request('PUT', url, json={'value': value})
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
+        if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update property value")
 
-        return r.json()['results'][0]['value']
+        return response.json()['results'][0]['value']
 
     @classmethod
     def create(cls, json, **kwargs):
@@ -252,10 +252,10 @@ class Property(Base):
             for key, value in iteritems(kwargs):
                 update_dict[key] = value
 
-        r = self._client._request('PUT', self._client._build_url('property', property_id=self.id), json=update_dict)
+        response = self._client._request('PUT', self._client._build_url('property', property_id=self.id), json=update_dict)
 
-        if r.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Property ({})".format(r))
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Property ({})".format(response))
 
     def _parse_validators(self):
         """Parse the validator in the options to validators."""
