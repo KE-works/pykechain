@@ -1,7 +1,5 @@
 from pykechain.enums import PropertyType, Multiplicity
-from pykechain.models import MultiReferenceProperty2
 from tests.classes import TestBetamax
-from unittest import skip
 
 
 class TestMultiReferenceProperty(TestBetamax):
