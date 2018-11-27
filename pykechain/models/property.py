@@ -257,7 +257,7 @@ class Property(Base):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Property ({})".format(response))
 
-        self.refresh()
+        self.refresh(url=self._client._build_url('property', property_id=self.id))
 
     def _parse_validators(self):
         """Parse the validator in the options to validators."""
