@@ -191,8 +191,8 @@ class ExtCustomization(CustomizationBase):
 
     def add_super_grid_widget(self, part_model, delete=False, edit=True, export=True, clone=True, incomplete_rows=True,
                               new_instance=False, parent_part_instance=None, max_height=None, custom_title=False,
-                              emphasize_edit=False, emphasize_new_instance=True, emphasize_clone=False, sort_property=None,
-                              sort_direction=SortTable.ASCENDING):
+                              emphasize_edit=False, emphasize_new_instance=True, emphasize_clone=False,
+                              sort_property=None, sort_direction=SortTable.ASCENDING):
         """
         Add a KE-chain superGrid (e.g. basic table widget) to the customization.
 
@@ -681,7 +681,8 @@ class ExtCustomization(CustomizationBase):
 
         self._add_widget(dict(config=config, meta=meta, name=WidgetNames.FILTEREDGRIDWIDGET))
 
-    def add_script_widget(self, script, custom_title=False, custom_button_text=False, emphasize_run=True, download_log=False):
+    def add_script_widget(self, script, custom_title=False, custom_button_text=False, emphasize_run=True,
+                          download_log=False):
         """
         Add a KE-chain Script (e.g. script widget) to the customization.
 
