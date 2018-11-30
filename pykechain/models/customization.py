@@ -189,9 +189,9 @@ class ExtCustomization(CustomizationBase):
         validate(config, component_jsonwidget_schema)
         self._add_widget(dict(config=config, name=WidgetNames.JSONWIDGET))
 
-    def add_super_grid_widget(self, part_model, delete=False, edit=True, export=True, incomplete_rows=True,
+    def add_super_grid_widget(self, part_model, delete=False, edit=True, export=True, clone=True, incomplete_rows=True,
                               new_instance=False, parent_part_instance=None, max_height=None, custom_title=False,
-                              emphasize_edit=False, emphasize_new_instance=True, sort_property=None,
+                              emphasize_edit=False, emphasize_new_instance=True, emphasize_clone=False, sort_property=None,
                               sort_direction=SortTable.ASCENDING):
         """
         Add a KE-chain superGrid (e.g. basic table widget) to the customization.
@@ -202,6 +202,8 @@ class ExtCustomization(CustomizationBase):
         :type emphasize_new_instance: bool
         :param emphasize_edit: Emphasize the Edit button (default False)
         :type emphasize_edit: bool
+        :param emphasize_clone: Emphasize the Clone button (default False)
+        :type emphasize_clone: bool
         :param new_instance: Show or hide the New instance button (default False). You need to provide a
             `parent_part_instance` in order for this to work.
         :type new_instance: bool
@@ -211,6 +213,8 @@ class ExtCustomization(CustomizationBase):
         :type export: bool
         :param edit: Show or hide the Edit button (default True)
         :type edit: bool
+        :param clone: Show or hide the Clone button (default True)
+        :type clone: bool
         :param delete: Show or hide the Delete button (default False)
         :type delete: bool
         :param part_model: The part model based on which all instances will be shown.
@@ -234,6 +238,7 @@ class ExtCustomization(CustomizationBase):
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
 
         """
+        height = max_height
         # Check whether the part_model is uuid type or class `Part`
         if isinstance(part_model, Part):
             part_model_id = part_model.id
@@ -285,6 +290,7 @@ class ExtCustomization(CustomizationBase):
             "viewModel": {
                 "data": {
                     "actions": {
+                        "cloneInstance": clone,
                         "delete": delete,
                         "edit": edit,
                         "export": export,
@@ -297,6 +303,7 @@ class ExtCustomization(CustomizationBase):
                     }] if sort_property_id else [],
                     "ui": {
                         "newInstance": "primary-action" if emphasize_new_instance else "default-toolbar",
+                        "cloneInstance": "primary-action" if emphasize_clone else "default-toolbar",
                         "edit": "primary-action" if emphasize_edit else "default-toolbar"
                     }
                 }
@@ -307,8 +314,8 @@ class ExtCustomization(CustomizationBase):
         config['filter']["parent"] = parent_part_instance_id
 
         # Add max height and custom title
-        if max_height:
-            config['maxHeight'] = max_height
+        if height:
+            config['height'] = height
 
         if custom_title is False:
             show_title_value = "Default"
@@ -317,7 +324,7 @@ class ExtCustomization(CustomizationBase):
             show_title_value = "No title"
             title = str()
         else:
-            show_title_value = "Custom Title"
+            show_title_value = "Custom title"
             title = str(custom_title)
 
         config["title"] = title
@@ -325,9 +332,12 @@ class ExtCustomization(CustomizationBase):
 
         # Declare the meta info for the superGrid
         meta = {
+            "cloneButtonVisible": clone,
+            "cloneButtonUi": "primary-action" if emphasize_clone else "default-toolbar",
+            "primaryUiCloneValue": emphasize_clone,
             "parentInstanceId": parent_part_instance_id,
             "editButtonUi": "primary-action" if emphasize_edit else "default-toolbar",
-            "customHeight": max_height if max_height else 500,
+            "customHeight": height if height else None,
             "primaryAddUiValue": emphasize_new_instance,
             "activityId": str(self.activity.id),
             "customTitle": title,
@@ -340,7 +350,7 @@ class ExtCustomization(CustomizationBase):
             "showTitleValue": show_title_value,
             "partModelId": part_model_id,
             "editButtonVisible": edit,
-            "showHeightValue": "Custom max height" if max_height else "Auto",
+            "showHeightValue": "Set height" if height else "Automatic height",
             "sortDirection": sort_direction,
             "sortedColumn": sort_property_id if sort_property_id else None
         }
@@ -369,6 +379,7 @@ class ExtCustomization(CustomizationBase):
         :type show_columns: list
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
+        height = max_height
         # Check whether the parent_part_instance is uuid type or class `Part`
         if isinstance(part_instance, Part):
             part_instance_id = part_instance.id
@@ -404,12 +415,12 @@ class ExtCustomization(CustomizationBase):
                 "data": {
                     "displayColumns": display_columns
                 }
-            }
+            },
         }
 
         # Add max height and custom title
-        if max_height:
-            config['maxHeight'] = max_height
+        if height:
+            config['height'] = height
 
         if custom_title is False:
             show_title_value = "Default"
@@ -418,20 +429,21 @@ class ExtCustomization(CustomizationBase):
             show_title_value = "No title"
             title = str()
         else:
-            show_title_value = "Custom Title"
+            show_title_value = "Custom title"
             title = str(custom_title)
 
         config["title"] = title
+        config["showTitleValue"] = show_title_value
 
         # Declare the meta info for the property grid
         meta = {
             "activityId": str(self.activity.id),
-            "customHeight": max_height if max_height else None,
+            "customHeight": height if height else None,
             "customTitle": title,
             "partInstanceId": part_instance_id,
             "showColumns": show_columns,
             "showHeaders": show_headers,
-            "showHeightValue": "Custom max height" if max_height else "Auto",
+            "showHeightValue": "Set height" if height else "Automatic height",
             "showTitleValue": show_title_value
         }
 
@@ -467,10 +479,10 @@ class ExtCustomization(CustomizationBase):
         if text:
             config['html'] = text
         if custom_title:
-            show_title_value = "Custom Title"
+            show_title_value = "Custom title"
             title = custom_title
         else:
-            show_title_value = "No Title"
+            show_title_value = "No title"
             title = None
         config['collapsible'] = collapsible
         # A widget can only be collapsed if it is collapsible in the first place
@@ -491,10 +503,11 @@ class ExtCustomization(CustomizationBase):
 
         self._add_widget(dict(config=config, meta=meta, name=WidgetNames.HTMLWIDGET))
 
-    def add_paginated_grid_widget(self, part_model, delete=False, edit=True, export=True,
+    def add_paginated_grid_widget(self, part_model, delete=False, edit=True, export=True, clone=True,
                                   new_instance=False, parent_part_instance=None, max_height=None, custom_title=False,
-                                  emphasize_edit=False, emphasize_new_instance=True, sort_property=None,
-                                  sort_direction=SortTable.ASCENDING, page_size=25, collapse_filters=False):
+                                  emphasize_edit=False, emphasize_clone=False, emphasize_new_instance=True,
+                                  sort_property=None, sort_direction=SortTable.ASCENDING, page_size=25,
+                                  collapse_filters=False):
         """
         Add a KE-chain paginatedGrid (e.g. paginated table widget) to the customization.
 
@@ -504,15 +517,17 @@ class ExtCustomization(CustomizationBase):
         :type emphasize_new_instance: bool
         :param emphasize_edit: Emphasize the Edit button (default False)
         :type emphasize_edit: bool
+        :param emphasize_clone: Emphasize the Clone button (default False)
+        :type emphasize_clone: bool
         :param new_instance: Show or hide the New instance button (default False). You need to provide a
             `parent_part_instance` in order for this to work.
         :type new_instance: bool
-        :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
-        :type incomplete_rows: bool
         :param export: Show or hide the Export Grid button (default True)
         :type export: bool
         :param edit: Show or hide the Edit button (default True)
         :type edit: bool
+        :param clone: Show or hide the Clone button (default True)
+        :type clone: bool
         :param delete: Show or hide the Delete button (default False)
         :type delete: bool
         :param page_size: Number of parts that will be shown per page in the grid.
@@ -539,6 +554,7 @@ class ExtCustomization(CustomizationBase):
         :type sort_direction: basestring (see :class:`enums.SortTable`)
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
+        height = max_height
         # Check whether the part_model is uuid type or class `Part`
         if isinstance(part_model, Part):
             part_model_id = part_model.id
@@ -589,7 +605,7 @@ class ExtCustomization(CustomizationBase):
             show_title_value = "No title"
             title = ' '
         else:
-            show_title_value = "Custom Title"
+            show_title_value = "Custom title"
             title = str(custom_title)
 
         # Set the collapse filters value
@@ -611,7 +627,8 @@ class ExtCustomization(CustomizationBase):
                             "delete": delete,
                             "edit": edit,
                             "export": export,
-                            "newInstance": new_instance
+                            "newInstance": new_instance,
+                            "cloneInstance": clone
                         },
                         "sorters": [{
                             "direction": sort_direction,
@@ -619,7 +636,8 @@ class ExtCustomization(CustomizationBase):
                         }] if sort_property_id else [],
                         "ui": {
                             "newInstance": "primary-action" if emphasize_new_instance else "default-toolbar",
-                            "edit": "primary-action" if emphasize_edit else "default-toolbar"
+                            "edit": "primary-action" if emphasize_edit else "default-toolbar",
+                            "cloneInstance": "primary-action" if emphasize_clone else "default-toolbar"
                         },
                         "pageSize": page_size
                     }
@@ -628,7 +646,7 @@ class ExtCustomization(CustomizationBase):
                 "title": title,
                 "showTitleValue": show_title_value,
             },
-            "maxHeight": max_height if max_height else None,
+            "maxHeight": height if height else None,
             "parentInstanceId": parent_part_instance_id,
             "partModelId": part_model_id,
             "collapseFilters": collapse_filters
@@ -636,10 +654,13 @@ class ExtCustomization(CustomizationBase):
 
         # Declare the meta info for the paginatedGrid
         meta = {
+            "cloneButtonUi": "primary-action" if emphasize_clone else "defualt-toolbar",
+            "cloneButtonVisible": clone,
+            "primaryCloneUiValue": emphasize_clone,
             "parentInstanceId": parent_part_instance_id,
             "editButtonUi": "primary-action" if emphasize_edit else "default-toolbar",
             "editButtonVisible": edit,
-            "customHeight": max_height if max_height else 500,
+            "customHeight": height if height else None,
             "primaryAddUiValue": emphasize_new_instance,
             "activityId": str(self.activity.id),
             "customTitle": title,
@@ -650,7 +671,7 @@ class ExtCustomization(CustomizationBase):
             "addButtonVisible": new_instance,
             "showTitleValue": show_title_value,
             "partModelId": str(part_model_id),
-            "showHeightValue": "Custom max height" if max_height else "Auto",
+            "showHeightValue": "Set height" if height else "Automatic height",
             "sortDirection": sort_direction,
             "sortedColumn": sort_property_id if sort_property_id else None,
             "collapseFilters": collapse_filters,
@@ -660,7 +681,7 @@ class ExtCustomization(CustomizationBase):
 
         self._add_widget(dict(config=config, meta=meta, name=WidgetNames.FILTEREDGRIDWIDGET))
 
-    def add_script_widget(self, script, custom_title=False, custom_button_text=False, emphasize_run=True):
+    def add_script_widget(self, script, custom_title=False, custom_button_text=False, emphasize_run=True, download_log=False):
         """
         Add a KE-chain Script (e.g. script widget) to the customization.
 
@@ -680,6 +701,8 @@ class ExtCustomization(CustomizationBase):
         :type custom_button_text: bool or basestring or None
         :param emphasize_run: Emphasize the run button (default True)
         :type emphasize_run: bool
+        :param download_log: Include the possibility of downloading the log inside the activity
+        :type download_log: bool
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
         # Check whether the script is uuid type or class `Service`
@@ -699,7 +722,7 @@ class ExtCustomization(CustomizationBase):
             show_title_value = "No title"
             title = ''
         else:
-            show_title_value = "Custom Title"
+            show_title_value = "Custom title"
             title = str(custom_title)
 
         # Add custom button text
@@ -707,10 +730,10 @@ class ExtCustomization(CustomizationBase):
             show_button_value = "Default"
             button_text = script.name
         elif custom_button_text is None:
-            show_button_value = "No title"
+            show_button_value = "No text"
             button_text = ''
         else:
-            show_button_value = "Custom Title"
+            show_button_value = "Custom text"
             button_text = str(custom_button_text)
 
         # Declare script widget config
@@ -719,7 +742,8 @@ class ExtCustomization(CustomizationBase):
             'serviceId': script_id,
             'viewModel': {
                 'data': {
-                    'buttonUI': 'primary-action' if emphasize_run else "default-toolbar",
+                    'canDowloadLog': download_log,
+                    'buttonUI': 'primary-action' if emphasize_run else "default-toolbar"
                 }
             },
             'title': title,
@@ -734,7 +758,8 @@ class ExtCustomization(CustomizationBase):
             'customTitle': title,
             'serviceId': script_id,
             'emphasizeButton': emphasize_run,
-            'showTitleValue': show_title_value
+            'showTitleValue': show_title_value,
+            'showDownloadLog': download_log
         }
 
         self._add_widget(dict(config=config, meta=meta, name=WidgetNames.SERVICEWIDGET))
@@ -774,7 +799,7 @@ class ExtCustomization(CustomizationBase):
             show_title_value = "No title"
             title = ''
         else:
-            show_title_value = "Custom Title"
+            show_title_value = "Custom title"
             title = str(custom_title)
 
         # Declare notebook widget config
@@ -843,7 +868,7 @@ class ExtCustomization(CustomizationBase):
             show_title_value = "No title"
             title = ''
         else:
-            show_title_value = "Custom Title"
+            show_title_value = "Custom title"
             title = str(custom_title)
 
         # Declare attachment viewer widget config
