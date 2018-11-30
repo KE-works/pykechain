@@ -3,17 +3,22 @@ Change Log
 
 pykechain changelog
 
-2.5.1 (5NOV18)
+2.5.2 (30NOV18)
+---------------
+ * Fixed the customizations to be compatible with KE-chain 3: `Custom Title` replaced by `Custom title`; added the possibility to include the `Clone button` where applicable. The `metaWidget` now uses 'Set height' and 'Automatic height'. (#421) thanks to @raduiordache.
+ * Updated dependent versions for development: requests (2.20.1), sphinx (1.8.2), pytest (4.0.1), requests (2.20.0), matplotlib (3.0.2)
+
+2.5.1 (05NOV18)
 --------------
  * patch release to include the dependency pytz in the normal list of dependencies, not only for development.
 
 2.5.0 (1NOV18)
 --------------
- * Added the ability to set and retrieve the scope tags using the `Scope.tags` property (#367)
- * Added timezone, language and email to the user object. You can access this directly as a property on the `User` object (#378)
+ * Added the ability to set and retrieve the scope tags using the `Scope.tags` property. (#367)
+ * Added timezone, language and email to the user object. You can access this directly as a property on the `User` object. (#378)
  * Ensured that you can now filter users on their name, username and email. (#373)
  * Added the possibility to generate a PDF from an activity even with attachments included. The later is an async process on the KE-chain server and pykechain uses a 'hint' to retrieve the PDF once it becomes available on the server. It has an timeout of 100 seconds. (#406)
- * included many updated tests for the copy_move functionality including cross reference properties (#376)
+ * included many updated tests for the copy_move functionality including cross reference properties. (#376)
  * Updated dependent versions for development: semver (2.8.1), pydocstyle (3.0.0), mypy (0.641), requests (2.20.0), flake8 (3.6.0), matplotlib (3.0.1), pytest (3.9.3), tox (3.5.3)
 
 2.4.1 (26SEP18)
