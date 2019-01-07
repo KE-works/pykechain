@@ -16,6 +16,7 @@ Major differences
 
 Improvements
 ~~~~~~~~~~~~
+ * Added `clone_scope()` method to the `Client` and the `Scope` object. With the right permissions you can now clone a project using pykechain.
 
 2.5.1 (5NOV18)
 --------------
