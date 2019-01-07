@@ -3,7 +3,7 @@ from six import text_type, string_types
 from typing import Any  # noqa: F401
 
 from pykechain.enums import Multiplicity
-from pykechain.exceptions import APIError, NotFoundError
+from pykechain.exceptions import APIError, NotFoundError, ForbiddenError
 from pykechain.models import Scope
 
 
@@ -78,6 +78,13 @@ class Scope2(Scope):
 
     def _edit(self, update_dict):
         from pykechain.client import API_EXTRA_PARAMS
+        if update_dict.get('options'):
+            update_dict['scope_options'] = update_dict.get('options')
+            del update_dict['options']
+        if update_dict.get['team']:
+            update_dict['team_id'] = update_dict.get('team')
+            del update_dict['team']
+
         url = self._client._build_url('scope2', scope_id=self.id)
 
         response = self._client._request('PUT', url, params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
@@ -137,3 +144,31 @@ class Scope2(Scope):
         """
         return self._client.create_model_with_properties(parent, name, multiplicity=multiplicity,
                                                          properties_fvalues=properties_fvalues, **kwargs)
+
+    def clone(self, *args, **kwargs):
+        """Clone a scope.
+
+        See :method:`pykechain.Client.clone_scope()` for available paramters.
+        """
+        return self._client.clone_scope(source_scope=self, **kwargs)
+
+    def delete(self):
+        """Delete the scope.
+
+        Only works with enough permissions
+
+        .. versionadded: 3.0
+        :raises ForbiddenError: if you do not have the permissions to delete a scope
+        """
+        url = self._client._build_url('scope2', scope_id=self.id)
+        response = self._client._request('DELETE', url)
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            if response.status_code == requests.codes.forbiddem:
+                raise ForbiddenError("Forbidden to delete scope, {}: {}".format(str(response), response.content))
+            raise APIError("Could not delete scope, {}: {}".format(str(response), response.content))
+
+
+
+
+

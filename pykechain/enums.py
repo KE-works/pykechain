@@ -268,15 +268,32 @@ class ActivityStatus(Enum):
 class ScopeStatus(Enum):
     """The various status of a scope.
 
+    .. versionchanged:: 3.0
+      The `TEMPLATE` ScopeStatus is deprecated in KE-chain 3
+
     :cvar ACTIVE: Status of a scope is active (default)
     :cvar CLOSED: Status of a scope is closed
-    :cvar TEMPLATE: Status of a scope is a template (not actively used)
+    :cvar TEMPLATE: Status of a scope is a template (not actively used)(deprecated in KE-chain 3.0)
+    :cvar DELETING: Status of a scope when the scope is being deleted
     """
 
     ACTIVE = 'ACTIVE'
     CLOSED = 'CLOSED'
     TEMPLATE = 'TEMPLATE'
+    DELETING = 'DELETING'
 
+class ScopeCategory(Enum):
+    """The various categories of a scope.
+
+    .. versionadded::3.0
+
+    :cvar LIBRARY_SCOPE: The scope is a library scope
+    :cvar USER_SCOPE: The scope is a normal user scope
+    :cvar TEMPLATE_SCOPE: The scope is a template scope
+    """
+    LIBRARY_SCOPE = 'LIBRARY_SCOPE'
+    USER_SCOPE = 'USER_SCOPE'
+    TEMPLATE_SCOPE = 'TEMPLATE_SCOPE'
 
 class ServiceType(Enum):
     """The file types of sim script.
