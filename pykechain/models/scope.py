@@ -6,7 +6,7 @@ from six import text_type, string_types
 from typing import Any  # noqa: F401
 
 from pykechain.enums import Multiplicity, ScopeStatus
-from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
+from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError, ForbiddenError
 from pykechain.models.base import Base
 from pykechain.models.team import Team
 from pykechain.utils import is_uuid
@@ -220,6 +220,22 @@ class Scope(Base):
         select_action = 'remove_manager'
 
         self._update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
+
+    def delete(self):
+        """Delete the scope.
+
+        Only works with enough permissions
+
+        .. versionadded: 3.0
+        :raises ForbiddenError: if you do not have the permissions to delete a scope
+        """
+        url = self._client._build_url('scope', scope_id=self.id)
+        response = self._client._request('DELETE', url)
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            if response.status_code == requests.codes.forbiddem:
+                raise ForbiddenError("Forbidden to delete scope, {}: {}".format(str(response), response.content))
+            raise APIError("Could not delete scope, {}: {}".format(str(response), response.content))
 
     def _update_scope_project_team(self, select_action, user, user_type):
         """

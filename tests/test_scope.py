@@ -215,7 +215,7 @@ class TestScopes(TestBetamax):
         # teardown
         self.project.edit(tags=saved_tags)
 
-@skipIf(not TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 1, expected to fail on new PIM2")
+@skipIf(not TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 2, expected to fail on old PIM")
 class TestScopes2SpecificTests(TestBetamax):
 
     def test_retrieve_scope2_members(self):
@@ -238,3 +238,44 @@ class TestScopes2SpecificTests(TestBetamax):
 
         # teardown
         self.project.remove_member('anotheruser')
+
+    def test_clone_scope_vanilla(self):
+        new_scope = self.project.clone(async=False)
+
+        self.assertNotEqual(self.project.id, new_scope.id)
+        self.assertEqual(self.project._json_data.get('tasks_count'), new_scope._json_data.get('tasks_count'))
+        self.assertEqual(self.project._json_data.get('processes_count'), new_scope._json_data.get('processes_count'))
+        self.assertEqual(self.project._json_data.get('activities_count'), new_scope._json_data.get('activities_count'))
+        self.assertEqual(self.project._json_data.get('parts_count'), new_scope._json_data.get('parts_count'))
+        self.assertEqual(self.project._json_data.get('model_parts_count'), new_scope._json_data.get('model_parts_count'))
+        self.assertEqual(self.project._json_data.get('properties_count'), new_scope._json_data.get('properties_count'))
+        new_scope.delete()
+
+    def test_scope_delete(self):
+        new_scope = self.project.clone(async=False)
+        self.assertNotEqual(self.project.id, new_scope.id)
+        new_scope.delete()
+
+        with self.assertRaisesRegex(NotFoundError, 'No scope fits criteria'):
+            self.client.scope(pk=new_scope.id)
+
+    def test_clone_scope_updated_name_description_tags_etc(self):
+        """
+        self, source_scope, name=None, status=None, tags=None, start_date=None, due_date=None,
+                    description=None, team=None, scope_options=None, async=False):
+        """
+        new_scope = self.project.clone(
+            name="new bike scope",
+            description="new description",
+            status=ScopeStatus.CLOSED,
+            # scope_options={"hello": "world"},
+            tags=('a', 'b', 'b', 'c'),
+            async=False)
+
+        self.assertNotEqual(self.project.id, new_scope.id)
+        self.assertEqual(new_scope._json_data.get('name'), "new bike scope")
+        self.assertEqual(new_scope._json_data.get('text'), "new description")
+        self.assertEqual(new_scope._json_data.get('status'), ScopeStatus.CLOSED)
+        # self.assertListEqual(new_scope._json_data.get('tags'), ["a", "b", "c"])
+
+        new_scope.delete()

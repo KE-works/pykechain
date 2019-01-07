@@ -3,6 +3,20 @@ Change Log
 
 pykechain changelog
 
+3.0.0 (UNRELEASED)
+------------------
+This is a next major release of pykechain, adding support for the legacy version of the Product Information Module (PIM) in KE-chain as well as the new version PIM3. Based on the version number of the PIM2, either an `Part` or an `Part2` class is provided.
+
+The main difference between PIM1 and PIM2 is that the backend is implemented as a graph database, which should provide additional scalability for large datasets.
+
+Major differences
+~~~~~~~~~~~~~~~~~
+
+
+
+Improvements
+~~~~~~~~~~~~
+
 2.5.1 (5NOV18)
 --------------
  * patch release to include the dependency pytz in the normal list of dependencies, not only for development.
