@@ -81,7 +81,7 @@ class Scope2(Scope):
         if update_dict.get('options'):
             update_dict['scope_options'] = update_dict.get('options')
             del update_dict['options']
-        if update_dict.get['team']:
+        if update_dict.get('team'):
             update_dict['team_id'] = update_dict.get('team')
             del update_dict['team']
 
