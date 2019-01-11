@@ -38,6 +38,19 @@ class Scope2(Scope):
         else:
             return None
 
+    @property
+    def options(self):
+        """Options of the Scope.
+
+        .. versionadded: 3.0
+        """
+        return self._json_data.get('scope_options')
+
+    @options.setter
+    def options(self, option_value):
+        self.edit(options=option_value)
+
+
     def refresh(self, json=None, url=None, extra_params=None):
         """Refresh the object in place."""
         from pykechain.client import API_EXTRA_PARAMS
