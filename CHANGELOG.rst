@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+2.5.3 (18JAN19)
+---------------
+ * Fixed a bug where a numeric range validator from a property was not correctly instantiated for provided min/max values when the validator was retrieved from the KE-chain backend. Thanks to @bastiaanbeijer for finding this! (#435)
+
 2.5.2 (30NOV18)
 ---------------
  * Fixed the customizations to be compatible with KE-chain 3: `Custom Title` replaced by `Custom title`; added the possibility to include the `Clone button` where applicable. The `metaWidget` now uses 'Set height' and 'Automatic height'. (#421) thanks to @raduiordache.
