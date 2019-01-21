@@ -3,9 +3,11 @@ Change Log
 
 pykechain changelog
 
-2.5.3 (18JAN19)
+2.5.3 (21JAN19)
 ---------------
  * Fixed a bug where a numeric range validator from a property was not correctly instantiated for provided min/max values when the validator was retrieved from the KE-chain backend. Thanks to @bastiaanbeijer for finding this! (#435)
+ * Updated dependent versions for development: requests (2.21.0), sphinx (1.8.3), pytest (4.1.1), mypy (0.660), nbsphinx (0.4.2), tox (3.7.0).
+
 
 2.5.2 (30NOV18)
 ---------------
