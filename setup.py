@@ -87,7 +87,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['requests', 'envparse', 'typing', 'six', 'jsonschema', 'semver', 'pytz'],
+    install_requires=['requests>=2.20.0', 'envparse', 'typing', 'six', 'jsonschema', 'semver', 'pytz'],
 
     setup_requires=['pytest-runner'],
     tests_require=['pytest', 'betamax'],
