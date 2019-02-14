@@ -162,7 +162,7 @@ class ExtCustomization(CustomizationBase):
         :raises ValueError: if the customization has no widgets
         """
         widgets = self.widgets()
-        if len(widgets) is 0:
+        if len(widgets) == 0:
             raise ValueError("This customization has no widgets")
         widgets.pop(index)
         self._save_customization(widgets)
