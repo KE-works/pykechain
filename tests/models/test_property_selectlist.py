@@ -76,3 +76,12 @@ class TestSelectListProperty(TestBetamax):
 
         # tearDown
         self.select.value = None
+
+    def test_integrity_options_dict(self):
+        # setUp
+        original_options_dict = dict(self.select_model._options)
+        self.select_model.options = list(self.select_model.options)
+
+        # testing
+        testing_options_dict = self.select_model._options
+        self.assertEqual(original_options_dict, testing_options_dict)
