@@ -1,6 +1,9 @@
+from jsonschema import validate
+
 from pykechain.enums import Category
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models.property import Property
+from pykechain.models.validators.validator_schemas import options_json_schema
 
 
 class SelectListProperty(Property):
@@ -9,7 +12,7 @@ class SelectListProperty(Property):
     def __init__(self, json, **kwargs):
         """Construct a Property from a json object."""
         super(SelectListProperty, self).__init__(json, **kwargs)
-        self._value_choices = self._json_data.get('options').get('value_choices')
+        self._value_choices = self._json_data.get('options').get('value_choices', [])
 
     @property
     def value(self):
@@ -87,10 +90,12 @@ class SelectListProperty(Property):
         :param options_list: list of options to set.
         :raises APIError: when unable to update the options
         """
-        self._options.update({"value_choices": options_list})
+        new_options = self._options
+        new_options.update({"value_choices": options_list})
+        validate(new_options, options_json_schema)
 
         url = self._client._build_url('property', property_id=self.id)
-        response = self._client._request('PUT', url, json=self._options)
+        response = self._client._request('PUT', url, json={'options': new_options})
 
         if response.status_code != 200:  # pragma: no cover
             raise APIError("Could not update property value. Response: {}".format(str(response)))
