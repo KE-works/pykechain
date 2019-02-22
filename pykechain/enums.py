@@ -316,7 +316,9 @@ class ServiceEnvironmentVersion(Enum):
 
     PYTHON_2_7 = '2.7'
     PYTHON_3_5 = '3.5'
+    PYTHON_3_6 = '3.6'
     PYTHON_3_5_NOTEBOOKS = '3.5_notebook'
+    PYTHON_3_6_NOTEBOOKS = '3.6_notebook'
 
 
 class ServiceExecutionStatus(Enum):
