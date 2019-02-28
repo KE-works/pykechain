@@ -3,6 +3,12 @@ Change Log
 
 pykechain changelog
 
+2.5.4 (28FEB19)
+---------------
+ * Fixed a bug where the update of the single select list options could overwrite the existing validators. Thanks to @jelleboersma for finding this out and creating the PR. (#446)
+ * Updated dependent versions for development: sphinx (1.8.4), mypy (0.670), pytest (4.3.0), flake8 (3.7.7), jsonschema (3.0.0), pyOpenSSL (for python 2.7, 19.0.0).
+ * Updated security advisory to install requests package later than 2.20.0 (CVE-2018-18074).
+
 2.5.3 (21JAN19)
 ---------------
  * Fixed a bug where a numeric range validator from a property was not correctly instantiated for provided min/max values when the validator was retrieved from the KE-chain backend. Thanks to @bastiaanbeijer for finding this! (#435)
