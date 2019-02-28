@@ -90,7 +90,7 @@ class SelectListProperty(Property):
         :param options_list: list of options to set.
         :raises APIError: when unable to update the options
         """
-        new_options = self._options
+        new_options = self._options.copy()  # make a full copy of the dict not to only link it and update dict in place
         new_options.update({"value_choices": options_list})
         validate(new_options, options_json_schema)
 
@@ -99,3 +99,5 @@ class SelectListProperty(Property):
 
         if response.status_code != 200:  # pragma: no cover
             raise APIError("Could not update property value. Response: {}".format(str(response)))
+        else:
+            self._options = new_options  # save the new options as the options
