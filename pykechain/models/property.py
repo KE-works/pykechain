@@ -257,7 +257,7 @@ class Property(Base):
                 # no change
                 pass
             else:
-                new_options = dict(self._options)
+                new_options = self._options.copy()  # make a copy
                 new_options.update({'validators': validators_json})
                 validate(new_options, options_json_schema)
                 self._options = new_options
