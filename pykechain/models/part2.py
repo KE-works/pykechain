@@ -156,6 +156,36 @@ class Part2(Part):
         if name:
             self.name = name
 
+    def proxy_model(self):
+        """
+        Retrieve the proxy model of this proxied `Part` as a `Part`.
+
+        Allows you to retrieve the model of a proxy. But trying to get the catalog model of a part that
+        has no proxy, will raise an :exc:`NotFoundError`. Only models can have a proxy.
+
+        .. versionchanged:: 3.0
+           Added compatibility with KE-chain 3 backend.
+
+        :return: :class:`Part` with category `MODEL` and from which the current part is proxied
+        :raises NotFoundError: When no proxy model is found
+
+        Example
+        -------
+
+        >>> proxy_part = project.model('Proxy based on catalog model')
+        >>> catalog_model_of_proxy_part = proxy_part.proxy_model()
+
+        >>> proxied_material_of_the_bolt_model = project.model('Bolt Material')
+        >>> proxy_basis_for_the_material_model = proxied_material_of_the_bolt_model.proxy_model()
+
+        """
+        if self.category != Category.MODEL:
+            raise IllegalArgumentError("Part {} is not a model, therefore it cannot have a proxy model".format(self))
+        if self._json_data.get('proxy_source_id_name') and is_uuid(self._json_data['proxy_source_id_name'].get('id')):
+            return self._client.model(pk=self._json_data['proxy_source_id_name'].get('id'))
+        else:
+            raise NotFoundError("Part {} is not a proxy".format(self.name))
+
     def add_with_properties(self, model, name=None, update_dict=None, properties_fvalues=None, refresh=True, **kwargs):
         """
         Add a part as a child of this part and update its properties in one go.
