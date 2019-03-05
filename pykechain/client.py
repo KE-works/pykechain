@@ -78,10 +78,11 @@ API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
 PARAMS_BASE = ["id", "name"]
 
 API_EXTRA_PARAMS = {
-    'activity': {
-        'fields': ['id', 'name', 'activity_type', 'progress', 'assignees_names', 'start_date', 'due_date', 'status',
-                   'parent_id', 'scope_id', 'parent_id_name', 'customization']
-    },
+    'activity':API_QUERY_PARAM_ALL_FIELDS,
+    #     {
+    #     'fields': ['id', 'name', 'activity_type', 'progress', 'assignees_names', 'start_date', 'due_date', 'status',
+    #                'parent_id', 'scope_id', 'parent_id_name', 'customization']
+    # },
     'activities': {
         'fields': ['id', 'name', 'activity_type', 'progress', 'assignees_names', 'start_date', 'due_date', 'status',
                    'parent_id', 'scope_id', 'parent_id_name', 'customization']
