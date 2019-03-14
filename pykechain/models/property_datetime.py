@@ -11,3 +11,15 @@ class DatetimeProperty(Property):
         :return:
         """
         pass
+
+    def to_value(self, datetime_object):
+        """
+        Transmogrify the datetime object to a isostring for storage in the value.
+
+        Will update the value and store it in the backend. Will make a backend call for it.
+
+        :param datetime_object: datetime object can be provided as value setting.
+        :type datetime_object: datetime
+        :return:
+        """
+        pass
