@@ -78,34 +78,45 @@ API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
 PARAMS_BASE = ["id", "name"]
 
 API_EXTRA_PARAMS = {
-    'activity':API_QUERY_PARAM_ALL_FIELDS,
-    #     {
-    #     'fields': ['id', 'name', 'activity_type', 'progress', 'assignees_names', 'start_date', 'due_date', 'status',
-    #                'parent_id', 'scope_id', 'parent_id_name', 'customization']
-    # },
-    'activities': {
-        'fields': ['id', 'name', 'activity_type', 'progress', 'assignees_names', 'start_date', 'due_date', 'status',
-                   'parent_id', 'scope_id', 'parent_id_name', 'customization']
-    },
-    'scope2': {'fields': ",".join(
-        ['id', 'name', 'text', 'start_date', 'due_date', 'status', 'progress', 'members', 'team', 'tags',
-         'scope_options', 'team_id_name'])},
-    'scopes2': {'fields': ",".join(
-        ['id', 'name', 'text', 'start_date', 'due_date', 'status', 'progress', 'members', 'team', 'tags',
-         'scope_options', 'team_id_name'])},
-    'part2': {'fields': ",".join(
-        ['id', 'name', 'properties', 'category', 'classification', 'parent_id', 'multiplicity', 'value_options',
-         'property_type', 'value', 'order', 'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
-    'parts2': {'fields': ",".join(
-        ['id', 'name', 'properties', 'category', 'classification', 'parent_id', 'multiplicity', 'value_options',
-         'property_type', 'value', 'order', 'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
-    'properties2': {'fields': ",".join(
-        ['id', 'name', 'model_id', 'part_id', 'order', 'scope_id', 'category', 'property_type', 'value',
-         'value_options', 'description', 'unit'])},
-    'property2': {'fields': ",".join(
-        ['id', 'name', 'model_id', 'part_id', 'order', 'scope_id', 'category', 'property_type', 'value',
-         'value_options', 'description', 'unit'])}
+    'activity': API_QUERY_PARAM_ALL_FIELDS,  # id,name,scope,status,classification,activity_type,parent_id'},
+    'activities': API_QUERY_PARAM_ALL_FIELDS,  # 'id,name,scope,status,classification,activity_type,parent_id'}
+    'scope2': API_QUERY_PARAM_ALL_FIELDS,
+    'scopes2': API_QUERY_PARAM_ALL_FIELDS,
+    'part2': API_QUERY_PARAM_ALL_FIELDS,
+    'parts2': API_QUERY_PARAM_ALL_FIELDS,
+    'properties2': API_QUERY_PARAM_ALL_FIELDS,
+    'property2': API_QUERY_PARAM_ALL_FIELDS
 }
+# TODO: need to tune this
+# API_EXTRA_PARAMS = {
+#     'activity':API_QUERY_PARAM_ALL_FIELDS,
+#     #     {
+#     #     'fields': ['id', 'name', 'activity_type', 'progress', 'assignees_names', 'start_date', 'due_date', 'status',
+#     #                'parent_id', 'scope_id', 'parent_id_name', 'customization']
+#     # },
+#     'activities': {
+#         'fields': ['id', 'name', 'activity_type', 'progress', 'assignees_names', 'start_date', 'due_date', 'status',
+#                    'parent_id', 'scope_id', 'parent_id_name', 'customization']
+#     },
+#     'scope2': {'fields': ",".join(
+#         ['id', 'name', 'text', 'start_date', 'due_date', 'status', 'progress', 'members', 'team', 'tags',
+#          'scope_options', 'team_id_name'])},
+#     'scopes2': {'fields': ",".join(
+#         ['id', 'name', 'text', 'start_date', 'due_date', 'status', 'progress', 'members', 'team', 'tags',
+#          'scope_options', 'team_id_name'])},
+#     'part2': {'fields': ",".join(
+#         ['id', 'name', 'properties', 'category', 'classification', 'parent_id', 'multiplicity', 'value_options',
+#          'property_type', 'value', 'order', 'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
+#     'parts2': {'fields': ",".join(
+#         ['id', 'name', 'properties', 'category', 'classification', 'parent_id', 'multiplicity', 'value_options',
+#          'property_type', 'value', 'order', 'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
+#     'properties2': {'fields': ",".join(
+#         ['id', 'name', 'model_id', 'part_id', 'order', 'scope_id', 'category', 'property_type', 'value',
+#          'value_options', 'description', 'unit'])},
+#     'property2': {'fields': ",".join(
+#         ['id', 'name', 'model_id', 'part_id', 'order', 'scope_id', 'category', 'property_type', 'value',
+#          'value_options', 'description', 'unit'])}
+# }
 
 
 class Client(object):
