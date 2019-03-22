@@ -1737,7 +1737,7 @@ class Client(object):
 
         if start_date is not None:
             if isinstance(start_date, datetime.datetime):
-                if not due_date.tzinfo:
+                if not start_date.tzinfo:
                     warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
                                   "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
                 data_dict['start_date'] = start_date.isoformat(sep='T')
