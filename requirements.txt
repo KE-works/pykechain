@@ -3,10 +3,10 @@ requests==2.21.0
 envparse==0.2.0
 
 # json validation (inspector)
-jsonschema==3.0.0
+jsonschema==3.0.1
 
 # testing
-pytest==4.3.0
+pytest==4.4.0
 betamax==0.8.1
 
 # documentation
@@ -15,10 +15,10 @@ nbsphinx==0.4.2
 
 # data science
 jupyter==1.0.0
-matplotlib==3.0.2
+matplotlib==3.0.3
 
 # integration
-tox==3.7.0
+tox==3.8.6
 
 # code style
 flake8==3.7.7
