@@ -559,3 +559,12 @@ class TestActivity2SpecificTests(TestBetamax):
             pdf_file_called_after_activity = os.path.join(target_dir, activity_name + '.pdf')
             self.assertTrue(pdf_file)
             self.assertTrue(pdf_file_called_after_activity)
+
+    def test_activity2_assignees_list(self):
+        activity_name = 'automated_created_task'
+        activity = self.project.activity(name=activity_name)  # type: Activity2
+
+        list_of_assignees_in_data = activity._json_data.get('assignees_ids')
+        assignees_list = activity.assignees
+
+        self.assertSetEqual(set(list_of_assignees_in_data), set([u.id for u in assignees_list]))
