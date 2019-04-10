@@ -3,6 +3,12 @@ Change Log
 
 pykechain changelog
 
+2.5.5 (UNRELEASED)
+------------------
+ * Added a property to the `AttachmentProperty.filename` to return the filename of an attachment. #472
+ * Added a property to retrieve the assignees list of an activity through `Activity2.assignees`. This will return a list of `User`'s assigned to the activity. #473
+ * Updated dependent versions for development: matplotlib (3.0.3), jsonschema (3.0.1), pytest (4.4.0), sphinx (2.0.1), mypy (0.700), tox (3.8.6).
+
 2.5.4 (28FEB19)
 ---------------
  * Fixed a bug where the update of the single select list options could overwrite the existing validators. Thanks to @jelleboersma for finding this out and creating the PR. (#446)
