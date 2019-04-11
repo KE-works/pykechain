@@ -39,6 +39,8 @@ class Property(Base):
         self._value = json.get('value', None)
         self._options = json.get('options', None)
         self.type = json.get('property_type', None)
+        self.description = json.get('description', None)
+        self.unit = json.get('unit', None)
 
         # set an empty internal validators variable
         self._validators = []  # type: List[Any]
