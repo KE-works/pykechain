@@ -8,14 +8,10 @@ jsonschema==3.0.1
 # testing
 pytest==4.4.0
 betamax==0.8.1
-setuptools>=38.6.0
-wheel>=0.31.0
-twine>=1.11.0
 
 # documentation
 Sphinx==2.0.1
 nbsphinx==0.4.2
-recommonmark==0.8.1
 
 # data science
 jupyter==1.0.0
@@ -34,6 +30,7 @@ PyOpenSSL==19.0.0; python_version <= '2.7'
 
 # for package management (uploads)
 twine==1.12.1
+readme_renderer[md]
 
 # for version comparison
 semver==2.8.1

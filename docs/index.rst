@@ -1,5 +1,3 @@
-
-
 .. toctree::
    :hidden:
    :maxdepth: 4
@@ -10,4 +8,4 @@
    developer_api
    notebooks
 
-.. include:: ../README.md
+.. include:: ../README.rst

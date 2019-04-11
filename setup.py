@@ -11,7 +11,7 @@ PACKAGE_NAME = 'pykechain'
 HERE = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
-with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
+with open(path.join(HERE, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 ABOUT = {}
@@ -28,7 +28,7 @@ setup(
 
     description=ABOUT['description'],
     long_description=long_description,
-    long_description_content_type='text/markdown',
+    # long_description_content_type='text/markdown',
 
     # The project's main homepage.
     url='https://github.com/KE-works/pykechain',
