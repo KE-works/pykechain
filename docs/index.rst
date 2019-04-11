@@ -10,4 +10,4 @@
    developer_api
    notebooks
 
-.. include:: ../README.rst
+.. include:: ../README.md

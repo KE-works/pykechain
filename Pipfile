@@ -27,6 +27,7 @@ twine = "*"
 Sphinx = "*"
 tox = "*"
 coverage = "*"
+recommonmark = "*"
 
 [requires]
 python_version = "3"

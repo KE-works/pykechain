@@ -12,6 +12,7 @@ betamax==0.8.1
 # documentation
 Sphinx==2.0.1
 nbsphinx==0.4.2
+recommonmark==0.8.1
 
 # data science
 jupyter==1.0.0
