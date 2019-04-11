@@ -22,7 +22,6 @@ pykechain changelog
  * Fixed a bug where a numeric range validator from a property was not correctly instantiated for provided min/max values when the validator was retrieved from the KE-chain backend. Thanks to @bastiaanbeijer for finding this! (#435)
  * Updated dependent versions for development: requests (2.21.0), sphinx (1.8.3), pytest (4.1.1), mypy (0.660), nbsphinx (0.4.2), tox (3.7.0).
 
-
 ## 2.5.2 (30NOV18)
 
  * Fixed the customizations to be compatible with KE-chain 3: `Custom Title` replaced by `Custom title`; added the possibility to include the `Clone button` where applicable. The `metaWidget` now uses 'Set height' and 'Automatic height'. (#421) thanks to @raduiordache.
@@ -67,12 +66,13 @@ pykechain changelog
  * The details of a scope can now be edited using `Scope.edit()` method. This contains action already prepared for the KE-chain 2.16.0-143 release (Mid August). (#357)
 
    For example:
-
-    >>> from datetime import datetime
-    >>> project.edit(name='New project name',
-    ...              description='Changing the description just because I can',
-    ...              start_date=datetime.utcnow(),  # naive time is interpreted as UTC time
-    ...              status=ScopeStatus.CLOSED)
+```pydocstring
+>>> from datetime import datetime
+>>> project.edit(name='New project name',
+...              description='Changing the description just because I can',
+...              start_date=datetime.utcnow(),  # naive time is interpreted as UTC time
+...              status=ScopeStatus.CLOSED)
+```
 
  * Updated dependent versions for development: pytest (3.7.0)
 
@@ -82,11 +82,13 @@ pykechain changelog
 
 For example; To move part models, their children (subtree) and their instances:
 
-    >>> model_to_move = project.model(name='Model to be moved')
-    >>> bike = project.model('Bike')
-    >>> model_moved = model_to_move.move(target_parent=bike, name='Moved model',
-    >>>                                  include_children=True,
-    >>>                                  include_instances=True)
+```pydocstring
+>>> model_to_move = project.model(name='Model to be moved')
+>>> bike = project.model('Bike')
+>>> model_moved = model_to_move.move(target_parent=bike, name='Moved model',
+>>>                                  include_children=True,
+>>>                                  include_instances=True)
+```
 
  * We added show headers and show columns in the arguments of the property grid to align to KE-chain functionality of the widget. (#350)
  * We added the posibility to use a JSON widget to the list of allowed widgets. (#351)
@@ -114,7 +116,6 @@ For example; To move part models, their children (subtree) and their instances:
 
 ## 2.2.0 (14MAY18)
 
-
 ### Major feature: Property validators
 
  * We added support for validators to KE-chain v2.12.0-139 and pykechain. Validators objects are stored on a property and can be used to validate the value of a property. The validator objects are also visualised in the KE-chain frontend. (#317)
@@ -135,36 +136,38 @@ To retrieve the :class:`PropertyValidator` objects that are stored on the `Prope
 
 To add validators to a property (model)::
 
-    >>> bike_model = project.model(name='Bike')  # type: Part
-    >>> electric_range = bike_model.property('electric_range')  # type: Property
-    >>> range = NumericRangeValidator(minvalue=0, maxvalue=100)  # instantiate a range validation between 0 and 100
-    >>> reqd = RequiredFieldValidator()  # instantiate a requiredFieldValidator
-    >>> electric_range.validators = [range, reqd]  # save the validators on the property to KE-chain
+```pydocstring
+>>> bike_model = project.model(name='Bike')  # type: Part
+>>> electric_range = bike_model.property('electric_range')  # type: Property
+>>> range = NumericRangeValidator(minvalue=0, maxvalue=100)  # instantiate a range validation between 0 and 100
+>>> reqd = RequiredFieldValidator()  # instantiate a requiredFieldValidator
+>>> electric_range.validators = [range, reqd]  # save the validators on the property to KE-chain
+```
 
 To validate a value against a validator::
 
-    >>> bike = project.part(name='Bike')  # type: Part
-    >>> electric_range = bike.property('electric_range')  # type: Property
-    >>> electric_range.value
-    None
-    >>> electric_range.is_valid  # No value set, invalid according to the requiredFieldValidator
-    False
-    >>> electric_range.value = 50
-    >>> electric_range.is_valid  # Value is provided AND value is within the range (0, 100)
-    True
-    >>> electric_range.value = -1
-    >>> electric_range.is_valid  # However, the value itself is invalid according to the range validation
-    False
-    >>> electric_range.validate(reason=True)  # use the explicit validation
-    [(False, "Value '-1' should be between 0 and 100"), (True, "Value is provided")]
-
+```pydocstring
+>>> bike = project.part(name='Bike')  # type: Part
+>>> electric_range = bike.property('electric_range')  # type: Property
+>>> electric_range.value
+None
+>>> electric_range.is_valid  # No value set, invalid according to the requiredFieldValidator
+False
+>>> electric_range.value = 50
+>>> electric_range.is_valid  # Value is provided AND value is within the range (0, 100)
+True
+>>> electric_range.value = -1
+>>> electric_range.is_valid  # However, the value itself is invalid according to the range validation
+False
+>>> electric_range.validate(reason=True)  # use the explicit validation
+[(False, "Value '-1' should be between 0 and 100"), (True, "Value is provided")]
+```
 
 For more documentation of Validators, please refer to the API documentation at: http://pykechain.readthedocs.io/en/latest/developer_api.html
 
 ### Fixes and improvements
 
  * A fix was made for the the `Part.populate_descendants()` to be working for part of category `MODEL` too. Thanks to a fix of @raduiordache. (#320)
-
 
 ## 2.1.1 (10APR18)
 
@@ -228,7 +231,6 @@ This is the last release in preparation for the WIM2 release of KE-chain and con
  * increased the coverage of `Client` tests to 99%. (#296)
  * increased the coverage of `Service` tests to 90%. (#296)
  * Updated dependent versions for development: betamax (0.8.1), twine (1.10.0), matplotlib (2.2.0), pytest (3.4.2), mypy (0.570), sphinx (1.7.1)
-
 
 ## 1.15.4 (15FEB18)
 
@@ -327,36 +329,40 @@ This is the last release in preparation for the WIM2 release of KE-chain and con
 
  * Removed a logical error in the checking of the existing of the environment variables.
 
-1.12.1 (15SEP17)
-----------------
+## 1.12.1 (15SEP17)
+
  * Added the ability to enforce the use of environment variables when the KECHAIN_FORCE_ENV_USE is set to a true value in the environment. Altered documentation and altered tests for that (#193).
 
-1.12 (14SEP17)
---------------
+## 1.12 (14SEP17)
+
  * Added a new helper `get_project()` to bootstrap a pykechain client and return a project (aka Scope) immediately. You can retrieve a project using direct arguments `url`, `token` (or `username` and `password`), and `scope_id` (or `scope` name). Alternatively, you can provide an `.env` file or provide the arguments from the environment as the environment variables `KECHAIN_URL`, `KECHAIN_TOKEN` (or `KECHAIN_USERNAME` and `KECHAIN_PASSWORD`), and `KECHAIN_SCOPE_ID` (or `KECHAIN_SCOPE`) (#185). This is ideal for `pykechain` scripts in the KE-chain SIM, as we provide support for this to make your scripting experience in KE-chain buttersmooth. An example:
 
-    >>> from pykechain import get_project
-    >>> project = get_project(url='http://localhost:8000', username='foo', password='bar', scope='Bike Project')
-    >>> print(project.name)
+```pydocstring
+>>> from pykechain import get_project
+>>> project = get_project(url='http://localhost:8000', username='foo', password='bar', scope='Bike Project')
+>>> print(project.name)
+```
 
  * Added additional checks for the `Client` to check if the url provided is correct (#185).
  * Improved the state of the project on codacy, a nice code quality monitor, from B to A grade. Removed over 100 insecure code elements, according to codacy. See: https://www.codacy.com/app/KE-works/pykechain/dashboard (#187).
  * Updated dependent versions of pyopenssl to 1.1.2 (#188), pytest to 3.2.2 (#183) and tox to 2.8.2 (#184).
  * Updated coverage of the files to internal standards. The critical models are now 100% tested such as the `Client`, `Activity` and `Part`. (#190) see: https://coveralls.io/github/KE-works/pykechain.
 
-1.11.1 (4SEP17)
----------------
+## 1.11.1 (4SEP17)
+
  * Added the ability to clear and attachment field (unlink the attachment). Please refer to the `AttachmentProperty.clear()` method.
  * Ensured a more robust updating of property value all over by altering `Property._value` and `Property._json_data['value']` after you set a value on a property.
 
-1.11 (4SEP17)
--------------
+## 1.11 (4SEP17)
+
  * In KE-chain 2.5 the way we use task customization has changed drastically. Pykechain (from 1.11 onwards) supports this by implementing a new concept in the activity called `Activity.customization()` (#161). This provides you an `ExtCustomization` object, which you can inspect and add new widgets. Please see the documentation on `ExtCustomization` and `Activity.customization()` for more details. An example to use is:
 
-    >>> activity = project.activity(name='Customizable activity')
-    >>> customization = activity.customization()
-    >>> part_to_show = project.part(name='Bike')
-    >>> customization.add_property_grid_widget(part_to_show, custom_title="My super bike"))
+```pydocstring
+>>> activity = project.activity(name='Customizable activity')
+>>> customization = activity.customization()
+>>> part_to_show = project.part(name='Bike')
+>>> customization.add_property_grid_widget(part_to_show, custom_title="My super bike"))
+```
 
  * Removed previously announced deprecated method for `activity.create_activity()` (use `Activity.create()`).
  * Added deprecation warnings when using `InspectorComponent` objects and old style `Customization` components. They will be removed in November 2017 (introduced in pykechain 1.9)
@@ -369,44 +375,46 @@ This is the last release in preparation for the WIM2 release of KE-chain and con
  * Updated dependent version of tox to 2.8.0 (#178) and further to 2.8.1 (#180)
  * Updated all tests such that our coverage aim of 96%+ is maintained.
 
-1.10.3 (28AUG17)
-----------------
+## 1.10.3 (28AUG17)
+
  * Corrected the creation of partmodels (`Part` with category `MODEL`) with multiplicities other than `ZERO_MANY` as the provided multiplicity option was not respected in the `create_model()` method of `Client` and `Scope`. Thanks @raduiordache for the find. (#170)
  * Updated tests.
 
-1.10.2 (22AUG17)
-----------------
+## 1.10.2 (22AUG17)
+
  * Corrected the ability to assign multiple assignees, using a list of assignees to an activity using the `Activity.edit()` method. (#167)
  * Updated tests.
 
-1.10.1 (18AUG17)
-----------------
+## 1.10.1 (18AUG17)
+
  * updated incorrect tests related to `Activity.associated_parts()`. (#96, #149)
 
-1.10.0 (18AUG17)
-----------------
+## 1.10.0 (18AUG17)
+
  * Ability to edit the status of an `Activity`. Please refer to the `ActivityStatus` enumerations. (#163)
  * Ability to sort properties of a `Part` model. (#141)
  * Upgraded the requirements of dependent packages for development. (#152, #160, #159, #153, #157, #154)
  * Added tests for all new features to get the > 95% coverage
  * Updated the documentation.
 
-1.9.1 (27JUN17)
----------------
+## 1.9.1 (27JUN17)
+
  * Improved testing. Notably on the new inspector objects. No functional change only that we want to reach our goal of 95% test coverage! Thanks to @raduiordache (#137)
 
-1.9.0 (23JUN17)
----------------
+## 1.9.0 (23JUN17)
 
  * Added a major new feature to create `Customization`s of activities in KE-chain 2 all programmatically and pythonic. We provide building block classes such as `SuperGrid`, `PaginatedGrid`s and `PropertyGrid`s to make your own task customization. All is documented with examples. A `validation()` method is available. (#110)
 
-    >>> my_task = project.activity('my task')
-    >>> bike = project.part(name='Bike')
-    >>> customization = Customization()  # init customization object for the task
-    >>> my_prop_grid = PropertyGrid(part=bike, title=bike.name)  # create a PropertyGrid
-    >>> customization.add_component(my_prop_grid)  # add PropertyGrid to the Customization component list
-    >>> customization.validate()  # you can validate the customization
-    >>> my_task.customize(customization)  # upload/set the Customization. Ensure you have data access set correctly.
+```pydocstring
+>>> my_task = project.activity('my task')
+>>> bike = project.part(name='Bike')
+>>> customization = Customization()  # init customization object for the task
+>>> my_prop_grid = PropertyGrid(part=bike, title=bike.name)  # create a PropertyGrid
+>>> customization.add_component(my_prop_grid)  # add PropertyGrid to the Customization component list
+>>> customization.validate()  # you can validate the customization
+>>> my_task.customize(customization)  # upload/set the Customization. Ensure you have data access set correctly.
+```
+
 
  * Updated the way the `Activity.customize()` method works. This method now accepts a `Customization` object or a josn (as a python dict). It uses the `Customization.validate()` method to validate if it conforms to the required json structure before uploading it to KE-chain.
  * Improved test coverage and refactored the HTTP codes to human readable form. (#128)
@@ -415,9 +423,8 @@ This is the last release in preparation for the WIM2 release of KE-chain and con
  * Added the ability to optionally update the name of a part together with the value of its properties. See the `Part.update()` method. (#126)
  * Deprecated the `Activity.create_activity()` method in favor of `Activity.create()`. Use the latter. Will warn with a `DeprecationWarning` until removed.
 
+## 1.8.0 (05JUN17)
 
-1.8.0 (05JUN17)
----------------
  * Added `Part.instances()` method for models to find their associated instances. (#113) Also added a
    `Part.instance()` method if you for sure that you will get only a single instance back.
  * Added `Activity.subprocess()`, `Activity.siblings()` and `Activity.children()` methods to the `Activity`.
@@ -436,36 +443,34 @@ This is the last release in preparation for the WIM2 release of KE-chain and con
  * added tests for all new features.
  * Updated the documentation.
 
+## 1.7.3 (01JUN17)
 
-1.7.3 (01JUN17)
----------------
  * Updated documentation for activity startdate and duedate editting using timezone supported datetime objects.
    If a user want to make use of timezone aware datetime the best way to do it is::
 
-    >>> my_tz = pytz.timezone('Europe/Amsterdam')
-    >>> start_date = my_tz.localize(datetime(2017,6,1,23,59,0))
-    >>> due_date = my_tz.localize(datetime(2017,12,31))
-    >>> my_task.edit(start_date = start_date, due_date = due_date)
+```pydocstring
+>>> my_tz = pytz.timezone('Europe/Amsterdam')
+>>> start_date = my_tz.localize(datetime(2017,6,1,23,59,0))
+>>> due_date = my_tz.localize(datetime(2017,12,31))
+>>> my_task.edit(start_date = start_date, due_date = due_date)
+```
 
  * Fixed a bug where a naive due_date and no provided start_date resulted in an error. Keep them bugs comin'!
 
+## 1.7.2 (01JUN17)
 
-1.7.2 (01JUN17)
----------------
  * updated `property.part` property that gets the part for its property. For model this did not work as underlying
    only `category=INSTANCES` were retrieved. Thanks to @joost.schut for finding it and reporting.
  * updated requirements for development.
 
+## 1.7.1 (29MAY17)
 
-1.7.1 (29MAY17)
----------------
  * Added `Part.multiplicity` property method. Use the `pykechain.enums.Multiplicity` to check the multiplicity of a part
    against the set multiplicities.
  * Updated documentation (a.o. the Basic Usage notebook).
 
+## 1.7.0 (29MAY17)
 
-1.7.0 (29MAY17)
----------------
  * Added `ReferencyProperty.choices()` convenience method to provide you the list of parts (instances) that are
    acceptable as a choice for the value of the reference property.
  * Added `Part.proxy_model()` method that will return the model that is used as the basis for the proxied model.
@@ -479,26 +484,24 @@ This is the last release in preparation for the WIM2 release of KE-chain and con
  * Updated documentation according to PEP257.
  * Updated requirements for development.
 
+## 1.6.0 (3MAY17)
 
-1.6.0 (3MAY17)
---------------
  * Added a `Part.model()` method to retrieve the model from an instance.
  * (Backwards Incompatibile) The task configuration (association) API is updated to the
    latest KE-chain release (release 2.1.0b-sprint119 30MAR17). This affects the `activity.configure()` method.
    This change is not compatible with older KE-chain 2 releases. For older KE-chain 2 releases use a
    pykechain version < 1.6
- * Added `Getting Started`_ documentation page for pykechain using jupyter notebooks
+ * Added [`Getting Started`](http://pykechain.readthedocs.io/en/latest/notebooks/00_getting_started.html)
+   documentation page for pykechain using jupyter notebooks
  * Documentation update for the reference property
  * Updated documentation according to PEP257
 
-.. _Getting Started: http://pykechain.readthedocs.io/en/latest/notebooks/00_getting_started.html
 
-1.5.1 (6APR17)
---------------
+## 1.5.1 (6APR17)
+
  * Patch release to include the python package typing.
 
-1.5.0 (6APR17)
---------------
+## 1.5.0 (6APR17)
 
  * Added ability to edit the part name and description functionality. See the `Part.edit()` method.
  * Added the ability to use the bulk_update_properties API endpoint for KE-chain releases later then 2.1.0b. No need to
@@ -519,9 +522,8 @@ This is the last release in preparation for the WIM2 release of KE-chain and con
  * Improved the documentation
 
 
+## 1.4.0 (17FEB17)
 
-1.4.0 (17FEB17)
----------------
  * Added functionality to create part models, just as you create part instances.
  * Added functionality to upload files (using filename), python objects (as json) and matplotlib figures as attachments
  * Added functionality to download attachments directly as file or python objects (from json).
@@ -529,42 +531,37 @@ This is the last release in preparation for the WIM2 release of KE-chain and con
  * Improved continuous integration.
  * Improved documentation
 
-1.3.0 (16FEB17)
----------------
+## 1.3.0 (16FEB17)
 
  * Added functionality to support a select list property type from KE-chain in pykechain. Now you can inquire for the
-   options and set the list of options (on the model) to choose from. See documentation of `SelectListProperty`_.
+   options and set the list of options (on the model) to choose from. See documentation of 
+   [`SelectListProperty`](http://pykechain.readthedocs.io/en/latest/api/models.html#pykechain.models.SelectListProperty).
  * Added additional keyword arguments to the `Client.parts()` method. This allows access to additional filters on the
    KE-chain REST API.
  * Fixed a bug that shows a warning when importing pykechain without a `.env` file being present. Improved documentation
-   of the `Client.from_env()`_ method. Including an example of this .env file.
+   of the `Client.from_env()` method. Including an example of this .env file.
  * Improved documentation
  * Improved testing (and coverage)
  * Improved introspection of `PartSet`.
 
-.. _SelectListProperty: http://pykechain.readthedocs.io/en/latest/api/models.html#pykechain.models.SelectListProperty
-.. _Client.from_env(): http://pykechain.readthedocs.io/en/latest/api/client.html#pykechain.Client.from_env
-
-1.2.0 (14FEB17)
----------------
+## 1.2.0 (14FEB17)
 
  * batch updates of properties in a part using a dictionary is now possible using the part `update({'prop_name': val})`
-   `Part`_ method.
+   [`Part`](http://pykechain.readthedocs.io/en/latest/api/models.html#pykechain.models.Part) method.
  * added relational methods on the part like: `Part.parent()`, `Part.children()` and `Part.siblings()`. See
-   documentation of `Part`_ for that.
+   documentation of [`Part`](http://pykechain.readthedocs.io/en/latest/api/models.html#pykechain.models.Part) for that.
  * improved documentation
  * improved testing
  * improved introspection of objects due to correct representation for debugging
  * version number now available through pykechain.version
 
-.. _Part: http://pykechain.readthedocs.io/en/latest/api/models.html#pykechain.models.Part
+.. _Part: 
 
-1.1.2 (7FEB17)
---------------
+## 1.1.2 (7FEB17)
 
  * improved (iterative) part retriever capability with a batch processed request. Will enable to retrieve large datasets
    than normal, that take longer than a standard timeout. Will concatenate the results of the various requests.
-   Check out the documentation for the new `limit` and `batch` parameters on the `Client.parts`_ method.
+   Check out the documentation for the new `limit` and `batch` parameters on the `Client.parts` method.
  * improved upload of files and attachments
  * added bucket and limit filters to limit the number of parts retrieved
  * improved testing
@@ -572,10 +569,7 @@ This is the last release in preparation for the WIM2 release of KE-chain and con
  * updated dependencies
  * improved documentation
 
-.. _Client.parts: http://pykechain.readthedocs.io/en/latest/api/client.html#pykechain.Client.parts
-
-1.0.0 (3JAN17)
---------------
+## 1.0.0 (3JAN17)
 
  * First public release of pykechain
  * ability to create a client to connect to a KE-chain instance
@@ -583,8 +577,7 @@ This is the last release in preparation for the WIM2 release of KE-chain and con
  * ability to retrieve activities with a KE-chain scope
  * ability to upload and download a property value
 
-0.1.0.dev0 - 0.1.1.dev0 (23DEC16)
----------------------------------
+## 0.1.0.dev0 - 0.1.1.dev0 (23DEC16)
 
  * Initial pre-release of pykechain
  * ability to create a client to connect to a KE-chain instance

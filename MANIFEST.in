@@ -1,6 +1,6 @@
 include LICENSE
-include CONTRIBUTING.rst
-include CHANGELOG.rst
+include CONTRIBUTING.md
+include CHANGELOG.md
 include requirements.txt
 include tox.ini
 include mypy.ini
