@@ -3,10 +3,13 @@ Change Log
 
 pykechain changelog
 
-2.5.5 (UNRELEASED)
-------------------
+2.5.5 (11APR19)
+---------------
+ * Added properties to the `Property` to directly access properties such as `unit`, `description` and `type`. `Property.type` refers to a `PropertyType` enum. #469
  * Added a property to the `AttachmentProperty.filename` to return the filename of an attachment. #472
  * Added a property to retrieve the assignees list of an activity through `Activity2.assignees`. This will return a list of `User`'s assigned to the activity. #473
+ * Added additional properties to `Service` such as `name`, `description` and `version` of a service. #469
+ * Added additional properties to `Scope` such as `description`, `status` and `type`. #469
  * Updated dependent versions for development: matplotlib (3.0.3), jsonschema (3.0.1), pytest (4.4.0), sphinx (2.0.1), mypy (0.700), tox (3.8.6).
 
 2.5.4 (28FEB19)

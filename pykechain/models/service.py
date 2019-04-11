@@ -18,6 +18,8 @@ class Service(Base):
 
         self.scope_id = json.get('scope', '')
         self.version = json.get('script_version', '')
+        self.description = json.get('description')
+        self.version = json.get('version')
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Service '{}' id {}>".format(self.name, self.id[-8:])
