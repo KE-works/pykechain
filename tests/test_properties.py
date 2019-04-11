@@ -217,3 +217,26 @@ class TestProperties(TestBetamax):
         link.delete()
         single_select.delete()
         reference.delete()
+
+    # 2.5.4
+    def test_property_type_property(self):
+        # set up
+        front_fork_model = self.project.model('Front Fork')
+        height_property = front_fork_model.property(name='Height')
+
+        self.assertEqual(str(height_property.type), PropertyType.FLOAT_VALUE)
+
+    def test_property_unit_property(self):
+        # set up
+        front_fork_model = self.project.model('Front Fork')
+        height_property = front_fork_model.property(name='Height')
+
+        self.assertEqual(str(height_property.unit), str(height_property._json_data.get('unit')))
+
+    def test_property_description_property(self):
+        # set up
+        front_fork_model = self.project.model('Front Fork')
+        height_property = front_fork_model.property(name='Height')
+
+        self.assertEqual(str(height_property.description), str(height_property._json_data.get('description')))
+
