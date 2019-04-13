@@ -46,7 +46,7 @@ class Activity2(Activity):
         """List of assignees to the activity."""
         if 'assignees' in self._json_data and self._json_data.get('assignees_ids') == list():
             return []
-        elif 'assignees' in self._json_data and self._json_data.get('assignees_ids') is not None:
+        elif 'assignees' in self._json_data and self._json_data.get('assignees_ids'):
             assignees_ids_str = ','.join([str(id) for id in self._json_data.get('assignees_ids')])
             return self._client.users(id__in=assignees_ids_str, is_hidden=False)
         return None
