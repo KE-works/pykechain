@@ -3,9 +3,9 @@ Change Log
 
 pykechain changelog
 
-2.5.5.1 (13APR19)
+2.5.6 (13APR19)
 -----------------
- * Small patch to ensure that the `Activity2.assignees` returns an empty list when nobody is assigned to the task. #477. Thanks to @raduiordache for finding it out.
+ * Small patch release to ensure that the `Activity2.assignees` returns an empty list when nobody is assigned to the task. #477. Thanks to @raduiordache for finding it out.
 
 2.5.5 (11APR19)
 ---------------
