@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from typing import TypeVar, Iterable, Callable, Optional, AnyStr  # noqa: F401
 
 import six
-from pytz import FixedOffset, UTC
+import pytz
 
 T = TypeVar('T')
 
@@ -116,7 +116,7 @@ def parse_datetime(value):
         sign = '-' if offset < 0 else '+'
         hhmm = '%02d%02d' % divmod(abs(offset), 60)
         name = sign + hhmm
-        return FixedOffset(offset, name)
+        return pytz.FixedOffset(offset, name)
 
     DATETIME_RE = re.compile(
         r'(?P<year>\d{4})-(?P<month>\d{1,2})-(?P<day>\d{1,2})'
@@ -132,7 +132,7 @@ def parse_datetime(value):
             kw['microsecond'] = kw['microsecond'].ljust(6, '0')
         tzinfo = kw.pop('tzinfo')
         if tzinfo == 'Z':
-            tzinfo = UTC
+            tzinfo = pytz.UTC
         elif tzinfo is not None:
             offset_mins = int(tzinfo[-2:]) if len(tzinfo) > 3 else 0
             offset = 60 * int(tzinfo[1:3]) + offset_mins
