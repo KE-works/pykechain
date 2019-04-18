@@ -85,7 +85,8 @@ def temp_chdir(cwd=None):
 
 def parse_datetime(value):
     # type: (AnyStr) -> Optional[datetime]
-    """Converts datetime string to datetime object.
+    """
+    Convert datetime string to datetime object.
 
     Helper function to convert a datetime string found in json responses to a datetime object with timezone information.
     The server is storing all datetime strings as UTC (ZULU time). This function supports time zone offsets. When
@@ -110,9 +111,7 @@ def parse_datetime(value):
         return None
 
     def _get_fixed_timezone(offset):
-        """
-        Returns a tzinfo instance with a fixed offset from UTC.
-        """
+        """Return a tzinfo instance with a fixed offset from UTC."""
         if isinstance(offset, timedelta):
             offset = offset.seconds // 60
         sign = '-' if offset < 0 else '+'
