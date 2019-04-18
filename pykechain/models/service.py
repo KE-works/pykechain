@@ -3,6 +3,7 @@ import requests
 
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models.base import Base
+from pykechain.utils import parse_datetime
 
 
 class Service(Base):
@@ -27,6 +28,8 @@ class Service(Base):
     :type filename: str
     :ivar environment: environment in which the service will execute. One of :class:`ServiceEnvironmentVersion`
     :type environment: str
+    :ivar updated_at: datetime in UTC timezone when the Service was last updated
+    :type updated_at: datetime
     """
 
     def __init__(self, json, **kwargs):
@@ -39,6 +42,8 @@ class Service(Base):
         self.type = json.get('script_type')
         self.environment = json.get('env_version')
         self.scope_id = json.get('scope')
+
+        self.updated_at = parse_datetime(json.get('updated_at'))
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Service '{}' id {}>".format(self.name, self.id[-8:])
@@ -217,6 +222,9 @@ class ServiceExecution(Base):
             self.activity_id = json['activity'].get('id')
         else:
             self.activity_id = None
+
+        self.started_at = parse_datetime(json.get('started_at'))
+        self.finished_at = parse_datetime(json.get('finished_at'))
 
         self._service = None
 

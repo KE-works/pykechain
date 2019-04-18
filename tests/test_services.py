@@ -1,14 +1,15 @@
-import time
-
 import os
+import time
+from datetime import datetime
+
 import pytest
 
 from pykechain.enums import ServiceExecutionStatus, ServiceType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from pykechain.models import Service
-from tests.classes import TestBetamax
 # new in 1.13
 from pykechain.utils import temp_chdir
+from tests.classes import TestBetamax
 
 
 class TestServices(TestBetamax):
@@ -215,6 +216,7 @@ class TestServices(TestBetamax):
         # tearDown
         service_to_upload.delete()
 
+
 # new in 1.13
 class TestServiceExecutions(TestBetamax):
     def test_retrieve_service_executions(self):
@@ -278,6 +280,9 @@ class TestServiceExecutions(TestBetamax):
         self.assertEqual(service_execution.service_id, json_data.get('service'))
         self.assertIsInstance(service_execution.service, Service)
 
+        self.assertIsInstance(service_execution.started_at, datetime)
+        self.assertIsInstance(service_execution.finished_at, datetime)
+
     @pytest.mark.skipif("os.getenv('TRAVIS', False)",
                         reason="Skipping tests when using Travis, as Service Execution cannot be provided")
     def test_debug_service_execution_terminate(self):
@@ -307,4 +312,3 @@ class TestServiceExecutions(TestBetamax):
             last_service_execution.get_log(target_dir=target_dir)
             log_file = os.path.join(target_dir, 'log.txt')
             self.assertTrue(log_file)
-
