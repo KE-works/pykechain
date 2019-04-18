@@ -6,7 +6,7 @@ envparse==0.2.0
 jsonschema==3.0.1
 
 # testing
-pytest==4.4.0
+pytest==4.4.1
 betamax==0.8.1
 
 # documentation
@@ -18,12 +18,12 @@ jupyter==1.0.0
 matplotlib==3.0.3
 
 # integration
-tox==3.8.6
+tox==3.9.0
 
 # code style
 flake8==3.7.7
 pydocstyle==3.0.0
-mypy==0.700; python_version >= '3.4'
+mypy==0.701; python_version >= '3.4'
 
 # to fix connection issues
 PyOpenSSL==19.0.0; python_version <= '2.7'
