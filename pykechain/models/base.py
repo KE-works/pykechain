@@ -1,8 +1,10 @@
 class Base(object):
     """Base model connecting retrieved data to a KE-chain client.
 
-    :cvar basestring id: The UUID of the object (corresponds with the UUID in KE-chain).
-    :cvar basestring name: The name of the object.
+    :ivar id: The UUID of the object (corresponds with the UUID in KE-chain).
+    :type id: uuid
+    :ivar name: The name of the object.
+    :type name: str
     """
 
     def __init__(self, json, client):

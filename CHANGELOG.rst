@@ -3,6 +3,12 @@ Change Log
 
 pykechain changelog
 
+2.5.7 (18APR19)
+---------------
+ * Added additional properties for the `Service` and `ServiceExecution` class. Now you can retrieve the `Service.filename` amoungst others. Please refer to the documentation of `Service` and `ServiceExecution` to see the properties that are now available (a feature request by @JelleBoersma). #480
+ * We added a utility function to `parse_datetime` strings into `datetime` objects. These strings are in a json response from the KE-chain backend and are now properly translated and timezoned. #482
+ *  Updated dependent versions for development: pytest (4.4.1), mypy (0.701), tox (3.9.0).
+
 2.5.6 (13APR19)
 -----------------
  * Small patch release to ensure that the `Activity2.assignees` returns an empty list when nobody is assigned to the task. #477. Thanks to @raduiordache for finding it out.
