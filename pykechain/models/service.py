@@ -10,15 +10,35 @@ class Service(Base):
     A virtual object representing a KE-chain Service.
 
     .. versionadded:: 1.13
+
+    :ivar id: id of the service
+    :type id: uuid
+    :ivar name: name of the service
+    :type name: str
+    :ivar description: description of the service
+    :type description: str
+    :ivar version: version number of the service, as provided by uploaded
+    :type version: str
+    :ivar scope_id: uuid of the scope to which the service belongs
+    :type scope_id: uuid
+    :ivar type: type of the service. One of the :class:`ServiceType`
+    :type type: str
+    :ivar filename: filename of the service
+    :type filename: str
+    :ivar environment: environment in which the service will execute. One of :class:`ServiceEnvironmentVersion`
+    :type environment: str
     """
 
     def __init__(self, json, **kwargs):
         """Construct a scope from provided json data."""
         super(Service, self).__init__(json, **kwargs)
 
-        self.scope_id = json.get('scope', '')
+        self.description = json.get('description', '')
         self.version = json.get('script_version', '')
-        self.description = json.get('description')
+        self.filename = json.get('script_file_name')
+        self.type = json.get('script_type')
+        self.environment = json.get('env_version')
+        self.scope_id = json.get('scope')
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Service '{}' id {}>".format(self.name, self.id[-8:])
@@ -138,8 +158,7 @@ class Service(Base):
         :raises APIError: if unable to download the service.
         :raises OSError: if unable to save the service kecpkg file to disk.
         """
-        filename = self._json_data.get('script_file_name')
-        full_path = os.path.join(target_dir or os.getcwd(), filename)
+        full_path = os.path.join(target_dir or os.getcwd(), self.filename)
 
         url = self._client._build_url('service_download', service_id=self.id)
         response = self._client._request('GET', url)
@@ -168,15 +187,45 @@ class ServiceExecution(Base):
     A virtual object representing a KE-chain Service Execution.
 
     .. versionadded:: 1.13
+
+    :ivar id: id of the service execution
+    :type id: uuid
+    :ivar name: name of the service to which the execution is associated
+    :type name: str
+    :ivar status: status of the service. One of :class:`ServiceExecutionStatus`
+    :type status: str
+    :ivar service: the :class:`Service` object associated to this service execution
+    :type service: :class:`Service`
+    :ivar service_id: the uuid of the associated Service object
+    :type service_id: uuid
+    :ivar user: (optional) username of the user that executed the service
+    :type user: str or None
+    :ivar activity_id: (optional) the uuid of the activity where the service was executed from
+    :type activity_id: uuid or None
     """
 
     def __init__(self, json, **kwargs):
         """Construct a scope from provided json data."""
         super(ServiceExecution, self).__init__(json, **kwargs)
 
-        self.scope_id = json.get('scope', '')
-        self.status = json.get('status', '')
         self.name = json.get('service_name')
+        self.service_id = json.get('service')
+        self.status = json.get('status', '')
+
+        self.user = json.get('username', None)
+        if json.get('activity') is not None:
+            self.activity_id = json['activity'].get('id')
+        else:
+            self.activity_id = None
+
+        self._service = None
+
+    @property
+    def service(self):
+        """Retrieve the `Service` object to which this execution is associated."""
+        if not self._service:
+            self._service = self._client.service(id=self.service_id)
+        return self._service
 
     def __repr__(self):  # pragma: no cover
         return "<pyke ServiceExecution '{}' id {}>".format(self.name, self.id[-8:])
