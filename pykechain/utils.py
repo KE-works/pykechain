@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from typing import TypeVar, Iterable, Callable, Optional, AnyStr  # noqa: F401
 
 import six
-from pytz import UTC, FixedOffset
+from pytz import FixedOffset, UTC
 
 T = TypeVar('T')
 
@@ -84,7 +84,6 @@ def temp_chdir(cwd=None):
 
 
 def parse_datetime(value):
-    # type: (AnyStr) -> Optional[datetime]
     """
     Convert datetime string to datetime object.
 
