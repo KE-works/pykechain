@@ -101,10 +101,13 @@ def parse_datetime(value):
 
     :param value: datetime string
     :type value: str or None
-    :return: datetime of the value is well formated. Otherwise returns None
+    :return: datetime of the value is well formatted. Otherwise (including if value is None) returns None
     :rtype: datetime or None
     :raises ValueError: if the value is well formatted but not a valid datetime
     """
+    if value is None:
+        # do not process the value
+        return None
 
     def _get_fixed_timezone(offset):
         """
