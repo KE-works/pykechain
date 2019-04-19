@@ -399,7 +399,7 @@ class Scope(Base):
         else:
             self._json_data = r.json().get('results') and r.json().get('results')[0]
 
-    # 2.5.8
+    # 2.6.0
     def delete(self):
         # type: () -> None
         """
@@ -415,6 +415,6 @@ class Scope(Base):
 
         See :class:`pykechain.Client.clone_scope` for available parameters.
 
-        .. versionadded:: 2.5.8
+        .. versionadded:: 2.6.0
         """
         return self._client.clone_scope(*args, scope=self, **kwargs)

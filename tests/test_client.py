@@ -88,7 +88,7 @@ class TestClientLive(TestBetamax):
         with self.assertRaises(ForbiddenError):
             self.client.parts()
 
-    # 2.5.8
+    # 2.6.0
     def test_create_scope(self):
         # setUp
         client = self.client
