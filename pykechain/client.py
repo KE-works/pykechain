@@ -1,3 +1,4 @@
+import datetime
 import warnings
 from typing import Dict, Tuple, Optional, Any, List  # noqa: F401
 
@@ -1340,6 +1341,138 @@ class Client(object):
         service.refresh()
 
         return service
+
+    def create_scope(self, name, status=None, description=None, tags=None, start_date=None, due_date=None,
+                     team=None):
+        """
+        Creates a Scope.
+
+        :param name: Name of the scope
+        :type name: basestring
+        :param status: choose one of the :class:`enums.ScopeStatus`, defaults to `ScopeStatus.ACTIVE`
+        :type status: basestring or None
+        :param description: (optional) Description of the scope
+        :type description: basestring or None
+        :param tags: (optional) List of tags to be added to the new scope
+        :type tags: list or None
+        :param start_date: (optional) start date of the scope
+        :type start_date: datetime.datetime or None
+        :param due_date: (optional) due date of the scope
+        :type due_date: datetime.datetime or None
+        :param team: Team object
+        :type team :class: `models: Team`
+        :return: the created :class:`models.Scope`
+        :raises APIError: In case of failure of the creation of new Scope
+        """
+
+        assert isinstance(name, str)
+        assert status is None or status in ScopeStatus.values()
+        assert description is None or isinstance(description, str)
+        assert tags is None or (isinstance(tags, list) and all([isinstance(t, str) for t in tags]))
+        assert team is None or isinstance(team, Team)
+
+        if not status:
+            status = ScopeStatus.ACTIVE
+        if not start_date:
+            start_date = datetime.datetime.now()
+        if not tags:
+            tags = list()
+
+        data = {
+            'name': name,
+            'status': status,
+            'text': description,
+            'tags': tags,
+            'start_date': start_date,
+            'due_date': due_date,
+            'team_id': team.id if team else None,
+        }
+
+        response = self._request('POST', self._build_url('scopes'),
+                                 data=data)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create scope, {}:\n\n{}'".format(str(response), response.json()))
+
+        return Scope(response.json()['results'][0], client=self)
+
+    def delete_scope(self, scope):
+        """
+        Deletes a scope
+
+        :param scope: Scope object to be deleted
+        :type scope: :class: `models.Scope`
+
+        :return: None
+        :raises APIError: in case of failure in the deletion of the scope
+        """
+        assert isinstance(scope, Scope), 'Scope "{}" is not a scope!'.format(scope.name)
+
+        response = self._request('DELETE', self._build_url('scope', scope_id=str(scope.id)))
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            raise APIError("Could not delete scope, {}: {}".format(str(response), response.content))
+
+    def clone_scope(self, scope, name=None, status=None, description=None, tags=None, start_date=None, due_date=None,
+                    team=None, **kwargs):
+        """
+        Clone scope
+
+        :type scope: Scope object to be cloned
+        :param scope: :class: `models.Scope`
+        :param name: Name of the scope
+        :type name: (optional) basestring
+        :param status: choose one of the :class:`enums.ScopeStatus`, defaults to `ScopeStatus.ACTIVE`
+        :type status: basestring or None
+        :param description: (optional) Description of the scope
+        :type description: basestring or None
+        :param tags: (optional) List of tags to be added to the new scope
+        :type tags: list or None
+        :param start_date: (optional) start date of the scope
+        :type start_date: datetime.datetime or None
+        :param due_date: (optional) due date of the scope
+        :type due_date: datetime.datetime or None
+        :param team: Team object
+        :type team :class: `models: Team`
+        :return: the clone :class:`models.Scope`
+        :raises APIError: In case of failure of the cloning of new Scope
+        """
+        assert isinstance(scope, Scope)
+        assert isinstance(scope.name, str)
+        assert description is None or isinstance(description, str)
+        assert status is None or status in ScopeStatus.values()
+
+        if not name:
+            name = "CLONE - {}".format(scope.name)
+
+        data = {
+            "id": str(scope.id),
+            "name": name
+        }
+
+        if start_date:
+            data['start_date'] = start_date
+        if due_date:
+            data['due_date'] = due_date
+        if description:
+            data['text'] = description
+        if status:
+            data['status'] = status
+        if team:
+            data['team'] = team
+        if tags:
+            data['tags'] = tags
+
+        response = self._request('POST', self._build_url('scopes'),
+                                 params={"select_action": "clone"},
+                                 data=data)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create scope, {}:\n{}'".format(str(response), response.json()))
+
+        cloned_scope = self.scope(id=response.json()['results'][0]['id'], status=None)
+
+        return cloned_scope
 
     # def create_team(self, name, user, description=None, options=None, is_hidden=False):
     #     """
