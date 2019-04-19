@@ -5,6 +5,7 @@ from typing import Dict, Tuple, Optional, Any, List  # noqa: F401
 import requests
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
+from six import text_type
 
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     WIMCompatibleActivityTypes, PropertyType
@@ -1364,11 +1365,10 @@ class Client(object):
         :return: the created :class:`models.Scope`
         :raises APIError: In case of failure of the creation of new Scope
         """
-
-        assert isinstance(name, str)
+        assert isinstance(name, (str, text_type))
         assert status is None or status in ScopeStatus.values()
-        assert description is None or isinstance(description, str)
-        assert tags is None or (isinstance(tags, list) and all([isinstance(t, str) for t in tags]))
+        assert description is None or isinstance(description, (str, text_type))
+        assert tags is None or (isinstance(tags, list) and all([isinstance(t, (str, text_type)) for t in tags]))
         assert team is None or isinstance(team, Team)
 
         if not status:
@@ -1438,8 +1438,8 @@ class Client(object):
         :raises APIError: In case of failure of the cloning of new Scope
         """
         assert isinstance(scope, Scope)
-        assert isinstance(scope.name, str)
-        assert description is None or isinstance(description, str)
+        assert isinstance(scope.name, (str, text_type))
+        assert description is None or isinstance(description, (str, text_type))
         assert status is None or status in ScopeStatus.values()
 
         if not name:
