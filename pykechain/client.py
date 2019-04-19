@@ -1345,7 +1345,7 @@ class Client(object):
     def create_scope(self, name, status=None, description=None, tags=None, start_date=None, due_date=None,
                      team=None):
         """
-        Creates a Scope.
+        Create a Scope.
 
         :param name: Name of the scope
         :type name: basestring
@@ -1398,7 +1398,7 @@ class Client(object):
 
     def delete_scope(self, scope):
         """
-        Deletes a scope
+        Delete a scope.
 
         :param scope: Scope object to be deleted
         :type scope: :class: `models.Scope`
@@ -1416,7 +1416,7 @@ class Client(object):
     def clone_scope(self, scope, name=None, status=None, description=None, tags=None, start_date=None, due_date=None,
                     team=None, **kwargs):
         """
-        Clone scope
+        Clone scope.
 
         :type scope: Scope object to be cloned
         :param scope: :class: `models.Scope`

@@ -403,7 +403,7 @@ class Scope(Base):
     def delete(self):
         # type: () -> None
         """
-        Delete scope
+        Delete scope.
 
         :return: None
         :raises APIError: in case an Error occurs
@@ -411,7 +411,8 @@ class Scope(Base):
         return self._client.delete_scope(scope=self)
 
     def clone(self, *args, **kwargs):
-        """Clone current scope.
+        """
+        Clone current scope.
 
         See :class:`pykechain.Client.clone_scope` for available parameters.
 
