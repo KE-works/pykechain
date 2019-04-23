@@ -1213,7 +1213,6 @@ class Client(object):
         provide the correct values to the KE-chain backend. The default is a `PropertyType.CHAR_VALUE` which is a
         single line text in KE-chain.
 
-
         :param model: parent model
         :type model: :class:`models.Part`
         :param name: property model name
@@ -1289,6 +1288,9 @@ class Client(object):
         this `kecpkg` will be uploaded in one go. If the later fails, the service is still there, and the package is
         not uploaded.
 
+        Permission to upload a script is restricted to a superuser, a user in the `GG:Configurators` group and a Scope
+        Manager of the scope to which you are uploading the script.
+
         :param name: Name of the service
         :type name: basestring
         :param scope: Scope where the create the Service under
@@ -1348,6 +1350,11 @@ class Client(object):
         """
         Create a Scope.
 
+        This will create a scope if the client has the right to do so. Sufficient permissions to create a scope are a
+        superuser, a user in the `GG:Configurators` group or `GG:Managers` group.
+
+        ..versionadded: 2.6
+
         :param name: Name of the scope
         :type name: basestring
         :param status: choose one of the :class:`enums.ScopeStatus`, defaults to `ScopeStatus.ACTIVE`
@@ -1356,7 +1363,7 @@ class Client(object):
         :type description: basestring or None
         :param tags: (optional) List of tags to be added to the new scope
         :type tags: list or None
-        :param start_date: (optional) start date of the scope
+        :param start_date: (optional) start date of the scope. Will default to 'now' if not provided.
         :type start_date: datetime.datetime or None
         :param due_date: (optional) due date of the scope
         :type due_date: datetime.datetime or None
@@ -1387,14 +1394,33 @@ class Client(object):
         if not tags:
             tags = list()
 
-        data = {
+        data_dict = {
             'name': name,
             'status': status,
             'text': description,
             'tags': tags,
-            'start_date': start_date,
-            'due_date': due_date
         }
+
+        if start_date is not None:
+            if isinstance(start_date, datetime.datetime):
+                if not start_date.tzinfo:
+                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
+                data_dict['start_date'] = start_date.isoformat(sep='T')
+            else:
+                raise IllegalArgumentError('Start date should be a datetime.datetime() object')
+        else:
+            # defaults to now
+            data_dict['start_date'] = datetime.datetime.now()
+
+        if due_date is not None:
+            if isinstance(due_date, datetime.datetime):
+                if not due_date.tzinfo:
+                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
+                data_dict['due_date'] = due_date.isoformat(sep='T')
+            else:
+                raise IllegalArgumentError('Due date should be a datetime.datetime() object')
 
         if team is not None:
             if isinstance(team, Team):
@@ -1406,11 +1432,12 @@ class Client(object):
             else:
                 raise IllegalArgumentError("'Team' should be provided as a `models.Team` object or UUID or team name, "
                                            "was provided as a {}".format(type(team)))
-            data['team'] = team_id
+            data_dict['team'] = team_id
 
-        data.update(kwargs)
+        # injecting additional kwargs for those cases that you need to add extra options.
+        data_dict.update(kwargs)
 
-        response = self._request('POST', self._build_url('scopes'), data=data)
+        response = self._request('POST', self._build_url('scopes'), data=data_dict)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create scope, {}:\n\n{}'".format(str(response), response.json()))
@@ -1420,6 +1447,10 @@ class Client(object):
     def delete_scope(self, scope):
         """
         Delete a scope.
+
+        This will delete a scope if the client has the right to do so. Sufficient permissions to delete a scope are a
+        superuser, a user in the `GG:Configurators` group or a user that is the Scope manager of the scope to be
+        deleted.
 
         :param scope: Scope object to be deleted
         :type scope: :class: `models.Scope`
@@ -1445,7 +1476,7 @@ class Client(object):
 
         If no additional arguments are provided, the values of the `source_scope` are used for the new scope.
 
-        .. versionadded: 3.0
+        .. versionadded: 2.6
 
         :param source_scope: Scope object to be cloned itself
         :type source_scope: :class:`models.Scope`
