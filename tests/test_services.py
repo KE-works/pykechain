@@ -5,7 +5,7 @@ from unittest import skip
 import pytest
 
 from pykechain.enums import ServiceExecutionStatus, ServiceType
-from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
+from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError, APIError
 # new in 1.13
 from pykechain.utils import temp_chdir
 from tests.classes import TestBetamax
@@ -103,9 +103,6 @@ class TestServices(TestBetamax):
             time.sleep(2)
             service_execution.refresh()
             self.assertTrue(service_execution.status in ServiceExecutionStatus.values())
-        self.assertEqual(ServiceExecutionStatus.FAILED, service_execution.status,
-                         "The service execution is status 'FAILED', please upload working debugging scripts before "
-                         "running the tests")
 
     def test_update_service(self):
         # setUp
@@ -223,12 +220,24 @@ class TestServiceExecutions(TestServiceSetup):
 
     def test_retrieve_single_service_execution_but_found_multiple(self):
         # setUp
-        self.service.execute()
+        service_execution = self.service.execute()
+        while service_execution.status in [ServiceExecutionStatus.LOADING, ServiceExecutionStatus.RUNNING]:
+            time.sleep(0.500) # 200ms
+            service_execution.refresh()
+
         self.service.execute()
 
         # testing
         with self.assertRaises(MultipleFoundError):
             self.project.service_execution(service=self.service.id)
+
+    def test_service_execution_conflict(self):
+        # setUp
+        self.service.execute()
+
+        # testing
+        with self.assertRaisesRegex(APIError, "Conflict: Could not execute service as it is already running"):
+            self.service.execute()
 
     @pytest.mark.skipif("os.getenv('TRAVIS', False)",
                         reason="Skipping tests when using Travis, as Service Execution cannot be provided")
