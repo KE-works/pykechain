@@ -418,4 +418,4 @@ class Scope(Base):
 
         .. versionadded:: 2.6.0
         """
-        return self._client.clone_scope(*args, scope=self, **kwargs)
+        return self._client.clone_scope(*args, source_scope=self, **kwargs)

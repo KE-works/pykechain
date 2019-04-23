@@ -5,6 +5,7 @@ import six
 import warnings
 
 from pykechain.enums import ScopeStatus
+from pykechain.models import Team
 from tests.utils import TEST_FLAG_IS_WIM2
 
 if six.PY2:
@@ -119,6 +120,45 @@ class TestClientLive(TestBetamax):
         # tearDown
         client.delete_scope(scope=new_scope)
 
+    def test_create_scope_with_team_name(self):
+        # setUp
+        client = self.client
+
+        scope_name = 'New scope with the team name'
+        scope_team_name = 'Team No.1'
+
+        new_scope = client.create_scope(name=scope_name,
+                                        team=scope_team_name
+                                        )
+
+        # testing
+        self.assertTrue(new_scope.team)
+        self.assertTrue(isinstance(new_scope.team, Team))
+        self.assertEqual(new_scope.team.name, scope_team_name)
+
+        # tearDown
+        client.delete_scope(scope=new_scope)
+
+    def test_create_scope_with_team_uuid(self):
+        # setUp
+        client = self.client
+
+        scope_name = 'New scope with team uuid'
+        scope_team_name = 'Team No.1'
+        scope_team_id = client.team(name=scope_team_name).id
+
+        new_scope = client.create_scope(name=scope_name,
+                                        team=scope_team_id
+                                        )
+
+        # testing
+        self.assertTrue(new_scope.team)
+        self.assertTrue(isinstance(new_scope.team, Team))
+        self.assertEqual(new_scope.team.name, scope_team_name)
+
+        # tearDown
+        client.delete_scope(scope=new_scope)
+
     def test_create_scope_no_arguments(self):
         # setUp
         client = self.client
@@ -131,6 +171,24 @@ class TestClientLive(TestBetamax):
 
         # tearDown
         client.delete_scope(scope=new_scope)
+
+    def test_create_scope_with_wrong_arguments(self):
+        # setUp
+        client = self.client
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            client.create_scope(name=12)
+        with self.assertRaises(IllegalArgumentError):
+            client.create_scope(name='Failed scope', status='LIMBO')
+        with self.assertRaises(IllegalArgumentError):
+            client.create_scope(name='Failed scope', description=True)
+        with self.assertRaises(IllegalArgumentError):
+            client.create_scope(name='Failed scope', tags='One tag no list')
+        with self.assertRaises(IllegalArgumentError):
+            client.create_scope(name='Failed scope', tags=[12, 'this', 'fails'])
+        with self.assertRaises(IllegalArgumentError):
+            client.create_scope(name='Failed scope', team=['Fake team'])
 
 
 @skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
