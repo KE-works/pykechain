@@ -80,43 +80,44 @@ PARAMS_BASE = ["id", "name"]
 API_EXTRA_PARAMS = {
     'activity': API_QUERY_PARAM_ALL_FIELDS,  # id,name,scope,status,classification,activity_type,parent_id'},
     'activities': API_QUERY_PARAM_ALL_FIELDS,  # 'id,name,scope,status,classification,activity_type,parent_id'}
-    'scope2': API_QUERY_PARAM_ALL_FIELDS,
-    'scopes2': API_QUERY_PARAM_ALL_FIELDS,
+    # 'scope2': API_QUERY_PARAM_ALL_FIELDS,
+    # 'scopes2': API_QUERY_PARAM_ALL_FIELDS,
     'part2': API_QUERY_PARAM_ALL_FIELDS,
     'parts2': API_QUERY_PARAM_ALL_FIELDS,
     'properties2': API_QUERY_PARAM_ALL_FIELDS,
     'property2': API_QUERY_PARAM_ALL_FIELDS
 }
+
 # TODO: need to tune this
-# API_EXTRA_PARAMS = {
-#     'activity':API_QUERY_PARAM_ALL_FIELDS,
-#     #     {
-#     #     'fields': ['id', 'name', 'activity_type', 'progress', 'assignees_names', 'start_date', 'due_date', 'status',
-#     #                'parent_id', 'scope_id', 'parent_id_name', 'customization']
-#     # },
-#     'activities': {
-#         'fields': ['id', 'name', 'activity_type', 'progress', 'assignees_names', 'start_date', 'due_date', 'status',
-#                    'parent_id', 'scope_id', 'parent_id_name', 'customization']
-#     },
-#     'scope2': {'fields': ",".join(
-#         ['id', 'name', 'text', 'start_date', 'due_date', 'status', 'progress', 'members', 'team', 'tags',
-#          'scope_options', 'team_id_name'])},
-#     'scopes2': {'fields': ",".join(
-#         ['id', 'name', 'text', 'start_date', 'due_date', 'status', 'progress', 'members', 'team', 'tags',
-#          'scope_options', 'team_id_name'])},
-#     'part2': {'fields': ",".join(
-#         ['id', 'name', 'properties', 'category', 'classification', 'parent_id', 'multiplicity', 'value_options',
-#          'property_type', 'value', 'order', 'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
-#     'parts2': {'fields': ",".join(
-#         ['id', 'name', 'properties', 'category', 'classification', 'parent_id', 'multiplicity', 'value_options',
-#          'property_type', 'value', 'order', 'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
-#     'properties2': {'fields': ",".join(
-#         ['id', 'name', 'model_id', 'part_id', 'order', 'scope_id', 'category', 'property_type', 'value',
-#          'value_options', 'description', 'unit'])},
-#     'property2': {'fields': ",".join(
-#         ['id', 'name', 'model_id', 'part_id', 'order', 'scope_id', 'category', 'property_type', 'value',
-#          'value_options', 'description', 'unit'])}
-# }
+API_EXTRA_PARAMS.update({
+    #     'activity':API_QUERY_PARAM_ALL_FIELDS,
+    #     #     {
+    #     #     'fields': ['id', 'name', 'activity_type', 'progress', 'assignees_names', 'start_date', 'due_date', 'status',
+    #     #                'parent_id', 'scope_id', 'parent_id_name', 'customization']
+    #     # },
+    #     'activities': {
+    #         'fields': ['id', 'name', 'activity_type', 'progress', 'assignees_names', 'start_date', 'due_date', 'status',
+    #                    'parent_id', 'scope_id', 'parent_id_name', 'customization']
+    #     },
+    'scope2': {'fields': ",".join(
+        ['id', 'name', 'text', 'start_date', 'due_date', 'status', 'progress', 'members', 'team', 'tags',
+         'scope_options', 'team_id_name'])},
+    'scopes2': {'fields': ",".join(
+        ['id', 'name', 'text', 'start_date', 'due_date', 'status', 'progress', 'members', 'team', 'tags',
+         'scope_options', 'team_id_name'])},
+    #     'part2': {'fields': ",".join(
+    #         ['id', 'name', 'properties', 'category', 'classification', 'parent_id', 'multiplicity', 'value_options',
+    #          'property_type', 'value', 'order', 'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
+    #     'parts2': {'fields': ",".join(
+    #         ['id', 'name', 'properties', 'category', 'classification', 'parent_id', 'multiplicity', 'value_options',
+    #          'property_type', 'value', 'order', 'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
+    #     'properties2': {'fields': ",".join(
+    #         ['id', 'name', 'model_id', 'part_id', 'order', 'scope_id', 'category', 'property_type', 'value',
+    #          'value_options', 'description', 'unit'])},
+    #     'property2': {'fields': ",".join(
+    #         ['id', 'name', 'model_id', 'part_id', 'order', 'scope_id', 'category', 'property_type', 'value',
+    #          'value_options', 'description', 'unit'])}
+})
 
 
 class Client(object):
@@ -1567,6 +1568,9 @@ class Client(object):
         this `kecpkg` will be uploaded in one go. If the later fails, the service is still there, and the package is
         not uploaded.
 
+        Permission to upload a script is restricted to a superuser, a user in the `GG:Configurators` group and a Scope
+        Manager of the scope to which you are uploading the script.
+
         :param name: Name of the service
         :type name: basestring
         :param scope: Scope where the create the Service under
@@ -1620,70 +1624,146 @@ class Client(object):
 
         return service
 
-    def create_team(self, name, user, description=None, options=None, is_hidden=False):
+    def create_scope(self, name, status=ScopeStatus.ACTIVE, description=None, tags=None, start_date=None, due_date=None,
+                     team=None, **kwargs):
         """
-        Create a team.
+        Create a Scope.
 
-        To create a team, a :class:`User` (id or object) need to be passed for it to become owner. As most pykechain
-        enabled script are running inside the SIM environment in KE-chain, the user having the current connection
-        to the API is often not the user that needs to be part of the team to be created. The user provided will
-        become 'owner' of the team.
+        This will create a scope if the client has the right to do so. Sufficient permissions to create a scope are a
+        superuser, a user in the `GG:Configurators` group or `GG:Managers` group.
 
-        .. versionadded: 2.4.0
+        ..versionadded: 2.6
 
-        :param name: name of the team
+        :param name: Name of the scope
         :type name: basestring
-        :param user: user (userid, username or `User`) that will become owner of the team
-        :type user: userid or username or :class:`models.User`
-        :param description: (optional) description of the team
-        :type name: basestring or None
-        :param options: (optional) provide additional team advanced options (as dict)
-        :type options: dict or None
-        :param is_hidden: (optional) if the team needs to be hidden (defaults to false)
-        :type is_hidden: bool or None
-        :return: the created :class:`models.Team`
-        :raises IllegalArgumentError: When the provided arguments are incorrect
+        :param status: choose one of the :class:`enums.ScopeStatus`, defaults to `ScopeStatus.ACTIVE`
+        :type status: basestring or None
+        :param description: (optional) Description of the scope
+        :type description: basestring or None
+        :param tags: (optional) List of tags to be added to the new scope
+        :type tags: list or None
+        :param start_date: (optional) start date of the scope. Will default to 'now' if not provided.
+        :type start_date: datetime.datetime or None
+        :param due_date: (optional) due date of the scope
+        :type due_date: datetime.datetime or None
+        :param team: (optional) team_id or Team object to assign membership of scope to a team.
+        :type team: basestring or :class:`models.Team` or None
+        :param kwargs: optional additional search arguments
+        :type kwargs: dict or None
+        :return: the created :class:`models.Scope`
+        :raises APIError: In case of failure of the creation of new Scope
         """
-        if not isinstance(name, (string_types, text_type)):
-            raise IllegalArgumentError('`name` should be string')
-        if not isinstance(description, (string_types, text_type)):
-            raise IllegalArgumentError('`description` should be string')
-        if options and not isinstance(options, dict):
-            raise IllegalArgumentError('`options` should be a dictionary')
-        if is_hidden and not isinstance(is_hidden, bool):
-            raise IllegalArgumentError('`is_hidden` should be a boolean')
-        if isinstance(user, (string_types, text_type)):
-            user = self.user(username=user)
-        elif isinstance(user, int):
-            user = self.user(pk=user)
-        elif isinstance(user, User):
-            pass
+        if not isinstance(name, (str, text_type)):
+            raise IllegalArgumentError("'Name' should be provided as a string, was provided as '{}'".
+                                       format(type(name)))
+        if status not in ScopeStatus.values():
+            raise IllegalArgumentError("Please provide a valid scope status, please use one of `enums.ScopeStatus`. "
+                                       "Got: '{}'".format(status))
+        if description and not isinstance(description, (str, text_type)):
+            raise IllegalArgumentError("'Description' should be provided as a string, was provided as '{}'".
+                                       format(type(description)))
+        if tags and not isinstance(tags, list):
+            raise IllegalArgumentError("'Tags' should be provided as a list, was provided as '{}'".
+                                       format(type(tags)))
+        if tags and not (all([isinstance(t, (str, text_type)) for t in tags])):
+            raise IllegalArgumentError("Each tag in the list of tags should be provided as a string")
+
+        if not start_date:
+            start_date = datetime.datetime.now()
+        if not tags:
+            tags = list()
+
+        data_dict = {
+            'name': name,
+            'status': status,
+            'text': description,
+            'tags': tags,
+        }
+
+        if start_date is not None:
+            if isinstance(start_date, datetime.datetime):
+                if not start_date.tzinfo:
+                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
+                data_dict['start_date'] = start_date.isoformat(sep='T')
+            else:
+                raise IllegalArgumentError('Start date should be a datetime.datetime() object')
         else:
-            raise IllegalArgumentError('the `user` is not of a type `User`, a `username` or a user id')
+            # defaults to now
+            data_dict['start_date'] = datetime.datetime.now()
 
-        data = dict(
-            name=name,
-            description=description,
-            options=options,
-            is_hidden=is_hidden
-        )
+        if due_date is not None:
+            if isinstance(due_date, datetime.datetime):
+                if not due_date.tzinfo:
+                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
+                data_dict['due_date'] = due_date.isoformat(sep='T')
+            else:
+                raise IllegalArgumentError('Due date should be a datetime.datetime() object')
 
-        url = self._build_url('teams')
-        response = self._request('POST', url, json=data)
+        if team is not None:
+            if isinstance(team, Team):
+                team_id = team.id
+            elif is_uuid(team):
+                team_id = team
+            elif isinstance(team, (text_type, string_types)):
+                team_id = self.team(name=team).id
+            else:
+                raise IllegalArgumentError("'Team' should be provided as a `models.Team` object or UUID or team name, "
+                                           "was provided as a {}".format(type(team)))
+
+            if self.match_app_version(label="gscope", version=">=2.0.0"):
+                data_dict['team_id'] = team_id
+            else:
+                data_dict['team'] = team_id
+
+        # injecting additional kwargs for those cases that you need to add extra options.
+        data_dict.update(kwargs)
+        if self.match_app_version(label="gscope", version=">=2.0.0"):
+            url = self._build_url('scopes2')
+            query_params = API_EXTRA_PARAMS['scopes2']
+            response = self._request('POST', url, params=query_params, data=data_dict)
+        else:
+            url = self._build_url('scopes')
+            response = self._request('POST', url, data=data_dict)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create a team ({})".format((response, response.json())))
+            raise APIError("Could not create scope, {}:\n\n{}'".format(str(response), response.json()))
 
-        the_team = Team(response.json().get('results')[0])
+        if self.match_app_version(label="gscope", version=">=2.0.0"):
+            return Scope2(response.json()['results'][0], client=self)
+        else:
+            return Scope(response.json()['results'][0], client=self)
 
-        the_team.add_members([user], role=TeamRoles.OWNER)
-        team_members = the_team.members()
-        the_team.remove_members([u for u in team_members if u != user])
+    def delete_scope(self, scope):
+        """
+        Delete a scope.
 
-        the_team.refresh()
+        This will delete a scope if the client has the right to do so. Sufficient permissions to delete a scope are a
+        superuser, a user in the `GG:Configurators` group or a user that is the Scope manager of the scope to be
+        deleted.
+
+        :param scope: Scope object to be deleted
+        :type scope: :class: `models.Scope`
+
+        :return: True when the delete is a success.
+        :raises APIError: in case of failure in the deletion of the scope
+        """
+        if not isinstance(scope, Scope):
+            raise IllegalArgumentError('Scope "{}" is not a scope!'.format(scope.name))
+
+        if self.match_app_version(label="gscope", version=">=2.0.0"):
+            response = self._request('DELETE', self._build_url('scope2', scope_id=str(scope.id)))
+        else:
+            response = self._request('DELETE', self._build_url('scope', scope_id=str(scope.id)))
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            raise APIError("Could not delete scope, {}: {}".format(str(response), response.content))
+
+        return True
 
     def clone_scope(self, source_scope, name=None, status=None, start_date=None, due_date=None,
-                    description=None, team=None, async=False):
+                    description=None, tags=None, team=None, asynchronous=False):
         """
         Clone a Scope.
 
@@ -1701,8 +1781,8 @@ class Client(object):
         :type name: basestring or None
         :param status: (optional) statis of the new scope
         :type status: one of :class:`enums.ScopeStatus`
-        # :param tags: (optional) list of new scope tags (NO EFFECT)
-        # :type status: list of basestring or None
+        :param tags: (optional) list of new scope tags
+        :type tags: list or None
         :param start_date: (optional) start date of the to be cloned scope
         :type start_date: datetime or None
         :param due_date: (optional) due data of the to be cloned scope
@@ -1713,8 +1793,8 @@ class Client(object):
         :type team: basestring or :class:`models.Team` or None
         # :param scope_options: (optional) dictionary with scope options (NO EFFECT)
         # :type scope_options: dict or None
-        :param async: (optional) option to use asynchronous cloning of the scope, default to False.
-        :type async: bool or None
+        :param asynchronous: (optional) option to use asynchronous cloning of the scope, default to False.
+        :type asynchronous: bool or None
         :return: New scope that is cloned
         :rtype: :class:`models.Scope`
         :raises IllegalArgumentError: When the provided arguments are incorrect
@@ -1724,11 +1804,9 @@ class Client(object):
             raise IllegalArgumentError('`source_scope` should be a `Scope` object')
 
         if self.match_app_version(label="gscope", version=">=2.0.0"):
-            data_dict = dict(scope_id=source_scope.id,
-                             async=async)
+            data_dict = {'scope_id': source_scope.id, 'async': asynchronous}
         else:
-            data_dict = dict(id=source_scope.id,
-                             async=async)
+            data_dict = {'id': source_scope.id, 'async': asynchronous}
 
         if name is not None:
             if not isinstance(name, (string_types, text_type)):
@@ -1760,18 +1838,18 @@ class Client(object):
                 data_dict['text'] = description
 
         if status is not None:
-            if not status in ScopeStatus.values():
+            if status not in ScopeStatus.values():
                 raise IllegalArgumentError("`status` should be one of '{}'".format(ScopeStatus.values()))
             else:
                 data_dict['status'] = str(status)
 
-        # TODO: fix in KEC3
-        # if tags is not None:
-        #     if not isinstance(tags, (list, tuple, set)) and not all(
-        #             [isinstance(tag, (string_types, text_type)) for tag in tags]):
-        #         raise IllegalArgumentError('`tags` should be a list (or tuple or set) of strings')
-        #     else:
-        #         data_dict['tags'] = list(set(tags))
+        if tags is not None:
+            if not isinstance(tags, (list, tuple, set)):
+                raise IllegalArgumentError("'Tags' should be provided as a list, tuple or set, was provided as '{}'".
+                                           format(type(tags)))
+            if not (all([isinstance(t, (str, text_type)) for t in tags])):
+                raise IllegalArgumentError("Each tag in the list of tags should be provided as a string")
+            data_dict['tags'] = tags
 
         if team is not None:
             if isinstance(team, Team):
@@ -1821,3 +1899,65 @@ class Client(object):
             return Scope2(response.json()['results'][0], client=source_scope._client)
         else:
             return Scope(response.json()['results'][0], client=source_scope._client)
+
+    def create_team(self, name, user, description=None, options=None, is_hidden=False):
+        """
+        Create a team.
+
+        To create a team, a :class:`User` (id or object) need to be passed for it to become owner. As most pykechain
+        enabled script are running inside the SIM environment in KE-chain, the user having the current connection
+        to the API is often not the user that needs to be part of the team to be created. The user provided will
+        become 'owner' of the team.
+
+        .. versionadded: 3.0
+
+        :param name: name of the team
+        :type name: basestring
+        :param user: user (userid, username or `User`) that will become owner of the team
+        :type user: userid or username or :class:`models.User`
+        :param description: (optional) description of the team
+        :type name: basestring or None
+        :param options: (optional) provide additional team advanced options (as dict)
+        :type options: dict or None
+        :param is_hidden: (optional) if the team needs to be hidden (defaults to false)
+        :type is_hidden: bool or None
+        :return: the created :class:`models.Team`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
+        """
+        if not isinstance(name, (string_types, text_type)):
+            raise IllegalArgumentError('`name` should be string')
+        if not isinstance(description, (string_types, text_type)):
+            raise IllegalArgumentError('`description` should be string')
+        if options and not isinstance(options, dict):
+            raise IllegalArgumentError('`options` should be a dictionary')
+        if is_hidden and not isinstance(is_hidden, bool):
+            raise IllegalArgumentError('`is_hidden` should be a boolean')
+        if isinstance(user, (string_types, text_type)):
+            user = self.user(username=user)
+        elif isinstance(user, int):
+            user = self.user(pk=user)
+        elif isinstance(user, User):
+            pass
+        else:
+            raise IllegalArgumentError('the `user` is not of a type `User`, a `username` or a user id')
+
+        data = dict(
+            name=name,
+            description=description,
+            options=options,
+            is_hidden=is_hidden
+        )
+
+        url = self._build_url('teams')
+        response = self._request('POST', url, json=data)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create a team ({})".format((response, response.json())))
+
+        new_team = Team(response.json().get('results')[0])
+
+        new_team.add_members([user], role=TeamRoles.OWNER)
+        team_members = new_team.members()
+        new_team.remove_members([u for u in team_members if u != user])
+
+        new_team.refresh()

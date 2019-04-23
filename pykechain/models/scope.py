@@ -9,11 +9,33 @@ from pykechain.enums import Multiplicity, ScopeStatus
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError, ForbiddenError
 from pykechain.models.base import Base
 from pykechain.models.team import Team
-from pykechain.utils import is_uuid
+from pykechain.utils import is_uuid, parse_datetime
 
 
 class Scope(Base):
-    """A virtual object representing a KE-chain scope."""
+    """A virtual object representing a KE-chain scope.
+
+    :ivar name: Name of the scope
+    :type name: str
+    :ivar id: UUID of the scope
+    :type if: uuid
+    :ivar workflow_root: Root of the workflow
+    :type workflow_root: uuid
+    :ivar description: Description of the scope
+    :type description: str or None
+    :ivar status: Status of the scope, enumeration of `ScopeStatus`
+    :type status: str
+    :ivar start_date: Start date of the scope
+    :type start_date: datetime or None
+    :ivar due_date: Due date of the scope
+    :type due_date: datetime or None
+    :ivar type: Type of scope, enumeration of `ScopeType`
+    :type type: str
+    :ivar tags: list of unique tags of the scope.
+    :type tags: list of str
+    :ivar team: Team associated to the scope
+    :type team: `Team` or None
+    """
 
     def __init__(self, json, **kwargs):
         # type: (dict, **Any) -> None
@@ -26,6 +48,17 @@ class Scope(Base):
         self.process = json.get('process')
         # for 'kechain2.core.wim >=2.0.0'
         self.workflow_root = json.get('workflow_root_id')
+
+        self.description = json.get('description')
+        self.status = json.get('status')
+        self.type = json.get('type')
+
+        self.start_date = parse_datetime(json.get('start_date'))
+        self.due_date = parse_datetime(json.get('due_date'))
+
+
+    def __repr__(self):  # pragma: no cover
+        return "<pyke Scope '{}' id {}>".format(self.name, self.id[-8:])
 
     @property
     def team(self):
@@ -221,22 +254,6 @@ class Scope(Base):
 
         self._update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
 
-    def delete(self):
-        """Delete the scope.
-
-        Only works with enough permissions
-
-        .. versionadded: 3.0
-        :raises ForbiddenError: if you do not have the permissions to delete a scope
-        """
-        url = self._client._build_url('scope', scope_id=self.id)
-        response = self._client._request('DELETE', url)
-
-        if response.status_code != requests.codes.no_content:  # pragma: no cover
-            if response.status_code == requests.codes.forbiddem:
-                raise ForbiddenError("Forbidden to delete scope, {}: {}".format(str(response), response.content))
-            raise APIError("Could not delete scope, {}: {}".format(str(response), response.content))
-
     def _update_scope_project_team(self, select_action, user, user_type):
         """
         Update the Project Team of the Scope. Updates include addition or removing of managers or members.
@@ -393,3 +410,29 @@ class Scope(Base):
 
         # do the update itself in an abstracted function.
         self._edit(update_dict)
+
+    def clone(self, *args, **kwargs):
+        """
+        Clone current scope.
+
+        See :class:`pykechain.Client.clone_scope` for available parameters.
+
+        .. versionadded:: 2.6.0
+        """
+        return self._client.clone_scope(*args, source_scope=self, **kwargs)
+
+    def delete(self):
+        """Delete the scope.
+
+        Only works with enough permissions
+
+        .. versionadded: 3.0
+        :raises ForbiddenError: if you do not have the permissions to delete a scope
+        """
+        url = self._client._build_url('scope', scope_id=self.id)
+        response = self._client._request('DELETE', url)
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            if response.status_code == requests.codes.forbiddem:
+                raise ForbiddenError("Forbidden to delete scope, {}: {}".format(str(response), response.content))
+            raise APIError("Could not delete scope, {}: {}".format(str(response), response.content))
