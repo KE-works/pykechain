@@ -398,3 +398,24 @@ class Scope(Base):
             raise APIError("Could not update Scope ({})".format(r))
         else:
             self._json_data = r.json().get('results') and r.json().get('results')[0]
+
+    # 2.6.0
+    def delete(self):
+        # type: () -> None
+        """
+        Delete scope.
+
+        :return: None
+        :raises APIError: in case an Error occurs
+        """
+        return self._client.delete_scope(scope=self)
+
+    def clone(self, *args, **kwargs):
+        """
+        Clone current scope.
+
+        See :class:`pykechain.Client.clone_scope` for available parameters.
+
+        .. versionadded:: 2.6.0
+        """
+        return self._client.clone_scope(*args, source_scope=self, **kwargs)
