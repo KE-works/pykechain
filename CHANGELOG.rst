@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+2.6.0 (23APR19)
+---------------
+ * Added the possibility to create a scope, clone a scope, and delete a scope. Check `Client.create_scope()`, `Scope.clone` and `Scope.delete` for documentation. (#359)
+
 2.5.7 (18APR19)
 ---------------
  * Added additional properties for the `Service` and `ServiceExecution` class. Now you can retrieve the `Service.filename` amoungst others. Please refer to the documentation of `Service` and `ServiceExecution` to see the properties that are now available (a feature request by @JelleBoersma). #480
