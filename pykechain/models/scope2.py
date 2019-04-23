@@ -5,6 +5,7 @@ from typing import Any  # noqa: F401
 from pykechain.enums import Multiplicity
 from pykechain.exceptions import APIError, NotFoundError, ForbiddenError
 from pykechain.models import Scope
+from pykechain.utils import parse_datetime
 
 
 class Scope2(Scope):
@@ -19,6 +20,13 @@ class Scope2(Scope):
         self.process = json.get('process')
         # for 'kechain2.core.wim >=2.0.0'
         self.workflow_root = json.get('workflow_root_id')
+
+        self.description = json.get('description')
+        self.status = json.get('status')
+        self.type = json.get('type')
+
+        self.start_date = parse_datetime(json.get('start_date'))
+        self.due_date = parse_datetime(json.get('due_date'))
 
     @property
     def bucket(self):
@@ -168,20 +176,19 @@ class Scope2(Scope):
     def delete(self):
         """Delete the scope.
 
-        Only works with enough permissions
+        Only works with enough permissions.
 
         .. versionadded: 3.0
+
+        See :method:`pykechain.Client.deletee_scope()` for available paramters.
         :raises ForbiddenError: if you do not have the permissions to delete a scope
         """
-        url = self._client._build_url('scope2', scope_id=self.id)
-        response = self._client._request('DELETE', url)
-
-        if response.status_code != requests.codes.no_content:  # pragma: no cover
-            if response.status_code == requests.codes.forbiddem:
-                raise ForbiddenError("Forbidden to delete scope, {}: {}".format(str(response), response.content))
-            raise APIError("Could not delete scope, {}: {}".format(str(response), response.content))
-
-
-
-
+        return self._client.delete_scope(scope=self)
+        # url = self._client._build_url('scope2', scope_id=self.id)
+        # response = self._client._request('DELETE', url)
+        #
+        # if response.status_code != requests.codes.no_content:  # pragma: no cover
+        #     if response.status_code == requests.codes.forbiddem:
+        #         raise ForbiddenError("Forbidden to delete scope, {}: {}".format(str(response), response.content))
+        #     raise APIError("Could not delete scope, {}: {}".format(str(response), response.content))
 

@@ -1,8 +1,9 @@
 import datetime
+from time import sleep
 from unittest import skipIf
 
 from pykechain.enums import ScopeStatus
-from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
+from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError, APIError
 from pykechain.models import Team
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_PIM2
@@ -218,6 +219,26 @@ class TestScopes(TestBetamax):
 @skipIf(not TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 2, expected to fail on old PIM")
 class TestScopes2SpecificTests(TestBetamax):
 
+    def setUp(self):
+        """
+        SetUp the test.
+
+        When you create a scope, assign it to self.scope such that it is deleted when the test is complete
+
+        :ivar scope: scope that you create during a test, which will be autoremoved in the cleanup.
+        """
+        super(TestScopes2SpecificTests, self).setUp()
+        self.scope = None
+
+    def tearDown(self):
+        """Teardown the test, remove the scope.
+
+        When you create a scope, assign it to self.scope such that it is deleted when the test is complete
+        """
+        if self.scope:
+            self.scope.delete()
+        super(TestScopes2SpecificTests, self).tearDown()
+
     def test_retrieve_scope2_members(self):
         original_scope_members = [u.get('username') for u in self.project.members()]
         original_scope_managers = [u.get('username') for u in self.project.members(is_manager=True)]
@@ -240,24 +261,25 @@ class TestScopes2SpecificTests(TestBetamax):
         self.project.remove_member('anotheruser')
 
     def test_clone_scope_vanilla(self):
-        new_scope = self.project.clone(async=False)
+        self.scope = self.project.clone(asynchronous=False)
 
-        self.assertNotEqual(self.project.id, new_scope.id)
-        self.assertEqual(self.project._json_data.get('tasks_count'), new_scope._json_data.get('tasks_count'))
-        self.assertEqual(self.project._json_data.get('processes_count'), new_scope._json_data.get('processes_count'))
-        self.assertEqual(self.project._json_data.get('activities_count'), new_scope._json_data.get('activities_count'))
-        self.assertEqual(self.project._json_data.get('parts_count'), new_scope._json_data.get('parts_count'))
-        self.assertEqual(self.project._json_data.get('model_parts_count'), new_scope._json_data.get('model_parts_count'))
-        self.assertEqual(self.project._json_data.get('properties_count'), new_scope._json_data.get('properties_count'))
-        new_scope.delete()
+        self.assertNotEqual(self.project.id, self.scope.id)
+        self.assertEqual(self.project._json_data.get('tasks_count'), self.scope._json_data.get('tasks_count'))
+        self.assertEqual(self.project._json_data.get('processes_count'), self.scope._json_data.get('processes_count'))
+        self.assertEqual(self.project._json_data.get('activities_count'), self.scope._json_data.get('activities_count'))
+        self.assertEqual(self.project._json_data.get('parts_count'), self.scope._json_data.get('parts_count'))
+        self.assertEqual(self.project._json_data.get('model_parts_count'), self.scope._json_data.get('model_parts_count'))
+        self.assertEqual(self.project._json_data.get('properties_count'), self.scope._json_data.get('properties_count'))
 
     def test_scope_delete(self):
-        new_scope = self.project.clone(async=False)
+        new_scope = self.project.clone(asynchronous=False)
         self.assertNotEqual(self.project.id, new_scope.id)
         new_scope.delete()
 
         with self.assertRaisesRegex(NotFoundError, 'No scope fits criteria'):
-            self.client.scope(pk=new_scope.id)
+            # throw in arbitrary sleep to give backend time to actually delete the scope.
+            sleep(0.500)
+            self.client.scope(pk=new_scope.id, status=new_scope.status)
 
     def test_clone_scope_updated_name_description_tags_etc(self):
         """
@@ -270,12 +292,11 @@ class TestScopes2SpecificTests(TestBetamax):
             status=ScopeStatus.CLOSED,
             # scope_options={"hello": "world"},
             tags=('a', 'b', 'b', 'c'),
-            async=False)
+            asynchronous=False)
+        self.scope = new_scope
 
         self.assertNotEqual(self.project.id, new_scope.id)
         self.assertEqual(new_scope._json_data.get('name'), "new bike scope")
         self.assertEqual(new_scope._json_data.get('text'), "new description")
         self.assertEqual(new_scope._json_data.get('status'), ScopeStatus.CLOSED)
         # self.assertListEqual(new_scope._json_data.get('tags'), ["a", "b", "c"])
-
-        new_scope.delete()
