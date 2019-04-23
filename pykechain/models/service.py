@@ -1,4 +1,5 @@
 import os
+
 import requests
 from six import string_types, text_type
 
@@ -39,8 +40,12 @@ class Service(Base):
         url = self._client._build_url('service_execute', service_id=self.id)
         response = self._client._request('GET', url, params=dict(interactive=interactive, format='json'))
 
-        if response.status_code != requests.codes.accepted:  # pragma: no cover
-            raise APIError("Could not execute service '{}': {}".format(self, (response.status_code, response.json())))
+        if response.status_code == requests.codes.conflict:  # pragma: no cover
+            raise APIError("Conflict: Could not execute service as it is already running '{}': {}".
+                           format(self, (response.status_code, response.json())))
+        elif response.status_code != requests.codes.accepted:  # pragma: no cover
+            raise APIError(
+                "Could not execute service '{}': {}".format(self, (response.status_code, response.json())))
 
         data = response.json()
         return ServiceExecution(json=data.get('results')[0], client=self._client)

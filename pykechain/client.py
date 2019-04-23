@@ -355,10 +355,10 @@ class Client(object):
         """Reload an object from server. The original object is immutable and it will return a new object.
 
         The object will be refetched from KE-chain. If the object has a 'url' field the url will be taken from
-        that field (KE-chain version 2). If the object does not have an 'url' field it will be constructed based
-        on the class name and the id of the object itself. If `extra_params` are provided, these will be respected.
-        If additional API params are needed to be included (eg. for KE-chain 3/PIM2) these will be added/updated
-        automatically before the request continues.
+        that field (KE-chain version 2 and newer). If the object does not have an 'url' field it will be constructed
+        based on the class name and the id of the object itself. If `extra_params` are provided, these will be
+        respected. If additional API params are needed to be included (eg. for KE-chain 3/PIM2) these will be
+        added/updated automatically before the request is performed.
 
         :param obj: object to reload
         :type obj: :py:obj:`obj`
