@@ -2,9 +2,9 @@ import datetime
 import os
 import time
 import warnings
-from requests.compat import urljoin  # type: ignore
 
 import requests
+from requests.compat import urljoin  # type: ignore
 from six import text_type
 
 from pykechain.config import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT
@@ -33,7 +33,8 @@ class Activity2(Activity):
     def refresh(self, *args, **kwargs):
         """Refresh the object in place."""
         from pykechain.client import API_EXTRA_PARAMS
-        super(Activity2, self).refresh(extra_params=API_EXTRA_PARAMS['activity'])
+        super(Activity2, self).refresh(url=self._client._build_url('activity', activity_id=self.id),
+                                       extra_params=API_EXTRA_PARAMS['activity'])
 
     #
     # predicates
@@ -393,6 +394,7 @@ class Activity2(Activity):
         :type outputs: list(:class:`Property`)
         :raises APIError: when unable to configure the activity
         """
+
         def _get_propertyset(proplist):
             """Make it into a unique list of properties to configure for either inputs or outputs."""
             from pykechain.models import Property
