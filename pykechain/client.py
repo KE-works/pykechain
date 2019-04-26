@@ -78,8 +78,8 @@ API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
 PARAMS_BASE = ["id", "name"]
 
 API_EXTRA_PARAMS = {
-    #'activity': API_QUERY_PARAM_ALL_FIELDS,  # id,name,scope,status,classification,activity_type,parent_id'},
-    #'activities': API_QUERY_PARAM_ALL_FIELDS,  # 'id,name,scope,status,classification,activity_type,parent_id'}
+    # 'activity': API_QUERY_PARAM_ALL_FIELDS,  # id,name,scope,status,classification,activity_type,parent_id'},
+    # 'activities': API_QUERY_PARAM_ALL_FIELDS,  # 'id,name,scope,status,classification,activity_type,parent_id'}
     # 'scope2': API_QUERY_PARAM_ALL_FIELDS,
     # 'scopes2': API_QUERY_PARAM_ALL_FIELDS,
     'part2': API_QUERY_PARAM_ALL_FIELDS,
@@ -91,11 +91,11 @@ API_EXTRA_PARAMS = {
 # TODO: need to tune this
 API_EXTRA_PARAMS.update({
     'activity': {'fields': ",".join(
-        ['id', 'name', 'activity_type', 'progress', 'assignees_names', 'start_date', 'due_date', 'status',
-         'parent_id', 'scope_id', 'customization'])},
+        ['id', 'name', 'activity_type', 'classification', 'progress', 'assignees_names', 'start_date', 'due_date',
+         'status', 'parent_id', 'scope_id', 'customization'])},
     'activities': {'fields': ",".join(
-        ['id', 'name', 'activity_type', 'progress', 'assignees_names', 'start_date', 'due_date', 'status',
-         'parent_id', 'scope_id', 'customization'])},
+        ['id', 'name', 'activity_type', 'classification', 'progress', 'assignees_names', 'start_date', 'due_date',
+         'status', 'parent_id', 'scope_id', 'customization'])},
     'scope2': {'fields': ",".join(
         ['id', 'name', 'text', 'start_date', 'due_date', 'status', 'progress', 'members', 'team', 'tags',
          'scope_options', 'team_id_name', 'workflow_root_id'])},

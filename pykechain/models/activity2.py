@@ -42,7 +42,7 @@ class Activity2(Activity):
 
     def is_rootlevel(self):
         """
-        Determine if the Activity is at the root level of a project.
+        Determine if the Activity is at the toplevel of a project.
 
         It will look for the name of the parent which should be either ActivityRootNames.WORKFLOW_ROOT or
         ActivityRootNames.CATALOG_ROOT. If the name of the parent cannot be found an additional API call is made
@@ -118,7 +118,7 @@ class Activity2(Activity):
         :return: Return True if it is a root workflow classification activity, otherwise return False
         :rtype: bool
         """
-        return self.is_root and self.is_workflow()
+        return self.is_root() and self.is_workflow()
 
     def is_catalog_root(self):
         """
@@ -127,7 +127,7 @@ class Activity2(Activity):
         :return: Return True if it is a root catalog classification activity, otherwise return False
         :rtype: bool
         """
-        return self.is_root and self.is_catalog()
+        return self.is_root() and self.is_catalog()
 
     def is_root(self):
         """
@@ -139,7 +139,7 @@ class Activity2(Activity):
         :return: Return True if it is a root object, otherwise return False
         :rtype: bool
         """
-        return self.name in ActivityRootNames.values()
+        return self.name in ActivityRootNames.values() and self._json_data.get('parent_id', False) is None
 
     #
     # methods
