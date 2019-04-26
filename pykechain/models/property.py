@@ -182,6 +182,9 @@ class Property(Base):
         elif property_type == PropertyType.REFERENCES_VALUE:
             from .property_multi_reference import MultiReferenceProperty
             return MultiReferenceProperty(json, **kwargs)
+        elif property_type == PropertyType.DATETIME_VALUE:
+            from .property_datetime import DatetimeProperty
+            return DatetimeProperty(json, **kwargs)
         else:
             return Property(json, **kwargs)
 
