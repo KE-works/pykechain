@@ -37,7 +37,15 @@ class Property2(Property):
     def __init__(self, json, **kwargs):
         """Construct a Property from a json object."""
         super(Property2, self).__init__(json, **kwargs)
+
+        self._output = json.get('output', None)
+        self._value = json.get('value', None)
         self._options = json.get('value_options', None)
+        self.type = json.get('property_type', None)
+        self.category = json.get('category')
+
+        # set an empty internal validators variable
+        self._validators = []  # type: List[Any]
 
         if self._options:
             validate(self._options, options_json_schema)
