@@ -6,7 +6,7 @@ env = Env()
 env.read_envfile()
 
 # TEST_URL = env('TEST_URL', default='https://kec2api.ke-chain.com')
-TEST_URL = env('TEST_URL', default='http://localhost:8000')
+TEST_URL = env('TEST_URL', default='https://pim2-test.ke-chain.com')
 TEST_USERNAME = env('TEST_USERNAME', default='pykechain')  # LVL1
 TEST_TOKEN = env('TEST_TOKEN', default='')
 TEST_SCOPE_ID = env('TEST_SCOPE_ID', default='dec21c02-7f27-4a49-b199-454d48ee1e6e')

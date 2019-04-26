@@ -103,10 +103,10 @@ API_EXTRA_PARAMS = {
         ['id', 'name', 'text', 'created_at', 'updated_at', 'start_date', 'due_date', 'status',
          'progress', 'members', 'team', 'tags', 'scope_options', 'team_id_name', 'workflow_root_id'])},
     'part2': {'fields': ",".join(
-        ['id', 'name', 'created_at', 'updated_at', 'properties', 'category', 'classification', 'parent_id', 'multiplicity', 'value_options',
+        ['id', 'name', 'description', 'created_at', 'updated_at', 'properties', 'category', 'classification', 'parent_id', 'multiplicity', 'value_options',
          'property_type', 'value', 'output', 'order', 'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
     'parts2': {'fields': ",".join(
-        ['id', 'name', 'created_at', 'updated_at', 'properties', 'category', 'classification', 'parent_id', 'multiplicity', 'value_options',
+        ['id', 'name', 'description', 'created_at', 'updated_at', 'properties', 'category', 'classification', 'parent_id', 'multiplicity', 'value_options',
          'property_type', 'value', 'output', 'order', 'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
     'properties2': {'fields': ",".join(
         ['id', 'name', 'created_at', 'updated_at', 'model_id', 'part_id', 'order', 'scope_id', 'category', 'property_type', 'value',
@@ -1216,7 +1216,7 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
-        if not isinstance(parent, Part) or not isinstance(model, Part):
+        if not isinstance(parent, (Part, Part2)) or not isinstance(model, (Part, Part2)):
             raise IllegalArgumentError("The parent and model should be a 'Part' object")
         if parent.category != Category.INSTANCE:
             raise IllegalArgumentError("The parent should be an category 'INSTANCE'")
@@ -1258,7 +1258,7 @@ class Client(object):
         if parent.category != Category.MODEL:
             raise IllegalArgumentError("The parent should be of category 'MODEL'")
 
-        if isinstance(parent, Part):
+        if isinstance(parent, (Part, Part2)):
             pass
         elif is_uuid(parent):
             parent = self.model(id=parent)
@@ -1322,7 +1322,7 @@ class Client(object):
             # PIM1 world
             raise ClientError("This function only works for KE-chain 3 backends.")
 
-        if isinstance(parent, Part):
+        if isinstance(parent, (Part, Part2)):
             pass
         elif is_uuid(parent):
             parent = self.model(id=parent)
@@ -1378,7 +1378,7 @@ class Client(object):
             select_action = 'clone_model'
         else:
             select_action = 'clone_instance'
-        if not isinstance(part, Part) and not isinstance(parent, Part):
+        if not isinstance(part, (Part, Part2)) and not isinstance(parent, (Part, Part2)):
             raise IllegalArgumentError("Either part and parent need to be of class `Part`. "
                                        "We got: part: '{}' and parent '{}'".format(type(part), type(parent)))
 
@@ -1503,7 +1503,7 @@ class Client(object):
         if property_type in (PropertyType.REFERENCE_VALUE, PropertyType.REFERENCES_VALUE) and default_value:
             if isinstance(default_value, (list, tuple)):
                 default_value = default_value[0]
-            if isinstance(default_value, Part):
+            if isinstance(default_value, (Part, Part2)):
                 default_value = default_value.id
             if not is_uuid(default_value):
                 raise IllegalArgumentError("Please provide a valid default_value being a `Part` of category `MODEL` "

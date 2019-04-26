@@ -2,7 +2,7 @@ from unittest import skipIf
 
 from pykechain.enums import Multiplicity, Category, Classification
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
-from pykechain.models import Part, PartSet
+from pykechain.models import Part, PartSet, Part2
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_PIM2
 
@@ -176,7 +176,7 @@ class TestParts(TestBetamax):
 
     def test_retrieve_children_of_part(self):
         bike = self.project.part('Bike')  # type:Part
-        self.assertIsInstance(bike, Part)
+        self.assertIsInstance(bike, (Part, Part2))
         children_of_bike = bike.children()
         self.assertIsInstance(children_of_bike, (PartSet, list))
         self.assertTrue(len(children_of_bike) >= 1)  # eg. Wheels ...
@@ -357,7 +357,7 @@ class TestParts(TestBetamax):
     # new in 1.12
     def test_retrieve_children_of_part_with_additional_arguments(self):
         bike = self.project.part('Bike')  # type:Part
-        self.assertIsInstance(bike, Part)
+        self.assertIsInstance(bike, (Part, Part2))
         children_of_bike = bike.children(name__icontains='Wheel')
         self.assertIsInstance(children_of_bike, PartSet)
         self.assertTrue(len(children_of_bike) >= 1)  # eg. Wheels ...

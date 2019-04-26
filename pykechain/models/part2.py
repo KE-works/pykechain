@@ -1,15 +1,17 @@
-import requests
-from six import text_type, string_types
 from typing import Any  # noqa: F401
 
-from pykechain.enums import Category
-from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
-from pykechain.models import Part
+import requests
+from six import text_type, string_types
+
+from pykechain.enums import Category, Multiplicity
+from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
+from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance
+from pykechain.models import Part, Base
 from pykechain.models.property2 import Property2
-from pykechain.utils import is_uuid
+from pykechain.utils import is_uuid, find
 
 
-class Part2(Part):
+class Part2(Base):
     """A virtual object representing a KE-chain part.
 
     :cvar basestring category: The category of the part, either 'MODEL' or 'INSTANCE'
@@ -56,10 +58,11 @@ class Part2(Part):
         :type json: dict
         """
         # we need to run the init of 'Base' instead of 'Part' as we do not need the instantiation of properties
-        super(Part, self).__init__(json, **kwargs)
+        super(Part2, self).__init__(json, **kwargs)
 
         self.category = json.get('category')
         self.parent_id = json.get('parent_id', None)
+        self.description = json.get('description', None)
         self.multiplicity = json.get('multiplicity', None)
         self._cached_children = None
 
@@ -71,6 +74,157 @@ class Part2(Part):
         super(Part2, self).refresh(json=json,
                                    url=self._client._build_url('part2', part_id=self.id),
                                    extra_params=API_EXTRA_PARAMS['part2'])
+
+    #
+    # Family and structure methods
+    #
+
+    def property(self, name):
+        """Retrieve the property belonging to this part based on its name or uuid.
+
+        :param name: property name or property UUID to search for
+        :type name: basestring
+        :return: a single :class:`Property`
+        :raises NotFoundError: if the `Property` is not part of the `Part`
+
+        Example
+        -------
+
+        >>> part = project.part('Bike')
+        >>> part.properties
+        [<pyke Property ...>, ...]
+        # this returns a list of all properties of this part
+
+        >>> gears = part.property('Gears')
+        >>> gears.value
+        6
+
+        >>> gears = part.property('123e4567-e89b-12d3-a456-426655440000')
+        >>> gears.value
+        6
+
+        """
+        found = None
+        if is_uuid(name):
+            found = find(self.properties, lambda p: name == p.id)
+        else:
+            found = find(self.properties, lambda p: name == p.name)
+
+        if not found:
+            raise NotFoundError("Could not find property with name or id {}".format(name))
+
+        return found
+
+    def parent(self):
+        # type: () -> Any
+        """Retrieve the parent of this `Part`.
+
+        :return: the parent :class:`Part` of this part
+        :raises APIError: if an Error occurs
+
+        Example
+        -------
+
+        >>> part = project.part('Frame')
+        >>> bike = part.parent()
+
+        """
+        if self.parent_id:
+            return self._client.part(pk=self.parent_id, category=self.category)
+        else:
+            return None
+
+    def children(self, **kwargs):
+        """Retrieve the children of this `Part` as `Partset`.
+
+        When you call the :func:`Part.children()` method without any additional filtering options for the children,
+        the children are cached to help speed up subsequent calls to retrieve the children. The cached children are
+        returned as a list and not as a `Partset`.
+
+        When you *do provide* additional keyword arguments (kwargs) that act as a specific children filter, the
+        cached children are _not_ used and a separate API call is made to retrieve only those children.
+
+        :param kwargs: Additional search arguments to search for, check :class:`pykechain.Client.parts`
+                       for additional info
+        :type kwargs: dict
+        :return: a set of `Parts` as a :class:`PartSet`. Will be empty if no children. Will be a `List` if the
+                 children are retrieved from the cached children.
+        :raises APIError: When an error occurs.
+
+        Example
+        -------
+
+        A normal call, which caches all children of the bike. If you call `bike.children` twice only 1 API call is made.
+
+        >>> bike = project.part('Bike')
+        >>> direct_descendants_of_bike = bike.children()
+
+        An example with providing additional part search parameters 'name__icontains'. Children are retrieved from the
+        API, not the bike's internal (already cached in previous example) cache.
+
+        >>> bike = project.part('Bike')
+        >>> wheel_children_of_bike = bike.children(name__icontains='wheel')
+
+        """
+        if not kwargs:
+            # no kwargs provided is the default, we aim to cache it.
+            if not self._cached_children:
+                self._cached_children = list(self._client.parts(parent=self.id, category=self.category))
+            return self._cached_children
+        else:
+            # if kwargs are provided, we assume no use of cache as specific filtering on the children is performed.
+            return self._client.parts(parent=self.id, category=self.category, **kwargs)
+
+    def populate_descendants(self, batch=200):
+        """
+        Retrieve the descendants of a specific part in a list of dicts and populate the :func:`Part.children()` method.
+
+        Each `Part` has a :func:`Part.children()` method to retrieve the children on the go. This function
+        prepopulates the children and the children's children with its children in one call, making the traversal
+        through the parttree blazingly fast.
+
+        .. versionadded:: 2.1
+
+        :param batch: Number of Parts to be retrieved in a batch
+        :type batch: int (defaults to 200)
+        :returns: list of `Parts` with `children`
+        :raises APIError: if you cannot create the children tree.
+
+        Example
+        -------
+        >>> bike = client.part('Bike')
+        >>> bike.populate_descendants(batch=150)
+
+        """
+        descendants_flat_list = list(self._client.parts(
+            parent_id=self.id,
+            category=self.category,
+            batch=batch)
+        )
+
+        self._cached_children = descendants_flat_list
+
+    def siblings(self, **kwargs):
+        # type: (Any) -> Any
+        """Retrieve the siblings of this `Part` as `Partset`.
+
+        Siblings are other Parts sharing the same parent of this `Part`, including the part itself.
+
+        :param kwargs: Additional search arguments to search for, check :class:`pykechain.Client.parts`
+                       for additional info
+        :type kwargs: dict
+        :return: a set of `Parts` as a :class:`PartSet`. Will be empty if no siblings.
+        :raises APIError: When an error occurs.
+        """
+        if self.parent_id:
+            return self._client.parts(parent=self.parent_id, category=self.category, **kwargs)
+        else:
+            from pykechain.models.partset import PartSet
+            return PartSet(parts=[])
+
+    #
+    # Model and Instance(s) methods
+    #
 
     def model(self):
         """
@@ -95,6 +249,58 @@ class Part2(Part):
             return self._client.model(pk=model_id)
         else:
             raise NotFoundError("Part {} has no model".format(self.name))
+
+    def instances(self, **kwargs):
+        """
+        Retrieve the instances of this `Part` as a `PartSet`.
+
+        For instance, if you have a model part, you can get the list of instances that are created based on this
+        moodel. If there are no instances (only possible if the multiplicity is :attr:`enums.Multiplicity.ZERO_MANY`)
+        than a :exc:`NotFoundError` is returned
+
+        .. versionadded:: 1.8
+
+        :return: the instances of this part model :class:`PartSet` with category `INSTANCE`
+        :raises NotFoundError: if no instances found
+
+        Example
+        -------
+        >>> wheel_model = project.model('Wheel')
+        >>> wheel_instance_set = wheel_model.instances()
+
+        An example with retrieving the front wheels only using the 'name__contains' search argument.
+
+        >>> wheel_model = project.model('Wheel')
+        >>> front_wheel_instances = wheel_model.instances(name__contains='Front')
+
+        """
+        if self.category == Category.MODEL:
+            return self._client.parts(model=self, category=Category.INSTANCE, **kwargs)
+        else:
+            raise NotFoundError("Part {} is not a model".format(self.name))
+
+    def instance(self):
+        """
+        Retrieve the single (expected) instance of this 'Part' (of `Category.MODEL`) as a 'Part'.
+
+        See :func:`Part.instances()` method for documentation.
+
+        :return: :class:`Part` with category `INSTANCE`
+        :raises NotFoundError: if the instance does not exist
+        :raises MultipleFoundError: if there are more than a single instance returned
+        """
+        instances_list = list(self.instances())
+        if len(instances_list) == 1:
+            return instances_list[0]
+        elif len(instances_list) > 1:
+            raise MultipleFoundError("Part {} has more than a single instance. "
+                                     "Use the `Part.instances()` method".format(self.name))
+        else:
+            raise NotFoundError("Part {} has no instance".format(self.name))
+
+    #
+    # CRUD operations
+    #
 
     def edit(self, name=None, description=None, **kwargs):
         """Edit the details of a part (model or instance).
@@ -186,6 +392,135 @@ class Part2(Part):
         else:
             raise NotFoundError("Part {} is not a proxy".format(self.name))
 
+    def add(self, model, **kwargs):
+        # type: (Part, **Any) -> Part
+        """Add a new child instance, based on a model, to this part.
+
+        This can only act on instances. It needs a model from which to create the child instance.
+
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
+
+        :type kwargs: dict or None
+        :type model: :class:`Part`
+        :param kwargs: (optional) additional keyword=value arguments
+        :type kwargs: dict
+        :return: :class:`Part` with category `INSTANCE`.
+        :raises APIError: if unable to add the new child instance
+
+        Example
+        -------
+
+        >>> bike = project.part('Bike')
+        >>> wheel_model = project.model('Wheel')
+        >>> bike.add(wheel_model)
+        """
+        if self.category != Category.INSTANCE:
+            raise APIError("Part should be of category INSTANCE")
+
+        return self._client.create_part(self, model, **kwargs)
+
+    def add_to(self, parent, **kwargs):
+        # type: (Part, **Any) -> Part
+        """Add a new instance of this model to a part.
+
+        This works if the current part is a model and an instance of this model is to be added
+        to a part instances in the tree.
+
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
+
+        :param parent: part to add the new instance to
+        :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
+        :type kwargs: dict or None
+        :type parent: :class:`Part`
+        :param kwargs: (optional) additional keyword=value arguments
+        :type kwargs: dict
+        :return: :class:`Part` with category `INSTANCE`
+        :raises APIError: if unable to add the new child instance
+
+        Example
+        -------
+
+        >>> wheel_model = project.model('wheel')
+        >>> bike = project.part('Bike')
+        >>> wheel_model.add_to(bike)
+        """
+        if self.category != Category.MODEL:
+            raise APIError("Part should be of category MODEL")
+
+        return self._client.create_part(parent, self, **kwargs)
+
+    def add_model(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Part
+        """Add a new child model to this model.
+
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
+
+        :return: a :class:`Part` of category `MODEL`
+        """
+        if self.category != Category.MODEL:
+            raise APIError("Part should be of category MODEL")
+
+        return self._client.create_model(self, *args, **kwargs)
+
+    def add_proxy_to(self, parent, name, multiplicity=Multiplicity.ONE_MANY, **kwargs):
+        # type: (Any, AnyStr, Any, **Any) -> Part
+        """Add this model as a proxy to another parent model.
+
+        This will add the current model as a proxy model to another parent model. It ensure that it will copy the
+        whole subassembly to the 'parent' model.
+
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
+        additional keyword=value argument to this method. This will improve performance of the backend
+        against a trade-off that someone looking at the frontend won't notice any changes unless the page
+        is refreshed.
+
+        :param name: Name of the new proxy model
+        :type name: basestring
+        :param parent: parent of the to be proxied model
+        :type parent: :class:`Part`
+        :param multiplicity: the multiplicity of the new proxy model (default ONE_MANY)
+        :type multiplicity: basestring or None
+        :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
+        :type kwargs: dict or None
+        :return: the new proxied :class:`Part`.
+        :raises APIError: in case an Error occurs
+
+        Examples
+        --------
+        >>> from pykechain.enums import Multiplicity
+        >>> bike_model = project.model('Bike')
+        # find the catalog model container, the highest parent to create catalog models under
+        >>> catalog_model_container = project.model('Catalog container')
+        >>> new_wheel_model = project.create_model(catalog_model_container, 'Wheel Catalog',
+        ...                                        multiplicity=Multiplicity.ZERO_MANY)
+        >>> new_wheel_model.add_proxy_to(bike_model, "Wheel", multiplicity=Multiplicity.ONE_MANY)
+
+        """
+        return self._client.create_proxy_model(self, parent, name, multiplicity, **kwargs)
+
+    def add_property(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Property
+        """Add a new property to this model.
+
+        See :class:`pykechain.Client.create_property` for available parameters.
+
+        :return: :class:`Property`
+        :raises APIError: in case an Error occurs
+        """
+        if self.category != Category.MODEL:
+            raise APIError("Part should be of category MODEL")
+
+        return self._client.create_property(self, *args, **kwargs)
+
     def add_with_properties(self, model, name=None, update_dict=None, properties_fvalues=None, refresh=True, **kwargs):
         """
         Add a part as a child of this part and update its properties in one go.
@@ -274,12 +609,145 @@ class Part2(Part):
 
         return Part2(response.json()['results'][0], client=self._client)
 
-        # else:  # do the old way
-        #     new_part = self.add(model, name=name)  # type: Part
-        #     new_part.update(update_dict=update_dict, bulk=bulk)
-        #     return new_part
+    def clone(self, **kwargs):
+        """
+        Clone a part.
 
-    def update(self, name=None, update_dict=None, properties_fvalues=None, refresh=True, **kwargs):
+        An optional name of the cloned part may be provided. If not provided the name will be set
+        to "CLONE - <part name>". (available for KE-chain 3 backends only)
+        An optional multiplicity, may be added as paremeter for the cloning of models. If not
+        provided the multiplicity of the part will be used. (available for KE-chain 3 backends only)
+
+        .. versionadded:: 2.3
+        .. versionchanged:: 3.0
+           Added optional paramenters the name and multiplicity for KE-chain 3 backends.
+
+        :param kwargs: (optional) additional keyword=value arguments
+        :type kwargs: dict
+        :return: cloned :class:`models.Part`
+        :raises APIError: if the `Part` could not be cloned
+
+        Example
+        -------
+        >>> bike = project.model('Bike')
+        >>> bike2 = bike.clone()
+
+        For KE-chain 3 backends
+
+        >>> bike = project.model('Bike')
+        >>> bike2 = bike.clone(name='Trike', multiplicity=Multiplicity.ZERO_MANY)
+
+        """
+        parent = self.parent()
+        return self._client._create_clone(parent, self, **kwargs)
+
+    def copy(self, target_parent, name=None, include_children=True, include_instances=True):
+        """
+        Copy the `Part` to target parent, both of them having the same category.
+
+        .. versionadded:: 2.3
+
+        :param target_parent: `Part` object under which the desired `Part` is copied
+        :type target_parent: :class:`Part`
+        :param name: how the copied top-level `Part` should be called
+        :type name: basestring
+        :param include_children: True to copy also the descendants of `Part`.
+        :type include_children: bool
+        :param include_instances: True to copy also the instances of `Part` to ALL the instances of target_parent.
+        :type include_instances: bool
+        :returns: copied :class:`Part` model.
+        :raises IllegalArgumentError: if part and target_parent have different `Category`
+        :raises IllegalArgumentError: if part and target_parent are identical
+
+        Example
+        -------
+        >>> model_to_copy = client.model(name='Model to be copied')
+        >>> bike = client.model('Bike')
+        >>> model_to_copy.copy(target_parent=bike, name='Copied model',
+        >>>                    include_children=True,
+        >>>                    include_instances=True)
+
+        """
+        if not isinstance(target_parent, Part2):
+            raise IllegalArgumentError("`target_parent` needs to be a part, got '{}'".format(type(target_parent)))
+
+        if self.category == Category.MODEL and target_parent.category == Category.MODEL:
+            # Cannot add a model under an instance or vice versa
+            copied_model = relocate_model(part=self, target_parent=target_parent, name=name,
+                                          include_children=include_children)
+            if include_instances:
+                instances_to_be_copied = list(self.instances())
+                parent_instances = list(target_parent.instances())
+                for parent_instance in parent_instances:
+                    for instance in instances_to_be_copied:
+                        instance.populate_descendants()
+                        move_part_instance(part_instance=instance, target_parent=parent_instance,
+                                           part_model=self, name=instance.name,
+                                           include_children=include_children)
+            return copied_model
+
+        elif self.category == Category.INSTANCE and target_parent.category == Category.INSTANCE:
+            copied_instance = relocate_instance(part=self, target_parent=target_parent, name=name,
+                                                include_children=include_children)
+            return copied_instance
+        else:
+            raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category')
+
+    def move(self, target_parent, name=None, include_children=True, include_instances=True):
+        """
+        Move the `Part` to target parent, both of them the same category.
+
+        .. versionadded:: 2.3
+
+        :param target_parent: `Part` object under which the desired `Part` is moved
+        :type target_parent: :class:`Part`
+        :param name: how the moved top-level `Part` should be called
+        :type name: basestring
+        :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
+        :type include_children: bool
+        :param include_instances: True to move also the instances of `Part` to ALL the instances of target_parent.
+        :type include_instances: bool
+        :returns: moved :class:`Part` model.
+        :raises IllegalArgumentError: if part and target_parent have different `Category`
+        :raises IllegalArgumentError: if target_parent is descendant of part
+
+        Example
+        -------
+        >>> model_to_move = client.model(name='Model to be moved')
+        >>> bike = client.model('Bike')
+        >>> model_to_move.move(target_parent=bike, name='Moved model',
+        >>>                    include_children=True,
+        >>>                    include_instances=True)
+
+        """
+        if not name:
+            name = self.name
+        if self.category == Category.MODEL and target_parent.category == Category.MODEL:
+            moved_model = relocate_model(part=self, target_parent=target_parent, name=name,
+                                         include_children=include_children)
+            if include_instances:
+                retrieve_instances_to_copied = list(self.instances())
+                retrieve_parent_instances = list(target_parent.instances())
+                for parent_instance in retrieve_parent_instances:
+                    for instance in retrieve_instances_to_copied:
+                        instance.populate_descendants()
+                        move_part_instance(part_instance=instance, target_parent=parent_instance,
+                                           part_model=self, name=instance.name, include_children=include_children)
+            self.delete()
+            return moved_model
+        elif self.category == Category.INSTANCE and target_parent.category == Category.INSTANCE:
+            moved_instance = relocate_instance(part=self, target_parent=target_parent, name=name,
+                                               include_children=include_children)
+            try:
+                self.delete()
+            except APIError:
+                model_of_instance = self.model()
+                model_of_instance.delete()
+            return moved_instance
+        else:
+            raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category')
+
+    def update(self, name=None, update_dict=None, properties_fvalues=None, **kwargs):
         """
         Edit part name and property values in one go.
 
@@ -305,8 +773,6 @@ class Part2(Part):
         :type update_dict: dict or None
         :param properties_fvalues: (optional) keyword argument with raw list of properties update dicts
         :type properties_fvalues: list of dict or None
-        :param refresh: refresh the part after succesfull completion, default to True
-        :type refresh: bool
         :param kwargs: additional keyword-value arguments that will be passed into the part update request.
         :type kwargs: dict or None
 
@@ -370,7 +836,6 @@ class Part2(Part):
 
         # update local properties (without a call)
         self.refresh(json=response.json()['results'][0])
-        # self.properties = [Property2.create(p, client=self._client) for p in self._json_data['properties']]
 
     def delete(self):
         # type: () -> None
@@ -442,3 +907,55 @@ class Part2(Part):
             properties_fvalues.append(updated_p)
 
         return self.update(properties_fvalues=properties_fvalues)
+
+    #
+    # Utility Functions
+    #
+
+    def _repr_html_(self):
+        # type: () -> str
+
+        html = [
+            "<table width=100%>",
+            "<caption>{}</caption>".format(self.name),
+            "<tr>",
+            "<th>Property</th>",
+            "<th>Value</th>",
+            "</tr>"
+        ]
+
+        for prop in self.properties:
+            style = "color:blue;" if prop._json_data.get('output', False) else ""
+
+            html.append("<tr style=\"{}\">".format(style))
+            html.append("<td>{}</td>".format(prop.name))
+            html.append("<td>{}</td>".format(prop.value))
+            html.append("</tr>")
+
+        html.append("</table>")
+
+        return ''.join(html)
+
+    def as_dict(self):
+        """
+        Retrieve the properties of a part inside a dict in this structure: {property_name: property_value}.
+
+        .. versionadded:: 1.9
+
+        :returns: the values of the properties as a `dict`
+        :rtype: dict
+
+        Example
+        -------
+        >>> front_wheel = client.scope('Bike Project').part('Front Wheel')
+        >>> front_wheel_properties = front_wheel.as_dict()
+        {'Diameter': 60.8,
+         'Spokes': 24,
+         'Rim Material': 'Aluminium',
+         'Tire Thickness': 4.2}
+
+        """
+        properties_dict = dict()
+        for prop in self.properties:
+            properties_dict[prop.name] = prop.value
+        return properties_dict
