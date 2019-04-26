@@ -1,4 +1,9 @@
+import datetime
+import warnings
+
+from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.property import Property
+from pykechain.utils import parse_datetime
 
 
 class DatetimeProperty(Property):
@@ -6,13 +11,13 @@ class DatetimeProperty(Property):
 
     def as_datetime(self):
         """
-        Transmogrify the value as a datetime object instead of a string
+        Transmogrify the value as a datetime object instead of a string.
 
         :return:
         """
-        pass
+        return parse_datetime(self.value)
 
-    def to_value(self, datetime_object):
+    def to_value(self, obj):
         """
         Transmogrify the datetime object to a isostring for storage in the value.
 
@@ -22,4 +27,11 @@ class DatetimeProperty(Property):
         :type datetime_object: datetime
         :return:
         """
-        pass
+        if isinstance(obj, datetime.datetime):
+            if not obj.tzinfo:
+                warnings.warn("The value '{}' is naive and not timezone aware, use pytz.timezone info. "
+                              "This date is interpreted as UTC time.".format(obj.isoformat(sep=' ')))
+
+            self._put_value(obj.isoformat(sep='T'))
+        else:
+            raise IllegalArgumentError('Start date should be a datetime.datetime() object')
