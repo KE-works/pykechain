@@ -11,11 +11,11 @@ from pykechain.config import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
-from pykechain.models.activity import Activity
-from pykechain.utils import is_uuid
+from pykechain.models import Base
+from pykechain.utils import is_uuid, parse_datetime
 
 
-class Activity2(Activity):
+class Activity2(Base):
     """A virtual object representing a KE-chain activity.
 
     .. versionadded:: 2.0
@@ -25,16 +25,53 @@ class Activity2(Activity):
         """Construct an Activity from a json object."""
         super(Activity2, self).__init__(json, **kwargs)
 
-        self.scope = json.get('scope', None)
+        self._scope_id = json.get('scope_id', None)
+
         self.status = json.get('status', None)
         self.classification = json.get('classification', None)
         self.activity_type = json.get('activity_type', None)
+        self.start_date = parse_datetime(json.get('start_date'))
+        self.due_date = parse_datetime(json.get('due_date'))
 
     def refresh(self, *args, **kwargs):
         """Refresh the object in place."""
         from pykechain.client import API_EXTRA_PARAMS
         super(Activity2, self).refresh(url=self._client._build_url('activity', activity_id=self.id),
                                        extra_params=API_EXTRA_PARAMS['activity'])
+
+    #
+    # additional properties
+    #
+
+    @property
+    def assignees(self):
+        """List of assignees to the activity.
+
+        Provides a list of `User` objects or an empty list. If no `assignees_ids` are in the API call, then
+        returns None.
+
+        :return: a list of `User`s or an empty list.
+        :rtype: list or None
+        """
+        if 'assignees_ids' in self._json_data and self._json_data.get('assignees_ids') == list():
+            return []
+        elif 'assignees_ids' in self._json_data and self._json_data.get('assignees_ids'):
+            assignees_ids_str = ','.join([str(id) for id in self._json_data.get('assignees_ids')])
+            return self._client.users(id__in=assignees_ids_str, is_hidden=False)
+        return None
+
+    @property
+    def scope_id(self):
+        if self._scope_id is None:
+            self.refresh()
+            if self._scope_id is None:
+                raise NotFoundError("This activity '{}'({}) does not belong to a scope, something is weird!".
+                                    format(self.name, self.id))
+        return self._scope_id
+
+    @property
+    def scope(self):
+        return self._client.scope(pk=self._scope_id)
 
     #
     # predicates
@@ -140,6 +177,37 @@ class Activity2(Activity):
         :rtype: bool
         """
         return self.name in ActivityRootNames.values() and self._json_data.get('parent_id', False) is None
+
+    def is_configured(self):
+        """
+        Determine if the Activity is configured with input and output properties.
+
+        Makes an additional lightweight call to the API to determine if any associated models are there.
+
+        :return: Return True if it is configured, otherwise return False
+        :rtype: bool
+        """
+        # check configured based on if we get at least 1 part back
+        associated_models = self.parts(category=Category.MODEL, limit=1)
+        if associated_models:
+            return True
+        else:
+            return False
+
+    def is_customized(self):
+        """
+        Determine if the Activity is customized.
+
+        In other words if it has a customization. Use can use the :func:`Activity.customization()` to retrieve
+        the customization object and configure the task.
+
+        :return: Return True if it is customized, otherwise return False
+        :rtype: bool
+        """
+        if self._json_data.get('customization', False):
+            return True
+        else:
+            return False
 
     #
     # methods
@@ -379,9 +447,96 @@ class Activity2(Activity):
 
         self.refresh(json=response.json().get('results')[0])
 
+    def delete(self):
+        """Delete this activity.
+
+        :raises APIError: when unable to delete the activity
+        """
+        response = self._client._request('DELETE', self._client._build_url('activity', activity_id=self.id))
+
+        if response.status_code != requests.codes.no_content:
+            raise APIError("Could not delete activity: {} with id {}".format(self.name, self.id))
+
+    #
+    # Searchers and retrievers
+    #
+
+    def parts(self, *args, **kwargs):
+        """Retrieve parts belonging to this activity.
+
+        Without any arguments it retrieves the Instances related to this task only.
+
+        This call only returns the configured properties in an activity. So properties that are not configured
+        are not in the returned parts.
+
+        See :class:`pykechain.Client.parts` for additional available parameters.
+
+        Example
+        -------
+        >>> task = project.activity('Specify Wheel Diameter')
+        >>> parts = task.parts()
+
+        To retrieve the models only.
+        >>> parts = task.parts(category=Category.MODEL)
+
+        """
+        return self._client.parts(*args, activity=self.id, **kwargs)
+
+    def associated_parts(self, *args, **kwargs):
+        """Retrieve models and instances belonging to this activity.
+
+        This is a convenience method for the :func:`Activity.parts()` method, which is used to retrieve both the
+        `Category.MODEL` as well as the `Category.INSTANCE` in a tuple.
+
+        This call only returns the configured properties in an activity. So properties that are not configured
+        are not in the returned parts.
+
+        If you want to retrieve only the models associated to this task it is better to use:
+            `task.parts(category=Category.MODEL)`.
+
+        See :func:`pykechain.Client.parts` for additional available parameters.
+
+        :returns: a tuple(models of :class:`PartSet`, instances of :class:`PartSet`)
+
+        Example
+        -------
+        >>> task = project.activity('Specify Wheel Diameter')
+        >>> all_models, all_instances = task.associated_parts()
+
+        """
+        return (
+            self.parts(category=Category.MODEL, *args, **kwargs),
+            self.parts(category=Category.INSTANCE, *args, **kwargs)
+        )
+
+    #
+    # Customizations
+    #
+
     def customize(self, config):  # noqa: D401
         """Method is deprecated."""
         raise DeprecationWarning('This function is deprecated')
+
+    def customization(self):
+        """
+        Get a customization object representing the customization of the activity.
+
+        .. versionadded:: 1.11
+
+        :return: An instance of :class:`customization.ExtCustomization`
+
+        Example
+        -------
+        >>> activity = project.activity(name='Customizable activity')
+        >>> customization = activity.customization()
+        >>> part_to_show = project.part(name='Bike')
+        >>> customization.add_property_grid_widget(part_to_show, custom_title="My super bike"))
+
+        """
+        from .customization import ExtCustomization
+
+        # For now, we only allow customization in an Ext JS context
+        return ExtCustomization(activity=self, client=self._client)
 
     def configure(self, inputs, outputs):
         """Configure activity input and output.
