@@ -1,4 +1,4 @@
-from typing import Any  # noqa: F401
+from typing import Any, AnyStr  # noqa: F401
 
 import requests
 from six import text_type, string_types
@@ -508,7 +508,7 @@ class Part2(Base):
         return self._client.create_proxy_model(self, parent, name, multiplicity, **kwargs)
 
     def add_property(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Property
+        # type: (*Any, **Any) -> Property2
         """Add a new property to this model.
 
         See :class:`pykechain.Client.create_property` for available parameters.

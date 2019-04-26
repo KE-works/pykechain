@@ -1,9 +1,9 @@
 import datetime
 import warnings
+from typing import Any  # noqa: F401
 
 import requests
 from six import text_type, string_types
-from typing import Any  # noqa: F401
 
 from pykechain.enums import Multiplicity, ScopeStatus
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError, ForbiddenError
@@ -55,7 +55,6 @@ class Scope(Base):
 
         self.start_date = parse_datetime(json.get('start_date'))
         self.due_date = parse_datetime(json.get('due_date'))
-
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Scope '{}' id {}>".format(self.name, self.id[-8:])

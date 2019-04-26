@@ -19,6 +19,23 @@ class Activity2(Base):
     """A virtual object representing a KE-chain activity.
 
     .. versionadded:: 2.0
+
+    :ivar id: id of the activity
+    :type id: uuid
+    :ivar name: name of the activity
+    :type name: basestring
+    :ivar created_at: created datetime of the activity
+    :type created_at: datetime
+    :ivar updated_at: updated datetime of the activity
+    :type updated_at: datetime
+    :ivar description: description of the activity
+    :type description: basestring
+    :ivar status: status of the activity. One of :class:`pykechain.enums.ActivityStatus`
+    :type status: basestring
+    :ivar classification: classification of the activity. One of :class:`pykechain.enums.ActivityClassificiation`
+    :type classification: basestring
+    :ivar activity_type: Type of the acitivity. One of :class:`pykechain.enums.ActivityType` for WIM version 2
+    :type activity_type: basestring
     """
 
     def __init__(self, json, **kwargs):
@@ -27,6 +44,7 @@ class Activity2(Base):
 
         self._scope_id = json.get('scope_id', None)
 
+        self.description = json.get('description', '')
         self.status = json.get('status', None)
         self.classification = json.get('classification', None)
         self.activity_type = json.get('activity_type', None)
@@ -62,6 +80,18 @@ class Activity2(Base):
 
     @property
     def scope_id(self):
+        """
+        Id of the scope this Activity belongs to.
+
+        This property will always produce a scope_id, even when the scope object was not included in an earlier
+        response.
+
+        When the :class:`Scope` is not included in this task, it will make an additional call to the KE-chain API.
+
+        :return: the scope id
+        :type: uuid
+        :raises NotFoundError: if the scope could not be found
+        """
         if self._scope_id is None:
             self.refresh()
             if self._scope_id is None:
@@ -71,6 +101,15 @@ class Activity2(Base):
 
     @property
     def scope(self):
+        """
+        Scope this Activity belongs to.
+
+        This property will return a `Scope` object. It will make an additional call to the KE-chain API.
+
+        :return: the scope
+        :type: :class:`pykechain.models.Scope`
+        :raises NotFoundError: if the scope could not be found
+        """
         return self._client.scope(pk=self._scope_id)
 
     #

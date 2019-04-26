@@ -97,23 +97,25 @@ API_EXTRA_PARAMS = {
         ['id', 'name', 'description', 'created_at', 'updated_at', 'activity_type', 'classification',
          'progress', 'assignees_ids', 'start_date', 'due_date', 'status', 'parent_id', 'scope_id', 'customization'])},
     'scope2': {'fields': ",".join(
-        ['id', 'name', 'text', 'created_at', 'updated_at', 'start_date', 'due_date', 'status',
+        ['id', 'name', 'text', 'created_at', 'updated_at', 'start_date', 'due_date', 'status', 'category',
          'progress', 'members', 'team', 'tags', 'scope_options', 'team_id_name', 'workflow_root_id'])},
     'scopes2': {'fields': ",".join(
-        ['id', 'name', 'text', 'created_at', 'updated_at', 'start_date', 'due_date', 'status',
+        ['id', 'name', 'text', 'created_at', 'updated_at', 'start_date', 'due_date', 'status', 'category',
          'progress', 'members', 'team', 'tags', 'scope_options', 'team_id_name', 'workflow_root_id'])},
     'part2': {'fields': ",".join(
-        ['id', 'name', 'description', 'created_at', 'updated_at', 'properties', 'category', 'classification', 'parent_id', 'multiplicity', 'value_options',
-         'property_type', 'value', 'output', 'order', 'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
+        ['id', 'name', 'description', 'created_at', 'updated_at', 'properties', 'category', 'classification',
+         'parent_id', 'multiplicity', 'value_options', 'property_type', 'value', 'output', 'order',
+         'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
     'parts2': {'fields': ",".join(
-        ['id', 'name', 'description', 'created_at', 'updated_at', 'properties', 'category', 'classification', 'parent_id', 'multiplicity', 'value_options',
-         'property_type', 'value', 'output', 'order', 'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
+        ['id', 'name', 'description', 'created_at', 'updated_at', 'properties', 'category', 'classification',
+         'parent_id', 'multiplicity', 'value_options', 'property_type', 'value', 'output', 'order',
+         'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
     'properties2': {'fields': ",".join(
-        ['id', 'name', 'created_at', 'updated_at', 'model_id', 'part_id', 'order', 'scope_id', 'category', 'property_type', 'value',
-         'value_options', 'output', 'description', 'unit'])},
+        ['id', 'name', 'created_at', 'updated_at', 'model_id', 'part_id', 'order', 'scope_id', 'category',
+         'property_type', 'value', 'value_options', 'output', 'description', 'unit'])},
     'property2': {'fields': ",".join(
-        ['id', 'name', 'created_at', 'updated_at', 'model_id', 'part_id', 'order', 'scope_id', 'category', 'property_type', 'value',
-         'value_options', 'output', 'description', 'unit'])}
+        ['id', 'name', 'created_at', 'updated_at', 'model_id', 'part_id', 'order', 'scope_id', 'category',
+         'property_type', 'value', 'value_options', 'output', 'description', 'unit'])}
 }
 
 
@@ -1746,7 +1748,7 @@ class Client(object):
         :return: True when the delete is a success.
         :raises APIError: in case of failure in the deletion of the scope
         """
-        if not isinstance(scope, Scope):
+        if not isinstance(scope, (Scope, Scope2)):
             raise IllegalArgumentError('Scope "{}" is not a scope!'.format(scope.name))
 
         if self.match_app_version(label="gscope", version=">=2.0.0"):
@@ -1797,7 +1799,7 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: When the server is unable to clone the scope (eg. permissions)
         """
-        if not isinstance(source_scope, (Scope)):
+        if not isinstance(source_scope, (Scope, Scope2)):
             raise IllegalArgumentError('`source_scope` should be a `Scope` object')
 
         if self.match_app_version(label="gscope", version=">=2.0.0"):
