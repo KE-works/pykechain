@@ -62,7 +62,9 @@ class Property2(Property):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update property value: '{}'".format(response.content))
 
-        return response.json()['results'][0]['value']
+        self.refresh(json=response.json()['results'][0])
+        return self.value
+
 
     @property
     def model_id(self):

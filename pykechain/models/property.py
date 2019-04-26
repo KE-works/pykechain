@@ -75,9 +75,7 @@ class Property(Base):
     @value.setter
     def value(self, value):
         # type: (Any) -> None
-        if self._put_value(value):
-            self._value = value
-            self._json_data['value'] = value
+        self._put_value(value)
 
     @property
     def validators(self):
@@ -154,7 +152,8 @@ class Property(Base):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update property value")
 
-        return response.json()['results'][0]['value']
+        self.refresh(json=response.json()['results'][0])
+        return self.value
 
     @classmethod
     def create(cls, json, **kwargs):

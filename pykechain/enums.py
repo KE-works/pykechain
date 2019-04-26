@@ -292,6 +292,7 @@ class ScopeCategory(Enum):
     :cvar USER_SCOPE: The scope is a normal user scope
     :cvar TEMPLATE_SCOPE: The scope is a template scope
     """
+
     LIBRARY_SCOPE = 'LIBRARY_SCOPE'
     USER_SCOPE = 'USER_SCOPE'
     TEMPLATE_SCOPE = 'TEMPLATE_SCOPE'

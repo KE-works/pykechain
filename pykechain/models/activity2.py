@@ -578,7 +578,8 @@ class Activity2(Base):
         return ExtCustomization(activity=self, client=self._client)
 
     def configure(self, inputs, outputs):
-        """Configure activity input and output.
+        """
+        Configure activity input and output.
 
         You need to provide a list of input and output :class:`Property`. Does not work with lists of propery id's.
 
@@ -588,7 +589,6 @@ class Activity2(Base):
         :type outputs: list(:class:`Property`)
         :raises APIError: when unable to configure the activity
         """
-
         def _get_propertyset(proplist):
             """Make it into a unique list of properties to configure for either inputs or outputs."""
             from pykechain.models import Property
