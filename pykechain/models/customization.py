@@ -5,6 +5,7 @@ from six import text_type, string_types
 from pykechain.enums import ComponentXType, Category, SortTable, PropertyType, NavigationBarAlignment, WidgetNames, \
     ShowColumnTypes
 from pykechain.exceptions import APIError, IllegalArgumentError
+from pykechain.models import Part2, Activity2
 from pykechain.models.activity import Activity
 from pykechain.models.part import Part
 from pykechain.models.property import Property
@@ -235,7 +236,7 @@ class ExtCustomization(CustomizationBase):
 
         """
         # Check whether the part_model is uuid type or class `Part`
-        if isinstance(part_model, Part):
+        if isinstance(part_model, (Part, Part2)):
             part_model_id = part_model.id
         elif isinstance(part_model, (string_types, text_type)) and is_uuid(part_model):
             part_model_id = part_model
@@ -245,7 +246,7 @@ class ExtCustomization(CustomizationBase):
                                        "Type is: {}".format(type(part_model)))
 
         # Check whether the parent_part_instance is uuid type or class `Part`
-        if isinstance(parent_part_instance, Part):
+        if isinstance(parent_part_instance, (Part, Part2)):
             parent_part_instance_id = parent_part_instance.id
         elif isinstance(parent_part_instance, (string_types, text_type)) and is_uuid(parent_part_instance):
             parent_part_instance_id = parent_part_instance
@@ -398,7 +399,7 @@ class ExtCustomization(CustomizationBase):
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
         # Check whether the parent_part_instance is uuid type or class `Part`
-        if isinstance(part_instance, Part):
+        if isinstance(part_instance, (Part, Part2)):
             part_instance_id = part_instance.id
         elif isinstance(part_instance, (string_types, text_type)) and is_uuid(part_instance):
             part_instance_id = part_instance
@@ -594,7 +595,7 @@ class ExtCustomization(CustomizationBase):
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
         # Check whether the part_model is uuid type or class `Part`
-        if isinstance(part_model, Part):
+        if isinstance(part_model, (Part, Part2)):
             part_model_id = part_model.id
         elif isinstance(part_model, (string_types, text_type)) and is_uuid(part_model):
             part_model_id = part_model
@@ -604,7 +605,7 @@ class ExtCustomization(CustomizationBase):
                                        " Type is: {}".format(type(part_model)))
 
         # Check whether the parent_part_instance is uuid type or class `Part`
-        if isinstance(parent_part_instance, Part):
+        if isinstance(parent_part_instance, (Part, Part2)):
             parent_part_instance_id = parent_part_instance.id
         elif isinstance(parent_part_instance, (string_types, text_type)) and is_uuid(parent_part_instance):
             parent_part_instance_id = parent_part_instance
@@ -949,7 +950,7 @@ class ExtCustomization(CustomizationBase):
             if set(activity_dict.keys()).issubset(set_of_expected_keys) and 'activityId' in set_of_expected_keys:
                 # Check whether the activityId is class `Activity` or UUID
                 activity = activity_dict['activityId']
-                if isinstance(activity, Activity):
+                if isinstance(activity, (Activity, Activity2)):
                     activity_dict['activityId'] = activity.id
                 elif isinstance(activity, (string_types, text_type)) and is_uuid(activity):
                     pass

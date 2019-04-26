@@ -278,7 +278,7 @@ class TestScopes2SpecificTests(TestBetamax):
 
         with self.assertRaisesRegex(NotFoundError, 'No scope fits criteria'):
             # throw in arbitrary sleep to give backend time to actually delete the scope.
-            sleep(0.500)
+            sleep(1)
             self.client.scope(pk=new_scope.id, status=new_scope.status)
 
     def test_clone_scope_updated_name_description_tags_etc(self):

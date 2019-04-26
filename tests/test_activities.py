@@ -8,7 +8,7 @@ import os
 
 from pykechain.enums import Category, ActivityType, ActivityStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
-from pykechain.models import Part, Activity
+from pykechain.models import Part, Activity, Part2
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_WIM2
 from pykechain.utils import temp_chdir
@@ -260,7 +260,7 @@ class TestActivities(TestBetamax):
         parts = list(task.parts())
 
         for part in parts:
-            self.assertIsInstance(part, Part)
+            self.assertIsInstance(part, (Part, Part2))
             self.assertEqual(part.category, Category.INSTANCE)
 
     def test_retrieve_part_models_associated_to_activities(self):
@@ -268,10 +268,10 @@ class TestActivities(TestBetamax):
         models = list(task.parts(category=Category.MODEL))
 
         for model in models:
-            self.assertIsInstance(model, Part)
+            self.assertIsInstance(model, (Part, Part2))
             self.assertEqual(model.category, Category.MODEL)
             if model.name == 'Bike':
-                self.assertTrue(not model.property('Gears').output)
+                self.assertFalse(model.property('Gears').output)
             elif model.name == 'Front Fork':
                 self.assertTrue(model.property('Material').output)
 
@@ -280,11 +280,11 @@ class TestActivities(TestBetamax):
         (models, parts) = list(task.associated_parts())
 
         for part in models:
-            self.assertIsInstance(part, Part)
+            self.assertIsInstance(part, (Part, Part2))
             self.assertEqual(part.category, Category.MODEL)
 
         for part in parts:
-            self.assertIsInstance(part, Part)
+            self.assertIsInstance(part, (Part, Part2))
             self.assertEqual(part.category, Category.INSTANCE)
 
     # in 1.12
@@ -297,9 +297,18 @@ class TestActivities(TestBetamax):
         self.assertEqual(1, len(siblings))
 
     # in 1.12.9
-    def test_activity_without_scope_id_will_fix_itself(self):
+    @skipIf(TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 1, expected to fail on newer WIM")
+    def test_activity1_without_scope_id_will_fix_itself(self):
         specify_wheel_diam_cripled = self.project.activity(name='Specify wheel diameter', fields='id,name,status')
         self.assertFalse(specify_wheel_diam_cripled.scope)
+
+        # now the self-healing will beging
+        self.assertEqual(specify_wheel_diam_cripled.scope_id, self.project.id)
+
+    @skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on old WIM")
+    def test_activity2_without_scope_id_will_fix_itself(self):
+        specify_wheel_diam_cripled = self.project.activity(name='Specify wheel diameter', fields='id,name,status')
+        self.assertFalse(specify_wheel_diam_cripled._json_data.get('scope_id'))
 
         # now the self-healing will beging
         self.assertEqual(specify_wheel_diam_cripled.scope_id, self.project.id)
@@ -402,7 +411,7 @@ class TestActivity2SpecificTests(TestBetamax):
         specify_wd.edit(assignees_ids=[test_user.id])
         specify_wd.refresh()
 
-        self.assertEqual(['testuser'], specify_wd._json_data.get('assignees_names'))
+        self.assertEqual([3], specify_wd._json_data.get('assignees_ids'))
 
         self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
 
@@ -517,3 +526,21 @@ class TestActivityDownloadAsPDF(TestBetamax):
             pdf_file_called_after_activity = os.path.join(target_dir, activity_name + '.pdf')
             self.assertTrue(pdf_file)
             self.assertTrue(pdf_file_called_after_activity)
+
+    def test_activity2_assignees_list(self):
+        activity_name = 'automated_created_task'
+        activity = self.project.activity(name=activity_name)  # type: Activity2
+
+        list_of_assignees_in_data = activity._json_data.get('assignees_ids')
+        assignees_list = activity.assignees
+
+        self.assertSetEqual(set(list_of_assignees_in_data), set([u.id for u in assignees_list]))
+
+    def test_activity2_assignees_list_no_assignees_gives_empty_list(self):
+        activity_name = 'Customized task'
+        activity = self.project.activity(name=activity_name)  # type: Activity2
+
+        list_of_assignees_in_data = activity._json_data.get('assignees_ids')
+        assignees_list = activity.assignees
+
+        self.assertListEqual(list(), activity.assignees, "Task has no assingees and should return Empty list")
