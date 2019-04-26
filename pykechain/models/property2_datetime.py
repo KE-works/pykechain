@@ -2,16 +2,16 @@ import datetime
 import warnings
 
 from pykechain.exceptions import IllegalArgumentError
+from pykechain.models import Property2
 from pykechain.models.property import Property
 from pykechain.utils import parse_datetime
 
 
-class DatetimeProperty(Property):
+class DatetimeProperty2(Property2):
     """A virtual object representing a KE-chain reference property."""
 
-
     def __index__(self, json, **kwargs):
-        super(DatetimeProperty, self).__init__(json, **kwargs)
+        super(DatetimeProperty2, self).__init__(json, **kwargs)
 
     @property
     def value(self):
