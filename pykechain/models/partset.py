@@ -1,6 +1,7 @@
-from typing import Sized, Any, Iterable  # noqa: F401
+from typing import Sized, Any, Iterable, Union  # noqa: F401
 
 from pykechain.models.part import Part  # noqa: F401
+from pykechain.models.part2 import Part2  # noqa: F401
 
 
 class PartSet(Sized):
@@ -14,7 +15,7 @@ class PartSet(Sized):
     """
 
     def __init__(self, parts):
-        # type: (Iterable[Part]) -> None
+        # type: (Iterable[Union[Part, Part2]]) -> None
         """Construct a PartSet from a part iterable."""
         self._parts = list(parts)
         self._iter = iter(self._parts)
@@ -35,7 +36,7 @@ class PartSet(Sized):
     next = __next__  # py2.7 alias
 
     def __getitem__(self, k):
-        # type: (Any) -> Part
+        # type: (Any) -> Union[Part, Part2]
         if isinstance(k, int):
             return self._parts[k]
 

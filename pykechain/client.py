@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Dict, Tuple, Optional, Any, List  # noqa: F401 pragma: no cover
+from typing import Dict, Tuple, Optional, Any, List, Union  # noqa: F401 pragma: no cover
 
 import requests
 from envparse import env
@@ -392,7 +392,7 @@ class Client(object):
         return obj.__class__(data['results'][0], client=self)
 
     def scopes(self, name=None, pk=None, status=ScopeStatus.ACTIVE, **kwargs):
-        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Scope]
+        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Union[Scope, Scope2]]
         """Return all scopes visible / accessible for the logged in user.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -454,7 +454,7 @@ class Client(object):
             return [Scope(s, client=self) for s in data['results']]
 
     def scope(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Scope
+        # type: (*Any, **Any) -> Union[Scope, Scope2]
         """Return a single scope based on the provided name.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -474,7 +474,7 @@ class Client(object):
         return _scopes[0]
 
     def activities(self, name=None, pk=None, scope=None, **kwargs):
-        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Activity]
+        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Union[Activity, Activity2]]
         """Search for activities with optional name, pk and scope filter.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -519,7 +519,7 @@ class Client(object):
             return [Activity2(a, client=self) for a in data['results']]
 
     def activity(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Activity
+        # type: (*Any, **Any) -> Union[Activity, Activity2]
         """Search for a single activity.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -664,7 +664,7 @@ class Client(object):
             return PartSet((Part(p, client=self) for p in part_results))
 
     def part(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Part
+        # type: (*Any, **Any) -> Union[Part, Part2]
         """Retrieve single KE-chain part.
 
         Uses the same interface as the :func:`parts` method but returns only a single pykechain :class:`models.Part`
@@ -687,7 +687,7 @@ class Client(object):
         return _parts[0]
 
     def model(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Part
+        # type: (*Any, **Any) -> Union[Part, Part2]
         """Retrieve single KE-chain part model.
 
         Uses the same interface as the :func:`part` method but returns only a single pykechain
@@ -711,7 +711,7 @@ class Client(object):
         return _parts[0]
 
     def properties(self, name=None, pk=None, category=Category.INSTANCE, **kwargs):
-        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Property]
+        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Union[Property, Property2]]
         """Retrieve properties.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -753,7 +753,7 @@ class Client(object):
             return [Property.create(p, client=self) for p in data['results']]
 
     def property(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Property
+        # type: (*Any, **Any) -> Union[Property, Property2]
         """Retrieve single KE-chain Property.
 
         Uses the same interface as the :func:`properties` method but returns only a single pykechain :class:
