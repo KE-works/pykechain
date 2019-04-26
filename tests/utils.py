@@ -9,9 +9,9 @@ env.read_envfile()
 TEST_URL = env('TEST_URL', default='https://pim2-test.ke-chain.com')
 TEST_USERNAME = env('TEST_USERNAME', default='pykechain')  # LVL1
 TEST_TOKEN = env('TEST_TOKEN', default='')
-TEST_SCOPE_ID = env('TEST_SCOPE_ID', default='dec21c02-7f27-4a49-b199-454d48ee1e6e')
+TEST_SCOPE_ID = env('TEST_SCOPE_ID', default='30f8f4db-55d6-4e71-a942-03c1a0b6c438')
 # TEST_SCOPE_NAME = env('TEST_SCOPE_NAME', default='Bike Project (pykechain testing)')
-TEST_SCOPE_NAME = env('TEST_SCOPE_NAME', default='Bike Project')
+TEST_SCOPE_NAME = env('TEST_SCOPE_NAME', default='Bike Project (pykechain testing)')
 TEST_RECORD_CASSETTES = env.bool('TEST_RECORD_CASSETTES', default=True)
 
 # flags for altering testing behaviour (to skip test) for major API changes requiring different tests.
