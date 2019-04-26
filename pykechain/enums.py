@@ -282,6 +282,7 @@ class ScopeStatus(Enum):
     TEMPLATE = 'TEMPLATE'
     DELETING = 'DELETING'
 
+
 class ScopeCategory(Enum):
     """The various categories of a scope.
 
@@ -294,6 +295,7 @@ class ScopeCategory(Enum):
     LIBRARY_SCOPE = 'LIBRARY_SCOPE'
     USER_SCOPE = 'USER_SCOPE'
     TEMPLATE_SCOPE = 'TEMPLATE_SCOPE'
+
 
 class ServiceType(Enum):
     """The file types of sim script.

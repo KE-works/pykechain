@@ -1,3 +1,4 @@
+from pykechain import Client
 from pykechain.utils import parse_datetime
 
 
@@ -16,7 +17,7 @@ class Base(object):
 
     def __init__(self, json, client):
         """Construct a model from provided json data."""
-        self._json_data = json
+        self._json_data = json  # type: dict
         self._client = client  # type: Client
 
         self.id = json.get('id', None)

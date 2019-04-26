@@ -1,6 +1,7 @@
 import requests
 from jsonschema import validate
 from six import text_type, iteritems
+from typing import Any, Union, List  # noqa: F401
 
 from pykechain.enums import PropertyType, Category
 from pykechain.exceptions import APIError, IllegalArgumentError
