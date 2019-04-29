@@ -281,6 +281,16 @@ class TestNumericRangeValidator(SixTestCase):
         with self.assertRaisesRegex(Exception, 'The stepsize should be provided when enforcing stepsize'):
             NumericRangeValidator(stepsize=None, enforce_stepsize=True)
 
+    def test_numeric_range_does_not_respect_max_issue_435(self):
+        """With reference to issue #435
+
+        In KE-chain I've added a property with numeric range validators min = unbound and max = 1000.
+        A value of 3333 simply returns as valid in pykechain:
+        _validation_reasons =>'Value \'3333\' is between -inf and inf'
+        """
+        validator = NumericRangeValidator(maxvalue=1000)
+        self.assertFalse(validator.is_valid(3333))
+        self.assertRegex(validator.get_reason(), "Value '3333' should be between -inf and 1000")
 
 class TestBooleanFieldValidator(SixTestCase):
     def test_boolean_validator_without_settings(self):
