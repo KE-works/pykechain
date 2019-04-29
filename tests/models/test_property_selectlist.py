@@ -12,7 +12,7 @@ class TestSelectListProperty(TestBetamax):
         self.select_model = self.project.model('Bike').add_property(
             name='Test single select list property',
             property_type=PropertyType.SINGLE_SELECT_VALUE,
-            options={'value_choices': [1, 3.14, "text"]}
+            options={'value_choices': ['1', '3.14', "text"]}
         )
         self.select = self.project.part('Bike').property('Test single select list property')
 

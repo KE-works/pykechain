@@ -1,6 +1,9 @@
+from jsonschema import validate
+
 from pykechain.enums import Category
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models.property2 import Property2
+from pykechain.models.validators.validator_schemas import options_json_schema
 
 
 class SelectListProperty2(Property2):
@@ -9,7 +12,7 @@ class SelectListProperty2(Property2):
     def __init__(self, json, **kwargs):
         """Construct a Property from a json object."""
         super(SelectListProperty2, self).__init__(json, **kwargs)
-        self._options = self._json_data.get('value_options').get('value_choices')
+        self._value_choices = json.get('value_options').get('value_choices')
 
     @property
     def value(self):
@@ -61,7 +64,7 @@ class SelectListProperty2(Property2):
         List of options of this property to select from.
 
         """
-        return self._options
+        return self._value_choices
 
     @options.setter
     def options(self, options_list):
@@ -75,9 +78,9 @@ class SelectListProperty2(Property2):
         options_list = list(map(str, options_list))
 
         # check if the options are not already set and indeed different
-        if not self._options or set(options_list) != set(self._options):
+        if not self._value_choices or set(options_list) != set(self._value_choices):
             self._put_options(options_list=options_list)
-            self._options = options_list
+            self._value_choices = options_list
 
     def _put_options(self, options_list):
         """Save the options to KE-chain.
@@ -87,8 +90,14 @@ class SelectListProperty2(Property2):
         :param options_list: list of options to set.
         :raises APIError: when unable to update the options
         """
+        new_options = self._options.copy()  # make a full copy of the dict not to only link it and update dict in place
+        new_options.update({"value_choices": options_list})
+        validate(new_options, options_json_schema)
+
         url = self._client._build_url('property2', property_id=self.id)
-        response = self._client._request('PUT', url, json={'value_options': {"value_choices": options_list}})
+        response = self._client._request('PUT', url, json={'value_options': new_options})
 
         if response.status_code != 200:  # pragma: no cover
             raise APIError("Could not update property value. Response: {}".format(str(response)))
+        else:
+            self._options = new_options  # save the new options as the options
