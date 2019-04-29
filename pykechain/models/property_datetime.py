@@ -33,7 +33,6 @@ class DatetimeProperty(Property):
         else:
             raise IllegalArgumentError('value should be a datetime.datetime() object')
 
-
     def to_datetime(self):
         """Retrieve the data value of a property.
 
