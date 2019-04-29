@@ -83,6 +83,6 @@ class TestAttachment(TestBetamax):
 
         self.assertEqual(photo_attach_filename, photo_attach_actual_filename)
 
-        empty_attach = self.project.part('Bike').property('Empty attachment')
+        empty_attach = self.project.part('Bike').property('Empty Attachment')
 
         self.assertEqual(empty_attach.filename, None)

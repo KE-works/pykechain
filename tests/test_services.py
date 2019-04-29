@@ -297,7 +297,7 @@ class TestServiceExecutions(TestServiceSetup):
         self.assertEqual(service_execution.name, json_data.get('service_name'))
         self.assertEqual(service_execution.status, json_data.get('status'))
         self.assertEqual(service_execution.user, json_data.get('username'))
-        self.assertEqual(service_execution.activity_id, json_data['activity'].get('id'))
+        self.assertEqual(service_execution.activity_id, json_data['activity'].get('id') if json_data.get('activity') else json_data.get('activity'))
         self.assertEqual(service_execution.service_id, json_data.get('service'))
         self.assertIsInstance(service_execution.service, Service)
 
