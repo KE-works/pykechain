@@ -22,15 +22,6 @@ class DatetimeProperty2(Property2):
         """
         return self._value
 
-    def to_datetime(self):
-        """Retrieve the data value of a property.
-
-        Setting this value will immediately update the property in KE-chain.
-
-        :returns: the value
-        """
-        return parse_datetime(self._value)
-
     @value.setter
     def value(self, value):
         if isinstance(value, datetime.datetime):
@@ -41,3 +32,12 @@ class DatetimeProperty2(Property2):
             self._put_value(value.isoformat(sep='T'))
         else:
             raise IllegalArgumentError('value should be a datetime.datetime() object')
+
+    def to_datetime(self):
+        """Retrieve the data value of a property.
+
+        Setting this value will immediately update the property in KE-chain.
+
+        :returns: the value
+        """
+        return parse_datetime(self._value)
