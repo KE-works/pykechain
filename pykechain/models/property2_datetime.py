@@ -14,7 +14,6 @@ class DatetimeProperty2(Property2):
 
     @property
     def value(self):
-        # type: () -> str
         """Retrieve the data value of a property.
 
         Setting this value will immediately update the property in KE-chain.
@@ -24,7 +23,6 @@ class DatetimeProperty2(Property2):
         return self._value
 
     def to_datetime(self):
-        # type: () -> datetime.datetime
         """Retrieve the data value of a property.
 
         Setting this value will immediately update the property in KE-chain.
@@ -35,7 +33,6 @@ class DatetimeProperty2(Property2):
 
     @value.setter
     def value(self, value):
-        # type: (str) -> None
         if isinstance(value, datetime.datetime):
             if not value.tzinfo:
                 warnings.warn("The value '{}' is naive and not timezone aware, use pytz.timezone info. "
