@@ -1,5 +1,6 @@
 import os
 import time
+from datetime import datetime
 from unittest import skip
 
 import pytest
@@ -7,6 +8,7 @@ import pytest
 from pykechain.enums import ServiceExecutionStatus, ServiceType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError, APIError
 # new in 1.13
+from pykechain.models import Service
 from pykechain.utils import temp_chdir
 from tests.classes import TestBetamax
 
@@ -78,7 +80,7 @@ class TestServices(TestBetamax):
             self.project.service(script_type=ServiceType.PYTHON_SCRIPT)
 
     def test_retrieve_single_service(self):
-        services = self.project.services()
+        services = self.project.services()  # type: Service
         self.assertTrue(services)
         service_1 = services[0]
 
@@ -89,6 +91,36 @@ class TestServices(TestBetamax):
         service = self.project.service(name=service_name)
         self.assertTrue(service)
         self.assertEqual(service.name, service_name)
+
+    def test_properties_of_service(self):
+        """
+        :ivar id: id of the service
+        :type id: uuid
+        :ivar name: name of the service
+        :type name: str
+        :ivar description: description of the service
+        :type description: str
+        :ivar version: version number of the service, as provided by uploaded
+        :type version: str
+        :ivar scope_id: uuid of the scope to which the service belongs
+        :type scope_id: uuid
+        :ivar type: type of the service. One of the :class:`ServiceType`
+        :type type: str
+        :ivar filename: filename of the service
+        :type filename: str
+        :ivar environment: environment in which the service will execute. One of :class:`ServiceEnvironmentVersion`
+        :type environment: str
+        """
+        service_name = 'Debug pykechain'
+        service = self.project.service(name=service_name)
+        json_data = service._json_data
+        self.assertEqual(service.filename, json_data.get('script_file_name'))
+        self.assertEqual(service.type, json_data.get('script_type'))
+        self.assertEqual(service.version, json_data.get('script_version'))
+        self.assertEqual(service.environment, json_data.get('env_version'))
+        self.assertEqual(service.description, json_data.get('description'))
+        self.assertEqual(service.name, json_data.get('name'))
+        self.assertEqual(service.scope_id, json_data.get('scope'))
 
     @pytest.mark.skipif("os.getenv('TRAVIS', False)",
                         reason="Skipping tests when using Travis, as Service Execution cannot be provided")
@@ -192,9 +224,8 @@ class TestServicesWithCustomUploadedService(TestServiceSetup):
         with self.assertRaisesRegex(OSError, 'Could not locate python package to upload in'):
             self.service.upload(pkg_path=upload_path)
 
-    # new in 1.13
 
-
+# new in 1.13
 class TestServiceExecutions(TestServiceSetup):
     def test_retrieve_service_executions(self):
         self.assertTrue(self.project.service_executions())
@@ -222,7 +253,7 @@ class TestServiceExecutions(TestServiceSetup):
         # setUp
         service_execution = self.service.execute()
         while service_execution.status in [ServiceExecutionStatus.LOADING, ServiceExecutionStatus.RUNNING]:
-            time.sleep(0.500) # 200ms
+            time.sleep(0.500)  # 200ms
             service_execution.refresh()
 
         self.service.execute()
@@ -238,6 +269,40 @@ class TestServiceExecutions(TestServiceSetup):
         # testing
         with self.assertRaisesRegex(APIError, "Conflict: Could not execute service as it is already running"):
             self.service.execute()
+
+    def test_properties_of_service_execution(self):
+        """
+        :ivar id: id of the service execution
+        :type id: uuid
+        :ivar name: name of the service to which the execution is associated
+        :type name: str
+        :ivar status: status of the service. One of :class:`ServiceExecutionStatus`
+        :type status: str
+        :ivar service: the :class:`Service` object associated to this service execution
+        :type service: :class:`Service`
+        :ivar service_id: the uuid of the associated Service object
+        :type service_id: uuid
+        :ivar user: (optional) username of the user that executed the service
+        :type user: str or None
+        :ivar activity_id: (optional) the uuid of the activity where the service was executed from
+        :type activity_id: uuid or None
+        """
+        service_name = 'Debug pykechain'
+        service = self.project.service(name=service_name)
+        service_executions = self.project.service_executions(service=service.id, limit=1)
+        self.assertTrue(service_executions)
+        service_execution = service_executions[0]
+        json_data = service_execution._json_data
+
+        self.assertEqual(service_execution.name, json_data.get('service_name'))
+        self.assertEqual(service_execution.status, json_data.get('status'))
+        self.assertEqual(service_execution.user, json_data.get('username'))
+        self.assertEqual(service_execution.activity_id, json_data['activity'].get('id'))
+        self.assertEqual(service_execution.service_id, json_data.get('service'))
+        self.assertIsInstance(service_execution.service, Service)
+
+        self.assertIsInstance(service_execution.started_at, datetime)
+        self.assertIsInstance(service_execution.finished_at, datetime)
 
     @pytest.mark.skipif("os.getenv('TRAVIS', False)",
                         reason="Skipping tests when using Travis, as Service Execution cannot be provided")

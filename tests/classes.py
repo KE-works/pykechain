@@ -20,17 +20,16 @@ with Betamax.configure() as config:
 
 class SixTestCase(TestCase):
     def assertRaisesRegex(self, expected_exception, expected_regex, *args, **kwargs):
-
         if six.PY2:
             return self.assertRaisesRegexp(expected_exception, expected_regex, *args, **kwargs)
         else:
             return super(__class__, self).assertRaisesRegex(expected_exception, expected_regex, *args, **kwargs)
 
-    def assertRegex(self, text, regex, msg=None):
+    def assertRegex(self, text, expected_regex, *args, **kwargs):
         if six.PY2:
-            return self.assertRegexpMatches(text, regex, msg=msg)
+            return self.assertRegexpMatches(text, expected_regex, *args, **kwargs)
         else:
-            return super(__class__, self).assertRegex(text, regex, msg=msg)
+            return super(__class__, self).assertRegex(text, expected_regex, *args, **kwargs)
 
 
 class TestBetamax(SixTestCase):

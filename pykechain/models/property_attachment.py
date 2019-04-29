@@ -9,7 +9,26 @@ from pykechain.models.property import Property
 
 
 class AttachmentProperty(Property):
-    """A virtual object representing a KE-chain attachment property."""
+    """
+    A virtual object representing a KE-chain attachment property.
+
+    :ivar type: The property type of the property. One of the types described in :class:`pykechain.enums.PropertyType`
+    :type type: str
+    :ivar output: a boolean if the value is configured as an output (in an activity)
+    :type output: bool
+    :ivar part: The (parent) part in which this property is available
+    :type part: :class:`Part`
+    :ivar value: the property value, can be set as well as property
+    :type value: Any
+    :ivar filename: the filename and extension of the attachment
+    :type filename: str or None
+    :ivar validators: the list of validators that are available in the property
+    :type validators: list(PropertyValidator)
+    :ivar is_valid: if the property conforms to the validators
+    :type is_valid: bool
+    :ivar is_invalid: if the property does not conform to the validator
+    :type is_invalid: bool
+    """
 
     @property
     def value(self):
@@ -46,6 +65,13 @@ class AttachmentProperty(Property):
         if self._put_value(None) is None:
             self._value = None
             self._json_data['value'] = None
+
+    @property
+    def filename(self):
+        """Filename of the attachment, without the full 'attachment' path."""
+        if self.value and 'value' in self._json_data and self._json_data['value']:
+            return self._json_data['value'].split('/')[-1]
+        return None
 
     def json_load(self):
         """Download the data from the attachment and deserialise the contained json.
