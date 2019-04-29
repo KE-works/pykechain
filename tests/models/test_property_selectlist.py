@@ -9,8 +9,11 @@ class TestSelectListProperty(TestBetamax):
     def setUp(self):
         super(TestSelectListProperty, self).setUp()
 
-        self.select = self.project.part('Bike').property('Test single select list property')
         self.select_model = self.project.model('Bike').property('Test single select list property')
+        self.select_model.options = [1, 3.14, "text"]
+
+        # Retrieve property instance after options have been set
+        self.select = self.project.part('Bike').property('Test single select list property')
 
     def test_get_options_list(self):
         self.assertTrue(hasattr(self.select_model, 'options'))
@@ -76,3 +79,20 @@ class TestSelectListProperty(TestBetamax):
 
         # tearDown
         self.select.value = None
+
+    def test_integrity_options_dict(self):
+        # Add a validator to the property
+        from pykechain.models.validators import RequiredFieldValidator
+        validator = RequiredFieldValidator()
+        self.select_model.validators = [validator]
+
+        # Put the options again
+        options_list = list(self.select_model.options)
+        self.select_model.options = options_list
+
+        # testing
+        self.assertTrue(self.select_model.validators)
+        self.assertIsInstance(self.select_model.validators[0], RequiredFieldValidator)
+
+        # tearDown
+        self.select_model.validators = []

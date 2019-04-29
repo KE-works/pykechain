@@ -60,3 +60,13 @@ class TestAttachment(TestBetamax):
         self.assertEqual(plot_attach.value, None)
         self.assertEqual(plot_attach._value, None)
 
+    def test_retrieve_filename_from_value(self):
+        photo_attach = self.project.part('Bike').property('Photo Attachment')
+        photo_attach_filename= 'Awesome.jpg'
+        photo_attach_actual_filename = photo_attach.filename
+
+        self.assertEqual(photo_attach_filename, photo_attach_actual_filename)
+
+        empty_attach = self.project.part('Bike').property('Empty attachment')
+
+        self.assertEqual(empty_attach.filename, None)

@@ -1,9 +1,11 @@
+import datetime
 import warnings
 from typing import Dict, Tuple, Optional, Any, List  # noqa: F401
 
 import requests
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
+from six import text_type, string_types
 
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     WIMCompatibleActivityTypes, PropertyType
@@ -1211,7 +1213,6 @@ class Client(object):
         provide the correct values to the KE-chain backend. The default is a `PropertyType.CHAR_VALUE` which is a
         single line text in KE-chain.
 
-
         :param model: parent model
         :type model: :class:`models.Part`
         :param name: property model name
@@ -1287,6 +1288,9 @@ class Client(object):
         this `kecpkg` will be uploaded in one go. If the later fails, the service is still there, and the package is
         not uploaded.
 
+        Permission to upload a script is restricted to a superuser, a user in the `GG:Configurators` group and a Scope
+        Manager of the scope to which you are uploading the script.
+
         :param name: Name of the service
         :type name: basestring
         :param scope: Scope where the create the Service under
@@ -1340,6 +1344,237 @@ class Client(object):
         service.refresh()
 
         return service
+
+    def create_scope(self, name, status=ScopeStatus.ACTIVE, description=None, tags=None, start_date=None, due_date=None,
+                     team=None, **kwargs):
+        """
+        Create a Scope.
+
+        This will create a scope if the client has the right to do so. Sufficient permissions to create a scope are a
+        superuser, a user in the `GG:Configurators` group or `GG:Managers` group.
+
+        ..versionadded: 2.6
+
+        :param name: Name of the scope
+        :type name: basestring
+        :param status: choose one of the :class:`enums.ScopeStatus`, defaults to `ScopeStatus.ACTIVE`
+        :type status: basestring or None
+        :param description: (optional) Description of the scope
+        :type description: basestring or None
+        :param tags: (optional) List of tags to be added to the new scope
+        :type tags: list or None
+        :param start_date: (optional) start date of the scope. Will default to 'now' if not provided.
+        :type start_date: datetime.datetime or None
+        :param due_date: (optional) due date of the scope
+        :type due_date: datetime.datetime or None
+        :param team: (optional) team_id or Team object to assign membership of scope to a team.
+        :type team: basestring or :class:`models.Team` or None
+        :param kwargs: optional additional search arguments
+        :type kwargs: dict or None
+        :return: the created :class:`models.Scope`
+        :raises APIError: In case of failure of the creation of new Scope
+        """
+        if not isinstance(name, (str, text_type)):
+            raise IllegalArgumentError("'Name' should be provided as a string, was provided as '{}'".
+                                       format(type(name)))
+        if status not in ScopeStatus.values():
+            raise IllegalArgumentError("Please provide a valid scope status, please use one of `enums.ScopeStatus`. "
+                                       "Got: '{}'".format(status))
+        if description and not isinstance(description, (str, text_type)):
+            raise IllegalArgumentError("'Description' should be provided as a string, was provided as '{}'".
+                                       format(type(description)))
+        if tags and not isinstance(tags, list):
+            raise IllegalArgumentError("'Tags' should be provided as a list, was provided as '{}'".
+                                       format(type(tags)))
+        if tags and not (all([isinstance(t, (str, text_type)) for t in tags])):
+            raise IllegalArgumentError("Each tag in the list of tags should be provided as a string")
+
+        if not start_date:
+            start_date = datetime.datetime.now()
+        if not tags:
+            tags = list()
+
+        data_dict = {
+            'name': name,
+            'status': status,
+            'text': description,
+            'tags': tags,
+        }
+
+        if start_date is not None:
+            if isinstance(start_date, datetime.datetime):
+                if not start_date.tzinfo:
+                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
+                data_dict['start_date'] = start_date.isoformat(sep='T')
+            else:
+                raise IllegalArgumentError('Start date should be a datetime.datetime() object')
+        else:
+            # defaults to now
+            data_dict['start_date'] = datetime.datetime.now()
+
+        if due_date is not None:
+            if isinstance(due_date, datetime.datetime):
+                if not due_date.tzinfo:
+                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
+                data_dict['due_date'] = due_date.isoformat(sep='T')
+            else:
+                raise IllegalArgumentError('Due date should be a datetime.datetime() object')
+
+        if team is not None:
+            if isinstance(team, Team):
+                team_id = team.id
+            elif is_uuid(team):
+                team_id = team
+            elif isinstance(team, (text_type, string_types)):
+                team_id = self.team(name=team).id
+            else:
+                raise IllegalArgumentError("'Team' should be provided as a `models.Team` object or UUID or team name, "
+                                           "was provided as a {}".format(type(team)))
+            data_dict['team'] = team_id
+
+        # injecting additional kwargs for those cases that you need to add extra options.
+        data_dict.update(kwargs)
+
+        response = self._request('POST', self._build_url('scopes'), data=data_dict)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create scope, {}:\n\n{}'".format(str(response), response.json()))
+
+        return Scope(response.json()['results'][0], client=self)
+
+    def delete_scope(self, scope):
+        """
+        Delete a scope.
+
+        This will delete a scope if the client has the right to do so. Sufficient permissions to delete a scope are a
+        superuser, a user in the `GG:Configurators` group or a user that is the Scope manager of the scope to be
+        deleted.
+
+        :param scope: Scope object to be deleted
+        :type scope: :class: `models.Scope`
+
+        :return: None
+        :raises APIError: in case of failure in the deletion of the scope
+        """
+        assert isinstance(scope, Scope), 'Scope "{}" is not a scope!'.format(scope.name)
+
+        response = self._request('DELETE', self._build_url('scope', scope_id=str(scope.id)))
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            raise APIError("Could not delete scope, {}: {}".format(str(response), response.content))
+
+    def clone_scope(self, source_scope, name=None, status=None, start_date=None, due_date=None,
+                    description=None, tags=None, team=None, asynchronous=False):
+        """
+        Clone a Scope.
+
+        This will clone a scope if the client has the right to do so. Sufficient permissions to clone a scope are a
+        superuser, a user in the `GG:Configurators` group and a user that is Scope manager of the scope to be
+        clone and member of the `GG:Managers` group as well.
+
+        If no additional arguments are provided, the values of the `source_scope` are used for the new scope.
+
+        .. versionadded: 2.6
+
+        :param source_scope: Scope object to be cloned itself
+        :type source_scope: :class:`models.Scope`
+        :param name: (optional) new name of the scope
+        :type name: basestring or None
+        :param status: (optional) statis of the new scope
+        :type status: one of :class:`enums.ScopeStatus`
+        :param tags: (optional) list of new scope tags
+        :type tags: list or None
+        :param start_date: (optional) start date of the to be cloned scope
+        :type start_date: datetime or None
+        :param due_date: (optional) due data of the to be cloned scope
+        :type due_date: datetime or None
+        :param description: (optional) description of the new scope
+        :type description: basestring or None
+        :param team: (optional) team_id or Team object to assign membership of scope to a team.
+        :type team: basestring or :class:`models.Team` or None
+        # :param scope_options: (optional) dictionary with scope options (NO EFFECT)
+        # :type scope_options: dict or None
+        :param asynchronous: (optional) option to use asynchronous cloning of the scope, default to False.
+        :type asynchronous: bool or None
+        :return: New scope that is cloned
+        :rtype: :class:`models.Scope`
+        :raises IllegalArgumentError: When the provided arguments are incorrect
+        :raises APIError: When the server is unable to clone the scope (eg. permissions)
+        """
+        if not isinstance(source_scope, Scope):
+            raise IllegalArgumentError('`source_scope` should be a `Scope` object')
+
+        data_dict = {'id': source_scope.id, 'async': asynchronous}
+
+        if name is not None:
+            if not isinstance(name, (string_types, text_type)):
+                raise IllegalArgumentError("`name` should be a string")
+            data_dict['name'] = str(name)
+
+        if start_date is not None:
+            if isinstance(start_date, datetime.datetime):
+                if not start_date.tzinfo:
+                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
+                data_dict['start_date'] = start_date.isoformat(sep='T')
+            else:
+                raise IllegalArgumentError('Start date should be a datetime.datetime() object')
+
+        if due_date is not None:
+            if isinstance(due_date, datetime.datetime):
+                if not due_date.tzinfo:
+                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
+                data_dict['due_date'] = due_date.isoformat(sep='T')
+            else:
+                raise IllegalArgumentError('Due date should be a datetime.datetime() object')
+
+        if description is not None:
+            if not isinstance(description, (text_type, string_types)):
+                raise IllegalArgumentError("`description` should be a string")
+            else:
+                data_dict['text'] = description
+
+        if status is not None:
+            if status not in ScopeStatus.values():
+                raise IllegalArgumentError("`status` should be one of '{}'".format(ScopeStatus.values()))
+            else:
+                data_dict['status'] = str(status)
+
+        if tags is not None:
+            if not isinstance(tags, list):
+                raise IllegalArgumentError("'Tags' should be provided as a list, was provided as '{}'".
+                                           format(type(tags)))
+            if not (all([isinstance(t, (str, text_type)) for t in tags])):
+                raise IllegalArgumentError("Each tag in the list of tags should be provided as a string")
+            data_dict['tags'] = tags
+
+        if team is not None:
+            if isinstance(team, Team):
+                team_id = team.id
+            elif is_uuid(team):
+                team_id = team
+            elif isinstance(team, (text_type, string_types)):
+                team_id = self.team(name=team).id
+            else:
+                raise IllegalArgumentError("`team` should be a name of an existing team or UUID of a team")
+            data_dict['team'] = team_id
+
+        url = self._build_url('scopes')
+        query_params = dict(select_action='clone')
+        response = self._request('POST', url,
+                                 params=query_params,
+                                 json=data_dict)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            if response.status_code == requests.codes.forbidden:
+                raise ForbiddenError("Could not clone scope, {}: {}".format(str(response), response.content))
+            else:
+                raise APIError("Could not clone scope, {}: {}".format(str(response), response.content))
+
+        return Scope(response.json()['results'][0], client=source_scope._client)
 
     # def create_team(self, name, user, description=None, options=None, is_hidden=False):
     #     """

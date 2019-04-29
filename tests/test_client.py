@@ -1,8 +1,11 @@
+import datetime
 from unittest import TestCase, skipIf
 
 import six
 import warnings
 
+from pykechain.enums import ScopeStatus
+from pykechain.models import Team
 from tests.utils import TEST_FLAG_IS_WIM2
 
 if six.PY2:
@@ -85,6 +88,107 @@ class TestClientLive(TestBetamax):
 
         with self.assertRaises(ForbiddenError):
             self.client.parts()
+
+    # 2.6.0
+    def test_create_scope(self):
+        # setUp
+        client = self.client
+        scope_name = 'New scope'
+        scope_description = 'This is a new scope for testing'
+        scope_status = ScopeStatus.CLOSED
+        scope_tags = ['test_tag', 'new_project_tag']
+        scope_start_date = datetime.datetime(2019, 4, 12)
+        scope_due_date = datetime.datetime(2020, 4, 12)
+        scope_team = client.team(name='Team No.1')
+
+        new_scope = client.create_scope(name=scope_name,
+                                        description=scope_description,
+                                        status=scope_status,
+                                        tags=scope_tags,
+                                        start_date=scope_start_date,
+                                        due_date=scope_due_date,
+                                        team=scope_team
+                                        )
+
+        # testing
+        self.assertEqual(new_scope.name, scope_name)
+        self.assertEqual(new_scope._json_data['start_date'], scope_start_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
+        self.assertEqual(new_scope._json_data['due_date'], scope_due_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
+        self.assertIn(scope_tags[0], new_scope.tags)
+        self.assertIn(scope_tags[1], new_scope.tags)
+
+        # tearDown
+        client.delete_scope(scope=new_scope)
+
+    def test_create_scope_with_team_name(self):
+        # setUp
+        client = self.client
+
+        scope_name = 'New scope with the team name'
+        scope_team_name = 'Team No.1'
+
+        new_scope = client.create_scope(name=scope_name,
+                                        team=scope_team_name
+                                        )
+
+        # testing
+        self.assertTrue(new_scope.team)
+        self.assertTrue(isinstance(new_scope.team, Team))
+        self.assertEqual(new_scope.team.name, scope_team_name)
+
+        # tearDown
+        client.delete_scope(scope=new_scope)
+
+    def test_create_scope_with_team_uuid(self):
+        # setUp
+        client = self.client
+
+        scope_name = 'New scope with team uuid'
+        scope_team_name = 'Team No.1'
+        scope_team_id = client.team(name=scope_team_name).id
+
+        new_scope = client.create_scope(name=scope_name,
+                                        team=scope_team_id
+                                        )
+
+        # testing
+        self.assertTrue(new_scope.team)
+        self.assertTrue(isinstance(new_scope.team, Team))
+        self.assertEqual(new_scope.team.name, scope_team_name)
+
+        # tearDown
+        client.delete_scope(scope=new_scope)
+
+    def test_create_scope_no_arguments(self):
+        # setUp
+        client = self.client
+        new_scope = client.create_scope(name='New scope no arguments')
+
+        # testing
+        self.assertEqual(new_scope.name, 'New scope no arguments')
+        self.assertTrue(new_scope._json_data['start_date'])
+        self.assertFalse(new_scope.tags)
+
+        # tearDown
+        client.delete_scope(scope=new_scope)
+
+    def test_create_scope_with_wrong_arguments(self):
+        # setUp
+        client = self.client
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            client.create_scope(name=12)
+        with self.assertRaises(IllegalArgumentError):
+            client.create_scope(name='Failed scope', status='LIMBO')
+        with self.assertRaises(IllegalArgumentError):
+            client.create_scope(name='Failed scope', description=True)
+        with self.assertRaises(IllegalArgumentError):
+            client.create_scope(name='Failed scope', tags='One tag no list')
+        with self.assertRaises(IllegalArgumentError):
+            client.create_scope(name='Failed scope', tags=[12, 'this', 'fails'])
+        with self.assertRaises(IllegalArgumentError):
+            client.create_scope(name='Failed scope', team=['Fake team'])
 
 
 @skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")

@@ -3,6 +3,35 @@ Change Log
 
 pykechain changelog
 
+2.6.0 (23APR19)
+---------------
+ * Added the possibility to create a scope, clone a scope, and delete a scope. Check `Client.create_scope()`, `Scope.clone` and `Scope.delete` for documentation. (#359)
+
+2.5.7 (18APR19)
+---------------
+ * Added additional properties for the `Service` and `ServiceExecution` class. Now you can retrieve the `Service.filename` amoungst others. Please refer to the documentation of `Service` and `ServiceExecution` to see the properties that are now available (a feature request by @JelleBoersma). #480
+ * We added a utility function to `parse_datetime` strings into `datetime` objects. These strings are in a json response from the KE-chain backend and are now properly translated and timezoned. #482
+ *  Updated dependent versions for development: pytest (4.4.1), mypy (0.701), tox (3.9.0).
+
+2.5.6 (13APR19)
+-----------------
+ * Small patch release to ensure that the `Activity2.assignees` returns an empty list when nobody is assigned to the task. #477. Thanks to @raduiordache for finding it out.
+
+2.5.5 (11APR19)
+---------------
+ * Added properties to the `Property` to directly access properties such as `unit`, `description` and `type`. `Property.type` refers to a `PropertyType` enum. #469
+ * Added a property to the `AttachmentProperty.filename` to return the filename of an attachment. #472
+ * Added a property to retrieve the assignees list of an activity through `Activity2.assignees`. This will return a list of `User`'s assigned to the activity. #473
+ * Added additional properties to `Service` such as `name`, `description` and `version` of a service. #469
+ * Added additional properties to `Scope` such as `description`, `status` and `type`. #469
+ * Updated dependent versions for development: matplotlib (3.0.3), jsonschema (3.0.1), pytest (4.4.0), sphinx (2.0.1), mypy (0.700), tox (3.8.6).
+
+2.5.4 (28FEB19)
+---------------
+ * Fixed a bug where the update of the single select list options could overwrite the existing validators. Thanks to @jelleboersma for finding this out and creating the PR. (#446)
+ * Updated dependent versions for development: sphinx (1.8.4), mypy (0.670), pytest (4.3.0), flake8 (3.7.7), jsonschema (3.0.0), pyOpenSSL (for python 2.7, 19.0.0).
+ * Updated security advisory to install requests package later than 2.20.0 (CVE-2018-18074).
+
 2.5.3 (21JAN19)
 ---------------
  * Fixed a bug where a numeric range validator from a property was not correctly instantiated for provided min/max values when the validator was retrieved from the KE-chain backend. Thanks to @bastiaanbeijer for finding this! (#435)

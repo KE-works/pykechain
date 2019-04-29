@@ -69,7 +69,23 @@ Or if you want to live on the edge, install the latest and greatest from the mas
 
     pip install https://github.com/KE-works/pykechain/archive/master.zip
 
+In scripts you can either use [Pipenv]() or a pip requirements.txt file to install pykechain as a requirement
+
+in a `Pipfile`::
+
+    [packages]
+    pykechain = "*"
+    # or when you want to install a certain branch
+    pykechain = {ref = "master", git = "https://github.com/KE-works/pykechain"}
+
+in a pip `requirements.txt`::
+
+    pykechain
+    # or when you want to install a certain branch i.e. `master`
+    git+https://github.com/KE-works/pykechain.git@master#egg=pykechain
+
 Changelog
 ---------
 
 A proper changelog is maintained in the `Changelog <http://pykechain.readthedocs.io/en/latest/changelog.html>`__
+

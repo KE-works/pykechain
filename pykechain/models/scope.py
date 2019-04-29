@@ -13,7 +13,25 @@ from pykechain.utils import is_uuid
 
 
 class Scope(Base):
-    """A virtual object representing a KE-chain scope."""
+    """A virtual object representing a KE-chain scope.
+
+    :ivar name: Name of the scope
+    :type name: str
+    :ivar id: UUID of the scope
+    :type if: uuid
+    :ivar workflow_root: Root of the workflow
+    :type workflow_root: uuid
+    :ivar description: Description of the scope
+    :type description: str or None
+    :ivar status: Status of the scope, enumeration of `ScopeStatus`
+    :type status: str
+    :ivar type: Type of scope, enumeration of `ScopeType`
+    :type type: str
+    :ivar tags: list of unique tags of the scope.
+    :type tags: list of str
+    :ivar team: Team associated to the scope
+    :type team: `Team` or None
+    """
 
     def __init__(self, json, **kwargs):
         # type: (dict, **Any) -> None
@@ -26,6 +44,10 @@ class Scope(Base):
         self.process = json.get('process')
         # for 'kechain2.core.wim >=2.0.0'
         self.workflow_root = json.get('workflow_root_id')
+
+        self.description = json.get('description')
+        self.status = json.get('status')
+        self.type = json.get('type')
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Scope '{}' id {}>".format(self.name, self.id[-8:])
@@ -376,3 +398,24 @@ class Scope(Base):
             raise APIError("Could not update Scope ({})".format(r))
         else:
             self._json_data = r.json().get('results') and r.json().get('results')[0]
+
+    # 2.6.0
+    def delete(self):
+        # type: () -> None
+        """
+        Delete scope.
+
+        :return: None
+        :raises APIError: in case an Error occurs
+        """
+        return self._client.delete_scope(scope=self)
+
+    def clone(self, *args, **kwargs):
+        """
+        Clone current scope.
+
+        See :class:`pykechain.Client.clone_scope` for available parameters.
+
+        .. versionadded:: 2.6.0
+        """
+        return self._client.clone_scope(*args, source_scope=self, **kwargs)

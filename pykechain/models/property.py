@@ -39,6 +39,8 @@ class Property(Base):
         self._value = json.get('value', None)
         self._options = json.get('options', None)
         self.type = json.get('property_type', None)
+        self.description = json.get('description', None)
+        self.unit = json.get('unit', None)
 
         # set an empty internal validators variable
         self._validators = []  # type: List[Any]
@@ -253,13 +255,14 @@ class Property(Base):
                     validators_json.append(validator.as_json())
                 else:
                     raise APIError("validator is not a PropertyValidator: '{}'".format(validator))
-            if self._options == dict(validators=validators_json):
+            if self._options.get('validators', list()) == validators_json:
                 # no change
                 pass
             else:
-                new_options = dict(validators=validators_json)
+                new_options = self._options.copy()  # make a copy
+                new_options.update({'validators': validators_json})
                 validate(new_options, options_json_schema)
-                self._options = dict(validators=validators_json)
+                self._options = new_options
 
     @property
     def is_valid(self):

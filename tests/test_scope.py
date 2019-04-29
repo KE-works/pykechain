@@ -198,3 +198,45 @@ class TestScopes(TestBetamax):
 
         # teardown
         self.project.edit(tags=saved_tags)
+
+    def test_delete_scope(self):
+        # setUp
+        scope_name = 'Test deletion scope'
+        new_scope = self.client.create_scope(name=scope_name)
+        self.assertEqual(len(self.client.scopes(name=scope_name)), 1)
+        new_scope.delete()
+
+        # testing
+        with self.assertRaises(NotFoundError):
+            self.client.scope(name=scope_name)
+
+    def test_clone_scope(self):
+        # setUp
+        scope_name = 'Test cloning scope'
+        scope_description = 'Description of clone scope'
+        scope_start_date = datetime.datetime(2019, 4, 12)
+        scope_due_date = datetime.datetime(2020, 4, 12)
+        scope_team = self.client.team(name='Team No.1')
+
+        scope_to_be_cloned = self.client.scope(name='Bike Project (pykechain testing)')
+        cloned_scope = scope_to_be_cloned.clone(name=scope_name,
+                                                status=ScopeStatus.CLOSED,
+                                                tags=['cloned_scope'],
+                                                description=scope_description,
+                                                start_date=scope_start_date,
+                                                due_date=scope_due_date,
+                                                team=scope_team
+                                                )
+
+        # testing
+        self.assertEqual(cloned_scope.name, scope_name)
+        self.assertIsInstance(cloned_scope.team, Team)
+        self.assertEqual(cloned_scope.team.name, 'Team No.1')
+        self.assertEqual(cloned_scope.status, ScopeStatus.CLOSED)
+        self.assertEqual(cloned_scope._json_data['text'], scope_description)
+        self.assertEqual(cloned_scope._json_data['start_date'], scope_start_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
+        self.assertEqual(cloned_scope._json_data['due_date'], scope_due_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
+        self.assertIn('cloned_scope', cloned_scope.tags)
+
+        # tearDown
+        cloned_scope.delete()
