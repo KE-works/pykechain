@@ -3,7 +3,6 @@ import warnings
 
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Property2
-from pykechain.models.property import Property
 from pykechain.utils import parse_datetime
 
 
