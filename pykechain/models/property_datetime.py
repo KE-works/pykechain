@@ -9,7 +9,6 @@ from pykechain.utils import parse_datetime
 class DatetimeProperty(Property):
     """A virtual object representing a KE-chain reference property."""
 
-
     def __index__(self, json, **kwargs):
         super(DatetimeProperty, self).__init__(json, **kwargs)
 
