@@ -64,7 +64,7 @@ class Property2(Property):
             raise APIError("Could not update property value: '{}'".format(response.content))
 
         self.refresh(json=response.json()['results'][0])
-        return self.value
+        return self._value
 
     @property
     def model_id(self):

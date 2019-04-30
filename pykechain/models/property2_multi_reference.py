@@ -64,9 +64,10 @@ class MultiReferenceProperty2(Property2):
         if not self._value:
             return None
         if not self._cached_values and isinstance(self._value, (list, tuple)):
+            assert all([isinstance(v, dict) for v in self._value]), \
+                "Expect all elements in the _value to be a dict with 'name' and 'id', got '{}'".format(self._value)
             ids = [v.get('id') for v in self._value]
-            self._cached_values = list(self._client.parts(id__in=','.join(ids),
-                                                          category=None))
+            self._cached_values = list(self._client.parts(id__in=','.join(ids), category=None))
         return self._cached_values
 
     @value.setter
@@ -89,8 +90,8 @@ class MultiReferenceProperty2(Property2):
             raise ValueError(
                 "Reference must be a list (or tuple) of Part, Part id or None. type: {}".format(type(value)))
 
-        # we replace the current choices!
-        self._value = self._put_value(value_to_set)
+        # we replace the current choices in the _put_value
+        self._put_value(value_to_set)
 
     def choices(self):
         """Retrieve the parts that you can reference for this `MultiReferenceProperty`.

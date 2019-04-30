@@ -24,6 +24,8 @@ class Property(Base):
     :type unit: str or None
     :ivar model: the id of the model (not the model object)
     :type model: str
+    :ivar scope_id: the id of the Scope (not the `Scope` object)
+    :type scope_id: str
     :ivar output: a boolean if the value is configured as an output (in an activity)
     :type output: bool
     :ivar part: The (parent) part in which this property is available
@@ -46,10 +48,12 @@ class Property(Base):
         self._output = json.get('output', None)
         self._value = json.get('value', None)
         self._options = json.get('options', None)
+        self._model = None  # Model object storage
         self.type = json.get('property_type', None)
         self.category = json.get('category')
         self.description = json.get('description', None)
         self.unit = json.get('unit', None)
+        self.scope_id = json.get('scope_id', None)
 
         # set an empty internal validators variable
         self._validators = []  # type: List[Any]
@@ -138,6 +142,22 @@ class Property(Base):
             return None
         else:
             return self._json_data.get('model')
+
+    def model(self):
+        """
+        Model object of the property if the property is an instance.
+
+        Will cache the model object in order to not generate too many API calls. Otherwise will make an API call
+        to the backend to retrieve its model object.
+
+        :return: `Property` model object if the current `Property` is an instance.
+        :rtype: :class:`pykechain.models.Property`
+        """
+        if self.category == Category.MODEL:
+            return self
+        elif self._model is None:
+            self._model = self._client.property(pk=self.model_id, category=Category.MODEL)
+        return self._model
 
     def delete(self):
         # type () -> ()
