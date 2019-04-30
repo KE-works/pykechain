@@ -1,5 +1,6 @@
 from six import text_type, string_types
 
+from pykechain.enums import Category
 from pykechain.models.part2 import Part2
 from pykechain.models.property2 import Property2
 from pykechain.utils import is_uuid
@@ -67,7 +68,19 @@ class MultiReferenceProperty2(Property2):
             assert all([isinstance(v, dict) for v in self._value]), \
                 "Expect all elements in the _value to be a dict with 'name' and 'id', got '{}'".format(self._value)
             ids = [v.get('id') for v in self._value]
-            self._cached_values = list(self._client.parts(id__in=','.join(ids), category=None))
+            # TODO: this will change when the configured model is put in the value_options. Now we configure a single
+            # ...   part_model_id in the multirefproperty_model.value as
+            if self.category == Category.MODEL and len(ids) == 1:
+                self._cached_values = [self._client.part(pk=ids[0], category=None)]
+            elif self.category == Category.INSTANCE:
+                referred_partmodels = self.model().value
+                if referred_partmodels:
+                    referred_partmodel = referred_partmodels[0] # get the only one, which is the right part_model
+                else:
+                    referred_partmodel = None
+                self._cached_values = list(self._client.parts(id__in=','.join(ids),
+                                                              model=referred_partmodel,
+                                                              category=None))
         return self._cached_values
 
     @value.setter
