@@ -6,7 +6,7 @@ envparse==0.2.0
 jsonschema==3.0.1
 
 # testing
-pytest==4.4.1
+pytest==4.6.0
 betamax==0.8.1
 
 # documentation
