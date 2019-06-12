@@ -52,26 +52,26 @@ API_PATH = {
     'versions': 'api/versions.json',
 
     # PIM2
-    'scope2': 'api/v2/scopes/{scope_id}.json',
-    'scope2_add_member': 'api/v2/scopes/{scope_id}/add_member',
-    'scope2_remove_member': 'api/v2/scopes/{scope_id}/remove_member',
-    'scope2_add_manager': 'api/v2/scopes/{scope_id}/add_manager',
-    'scope2_remove_manager': 'api/v2/scopes/{scope_id}/remove_manager',
-    'scopes2': 'api/v2/scopes.json',
-    'scopes2_clone': 'api/v2/scopes/clone',
-    'parts2': 'api/v2/parts.json',
-    'parts2_new_instance': 'api/v2/parts/new_instance',
-    'parts2_create_child_model': 'api/v2/parts/create_child_model',
-    'parts2_create_proxy_model': 'api/v2/parts/create_proxy_model',
-    'parts2_clone_model': 'api/v2/parts/clone_model',
-    'parts2_clone_instance': 'api/v2/parts/clone_instance',
-    'parts2_export': 'api/v2/parts/export',
-    'part2': 'api/v2/parts/{part_id}.json',
-    'properties2': 'api/v2/properties.json',
-    'properties2_create_model': 'api/v2/properties/create_model',
-    'property2': 'api/v2/properties/{property_id}.json',
-    'property2_upload': 'api/v2/properties/{property_id}/upload',
-    'property2_download': 'api/v2/properties/{property_id}/download',
+    'scope2': 'api/v3/scopes/{scope_id}.json',
+    'scope2_add_member': 'api/v3/scopes/{scope_id}/add_member',
+    'scope2_remove_member': 'api/v3/scopes/{scope_id}/remove_member',
+    'scope2_add_manager': 'api/v3/scopes/{scope_id}/add_manager',
+    'scope2_remove_manager': 'api/v3/scopes/{scope_id}/remove_manager',
+    'scopes2': 'api/v3/scopes.json',
+    'scopes2_clone': 'api/v3/scopes/clone',
+    'parts2': 'api/v3/parts.json',
+    'parts2_new_instance': 'api/v3/parts/new_instance',
+    'parts2_create_child_model': 'api/v3/parts/create_child_model',
+    'parts2_create_proxy_model': 'api/v3/parts/create_proxy_model',
+    'parts2_clone_model': 'api/v3/parts/clone_model',
+    'parts2_clone_instance': 'api/v3/parts/clone_instance',
+    'parts2_export': 'api/v3/parts/export',
+    'part2': 'api/v3/parts/{part_id}.json',
+    'properties2': 'api/v3/properties.json',
+    'properties2_create_model': 'api/v3/properties/create_model',
+    'property2': 'api/v3/properties/{property_id}.json',
+    'property2_upload': 'api/v3/properties/{property_id}/upload',
+    'property2_download': 'api/v3/properties/{property_id}/download',
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
@@ -430,7 +430,7 @@ class Client(object):
             'status': status,
         }
 
-        if self.match_app_version(label='gscope', version='>=2.0.0', default=False):
+        if self.match_app_version(label='scope', version='>=3.0.0', default=False):
             request_params.update(API_EXTRA_PARAMS['scope2'])
             url = self._build_url('scopes2')
         else:
@@ -447,7 +447,7 @@ class Client(object):
         data = response.json()
 
         # for 'kechain.gcore.gscope >= 2.0.0 we return Scope2 otherwiser Scope
-        if self.match_app_version(label='gscope', version='>=2.0.0', default=False):
+        if self.match_app_version(label='scope', version='>=3.0.0', default=False):
             # Scope2
             return [Scope2(s, client=self) for s in data['results']]
         else:
@@ -497,7 +497,7 @@ class Client(object):
 
         # update the fields query params
         # for 'kechain.core.wim >= 2.0.0' add additional API params
-        if self.match_app_version(label='wim', version='>=2.0.0', default=False):
+        if self.match_app_version(label='wim', version='>=3.0.0', default=False):
             request_params.update(API_EXTRA_PARAMS['activity'])
 
         if kwargs:
@@ -622,7 +622,7 @@ class Client(object):
             scope_id=scope_id
         )
 
-        if self.match_app_version(label='gpim', version='>=2.0.0'):
+        if self.match_app_version(label='pim', version='>=3.0.0'):
             request_params.update(dict(
                 parent_id=parent,
                 model_id=model.id if model else None,
@@ -658,7 +658,7 @@ class Client(object):
                 data = response.json()
                 part_results.extend(data['results'])
 
-        if self.match_app_version(label='gpim', version='>=2.0.0'):
+        if self.match_app_version(label='pim', version='>=3.0.0'):
             return PartSet((Part2(p, client=self) for p in part_results))
         else:
             return PartSet((Part(p, client=self) for p in part_results))
@@ -736,7 +736,7 @@ class Client(object):
         if kwargs:
             request_params.update(**kwargs)
 
-        if self.match_app_version(label='gpim', version='>=2.0.0'):
+        if self.match_app_version(label='pim', version='>=3.0.0'):
             request_params.update(API_EXTRA_PARAMS['properties2'])
             response = self._request('GET', self._build_url('properties2'), params=request_params)
         else:
@@ -747,7 +747,7 @@ class Client(object):
 
         data = response.json()
 
-        if self.match_app_version(label='gpim', version='>=2.0.0'):
+        if self.match_app_version(label='pim', version='>=3.0.0'):
             return [Property2.create(p, client=self) for p in data['results']]
         else:
             return [Property.create(p, client=self) for p in data['results']]
@@ -1085,7 +1085,7 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: When the object could not be created
         """
-        if self.match_app_version(label='wim', version='>=2.0.0', default=False):
+        if self.match_app_version(label='wim', version='>=3.0.0', default=False):
             raise APIError('This method is only compatible with versions of KE-chain where the internal `wim` module '
                            'has a version <=2.0.0. Use the `Client.create_activity2()` method.')
 
@@ -1228,7 +1228,7 @@ class Client(object):
         if not name:
             name = model.name
 
-        if self.match_app_version(label="gpim", version=">=2.0.0"):
+        if self.match_app_version(label="pim", version=">=3.0.0"):
             # PIM2
             data = dict(name=name, parent_id=parent.id, model_id=model.id)
             return self._create_part2(action="new_instance", data=data, **kwargs)
@@ -1267,7 +1267,7 @@ class Client(object):
         else:
             raise IllegalArgumentError("`parent` should be either a parent part or a uuid, got '{}'".format(parent))
 
-        if self.match_app_version(label="gpim", version=">=2.0.0"):
+        if self.match_app_version(label="pim", version=">=3.0.0"):
             data = dict(name=name, parent_id=parent.id, multiplicity=multiplicity)
             return self._create_part2(action="create_child_model", data=data, **kwargs)
         else:
@@ -1320,7 +1320,7 @@ class Client(object):
         ...                                                  properties_fvalues=properties_fvalues)
 
         """
-        if not self.match_app_version(label="gpim", version=">=2.0.0"):
+        if not self.match_app_version(label="pim", version=">=3.0.0"):
             # PIM1 world
             raise ClientError("This function only works for KE-chain 3 backends.")
 
@@ -1384,7 +1384,7 @@ class Client(object):
             raise IllegalArgumentError("Either part and parent need to be of class `Part`. "
                                        "We got: part: '{}' and parent '{}'".format(type(part), type(parent)))
 
-        if self.match_app_version(label="gpim", version=">=2.0.0"):
+        if self.match_app_version(label="pim", version=">=3.0.0"):
             data = dict(
                 name=name or "CLONE - {}".format(part.name),
                 parent_id=parent.id,
@@ -1416,7 +1416,7 @@ class Client(object):
         if response.status_code != requests.codes.created:
             raise APIError("Could not clone part, {}: {}".format(str(response), response.content))
 
-        if self.match_app_version(label="gpim", version=">=2.0.0"):
+        if self.match_app_version(label="pim", version=">=3.0.0"):
             return Part2(response.json()['results'][0], client=self)
         else:
             return Part(response.json()['results'][0], client=self)
@@ -1451,7 +1451,7 @@ class Client(object):
         if parent.category != Category.MODEL:
             raise IllegalArgumentError("The parent should be of category MODEL")
 
-        if self.match_app_version(label="gpim", version=">=2.0.0"):
+        if self.match_app_version(label="pim", version=">=3.0.0"):
             data = dict(name=name, model_id=model.id, parent_id=parent.id, multiplicity=multiplicity)
             return self._create_part2(action='create_proxy_model', data=data, **kwargs)
         else:
@@ -1511,7 +1511,7 @@ class Client(object):
                 raise IllegalArgumentError("Please provide a valid default_value being a `Part` of category `MODEL` "
                                            "or a model uuid, got: '{}'".format(default_value))
 
-        if self.match_app_version(label="gpim", version=">=2.0.0"):
+        if self.match_app_version(label="pim", version=">=3.0.0"):
             data = dict(
                 name=name,
                 part_id=model.id,
@@ -1547,7 +1547,7 @@ class Client(object):
         if response.status_code != requests.codes.created:
             raise APIError("Could not create property, {}: {}".format(str(response), response.content))
 
-        if self.match_app_version(label="gpim", version=">=2.0.0"):
+        if self.match_app_version(label="pim", version=">=3.0.0"):
             prop = Property2.create(response.json()['results'][0], client=self)
         else:
             prop = Property.create(response.json()['results'][0], client=self)
@@ -1711,14 +1711,14 @@ class Client(object):
                 raise IllegalArgumentError("'Team' should be provided as a `models.Team` object or UUID or team name, "
                                            "was provided as a {}".format(type(team)))
 
-            if self.match_app_version(label="gscope", version=">=2.0.0"):
+            if self.match_app_version(label="scope", version=">=3.0.0"):
                 data_dict['team_id'] = team_id
             else:
                 data_dict['team'] = team_id
 
         # injecting additional kwargs for those cases that you need to add extra options.
         data_dict.update(kwargs)
-        if self.match_app_version(label="gscope", version=">=2.0.0"):
+        if self.match_app_version(label="scope", version=">=3.0.0"):
             url = self._build_url('scopes2')
             query_params = API_EXTRA_PARAMS['scopes2']
             response = self._request('POST', url, params=query_params, data=data_dict)
@@ -1729,7 +1729,7 @@ class Client(object):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create scope, {}:\n\n{}'".format(str(response), response.json()))
 
-        if self.match_app_version(label="gscope", version=">=2.0.0"):
+        if self.match_app_version(label="scope", version=">=3.0.0"):
             return Scope2(response.json()['results'][0], client=self)
         else:
             return Scope(response.json()['results'][0], client=self)
@@ -1751,7 +1751,7 @@ class Client(object):
         if not isinstance(scope, (Scope, Scope2)):
             raise IllegalArgumentError('Scope "{}" is not a scope!'.format(scope.name))
 
-        if self.match_app_version(label="gscope", version=">=2.0.0"):
+        if self.match_app_version(label="scope", version=">=3.0.0"):
             response = self._request('DELETE', self._build_url('scope2', scope_id=str(scope.id)))
         else:
             response = self._request('DELETE', self._build_url('scope', scope_id=str(scope.id)))
@@ -1802,7 +1802,7 @@ class Client(object):
         if not isinstance(source_scope, (Scope, Scope2)):
             raise IllegalArgumentError('`source_scope` should be a `Scope` object')
 
-        if self.match_app_version(label="gscope", version=">=2.0.0"):
+        if self.match_app_version(label="scope", version=">=3.0.0"):
             data_dict = {'scope_id': source_scope.id, 'async': asynchronous}
         else:
             data_dict = {'id': source_scope.id, 'async': asynchronous}
@@ -1860,7 +1860,7 @@ class Client(object):
             else:
                 raise IllegalArgumentError("`team` should be a name of an existing team or UUID of a team")
 
-            if self.match_app_version(label="gscope", version=">=2.0.0"):
+            if self.match_app_version(label="scope", version=">=3.0.0"):
                 data_dict['team_id'] = team_id
             else:
                 data_dict['team'] = team_id
@@ -1870,12 +1870,12 @@ class Client(object):
         #     if not isinstance(scope_options, dict):
         #         raise IllegalArgumentError("`scope_options` need to be a dictionary")
         #     else:
-        #         if self.match_app_version(label="gpim", version=">=2.0.0"):
+        #         if self.match_app_version(label="pim", version=">=3.0.0"):
         #             data_dict['scope_options'] = scope_options
         #         else:
         #             data_dict['options'] = scope_options
 
-        if self.match_app_version(label="gscope", version=">=2.0.0"):
+        if self.match_app_version(label="scope", version=">=3.0.0"):
             url = self._build_url('scopes2_clone')
             query_params = API_EXTRA_PARAMS['scopes2']
             response = self._request('POST', url,
@@ -1894,7 +1894,7 @@ class Client(object):
             else:
                 raise APIError("Could not clone scope, {}: {}".format(str(response), response.content))
 
-        if self.match_app_version(label="gscope", version=">=2.0.0"):
+        if self.match_app_version(label="scope", version=">=3.0.0"):
             return Scope2(response.json()['results'][0], client=source_scope._client)
         else:
             return Scope(response.json()['results'][0], client=source_scope._client)

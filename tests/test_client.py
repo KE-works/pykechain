@@ -239,17 +239,17 @@ class TestClientAppVersions(TestBetamax):
 
         # no version found on the app kechain2.metrics
         with self.assertRaises(NotFoundError):
-            self.client.match_app_version(app='kechain2.metrics', version='>0.0.0', default=None)
+            self.client.match_app_version(app='kechain2.core.activitylog', version='>0.0.0', default=None)
 
         # no version found on the app kechain2.metrics, default = True, returns True
-        self.assertTrue(self.client.match_app_version(app='kechain2.metrics', version='>0.0.0', default=True))
+        self.assertTrue(self.client.match_app_version(app='kechain2.core.activitylog', version='>0.0.0', default=True))
 
         # no version found on the app kechain2.metrics, default = False, returns False
-        self.assertFalse(self.client.match_app_version(app='kechain2.metrics', version='>0.0.0', default=False))
+        self.assertFalse(self.client.match_app_version(app='kechain2.core.activitylog', version='>0.0.0', default=False))
 
         # no version found on the app kechain2.metrics, default = False, returns False
         # default is set to return False in the method
-        self.assertFalse(self.client.match_app_version(app='kechain2.metrics', version='>0.0.0'))
+        self.assertFalse(self.client.match_app_version(app='kechain2.core.activitylog', version='>0.0.0'))
 
         # did not find the app
         with self.assertRaises(NotFoundError):

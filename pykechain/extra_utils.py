@@ -82,7 +82,7 @@ def relocate_model(part, target_parent, name=None, include_children=True):
         unit = prop._json_data.get('unit')
 
         # For KE-chain 3 (PIM2) we have value_options instead of options.
-        if prop._client.match_app_version(label='gpim', version='>=2.0.0'):
+        if prop._client.match_app_version(label='pim', version='>=3.0.0'):
             options = prop._json_data.get('value_options')
         else:
             options = prop._json_data.get('options')

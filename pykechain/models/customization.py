@@ -277,7 +277,7 @@ class ExtCustomization(CustomizationBase):
             raise IllegalArgumentError("If you want to sort on a property, then sort_property must be located under "
                                        "part_model")
         # Declare superGrid config
-        if self._client.match_app_version(label='gpim', version='>=2.0.0'):
+        if self._client.match_app_version(label='pim', version='>=3.0.0'):
             config = {
                 "xtype": ComponentXType.SUPERGRID,
                 "filter": {
@@ -421,7 +421,7 @@ class ExtCustomization(CustomizationBase):
                 display_columns[possible_column] = False
 
         # Declare property grid config
-        if self._client.match_app_version(label='gpim', version='>=2.0.0'):
+        if self._client.match_app_version(label='pim', version='>=3.0.0'):
             config = {
                 "xtype": ComponentXType.PROPERTYGRID,
                 "category": Category.INSTANCE,
