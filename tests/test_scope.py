@@ -162,7 +162,7 @@ class TestScopes(TestBetamax):
         team_b_id = r.json().get('results')[0].get('id')
 
         # save current team
-        if self.client.match_app_version(label="gpim", version=">=2.0.0"):
+        if self.client.match_app_version(label="pim", version=">=3.0.0"):
             team_dict = self.project._json_data.get('team_id_name')
             saved_team_id = team_dict and team_dict.get('id')
         else:
@@ -170,19 +170,19 @@ class TestScopes(TestBetamax):
             saved_team_id = team_dict and team_dict.get('id')
 
         self.project.edit(team=team_b_id)
-        if self.client.match_app_version(label="gpim", version=">=2.0.0"):
+        if self.client.match_app_version(label="pim", version=">=3.0.0"):
             self.assertEqual(self.project._json_data.get('team_id_name').get('id'), team_b_id)
         else:
             self.assertEqual(self.project._json_data.get('team').get('id'), team_b_id)
 
         self.project.edit(team=team_kew_id)
-        if self.client.match_app_version(label="gpim", version=">=2.0.0"):
+        if self.client.match_app_version(label="pim", version=">=3.0.0"):
             self.assertEqual(self.project._json_data.get('team_id_name').get('id'), team_kew_id)
         else:
             self.assertEqual(self.project._json_data.get('team').get('id'), team_kew_id)
 
         self.project.edit(team=saved_team_id)
-        if self.client.match_app_version(label="gpim", version=">=2.0.0"):
+        if self.client.match_app_version(label="pim", version=">=3.0.0"):
             self.assertEqual(self.project._json_data.get('team_id_name').get('id'), saved_team_id)
         else:
             self.assertEqual(self.project._json_data.get('team').get('id'), saved_team_id)
