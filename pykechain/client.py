@@ -15,6 +15,7 @@ from pykechain.models.scope2 import Scope2
 from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.team import Team
 from pykechain.models.user import User
+from pykechain.models.widget import Widget
 from pykechain.utils import is_uuid
 from .__about__ import version
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError, IllegalArgumentError
@@ -51,7 +52,7 @@ API_PATH = {
     'team_remove_members': 'api/teams/{team_id}/remove_members',
     'versions': 'api/versions.json',
 
-    # PIM2
+    # PIM3
     'scope2': 'api/v3/scopes/{scope_id}.json',
     'scope2_add_member': 'api/v3/scopes/{scope_id}/add_member',
     'scope2_remove_member': 'api/v3/scopes/{scope_id}/remove_member',
@@ -72,6 +73,8 @@ API_PATH = {
     'property2': 'api/v3/properties/{property_id}.json',
     'property2_upload': 'api/v3/properties/{property_id}/upload',
     'property2_download': 'api/v3/properties/{property_id}/download',
+    'widgets':'api/widgets.json',
+    'widget':'api/widgets/{widget_id}.json'
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
@@ -115,7 +118,13 @@ API_EXTRA_PARAMS = {
          'property_type', 'value', 'value_options', 'output', 'description', 'unit'])},
     'property2': {'fields': ",".join(
         ['id', 'name', 'created_at', 'updated_at', 'model_id', 'part_id', 'order', 'scope_id', 'category',
-         'property_type', 'value', 'value_options', 'output', 'description', 'unit'])}
+         'property_type', 'value', 'value_options', 'output', 'description', 'unit'])},
+    'widgets': {'fields': ",".join(
+        ['id', 'name', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
+         'parent_id', 'progress', 'has_subwidgets', 'scope_id'])},
+    'widget': {'fields': ",".join(
+        ['id', 'name', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
+         'parent_id', 'progress', 'has_subwidgets', 'scope_id'])}
 }
 
 
@@ -1019,6 +1028,30 @@ class Client(object):
 
         data = response.json()
         return [Team(team, client=self) for team in data['results']]
+
+    def widgets(self, pk=None, activity=None, **kwargs):
+        """Widgets of an activity."""
+        if self.match_app_version(label='widget', version='<3.0.0'):
+            raise APIError("The widget concept is not introduced yet for this KE-chain version")
+
+        request_params = API_EXTRA_PARAMS['widgets']
+        request_params['id'] = pk
+
+        if isinstance(activity, (Activity, Activity2)):
+            request_params.update(dict(activity_id=activity.id))
+        elif is_uuid(activity):
+            request_params.update(dict(activity_id=activity))
+
+        if kwargs:
+            request_params.update(**kwargs)
+
+        response = self._request('GET', self._build_url('widgets'), params=request_params)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not find widgets: '{}'".format(response.json()))
+
+        data = response.json()
+        return [Widget(widget, client=self) for widget in data['results']]
 
     #
     # Creators
