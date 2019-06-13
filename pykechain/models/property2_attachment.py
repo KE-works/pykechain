@@ -1,5 +1,6 @@
 import io
 import json
+import os
 
 import requests
 from six import string_types, text_type
@@ -117,14 +118,17 @@ class AttachmentProperty2(Property2):
         else:
             self._upload_json(data, **kwargs)
 
-    def save_as(self, filename):
+    def save_as(self, filename=None):
         """Download the attachment to a file.
 
-        :param filename: File path
-        :type filename: basestring
+        :param filename: (optional) File path. If not provided, will be saved to current working dir
+                         with `self.filename`.
+        :type filename: basestring or None
         :raises APIError: When unable to download the data
         :raises OSError: When unable to save the data to disk
         """
+        filename = filename or os.path.join(os.getcwd(), self.filename)
+
         with open(filename, 'w+b') as f:
             for chunk in self._download():
                 f.write(chunk)

@@ -324,6 +324,18 @@ class ServiceEnvironmentVersion(Enum):
     PYTHON_3_6_NOTEBOOKS = '3.6_notebook'
 
 
+class ServiceScriptUser(Enum):
+    """The acceptable usertypes under which a (trusted) service is run.
+
+    :cvar KENODE_USER: Run as "kenode" user. Equivalent to a manager in a scope.
+    :cvar TEAMMANAGER_USER: Run as "kenode_team". Equivalent to a manager in a team. (disabled until available)
+    :cvar CONFIGURATOR_USER: Run as "kenode_configurator". Equivalent to GG:Configurator.
+    """
+    KENODE_USER = "kenode"
+    # TEAMMANAGER_USER = "kenode_team"
+    CONFIGURATOR_USER = "kenode_configurator"
+
+
 class ServiceExecutionStatus(Enum):
     """The acceptable states of a running service.
 

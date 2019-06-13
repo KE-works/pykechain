@@ -1,7 +1,10 @@
 import json
 import os
+from tempfile import NamedTemporaryFile
 
 from pykechain.enums import PropertyType
+from pykechain.models import AttachmentProperty2
+from pykechain.utils import temp_chdir
 from tests.classes import TestBetamax
 
 
@@ -77,12 +80,7 @@ class TestAttachment(TestBetamax):
         plot_attach_model.delete()
 
     def test_retrieve_filename_from_value(self):
-        photo_attach = self.project.part('Bike').property('Photo Attachment')
-        photo_attach_filename= 'Awesome.jpg'
+        photo_attach = self.project.part('Bike').property('Picture')  # type: AttachmentProperty2
         photo_attach_actual_filename = photo_attach.filename
 
-        self.assertEqual(photo_attach_filename, photo_attach_actual_filename)
-
-        empty_attach = self.project.part('Bike').property('Empty Attachment')
-
-        self.assertEqual(empty_attach.filename, None)
+        self.assertEqual(photo_attach.filename, photo_attach.filename)
