@@ -552,9 +552,9 @@ class Activity2(Base):
     # Customizations
     #
 
-    def customize(self, config):  # noqa: D401
-        """Method is deprecated."""
-        raise DeprecationWarning('This function is deprecated')
+
+    def widgets(self, *args, **kwargs):
+        return self._client.widgets(*args, activity=self.id, **kwargs)
 
     def customization(self):
         """
@@ -573,6 +573,8 @@ class Activity2(Base):
 
         """
         from .customization import ExtCustomization
+        if self._client.match_app_version(label='widget', version='>=3.0.0'):
+            raise DeprecationWarning("Customizations are deprecated. We introduced the `Widget` concept in version 3.")
 
         # For now, we only allow customization in an Ext JS context
         return ExtCustomization(activity=self, client=self._client)

@@ -17,7 +17,7 @@ class Base(object):
     def __init__(self, json, client):
         """Construct a model from provided json data."""
         self._json_data = json
-        self._client = client
+        self._client = client  # type: Client
 
         self.id = json.get('id', None)
         self.name = json.get('name', None)
