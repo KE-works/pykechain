@@ -8,7 +8,7 @@ from requests.compat import urljoin, urlparse  # type: ignore
 from six import text_type, string_types
 
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
-    WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity
+    WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser
 from pykechain.models import Part2, Property2
 from pykechain.models.activity2 import Activity2
 from pykechain.models.scope2 import Scope2
@@ -1558,7 +1558,9 @@ class Client(object):
 
     def create_service(self, name, scope, description=None, version=None,
                        service_type=ServiceType.PYTHON_SCRIPT,
-                       environment_version=ServiceEnvironmentVersion.PYTHON_3_5, pkg_path=None):
+                       environment_version=ServiceEnvironmentVersion.PYTHON_3_5,
+                       run_as=ServiceScriptUser.KENODE_USER,
+                       pkg_path=None):
         """
         Create a Service.
 
@@ -1584,6 +1586,8 @@ class Client(object):
         :param environment_version: (optional) execution environment of the service (refer to
          :class:`pykechain.enums.ServiceEnvironmentVersion`), defaults to `PYTHON_3_5`
         :type environment_version: basestring or None
+        :param run_as: (optional) user to run the service as. Defaults to kenode user (bound to scope)
+        :type run_as: basestring or None
         :param pkg_path: (optional) full path name to the `kecpkg` (or python script) to upload
         :type pkg_path: basestring or None
         :return: the created :class:`models.Service`
@@ -1607,7 +1611,8 @@ class Client(object):
             description=description,
             script_type=service_type,
             script_version=version,
-            env_version=environment_version
+            env_version=environment_version,
+            run_as=run_as
         )
 
         response = self._request('POST', self._build_url('services'), json=data)
