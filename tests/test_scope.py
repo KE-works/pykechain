@@ -274,12 +274,12 @@ class TestScopes2SpecificTests(TestBetamax):
     def test_scope_delete(self):
         new_scope = self.project.clone(asynchronous=False)
         self.assertNotEqual(self.project.id, new_scope.id)
-        new_scope.delete()
+        new_scope.delete(asynchronous=False)
 
         with self.assertRaisesRegex(NotFoundError, 'No scope fits criteria'):
             # throw in arbitrary sleep to give backend time to actually delete the scope.
             sleep(1)
-            self.client.scope(pk=new_scope.id, status=new_scope.status)
+            self.client.scope(pk=new_scope.id)
 
     def test_clone_scope_updated_name_description_tags_etc(self):
         """

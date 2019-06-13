@@ -1739,7 +1739,7 @@ class Client(object):
         else:
             return Scope(response.json()['results'][0], client=self)
 
-    def delete_scope(self, scope):
+    def delete_scope(self, scope, asynchronous=True):
         """
         Delete a scope.
 
@@ -1756,8 +1756,10 @@ class Client(object):
         if not isinstance(scope, (Scope, Scope2)):
             raise IllegalArgumentError('Scope "{}" is not a scope!'.format(scope.name))
 
+        query_options = dict(async=asynchronous)
+
         if self.match_app_version(label="scope", version=">=3.0.0"):
-            response = self._request('DELETE', self._build_url('scope2', scope_id=str(scope.id)))
+            response = self._request('DELETE', self._build_url('scope2', scope_id=str(scope.id)), params=query_options)
         else:
             response = self._request('DELETE', self._build_url('scope', scope_id=str(scope.id)))
 

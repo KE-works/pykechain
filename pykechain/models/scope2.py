@@ -268,7 +268,7 @@ class Scope2(Base):
         """
         return self._client.clone_scope(source_scope=self, **kwargs)
 
-    def delete(self):
+    def delete(self, asynchronous=True):
         """Delete the scope.
 
         Only works with enough permissions.
@@ -278,7 +278,7 @@ class Scope2(Base):
         See :method:`pykechain.Client.delete_scope()` for available parameters.
         :raises ForbiddenError: if you do not have the permissions to delete a scope
         """
-        return self._client.delete_scope(scope=self)
+        return self._client.delete_scope(scope=self, asynchronous=asynchronous)
 
     #
     # Part methods
