@@ -110,8 +110,14 @@ class TestServices(TestBetamax):
         :type filename: str
         :ivar environment: environment in which the service will execute. One of :class:`ServiceEnvironmentVersion`
         :type environment: str
+
+        --- 3.0 features
+        :ivar trusted: Trusted flag. If the kecpkg is trusted.
+        :ivar run_as: User to run the script as. One of :class:`ServiceScriptUser`.
+        :ivar verified_on: Date when the kecpkg was verified by KE-chain (if verification pipeline is enabled)
+        :ivar verification_results: Results of the verification (if verification pipeline is enabled)
         """
-        service_name = 'Debug pykechain'
+        service_name = 'Service Gears - Successful with Package'
         service = self.project.service(name=service_name)
         json_data = service._json_data
         self.assertEqual(service.filename, json_data.get('script_file_name'))
@@ -121,6 +127,11 @@ class TestServices(TestBetamax):
         self.assertEqual(service.description, json_data.get('description'))
         self.assertEqual(service.name, json_data.get('name'))
         self.assertEqual(service.scope_id, json_data.get('scope'))
+
+        self.assertEqual(service.trusted, json_data.get('trusted'))
+        self.assertEqual(service.run_as, json_data.get('run_as'))
+        self.assertEqual(service.verified_on, json_data.get('verified_on'))
+        self.assertEqual(service.verification_results, json_data.get('verification_results'))
 
     @pytest.mark.skipif("os.getenv('TRAVIS', False)",
                         reason="Skipping tests when using Travis, as Service Execution cannot be provided")
@@ -287,7 +298,7 @@ class TestServiceExecutions(TestServiceSetup):
         :ivar activity_id: (optional) the uuid of the activity where the service was executed from
         :type activity_id: uuid or None
         """
-        service_name = 'Debug pykechain'
+        service_name = 'Service Gears - Successful'
         service = self.project.service(name=service_name)
         service_executions = self.project.service_executions(service=service.id, limit=1)
         self.assertTrue(service_executions)

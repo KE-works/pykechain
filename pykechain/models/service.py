@@ -3,6 +3,7 @@ import os
 import requests
 from six import string_types, text_type
 
+from pykechain.enums import ServiceScriptUser
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models.base import Base
 from pykechain.utils import parse_datetime
@@ -32,6 +33,13 @@ class Service(Base):
     :type environment: str
     :ivar updated_at: datetime in UTC timezone when the Service was last updated
     :type updated_at: datetime
+
+    .. versionadded:: 3.0
+
+    :ivar trusted: Trusted flag. If the kecpkg is trusted.
+    :ivar run_as: User to run the script as. One of :class:`ServiceScriptUser`.
+    :ivar verified_on: Date when the kecpkg was verified by KE-chain (if verification pipeline is enabled)
+    :ivar verification_results: Results of the verification (if verification pipeline is enabled)
     """
 
     def __init__(self, json, **kwargs):
@@ -44,8 +52,13 @@ class Service(Base):
         self.type = json.get('script_type')
         self.environment = json.get('env_version')
         self.scope_id = json.get('scope')
-
         self.updated_at = parse_datetime(json.get('updated_at'))
+
+        # for SIM3 version
+        self.trusted = json.get('trusted')
+        self.run_as = json.get('run_as')
+        self.verified_on = parse_datetime(json.get('verified_on'))
+        self.verification_results = json.get('verification_results')
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Service '{}' id {}>".format(self.name, self.id[-8:])
@@ -76,7 +89,7 @@ class Service(Base):
         data = response.json()
         return ServiceExecution(json=data.get('results')[0], client=self._client)
 
-    def edit(self, name=None, description=None, version=None, **kwargs):
+    def edit(self, name=None, description=None, version=None, run_as=None, **kwargs):
         """
         Edit Service details.
 
@@ -88,6 +101,8 @@ class Service(Base):
         :type description: basestring or None
         :param version: (optional) version number of the service.
         :type version: basestring or None
+        :param run_as: (optional) user to run the service as. Defaults to kenode user (bound to scope)
+        :type run_as: basestring or None
         :param kwargs: (optional) additional keyword arguments to change.
         :type kwargs: dict or None
         :raises IllegalArgumentError: when you provide an illegal argument.
@@ -106,11 +121,16 @@ class Service(Base):
             if not isinstance(version, (string_types, text_type)):
                 raise IllegalArgumentError("description should be provided as a string")
             update_dict.update({'script_version': version})
+        if run_as is not None:
+            if not isinstance(run_as, (string_types, text_type)) and run_as not in ServiceScriptUser.values():
+                raise IllegalArgumentError("run_as should be provided as one of '{}'".format(
+                    ServiceScriptUser.values()))
+            update_dict.update({'run_as': run_as})
 
         if kwargs is not None:  # pragma: no cover
             update_dict.update(**kwargs)
-        response = self._client._request('PUT',
-                                         self._client._build_url('service', service_id=self.id), json=update_dict)
+        response = self._client._request('PUT', self._client._build_url('service', service_id=self.id),
+                                         json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Service ({})".format(response))
@@ -147,8 +167,11 @@ class Service(Base):
     def _upload(self, pkg_path):
         url = self._client._build_url('service_upload', service_id=self.id)
 
-        response = self._client._request('POST', url,
-                                         files={'attachment': (os.path.basename(pkg_path), open(pkg_path, 'rb'))})
+        with open(pkg_path, 'rb') as pkg:
+            response = self._client._request(
+                'POST', url,
+                files={'attachment': (os.path.basename(pkg_path), pkg)}
+            )
 
         if response.status_code != requests.codes.accepted:  # pragma: no cover
             raise APIError("Could not upload service script file (or kecpkg) ({})".format(response))
