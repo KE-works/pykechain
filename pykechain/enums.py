@@ -221,7 +221,7 @@ class WidgetNames(Enum):
     :cvar TASKNAVIGATIONBARWIDGET: taskNavigationBarWidget
     :cvar JSONWIDGET: jsonWidget
 
-    # KE-chain 3 only
+    # KE-chain 2 only
     :cvar METAPANELWIDGET: metaPanelWidget
     :cvar MULTICOLUMNWIDGET: multiColumnWidget
     """
@@ -237,6 +237,28 @@ class WidgetNames(Enum):
     JSONWIDGET = 'jsonWidget'
     METAPANELWIDGET = 'metaPanelWidget'
     MULTICOLUMNWIDGET = 'multiColumnWidget'
+
+
+class WidgetTypes(Enum):
+    """The various widget types for the widget definitions available to the widget api.
+
+
+    """
+    UNDEFINED = 'UNDEFINED'
+    PROPERTYGRID = 'PROPERTYGRID'
+    SUPERGRID = 'SUPERGRID'
+    HTML = 'HTML'
+    FILTEREDGRID = 'FILTEREDGRID'
+    SERVICE = 'SERVICE'
+    NOTEBOOK = 'NOTEBOOK'
+    ATTACHMENTVIEWER = 'ATTACHMENTVIEWER'
+    TASKNAVIGATIONBAR = 'TASKNAVIGATIONBAR'
+    JSON = 'JSON'
+    METAPANEL = 'METAPANEL'
+    MULTICOLUMN = 'MULTICOLUMN'
+    SCOPE_WIDGET = 'SCOPE_WIDGET'
+    THIRD_PARTY = 'THIRD_PARTY'
+    PROGRESS = 'PROGRESS'
 
 
 default_metapanel_widget = dict(

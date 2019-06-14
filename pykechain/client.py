@@ -15,7 +15,7 @@ from pykechain.models.scope2 import Scope2
 from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.team import Team
 from pykechain.models.user import User
-from pykechain.models.widget import Widget
+from pykechain.models.widgets.widget import Widget
 from pykechain.utils import is_uuid
 from .__about__ import version
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError, IllegalArgumentError
@@ -1051,7 +1051,7 @@ class Client(object):
             raise NotFoundError("Could not find widgets: '{}'".format(response.json()))
 
         data = response.json()
-        return [Widget(widget, client=self) for widget in data['results']]
+        return [Widget.create(widget_json, client=self) for widget_json in data['results']]
 
     #
     # Creators
