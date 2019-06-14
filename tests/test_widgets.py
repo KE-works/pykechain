@@ -1,4 +1,4 @@
-from pykechain.models.widget import Widget
+from pykechain.models.widgets.widget import Widget
 from tests.classes import TestBetamax
 
 
