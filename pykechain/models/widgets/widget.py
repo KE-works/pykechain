@@ -1,8 +1,11 @@
+from jsonschema import validate
+
 from pykechain.models import Base
-from pykechain.utils import parse_datetime
+from pykechain.models.widgets.widget_schemas import widget_meta_schema
 
 
 class Widget(Base):
+    schema = widget_meta_schema
 
     def __init__(self, json, **kwargs):
         # type: (dict, **Any) -> None
@@ -15,9 +18,10 @@ class Widget(Base):
         super(Widget, self).__init__(json, **kwargs)
         del self.name
 
-        self.title=json.get('title')
+        self.title = json.get('title')
         self.widget_type = json.get('widget_type')
         self.meta = json.get('meta')
+        self.validate_meta()
         self.order = json.get('order')
         self._activity_id = json.get('activity_id')
         self._parent_id = json.get('parent_id')
@@ -34,6 +38,9 @@ class Widget(Base):
     def parent(self):
         return self._client.widget(id=self._parent_id)
 
+    def validate_meta(self):
+        return validate(self.meta, self.schema)
+
     @classmethod
     def create(cls, json, **kwargs):
         # type: (dict, **Any) -> Widget
@@ -47,6 +54,7 @@ class Widget(Base):
         :type json: dict
         :return: a :class:`Widget` object
         """
+
         def type_to_classname(widget_type):
             return "{}Widget".format(widget_type.title())
 
@@ -59,4 +67,3 @@ class Widget(Base):
             return getattr(all_widgets, type_to_classname(widget_type))(json, **kwargs)
         else:
             return Widget(json, **kwargs)
-
