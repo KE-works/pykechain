@@ -94,7 +94,8 @@ def relocate_model(part, target_parent, name=None, include_children=True):
                 name=prop.name,
                 description=description,
                 property_type=prop_type,
-                default_value=referenced_part_ids
+                default_value=referenced_part_ids,
+                options=options
             )
 
         # On "Attachment" properties, attachments needs to be downloaded and re-uploaded to the new property.
@@ -102,7 +103,8 @@ def relocate_model(part, target_parent, name=None, include_children=True):
             moved_prop = moved_part_model.add_property(
                 name=prop.name,
                 description=description,
-                property_type=prop_type
+                property_type=prop_type,
+                options=options
             )
             if prop.value:
                 attachment_name = prop._json_data['value'].split('/')[-1]
