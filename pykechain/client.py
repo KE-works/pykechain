@@ -21,6 +21,7 @@ from .models import Scope, Activity, Part, PartSet, Property
 API_PATH = {
     'scopes': 'api/scopes.json',
     'scope': 'api/scopes/{scope_id}.json',
+    'associations': 'api/associations.json',
     'activities': 'api/activities.json',
     'activity': 'api/activities/{activity_id}.json',
     'activity_export': 'api/activities/{activity_id}/export',

@@ -606,3 +606,14 @@ class TestParts(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             model.copy(target_parent=target_model)
 
+    def test_retrieve_activities_of_part(self):
+        # setUp
+        name_of_part = 'Bike'
+        model = self.project.model(name=name_of_part)
+        set_of_activity_ids = model.associated_activities()
+
+        # testing
+        self.assertEqual(len(set_of_activity_ids), 8)
+        self.assertEqual(len(model._associated_activities_ids), 8)
+        for prop in model.properties:
+            self.assertTrue(set(prop._associated_activities_ids).issubset(model._associated_activities_ids))
