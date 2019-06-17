@@ -860,4 +860,3 @@ class Part(Base):
         for prop in self.properties:
             self._associated_activities_ids.update(prop.associated_activities())
         return self._associated_activities_ids
-
