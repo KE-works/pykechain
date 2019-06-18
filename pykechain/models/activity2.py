@@ -489,12 +489,14 @@ class Activity2(Base):
     def delete(self):
         """Delete this activity.
 
+        :return: True when succesfull
         :raises APIError: when unable to delete the activity
         """
         response = self._client._request('DELETE', self._client._build_url('activity', activity_id=self.id))
 
         if response.status_code != requests.codes.no_content:
             raise APIError("Could not delete activity: {} with id {}".format(self.name, self.id))
+        return True
 
     #
     # Searchers and retrievers
