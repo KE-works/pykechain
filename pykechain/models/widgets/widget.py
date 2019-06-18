@@ -1,5 +1,10 @@
+from typing import Any
+
+import requests
 from jsonschema import validate
 
+from pykechain.enums import WidgetTypes
+from pykechain.exceptions import APIError
 from pykechain.models import Base
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 
@@ -20,8 +25,7 @@ class Widget(Base):
 
         self.title = json.get('title')
         self.widget_type = json.get('widget_type')
-        self.meta = json.get('meta')
-        self.validate_meta()
+        self.meta = self.validate_meta(json.get('meta'))
         self.order = json.get('order')
         self._activity_id = json.get('activity_id')
         self._parent_id = json.get('parent_id')
@@ -38,8 +42,16 @@ class Widget(Base):
     def parent(self):
         return self._client.widget(id=self._parent_id)
 
-    def validate_meta(self):
-        return validate(self.meta, self.schema)
+    def validate_meta(self, meta):
+        # type: (dict) -> dict
+        """Validate the meta and return the meta if validation is successfull.
+
+        :param meta: meta of the widget to be validated.
+        :type meta: dict
+        :return meta: if the meta is validated correctly
+        :raise: `ValidationError`
+        """
+        return validate(meta, self.schema) and meta
 
     @classmethod
     def create(cls, json, **kwargs):
@@ -53,17 +65,64 @@ class Widget(Base):
         :param json: the json from which the :class:`Widget` object to create
         :type json: dict
         :return: a :class:`Widget` object
+        :rtype: :class:`Widget`
         """
 
-        def type_to_classname(widget_type):
+        def _type_to_classname(widget_type):
+            """
+            Generate corresponding inner classname based on the widget type.
+
+            :param widget_type: type of the widget (one of :class:`WidgetTypes`)
+            :type widget_type: str
+            :return: classname corresponding to the widget type
+            :rtype: str
+            """
+            if widget_type is None:
+                widget_type = WidgetTypes.UNDEFINED
             return "{}Widget".format(widget_type.title())
 
         widget_type = json.get('widget_type')
 
+        # dispatcher to instantiate the right widget class based on the widget type
+        # load all difference widget types from the pykechain.model.widgets module.
         import importlib
-
         all_widgets = importlib.import_module("pykechain.models.widgets")
-        if hasattr(all_widgets, type_to_classname(widget_type)):
-            return getattr(all_widgets, type_to_classname(widget_type))(json, **kwargs)
+        if hasattr(all_widgets, _type_to_classname(widget_type)):
+            return getattr(all_widgets, _type_to_classname(widget_type))(json, client=kwargs.pop('client'), **kwargs)
         else:
-            return Widget(json, **kwargs)
+            return getattr(all_widgets, _type_to_classname(WidgetTypes.UNDEFINED))(json, client=kwargs.pop('client'),
+                                                                                   **kwargs)
+
+    def edit(self, title=None, meta=None, **kwargs):
+        """Edit the details of a widget."""
+
+        update_dict = {
+            meta: meta,
+            title: title
+        }
+
+        if kwargs:
+            update_dict.update(**kwargs)
+
+        url = self._client._build_url('widget', activity_id=self.id)
+
+        response = self._client._request('PUT', url, json=update_dict)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Widget ({})".format(response))
+
+        self.refresh(json=response.json().get('results')[0])
+
+    def delete(self):
+        """Delete the widget.
+
+        :return: True when succesful
+        :raises APIError: when unable to delete the activity
+        """
+        url = self._client._build_url('widget', widget_id=self.id)
+        response = self._client._request('DELETE', url)
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            raise APIError("Could not delete Widget ({})".format(response))
+
+        return True

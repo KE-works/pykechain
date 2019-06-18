@@ -8,7 +8,7 @@ from requests.compat import urljoin, urlparse  # type: ignore
 from six import text_type, string_types
 
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
-    WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser
+    WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes
 from pykechain.models import Part2, Property2
 from pykechain.models.activity2 import Activity2
 from pykechain.models.scope2 import Scope2
@@ -73,8 +73,8 @@ API_PATH = {
     'property2': 'api/v3/properties/{property_id}.json',
     'property2_upload': 'api/v3/properties/{property_id}/upload',
     'property2_download': 'api/v3/properties/{property_id}/download',
-    'widgets':'api/widgets.json',
-    'widget':'api/widgets/{widget_id}.json'
+    'widgets': 'api/widgets.json',
+    'widget': 'api/widgets/{widget_id}.json'
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
@@ -1925,7 +1925,7 @@ class Client(object):
             url = self._build_url('scope')
             query_params = dict(select_action='clone')
             response = self._request('POST', url,
-                                     query_params=query_params,
+                                     params=query_params,
                                      json=data_dict)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
@@ -1962,6 +1962,7 @@ class Client(object):
         :type is_hidden: bool or None
         :return: the created :class:`models.Team`
         :raises IllegalArgumentError: When the provided arguments are incorrect
+        :raises APIError: When an API Error occurs
         """
         if not isinstance(name, (string_types, text_type)):
             raise IllegalArgumentError('`name` should be string')
@@ -1999,4 +2000,57 @@ class Client(object):
         team_members = new_team.members()
         new_team.remove_members([u for u in team_members if u != user])
 
-        new_team.refresh()
+        return new_team.refresh()
+
+    def create_widget(self, activity=None, widget_type=None, title=None, meta=None, order=None, **kwargs):
+        """
+        Create a widget inside an activity.
+
+        :param activity: activity objects to create the widget in.
+        :type activity: :class:`Activity` or UUID
+        :param widget_type: type of the widget, one of :class:`WidgetTypes`
+        :type: string
+        :param title: (optional) title of the widget
+        :type title: str or None
+        :param meta: meta dictionary of the widget.
+        :type meta: dict
+        :param order: (optional) order in the activity of the widget.
+        :type order: int or None
+        :param kwargs: (optional) additional keyword=value arguments to create widget
+        :type kwargs: dict or None
+        :return: the created subclass of :class:`Widget`
+        :rtype: :class:`Widget`
+        :raises IllegalArgumentError: when an illegal argument is send.
+        :raises APIError: when an API Error occurs.
+        """
+        if isinstance(activity, (Activity, Activity2)):
+            activity = activity.id
+        elif is_uuid(activity):
+            pass
+        else:
+            raise IllegalArgumentError("`activity` should be either an `Activity` or a uuid.")
+        if not isinstance(widget_type, (string_types, text_type)) and widget_type not in WidgetTypes.values():
+            raise IllegalArgumentError("`widget_type` should be one of '{}'".format(WidgetTypes.values()))
+        if order and not isinstance(order, int):
+            raise IllegalArgumentError("`order` should be an integer or None")
+        if title and not isinstance(title, (string_types, text_type)):
+            raise IllegalArgumentError("`title` should be a string")
+
+        data = dict(
+            activity_id=activity,
+            widget_type=widget_type,
+            title=title,
+            meta=meta,
+            order=order,
+        )
+
+        if kwargs:
+            data.update(**kwargs)
+
+        url = self._build_url('widgets')
+        response = self._request('POST', url, params=API_EXTRA_PARAMS['widgets'], json=data)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create a widget ({})".format((response, response.json())))
+
+        return Widget.create(json=response.json().get('results')[0], client=self)
