@@ -8,5 +8,18 @@ widget_meta_schema = {
     "properties": {}
 }
 
+
 def get_widget_meta_schema(widget_type=WidgetTypes.UNDEFINED):
     return widget_meta_schema
+
+
+attachmentviewer_meta_schema = {
+    "type": "object",
+    "properties": {
+        "propertyInstanceId": {"type": ["uuidstr", "null"]},
+        "customHeight": "number|null",
+        "activityId": "uuid|null",
+        "showTitleValue": "[NONE|CUSTOM|DEFAULT]",
+        "customTitle": "string|null",
+    }
+}
