@@ -32,7 +32,8 @@ def get_widget_meta_schema(widget_type=WidgetTypes.UNDEFINED):
 #     }
 # })
 
-attachmentviewer_meta_schema = deepcopy(widget_meta_schema).update({
+attachmentviewer_meta_schema = deepcopy(widget_meta_schema)
+attachmentviewer_meta_schema.update({
     "properties": {
         "propertyInstanceId": {"$ref": "#/definitions/uuidString"},
         "activityId": {"$ref": "#/definitions/uuidString"},
