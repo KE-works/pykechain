@@ -3,6 +3,7 @@ from pykechain.models import Activity
 from pykechain.models.widgets import UndefinedWidget
 
 from pykechain.models.widgets.widget import Widget
+from pykechain.models.widgets.widgetset import WidgetSet
 from tests.classes import TestBetamax
 
 
@@ -13,12 +14,13 @@ class TestWidgets(TestBetamax):
 
     def test_retrieve_widgets_in_activity(self):
         activity = self.project.activity('Task - Form + Tables + Service')
-        for w in activity.widgets():
+        widget_set = activity.widgets()
+        self.assertIsInstance(widget_set, WidgetSet)
+        for w in widget_set:
             self.assertIsInstance(w, Widget)
 
-
     def test_create_widget_in_activity(self):
-        activity = self.project.activity('test task') # type: Activity
+        activity = self.project.activity('test task')  # type: Activity
         created_widget = self.client.create_widget(
             title="Test_widget",
             activity=activity,

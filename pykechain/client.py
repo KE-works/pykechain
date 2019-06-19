@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Dict, Tuple, Optional, Any, List, Union  # noqa: F401 pragma: no cover
+from typing import Dict, Tuple, Optional, Any, List, Union, AnyStr  # noqa: F401 pragma: no cover
 
 import requests
 from envparse import env
@@ -79,20 +79,7 @@ API_PATH = {
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
-PARAMS_BASE = ["id", "name"]
 
-# API_EXTRA_PARAMS = {
-#     # 'activity': API_QUERY_PARAM_ALL_FIELDS,  # id,name,scope,status,classification,activity_type,parent_id'},
-#     # 'activities': API_QUERY_PARAM_ALL_FIELDS,  # 'id,name,scope,status,classification,activity_type,parent_id'}
-#     # 'scope2': API_QUERY_PARAM_ALL_FIELDS,
-#     # 'scopes2': API_QUERY_PARAM_ALL_FIELDS,
-#     # 'part2': API_QUERY_PARAM_ALL_FIELDS,
-#     # 'parts2': API_QUERY_PARAM_ALL_FIELDS,
-#     # 'properties2': API_QUERY_PARAM_ALL_FIELDS,
-#     # 'property2': API_QUERY_PARAM_ALL_FIELDS
-# }
-
-# TODO: need to tune this
 API_EXTRA_PARAMS = {
     'activity': {'fields': ",".join(
         ['id', 'name', 'description', 'created_at', 'updated_at', 'activity_type', 'classification',
@@ -1031,6 +1018,7 @@ class Client(object):
         return [Team(team, client=self) for team in data['results']]
 
     def widgets(self, pk=None, activity=None, **kwargs):
+        # type: (Optional[AnyStr], Optional[Union[Activity, Activity2, AnyStr]], **Any) -> WidgetSet
         """Widgets of an activity."""
         if self.match_app_version(label='widget', version='<3.0.0'):
             raise APIError("The widget concept is not introduced yet for this KE-chain version")
