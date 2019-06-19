@@ -261,6 +261,20 @@ class WidgetTypes(Enum):
     PROGRESS = 'PROGRESS'
 
 
+WidgetCompatibleTypes = {
+    WidgetNames.SUPERGRIDWIDGET: WidgetTypes.SUPERGRID,
+    WidgetNames.PROPERTYGRIDWIDGET: WidgetTypes.PROPERTYGRID,
+    WidgetNames.HTMLWIDGET: WidgetTypes.HTML,
+    WidgetNames.FILTEREDGRIDWIDGET: WidgetTypes.FILTEREDGRID,
+    WidgetNames.SERVICEWIDGET: WidgetTypes.SERVICE,
+    WidgetNames.NOTEBOOKWIDGET: WidgetTypes.NOTEBOOK,
+    WidgetNames.ATTACHMENTVIEWERWIDGET: WidgetTypes.ATTACHMENTVIEWER,
+    WidgetNames.TASKNAVIGATIONBARWIDGET: WidgetTypes.TASKNAVIGATIONBAR,
+    WidgetNames.JSONWIDGET: WidgetTypes.JSON,
+    WidgetNames.METAPANELWIDGET: WidgetTypes.METAPANEL,
+    WidgetNames.MULTICOLUMNWIDGET: WidgetTypes.MULTICOLUMN,
+}
+
 default_metapanel_widget = dict(
     name=WidgetNames.METAPANELWIDGET,
     config=dict(),

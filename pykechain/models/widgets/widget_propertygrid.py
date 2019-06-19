@@ -16,6 +16,8 @@ from pykechain.models.widgets.widget import Widget
 # SCOPE_WIDGET = 'SCOPE_WIDGET'
 # THIRD_PARTY = 'THIRD_PARTY'
 # PROGRESS = 'PROGRESS'
+from pykechain.models.widgets.widget_schemas import attachmentviewer_meta_schema
+
 
 class PropertygridWidget(Widget):
     def __init__(self, json, **kwargs):
@@ -53,6 +55,8 @@ class NotebookWidget(Widget):
 
 
 class AttachmentviewerWidget(Widget):
+    schema = attachmentviewer_meta_schema
+
     def __init__(self, json, **kwargs):
         super(AttachmentviewerWidget, self).__init__(json, **kwargs)
 
