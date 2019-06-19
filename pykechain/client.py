@@ -16,6 +16,7 @@ from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.widgets.widget import Widget
+from pykechain.models.widgets.widgetset import WidgetSet
 from pykechain.utils import is_uuid
 from .__about__ import version
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError, IllegalArgumentError
@@ -1051,7 +1052,7 @@ class Client(object):
             raise NotFoundError("Could not find widgets: '{}'".format(response.json()))
 
         data = response.json()
-        return [Widget.create(widget_json, client=self) for widget_json in data['results']]
+        return WidgetSet([Widget.create(widget_json, client=self) for widget_json in data['results']])
 
     #
     # Creators
@@ -1782,14 +1783,15 @@ class Client(object):
 
         :param scope: Scope object to be deleted
         :type scope: :class: `models.Scope`
-
+        :param asynchronous: (optional) if the scope deletion should be performed asynchronous (default True)
+        :type asynchronous: bool
         :return: True when the delete is a success.
         :raises APIError: in case of failure in the deletion of the scope
         """
         if not isinstance(scope, (Scope, Scope2)):
             raise IllegalArgumentError('Scope "{}" is not a scope!'.format(scope.name))
 
-        query_options = dict(async=asynchronous)
+        query_options = {"async" : asynchronous}
 
         if self.match_app_version(label="scope", version=">=3.0.0"):
             response = self._request('DELETE', self._build_url('scope2', scope_id=str(scope.id)), params=query_options)
