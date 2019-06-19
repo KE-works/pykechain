@@ -218,7 +218,7 @@ class ExtCustomization(CustomizationBase):
         :param delete: Show or hide the Delete button (default False)
         :type delete: bool
         :param part_model: The part model based on which all instances will be shown.
-        :type parent_part_instance: :class:`Part` or UUID
+        :type part_model: :class:`Part` or UUID
         :param parent_part_instance: The parent part instance for which the instances will be shown or to which new
             instances will be added.
         :type parent_part_instance: :class:`Part` or UUID

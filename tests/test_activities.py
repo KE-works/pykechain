@@ -577,3 +577,48 @@ class TestActivity2SpecificTests(TestBetamax):
         assignees_list = activity.assignees
 
         self.assertListEqual(list(), activity.assignees, "Task has no assingees and should return Empty list")
+
+    def test_activity2_move(self):
+        # setUp
+        activity_name = 'Activity to be moved'
+        activity_to_be_moved = self.project.activity(name=activity_name)
+        original_parent = activity_to_be_moved.parent()
+
+        new_parent_name = 'Subprocess'
+        new_parent = self.project.activity(name=new_parent_name)
+
+        activity_to_be_moved.move(parent=new_parent)
+
+        activity_to_be_moved.refresh()
+
+        # testing
+        self.assertTrue(activity_to_be_moved.parent().id == new_parent.id)
+
+        # tearDown
+        activity_to_be_moved.move(parent=original_parent.id)
+        activity_to_be_moved.refresh()
+        self.assertTrue(activity_to_be_moved.parent().id == original_parent.id)
+
+    def test_activity2_move_under_task_parent(self):
+        # setUp
+        activity_name = 'Activity to be moved'
+        activity_to_be_moved = self.project.activity(name=activity_name)
+
+        new_parent_name = 'Customized task'
+        new_parent = self.project.activity(name=new_parent_name)
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            activity_to_be_moved.move(parent=new_parent)
+
+    def test_activity2_move_under_part_object(self):
+        # setUp
+        activity_name = 'Activity to be moved'
+        activity_to_be_moved = self.project.activity(name=activity_name)
+
+        new_parent_name = 'Bike'
+        new_parent = self.project.part(name=new_parent_name)
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            activity_to_be_moved.move(parent=new_parent)
