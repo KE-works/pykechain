@@ -1,10 +1,11 @@
-
 #
 #
 import uuid
+from pathlib import Path
 
-from jsonschema import Draft7Validator, validate, Draft6Validator
+from jsonschema import validate, Draft6Validator
 
+from pykechain import get_project
 from pykechain.enums import WidgetCompatibleTypes, WidgetTypes
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.widgetset import WidgetSet
@@ -88,7 +89,7 @@ widgets_jsonschema = {
                                 "customHeight": {"$ref": "#/definitions/positiveInteger"},
                                 "collapsed": {"$ref": "#/definitions/booleanNull"},
                                 "collapsible": {"$ref": "#/definitions/booleanNull"},
-                                "html": {"type":"string"}
+                                "html": {"type": "string"}
                             },
                             "additionalProperties": False,
                             "required": ["html"]
@@ -525,11 +526,16 @@ if __name__ == '__main__':
     validate(widgets, widgets_jsonschema)
 
     widgets_metas = [{
-        "widget_type":WidgetCompatibleTypes.get(w.get('name'), WidgetTypes.UNDEFINED),
-        "meta":w.get('meta'),
-        "id":uuid.uuid4()
+        "widget_type": WidgetCompatibleTypes.get(w.get('name'), WidgetTypes.UNDEFINED),
+        "meta": w.get('meta'),
+        "id": uuid.uuid4()
     } for w in widgets]
 
     print(widgets_metas)
     widgetset = WidgetSet([Widget.create(json=w, client=object()) for w in widgets_metas])
     print(widgetset)
+
+    project = get_project(env_filename=Path("/home/jochem/dev/pykechain/.env").name)
+    all_activities = project.activities()
+    for activity in all_activities:
+        print([w for w in activity.widgets()])
