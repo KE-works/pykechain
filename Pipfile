@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 requests = "*"
 envparse = "*"
-jsonschema = "*"
+jsonschema = ">=3.0.0"
 semver = "*"
 typing = "*"
 pytz = "*"

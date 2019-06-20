@@ -1,6 +1,5 @@
 from pykechain.models.widgets.widget import Widget
 
-
 # UNDEFINED = 'UNDEFINED'
 # PROPERTYGRID = 'PROPERTYGRID'
 # SUPERGRID = 'SUPERGRID'
@@ -16,10 +15,18 @@ from pykechain.models.widgets.widget import Widget
 # SCOPE_WIDGET = 'SCOPE_WIDGET'
 # THIRD_PARTY = 'THIRD_PARTY'
 # PROGRESS = 'PROGRESS'
-from pykechain.models.widgets.widget_schemas import attachmentviewer_meta_schema
+from pykechain.models.widgets.widget_schemas import attachmentviewer_meta_schema, html_meta_schema, navbar_meta_schema, \
+    property_grid_meta_schema, service_meta_schema, filteredgrid_meta_schema
+
+
+class MetapanelWidget(Widget):
+    def __init__(self, json, **kwargs):
+        super(MetapanelWidget, self).__init__(json, **kwargs)
 
 
 class PropertygridWidget(Widget):
+    schema = property_grid_meta_schema
+
     def __init__(self, json, **kwargs):
         super(PropertygridWidget, self).__init__(json, **kwargs)
 
@@ -29,29 +36,16 @@ class UndefinedWidget(Widget):
         super(UndefinedWidget, self).__init__(json, **kwargs)
 
 
-class SupergridWidget(Widget):
-    def __init__(self, json, **kwargs):
-        super(SupergridWidget, self).__init__(json, **kwargs)
-
-
 class FilteredgridWidget(Widget):
+    schema = filteredgrid_meta_schema
+
     def __init__(self, json, **kwargs):
         super(FilteredgridWidget, self).__init__(json, **kwargs)
 
 
-class HtmlWidget(Widget):
+class SupergridWidget(Widget):
     def __init__(self, json, **kwargs):
-        super(HtmlWidget, self).__init__(json, **kwargs)
-
-
-class ServiceWidget(Widget):
-    def __init__(self, json, **kwargs):
-        super(ServiceWidget, self).__init__(json, **kwargs)
-
-
-class NotebookWidget(Widget):
-    def __init__(self, json, **kwargs):
-        super(NotebookWidget, self).__init__(json, **kwargs)
+        super(SupergridWidget, self).__init__(json, **kwargs)
 
 
 class AttachmentviewerWidget(Widget):
@@ -62,18 +56,34 @@ class AttachmentviewerWidget(Widget):
 
 
 class TasknavigationbarWidget(Widget):
+    schema = navbar_meta_schema
+
     def __init__(self, json, **kwargs):
         super(TasknavigationbarWidget, self).__init__(json, **kwargs)
+
+
+class HtmlWidget(Widget):
+    schema = html_meta_schema
+
+    def __init__(self, json, **kwargs):
+        super(HtmlWidget, self).__init__(json, **kwargs)
+
+
+class ServiceWidget(Widget):
+    schema = service_meta_schema
+
+    def __init__(self, json, **kwargs):
+        super(ServiceWidget, self).__init__(json, **kwargs)
+
+
+class NotebookWidget(Widget):
+    def __init__(self, json, **kwargs):
+        super(NotebookWidget, self).__init__(json, **kwargs)
 
 
 class JsonWidget(Widget):
     def __init__(self, json, **kwargs):
         super(JsonWidget, self).__init__(json, **kwargs)
-
-
-class MetapanelWidget(Widget):
-    def __init__(self, json, **kwargs):
-        super(MetapanelWidget, self).__init__(json, **kwargs)
 
 
 class MulticolumnWidget(Widget):
