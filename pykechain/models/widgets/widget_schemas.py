@@ -193,7 +193,7 @@ service_meta_schema.update({
         "showDownloadLog": def_bool,
         "showLog": def_bool,
         "serviceId": def_uuid,
-        "emphasizeButton": def_bool,
+        "emphasizeButton": {"type":["string","boolean","null"]},  ## needs to be boolean - but old bike_fixtures do have 'false' instead of False
         "customText": def_nullstring,
         "showButtonValue": {"type": "string", "enum": ["Custom text", "Default", "No text"]},
     },
