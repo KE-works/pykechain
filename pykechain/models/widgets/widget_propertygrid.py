@@ -15,11 +15,18 @@ from pykechain.models.widgets.widget import Widget
 # SCOPE_WIDGET = 'SCOPE_WIDGET'
 # THIRD_PARTY = 'THIRD_PARTY'
 # PROGRESS = 'PROGRESS'
-from pykechain.models.widgets.widget_schemas import attachmentviewer_meta_schema, html_meta_schema, navbar_meta_schema, \
-    property_grid_meta_schema, service_meta_schema, filteredgrid_meta_schema
+
+from .widget_schemas import (
+    attachmentviewer_meta_schema, html_meta_schema, navbar_meta_schema,
+    property_grid_meta_schema, service_meta_schema, filteredgrid_meta_schema, supergrid_meta_schema,
+    progress_meta_schema, multicolumn_meta_schema, scope_meta_schema, thirdpart_meta_schema, notebook_meta_schema,
+    metapanel_meta_schema
+)
 
 
 class MetapanelWidget(Widget):
+    schema = metapanel_meta_schema
+
     def __init__(self, json, **kwargs):
         super(MetapanelWidget, self).__init__(json, **kwargs)
 
@@ -44,6 +51,8 @@ class FilteredgridWidget(Widget):
 
 
 class SupergridWidget(Widget):
+    schema = supergrid_meta_schema
+
     def __init__(self, json, **kwargs):
         super(SupergridWidget, self).__init__(json, **kwargs)
 
@@ -77,6 +86,8 @@ class ServiceWidget(Widget):
 
 
 class NotebookWidget(Widget):
+    schema = notebook_meta_schema
+
     def __init__(self, json, **kwargs):
         super(NotebookWidget, self).__init__(json, **kwargs)
 
@@ -87,24 +98,28 @@ class JsonWidget(Widget):
 
 
 class MulticolumnWidget(Widget):
+    schema = multicolumn_meta_schema
+
     def __init__(self, json, **kwargs):
         super(MulticolumnWidget, self).__init__(json, **kwargs)
 
 
 class ProgressWidget(Widget):
+    schema = progress_meta_schema
+
     def __init__(self, json, **kwargs):
         super(ProgressWidget, self).__init__(json, **kwargs)
 
 
 class ScopeWidget(Widget):
+    schema = scope_meta_schema
+
     def __init__(self, json, **kwargs):
         super(ScopeWidget, self).__init__(json, **kwargs)
 
 
 class ThirdpartyWidget(Widget):
+    schema = thirdpart_meta_schema
+
     def __init__(self, json, **kwargs):
         super(ThirdpartyWidget, self).__init__(json, **kwargs)
-
-# class XXXWidget(Widget):
-#     def __init__(self, json, **kwargs):
-#         super(XXXWidget, self).__init__(json, **kwargs)
