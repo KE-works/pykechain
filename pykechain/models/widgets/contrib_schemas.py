@@ -1,12 +1,13 @@
 #
 #
+import json
 import uuid
 from pathlib import Path
 
 from jsonschema import validate, Draft6Validator
 
 from pykechain import get_project
-from pykechain.enums import WidgetCompatibleTypes, WidgetTypes
+from pykechain.enums import WidgetCompatibleTypes, WidgetTypes, ActivityType
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.widgetset import WidgetSet
 
@@ -535,7 +536,18 @@ if __name__ == '__main__':
     widgetset = WidgetSet([Widget.create(json=w, client=object()) for w in widgets_metas])
     print(widgetset)
 
-    project = get_project(env_filename=Path("/home/jochem/dev/pykechain/.env").name)
-    all_activities = project.activities()
+    # project = get_project(env_filename=Path("/home/jochem/dev/pykechain/.env").name)
+    # all_activities = project.activities()
+    # for activity in all_activities:
+    #     print([w for w in activity.widgets()])
+
+    berts_project=get_project(url="http://10.0.145.204:8000", username="admin", password="pass",
+                              scope_id="13fb3e43-69d7-4096-98da-7f50347d4f6d")
+    all_activities = berts_project.activities(activity_type=ActivityType.TASK)
     for activity in all_activities:
-        print([w for w in activity.widgets()])
+        act_widgets = list(activity.widgets())
+        widgets_json = [w._json_data for w in act_widgets]
+        with Path('act_{}_widgets.json'.format(activity.id[-6:])).open('w') as fd:
+            json.dump(widgets_json, fd, indent=2, ensure_ascii=True)
+
+        print([w for w in act_widgets])
