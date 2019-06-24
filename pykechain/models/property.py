@@ -22,6 +22,8 @@ class Property(Base):
     :type part: :class:`Part`
     :ivar value: the property value, can be set as well as property
     :type value: Any
+    :ivar associated_activities_ids: the list of associated activities ids the are linked to this property
+    :type associated_activities_ids: list(UUIDs)
     :ivar validators: the list of validators that are available in the property
     :type validators: list(PropertyValidator)
     :ivar is_valid: if the property conforms to the validators
@@ -41,7 +43,7 @@ class Property(Base):
         self.type = json.get('property_type', None)
         self.description = json.get('description', None)
         self.unit = json.get('unit', None)
-        self._associated_activities_ids = list()
+        self._associated_activities_ids = list()  # type: List[Any]
         # set an empty internal validators variable
         self._validators = []  # type: List[Any]
 
