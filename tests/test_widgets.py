@@ -1,10 +1,13 @@
+import json
+import os
+
 from pykechain.enums import WidgetTypes
 from pykechain.models import Activity
 from pykechain.models.widgets import UndefinedWidget
 
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgetset import WidgetSet
-from tests.classes import TestBetamax
+from tests.classes import TestBetamax, SixTestCase
 
 
 class TestWidgets(TestBetamax):
@@ -30,3 +33,14 @@ class TestWidgets(TestBetamax):
         )
         self.assertIsInstance(created_widget, UndefinedWidget)
         created_widget.delete()
+
+class TestWidgetsValidation(SixTestCase):
+
+    def test_create_widgets_from_all_widget_test_activity(self):
+        """Test a comprehensive list with all widgets created with the form editor. (JUN19)"""
+        filepath = os.path.join(os.path.dirname(__file__), 'files', 'test_activity_widgets.json')
+        with open(filepath) as fd:
+            widget_raw_jsons = json.load(fd)
+        for widget in widget_raw_jsons:
+            w = Widget.create(json=widget, client=object())
+            self.assertIsInstance(w, Widget)
