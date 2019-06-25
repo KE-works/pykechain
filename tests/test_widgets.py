@@ -38,9 +38,27 @@ class TestWidgetsValidation(SixTestCase):
 
     def test_create_widgets_from_all_widget_test_activity(self):
         """Test a comprehensive list with all widgets created with the form editor. (JUN19)"""
-        filepath = os.path.join(os.path.dirname(__file__), 'files', 'test_activity_widgets.json')
+        fn = 'test_activity_widgets.json'
+
+        filepath = os.path.join(os.path.dirname(__file__), 'files', 'widget_tests', fn )
         with open(filepath) as fd:
             widget_raw_jsons = json.load(fd)
         for widget in widget_raw_jsons:
             w = Widget.create(json=widget, client=object())
             self.assertIsInstance(w, Widget)
+            self.assertEqual(w.widget_type, widget.get('widget_type'))
+
+    def test_create_widgets_from_all_widget_test_activity_pt2(self):
+        """Test another comprehensive list with all widgets created with the form editor. (JUN19)
+
+        In this test the customHeight is set to "800" being a string, not an int.
+        """
+        fn = "test_activity_widgets_2.json"
+
+        filepath = os.path.join(os.path.dirname(__file__), 'files', 'widget_tests', fn)
+        with open(filepath) as fd:
+            widget_raw_jsons = json.load(fd)
+        for widget in widget_raw_jsons:
+            w = Widget.create(json=widget, client=object())
+            self.assertIsInstance(w, Widget)
+            self.assertEqual(w.widget_type, widget.get('widget_type'))
