@@ -242,7 +242,21 @@ class WidgetNames(Enum):
 class WidgetTypes(Enum):
     """The various widget types for the widget definitions available to the widget api.
 
-
+    :cvar UNDEFINED: Undefined Widget
+    :cvar PROPERTYGRID: Propertygrid widget
+    :cvar SUPERGRID: Supergrid widget
+    :cvar HTML: Html widget
+    :cvar FILTEREDGRID: Filteredgrid widget
+    :cvar SERVICE: Service widget
+    :cvar NOTEBOOK: Notebook widget
+    :cvar ATTACHMENTVIEWER: Attachmentviewer widget
+    :cvar TASKNAVIGATIONBAR: Tasknavigationbar widget
+    :cvar JSON: Json widget
+    :cvar METAPANEL: Metapanel widget
+    :cvar MULTICOLUMN: Multicolumn widget
+    :cvar SCOPE: Scope widget
+    :cvar THIRDPARTY: Thirdparty widget
+    :cvar PROGRESS: Progress widget
     """
     UNDEFINED = 'UNDEFINED'
     PROPERTYGRID = 'PROPERTYGRID'
