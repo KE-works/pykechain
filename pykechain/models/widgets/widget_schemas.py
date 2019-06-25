@@ -363,7 +363,16 @@ scope_meta_schema.update({
         "noBackground": def_bool,
         "noPadding": def_bool,
         "isDisabled": def_bool,
-        # progress
+        # columns
+        "showHeaders": def_bool,
+        "hideHeaders": def_bool,
+        "showColumns": {
+            "type": "array",
+            "items": [def_nullstring]
+        },
+        "sortedColumn": def_nullstring,
+        "sortDirection": {"type": "string", "enum": ["ASC", "DESC"]},
+        # scope
         "activityId": def_uuid,
         "teamId": def_nulluuid,
         "ordering": def_nullstring,
