@@ -6,7 +6,7 @@ from pykechain.models import Activity
 from pykechain.models.widgets import UndefinedWidget
 
 from pykechain.models.widgets.widget import Widget
-from pykechain.models.widgets.widgetset import WidgetSet
+from pykechain.models.widgets.widgets_manager import WidgetsManager
 from tests.classes import TestBetamax, SixTestCase
 
 
@@ -18,7 +18,7 @@ class TestWidgets(TestBetamax):
     def test_retrieve_widgets_in_activity(self):
         activity = self.project.activity('Task - Form + Tables + Service')
         widget_set = activity.widgets()
-        self.assertIsInstance(widget_set, WidgetSet)
+        self.assertIsInstance(widget_set, WidgetsManager)
         for w in widget_set:
             self.assertIsInstance(w, Widget)
 

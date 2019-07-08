@@ -16,7 +16,7 @@ from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.widgets.widget import Widget
-from pykechain.models.widgets.widgetset import WidgetSet
+from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
 from .__about__ import version
 from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError, IllegalArgumentError
@@ -75,7 +75,9 @@ API_PATH = {
     'property2_upload': 'api/v3/properties/{property_id}/upload',
     'property2_download': 'api/v3/properties/{property_id}/download',
     'widgets': 'api/widgets.json',
-    'widget': 'api/widgets/{widget_id}.json'
+    'widget': 'api/widgets/{widget_id}.json',
+    'widgets_update_associations': 'api/widgets/update_associations.json',
+    'widget_update_associations': 'api/widget/{widget_id}/update_associations.json',
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
@@ -1018,7 +1020,7 @@ class Client(object):
         return [Team(team, client=self) for team in data['results']]
 
     def widgets(self, pk=None, activity=None, **kwargs):
-        # type: (Optional[AnyStr], Optional[Union[Activity, Activity2, AnyStr]], **Any) -> WidgetSet
+        # type: (Optional[AnyStr], Optional[Union[Activity, Activity2, AnyStr]], **Any) -> WidgetsManager
         """Widgets of an activity."""
         if self.match_app_version(label='widget', version='<3.0.0'):
             raise APIError("The widget concept is not introduced yet for this KE-chain version")
@@ -1040,7 +1042,7 @@ class Client(object):
             raise NotFoundError("Could not find widgets: '{}'".format(response.json()))
 
         data = response.json()
-        return WidgetSet([Widget.create(widget_json, client=self) for widget_json in data['results']])
+        return WidgetsManager([Widget.create(widget_json, client=self) for widget_json in data['results']])
 
     #
     # Creators

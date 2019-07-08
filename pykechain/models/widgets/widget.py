@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional, List
 
 import requests
 from jsonschema import validate
@@ -92,6 +92,11 @@ class Widget(Base):
         else:
             return getattr(all_widgets, _type_to_classname(WidgetTypes.UNDEFINED))(json, client=kwargs.pop('client'),
                                                                                    **kwargs)
+
+
+    def update_associations(self, inputs=None, outputs=None):
+        #type: (Optional[List], Optional[List]) -> Widget
+        pass
 
     def edit(self, title=None, meta=None, **kwargs):
         """Edit the details of a widget."""
