@@ -9,7 +9,7 @@ from jsonschema import validate, Draft6Validator
 from pykechain import get_project
 from pykechain.enums import WidgetCompatibleTypes, WidgetTypes, ActivityType
 from pykechain.models.widgets import Widget
-from pykechain.models.widgets.widgetset import WidgetSet
+from pykechain.models.widgets.widgets_manager import WidgetsManager
 
 widget_names_values = [
     'superGridWidget', 'propertyGridWidget', 'htmlWidget', 'filteredGridWidget', 'serviceWidget', 'notebookWidget',
@@ -533,7 +533,7 @@ if __name__ == '__main__':
     } for w in widgets]
 
     print(widgets_metas)
-    widgetset = WidgetSet([Widget.create(json=w, client=object()) for w in widgets_metas])
+    widgetset = WidgetsManager([Widget.create(json=w, client=object()) for w in widgets_metas])
     print(widgetset)
 
     # project = get_project(env_filename=Path("/home/jochem/dev/pykechain/.env").name)
