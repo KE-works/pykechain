@@ -3,10 +3,11 @@ import os
 
 from pykechain.enums import WidgetTypes
 from pykechain.models import Activity
-from pykechain.models.widgets import UndefinedWidget
+from pykechain.models.widgets import UndefinedWidget, HtmlWidget
 
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
+from pykechain.utils import is_uuid
 from tests.classes import TestBetamax, SixTestCase
 
 
@@ -62,3 +63,57 @@ class TestWidgetsValidation(SixTestCase):
             w = Widget.create(json=widget, client=object())
             self.assertIsInstance(w, Widget)
             self.assertEqual(w.widget_type, widget.get('widget_type'))
+
+
+class TestWidgetManager(TestBetamax):
+    def test_activity_has_metapanel_in_widget_manager(self):
+        activity = self.project.activity('Task - Form + Tables + Service')
+        widgets = activity.widgets()
+        self.assertIsInstance(widgets, WidgetsManager)
+        self.assertEqual(len(widgets), 5)
+
+        self.assertTrue(widgets[0].widget_type, WidgetTypes.METAPANEL)
+
+    def test_widget_can_be_found_with_uuid_in_widget_manager(self):
+        activity = self.project.activity('Task - Form + Tables + Service')
+        widgets = activity.widgets()
+        metapanel = widgets[0]
+        self.assertTrue(metapanel, WidgetTypes.METAPANEL)
+
+        self.assertEqual(widgets[metapanel.id], metapanel)
+
+    def test_widgetmanager_has_activity_and_client(self):
+        activity = self.project.activity('Task - Form + Tables + Service')
+        widgets = activity.widgets()
+        self.assertIsNotNone(widgets._client)
+        self.assertIsNotNone(widgets._activity_id)
+        self.assertIsInstance(widgets._client, self.client.__class__)
+        self.assertTrue(is_uuid(widgets._activity_id))
+
+
+class TestWidgetManagerInActivity(TestBetamax):
+    def setUp(self):
+        super(TestWidgetManagerInActivity, self).setUp()
+        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
+
+
+    def tearDown(self):
+        self.task.delete()
+        super(TestWidgetManagerInActivity, self).tearDown()
+
+    def test_new_widget_using_widget_manager(self):
+        widgets = self.task.widgets()  #type: WidgetsManager
+
+        self.assertEqual(len(widgets), 1)
+        metapanel = widgets[0]
+
+        htmlwidget = widgets.create_widget(
+            widget_type=WidgetTypes.HTML,
+            title="Test HTML widget",
+            meta=dict(html="Hello")
+        )
+
+        self.assertIsInstance(htmlwidget, HtmlWidget)
+
+
+

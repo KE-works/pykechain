@@ -3,7 +3,7 @@ from copy import deepcopy
 from pykechain.enums import WidgetTypes
 
 widget_meta_schema = {
-    "$schema": "https://json-schema.org/schema#",
+    "$schema": "http://json-schema.org/draft-06/schema#",
     "title": "Toplevel Widget Meta schema",
     "type": "object",
     "additionalProperties": False,

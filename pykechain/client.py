@@ -9,7 +9,9 @@ from six import text_type, string_types
 
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes
-from pykechain.models import Part2, Property2
+from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
+    APIError
+from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property
 from pykechain.models.activity2 import Activity2
 from pykechain.models.scope2 import Scope2
 from pykechain.models.service import Service, ServiceExecution
@@ -19,8 +21,7 @@ from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
 from .__about__ import version
-from .exceptions import ForbiddenError, NotFoundError, MultipleFoundError, APIError, ClientError, IllegalArgumentError
-from .models import Scope, Activity, Part, PartSet, Property
+
 
 API_PATH = {
     'scopes': 'api/scopes.json',
@@ -161,6 +162,14 @@ class Client(object):
 
         if not check_certificates:
             self.session.verify = False
+
+    def __del__(self):
+        """Destroy the client object."""
+        self.session.close()
+        del self.auth
+        del self.headers
+        del self.session
+
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Client '{}'>".format(self.api_root)
@@ -1042,7 +1051,9 @@ class Client(object):
             raise NotFoundError("Could not find widgets: '{}'".format(response.json()))
 
         data = response.json()
-        return WidgetsManager([Widget.create(widget_json, client=self) for widget_json in data['results']])
+        return WidgetsManager([Widget.create(widget_json, client=self) for widget_json in data['results']],
+                              client=self,
+                              activity_id=request_params.get('activity_id'))
 
     #
     # Creators
@@ -1794,7 +1805,7 @@ class Client(object):
         return True
 
     def clone_scope(self, source_scope, name=None, status=None, start_date=None, due_date=None,
-                    description=None, tags=None, team=None, asynchronous=False):
+                    description=None, tags=None, team=None, scope_options=None, asynchronous=False):
         """
         Clone a Scope.
 
@@ -1822,8 +1833,8 @@ class Client(object):
         :type description: basestring or None
         :param team: (optional) team_id or Team object to assign membership of scope to a team.
         :type team: basestring or :class:`models.Team` or None
-        # :param scope_options: (optional) dictionary with scope options (NO EFFECT)
-        # :type scope_options: dict or None
+        :param scope_options: (optional) dictionary with scope options (NO EFFECT)
+        :type scope_options: dict or None
         :param asynchronous: (optional) option to use asynchronous cloning of the scope, default to False.
         :type asynchronous: bool or None
         :return: New scope that is cloned
@@ -1897,15 +1908,14 @@ class Client(object):
             else:
                 data_dict['team'] = team_id
 
-        # TODO: fix in KEC3
-        # if scope_options is not None:
-        #     if not isinstance(scope_options, dict):
-        #         raise IllegalArgumentError("`scope_options` need to be a dictionary")
-        #     else:
-        #         if self.match_app_version(label="pim", version=">=3.0.0"):
-        #             data_dict['scope_options'] = scope_options
-        #         else:
-        #             data_dict['options'] = scope_options
+        if scope_options is not None:
+            if not isinstance(scope_options, dict):
+                raise IllegalArgumentError("`scope_options` need to be a dictionary")
+            else:
+                if self.match_app_version(label="pim", version=">=3.0.0"):
+                    data_dict['scope_options'] = scope_options
+                else:
+                    data_dict['options'] = scope_options
 
         if self.match_app_version(label="scope", version=">=3.0.0"):
             url = self._build_url('scopes2_clone')
@@ -1994,7 +2004,8 @@ class Client(object):
 
         return new_team.refresh()
 
-    def create_widget(self, activity=None, widget_type=None, title=None, meta=None, order=None, **kwargs):
+    def create_widget(self, activity=None, widget_type=None, title=None, meta=None, order=None,
+                      parent=None, inputs=None, outputs=None, **kwargs):
         """
         Create a widget inside an activity.
 
@@ -2008,6 +2019,12 @@ class Client(object):
         :type meta: dict
         :param order: (optional) order in the activity of the widget.
         :type order: int or None
+        :param parent: (optional) parent of the widget for Multicolumn and Multirow widget.
+        :type parent: :class:`Widget` or UUID
+        :param inputs: (optional) list of property model ids to be configured as readable
+        :type inputs: list of properties or list of property id's
+        :param outputs: (optional) list of property model ids to be configured as writable
+        :type outputs: list of properties or list of property id's
         :param kwargs: (optional) additional keyword=value arguments to create widget
         :type kwargs: dict or None
         :return: the created subclass of :class:`Widget`
@@ -2023,26 +2040,67 @@ class Client(object):
             raise IllegalArgumentError("`activity` should be either an `Activity` or a uuid.")
         if not isinstance(widget_type, (string_types, text_type)) and widget_type not in WidgetTypes.values():
             raise IllegalArgumentError("`widget_type` should be one of '{}'".format(WidgetTypes.values()))
-        if order and not isinstance(order, int):
+        if order is not None and not isinstance(order, int):
             raise IllegalArgumentError("`order` should be an integer or None")
-        if title and not isinstance(title, (string_types, text_type)):
+        if title is not None and not isinstance(title, (string_types, text_type)):
             raise IllegalArgumentError("`title` should be a string")
+        if parent is not None and isinstance(parent, Widget):
+            parent_id = parent.id
+        elif parent is not None and is_uuid(parent):
+            parent_id=parent
+        elif parent is not None:
+            raise IllegalArgumentError("`parent` should be provided as a widget or uuid")
+
+        readable_model_ids = []
+        if inputs is not None:
+            if not isinstance(inputs, (list, tuple, set)):
+                raise IllegalArgumentError("`inputs` should be provided as a list of uuids or property models")
+            for input in inputs:
+                if is_uuid(input):
+                    readable_model_ids.append(input)
+                elif isinstance(input, (Property2, Property)):
+                    readable_model_ids.append(input.id)
+                else:
+                    IllegalArgumentError("`inputs` should be provided as a list of uuids or property models")
+
+        writable_model_ids = []
+        if outputs is not None:
+            if not isinstance(outputs, (list, tuple, set)):
+                raise IllegalArgumentError("`outputs` should be provided as a list of uuids or property models")
+            for output in outputs:
+                if is_uuid(output):
+                    writable_model_ids.append(output)
+                elif isinstance(output, (Property2, Property)):
+                    writable_model_ids.append(output.id)
+                else:
+                    IllegalArgumentError("`outputs` should be provided as a list of uuids or property models")
 
         data = dict(
             activity_id=activity,
             widget_type=widget_type,
             title=title,
             meta=meta,
-            order=order,
+            parent_id=parent
         )
 
         if kwargs:
             data.update(**kwargs)
 
+        if order is not None:
+            data.update(dict(order=order))
+
+        # perform the call
         url = self._build_url('widgets')
         response = self._request('POST', url, params=API_EXTRA_PARAMS['widgets'], json=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create a widget ({})".format((response, response.json())))
 
-        return Widget.create(json=response.json().get('results')[0], client=self)
+        # create the widget and do postprocessing
+        widget = Widget.create(json=response.json().get('results')[0], client=self)
+
+        # update the associations if needed
+        if readable_model_ids is not None or writable_model_ids is not None:
+            widget.update_associations(readable_model_ids=readable_model_ids, writable_model_ids=writable_model_ids)
+
+        return widget

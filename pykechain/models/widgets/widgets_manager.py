@@ -4,11 +4,9 @@ from typing import Sized
 import requests
 from six import string_types, text_type
 
-from pykechain.client import API_EXTRA_PARAMS
 from pykechain.enums import WidgetTypes
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
 from pykechain.models import Property2, Property
-from pykechain.models.widgets import Widget
 from pykechain.utils import is_uuid, find
 
 
@@ -16,7 +14,7 @@ class WidgetsManager(Sized):
     def __init__(self, widgets, activity_id=None, client=None, **kwargs):
         self._widgets = list(widgets)
         self._activity_id = activity_id
-        self._client = client
+        self._client = client  # type: Client
         self._iter = iter(self._widgets)
 
     def __repr__(self):  # pragma: no cover
@@ -46,83 +44,14 @@ class WidgetsManager(Sized):
 
         raise NotFoundError("Could not find widget with index, name or id {}".format(key))
 
-    def create_widget(self, widget_type=WidgetTypes.UNDEFINED,
-                      title=None, meta=None, order=None, parent_id=None,
-                      inputs=None, outputs=None):
-        if widget_type is not None and not isinstance(widget_type, text_type) \
-                or widget_type not in WidgetTypes.values():
-            raise IllegalArgumentError("`widget_type` should be one of '{}'".format(WidgetTypes.values()))
+    def create_widget(self, *args, **kwargs):
 
-        if title is not None:
-            if not isinstance(title, (string_types, text_type)):
-                raise IllegalArgumentError("`title` should be provided as a string")
+        widget = self._client.create_widget(*args, activity=self._activity_id, **kwargs)
 
-        if order is not None:
-            if not isinstance(order, int):
-                raise IllegalArgumentError("`order` should be provided as a integer, and unique in the list "
-                                           "of widgets")
-
-        if parent_id is not None:
-            if isinstance(parent_id, Widget):
-                parent_id = parent_id.id
-            elif is_uuid(parent_id):
-                pass
-            else:
-                raise IllegalArgumentError("`parent_id` should be provided as a widget or uuid")
-
-        if meta is not None:
-            if not isinstance(meta, dict):
-                raise IllegalArgumentError("`meta` should be provided as a dictionary with keys according "
-                                           "to the schema of the widget_type")
-
-        if inputs is not None:
-            if not isinstance(inputs, (list, tuple, set)):
-                raise IllegalArgumentError("`inputs` should be provided as a list of uuids or property models")
-            readable_model_ids = []
-            for input in inputs:
-                if is_uuid(input):
-                    readable_model_ids.append(input)
-                elif isinstance(input, (Property2, Property)):
-                    readable_model_ids.append(input.id)
-                else:
-                    IllegalArgumentError("`inputs` should be provided as a list of uuids or property models")
-
-        if outputs is not None:
-            if not isinstance(outputs, (list, tuple, set)):
-                raise IllegalArgumentError("`outputs` should be provided as a list of uuids or "
-                                           "property models")
-            writable_model_ids = []
-            for output in outputs:
-                if is_uuid(output):
-                    writable_model_ids.append(output)
-                elif isinstance(output, (Property2, Property)):
-                    writable_model_ids.append(output.id)
-                else:
-                    IllegalArgumentError("`outputs` should be provided as a list of uuids or property models")
-
-        data = dict(
-            widget_type=widget_type,
-            title=title,
-            activity_id=self._activity_id,
-            meta=meta,
-            widget_options=dict(),
-            order=order,
-            parent_id=parent_id
-        )
-
-        request_params = API_EXTRA_PARAMS['widget']
-
-        response = self._client._request('POST', self._client._build_url('widget'),
-                                         params=request_params, data=data)
-
-        if response.status_code != requests.codes.created:
-            raise APIError("Could not create widget: {}: {}".format(str(response), response.content))
-
-        widget = Widget.create(json=response.json().get('results')[0], client=self._client)
-        if order is None:
+        if kwargs.get('order') is None:
             self._widgets.append(widget)
         else:
-            self.insert(order, widget)
+            self.insert(kwargs.get('order'), widget)
         return widget
 
     def insert(self, index, widget):
@@ -150,6 +79,7 @@ class WidgetsManager(Sized):
         # bulk update the order of the widgets:
         fvalues = [dict(id=w.id, order=index) for index, w in enumerate(self._widgets)]
 
+        from pykechain.client import API_EXTRA_PARAMS
         response = self._client._request("PUT", self._client._build_url('widgets'),
                                          params=API_EXTRA_PARAMS['widgets'],
                                          data=fvalues)

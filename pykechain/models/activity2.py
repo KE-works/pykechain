@@ -556,6 +556,7 @@ class Activity2(Base):
 
 
     def widgets(self, *args, **kwargs):
+        #type: (*Any, **Any) -> WidgetManager
         return self._client.widgets(*args, activity=self.id, **kwargs)
 
     def customization(self):

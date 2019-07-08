@@ -94,8 +94,8 @@ class Widget(Base):
                                                                                    **kwargs)
 
 
-    def update_associations(self, inputs=None, outputs=None):
-        #type: (Optional[List], Optional[List]) -> Widget
+    def update_associations(self, readibles=None, writables=None, readable_model_ids=None, writable_model_ids=None):
+        #type: (Optional[List], Optional[List], Optional[List], Optional[List]) -> Widget
         pass
 
     def edit(self, title=None, meta=None, **kwargs):
