@@ -70,10 +70,11 @@ class WidgetsManager(Sized):
         :raises IndexError: The index is out of range
         :raises APIError: The list of widgets could not be updated
         """
-        if index < self.__len__():
+        if index < 0 or index > self.__len__():
             raise IndexError("The index is out of range. "
                              "The list of widgets is '{}' widget(s) long.".format(self.__len__()))
 
+        # TODO check if this works
         bisect.insort(self._widgets, widget)
 
         # bulk update the order of the widgets:

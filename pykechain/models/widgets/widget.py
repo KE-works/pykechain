@@ -93,10 +93,29 @@ class Widget(Base):
             return getattr(all_widgets, _type_to_classname(WidgetTypes.UNDEFINED))(json, client=kwargs.pop('client'),
                                                                                    **kwargs)
 
+    def update_associations(self, readable_models=None, writable_models=None, **kwargs):
+        # type: (Optional[List], Optional[List], **Any) -> None
+        """
+        Update associations on this widget.
 
-    def update_associations(self, readibles=None, writables=None, readable_model_ids=None, writable_model_ids=None):
-        #type: (Optional[List], Optional[List], Optional[List], Optional[List]) -> Widget
-        pass
+        This is an absolute list of associations. If you provide No models, than the associations are cleared.
+
+        Alternatively you may use `inputs` or `outputs` as a alias to `readable_models` and `writable_models`
+        respectively.
+
+        :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
+                                read rights (alias = inputs)
+        :type readable_models: List[Property] or List[UUID] or None
+        :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
+                                write rights (alias = outputs)
+        :type writable_models: List[Property] or List[UUID] or None
+        :param kwargs: additional keyword arguments to be passed into the API call as param.
+        :return: None
+        :raises APIError: when the associations could not be changed
+        :raise IllegalArgumentError: when the list is not of the right type
+        """
+        self._client.update_widget_associations(widget=self, readable_models=readable_models,
+                                                writable_models=writable_models, **kwargs)
 
     def edit(self, title=None, meta=None, **kwargs):
         """Edit the details of a widget."""
