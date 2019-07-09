@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Any  # noqa: F401
+from typing import Any, Union  # noqa: F401
 
 import requests
 from six import text_type, string_types
