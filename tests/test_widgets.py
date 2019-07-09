@@ -133,3 +133,27 @@ class TestWidgetManagerInActivity(TestBetamax):
             reable_models=[]
         )
 
+    def test_attachment_widget_with_associations_using_widget_manager(self):
+        """
+        properties: {
+            # attachment
+            "propertyInstanceId": {"$ref": "#/definitions/uuidString"},
+            "activityId": {"$ref": "#/definitions/uuidString"},
+            "alignment": {"$ref": "#/definitions/booleanNull"}
+        },
+        "required": ["propertyInstanceId", "activityId"]
+        :return:
+        """
+        widgets = self.task.widgets()  # type: WidgetsManager
+        foto_property = self.project.property("Picture")
+
+        widgets.create_widget(
+            widget_type=WidgetTypes.ATTACHMENTVIEWER,
+            title="Attachment Viewer",
+            meta = dict(
+                activityId=str(self.task.id),
+                propertyInstanceId=str(foto_property.id)
+            ),
+            readable_models=[foto_property.model_id]
+        )
+
