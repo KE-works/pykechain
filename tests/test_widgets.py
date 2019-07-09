@@ -130,7 +130,7 @@ class TestWidgetManagerInActivity(TestBetamax):
                 partInstanceId=str(self.frame.id)
             ),
             writable_models=self.frame_model.properties,
-            reable_models=[]
+            readable_models=[]
         )
 
     def test_attachment_widget_with_associations_using_widget_manager(self):
