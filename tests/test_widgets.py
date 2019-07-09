@@ -96,9 +96,12 @@ class TestWidgetManagerInActivity(TestBetamax):
         super(TestWidgetManagerInActivity, self).setUp()
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
 
+        self.frame = self.project.part(name='Frame')
+        self.frame_model = self.project.model(name='Frame')
+
 
     def tearDown(self):
-        self.task.delete()
+        # self.task.delete()
         super(TestWidgetManagerInActivity, self).tearDown()
 
     def test_new_widget_using_widget_manager(self):
@@ -116,4 +119,17 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertIsInstance(htmlwidget, HtmlWidget)
 
 
+    def test_property_grid_with_associations_using_widget_manager(self):
+        widgets = self.task.widgets()  # type: WidgetsManager
+
+        widgets.create_widget(
+            widget_type=WidgetTypes.PROPERTYGRID,
+            title="Frame Property Grid",
+            meta = dict(
+                activityId=str(self.task.id),
+                partInstanceId=str(self.frame.id)
+            ),
+            writable_models=self.frame_model.properties,
+            reable_models=[]
+        )
 

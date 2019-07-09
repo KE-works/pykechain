@@ -22,7 +22,6 @@ from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
 from .__about__ import version
 
-
 API_PATH = {
     'scopes': 'api/scopes.json',
     'scope': 'api/scopes/{scope_id}.json',
@@ -78,7 +77,7 @@ API_PATH = {
     'widgets': 'api/widgets.json',
     'widget': 'api/widgets/{widget_id}.json',
     'widgets_update_associations': 'api/widgets/update_associations.json',
-    'widget_update_associations': 'api/widget/{widget_id}/update_associations.json',
+    'widget_update_associations': 'api/widgets/{widget_id}/update_associations.json',
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
@@ -169,7 +168,6 @@ class Client(object):
         del self.auth
         del self.headers
         del self.session
-
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Client '{}'>".format(self.api_root)
@@ -275,6 +273,8 @@ class Client(object):
         # type: (str, str, **Any) -> requests.Response
         """Perform the request on the API."""
         self.last_request = None
+        if method in ('PUT', 'POST'):
+            kwargs['allow_redirects'] = False  # to prevent redirects on write action. Better check your URL first.
         self.last_response = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
         self.last_request = self.last_response.request
         self.last_url = self.last_response.url
@@ -1189,7 +1189,7 @@ class Client(object):
                                  params=API_EXTRA_PARAMS['activities'])
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create activity")
+            raise APIError("Could not create activity {}: {}".format(str(response), response.content))
 
         data = response.json()
 
@@ -1792,7 +1792,7 @@ class Client(object):
         if not isinstance(scope, (Scope, Scope2)):
             raise IllegalArgumentError('Scope "{}" is not a scope!'.format(scope.name))
 
-        query_options = {"async" : asynchronous}
+        query_options = {"async": asynchronous}
 
         if self.match_app_version(label="scope", version=">=3.0.0"):
             response = self._request('DELETE', self._build_url('scope2', scope_id=str(scope.id)), params=query_options)
@@ -2004,10 +2004,17 @@ class Client(object):
 
         return new_team.refresh()
 
-    def create_widget(self, activity=None, widget_type=None, title=None, meta=None, order=None,
-                      parent=None, inputs=None, outputs=None, **kwargs):
+    def create_widget(self, activity, widget_type, title=None, meta=None, order=None,
+                      parent=None, readable_models=None, writable_models=None, **kwargs):
+        # type: (Union[Activity,text_type], text_type, Optional[text_type], Optional[Dict], Optional[int], Optional[Widget, text_type], Optional[List], Optional[List], **Any) -> Widget
         """
         Create a widget inside an activity.
+
+        If you want to associate models (and instances) in a single go, you may provide a list of `Property`
+        (models) to the `readable_model_ids` or `writable_model_ids`.
+
+        Alternatively you can use the alias, `inputs` and `outputs` which connect to respectively
+        `readable_model_ids` and `writable_models_ids`.
 
         :param activity: activity objects to create the widget in.
         :type activity: :class:`Activity` or UUID
@@ -2021,10 +2028,10 @@ class Client(object):
         :type order: int or None
         :param parent: (optional) parent of the widget for Multicolumn and Multirow widget.
         :type parent: :class:`Widget` or UUID
-        :param inputs: (optional) list of property model ids to be configured as readable
-        :type inputs: list of properties or list of property id's
-        :param outputs: (optional) list of property model ids to be configured as writable
-        :type outputs: list of properties or list of property id's
+        :param readable_models: (optional) list of property model ids to be configured as readable (alias = inputs)
+        :type readable_models: list of properties or list of property id's
+        :param writable_models: (optional) list of property model ids to be configured as writable (alias = ouputs)
+        :type writable_models: list of properties or list of property id's
         :param kwargs: (optional) additional keyword=value arguments to create widget
         :type kwargs: dict or None
         :return: the created subclass of :class:`Widget`
@@ -2047,33 +2054,37 @@ class Client(object):
         if parent is not None and isinstance(parent, Widget):
             parent_id = parent.id
         elif parent is not None and is_uuid(parent):
-            parent_id=parent
+            parent_id = parent
         elif parent is not None:
             raise IllegalArgumentError("`parent` should be provided as a widget or uuid")
+        if kwargs.get('inputs'):
+            readable_models = kwargs.pop('inputs')
+        if kwargs.get('outputs'):
+            writable_models = kwargs.pop('outputs')
 
         readable_model_ids = []
-        if inputs is not None:
-            if not isinstance(inputs, (list, tuple, set)):
-                raise IllegalArgumentError("`inputs` should be provided as a list of uuids or property models")
-            for input in inputs:
+        if readable_models is not None:
+            if not isinstance(readable_models, (list, tuple, set)):
+                raise IllegalArgumentError("`readable_models` should be provided as a list of uuids or property models")
+            for input in readable_models:
                 if is_uuid(input):
                     readable_model_ids.append(input)
                 elif isinstance(input, (Property2, Property)):
                     readable_model_ids.append(input.id)
                 else:
-                    IllegalArgumentError("`inputs` should be provided as a list of uuids or property models")
+                    IllegalArgumentError("`readable_models` should be provided as a list of uuids or property models")
 
         writable_model_ids = []
-        if outputs is not None:
-            if not isinstance(outputs, (list, tuple, set)):
-                raise IllegalArgumentError("`outputs` should be provided as a list of uuids or property models")
-            for output in outputs:
+        if writable_models is not None:
+            if not isinstance(writable_models, (list, tuple, set)):
+                raise IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
+            for output in writable_models:
                 if is_uuid(output):
                     writable_model_ids.append(output)
                 elif isinstance(output, (Property2, Property)):
                     writable_model_ids.append(output.id)
                 else:
-                    IllegalArgumentError("`outputs` should be provided as a list of uuids or property models")
+                    IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
 
         data = dict(
             activity_id=activity,
@@ -2101,6 +2112,79 @@ class Client(object):
 
         # update the associations if needed
         if readable_model_ids is not None or writable_model_ids is not None:
-            widget.update_associations(readable_model_ids=readable_model_ids, writable_model_ids=writable_model_ids)
+            widget.update_associations(readable_models=readable_model_ids, writable_models=writable_model_ids)
 
         return widget
+
+    def update_widget_associations(self, widget, readable_models=None, writable_models=None, **kwargs):
+        # type: (Union[Widget,text_type], Optional[List], Optional[List], **Any) -> None
+        """
+        Update associations on this widget.
+
+        This is an absolute list of associations. If no property model id's are provided, then the associations are
+        emptied out and replaced with no associations.
+
+        :param widget: widget to update associations for
+        :type widget: :class:`Widget` or UUID
+        :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
+                                   read rights
+        :type readable_models: List[Property] or List[UUID] or None
+        :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
+                                   write rights
+        :type writable_models: List[Property] or List[UUID] or None
+        :return: None
+        :raises APIError: when the associations could not be changed
+        :raise IllegalArgumentError: when the list is not of the right type
+        """
+        if isinstance(widget, Widget):
+            widget_id = widget.id
+        elif is_uuid(widget):
+            widget_id = widget
+        else:
+            raise IllegalArgumentError("`widget` should be provided as a Widget or a uuid")
+
+        if kwargs.get('inputs'):
+            readable_models = kwargs.pop('inputs')
+        if kwargs.get('outputs'):
+            writable_models = kwargs.pop('outputs')
+
+        readable_model_properties_ids = []
+        if readable_models is not None:
+            if not isinstance(readable_models, (list, tuple, set)):
+                raise IllegalArgumentError("`readable_models` should be provided as a list of uuids or property models")
+            for input in readable_models:
+                if is_uuid(input):
+                    readable_model_properties_ids.append(input)
+                elif isinstance(input, (Property2, Property)):
+                    readable_model_properties_ids.append(input.id)
+                else:
+                    IllegalArgumentError("`readable_models` should be provided as a list of uuids or property models")
+
+        writable_model_properties_ids = []
+        if writable_models is not None:
+            if not isinstance(writable_models, (list, tuple, set)):
+                raise IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
+            for output in writable_models:
+                if is_uuid(output):
+                    writable_model_properties_ids.append(output)
+                elif isinstance(output, (Property2, Property)):
+                    writable_model_properties_ids.append(output.id)
+                else:
+                    IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
+        data = dict(
+            id=widget_id,
+            readable_model_properties_ids=readable_model_properties_ids,
+            writable_model_properties_ids=writable_model_properties_ids
+        )
+
+        if kwargs:
+            data.update(**kwargs)
+
+        # perform the call
+        url = self._build_url('widget_update_associations', widget_id=widget_id)
+        response = self._request('PUT', url, params=API_EXTRA_PARAMS['widget'], json=data)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update associations of the widget ({})".format((response, response.json())))
+
+        return None
