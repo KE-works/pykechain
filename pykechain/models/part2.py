@@ -60,10 +60,11 @@ class Part2(Base):
         # we need to run the init of 'Base' instead of 'Part' as we do not need the instantiation of properties
         super(Part2, self).__init__(json, **kwargs)
 
+        self.ref = json.get('ref')
         self.category = json.get('category')
-        self.parent_id = json.get('parent_id', None)
-        self.description = json.get('description', None)
-        self.multiplicity = json.get('multiplicity', None)
+        self.parent_id = json.get('parent_id')
+        self.description = json.get('description')
+        self.multiplicity = json.get('multiplicity')
         self._cached_children = None
 
         self.properties = [Property2.create(p, client=self._client) for p in json['properties']]

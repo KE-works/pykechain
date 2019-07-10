@@ -42,6 +42,7 @@ class Scope2(Base):
         # for 'kechain2.core.wim >=2.0.0'
         self.workflow_root = json.get('workflow_root_id')
 
+        self.ref = json.get('ref')
         self.description = json.get('description')
         self.status = json.get('status')
         self.category = json.get('category')

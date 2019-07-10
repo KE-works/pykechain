@@ -84,36 +84,36 @@ API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
 
 API_EXTRA_PARAMS = {
     'activity': {'fields': ",".join(
-        ['id', 'name', 'description', 'created_at', 'updated_at', 'activity_type', 'classification',
+        ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'activity_type', 'classification',
          'progress', 'assignees_ids', 'start_date', 'due_date', 'status', 'parent_id', 'scope_id', 'customization'])},
     'activities': {'fields': ",".join(
-        ['id', 'name', 'description', 'created_at', 'updated_at', 'activity_type', 'classification',
+        ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'activity_type', 'classification',
          'progress', 'assignees_ids', 'start_date', 'due_date', 'status', 'parent_id', 'scope_id', 'customization'])},
     'scope2': {'fields': ",".join(
-        ['id', 'name', 'text', 'created_at', 'updated_at', 'start_date', 'due_date', 'status', 'category',
+        ['id', 'name', 'ref', 'text', 'created_at', 'updated_at', 'start_date', 'due_date', 'status', 'category',
          'progress', 'members', 'team', 'tags', 'scope_options', 'team_id_name', 'workflow_root_id'])},
     'scopes2': {'fields': ",".join(
-        ['id', 'name', 'text', 'created_at', 'updated_at', 'start_date', 'due_date', 'status', 'category',
+        ['id', 'name', 'ref', 'text', 'created_at', 'updated_at', 'start_date', 'due_date', 'status', 'category',
          'progress', 'members', 'team', 'tags', 'scope_options', 'team_id_name', 'workflow_root_id'])},
     'part2': {'fields': ",".join(
-        ['id', 'name', 'description', 'created_at', 'updated_at', 'properties', 'category', 'classification',
+        ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'properties', 'category', 'classification',
          'parent_id', 'multiplicity', 'value_options', 'property_type', 'value', 'output', 'order',
          'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
     'parts2': {'fields': ",".join(
-        ['id', 'name', 'description', 'created_at', 'updated_at', 'properties', 'category', 'classification',
+        ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'properties', 'category', 'classification',
          'parent_id', 'multiplicity', 'value_options', 'property_type', 'value', 'output', 'order',
          'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
     'properties2': {'fields': ",".join(
-        ['id', 'name', 'created_at', 'updated_at', 'model_id', 'part_id', 'order', 'scope_id', 'category',
+        ['id', 'name', 'ref', 'created_at', 'updated_at', 'model_id', 'part_id', 'order', 'scope_id', 'category',
          'property_type', 'value', 'value_options', 'output', 'description', 'unit'])},
     'property2': {'fields': ",".join(
-        ['id', 'name', 'created_at', 'updated_at', 'model_id', 'part_id', 'order', 'scope_id', 'category',
+        ['id', 'name', 'ref', 'created_at', 'updated_at', 'model_id', 'part_id', 'order', 'scope_id', 'category',
          'property_type', 'value', 'value_options', 'output', 'description', 'unit'])},
     'widgets': {'fields': ",".join(
-        ['id', 'name', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
+        ['id', 'name', 'ref', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
          'parent_id', 'progress', 'has_subwidgets', 'scope_id'])},
     'widget': {'fields': ",".join(
-        ['id', 'name', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
+        ['id', 'name', 'ref', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
          'parent_id', 'progress', 'has_subwidgets', 'scope_id'])}
 }
 

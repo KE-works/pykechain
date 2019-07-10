@@ -42,12 +42,13 @@ class Activity2(Base):
         """Construct an Activity from a json object."""
         super(Activity2, self).__init__(json, **kwargs)
 
-        self._scope_id = json.get('scope_id', None)
+        self._scope_id = json.get('scope_id')
 
+        self.ref = json.get('ref')
         self.description = json.get('description', '')
-        self.status = json.get('status', None)
-        self.classification = json.get('classification', None)
-        self.activity_type = json.get('activity_type', None)
+        self.status = json.get('status')
+        self.classification = json.get('classification')
+        self.activity_type = json.get('activity_type')
         self.start_date = parse_datetime(json.get('start_date'))
         self.due_date = parse_datetime(json.get('due_date'))
 

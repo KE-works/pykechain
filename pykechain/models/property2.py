@@ -43,6 +43,7 @@ class Property2(Property):
         self._output = json.get('output', None)
         self._value = json.get('value', None)
         self._options = json.get('value_options', None)
+        self.ref = json.get('ref')
         self.type = json.get('property_type', None)
         self.category = json.get('category')
 

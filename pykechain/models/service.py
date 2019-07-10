@@ -242,10 +242,12 @@ class ServiceExecution(Base):
         super(ServiceExecution, self).__init__(json, **kwargs)
 
         self.name = json.get('service_name')
+        self.ref = json.get('ref')
         self.service_id = json.get('service')
         self.status = json.get('status', '')
+        self.trusted = json.get('trusted')
 
-        self.user = json.get('username', None)
+        self.user = json.get('username')
         if json.get('activity') is not None:
             self.activity_id = json['activity'].get('id')
         else:
