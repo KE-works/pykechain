@@ -24,6 +24,7 @@ class Widget(Base):
         del self.name
 
         self.title = json.get('title')
+        self.ref = json.get('ref')
         self.widget_type = json.get('widget_type')
         self.meta = self.validate_meta(json.get('meta'))
         self.order = json.get('order')

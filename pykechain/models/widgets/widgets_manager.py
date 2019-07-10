@@ -40,9 +40,9 @@ class WidgetsManager(Sized):
         elif is_uuid(key):
             return find(self._widgets, lambda p: key == p.id)
         elif isinstance(key, (string_types, text_type)):
-            return find(self._widgets, lambda p: key == p.name)
+            return find(self._widgets, lambda p: key == p.title)
 
-        raise NotFoundError("Could not find widget with index, name or id {}".format(key))
+        raise NotFoundError("Could not find widget with index, title or id {}".format(key))
 
     def create_widget(self, *args, **kwargs):
 
@@ -59,8 +59,8 @@ class WidgetsManager(Sized):
         """
         Insert a widget at index n, shifting the rest of the list to the right.
 
-        if widget order is [Widget0,Widget1,Widget2] and inserting Widget4 at index 2 (before Widget1);
-        the list will be [Widget0, Widget4, Widget1, Widget2]
+        if widget order is `[w0,w1,w2]` and inserting `w4` at index 2 (before Widget1);
+        the list will be `[w0,w4,w1,w2]`
 
         :param index: integer (position) starting from 1 at first position in which the widget is inserted
         :type index: int
