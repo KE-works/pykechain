@@ -16,9 +16,7 @@ class Team(Base):
     def __init__(self, json, **kwargs):
         """Construct a user from provided json data."""
         super(Team, self).__init__(json, **kwargs)
-
-        self.name = self._json_data.get('name', '')
-        self.id = self._json_data.get('id', '')
+        self.ref = json.get('ref')
 
     def _update(self, resource, update_dict=None, params=None, **kwargs):
         """Update the object."""
