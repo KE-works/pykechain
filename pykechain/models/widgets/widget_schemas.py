@@ -1,7 +1,5 @@
 from copy import deepcopy
 
-from pykechain.enums import WidgetTypes
-
 widget_meta_schema = {
     "$schema": "http://json-schema.org/draft-06/schema#",
     "title": "Toplevel Widget Meta schema",
@@ -14,7 +12,7 @@ widget_meta_schema = {
         "nullUuidString": {"type": ["string", "null"],
                            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"},
         "nullString": {"type": ["string", "null"]},
-        "positiveInteger": {"type": ["integer", "null","string"], "minimum": 0},
+        "positiveInteger": {"type": ["integer", "null", "string"], "minimum": 0},
         "booleanNull": {"type": ["boolean", "null"]}
     }
 }
@@ -50,7 +48,6 @@ attachmentviewer_meta_schema.update({
     "required": ["propertyInstanceId", "activityId"]
 })
 
-
 #
 # Html
 #
@@ -76,7 +73,6 @@ html_meta_schema.update({
     },
     # "required": ["htmlContent"]
 })
-
 
 #
 # Json

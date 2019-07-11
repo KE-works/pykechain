@@ -1,5 +1,5 @@
 import bisect
-from typing import Sized
+from typing import Sized, Any
 
 import requests
 from six import string_types, text_type
@@ -7,6 +7,7 @@ from six import string_types, text_type
 from pykechain.enums import WidgetTypes
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
 from pykechain.models import Property2, Property
+from pykechain.models.widgets import Widget
 from pykechain.utils import is_uuid, find
 
 
@@ -14,7 +15,7 @@ class WidgetsManager(Sized):
     def __init__(self, widgets, activity_id=None, client=None, **kwargs):
         self._widgets = list(widgets)
         self._activity_id = activity_id
-        self._client = client  # type: Client
+        self._client = client
         self._iter = iter(self._widgets)
 
     def __repr__(self):  # pragma: no cover
@@ -34,15 +35,19 @@ class WidgetsManager(Sized):
 
     def __getitem__(self, key):
         # type: (Any) -> Widget
+        """Widget from the list of widgets based on index, uuid, title or ref"""
         found = None
         if isinstance(key, int):
-            return self._widgets[key]
+            found = self._widgets[key]
         elif is_uuid(key):
-            return find(self._widgets, lambda p: key == p.id)
+            found = find(self._widgets, lambda p: key == p.id)
         elif isinstance(key, (string_types, text_type)):
-            return find(self._widgets, lambda p: key == p.title)
+            found =  find(self._widgets, lambda p: key == p.title or key==p.ref)
 
-        raise NotFoundError("Could not find widget with index, title or id {}".format(key))
+        if found is not None:
+            return found
+
+        raise NotFoundError("Could not find widget with index, title, ref, or id {}".format(key))
 
     def create_widget(self, *args, **kwargs):
 

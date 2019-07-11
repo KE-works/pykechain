@@ -2006,7 +2006,7 @@ class Client(object):
 
     def create_widget(self, activity, widget_type, title=None, meta=None, order=None,
                       parent=None, readable_models=None, writable_models=None, **kwargs):
-        # type: (Union[Activity,text_type], text_type, Optional[text_type], Optional[Dict], Optional[int], Optional[Widget, text_type], Optional[List], Optional[List], **Any) -> Widget
+        # type: (Union[Activity,text_type], text_type, Optional[text_type], Optional[Dict], Optional[int], Optional[Widget, text_type], Optional[List], Optional[List], **Any) -> Widget  # noqa:E501
         """
         Create a widget inside an activity.
 
@@ -2091,7 +2091,7 @@ class Client(object):
             widget_type=widget_type,
             title=title,
             meta=meta,
-            parent_id=parent
+            parent_id=parent_id
         )
 
         if kwargs:
