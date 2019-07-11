@@ -1,17 +1,17 @@
+import os
+import warnings
 from datetime import datetime
 from unittest import skip, skipIf
 
 import pytz
 import requests
-import warnings
-import os
 
 from pykechain.enums import Category, ActivityType, ActivityStatus
-from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
+from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from pykechain.models import Part, Activity, Part2
-from tests.classes import TestBetamax
-from tests.utils import TEST_FLAG_IS_WIM2
 from pykechain.utils import temp_chdir
+from tests.classes import TestBetamax
+from tests.utils import TEST_FLAG_IS_WIM2, TEST_FLAG_IS_PIM2
 
 ISOFORMAT = "%Y-%m-%dT%H:%M:%SZ"
 ISOFORMAT_HIGHPRECISION = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -42,13 +42,6 @@ class TestActivities(TestBetamax):
         with self.assertRaises(MultipleFoundError):
             self.project.activity()
 
-    def test_retrieve_single_bike(self):
-        activity = self.project.activity('Specify wheel diameter')
-
-        parts = activity.parts()
-
-        self.assertEqual(len(parts), 2)
-
     def test_create_activity(self):
         # set up
         project = self.project
@@ -72,32 +65,6 @@ class TestActivities(TestBetamax):
 
         with self.assertRaises(IllegalArgumentError):
             task.create('This cannot happen')
-
-    def test_configure_activity(self):
-        # setup
-        project = self.project
-
-        bike = project.model('Bike')
-        wheel = project.model('Wheel')
-
-        task = project.create_activity('Test activity configuration')
-
-        task.configure(
-            inputs=[
-                bike.property('Gears'),
-                bike.property('Total height')
-            ],
-            outputs=[
-                wheel.property('Spokes')
-            ])
-
-        associated_models, associated_instances = task.associated_parts()
-
-        self.assertEqual(len(associated_models), 2)
-        self.assertEqual(len(associated_instances), 3)
-
-        # teardown
-        task.delete()
 
     # new in 1.7
     def test_edit_activity_name(self):
@@ -265,38 +232,6 @@ class TestActivities(TestBetamax):
         self.assertIn(task.id, [sibling.id for sibling in siblings])
         self.assertTrue(len(siblings) >= 1)
 
-    def test_retrieve_part_associated_to_activities(self):
-        task = self.project.activity('Specify wheel diameter')
-        parts = list(task.parts())
-
-        for part in parts:
-            self.assertIsInstance(part, (Part, Part2))
-            self.assertEqual(part.category, Category.INSTANCE)
-
-    def test_retrieve_part_models_associated_to_activities(self):
-        task = self.project.activity('Specify wheel diameter')
-        models = list(task.parts(category=Category.MODEL))
-
-        for model in models:
-            self.assertIsInstance(model, (Part, Part2))
-            self.assertEqual(model.category, Category.MODEL)
-            if model.name == 'Bike':
-                self.assertFalse(model.property('Gears').output)
-            elif model.name == 'Front Fork':
-                self.assertTrue(model.property('Material').output)
-
-    def test_retrieve_associated_parts_to_activity(self):
-        task = self.project.activity('Specify wheel diameter')
-        (models, parts) = list(task.associated_parts())
-
-        for part in models:
-            self.assertIsInstance(part, (Part, Part2))
-            self.assertEqual(part.category, Category.MODEL)
-
-        for part in parts:
-            self.assertIsInstance(part, (Part, Part2))
-            self.assertEqual(part.category, Category.INSTANCE)
-
     # in 1.12
 
     def test_retrieve_siblings_of_a_task_in_a_subprocess_with_arguments(self):
@@ -329,6 +264,7 @@ class TestActivities(TestBetamax):
             self.project.create_activity(name='New', activity_type='DEFUNCTActivity')
 
 
+@skipIf(TEST_FLAG_IS_PIM2, reason="This tests is for the old style customizations, not the new widget with PIM3")
 class TestActivitiesCustomisation(TestBetamax):
     # updated and new in 1.9
     def test_wrong_customization(self):
@@ -341,6 +277,75 @@ class TestActivitiesCustomisation(TestBetamax):
 
         # teardown
         new_task.delete()
+
+    def test_configure_activity(self):
+        # setup
+        project = self.project
+
+        bike = project.model('Bike')
+        wheel = project.model('Wheel')
+
+        task = project.create_activity('Test activity configuration')
+
+        task.configure(
+            inputs=[
+                bike.property('Gears'),
+                bike.property('Total height')
+            ],
+            outputs=[
+                wheel.property('Spokes')
+            ])
+
+        associated_models, associated_instances = task.associated_parts()
+
+        self.assertEqual(len(associated_models), 2)
+        self.assertEqual(len(associated_instances), 3)
+
+        # teardown
+        task.delete()
+
+
+@skipIf(TEST_FLAG_IS_PIM2, reason="This tests is for the old style customizations, not the new widget with PIM3")
+class TestActivityAssociation(TestBetamax):
+
+    def test_retrieve_single_bike(self):
+        activity = self.project.activity('Specify wheel diameter')
+
+        parts = activity.parts()
+
+        self.assertEqual(len(parts), 2)
+
+    def test_retrieve_part_models_associated_to_activities(self):
+        task = self.project.activity('Specify wheel diameter')
+        models = list(task.parts(category=Category.MODEL))
+
+        for model in models:
+            self.assertIsInstance(model, (Part, Part2))
+            self.assertEqual(model.category, Category.MODEL)
+            if model.name == 'Bike':
+                self.assertFalse(model.property('Gears').output)
+            elif model.name == 'Front Fork':
+                self.assertTrue(model.property('Material').output)
+
+    def test_retrieve_associated_parts_to_activity(self):
+        task = self.project.activity('Specify wheel diameter')
+        (models, parts) = list(task.associated_parts())
+
+        for part in models:
+            self.assertIsInstance(part, (Part, Part2))
+            self.assertEqual(part.category, Category.MODEL)
+
+        for part in parts:
+            self.assertIsInstance(part, (Part, Part2))
+            self.assertEqual(part.category, Category.INSTANCE)
+
+    def test_retrieve_part_associated_to_activities(self):
+        task = self.project.activity('Specify wheel diameter')
+        parts = list(task.parts())
+
+        for part in parts:
+            self.assertIsInstance(part, (Part, Part2))
+            self.assertEqual(part.category, Category.INSTANCE)
 
 
 @skipIf(TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 1, expected to fail on newer WIM")
@@ -490,23 +495,36 @@ class TestActivity2SpecificTests(TestBetamax):
         self.assertTrue(subprocess.is_subprocess())
         self.assertFalse(subprocess.is_task())
 
+    @skipIf(TEST_FLAG_IS_PIM2, reason="This tests is for the old style customizations, not the new widget with PIM3")
+    def test_retrieve_part_associated_to_activities(self):
+        task = self.project.activity('Specify wheel diameter')
+        parts = list(task.parts())
+
+        for part in parts:
+            self.assertIsInstance(part, (Part, Part2))
+            self.assertEqual(part.category, Category.INSTANCE)
+
+    @skipIf(TEST_FLAG_IS_PIM2, reason="This tests is for the old style customizations, not the new widget with PIM3")
     def test_activity2_is_configured_not_customised(self):
         specify_wd = self.project.activity('Specify wheel diameter')
 
         self.assertTrue(specify_wd.is_configured())
         self.assertTrue(specify_wd.is_customized())  # always has a metapanel widget
 
+    @skipIf(TEST_FLAG_IS_PIM2, reason="This tests is for the old style customizations, not the new widget with PIM3")
     def test_unconfigured_subtask_activity2_is_not_configured(self):
         subprocess_subtask = self.project.activity('SubTask')
 
         self.assertTrue(subprocess_subtask.is_configured())  # is configured in bikefixture
         self.assertTrue(subprocess_subtask.is_customized())  # always has a metapanel widget
 
+    @skipIf(TEST_FLAG_IS_PIM2, reason="This tests is for the old style customizations, not the new widget with PIM3")
     def test_activity2_is_configured_and_customised(self):
         customized_task = self.project.activity('Task - Form')
 
         self.assertTrue(customized_task.is_configured())
         self.assertTrue(customized_task.is_customized())  # always has a metapanel widget
+
 
 @skip('Does not work in PIM2 until KEC-19193 is resolved')
 class TestActivityDownloadAsPDF(TestBetamax):

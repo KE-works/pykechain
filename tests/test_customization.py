@@ -1,10 +1,14 @@
+from unittest import skipIf
+
 from pykechain.enums import SortTable, NavigationBarAlignment, ShowColumnTypes, PropertyType
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity2
 from pykechain.models.customization import ExtCustomization
 from tests.classes import TestBetamax
+from tests.utils import TEST_FLAG_IS_PIM2
 
 
+@skipIf(TEST_FLAG_IS_PIM2, reason="This tests is for the old style customizations, not the new widget with PIM3")
 class TestExtCustomization(TestBetamax):
     """ Test the customization of activities """
 
