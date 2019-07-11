@@ -75,7 +75,7 @@ class MultiReferenceProperty2(Property2):
             elif self.category == Category.INSTANCE:
                 referred_partmodels = self.model().value
                 if referred_partmodels:
-                    referred_partmodel = referred_partmodels[0] # get the only one, which is the right part_model
+                    referred_partmodel = referred_partmodels[0]  # get the only one, which is the right part_model
                 else:
                     referred_partmodel = None
                 self._cached_values = list(self._client.parts(id__in=','.join(ids),

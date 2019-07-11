@@ -2,6 +2,7 @@ import datetime
 import os
 import time
 import warnings
+from typing import Any
 
 import requests
 from requests.compat import urljoin  # type: ignore
@@ -12,6 +13,7 @@ from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClas
     PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
 from pykechain.models import Base
+from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid, parse_datetime
 
 
@@ -555,9 +557,8 @@ class Activity2(Base):
     # Customizations
     #
 
-
     def widgets(self, *args, **kwargs):
-        #type: (*Any, **Any) -> WidgetManager
+        # type: (*Any, **Any) -> WidgetsManager
         return self._client.widgets(*args, activity=self.id, **kwargs)
 
     def customization(self):
@@ -595,6 +596,7 @@ class Activity2(Base):
         :type outputs: list(:class:`Property`)
         :raises APIError: when unable to configure the activity
         """
+
         def _get_propertyset(proplist):
             """Make it into a unique list of properties to configure for either inputs or outputs."""
             from pykechain.models import Property
