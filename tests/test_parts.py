@@ -15,7 +15,8 @@ class TestParts(TestBetamax):
         self.assertTrue(len(parts))
 
     def test_retrieve_single_part(self):
-        part = self.project.part('Front wheel')
+        part_to_retrieve =self.project.parts()[0]
+        part = self.project.part(part_to_retrieve.name)
 
         self.assertTrue(part)
 

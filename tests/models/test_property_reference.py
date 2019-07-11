@@ -46,7 +46,7 @@ class TestMultiReferenceProperty(TestBetamax):
         self.ref.value = wheel_instances_list
 
         # testing
-        self.assertEqual(len(self.ref.value), 2)
+        self.assertTrue(len(self.ref.value) >= 2)
 
         # tearDown
         self.ref.value = None
@@ -63,7 +63,7 @@ class TestMultiReferenceProperty(TestBetamax):
         self.ref._cached_values = None
 
         # testing
-        self.assertEqual(len(self.ref.value), 2)
+        self.assertTrue(len(self.ref.value) >= 2)
 
         # tearDown
         self.ref.value = None
