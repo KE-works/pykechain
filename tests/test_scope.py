@@ -14,6 +14,16 @@ class TestScopes(TestBetamax):
     def test_retrieve_scopes(self):
         self.assertTrue(self.client.scopes())
 
+    def test_scope_attributes(self):
+        attributes = ['_client', '_json_data', 'id', 'name', 'created_at', 'updated_at', 'ref',
+                      'process', 'workflow_root', 'description', 'status', 'category', 'tags',
+                      'start_date', 'due_date']
+
+        obj = self.project
+        for attribute in attributes:
+            self.assertTrue(hasattr(obj, attribute),
+                            "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
+
     def test_retrieve_scope_with_kwargs(self):
         retrieve_scopes_with_kwargs = self.client.scopes(name__icontains='Bike')
         self.assertTrue(retrieve_scopes_with_kwargs)

@@ -35,6 +35,17 @@ class TestWidgets(TestBetamax):
         self.assertIsInstance(created_widget, UndefinedWidget)
         created_widget.delete()
 
+    def test_widget_attributes(self):
+        attributes = ['_client', '_json_data', 'id', 'created_at', 'updated_at', 'ref',
+                      'widget_type', 'title', 'meta', 'order', '_activity_id','_parent_id',
+                      'has_subwidgets', '_scope_id', 'progress']
+
+        obj = self.project.activity('Specify wheel diameter').widgets()[0]
+        self.assertIsInstance(obj, Widget)
+        for attribute in attributes:
+            self.assertTrue(hasattr(obj, attribute),
+                            "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
+
 class TestWidgetsValidation(SixTestCase):
 
     def test_create_widgets_from_all_widget_test_activity(self):

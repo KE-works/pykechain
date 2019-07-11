@@ -15,9 +15,19 @@ class TestParts(TestBetamax):
         self.assertTrue(len(parts))
 
     def test_retrieve_single_part(self):
-        part = self.project.part('Front Wheel')
+        part = self.project.part('Front wheel')
 
         self.assertTrue(part)
+
+    def test_part_attributes(self):
+        attributes = ['_client', '_json_data', 'id', 'name', 'created_at', 'updated_at', 'ref',
+                      'category', 'parent_id', 'description', 'multiplicity',
+                      '_cached_children', 'properties']
+
+        obj = self.project.parts(limit=1)[0]
+        for attribute in attributes:
+            self.assertTrue(hasattr(obj, attribute),
+                            "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
 
     def test_retrieve_single_unknown(self):
         with self.assertRaises(NotFoundError):
