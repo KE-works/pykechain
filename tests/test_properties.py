@@ -28,6 +28,16 @@ class TestProperties(TestBetamax):
 
         self.assertTrue(prop)
 
+    def test_property_attributes(self):
+        attributes = ['_client', '_json_data', 'id', 'name', 'created_at', 'updated_at', 'ref',
+                      '_output', '_value', '_options', 'type', 'category',
+                      '_validators']
+
+        obj = self.project.property(name='Cheap?', category=Category.MODEL)
+        for attribute in attributes:
+            self.assertTrue(hasattr(obj, attribute),
+                            "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
+
     def test_get_property_by_name(self):
         bike = self.project.part('Bike')
         # retrieve the property Gears directly via an API call

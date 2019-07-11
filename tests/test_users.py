@@ -11,6 +11,15 @@ class TestUsers(TestBetamax):
         with self.assertRaises(NotFoundError):
             self.client.user('123lladadwd')
 
+    def test_user_attributes(self):
+        attributes = ['_client', '_json_data', 'id', 'name', 'created_at', 'updated_at',
+                      'username', 'timezone', 'language', 'email']
+
+        obj = self.client.users()[0]
+        for attribute in attributes:
+            self.assertTrue(hasattr(obj, attribute),
+                            "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__))
+
     def test_retrieve_single_multiple_user_raises_error(self):
         with self.assertRaises(MultipleFoundError):
             self.client.user()

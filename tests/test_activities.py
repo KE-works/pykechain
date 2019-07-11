@@ -24,6 +24,16 @@ class TestActivities(TestBetamax):
     def test_retrieve_single_activity(self):
         self.assertTrue(self.project.activity('Specify wheel diameter'))
 
+    def test_activity_attributes(self):
+        attributes = ['_client', '_json_data', 'id', 'name', 'created_at', 'updated_at', 'ref',
+                      'description', 'status', 'activity_type', '_scope_id',
+                      'start_date', 'due_date']
+
+        obj = self.project.activity('Specify wheel diameter')
+        for attribute in attributes:
+            self.assertTrue(hasattr(obj, attribute),
+                            "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
+
     def test_retrieve_unknown_activity(self):
         with self.assertRaises(NotFoundError):
             self.project.activity('Hello?!')

@@ -25,7 +25,6 @@ class User(Base):
         super(User, self).__init__(json, **kwargs)
 
         self.username = self._json_data.get('username', '')
-        self.name = self.name
         self.id = self._json_data.get('pk', '')
 
     def __repr__(self):  # pragma: no cover

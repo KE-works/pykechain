@@ -73,3 +73,11 @@ class TestTeams(TestBetamax):
 
         #teardown
         self.project.edit(team=old_team and old_team.get('id') or None)
+
+    def test_team_attributes(self):
+        attributes = ['_client', '_json_data', 'id', 'name', 'created_at', 'updated_at', 'ref']
+
+        obj = self.team
+        for attribute in attributes:
+            self.assertTrue(hasattr(obj, attribute),
+                            "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__))
