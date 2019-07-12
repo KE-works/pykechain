@@ -81,7 +81,7 @@ class TestWidgetManager(TestBetamax):
         activity = self.project.activity('Task - Form + Tables + Service')
         widgets = activity.widgets()
         self.assertIsInstance(widgets, WidgetsManager)
-        self.assertEqual(len(widgets), 5)
+        self.assertTrue(len(widgets) >=5)
 
         self.assertTrue(widgets[0].widget_type, WidgetTypes.METAPANEL)
 
