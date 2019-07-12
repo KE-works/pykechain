@@ -18,7 +18,7 @@ class Base(object):
     """
 
     def __init__(self, json, client):
-        #type: (Dict, Client) -> None
+        # type: (Dict, Client) -> None
         """Construct a model from provided json data."""
         self._json_data = json
         self._client = client
