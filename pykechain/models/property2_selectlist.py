@@ -50,7 +50,6 @@ class SelectListProperty2(Property2):
 
         Example
         -------
-
         >>> a_model = project.model('Model')
         >>> select_list_property = a_model.property('a_select_list_property')
 

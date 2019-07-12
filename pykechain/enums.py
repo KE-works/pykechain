@@ -3,11 +3,11 @@ class Enum(object):
 
     Example
     -------
-
     >>> class Toppings(Enum):
     ...    CHEESE = "Cheese"
     ...    SALAMI = "Salami"
     >>> topping_choice = Toppings.CHEESE
+
     """
 
     @classmethod
@@ -258,6 +258,7 @@ class WidgetTypes(Enum):
     :cvar THIRDPARTY: Thirdparty widget
     :cvar PROGRESS: Progress widget
     """
+
     UNDEFINED = 'UNDEFINED'
     PROPERTYGRID = 'PROPERTYGRID'
     SUPERGRID = 'SUPERGRID'
@@ -381,6 +382,7 @@ class ServiceScriptUser(Enum):
     :cvar TEAMMANAGER_USER: Run as "kenode_team". Equivalent to a manager in a team. (disabled until available)
     :cvar CONFIGURATOR_USER: Run as "kenode_configurator". Equivalent to GG:Configurator.
     """
+
     KENODE_USER = "kenode"
     # TEAMMANAGER_USER = "kenode_team"
     CONFIGURATOR_USER = "kenode_configurator"

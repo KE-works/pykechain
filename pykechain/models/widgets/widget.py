@@ -1,4 +1,4 @@
-from typing import Any, Optional, List
+from typing import Any, Optional, List, AnyStr, Dict
 
 import requests
 from jsonschema import validate
@@ -10,11 +10,23 @@ from pykechain.models.widgets.widget_schemas import widget_meta_schema
 
 
 class Widget(Base):
+    """A virtual object representing a KE-chain Widget.
+
+    :cvar basestring id: UUID of the widget
+    :cvar basestring title: Title of the widget
+    :cvar basestring ref: Reference of the widget
+    :cvar basestring widget_type: Type of the widget. Should be one of :class:`WidgetTypes`
+    :cvar dict meta: Meta definition of the widget
+    :cvar int order: Order of the widget in the list of widgets
+    :cvar bool has_subwidgets: if the widgets contains any subwidgets. In case this widget being eg. a Multicolumn
+    :cvar float progress: Progress of the widget
+    """
+
     schema = widget_meta_schema
 
     def __init__(self, json, **kwargs):
         # type: (dict, **Any) -> None
-        """Construct a part from a KE-chain 2 json response.
+        """Construct a Widget from a KE-chain 2 json response.
 
         :param json: the json response to construct the :class:`Part` from
         :type json: dict
@@ -38,9 +50,21 @@ class Widget(Base):
         return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.widget_type, self.id[-8:])
 
     def activity(self):
+        # type: () -> Activity2  # noqa: F821 to prevent circular imports
+        """Activity associated to the widget.
+
+        :return: The Activity
+        :rtype: :class:`Activity2`
+        """
         return self._client.activity(id=self._activity_id)
 
     def parent(self):
+        # type: () -> Widget
+        """Parent widget.
+
+        :return: The parent of this widget.
+        :rtype: :class:`Widget`
+        """
         return self._client.widget(id=self._parent_id)
 
     def validate_meta(self, meta):
@@ -68,7 +92,6 @@ class Widget(Base):
         :return: a :class:`Widget` object
         :rtype: :class:`Widget`
         """
-
         def _type_to_classname(widget_type):
             """
             Generate corresponding inner classname based on the widget type.
@@ -119,8 +142,15 @@ class Widget(Base):
                                                 writable_models=writable_models, **kwargs)
 
     def edit(self, title=None, meta=None, **kwargs):
-        """Edit the details of a widget."""
+        # type: (Optional[AnyStr], Optional[Dict], **Any) -> None
+        """Edit the details of a widget.
 
+        :param title: (optional) title of the widget
+        :type title: basestring or None
+        :param meta: (optional) new Meta definition
+        :type meta: dict or None
+        :raises APIError: if the widget could not be updated.
+        """
         update_dict = {
             meta: meta,
             title: title
@@ -139,9 +169,11 @@ class Widget(Base):
         self.refresh(json=response.json().get('results')[0])
 
     def delete(self):
+        # type: () -> bool
         """Delete the widget.
 
-        :return: True when succesful
+        :return: True when successful
+        :rtype: bool
         :raises APIError: when unable to delete the activity
         """
         url = self._client._build_url('widget', widget_id=self.id)

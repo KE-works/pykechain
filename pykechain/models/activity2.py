@@ -557,9 +557,21 @@ class Activity2(Base):
     # Customizations
     #
 
-    def widgets(self, *args, **kwargs):
-        # type: (*Any, **Any) -> WidgetsManager
-        return self._client.widgets(*args, activity=self.id, **kwargs)
+    def widgets(self, **kwargs):
+        # type: (**Any) -> WidgetsManager
+        """
+        Widgets of the activity.
+
+        Works with KE-chain version 3.
+
+        :param kwargs: additional keyword arguments
+        :type kwargs: dict or None
+        :return: A :class:`WidgetManager` list, containing the widgets
+        :rtype: WidgetManager
+        :raises NotFoundError: when the widgets could not be found
+        :raises APIError: when the API does not support the widgets, or when the API gives an error.
+        """
+        return self._client.widgets(activity=self.id, **kwargs)
 
     def customization(self):
         """
@@ -596,7 +608,6 @@ class Activity2(Base):
         :type outputs: list(:class:`Property`)
         :raises APIError: when unable to configure the activity
         """
-
         def _get_propertyset(proplist):
             """Make it into a unique list of properties to configure for either inputs or outputs."""
             from pykechain.models import Property

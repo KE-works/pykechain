@@ -1,1 +1,2 @@
-from pykechain.models.widgets.widget_propertygrid import *  #noqa: F401,F403
+"""Widgets for KE-chain 3."""
+from pykechain.models.widgets.widget_models import *  # noqa: F403,F401,D104

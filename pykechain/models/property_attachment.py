@@ -39,7 +39,6 @@ class AttachmentProperty(Property):
 
         Example
         -------
-
         >>> file_attachment_property = project.part('Bike').property('file_attachment')
         >>> if file_attachment_property.value:
         ...     file_attachment_property.save_as('file.ext')
@@ -86,6 +85,7 @@ class AttachmentProperty(Property):
 
         >>> json_attachment = project.part('Bike').property('json_attachment')
         >>> deserialised_json = json_attachment.json_load()
+
         """
         return self._download().json()
 

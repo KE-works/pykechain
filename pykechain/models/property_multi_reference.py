@@ -102,7 +102,6 @@ class MultiReferenceProperty(Property):
 
         Example
         -------
-
         >>> property = project.part('Bike').property('a_multi_reference_property')
         >>> reference_part_choices = property.choices()
 

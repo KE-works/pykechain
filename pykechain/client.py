@@ -183,7 +183,6 @@ class Client(object):
 
         Example
         -------
-
         Initiates the pykechain client from the contents of an environment file. Authentication information is optional
         but ensure that you provide this later in your code. Offered are both username/password authentication and
         user token authentication.
@@ -420,7 +419,6 @@ class Client(object):
 
         Example
         -------
-
         >>> client = Client(url='https://default.localhost:9443', verify=False)
         >>> client.login('admin','pass')
         >>> client.scopes()  # doctest: Ellipsis
@@ -431,6 +429,7 @@ class Client(object):
 
         >>> last_request = client.last_request  # doctest: Ellipsis
         ...
+
         """
         request_params = {
             'name': name,
@@ -1030,6 +1029,22 @@ class Client(object):
 
     def widgets(self, pk=None, activity=None, **kwargs):
         # type: (Optional[AnyStr], Optional[Union[Activity, Activity2, AnyStr]], **Any) -> WidgetsManager
+        """
+        Widgets of an activity.
+
+        Only works for KE-chain version 3.
+
+        :param pk: (optional) the uuid of the widget.
+        :type pk: basestring or None
+        :param activity: (optional) the :class:`Activity` or UUID of the activity to filter the widgets for.
+        :type activity: basestring or None
+        :param kwargs: additional keyword arguments
+        :type kwargs: dict or None
+        :return: A :class:`WidgetManager` list, containing the widgets
+        :rtype: WidgetManager
+        :raises NotFoundError: when the widgets could not be found
+        :raises APIError: when the API does not support the widgets, or when the API gives an error.
+        """
         """Widgets of an activity."""
         if self.match_app_version(label='widget', version='<3.0.0'):
             raise APIError("The widget concept is not introduced yet for this KE-chain version")
@@ -1052,8 +1067,7 @@ class Client(object):
 
         data = response.json()
         return WidgetsManager([Widget.create(widget_json, client=self) for widget_json in data['results']],
-                              client=self,
-                              activity_id=request_params.get('activity_id'))
+                              activity=request_params.get('activity_id'), client=self)
 
     #
     # Creators
@@ -1342,8 +1356,8 @@ class Client(object):
         :raises APIError: if the `Part` could not be created
 
 
-        Example:
-        --------
+        Example
+        -------
         >>> properties_fvalues = [
         ...     {"name": "char prop", "property_type": PropertyType.CHAR_VALUE, "order": 1},
         ...     {"name": "number prop", "property_type": PropertyType.FLOAT_VALUE, "value": 3.14, "order": 2},
@@ -2052,9 +2066,9 @@ class Client(object):
         if title is not None and not isinstance(title, (string_types, text_type)):
             raise IllegalArgumentError("`title` should be a string")
         if parent is not None and isinstance(parent, Widget):
-            parent_id = parent.id
+            parent = parent.id
         elif parent is not None and is_uuid(parent):
-            parent_id = parent
+            parent = parent
         elif parent is not None:
             raise IllegalArgumentError("`parent` should be provided as a widget or uuid")
         if kwargs.get('inputs'):
@@ -2091,7 +2105,7 @@ class Client(object):
             widget_type=widget_type,
             title=title,
             meta=meta,
-            parent_id=parent_id
+            parent_id=parent
         )
 
         if kwargs:

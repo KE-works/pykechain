@@ -90,7 +90,6 @@ class Part2(Base):
 
         Example
         -------
-
         >>> part = project.part('Bike')
         >>> part.properties
         [<pyke Property ...>, ...]
@@ -125,7 +124,6 @@ class Part2(Base):
 
         Example
         -------
-
         >>> part = project.part('Frame')
         >>> bike = part.parent()
 
@@ -154,7 +152,6 @@ class Part2(Base):
 
         Example
         -------
-
         A normal call, which caches all children of the bike. If you call `bike.children` twice only 1 API call is made.
 
         >>> bike = project.part('Bike')
@@ -325,7 +322,6 @@ class Part2(Base):
 
         Example
         -------
-
         For changing a part:
 
         >>> front_fork = project.part('Front Fork')
@@ -378,7 +374,6 @@ class Part2(Base):
 
         Example
         -------
-
         >>> proxy_part = project.model('Proxy based on catalog model')
         >>> catalog_model_of_proxy_part = proxy_part.proxy_model()
 
@@ -413,10 +408,10 @@ class Part2(Base):
 
         Example
         -------
-
         >>> bike = project.part('Bike')
         >>> wheel_model = project.model('Wheel')
         >>> bike.add(wheel_model)
+
         """
         if self.category != Category.INSTANCE:
             raise APIError("Part should be of category INSTANCE")
@@ -446,10 +441,10 @@ class Part2(Base):
 
         Example
         -------
-
         >>> wheel_model = project.model('wheel')
         >>> bike = project.part('Bike')
         >>> wheel_model.add_to(bike)
+
         """
         if self.category != Category.MODEL:
             raise APIError("Part should be of category MODEL")
@@ -784,7 +779,6 @@ class Part2(Base):
 
         Example
         -------
-
         >>> bike = project.part('Bike')
         >>> bike.update(name='Good name', update_dict={'Gears': 11, 'Total Height': 56.3})
 

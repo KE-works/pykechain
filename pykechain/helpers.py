@@ -85,6 +85,7 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
     >>> project = get_project()
     >>> project.name
     Bike Project
+
     """
     if env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False):
         if not os.getenv(kecenv.KECHAIN_URL):
