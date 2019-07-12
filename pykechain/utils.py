@@ -53,7 +53,6 @@ def temp_chdir(cwd=None):
 
     Example
     -------
-
     >>> with temp_chdir() as temp_dir:
     >>>     # do things here
     >>>     print(temp_dir)  # etc etc

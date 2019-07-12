@@ -284,6 +284,7 @@ class RegexStringValidator(PropertyValidator):
     .. _python documentation: https://docs.python.org/2/library/re.html
     .. _regex101.com: https://regex101.com/
     .. _regexr.com: https://regexr.com/
+
     """
 
     vtype = PropertyVTypes.REGEXSTRING

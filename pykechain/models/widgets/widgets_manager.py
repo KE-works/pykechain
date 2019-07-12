@@ -1,21 +1,52 @@
 import bisect
-from typing import Sized, Any
+from typing import Sized, Any, Iterable, Union, AnyStr, Optional
 
 import requests
 from six import string_types, text_type
 
-from pykechain.enums import WidgetTypes
-from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
-from pykechain.models import Property2, Property
+from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.utils import is_uuid, find
 
 
 class WidgetsManager(Sized):
-    def __init__(self, widgets, activity_id=None, client=None, **kwargs):
+    """Manager for Widgets.
+
+    This is the list of widgets. The widgets in the list are accessible directly using an index, uuid of the widget,
+    widget title or widget 'ref'.
+    """
+
+    def __init__(self, widgets, activity, client=None, **kwargs):
+        # type: (Iterable[Widget], Union[Activity, Activity2, AnyStr], Optional[Client], **Any) -> None  # noqa: F821
+        """Construct a Widget Manager from a list of widgets.
+
+        You need to provide an :class:`Activity` to initiate the WidgetsManager. Alternatively you may provide both a
+        activity uuid and a :class:`Client`.
+
+        :param widgets: list of widgets.
+        :type widgets: List[Widget]
+        :param activity: an :class:`Activity` object or an activity UUID
+        :type activity: basestring or None
+        :param client: (optional) if the activity was provided as a UUID, also provide a :class:`Client` object.
+        :type client: `Client` or None
+        :param kwargs: additional keyword arguments
+        :type kwargs: dict or None
+        :returns: None
+        :raises IllegalArgumentError: if not provided one of :class:`Activity` or activity uuid and a `Client`
+        """
         self._widgets = list(widgets)
-        self._activity_id = activity_id
-        self._client = client
+        from pykechain.models import Activity
+        from pykechain.models import Activity2
+        if isinstance(activity, (Activity, Activity2)):
+            self._activity_id = activity.id
+            self._client = activity._client
+        elif isinstance(activity, (text_type)) and client is not None:
+            self._activity_id = activity
+            self._client = client
+        else:
+            raise IllegalArgumentError("The `WidgetsManager` should be provided either an :class:`Activity` or "
+                                       "an activity uuid and a `Client` to function properly.")
+
         self._iter = iter(self._widgets)
 
     def __repr__(self):  # pragma: no cover
@@ -35,14 +66,14 @@ class WidgetsManager(Sized):
 
     def __getitem__(self, key):
         # type: (Any) -> Widget
-        """Widget from the list of widgets based on index, uuid, title or ref"""
+        """Widget from the list of widgets based on index, uuid, title or ref."""
         found = None
         if isinstance(key, int):
             found = self._widgets[key]
         elif is_uuid(key):
             found = find(self._widgets, lambda p: key == p.id)
         elif isinstance(key, (string_types, text_type)):
-            found =  find(self._widgets, lambda p: key == p.title or key==p.ref)
+            found = find(self._widgets, lambda p: key == p.title or key == p.ref)
 
         if found is not None:
             return found
@@ -50,7 +81,37 @@ class WidgetsManager(Sized):
         raise NotFoundError("Could not find widget with index, title, ref, or id {}".format(key))
 
     def create_widget(self, *args, **kwargs):
+        """Create a widget inside an activity.
 
+        If you want to associate models (and instances) in a single go, you may provide a list of `Property`
+        (models) to the `readable_model_ids` or `writable_model_ids`.
+
+        Alternatively you can use the alias, `inputs` and `outputs` which connect to respectively
+        `readable_model_ids` and `writable_models_ids`.
+
+        :param activity: activity objects to create the widget in.
+        :type activity: :class:`Activity` or UUID
+        :param widget_type: type of the widget, one of :class:`WidgetTypes`
+        :type: string
+        :param title: (optional) title of the widget
+        :type title: str or None
+        :param meta: meta dictionary of the widget.
+        :type meta: dict
+        :param order: (optional) order in the activity of the widget.
+        :type order: int or None
+        :param parent: (optional) parent of the widget for Multicolumn and Multirow widget.
+        :type parent: :class:`Widget` or UUID
+        :param readable_models: (optional) list of property model ids to be configured as readable (alias = inputs)
+        :type readable_models: list of properties or list of property id's
+        :param writable_models: (optional) list of property model ids to be configured as writable (alias = ouputs)
+        :type writable_models: list of properties or list of property id's
+        :param kwargs: (optional) additional keyword=value arguments to create widget
+        :type kwargs: dict or None
+        :return: the created subclass of :class:`Widget`
+        :rtype: :class:`Widget`
+        :raises IllegalArgumentError: when an illegal argument is send.
+        :raises APIError: when an API Error occurs.
+        """
         widget = self._client.create_widget(*args, activity=self._activity_id, **kwargs)
 
         if kwargs.get('order') is None:

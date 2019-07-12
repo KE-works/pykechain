@@ -46,6 +46,7 @@ class Team(Base):
         >>> my_team = client.team(name='My own team')
         >>> my_team.members()
         [{"pk":1, "username"="first user", "role"="OWNER", "email":"email@address.com"}, ...]
+
         """
         if role and role not in TeamRoles.values():
             raise IllegalArgumentError("role should be one of `TeamRoles` {}, got '{}'".format(TeamRoles.values(),

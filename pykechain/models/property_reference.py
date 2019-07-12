@@ -78,7 +78,6 @@ class ReferenceProperty(Property):
 
         Example
         -------
-
         >>> property = project.part('Bike').property('RefTest')
         >>> reference_part_choices = property.choices()
 
