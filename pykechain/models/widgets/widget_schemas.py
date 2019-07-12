@@ -308,7 +308,6 @@ supergrid_meta_schema = deepcopy(filteredgrid_meta_schema)
 supergrid_meta_schema.update({
     "title": "Supergrid Widget Meta schema",
 })
-supergrid_meta_schema['properties'] = {}
 
 #
 # Progress
