@@ -2018,7 +2018,7 @@ class Client(object):
 
         return new_team.refresh()
 
-    def create_widget(self, activity, widget_type, title=None, meta=None, order=None,
+    def create_widget(self, activity, widget_type, meta, title=None, order=None,
                       parent=None, readable_models=None, writable_models=None, **kwargs):
         # type: (Union[Activity,text_type], text_type, Optional[text_type], Optional[Dict], Optional[int], Optional[Widget, text_type], Optional[List], Optional[List], **Any) -> Widget  # noqa:E501
         """
@@ -2034,10 +2034,10 @@ class Client(object):
         :type activity: :class:`Activity` or UUID
         :param widget_type: type of the widget, one of :class:`WidgetTypes`
         :type: string
-        :param title: (optional) title of the widget
-        :type title: str or None
         :param meta: meta dictionary of the widget.
         :type meta: dict
+        :param title: (optional) title of the widget
+        :type title: str or None
         :param order: (optional) order in the activity of the widget.
         :type order: int or None
         :param parent: (optional) parent of the widget for Multicolumn and Multirow widget.
