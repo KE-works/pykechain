@@ -4,7 +4,7 @@ from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text
 import requests
 from six import string_types, text_type
 
-from pykechain.enums import SortTable, WidgetTypes
+from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id
@@ -197,6 +197,83 @@ class WidgetsManager(Sized):
             readable_models=[attachment_property.id],
         )
 
+        return widget
+
+    def add_property_grid_widget(self, part_instance, max_height=None, custom_title=False, show_headers=True,
+                                 show_columns=None, readable_models=None, writable_models=None, all_readable=False,
+                                 parent_widget=None, **kwargs):
+        """
+        Add a KE-chain Property Grid widget to the customization.
+
+        The widget will be saved to KE-chain.
+        :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or str or None
+        :param part_instance: The part instance on which the property grid will be based
+        :type part_instance: :class:`Part` or UUID
+        :param max_height: The max height of the property grid in pixels
+        :type max_height: int or None
+        :param custom_title: A custom title for the property grid::
+            * False (default): Part instance name
+            * String value: Custom title
+            * None: No title
+        :type custom_title: bool or basestring or None
+        :param show_headers: Show or hide the headers in the grid (default True)
+        :type show_headers: bool
+        :param show_columns: Columns to be hidden or shown (default to 'unit' and 'description')
+        :type show_columns: list
+        :param readable_models: list of property model ids to be configured as readable (alias = inputs)
+        :type readable_models: list of properties or list of property id's
+        :param writable_models: list of property model ids to be configured as writable (alias = outputs)
+        :type writable_models: list of properties or list of property id's
+        :param all_readable: (optional) boolean indicating if all properties should automatically be configured as
+        readable (if True) or writable (if False).
+        :type all_readable: bool
+        :param kwargs: (optional) additional keyword=value arguments to create widget
+        :type kwargs: dict or None
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        """
+        # Check whether the part_model is uuid type or class `Part`
+        part_instance = _retrieve_object(part_instance, client=self._client)  # type: Part2
+
+        if not show_columns:
+            show_columns = list()
+
+        # Set the display_columns for the config
+        possible_columns = [ShowColumnTypes.DESCRIPTION, ShowColumnTypes.UNIT]
+        display_columns = dict()
+
+        for possible_column in possible_columns:
+            if possible_column in show_columns:
+                display_columns[possible_column] = True
+            else:
+                display_columns[possible_column] = False
+
+        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
+        meta.update({
+            "customHeight": max_height if max_height else None,
+            "partInstanceId": part_instance.id,
+            "showColumns": show_columns,
+            "showHeaders": show_headers,
+            "showHeightValue": "Custom max height" if max_height else "Auto",
+        })
+
+        meta, title = _set_title(meta, custom_title, default_title=part_instance.name)
+
+        if all_readable and not readable_models:
+            readable_models = part_instance.model().properties
+        elif not writable_models:
+            writable_models = part_instance.model().properties
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.PROPERTYGRID,
+            title=title,
+            meta=meta,
+            parent=parent_widget,
+            order=kwargs.get("order"),
+            readable_models=readable_models,
+            writable_models=writable_models
+        )
+        print()
         return widget
 
     def insert(self, index, widget):
