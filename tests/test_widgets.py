@@ -198,7 +198,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         widgets = self.task.widgets()
         picture_instance = self.project.part('Bike').property('Picture')
         widgets.add_attachmentviewer_widget(
-            attachment_property = picture_instance
+            attachment_property=picture_instance
         )
 
     def test_add_navbar_widget(self):
@@ -215,19 +215,19 @@ class TestWidgetManagerInActivity(TestBetamax):
         ]
 
         widgets.add_tasknavigationbar_widget(
-            activities = bar,
+            activities=bar,
             title="Navbar",
-            alignment = NavigationBarAlignment.LEFT
+            alignment=NavigationBarAlignment.LEFT
         )
 
     def test_add_propertygrid_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         bike_part = self.project.part(name='Bike')
         widget_manager.add_propertygrid_widget(part_instance=bike_part,
-                                         custom_title="Testing the customtitle of a property grid widget",
-                                         show_headers=False, show_columns=[ShowColumnTypes.UNIT],
-                                         readable_models=bike_part.model().properties[:2],
-                                         writable_models=bike_part.model().properties[3:])
+                                               custom_title="Testing the customtitle of a property grid widget",
+                                               show_headers=False, show_columns=[ShowColumnTypes.UNIT],
+                                               readable_models=bike_part.model().properties[:2],
+                                               writable_models=bike_part.model().properties[3:])
 
     def test_service_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
@@ -244,6 +244,23 @@ class TestWidgetManagerInActivity(TestBetamax):
                                           custom_button_text="Run this script (Custom!)",
                                           emphasize_run=False,
                                           show_log=False)
+
+    def test_add_html_widget(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        widget_manager.add_html_widget(html='Or is this just fantasy?',
+                                       custom_title='Is this the real life?')
+
+    def test_delete_all_widgets(self):
+        """Delete all widgets from an activity"""
+
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+
+        self.assertEqual(len(widget_manager), 1)
+
+        widget_manager.delete_all_widgets()
+
+        self.assertEqual(len(widget_manager), 0)
+        self.assertEqual(len(self.task.widgets()), 0)
 
     def test_notebook_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
