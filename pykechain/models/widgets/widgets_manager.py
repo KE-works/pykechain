@@ -637,6 +637,9 @@ class WidgetsManager(Sized):
         )
         return widget
 
+    def add_metapanel_widget(self):
+        pass
+
 
 
     #
