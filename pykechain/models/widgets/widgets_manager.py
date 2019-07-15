@@ -126,7 +126,7 @@ class WidgetsManager(Sized):
                               edit=True, clone=True, export=True, delete=False, incomplete_rows=True,
                               emphasize_new_instance=True, emphasize_edit=False, emphasize_clone=False,
                               emphasize_delete=False, sort_property=None, sort_direction=SortTable.ASCENDING,
-                              readable_models=None, writable_models=None,  all_readable=False, all_writable=False,
+                              readable_models=None, writable_models=None, all_readable=False, all_writable=False,
                               **kwargs):
 
         # Check whether the part_model is uuid type or class `Part`
@@ -142,7 +142,7 @@ class WidgetsManager(Sized):
             "sortedColumn": sort_property_id if sort_property_id else None,
             "sortDirection": sort_direction,
             # buttons
-            "addButtonVisible": new_instance,
+            "addButtonVisible": new_instance if parent_instance else False,
             "editButtonVisible": edit,
             "deleteButtonVisible": delete,
             "cloneButtonVisible": clone,
@@ -169,6 +169,65 @@ class WidgetsManager(Sized):
 
         widget = self.create_widget(
             widget_type=WidgetTypes.SUPERGRID,
+            title=title,
+            meta=meta,
+            order=kwargs.get("order"),
+            parent=kwargs.get("parent_widget"),
+            readable_models=readable_models,
+            writable_models=writable_models
+        )
+        return widget
+
+    def add_filteredgrid_widget(self, part_model, parent_instance=None, custom_title=False, new_instance=True,
+                                edit=True, clone=True, export=True, delete=False, incomplete_rows=True,
+                                emphasize_new_instance=True, emphasize_edit=False, emphasize_clone=False,
+                                emphasize_delete=False, sort_property=None, sort_direction=SortTable.ASCENDING,
+                                collapse_filters=False, page_size=25, readable_models=None, writable_models=None,
+                                all_readable=False, all_writable=False,
+                                **kwargs):
+        # Check whether the part_model is uuid type or class `Part`
+        part_model = _retrieve_object(ke_chain_object=part_model, client=self._client)  # type: Part2
+        parent_instance = _retrieve_object_id(ke_chain_object=parent_instance)  # type: Part2
+        sort_property_id = _retrieve_object_id(ke_chain_object=sort_property)  # type: text_type
+
+        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
+        meta.update({
+            # grid
+            "partModelId": part_model.id,
+            # columns
+            "sortedColumn": sort_property_id if sort_property_id else None,
+            "sortDirection": sort_direction,
+            "showCollapseFiltersValue": "Collapsed" if collapse_filters else "Expanded",  # compatibility
+            "collapseFilters": collapse_filters,
+            "customPageSize": page_size,
+            # buttons
+            "addButtonVisible": new_instance if parent_instance else False,
+            "editButtonVisible": edit,
+            "deleteButtonVisible": delete,
+            "cloneButtonVisible": clone,
+            "downloadButtonVisible": export,
+            "incompleteRowsVisible": incomplete_rows,
+            "primaryAddUiValue": emphasize_new_instance,
+            "primaryEditUiValue": emphasize_edit,
+            "primaryCloneUiValue": emphasize_clone,
+            "primaryDeleteUiValue": emphasize_delete,
+        })
+
+        if parent_instance:
+            meta['parentInstanceId'] = parent_instance
+
+        if all_readable and all_writable:
+            raise IllegalArgumentError('Properties can be either writable or readable, but not both')
+
+        if all_readable and not readable_models:
+            readable_models = part_model.properties
+        if all_writable and not writable_models:
+            writable_models = part_model.properties
+
+        meta, title = _set_title(meta, custom_title, default_title=part_model.name)
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.FILTEREDGRID,
             title=title,
             meta=meta,
             order=kwargs.get("order"),
