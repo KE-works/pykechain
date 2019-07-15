@@ -168,10 +168,29 @@ class TestWidgetManagerInActivity(TestBetamax):
 
     def test_add_super_grid_widget(self):
         widgets = self.task.widgets()  # type: WidgetsManager
-        part_model = self.project.model(name='Bike')
+        part_model = self.project.model(name='Wheel')
+        parent_instance = self.project.part(name='Bike')
         widgets.add_super_grid_widget(
             part_model=part_model,
-            writable_models=part_model.properties
+            parent_instance=parent_instance,
+            edit=False,
+            emphasize_edit=True,
+            all_readable=True,
+            incomplete_rows=True
+        )
+
+    def test_add_filtered_grid_widget(self):
+        widgets = self.task.widgets()  # type: WidgetsManager
+        part_model = self.project.model(name='Wheel')
+        parent_instance = self.project.part(name='Bike')
+        widgets.add_filteredgrid_widget(
+            part_model=part_model,
+            parent_instance=parent_instance,
+            edit=True,
+            sort_property=part_model.property(name='Diameter'),
+            emphasize_edit=True,
+            all_writable=True,
+            collapse_filters=False,
         )
 
     def test_add_attachment_widget(self):
@@ -200,11 +219,27 @@ class TestWidgetManagerInActivity(TestBetamax):
             alignment = NavigationBarAlignment.LEFT
         )
 
-    def test_add_property_grid_widget(self):
-        widgets = self.task.widgets()  # type: WidgetsManager
+    def test_add_propertygrid_widget(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
         bike_part = self.project.part(name='Bike')
-        widgets.add_propertygrid_widget(part_instance=bike_part,
+        widget_manager.add_propertygrid_widget(part_instance=bike_part,
                                          custom_title="Testing the customtitle of a property grid widget",
                                          show_headers=False, show_columns=[ShowColumnTypes.UNIT],
                                          readable_models=bike_part.model().properties[:2],
                                          writable_models=bike_part.model().properties[3:])
+
+    def test_service_widget(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        service_gears_successful = self.project.service("Service Gears - Successful")
+
+        widget_manager.add_service_widget(service=service_gears_successful)
+        widget_manager.add_service_widget(service=service_gears_successful,
+                                          custom_title=None,
+                                          custom_button_text="Run this script (Custom!) and no title",
+                                          emphasize_run=True,
+                                          download_log=True)
+        widget_manager.add_service_widget(service=service_gears_successful,
+                                          custom_title="Also a custom title, but no log",
+                                          custom_button_text="Run this script (Custom!)",
+                                          emphasize_run=False,
+                                          show_log=False)
