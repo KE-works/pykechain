@@ -457,12 +457,17 @@ class SortTable(Enum):
 class NavigationBarAlignment(Enum):
     """The acceptable alignment options for a Navigation Bar Widget.
 
-    :cvar START: Buttons are aligned to the left
+    :cvar START: Buttons are aligned to the left (for KE-chain 2)
+    :cvar LEFT: Buttons are aligned to the left (for KE-chain 3)
     :cvar CENTER: Buttons are aligned to the center
     """
-
-    START = 'start'
     CENTER = 'center'
+
+    # for KE-chain 2
+    START = 'start'
+
+    # for KE-chain 3
+    LEFT = 'left'
 
 
 class PaperSize(Enum):

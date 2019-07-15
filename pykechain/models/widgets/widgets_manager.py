@@ -1,4 +1,5 @@
 import bisect
+import warnings
 from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text
 
 import requests
@@ -211,16 +212,17 @@ class WidgetsManager(Sized):
         :param activities: List of activities. Each activity must be a Python dict(), with the following keys:
             * customText: A custom text for each button in the attachment viewer widget: None (default): Task name;
             a String value: Custom text
-            * emphasize: bool which determines if the button should stand-out or not - default(False)
+            * emphasized: bool which determines if the button should stand-out or not - default(False)
             * activityId: class `Activity` or UUID
-        :type activities: list
-        :param alignment: The alignment of the buttons inside navigation bar
+            * isDisabled: (optional) to disable the navbar button
+        :type activities: list of dict
+        :param alignment: The alignment of the buttons inside navigation bar. One of :class:`NavigationBarAlignment`
             * center (default): Center aligned
             * start: left aligned
         :type alignment: basestring (see :class:`enums.NavigationBarAlignment`)
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
-        set_of_expected_keys = {'activityId', 'customText', 'emphasize'}
+        set_of_expected_keys = {'activityId', 'customText', 'emphasized', 'emphasize', 'isDisabled'}
         for activity_dict in activities:
             if set(activity_dict.keys()).issubset(set_of_expected_keys) and 'activityId' in set_of_expected_keys:
                 # Check whether the activityId is class `Activity` or UUID
@@ -233,22 +235,45 @@ class WidgetsManager(Sized):
                 else:
                     raise IllegalArgumentError("When using the add_navigation_bar_widget, activityId must be an "
                                                "Activity or Activity id. Type is: {}".format(type(activity)))
-                if 'customText' not in activity_dict.keys() or not activity_dict['customText']:
-                    activity_dict['customText'] = str()
-                if 'emphasize' not in activity_dict.keys():
-                    activity_dict['emphasize'] = False
+                if 'customText' not in activity_dict or not activity_dict['customText']:
+                    activity_dict['customText'] = ''
+                if 'emphasized' not in activity_dict:
+                    activity_dict['emphasized'] = False
+                if 'emphasize' in activity_dict:  # emphasize is to be moved to emphasized
+                    # TODO: pending deprecation in version 3.4.0
+                    warnings.warn(PendingDeprecationWarning, "The `emphasize` key in the navbar button will be "
+                                                             "deprecated in pykechain 3.4.0")
+                    activity_dict['emphasized'] = activity_dict.pop('emphasize')
 
             else:
                 raise IllegalArgumentError("Found unexpected key in activities. Only keys allowed are: {}".
                                            format(set_of_expected_keys))
 
-
         meta = _initiate_meta(kwargs, activity_id=self._activity_id)
+        meta['taskButtons'] = activities
+        # removed meta items that are not allowed but added by the _initiate meta
+        _ = meta.pop('showHeightValue'), meta.pop('customHeight'), meta.pop('collapsed'), meta.pop('collapsible'), \
+            meta.pop('noPadding'), meta.pop('noBackground')
+
+        # TODO: pending deprecation in version 3.4.0
+        if alignment and alignment is NavigationBarAlignment.START:
+            warnings.warn(PendingDeprecationWarning, "In KE-chain 3 we use the LEFT alignment, instead of START "
+                                                     "alignment of the task navigationbar widgets. Will be autocorrected"
+                                                     "to LEFT alignment for now. Please correct your code as this is "
+                                                     "pending deprecation at version 3.4.0")
+            alignment = NavigationBarAlignment.LEFT
+
+        if alignment and alignment not in (NavigationBarAlignment.CENTER, NavigationBarAlignment.LEFT):
+            raise IllegalArgumentError("`alignment` should be one of '{}'".format(NavigationBarAlignment.values()))
+        elif alignment:
+            meta['alignment'] = alignment
+
+
         widget = self.create_widget(
             widget_type=WidgetTypes.TASKNAVIGATIONBAR,
             meta=meta,
             parent=parent_widget,
-            order=kwargs.get("order"),
+            **kwargs
         )
 
         return widget
