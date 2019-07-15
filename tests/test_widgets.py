@@ -4,7 +4,8 @@ import os
 from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity
-from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget
+from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, \
+    SupergridWidget, FilteredgridWidget, TasknavigationbarWidget
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
@@ -128,8 +129,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         )
 
         self.assertIsInstance(htmlwidget, HtmlWidget)
-        self.assertEqual(len(widget_manager), 1+1)
-
+        self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_property_grid_with_associations_using_widget_manager(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
@@ -145,14 +145,14 @@ class TestWidgetManagerInActivity(TestBetamax):
             readable_models=[]
         )
 
-        self.assertEqual(widget, PropertygridWidget)
-        self.assertEqual(len(widget_manager), 1+1)
+        self.assertIsInstance(widget, PropertygridWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_attachment_widget_with_associations_using_widget_manager(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         foto_property = self.project.property("Picture")
 
-        widget= widget_manager.create_widget(
+        widget = widget_manager.create_widget(
             widget_type=WidgetTypes.ATTACHMENTVIEWER,
             title="Attachment Viewer",
             meta=dict(
@@ -162,14 +162,15 @@ class TestWidgetManagerInActivity(TestBetamax):
             readable_models=[foto_property.model_id]
         )
 
-        self.assertEqual(widget, AttachmentviewerWidget)
-        self.assertEqual(len(widget_manager), 1+1)
+        self.assertIsInstance(widget, AttachmentviewerWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_add_super_grid_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         part_model = self.project.model(name='Wheel')
         parent_instance = self.project.part(name='Bike')
-        widget_manager.add_super_grid_widget(
+
+        widget = widget_manager.add_super_grid_widget(
             part_model=part_model,
             parent_instance=parent_instance,
             edit=False,
@@ -178,13 +179,14 @@ class TestWidgetManagerInActivity(TestBetamax):
             incomplete_rows=True
         )
 
-        self.assertEqual(len(widget_manager), 1+1)
+        self.assertIsInstance(widget, SupergridWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_add_filtered_grid_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         part_model = self.project.model(name='Wheel')
         parent_instance = self.project.part(name='Bike')
-        widget_manager.add_filteredgrid_widget(
+        widget = widget_manager.add_filteredgrid_widget(
             part_model=part_model,
             parent_instance=parent_instance,
             edit=True,
@@ -194,16 +196,18 @@ class TestWidgetManagerInActivity(TestBetamax):
             collapse_filters=False,
         )
 
-        self.assertEqual(len(widget_manager), 1+1)
+        self.assertIsInstance(widget, FilteredgridWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_add_attachment_widget(self):
         widget_manager = self.task.widgets()
         picture_instance = self.project.part('Bike').property('Picture')
-        widget_manager.add_attachmentviewer_widget(
+        widget = widget_manager.add_attachmentviewer_widget(
             attachment_property=picture_instance
         )
 
-        self.assertEqual(len(widget_manager), 1+1)
+        self.assertIsInstance(widget, AttachmentviewerWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_add_navbar_widget(self):
         widget_manager = self.task.widgets()
@@ -218,13 +222,14 @@ class TestWidgetManagerInActivity(TestBetamax):
             {'activityId': activity_3}
         ]
 
-        widget_manager.add_tasknavigationbar_widget(
+        widget = widget_manager.add_tasknavigationbar_widget(
             activities=bar,
             title="Navbar",
             alignment=NavigationBarAlignment.LEFT
         )
 
-        self.assertEqual(len(widget_manager), 1+1)
+        self.assertIsInstance(widget, TasknavigationbarWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_add_propertygrid_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
@@ -235,7 +240,7 @@ class TestWidgetManagerInActivity(TestBetamax):
                                                readable_models=bike_part.model().properties[:2],
                                                writable_models=bike_part.model().properties[3:])
 
-        self.assertEqual(len(widget_manager), 1+1)
+        self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_service_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
@@ -253,14 +258,14 @@ class TestWidgetManagerInActivity(TestBetamax):
                                           emphasize_run=False,
                                           show_log=False)
 
-        self.assertEqual(len(widget_manager), 1+3)
+        self.assertEqual(len(widget_manager), 1 + 3)
 
     def test_add_html_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         widget_manager.add_html_widget(html='Or is this just fantasy?',
                                        custom_title='Is this the real life?')
 
-        self.assertEqual(len(widget_manager), 1+1)
+        self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_metapanel_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
@@ -270,8 +275,7 @@ class TestWidgetManagerInActivity(TestBetamax):
             show_progressbar=True
         )
 
-        self.assertEqual(len(widget_manager), 1+1)
-
+        self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_delete_all_widgets(self):
         """Delete all widgets from an activity"""
