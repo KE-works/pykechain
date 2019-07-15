@@ -295,7 +295,7 @@ class WidgetsManager(Sized):
         """
         # Check whether the part_model is uuid type or class `Part`
         part_model = _retrieve_object(ke_chain_object=part_model, client=self._client)  # type: Part2
-        parent_instance = _retrieve_object_id(ke_chain_object=parent_instance)  # type: Part2
+        parent_instance_id = _retrieve_object_id(ke_chain_object=parent_instance)  # type: text_type
         sort_property_id = _retrieve_object_id(ke_chain_object=sort_property)  # type: text_type
 
         meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
@@ -309,7 +309,7 @@ class WidgetsManager(Sized):
             "collapseFilters": collapse_filters,
             "customPageSize": page_size,
             # buttons
-            "addButtonVisible": new_instance if parent_instance else False,
+            "addButtonVisible": new_instance if parent_instance_id else False,
             "editButtonVisible": edit,
             "deleteButtonVisible": delete,
             "cloneButtonVisible": clone,
@@ -321,8 +321,8 @@ class WidgetsManager(Sized):
             "primaryDeleteUiValue": emphasize_delete,
         })
 
-        if parent_instance:
-            meta['parentInstanceId'] = parent_instance
+        if parent_instance_id:
+            meta['parentInstanceId'] = parent_instance_id
 
         if all_readable and all_writable:
             raise IllegalArgumentError('Properties can be either writable or readable, but not both')
@@ -350,7 +350,7 @@ class WidgetsManager(Sized):
                                     readable_models=None, parent_widget=None, **kwargs):
         # type: (Union[Text, Property2], Optional[Text, bool], Optional[int], Optional[Text], Optional[Iterable], Optional[Widget,Text], **Any) -> Widget  # noqa
 
-        attachment_property = _retrieve_object(attachment_property, client=self._client)
+        attachment_property = _retrieve_object(attachment_property, client=self._client)  # type: Property2
         meta = _initiate_meta(kwargs, activity_id=self._activity_id)
 
         meta.update({
@@ -437,7 +437,6 @@ class WidgetsManager(Sized):
         elif alignment:
             meta['alignment'] = alignment
 
-
         widget = self.create_widget(
             widget_type=WidgetTypes.TASKNAVIGATIONBAR,
             meta=meta,
@@ -448,9 +447,9 @@ class WidgetsManager(Sized):
         return widget
 
     def add_propertygrid_widget(self, part_instance, custom_title=False, max_height=None, show_headers=True,
-                                 show_columns=None, parent_widget=None, readable_models=None, writable_models=None,
-                                 all_readable=False, **kwargs):
-        #type: (Union[Property2, Text], Optional[Text, bool], Optional[int], bool, Optional[Iterable], Optional[Text, Widget], Optional[Iterable], Optional[Iterable], bool, **Any ) -> Widget
+                                show_columns=None, parent_widget=None, readable_models=None, writable_models=None,
+                                all_readable=False, **kwargs):
+        # type: (Union[Property2, Text], Optional[Text, bool], Optional[int], bool, Optional[Iterable], Optional[Text, Widget], Optional[Iterable], Optional[Iterable], bool, **Any ) -> Widget
         """
         Add a KE-chain Property Grid widget to the customization.
 
@@ -598,6 +597,10 @@ class WidgetsManager(Sized):
 
         return widget
 
+    #
+    # Additional Widget Manager Methods
+    #
+
 
     def add_html_widget(self, text=None, custom_title=None, collapsible=True, collapsed=False):
         pass
@@ -634,9 +637,23 @@ class WidgetsManager(Sized):
                                          data=fvalues)
 
         if response.status_code != requests.codes.ok:
-            raise APIError("Could not update the order of the widgets: {}: {}".format(str(response),
-                                                                                      response.content))
+            raise APIError("Could not update the order of the widgets: {}: {}".format(str(response), response.content))
 
         widgets_response = response.json().get('results')
         for widget, updated_response in self._widgets, widgets_response:
             widget.refresh(json=updated_response)
+
+    def delete_all_widgets(self):
+        """Delete all widgets.
+
+        :return: None
+        :raises ApiError: When the deletion of the widgets was not succesfull
+        """
+        widget_ids = [dict(id=w.id) for w in self.__iter__()]
+        url = self._client._build_url('widgets_bulk_delete')
+        response = self._client.POST(url, data=widget_ids)
+
+        if response.status_code != requests.codes.no_content:
+            raise APIError("Could not delete the widgets: {}: {}".format(str(response), response.content))
+
+        self._widgets = []

@@ -185,7 +185,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         parent_instance = self.project.part(name='Bike')
         widgets.add_filteredgrid_widget(
             part_model=part_model,
-            parent_instance=parent_instance,
+            parent_instance_id=parent_instance,
             edit=True,
             sort_property=part_model.property(name='Diameter'),
             emphasize_edit=True,

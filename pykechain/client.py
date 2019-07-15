@@ -78,6 +78,7 @@ API_PATH = {
     'widget': 'api/widgets/{widget_id}.json',
     'widgets_update_associations': 'api/widgets/update_associations.json',
     'widget_update_associations': 'api/widgets/{widget_id}/update_associations.json',
+    'widgets_bulk_delete': 'api/widget/bulk_delete.json',
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
@@ -251,7 +252,14 @@ class Client(object):
 
     def _build_url(self, resource, **kwargs):
         # type: (str, **str) -> str
-        """Build the correct API url."""
+        """Build the correct API url.
+
+        :param resource: name the resouce from the API_PATH
+        :type resource: basestring
+        :param kwargs: (optional) id of the detail path to follow, eg. activity_id=...
+        :type kwargs: dict
+        :return: url of the resource to the resource (id)
+        """
         return urljoin(self.api_root, API_PATH[resource].format(**kwargs))
 
     def _retrieve_users(self):
