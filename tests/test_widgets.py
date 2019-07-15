@@ -5,7 +5,7 @@ from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity
 from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, \
-    SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, ServiceWidget
+    SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, ServiceWidget, NotebookWidget, MulticolumnWidget
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
@@ -113,7 +113,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.frame_model = self.project.model(name='Frame')
 
     def tearDown(self):
-        # self.task.delete()
+        self.task.delete()
         super(TestWidgetManagerInActivity, self).tearDown()
 
     def test_new_widget_using_widget_manager(self):
@@ -267,7 +267,7 @@ class TestWidgetManagerInActivity(TestBetamax):
     def test_add_html_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         widget = widget_manager.add_html_widget(html='Or is this just fantasy?',
-                                       custom_title='Is this the real life?')
+                                                custom_title='Is this the real life?')
 
         self.assertIsInstance(widget, HtmlWidget)
         self.assertEqual(len(widget_manager), 1 + 1)
@@ -294,19 +294,36 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(len(widget_manager), 0)
         self.assertEqual(len(self.task.widgets()), 0)
 
+    def test_delete_widget(self):
+        """Delete single widget from an activity"""
+
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+
+        self.assertEqual(len(widget_manager), 1)
+
+        widget_manager.delete_widget(0)
+
+        self.assertEqual(len(widget_manager), 0)
+        self.assertEqual(len(self.task.widgets()), 0)
+
     def test_notebook_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         notebook = self.project.service(name="Service Gears - Successful")
-        widget_manager.add_notebook_widget(notebook=notebook,
+        widget1 = widget_manager.add_notebook_widget(notebook=notebook,
                                            custom_title=False)
 
-        widget_manager.add_notebook_widget(notebook=notebook,
+        widget2 = widget_manager.add_notebook_widget(notebook=notebook,
                                            custom_title="With custom title")
 
-        widget_manager.add_notebook_widget(notebook=notebook.id,
+        widget3 = widget_manager.add_notebook_widget(notebook=notebook.id,
                                            custom_title="With no padding and custom height",
-                                           height=400,
+                                           customHeight=400,
                                            noPadding=True)
+
+        self.assertIsInstance(widget1, NotebookWidget)
+        self.assertIsInstance(widget2, NotebookWidget)
+        self.assertIsInstance(widget3, NotebookWidget)
+        self.assertEqual(len(widget_manager), 1 + 3)
 
         with self.assertRaises(IllegalArgumentError):
             widget_manager.add_notebook_widget(notebook="This will raise an error")
@@ -317,10 +334,29 @@ class TestWidgetManagerInActivity(TestBetamax):
         picture_instance = bike_part.property('Picture')
         picture_model = picture_instance.model()
         multi_column_widget = widget_manager.add_multicolumn_widget(custom_title="Multi column Grid + Attachment")
-        widget_manager.add_propertygrid_widget(part_instance=bike_part,
+
+        widget1= widget_manager.add_propertygrid_widget(part_instance=bike_part,
                                                writable_models=[picture_model],
                                                parent_widget=multi_column_widget)
 
-        widget_manager.add_attachmentviewer_widget(
+        widget2 = widget_manager.add_attachmentviewer_widget(
             attachment_property=picture_instance, parent_widget=multi_column_widget.id
         )
+
+        self.assertIsInstance(multi_column_widget, MulticolumnWidget)
+        self.assertIsInstance(widget1, PropertygridWidget)
+        self.assertIsInstance(widget2, AttachmentviewerWidget)
+        self.assertEqual(len(widget_manager), 1 + 3)
+
+    def test_compatibility_functions(self):
+        """Testing various compatibility function for equavalence to the 'customization' in WIM1/PIM1"""
+
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+
+        self.assertTrue(hasattr(widget_manager, 'add_text_widget'))
+        self.assertTrue(hasattr(widget_manager, 'add_super_grid_widget'))
+        self.assertTrue(hasattr(widget_manager, 'add_property_grid_widget'))
+        self.assertTrue(hasattr(widget_manager, 'add_paginated_grid_widget'))
+        self.assertTrue(hasattr(widget_manager, 'add_script_widget'))
+        self.assertTrue(hasattr(widget_manager, 'add_attachment_viewer_widget'))
+        self.assertTrue(hasattr(widget_manager, 'add_navigation_bar_widget'))

@@ -141,3 +141,113 @@ def parse_datetime(value):
         kw = {k: int(v) for k, v in six.iteritems(kw) if v is not None}
         kw['tzinfo'] = tzinfo
         return datetime(**kw)
+
+#
+# The following functions are inspired by: https://github.com/okunishinishi/python-stringcase
+# License: MIT
+#
+
+def camelcase(string):
+    """Convert string into camel case.
+
+    Inspired by: https://github.com/okunishinishi/python-stringcase
+    License: MIT
+
+    Examples:
+    --------
+    >>> camelcase('foo_bar_baz')
+    fooBarBaz
+    >>> camelcase('FooBarBaz')
+    fooBarBaz
+
+    :param string: String to convert.
+    :returns: string: Camel case string.
+    """
+    string = re.sub(r"^[\-_\.]", '', str(string))
+    if not string:
+        return string
+    return lowercase(string[0]) + re.sub(r"[\-_\.\s]([a-z])", lambda matched: uppercase(matched.group(1)), string[1:])
+
+
+def capitalcase(string):
+    """Convert string into capital case.
+
+    First letters will be uppercase.
+
+    Inspired by: https://github.com/okunishinishi/python-stringcase
+    License: MIT
+
+    Examples:
+    --------
+    >>> capitalcase('foo_bar_baz')
+    Foo_bar_baz
+    >>> capitalcase('FooBarBaz')
+    FooBarBaz
+
+    :param string: String to convert.
+    :returns: string: Capital case string.
+    """
+    string = str(string)
+    if not string:
+        return string
+    return uppercase(string[0]) + string[1:]
+
+
+def lowercase(string):
+    """Convert string into lower case.
+
+    Inspired by: https://github.com/okunishinishi/python-stringcase
+    License: MIT
+
+    Examples:
+    --------
+    >>> lowercase('foo_bar_baz')
+    Foo_bar_baz
+    >>> lowercase('FooBarBaz')
+    foobarbaz
+
+    :param string: String to convert.
+    :returns: string: lower case string.
+    """
+    return str(string).lower()
+
+def snakecase(string):
+    """Convert string into snake case.
+
+    Join punctuation with underscore
+
+    Inspired by: https://github.com/okunishinishi/python-stringcase
+    License: MIT
+
+    Examples:
+    --------
+    >>> snakecase('foo_bar_baz')
+    foo_bar_baz
+    >>> snakecase('FooBarBaz')
+    foo_bar_baz
+
+    :param string: String to convert.
+    :returns: string: Snake case string.
+    """
+    string = re.sub(r"[\-\.\s]", '_', str(string))
+    if not string:
+        return string
+    return lowercase(string[0]) + re.sub(r"[A-Z]", lambda matched: '_' + lowercase(matched.group(0)), string[1:])
+
+def uppercase(string):
+    """Convert string into upper case.
+
+    Inspired by: https://github.com/okunishinishi/python-stringcase
+    License: MIT
+
+    Examples:
+    --------
+    >>> uppercase('foo_bar_baz')
+    FOO_BAR_BAZ
+    >>> uppercase('FooBarBaz')
+    FOOBARBAZ
+
+    :param string: String to convert.
+    :returns: string: Upper case string.
+    """
+    return str(string).upper()
