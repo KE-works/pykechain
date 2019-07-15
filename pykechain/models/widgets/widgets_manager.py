@@ -5,7 +5,7 @@ from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text
 import requests
 from six import string_types, text_type
 
-from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment
+from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id
@@ -630,6 +630,13 @@ class WidgetsManager(Sized):
             parent=kwargs.get("parent_widget")
         )
         return widget
+
+    def add_scope_widget(self, team, custom_title=None, show_columns=None, show_all_columns=True, tags=None,
+                         sorted_column=ScopeWidgetColumnTypes.PROJECT_NAME, sorted_direction=SortTable.ASCENDING,
+                         **kwargs):
+        meta = _initiate_meta(kwargs, activity_id=self._activity_id)
+
+
 
     def insert(self, index, widget):
         # type: (int, Widget) -> None

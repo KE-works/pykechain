@@ -2,20 +2,20 @@ from typing import Dict, Optional, Union, Text
 
 from six import text_type
 
-from pykechain.exceptions import IllegalArgumentError
+from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.utils import is_uuid
 
 
 def _retrieve_object(ke_chain_object, client):
-    # type: (Union[Part2, Property2, Text], Client) -> (Union[Part2, Property2])  # noqa
+    # type: (Union[Part2, Property2, Team, Text], Client) -> (Union[Part2, Team, Property2])  # noqa
     """
 
     :param part:
     :return:
     """
     # Check whether the part_model is uuid type or class `Part`
-    from pykechain.models import Part, Part2, Property, Property2
-    if isinstance(ke_chain_object, (Part, Part2, Property, Property2)):
+    from pykechain.models import Part, Part2, Property, Property2, Team
+    if isinstance(ke_chain_object, (Part, Part2, Property, Property2, Team)):
         return ke_chain_object
     elif isinstance(ke_chain_object, text_type) and is_uuid(ke_chain_object):
         part_model_id = ke_chain_object

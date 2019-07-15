@@ -557,3 +557,21 @@ class ShowColumnTypes(Enum):
 
     UNIT = 'unit'
     DESCRIPTION = 'description'
+
+
+class ScopeWidgetColumnTypes(Enum):
+    """The columns that can be shown in a Scope widget grid.
+
+    .. versionadded:: 3.0
+
+    :cvar PROJECT_NAME: Project Name
+    :cvar START_DATE: Start date
+    :cvar DUE_DATE: Due date
+    :cvar PROGRESS: Progress
+    :cvar STATUS: Status
+    """
+    PROJECT_NAME = 'Project Name'
+    START_DATE = 'Start date'
+    DUE_DATE = 'Due date'
+    PROGRESS = 'Progress'
+    STATUS = 'Status'
