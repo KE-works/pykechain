@@ -1,10 +1,10 @@
 import bisect
-from typing import Sized, Any, Iterable, Union, AnyStr, Optional
+from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text
 
 import requests
 from six import string_types, text_type
 
-from pykechain.enums import SortTable, WidgetTypes
+from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id
@@ -172,10 +172,165 @@ class WidgetsManager(Sized):
             title=title,
             meta=meta,
             order=kwargs.get("order"),
+            parent=kwargs.get("parent_widget"),
             readable_models=readable_models,
             writable_models=writable_models
         )
-        print()
+        return widget
+
+    def add_attachmentviewer_widget(self, attachment_property, custom_title=False, height=None,
+                                    alignment=None,
+                                    readable_models=None, parent_widget=None, **kwargs):
+        # type: (Union[Text, Property2], Optional[Text, bool], Optional[int], Optional[Text], Optional[Iterable], Optional[Widget,Text], **Any) -> Widget  # noqa
+
+        attachment_property = _retrieve_object(attachment_property, client=self._client)
+        meta = _initiate_meta(kwargs, activity_id=self._activity_id)
+
+        meta.update({
+            "propertyInstanceId": attachment_property.id,
+        })
+
+        meta, title = _set_title(meta, custom_title, default_title=attachment_property.name)
+        widget = self.create_widget(
+            widget_type=WidgetTypes.ATTACHMENTVIEWER,
+            meta=meta,
+            title=title,
+            order=kwargs.get("order"),
+            parent=kwargs.get("parent_widget"),
+            readable_models=[attachment_property.id],
+        )
+
+        return widget
+
+    def add_tasknavigationbar_widget(self, activities,
+                                     alignment=NavigationBarAlignment.CENTER,
+                                     parent_widget=None, **kwargs):
+        # type: (Union[Iterable[Dict]], Optional[Text], Optional[Widget,Text], **Any) -> Widget  # noqa
+        """
+        Add a KE-chain Navigation Bar (e.g. navigation bar widget) to the activity.
+
+        The widget will be saved to KE-chain.
+
+        :param activities: List of activities. Each activity must be a Python dict(), with the following keys:
+            * customText: A custom text for each button in the attachment viewer widget: None (default): Task name;
+            a String value: Custom text
+            * emphasize: bool which determines if the button should stand-out or not - default(False)
+            * activityId: class `Activity` or UUID
+        :type activities: list
+        :param alignment: The alignment of the buttons inside navigation bar
+            * center (default): Center aligned
+            * start: left aligned
+        :type alignment: basestring (see :class:`enums.NavigationBarAlignment`)
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        """
+        set_of_expected_keys = {'activityId', 'customText', 'emphasize'}
+        for activity_dict in activities:
+            if set(activity_dict.keys()).issubset(set_of_expected_keys) and 'activityId' in set_of_expected_keys:
+                # Check whether the activityId is class `Activity` or UUID
+                activity = activity_dict['activityId']
+                from pykechain.models import Activity2
+                if isinstance(activity, Activity2):
+                    activity_dict['activityId'] = activity.id
+                elif isinstance(activity, text_type) and is_uuid(activity):
+                    pass
+                else:
+                    raise IllegalArgumentError("When using the add_navigation_bar_widget, activityId must be an "
+                                               "Activity or Activity id. Type is: {}".format(type(activity)))
+                if 'customText' not in activity_dict.keys() or not activity_dict['customText']:
+                    activity_dict['customText'] = str()
+                if 'emphasize' not in activity_dict.keys():
+                    activity_dict['emphasize'] = False
+
+            else:
+                raise IllegalArgumentError("Found unexpected key in activities. Only keys allowed are: {}".
+                                           format(set_of_expected_keys))
+
+
+        meta = _initiate_meta(kwargs, activity_id=self._activity_id)
+        widget = self.create_widget(
+            widget_type=WidgetTypes.TASKNAVIGATIONBAR,
+            meta=meta,
+            parent=parent_widget,
+            order=kwargs.get("order"),
+        )
+
+        return widget
+
+    def add_propertygrid_widget(self, part_instance, custom_title=False, max_height=None, show_headers=True,
+                                 show_columns=None, parent_widget=None, readable_models=None, writable_models=None,
+                                 all_readable=False, **kwargs):
+        #type: (Union[Property2, Text], Optional[Text, bool], Optional[int], bool, Optional[Iterable], Optional[Text, Widget], Optional[Iterable], Optional[Iterable], bool, **Any ) -> Widget
+        """
+        Add a KE-chain Property Grid widget to the customization.
+
+        The widget will be saved to KE-chain.
+        :param part_instance: The part instance on which the property grid will be based
+        :type part_instance: :class:`Part` or UUID
+        :param max_height: The max height of the property grid in pixels
+        :type max_height: int or None
+        :param custom_title: A custom title for the property grid::
+            * False (default): Part instance name
+            * String value: Custom title
+            * None: No title
+        :type custom_title: bool or basestring or None
+        :param show_headers: Show or hide the headers in the grid (default True)
+        :type show_headers: bool
+        :param show_columns: Columns to be hidden or shown (default to 'unit' and 'description')
+        :type show_columns: list
+        :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or str or None
+        :param readable_models: list of property model ids to be configured as readable (alias = inputs)
+        :type readable_models: list of properties or list of property id's
+        :param writable_models: list of property model ids to be configured as writable (alias = outputs)
+        :type writable_models: list of properties or list of property id's
+        :param all_readable: (optional) boolean indicating if all properties should automatically be configured as
+        readable (if True) or writable (if False).
+        :type all_readable: bool
+        :param kwargs: (optional) additional keyword=value arguments to create widget
+        :type kwargs: dict or None
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        """
+        # Check whether the part_model is uuid type or class `Part`
+        part_instance = _retrieve_object(part_instance, client=self._client)  # type: Part2
+
+        if not show_columns:
+            show_columns = list()
+
+        # Set the display_columns for the config
+        possible_columns = [ShowColumnTypes.DESCRIPTION, ShowColumnTypes.UNIT]
+        display_columns = dict()
+
+        for possible_column in possible_columns:
+            if possible_column in show_columns:
+                display_columns[possible_column] = True
+            else:
+                display_columns[possible_column] = False
+
+        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
+        meta.update({
+            "customHeight": max_height if max_height else None,
+            "partInstanceId": part_instance.id,
+            "showColumns": show_columns,
+            "showHeaders": show_headers,
+            "showHeightValue": "Custom max height" if max_height else "Auto",
+        })
+
+        meta, title = _set_title(meta, custom_title, default_title=part_instance.name)
+
+        if all_readable and not readable_models:
+            readable_models = part_instance.model().properties
+        elif not writable_models:
+            writable_models = part_instance.model().properties
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.PROPERTYGRID,
+            title=title,
+            meta=meta,
+            parent=parent_widget,
+            order=kwargs.get("order"),
+            readable_models=readable_models,
+            writable_models=writable_models
+        )
         return widget
 
     def insert(self, index, widget):

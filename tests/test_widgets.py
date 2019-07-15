@@ -1,7 +1,7 @@
 import json
 import os
 
-from pykechain.enums import WidgetTypes
+from pykechain.enums import WidgetTypes, ShowColumnTypes
 from pykechain.models import Activity
 from pykechain.models.widgets import UndefinedWidget, HtmlWidget
 from pykechain.models.widgets.widget import Widget
@@ -178,4 +178,21 @@ class TestWidgetManagerInActivity(TestBetamax):
             all_readable=True,
             incomplete_rows=True
         )
+        print()
+
+    def test_add_attachment_widget(self):
+        widgets = self.task.widgets()
+        picture_instance = self.project.part('Bike').property('Picture')
+        widgets.add_attachmentviewer_widget(
+            attachment_property = picture_instance
+        )
+
+    def test_add_property_grid_widget(self):
+        widgets = self.task.widgets()  # type: WidgetsManager
+        bike_part = self.project.part(name='Bike')
+        widgets.add_property_grid_widget(part_instance=bike_part,
+                                         custom_title="Testing the customtitle of a property grid widget",
+                                         show_headers=False, show_columns=[ShowColumnTypes.UNIT],
+                                         readable_models=bike_part.model().properties[:2],
+                                         writable_models=bike_part.model().properties[3:])
         print()
