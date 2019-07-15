@@ -248,3 +248,15 @@ class TestWidgetManagerInActivity(TestBetamax):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         widget_manager.add_html_widget(html='Or is this just fantasy?',
                                        custom_title='Is this the real life?')
+
+    def test_delete_all_widgets(self):
+        """Delete all widgets from an activity"""
+
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+
+        self.assertEqual(len(widget_manager), 1)
+
+        widget_manager.delete_all_widgets()
+
+        self.assertEqual(len(widget_manager), 0)
+        self.assertEqual(len(self.task.widgets()), 0)
