@@ -192,7 +192,7 @@ class WidgetsManager(Sized):
         parent_instance = _retrieve_object_id(ke_chain_object=parent_instance)  # type: Part2
         sort_property_id = _retrieve_object_id(ke_chain_object=sort_property)  # type: text_type
 
-        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
+        meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
         meta.update({
             # grid
             "partModelId": part_model.id,
@@ -304,7 +304,7 @@ class WidgetsManager(Sized):
         parent_instance_id = _retrieve_object_id(ke_chain_object=parent_instance)  # type: text_type
         sort_property_id = _retrieve_object_id(ke_chain_object=sort_property)  # type: text_type
 
-        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
+        meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
         meta.update({
             # grid
             "partModelId": part_model.id,
@@ -369,7 +369,7 @@ class WidgetsManager(Sized):
         :return:
         """
         attachment_property = _retrieve_object(attachment_property, client=self._client)  # type: Property2
-        meta = _initiate_meta(kwargs, activity_id=self._activity_id)
+        meta = _initiate_meta(kwargs, activity=self._activity_id)
 
         # TODO: Add enumeration for alignment
         if alignment and alignment not in ['left', 'right', 'center']:
@@ -447,11 +447,8 @@ class WidgetsManager(Sized):
                 raise IllegalArgumentError("Found unexpected key in activities. Only keys allowed are: {}".
                                            format(set_of_expected_keys))
 
-        meta = _initiate_meta(kwargs, activity_id=self._activity_id)
+        meta = _initiate_meta(kwargs, activity=self._activity_id, ignores=('showHeightValue'))
         meta['taskButtons'] = activities
-        # removed meta items that are not allowed but added by the _initiate meta
-        _ = meta.pop('showHeightValue'), meta.pop('customHeight'), meta.pop('collapsed'), meta.pop('collapsible'), \
-            meta.pop('noPadding'), meta.pop('noBackground')
 
         # TODO: pending deprecation in version 3.4.0
         if alignment and alignment is NavigationBarAlignment.START:
@@ -525,7 +522,7 @@ class WidgetsManager(Sized):
             else:
                 display_columns[possible_column] = False
 
-        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
+        meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
         meta.update({
             "customHeight": max_height if max_height else None,
             "partInstanceId": part_instance.id,
@@ -592,7 +589,7 @@ class WidgetsManager(Sized):
             raise IllegalArgumentError("When using the add_script_widget, script must be a Service or Service id. "
                                        "Type is: {}".format(type(service)))
 
-        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
+        meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
 
         # Add custom button text
         if custom_button_text is False:
@@ -646,7 +643,7 @@ class WidgetsManager(Sized):
             raise IllegalArgumentError("Text injected in the HTML widget must be string. Type is: {}".
                                        format(type(html)))
 
-        meta = _initiate_meta(kwargs, activity_id=self._activity_id)
+        meta = _initiate_meta(kwargs, activity=self._activity_id)
         meta, title = _set_title(meta, custom_title, default_title=None)
 
         meta["htmlContent"] = html
@@ -691,11 +688,11 @@ class WidgetsManager(Sized):
 
         if 'height' in kwargs:
             # TODO: Pending deprecation 3.4.0.
-            warnings.warn(PendingDeprecationWarning, '`height` attribute will be deprecated in version 3.4.0, please '
-                                                     'adapt your code accordingly to use `custom_height`')
+            warnings.warn('`height` attribute will be deprecated in version 3.4.0, please '
+                          'adapt your code accordingly to use `custom_height`', PendingDeprecationWarning)
             kwargs['custom_height'] = kwargs.pop('height')
 
-        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
+        meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
 
         meta, title = _set_title(meta, custom_title, default_title=notebook.name)
 
@@ -719,7 +716,7 @@ class WidgetsManager(Sized):
                              show_assignees=None, show_breadcrumbs=None, show_menu=None,
                              show_progressbar=None, **kwargs):
         # type: (bool, Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], **Any) -> Widget
-        meta = _initiate_meta(kwargs, activity_id=self._activity_id)
+        meta = _initiate_meta(kwargs, activity=self._activity_id)
 
         if show_all:
             meta['showAll'] = True
@@ -765,7 +762,7 @@ class WidgetsManager(Sized):
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
 
-        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
+        meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
         meta, title = _set_title(meta, custom_title, default_title=WidgetTypes.MULTICOLUMN)
 
         if 'height' in kwargs:
@@ -783,6 +780,12 @@ class WidgetsManager(Sized):
         )
 
         return widget
+
+    def add_scope_widget(self, team, custom_title=None, show_columns=None, show_all_columns=True, tags=None,
+                         sorted_column=ScopeWidgetColumnTypes.PROJECT_NAME, sorted_direction=SortTable.ASCENDING,
+                         **kwargs):
+        meta = _initiate_meta(kwargs, activity=self._activity_id)
+        raise NotImplementedError("Not yet implemented")
 
     #
     # Compatibility Funnctions
@@ -839,11 +842,6 @@ class WidgetsManager(Sized):
     # Widget manager methods
     #
 
-    def add_scope_widget(self, team, custom_title=None, show_columns=None, show_all_columns=True, tags=None,
-                         sorted_column=ScopeWidgetColumnTypes.PROJECT_NAME, sorted_direction=SortTable.ASCENDING,
-                         **kwargs):
-        meta = _initiate_meta(kwargs, activity_id=self._activity_id)
-
     def insert(self, index, widget):
         # type: (int, Widget) -> None
         """
@@ -897,7 +895,9 @@ class WidgetsManager(Sized):
         """
         widget = self[key]
         if isinstance(widget, Widget):
-            return widget.delete()
+            if widget.delete():
+                self._widgets.remove(widget)
+                return True
 
     def delete_all_widgets(self):
         """Delete all widgets.
