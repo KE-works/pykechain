@@ -1,7 +1,7 @@
 import json
 import os
 
-from pykechain.enums import WidgetTypes, ShowColumnTypes
+from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment
 from pykechain.models import Activity
 from pykechain.models.widgets import UndefinedWidget, HtmlWidget
 from pykechain.models.widgets.widget import Widget
@@ -200,14 +200,33 @@ class TestWidgetManagerInActivity(TestBetamax):
             attachment_property = picture_instance
         )
 
+    def test_add_navbar_widget(self):
+        widgets = self.task.widgets()
+
+        activity_1 = self.project.activity('Task - Basic Table')
+        activity_2 = self.project.activity('Task - Form')
+        activity_3 = self.project.activity('Task - Service Increase Gears')
+
+        bar = [
+            {'activityId': activity_1},
+            {'activityId': activity_2},
+            {'activityId': activity_3}
+        ]
+
+        widgets.add_tasknavigationbar_widget(
+            activities = bar,
+            title="Navbar",
+            alignment = NavigationBarAlignment.LEFT
+        )
+
     def test_add_propertygrid_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         bike_part = self.project.part(name='Bike')
         widget_manager.add_propertygrid_widget(part_instance=bike_part,
-                                               custom_title="Testing the customtitle of a property grid widget",
-                                               show_headers=False, show_columns=[ShowColumnTypes.UNIT],
-                                               readable_models=bike_part.model().properties[:2],
-                                               writable_models=bike_part.model().properties[3:])
+                                         custom_title="Testing the customtitle of a property grid widget",
+                                         show_headers=False, show_columns=[ShowColumnTypes.UNIT],
+                                         readable_models=bike_part.model().properties[:2],
+                                         writable_models=bike_part.model().properties[3:])
 
     def test_service_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
