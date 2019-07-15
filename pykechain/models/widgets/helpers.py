@@ -65,7 +65,7 @@ def _set_title(meta, custom_title, default_title=None):
 
 
 def _initiate_meta(kwargs, activity_id):
-    custom_height = kwargs.get("custom_height", None)
+    custom_height = kwargs.pop("custom_height", None)
     if custom_height:
         show_height_value = "Custom Height"
     else:
@@ -73,11 +73,11 @@ def _initiate_meta(kwargs, activity_id):
 
     kecard = {
         "activityId": str(activity_id),
-        "collapsed": kwargs.get("collapsed", False),
-        "collapsible": kwargs.get("collapsible", False),
-        "noBackground": kwargs.get("no_background", False),
-        "noPadding": kwargs.get("no_padding", False),
-        "isDisabled": kwargs.get("is_disabled", False),
+        "collapsed": kwargs.pop("collapsed", False),
+        "collapsible": kwargs.pop("collapsible", False),
+        "noBackground": kwargs.pop("no_background", False),
+        "noPadding": kwargs.pop("no_padding", False),
+        "isDisabled": kwargs.pop("is_disabled", False),
         "customHeight": custom_height,
         "showHeightValue": show_height_value
     }
