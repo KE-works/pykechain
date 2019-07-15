@@ -181,13 +181,13 @@ class TestWidgetManagerInActivity(TestBetamax):
 
     def test_add_filtered_grid_widget(self):
         widgets = self.task.widgets()  # type: WidgetsManager
-        part_model = self.project.model(name='Wheel')
+        part_model = self.project.model(name='Wheel').id
         parent_instance = self.project.part(name='Bike')
         widgets.add_filteredgrid_widget(
             part_model=part_model,
             parent_instance=parent_instance,
             edit=True,
-            sort_property=part_model.property(name='Diameter'),
+            # sort_property=part_model.property(name='Diameter'),
             emphasize_edit=True,
             all_writable=True,
             collapse_filters=False,
