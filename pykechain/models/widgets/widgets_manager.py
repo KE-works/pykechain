@@ -128,7 +128,58 @@ class WidgetsManager(Sized):
                               emphasize_delete=False, sort_property=None, sort_direction=SortTable.ASCENDING,
                               readable_models=None, writable_models=None, all_readable=False, all_writable=False,
                               **kwargs):
-
+        """
+        Add a KE-chain superGrid (e.g. basic table widget) to the customization.
+        The widget will be saved to KE-chain.
+        :param readable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as readable
+        :type readable_models: list
+        :param writable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as writable
+        :type writable_models: list
+        :param all_readable: Selects all the `Properties` of part_model and configures them as readable in the widget
+        :type all_readable: bool
+        :param all_writable: Selects all the `Properties` of part_model and configures them as writable in the widget
+        :type all_writable: bool
+        :param emphasize_new_instance: Emphasize the New instance button (default True)
+        :type emphasize_new_instance: bool
+        :param emphasize_edit: Emphasize the Edit button (default False)
+        :type emphasize_edit: bool
+        :param emphasize_clone: Emphasize the Clone button (default False)
+        :type emphasize_clone: bool
+        :param emphasize_delete: Emphasize the Delete button (default False)
+        :type emphasize_delete: bool
+        :param new_instance: Show or hide the New instance button (default False). You need to provide a
+            `parent_instance` in order for this to work.
+        :type new_instance: bool
+        :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
+        :type incomplete_rows: bool
+        :param export: Show or hide the Export Grid button (default True)
+        :type export: bool
+        :param edit: Show or hide the Edit button (default True)
+        :type edit: bool
+        :param clone: Show or hide the Clone button (default True)
+        :type clone: bool
+        :param delete: Show or hide the Delete button (default False)
+        :type delete: bool
+        :param part_model: The part model based on which all instances will be shown.
+        :type parent_instance: :class:`Part` or UUID
+        :param parent_instance: The parent part instance for which the instances will be shown or to which new
+            instances will be added.
+        :type parent_instance: :class:`Part` or UUID
+        :param custom_height: The height of the supergrid in pixels
+        :type custom_height: int or None
+        :param custom_title: A custom title for the supergrid::
+            * False (default): Part instance name
+            * String value: Custom title
+            * None: No title
+        :type custom_title: bool or basestring or None
+        :param sort_property: The property model on which the part instances are being sorted on
+        :type sort_property: :class:`Property` or UUID
+        :param sort_direction: The direction on which the values of property instances are being sorted on:
+            * ASC (default): Sort in ascending order
+            * DESC: Sort in descending order
+        :type sort_direction: basestring (see :class:`enums.SortTable`)
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        """
         # Check whether the part_model is uuid type or class `Part`
         part_model = _retrieve_object(ke_chain_object=part_model, client=self._client)  # type: Part2
         parent_instance = _retrieve_object_id(ke_chain_object=parent_instance)  # type: Part2
@@ -185,6 +236,62 @@ class WidgetsManager(Sized):
                                 collapse_filters=False, page_size=25, readable_models=None, writable_models=None,
                                 all_readable=False, all_writable=False,
                                 **kwargs):
+        """
+        Add a KE-chain superGrid (e.g. basic table widget) to the customization.
+        The widget will be saved to KE-chain.
+        :param readable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as readable
+        :type readable_models: list
+        :param writable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as writable
+        :type writable_models: list
+        :param all_readable: Selects all the `Properties` of part_model and configures them as readable in the widget
+        :type all_readable: bool
+        :param all_writable: Selects all the `Properties` of part_model and configures them as writable in the widget
+        :type all_writable: bool
+        :param emphasize_new_instance: Emphasize the New instance button (default True)
+        :type emphasize_new_instance: bool
+        :param emphasize_edit: Emphasize the Edit button (default False)
+        :type emphasize_edit: bool
+        :param emphasize_clone: Emphasize the Clone button (default False)
+        :type emphasize_clone: bool
+        :param emphasize_delete: Emphasize the Delete button (default False)
+        :type emphasize_delete: bool
+        :param new_instance: Show or hide the New instance button (default False). You need to provide a
+            `parent_instance` in order for this to work.
+        :type new_instance: bool
+        :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
+        :type incomplete_rows: bool
+        :param export: Show or hide the Export Grid button (default True)
+        :type export: bool
+        :param edit: Show or hide the Edit button (default True)
+        :type edit: bool
+        :param clone: Show or hide the Clone button (default True)
+        :type clone: bool
+        :param delete: Show or hide the Delete button (default False)
+        :type delete: bool
+        :param collapse_filters: Hide or show the filters pane (default False)
+        :type collapse_filters: bool
+        :param page_size: Number of parts that will be shown per page in the grid.
+        :type page_size: int
+        :param part_model: The part model based on which all instances will be shown.
+        :type parent_instance: :class:`Part` or UUID
+        :param parent_instance: The parent part instance for which the instances will be shown or to which new
+            instances will be added.
+        :type parent_instance: :class:`Part` or UUID
+        :param custom_height: The height of the supergrid in pixels
+        :type custom_height: int or None
+        :param custom_title: A custom title for the supergrid::
+            * False (default): Part instance name
+            * String value: Custom title
+            * None: No title
+        :type custom_title: bool or basestring or None
+        :param sort_property: The property model on which the part instances are being sorted on
+        :type sort_property: :class:`Property` or UUID
+        :param sort_direction: The direction on which the values of property instances are being sorted on:
+            * ASC (default): Sort in ascending order
+            * DESC: Sort in descending order
+        :type sort_direction: basestring (see :class:`enums.SortTable`)
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        """
         # Check whether the part_model is uuid type or class `Part`
         part_model = _retrieve_object(ke_chain_object=part_model, client=self._client)  # type: Part2
         parent_instance = _retrieve_object_id(ke_chain_object=parent_instance)  # type: Part2
@@ -465,6 +572,10 @@ class WidgetsManager(Sized):
         )
 
         return widget
+
+
+    def add_html_widget(self, text=None, custom_title=None, collapsible=True, collapsed=False):
+        pass
 
     def insert(self, index, widget):
         # type: (int, Widget) -> None
