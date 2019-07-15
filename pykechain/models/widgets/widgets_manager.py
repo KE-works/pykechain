@@ -597,6 +597,12 @@ class WidgetsManager(Sized):
 
         return widget
 
+    def add_text_widget(self, *args, **kwargs):
+        """Add a KE-chain HTML widget to the activity."""
+        warnings.warn(PendingDeprecationWarning, "The `add_text_widget()` method will be deprecated in favor of "
+                                                 "`add_html_widget` in version 3.4.0")
+        return self.add_html_widget(*args, **kwargs)
+
     def add_html_widget(self, html, custom_title=None, **kwargs):
         """
         Add a KE-chain HTML widget to the widget manager.
@@ -630,6 +636,12 @@ class WidgetsManager(Sized):
             parent=kwargs.get("parent_widget")
         )
         return widget
+
+
+
+    #
+    # Widget manager methods
+    #
 
     def insert(self, index, widget):
         # type: (int, Widget) -> None
