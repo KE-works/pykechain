@@ -677,7 +677,7 @@ class WidgetsManager(Sized):
         """
         widget_ids = [dict(id=w.id) for w in self.__iter__()]
         url = self._client._build_url('widgets_bulk_delete')
-        response = self._client.POST(url, data=widget_ids)
+        response = self._client._request('DELETE', url, json=widget_ids)
 
         if response.status_code != requests.codes.no_content:
             raise APIError("Could not delete the widgets: {}: {}".format(str(response), response.content))

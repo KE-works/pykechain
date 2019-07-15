@@ -78,7 +78,7 @@ API_PATH = {
     'widget': 'api/widgets/{widget_id}.json',
     'widgets_update_associations': 'api/widgets/update_associations.json',
     'widget_update_associations': 'api/widgets/{widget_id}/update_associations.json',
-    'widgets_bulk_delete': 'api/widget/bulk_delete.json',
+    'widgets_bulk_delete': 'api/widgets/bulk_delete',
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
@@ -280,7 +280,7 @@ class Client(object):
         # type: (str, str, **Any) -> requests.Response
         """Perform the request on the API."""
         self.last_request = None
-        if method in ('PUT', 'POST'):
+        if method in ('PUT', 'POST', 'DELETE'):
             kwargs['allow_redirects'] = False  # to prevent redirects on write action. Better check your URL first.
         self.last_response = self.session.request(method, url, auth=self.auth, headers=self.headers, **kwargs)
         self.last_request = self.last_response.request
