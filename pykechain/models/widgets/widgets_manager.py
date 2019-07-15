@@ -598,9 +598,39 @@ class WidgetsManager(Sized):
 
         return widget
 
+    def add_html_widget(self, html, custom_title=None, **kwargs):
+        """
+        Add a KE-chain HTML widget to the widget manager.
+        The widget will be saved to KE-chain.
+        :param html: The text that will be shown by the widget.
+        :type html: basestring or None
+        :param custom_title: A custom title for the text panel::
+            * None (default): No title
+            * String value: Custom title
+        :type custom_title: basestring or None
+        :param collapsible: A boolean to decide whether the panel is collapsible or not (default True)
+        :type collapsible: bool
+        :param collapsed: A boolean to decide whether the panel is collapsed or not (default False)
+        :type collapsible: bool
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        """
+        if not isinstance(html, text_type):
+            raise IllegalArgumentError("Text injected in the HTML widget must be string. Type is: {}".
+                                       format(type(html)))
 
-    def add_html_widget(self, text=None, custom_title=None, collapsible=True, collapsed=False):
-        pass
+        meta = _initiate_meta(kwargs, activity_id=self._activity_id)
+
+        meta, title = _set_title(meta, custom_title, default_title=None)
+        meta["htmlContent"] = html
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.HTML,
+            title=title,
+            meta=meta,
+            order=kwargs.get("order"),
+            parent=kwargs.get("parent_widget")
+        )
+        return widget
 
     def insert(self, index, widget):
         # type: (int, Widget) -> None
