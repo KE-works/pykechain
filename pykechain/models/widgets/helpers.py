@@ -65,7 +65,7 @@ def _set_title(meta, custom_title, default_title=None):
 
 
 def _initiate_meta(kwargs, activity_id):
-    custom_height = kwargs.pop("customHeight", None)
+    custom_height = kwargs.pop("custom_height", None)
     if custom_height:
         show_height_value = "Custom Height"
     else:
@@ -75,9 +75,9 @@ def _initiate_meta(kwargs, activity_id):
         "activityId": str(activity_id),
         "collapsed": kwargs.pop("collapsed", False),
         "collapsible": kwargs.pop("collapsible", False),
-        "noBackground": kwargs.pop("noBackground", False),
-        "noPadding": kwargs.pop("noPadding", False),
-        "isDisabled": kwargs.pop("isDisabled", False),
+        "noBackground": kwargs.pop("no_background", False),
+        "noPadding": kwargs.pop("no_padding", False),
+        "isDisabled": kwargs.pop("is_disabled", False),
         "customHeight": custom_height,
         "showHeightValue": show_height_value
     }
