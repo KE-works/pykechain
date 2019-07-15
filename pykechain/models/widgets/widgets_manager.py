@@ -345,16 +345,39 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_attachmentviewer_widget(self, attachment_property, custom_title=False, height=None,
-                                    alignment=None,
-                                    readable_models=None, parent_widget=None, **kwargs):
+    def add_attachmentviewer_widget(self, attachment_property, custom_title=False, alignment=None, **kwargs):
         # type: (Union[Text, Property2], Optional[Text, bool], Optional[int], Optional[Text], Optional[Iterable], Optional[Widget,Text], **Any) -> Widget  # noqa
+        """
+        Add a KE-chain Attachment widget widget manager.
+        The widget will be saved to KE-chain.
 
+        :param attachment_property: KE-chain Attachment property to display
+        :type attachment_property: AttachmentProperty
+        :param custom_title: A custom title for the script widget
+            * False (default): Script name
+            * String value: Custom title
+            * None: No title
+        :type custom_title: bool or basestring or None
+        :param alignment: Alignment of the previewed attachment
+        :type alignment: basestring or None
+        :return:
+        """
         attachment_property = _retrieve_object(attachment_property, client=self._client)  # type: Property2
         meta = _initiate_meta(kwargs, activity_id=self._activity_id)
 
+        # TODO: Add enumeration for alignment
+        if alignment and alignment not in ['left', 'right', 'center']:
+            raise IllegalArgumentError('Alignment must be either `left`, `right` or `center`')
+
+        if 'height' in kwargs:
+            # TODO: Pending deprecation 3.4.0.
+            warnings.warn(PendingDeprecationWarning, '`height` attribute will be deprecated in version 3.4.0, please '
+                                                     'adapt your code accordingly to use `custom_height`')
+            kwargs['custom_height'] = kwargs.pop('height')
+
         meta.update({
             "propertyInstanceId": attachment_property.id,
+            "alignment": alignment
         })
 
         meta, title = _set_title(meta, custom_title, default_title=attachment_property.name)
@@ -364,7 +387,7 @@ class WidgetsManager(Sized):
             title=title,
             order=kwargs.get("order"),
             parent=kwargs.get("parent_widget"),
-            readable_models=[attachment_property.id],
+            readable_models=[attachment_property.model()],
         )
 
         return widget
@@ -638,7 +661,7 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_notebook_widget(self, notebook, custom_title=False, height=None, parent_widget=None, **kwargs):
+    def add_notebook_widget(self, notebook, custom_title=False, parent_widget=None, **kwargs):
         """
         Add a KE-chain Notebook (e.g. notebook widget) to the WidgetManager.
 
@@ -651,8 +674,6 @@ class WidgetsManager(Sized):
             * String value: Custom title
             * None: No title
         :type custom_title: bool or basestring or None
-        :param height: The height of the Notebook in pixels
-        :type height: int or None
         :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
         :type parent_widget: Widget or str or None
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
@@ -669,12 +690,17 @@ class WidgetsManager(Sized):
             raise IllegalArgumentError("When using the add_notebook_widget, notebook must be a Service or Service id. "
                                        "Type is: {}".format(type(notebook)))
 
+        if 'height' in kwargs:
+            # TODO: Pending deprecation 3.4.0.
+            warnings.warn(PendingDeprecationWarning, '`height` attribute will be deprecated in version 3.4.0, please '
+                                                     'adapt your code accordingly to use `custom_height`')
+            kwargs['custom_height'] = kwargs.pop('height')
+
         meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
 
-        meta, title = _set_title(meta, custom_title, default_title= notebook.name)
+        meta, title = _set_title(meta, custom_title, default_title=notebook.name)
 
         meta.update({
-            'customHeight': height if height else 800,
             'serviceId': notebook_id
         })
 
@@ -722,6 +748,41 @@ class WidgetsManager(Sized):
             meta=meta,
             **kwargs
         )
+        return widget
+
+    def add_multicolumn_widget(self, custom_title=None, **kwargs):
+        """
+        Add a KE-chain Multi Column widget to the WidgetManager.
+
+        The widget will be saved to KE-chain.
+
+        :param custom_title: A custom title for the multi column widget
+            * False: Widget id
+            * String value: Custom title
+            * None (default): No title
+        :type custom_title: bool or basestring or None
+        :param height: The height of the Notebook in pixels
+        :type height: int or None
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        """
+
+        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
+        meta, title = _set_title(meta, custom_title, default_title=WidgetTypes.MULTICOLUMN)
+
+        if 'height' in kwargs:
+            # TODO: Pending deprecation 3.4.0.
+            warnings.warn(PendingDeprecationWarning, '`height` attribute will be deprecated in version 3.4.0, please '
+                                                     'adapt your code accordingly to use `custom_height`')
+            kwargs['custom_height'] = kwargs.pop('height')
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.MULTICOLUMN,
+            title=title,
+            meta=meta,
+            parent=None,
+            order=kwargs.get("order")
+        )
+
         return widget
 
     #

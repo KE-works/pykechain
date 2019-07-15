@@ -302,3 +302,16 @@ class TestWidgetManagerInActivity(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             widget_manager.add_notebook_widget(notebook="This will raise an error")
 
+    def test_multicolumn_widget(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        bike_part = self.project.part('Bike')
+        picture_instance = bike_part.property('Picture')
+        picture_model = picture_instance.model()
+        multi_column_widget = widget_manager.add_multicolumn_widget(custom_title="Multi column Grid + Attachment")
+        widget_manager.add_propertygrid_widget(part_instance=bike_part,
+                                               writable_models=[picture_model],
+                                               parent_widget=multi_column_widget)
+
+        widget_manager.add_attachmentviewer_widget(
+            attachment_property=picture_instance, parent_widget=multi_column_widget.id
+        )
