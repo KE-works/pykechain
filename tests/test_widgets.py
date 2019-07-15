@@ -168,12 +168,30 @@ class TestWidgetManagerInActivity(TestBetamax):
 
     def test_add_super_grid_widget(self):
         widgets = self.task.widgets()  # type: WidgetsManager
-        part_model = self.project.model(name='Bike')
+        part_model = self.project.model(name='Wheel')
+        parent_instance = self.project.part(name='Bike')
         widgets.add_super_grid_widget(
             part_model=part_model,
-            writable_models=part_model.properties
+            parent_instance=parent_instance,
+            edit=False,
+            emphasize_edit=True,
+            all_readable=True,
+            incomplete_rows=True
         )
-        print()
+
+    def test_add_filtered_grid_widget(self):
+        widgets = self.task.widgets()  # type: WidgetsManager
+        part_model = self.project.model(name='Wheel')
+        parent_instance = self.project.part(name='Bike')
+        widgets.add_filteredgrid_widget(
+            part_model=part_model,
+            parent_instance=parent_instance,
+            edit=True,
+            sort_property=part_model.property(name='Diameter'),
+            emphasize_edit=True,
+            all_writable=True,
+            collapse_filters=False,
+        )
 
     def test_add_attachment_widget(self):
         widgets = self.task.widgets()
