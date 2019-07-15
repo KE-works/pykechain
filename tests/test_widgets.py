@@ -174,3 +174,12 @@ class TestWidgetManagerInActivity(TestBetamax):
             writable_models=part_model.properties
         )
         print()
+
+
+    def test_add_attachment_widget(self):
+        widgets = self.task.widgets()
+        picture_instance = self.project.part('Bike').property('Picture')
+        widgets.add_attachmentviewer_widget(
+            attachment_property = picture_instance
+        )
+
