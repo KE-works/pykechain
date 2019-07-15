@@ -168,9 +168,14 @@ class TestWidgetManagerInActivity(TestBetamax):
 
     def test_add_super_grid_widget(self):
         widgets = self.task.widgets()  # type: WidgetsManager
-        part_model = self.project.model(name='Bike')
+        part_model = self.project.model(name='Leg')
+        # parent_instance = self.project.part(name='Bike')
         widgets.add_super_grid_widget(
             part_model=part_model,
-            writable_models=part_model.properties
+            # parent_instance=parent_instance,
+            edit=False,
+            emphasize_edit=True,
+            all_readable=True,
+            incomplete_rows=True
         )
         print()

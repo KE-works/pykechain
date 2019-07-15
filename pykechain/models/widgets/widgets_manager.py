@@ -122,12 +122,12 @@ class WidgetsManager(Sized):
             self.insert(kwargs.get('order'), widget)
         return widget
 
-    def add_super_grid_widget(self, part_model, parent_instance=None, custom_title=False,
-                              delete=False, edit=True, export=True, clone=True, incomplete_rows=True,
-                              new_instance=True, emphasize_edit=False, emphasize_new_instance=True,
-                              emphasize_clone=False, emphasize_delete=False, sort_property=None,
-                              sort_direction=SortTable.ASCENDING, readable_models=None, writable_models=None,
-                              all_readable=False, all_writable=False, **kwargs):
+    def add_super_grid_widget(self, part_model, parent_instance=None, custom_title=False, new_instance=True,
+                              edit=True, clone=True, export=True, delete=False, incomplete_rows=True,
+                              emphasize_new_instance=True, emphasize_edit=False, emphasize_clone=False,
+                              emphasize_delete=False, sort_property=None, sort_direction=SortTable.ASCENDING,
+                              readable_models=None, writable_models=None,  all_readable=False, all_writable=False,
+                              **kwargs):
 
         # Check whether the part_model is uuid type or class `Part`
         part_model = _retrieve_object(ke_chain_object=part_model, client=self._client)  # type: Part2
@@ -139,17 +139,15 @@ class WidgetsManager(Sized):
             # grid
             "partModelId": part_model.id,
             # columns
-            # "columns": ,
             "sortedColumn": sort_property_id if sort_property_id else None,
             "sortDirection": sort_direction,
             # buttons
             "addButtonVisible": new_instance,
             "editButtonVisible": edit,
             "deleteButtonVisible": delete,
-            # "cloneButtonVisible": clone,
+            "cloneButtonVisible": clone,
             "downloadButtonVisible": export,
             "incompleteRowsVisible": incomplete_rows,
-            # "incompleteRowsButtonVisible": def_bool,
             "primaryAddUiValue": emphasize_new_instance,
             "primaryEditUiValue": emphasize_edit,
             "primaryCloneUiValue": emphasize_clone,
@@ -159,8 +157,13 @@ class WidgetsManager(Sized):
         if parent_instance:
             meta['parentInstanceId'] = parent_instance
 
+        if all_readable and all_writable:
+            raise IllegalArgumentError('Properties can be either writable or readable, but not both')
+
         if all_readable and not readable_models:
             readable_models = part_model.properties
+        if all_writable and not writable_models:
+            writable_models = part_model.properties
 
         meta, title = _set_title(meta, custom_title, default_title=part_model.name)
 
