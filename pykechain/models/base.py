@@ -7,7 +7,7 @@ class Base(object):
     """Base model connecting retrieved data to a KE-chain client.
 
     :cvar id: The UUID of the object (corresponds with the UUID in KE-chain).
-    :type id: uuid
+    :type id: str
     :cvar name: The name of the object.
     :type name: basestring
     :cvar created_at: the datetime when the object was created if available (otherwise None)
