@@ -597,6 +597,7 @@ class WidgetsManager(Sized):
 
         return widget
 
+    # TODO: this is pending deprecation in version 3.4.0
     def add_text_widget(self, *args, **kwargs):
         """Add a KE-chain HTML widget to the activity."""
         warnings.warn(PendingDeprecationWarning, "The `add_text_widget()` method will be deprecated in favor of "
@@ -624,8 +625,8 @@ class WidgetsManager(Sized):
                                        format(type(html)))
 
         meta = _initiate_meta(kwargs, activity_id=self._activity_id)
-
         meta, title = _set_title(meta, custom_title, default_title=None)
+
         meta["htmlContent"] = html
 
         widget = self.create_widget(
@@ -687,8 +688,41 @@ class WidgetsManager(Sized):
 
         return widget
 
-    def add_metapanel_widget(self):
-        pass
+    def add_metapanel_widget(self, show_all=True,
+                             show_due_date=None, show_start_date=None,
+                             show_title=None, show_status=None, show_progress=None,
+                             show_assignees=None, show_breadcrumbs=None, show_menu=None,
+                             show_progressbar=None, **kwargs):
+        # type: (bool, Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], **Any) -> Widget
+        meta = _initiate_meta(kwargs, activity_id=self._activity_id)
+
+        if show_all:
+            meta['showAll'] = True
+        else:
+            meta.update(dict(
+                showAll=False,
+                showDueDate=show_due_date,
+                showStartDate=show_start_date,
+                showTitle=show_title,
+                showStatus=show_status,
+
+                showAssignees=show_assignees,
+                showBreadcrumbs=show_breadcrumbs,
+                showMenu=show_menu,
+                # if the progress = True -> bar = False. Also when the bar is set to True,
+                # if progress=False and Bar=True, the bar is True
+                # if progress=False and Bar=False, both are False
+                showProgress=show_progress and not show_progressbar or show_progress,
+                showProgressbar=show_progressbar and not show_progress
+            ))
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.METAPANEL,
+            title=kwargs.pop('title', WidgetTypes.METAPANEL),
+            meta=meta,
+            **kwargs
+        )
+        return widget
 
     #
     # Widget manager methods
