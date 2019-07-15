@@ -43,7 +43,7 @@ attachmentviewer_meta_schema.update({
         # attachment
         "propertyInstanceId": {"$ref": "#/definitions/uuidString"},
         "activityId": {"$ref": "#/definitions/uuidString"},
-        "alignment": {"type":"array", "items": ["left", "center", "right"]}
+        "alignment": {"type": ["array", "null"], "items": {"type": "string", "enum": ["left", "center", "right"]}}
     },
     "required": ["propertyInstanceId", "activityId"]
 })
