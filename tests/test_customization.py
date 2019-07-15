@@ -205,24 +205,24 @@ class TestExtCustomization(TestBetamax):
         parent_model = part_model.parent()
         parent_instance = parent_model.instance()
         wrong_sort_property_model = parent_model.property(name='Total height')
-        self.customization.add_super_grid_widget(part_model=part_model, parent_part_instance=parent_instance,
-                                                 max_height=800, custom_title='This grid has title, height and parent',
-                                                 new_instance=True, emphasize_new_instance=True, emphasize_edit=True)
-        self.customization.add_super_grid_widget(part_model=part_model.id, parent_part_instance=parent_instance.id,
-                                                 custom_title=None, delete=True, edit=False, export=False,
-                                                 incomplete_rows=False, sort_property=sort_property)
-        self.customization.add_super_grid_widget(part_model=part_model, sort_property=sort_property.id,
-                                                 sort_direction=SortTable.DESCENDING)
+        self.customization.add_supergrid_widget(part_model=part_model, parent_part_instance=parent_instance,
+                                                max_height=800, custom_title='This grid has title, height and parent',
+                                                new_instance=True, emphasize_new_instance=True, emphasize_edit=True)
+        self.customization.add_supergrid_widget(part_model=part_model.id, parent_part_instance=parent_instance.id,
+                                                custom_title=None, delete=True, edit=False, export=False,
+                                                incomplete_rows=False, sort_property=sort_property)
+        self.customization.add_supergrid_widget(part_model=part_model, sort_property=sort_property.id,
+                                                sort_direction=SortTable.DESCENDING)
         with self.assertRaises(IllegalArgumentError):
-            self.customization.add_super_grid_widget(part_model=part_model, new_instance=True)
+            self.customization.add_supergrid_widget(part_model=part_model, new_instance=True)
         with self.assertRaises(IllegalArgumentError):
-            self.customization.add_super_grid_widget(part_model=part_model, sort_property=wrong_sort_property_model)
+            self.customization.add_supergrid_widget(part_model=part_model, sort_property=wrong_sort_property_model)
         with self.assertRaises(IllegalArgumentError):
-            self.customization.add_super_grid_widget(part_model='This will not work, needs UUID or Part')
+            self.customization.add_supergrid_widget(part_model='This will not work, needs UUID or Part')
         with self.assertRaises(IllegalArgumentError):
-            self.customization.add_super_grid_widget(part_model=part_model, parent_part_instance='Errors triggered')
+            self.customization.add_supergrid_widget(part_model=part_model, parent_part_instance='Errors triggered')
         with self.assertRaises(IllegalArgumentError):
-            self.customization.add_super_grid_widget(part_model=part_model, sort_property='Errors triggered')
+            self.customization.add_supergrid_widget(part_model=part_model, sort_property='Errors triggered')
 
         widgets = self.customization.widgets()
         self.assertEqual(len(widgets), 3, "The customization should have 3 super grid widgets")
@@ -233,14 +233,14 @@ class TestExtCustomization(TestBetamax):
         parent_model = part_model.parent()
         parent_instance = parent_model.instance()
         wrong_sort_property_model = parent_model.property(name='Total height')
-        self.customization.add_super_grid_widget(part_model=part_model, parent_part_instance=parent_instance,
-                                                 max_height=800, custom_title='This grid has title, height and parent',
-                                                 new_instance=True, emphasize_new_instance=True, emphasize_edit=True)
-        self.customization.add_super_grid_widget(part_model=part_model.id, parent_part_instance=parent_instance.id,
-                                                 custom_title=None, delete=True, edit=False, export=False,
-                                                 incomplete_rows=False, sort_property=sort_property)
-        self.customization.add_super_grid_widget(part_model=part_model, sort_property=sort_property.id,
-                                                 sort_direction=SortTable.DESCENDING)
+        self.customization.add_supergrid_widget(part_model=part_model, parent_part_instance=parent_instance,
+                                                max_height=800, custom_title='This grid has title, height and parent',
+                                                new_instance=True, emphasize_new_instance=True, emphasize_edit=True)
+        self.customization.add_supergrid_widget(part_model=part_model.id, parent_part_instance=parent_instance.id,
+                                                custom_title=None, delete=True, edit=False, export=False,
+                                                incomplete_rows=False, sort_property=sort_property)
+        self.customization.add_supergrid_widget(part_model=part_model, sort_property=sort_property.id,
+                                                sort_direction=SortTable.DESCENDING)
         with self.assertRaises(IllegalArgumentError):
             self.customization.add_paginated_grid_widget(part_model=part_model, new_instance=True)
         with self.assertRaises(IllegalArgumentError):

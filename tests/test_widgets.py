@@ -170,7 +170,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         part_model = self.project.model(name='Wheel')
         parent_instance = self.project.part(name='Bike')
 
-        widget = widget_manager.add_super_grid_widget(
+        widget = widget_manager.add_supergrid_widget(
             part_model=part_model,
             parent_instance=parent_instance,
             edit=False,

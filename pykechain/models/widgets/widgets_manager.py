@@ -69,7 +69,14 @@ class WidgetsManager(Sized):
 
     def __getitem__(self, key):
         # type: (Any) -> Widget
-        """Widget from the list of widgets based on index, uuid, title or ref."""
+        """Widget from the list of widgets based on index, uuid, title or ref.
+
+        :param key: index, uuid, title or ref of the widget to retrieve
+        :type key: int or basestring
+        :return: Retrieved widget
+        :rtype: Widget
+        :raises NotFoundError: when the widget could not be found
+        """
         found = None
         if isinstance(key, int):
             found = self._widgets[key]
@@ -80,8 +87,7 @@ class WidgetsManager(Sized):
 
         if found is not None:
             return found
-
-        raise NotFoundError("Could not find widget with index, title, ref, or id {}".format(key))
+        raise NotFoundError("Could not find widget with index, title, ref, or id '{}'".format(key))
 
     def create_widget(self, *args, **kwargs):
         """Create a widget inside an activity.
@@ -123,12 +129,12 @@ class WidgetsManager(Sized):
             self.insert(kwargs.get('order'), widget)
         return widget
 
-    def add_super_grid_widget(self, part_model, parent_instance=None, custom_title=False, new_instance=True,
-                              edit=True, clone=True, export=True, delete=False, incomplete_rows=True,
-                              emphasize_new_instance=True, emphasize_edit=False, emphasize_clone=False,
-                              emphasize_delete=False, sort_property=None, sort_direction=SortTable.ASCENDING,
-                              readable_models=None, writable_models=None, all_readable=False, all_writable=False,
-                              **kwargs):
+    def add_supergrid_widget(self, part_model, parent_instance=None, custom_title=False, new_instance=True,
+                             edit=True, clone=True, export=True, delete=False, incomplete_rows=True,
+                             emphasize_new_instance=True, emphasize_edit=False, emphasize_clone=False,
+                             emphasize_delete=False, sort_property=None, sort_direction=SortTable.ASCENDING,
+                             readable_models=None, writable_models=None, all_readable=False, all_writable=False,
+                             **kwargs):
         """
         Add a KE-chain superGrid (e.g. basic table widget) to the customization.
         The widget will be saved to KE-chain.
@@ -346,7 +352,7 @@ class WidgetsManager(Sized):
         return widget
 
     def add_attachmentviewer_widget(self, attachment_property, custom_title=False, alignment=None, **kwargs):
-        # type: (Union[Text, Property2], Optional[Text, bool], Optional[int], Optional[Text], Optional[Iterable], Optional[Widget,Text], **Any) -> Widget  # noqa
+        # type: (Union[Text, Property2], Optional[Text, bool], Optional[int], Optional[Text], **Any) -> Widget  # noqa
         """
         Add a KE-chain Attachment widget widget manager.
         The widget will be saved to KE-chain.
@@ -620,13 +626,6 @@ class WidgetsManager(Sized):
 
         return widget
 
-    # TODO: this is pending deprecation in version 3.4.0
-    def add_text_widget(self, *args, **kwargs):
-        """Add a KE-chain HTML widget to the activity."""
-        warnings.warn(PendingDeprecationWarning, "The `add_text_widget()` method will be deprecated in favor of "
-                                                 "`add_html_widget` in version 3.4.0")
-        return self.add_html_widget(*args, **kwargs)
-
     def add_html_widget(self, html, custom_title=None, **kwargs):
         """
         Add a KE-chain HTML widget to the widget manager.
@@ -786,6 +785,57 @@ class WidgetsManager(Sized):
         return widget
 
     #
+    # Compatibility Funnctions
+    #
+
+    # TODO: this is pending deprecation in version 3.4.0
+    def add_text_widget(self, *args, **kwargs):
+        """Add a KE-chain HTML widget to the activity."""
+        warnings.warn(PendingDeprecationWarning, "The `add_text_widget()` method will be deprecated in favor of "
+                                                 "`add_html_widget` in version 3.4.0")
+        return self.add_html_widget(*args, **kwargs)
+
+    def add_super_grid_widget(self, *args, **kwargs):
+        """Add a KE-chain Supergrid widget to the activity."""
+        warnings.warn(PendingDeprecationWarning, "The `add_super_grid_widget()` method will be deprecated in favor of "
+                                                 "`add_supergrid_widget` in version 3.4.0")
+        return self.add_supergrid_widget(*args, **kwargs)
+
+    def add_property_grid_widget(self, *args, **kwargs):
+        """Add a KE-chain Propertygrid widget to the activity."""
+        warnings.warn(PendingDeprecationWarning,
+                      "The `add_property_grid_widget()` method will be deprecated in favor of "
+                      "`add_propertygrid_widget` in version 3.4.0")
+        return self.add_propertygrid_widget(*args, **kwargs)
+
+    def add_paginated_grid_widget(self, *args, **kwargs):
+        """Add a KE-chain Filteredgrid widget to the activity."""
+        warnings.warn(PendingDeprecationWarning,
+                      "The `add_paginated_grid_widget()` method will be deprecated in favor of "
+                      "`add_filteredgrid_widget` in version 3.4.0")
+        return self.add_filteredgrid_widget(*args, **kwargs)
+
+    def add_script_widget(self, *args, **kwargs):
+        """Add a KE-chain Service widget to the activity."""
+        warnings.warn(PendingDeprecationWarning, "The `add_script_widget()` method will be deprecated in favor of "
+                                                 "`add_service_widget` in version 3.4.0")
+        return self.add_service_widget(*args, **kwargs)
+
+    def add_attachment_viewer_widget(self, *args, **kwargs):
+        """Add a KE-chain Attachmentviewer widget to the activity."""
+        warnings.warn(PendingDeprecationWarning,
+                      "The `add_attachment_viewer_widget()` method will be deprecated in favor of "
+                      "`add_attachmentviewer_widget` in version 3.4.0")
+        return self.add_attachmentviewer_widget(*args, **kwargs)
+
+    def add_navigation_bar_widget(self, *args, **kwargs):
+        """Add a KE-chain Tasknavigationbar widget to the activity."""
+        warnings.warn(PendingDeprecationWarning,
+                      "The `add_navigation_bar_widget()` method will be deprecated in favor of "
+                      "`add_tasknavigationbar_widget` in version 3.4.0")
+        return self.add_tasknavigationbar_widget(*args, **kwargs)
+
+    #
     # Widget manager methods
     #
 
@@ -793,8 +843,6 @@ class WidgetsManager(Sized):
                          sorted_column=ScopeWidgetColumnTypes.PROJECT_NAME, sorted_direction=SortTable.ASCENDING,
                          **kwargs):
         meta = _initiate_meta(kwargs, activity_id=self._activity_id)
-
-
 
     def insert(self, index, widget):
         # type: (int, Widget) -> None
@@ -833,6 +881,23 @@ class WidgetsManager(Sized):
         widgets_response = response.json().get('results')
         for widget, updated_response in self._widgets, widgets_response:
             widget.refresh(json=updated_response)
+
+    def delete_widget(self, key):
+        # type: (Any) -> bool
+        """
+        Delete widgets by index.
+
+        The widgets are saved to KE-chain.
+
+        :param key: index, uuid, title or ref of the widget to delete
+        :type key: int or basestring
+        :return: True if the widget is deleted succesfully
+        :raises APIError: if the widget could not be deleted
+        :raises NotFoundError: if the widgetmanager (activity) has no such widget
+        """
+        widget = self[key]
+        if isinstance(widget, Widget):
+            return widget.delete()
 
     def delete_all_widgets(self):
         """Delete all widgets.
