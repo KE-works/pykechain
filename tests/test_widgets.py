@@ -243,3 +243,8 @@ class TestWidgetManagerInActivity(TestBetamax):
                                           custom_button_text="Run this script (Custom!)",
                                           emphasize_run=False,
                                           show_log=False)
+
+    def test_add_html_widget(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        widget_manager.add_html_widget(html='Or is this just fantasy?',
+                                       custom_title='Is this the real life?')
