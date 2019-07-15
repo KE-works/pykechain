@@ -446,8 +446,6 @@ class WidgetsManager(Sized):
         :type parent_widget: Widget or str or None
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
-        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
-
         # Check whether the script is uuid type or class `Service`
         from pykechain.models import Service
         if isinstance(service, Service):
@@ -458,6 +456,8 @@ class WidgetsManager(Sized):
         else:
             raise IllegalArgumentError("When using the add_script_widget, script must be a Service or Service id. "
                                        "Type is: {}".format(type(service)))
+
+        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
 
         # Add custom button text
         if custom_button_text is False:
@@ -483,6 +483,56 @@ class WidgetsManager(Sized):
 
         widget = self.create_widget(
             widget_type=WidgetTypes.SERVICE,
+            title=title,
+            meta=meta,
+            parent=parent_widget,
+            order=kwargs.get("order")
+        )
+
+        return widget
+
+    def add_notebook_widget(self, notebook, custom_title=False, height=None, parent_widget=None, **kwargs):
+        """
+        Add a KE-chain Notebook (e.g. notebook widget) to the WidgetManager.
+
+        The widget will be saved to KE-chain.
+
+        :param notebook: The Notebook to which the button will be coupled and will start when the button is pressed.
+        :type notebook: :class:`Service` or UUID
+        :param custom_title: A custom title for the notebook widget
+            * False (default): Notebook name
+            * String value: Custom title
+            * None: No title
+        :type custom_title: bool or basestring or None
+        :param height: The height of the Notebook in pixels
+        :type height: int or None
+        :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or str or None
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        """
+
+        # Check whether the notebook is uuid type or class `Service`
+        from pykechain.models import Service
+        if isinstance(notebook, Service):
+            notebook_id = notebook.id
+        elif isinstance(notebook, (string_types, text_type)) and is_uuid(notebook):
+            notebook_id = notebook
+            notebook = self._client.service(id=notebook_id)
+        else:
+            raise IllegalArgumentError("When using the add_notebook_widget, notebook must be a Service or Service id. "
+                                       "Type is: {}".format(type(notebook)))
+
+        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
+
+        meta, title = _set_title(meta, custom_title, default_title= notebook.name)
+
+        meta.update({
+            'customHeight': height if height else 800,
+            'serviceId': notebook_id
+        })
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.NOTEBOOK,
             title=title,
             meta=meta,
             parent=parent_widget,

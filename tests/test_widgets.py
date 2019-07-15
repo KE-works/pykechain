@@ -2,6 +2,7 @@ import json
 import os
 
 from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment
+from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity
 from pykechain.models.widgets import UndefinedWidget, HtmlWidget
 from pykechain.models.widgets.widget import Widget
@@ -243,3 +244,21 @@ class TestWidgetManagerInActivity(TestBetamax):
                                           custom_button_text="Run this script (Custom!)",
                                           emphasize_run=False,
                                           show_log=False)
+
+    def test_notebook_widget(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        notebook = self.project.service(name="Service Gears - Successful")
+        widget_manager.add_notebook_widget(notebook=notebook,
+                                           custom_title=False)
+
+        widget_manager.add_notebook_widget(notebook=notebook,
+                                           custom_title="With custom title")
+
+        widget_manager.add_notebook_widget(notebook=notebook.id,
+                                           custom_title="With no padding and custom height",
+                                           height=400,
+                                           noPadding=True)
+
+        with self.assertRaises(IllegalArgumentError):
+            widget_manager.add_notebook_widget(notebook="This will raise an error")
+
