@@ -2,8 +2,10 @@ import json
 import os
 
 from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment
+from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity
-from pykechain.models.widgets import UndefinedWidget, HtmlWidget
+from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, \
+    SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, ServiceWidget
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
@@ -115,23 +117,24 @@ class TestWidgetManagerInActivity(TestBetamax):
         super(TestWidgetManagerInActivity, self).tearDown()
 
     def test_new_widget_using_widget_manager(self):
-        widgets = self.task.widgets()  # type: WidgetsManager
+        widget_manager = self.task.widgets()  # type: WidgetsManager
 
-        self.assertEqual(len(widgets), 1)
-        metapanel = widgets[0]
+        self.assertEqual(len(widget_manager), 1)
+        metapanel = widget_manager[0]
 
-        htmlwidget = widgets.create_widget(
+        htmlwidget = widget_manager.create_widget(
             widget_type=WidgetTypes.HTML,
             title="Test HTML widget",
             meta=dict(html="Hello")
         )
 
         self.assertIsInstance(htmlwidget, HtmlWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_property_grid_with_associations_using_widget_manager(self):
-        widgets = self.task.widgets()  # type: WidgetsManager
+        widget_manager = self.task.widgets()  # type: WidgetsManager
 
-        widgets.create_widget(
+        widget = widget_manager.create_widget(
             widget_type=WidgetTypes.PROPERTYGRID,
             title="Frame Property Grid",
             meta=dict(
@@ -142,21 +145,14 @@ class TestWidgetManagerInActivity(TestBetamax):
             readable_models=[]
         )
 
+        self.assertIsInstance(widget, PropertygridWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
+
     def test_attachment_widget_with_associations_using_widget_manager(self):
-        """
-        properties: {
-            # attachment
-            "propertyInstanceId": {"$ref": "#/definitions/uuidString"},
-            "activityId": {"$ref": "#/definitions/uuidString"},
-            "alignment": {"$ref": "#/definitions/booleanNull"}
-        },
-        "required": ["propertyInstanceId", "activityId"]
-        :return:
-        """
-        widgets = self.task.widgets()  # type: WidgetsManager
+        widget_manager = self.task.widgets()  # type: WidgetsManager
         foto_property = self.project.property("Picture")
 
-        widgets.create_widget(
+        widget = widget_manager.create_widget(
             widget_type=WidgetTypes.ATTACHMENTVIEWER,
             title="Attachment Viewer",
             meta=dict(
@@ -166,11 +162,15 @@ class TestWidgetManagerInActivity(TestBetamax):
             readable_models=[foto_property.model_id]
         )
 
+        self.assertIsInstance(widget, AttachmentviewerWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
+
     def test_add_super_grid_widget(self):
-        widgets = self.task.widgets()  # type: WidgetsManager
+        widget_manager = self.task.widgets()  # type: WidgetsManager
         part_model = self.project.model(name='Wheel')
         parent_instance = self.project.part(name='Bike')
-        widgets.add_super_grid_widget(
+
+        widget = widget_manager.add_super_grid_widget(
             part_model=part_model,
             parent_instance=parent_instance,
             edit=False,
@@ -179,11 +179,14 @@ class TestWidgetManagerInActivity(TestBetamax):
             incomplete_rows=True
         )
 
+        self.assertIsInstance(widget, SupergridWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
+
     def test_add_filtered_grid_widget(self):
-        widgets = self.task.widgets()  # type: WidgetsManager
-        part_model = self.project.model(name='Wheel').id
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        part_model = self.project.model(name='Wheel')
         parent_instance = self.project.part(name='Bike')
-        widgets.add_filteredgrid_widget(
+        widget = widget_manager.add_filteredgrid_widget(
             part_model=part_model,
             parent_instance=parent_instance,
             edit=True,
@@ -193,15 +196,21 @@ class TestWidgetManagerInActivity(TestBetamax):
             collapse_filters=False,
         )
 
+        self.assertIsInstance(widget, FilteredgridWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
+
     def test_add_attachment_widget(self):
-        widgets = self.task.widgets()
+        widget_manager = self.task.widgets()
         picture_instance = self.project.part('Bike').property('Picture')
-        widgets.add_attachmentviewer_widget(
+        widget = widget_manager.add_attachmentviewer_widget(
             attachment_property=picture_instance
         )
 
+        self.assertIsInstance(widget, AttachmentviewerWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
+
     def test_add_navbar_widget(self):
-        widgets = self.task.widgets()
+        widget_manager = self.task.widgets()
 
         activity_1 = self.project.activity('Task - Basic Table')
         activity_2 = self.project.activity('Task - Form')
@@ -213,41 +222,65 @@ class TestWidgetManagerInActivity(TestBetamax):
             {'activityId': activity_3}
         ]
 
-        widgets.add_tasknavigationbar_widget(
+        widget = widget_manager.add_tasknavigationbar_widget(
             activities=bar,
             title="Navbar",
             alignment=NavigationBarAlignment.LEFT
         )
 
+        self.assertIsInstance(widget, TasknavigationbarWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
+
     def test_add_propertygrid_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         bike_part = self.project.part(name='Bike')
-        widget_manager.add_propertygrid_widget(part_instance=bike_part,
-                                               custom_title="Testing the customtitle of a property grid widget",
-                                               show_headers=False, show_columns=[ShowColumnTypes.UNIT],
-                                               readable_models=bike_part.model().properties[:2],
-                                               writable_models=bike_part.model().properties[3:])
+        widget = widget_manager.add_propertygrid_widget(part_instance=bike_part,
+                                                        custom_title="Testing the customtitle of a property grid widget",
+                                                        show_headers=False, show_columns=[ShowColumnTypes.UNIT],
+                                                        readable_models=bike_part.model().properties[:2],
+                                                        writable_models=bike_part.model().properties[3:])
+
+        self.assertIsInstance(widget, PropertygridWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_service_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         service_gears_successful = self.project.service("Service Gears - Successful")
 
-        widget_manager.add_service_widget(service=service_gears_successful)
-        widget_manager.add_service_widget(service=service_gears_successful,
-                                          custom_title=None,
-                                          custom_button_text="Run this script (Custom!) and no title",
-                                          emphasize_run=True,
-                                          download_log=True)
-        widget_manager.add_service_widget(service=service_gears_successful,
-                                          custom_title="Also a custom title, but no log",
-                                          custom_button_text="Run this script (Custom!)",
-                                          emphasize_run=False,
-                                          show_log=False)
+        widget1 = widget_manager.add_service_widget(service=service_gears_successful)
+        widget2 = widget_manager.add_service_widget(service=service_gears_successful,
+                                                    custom_title=None,
+                                                    custom_button_text="Run this script (Custom!) and no title",
+                                                    emphasize_run=True,
+                                                    download_log=True)
+        widget3 = widget_manager.add_service_widget(service=service_gears_successful,
+                                                    custom_title="Also a custom title, but no log",
+                                                    custom_button_text="Run this script (Custom!)",
+                                                    emphasize_run=False,
+                                                    show_log=False)
+
+        self.assertIsInstance(widget1, ServiceWidget)
+        self.assertIsInstance(widget2, ServiceWidget)
+        self.assertIsInstance(widget3, ServiceWidget)
+        self.assertEqual(len(widget_manager), 1 + 3)
 
     def test_add_html_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
-        widget_manager.add_html_widget(html='Or is this just fantasy?',
+        widget = widget_manager.add_html_widget(html='Or is this just fantasy?',
                                        custom_title='Is this the real life?')
+
+        self.assertIsInstance(widget, HtmlWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
+
+    def test_metapanel_widget(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        widget_manager.add_metapanel_widget(
+            show_all=True,
+            show_progress=True,
+            show_progressbar=True
+        )
+
+        self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_delete_all_widgets(self):
         """Delete all widgets from an activity"""
@@ -260,3 +293,34 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertEqual(len(widget_manager), 0)
         self.assertEqual(len(self.task.widgets()), 0)
+
+    def test_notebook_widget(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        notebook = self.project.service(name="Service Gears - Successful")
+        widget_manager.add_notebook_widget(notebook=notebook,
+                                           custom_title=False)
+
+        widget_manager.add_notebook_widget(notebook=notebook,
+                                           custom_title="With custom title")
+
+        widget_manager.add_notebook_widget(notebook=notebook.id,
+                                           custom_title="With no padding and custom height",
+                                           height=400,
+                                           noPadding=True)
+
+        with self.assertRaises(IllegalArgumentError):
+            widget_manager.add_notebook_widget(notebook="This will raise an error")
+
+    def test_multicolumn_widget(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        bike_part = self.project.part('Bike')
+        picture_instance = bike_part.property('Picture')
+        picture_model = picture_instance.model()
+        multi_column_widget = widget_manager.add_multicolumn_widget(custom_title="Multi column Grid + Attachment")
+        widget_manager.add_propertygrid_widget(part_instance=bike_part,
+                                               writable_models=[picture_model],
+                                               parent_widget=multi_column_widget)
+
+        widget_manager.add_attachmentviewer_widget(
+            attachment_property=picture_instance, parent_widget=multi_column_widget.id
+        )

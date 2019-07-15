@@ -345,16 +345,39 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_attachmentviewer_widget(self, attachment_property, custom_title=False, height=None,
-                                    alignment=None,
-                                    readable_models=None, parent_widget=None, **kwargs):
+    def add_attachmentviewer_widget(self, attachment_property, custom_title=False, alignment=None, **kwargs):
         # type: (Union[Text, Property2], Optional[Text, bool], Optional[int], Optional[Text], Optional[Iterable], Optional[Widget,Text], **Any) -> Widget  # noqa
+        """
+        Add a KE-chain Attachment widget widget manager.
+        The widget will be saved to KE-chain.
 
+        :param attachment_property: KE-chain Attachment property to display
+        :type attachment_property: AttachmentProperty
+        :param custom_title: A custom title for the script widget
+            * False (default): Script name
+            * String value: Custom title
+            * None: No title
+        :type custom_title: bool or basestring or None
+        :param alignment: Alignment of the previewed attachment
+        :type alignment: basestring or None
+        :return:
+        """
         attachment_property = _retrieve_object(attachment_property, client=self._client)  # type: Property2
         meta = _initiate_meta(kwargs, activity_id=self._activity_id)
 
+        # TODO: Add enumeration for alignment
+        if alignment and alignment not in ['left', 'right', 'center']:
+            raise IllegalArgumentError('Alignment must be either `left`, `right` or `center`')
+
+        if 'height' in kwargs:
+            # TODO: Pending deprecation 3.4.0.
+            warnings.warn(PendingDeprecationWarning, '`height` attribute will be deprecated in version 3.4.0, please '
+                                                     'adapt your code accordingly to use `custom_height`')
+            kwargs['custom_height'] = kwargs.pop('height')
+
         meta.update({
             "propertyInstanceId": attachment_property.id,
+            "alignment": alignment
         })
 
         meta, title = _set_title(meta, custom_title, default_title=attachment_property.name)
@@ -364,7 +387,7 @@ class WidgetsManager(Sized):
             title=title,
             order=kwargs.get("order"),
             parent=kwargs.get("parent_widget"),
-            readable_models=[attachment_property.id],
+            readable_models=[attachment_property.model()],
         )
 
         return widget
@@ -552,8 +575,6 @@ class WidgetsManager(Sized):
         :type parent_widget: Widget or str or None
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
-        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
-
         # Check whether the script is uuid type or class `Service`
         from pykechain.models import Service
         if isinstance(service, Service):
@@ -564,6 +585,8 @@ class WidgetsManager(Sized):
         else:
             raise IllegalArgumentError("When using the add_script_widget, script must be a Service or Service id. "
                                        "Type is: {}".format(type(service)))
+
+        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
 
         # Add custom button text
         if custom_button_text is False:
@@ -597,6 +620,13 @@ class WidgetsManager(Sized):
 
         return widget
 
+    # TODO: this is pending deprecation in version 3.4.0
+    def add_text_widget(self, *args, **kwargs):
+        """Add a KE-chain HTML widget to the activity."""
+        warnings.warn(PendingDeprecationWarning, "The `add_text_widget()` method will be deprecated in favor of "
+                                                 "`add_html_widget` in version 3.4.0")
+        return self.add_html_widget(*args, **kwargs)
+
     def add_html_widget(self, html, custom_title=None, **kwargs):
         """
         Add a KE-chain HTML widget to the widget manager.
@@ -618,8 +648,8 @@ class WidgetsManager(Sized):
                                        format(type(html)))
 
         meta = _initiate_meta(kwargs, activity_id=self._activity_id)
-
         meta, title = _set_title(meta, custom_title, default_title=None)
+
         meta["htmlContent"] = html
 
         widget = self.create_widget(
@@ -630,6 +660,134 @@ class WidgetsManager(Sized):
             parent=kwargs.get("parent_widget")
         )
         return widget
+
+    def add_notebook_widget(self, notebook, custom_title=False, parent_widget=None, **kwargs):
+        """
+        Add a KE-chain Notebook (e.g. notebook widget) to the WidgetManager.
+
+        The widget will be saved to KE-chain.
+
+        :param notebook: The Notebook to which the button will be coupled and will start when the button is pressed.
+        :type notebook: :class:`Service` or UUID
+        :param custom_title: A custom title for the notebook widget
+            * False (default): Notebook name
+            * String value: Custom title
+            * None: No title
+        :type custom_title: bool or basestring or None
+        :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or str or None
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        """
+
+        # Check whether the notebook is uuid type or class `Service`
+        from pykechain.models import Service
+        if isinstance(notebook, Service):
+            notebook_id = notebook.id
+        elif isinstance(notebook, (string_types, text_type)) and is_uuid(notebook):
+            notebook_id = notebook
+            notebook = self._client.service(id=notebook_id)
+        else:
+            raise IllegalArgumentError("When using the add_notebook_widget, notebook must be a Service or Service id. "
+                                       "Type is: {}".format(type(notebook)))
+
+        if 'height' in kwargs:
+            # TODO: Pending deprecation 3.4.0.
+            warnings.warn(PendingDeprecationWarning, '`height` attribute will be deprecated in version 3.4.0, please '
+                                                     'adapt your code accordingly to use `custom_height`')
+            kwargs['custom_height'] = kwargs.pop('height')
+
+        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
+
+        meta, title = _set_title(meta, custom_title, default_title=notebook.name)
+
+        meta.update({
+            'serviceId': notebook_id
+        })
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.NOTEBOOK,
+            title=title,
+            meta=meta,
+            parent=parent_widget,
+            order=kwargs.get("order")
+        )
+
+        return widget
+
+    def add_metapanel_widget(self, show_all=True,
+                             show_due_date=None, show_start_date=None,
+                             show_title=None, show_status=None, show_progress=None,
+                             show_assignees=None, show_breadcrumbs=None, show_menu=None,
+                             show_progressbar=None, **kwargs):
+        # type: (bool, Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], **Any) -> Widget
+        meta = _initiate_meta(kwargs, activity_id=self._activity_id)
+
+        if show_all:
+            meta['showAll'] = True
+        else:
+            meta.update(dict(
+                showAll=False,
+                showDueDate=show_due_date,
+                showStartDate=show_start_date,
+                showTitle=show_title,
+                showStatus=show_status,
+
+                showAssignees=show_assignees,
+                showBreadcrumbs=show_breadcrumbs,
+                showMenu=show_menu,
+                # if the progress = True -> bar = False. Also when the bar is set to True,
+                # if progress=False and Bar=True, the bar is True
+                # if progress=False and Bar=False, both are False
+                showProgress=show_progress and not show_progressbar or show_progress,
+                showProgressbar=show_progressbar and not show_progress
+            ))
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.METAPANEL,
+            title=kwargs.pop('title', WidgetTypes.METAPANEL),
+            meta=meta,
+            **kwargs
+        )
+        return widget
+
+    def add_multicolumn_widget(self, custom_title=None, **kwargs):
+        """
+        Add a KE-chain Multi Column widget to the WidgetManager.
+
+        The widget will be saved to KE-chain.
+
+        :param custom_title: A custom title for the multi column widget
+            * False: Widget id
+            * String value: Custom title
+            * None (default): No title
+        :type custom_title: bool or basestring or None
+        :param height: The height of the Notebook in pixels
+        :type height: int or None
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        """
+
+        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
+        meta, title = _set_title(meta, custom_title, default_title=WidgetTypes.MULTICOLUMN)
+
+        if 'height' in kwargs:
+            # TODO: Pending deprecation 3.4.0.
+            warnings.warn(PendingDeprecationWarning, '`height` attribute will be deprecated in version 3.4.0, please '
+                                                     'adapt your code accordingly to use `custom_height`')
+            kwargs['custom_height'] = kwargs.pop('height')
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.MULTICOLUMN,
+            title=title,
+            meta=meta,
+            parent=None,
+            order=kwargs.get("order")
+        )
+
+        return widget
+
+    #
+    # Widget manager methods
+    #
 
     def add_scope_widget(self, team, custom_title=None, show_columns=None, show_all_columns=True, tags=None,
                          sorted_column=ScopeWidgetColumnTypes.PROJECT_NAME, sorted_direction=SortTable.ASCENDING,
