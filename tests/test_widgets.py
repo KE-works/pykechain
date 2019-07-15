@@ -4,7 +4,6 @@ import os
 from pykechain.enums import WidgetTypes
 from pykechain.models import Activity
 from pykechain.models.widgets import UndefinedWidget, HtmlWidget
-
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
@@ -37,7 +36,7 @@ class TestWidgets(TestBetamax):
 
     def test_widget_attributes(self):
         attributes = ['_client', '_json_data', 'id', 'created_at', 'updated_at', 'ref',
-                      'widget_type', 'title', 'meta', 'order', '_activity_id','_parent_id',
+                      'widget_type', 'title', 'meta', 'order', '_activity_id', '_parent_id',
                       'has_subwidgets', '_scope_id', 'progress']
 
         obj = self.project.activity('Specify wheel diameter').widgets()[0]
@@ -46,13 +45,14 @@ class TestWidgets(TestBetamax):
             self.assertTrue(hasattr(obj, attribute),
                             "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
 
+
 class TestWidgetsValidation(SixTestCase):
 
     def test_create_widgets_from_all_widget_test_activity(self):
         """Test a comprehensive list with all widgets created with the form editor. (JUN19)"""
         fn = 'test_activity_widgets.json'
 
-        filepath = os.path.join(os.path.dirname(__file__), 'files', 'widget_tests', fn )
+        filepath = os.path.join(os.path.dirname(__file__), 'files', 'widget_tests', fn)
         with open(filepath) as fd:
             widget_raw_jsons = json.load(fd)
         for widget in widget_raw_jsons:
@@ -81,7 +81,7 @@ class TestWidgetManager(TestBetamax):
         activity = self.project.activity('Task - Form + Tables + Service')
         widgets = activity.widgets()
         self.assertIsInstance(widgets, WidgetsManager)
-        self.assertTrue(len(widgets) >=5)
+        self.assertTrue(len(widgets) >= 5)
 
         self.assertTrue(widgets[0].widget_type, WidgetTypes.METAPANEL)
 
@@ -110,13 +110,12 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.frame = self.project.part(name='Frame')
         self.frame_model = self.project.model(name='Frame')
 
-
     def tearDown(self):
         # self.task.delete()
         super(TestWidgetManagerInActivity, self).tearDown()
 
     def test_new_widget_using_widget_manager(self):
-        widgets = self.task.widgets()  #type: WidgetsManager
+        widgets = self.task.widgets()  # type: WidgetsManager
 
         self.assertEqual(len(widgets), 1)
         metapanel = widgets[0]
@@ -129,14 +128,13 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertIsInstance(htmlwidget, HtmlWidget)
 
-
     def test_property_grid_with_associations_using_widget_manager(self):
         widgets = self.task.widgets()  # type: WidgetsManager
 
         widgets.create_widget(
             widget_type=WidgetTypes.PROPERTYGRID,
             title="Frame Property Grid",
-            meta = dict(
+            meta=dict(
                 activityId=str(self.task.id),
                 partInstanceId=str(self.frame.id)
             ),
@@ -161,10 +159,18 @@ class TestWidgetManagerInActivity(TestBetamax):
         widgets.create_widget(
             widget_type=WidgetTypes.ATTACHMENTVIEWER,
             title="Attachment Viewer",
-            meta = dict(
+            meta=dict(
                 activityId=str(self.task.id),
                 propertyInstanceId=str(foto_property.id)
             ),
             readable_models=[foto_property.model_id]
         )
 
+    def test_add_super_grid_widget(self):
+        widgets = self.task.widgets()  # type: WidgetsManager
+        part_model = self.project.model(name='Bike')
+        widgets.add_super_grid_widget(
+            part_model=part_model,
+            writable_models=part_model.properties
+        )
+        print()
