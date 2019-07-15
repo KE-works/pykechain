@@ -88,7 +88,7 @@ class TestExtCustomization(TestBetamax):
         """
         custom_title = "my title"
 
-        self.customization.add_property_grid_widget(self.instances[0], None, custom_title)
+        self.customization.add_property_grid_widget(self.instances[0], custom_title, None)
 
         self.assertEqual(len(self.customization.widgets()), 1, "The customization should have 1 widget")
         self.assertTrue(self.customization.widgets()[0]["name"] == "propertyGridWidget",
@@ -100,7 +100,7 @@ class TestExtCustomization(TestBetamax):
         """
         Test if a Property Grid Widget can be added to the customization without a title
         """
-        self.customization.add_property_grid_widget(self.instances[0], max_height=None, custom_title=None)
+        self.customization.add_property_grid_widget(self.instances[0], custom_title=None, max_height=None)
 
         self.assertEqual(len(self.customization.widgets()), 1, "The customization should have 1 widget")
         self.assertTrue(self.customization.widgets()[0]["name"] == "propertyGridWidget",

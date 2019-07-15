@@ -186,9 +186,8 @@ class TestWidgetManagerInActivity(TestBetamax):
         widgets = self.task.widgets()  # type: WidgetsManager
         bike_part = self.project.part(name='Bike')
         widgets.add_property_grid_widget(part_instance=bike_part,
-                                         show_headers=False,
-                                         show_columns=[ShowColumnTypes.UNIT],
                                          custom_title="Testing the customtitle of a property grid widget",
+                                         show_headers=False, show_columns=[ShowColumnTypes.UNIT],
                                          readable_models=bike_part.model().properties[:2],
                                          writable_models=bike_part.model().properties[3:])
         print()
