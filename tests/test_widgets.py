@@ -5,7 +5,7 @@ from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity
 from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, \
-    SupergridWidget, FilteredgridWidget, TasknavigationbarWidget
+    SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, ServiceWidget
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
@@ -234,37 +234,42 @@ class TestWidgetManagerInActivity(TestBetamax):
     def test_add_propertygrid_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         bike_part = self.project.part(name='Bike')
-        widget_manager.add_propertygrid_widget(part_instance=bike_part,
-                                               custom_title="Testing the customtitle of a property grid widget",
-                                               show_headers=False, show_columns=[ShowColumnTypes.UNIT],
-                                               readable_models=bike_part.model().properties[:2],
-                                               writable_models=bike_part.model().properties[3:])
+        widget = widget_manager.add_propertygrid_widget(part_instance=bike_part,
+                                                        custom_title="Testing the customtitle of a property grid widget",
+                                                        show_headers=False, show_columns=[ShowColumnTypes.UNIT],
+                                                        readable_models=bike_part.model().properties[:2],
+                                                        writable_models=bike_part.model().properties[3:])
 
+        self.assertIsInstance(widget, PropertygridWidget)
         self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_service_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         service_gears_successful = self.project.service("Service Gears - Successful")
 
-        widget_manager.add_service_widget(service=service_gears_successful)
-        widget_manager.add_service_widget(service=service_gears_successful,
-                                          custom_title=None,
-                                          custom_button_text="Run this script (Custom!) and no title",
-                                          emphasize_run=True,
-                                          download_log=True)
-        widget_manager.add_service_widget(service=service_gears_successful,
-                                          custom_title="Also a custom title, but no log",
-                                          custom_button_text="Run this script (Custom!)",
-                                          emphasize_run=False,
-                                          show_log=False)
+        widget1 = widget_manager.add_service_widget(service=service_gears_successful)
+        widget2 = widget_manager.add_service_widget(service=service_gears_successful,
+                                                    custom_title=None,
+                                                    custom_button_text="Run this script (Custom!) and no title",
+                                                    emphasize_run=True,
+                                                    download_log=True)
+        widget3 = widget_manager.add_service_widget(service=service_gears_successful,
+                                                    custom_title="Also a custom title, but no log",
+                                                    custom_button_text="Run this script (Custom!)",
+                                                    emphasize_run=False,
+                                                    show_log=False)
 
+        self.assertIsInstance(widget1, ServiceWidget)
+        self.assertIsInstance(widget2, ServiceWidget)
+        self.assertIsInstance(widget3, ServiceWidget)
         self.assertEqual(len(widget_manager), 1 + 3)
 
     def test_add_html_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
-        widget_manager.add_html_widget(html='Or is this just fantasy?',
+        widget = widget_manager.add_html_widget(html='Or is this just fantasy?',
                                        custom_title='Is this the real life?')
 
+        self.assertIsInstance(widget, HtmlWidget)
         self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_metapanel_widget(self):
