@@ -242,7 +242,7 @@ class ExtCustomization(CustomizationBase):
             part_model_id = part_model
             part_model = self._client.model(id=part_model_id)
         else:
-            raise IllegalArgumentError("When using the add_super_grid_widget, part_model must be a Part or Part id. "
+            raise IllegalArgumentError("When using the add_supergrid_widget, part_model must be a Part or Part id. "
                                        "Type is: {}".format(type(part_model)))
 
         # Check whether the parent_part_instance is uuid type or class `Part`
@@ -254,7 +254,7 @@ class ExtCustomization(CustomizationBase):
         elif isinstance(parent_part_instance, type(None)):
             parent_part_instance_id = None
         else:
-            raise IllegalArgumentError("When using the add_super_grid_widget, parent_part_instance must be a "
+            raise IllegalArgumentError("When using the add_supergrid_widget, parent_part_instance must be a "
                                        "Part, Part id or None. Type is: {}".format(type(parent_part_instance)))
 
         # Check whether the sort_property is uuid type or class `Property`
@@ -266,7 +266,7 @@ class ExtCustomization(CustomizationBase):
         elif isinstance(sort_property, type(None)):
             sort_property_id = None
         else:
-            raise IllegalArgumentError("When using the add_super_grid_widget, sort_property must be a "
+            raise IllegalArgumentError("When using the add_supergrid_widget, sort_property must be a "
                                        "Property, Property id or None. Type is: {}".format(type(sort_property)))
 
         # Assertions
