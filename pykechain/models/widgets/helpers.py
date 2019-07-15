@@ -58,6 +58,9 @@ def _set_title(meta, custom_title, default_title=None):
         "customTitle": title
     })
 
+    if not title:
+        title = default_title
+
     return meta, title
 
 
