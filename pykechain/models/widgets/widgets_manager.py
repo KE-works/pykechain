@@ -1,5 +1,5 @@
 import bisect
-from typing import Sized, Any, Iterable, Union, AnyStr, Optional
+from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text
 
 import requests
 from six import string_types, text_type
@@ -169,10 +169,34 @@ class WidgetsManager(Sized):
             title=title,
             meta=meta,
             order=kwargs.get("order"),
+            parent=kwargs.get("parent_widget"),
             readable_models=readable_models,
             writable_models=writable_models
         )
-        print()
+        return widget
+
+    def add_attachmentviewer_widget(self, attachment_property, custom_title=False, height=None,
+                                    alignment=None,
+                                    readable_models=None, parent_widget=None, **kwargs):
+        # type: (Union[Text, Property2], Optional[Text, bool], Optional[int], Optional[Text], Optional[Iterable], Optional[Widget,Text], **Any) -> Widget  # noqa
+
+        attachment_property = _retrieve_object(attachment_property, client=self._client)
+        meta = _initiate_meta(kwargs, activity_id=self._activity_id)
+
+        meta.update({
+            "propertyInstanceId": attachment_property.id,
+        })
+
+        meta, title = _set_title(meta, custom_title, default_title=attachment_property.name)
+        widget = self.create_widget(
+            widget_type=WidgetTypes.ATTACHMENTVIEWER,
+            meta=meta,
+            title=title,
+            order=kwargs.get("order"),
+            parent=kwargs.get("parent_widget"),
+            readable_models=[attachment_property.id],
+        )
+
         return widget
 
     def insert(self, index, widget):
