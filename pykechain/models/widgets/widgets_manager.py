@@ -7,8 +7,7 @@ from six import string_types, text_type
 from pykechain.enums import SortTable, WidgetTypes
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
-from pykechain.models.widgets.helpers import _retrieve_part_model, _retrieve_parent_instance, \
-    _retrieve_sort_property_id, _set_title, _initiate_meta
+from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id
 from pykechain.utils import is_uuid, find
 
 
@@ -124,33 +123,16 @@ class WidgetsManager(Sized):
         return widget
 
     def add_super_grid_widget(self, part_model, parent_instance=None, custom_title=False,
-                              delete=False, edit=True, export=True, clone=True, incomplete_rows=True, add=False,
-                              emphasize_edit=False, emphasize_add=True,
+                              delete=False, edit=True, export=True, clone=True, incomplete_rows=True,
+                              new_instance=True, emphasize_edit=False, emphasize_new_instance=True,
                               emphasize_clone=False, emphasize_delete=False, sort_property=None,
-                              sort_direction=SortTable.ASCENDING, readable_models=None, writable_models=None, **kwargs):
-        """
+                              sort_direction=SortTable.ASCENDING, readable_models=None, writable_models=None,
+                              all_readable=False, all_writable=False, **kwargs):
 
-        :param part_model:
-        :param parent_instance:
-        :param delete:
-        :param edit:
-        :param export:
-        :param clone:
-        :param incomplete_rows:
-        :param add:
-        :param emphasize_edit:
-        :param emphasize_add:
-        :param emphasize_clone:
-        :param emphasize_delete:
-        :param sort_property_id:
-        :param sort_direction:
-        :param kwargs:
-        :return:
-        """
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_part_model(part_model, client=self._client)  # type: Part2
-        parent_instance = _retrieve_parent_instance(parent_instance=parent_instance, client=self._client)  # type: Part2
-        sort_property_id = _retrieve_sort_property_id(sort_property=sort_property)  # type: text_type
+        part_model = _retrieve_object(ke_chain_object=part_model, client=self._client)  # type: Part2
+        parent_instance = _retrieve_object_id(ke_chain_object=parent_instance)  # type: Part2
+        sort_property_id = _retrieve_object_id(ke_chain_object=sort_property)  # type: text_type
 
         meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
         meta.update({
@@ -161,21 +143,24 @@ class WidgetsManager(Sized):
             "sortedColumn": sort_property_id if sort_property_id else None,
             "sortDirection": sort_direction,
             # buttons
-            "addButtonVisible": add,
+            "addButtonVisible": new_instance,
             "editButtonVisible": edit,
             "deleteButtonVisible": delete,
-            "cloneButtonVisible": clone,
+            # "cloneButtonVisible": clone,
             "downloadButtonVisible": export,
             "incompleteRowsVisible": incomplete_rows,
             # "incompleteRowsButtonVisible": def_bool,
-            "primaryAddUiValue": emphasize_add,
+            "primaryAddUiValue": emphasize_new_instance,
             "primaryEditUiValue": emphasize_edit,
             "primaryCloneUiValue": emphasize_clone,
             "primaryDeleteUiValue": emphasize_delete,
         })
 
         if parent_instance:
-            meta['parentInstanceId'] = parent_instance.id
+            meta['parentInstanceId'] = parent_instance
+
+        if all_readable and not readable_models:
+            readable_models = part_model.properties
 
         meta, title = _set_title(meta, custom_title, default_title=part_model.name)
 

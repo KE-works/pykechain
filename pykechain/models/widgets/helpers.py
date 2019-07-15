@@ -6,57 +6,39 @@ from pykechain.exceptions import IllegalArgumentError
 from pykechain.utils import is_uuid
 
 
-def _retrieve_part_model(part_model, client):
-    # type: (Union[Part2,Text], Client) -> Part2  # noqa
+def _retrieve_object(ke_chain_object, client):
+    # type: (Union[Part2, Property2, Text], Client) -> (Union[Part2, Property2])  # noqa
     """
 
     :param part:
     :return:
     """
     # Check whether the part_model is uuid type or class `Part`
-    from pykechain.models import Part, Part2
-    if isinstance(part_model, (Part, Part2)):
-        return part_model
-    elif isinstance(part_model, text_type) and is_uuid(part_model):
-        part_model_id = part_model
+    from pykechain.models import Part, Part2, Property, Property2
+    if isinstance(ke_chain_object, (Part, Part2, Property, Property2)):
+        return ke_chain_object
+    elif isinstance(ke_chain_object, text_type) and is_uuid(ke_chain_object):
+        part_model_id = ke_chain_object
         part_model = client.model(id=part_model_id)
         return part_model
     else:
-        raise IllegalArgumentError("When using the add_super_grid_widget, part_model must be a Part or Part id. "
-                                   "Type is: {}".format(type(part_model)))
+        raise IllegalArgumentError("When adding the widget, ke_chain_object must be a Part, Property,"
+                                   " Part id or Property id. Type is: {}".format(type(ke_chain_object)))
 
 
-def _retrieve_parent_instance(parent_instance, client):
-    # type: (Optional[Union[Part2, Text]], Client) -> Part2  # noqa
+def _retrieve_object_id(ke_chain_object):
+    # type: (Optional[Union[Part2, Property2, Text]]) -> Optional[Text]  # noqa
     # Check whether the parent_part_instance is uuid type or class `Part`
-    from pykechain.models import Part, Part2
-    if isinstance(parent_instance, (Part, Part2)):
-        return parent_instance
-    elif isinstance(parent_instance, text_type) and is_uuid(parent_instance):
-        parent_instance_id = parent_instance
-        parent_instance = client.part(id=parent_instance_id)
-        return parent_instance
-    elif isinstance(parent_instance, type(None)):
-        return parent_instance
-    else:
-        raise IllegalArgumentError("When using the add_super_grid_widget, parent_part_instance must be a "
-                                   "Part, Part id or None. Type is: {}".format(type(parent_instance)))
-
-
-def _retrieve_sort_property_id(sort_property):
-    # type: (Optional[Union[Property2,Text]]) -> Optional[Text]  # noqa
-
-    # Check whether the sort_property is uuid type or class `Property`
-    from pykechain.models import Property2
-    if isinstance(sort_property, Property2):
-        return sort_property.id
-    elif isinstance(sort_property, text_type) and is_uuid(sort_property):
-        return sort_property
-    elif isinstance(sort_property, type(None)):
+    from pykechain.models import Part, Part2, Property, Property2
+    if isinstance(ke_chain_object, (Part, Part2, Property, Property2)):
+        return ke_chain_object.id
+    elif isinstance(ke_chain_object, text_type) and is_uuid(ke_chain_object):
+        return ke_chain_object
+    elif isinstance(ke_chain_object, type(None)):
         return None
     else:
-        raise IllegalArgumentError("When using the add_paginated_grid_widget, sort_property must be a "
-                                   "Property, Property id or None. Type is: {}".format(type(sort_property)))
+        raise IllegalArgumentError("When adding the widget, ke_chain_object must be a Part, Property,"
+                                   " Part id or Property id. Type is: {}".format(type(ke_chain_object)))
 
 
 def _set_title(meta, custom_title, default_title=None):
