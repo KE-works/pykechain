@@ -330,6 +330,80 @@ class WidgetsManager(Sized):
         )
         return widget
 
+    def add_service_widget(self, service, custom_title=False, custom_button_text=False, emphasize_run=True,
+                           download_log=False, parent_widget=None, **kwargs):
+        """
+        Add a KE-chain Service (e.g. script widget) to the widget manager.
+
+        The widget will be saved to KE-chain.
+
+        :param service: The Service to which the button will be coupled and will be ran when the button is pressed.
+        :type service: :class:`Service` or UUID
+        :param custom_title: A custom title for the script widget
+            * False (default): Script name
+            * String value: Custom title
+            * None: No title
+        :type custom_title: bool or basestring or None
+        :param custom_button_text: A custom text for the button linked to the script
+            * False (default): Script name
+            * String value: Custom title
+            * None: No title
+        :type custom_button_text: bool or basestring or None
+        :param emphasize_run: Emphasize the run button (default True)
+        :type emphasize_run: bool
+        :param download_log: Include the possibility of downloading the log inside the activity (default False)
+        :type download_log: bool
+        :param download_log: Include the log message inside the activity (default True)
+        :type download_log: bool
+        :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or str or None
+        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        """
+        meta = _initiate_meta(kwargs=kwargs, activity_id=self._activity_id)
+
+        # Check whether the script is uuid type or class `Service`
+        from pykechain.models import Service
+        if isinstance(service, Service):
+            script_id = service.id
+        elif isinstance(service, (string_types, text_type)) and is_uuid(service):
+            script_id = service
+            service = self._client.service(id=script_id)
+        else:
+            raise IllegalArgumentError("When using the add_script_widget, script must be a Service or Service id. "
+                                       "Type is: {}".format(type(service)))
+
+        # Add custom button text
+        if custom_button_text is False:
+            show_button_value = "Default"
+            button_text = service.name
+        elif custom_button_text is None:
+            show_button_value = "No text"
+            button_text = ''
+        else:
+            show_button_value = "Custom text"
+            button_text = str(custom_button_text)
+
+        meta.update({
+            'showButtonValue': show_button_value,
+            'customText': button_text,
+            'serviceId': script_id,
+            'emphasizeButton': emphasize_run,
+            'showDownloadLog': download_log,
+            'showLog': kwargs.get('show_log', True)
+        })
+
+        meta, title = _set_title(meta, custom_title, default_title=service.name)
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.SERVICE,
+            title=title,
+            meta=meta,
+            parent=parent_widget,
+            order=kwargs.get("order")
+        )
+
+        return widget
+
     def insert(self, index, widget):
         # type: (int, Widget) -> None
         """
