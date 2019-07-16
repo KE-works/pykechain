@@ -1013,16 +1013,16 @@ class WidgetsManager(Sized):
         fvalues = [dict(id=w.id, order=index) for index, w in enumerate(self._widgets)]
 
         from pykechain.client import API_EXTRA_PARAMS
-        response = self._client._request("PUT", self._client._build_url('widgets'),
+        response = self._client._request("PUT", self._client._build_url('widgets_bulk_update'),
                                          params=API_EXTRA_PARAMS['widgets'],
-                                         data=fvalues)
+                                         json=fvalues)
 
         if response.status_code != requests.codes.ok:
             raise APIError("Could not update the order of the widgets: {}: {}".format(str(response), response.content))
 
         widgets_response = response.json().get('results')
-        for widget, updated_response in self._widgets, widgets_response:
-            widget.refresh(json=updated_response)
+        new_widgets = [Widget.create(json=widget_json, client=self._client) for widget_json in widgets_response]
+        self._widgets = new_widgets
 
     def delete_widget(self, key):
         # type: (Any) -> bool
