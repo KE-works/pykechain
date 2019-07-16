@@ -38,6 +38,10 @@ class Widget(Base):
         self.title = json.get('title')
         self.ref = json.get('ref')
         self.widget_type = json.get('widget_type')
+        # set schema
+        if self._client:
+            self.schema = self._client.widget_schema(self.widget_type)
+
         self.meta = self.validate_meta(json.get('meta'))
         self.order = json.get('order')
         self._activity_id = json.get('activity_id')
