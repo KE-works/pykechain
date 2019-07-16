@@ -564,7 +564,8 @@ class WidgetsManager(Sized):
 
         if all_readable and not readable_models:
             readable_models = part_instance.model().properties
-        elif not writable_models:
+            writable_models = []
+        elif not writable_models and not readable_models:
             writable_models = part_instance.model().properties
 
         widget = self.create_widget(
