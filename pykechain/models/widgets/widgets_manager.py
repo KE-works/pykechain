@@ -1,4 +1,3 @@
-import bisect
 import warnings
 from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text
 
@@ -989,10 +988,10 @@ class WidgetsManager(Sized):
         """
         Insert a widget at index n, shifting the rest of the list to the right.
 
-        if widget order is `[w0,w1,w2]` and inserting `w4` at index 2 (before Widget1);
+        if widget order is `[w0,w1,w2]` and inserting `w4` at index 1 (before Widget1);
         the list will be `[w0,w4,w1,w2]`
 
-        :param index: integer (position) starting from 1 at first position in which the widget is inserted
+        :param index: integer (position) starting from 0 at first position in which the widget is inserted
         :type index: int
         :param widget: Widget object to insert
         :type widget: Widget
@@ -1004,8 +1003,9 @@ class WidgetsManager(Sized):
             raise IndexError("The index is out of range. "
                              "The list of widgets is '{}' widget(s) long.".format(self.__len__()))
 
-        # TODO check if this works
-        bisect.insort(self._widgets, widget)
+        if widget in self._widgets:
+            self._widgets.remove(widget)
+        self._widgets.insert(index, widget)
 
         # bulk update the order of the widgets:
         fvalues = [dict(id=w.id, order=index) for index, w in enumerate(self._widgets)]
