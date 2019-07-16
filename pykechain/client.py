@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Dict, Tuple, Optional, Any, List, Union, AnyStr  # noqa: F401 pragma: no cover
+from typing import Dict, Tuple, Optional, Any, List, Union, AnyStr, Text  # noqa: F401 pragma: no cover
 
 import requests
 from envparse import env
@@ -19,7 +19,7 @@ from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
-from pykechain.utils import is_uuid
+from pykechain.utils import is_uuid, find
 from .__about__ import version
 
 API_PATH = {
@@ -80,6 +80,7 @@ API_PATH = {
     'widget_update_associations': 'api/widgets/{widget_id}/update_associations.json',
     'widgets_bulk_delete': 'api/widgets/bulk_delete',
     'widgets_bulk_update': 'api/widgets/bulk_update',
+    'widgets_schemas': 'api/widgets/schemas',
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
@@ -160,6 +161,7 @@ class Client(object):
         self.last_response = None  # type: Optional[requests.Response]
         self.last_url = None  # type: Optional[str]
         self._app_versions = None  # type: Optional[List[dict]]
+        self._widget_schemas = None  # type: Optional[List[dict]]
 
         if not check_certificates:
             self.session.verify = False
@@ -310,6 +312,55 @@ class Client(object):
                 self._app_versions = response.json().get('results')
 
         return self._app_versions
+
+    @property
+    def widget_schemas(self):
+        # type: () -> List[Dict]
+        """
+        Widget meta schemas for all widgets in KE-chain 3
+
+        In KE-chain 3, the backend provides widget meta schema for each widgettype. A single call
+        per pykechain client session is made (and cached forever in the client) to retrieve all
+        widget schemas.
+
+        ..versionadded:: 3.0
+
+        :return: list of widget meta schemas
+        :rtype: list of dict
+        :raises APIError: When it could not retrieve the widget schemas
+        :raises NotImplementedError: When the KE-chain version is lower than 3.
+        """
+        if self.match_app_version(label='pim', version='<3.0.0'):
+            raise NotImplementedError('Widget schemas is not implemented in KE-chain versions lower that 3.0')
+        if not self._widget_schemas:
+            response = self._request('GET', self._build_url('widgets_schemas'))
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise APIError("Could not retrieve widgets schemas ({})".format((response, response.json())))
+            self._widget_schemas = response.json().get('results')
+
+        return self._widget_schemas
+
+    def widget_schema(self, widget_type):
+        # type: (Text) -> Dict
+        """Widget schema for widget type.
+
+        ..versionadded:: 3.0
+
+        :param widget_type: Type of the widget to return the widgetschema for.
+        :type widget_type: basestring
+        :returns: dictionary with jsonschema to validate the widget meta
+        :rtype: dict
+        :raises APIError: When it could not retrieve the jsonschema from KE-chain
+        :raises NotFoundError: When it could not find the correct schema
+        """
+        if widget_type not in WidgetTypes.values():
+            raise IllegalArgumentError("`widget_type` should be one of "
+                                       "'{}', got '{}'".format(WidgetTypes.values(), widget_type))
+        found = find(self.widget_schemas, lambda ws: ws.get('widget_type') == widget_type)
+        if not found:
+            raise NotFoundError("Could not find a widget_schema for widget_type: `{}`".format(widget_type))
+        return found
+
 
     def match_app_version(self, app=None, label=None, version=None, default=False):
         """Match app version against a semantic version string.

@@ -1,5 +1,6 @@
 import json
 import os
+from unittest import skip
 
 from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment
 from pykechain.exceptions import IllegalArgumentError
@@ -52,7 +53,7 @@ class TestWidgets(TestBetamax):
         self.assertIsInstance(obj, Widget)
         self.assertIsNotNone(obj.meta)
 
-
+@skip('This test is deprecated as we only support online widget_schema checking.')
 class TestWidgetsValidation(SixTestCase):
 
     def test_create_widgets_from_all_widget_test_activity(self):
@@ -63,7 +64,7 @@ class TestWidgetsValidation(SixTestCase):
         with open(filepath) as fd:
             widget_raw_jsons = json.load(fd)
         for widget in widget_raw_jsons:
-            w = Widget.create(json=widget, client=object())
+            w = Widget.create(json=widget, client=False)
             self.assertIsInstance(w, Widget)
             self.assertEqual(w.widget_type, widget.get('widget_type'))
 
@@ -78,7 +79,7 @@ class TestWidgetsValidation(SixTestCase):
         with open(filepath) as fd:
             widget_raw_jsons = json.load(fd)
         for widget in widget_raw_jsons:
-            w = Widget.create(json=widget, client=object())
+            w = Widget.create(json=widget, client=False)
             self.assertIsInstance(w, Widget)
             self.assertEqual(w.widget_type, widget.get('widget_type'))
 
