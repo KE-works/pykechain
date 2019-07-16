@@ -154,7 +154,6 @@ property_grid_meta_schema.update({
         "activityId": def_uuid,
         "partModelId": def_uuid,
         "showHeaders": def_bool,
-        "hideHeaders": def_bool,
         "showColumns": {
             "type": "array",
             "items": [def_nullstring]
@@ -283,7 +282,7 @@ filteredgrid_meta_schema.update({
         "columns": {"type": "array", "items": [def_nulluuid]},
         "sortedColumn": def_nullstring,
         "sortDirection": {"type": "string", "enum": ["ASC", "DESC"]},
-        "hideHeaders": def_bool,
+        "showHeaders": def_bool,
         "customPageSize": def_positive_int,
         # buttons
         "addButtonVisible": def_bool,
@@ -359,7 +358,6 @@ scope_meta_schema.update({
         "isDisabled": def_bool,
         # columns
         "showHeaders": def_bool,
-        "hideHeaders": def_bool,
         "showColumns": {
             "type": "array",
             "items": [def_nullstring]

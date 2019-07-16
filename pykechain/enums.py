@@ -461,6 +461,7 @@ class NavigationBarAlignment(Enum):
     :cvar LEFT: Buttons are aligned to the left (for KE-chain 3)
     :cvar CENTER: Buttons are aligned to the center
     """
+
     CENTER = 'center'
 
     # for KE-chain 2
@@ -570,6 +571,7 @@ class ScopeWidgetColumnTypes(Enum):
     :cvar PROGRESS: Progress
     :cvar STATUS: Status
     """
+
     PROJECT_NAME = 'Project Name'
     START_DATE = 'Start date'
     DUE_DATE = 'Due date'

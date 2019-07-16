@@ -103,7 +103,7 @@ class WidgetsManager(Sized):
         :param widget_type: type of the widget, one of :class:`WidgetTypes`
         :type: string
         :param title: (optional) title of the widget
-        :type title: str or None
+        :type title: basestring or None
         :param meta: meta dictionary of the widget.
         :type meta: dict
         :param order: (optional) order in the activity of the widget.
@@ -114,12 +114,13 @@ class WidgetsManager(Sized):
         :type readable_models: list of properties or list of property id's
         :param writable_models: (optional) list of property model ids to be configured as writable (alias = outputs)
         :type writable_models: list of properties or list of property id's
-        :param kwargs: (optional) additional keyword=value arguments to create widget
-        :type kwargs: dict or None
-        :return: the created subclass of :class:`Widget`
-        :rtype: :class:`Widget`
-        :raises IllegalArgumentError: when an illegal argument is send.
-        :raises APIError: when an API Error occurs.
+        :param kwargs: additional keyword arguments to pass
+        :type kwargs: dict
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
+
         """
         widget = self._client.create_widget(*args, activity=self._activity_id, **kwargs)
 
@@ -137,7 +138,9 @@ class WidgetsManager(Sized):
                              **kwargs):
         """
         Add a KE-chain superGrid (e.g. basic table widget) to the customization.
+
         The widget will be saved to KE-chain.
+
         :param readable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as readable
         :type readable_models: list
         :param writable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as writable
@@ -185,12 +188,17 @@ class WidgetsManager(Sized):
             * ASC (default): Sort in ascending order
             * DESC: Sort in descending order
         :type sort_direction: basestring (see :class:`enums.SortTable`)
-        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        :param kwargs: additional keyword arguments to pass
+        :type kwargs: dict
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_object(ke_chain_object=part_model, client=self._client)  # type: Part2
-        parent_instance = _retrieve_object_id(ke_chain_object=parent_instance)  # type: Part2
-        sort_property_id = _retrieve_object_id(ke_chain_object=sort_property)  # type: text_type
+        part_model = _retrieve_object(obj=part_model, client=self._client)  # type: Part2  # noqa
+        parent_instance = _retrieve_object_id(obj=parent_instance)  # type: Part2  # noqa
+        sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
 
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
         meta.update({
@@ -245,7 +253,9 @@ class WidgetsManager(Sized):
                                 **kwargs):
         """
         Add a KE-chain superGrid (e.g. basic table widget) to the customization.
+
         The widget will be saved to KE-chain.
+
         :param readable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as readable
         :type readable_models: list
         :param writable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as writable
@@ -297,12 +307,17 @@ class WidgetsManager(Sized):
             * ASC (default): Sort in ascending order
             * DESC: Sort in descending order
         :type sort_direction: basestring (see :class:`enums.SortTable`)
-        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        :param kwargs: additional keyword arguments to pass
+        :type kwargs: dict
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_object(ke_chain_object=part_model, client=self._client)  # type: Part2
-        parent_instance_id = _retrieve_object_id(ke_chain_object=parent_instance)  # type: text_type
-        sort_property_id = _retrieve_object_id(ke_chain_object=sort_property)  # type: text_type
+        part_model = _retrieve_object(obj=part_model, client=self._client)  # type: Part2  # noqa
+        parent_instance_id = _retrieve_object_id(obj=parent_instance)  # type: text_type
+        sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
 
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
         meta.update({
@@ -355,6 +370,7 @@ class WidgetsManager(Sized):
         # type: (Union[Text, Property2], Optional[Text, bool], Optional[int], Optional[Text], **Any) -> Widget  # noqa
         """
         Add a KE-chain Attachment widget widget manager.
+
         The widget will be saved to KE-chain.
 
         :param attachment_property: KE-chain Attachment property to display
@@ -366,9 +382,14 @@ class WidgetsManager(Sized):
         :type custom_title: bool or basestring or None
         :param alignment: Alignment of the previewed attachment
         :type alignment: basestring or None
-        :return:
+        :param kwargs: additional keyword arguments to pass
+        :type kwargs: dict
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
         """
-        attachment_property = _retrieve_object(attachment_property, client=self._client)  # type: Property2
+        attachment_property = _retrieve_object(attachment_property, client=self._client)  # type: Property2  # noqa
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
         # TODO: Add enumeration for alignment
@@ -418,7 +439,12 @@ class WidgetsManager(Sized):
             * center (default): Center aligned
             * start: left aligned
         :type alignment: basestring (see :class:`enums.NavigationBarAlignment`)
-        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        :param kwargs: additional keyword arguments to pass
+        :type kwargs: dict
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
         """
         set_of_expected_keys = {'activityId', 'customText', 'emphasized', 'emphasize', 'isDisabled'}
         for activity_dict in activities:
@@ -447,15 +473,15 @@ class WidgetsManager(Sized):
                 raise IllegalArgumentError("Found unexpected key in activities. Only keys allowed are: {}".
                                            format(set_of_expected_keys))
 
-        meta = _initiate_meta(kwargs, activity=self._activity_id, ignores=('showHeightValue'))
+        meta = _initiate_meta(kwargs, activity=self._activity_id, ignores=('showHeightValue',))
         meta['taskButtons'] = activities
 
         # TODO: pending deprecation in version 3.4.0
         if alignment and alignment is NavigationBarAlignment.START:
             warnings.warn(PendingDeprecationWarning, "In KE-chain 3 we use the LEFT alignment, instead of START "
-                                                     "alignment of the task navigationbar widgets. Will be autocorrected"
-                                                     "to LEFT alignment for now. Please correct your code as this is "
-                                                     "pending deprecation at version 3.4.0")
+                                                     "alignment of the task navigationbar widgets. Will be "
+                                                     "autocorrected to LEFT alignment for now. Please correct your "
+                                                     "code as this is pending deprecation at version 3.4.0")
             alignment = NavigationBarAlignment.LEFT
 
         if alignment and alignment not in (NavigationBarAlignment.CENTER, NavigationBarAlignment.LEFT):
@@ -475,7 +501,7 @@ class WidgetsManager(Sized):
     def add_propertygrid_widget(self, part_instance, custom_title=False, max_height=None, show_headers=True,
                                 show_columns=None, parent_widget=None, readable_models=None, writable_models=None,
                                 all_readable=False, **kwargs):
-        # type: (Union[Property2, Text], Optional[Text, bool], Optional[int], bool, Optional[Iterable], Optional[Text, Widget], Optional[Iterable], Optional[Iterable], bool, **Any ) -> Widget
+        # type: (Union[Property2, Text], Optional[Text, bool], Optional[int], bool, Optional[Iterable], Optional[Text, Widget], Optional[Iterable], Optional[Iterable], bool, **Any ) -> Widget  # noqa: E501,F821
         """
         Add a KE-chain Property Grid widget to the customization.
 
@@ -494,7 +520,7 @@ class WidgetsManager(Sized):
         :param show_columns: Columns to be hidden or shown (default to 'unit' and 'description')
         :type show_columns: list
         :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
-        :type parent_widget: Widget or str or None
+        :type parent_widget: Widget or basestring or None
         :param readable_models: list of property model ids to be configured as readable (alias = inputs)
         :type readable_models: list of properties or list of property id's
         :param writable_models: list of property model ids to be configured as writable (alias = outputs)
@@ -502,12 +528,15 @@ class WidgetsManager(Sized):
         :param all_readable: (optional) boolean indicating if all properties should automatically be configured as
         readable (if True) or writable (if False).
         :type all_readable: bool
-        :param kwargs: (optional) additional keyword=value arguments to create widget
-        :type kwargs: dict or None
-        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        :param kwargs: additional keyword arguments to pass
+        :type kwargs: dict
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_instance = _retrieve_object(part_instance, client=self._client)  # type: Part2
+        part_instance = _retrieve_object(part_instance, client=self._client)  # type: Part2  # noqa
 
         if not show_columns:
             show_columns = list()
@@ -575,8 +604,13 @@ class WidgetsManager(Sized):
         :param download_log: Include the log message inside the activity (default True)
         :type download_log: bool
         :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
-        :type parent_widget: Widget or str or None
-        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        :type parent_widget: Widget or basestring or None
+        :param kwargs: additional keyword arguments to pass
+        :type kwargs: dict
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
         """
         # Check whether the script is uuid type or class `Service`
         from pykechain.models import Service
@@ -626,7 +660,9 @@ class WidgetsManager(Sized):
     def add_html_widget(self, html, custom_title=None, **kwargs):
         """
         Add a KE-chain HTML widget to the widget manager.
+
         The widget will be saved to KE-chain.
+
         :param html: The text that will be shown by the widget.
         :type html: basestring or None
         :param custom_title: A custom title for the text panel::
@@ -637,7 +673,12 @@ class WidgetsManager(Sized):
         :type collapsible: bool
         :param collapsed: A boolean to decide whether the panel is collapsed or not (default False)
         :type collapsible: bool
-        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        :param kwargs: additional keyword arguments to pass
+        :type kwargs: dict
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
         """
         if not isinstance(html, text_type):
             raise IllegalArgumentError("Text injected in the HTML widget must be string. Type is: {}".
@@ -671,11 +712,15 @@ class WidgetsManager(Sized):
             * None: No title
         :type custom_title: bool or basestring or None
         :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
-        :type parent_widget: Widget or str or None
-        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
-        """
+        :type parent_widget: Widget or basestring or None
+        :param kwargs: additional keyword arguments to pass
+        :type kwargs: dict
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
 
-        # Check whether the notebook is uuid type or class `Service`
+        """
         from pykechain.models import Service
         if isinstance(notebook, Service):
             notebook_id = notebook.id
@@ -693,7 +738,6 @@ class WidgetsManager(Sized):
             kwargs['custom_height'] = kwargs.pop('height')
 
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
-
         meta, title = _set_title(meta, custom_title, default_title=notebook.name)
 
         meta.update({
@@ -715,7 +759,39 @@ class WidgetsManager(Sized):
                              show_title=None, show_status=None, show_progress=None,
                              show_assignees=None, show_breadcrumbs=None, show_menu=None,
                              show_progressbar=None, **kwargs):
-        # type: (bool, Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], **Any) -> Widget
+        # type: (bool, Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], **Any) -> Widget  # noqa: E501
+        """
+        Add a KE-chain Metapanel to the WidgetManager.
+
+        The widget will be saved to KE-chain.
+
+        :param show_all: Show all elements of the metapanel (defaults to True). If True other arguments are ignored.
+        :type show_all: bool
+        :param show_due_date: show Due date
+        :type show_due_date: bool or None
+        :param show_start_date: show Start date
+        :type show_start_date: bool or None
+        :param show_title: Show Title of the activity
+        :type show_title: bool or None
+        :param show_status: Show status
+        :type show_status: bool or None
+        :param show_progress: Show progress. If True, the progressbar is not shown.
+        :type show_progress: bool or None
+        :param show_assignees: show Assignees
+        :type show_assignees: bool or None
+        :param show_breadcrumbs: show Breadcrumbs
+        :type show_breadcrumbs: bool or None
+        :param show_menu: show Menu
+        :type show_menu: bool or None
+        :param show_progressbar: Show the progress bar. Shown when progress is not True.
+        :type show_progressbar: bool or None
+        :param kwargs: additional keyword arguments to pass
+        :type kwargs: dict
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
+        """
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
         if show_all:
@@ -759,9 +835,13 @@ class WidgetsManager(Sized):
         :type custom_title: bool or basestring or None
         :param height: The height of the Notebook in pixels
         :type height: int or None
-        :raises IllegalArgumentError: When unknown or illegal arguments are passed.
+        :param kwargs: additional keyword arguments to pass
+        :type kwargs: dict
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
         """
-
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
         meta, title = _set_title(meta, custom_title, default_title=WidgetTypes.MULTICOLUMN)
 
@@ -778,15 +858,76 @@ class WidgetsManager(Sized):
             parent=None,
             order=kwargs.get("order")
         )
-
         return widget
 
-    def add_scope_widget(self, team, custom_title=None, show_columns=None, show_all_columns=True, tags=None,
+    def add_scope_widget(self, team=None, custom_title=None, show_columns=None, show_all_columns=True, tags=None,
                          sorted_column=ScopeWidgetColumnTypes.PROJECT_NAME, sorted_direction=SortTable.ASCENDING,
-                         **kwargs):
-        meta = _initiate_meta(kwargs, activity=self._activity_id)
-        raise NotImplementedError("Not yet implemented")
+                         parent_widget=None, **kwargs):
+        # type: (Union[Team,Text], Optional[Text], Optional[Iterable[Text]], Optional[bool], Optional[Iterable[Text]], Optional[Text], Optional[Text], Optional[Widget,Text], **Any) -> Widget  # noqa: F821,E501
+        """
+        Add a KE-chain Scope widget to the Widgetmanager and the activity.
 
+        The widget will be saved in KE-chain.
+
+        :param team: Team to limit the list of scopes to. Providing this is not obligated but highly preferred.
+        :type team: :class:`Team` or basestring
+        :param custom_title:A custom title for the multi column widget
+            * False: Widget id
+            * String value: Custom title
+            * None (default): No title
+        :type custom_title: bool or basestring or None
+        :param show_columns: (optional) list of column headers to show. One of `ScopeWidgetColumnTypes`.
+        :type show_columns: list of basestring
+        :param show_all_columns: boolean to show all columns (defaults to True). If True, will override `show_columns`
+        :type show_all_columns: bool
+        :param tags: (optional) list of scope tags to filter the Scopes on
+        :type tags: list of basestring
+        :param sorted_column: column name to sort on. (defaults to project name column). One of `ScopeWidgetColumnTypes`
+        :type sorted_column: basestring
+        :param sort_direction: The direction on which the values of property instances are being sorted on:
+            * ASC (default): Sort in ascending order
+            * DESC: Sort in descending order
+        :type sorted_direction: basestring
+        :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or basestring or None
+        :param kwargs: additional keyword arguments to pass
+        :type kwargs: dict
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
+        """
+        meta = _initiate_meta(kwargs, activity=self._activity_id)
+        meta, title = _set_title(meta, custom_title, default_title=WidgetTypes.SCOPE)
+
+        if not show_all_columns and show_columns:
+            if not isinstance(show_columns, (list, tuple)) and \
+                    not all([isinstance(i, string_types) for i in show_columns]):
+                raise IllegalArgumentError("`show_columns` should be a list of column header "
+                                           "names: '{}'".format(show_columns))
+            meta['showColumns'] = show_columns
+
+        if tags:
+            if not isinstance(tags, (list, tuple)) and not all([isinstance(i, string_types) for i in tags]):
+                raise IllegalArgumentError("`tags` should be a list of strings: '{}'".format(tags))
+            meta['tags'] = tags
+
+        if team:
+            meta['teamId'] = _retrieve_object_id(team)
+
+        meta.update({
+            'sortedColumn': sorted_column,
+            'sortDirection': sorted_direction,
+        })
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.SCOPE,
+            title=title,
+            meta=meta,
+            parent=parent_widget,
+            **kwargs
+        )
+        return widget
     #
     # Compatibility Funnctions
     #
