@@ -4,8 +4,8 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta
 from typing import TypeVar, Iterable, Callable, Optional, AnyStr  # noqa: F401
 
-import six
 import pytz
+import six
 
 T = TypeVar('T')
 
@@ -142,6 +142,7 @@ def parse_datetime(value):
         kw['tzinfo'] = tzinfo
         return datetime(**kw)
 
+
 #
 # The following functions are inspired by: https://github.com/okunishinishi/python-stringcase
 # License: MIT
@@ -153,15 +154,16 @@ def camelcase(string):
     Inspired by: https://github.com/okunishinishi/python-stringcase
     License: MIT
 
-    Examples:
+    :param string: String to convert.
+    :returns: string: Camel case string.
+
+    Examples
     --------
     >>> camelcase('foo_bar_baz')
     fooBarBaz
     >>> camelcase('FooBarBaz')
     fooBarBaz
 
-    :param string: String to convert.
-    :returns: string: Camel case string.
     """
     string = re.sub(r"^[\-_\.]", '', str(string))
     if not string:
@@ -177,15 +179,16 @@ def capitalcase(string):
     Inspired by: https://github.com/okunishinishi/python-stringcase
     License: MIT
 
-    Examples:
+    :param string: String to convert.
+    :returns: string: Capital case string.
+
+    Examples
     --------
     >>> capitalcase('foo_bar_baz')
     Foo_bar_baz
     >>> capitalcase('FooBarBaz')
     FooBarBaz
 
-    :param string: String to convert.
-    :returns: string: Capital case string.
     """
     string = str(string)
     if not string:
@@ -199,17 +202,19 @@ def lowercase(string):
     Inspired by: https://github.com/okunishinishi/python-stringcase
     License: MIT
 
-    Examples:
+    :param string: String to convert.
+    :returns: string: lower case string.
+
+    Examples
     --------
     >>> lowercase('foo_bar_baz')
     Foo_bar_baz
     >>> lowercase('FooBarBaz')
     foobarbaz
 
-    :param string: String to convert.
-    :returns: string: lower case string.
     """
     return str(string).lower()
+
 
 def snakecase(string):
     """Convert string into snake case.
@@ -219,20 +224,24 @@ def snakecase(string):
     Inspired by: https://github.com/okunishinishi/python-stringcase
     License: MIT
 
-    Examples:
+
+    :param string: String to convert.
+    :returns: string: Snake case string.
+
+
+    Examples
     --------
     >>> snakecase('foo_bar_baz')
     foo_bar_baz
     >>> snakecase('FooBarBaz')
     foo_bar_baz
 
-    :param string: String to convert.
-    :returns: string: Snake case string.
     """
     string = re.sub(r"[\-\.\s]", '_', str(string))
     if not string:
         return string
     return lowercase(string[0]) + re.sub(r"[A-Z]", lambda matched: '_' + lowercase(matched.group(0)), string[1:])
+
 
 def uppercase(string):
     """Convert string into upper case.
@@ -240,14 +249,15 @@ def uppercase(string):
     Inspired by: https://github.com/okunishinishi/python-stringcase
     License: MIT
 
-    Examples:
+    :param string: String to convert.
+    :returns: string: Upper case string.
+
+    Examples
     --------
     >>> uppercase('foo_bar_baz')
     FOO_BAR_BAZ
     >>> uppercase('FooBarBaz')
     FOOBARBAZ
 
-    :param string: String to convert.
-    :returns: string: Upper case string.
     """
     return str(string).upper()

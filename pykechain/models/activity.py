@@ -409,7 +409,6 @@ class Activity(Base):
         >>> customization = activity.customization()
         >>> part_to_show = project.part(name='Bike')
         >>> customization.add_property_grid_widget(part_to_show,custom_title="My super bike")
-)
 
         """
         from .customization import ExtCustomization
