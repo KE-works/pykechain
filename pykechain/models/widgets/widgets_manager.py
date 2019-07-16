@@ -988,8 +988,8 @@ class WidgetsManager(Sized):
         """
         Insert a widget at index n, shifting the rest of the list to the right.
 
-        if widget order is `[w0,w1,w2]` and inserting `w4` at index 1 (before Widget1);
-        the list will be `[w0,w4,w1,w2]`
+        if widget order is `[w0,w1,w2]` and inserting `w3` at index 1 (before Widget1);
+        the list will be `[w0,w3,w1,w2]`
 
         :param index: integer (position) starting from 0 at first position in which the widget is inserted
         :type index: int
