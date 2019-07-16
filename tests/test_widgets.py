@@ -47,6 +47,10 @@ class TestWidgets(TestBetamax):
             self.assertTrue(hasattr(obj, attribute),
                             "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
 
+    def test_widget_meta_attribute_is_not_None(self):
+        obj = self.project.activity('Specify wheel diameter').widgets()[0]
+        self.assertIsInstance(obj, Widget)
+        self.assertIsNotNone(obj.meta)
 
 class TestWidgetsValidation(SixTestCase):
 
