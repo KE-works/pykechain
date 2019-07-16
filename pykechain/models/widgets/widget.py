@@ -152,15 +152,16 @@ class Widget(Base):
         :type meta: dict or None
         :raises APIError: if the widget could not be updated.
         """
-        update_dict = dict(
-            meta=meta,
-            title=title
-        )
+        update_dict = dict()
 
+        if update_dict is not None:
+            update_dict.update(dict(meta=meta))
+        if title is not None:
+            update_dict.update(dict(title=title))
         if kwargs:
             update_dict.update(**kwargs)
 
-        url = self._client._build_url('widget', activity_id=self.id)
+        url = self._client._build_url('widget', widget_id=self.id)
         response = self._client._request('PUT', url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
