@@ -335,9 +335,9 @@ class TestWidgetManagerInActivity(TestBetamax):
         picture_model = picture_instance.model()
         multi_column_widget = widget_manager.add_multicolumn_widget(custom_title="Multi column Grid + Attachment")
 
-        widget1= widget_manager.add_propertygrid_widget(part_instance=bike_part,
-                                               writable_models=[picture_model],
-                                               parent_widget=multi_column_widget)
+        widget1 = widget_manager.add_propertygrid_widget(part_instance=bike_part,
+                                                         writable_models=[picture_model],
+                                                         parent_widget=multi_column_widget)
 
         widget2 = widget_manager.add_attachmentviewer_widget(
             attachment_property=picture_instance, parent_widget=multi_column_widget.id
@@ -347,6 +347,40 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertIsInstance(widget1, PropertygridWidget)
         self.assertIsInstance(widget2, AttachmentviewerWidget)
         self.assertEqual(len(widget_manager), 1 + 3)
+
+    def test_insert_widget(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        bike_part = self.project.part('Bike')
+        w0 = widget_manager[0]  # meta panel
+        w1 = widget_manager.add_propertygrid_widget(part_instance=bike_part,
+                                                    writable_models=[bike_part.model().properties],
+                                                    custom_title="Original widget 1 (w1)")
+        w2 = widget_manager.add_propertygrid_widget(part_instance=bike_part,
+                                                    writable_models=[bike_part.model().properties],
+                                                    custom_title="Original widget 2 (w2)")
+        w3 = widget_manager.add_propertygrid_widget(part_instance=bike_part,
+                                                    writable_models=[bike_part.model().properties],
+                                                    custom_title="Original widget 3 (w3)")
+
+        # if widget order is `[w0,w1,w2]` and inserting `w3` at index 1 (before Widget1);
+        # the list will be `[w0,w3,w1,w2]`
+        widget_manager.insert(1, w3)
+
+        self.assertTrue(w0.widget_type, WidgetTypes.METAPANEL)
+        self.assertEqual(w0.order, 0)
+        self.assertEqual(w3.order, 1)
+        self.assertEqual(w1.order, 2)
+        self.assertEqual(w2.order, 3)
+
+        added_widget = widget_manager.add_propertygrid_widget(part_instance=bike_part,
+                                                              writable_models=[bike_part.model().properties],
+                                                              custom_title="Widget Finally Positioned Under Metapanel",
+                                                              order=1)
+
+        self.assertEqual(added_widget.order, 1)
+        self.assertEqual(w3.order, 2)
+        self.assertEqual(w1.order, 3)
+        self.assertEqual(w2.order, 4)
 
     def test_compatibility_functions(self):
         """Testing various compatibility function for equavalence to the 'customization' in WIM1/PIM1"""
