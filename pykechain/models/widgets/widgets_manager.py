@@ -499,8 +499,8 @@ class WidgetsManager(Sized):
 
     def add_propertygrid_widget(self, part_instance, custom_title=False, max_height=None, show_headers=True,
                                 show_columns=None, parent_widget=None, readable_models=None, writable_models=None,
-                                all_readable=False, **kwargs):
-        # type: (Union[Property2, Text], Optional[Text, bool], Optional[int], bool, Optional[Iterable], Optional[Text, Widget], Optional[Iterable], Optional[Iterable], bool, **Any ) -> Widget  # noqa: E501,F821
+                                all_readable=False, all_writable=False, **kwargs):
+        # type: (Union[Property2, Text], Optional[Text, bool], Optional[int], bool, Optional[Iterable], Optional[Text, Widget], Optional[Iterable], Optional[Iterable], bool, bool, **Any ) -> Widget  # noqa: E501,F821
         """
         Add a KE-chain Property Grid widget to the customization.
 
@@ -527,6 +527,9 @@ class WidgetsManager(Sized):
         :param all_readable: (optional) boolean indicating if all properties should automatically be configured as
         readable (if True) or writable (if False).
         :type all_readable: bool
+        :param all_writable: (optional) boolean indicating if all properties should automatically be configured as
+        writable (if True) or writable (if False).
+        :type all_writable: bool
         :param kwargs: additional keyword arguments to pass
         :type kwargs: dict
         :return: newly created widget
@@ -563,8 +566,7 @@ class WidgetsManager(Sized):
 
         if all_readable and not readable_models:
             readable_models = part_instance.model().properties
-            writable_models = []
-        elif not writable_models and not readable_models:
+        if all_writable and not writable_models:
             writable_models = part_instance.model().properties
 
         widget = self.create_widget(
