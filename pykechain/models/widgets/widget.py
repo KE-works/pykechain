@@ -76,7 +76,7 @@ class Widget(Base):
         :return meta: if the meta is validated correctly
         :raise: `ValidationError`
         """
-        return validate(meta, self.schema) and meta
+        return validate(meta, self.schema) is None and meta
 
     @classmethod
     def create(cls, json, **kwargs):
