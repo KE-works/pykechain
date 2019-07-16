@@ -387,6 +387,22 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(widget_manager[w1.id].order, 3)
         self.assertEqual(widget_manager[w2.id].order, 4)
 
+    def test_edit_widget(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        bike_part = self.project.part('Bike')
+        widget = widget_manager.add_propertygrid_widget(part_instance=bike_part,
+                                                        writable_models=[bike_part.model().properties])
+        import copy
+        updated_meta = copy.deepcopy(widget.meta)
+        new_title = "My customly edited title"
+        updated_meta.update({
+            "showTitleValue": "Custom title",
+            "customTitle": new_title
+        })
+        widget_manager[widget.id].edit(meta=updated_meta)
+
+        self.assertEqual(widget_manager[widget.id].meta.get('customTitle'), new_title)
+
     def test_compatibility_functions(self):
         """Testing various compatibility function for equavalence to the 'customization' in WIM1/PIM1"""
 
