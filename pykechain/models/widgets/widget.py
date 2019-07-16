@@ -92,6 +92,7 @@ class Widget(Base):
         :return: a :class:`Widget` object
         :rtype: :class:`Widget`
         """
+
         def _type_to_classname(widget_type):
             """
             Generate corresponding inner classname based on the widget type.
@@ -151,16 +152,15 @@ class Widget(Base):
         :type meta: dict or None
         :raises APIError: if the widget could not be updated.
         """
-        update_dict = {
-            meta: meta,
-            title: title
-        }
+        update_dict = dict(
+            meta=meta,
+            title=title
+        )
 
         if kwargs:
             update_dict.update(**kwargs)
 
         url = self._client._build_url('widget', activity_id=self.id)
-
         response = self._client._request('PUT', url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
