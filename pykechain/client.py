@@ -79,6 +79,7 @@ API_PATH = {
     'widgets_update_associations': 'api/widgets/update_associations.json',
     'widget_update_associations': 'api/widgets/{widget_id}/update_associations.json',
     'widgets_bulk_delete': 'api/widgets/bulk_delete',
+    'widgets_bulk_update': 'api/widgets/bulk_update',
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
