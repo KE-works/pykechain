@@ -937,48 +937,44 @@ class WidgetsManager(Sized):
     # TODO: this is pending deprecation in version 3.4.0
     def add_text_widget(self, *args, **kwargs):
         """Add a KE-chain HTML widget to the activity."""
-        warnings.warn(PendingDeprecationWarning, "The `add_text_widget()` method will be deprecated in favor of "
-                                                 "`add_html_widget` in version 3.4.0")
+        warnings.warn("The `add_text_widget()` method will be deprecated in favor of `add_html_widget` in version "
+                      "3.4.0", PendingDeprecationWarning)
         return self.add_html_widget(*args, **kwargs)
 
     def add_super_grid_widget(self, *args, **kwargs):
         """Add a KE-chain Supergrid widget to the activity."""
-        warnings.warn(PendingDeprecationWarning, "The `add_super_grid_widget()` method will be deprecated in favor of "
-                                                 "`add_supergrid_widget` in version 3.4.0")
+        warnings.warn("The `add_super_grid_widget()` method will be deprecated in favor of `add_supergrid_widget` "
+                      "in version 3.4.0", PendingDeprecationWarning)
         return self.add_supergrid_widget(*args, **kwargs)
 
     def add_property_grid_widget(self, *args, **kwargs):
         """Add a KE-chain Propertygrid widget to the activity."""
-        warnings.warn(PendingDeprecationWarning,
-                      "The `add_property_grid_widget()` method will be deprecated in favor of "
-                      "`add_propertygrid_widget` in version 3.4.0")
+        warnings.warn("The `add_property_grid_widget()` method will be deprecated in favor of "
+                      "`add_propertygrid_widget` in version 3.4.0", PendingDeprecationWarning)
         return self.add_propertygrid_widget(*args, **kwargs)
 
     def add_paginated_grid_widget(self, *args, **kwargs):
         """Add a KE-chain Filteredgrid widget to the activity."""
-        warnings.warn(PendingDeprecationWarning,
-                      "The `add_paginated_grid_widget()` method will be deprecated in favor of "
-                      "`add_filteredgrid_widget` in version 3.4.0")
+        warnings.warn("The `add_paginated_grid_widget()` method will be deprecated in favor of "
+                      "`add_filteredgrid_widget` in version 3.4.0", PendingDeprecationWarning)
         return self.add_filteredgrid_widget(*args, **kwargs)
 
     def add_script_widget(self, *args, **kwargs):
         """Add a KE-chain Service widget to the activity."""
-        warnings.warn(PendingDeprecationWarning, "The `add_script_widget()` method will be deprecated in favor of "
-                                                 "`add_service_widget` in version 3.4.0")
+        warnings.warn("The `add_script_widget()` method will be deprecated in favor of `add_service_widget` in "
+                      "version 3.4.0", PendingDeprecationWarning)
         return self.add_service_widget(*args, **kwargs)
 
     def add_attachment_viewer_widget(self, *args, **kwargs):
         """Add a KE-chain Attachmentviewer widget to the activity."""
-        warnings.warn(PendingDeprecationWarning,
-                      "The `add_attachment_viewer_widget()` method will be deprecated in favor of "
-                      "`add_attachmentviewer_widget` in version 3.4.0")
+        warnings.warn("The `add_attachment_viewer_widget()` method will be deprecated in favor of "
+                      "`add_attachmentviewer_widget` in version 3.4.0", PendingDeprecationWarning)
         return self.add_attachmentviewer_widget(*args, **kwargs)
 
     def add_navigation_bar_widget(self, *args, **kwargs):
         """Add a KE-chain Tasknavigationbar widget to the activity."""
-        warnings.warn(PendingDeprecationWarning,
-                      "The `add_navigation_bar_widget()` method will be deprecated in favor of "
-                      "`add_tasknavigationbar_widget` in version 3.4.0")
+        warnings.warn("The `add_navigation_bar_widget()` method will be deprecated in favor of "
+                      "`add_tasknavigationbar_widget` in version 3.4.0", PendingDeprecationWarning)
         return self.add_tasknavigationbar_widget(*args, **kwargs)
 
     #
