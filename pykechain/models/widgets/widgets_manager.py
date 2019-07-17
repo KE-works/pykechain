@@ -633,7 +633,7 @@ class WidgetsManager(Sized):
         meta.update({
             'showButtonValue': show_button_value,
             'customText': button_text,
-            'serviceId': service,
+            'serviceId': service.id,
             'emphasizeButton': emphasize_run,
             'showDownloadLog': download_log,
             'showLog': kwargs.get('show_log', True)
