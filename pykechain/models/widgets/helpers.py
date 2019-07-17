@@ -6,31 +6,31 @@ from pykechain.exceptions import IllegalArgumentError
 from pykechain.utils import is_uuid, snakecase, camelcase
 
 
-def _retrieve_object(obj, client):
-    # type: (Union[Part2, Property2, Team, Text], Client) -> (Union[Part2, Team, Property2])  # noqa
+def _retrieve_object(obj, method):
+    # type: (Union[Part2, Property2, Team, Service, Text], Client) -> (Union[Part2, Team, Service, Property2])  # noqa
     """
     Object if object or uuid of object is provided as argument.
 
     :param obj: object or uuid to retrieve the object for
     :type obj: :class:`Base` or basestring
-    :param client: client object to retrieve the object if only uuid is provided.
-    :type client: `Client`
+    :param method: client object to retrieve the object if only uuid is provided.
+    :type method: `Client`
     :return: object based on the object or uuid of the objet
     :rtype: `Part2` or `Team` or `Property2`
     :raises APIError: If the object could not be retrieved based on the UUID
     :raises IllegalArgumentError: if the object provided is not a Part, Property2 or UUID.
     """
     # Check whether the part_model is uuid type or class `Part`
-    from pykechain.models import Part, Part2, Property, Property2, Team
-    if isinstance(obj, (Part, Part2, Property, Property2, Team)):
+    from pykechain.models import Part, Part2, Property, Property2, Service, Team
+    if isinstance(obj, (Part, Part2, Property, Property2, Service, Team)):
         return obj
     elif isinstance(obj, text_type) and is_uuid(obj):
-        part_model_id = obj
-        part_model = client.model(id=part_model_id)
-        return part_model
+        obj_id = obj
+        obj = method(id=obj_id)
+        return obj
     else:
-        raise IllegalArgumentError("When adding the widget, obj must be a Part, Property,"
-                                   " Part id or Property id. Type is: {}".format(type(obj)))
+        raise IllegalArgumentError("When adding the widget, obj must be a Part, Property, Service, Team, "
+                                   " Part id, Property id, Service id or Team id. Type is: {}".format(type(obj)))
 
 
 def _retrieve_object_id(obj):
