@@ -3,7 +3,7 @@ from typing import Any, Optional, List, AnyStr, Dict
 import requests
 from jsonschema import validate
 
-from pykechain.enums import WidgetTypes
+from pykechain.enums import WidgetTypes, Category
 from pykechain.exceptions import APIError
 from pykechain.models import Base
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
@@ -122,6 +122,48 @@ class Widget(Base):
             return getattr(all_widgets, _type_to_classname(WidgetTypes.UNDEFINED))(json, client=kwargs.pop('client'),
                                                                                    **kwargs)
 
+        #
+        # Searchers and retrievers
+        #
+
+    def parts(self, *args, **kwargs):
+        """Retrieve parts belonging to this widget.
+
+        Without any arguments it retrieves the Instances related to this widget only.
+
+        This call only returns the configured properties in an widget. So properties that are not configured
+        are not in the returned parts.
+
+        See :class:`pykechain.Client.parts` for additional available parameters.
+
+        """
+        return self._client.parts(*args, widget=self.id, **kwargs)
+
+    def associated_parts(self, *args, **kwargs):
+        """Retrieve models and instances belonging to this widget.
+
+        This is a convenience method for the :func:`Widget.parts()` method, which is used to retrieve both the
+        `Category.MODEL` as well as the `Category.INSTANCE` in a tuple.
+
+        This call only returns the configured (associated) properties in a widget. So properties that are not
+        configured (associated) are not in the returned parts.
+
+        If you want to retrieve only the models associated to this task it is better to use:
+            `Widget.parts(category=Category.MODEL)`.
+
+        See :func:`pykechain.Client.parts` for additional available parameters.
+
+        :returns: a tuple(models of :class:`PartSet`, instances of :class:`PartSet`)
+
+        """
+        return (
+            self.parts(category=Category.MODEL, *args, **kwargs),
+            self.parts(category=Category.INSTANCE, *args, **kwargs)
+        )
+
+    #
+    # Write methods
+    #
     def update_associations(self, readable_models=None, writable_models=None, **kwargs):
         # type: (Optional[List], Optional[List], **Any) -> None
         """
