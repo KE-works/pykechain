@@ -620,6 +620,7 @@ class Client(object):
               scope_id=None,  # type: Optional[str]
               parent=None,  # type: Optional[str]
               activity=None,  # type: Optional[str]
+              widget=None,  # type: Optional[str]
               limit=None,  # type: Optional[int]
               batch=100,  # type: int
               **kwargs):
@@ -646,6 +647,8 @@ class Client(object):
         :param parent: filter on the parent_id, returns all children of the parent_id
         :type parent: basestring or None
         :param activity: filter on activity_id
+        :type activity: basestring or None
+        :param widget: filter on widget_id
         :type activity: basestring or None
         :param limit: limit the return to # items (default unlimited, so return all results)
         :type limit: int or None
@@ -685,6 +688,7 @@ class Client(object):
             name=name,
             category=category,
             activity_id=activity,
+            widget_id=widget,
             limit=batch,
             scope_id=scope_id
         )
