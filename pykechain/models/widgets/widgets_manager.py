@@ -195,7 +195,7 @@ class WidgetsManager(Sized):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_object(obj=part_model, client=self._client)  # type: Part2  # noqa
+        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: Part2  # noqa
         parent_instance = _retrieve_object_id(obj=parent_instance)  # type: Part2  # noqa
         sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
 
@@ -314,7 +314,7 @@ class WidgetsManager(Sized):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_object(obj=part_model, client=self._client)  # type: Part2  # noqa
+        part_model = _retrieve_object(obj=part_model, method=self._client)  # type: Part2  # noqa
         parent_instance_id = _retrieve_object_id(obj=parent_instance)  # type: text_type
         sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
 
@@ -388,7 +388,7 @@ class WidgetsManager(Sized):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        attachment_property = _retrieve_object(attachment_property, client=self._client)  # type: Property2  # noqa
+        attachment_property = _retrieve_object(attachment_property, method=self._client.property)  # type: Property2  # noqa
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
         # TODO: Add enumeration for alignment
@@ -537,7 +537,7 @@ class WidgetsManager(Sized):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_instance = _retrieve_object(part_instance, client=self._client)  # type: Part2  # noqa
+        part_instance = _retrieve_object(part_instance, method=self._client.part)  # type: Part2  # noqa
 
         if not show_columns:
             show_columns = list()
@@ -614,15 +614,8 @@ class WidgetsManager(Sized):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the script is uuid type or class `Service`
-        from pykechain.models import Service
-        if isinstance(service, Service):
-            script_id = service.id
-        elif isinstance(service, (string_types, text_type)) and is_uuid(service):
-            script_id = service
-            service = self._client.service(id=script_id)
-        else:
-            raise IllegalArgumentError("When using the add_script_widget, script must be a Service or Service id. "
-                                       "Type is: {}".format(type(service)))
+
+        service = _retrieve_object(obj=service, method=self._client.service)  # type: Service  # noqa
 
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
 
@@ -640,7 +633,7 @@ class WidgetsManager(Sized):
         meta.update({
             'showButtonValue': show_button_value,
             'customText': button_text,
-            'serviceId': script_id,
+            'serviceId': service,
             'emphasizeButton': emphasize_run,
             'showDownloadLog': download_log,
             'showLog': kwargs.get('show_log', True)
