@@ -397,8 +397,8 @@ class WidgetsManager(Sized):
 
         if 'height' in kwargs:
             # TODO: Pending deprecation 3.4.0.
-            warnings.warn(PendingDeprecationWarning, '`height` attribute will be deprecated in version 3.4.0, please '
-                                                     'adapt your code accordingly to use `custom_height`')
+            warnings.warn('`height` attribute will be deprecated in version 3.4.0, please adapt your code accordingly '
+                          'to use `custom_height`', PendingDeprecationWarning)
             kwargs['custom_height'] = kwargs.pop('height')
 
         meta.update({
@@ -464,8 +464,8 @@ class WidgetsManager(Sized):
                     activity_dict['emphasized'] = False
                 if 'emphasize' in activity_dict:  # emphasize is to be moved to emphasized
                     # TODO: pending deprecation in version 3.4.0
-                    warnings.warn(PendingDeprecationWarning, "The `emphasize` key in the navbar button will be "
-                                                             "deprecated in pykechain 3.4.0")
+                    warnings.warn("The `emphasize` key in the navbar button will be deprecated in pykechain 3.4.0",
+                                  PendingDeprecationWarning)
                     activity_dict['emphasized'] = activity_dict.pop('emphasize')
 
             else:
@@ -477,10 +477,9 @@ class WidgetsManager(Sized):
 
         # TODO: pending deprecation in version 3.4.0
         if alignment and alignment is NavigationBarAlignment.START:
-            warnings.warn(PendingDeprecationWarning, "In KE-chain 3 we use the LEFT alignment, instead of START "
-                                                     "alignment of the task navigationbar widgets. Will be "
-                                                     "autocorrected to LEFT alignment for now. Please correct your "
-                                                     "code as this is pending deprecation at version 3.4.0")
+            warnings.warn("In KE-chain 3 we use the LEFT alignment, instead of START alignment of the task "
+                          "navigationbar widgets. Will be autocorrected to LEFT alignment for now. Please correct "
+                          "your code as this is pending deprecation at version 3.4.0", PendingDeprecationWarning)
             alignment = NavigationBarAlignment.LEFT
 
         if alignment and alignment not in (NavigationBarAlignment.CENTER, NavigationBarAlignment.LEFT):
@@ -849,8 +848,8 @@ class WidgetsManager(Sized):
 
         if 'height' in kwargs:
             # TODO: Pending deprecation 3.4.0.
-            warnings.warn(PendingDeprecationWarning, '`height` attribute will be deprecated in version 3.4.0, please '
-                                                     'adapt your code accordingly to use `custom_height`')
+            warnings.warn('`height` attribute will be deprecated in version 3.4.0, please adapt your code accordingly '
+                          'to use `custom_height`', PendingDeprecationWarning)
             kwargs['custom_height'] = kwargs.pop('height')
 
         widget = self.create_widget(
