@@ -46,7 +46,6 @@ class Property2(Property):
         self.ref = json.get('ref')
         self.type = json.get('property_type', None)
         self.category = json.get('category')
-        self.unit = json.get('unit', None)
 
         # set an empty internal validators variable
         self._validators = []  # type: List[Any]
