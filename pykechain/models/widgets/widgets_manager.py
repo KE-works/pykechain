@@ -1021,7 +1021,7 @@ class WidgetsManager(Sized):
 
         :param key: index, uuid, title or ref of the widget to delete
         :type key: int or basestring
-        :return: True if the widget is deleted succesfully
+        :return: True if the widget is deleted successfully
         :raises APIError: if the widget could not be deleted
         :raises NotFoundError: if the widgetmanager (activity) has no such widget
         """
@@ -1035,7 +1035,7 @@ class WidgetsManager(Sized):
         """Delete all widgets.
 
         :return: None
-        :raises ApiError: When the deletion of the widgets was not succesfull
+        :raises ApiError: When the deletion of the widgets was not successful
         """
         widget_ids = [dict(id=w.id) for w in self.__iter__()]
         url = self._client._build_url('widgets_bulk_delete')

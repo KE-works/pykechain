@@ -141,7 +141,7 @@ class Service(Base):
         # type: () -> None
         """Delete this service.
 
-        :raises APIError: if delete was not succesfull.
+        :raises APIError: if delete was not successful.
         """
         response = self._client._request('DELETE', self._client._build_url('service', service_id=self.id))
 
