@@ -101,11 +101,11 @@ API_EXTRA_PARAMS = {
     'part2': {'fields': ",".join(
         ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'properties', 'category', 'classification',
          'parent_id', 'multiplicity', 'value_options', 'property_type', 'value', 'output', 'order',
-         'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
+         'part_id', 'scope_id', 'model_id', 'proxy_source_id_name', 'unit'])},
     'parts2': {'fields': ",".join(
         ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'properties', 'category', 'classification',
          'parent_id', 'multiplicity', 'value_options', 'property_type', 'value', 'output', 'order',
-         'part_id', 'scope_id', 'model_id', 'proxy_source_id_name'])},
+         'part_id', 'scope_id', 'model_id', 'proxy_source_id_name', 'unit'])},
     'properties2': {'fields': ",".join(
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'model_id', 'part_id', 'order', 'scope_id', 'category',
          'property_type', 'value', 'value_options', 'output', 'description', 'unit'])},
