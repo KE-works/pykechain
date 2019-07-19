@@ -65,7 +65,7 @@ def relocate_model(part, target_parent, name=None, include_children=True):
         name = "CLONE - {}".format(part.name)
 
     # The description cannot be added when creating a model, so edit the model after creation.
-    part_desc = part._json_data['description']
+    part_desc = part.description
     moved_part_model = target_parent.add_model(name=name, multiplicity=part.multiplicity)
     if part_desc:
         moved_part_model.edit(description=str(part_desc))
@@ -77,9 +77,9 @@ def relocate_model(part, target_parent, name=None, include_children=True):
     list_of_properties_sorted_by_order = part.properties
     list_of_properties_sorted_by_order.sort(key=lambda x: x._json_data['order'])
     for prop in list_of_properties_sorted_by_order:
-        prop_type = prop._json_data.get('property_type')
-        description = prop._json_data.get('description', '')
-        unit = prop._json_data.get('unit')
+        prop_type = prop.type
+        description = prop.description
+        unit = prop.unit
 
         # For KE-chain 3 (PIM2) we have value_options instead of options.
         if prop._client.match_app_version(label='pim', version='>=3.0.0'):
@@ -281,7 +281,7 @@ def update_part_with_properties(part_instance, moved_instance, name=None):
     properties_id_dict = dict()
     for prop_instance in part_instance.properties:
         # Do different magic if there is an attachment property and it has a value
-        if prop_instance._json_data['property_type'] == PropertyType.ATTACHMENT_VALUE:
+        if prop_instance.type == PropertyType.ATTACHMENT_VALUE:
             moved_prop = get_mapping_dictionary()[prop_instance.id]
             if prop_instance.value:
                 attachment_name = prop_instance._json_data['value'].split('/')[-1]
@@ -293,7 +293,7 @@ def update_part_with_properties(part_instance, moved_instance, name=None):
                 moved_prop.clear()
         # For a reference value property, add the id's of the part referenced {property.id: [part1.id, part2.id, ...]},
         # if there is part referenced at all.
-        elif prop_instance._json_data['property_type'] == PropertyType.REFERENCES_VALUE:
+        elif prop_instance.type == PropertyType.REFERENCES_VALUE:
             if prop_instance.value:
                 moved_prop_instance = get_mapping_dictionary()[prop_instance.id]
                 properties_id_dict[moved_prop_instance.id] = [ref_part.id for ref_part in prop_instance.value]
