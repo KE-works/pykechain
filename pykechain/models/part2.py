@@ -545,7 +545,7 @@ class Part2(Base):
         :type update_dict: dict or None
         :param properties_fvalues: (optional) keyword argument with raw list of properties update dicts
         :type properties_fvalues: list of dict or None
-        :param refresh: refresh the part after succesfull completion, default to True
+        :param refresh: refresh the part after successful completion, default to True
         :type refresh: bool
         :param kwargs: (optional) additional keyword arguments that will be passed inside the update request
         :type kwargs: dict or None
