@@ -18,7 +18,6 @@ from pykechain.models.widgets.widget_schemas import undefined_meta_schema
 # PROGRESS = 'PROGRESS'
 
 
-
 class MetapanelWidget(Widget):
     """Metapanel Widget."""
 
@@ -29,6 +28,7 @@ class PropertygridWidget(Widget):
 
 class UndefinedWidget(Widget):
     """Undefined Widget."""
+
     schema = undefined_meta_schema
 
 

@@ -317,7 +317,7 @@ class Client(object):
     def widget_schemas(self):
         # type: () -> List[Dict]
         """
-        Widget meta schemas for all widgets in KE-chain 3
+        Widget meta schemas for all widgets in KE-chain 3.
 
         In KE-chain 3, the backend provides widget meta schema for each widgettype. A single call
         per pykechain client session is made (and cached forever in the client) to retrieve all
@@ -360,7 +360,6 @@ class Client(object):
         if not found:
             raise NotFoundError("Could not find a widget_schema for widget_type: `{}`".format(widget_type))
         return found
-
 
     def match_app_version(self, app=None, label=None, version=None, default=False):
         """Match app version against a semantic version string.
