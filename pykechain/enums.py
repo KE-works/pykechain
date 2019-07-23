@@ -546,6 +546,7 @@ class ValidatorEffectTypes(Enum):
     ERRORTEXT_EFFECT = 'errorTextEffect'
     HELPTEXT_EFFECT = 'helpTextEffect'
 
+
 class PropertyRepresentation(Enum):
     """
     The Representation configuration to display a property value.
@@ -556,9 +557,11 @@ class PropertyRepresentation(Enum):
     :cvar SIGNIFICANT_DIGITS: Number (count) of significant digits to display the number
     :cvar LINK_TARGET: configuration of a link to open the link in a new browsertab or not.
     """
+
     DECIMAL_PLACES = "decimalPlaces"
     SIGNIFICANT_DIGITS = "significantDigits"
     LINK_TARGET = "linkTarget"
+
 
 class ShowColumnTypes(Enum):
     """The columns that can be shown in a Property grid.
@@ -590,5 +593,3 @@ class ScopeWidgetColumnTypes(Enum):
     DUE_DATE = 'Due date'
     PROGRESS = 'Progress'
     STATUS = 'Status'
-
-
