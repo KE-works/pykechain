@@ -1,4 +1,8 @@
-from pykechain.enums import PropertyVTypes
+from pykechain.enums import PropertyVTypes, PropertyRepresentation
+
+#
+# Validators and Validator Effects
+#
 
 effects_jsonschema_stub = {
     "type": "object",
@@ -35,6 +39,31 @@ validators_options_json_schema = {
     "items": validator_jsonschema_stub
 }
 
+#
+# Representation of a property configurations
+#
+
+representation_jsonschema_stub = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["rtype", "config"],
+    "properties": {
+        "rtype": {"type": "string", "enum": PropertyRepresentation.values()},
+        "config": {"type": "object"}
+    }
+}
+
+representation_options_json_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Validators JSON schema",
+    "type": "array",
+    "items": representation_jsonschema_stub
+}
+
+#
+# Property Value Options json schema
+#
+
 options_json_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "Toplevel Property Options JSON schema",
@@ -44,7 +73,13 @@ options_json_schema = {
         # Validators
         "validators": validators_options_json_schema,
 
-        # Single Select Lists
-        "value_choices": {"type": "array"}
+        # Reference Property additional options to hide columns and store filters
+        "propmodels_excl": {"type": "array"},
+        "propmodels_incl": {"type": "array"},
+        "prefilters": {"type": "object"},
+
+        # Representations
+        "representation": representation_options_json_schema,
     }
 }
+
