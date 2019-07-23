@@ -82,4 +82,3 @@ options_json_schema = {
         "representation": representation_options_json_schema,
     }
 }
-
