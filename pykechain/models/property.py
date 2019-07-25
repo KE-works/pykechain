@@ -179,7 +179,7 @@ class Property(Base):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update property value")
 
-        self.refresh(json=response.json()['results'][0])
+        self.refresh(url=url)  # update itself by requerying the url to retrieve all the information.
         return self.value
 
     @classmethod
