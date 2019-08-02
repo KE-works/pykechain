@@ -49,7 +49,7 @@ class TestProperties(TestBetamax):
         bike = self.project.part('Bike')
         gears_id = bike.property('Gears').id
         # retrieve the property Gears directly via an API call
-        gears_property = self.project.properties(name='Gears', category=Category.INSTANCE)[0]
+        gears_property = self.project.properties(pk=gears_id, category=Category.INSTANCE)[0]
 
         self.assertEqual(bike.property(gears_id), gears_property)
 

@@ -96,7 +96,6 @@ class Widget(Base):
         :return: a :class:`Widget` object
         :rtype: :class:`Widget`
         """
-
         def _type_to_classname(widget_type):
             """
             Generate corresponding inner classname based on the widget type.

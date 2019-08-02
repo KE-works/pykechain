@@ -674,7 +674,7 @@ class WidgetsManager(Sized):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        if not isinstance(html, text_type):
+        if not isinstance(html, (str, text_type)):
             raise IllegalArgumentError("Text injected in the HTML widget must be string. Type is: {}".
                                        format(type(html)))
 
