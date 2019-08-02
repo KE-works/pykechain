@@ -3,7 +3,7 @@ requests==2.22.0
 envparse==0.2.0
 
 # json validation (inspector)
-jsonschema==3.0.1
+jsonschema==3.0.2
 
 # testing
 pytest==4.6.3
