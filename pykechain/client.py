@@ -1617,10 +1617,10 @@ class Client(object):
         # to a single value from the list of values.
         if property_type in (PropertyType.REFERENCE_VALUE, PropertyType.REFERENCES_VALUE) and default_value:
             if isinstance(default_value, (list, tuple)):
-                default_value = default_value[0]
+                default_value = [default_value[0]]
             if isinstance(default_value, (Part, Part2)):
-                default_value = default_value.id
-            if not is_uuid(default_value):
+                default_value = [default_value.id]
+            if not is_uuid(default_value[0]):
                 raise IllegalArgumentError("Please provide a valid default_value being a `Part` of category `MODEL` "
                                            "or a model uuid, got: '{}'".format(default_value))
 
