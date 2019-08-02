@@ -426,7 +426,7 @@ class TestActivity2SpecificTests(TestBetamax):
         specify_wd.edit(assignees_ids=[test_user.id])
         specify_wd.refresh()
 
-        self.assertEqual([3], specify_wd._json_data.get('assignees_ids'))
+        self.assertIsInstance(specify_wd._json_data.get('assignees_ids')[0], int)
 
         self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
 

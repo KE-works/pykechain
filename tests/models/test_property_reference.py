@@ -1,3 +1,5 @@
+import uuid
+
 from pykechain.enums import PropertyType, Multiplicity
 from tests.classes import TestBetamax
 
@@ -14,13 +16,16 @@ class TestMultiReferenceProperty(TestBetamax):
         self.ref_target = self.ref_target_model.instances()[0]
 
         # reference property model (with a value pointing to a target part model
-        self.ref_model = self.project.model('Bike').add_property(
-            name='Test reference property',
+        ref_prop_name = 'Test reference property ({})'.format(str(uuid.uuid4())[-8:])
+        self.ref_part = self.project.model('Bike')
+        self.ref_part.add_property(
+            name=ref_prop_name,
             property_type=PropertyType.REFERENCES_VALUE,
             default_value=self.ref_target_model
         )  # type: MultiReferenceProperty
+        self.ref_model = self.ref_part.property(ref_prop_name)
         # reference property instance (holding the value
-        self.ref = self.project.part('Bike').property('Test reference property')
+        self.ref = self.project.part('Bike').property(ref_prop_name)
 
     def tearDown(self):
         self.ref_target_model.delete()
