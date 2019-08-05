@@ -1,6 +1,6 @@
 from six import text_type, string_types
 
-from pykechain.enums import Category
+from pykechain.enums import Category, FilterType
 from pykechain.models.part2 import Part2
 from pykechain.models.property2 import Property2
 from pykechain.utils import is_uuid
@@ -125,7 +125,18 @@ class MultiReferenceProperty2(Property2):
         # in the reference property of the model the value is set to the ID of the model from which we can choose parts
         model_parent_part = self.part.model()  # makes single part call
         property_model = model_parent_part.property(self.name)
-        referenced_model = property_model.value and property_model.value[0]  # list of seleceted models is always 1
+        referenced_model = property_model.value and property_model.value[0]  # list of selected models is always 1
         possible_choices = self._client.parts(model=referenced_model)  # makes multiple parts call
 
         return possible_choices
+
+    def set_prefilters(self, property_model, value, filter_type=FilterType.CONTAINS, overwrite=False):
+        """
+
+        :param property_model:
+        :param value:
+        :param filter_type:
+        :param overwrite:
+        :return:
+        """
+        return

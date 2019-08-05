@@ -593,3 +593,18 @@ class ScopeWidgetColumnTypes(Enum):
     DUE_DATE = 'Due date'
     PROGRESS = 'Progress'
     STATUS = 'Status'
+
+
+class FilterType(Enum):
+    """The type of pre-filters that can be set on a Multi Reference Property.
+
+    .. versionadded:: 3.0
+
+    :cvar GREATER_THAN_EQUAL: 'gte'
+    :cvar LOWER_THAN_EQUAL: 'lte'
+    :cvar CONTAINS: 'icontains'
+    """
+
+    GREATER_THAN_EQUAL = 'gte'
+    LOWER_THAN_EQUAL = 'lte'
+    CONTAINS = 'icontains'
