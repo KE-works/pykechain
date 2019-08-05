@@ -12,6 +12,9 @@ class TestCopyAndMoveParts(TestBetamax):
     def setUp(self):
         super(TestCopyAndMoveParts, self).setUp()
         self.base = self.project.model(name__startswith='Catalog')
+        self.cross_scope_project = self.client.scope(name='Cross-scope Bike Project')
+        self.cross_scope_wheel = self.cross_scope_project.model(name='Wheel')
+
         self.model_to_be_copied = self.project.create_model(
             parent=self.base, name='Model to be Copied @ {} [TEST]'.format(str(datetime.now())),
             multiplicity=Multiplicity.ONE_MANY)  # type Part
@@ -30,6 +33,12 @@ class TestCopyAndMoveParts(TestBetamax):
             name='Property single select list',
             options=dict(value_choices=['a', 'b', 'c']),
             property_type=PropertyType.SINGLE_SELECT_VALUE
+        )
+        p_multi_reference_property = self.model_to_be_copied.add_property(
+            name='Property multi reference',
+            default_value=self.cross_scope_wheel,
+            # options={S},
+            property_type=PropertyType.REFERENCES_VALUE
         )
         sub_part1 = self.model_to_be_copied.add_model(
             name="subpart 1",

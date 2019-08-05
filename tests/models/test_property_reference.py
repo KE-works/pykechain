@@ -1,6 +1,8 @@
 import uuid
 
 from pykechain.enums import PropertyType, Multiplicity
+from pykechain.exceptions import IllegalArgumentError
+from pykechain.models import MultiReferenceProperty, MultiReferenceProperty2
 from tests.classes import TestBetamax
 
 
@@ -16,16 +18,16 @@ class TestMultiReferenceProperty(TestBetamax):
         self.ref_target = self.ref_target_model.instances()[0]
 
         # reference property model (with a value pointing to a target part model
-        ref_prop_name = 'Test reference property ({})'.format(str(uuid.uuid4())[-8:])
+        self.ref_prop_name = 'Test reference property ({})'.format(str(uuid.uuid4())[-8:])
         self.ref_part = self.project.model('Bike')
         self.ref_part.add_property(
-            name=ref_prop_name,
+            name=self.ref_prop_name,
             property_type=PropertyType.REFERENCES_VALUE,
             default_value=self.ref_target_model
-        )  # type: MultiReferenceProperty
-        self.ref_model = self.ref_part.property(ref_prop_name)
+        )  # type: MultiReferenceProperty2
+        self.ref_model = self.ref_part.property(self.ref_prop_name)
         # reference property instance (holding the value
-        self.ref = self.project.part('Bike').property(ref_prop_name)
+        self.ref = self.project.part('Bike').property(self.ref_prop_name)
 
     def tearDown(self):
         self.ref_target_model.delete()
@@ -120,7 +122,77 @@ class TestMultiReferenceProperty(TestBetamax):
         possible_options = self.ref.choices()
         self.assertEqual(1, len(possible_options))
 
-    # new in 2.3
+    def test_create_ref_property_referencing_part_in_list(self):
+        # setUp
+        new_prop = self.ref_part.add_property(
+            name=self.ref_prop_name,
+            property_type=PropertyType.REFERENCES_VALUE,
+            default_value=[self.ref_target_model]
+        )
+        # testing
+        self.assertTrue(new_prop.value[0].id, self.ref_target_model.id)
+
+        # tearDown
+        new_prop.delete()
+
+    def test_create_ref_property_referencing_id_in_list(self):
+        # setUp
+        new_prop = self.ref_part.add_property(
+            name=self.ref_prop_name,
+            property_type=PropertyType.REFERENCES_VALUE,
+            default_value=[self.ref_target_model.id]
+        )
+        # testing
+        self.assertTrue(new_prop.value[0].id, self.ref_target_model.id)
+
+        # tearDown
+        new_prop.delete()
+
+    def test_create_ref_property_wrongly_referencing_in_list(self):
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            self.ref_part.add_property(
+                name=self.ref_prop_name,
+                property_type=PropertyType.REFERENCES_VALUE,
+                default_value=[12]
+            )
+
+    def test_create_ref_property_referencing_part(self):
+        # setUp
+        new_prop = self.ref_part.add_property(
+            name=self.ref_prop_name,
+            property_type=PropertyType.REFERENCES_VALUE,
+            default_value=self.ref_target_model
+        )
+        # testing
+        self.assertTrue(new_prop.value[0].id, self.ref_target_model.id)
+
+        # tearDown
+        new_prop.delete()
+
+    def test_create_ref_property_referencing_id(self):
+        # setUp
+        new_prop = self.ref_part.add_property(
+            name=self.ref_prop_name,
+            property_type=PropertyType.REFERENCES_VALUE,
+            default_value=self.ref_target_model.id
+        )
+        # testing
+        self.assertTrue(new_prop.value[0].id, self.ref_target_model.id)
+
+        # tearDown
+        new_prop.delete()
+
+    def test_create_ref_property_wrongly_referencing(self):
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            self.ref_part.add_property(
+                name=self.ref_prop_name,
+                property_type=PropertyType.REFERENCES_VALUE,
+                default_value=True
+            )
+
+        # new in 2.3
     def test_add_filters_to_property(self):
         # setUp
         # wheel_property_reference = self.project.model('Bike').property('Reference wheel')
