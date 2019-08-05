@@ -1616,12 +1616,39 @@ class Client(object):
         # to a single value from the list of values.
         if property_type in (PropertyType.REFERENCE_VALUE, PropertyType.REFERENCES_VALUE) and default_value:
             if isinstance(default_value, (list, tuple)):
-                default_value = [default_value[0]]
-            if isinstance(default_value, (Part, Part2)):
+                if isinstance(default_value[0], (Part, Part2)):
+                    scope_options = dict(
+                        scope_id=default_value[0]._json_data["scope_id"]
+                    )
+                    default_value = [default_value[0].id]
+
+                elif is_uuid(default_value[0]):
+                    scope_options = dict(
+                        scope_id=self.model(id=default_value[0])._json_data["scope_id"]
+                    )
+                    default_value = [default_value[0]]
+                else:
+                    raise IllegalArgumentError(
+                        "Please provide a valid default_value being a `Part` of category `MODEL` "
+                        "or a model uuid, got: '{}'".format(default_value))
+
+            elif isinstance(default_value, (Part, Part2)):
+                scope_options = dict(
+                    scope_id=default_value._json_data["scope_id"]
+                )
                 default_value = [default_value.id]
-            if not is_uuid(default_value[0]):
+            elif is_uuid(default_value):
+                scope_options = dict(
+                    scope_id=self.model(id=default_value)._json_data["scope_id"]
+                )
+                default_value = [default_value]
+            else:
                 raise IllegalArgumentError("Please provide a valid default_value being a `Part` of category `MODEL` "
                                            "or a model uuid, got: '{}'".format(default_value))
+            if isinstance(options, dict):
+                options.update(scope_options)
+            else:
+                options = scope_options
 
         if self.match_app_version(label="pim", version=">=3.0.0"):
             data = dict(
