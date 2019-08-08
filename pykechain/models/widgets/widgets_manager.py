@@ -7,7 +7,8 @@ from six import string_types, text_type
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
-from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id
+from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
+    _check_prefilters, _check_excluded_propmodels
 from pykechain.utils import is_uuid, find
 
 
@@ -248,7 +249,7 @@ class WidgetsManager(Sized):
                                 emphasize_new_instance=True, emphasize_edit=False, emphasize_clone=False,
                                 emphasize_delete=False, sort_property=None, sort_direction=SortTable.ASCENDING,
                                 collapse_filters=False, page_size=25, readable_models=None, writable_models=None,
-                                all_readable=False, all_writable=False,
+                                all_readable=False, all_writable=False, excluded_propmodels=None, prefilters=None,
                                 **kwargs):
         """
         Add a KE-chain superGrid (e.g. basic table widget) to the customization.
@@ -317,8 +318,14 @@ class WidgetsManager(Sized):
         part_model = _retrieve_object(obj=part_model, method=self._client)  # type: Part2  # noqa
         parent_instance_id = _retrieve_object_id(obj=parent_instance)  # type: text_type
         sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
-
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
+        if prefilters:
+            list_of_prefilters = _check_prefilters(part_model=part_model, prefilters=prefilters)
+            prefilters = {'property_value': ','.join(list_of_prefilters) if list_of_prefilters else {}}
+        if excluded_propmodels:
+            excluded_propmodels = _check_excluded_propmodels(part_model=part_model,
+                                                             property_models=excluded_propmodels)
+
         meta.update({
             # grid
             "partModelId": part_model.id,
@@ -339,6 +346,8 @@ class WidgetsManager(Sized):
             "primaryEditUiValue": emphasize_edit,
             "primaryCloneUiValue": emphasize_clone,
             "primaryDeleteUiValue": emphasize_delete,
+            "prefilters": prefilters,
+            "propmodelsExcl": excluded_propmodels
         })
 
         if parent_instance_id:
