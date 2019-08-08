@@ -129,7 +129,7 @@ class WidgetsManager(Sized):
             self.insert(kwargs.get('order'), widget)
         return widget
 
-    def add_supergrid_widget(self, part_model, parent_instance=None, custom_title=False, new_instance=True,
+    def add_supergrid_widget(self, part_model, parent_instance=None, title=False, new_instance=True,
                              edit=True, clone=True, export=True, delete=False, incomplete_rows=True,
                              emphasize_new_instance=True, emphasize_edit=False, emphasize_clone=False,
                              emphasize_delete=False, sort_property=None, sort_direction=SortTable.ASCENDING,
@@ -176,11 +176,11 @@ class WidgetsManager(Sized):
         :type parent_instance: :class:`Part` or UUID
         :param custom_height: The height of the supergrid in pixels
         :type custom_height: int or None
-        :param custom_title: A custom title for the supergrid::
+        :param title: A custom title for the supergrid::
             * False (default): Part instance name
             * String value: Custom title
             * None: No title
-        :type custom_title: bool or basestring or None
+        :type title: bool or basestring or None
         :param sort_property: The property model on which the part instances are being sorted on
         :type sort_property: :class:`Property` or UUID
         :param sort_direction: The direction on which the values of property instances are being sorted on:
@@ -230,7 +230,7 @@ class WidgetsManager(Sized):
         if all_writable and not writable_models:
             writable_models = part_model.properties
 
-        meta, title = _set_title(meta, custom_title, default_title=part_model.name)
+        meta, title = _set_title(meta, title, default_title=part_model.name)
 
         widget = self.create_widget(
             widget_type=WidgetTypes.SUPERGRID,
@@ -243,7 +243,7 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_filteredgrid_widget(self, part_model, parent_instance=None, custom_title=False, new_instance=True,
+    def add_filteredgrid_widget(self, part_model, parent_instance=None, title=False, new_instance=True,
                                 edit=True, clone=True, export=True, delete=False, incomplete_rows=True,
                                 emphasize_new_instance=True, emphasize_edit=False, emphasize_clone=False,
                                 emphasize_delete=False, sort_property=None, sort_direction=SortTable.ASCENDING,
@@ -295,11 +295,11 @@ class WidgetsManager(Sized):
         :type parent_instance: :class:`Part` or UUID
         :param custom_height: The height of the supergrid in pixels
         :type custom_height: int or None
-        :param custom_title: A custom title for the supergrid::
+        :param title: A custom title for the supergrid::
             * False (default): Part instance name
             * String value: Custom title
             * None: No title
-        :type custom_title: bool or basestring or None
+        :type title: bool or basestring or None
         :param sort_property: The property model on which the part instances are being sorted on
         :type sort_property: :class:`Property` or UUID
         :param sort_direction: The direction on which the values of property instances are being sorted on:
@@ -352,7 +352,7 @@ class WidgetsManager(Sized):
         if all_writable and not writable_models:
             writable_models = part_model.properties
 
-        meta, title = _set_title(meta, custom_title, default_title=part_model.name)
+        meta, title = _set_title(meta, title, default_title=part_model.name)
 
         widget = self.create_widget(
             widget_type=WidgetTypes.FILTEREDGRID,
@@ -365,7 +365,7 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_attachmentviewer_widget(self, attachment_property, custom_title=False, alignment=None, **kwargs):
+    def add_attachmentviewer_widget(self, attachment_property, title=False, alignment=None, **kwargs):
         # type: (Union[Text, Property2], Optional[Text, bool], Optional[int], Optional[Text], **Any) -> Widget  # noqa
         """
         Add a KE-chain Attachment widget widget manager.
@@ -374,11 +374,11 @@ class WidgetsManager(Sized):
 
         :param attachment_property: KE-chain Attachment property to display
         :type attachment_property: AttachmentProperty
-        :param custom_title: A custom title for the script widget
+        :param title: A custom title for the script widget
             * False (default): Script name
             * String value: Custom title
             * None: No title
-        :type custom_title: bool or basestring or None
+        :type title: bool or basestring or None
         :param alignment: Alignment of the previewed attachment
         :type alignment: basestring or None
         :param kwargs: additional keyword arguments to pass
@@ -406,7 +406,7 @@ class WidgetsManager(Sized):
             "alignment": alignment
         })
 
-        meta, title = _set_title(meta, custom_title, default_title=attachment_property.name)
+        meta, title = _set_title(meta, title, default_title=attachment_property.name)
         widget = self.create_widget(
             widget_type=WidgetTypes.ATTACHMENTVIEWER,
             meta=meta,
@@ -496,7 +496,7 @@ class WidgetsManager(Sized):
 
         return widget
 
-    def add_propertygrid_widget(self, part_instance, custom_title=False, max_height=None, show_headers=True,
+    def add_propertygrid_widget(self, part_instance, title=False, max_height=None, show_headers=True,
                                 show_columns=None, parent_widget=None, readable_models=None, writable_models=None,
                                 all_readable=False, all_writable=False, **kwargs):
         # type: (Union[Property2, Text], Optional[Text, bool], Optional[int], bool, Optional[Iterable], Optional[Text, Widget], Optional[Iterable], Optional[Iterable], bool, bool, **Any ) -> Widget  # noqa: E501,F821
@@ -508,11 +508,11 @@ class WidgetsManager(Sized):
         :type part_instance: :class:`Part` or UUID
         :param max_height: The max height of the property grid in pixels
         :type max_height: int or None
-        :param custom_title: A custom title for the property grid::
+        :param title: A custom title for the property grid::
             * False (default): Part instance name
             * String value: Custom title
             * None: No title
-        :type custom_title: bool or basestring or None
+        :type title: bool or basestring or None
         :param show_headers: Show or hide the headers in the grid (default True)
         :type show_headers: bool
         :param show_columns: Columns to be hidden or shown (default to 'unit' and 'description')
@@ -561,7 +561,7 @@ class WidgetsManager(Sized):
             "showHeightValue": "Custom max height" if max_height else "Auto",
         })
 
-        meta, title = _set_title(meta, custom_title, default_title=part_instance.name)
+        meta, title = _set_title(meta, title, default_title=part_instance.name)
 
         if all_readable and not readable_models:
             readable_models = part_instance.model().properties
@@ -579,7 +579,7 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_service_widget(self, service, custom_title=False, custom_button_text=False, emphasize_run=True,
+    def add_service_widget(self, service, title=False, custom_button_text=False, emphasize_run=True,
                            download_log=False, parent_widget=None, **kwargs):
         """
         Add a KE-chain Service (e.g. script widget) to the widget manager.
@@ -588,11 +588,11 @@ class WidgetsManager(Sized):
 
         :param service: The Service to which the button will be coupled and will be ran when the button is pressed.
         :type service: :class:`Service` or UUID
-        :param custom_title: A custom title for the script widget
+        :param title: A custom title for the script widget
             * False (default): Script name
             * String value: Custom title
             * None: No title
-        :type custom_title: bool or basestring or None
+        :type title: bool or basestring or None
         :param custom_button_text: A custom text for the button linked to the script
             * False (default): Script name
             * String value: Custom title
@@ -639,7 +639,7 @@ class WidgetsManager(Sized):
             'showLog': kwargs.get('show_log', True)
         })
 
-        meta, title = _set_title(meta, custom_title, default_title=service.name)
+        meta, title = _set_title(meta, title, default_title=service.name)
 
         widget = self.create_widget(
             widget_type=WidgetTypes.SERVICE,
@@ -651,7 +651,7 @@ class WidgetsManager(Sized):
 
         return widget
 
-    def add_html_widget(self, html, custom_title=None, **kwargs):
+    def add_html_widget(self, html, title=None, **kwargs):
         """
         Add a KE-chain HTML widget to the widget manager.
 
@@ -659,10 +659,10 @@ class WidgetsManager(Sized):
 
         :param html: The text that will be shown by the widget.
         :type html: basestring or None
-        :param custom_title: A custom title for the text panel::
+        :param title: A custom title for the text panel::
             * None (default): No title
             * String value: Custom title
-        :type custom_title: basestring or None
+        :type title: basestring or None
         :param collapsible: A boolean to decide whether the panel is collapsible or not (default True)
         :type collapsible: bool
         :param collapsed: A boolean to decide whether the panel is collapsed or not (default False)
@@ -679,7 +679,7 @@ class WidgetsManager(Sized):
                                        format(type(html)))
 
         meta = _initiate_meta(kwargs, activity=self._activity_id)
-        meta, title = _set_title(meta, custom_title, default_title=None)
+        meta, title = _set_title(meta, title, default_title=None)
 
         meta["htmlContent"] = html
 
@@ -692,7 +692,7 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_notebook_widget(self, notebook, custom_title=False, parent_widget=None, **kwargs):
+    def add_notebook_widget(self, notebook, title=False, parent_widget=None, **kwargs):
         """
         Add a KE-chain Notebook (e.g. notebook widget) to the WidgetManager.
 
@@ -700,11 +700,11 @@ class WidgetsManager(Sized):
 
         :param notebook: The Notebook to which the button will be coupled and will start when the button is pressed.
         :type notebook: :class:`Service` or UUID
-        :param custom_title: A custom title for the notebook widget
+        :param title: A custom title for the notebook widget
             * False (default): Notebook name
             * String value: Custom title
             * None: No title
-        :type custom_title: bool or basestring or None
+        :type title: bool or basestring or None
         :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
         :type parent_widget: Widget or basestring or None
         :param kwargs: additional keyword arguments to pass
@@ -732,7 +732,7 @@ class WidgetsManager(Sized):
             kwargs['custom_height'] = kwargs.pop('height')
 
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
-        meta, title = _set_title(meta, custom_title, default_title=notebook.name)
+        meta, title = _set_title(meta, title, default_title=notebook.name)
 
         meta.update({
             'serviceId': notebook_id
@@ -816,17 +816,17 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_multicolumn_widget(self, custom_title=None, **kwargs):
+    def add_multicolumn_widget(self, title=None, **kwargs):
         """
         Add a KE-chain Multi Column widget to the WidgetManager.
 
         The widget will be saved to KE-chain.
 
-        :param custom_title: A custom title for the multi column widget
+        :param title: A custom title for the multi column widget
             * False: Widget id
             * String value: Custom title
             * None (default): No title
-        :type custom_title: bool or basestring or None
+        :type title: bool or basestring or None
         :param height: The height of the Notebook in pixels
         :type height: int or None
         :param kwargs: additional keyword arguments to pass
@@ -837,7 +837,7 @@ class WidgetsManager(Sized):
         :raises APIError: When the widget could not be created.
         """
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
-        meta, title = _set_title(meta, custom_title, default_title=WidgetTypes.MULTICOLUMN)
+        meta, title = _set_title(meta, title, default_title=WidgetTypes.MULTICOLUMN)
 
         if 'height' in kwargs:
             # TODO: Pending deprecation 3.4.0.
@@ -854,7 +854,7 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_scope_widget(self, team=None, custom_title=None, show_columns=None, show_all_columns=True, tags=None,
+    def add_scope_widget(self, team=None, title=None, show_columns=None, show_all_columns=True, tags=None,
                          sorted_column=ScopeWidgetColumnTypes.PROJECT_NAME, sorted_direction=SortTable.ASCENDING,
                          parent_widget=None, **kwargs):
         # type: (Union[Team,Text], Optional[Text], Optional[Iterable[Text]], Optional[bool], Optional[Iterable[Text]], Optional[Text], Optional[Text], Optional[Widget,Text], **Any) -> Widget  # noqa: F821,E501
@@ -865,11 +865,11 @@ class WidgetsManager(Sized):
 
         :param team: Team to limit the list of scopes to. Providing this is not obligated but highly preferred.
         :type team: :class:`Team` or basestring
-        :param custom_title:A custom title for the multi column widget
+        :param title:A custom title for the multi column widget
             * False: Widget id
             * String value: Custom title
             * None (default): No title
-        :type custom_title: bool or basestring or None
+        :type title: bool or basestring or None
         :param show_columns: (optional) list of column headers to show. One of `ScopeWidgetColumnTypes`.
         :type show_columns: list of basestring
         :param show_all_columns: boolean to show all columns (defaults to True). If True, will override `show_columns`
@@ -892,7 +892,7 @@ class WidgetsManager(Sized):
         :raises APIError: When the widget could not be created.
         """
         meta = _initiate_meta(kwargs, activity=self._activity_id)
-        meta, title = _set_title(meta, custom_title, default_title=WidgetTypes.SCOPE)
+        meta, title = _set_title(meta, title, default_title=WidgetTypes.SCOPE)
 
         if not show_all_columns and show_columns:
             if not isinstance(show_columns, (list, tuple)) and \

@@ -2193,7 +2193,7 @@ class Client(object):
         data = dict(
             activity_id=activity,
             widget_type=widget_type,
-            title=title,
+            customTitle=title,
             meta=meta,
             parent_id=parent
         )
