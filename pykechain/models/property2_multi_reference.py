@@ -132,13 +132,18 @@ class MultiReferenceProperty2(Property2):
         return possible_choices
 
     def set_prefilters(self, property_models, values, filters_type=FilterType.CONTAINS, overwrite=False):
-        """
+        """Sets the pre-filters on a `MultiReferenceProperty`.
 
-        :param property_models:
-        :param values:
-        :param filters_type:
-        :param overwrite:
-        :return:
+        :param property_models: `list` of `Property` models to set pre-filters on
+        :type property_models: list
+        :param values: `list` of values to pre-filter on
+        :type values: list
+        :param filters_type: choose one of the :class:`enums.FilterType`, defaults to `FilterType.CONTAINS`
+        :type filters_type: list
+        :param overwrite: determines whether the pre-filters should be over-written or not, defaults to False
+        :type overwrite: bool
+
+        :raises IllegalArgumentError: when the type of the input is provided incorrect.
         """
         if any(len(lst) != len(property_models) for lst in [values, filters_type]):
             raise IllegalArgumentError('The lists of "property_models", "values" and "filters_type" should be the '
@@ -166,9 +171,9 @@ class MultiReferenceProperty2(Property2):
             # TODO when a property is freshly created, the property has no "part_id" key in json_data.
             elif self.value[0].id != property_model._json_data.get('part_id', self.value[0].id):
                 raise IllegalArgumentError(
-                    'Pre-filters can only be set on properties belonging to the reference Part model, found referenced '
-                    'Part model "{}" and Properties belonging to "{}"'.format(
-                        self.value[0].name, property_model.part.name))
+                    'Pre-filters can only be set on properties belonging to the referenced Part model, found '
+                    'referenced Part model "{}" and Properties belonging to "{}"'.format(self.value[0].name,
+                                                                                         property_model.part.name))
             else:
                 property_id = property_model.id
                 if property_model.type == PropertyType.DATETIME_VALUE:
@@ -185,10 +190,59 @@ class MultiReferenceProperty2(Property2):
                     new_prefilter = ':'.join(new_prefilter_list)
                 list_of_prefilters.append(new_prefilter)
 
+        # Only concerned with the pre-filters, hence the validators and excluded property models should not be erased
         initial_propmodels_excl = self._options.get('propmodels_excl', [])
+        initial_validators = self._options.get('validators', [])
+
         options = dict()
         options['prefilters'] = {'property_value': ','.join(list_of_prefilters) if list_of_prefilters else {}}
         options['propmodels_excl'] = initial_propmodels_excl
+        options['validators'] = initial_validators
+        options['scope_id'] = self.value[0]._json_data["scope_id"]
+
+        self.edit(options=options)
+        return
+
+    def set_excluded_propmodels(self, property_models, overwrite=False):
+        """
+
+        :param property_models:
+        :param overwrite:
+        :return:
+        """
+        if not overwrite:
+            list_of_propmodels_excl = self._options.get('propmodels_excl', [])
+        else:
+            list_of_propmodels_excl = list()
+
+        for property_model in property_models:
+            if not isinstance(property_model, Property2):
+                if is_uuid(property_model):
+                    property_model = self._client.property(id=property_model, category=Category.MODEL)
+                else:
+                    raise IllegalArgumentError('A part reference property can only exclude `Property` models or their '
+                                               'UUIDs, found type "{}"'.format(type(property_model)))
+            if property_model.category != Category.MODEL:
+                raise IllegalArgumentError('A part reference property can only excluded `Property` models, found '
+                                           'category "{}" on property "{}"'.format(property_model.category,
+                                                                                   property_model.name))
+            # TODO when a property is freshly created, the property has no "part_id" key in json_data.
+            elif self.value[0].id != property_model._json_data.get('part_id', self.value[0].id):
+                raise IllegalArgumentError(
+                    'A part reference property can only exclude properties belonging to the referenced Part model, '
+                    'found referenced Part model "{}" and Properties belonging to "{}"'.
+                        format(self.value[0].name, property_model.part.name))
+            else:
+                list_of_propmodels_excl.append(property_model.id)
+
+        # Only concerned with the excluded property models, hence the validators and prefilters should not be erased
+        initial_prefilters = self._options.get('prefilters', {})
+        initial_validators = self._options.get('validators', [])
+
+        options = dict()
+        options['prefilters'] = initial_prefilters
+        options['propmodels_excl'] = list_of_propmodels_excl
+        options['validators'] = initial_validators
         options['scope_id'] = self.value[0]._json_data["scope_id"]
 
         self.edit(options=options)

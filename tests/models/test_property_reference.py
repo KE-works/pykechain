@@ -4,6 +4,7 @@ import uuid
 from pykechain.enums import PropertyType, Multiplicity, FilterType
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import MultiReferenceProperty, MultiReferenceProperty2
+from pykechain.models.validators import RequiredFieldValidator
 from tests.classes import TestBetamax
 
 
@@ -17,10 +18,10 @@ class TestMultiReferenceProperty(TestBetamax):
         # reference property model (with a value pointing to a target part model
         self.ref_prop_name = 'Test reference property ({})'.format(str(uuid.uuid4())[-8:])
         self.ref_part = self.project.model('Bike')
+
         self.ref_part.add_property(
             name=self.ref_prop_name,
-            property_type=PropertyType.REFERENCES_VALUE,
-            default_value=self.wheel_model
+            property_type=PropertyType.REFERENCES_VALUE
         )  # type: MultiReferenceProperty2
 
         self.fabrication_date_property = self.wheel_model.add_property(
@@ -34,7 +35,6 @@ class TestMultiReferenceProperty(TestBetamax):
             options={'value_choices': ['Michelin', 'Pirelli', 'Bridgestone']},
             default_value='Michelin'
         )
-
         self.reference_to_wheel = self.ref_part.add_property(
             name=self.ref_prop_name,
             property_type=PropertyType.REFERENCES_VALUE,
@@ -112,10 +112,9 @@ class TestMultiReferenceProperty(TestBetamax):
     def test_value_if_multi_ref_gives_back_all_parts(self):
         """because of #276 problem"""
         # setUp
-        wheel_model = self.project.model('Wheel')
-        self.ref_model.value = [wheel_model]
+        self.ref_model.value = [self.wheel_model]
 
-        wheel_instances = wheel_model.instances()
+        wheel_instances = self.wheel_model.instances()
         wheel_instances_list = [instance.id for instance in wheel_instances]
 
         # set ref value
@@ -137,6 +136,7 @@ class TestMultiReferenceProperty(TestBetamax):
 
     def test_multi_ref_choices(self):
         # testing
+        self.ref_model.value = [self.wheel_model]
         possible_options = self.ref.choices()
         self.assertEqual(2, len(possible_options))
 
@@ -210,42 +210,8 @@ class TestMultiReferenceProperty(TestBetamax):
                 default_value=True
             )
 
-    # new in 2.3
-    # def test_add_filters_to_property(self):
-    #     # setUp
-    #     # wheel_property_reference = self.project.model('Bike').property('Reference wheel')
-    #     # wheel_model = self.project.model('Wheel')
-    #
-    #     # self.ref_target_model # part model
-    #     # self.ref_target # part instance
-    #
-    #     diameter_property = self.ref_target_model.add_property(
-    #         name='Diameter',
-    #         property_type=PropertyType.FLOAT_VALUE,
-    #         default_value=15.0
-    #     )
-    #     spokes_property = self.ref_target_model.add_property(
-    #         name='Spokes',
-    #         property_type=PropertyType.INT_VALUE,
-    #         default_value=10
-    #     )
-    #
-    #     prefilters = {'property_value': diameter_property.id + ":{}:lte".format(15)}
-    #     propmodels_excl = [spokes_property.id]
-    #     options = dict()
-    #     options['prefilters'] = prefilters
-    #     options['propmodels_excl'] = propmodels_excl
-    #
-    #     # testing
-    #     self.ref_model.edit(options=options)
-    #
-    #     self.assertTrue('property_value' in self.ref_model._options['prefilters'] and
-    #                     self.ref_model._options['prefilters']['property_value'] ==
-    #                     diameter_property.id + ":{}:lte".format(15))
-    #     self.assertTrue(spokes_property.id in self.ref_model._options['propmodels_excl'])
-
     # new in 3.0
-    def test_set_prefilters_on_property(self):
+    def test_set_prefilters_on_reference_property(self):
         # setUp
         diameter_property = self.wheel_model.property(name='Diameter')  # decimal property
         spokes_property = self.wheel_model.property(name='Spokes')  # integer property
@@ -281,7 +247,33 @@ class TestMultiReferenceProperty(TestBetamax):
         self.assertTrue("{}:{}:{}".format(self.tyre_manufacturer_property.id, 'Michelin', FilterType.CONTAINS) in
                         self.reference_to_wheel._options['prefilters']['property_value'])
 
-    def test_add_prefilters_to_property(self):
+    def test_set_prefilters_on_reference_property_with_excluded_propmodels_and_validators(self):
+        # The excluded propmodels and validators already set on the property should not be erased when
+        # setting prefilters
+
+        # setUp
+        diameter_property = self.wheel_model.property(name='Diameter')  # decimal property
+        spokes_property = self.wheel_model.property(name='Spokes')  # integer property
+
+        self.reference_to_wheel.set_excluded_propmodels(property_models=[diameter_property, spokes_property])
+        self.reference_to_wheel.validators = [RequiredFieldValidator()]
+
+        self.reference_to_wheel.set_prefilters(
+            property_models=[diameter_property],
+            values=[15.13],
+            filters_type=[FilterType.GREATER_THAN_EQUAL]
+        )
+
+        # testing
+        self.assertTrue('property_value' in self.reference_to_wheel._options['prefilters'])
+        self.assertTrue("{}:{}:{}".format(diameter_property.id, 15.13, FilterType.GREATER_THAN_EQUAL) in
+                        self.reference_to_wheel._options['prefilters']['property_value'])
+        self.assertEqual(len(self.reference_to_wheel._options['propmodels_excl']), 2)
+        self.assertTrue(diameter_property.id in self.reference_to_wheel._options['propmodels_excl'])
+        self.assertTrue(spokes_property.id in self.reference_to_wheel._options['propmodels_excl'])
+        self.assertTrue(isinstance(self.reference_to_wheel._validators[0], RequiredFieldValidator))
+
+    def test_add_prefilters_to_reference_property(self):
         # setUp
         diameter_property = self.wheel_model.property(name='Diameter')  # decimal property
         spokes_property = self.wheel_model.property(name='Spokes')  # integer property
@@ -292,7 +284,7 @@ class TestMultiReferenceProperty(TestBetamax):
             values=[15.13],
             filters_type=[FilterType.GREATER_THAN_EQUAL]
         )
-        # Add others, see if the first ones are remembered (overwrite = False)
+        # Add others, checks whether the initial ones are remembered (overwrite = False)
         self.reference_to_wheel.set_prefilters(
             property_models=[spokes_property],
             values=[2],
@@ -307,7 +299,7 @@ class TestMultiReferenceProperty(TestBetamax):
         self.assertTrue("{}:{}:{}".format(spokes_property.id, 2, FilterType.LOWER_THAN_EQUAL) in
                         self.reference_to_wheel._options['prefilters']['property_value'])
 
-    def test_overwrite_prefilters_to_property(self):
+    def test_overwrite_prefilters_on_reference_property(self):
         # setUp
         diameter_property = self.wheel_model.property(name='Diameter')  # decimal property
         spokes_property = self.wheel_model.property(name='Spokes')  # integer property
@@ -331,7 +323,7 @@ class TestMultiReferenceProperty(TestBetamax):
         self.assertTrue("{}:{}:{}".format(spokes_property.id, 2, FilterType.LOWER_THAN_EQUAL) ==
                         self.reference_to_wheel._options['prefilters']['property_value'])
 
-    def test_set_prefilters_on_property_using_uuid(self):
+    def test_set_prefilters_on_reference_property_using_uuid(self):
         # setUp
         diameter_property = self.wheel_model.property(name='Diameter')  # decimal property
         spokes_property = self.wheel_model.property(name='Spokes')  # integer property
@@ -352,7 +344,7 @@ class TestMultiReferenceProperty(TestBetamax):
         self.assertTrue("{}:{}:{}".format(spokes_property.id, 7, FilterType.LOWER_THAN_EQUAL) in
                         self.reference_to_wheel._options['prefilters']['property_value'])
 
-    def test_set_prefilters_wrong(self):
+    def test_set_prefilters_on_reference_property_the_wrong_way(self):
         # setUp
         bike_gears_property = self.ref_part.property(name='Gears')
         instance_diameter_property = self.wheel_model.instances()[0].property(name='Diameter')
@@ -390,3 +382,103 @@ class TestMultiReferenceProperty(TestBetamax):
                 values=[3.33, 1.51],
                 filters_type=[FilterType.GREATER_THAN_EQUAL, FilterType.CONTAINS]
             )
+
+    def test_set_excluded_propmodels_on_reference_property(self):
+        # setUp
+        diameter_property = self.wheel_model.property(name='Diameter')  # decimal property
+        spokes_property = self.wheel_model.property(name='Spokes')  # integer property
+
+        self.reference_to_wheel.set_excluded_propmodels(property_models=[diameter_property, spokes_property])
+
+        # testing
+        self.assertEqual(len(self.reference_to_wheel._options['propmodels_excl']), 2)
+        self.assertTrue(diameter_property.id in self.reference_to_wheel._options['propmodels_excl'])
+        self.assertTrue(spokes_property.id in self.reference_to_wheel._options['propmodels_excl'])
+
+    def test_set_excluded_propmodels_on_reference_property_using_uuid(self):
+        # setUp
+        diameter_property = self.wheel_model.property(name='Diameter')  # decimal property
+        spokes_property = self.wheel_model.property(name='Spokes')  # integer property
+
+        self.reference_to_wheel.set_excluded_propmodels(property_models=[diameter_property.id, spokes_property.id])
+
+        # testing
+        self.assertEqual(len(self.reference_to_wheel._options['propmodels_excl']), 2)
+        self.assertTrue(diameter_property.id in self.reference_to_wheel._options['propmodels_excl'])
+        self.assertTrue(spokes_property.id in self.reference_to_wheel._options['propmodels_excl'])
+
+    def test_set_excluded_propmodels_on_reference_property_with_prefilters_and_validators(self):
+        # The prefilters and validators already set on the property should not be erased when setting
+        # excluded propmodels
+
+        # setUp
+        diameter_property = self.wheel_model.property(name='Diameter')  # decimal property
+        spokes_property = self.wheel_model.property(name='Spokes')  # integer property
+        self.reference_to_wheel.set_prefilters(
+            property_models=[diameter_property],
+            values=[15.13],
+            filters_type=[FilterType.GREATER_THAN_EQUAL]
+        )
+
+        self.reference_to_wheel.validators = [RequiredFieldValidator()]
+
+        self.reference_to_wheel.set_excluded_propmodels(property_models=[diameter_property, spokes_property])
+
+        # testing
+        self.assertTrue('property_value' in self.reference_to_wheel._options['prefilters'])
+        self.assertTrue("{}:{}:{}".format(diameter_property.id, 15.13, FilterType.GREATER_THAN_EQUAL) in
+                        self.reference_to_wheel._options['prefilters']['property_value'])
+        self.assertEqual(len(self.reference_to_wheel._options['propmodels_excl']), 2)
+        self.assertTrue(diameter_property.id in self.reference_to_wheel._options['propmodels_excl'])
+        self.assertTrue(spokes_property.id in self.reference_to_wheel._options['propmodels_excl'])
+        self.assertTrue(isinstance(self.reference_to_wheel._validators[0], RequiredFieldValidator))
+
+    def test_set_excluded_propmodels_on_reference_property_the_wrong_way(self):
+        # setUp
+        bike_gears_property = self.ref_part.property(name='Gears')
+        instance_diameter_property = self.wheel_model.instances()[0].property(name='Diameter')
+
+        # testing
+        # When excluded propmodels are being set, but the property does not belong to the referenced part
+        with self.assertRaises(IllegalArgumentError):
+            self.reference_to_wheel.set_excluded_propmodels(property_models=[bike_gears_property])
+
+        # When excluded propmodels are being set, but the property is an instance, not a model
+        with self.assertRaises(IllegalArgumentError):
+            self.reference_to_wheel.set_excluded_propmodels(property_models=[instance_diameter_property])
+
+        # When excluded propmodels are being set, but no UUIDs or `Property` objects are being used in property_models
+        with self.assertRaises(IllegalArgumentError):
+            self.reference_to_wheel.set_excluded_propmodels(property_models=[False, 301])
+
+    def test_add_excluded_propmodels_to_reference_property(self):
+        # setUp
+        diameter_property = self.wheel_model.property(name='Diameter')  # decimal property
+        spokes_property = self.wheel_model.property(name='Spokes')  # integer property
+
+        # Set the initial excluded propmodels
+        self.reference_to_wheel.set_excluded_propmodels(property_models=[diameter_property])
+
+        # Add others, checks whether the initial ones are remembered (overwrite = False)
+        self.reference_to_wheel.set_excluded_propmodels(property_models=[spokes_property], overwrite=False)
+
+        # testing
+        self.assertEqual(len(self.reference_to_wheel._options['propmodels_excl']), 2)
+        self.assertTrue(diameter_property.id in self.reference_to_wheel._options['propmodels_excl'])
+        self.assertTrue(spokes_property.id in self.reference_to_wheel._options['propmodels_excl'])
+
+    def test_overwrite_excluded_propmodels_on_reference_property(self):
+        # setUp
+        diameter_property = self.wheel_model.property(name='Diameter')  # decimal property
+        spokes_property = self.wheel_model.property(name='Spokes')  # integer property
+
+        # Set the initial excluded propmodels
+        self.reference_to_wheel.set_excluded_propmodels(property_models=[diameter_property])
+
+        # Overwrite them
+        self.reference_to_wheel.set_excluded_propmodels(property_models=[spokes_property], overwrite=True)
+
+        # testing
+        self.assertEqual(len(self.reference_to_wheel._options['propmodels_excl']), 1)
+        self.assertTrue(diameter_property.id not in self.reference_to_wheel._options['propmodels_excl'])
+        self.assertTrue(spokes_property.id in self.reference_to_wheel._options['propmodels_excl'])
