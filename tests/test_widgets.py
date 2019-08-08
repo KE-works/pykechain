@@ -257,7 +257,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         bike_part = self.project.part(name='Bike')
         widget = widget_manager.add_propertygrid_widget(part_instance=bike_part,
-                                                        custom_title="Testing the customtitle of a property grid widget",
+                                                        title="Testing the customtitle of a property grid widget",
                                                         show_headers=False, show_columns=[ShowColumnTypes.UNIT],
                                                         readable_models=bike_part.model().properties[:2],
                                                         writable_models=bike_part.model().properties[3:])
@@ -271,12 +271,12 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         widget1 = widget_manager.add_service_widget(service=service_gears_successful)
         widget2 = widget_manager.add_service_widget(service=service_gears_successful,
-                                                    custom_title=None,
+                                                    title=None,
                                                     custom_button_text="Run this script (Custom!) and no title",
                                                     emphasize_run=True,
                                                     download_log=True)
         widget3 = widget_manager.add_service_widget(service=service_gears_successful,
-                                                    custom_title="Also a custom title, but no log",
+                                                    title="Also a custom title, but no log",
                                                     custom_button_text="Run this script (Custom!)",
                                                     emphasize_run=False,
                                                     show_log=False)
@@ -289,7 +289,7 @@ class TestWidgetManagerInActivity(TestBetamax):
     def test_add_html_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         widget = widget_manager.add_html_widget(html='Or is this just fantasy?',
-                                                custom_title='Is this the real life?')
+                                                title='Is this the real life?')
 
         self.assertIsInstance(widget, HtmlWidget)
         self.assertEqual(len(widget_manager), 1 + 1)
@@ -332,13 +332,13 @@ class TestWidgetManagerInActivity(TestBetamax):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         notebook = self.project.service(name="Service Gears - Successful")
         widget1 = widget_manager.add_notebook_widget(notebook=notebook,
-                                                     custom_title=False)
+                                                     title=False)
 
         widget2 = widget_manager.add_notebook_widget(notebook=notebook,
-                                                     custom_title="With custom title")
+                                                     title="With custom title")
 
         widget3 = widget_manager.add_notebook_widget(notebook=notebook.id,
-                                                     custom_title="With no padding and custom height",
+                                                     title="With no padding and custom height",
                                                      customHeight=400,
                                                      noPadding=True)
 
@@ -355,7 +355,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         bike_part = self.project.part('Bike')
         picture_instance = bike_part.property('Picture')
         picture_model = picture_instance.model()
-        multi_column_widget = widget_manager.add_multicolumn_widget(custom_title="Multi column Grid + Attachment")
+        multi_column_widget = widget_manager.add_multicolumn_widget(title="Multi column Grid + Attachment")
 
         widget1 = widget_manager.add_propertygrid_widget(part_instance=bike_part,
                                                          writable_models=[picture_model],
@@ -376,13 +376,13 @@ class TestWidgetManagerInActivity(TestBetamax):
         w0 = widget_manager[0]  # meta panel
         w1 = widget_manager.add_propertygrid_widget(part_instance=bike_part,
                                                     writable_models=[bike_part.model().properties],
-                                                    custom_title="Original widget 1 (w1)")
+                                                    title="Original widget 1 (w1)")
         w2 = widget_manager.add_propertygrid_widget(part_instance=bike_part,
                                                     writable_models=[bike_part.model().properties],
-                                                    custom_title="Original widget 2 (w2)")
+                                                    title="Original widget 2 (w2)")
         w3 = widget_manager.add_propertygrid_widget(part_instance=bike_part,
                                                     writable_models=[bike_part.model().properties],
-                                                    custom_title="Original widget 3 (w3)")
+                                                    title="Original widget 3 (w3)")
 
         # if widget order is `[w0,w1,w2]` and inserting `w3` at index 1 (before Widget1);
         #           index:     0 ^1  2
@@ -397,7 +397,7 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         added_widget = widget_manager.add_propertygrid_widget(part_instance=bike_part,
                                                               writable_models=[bike_part.model().properties],
-                                                              custom_title="Widget Finally Positioned Under Metapanel",
+                                                              title="Widget Finally Positioned Under Metapanel",
                                                               order=1)
 
         self.assertEqual(added_widget.order, 1)
