@@ -146,20 +146,24 @@ class MultiReferenceProperty2(Property2):
         if not overwrite:
             initial_prefilters = self._options.get('prefilters', {})
             list_of_prefilters = initial_prefilters.get('property_value', [])
+            if list_of_prefilters:
+                list_of_prefilters = list_of_prefilters.split(',')
         else:
             list_of_prefilters = list()
 
         for property_model in property_models:
+            index = property_models.index(property_model)
             if not isinstance(property_model, Property2):
                 if is_uuid(property_model):
-                    property_model = self._client.property(id=property_model)
+                    property_model = self._client.property(id=property_model, category=Category.MODEL)
                 else:
-                    raise IllegalArgumentError('Pre-filters can only be set on properties, found "{}" with name "{}"'.
-                                               format(property_model.type, property_model.name))
+                    raise IllegalArgumentError('Pre-filters can only be set on `Property` models or their UUIDs, '
+                                               'found type "{}"'.format(type(property_model)))
 
             if property_model.category != Category.MODEL:
                 raise IllegalArgumentError('Pre-filters can only be set on property models, found category "{}"'
                                            'on property "{}"'.format(property_model.category, property_model.name))
+            # TODO when a property is freshly created, the property has no "part_id" key in json_data.
             elif self.value[0].id != property_model._json_data.get('part_id', self.value[0].id):
                 raise IllegalArgumentError(
                     'Pre-filters can only be set on properties belonging to the reference Part model, found referenced '
@@ -167,9 +171,10 @@ class MultiReferenceProperty2(Property2):
                         self.value[0].name, property_model.part.name))
             else:
                 property_id = property_model.id
-                index = property_models.index(property_model)
                 if property_model.type == PropertyType.DATETIME_VALUE:
                     datetime_value = values[index]
+                    # TODO really not elegant way to deal with DATETIME. Issue is that the value is being double
+                    #  encoded (KEC-20504)
                     datetime_value = "{}-{}-{}T00%253A00%253A00.000Z".format(datetime_value.year,
                                                                              str(datetime_value.month).rjust(2, '0'),
                                                                              str(datetime_value.day).rjust(2, '0'))
