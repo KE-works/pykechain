@@ -1,7 +1,8 @@
-from typing import Dict, Optional, Union, Text, Tuple
+from typing import Dict, Optional, Union, Text, Tuple, List
 
 from six import text_type
 
+from pykechain.enums import Category, PropertyType
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.utils import is_uuid, snakecase, camelcase
 
@@ -146,3 +147,69 @@ def _initiate_meta(kwargs, activity, ignores=()):
             del meta[key]
 
     return meta
+
+
+def _check_prefilters(part_model, prefilters):
+    """Checks the pre-filters on a `FilteredGridWidget`.
+
+    :raises IllegalArgumentError: when the type of the input is provided incorrect.
+    """
+    list_of_prefilters = []
+    property_models = prefilters.get('property_models', [])  # type: List[Property2]  # noqa
+    values = prefilters.get('values', [])
+    filters_type = prefilters.get('filters_type', [])
+    if any(len(lst) != len(property_models) for lst in [values, filters_type]):
+        raise IllegalArgumentError('The lists of "property_models", "values" and "filters_type" should be the '
+                                   'same length')
+
+    for property_model in property_models:
+        index = property_models.index(property_model)
+        if is_uuid(property_model):
+            property_model = part_model.property(id=property_model)
+
+        if property_model.category != Category.MODEL:
+            raise IllegalArgumentError('Pre-filters can only be set on property models, found category "{}"'
+                                       'on property "{}"'.format(property_model.category, property_model.name))
+        # TODO when a property is freshly created, the property has no "part_id" key in json_data.
+        elif part_model.id != property_model._json_data.get('part_id'):
+            raise IllegalArgumentError(
+                'Pre-filters can only be set on properties belonging to the selected Part model, found '
+                'selected Part model "{}" and Properties belonging to "{}"'.format(part_model.name,
+                                                                                   property_model.part.name))
+        else:
+            property_id = property_model.id
+            if property_model.type == PropertyType.DATETIME_VALUE:
+                datetime_value = values[index]
+                # TODO really not elegant way to deal with DATETIME. Issue is that the value is being double
+                #  encoded (KEC-20504)
+                datetime_value = "{}-{}-{}T00%253A00%253A00.000Z".format(datetime_value.year,
+                                                                         str(datetime_value.month).rjust(2, '0'),
+                                                                         str(datetime_value.day).rjust(2, '0'))
+                new_prefilter_list = [property_id, datetime_value, filters_type[index]]
+                new_prefilter = '%3A'.join(new_prefilter_list)
+            else:
+                new_prefilter_list = [property_id, str(values[index]), filters_type[index]]
+                new_prefilter = ':'.join(new_prefilter_list)
+            list_of_prefilters.append(new_prefilter)
+    return list_of_prefilters
+
+
+def _check_excluded_propmodels(part_model, property_models):
+    list_of_propmodels_excl = list()  # type: List[Property2]  # noqa
+    for property_model in property_models:
+        if is_uuid(property_model):
+            property_model = part_model.property(id=property_model)
+
+        if property_model.category != Category.MODEL:
+            raise IllegalArgumentError('A part reference property can only excluded `Property` models, found '
+                                       'category "{}" on property "{}"'.format(property_model.category,
+                                                                               property_model.name))
+        # TODO when a property is freshly created, the property has no "part_id" key in json_data.
+        elif part_model.id != property_model._json_data.get('part_id'):
+            raise IllegalArgumentError(
+                'A part reference property can only exclude properties belonging to the referenced Part model, '
+                'found referenced Part model "{}" and Properties belonging to "{}"'.
+                    format(part_model.name, property_model.part.name))
+        else:
+            list_of_propmodels_excl.append(property_model.id)
+    return list_of_propmodels_excl

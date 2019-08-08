@@ -2,7 +2,7 @@ import json
 import os
 from unittest import skip
 
-from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment
+from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity
 from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, \
@@ -216,6 +216,31 @@ class TestWidgetManagerInActivity(TestBetamax):
             emphasize_edit=True,
             all_writable=True,
             collapse_filters=False,
+        )
+
+        self.assertIsInstance(widget, FilteredgridWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
+
+    def test_add_filtered_grid_widget_with_prefilters_and_excluded_propmodels(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        part_model = self.project.model(name='Wheel')
+        parent_instance = self.project.part(name='Bike')
+        excluded_propmodels = [part_model.property(name='Spokes')]
+        prefilters = dict(
+            property_models=[part_model.property(name='Diameter')],
+            values=[16],
+            filters_type=[FilterType.LOWER_THAN_EQUAL]
+        )
+        widget = widget_manager.add_filteredgrid_widget(
+            part_model=part_model,
+            parent_instance=parent_instance,
+            edit=True,
+            # sort_property=part_model.property(name='Diameter'),
+            emphasize_edit=True,
+            all_writable=True,
+            collapse_filters=False,
+            prefilters=prefilters,
+            excluded_propmodels=excluded_propmodels
         )
 
         self.assertIsInstance(widget, FilteredgridWidget)
