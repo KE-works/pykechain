@@ -138,7 +138,7 @@ class TestMultiReferenceProperty(TestBetamax):
     def test_multi_ref_choices(self):
         # testing
         possible_options = self.ref.choices()
-        self.assertEqual(1, len(possible_options))
+        self.assertEqual(2, len(possible_options))
 
     def test_create_ref_property_referencing_part_in_list(self):
         # setUp
@@ -246,8 +246,7 @@ class TestMultiReferenceProperty(TestBetamax):
 
     # new in 3.0
     def test_set_prefilters_on_property(self):
-
-        # already exist, not to be deleted
+        # setUp
         diameter_property = self.wheel_model.property(name='Diameter')  # decimal property
         spokes_property = self.wheel_model.property(name='Spokes')  # integer property
         rim_material_property = self.wheel_model.property(name='Rim Material')  # single line text
@@ -269,3 +268,125 @@ class TestMultiReferenceProperty(TestBetamax):
                           FilterType.GREATER_THAN_EQUAL,
                           FilterType.CONTAINS]
         )
+
+        # testing
+        self.assertTrue('property_value' in self.reference_to_wheel._options['prefilters'])
+        self.assertTrue("{}:{}:{}".format(diameter_property.id, 30.5, FilterType.GREATER_THAN_EQUAL) in
+                        self.reference_to_wheel._options['prefilters']['property_value'])
+        self.assertTrue("{}:{}:{}".format(spokes_property.id, 7, FilterType.LOWER_THAN_EQUAL) in
+                        self.reference_to_wheel._options['prefilters']['property_value'])
+        self.assertTrue("{}:{}:{}".format(rim_material_property.id, 'Al', FilterType.CONTAINS) in
+                        self.reference_to_wheel._options['prefilters']['property_value'])
+        # TODO - fix KEC-20504 and then check for DATETIME
+        self.assertTrue("{}:{}:{}".format(self.tyre_manufacturer_property.id, 'Michelin', FilterType.CONTAINS) in
+                        self.reference_to_wheel._options['prefilters']['property_value'])
+
+    def test_add_prefilters_to_property(self):
+        # setUp
+        diameter_property = self.wheel_model.property(name='Diameter')  # decimal property
+        spokes_property = self.wheel_model.property(name='Spokes')  # integer property
+
+        # Set the initial prefilters
+        self.reference_to_wheel.set_prefilters(
+            property_models=[diameter_property],
+            values=[15.13],
+            filters_type=[FilterType.GREATER_THAN_EQUAL]
+        )
+        # Add others, see if the first ones are remembered (overwrite = False)
+        self.reference_to_wheel.set_prefilters(
+            property_models=[spokes_property],
+            values=[2],
+            filters_type=[FilterType.LOWER_THAN_EQUAL],
+            overwrite=False
+        )
+
+        # testing
+        self.assertTrue('property_value' in self.reference_to_wheel._options['prefilters'])
+        self.assertTrue("{}:{}:{}".format(diameter_property.id, 15.13, FilterType.GREATER_THAN_EQUAL) in
+                        self.reference_to_wheel._options['prefilters']['property_value'])
+        self.assertTrue("{}:{}:{}".format(spokes_property.id, 2, FilterType.LOWER_THAN_EQUAL) in
+                        self.reference_to_wheel._options['prefilters']['property_value'])
+
+    def test_overwrite_prefilters_to_property(self):
+        # setUp
+        diameter_property = self.wheel_model.property(name='Diameter')  # decimal property
+        spokes_property = self.wheel_model.property(name='Spokes')  # integer property
+
+        # Set the initial prefilters
+        self.reference_to_wheel.set_prefilters(
+            property_models=[diameter_property],
+            values=[15.13],
+            filters_type=[FilterType.GREATER_THAN_EQUAL]
+        )
+        # Add others, see if the first ones are remembered (overwrite = False)
+        self.reference_to_wheel.set_prefilters(
+            property_models=[spokes_property],
+            values=[2],
+            filters_type=[FilterType.LOWER_THAN_EQUAL],
+            overwrite=True
+        )
+
+        # testing
+        self.assertTrue('property_value' in self.reference_to_wheel._options['prefilters'])
+        self.assertTrue("{}:{}:{}".format(spokes_property.id, 2, FilterType.LOWER_THAN_EQUAL) ==
+                        self.reference_to_wheel._options['prefilters']['property_value'])
+
+    def test_set_prefilters_on_property_using_uuid(self):
+        # setUp
+        diameter_property = self.wheel_model.property(name='Diameter')  # decimal property
+        spokes_property = self.wheel_model.property(name='Spokes')  # integer property
+
+        self.reference_to_wheel.set_prefilters(
+            property_models=[diameter_property.id,
+                             spokes_property.id],
+            values=[30.5,
+                    7],
+            filters_type=[FilterType.GREATER_THAN_EQUAL,
+                          FilterType.LOWER_THAN_EQUAL]
+        )
+
+        # testing
+        self.assertTrue('property_value' in self.reference_to_wheel._options['prefilters'])
+        self.assertTrue("{}:{}:{}".format(diameter_property.id, 30.5, FilterType.GREATER_THAN_EQUAL) in
+                        self.reference_to_wheel._options['prefilters']['property_value'])
+        self.assertTrue("{}:{}:{}".format(spokes_property.id, 7, FilterType.LOWER_THAN_EQUAL) in
+                        self.reference_to_wheel._options['prefilters']['property_value'])
+
+    def test_set_prefilters_wrong(self):
+        # setUp
+        bike_gears_property = self.ref_part.property(name='Gears')
+        instance_diameter_property = self.wheel_model.instances()[0].property(name='Diameter')
+        diameter_property = self.wheel_model.property(name='Diameter')  # decimal property
+
+        # testing
+        # When prefilters are being set, but the property does not belong to the referenced part
+        with self.assertRaises(IllegalArgumentError):
+            self.reference_to_wheel.set_prefilters(
+                property_models=[bike_gears_property],
+                values=[2],
+                filters_type=[FilterType.GREATER_THAN_EQUAL]
+            )
+
+        # When prefilters are being set, but the property is an instance, not a model
+        with self.assertRaises(IllegalArgumentError):
+            self.reference_to_wheel.set_prefilters(
+                property_models=[instance_diameter_property],
+                values=[3.33],
+                filters_type=[FilterType.GREATER_THAN_EQUAL]
+            )
+
+        # When prefilters are being set, but the size of lists is not consistent
+        with self.assertRaises(IllegalArgumentError):
+            self.reference_to_wheel.set_prefilters(
+                property_models=[diameter_property],
+                values=[3.33, 1.51],
+                filters_type=[FilterType.GREATER_THAN_EQUAL, FilterType.CONTAINS]
+            )
+
+        # When prefilters are being set, but no UUIDs or `Property` objects are being used in property_models
+        with self.assertRaises(IllegalArgumentError):
+            self.reference_to_wheel.set_prefilters(
+                property_models=[False, 301],
+                values=[3.33, 1.51],
+                filters_type=[FilterType.GREATER_THAN_EQUAL, FilterType.CONTAINS]
+            )
