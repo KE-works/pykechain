@@ -346,10 +346,12 @@ class WidgetsManager(Sized):
             "primaryEditUiValue": emphasize_edit,
             "primaryCloneUiValue": emphasize_clone,
             "primaryDeleteUiValue": emphasize_delete,
-            "prefilters": prefilters,
-            "propmodelsExcl": excluded_propmodels
         })
 
+        if prefilters:
+            meta['prefilters'] = prefilters
+        if excluded_propmodels:
+            meta['propmodelsExcl'] = excluded_propmodels
         if parent_instance_id:
             meta['parentInstanceId'] = parent_instance_id
 
