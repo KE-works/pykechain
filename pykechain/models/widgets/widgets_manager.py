@@ -195,6 +195,10 @@ class WidgetsManager(Sized):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
+        if 'custom_title' in kwargs and not title:
+            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
+                          'accordingly to use `title`', PendingDeprecationWarning)
+            title = kwargs.pop('custom_title')
         # Check whether the part_model is uuid type or class `Part`
         part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: Part2  # noqa
         parent_instance = _retrieve_object_id(obj=parent_instance)  # type: Part2  # noqa
@@ -314,6 +318,10 @@ class WidgetsManager(Sized):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
+        if 'custom_title' in kwargs and not title:
+            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
+                          'accordingly to use `title`', PendingDeprecationWarning)
+            title = kwargs.pop('custom_title')
         # Check whether the part_model is uuid type or class `Part`
         part_model = _retrieve_object(obj=part_model, method=self._client)  # type: Part2  # noqa
         parent_instance_id = _retrieve_object_id(obj=parent_instance)  # type: text_type
@@ -322,9 +330,11 @@ class WidgetsManager(Sized):
         if prefilters:
             list_of_prefilters = _check_prefilters(part_model=part_model, prefilters=prefilters)
             prefilters = {'property_value': ','.join(list_of_prefilters) if list_of_prefilters else {}}
+            meta['prefilters'] = prefilters
         if excluded_propmodels:
             excluded_propmodels = _check_excluded_propmodels(part_model=part_model,
                                                              property_models=excluded_propmodels)
+            meta['propmodelsExcl'] = excluded_propmodels
 
         meta.update({
             # grid
@@ -348,10 +358,6 @@ class WidgetsManager(Sized):
             "primaryDeleteUiValue": emphasize_delete,
         })
 
-        if prefilters:
-            meta['prefilters'] = prefilters
-        if excluded_propmodels:
-            meta['propmodelsExcl'] = excluded_propmodels
         if parent_instance_id:
             meta['parentInstanceId'] = parent_instance_id
 
@@ -399,6 +405,11 @@ class WidgetsManager(Sized):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
+        if 'custom_title' in kwargs and not title:
+            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
+                          'accordingly to use `title`', PendingDeprecationWarning)
+            title = kwargs.pop('custom_title')
+
         attachment_property = _retrieve_object(attachment_property, method=self._client.property)  # type: Property2  # noqa
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
@@ -547,6 +558,11 @@ class WidgetsManager(Sized):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
+        if 'custom_title' in kwargs and not title:
+            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
+                          'accordingly to use `title`', PendingDeprecationWarning)
+            title = kwargs.pop('custom_title')
+
         # Check whether the part_model is uuid type or class `Part`
         part_instance = _retrieve_object(part_instance, method=self._client.part)  # type: Part2  # noqa
 
@@ -624,6 +640,11 @@ class WidgetsManager(Sized):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
+        if 'custom_title' in kwargs and not title:
+            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
+                          'accordingly to use `title`', PendingDeprecationWarning)
+            title = kwargs.pop('custom_title')
+
         # Check whether the script is uuid type or class `Service`
 
         service = _retrieve_object(obj=service, method=self._client.service)  # type: Service  # noqa
@@ -685,6 +706,11 @@ class WidgetsManager(Sized):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
+        if 'custom_title' in kwargs and not title:
+            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
+                          'accordingly to use `title`', PendingDeprecationWarning)
+            title = kwargs.pop('custom_title')
+
         if not isinstance(html, (str, text_type)):
             raise IllegalArgumentError("Text injected in the HTML widget must be string. Type is: {}".
                                        format(type(html)))
@@ -726,6 +752,11 @@ class WidgetsManager(Sized):
         :raises APIError: When the widget could not be created.
 
         """
+        if 'custom_title' in kwargs and not title:
+            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
+                          'accordingly to use `title`', PendingDeprecationWarning)
+            title = kwargs.pop('custom_title')
+
         from pykechain.models import Service
         if isinstance(notebook, Service):
             notebook_id = notebook.id
@@ -847,6 +878,11 @@ class WidgetsManager(Sized):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
+        if 'custom_title' in kwargs and not title:
+            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
+                          'accordingly to use `title`', PendingDeprecationWarning)
+            title = kwargs.pop('custom_title')
+
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
         meta, title = _set_title(meta, title, default_title=WidgetTypes.MULTICOLUMN)
 
@@ -902,6 +938,11 @@ class WidgetsManager(Sized):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
+        if 'custom_title' in kwargs and not title:
+            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
+                          'accordingly to use `title`', PendingDeprecationWarning)
+            title = kwargs.pop('custom_title')
+
         meta = _initiate_meta(kwargs, activity=self._activity_id)
         meta, title = _set_title(meta, title, default_title=WidgetTypes.SCOPE)
 
