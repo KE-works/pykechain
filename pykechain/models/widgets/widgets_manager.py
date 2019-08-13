@@ -716,7 +716,7 @@ class WidgetsManager(Sized):
                                        format(type(html)))
 
         meta = _initiate_meta(kwargs, activity=self._activity_id)
-        meta, title = _set_title(meta, title, default_title=None)
+        meta, title = _set_title(meta, title, default_title=WidgetTypes.HTML)
 
         meta["htmlContent"] = html
 
