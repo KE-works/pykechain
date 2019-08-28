@@ -104,6 +104,8 @@ class MultiReferenceProperty2(Property2):
             raise ValueError(
                 "Reference must be a list (or tuple) of Part, Part id or None. type: {}".format(type(value)))
 
+        #TODO: extract scope_id from the 'value_to_set' and putsh this onto the `value_options` if it is a model.
+
         # we replace the current choices in the _put_value
         self._put_value(value_to_set)
 
