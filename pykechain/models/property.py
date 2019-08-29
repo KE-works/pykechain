@@ -53,6 +53,7 @@ class Property(Base):
         self.category = json.get('category')
         self.description = json.get('description', None)
         self.unit = json.get('unit', None)
+        self.order = json.get('order', None)
         self.scope_id = json.get('scope_id', None)
 
         # set an empty internal validators variable
