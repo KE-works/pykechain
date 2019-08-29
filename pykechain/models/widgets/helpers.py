@@ -67,7 +67,8 @@ def _set_title(meta, custom_title, default_title=None):
     Set the customTitle in the meta based on provided optional custom title or default.
 
     This will inject into the meta the `customTitle` and `showTitleValue` if the custom_title is provided as
-    argument, otherwise it will inject the `defaultTitle`.
+    argument, otherwise it will inject the `defaultTitle`. It returns the meta definition of the widget and the
+    title of the widget (to be used to set `widget.title`).
 
     :param meta: meta dictionary to augment
     :type meat: dict
@@ -80,9 +81,13 @@ def _set_title(meta, custom_title, default_title=None):
     :type default_title: basestring or None
     :return: tuple of meta and the title
     :rtype: Tuple[Dict,Text]
+    :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
     if custom_title is False:
         show_title_value = "Default"
+        if default_title is None:
+            raise IllegalArgumentError("When the `custom_title` is set to False the `default_title` is used and "
+                                       "cannot be None. Provide a `default_title` argument and ensure it is not None.")
         title = default_title
     elif custom_title is None:
         show_title_value = "No title"
@@ -95,10 +100,6 @@ def _set_title(meta, custom_title, default_title=None):
         "showTitleValue": show_title_value,
         "customTitle": title
     })
-
-    if not title:
-        title = default_title
-
     return meta, title
 
 

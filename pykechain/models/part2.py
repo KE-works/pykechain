@@ -8,18 +8,38 @@ from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, 
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance
 from pykechain.models import Part, Base
 from pykechain.models.property2 import Property2
+from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.utils import is_uuid, find
 
 
 class Part2(Base):
     """A virtual object representing a KE-chain part.
 
-    :cvar basestring category: The category of the part, either 'MODEL' or 'INSTANCE'
-                               (use :class:`pykechain.enums.Category`)
-    :cvar basestring parent_id: The UUID of the parent of this part
-    :cvar properties: The list of :class:`Property` objects belonging to this part.
-    :cvar basestring multiplicity: The multiplicity of the part being one of the following options:
-                                   ZERO_ONE, ONE, ZERO_MANY, ONE_MANY, (reserved) M_N
+    :ivar id: UUID of the part
+    :type id: basestring
+    :ivar name: Name of the part
+    :type name: basestring
+    :ivar ref: Reference of the part (slug of the original name)
+    :type ref: basestring
+    :ivar description: description of the part
+    :type description: basestring or None
+    :ivar created_at: the datetime when the object was created if available (otherwise None)
+    :type created_at: datetime or None
+    :ivar updated_at: the datetime when the object was last updated if available (otherwise None)
+    :type updated_at: datetime or None
+    :ivar category: The category of the part, either 'MODEL' or 'INSTANCE' (of :class:`pykechain.enums.Category`)
+    :type category: basestring
+    :ivar parent_id: The UUID of the parent of this part
+    :type parent_id: basestring or None
+    :ivar properties: The list of :class:`Property2` objects belonging to this part.
+    :type properties: List[Property2]
+    :ivar multiplicity: The multiplicity of the part being one of the following options: ZERO_ONE, ONE, ZERO_MANY,
+                        ONE_MANY, (reserved) M_N (of :class:`pykechain.enums.Multiplicity`)
+    :type multiplicity: basestring
+    :ivar scope_id: scope UUID of the Part
+    :type scope_id: basestring
+    :ivar properties: the list of properties of this part
+    :type properties: List[Property2]
 
     Examples
     --------
@@ -60,22 +80,23 @@ class Part2(Base):
         # we need to run the init of 'Base' instead of 'Part' as we do not need the instantiation of properties
         super(Part2, self).__init__(json, **kwargs)
 
+        self.scope_id = json.get('scope_id')
+
         self.ref = json.get('ref')
         self.category = json.get('category')
         self.parent_id = json.get('parent_id')
         self.description = json.get('description')
         self.multiplicity = json.get('multiplicity')
+
         self._cached_children = None
 
         self.properties = [Property2.create(p, client=self._client) for p in json['properties']]
 
     def refresh(self, json=None, url=None, extra_params=None):
         """Refresh the object in place."""
-        from pykechain.client import API_EXTRA_PARAMS
         super(Part2, self).refresh(json=json,
                                    url=self._client._build_url('part2', part_id=self.id),
                                    extra_params=API_EXTRA_PARAMS['part2'])
-
     #
     # Family and structure methods
     #
@@ -114,6 +135,17 @@ class Part2(Base):
             raise NotFoundError("Could not find property with name or id {}".format(name))
 
         return found
+
+    def scope(self):
+        """Scope this Part belongs to.
+
+        This property will return a `Scope` object. It will make an additional call to the KE-chain API.
+
+        :return: the scope
+        :type: :class:`pykechain.models.Scope`
+        :raises NotFoundError: if the scope could not be found
+        """
+        return self._client.scope(pk=self.scope_id)
 
     def parent(self):
         # type: () -> Any
@@ -347,7 +379,6 @@ class Part2(Base):
         if kwargs is not None:  # pragma: no cover
             update_dict.update(**kwargs)
 
-        from pykechain.client import API_EXTRA_PARAMS
         response = self._client._request('PUT',
                                          self._client._build_url('part2', part_id=self.id),
                                          params=API_EXTRA_PARAMS['part2'],
@@ -582,7 +613,6 @@ class Part2(Base):
                 updated_p['model_id'] = model.property(prop_name_or_id).id
             properties_fvalues.append(updated_p)
 
-        from pykechain.client import API_EXTRA_PARAMS
         response = self._client._request(
             'POST', url,
             params=API_EXTRA_PARAMS['parts2'],
@@ -819,7 +849,6 @@ class Part2(Base):
         if name:
             payload_json.update(name=name)
 
-        from pykechain.client import API_EXTRA_PARAMS
         response = self._client._request(
             'PUT', self._client._build_url('part2', part_id=self.id),
             params=API_EXTRA_PARAMS['part2'],

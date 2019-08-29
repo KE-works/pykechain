@@ -9,6 +9,7 @@ from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
     _check_prefilters, _check_excluded_propmodels
+from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.utils import is_uuid, find
 
 
@@ -1052,7 +1053,6 @@ class WidgetsManager(Sized):
         # bulk update the order of the widgets:
         fvalues = [dict(id=w.id, order=index) for index, w in enumerate(self._widgets)]
 
-        from pykechain.client import API_EXTRA_PARAMS
         response = self._client._request("PUT", self._client._build_url('widgets_bulk_update'),
                                          params=API_EXTRA_PARAMS['widgets'],
                                          json=fvalues)

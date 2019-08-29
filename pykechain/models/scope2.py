@@ -8,6 +8,7 @@ from six import text_type, string_types
 from pykechain.enums import Multiplicity, ScopeStatus
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models import Team, Base
+from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.utils import parse_datetime, is_uuid
 
 
@@ -84,7 +85,6 @@ class Scope2(Base):
 
     def refresh(self, json=None, url=None, extra_params=None):
         """Refresh the object in place."""
-        from pykechain.client import API_EXTRA_PARAMS
         super(Scope2, self).refresh(json=json,
                                     url=self._client._build_url('scope2', scope_id=self.id),
                                     extra_params=API_EXTRA_PARAMS['scope2'])
@@ -106,7 +106,6 @@ class Scope2(Base):
         :raises APIError: When unable to update the scope project team.
         """
         if isinstance(user, (string_types, text_type)):
-            from pykechain.client import API_EXTRA_PARAMS
             users = self._client._retrieve_users()
             user_object = next((item for item in users['results'] if item["username"] == user), None)
             if user_object:
@@ -125,7 +124,6 @@ class Scope2(Base):
             raise TypeError("User {} should be defined as a string".format(user))
 
     def _edit(self, update_dict):
-        from pykechain.client import API_EXTRA_PARAMS
         if update_dict.get('options'):
             update_dict['scope_options'] = update_dict.get('options')
             del update_dict['options']
