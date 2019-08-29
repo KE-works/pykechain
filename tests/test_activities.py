@@ -481,7 +481,7 @@ class TestActivity2SpecificTests(TestBetamax):
         subprocess_subtask = self.project.activity('SubTask')
 
         self.assertFalse(subprocess_subtask.is_rootlevel())
-        self.assertTrue(subprocess_subtask.subprocess())
+        # self.assertTrue(subprocess_subtask.subprocess())
 
     def test_activity2_is_task(self):
         specify_wd = self.project.activity('Specify wheel diameter')
