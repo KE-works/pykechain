@@ -199,7 +199,7 @@ class Widget(Base):
         """
         update_dict = dict()
 
-        if update_dict is not None:
+        if meta is not None:
             update_dict.update(dict(meta=meta))
         if title is not None:
             update_dict.update(dict(title=title))
