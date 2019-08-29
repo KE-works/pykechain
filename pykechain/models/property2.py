@@ -8,6 +8,7 @@ from pykechain.enums import PropertyType, Category
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models.property import Property
 from pykechain.models.validators.validator_schemas import options_json_schema
+from pykechain.defaults import API_EXTRA_PARAMS
 
 
 class Property2(Property):
@@ -25,11 +26,11 @@ class Property2(Property):
     :ivar output: a boolean if the value is configured as an output (in an activity)
     :type output: bool
     :ivar part: The (parent) part in which this property is available
-    :type part: :class:`Part`
+    :type part: :class:`Part2`
     :ivar value: the property value, can be set as well as property
     :type value: Any
     :ivar validators: the list of validators that are available in the property
-    :type validators: list(PropertyValidator)
+    :type validators: List[PropertyValidator]
     :ivar is_valid: if the property conforms to the validators
     :type is_valid: bool
     :ivar is_invalid: if the property does not conform to the validator
@@ -40,11 +41,15 @@ class Property2(Property):
         """Construct a Property from a json object."""
         super(Property2, self).__init__(json, **kwargs)
 
-        self._output = json.get('output', None)
-        self._value = json.get('value', None)
-        self._options = json.get('value_options', None)
+        self._output = json.get('output')
+        self._value = json.get('value')
+        self._options = json.get('value_options')
+        self._part = None # Part2 storage
+
+        self.part_id = json.get('part_id')
+        self.scope_id = json.get('scope_id')
         self.ref = json.get('ref')
-        self.type = json.get('property_type', None)
+        self.type = json.get('property_type')
         self.category = json.get('category')
 
         # set an empty internal validators variable
@@ -58,7 +63,6 @@ class Property2(Property):
     def _put_value(self, value):
         url = self._client._build_url('property2', property_id=self.id)
 
-        from pykechain.client import API_EXTRA_PARAMS
         response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['property2'], json={'value': value})
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
@@ -87,9 +91,9 @@ class Property2(Property):
         :returns: The :class:`Part` associated to this property
         :raises APIError: if the `Part` is not found
         """
-        part_id = self._json_data.get('part_id')
-
-        return self._client.part(pk=part_id, category=self._json_data.get('category'))
+        if self._part is not None:
+            self._part = self._client.part(pk=self.part_id, category=self.category)
+        return self._part
 
     @classmethod
     def create(cls, json, **kwargs):
@@ -123,7 +127,6 @@ class Property2(Property):
 
     def refresh(self, json=None, url=None, extra_params=None):
         """Refresh the object in place."""
-        from pykechain.client import API_EXTRA_PARAMS
         super(Property2, self).refresh(json=json,
                                        url=self._client._build_url('property2', property_id=self.id),
                                        extra_params=API_EXTRA_PARAMS['property2'])
@@ -191,7 +194,6 @@ class Property2(Property):
             for key, value in iteritems(kwargs):
                 update_dict[key] = value
 
-        from pykechain.client import API_EXTRA_PARAMS
         response = self._client._request('PUT',
                                          self._client._build_url('property2', property_id=self.id),
                                          params=API_EXTRA_PARAMS['property2'],

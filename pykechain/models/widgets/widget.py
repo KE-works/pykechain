@@ -7,6 +7,7 @@ from pykechain.enums import WidgetTypes, Category
 from pykechain.exceptions import APIError
 from pykechain.models import Base
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
+from pykechain.defaults import API_EXTRA_PARAMS
 
 
 class Widget(Base):
@@ -206,7 +207,6 @@ class Widget(Base):
         if kwargs:
             update_dict.update(**kwargs)
 
-        from pykechain.client import API_EXTRA_PARAMS
         url = self._client._build_url('widget', widget_id=self.id)
         response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['widgets'], json=update_dict)
 

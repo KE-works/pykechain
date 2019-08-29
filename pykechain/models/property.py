@@ -145,7 +145,7 @@ class Property(Base):
 
     def model(self):
         """
-        Model object of the property if the property is an instance.
+        Model object of the property if the property is an instance otherwise itself.
 
         Will cache the model object in order to not generate too many API calls. Otherwise will make an API call
         to the backend to retrieve its model object.

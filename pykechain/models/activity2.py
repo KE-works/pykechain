@@ -8,7 +8,7 @@ import requests
 from requests.compat import urljoin  # type: ignore
 from six import text_type
 
-from pykechain.config import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT
+from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_EXTRA_PARAMS
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
@@ -36,7 +36,7 @@ class Activity2(Base):
     :type status: basestring
     :ivar classification: classification of the activity. One of :class:`pykechain.enums.ActivityClassificiation`
     :type classification: basestring
-    :ivar activity_type: Type of the acitivity. One of :class:`pykechain.enums.ActivityType` for WIM version 2
+    :ivar activity_type: Type of the activity. One of :class:`pykechain.enums.ActivityType` for WIM version 2
     :type activity_type: basestring
     """
 
@@ -56,7 +56,6 @@ class Activity2(Base):
 
     def refresh(self, *args, **kwargs):
         """Refresh the object in place."""
-        from pykechain.client import API_EXTRA_PARAMS
         super(Activity2, self).refresh(url=self._client._build_url('activity', activity_id=self.id),
                                        extra_params=API_EXTRA_PARAMS['activity'])
 
