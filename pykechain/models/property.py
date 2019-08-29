@@ -183,6 +183,21 @@ class Property(Base):
         self.refresh(url=url)  # update itself by requerying the url to retrieve all the information.
         return self.value
 
+    def has_value(self):
+        # type: () -> bool
+        """Predicate to indicate if the property has a value set.
+
+        This predicate determines if the property has a value set. It will not make a call to KE-chain API (in case
+        of reference properties). So it is a tiny fraction 'cheaper' in terms of processing time than checking the
+        `Property.value` itself.
+
+        It will return True if the property_type is a Boolean and set to a value of False.
+
+        :returns: True if the property has a value set, otherwise (also when value is None) returns False
+        :rtype: Bool
+        """
+        return self._value is not None
+
     @classmethod
     def create(cls, json, **kwargs):
         # type: (dict, **Any) -> Property
