@@ -383,7 +383,7 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_attachmentviewer_widget(self, attachment_property, title=False, alignment=None, **kwargs):
+    def add_attachmentviewer_widget(self, attachment_property, title=False, alignment=None, image_fit=None, **kwargs):
         # type: (Union[Text, Property2], Optional[Text, bool], Optional[int], Optional[Text], **Any) -> Widget  # noqa
         """
         Add a KE-chain Attachment widget widget manager.
@@ -399,6 +399,8 @@ class WidgetsManager(Sized):
         :type title: bool or basestring or None
         :param alignment: Alignment of the previewed attachment (left, center, right, cover)
         :type alignment: basestring or None
+        :param image_fit: enumeration to address the image_fit (defaults to 'contain', otherwise 'cover')
+        :type image_fit: basestring or None
         :param kwargs: additional keyword arguments to pass
         :type kwargs: dict
         :return: newly created widget
@@ -422,7 +424,8 @@ class WidgetsManager(Sized):
 
         meta.update({
             "propertyInstanceId": attachment_property.id,
-            "alignment": alignment
+            "alignment": alignment,
+            "imageFit": image_fit
         })
 
         meta, title = _set_title(meta, title, default_title=attachment_property.name)
