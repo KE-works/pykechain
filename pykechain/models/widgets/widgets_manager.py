@@ -397,7 +397,7 @@ class WidgetsManager(Sized):
             * String value: Custom title
             * None: No title
         :type title: bool or basestring or None
-        :param alignment: Alignment of the previewed attachment
+        :param alignment: Alignment of the previewed attachment (left, center, right, cover)
         :type alignment: basestring or None
         :param kwargs: additional keyword arguments to pass
         :type kwargs: dict
@@ -413,10 +413,6 @@ class WidgetsManager(Sized):
 
         attachment_property = _retrieve_object(attachment_property, method=self._client.property)  # type: Property2  # noqa
         meta = _initiate_meta(kwargs, activity=self._activity_id)
-
-        # TODO: Add enumeration for alignment
-        if alignment and alignment not in ['left', 'right', 'center']:
-            raise IllegalArgumentError('Alignment must be either `left`, `right` or `center`')
 
         if 'height' in kwargs:
             # TODO: Pending deprecation 3.4.0.
@@ -505,7 +501,7 @@ class WidgetsManager(Sized):
                           "your code as this is pending deprecation at version 3.4.0", PendingDeprecationWarning)
             alignment = NavigationBarAlignment.LEFT
 
-        if alignment and alignment not in (NavigationBarAlignment.CENTER, NavigationBarAlignment.LEFT):
+        if alignment and alignment not in NavigationBarAlignment.values():
             raise IllegalArgumentError("`alignment` should be one of '{}'".format(NavigationBarAlignment.values()))
         elif alignment:
             meta['alignment'] = alignment
