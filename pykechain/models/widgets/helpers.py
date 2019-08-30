@@ -130,7 +130,7 @@ def _initiate_meta(kwargs, activity, ignores=()):
     meta = dict(activityId=str(_retrieve_object_id(activity)))
     keys_in_kwargs = KECARD_COMMON_KEYS
     # also add the keys' in their snake case appearance so noPadding and no_padding, customHeight and custom_height
-    keys_in_kwargs += [snakecase(k) for k in keys_in_kwargs]
+    keys_in_kwargs += [snakecase(k) for k in KECARD_COMMON_KEYS]
 
     # initiate the meta based on known kwarg arguments
     for key in list(set(keys_in_kwargs)):
