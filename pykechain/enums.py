@@ -469,6 +469,7 @@ class NavigationBarAlignment(Enum):
 
     # for KE-chain 3
     LEFT = 'left'
+    RIGHT = 'right'
 
 
 class PaperSize(Enum):

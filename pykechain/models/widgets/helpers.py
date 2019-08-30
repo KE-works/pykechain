@@ -6,6 +6,9 @@ from pykechain.enums import Category, PropertyType
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.utils import is_uuid, snakecase, camelcase
 
+# these are the common keys to all kecards.
+KECARD_COMMON_KEYS = ["collapsed", "collapsible", "noBackground", "noPadding", "isDisabled", "isMerged"]
+
 
 def _retrieve_object(obj, method):
     # type: (Union[Part2, Property2, Team, Service, Text], Client) -> (Union[Part2, Team, Service, Property2])  # noqa
@@ -125,7 +128,7 @@ def _initiate_meta(kwargs, activity, ignores=()):
     :rtype: dict
     """
     meta = dict(activityId=str(_retrieve_object_id(activity)))
-    keys_in_kwargs = ["collapsed", "collapsible", "noBackground", "noPadding", "isDisabled"]
+    keys_in_kwargs = KECARD_COMMON_KEYS
     # also add the keys' in their snake case appearance so noPadding and no_padding, customHeight and custom_height
     keys_in_kwargs += [snakecase(k) for k in keys_in_kwargs]
 
