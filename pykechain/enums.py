@@ -257,6 +257,8 @@ class WidgetTypes(Enum):
     :cvar SCOPE: Scope widget
     :cvar THIRDPARTY: Thirdparty widget
     :cvar PROGRESS: Progress widget
+    :cvar SIGNATURE: Signature widget
+    :cvar CARD: Card widget
     """
 
     UNDEFINED = 'UNDEFINED'
@@ -274,6 +276,8 @@ class WidgetTypes(Enum):
     SCOPE = 'SCOPE'
     THIRDPARTY = 'THIRDPARTY'
     PROGRESS = 'PROGRESS'
+    SIGNATURE = 'SIGNATURE'
+    CARD = 'CARD'
 
 
 WidgetCompatibleTypes = {
