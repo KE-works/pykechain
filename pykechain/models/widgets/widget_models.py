@@ -16,6 +16,8 @@ from pykechain.models.widgets.widget_schemas import undefined_meta_schema
 # SCOPE_WIDGET = 'SCOPE_WIDGET'
 # THIRD_PARTY = 'THIRD_PARTY'
 # PROGRESS = 'PROGRESS'
+# SIGNATURE = 'SIGNATURE'
+# CARD = 'CARD'
 
 
 class MetapanelWidget(Widget):
@@ -76,5 +78,14 @@ class ScopeWidget(Widget):
     """Scope grid Widget."""
 
 
+class SignatureWidget(Widget):
+    """Signature Widget."""
+
+
+class CardWidget(Widget):
+    """Card Widget."""
+
+
 class ThirdpartyWidget(Widget):
     """Thirdparty Widget."""
+
