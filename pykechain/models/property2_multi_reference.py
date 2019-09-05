@@ -86,6 +86,7 @@ class MultiReferenceProperty2(Property2):
 
     @value.setter
     def value(self, value):
+        # the dirty 'value' is checked and sanitised an put into value_to_set
         value_to_set = []
         if isinstance(value, (list, tuple)):
             for item in value:
@@ -105,15 +106,21 @@ class MultiReferenceProperty2(Property2):
                 "Reference must be a list (or tuple) of Part, Part id or None. type: {}".format(type(value)))
 
         # consistency check for references model that should include a scope_id in the value_options.
-        if value_to_set is not None and self._options and 'scope_id' not in self._options:
+        if self._options and 'scope_id' not in self._options and value_to_set is not None:
             # if value_to_set is not None, retrieve the scope_id from the first value_to_set
             # we do this smart by checking if we got provided a full Part; that is easier.
             if isinstance(value[0], Part2):
-                scope_id = value[0].scope_id
+                x_scope_id = value_to_set[0].scope_id
             else:
-                # make a call
-                scope_id = self._client.part(pk=value_to_set[0]).scope_id
-            self._options['scope_id'] = scope_id
+                # retrieve the scope_id from the model value[0] (which is a part in a scope (x_scope))
+                referenced_model = self.model().value
+                if not referenced_model or not isinstance(referenced_model[0], Part2):
+                    # if the referenced model is not set or the referenced value is not a Part set to current scope
+                    x_scope_id = self.scope_id
+                else:
+                    # get the scope_id from the referenced model
+                    x_scope_id = referenced_model[0].scope_id
+            self._options['scope_id'] = x_scope_id
 
             # edit the model of the property, such that all instances are updated as well.
             self.model().edit(options=self._options)
@@ -138,10 +145,9 @@ class MultiReferenceProperty2(Property2):
         """
         # from the reference property (instance) we need to get the value of the reference property in the model
         # in the reference property of the model the value is set to the ID of the model from which we can choose parts
-        model_parent_part = self.part.model()  # makes single part call
-        property_model = model_parent_part.property(self.name)
-        referenced_model = property_model.value and property_model.value[0]  # list of selected models is always 1
-        possible_choices = self._client.parts(model=referenced_model)  # makes multiple parts call
+        # the configuration of this ref prop is stored in the model() of this multi-ref-prop. Need to extract model_id
+        choices_model_id = self.model()._value[0].get('id')
+        possible_choices = self._client.parts(model_id=choices_model_id)  # makes multiple parts call
 
         return possible_choices
 
@@ -187,7 +193,7 @@ class MultiReferenceProperty2(Property2):
                 raise IllegalArgumentError(
                     "Pre-filters can only be set on properties belonging to the referenced Part model, found "
                     "referenced Part model '{}' and Properties belonging to '{}'".format(self.value[0].name,
-                                                                                             property_model.part.name))
+                                                                                         property_model.part.name))
             else:
                 property_id = property_model.id
                 if property_model.type == PropertyType.DATETIME_VALUE:
@@ -231,7 +237,7 @@ class MultiReferenceProperty2(Property2):
             if property_model.category != Category.MODEL:
                 raise IllegalArgumentError("A part reference property can only excluded `Property` models, found "
                                            "category '{}' on property '{}'".format(property_model.category,
-                                                                                       property_model.name))
+                                                                                   property_model.name))
             # TODO when a property is freshly created, the property has no "part_id" key in json_data.
             elif self.value[0].id != property_model._json_data.get('part_id', self.value[0].id):
                 raise IllegalArgumentError(
