@@ -92,7 +92,7 @@ class Property2(Property):
         :returns: The :class:`Part` associated to this property
         :raises APIError: if the `Part` is not found
         """
-        if self._part is not None:
+        if self._part is None:
             self._part = self._client.part(pk=self.part_id, category=self.category)
         return self._part
 
