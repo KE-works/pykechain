@@ -840,13 +840,13 @@ class WidgetsManager(Sized):
                 showStatus=show_status,
 
                 showAssignees=show_assignees,
-                showBreadcrumbs=show_breadcrumbs,
+                showBreadCrumb=show_breadcrumbs,
                 showMenu=show_menu,
                 # if the progress = True -> bar = False. Also when the bar is set to True,
                 # if progress=False and Bar=True, the bar is True
                 # if progress=False and Bar=False, both are False
                 showProgress=show_progress and not show_progressbar or show_progress,
-                showProgressbar=show_progressbar and not show_progress
+                showProgressBar=show_progressbar and not show_progress
             ))
 
         widget = self.create_widget(
