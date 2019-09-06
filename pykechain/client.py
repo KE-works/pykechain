@@ -2092,11 +2092,6 @@ class Client(object):
                 else:
                     IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
 
-        # remove 'None' values from the meta
-        for key in set(meta.keys()):
-            if meta.get(key) is None:
-                del meta[key]
-
         data = dict(
             activity_id=activity,
             widget_type=widget_type,
