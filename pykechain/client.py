@@ -2111,7 +2111,7 @@ class Client(object):
         response = self._request('POST', url, params=API_EXTRA_PARAMS['widgets'], json=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create a widget ({})".format((response, response.json())))
+            raise APIError("Could not create a widget ({})\n\n{}".format(response, response.json().get('traceback')))
 
         # create the widget and do postprocessing
         widget = Widget.create(json=response.json().get('results')[0], client=self)
