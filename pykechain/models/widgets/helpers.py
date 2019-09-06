@@ -112,7 +112,7 @@ def _initiate_meta(kwargs, activity, ignores=()):
 
     Mainly ensure to initiate the correct keys that are common to (most) widgets like the keys related
     to the so called kecard (the card object around the widget in the frontend. These keys are: `collapsed`,
-    `collapsible`, `noBackground`, `noPadding`, `isDisabled`, `customHeight`, `showHeightValue`. Also the
+    `collapsible`, `noBackground`, `noPadding`, `isDisabled`, `customHeight`. Also the
     the `custom_height` is initiated.
 
     If you want to be sure that some keys are never present in the returned meta (eg 'customHeight')
