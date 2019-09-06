@@ -138,8 +138,7 @@ def _initiate_meta(kwargs, activity, ignores=()):
 
     # we check for custom_height specifically and deal with it.
     if snakecase('customHeight') in kwargs:
-        custom_height = kwargs.pop(snakecase("customHeight"))
-        meta['customHeight'] = custom_height
+        meta['customHeight'] = kwargs.pop(snakecase("customHeight"))
 
     # remove the 'ignores' from the meta
     for key in ignores:
