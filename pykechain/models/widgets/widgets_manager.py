@@ -585,7 +585,6 @@ class WidgetsManager(Sized):
             "partInstanceId": part_instance.id,
             "showColumns": show_columns,
             "showHeaders": show_headers,
-            "showHeightValue": "Custom max height" if max_height else "Auto",
         })
 
         meta, title = _set_title(meta, title, default_title=part_instance.name)
