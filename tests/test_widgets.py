@@ -2,12 +2,12 @@ import json
 import os
 from unittest import skip
 
-from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType
+from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity
 from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, \
     SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, SignatureWidget, ServiceWidget, NotebookWidget, \
-    MulticolumnWidget
+    MulticolumnWidget, ProgressWidget
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
@@ -351,7 +351,27 @@ class TestWidgetManagerInActivity(TestBetamax):
             show_progress=True,
             show_progressbar=True
         )
+        self.assertEqual(len(widget_manager), 1 + 1)
 
+    def test_add_metapanel_with_progress_settings(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        progress_bar = dict(
+            height=15,
+            showProgressText=False,
+            colorCompleted=ProgressBarColors.RED
+        )
+        widget_manager.add_metapanel_widget(
+            show_all=False,
+            show_progress=False,
+            show_progressbar=True,
+            progress_bar=progress_bar
+        )
+        self.assertEqual(len(widget_manager), 1 + 1)
+
+    def test_progress_widget(self):
+        widget_manager = self.task.widgets()
+        widget_manager.add_progress_widget(height=15,
+                                           show_progress_text=False)
         self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_delete_all_widgets(self):

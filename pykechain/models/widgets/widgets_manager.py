@@ -4,9 +4,10 @@ from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text
 import requests
 from six import string_types, text_type
 
-from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes
+from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes, \
+    ProgressBarColors
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
-from pykechain.models.widgets import Widget
+from pykechain.models.widgets import Widget, ProgressWidget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
     _check_prefilters, _check_excluded_propmodels
 from pykechain.defaults import API_EXTRA_PARAMS
@@ -790,11 +791,10 @@ class WidgetsManager(Sized):
         return widget
 
     def add_metapanel_widget(self, show_all=True,
-                             show_due_date=None, show_start_date=None,
-                             show_title=None, show_status=None, show_progress=None,
-                             show_assignees=None, show_breadcrumbs=None, show_menu=None,
-                             show_progressbar=None, **kwargs):
-        # type: (bool, Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], **Any) -> Widget  # noqa: E501
+                             show_due_date=None, show_start_date=None,   show_title=None, show_status=None,
+                             show_progress=None, show_assignees=None, show_breadcrumbs=None, show_menu=None,
+                             show_download_pdf=None, show_progressbar=None, progress_bar=None, **kwargs):
+        # type: (bool, Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[dict], **Any) -> Widget  # noqa: E501
         """
         Add a KE-chain Metapanel to the WidgetManager.
 
@@ -816,6 +816,8 @@ class WidgetsManager(Sized):
         :type show_assignees: bool or None
         :param show_breadcrumbs: show Breadcrumbs
         :type show_breadcrumbs: bool or None
+        :param show_download_pdf: Show the Download PDF button
+        :type show_download_pdf: bool or None
         :param show_menu: show Menu
         :type show_menu: bool or None
         :param show_progressbar: Show the progress bar. Shown when progress is not True.
@@ -838,7 +840,7 @@ class WidgetsManager(Sized):
                 showStartDate=show_start_date,
                 showTitle=show_title,
                 showStatus=show_status,
-
+                showMenuDownloadPDF=show_download_pdf,
                 showAssignees=show_assignees,
                 showBreadCrumb=show_breadcrumbs,
                 showMenu=show_menu,
@@ -848,10 +850,44 @@ class WidgetsManager(Sized):
                 showProgress=show_progress and not show_progressbar or show_progress,
                 showProgressBar=show_progressbar and not show_progress
             ))
-
+        if progress_bar:
+            meta.update(dict(
+                progressBarSettings=dict(
+                    colorNoProgress=progress_bar.get('colorNoProgress', ProgressBarColors.DEFAULT_NO_PROGRESS),
+                    showProgressText=progress_bar.get('showProgressText', True),
+                    customHeight=progress_bar.get('customHeight', 25),
+                    colorInProgress=progress_bar.get('colorInProgress', ProgressBarColors.DEFAULT_IN_PROGRESS),
+                    colorCompleted=progress_bar.get('colorCompleted', ProgressBarColors.DEFAULT_COMPLETED),
+                    colorInProgressBackground=progress_bar.get('colorInProgressBackground',
+                                                               ProgressBarColors.DEFAULT_IN_PROGRESS_BACKGROUND)
+                )
+            ))
         widget = self.create_widget(
             widget_type=WidgetTypes.METAPANEL,
             title=kwargs.pop('title', WidgetTypes.METAPANEL),
+            meta=meta,
+            **kwargs
+        )
+        return widget
+
+    def add_progress_widget(self, height=25,
+                            color_no_progress=ProgressBarColors.DEFAULT_NO_PROGRESS,
+                            color_completed=ProgressBarColors.DEFAULT_COMPLETED,
+                            color_in_progress=ProgressBarColors.DEFAULT_IN_PROGRESS,
+                            color_in_progress_background=ProgressBarColors.DEFAULT_IN_PROGRESS_BACKGROUND,
+                            show_progress_text=True, **kwargs):
+        meta = _initiate_meta(kwargs, activity=self._activity_id)
+
+        meta.update(dict(
+            colorNoProgress=color_no_progress,
+            showProgressText=show_progress_text,
+            customHeight=height,
+            colorInProgress=color_in_progress,
+            colorCompleted=color_completed,
+            colorInProgressBackground=color_in_progress_background
+        ))
+        widget = self.create_widget(
+            widget_type=WidgetTypes.PROGRESS,
             meta=meta,
             **kwargs
         )

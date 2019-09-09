@@ -226,6 +226,7 @@ class WidgetNames(Enum):
     :cvar CARDWIDGET: cardWidget
     :cvar METAPANELWIDGET: metaPanelWidget
     :cvar MULTICOLUMNWIDGET: multiColumnWidget
+    :cvar PROGRESSWIDGET: progressWidget
     """
 
     SUPERGRIDWIDGET = 'superGridWidget'
@@ -241,6 +242,7 @@ class WidgetNames(Enum):
     MULTICOLUMNWIDGET = 'multiColumnWidget'
     SIGNATUREWIDGET = 'signatureWidget'
     CARDWIDGET = 'cardWidget'
+    PROGRESSWIDGET = 'progressWidget'
 
 
 class WidgetTypes(Enum):
@@ -296,6 +298,7 @@ WidgetCompatibleTypes = {
     WidgetNames.JSONWIDGET: WidgetTypes.JSON,
     WidgetNames.METAPANELWIDGET: WidgetTypes.METAPANEL,
     WidgetNames.MULTICOLUMNWIDGET: WidgetTypes.MULTICOLUMN,
+    WidgetNames.PROGRESSWIDGET: WidgetTypes.PROGRESS,
     WidgetNames.SIGNATUREWIDGET: WidgetTypes.SIGNATURE,
     WidgetNames.CARDWIDGET: WidgetTypes.CARD
 }
@@ -619,3 +622,47 @@ class FilterType(Enum):
     GREATER_THAN_EQUAL = 'gte'
     LOWER_THAN_EQUAL = 'lte'
     CONTAINS = 'icontains'
+
+
+class ProgressBarColors(Enum):
+    """Some basic colors that can be set on a Progress Bar inside a Progress Bar Widget.
+    .. versionadded:: 3.0
+    
+    :cvar BLACK: '#000000'
+    :cvar WHITE: '#FFFFFF'
+    :cvar RED: 'FF0000'
+    :cvar LIME: '#00FF00'
+    :cvar BLUE: '#0000FF'
+    :cvar YELLOW: '#FFFF00'
+    :cvar CYAN: '#00FFFF'
+    :cvar MAGENTA: '#FF00FF'
+    :cvar SILVER: '#C0C0C0'
+    :cvar GRAY: '#808080'
+    :cvar MAROON: '#800000'
+    :cvar OLIVE: '#808000'
+    :cvar GREEN: '#008000'
+    :cvar PURPLE: '#800080'
+    :cvar TEAL: '#008080'
+    :cvar NAVY: '#000080'
+    """
+
+    BLACK = '#000000'
+    WHITE = '#FFFFFF'
+    RED = '#FF0000'
+    LIME = '#00FF00'
+    BLUE = '#0000FF'
+    YELLOW = '#FFFF00'
+    CYAN = '#00FFFF'
+    MAGENTA = '#FF00FF'
+    SILVER = '#C0C0C0'
+    GRAY = '#808080'
+    MAROON = '#800000'
+    OLIVE = '#808000'
+    GREEN = '#008000'
+    PURPLE = '#800080'
+    TEAL = '#008080'
+    NAVY = '#000080'
+    DEFAULT_COMPLETED = '#339447'
+    DEFAULT_IN_PROGRESS = '#FF6600'
+    DEFAULT_NO_PROGRESS = '#EEEEEE'
+    DEFAULT_IN_PROGRESS_BACKGROUND = '#FC7C3D'
