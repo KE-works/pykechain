@@ -1043,8 +1043,10 @@ class WidgetsManager(Sized):
             parent=kwargs.get("parent_widget"),
             readable_models=[attachment_property.model()],
         )
-
         return widget
+
+    def add_card_widget(self):
+        pass
 
     # Compatibility Funnctions
     #

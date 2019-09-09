@@ -223,6 +223,7 @@ class WidgetNames(Enum):
 
     # KE-chain 3 only
     :cvar SIGNATUREWIDGET: signatureWidget
+    :cvar CARDWIDGET: cardWidget
     :cvar METAPANELWIDGET: metaPanelWidget
     :cvar MULTICOLUMNWIDGET: multiColumnWidget
     """
@@ -239,6 +240,7 @@ class WidgetNames(Enum):
     METAPANELWIDGET = 'metaPanelWidget'
     MULTICOLUMNWIDGET = 'multiColumnWidget'
     SIGNATUREWIDGET = 'signatureWidget'
+    CARDWIDGET = 'cardWidget'
 
 
 class WidgetTypes(Enum):
@@ -295,6 +297,7 @@ WidgetCompatibleTypes = {
     WidgetNames.METAPANELWIDGET: WidgetTypes.METAPANEL,
     WidgetNames.MULTICOLUMNWIDGET: WidgetTypes.MULTICOLUMN,
     WidgetNames.SIGNATUREWIDGET: WidgetTypes.SIGNATURE,
+    WidgetNames.CARDWIDGET: WidgetTypes.CARD
 }
 
 default_metapanel_widget = dict(
