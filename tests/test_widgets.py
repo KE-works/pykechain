@@ -6,7 +6,8 @@ from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity
 from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, \
-    SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, ServiceWidget, NotebookWidget, MulticolumnWidget
+    SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, SignatureWidget, ServiceWidget, NotebookWidget, \
+    MulticolumnWidget
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
@@ -282,13 +283,37 @@ class TestWidgetManagerInActivity(TestBetamax):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         bike_part = self.project.part(name='Bike')
         widget = widget_manager.add_propertygrid_widget(part_instance=bike_part,
-                                                        title="Testing the customtitle of a property grid widget",
+                                                        title="Testing the custom title of a property grid widget",
                                                         show_headers=False, show_columns=[ShowColumnTypes.UNIT],
                                                         readable_models=bike_part.model().properties[:2],
                                                         writable_models=bike_part.model().properties[3:])
 
         self.assertIsInstance(widget, PropertygridWidget)
         self.assertEqual(len(widget_manager), 1 + 1)
+
+    def test_add_signature_widget(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        bike_part = self.project.part(name='Bike')
+        picture = bike_part.property(name='Picture')
+
+        widget1 = widget_manager.add_signature_widget(attachment_property=picture, title="Yes, my precious",
+                                                      custom_undo_button_text="Remove za widget",
+                                                      custom_button_text="Sign za widget")
+        widget2 = widget_manager.add_signature_widget(attachment_property=picture, title=None,
+                                                      custom_undo_button_text=None,
+                                                      custom_button_text=None)
+        widget3 = widget_manager.add_signature_widget(attachment_property=picture)
+        self.assertIsInstance(widget1, SignatureWidget)
+        self.assertIsInstance(widget2, SignatureWidget)
+        self.assertIsInstance(widget3, SignatureWidget)
+        self.assertEqual(len(widget_manager), 1 + 3)
+
+        with self.assertRaises(IllegalArgumentError):
+            widget_manager.add_signature_widget(attachment_property='Failed script')
+
+    def test_add_card_widget(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        print()
 
     def test_service_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
