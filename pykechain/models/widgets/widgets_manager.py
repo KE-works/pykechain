@@ -973,7 +973,79 @@ class WidgetsManager(Sized):
             **kwargs
         )
         return widget
-    #
+
+    def add_signature_widget(self, attachment_property, title=False, custom_button_text=False,
+                             custom_undo_button_text=False, **kwargs):
+        """
+        Add a KE-chain Signature widget to the Widgetmanager and the activity.
+
+        The widget will be saved in KE-chain.
+
+
+        :param attachment_property: KE-chain Attachment property to display
+        :type attachment_property: AttachmentProperty
+        :param title: A custom title for the script widget
+            * False (default): Script name
+            * String value: Custom title
+            * None: No title
+        :type title: bool or basestring or None
+        :param custom_button_text: Custom text for 'Add signature' button
+        :type custom_button_text: bool or basestring or None
+        :param custom_undo_button_text: Custom text for 'Remove signature' button
+        :type custom_undo_button_text: bool or basestring or None
+        :param kwargs: additional keyword arguments to pass
+        :type kwargs: dict
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
+        """
+
+        if 'custom_title' in kwargs and not title:
+            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
+                          'accordingly to use `title`', PendingDeprecationWarning)
+            title = kwargs.pop('custom_title')
+
+        attachment_property = _retrieve_object(attachment_property, method=self._client.property)  # type: Property2  # noqa
+        meta = _initiate_meta(kwargs, activity=self._activity_id)
+
+        meta, title = _set_title(meta, title, default_title=attachment_property.name)
+
+        # Add custom button text
+        if not custom_button_text:
+            show_button_value = "Default"
+            button_text = ''
+        else:
+            show_button_value = "Custom text"
+            button_text = str(custom_button_text)
+
+        # Add custom undo button text
+        if not custom_undo_button_text:
+            show_undo_button_value = "Default"
+            undo_button_text = ''
+        else:
+            show_undo_button_value = "Custom text"
+            undo_button_text = str(custom_undo_button_text)
+
+        meta.update({
+            "propertyInstanceId": attachment_property.id,
+            "showUndoButtonValue": show_undo_button_value,
+            "customUndoText": undo_button_text,
+            "customText": button_text,
+            "showButtonValue": show_button_value
+        })
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.SIGNATURE,
+            meta=meta,
+            title=title,
+            order=kwargs.get("order"),
+            parent=kwargs.get("parent_widget"),
+            readable_models=[attachment_property.model()],
+        )
+
+        return widget
+
     # Compatibility Funnctions
     #
 

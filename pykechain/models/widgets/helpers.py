@@ -74,7 +74,7 @@ def _set_title(meta, custom_title, default_title=None):
     title of the widget (to be used to set `widget.title`).
 
     :param meta: meta dictionary to augment
-    :type meat: dict
+    :type meta: dict
     :param custom_title: A custom title for the multi column widget
             * False: use the default title
             * String value: use the Custom title

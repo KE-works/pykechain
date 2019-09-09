@@ -221,7 +221,8 @@ class WidgetNames(Enum):
     :cvar TASKNAVIGATIONBARWIDGET: taskNavigationBarWidget
     :cvar JSONWIDGET: jsonWidget
 
-    # KE-chain 2 only
+    # KE-chain 3 only
+    :cvar SIGNATUREWIDGET: signatureWidget
     :cvar METAPANELWIDGET: metaPanelWidget
     :cvar MULTICOLUMNWIDGET: multiColumnWidget
     """
@@ -237,6 +238,7 @@ class WidgetNames(Enum):
     JSONWIDGET = 'jsonWidget'
     METAPANELWIDGET = 'metaPanelWidget'
     MULTICOLUMNWIDGET = 'multiColumnWidget'
+    SIGNATUREWIDGET = 'signatureWidget'
 
 
 class WidgetTypes(Enum):
@@ -292,6 +294,7 @@ WidgetCompatibleTypes = {
     WidgetNames.JSONWIDGET: WidgetTypes.JSON,
     WidgetNames.METAPANELWIDGET: WidgetTypes.METAPANEL,
     WidgetNames.MULTICOLUMNWIDGET: WidgetTypes.MULTICOLUMN,
+    WidgetNames.SIGNATUREWIDGET: WidgetTypes.SIGNATURE,
 }
 
 default_metapanel_widget = dict(
