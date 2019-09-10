@@ -791,9 +791,9 @@ class WidgetsManager(Sized):
         return widget
 
     def add_metapanel_widget(self, show_all=True,
-                             show_due_date=None, show_start_date=None,   show_title=None, show_status=None,
-                             show_progress=None, show_assignees=None, show_breadcrumbs=None, show_menu=None,
-                             show_download_pdf=None, show_progressbar=None, progress_bar=None, **kwargs):
+                             show_due_date=False, show_start_date=False, show_title=False, show_status=False,
+                             show_progress=False, show_assignees=False, show_breadcrumbs=False, show_menu=False,
+                             show_download_pdf=False, show_progressbar=False, progress_bar=None, **kwargs):
         # type: (bool, Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[dict], **Any) -> Widget  # noqa: E501
         """
         Add a KE-chain Metapanel to the WidgetManager.
@@ -803,25 +803,28 @@ class WidgetsManager(Sized):
         :param show_all: Show all elements of the metapanel (defaults to True). If True other arguments are ignored.
         :type show_all: bool
         :param show_due_date: show Due date
-        :type show_due_date: bool or None
+        :type show_due_date: bool
         :param show_start_date: show Start date
-        :type show_start_date: bool or None
+        :type show_start_date: bool
         :param show_title: Show Title of the activity
-        :type show_title: bool or None
+        :type show_title: bool
         :param show_status: Show status
-        :type show_status: bool or None
+        :type show_status: bool
         :param show_progress: Show progress. If True, the progressbar is not shown.
-        :type show_progress: bool or None
+        :type show_progress: bool
         :param show_assignees: show Assignees
-        :type show_assignees: bool or None
+        :type show_assignees: bool
         :param show_breadcrumbs: show Breadcrumbs
-        :type show_breadcrumbs: bool or None
+        :type show_breadcrumbs: bool
         :param show_download_pdf: Show the Download PDF button
-        :type show_download_pdf: bool or None
+        :type show_download_pdf: bool
         :param show_menu: show Menu
-        :type show_menu: bool or None
+        :type show_menu: bool
         :param show_progressbar: Show the progress bar. Shown when progress is not True.
-        :type show_progressbar: bool or None
+        :type show_progressbar: bool
+        :param progress_bar: Progress bar custom settings. Allowed dictionary items `colorNoProgress, showProgressText,
+        showProgressText, customHeight, colorInProgress, colorCompleted, colorInProgressBackground`
+        :type progress_bar: dict or None
         :param kwargs: additional keyword arguments to pass
         :type kwargs: dict
         :return: newly created widget
@@ -843,7 +846,8 @@ class WidgetsManager(Sized):
                 showMenuDownloadPDF=show_download_pdf,
                 showAssignees=show_assignees,
                 showBreadCrumb=show_breadcrumbs,
-                showMenu=show_menu,
+                # if show_download_pdf = Tue -> showMenu = True by default
+                showMenu=show_menu or show_download_pdf,
                 # if the progress = True -> bar = False. Also when the bar is set to True,
                 # if progress=False and Bar=True, the bar is True
                 # if progress=False and Bar=False, both are False
