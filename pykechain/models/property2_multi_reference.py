@@ -110,7 +110,7 @@ class MultiReferenceProperty2(Property2):
             # if value_to_set is not None, retrieve the scope_id from the first value_to_set
             # we do this smart by checking if we got provided a full Part; that is easier.
             if isinstance(value[0], Part2):
-                x_scope_id = value_to_set[0].scope_id
+                x_scope_id = value[0].scope_id
             else:
                 # retrieve the scope_id from the model value[0] (which is a part in a scope (x_scope))
                 referenced_model = self.model().value
