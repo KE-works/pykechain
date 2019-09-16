@@ -1,12 +1,50 @@
+import warnings
 from random import randrange
 
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models import Property
 from pykechain.enums import PropertyType, Category
+from pykechain.models.validators import SingleReferenceValidator
 from tests.classes import TestBetamax
 
 
 class TestProperties(TestBetamax):
+    def setUp(self):
+        super(TestProperties, self).setUp()
+
+        self.wheel_model = self.project.model('Wheel')
+        self.bike = self.project.model('Bike')
+        self.test_property = self.bike.add_property(name="Test property",
+                                                    property_type=PropertyType.INT_VALUE,
+                                                    description='Description of test property',
+                                                    unit='metric units',
+                                                    default_value=29)
+        self.front_wheel = self.project.part(name='Front Wheel')
+        self.test_property_instance = self.bike.instance().property(name=self.test_property.name)
+
+        srv = SingleReferenceValidator()
+        self.test_ref_property_model = self.bike.add_property(name="Test ref property",
+                                                              property_type=PropertyType.REFERENCES_VALUE,
+                                                              description='Description of test ref property',
+                                                              unit='metric units',
+                                                              default_value=[self.wheel_model],
+                                                              )
+        self.test_ref_property_model.validators = [srv]
+
+    def tearDown(self):
+        try:
+            self.test_property.delete()
+        except APIError:
+            pass
+        try:
+            self.test_property_instance.model().delete()
+        except APIError:
+            pass
+        try:
+            self.test_ref_property_model.delete()
+        except APIError:
+            pass
+
     def test_retrieve_properties(self):
         properties = self.project.properties('Diameter')
 
@@ -252,3 +290,60 @@ class TestProperties(TestBetamax):
         height_property = front_fork_model.property(name='Height')
 
         self.assertEqual(str(height_property.description), str(height_property._json_data.get('description')))
+
+    # 3.0
+    def test_copy_property_model(self):
+        # setUp
+        copied_property = self.test_property.copy(target_part=self.wheel_model, name='Copied property')
+
+        # testing
+        self.assertEqual(copied_property.name, 'Copied property')
+        self.assertEqual(copied_property.description, self.test_property.description)
+        self.assertEqual(copied_property.unit, self.test_property.unit)
+        self.assertEqual(copied_property.value, self.test_property.value)
+
+        # tearDown
+        copied_property.delete()
+
+    def test_move_property_model(self):
+        # setUp
+        moved_property = self.test_property.move(target_part=self.wheel_model, name='Copied property')
+
+        # testing
+        self.assertEqual(moved_property.name, 'Copied property')
+        self.assertEqual(moved_property.description, self.test_property.description)
+        self.assertEqual(moved_property.unit, self.test_property.unit)
+        self.assertEqual(moved_property.value, self.test_property.value)
+        with self.assertRaises(NotFoundError):
+            self.project.property(id=self.test_property.id)
+
+        # tearDown
+        moved_property.delete()
+
+    def test_copy_property_instance(self):
+        # setUp
+        self.test_property_instance.value = 200
+        copied_property = self.test_property_instance.copy(target_part=self.front_wheel, name='Copied property instance')
+
+        # testing
+        self.assertEqual(copied_property.name, 'Copied property instance')
+        self.assertEqual(copied_property.description, self.test_property_instance.description)
+        self.assertEqual(copied_property.unit, self.test_property_instance.unit)
+        self.assertEqual(copied_property.value, self.test_property_instance.value)
+
+        # tearDown
+        copied_property.model().delete()
+
+    def test_copy_reference_property_with_options(self):
+        # setUp
+        copied_ref_property = self.test_ref_property_model.copy(target_part=self.wheel_model, name='Copied ref property')
+
+        # testing
+        self.assertEqual(copied_ref_property.name, 'Copied ref property')
+        self.assertEqual(copied_ref_property.description, self.test_ref_property_model.description)
+        self.assertEqual(copied_ref_property.unit, self.test_ref_property_model.unit)
+        self.assertEqual(copied_ref_property.value, self.test_ref_property_model.value)
+        self.assertEqual(copied_ref_property._options, self.test_ref_property_model._options)
+
+        # tearDown
+        copied_ref_property.delete()
