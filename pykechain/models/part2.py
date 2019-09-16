@@ -717,7 +717,8 @@ class Part2(Base):
                                                 include_children=include_children)
             return copied_instance
         else:
-            raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category')
+            raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category'.
+                                       format(self.name, target_parent.name))
 
     def move(self, target_parent, name=None, include_children=True, include_instances=True):
         """

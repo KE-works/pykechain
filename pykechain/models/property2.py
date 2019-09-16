@@ -231,3 +231,58 @@ class Property2(Property):
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete property: {} with id {}".format(self.name, self.id))
+
+    def copy(self, target_part, name=None):
+        """
+
+        :param target_part:
+        :param name:
+        :return:
+        """
+        from pykechain.models import Part2
+        if not isinstance(target_part, Part2):
+            raise IllegalArgumentError("`target_part` needs to be a part, got '{}'".format(type(target_part)))
+        if not name:
+            name = self.name
+        if self.category == Category.MODEL and target_part.category == Category.MODEL:
+            # Cannot move a `Property` model under a `Part` instance or vice versa
+            copied_property_model = target_part.add_property(name=name,
+                                                             property_type=self.type,
+                                                             description=self.description,
+                                                             unit=self.unit,
+                                                             default_value=self.value,
+                                                             options=self._options
+                                                             )
+            return copied_property_model
+        elif self.category == Category.INSTANCE and target_part.category == Category.INSTANCE:
+            target_model = target_part.model()
+            self_model = self.model()
+            target_model.add_property(name=name,
+                                      property_type=self_model.type,
+                                      description=self_model.description,
+                                      unit=self_model.unit,
+                                      default_value=self_model.value,
+                                      options=self_model._options
+                                      )
+            target_part.refresh()
+            copied_property_instance = target_part.property(name=name)
+            copied_property_instance.value = self.value
+            return copied_property_instance
+        else:
+            raise IllegalArgumentError('property "{}" and target part "{}" must have the same category'.
+                                       format(self.name, target_part.name))
+
+    def move(self, target_part, name=None):
+        """
+
+        :param target_part:
+        :param name:
+        :return:
+        """
+        moved_property = self.copy(target_part=target_part, name=name)
+
+        if self.category == Category.MODEL:
+            self.delete()
+        else:
+            self.model().delete()
+        return moved_property
