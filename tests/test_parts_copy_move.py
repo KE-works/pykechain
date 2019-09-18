@@ -99,7 +99,7 @@ class TestCopyAndMoveParts(TestBetamax):
 
         # testing
         self.assertTrue(copied_instance)
-        self.assertEqual(len(copied_instance.properties), 3)
+        self.assertEqual(len(copied_instance.properties), 4)
         self.assertTrue(copied_instance.property('Property single text'))
         self.assertEqual(copied_instance.property('Property decimal number').value, 33)
         self.assertEqual(copied_instance.property('Property single select list').value, None)
@@ -125,7 +125,7 @@ class TestCopyAndMoveParts(TestBetamax):
         # testing
         self.assertTrue(copied_model)
         self.assertEqual(copied_model.name, name_of_part)
-        self.assertEqual(len(copied_model.properties), 3)
+        self.assertEqual(len(copied_model.properties), 4)
         self.assertEqual(len(copied_model._cached_children), 0)
 
         # tearDown

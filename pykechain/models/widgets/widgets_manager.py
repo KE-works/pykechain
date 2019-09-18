@@ -1030,9 +1030,9 @@ class WidgetsManager(Sized):
             * None: No title
         :type title: bool or basestring or None
         :param custom_button_text: Custom text for 'Add signature' button
-        :type custom_button_text: bool or basestring or None
+        :type custom_button_text: bool or basestring
         :param custom_undo_button_text: Custom text for 'Remove signature' button
-        :type custom_undo_button_text: bool or basestring or None
+        :type custom_undo_button_text: bool or basestring
         :param kwargs: additional keyword arguments to pass
         :type kwargs: dict
         :return: newly created widget
