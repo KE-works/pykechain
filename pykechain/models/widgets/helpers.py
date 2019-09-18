@@ -207,8 +207,8 @@ def _check_excluded_propmodels(part_model, property_models):
         elif part_model.id != property_model._json_data.get('part_id'):
             raise IllegalArgumentError(
                 'A part reference property can only exclude properties belonging to the referenced Part model, '
-                'found referenced Part model "{}" and Properties belonging to "{}"'.
-                    format(part_model.name, property_model.part.name))
+                'found referenced Part model "{}" and Properties belonging to "{}"'.format(
+                    part_model.name, property_model.part.name))
         else:
             list_of_propmodels_excl.append(property_model.id)
     return list_of_propmodels_excl

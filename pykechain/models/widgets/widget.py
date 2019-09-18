@@ -4,7 +4,7 @@ import requests
 from jsonschema import validate
 
 from pykechain.enums import WidgetTypes, Category
-from pykechain.exceptions import APIError
+from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Base
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 from pykechain.defaults import API_EXTRA_PARAMS
@@ -230,3 +230,63 @@ class Widget(Base):
             raise APIError("Could not delete Widget ({})".format(response))
 
         return True
+
+    def copy(self, target_activity, order=None):
+        """Copy the widget.
+
+        :param target_activity: `Activity` object under which the desired `Widget` is copied
+        :type target_activity: :class:`Activity`
+        :param order: (optional) order in the activity of the widget.
+        :type order: int or None
+        :returns: copied :class:`Widget `
+        :raises IllegalArgumentError: if target_activity is not :class:`Activity`
+
+        >>> source_activity = project.activity('Source task')
+        >>> target_activity = project.activity('Target task')
+        >>> widget_manager = source_activity.widgets()
+        >>> widget_to_copy = widget_manager[1]
+        >>> widget_to_copy.copy(target_activity=target_activity, order=3)
+
+        """
+        from pykechain.models import Activity2
+        if not isinstance(target_activity, Activity2):
+            raise IllegalArgumentError("`target_activity` needs to be an activity, got '{}'".format(
+                type(target_activity)))
+
+        # Retrieve the widget manager of the target activity
+        widget_manager = target_activity.widgets()
+
+        # Get the writable and readable models of the original widget
+        associated_part = self.parts(category=Category.MODEL)[0]
+        readable_models = list()
+        writable_models = list()
+        for associated_property in associated_part.properties:
+            if associated_property._output:
+                writable_models.append(associated_property)
+            else:
+                readable_models.append(associated_property)
+
+        # Create a perfect copy of the widget
+        copied_widget = widget_manager.create_widget(meta=self.meta, widget_type=self.widget_type, title=self.title,
+                                                     writable_models=writable_models, readable_models=readable_models,
+                                                     order=order)
+
+        return copied_widget
+
+    def move(self, target_activity, order=None):
+        """Move the widget.
+
+        :param target_activity: `Activity` object under which the desired `Widget` is moved
+        :type target_activity: :class:`Activity`
+        :param order: (optional) order in the activity of the widget.
+        :type order: int or None
+        :returns: copied :class:`Widget `
+        :raises IllegalArgumentError: if target_activity is not :class:`Activity`
+
+        """
+        moved_widget = self.copy(target_activity=target_activity, order=order)
+
+        self.delete()
+
+        return moved_widget
+

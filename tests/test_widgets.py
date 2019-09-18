@@ -2,7 +2,8 @@ import json
 import os
 from unittest import skip
 
-from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors
+from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors, \
+    Category
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity
 from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, \
@@ -132,7 +133,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         htmlwidget = widget_manager.create_widget(
             widget_type=WidgetTypes.HTML,
             title="Test HTML widget",
-            meta=dict(html="Hello")
+            meta=dict(htmlContent="Hello")
         )
 
         self.assertIsInstance(htmlwidget, HtmlWidget)
@@ -175,13 +176,10 @@ class TestWidgetManagerInActivity(TestBetamax):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         foto_property = self.project.property("Picture")
 
-        widget = widget_manager.create_widget(
+        widget = widget_manager.add_attachmentviewer_widget(
             widget_type=WidgetTypes.ATTACHMENTVIEWER,
             title="Attachment Viewer",
-            meta=dict(
-                activityId=str(self.task.id),
-                propertyInstanceId=str(foto_property.id)
-            ),
+            attachment_property=foto_property,
             readable_models=[foto_property.model_id]
         )
 
@@ -299,9 +297,9 @@ class TestWidgetManagerInActivity(TestBetamax):
         widget1 = widget_manager.add_signature_widget(attachment_property=picture, title="Yes, my precious",
                                                       custom_undo_button_text="Remove za widget",
                                                       custom_button_text="Sign za widget")
-        widget2 = widget_manager.add_signature_widget(attachment_property=picture, title=None,
-                                                      custom_undo_button_text=None,
-                                                      custom_button_text=None)
+        widget2 = widget_manager.add_signature_widget(attachment_property=picture, title=False,
+                                                      custom_undo_button_text=False,
+                                                      custom_button_text=False)
         widget3 = widget_manager.add_signature_widget(attachment_property=picture)
         self.assertIsInstance(widget1, SignatureWidget)
         self.assertIsInstance(widget2, SignatureWidget)
@@ -370,7 +368,7 @@ class TestWidgetManagerInActivity(TestBetamax):
 
     def test_progress_widget(self):
         widget_manager = self.task.widgets()
-        widget_manager.add_progress_widget(height=15,
+        widget_manager.add_progress_widget(custom_height=35,
                                            show_progress_text=False)
         self.assertEqual(len(widget_manager), 1 + 1)
 
@@ -487,3 +485,61 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertTrue(hasattr(widget_manager, 'add_script_widget'))
         self.assertTrue(hasattr(widget_manager, 'add_attachment_viewer_widget'))
         self.assertTrue(hasattr(widget_manager, 'add_navigation_bar_widget'))
+
+
+class TestCopyMoveWidgets(TestBetamax):
+    def setUp(self):
+        super(TestCopyMoveWidgets, self).setUp()
+        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
+        self.task_2 = self.project.create_activity(name="test_copy_widget") # type: Activity2
+
+    def tearDown(self):
+        self.task.delete()
+        self.task_2.delete()
+        super(TestCopyMoveWidgets, self).tearDown()
+
+    def test_copy_widget(self):
+        # setUp
+        title = "Widget to copy"
+        bike_part = self.project.part('Bike')
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        widget_1 = widget_manager.add_propertygrid_widget(part_instance=bike_part, all_writable=True,
+                                                          title=title)
+        widget_1.copy(target_activity=self.task_2, order=0)
+        widget_manager_2 = self.task_2.widgets()  # type: WidgetsManager
+        associated_model = widget_manager_2[0].parts(category=Category.MODEL)[0]
+
+        # testing
+        self.assertEqual(widget_manager_2[0].widget_type, WidgetTypes.PROPERTYGRID)
+        self.assertEqual(widget_manager_2[0].title, title)
+        self.assertTrue(all(prop.output for prop in associated_model.properties))
+        self.assertEqual(len(self.task.widgets()), 2)
+
+    def test_copy_widget_with_wrong_target(self):
+        # setUp
+        title = "Widget to copy"
+        bike_part = self.project.part('Bike')
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        widget_1 = widget_manager.add_propertygrid_widget(part_instance=bike_part, all_writable=True,
+                                                          title=title)
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            widget_1.copy(target_activity=self.project, order=0)
+
+    def test_move_widget(self):
+        # setUp
+        title = "Widget to move"
+        bike_part = self.project.part('Bike')
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        widget_1 = widget_manager.add_propertygrid_widget(part_instance=bike_part, all_writable=True,
+                                                          title=title)
+        widget_1.move(target_activity=self.task_2, order=0)
+        widget_manager_2 = self.task_2.widgets()  # type: WidgetsManager
+        associated_model = widget_manager_2[0].parts(category=Category.MODEL)[0]
+
+        # testing
+        self.assertEqual(widget_manager_2[0].widget_type, WidgetTypes.PROPERTYGRID)
+        self.assertEqual(widget_manager_2[0].title, title)
+        self.assertTrue(all(prop.output for prop in associated_model.properties))
+        self.assertEqual(len(self.task.widgets()), 1)
