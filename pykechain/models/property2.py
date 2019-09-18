@@ -233,11 +233,21 @@ class Property2(Property):
             raise APIError("Could not delete property: {} with id {}".format(self.name, self.id))
 
     def copy(self, target_part, name=None):
-        """
+        """Copy a property model or instance.
 
-        :param target_part:
-        :param name:
-        :return:
+        :param target_part: `Part` object under which the desired `Property` is copied
+        :type target_part: :class:`Part`
+        :param name: how the copied `Property` should be called
+        :type name: basestring
+        :return: copied :class:`Property` model.
+        :raises IllegalArgumentError: if property and target_part have different `Category`
+
+        Example
+        -------
+        >>> property_to_copy = client.property(name='Diameter')
+        >>> bike = client.model('Bike')
+        >>> property_to_copy.copy(target_part=bike, name='Bike diameter?')
+
         """
         from pykechain.models import Part2
         if not isinstance(target_part, Part2):
@@ -273,11 +283,21 @@ class Property2(Property):
                                        format(self.name, target_part.name))
 
     def move(self, target_part, name=None):
-        """
+        """Move a property model or instance.
 
-        :param target_part:
-        :param name:
-        :return:
+        :param target_part: `Part` object under which the desired `Property` is moved
+        :type target_part: :class:`Part`
+        :param name: how the moved `Property` should be called
+        :type name: basestring
+        :return: copied :class:`Property` model.
+        :raises IllegalArgumentError: if property and target_part have different `Category`
+
+        Example
+        -------
+        >>> property_to_move = client.property(name='Diameter')
+        >>> bike = client.model('Bike')
+        >>> property_to_move.move(target_part=bike, name='Bike diameter?')
+
         """
         moved_property = self.copy(target_part=target_part, name=name)
 
