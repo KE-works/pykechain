@@ -201,7 +201,7 @@ class Widget(Base):
         """
         update_dict = dict()
         activity = self._activity_id
-        meta.update({'activityId': str(_retrieve_object_id(activity))})
+        update_dict.update({'activity_id': str(_retrieve_object_id(activity))})
 
         if meta is not None:
             update_dict.update(dict(meta=meta))
