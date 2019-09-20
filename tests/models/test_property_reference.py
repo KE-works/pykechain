@@ -482,3 +482,10 @@ class TestMultiReferenceProperty(TestBetamax):
         self.assertEqual(len(self.reference_to_wheel._options['propmodels_excl']), 1)
         self.assertTrue(diameter_property.id not in self.reference_to_wheel._options['propmodels_excl'])
         self.assertTrue(spokes_property.id in self.reference_to_wheel._options['propmodels_excl'])
+
+    def test_retrieve_scope_id(self):
+        frame = self.project.part(name='Frame')
+
+        ref_to_wheel = frame.property(name='Ref to wheel')
+
+        self.assertEqual(ref_to_wheel.scope_id, self.project.id)
