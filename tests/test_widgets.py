@@ -143,7 +143,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         widget_manager = self.task.widgets()  # type: WidgetsManager
         bike_part = self.project.part('Bike')
         widget = widget_manager.add_propertygrid_widget(part_instance=bike_part,
-                                                        writable_models=[bike_part.model().properties])
+                                                        writable_models=bike_part.model().properties)
         import copy
         updated_meta = copy.deepcopy(widget.meta)
         new_title = "My customly edited title"

@@ -6,6 +6,7 @@ from jsonschema import validate
 from pykechain.enums import WidgetTypes, Category
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Base
+from pykechain.models.widgets.helpers import _retrieve_object_id
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 from pykechain.defaults import API_EXTRA_PARAMS
 
@@ -199,6 +200,8 @@ class Widget(Base):
         :raises APIError: if the widget could not be updated.
         """
         update_dict = dict()
+        activity = self._activity_id
+        meta.update({'activityId': str(_retrieve_object_id(activity))})
 
         if meta is not None:
             update_dict.update(dict(meta=meta))
