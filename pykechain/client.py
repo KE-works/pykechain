@@ -1015,7 +1015,7 @@ class Client(object):
             raise APIError("The widget concept is not introduced yet for this KE-chain version")
 
         request_params = API_EXTRA_PARAMS['widgets']
-        request_params['id'] = pk
+        request_params.update({'id': pk})
 
         if isinstance(activity, (Activity, Activity2)):
             request_params.update(dict(activity_id=activity.id))
