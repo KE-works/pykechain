@@ -3,12 +3,12 @@ import os
 from unittest import skip
 
 from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors, \
-    Category
+    Category, CardWidgetLinkTarget
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity
 from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, \
     SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, SignatureWidget, ServiceWidget, NotebookWidget, \
-    MulticolumnWidget, ProgressWidget
+    MulticolumnWidget, ProgressWidget, CardWidget
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
@@ -310,8 +310,34 @@ class TestWidgetManagerInActivity(TestBetamax):
             widget_manager.add_signature_widget(attachment_property='Failed script')
 
     def test_add_card_widget(self):
+        # setUp
         widget_manager = self.task.widgets()  # type: WidgetsManager
-        print()
+        bike_part = self.project.part(name='Bike')
+        picture = bike_part.property(name='Picture')
+        activity = self.project.activity(name='test task')
+
+        widget1 = widget_manager.add_card_widget(title="Some title", description='Some description',
+                                                 link='www.ke-chain.com', link_target=CardWidgetLinkTarget.NEW_TAB)
+        widget2 = widget_manager.add_card_widget(image=picture, title=False,
+                                                 link=activity.id, link_target=CardWidgetLinkTarget.SAME_TAB)
+
+        # testing
+        self.assertEqual(len(widget_manager), 1 + 2)
+
+        self.assertIsInstance(widget1, CardWidget)
+        self.assertIsInstance(widget2, CardWidget)
+
+        with self.assertRaises(IllegalArgumentError):
+            widget_manager.add_card_widget(title=12)
+
+        with self.assertRaises(IllegalArgumentError):
+            widget_manager.add_card_widget(description=bike_part)
+
+        with self.assertRaises(IllegalArgumentError):
+            widget_manager.add_card_widget(image='this should not work')
+
+        with self.assertRaises(IllegalArgumentError):
+            widget_manager.add_card_widget(link=activity, link_target='_somewhere')
 
     def test_service_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager

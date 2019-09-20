@@ -5,7 +5,7 @@ import requests
 from six import string_types, text_type
 
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes, \
-    ProgressBarColors
+    ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, CardWidgetLinkTarget
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget, ProgressWidget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
@@ -1085,10 +1085,105 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_card_widget(self):
-        pass
+    def add_card_widget(self, image=None, title=None, description=None, link=None,
+                        link_target=CardWidgetLinkTarget.SAME_TAB, **kwargs):
+        """
 
-    # Compatibility Funnctions
+        :param image:
+        :param title:
+        :param description:
+        :param link:
+        :return:
+        """
+        if 'custom_title' in kwargs and not title:
+            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
+                          'accordingly to use `title`', PendingDeprecationWarning)
+            title = kwargs.pop('custom_title')
+
+        meta = _initiate_meta(kwargs, activity=self._activity_id)
+
+        # Process the title
+        if title is False or title is None:
+            show_title_value = "Default"
+            title = self._client.activity(id=self._activity_id).scope.name
+        elif isinstance(title, text_type):
+            show_title_value = "Custom title"
+        else:
+            raise IllegalArgumentError("When using the add_card_widget, 'title' must be 'text_type' or None or False. "
+                                       "Type is: {}".format(type(title)))
+        meta.update({
+            "showTitleValue": show_title_value,
+            "customTitle": title
+        })
+
+        # Process the description
+        if description is False or description is None:
+            show_description_value = "No description"
+            description = ""
+        elif isinstance(description, text_type):
+            show_description_value = "Custom description"
+        else:
+            raise IllegalArgumentError("When using the add_card_widget, 'description' must be 'text_type' or None or "
+                                       "False. Type is: {}".format(type(description)))
+        meta.update({
+            "showDescriptionValue": show_description_value,
+            "customDescription": description
+        })
+
+        # Process the image it is linked to
+        from pykechain.models import Property2
+        if isinstance(image, Property2) and image.type == PropertyType.ATTACHMENT_VALUE:
+            meta.update({
+                'customImage': image.id,
+                'showImageValue': CardWidgetImageValue.CUSTOM_IMAGE
+            })
+        elif image is None:
+            meta.update({
+                'customImage': None,
+                'showImageValue': CardWidgetImageValue.NO_IMAGE
+            })
+        else:
+            raise IllegalArgumentError("When using the add_card_widget, 'image' must be a Property or None. Type "
+                                       "is: {}".format(type(image)))
+
+        from pykechain.models import Activity2
+        if isinstance(link, Activity2):
+            meta.update({
+                'customLink': link.id,
+                'showLinkValue': CardWidgetLinkValue.TASK_LINK
+            })
+        elif isinstance(link, text_type) and is_uuid(link):
+            meta.update({
+                'customLink': link,
+                'showLinkValue': CardWidgetLinkValue.TASK_LINK
+            })
+        elif link is None or link is False:
+            meta.update({
+                'customLink': None,
+                'showLinkValue': CardWidgetLinkValue.NO_LINK
+            })
+        else:
+            meta.update({
+                'customLink': link,
+                'showLinkValue': CardWidgetLinkValue.EXTERNAL_LINK
+            })
+
+        if link_target in CardWidgetLinkTarget.values():
+            meta['linkTarget'] = link_target
+        else:
+            raise IllegalArgumentError("When using the add_card_widget, 'link_target' must be a '_blank' or '_self. "
+                                       "link_target is: {}".format(link_target))
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.CARD,
+            meta=meta,
+            title=title,
+            order=kwargs.get("order"),
+            parent=kwargs.get("parent_widget")
+        )
+        return widget
+
+    # Compatibility Functions
     #
 
     # TODO: this is pending deprecation in version 3.4.0
