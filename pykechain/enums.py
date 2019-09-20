@@ -666,3 +666,19 @@ class ProgressBarColors(Enum):
     DEFAULT_IN_PROGRESS = '#FF6600'
     DEFAULT_NO_PROGRESS = '#EEEEEE'
     DEFAULT_IN_PROGRESS_BACKGROUND = '#FC7C3D'
+
+
+class CardWidgetLinkTarget(Enum):
+    SAME_TAB = "_self"
+    NEW_TAB = '_blank'
+
+
+class CardWidgetLinkValue(Enum):
+    EXTERNAL_LINK = "External link"
+    TASK_LINK = "Task link"
+    NO_LINK = "No link"
+
+
+class CardWidgetImageValue(Enum):
+    CUSTOM_IMAGE = "Custom image"
+    NO_IMAGE = "No image"
