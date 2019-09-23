@@ -2092,6 +2092,9 @@ class Client(object):
                 else:
                     IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
 
+        if not title:
+            title = widget_type
+
         data = dict(
             activity_id=activity,
             widget_type=widget_type,
