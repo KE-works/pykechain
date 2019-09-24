@@ -1134,7 +1134,7 @@ class WidgetsManager(Sized):
         from pykechain.models import Property2
         if isinstance(image, Property2) and image.type == PropertyType.ATTACHMENT_VALUE:
             meta.update({
-                'customImage': image.id,
+                'customImage': "/api/v3/properties/{}/preview".format(image.id),
                 'showImageValue': CardWidgetImageValue.CUSTOM_IMAGE
             })
         elif image is None:
