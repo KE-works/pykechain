@@ -3,6 +3,7 @@ import re
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from typing import TypeVar, Iterable, Callable, Optional, AnyStr  # noqa: F401
+from slugify import slugify
 
 import pytz
 import six
@@ -261,3 +262,13 @@ def uppercase(string):
 
     """
     return str(string).upper()
+
+
+def slugify_ref(string):
+    """ Convert string into a slugified version of itself.
+
+    :param string: String to convert to ref.
+    :returns: string: slugified string.
+    """
+
+    return slugify(string)
