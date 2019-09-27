@@ -3,7 +3,7 @@ import re
 import unicodedata
 from contextlib import contextmanager
 from datetime import datetime, timedelta
-from typing import TypeVar, Iterable, Callable, Optional, AnyStr  # noqa: F401
+from typing import TypeVar, Iterable, Callable, Optional, AnyStr, Text  # noqa: F401
 
 import pytz
 import six
@@ -264,16 +264,17 @@ def uppercase(string):
     return str(string).upper()
 
 
-def slugify_ref(value):
+def slugify_ref(value, allow_unicode=False):
+    # type: (Text, bool) -> Text
     """
-    Convert spaces to hyphens.
+    Convert to ASCII if 'allow_unicode' is False. Convert spaces to hyphens.
     Remove characters that aren't alphanumerics, underscores, or hyphens.
     Convert to lowercase. Also strip leading and trailing whitespace.
     """
-    return re.sub(r'[-\s]+', '-',
-                  pytz.unicode(
-                      re.sub(r'[^\w\s-]', '',
-                             unicodedata.normalize('NFKD', value)
-                             .encode('ascii', 'ignore'))
-                          .strip()
-                          .lower()))
+    if allow_unicode:
+        value = unicodedata.normalize('NFKC', value)
+        value = re.sub(r'[^\w\s-]', '', value, flags=re.U).strip().lower()
+        return re.sub(r'[-\s]+', '-', value, flags=re.U)
+    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^\w\s-]', '', value).strip().lower()
+    return re.sub(r'[-\s]+', '-', value)
