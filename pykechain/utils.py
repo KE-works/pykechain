@@ -1,9 +1,9 @@
 import os
 import re
+import unicodedata
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from typing import TypeVar, Iterable, Callable, Optional, AnyStr  # noqa: F401
-from slugify import slugify
 
 import pytz
 import six
@@ -264,11 +264,16 @@ def uppercase(string):
     return str(string).upper()
 
 
-def slugify_ref(string):
-    """ Convert string into a slugified version of itself.
-
-    :param string: String to convert to ref.
-    :returns: string: slugified string.
+def slugify_ref(value):
     """
-
-    return slugify(string)
+    Convert spaces to hyphens.
+    Remove characters that aren't alphanumerics, underscores, or hyphens.
+    Convert to lowercase. Also strip leading and trailing whitespace.
+    """
+    return re.sub(r'[-\s]+', '-',
+                  pytz.unicode(
+                      re.sub(r'[^\w\s-]', '',
+                             unicodedata.normalize('NFKD', value)
+                             .encode('ascii', 'ignore'))
+                          .strip()
+                          .lower()))

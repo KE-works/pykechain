@@ -1,7 +1,6 @@
 # basis
 requests==2.22.0
 envparse==0.2.0
-slugify
 
 # json validation (inspector)
 jsonschema==3.0.1
