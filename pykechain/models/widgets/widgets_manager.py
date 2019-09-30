@@ -325,7 +325,7 @@ class WidgetsManager(Sized):
                           'accordingly to use `title`', PendingDeprecationWarning)
             title = kwargs.pop('custom_title')
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_object(obj=part_model, method=self._client)  # type: Part2  # noqa
+        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: Part2  # noqa
         parent_instance_id = _retrieve_object_id(obj=parent_instance)  # type: text_type
         sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)

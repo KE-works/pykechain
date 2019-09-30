@@ -34,7 +34,7 @@ class Base(object):
         if hasattr(self, 'id') and hasattr(other, 'id'):
             return self.id == other.id
         else:
-            return self == other
+            return super().__eq__(other=other)
 
     def refresh(self, json=None, url=None, extra_params=None):
         """Refresh the object in place.
