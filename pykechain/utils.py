@@ -3,7 +3,7 @@ import re
 import unicodedata
 from contextlib import contextmanager
 from datetime import datetime, timedelta
-from typing import TypeVar, Iterable, Callable, Optional, AnyStr, Text  # noqa: F401
+from typing import TypeVar, Iterable, Callable, Optional, AnyStr, Text, Union  # noqa: F401
 
 import pytz
 import six
@@ -84,6 +84,7 @@ def temp_chdir(cwd=None):
 
 
 def parse_datetime(value):
+    # type: (Text) -> Union[type(None), datetime]
     """
     Convert datetime string to datetime object.
 

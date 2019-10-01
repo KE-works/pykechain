@@ -1,4 +1,4 @@
-from typing import Any, List  # noqa: F401
+from typing import Any, List, Dict, Optional, Text  # noqa: F401
 
 import requests
 from jsonschema import validate
@@ -37,6 +37,8 @@ class Property2(Property):
     :type is_invalid: bool
     """
 
+    from pykechain.models import Part2  # import within class namespace to prevent import loops
+
     def __init__(self, json, **kwargs):
         """Construct a Property from a json object."""
         super(Property2, self).__init__(json, **kwargs)
@@ -74,6 +76,7 @@ class Property2(Property):
 
     @property
     def model_id(self):
+        # type: () -> (type(None), Part2)
         """Model id of the Property.
 
         Returns None if the property is a model of its own. It will not return the model object, only the uuid.
@@ -87,6 +90,7 @@ class Property2(Property):
 
     @property
     def part(self):
+        # type: () -> Part2
         """Retrieve the part that holds this Property.
 
         :returns: The :class:`Part` associated to this property
@@ -98,6 +102,7 @@ class Property2(Property):
 
     @classmethod
     def create(cls, json, **kwargs):
+        # type: (dict, **Any) -> Property2
         """Create a property based on the json data.
 
         This method will attach the right class to a property, enabling the use of type-specific methods.
@@ -127,6 +132,7 @@ class Property2(Property):
             return Property2(json, **kwargs)
 
     def refresh(self, json=None, url=None, extra_params=None):
+        # type: (Optional[Dict], Optional[Text], Optional) -> ()
         """Refresh the object in place."""
         super(Property2, self).refresh(json=json,
                                        url=self._client._build_url('property2', property_id=self.id),
@@ -148,6 +154,7 @@ class Property2(Property):
         return self._value is not None
 
     def edit(self, name=None, description=None, unit=None, options=None, **kwargs):
+        # type: (Optional[Text], Optional[Text], Optional[Text], Optional[Dict], **Any) -> ()
         """Edit the details of a property (model).
 
         :param name: (optional) new name of the property to edit
@@ -221,7 +228,7 @@ class Property2(Property):
         self.refresh(json=response.json()['results'][0])
 
     def delete(self):
-        # type () -> ()
+        # type: () -> ()
         """Delete this property.
 
         :return: None
@@ -233,6 +240,7 @@ class Property2(Property):
             raise APIError("Could not delete property: {} with id {}".format(self.name, self.id))
 
     def copy(self, target_part, name=None):
+        # type: (Part2, Optional[Text]) -> Property2
         """Copy a property model or instance.
 
         :param target_part: `Part` object under which the desired `Property` is copied
@@ -283,6 +291,7 @@ class Property2(Property):
                                        format(self.name, target_part.name))
 
     def move(self, target_part, name=None):
+        # type: (Part2, Optional[Text]) -> Property2
         """Move a property model or instance.
 
         :param target_part: `Part` object under which the desired `Property` is moved

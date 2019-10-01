@@ -1,6 +1,8 @@
 import datetime
 import warnings
 
+from typing import Union
+
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Property2
 from pykechain.utils import parse_datetime
@@ -34,6 +36,7 @@ class DatetimeProperty2(Property2):
             raise IllegalArgumentError('value should be a datetime.datetime() object')
 
     def to_datetime(self):
+        # type: () -> Union[type(None), datetime.datetime]
         """Retrieve the data value of a property.
 
         Setting this value will immediately update the property in KE-chain.
