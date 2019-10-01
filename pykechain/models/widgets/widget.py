@@ -5,8 +5,7 @@ from jsonschema import validate
 
 from pykechain.enums import WidgetTypes, Category
 from pykechain.exceptions import APIError, IllegalArgumentError
-from pykechain.models import Base
-from pykechain.models.widgets.helpers import _retrieve_object_id
+from pykechain.models import Base, Activity2
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 from pykechain.defaults import API_EXTRA_PARAMS
 
@@ -128,6 +127,7 @@ class Widget(Base):
         #
 
     def parts(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Any
         """Retrieve parts belonging to this widget.
 
         Without any arguments it retrieves the Instances related to this widget only.
@@ -141,6 +141,7 @@ class Widget(Base):
         return self._client.parts(*args, widget=self.id, **kwargs)
 
     def associated_parts(self, *args, **kwargs):
+        # type: (*Any, **Any) -> (Any, Any)
         """Retrieve models and instances belonging to this widget.
 
         This is a convenience method for the :func:`Widget.parts()` method, which is used to retrieve both the
@@ -233,6 +234,7 @@ class Widget(Base):
         return True
 
     def copy(self, target_activity, order=None):
+        # type: (Activity2, Optional[int]) -> Widget
         """Copy the widget.
 
         :param target_activity: `Activity` object under which the desired `Widget` is copied
@@ -275,6 +277,7 @@ class Widget(Base):
         return copied_widget
 
     def move(self, target_activity, order=None):
+        # type: (Activity2, Optional[int]) -> Widget
         """Move the widget.
 
         :param target_activity: `Activity` object under which the desired `Widget` is moved

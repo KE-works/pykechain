@@ -1,4 +1,5 @@
 import requests
+from typing import Optional, Union, List, Text, Dict
 
 from pykechain.enums import TeamRoles
 from pykechain.exceptions import IllegalArgumentError, APIError
@@ -29,6 +30,7 @@ class Team(Base):
         self.refresh(json=response.json().get('results')[0])
 
     def members(self, role=None):
+        # type: (Optional[Union[TeamRoles, Text]]) -> List[Dict]
         """Members of the team.
 
         You may provide the role in the team, to retrieve only the teammmber with that role. Normally there is a
@@ -59,10 +61,11 @@ class Team(Base):
             return member_list
 
     def add_members(self, users=None, role=TeamRoles.MEMBER):
+        # type: (Optional[List[Union[User, Text]]], Optional[Union[TeamRoles, Text]]) -> ()
         """Members to add to a team.
 
-        :param members: list of members, either `User` objects or usernames
-        :type members: List of `User` or List of pk
+        :param users: list of members, either `User` objects or usernames
+        :type users: List of `User` or List of pk
         :param role: (optional) role of the users to add (default `TeamRoles.MEMBER`)
         :type role: basestring
         :raises IllegalArgumentError: when providing incorrect roles
@@ -97,10 +100,11 @@ class Team(Base):
         self._update('team_add_members', team_id=self.id, update_dict=update_dict)
 
     def remove_members(self, users=None):
+        # type: (Optional[List[Union[User, Text]]]) -> ()
         """Members to add to a team.
 
-        :param members: list of members, either `User` objects or usernames
-        :type members: List of `User` or List of pk
+        :param users: list of members, either `User` objects or usernames
+        :type users: List of `User` or List of pk
         :raises IllegalArgumentError: when providing incorrect roles
 
 
