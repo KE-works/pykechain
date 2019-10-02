@@ -1,3 +1,4 @@
+import copy
 import warnings
 from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text
 
@@ -468,8 +469,10 @@ class WidgetsManager(Sized):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
+        task_buttons = copy.deepcopy(activities)
+
         set_of_expected_keys = {'activityId', 'customText', 'emphasized', 'emphasize', 'isDisabled'}
-        for activity_dict in activities:
+        for activity_dict in task_buttons:
             if set(activity_dict.keys()).issubset(set_of_expected_keys) and 'activityId' in set_of_expected_keys:
                 # Check whether the activityId is class `Activity` or UUID
                 activity = activity_dict['activityId']
@@ -483,13 +486,13 @@ class WidgetsManager(Sized):
                                                "Activity or Activity id. Type is: {}".format(type(activity)))
                 if 'customText' not in activity_dict or not activity_dict['customText']:
                     activity_dict['customText'] = ''
-                if 'emphasized' not in activity_dict:
-                    activity_dict['emphasized'] = False
-                if 'emphasize' in activity_dict:  # emphasize is to be moved to emphasized
+                if 'emphasize' not in activity_dict:
+                    activity_dict['emphasize'] = False
+                if 'emphasized' in activity_dict:  # emphasize is to be moved to emphasized
                     # TODO: pending deprecation in version 3.4.0
-                    warnings.warn("The `emphasize` key in the navbar button will be deprecated in pykechain 3.4.0",
+                    warnings.warn("The `emphasized` key in the navbar button will be deprecated in pykechain 3.4.0",
                                   PendingDeprecationWarning)
-                    activity_dict['emphasized'] = activity_dict.pop('emphasize')
+                    activity_dict['emphasize'] = activity_dict.pop('emphasized')
 
             else:
                 raise IllegalArgumentError("Found unexpected key in activities. Only keys allowed are: {}".
