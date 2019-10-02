@@ -21,9 +21,6 @@ class WidgetsManager(Sized):
     widget title or widget 'ref'.
     """
 
-    from pykechain import Client
-    from pykechain.models import Activity2, Property2, Team, Service
-
     def __init__(self, widgets, activity, client=None, **kwargs):
         # type: (Iterable[Widget], Union[Activity2, Activity2, AnyStr], Optional[Client], **Any) -> None  # noqa: F821
         """Construct a Widget Manager from a list of widgets.

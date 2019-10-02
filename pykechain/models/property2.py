@@ -37,8 +37,6 @@ class Property2(Property):
     :type is_invalid: bool
     """
 
-    from pykechain.models import Part2  # import within class namespace to prevent import loops
-
     def __init__(self, json, **kwargs):
         """Construct a Property from a json object."""
         super(Property2, self).__init__(json, **kwargs)
