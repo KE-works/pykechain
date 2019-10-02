@@ -38,30 +38,28 @@ def _retrieve_object(obj, method):
 
 
 def _retrieve_object_id(obj):
-    # type: (Optional[Union[Part2, Property2, Text]]) -> Optional[Text]  # noqa
+    # type: (Optional[Union[Base, Text]]) -> Optional[Text]  # noqa
     """
     Object id if object or uuid of object is provided as argument.
 
     :param obj: object or uuid to retrieve the object id for
     :type obj: :class:`Base` or basestring
-    :param client: client object to retrieve the object if only uuid is provided.
-    :type client: `Client`
-    :return: object based on the object or uuid of the objet
+    :return: object based on the object or uuid of the object
     :rtype: basestring or None
     :raises APIError: If the object could not be retrieved based on the UUID
-    :raises IllegalArgumentError: if the object provided is not a Part, Property2 or UUID.
+    :raises IllegalArgumentError: if the object provided is not a Base instance or UUID.
     """
-    # Check whether the parent_part_instance is uuid type or class `Part`
-    from pykechain.models import Part, Part2, Property, Property2
-    if isinstance(obj, (Part, Part2, Property, Property2)):
+    # Check whether the obj is an object of any subclass of Base, or uuid type
+    from pykechain.models import Base
+    if issubclass(type(obj), Base):
         return obj.id
     elif isinstance(obj, text_type) and is_uuid(obj):
         return obj
     elif isinstance(obj, type(None)):
         return None
     else:
-        raise IllegalArgumentError("When adding the widget, obj must be a Part, Property,"
-                                   " Part id or Property id. Type is: {}".format(type(obj)))
+        raise IllegalArgumentError("When adding the widget, obj must be an instance of `Base` or an object id. "
+                                   "Type is: {}".format(type(obj)))
 
 
 def _set_title(meta, custom_title, default_title=None):
