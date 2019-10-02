@@ -5,7 +5,7 @@ from jsonschema import validate
 
 from pykechain.enums import WidgetTypes, Category
 from pykechain.exceptions import APIError, IllegalArgumentError
-from pykechain.models import Base, Activity2
+from pykechain.models import Base
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 from pykechain.defaults import API_EXTRA_PARAMS
 
