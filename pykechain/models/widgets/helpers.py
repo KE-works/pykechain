@@ -164,7 +164,7 @@ def _check_prefilters(part_model, prefilters):
     for property_model in property_models:
         index = property_models.index(property_model)
         if is_uuid(property_model):
-            property_model = part_model.property(id=property_model)
+            property_model = part_model.property(pk=property_model)
 
         if property_model.category != Category.MODEL:
             raise IllegalArgumentError('Pre-filters can only be set on property models, found category "{}"'
