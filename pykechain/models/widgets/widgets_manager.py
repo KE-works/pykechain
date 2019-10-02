@@ -457,6 +457,7 @@ class WidgetsManager(Sized):
             * emphasized: bool which determines if the button should stand-out or not - default(False)
             * activityId: class `Activity` or UUID
             * isDisabled: (optional) to disable the navbar button
+            * link: str URL to external web page
         :type activities: list of dict
         :param alignment: The alignment of the buttons inside navigation bar. One of :class:`NavigationBarAlignment`
             * center (default): Center aligned
@@ -471,19 +472,27 @@ class WidgetsManager(Sized):
         """
         task_buttons = copy.deepcopy(activities)
 
-        set_of_expected_keys = {'activityId', 'customText', 'emphasized', 'emphasize', 'isDisabled'}
+        set_of_expected_keys = {'activityId', 'customText', 'emphasized', 'emphasize', 'isDisabled', 'link'}
         for activity_dict in task_buttons:
             if set(activity_dict.keys()).issubset(set_of_expected_keys) and 'activityId' in set_of_expected_keys:
                 # Check whether the activityId is class `Activity` or UUID
-                activity = activity_dict['activityId']
-                from pykechain.models import Activity2
-                if isinstance(activity, Activity2):
-                    activity_dict['activityId'] = activity.id
-                elif isinstance(activity, text_type) and is_uuid(activity):
+                if 'activityId' in activity_dict:
+                    activity = activity_dict['activityId']
+                    from pykechain.models import Activity2
+                    if isinstance(activity, Activity2):
+                        activity_dict['activityId'] = activity.id
+                    elif isinstance(activity, text_type) and is_uuid(activity):
+                        pass
+                    else:
+                        raise IllegalArgumentError("When using the add_navigation_bar_widget, activityId must be an "
+                                                   "Activity or Activity id. Type is: {}".format(type(activity)))
+                elif 'link' in activity_dict:
+                    # TODO Validate link url
                     pass
                 else:
-                    raise IllegalArgumentError("When using the add_navigation_bar_widget, activityId must be an "
-                                               "Activity or Activity id. Type is: {}".format(type(activity)))
+                    raise IllegalArgumentError("When using the add_navigation_bar_widget, either the activityId or "
+                                               "link must be provided.")
+
                 if 'customText' not in activity_dict or not activity_dict['customText']:
                     activity_dict['customText'] = ''
                 if 'emphasize' not in activity_dict:
