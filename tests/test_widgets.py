@@ -263,8 +263,8 @@ class TestWidgetManagerInActivity(TestBetamax):
         activity_3 = self.project.activity('Task - Service Increase Gears')
 
         bar = [
-            {'activityId': activity_1},
-            {'activityId': activity_2},
+            {'activityId': activity_1, 'emphasized': True},
+            {'activityId': activity_2, 'customText': 'Hit me baby!'},
             {'activityId': activity_3}
         ]
 
