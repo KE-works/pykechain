@@ -470,10 +470,9 @@ class WidgetsManager(Sized):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        task_buttons = copy.deepcopy(activities)
 
         set_of_expected_keys = {'activityId', 'customText', 'emphasized', 'emphasize', 'isDisabled', 'link'}
-        for activity_dict in task_buttons:
+        for activity_dict in activities:
             if set(activity_dict.keys()).issubset(set_of_expected_keys) and 'activityId' in set_of_expected_keys:
                 # Check whether the activityId is class `Activity` or UUID
                 if 'activityId' in activity_dict:
