@@ -2002,13 +2002,15 @@ class Client(object):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create a team ({})".format((response, response.json())))
 
-        new_team = Team(response.json().get('results')[0])
+        new_team = Team(response.json().get('results')[0], client=self)
 
         new_team.add_members([user], role=TeamRoles.OWNER)
         team_members = new_team.members()
-        new_team.remove_members([u for u in team_members if u != user])
+        new_team.remove_members([self.user(username=u.get('username')) for u in team_members if u.get(
+            'username') != user.username])
 
-        return new_team.refresh()
+        new_team.refresh()
+        return new_team
 
     def create_widget(self, activity, widget_type, meta, title=None, order=None,
                       parent=None, readable_models=None, writable_models=None, **kwargs):
