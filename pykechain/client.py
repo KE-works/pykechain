@@ -39,8 +39,10 @@ class Client(object):
         # type: (str, bool) -> None
         """Create a KE-chain client with given settings.
 
-        :param basestring url: the url of the KE-chain instance to connect to (defaults to http://localhost:8000)
-        :param bool check_certificates: if to check TLS/SSL Certificates. Defaults to True
+        :param url: the url of the KE-chain instance to connect to (defaults to http://localhost:8000)
+        :type url: basestring
+        :param check_certificates: if to check TLS/SSL Certificates. Defaults to True
+        :type check_certificates: bool
 
         Examples
         --------
@@ -83,8 +85,9 @@ class Client(object):
         # type: (Optional[str]) -> Client
         """Create a client from environment variable settings.
 
-        :param basestring env_filename: filename of the environment file, defaults to '.env' in the local dir
+        :param env_filename: filename of the environment file, defaults to '.env' in the local dir
                                         (or parent dir)
+        :type env_filename: basestring
         :return: :class:`pykechain.Client`
 
         Example
@@ -128,9 +131,12 @@ class Client(object):
         # type: (Optional[str], Optional[str], Optional[str]) -> None
         """Login into KE-chain with either username/password or token.
 
-        :param basestring username: username for your user from KE-chain
-        :param basestring password: password for your user from KE-chain
-        :param basestring token: user authentication token retrieved from KE-chain
+        :param username: username for your user from KE-chain
+        :type username: basestring
+        :param password: password for your user from KE-chain
+        :type password: basestring
+        :param token: user authentication token retrieved from KE-chain
+        :type token: basestring
 
         Examples
         --------
