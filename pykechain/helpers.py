@@ -103,7 +103,7 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
 
     if env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False) or \
             not any((url, username, password, token, scope, scope_id)):
-        client = Client.from_env(env_filename=env_filename)
+        client = Client.from_env(env_filename=env_filename, check_certificates=check_certificates)
         scope_id = env(kecenv.KECHAIN_SCOPE_ID, default=None)
         scope = env(kecenv.KECHAIN_SCOPE, default=None)
         status = env(kecenv.KECHAIN_SCOPE_STATUS, default=None)
