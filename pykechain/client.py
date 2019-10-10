@@ -81,13 +81,15 @@ class Client(object):
         return "<pyke Client '{}'>".format(self.api_root)
 
     @classmethod
-    def from_env(cls, env_filename=None):
+    def from_env(cls, env_filename=None, check_certificates=True):
         # type: (Optional[str]) -> Client
         """Create a client from environment variable settings.
 
         :param env_filename: filename of the environment file, defaults to '.env' in the local dir
                                         (or parent dir)
         :type env_filename: basestring
+        :param check_certificates: if to check TLS/SSL Certificates. Defaults to True
+        :type check_certificates: bool
         :return: :class:`pykechain.Client`
 
         Example
@@ -118,7 +120,7 @@ class Client(object):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
             env.read_envfile(env_filename)
-        client = cls(url=env(KechainEnv.KECHAIN_URL))
+        client = cls(url=env(KechainEnv.KECHAIN_URL), check_certificates=check_certificates)
 
         if env(KechainEnv.KECHAIN_TOKEN, None):
             client.login(token=env(KechainEnv.KECHAIN_TOKEN))
