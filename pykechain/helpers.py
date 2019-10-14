@@ -7,7 +7,7 @@ from pykechain.exceptions import ClientError
 
 
 def get_project(url=None, username=None, password=None, token=None, scope=None, scope_id=None,
-                env_filename=None, status=ScopeStatus.ACTIVE):
+                env_filename=None, status=ScopeStatus.ACTIVE, check_certificates=True):
     """
     Retrieve and return the KE-chain project to be used throughout an app.
 
@@ -47,6 +47,8 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
     :type env_filename: basestring or None
     :param status: (optional) status of the scope to retrieve, defaults to :attr:`enums.Scopestatus.ACTIVE`
     :type status: basestring or None
+    :param check_certificates: if to check TLS/SSL Certificates. Defaults to True
+    :type check_certificates: bool
     :return: pykechain.models.Scope
     :raises NotFoundError: If the scope could not be found
     :raises ClientError: If the client connection to KE-chain was unsuccessful
@@ -101,13 +103,13 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
 
     if env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False) or \
             not any((url, username, password, token, scope, scope_id)):
-        client = Client.from_env(env_filename=env_filename)
+        client = Client.from_env(env_filename=env_filename, check_certificates=check_certificates)
         scope_id = env(kecenv.KECHAIN_SCOPE_ID, default=None)
         scope = env(kecenv.KECHAIN_SCOPE, default=None)
         status = env(kecenv.KECHAIN_SCOPE_STATUS, default=None)
     elif (url and ((username and password) or (token)) and (scope or scope_id)) and \
             not env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False):
-        client = Client(url=url)
+        client = Client(url=url, check_certificates=check_certificates)
         client.login(username=username, password=password, token=token)
     else:
         raise ClientError("Error: insufficient arguments to connect to KE-chain. "

@@ -5,7 +5,7 @@ from unittest import skip
 from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors, \
     Category, CardWidgetLinkTarget
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Activity
+from pykechain.models import Activity, Activity2
 from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, \
     SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, SignatureWidget, ServiceWidget, NotebookWidget, \
     MulticolumnWidget, ProgressWidget, CardWidget
@@ -54,6 +54,7 @@ class TestWidgets(TestBetamax):
         obj = self.project.activity('Specify wheel diameter').widgets()[0]
         self.assertIsInstance(obj, Widget)
         self.assertIsNotNone(obj.meta)
+
 
 @skip('This test is deprecated as we only support online widget_schema checking.')
 class TestWidgetsValidation(SixTestCase):
@@ -253,28 +254,6 @@ class TestWidgetManagerInActivity(TestBetamax):
         )
 
         self.assertIsInstance(widget, AttachmentviewerWidget)
-        self.assertEqual(len(widget_manager), 1 + 1)
-
-    def test_add_navbar_widget(self):
-        widget_manager = self.task.widgets()
-
-        activity_1 = self.project.activity('Task - Basic Table')
-        activity_2 = self.project.activity('Task - Form')
-        activity_3 = self.project.activity('Task - Service Increase Gears')
-
-        bar = [
-            {'activityId': activity_1},
-            {'activityId': activity_2},
-            {'activityId': activity_3}
-        ]
-
-        widget = widget_manager.add_tasknavigationbar_widget(
-            activities=bar,
-            title="Navbar",
-            alignment=NavigationBarAlignment.LEFT
-        )
-
-        self.assertIsInstance(widget, TasknavigationbarWidget)
         self.assertEqual(len(widget_manager), 1 + 1)
 
     def test_add_propertygrid_widget(self):
@@ -511,6 +490,103 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertTrue(hasattr(widget_manager, 'add_script_widget'))
         self.assertTrue(hasattr(widget_manager, 'add_attachment_viewer_widget'))
         self.assertTrue(hasattr(widget_manager, 'add_navigation_bar_widget'))
+
+
+class TestNavigationBarWidget(TestBetamax):
+
+    def setUp(self):
+        super(TestNavigationBarWidget, self).setUp()
+        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
+
+        self.frame = self.project.part(name='Frame')
+        self.frame_model = self.project.model(name='Frame')
+
+        activity_1 = self.project.activity('Task - Basic Table')
+        activity_2 = self.project.activity('Task - Form')
+        activity_3 = self.project.activity('Task - Service Increase Gears')
+
+        self.nav_bar_config = [
+            {'activityId': activity_1, 'emphasize': True},
+            {'activityId': activity_2, 'customText': 'Hit me baby!'},
+            {'activityId': activity_3}
+        ]
+
+    def tearDown(self):
+        self.task.delete()
+        super(TestNavigationBarWidget, self).tearDown()
+
+    def test_add_navbar_widget(self):
+        widget_manager = self.task.widgets()
+
+        widget = widget_manager.add_tasknavigationbar_widget(
+            activities=self.nav_bar_config,
+            title="Navbar",
+            alignment=NavigationBarAlignment.LEFT
+        )
+
+        self.assertIsInstance(widget, TasknavigationbarWidget)
+        self.assertEqual(len(widget_manager), 1 + 1)
+
+    def test_add_navbar_widget_in_place(self):
+        """
+        Test whether the inputs to the function are updated in-place (incorrect) or not (correct).
+        For example, activity objects are replaced by their IDs and customText is converted to a string.
+        """
+
+        widget_manager = self.task.widgets()
+
+        self.nav_bar_config[0]['customText'] = False
+
+        import copy
+        original_bar = copy.deepcopy(self.nav_bar_config)
+
+        widget_manager.add_tasknavigationbar_widget(
+            activities=self.nav_bar_config,
+            alignment=NavigationBarAlignment.LEFT,
+        )
+
+        self.assertEqual(original_bar, self.nav_bar_config)
+
+    def test_add_navbar_widget_incorrect_keys(self):
+
+        widget_manager = self.task.widgets()
+
+        self.nav_bar_config[0]['emphasizeButton'] = True
+
+        with self.assertRaises(IllegalArgumentError):
+            widget_manager.add_tasknavigationbar_widget(
+                activities=self.nav_bar_config,
+                alignment=NavigationBarAlignment.LEFT,
+            )
+
+    def test_add_navbar_external_link(self):
+        widget_manager = self.task.widgets()
+
+        link = 'https://www.google.com'
+
+        button_1 = self.nav_bar_config[0]
+        button_1.pop('activityId')
+        button_1['link'] = link
+
+        widget = widget_manager.add_tasknavigationbar_widget(
+            activities=self.nav_bar_config,
+            alignment=NavigationBarAlignment.LEFT,
+        )
+
+        self.assertEqual(widget.meta['taskButtons'][0]['link'], link)
+
+    def test_add_navbar_disabled_button(self):
+        widget_manager = self.task.widgets()
+
+        button_1 = self.nav_bar_config[0]
+        button_1['isDisabled'] = True
+
+        widget = widget_manager.add_tasknavigationbar_widget(
+            activities=self.nav_bar_config,
+            alignment=NavigationBarAlignment.LEFT,
+        )
+
+        self.assertTrue(widget.meta['taskButtons'][0]['isDisabled'])
 
 
 class TestCopyMoveWidgets(TestBetamax):
