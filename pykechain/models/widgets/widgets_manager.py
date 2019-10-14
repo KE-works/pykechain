@@ -1,3 +1,4 @@
+import copy
 import warnings
 from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text, Dict
 
@@ -453,6 +454,7 @@ class WidgetsManager(Sized):
             * emphasized: bool which determines if the button should stand-out or not - default(False)
             * activityId: class `Activity` or UUID
             * isDisabled: (optional) to disable the navbar button
+            * link: str URL to external web page
         :type activities: list of dict
         :param alignment: The alignment of the buttons inside navigation bar. One of :class:`NavigationBarAlignment`
             * center (default): Center aligned
@@ -464,35 +466,50 @@ class WidgetsManager(Sized):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        set_of_expected_keys = {'activityId', 'customText', 'emphasized', 'emphasize', 'isDisabled'}
-        for activity_dict in activities:
-            if set(activity_dict.keys()).issubset(set_of_expected_keys) and 'activityId' in set_of_expected_keys:
+        from pykechain.models import Activity2
+
+        set_of_expected_keys = {'activityId', 'customText', 'emphasized', 'emphasize', 'isDisabled', 'link'}
+        task_buttons = list()
+        for nr, input_dict in enumerate(activities):
+            if not set(input_dict.keys()).issubset(set_of_expected_keys):
+                raise IllegalArgumentError("Found unexpected key in activities. Only keys allowed are: {}".
+                                           format(set_of_expected_keys))
+            button_dict = dict()
+            task_buttons.append(button_dict)
+
+            if 'activityId' in input_dict:
                 # Check whether the activityId is class `Activity` or UUID
-                activity = activity_dict['activityId']
-                from pykechain.models import Activity2
+                activity = input_dict['activityId']
                 if isinstance(activity, Activity2):
-                    activity_dict['activityId'] = activity.id
+                    button_dict['activityId'] = activity.id
                 elif isinstance(activity, text_type) and is_uuid(activity):
-                    pass
+                    button_dict['activityId'] = activity
                 else:
                     raise IllegalArgumentError("When using the add_navigation_bar_widget, activityId must be an "
                                                "Activity or Activity id. Type is: {}".format(type(activity)))
-                if 'customText' not in activity_dict or not activity_dict['customText']:
-                    activity_dict['customText'] = ''
-                if 'emphasized' not in activity_dict:
-                    activity_dict['emphasized'] = False
-                if 'emphasize' in activity_dict:  # emphasize is to be moved to emphasized
-                    # TODO: pending deprecation in version 3.4.0
-                    warnings.warn("The `emphasize` key in the navbar button will be deprecated in pykechain 3.4.0",
-                                  PendingDeprecationWarning)
-                    activity_dict['emphasized'] = activity_dict.pop('emphasize')
-
+            elif 'link' in input_dict:
+                # TODO Validate link url
+                button_dict['link'] = input_dict['link']
             else:
-                raise IllegalArgumentError("Found unexpected key in activities. Only keys allowed are: {}".
-                                           format(set_of_expected_keys))
+                raise IllegalArgumentError("Each button must have key 'activityId' or 'link'. "
+                                           "Button {} has neither.".format(nr + 1))
+
+            if 'customText' not in input_dict or not input_dict['customText']:
+                button_dict['customText'] = ''
+            else:
+                button_dict['customText'] = str(input_dict['customText'])
+
+            if 'emphasized' in input_dict:  # emphasize is to be moved to emphasized
+                # TODO: pending deprecation in version 3.4.0
+                warnings.warn("The `emphasized` key in the navbar button will be deprecated in pykechain 3.4.0",
+                              PendingDeprecationWarning)
+                input_dict['emphasize'] = input_dict.pop('emphasized')
+            button_dict['emphasize'] = input_dict.get('emphasize', False)
+
+            button_dict['isDisabled'] = input_dict.get('isDisabled', False)
 
         meta = _initiate_meta(kwargs, activity=self._activity_id, ignores=('showHeightValue',))
-        meta['taskButtons'] = activities
+        meta['taskButtons'] = task_buttons
 
         # TODO: pending deprecation in version 3.4.0
         if alignment and alignment is NavigationBarAlignment.START:

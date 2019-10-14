@@ -39,8 +39,10 @@ class Client(object):
         # type: (str, bool) -> None
         """Create a KE-chain client with given settings.
 
-        :param basestring url: the url of the KE-chain instance to connect to (defaults to http://localhost:8000)
-        :param bool check_certificates: if to check TLS/SSL Certificates. Defaults to True
+        :param url: the url of the KE-chain instance to connect to (defaults to http://localhost:8000)
+        :type url: basestring
+        :param check_certificates: if to check TLS/SSL Certificates. Defaults to True
+        :type check_certificates: bool
 
         Examples
         --------
@@ -79,12 +81,15 @@ class Client(object):
         return "<pyke Client '{}'>".format(self.api_root)
 
     @classmethod
-    def from_env(cls, env_filename=None):
+    def from_env(cls, env_filename=None, check_certificates=True):
         # type: (Optional[str]) -> Client
         """Create a client from environment variable settings.
 
-        :param basestring env_filename: filename of the environment file, defaults to '.env' in the local dir
+        :param env_filename: filename of the environment file, defaults to '.env' in the local dir
                                         (or parent dir)
+        :type env_filename: basestring
+        :param check_certificates: if to check TLS/SSL Certificates. Defaults to True
+        :type check_certificates: bool
         :return: :class:`pykechain.Client`
 
         Example
@@ -115,7 +120,7 @@ class Client(object):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
             env.read_envfile(env_filename)
-        client = cls(url=env(KechainEnv.KECHAIN_URL))
+        client = cls(url=env(KechainEnv.KECHAIN_URL), check_certificates=check_certificates)
 
         if env(KechainEnv.KECHAIN_TOKEN, None):
             client.login(token=env(KechainEnv.KECHAIN_TOKEN))
@@ -128,9 +133,12 @@ class Client(object):
         # type: (Optional[str], Optional[str], Optional[str]) -> None
         """Login into KE-chain with either username/password or token.
 
-        :param basestring username: username for your user from KE-chain
-        :param basestring password: password for your user from KE-chain
-        :param basestring token: user authentication token retrieved from KE-chain
+        :param username: username for your user from KE-chain
+        :type username: basestring
+        :param password: password for your user from KE-chain
+        :type password: basestring
+        :param token: user authentication token retrieved from KE-chain
+        :type token: basestring
 
         Examples
         --------
@@ -2002,13 +2010,15 @@ class Client(object):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create a team ({})".format((response, response.json())))
 
-        new_team = Team(response.json().get('results')[0])
+        new_team = Team(response.json().get('results')[0], client=self)
 
         new_team.add_members([user], role=TeamRoles.OWNER)
         team_members = new_team.members()
-        new_team.remove_members([u for u in team_members if u != user])
+        new_team.remove_members([self.user(username=u.get('username')) for u in team_members if u.get(
+            'username') != user.username])
 
-        return new_team.refresh()
+        new_team.refresh()
+        return new_team
 
     def create_widget(self, activity, widget_type, meta, title=None, order=None,
                       parent=None, readable_models=None, writable_models=None, **kwargs):
