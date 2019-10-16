@@ -7,7 +7,7 @@ from pykechain.exceptions import ClientError
 
 
 def get_project(url=None, username=None, password=None, token=None, scope=None, scope_id=None,
-                env_filename=None, status=ScopeStatus.ACTIVE, check_certificates=True):
+                env_filename=None, status=ScopeStatus.ACTIVE, check_certificates=None):
     """
     Retrieve and return the KE-chain project to be used throughout an app.
 
@@ -28,6 +28,7 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
         KECHAIN_SCOPE_ID      - the UUID of the project / scope.
         KECHAIN_FORCE_ENV_USE - set to 'true', '1', 'ok', or 'yes' to always use the environment variables.
         KECHAIN_SCOPE_STATUS  - the status of the Scope to retrieve, defaults to None to retrieve all scopes
+        KECHAIN_CHECK_CERTIFICATES - if the certificates of the URL should be checked.
 
     .. versionadded:: 1.12
 
@@ -47,8 +48,9 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
     :type env_filename: basestring or None
     :param status: (optional) status of the scope to retrieve, defaults to :attr:`enums.Scopestatus.ACTIVE`
     :type status: basestring or None
-    :param check_certificates: if to check TLS/SSL Certificates. Defaults to True
-    :type check_certificates: bool
+    :param check_certificates: (optional) if to check TLS/SSL Certificates. If nothing provided (None) it
+                               ensures it does check certficates.
+    :type check_certificates: bool or None
     :return: pykechain.models.Scope
     :raises NotFoundError: If the scope could not be found
     :raises ClientError: If the client connection to KE-chain was unsuccessful
@@ -69,6 +71,7 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
         # This is an .env file on disk.
         KECHAIN_TOKEN=bd9377793f7e74a29dbb11fce969
         KECHAIN_URL=http://localhost:8080
+        KECHAIN_CHECK_CERTIFICATES=False
         KECHAIN_SCOPE_ID=c9f0-228e-4d3a-9dc0-ec5a75d7
 
     >>> project = get_project(env_filename='/path/to/.env')
@@ -103,12 +106,14 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
 
     if env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False) or \
             not any((url, username, password, token, scope, scope_id)):
+        check_certificates = env.bool(kecenv.KECHAIN_CHECK_CERTIFICATES, default=True)
         client = Client.from_env(env_filename=env_filename, check_certificates=check_certificates)
         scope_id = env(kecenv.KECHAIN_SCOPE_ID, default=None)
         scope = env(kecenv.KECHAIN_SCOPE, default=None)
         status = env(kecenv.KECHAIN_SCOPE_STATUS, default=None)
     elif (url and ((username and password) or (token)) and (scope or scope_id)) and \
             not env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False):
+        check_certificates = check_certificates or env.bool(kecenv.KECHAIN_CHECK_CERTIFICATES, default=True)
         client = Client(url=url, check_certificates=check_certificates)
         client.login(username=username, password=password, token=token)
     else:

@@ -444,6 +444,7 @@ class KechainEnv(Enum):
     :cvar KECHAIN_SCOPE_ID: the UUID of the project / scope.
     :cvar KECHAIN_FORCE_ENV_USE: set to 'true', '1', 'ok', or 'yes' to always use the environment variables.
     :cvar KECHAIN_SCOPE_STATUS: the status of the Scope to retrieve, defaults to None to retrieve all scopes
+    :cvar KECHAIN_CHECK_CERTIFICATES: if the certificates of the URL should be checked.
     """
 
     KECHAIN_FORCE_ENV_USE = 'KECHAIN_FORCE_ENV_USE'
@@ -454,6 +455,7 @@ class KechainEnv(Enum):
     KECHAIN_SCOPE = 'KECHAIN_SCOPE'
     KECHAIN_SCOPE_ID = 'KECHAIN_SCOPE_ID'
     KECHAIN_SCOPE_STATUS = 'KECHAIN_SCOPE_STATUS'
+    KECHAIN_CHECK_CERTIFICATES = 'KECHAIN_CHECK_CERTIFICATES'
 
 
 class SortTable(Enum):
@@ -627,7 +629,7 @@ class FilterType(Enum):
 class ProgressBarColors(Enum):
     """Some basic colors that can be set on a Progress Bar inside a Progress Bar Widget.
     .. versionadded:: 3.0
-    
+
     :cvar BLACK: '#000000'
     :cvar WHITE: '#FFFFFF'
     :cvar RED: 'FF0000'
