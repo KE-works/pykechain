@@ -31,6 +31,10 @@ class TestTags(TestCase):
         self.assertTrue(len(new_tags) == len(self.obj.tags))
         self.assertTrue(sorted(new_tags) == sorted(self.obj.tags))
 
+    def test_setter_duplicate(self):
+        self.obj.add_tag(tag='one')
+        self.assertTrue(len(self.obj.tags) == 3)
+
     def test_setter_none(self):
         self.obj.tags = None
 
