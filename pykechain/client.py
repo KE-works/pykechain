@@ -1185,6 +1185,9 @@ class Client(object):
                 data.update({
                     'tags': tags,
                 })
+            else:
+                raise IllegalArgumentError("Provided tags should be a list, tuple or set of strings. "
+                                           "Received type '{}'.".format(type(tags)))
 
         response = self._request('POST', self._build_url('activities'), data=data,
                                  params=API_EXTRA_PARAMS['activities'])

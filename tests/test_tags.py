@@ -3,7 +3,7 @@ from unittest import TestCase
 from pykechain.models import Activity2
 
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models.tags import ConcreteTagsBase
+from pykechain.models.tags import TagsMixin
 from tests.classes import TestBetamax
 
 
@@ -113,3 +113,12 @@ class TestTagsActivity(TestBetamax):
         self.task.refresh()
 
         self.assertTrue(len(self.task.tags) == 0)
+
+
+class ConcreteTagsBase(TagsMixin):
+    """
+    Dummy implementation of the edit method allows for instantiation of the TagsMixin class.
+    """
+
+    def edit(self, tags=None, *args, **kwargs):
+        return None
