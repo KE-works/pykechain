@@ -57,7 +57,8 @@ class TagsMixin:
         if not isinstance(tag, Text):
             raise IllegalArgumentError('Tag must be a string, received "{}".'.format(type(tag)))
         if tag not in self.tags:
-            raise ValueError("Tag '{}' is not part of the tags.".format(tag))
+            raise ValueError("Tag '{}' is not among the existing tags. Existing tags: '{}'.".format(
+                tag, "', '".join(self.tags)))
 
         remaining_tags = self.tags
         remaining_tags.remove(tag)
