@@ -74,8 +74,6 @@ class TagsMixin:
         """
         if not isinstance(tag, Text):
             raise IllegalArgumentError('Tag must be a string, received "{}".'.format(type(tag)))
-        if tag in self.tags:
-            raise ValueError("Tag '{}' is already part of the tags.".format(tag))
 
         updated_tags = self.tags
         updated_tags.append(tag)
