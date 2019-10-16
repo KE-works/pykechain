@@ -1,6 +1,5 @@
-import copy
 import warnings
-from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text
+from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text, Dict
 
 import requests
 from six import string_types, text_type
@@ -8,7 +7,7 @@ from six import string_types, text_type
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes, \
     ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, CardWidgetLinkTarget
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
-from pykechain.models.widgets import Widget, ProgressWidget
+from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
     _check_prefilters, _check_excluded_propmodels
 from pykechain.defaults import API_EXTRA_PARAMS
@@ -23,7 +22,7 @@ class WidgetsManager(Sized):
     """
 
     def __init__(self, widgets, activity, client=None, **kwargs):
-        # type: (Iterable[Widget], Union[Activity, Activity2, AnyStr], Optional[Client], **Any) -> None  # noqa: F821
+        # type: (Iterable[Widget], Union[Activity2, Activity2, AnyStr], Optional[Client], **Any) -> None  # noqa: F821
         """Construct a Widget Manager from a list of widgets.
 
         You need to provide an :class:`Activity` to initiate the WidgetsManager. Alternatively you may provide both a
@@ -71,7 +70,7 @@ class WidgetsManager(Sized):
     next = __next__  # py2.7 alias
 
     def __getitem__(self, key):
-        # type: (Any) -> Widget
+        # type: (Union[int, str]) -> Widget
         """Widget from the list of widgets based on index, uuid, title or ref.
 
         :param key: index, uuid, title or ref of the widget to retrieve
@@ -93,6 +92,7 @@ class WidgetsManager(Sized):
         raise NotFoundError("Could not find widget with index, title, ref, or id '{}'".format(key))
 
     def create_widget(self, *args, **kwargs):
+        # type: (*Any, **Any) -> Widget
         """Create a widget inside an activity.
 
         If you want to associate models (and instances) in a single go, you may provide a list of `Property`
@@ -118,7 +118,6 @@ class WidgetsManager(Sized):
         :param writable_models: (optional) list of property model ids to be configured as writable (alias = outputs)
         :type writable_models: list of properties or list of property id's
         :param kwargs: additional keyword arguments to pass
-        :type kwargs: dict
         :return: newly created widget
         :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
@@ -192,7 +191,6 @@ class WidgetsManager(Sized):
             * DESC: Sort in descending order
         :type sort_direction: basestring (see :class:`enums.SortTable`)
         :param kwargs: additional keyword arguments to pass
-        :type kwargs: dict
         :return: newly created widget
         :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
@@ -315,7 +313,6 @@ class WidgetsManager(Sized):
             * DESC: Sort in descending order
         :type sort_direction: basestring (see :class:`enums.SortTable`)
         :param kwargs: additional keyword arguments to pass
-        :type kwargs: dict
         :return: newly created widget
         :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
@@ -404,7 +401,6 @@ class WidgetsManager(Sized):
         :param image_fit: enumeration to address the image_fit (defaults to 'contain', otherwise 'cover')
         :type image_fit: basestring or None
         :param kwargs: additional keyword arguments to pass
-        :type kwargs: dict
         :return: newly created widget
         :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
@@ -464,7 +460,6 @@ class WidgetsManager(Sized):
             * start: left aligned
         :type alignment: basestring (see :class:`enums.NavigationBarAlignment`)
         :param kwargs: additional keyword arguments to pass
-        :type kwargs: dict
         :return: newly created widget
         :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
@@ -570,7 +565,6 @@ class WidgetsManager(Sized):
         writable (if True) or writable (if False).
         :type all_writable: bool
         :param kwargs: additional keyword arguments to pass
-        :type kwargs: dict
         :return: newly created widget
         :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
@@ -582,7 +576,7 @@ class WidgetsManager(Sized):
             title = kwargs.pop('custom_title')
 
         # Check whether the part_model is uuid type or class `Part`
-        part_instance = _retrieve_object(part_instance, method=self._client.part)  # type: Part2  # noqa
+        part_instance = _retrieve_object(part_instance, method=self._client.part)  # type: Part2
 
         if not show_columns:
             show_columns = list()
@@ -625,6 +619,7 @@ class WidgetsManager(Sized):
 
     def add_service_widget(self, service, title=False, custom_button_text=False, emphasize_run=True,
                            download_log=False, parent_widget=None, **kwargs):
+        # type: (Service, Optional[Union[type(None), bool, Text]], Optional[Union[type(None), bool, Text]], Optional[bool], Optional[bool], Optional[Union[Widget, Text]], **Any) -> Widget
         """
         Add a KE-chain Service (e.g. script widget) to the widget manager.
 
@@ -651,7 +646,6 @@ class WidgetsManager(Sized):
         :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
         :type parent_widget: Widget or basestring or None
         :param kwargs: additional keyword arguments to pass
-        :type kwargs: dict
         :return: newly created widget
         :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
@@ -701,6 +695,7 @@ class WidgetsManager(Sized):
         return widget
 
     def add_html_widget(self, html, title=None, **kwargs):
+        # type: (Union[Text], Optional[Union[type(None), bool, Text]], **Any) -> Widget
         """
         Add a KE-chain HTML widget to the widget manager.
 
@@ -715,9 +710,8 @@ class WidgetsManager(Sized):
         :param collapsible: A boolean to decide whether the panel is collapsible or not (default True)
         :type collapsible: bool
         :param collapsed: A boolean to decide whether the panel is collapsed or not (default False)
-        :type collapsible: bool
+        :type collapsed: bool
         :param kwargs: additional keyword arguments to pass
-        :type kwargs: dict
         :return: newly created widget
         :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
@@ -747,6 +741,7 @@ class WidgetsManager(Sized):
         return widget
 
     def add_notebook_widget(self, notebook, title=False, parent_widget=None, **kwargs):
+        # type: (Service, Optional[Union[type(None), bool, Text]], Optional[Widget, Text], **Any) -> Widget
         """
         Add a KE-chain Notebook (e.g. notebook widget) to the WidgetManager.
 
@@ -762,7 +757,6 @@ class WidgetsManager(Sized):
         :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
         :type parent_widget: Widget or basestring or None
         :param kwargs: additional keyword arguments to pass
-        :type kwargs: dict
         :return: newly created widget
         :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
@@ -843,7 +837,6 @@ class WidgetsManager(Sized):
         showProgressText, customHeight, colorInProgress, colorCompleted, colorInProgressBackground`
         :type progress_bar: dict or None
         :param kwargs: additional keyword arguments to pass
-        :type kwargs: dict
         :return: newly created widget
         :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
@@ -897,6 +890,22 @@ class WidgetsManager(Sized):
                             color_in_progress=ProgressBarColors.DEFAULT_IN_PROGRESS,
                             color_in_progress_background=ProgressBarColors.DEFAULT_IN_PROGRESS_BACKGROUND,
                             show_progress_text=True, **kwargs):
+        # type: (Optional[int], Optional[Union[str, ProgressBarColors]], Optional[Union[str, ProgressBarColors]], Optional[Union[str, ProgressBarColors]], Optional[Union[str, ProgressBarColors]], Optional[bool], **Any) -> ()
+        """
+        Add a KE-chain progress bar widget to the WidgetManager.
+
+        The widget will be saved to KE-chain.
+
+        :param height: height of the progress bar, counted in pixels
+        :param color_no_progress: color option for when the progress bar is empty
+        :param color_completed: color option for when the progress bar is fully completed
+        :param color_in_progress: color option for the filled part of the progress bar
+        :param color_in_progress_background: color option for the empty part of the progress bar
+        :param show_progress_text: visualize the progress percentage
+        :param kwargs: additional keyword arguments to pass
+        :return: newly created widget
+        :rtype Widget
+        """
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
         meta.update(dict(
@@ -915,6 +924,7 @@ class WidgetsManager(Sized):
         return widget
 
     def add_multicolumn_widget(self, title=None, **kwargs):
+        # type: (Optional[Text], **Any) -> Widget
         """
         Add a KE-chain Multi Column widget to the WidgetManager.
 
@@ -925,10 +935,7 @@ class WidgetsManager(Sized):
             * String value: Custom title
             * None (default): No title
         :type title: bool or basestring or None
-        :param height: The height of the Notebook in pixels
-        :type height: int or None
         :param kwargs: additional keyword arguments to pass
-        :type kwargs: dict
         :return: newly created widget
         :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
@@ -981,14 +988,13 @@ class WidgetsManager(Sized):
         :type tags: list of basestring
         :param sorted_column: column name to sort on. (defaults to project name column). One of `ScopeWidgetColumnTypes`
         :type sorted_column: basestring
-        :param sort_direction: The direction on which the values of property instances are being sorted on:
+        :param sorted_direction: The direction on which the values of property instances are being sorted on:
             * ASC (default): Sort in ascending order
             * DESC: Sort in descending order
         :type sorted_direction: basestring
         :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
         :type parent_widget: Widget or basestring or None
         :param kwargs: additional keyword arguments to pass
-        :type kwargs: dict
         :return: newly created widget
         :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
@@ -1033,6 +1039,7 @@ class WidgetsManager(Sized):
 
     def add_signature_widget(self, attachment_property, title=False, custom_button_text=False,
                              custom_undo_button_text=False, **kwargs):
+        # type: (Property2, Optional[Text], Optional[bool], Optional[bool], **Any) -> Widget
         """
         Add a KE-chain Signature widget to the Widgetmanager and the activity.
 
@@ -1051,7 +1058,6 @@ class WidgetsManager(Sized):
         :param custom_undo_button_text: Custom text for 'Remove signature' button
         :type custom_undo_button_text: bool or basestring
         :param kwargs: additional keyword arguments to pass
-        :type kwargs: dict
         :return: newly created widget
         :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
@@ -1104,12 +1110,23 @@ class WidgetsManager(Sized):
 
     def add_card_widget(self, image=None, title=None, description=None, link=None,
                         link_target=CardWidgetLinkTarget.SAME_TAB, **kwargs):
+        # type: (Optional[Property2], Optional[Union[type(None), Text, bool]], Optional[Union[Text, bool]], Optional[Union[type(None), Text, Property2, bool]], Optional[Union[Text, CardWidgetLinkTarget]], **Any) -> Widget
         """
+        Add a KE-chain Card widget to the WidgetManager and the activity.
 
-        :param image:
-        :param title:
-        :param description:
+        The widget will be saved in KE-chain.
+
+        :param image: AttachmentProperty2 providing the source of the image shown in the card widget.
+        :param title: A custom title for the card widget
+            * False (default): Script name
+            * String value: Custom title
+            * None: No title
+        :param description: Custom text shown below the image in the card widget
+            * False (default): Script name
+            * String value: Custom title
+            * None: No title
         :param link:
+        :param link_target:
         :return:
         """
         if 'custom_title' in kwargs and not title:

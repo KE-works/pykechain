@@ -1,10 +1,8 @@
 import json
 import os
-from tempfile import NamedTemporaryFile
 
 from pykechain.enums import PropertyType
 from pykechain.models import AttachmentProperty2
-from pykechain.utils import temp_chdir
 from tests.classes import TestBetamax
 
 
@@ -33,11 +31,15 @@ class TestAttachment(TestBetamax):
 
         self.assertIsNone(empty_attach.value)
 
+    def test_set_value_none(self):
+        picture = self.project.part('Bike').property('Picture')
+        picture.value = None
+
     def test_set_value(self):
         picture = self.project.part('Bike').property('Picture')
 
-        with self.assertRaises(RuntimeError):
-            picture.value = 'Should never work'
+        with self.assertRaises(FileNotFoundError):
+            picture.value = 'String must be a filepath'
 
     def test_upload(self):
         # setup

@@ -4,6 +4,7 @@ import os
 
 import requests
 from six import string_types, text_type
+from typing import Text, Any, Optional, Union
 
 from pykechain.exceptions import APIError
 from pykechain.models.property2 import Property2
@@ -54,10 +55,13 @@ class AttachmentProperty2(Property2):
 
     @value.setter
     def value(self, value):
-        raise RuntimeError("Cannot set the value of an attachment property, use upload() to upload a new attachment or "
-                           "clear() to clear the attachment from the field")
+        if value is None:
+            self.clear()
+        else:
+            self.upload(data=value)
 
     def clear(self):
+        # type: () -> ()
         """Clear the attachment from the attachment field.
 
         :raises APIError: if unable to remove the attachment
@@ -68,6 +72,7 @@ class AttachmentProperty2(Property2):
 
     @property
     def filename(self):
+        # type: () -> Union[type(None), Text]
         """Filename of the attachment, without the full 'attachment' path."""
         if self.value and 'value' in self._json_data and self._json_data['value']:
             return self._json_data['value'].split('/')[-1]
@@ -91,13 +96,14 @@ class AttachmentProperty2(Property2):
         return self._download().json()
 
     def upload(self, data, **kwargs):
+        # type: (Text, **Any) -> ()
         """Upload a file to the attachment property.
 
         When providing a :class:`matplotlib.figure.Figure` object as data, the figure is uploaded as PNG.
         For this, `matplotlib`_ should be installed.
 
-        :param filename: File path
-        :type filename: basestring
+        :param data: File path
+        :type data: basestring
         :raises APIError: When unable to upload the file to KE-chain
         :raises OSError: When the path to the file is incorrect or file could not be found
 
@@ -119,6 +125,7 @@ class AttachmentProperty2(Property2):
             self._upload_json(data, **kwargs)
 
     def save_as(self, filename=None):
+        # type: (Optional[Text]) -> ()
         """Download the attachment to a file.
 
         :param filename: (optional) File path. If not provided, will be saved to current working dir

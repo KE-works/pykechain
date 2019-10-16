@@ -1,4 +1,4 @@
-from typing import Any, AnyStr  # noqa: F401
+from typing import Any, Union, List, Dict, Optional, Text  # noqa: F401
 
 import requests
 from six import text_type, string_types
@@ -102,6 +102,7 @@ class Part2(Base):
     #
 
     def property(self, name):
+        # type: (str) -> Property2
         """Retrieve the property belonging to this part based on its name or uuid.
 
         :param name: property name or property UUID to search for
@@ -148,7 +149,7 @@ class Part2(Base):
         return self._client.scope(pk=self.scope_id)
 
     def parent(self):
-        # type: () -> Any
+        # type: () -> Union[Part2, type(None)]
         """Retrieve the parent of this `Part`.
 
         :return: the parent :class:`Part` of this part
@@ -166,6 +167,7 @@ class Part2(Base):
             return None
 
     def children(self, **kwargs):
+        # type: (**Any) -> Any
         """Retrieve the children of this `Part` as `Partset`.
 
         When you call the :func:`Part.children()` method without any additional filtering options for the children,
@@ -206,6 +208,7 @@ class Part2(Base):
             return self._client.parts(parent=self.id, category=self.category, **kwargs)
 
     def populate_descendants(self, batch=200):
+        # type: (int) -> ()
         """
         Retrieve the descendants of a specific part in a list of dicts and populate the :func:`Part.children()` method.
 
@@ -235,14 +238,13 @@ class Part2(Base):
         self._cached_children = descendants_flat_list
 
     def siblings(self, **kwargs):
-        # type: (Any) -> Any
+        # type: (**Any) -> Any
         """Retrieve the siblings of this `Part` as `Partset`.
 
         Siblings are other Parts sharing the same parent of this `Part`, including the part itself.
 
         :param kwargs: Additional search arguments to search for, check :class:`pykechain.Client.parts`
                        for additional info
-        :type kwargs: dict
         :return: a set of `Parts` as a :class:`PartSet`. Will be empty if no siblings.
         :raises APIError: When an error occurs.
         """
@@ -257,6 +259,7 @@ class Part2(Base):
     #
 
     def model(self):
+        # type: () -> Part2
         """
         Retrieve the model of this `Part` as `Part`.
 
@@ -281,6 +284,7 @@ class Part2(Base):
             raise NotFoundError("Part {} has no model".format(self.name))
 
     def instances(self, **kwargs):
+        # type: (Any) -> Any
         """
         Retrieve the instances of this `Part` as a `PartSet`.
 
@@ -310,6 +314,7 @@ class Part2(Base):
             raise NotFoundError("Part {} is not a model".format(self.name))
 
     def instance(self):
+        # type: () -> Part2
         """
         Retrieve the single (expected) instance of this 'Part' (of `Category.MODEL`) as a 'Part'.
 
@@ -333,6 +338,7 @@ class Part2(Base):
     #
 
     def edit(self, name=None, description=None, **kwargs):
+        # type: (Optional[Text], Optional[Text], **Any) -> Part2
         """Edit the details of a part (model or instance).
 
         For an instance you can edit the Part instance name and the part instance description. To alter the values
@@ -347,7 +353,6 @@ class Part2(Base):
         :param description: (optional) description of the part
         :type description: basestring or None
         :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
-        :type kwargs: dict or None
         :return: the updated object if successful
         :raises IllegalArgumentError: when the type or value of an argument provided is incorrect
         :raises APIError: in case an Error occurs
@@ -391,6 +396,7 @@ class Part2(Base):
             self.name = name
 
     def proxy_model(self):
+        # type: () -> Part2
         """
         Retrieve the proxy model of this proxied `Part` as a `Part`.
 
@@ -420,7 +426,7 @@ class Part2(Base):
             raise NotFoundError("Part {} is not a proxy".format(self.name))
 
     def add(self, model, **kwargs):
-        # type: (Part, **Any) -> Part
+        # type: (Part2, **Any) -> Part2
         """Add a new child instance, based on a model, to this part.
 
         This can only act on instances. It needs a model from which to create the child instance.
@@ -433,7 +439,6 @@ class Part2(Base):
         :type kwargs: dict or None
         :type model: :class:`Part`
         :param kwargs: (optional) additional keyword=value arguments
-        :type kwargs: dict
         :return: :class:`Part` with category `INSTANCE`.
         :raises APIError: if unable to add the new child instance
 
@@ -450,7 +455,7 @@ class Part2(Base):
         return self._client.create_part(self, model, **kwargs)
 
     def add_to(self, parent, **kwargs):
-        # type: (Part, **Any) -> Part
+        # type: (Part2, **Any) -> Part2
         """Add a new instance of this model to a part.
 
         This works if the current part is a model and an instance of this model is to be added
@@ -464,9 +469,8 @@ class Part2(Base):
         :param parent: part to add the new instance to
         :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
         :type kwargs: dict or None
-        :type parent: :class:`Part`
+        :type parent: :class:`Part2`
         :param kwargs: (optional) additional keyword=value arguments
-        :type kwargs: dict
         :return: :class:`Part` with category `INSTANCE`
         :raises APIError: if unable to add the new child instance
 
@@ -483,7 +487,7 @@ class Part2(Base):
         return self._client.create_part(parent, self, **kwargs)
 
     def add_model(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Part
+        # type: (*Any, **Any) -> Part2
         """Add a new child model to this model.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
@@ -491,7 +495,7 @@ class Part2(Base):
         against a trade-off that someone looking at the frontend won't notice any changes unless the page
         is refreshed.
 
-        :return: a :class:`Part` of category `MODEL`
+        :return: a :class:`Part2` of category `MODEL`
         """
         if self.category != Category.MODEL:
             raise APIError("Part should be of category MODEL")
@@ -499,7 +503,7 @@ class Part2(Base):
         return self._client.create_model(self, *args, **kwargs)
 
     def add_proxy_to(self, parent, name, multiplicity=Multiplicity.ONE_MANY, **kwargs):
-        # type: (Any, AnyStr, Any, **Any) -> Part
+        # type: (Part2, Text, Optional[Union[Multiplicity, Text]], **Any) -> Part2
         """Add this model as a proxy to another parent model.
 
         This will add the current model as a proxy model to another parent model. It ensure that it will copy the
@@ -549,6 +553,7 @@ class Part2(Base):
         return self._client.create_property(self, *args, **kwargs)
 
     def add_with_properties(self, model, name=None, update_dict=None, properties_fvalues=None, refresh=True, **kwargs):
+        # type: (Part2, Optional[Text], Optional[Dict], Optional[List[Dict]], Optional[bool], **Any) -> Part2
         """
         Add a part as a child of this part and update its properties in one go.
 
@@ -636,6 +641,7 @@ class Part2(Base):
         return Part2(response.json()['results'][0], client=self._client)
 
     def clone(self, **kwargs):
+        # type: (**Any) -> Part2
         """
         Clone a part.
 
@@ -649,7 +655,6 @@ class Part2(Base):
            Added optional paramenters the name and multiplicity for KE-chain 3 backends.
 
         :param kwargs: (optional) additional keyword=value arguments
-        :type kwargs: dict
         :return: cloned :class:`models.Part`
         :raises APIError: if the `Part` could not be cloned
 
@@ -668,6 +673,7 @@ class Part2(Base):
         return self._client._create_clone(parent, self, **kwargs)
 
     def copy(self, target_parent, name=None, include_children=True, include_instances=True):
+        # type: (Part2, Optional[Text], Optional[bool], Optional[bool]) -> Part2
         """
         Copy the `Part` to target parent, both of them having the same category.
 
@@ -721,6 +727,7 @@ class Part2(Base):
                                        format(self.name, target_parent.name))
 
     def move(self, target_parent, name=None, include_children=True, include_instances=True):
+        # type: (Part2, Optional[Text], Optional[bool], Optional[bool]) -> Part2
         """
         Move the `Part` to target parent, both of them the same category.
 
@@ -775,6 +782,7 @@ class Part2(Base):
             raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category')
 
     def update(self, name=None, update_dict=None, properties_fvalues=None, **kwargs):
+        # type: (Optional[Text], Optional[Dict], Optional[List[Dict]], **Any) -> ()
         """
         Edit part name and property values in one go.
 
@@ -863,7 +871,7 @@ class Part2(Base):
         self.refresh(json=response.json()['results'][0])
 
     def delete(self):
-        # type: () -> None
+        # type: () -> ()
         """Delete this part.
 
         :return: None
@@ -875,6 +883,7 @@ class Part2(Base):
             raise APIError("Could not delete part: {} with id {}: ({})".format(self.name, self.id, response))
 
     def order_properties(self, property_list=None):
+        # type: (Optional[List[Text]]) -> Part2
         """
         Order the properties of a part model using a list of property objects or property names or property id's.
 
@@ -962,6 +971,7 @@ class Part2(Base):
         return ''.join(html)
 
     def as_dict(self):
+        # type: () -> Dict
         """
         Retrieve the properties of a part inside a dict in this structure: {property_name: property_value}.
 
