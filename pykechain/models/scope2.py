@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Any, Union  # noqa: F401
+from typing import Any, Union, Text, Iterable, Dict  # noqa: F401
 
 import requests
 from six import text_type, string_types
@@ -9,10 +9,11 @@ from pykechain.enums import Multiplicity, ScopeStatus
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models import Team, Base
 from pykechain.defaults import API_EXTRA_PARAMS
+from pykechain.models.tags import TagsMixin
 from pykechain.utils import parse_datetime, is_uuid
 
 
-class Scope2(Base):
+class Scope2(Base, TagsMixin):
     """A virtual object representing a KE-chain scope.
 
     :ivar id: id of the activity
@@ -48,7 +49,7 @@ class Scope2(Base):
         self.status = json.get('status')
         self.category = json.get('category')
 
-        self.tags = json.get('tags')
+        self._tags = json.get('tags')
 
         self.start_date = parse_datetime(json.get('start_date'))
         self.due_date = parse_datetime(json.get('due_date'))
@@ -142,7 +143,8 @@ class Scope2(Base):
         self.refresh(json=response.json().get('results')[0])
 
     def edit(self, name=None, description=None, start_date=None, due_date=None, status=None, tags=None, team=None,
-             options=None, **kwargs):
+             options=None):
+        # type: (Text, Text, datetime.datetime, datetime.datetime, Union[ScopeStatus, Text], Iterable[Text], Team, Dict) -> None
         """Edit the details of a scope.
 
         :param name: (optionally) edit the name of the scope
