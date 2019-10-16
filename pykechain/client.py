@@ -1185,7 +1185,7 @@ class Client(object):
                 data.update({
                     'tags': tags,
                 })
-            else:
+            elif tags is not None:
                 raise IllegalArgumentError("Provided tags should be a list, tuple or set of strings. "
                                            "Received type '{}'.".format(type(tags)))
 

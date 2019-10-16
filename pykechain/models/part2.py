@@ -102,7 +102,7 @@ class Part2(Base):
     #
 
     def property(self, name):
-        # type: (str) -> Property2
+        # type: (str) -> Any
         """Retrieve the property belonging to this part based on its name or uuid.
 
         :param name: property name or property UUID to search for
