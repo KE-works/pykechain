@@ -28,7 +28,7 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
         KECHAIN_SCOPE_ID      - the UUID of the project / scope.
         KECHAIN_FORCE_ENV_USE - set to 'true', '1', 'ok', or 'yes' to always use the environment variables.
         KECHAIN_SCOPE_STATUS  - the status of the Scope to retrieve, defaults to None to retrieve all scopes
-        KECHAIN_CHECK_CERTIFICATES - if the certificates of the URL should be checked.
+        KECHAIN_CHECK_CERTIFICATES - if the certificates of the URL should be checked. default to True if not present.
 
     .. versionadded:: 1.12
 
@@ -113,7 +113,8 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
         status = env(kecenv.KECHAIN_SCOPE_STATUS, default=None)
     elif (url and ((username and password) or (token)) and (scope or scope_id)) and \
             not env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False):
-        check_certificates = check_certificates or env.bool(kecenv.KECHAIN_CHECK_CERTIFICATES, default=True)
+        if check_certificates is None:
+            check_certificates = env.bool(kecenv.KECHAIN_CHECK_CERTIFICATES, default=True)
         client = Client(url=url, check_certificates=check_certificates)
         client.login(username=username, password=password, token=token)
     else:

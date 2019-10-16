@@ -23,6 +23,7 @@ from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid, find
 from .__about__ import version
 
+
 class Client(object):
     """The KE-chain 2 python client to connect to a KE-chain (version 2) instance.
 
@@ -35,7 +36,7 @@ class Client(object):
     .. _requests.Response: http://docs.python-requests.org/en/master/api/#requests.Response
     """
 
-    def __init__(self, url='http://localhost:8000/', check_certificates=True):
+    def __init__(self, url='http://localhost:8000/', check_certificates=None):
         # type: (str, bool) -> None
         """Create a KE-chain client with given settings.
 
@@ -67,7 +68,10 @@ class Client(object):
         self._app_versions = None  # type: Optional[List[dict]]
         self._widget_schemas = None  # type: Optional[List[dict]]
 
-        if not check_certificates:
+        if check_certificates is None:
+            check_certificates = env.bool(KechainEnv.KECHAIN_CHECK_CERTIFICATES, default=True)
+
+        if check_certificates is False:
             self.session.verify = False
 
     def __del__(self):
@@ -81,7 +85,7 @@ class Client(object):
         return "<pyke Client '{}'>".format(self.api_root)
 
     @classmethod
-    def from_env(cls, env_filename=None, check_certificates=True):
+    def from_env(cls, env_filename=None, check_certificates=None):
         # type: (Optional[str]) -> Client
         """Create a client from environment variable settings.
 
@@ -120,6 +124,8 @@ class Client(object):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
             env.read_envfile(env_filename)
+        if check_certificates is None:
+            check_certificates = env.bool(KechainEnv.KECHAIN_CHECK_CERTIFICATES, default=True)
         client = cls(url=env(KechainEnv.KECHAIN_URL), check_certificates=check_certificates)
 
         if env(KechainEnv.KECHAIN_TOKEN, None):
