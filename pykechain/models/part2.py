@@ -1,3 +1,4 @@
+import warnings
 from typing import Any, Union, List, Dict, Optional, Text  # noqa: F401
 
 import requests
@@ -101,8 +102,8 @@ class Part2(Base):
     # Family and structure methods
     #
 
-    def property(self, key):
-        # type: (str) -> Any
+    def property(self, key=None, name=None):
+        # type: (str, str) -> Any
         """Retrieve the property belonging to this part based on its name or uuid.
 
         :param key: property name, ref or property UUID to search for
@@ -126,7 +127,11 @@ class Part2(Base):
         6
 
         """
-        found = None
+        if name is not None:
+            warnings.warn('Keyword "name" will be replaced by keyword "key".', PendingDeprecationWarning)
+            if key is None:
+                key = name
+
         if is_uuid(key):
             found = find(self.properties, lambda p: key == p.id)
         else:
