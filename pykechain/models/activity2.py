@@ -2,9 +2,11 @@ import datetime
 import os
 import time
 import warnings
-from typing import Any
+from collections import Iterable
+from typing import Any, List, Union, Text
 
 import requests
+from pykechain.models import Base
 from requests.compat import urljoin  # type: ignore
 from six import text_type
 
@@ -12,12 +14,12 @@ from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
-from pykechain.models import Base
+from pykechain.models.tags import TagsMixin
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid, parse_datetime
 
 
-class Activity2(Base):
+class Activity2(Base, TagsMixin):
     """A virtual object representing a KE-chain activity.
 
     .. versionadded:: 2.0
@@ -53,6 +55,8 @@ class Activity2(Base):
         self.activity_type = json.get('activity_type')
         self.start_date = parse_datetime(json.get('start_date'))
         self.due_date = parse_datetime(json.get('due_date'))
+
+        self._tags = json.get('tags')
 
     def refresh(self, *args, **kwargs):
         """Refresh the object in place."""
@@ -360,7 +364,8 @@ class Activity2(Base):
         return self._client.activities(parent_id=parent_id, scope=self.scope_id, **kwargs)
 
     def edit(self, name=None, description=None, start_date=None, due_date=None, assignees=None, assignees_ids=None,
-             status=None):
+             status=None, tags=None):
+        # type: (Text, Text, datetime.datetime, datetime.datetime, List[Text], List[Text], Union[ActivityStatus, Text], Iterable[Text]) -> None
         """Edit the details of an activity.
 
         :param name: (optionally) edit the name of the activity
@@ -382,6 +387,8 @@ class Activity2(Base):
         :param status: (optionally) edit the status of the activity as a string based
                        on :class:`~pykechain.enums.ActivityType`
         :type status: basestring or None
+        :param tags: (optionally) replace the tags on an activity, which is a list of strings ["one","two","three"]
+        :type tags: list of basestring or None
 
         :raises NotFoundError: if a `username` in the list of assignees is not in the list of scope members
         :raises IllegalArgumentError: if the type of the inputs is not correct
@@ -478,6 +485,12 @@ class Activity2(Base):
             else:
                 raise IllegalArgumentError('Status should be a string and in the list of acceptable '
                                            'status strings: {}'.format(ActivityStatus.values()))
+
+        if tags is not None:
+            if isinstance(tags, (list, tuple, set)):
+                update_dict.update({'tags': tags})
+            else:
+                raise IllegalArgumentError('tags should be a an array (list, tuple, set) of strings')
 
         url = self._client._build_url('activity', activity_id=self.id)
 

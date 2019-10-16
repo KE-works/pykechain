@@ -1137,7 +1137,7 @@ class Client(object):
         return Activity(data['results'][0], client=self)
 
     # WIM2
-    def _create_activity2(self, parent, name, activity_type=ActivityType.TASK):
+    def _create_activity2(self, parent, name, activity_type=ActivityType.TASK, tags=None):
         """Create a new activity.
 
         .. important::
@@ -1153,6 +1153,8 @@ class Client(object):
         :type name: basestring
         :param activity_type: type of activity: TASK (default) or PROCESS
         :type activity_type: basestring
+        :param tags: list of activity tags
+        :type tags: list
         :return: the created :class:`models.Activity2`
         :raises APIError: When the object could not be created
         :raises IllegalArgumentError: When an incorrect activitytype or parent is provided
@@ -1175,8 +1177,14 @@ class Client(object):
         data = {
             "name": name,
             "parent_id": parent,
-            "activity_type": activity_type
+            "activity_type": activity_type,
         }
+
+        if self.match_app_version(label='wim', version='>=3.1.0', default=True):
+            if isinstance(tags, (list, tuple, set)) and all(isinstance(t, Text) for t in tags):
+                data.update({
+                    'tags': tags,
+                })
 
         response = self._request('POST', self._build_url('activities'), data=data,
                                  params=API_EXTRA_PARAMS['activities'])
