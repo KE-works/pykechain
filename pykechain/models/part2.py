@@ -101,12 +101,12 @@ class Part2(Base):
     # Family and structure methods
     #
 
-    def property(self, name):
+    def property(self, key):
         # type: (str) -> Property2
         """Retrieve the property belonging to this part based on its name or uuid.
 
-        :param name: property name or property UUID to search for
-        :type name: basestring
+        :param key: property name, ref or property UUID to search for
+        :type key: basestring
         :return: a single :class:`Property`
         :raises NotFoundError: if the `Property` is not part of the `Part`
 
@@ -127,13 +127,13 @@ class Part2(Base):
 
         """
         found = None
-        if is_uuid(name):
-            found = find(self.properties, lambda p: name == p.id)
+        if is_uuid(key):
+            found = find(self.properties, lambda p: key == p.id)
         else:
-            found = find(self.properties, lambda p: name == p.name)
+            found = find(self.properties, lambda p: key == p.name or key == p.ref)
 
         if not found:
-            raise NotFoundError("Could not find property with name or id {}".format(name))
+            raise NotFoundError("Could not find property with name, ref or id '{}'".format(key))
 
         return found
 
