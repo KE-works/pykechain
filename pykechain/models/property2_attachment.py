@@ -55,8 +55,10 @@ class AttachmentProperty2(Property2):
 
     @value.setter
     def value(self, value):
-        raise RuntimeError("Cannot set the value of an attachment property, use upload() to upload a new attachment or "
-                           "clear() to clear the attachment from the field")
+        if value is None:
+            self.clear()
+        else:
+            self.upload(data=value)
 
     def clear(self):
         # type: () -> ()

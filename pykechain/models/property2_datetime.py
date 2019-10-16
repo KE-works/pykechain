@@ -26,7 +26,9 @@ class DatetimeProperty2(Property2):
 
     @value.setter
     def value(self, value):
-        if isinstance(value, datetime.datetime):
+        if value is None:
+            self._put_value(None)
+        elif isinstance(value, datetime.datetime):
             if not value.tzinfo:
                 warnings.warn("The value '{}' is naive and not timezone aware, use pytz.timezone info. "
                               "This date is interpreted as UTC time.".format(value.isoformat(sep=' ')))
