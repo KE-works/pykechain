@@ -21,13 +21,15 @@ class TestTags(TestCase):
         self.assertIsNone(self.obj.edit(tags=self.tags))
 
     def test_getter(self):
-        self.assertListEqual(self.obj.tags, self.tags)
+        self.assertTrue(len(self.tags) == len(self.obj.tags))
+        self.assertTrue(sorted(self.tags) == sorted(self.obj.tags))
 
     def test_setter(self):
         new_tags = ['1', '2', '3']
         self.obj.tags = new_tags
 
-        self.assertListEqual(self.obj.tags, new_tags)
+        self.assertTrue(len(new_tags) == len(self.obj.tags))
+        self.assertTrue(sorted(new_tags) == sorted(self.obj.tags))
 
     def test_setter_none(self):
         self.obj.tags = None
@@ -72,6 +74,9 @@ class TestTagsScope(TestBetamax):
         self.project.edit(tags=scope_tags)
         self.assertListEqual(scope_tags, self.project.tags)
 
+        self.assertTrue(len(scope_tags) == len(self.project.tags))
+        self.assertTrue(sorted(scope_tags) == sorted(self.project.tags))
+
         # teardown
         self.project.edit(tags=saved_tags)
 
@@ -102,17 +107,17 @@ class TestTagsActivity(TestBetamax):
         # setup
         new_tags = ['four', 'five', 'six']
         self.task.tags = new_tags
-
-        # test
         reloaded = self.project.activity(name='SubTask')
-        self.assertListEqual(new_tags, reloaded.tags)
+
+        self.assertTrue(len(new_tags) == len(reloaded.tags))
+        self.assertTrue(sorted(new_tags) == sorted(reloaded.tags))
 
     def test_activity_tags_may_be_emptied(self):
         # setup
         self.task.tags = None
-        self.task.refresh()
+        reloaded_task = self.project.activity(name='SubTask')
 
-        self.assertTrue(len(self.task.tags) == 0)
+        self.assertTrue(len(reloaded_task.tags) == 0)
 
 
 class ConcreteTagsBase(TagsMixin):
