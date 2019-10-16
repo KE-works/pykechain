@@ -1,4 +1,3 @@
-import copy
 import warnings
 from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text, Dict
 
