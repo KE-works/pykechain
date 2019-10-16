@@ -3,7 +3,7 @@ from time import sleep
 from unittest import skipIf
 
 from pykechain.enums import ScopeStatus
-from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError, APIError
+from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from pykechain.models import Team
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_PIM2
@@ -202,29 +202,6 @@ class TestScopes(TestBetamax):
         team = self.project.team
         self.assertIsInstance(team, Team)
 
-    def test_scope_tags(self):
-        """test to retrieve the tags for a scope"""
-        # setup
-        saved_tags = self.project.tags
-
-        # test
-        scope_tags = ['a', 'list', 'of-tags']
-        self.project.edit(tags=scope_tags)
-        self.assertListEqual(scope_tags, self.project.tags)
-
-        # teardown
-        self.project.edit(tags=saved_tags)
-
-    def test_scope_tags_may_be_emptied(self):
-        # setup
-        saved_tags = self.project.tags
-
-        # test
-        self.project.edit(tags=[])
-        self.assertListEqual(self.project.tags, [])
-
-        # teardown
-        self.project.edit(tags=saved_tags)
 
 @skipIf(not TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 2, expected to fail on old PIM")
 class TestScopes2SpecificTests(TestBetamax):
