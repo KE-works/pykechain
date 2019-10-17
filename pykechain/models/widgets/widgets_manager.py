@@ -122,7 +122,6 @@ class WidgetsManager(Sized):
         :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
-
         """
         widget = self._client.create_widget(*args, activity=self._activity_id, **kwargs)
 
@@ -1039,7 +1038,7 @@ class WidgetsManager(Sized):
 
     def add_signature_widget(self, attachment_property, title=False, custom_button_text=False,
                              custom_undo_button_text=False, **kwargs):
-        # type: (Property2, Optional[Text], Optional[bool], Optional[bool], **Any) -> Widget
+        # type: (Property2, Optional[Union[bool, Text]], Optional[Union[bool, Text]], Optional[Union[bool, Text]], **Any) -> Widget
         """
         Add a KE-chain Signature widget to the Widgetmanager and the activity.
 

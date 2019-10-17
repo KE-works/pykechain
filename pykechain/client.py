@@ -2039,7 +2039,7 @@ class Client(object):
 
     def create_widget(self, activity, widget_type, meta, title=None, order=None,
                       parent=None, readable_models=None, writable_models=None, **kwargs):
-        # type: (Union[Activity,text_type], text_type, Optional[text_type], Optional[Dict], Optional[int], Optional[Widget, text_type], Optional[List], Optional[List], **Any) -> Widget  # noqa:E501
+        # type: (Union[Activity,text_type], text_type, Optional[text_type], Optional[Text], Optional[int], Optional[Widget, text_type], Optional[List], Optional[List], **Any) -> Widget  # noqa:E501
         """
         Create a widget inside an activity.
 
@@ -2082,8 +2082,11 @@ class Client(object):
             raise IllegalArgumentError("`widget_type` should be one of '{}'".format(WidgetTypes.values()))
         if order is not None and not isinstance(order, int):
             raise IllegalArgumentError("`order` should be an integer or None")
-        if title is not None and not isinstance(title, (string_types, text_type)):
-            raise IllegalArgumentError("`title` should be a string")
+        if title is not None:
+            if not isinstance(title, (string_types, text_type)):
+                raise IllegalArgumentError("`title` should be a string, but received type '{}'.".format(type(title)))
+            elif title.strip() != title:
+                raise IllegalArgumentError("`title` can not be empty")
         if parent is not None and isinstance(parent, Widget):
             parent = parent.id
         elif parent is not None and is_uuid(parent):

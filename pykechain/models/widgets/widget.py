@@ -205,7 +205,8 @@ class Widget(Base):
         if meta is not None:
             update_dict.update(dict(meta=meta))
         if title is not None:
-            update_dict.update(dict(title=title))
+            self.meta.update({'customTitle': title})
+            update_dict.update(dict(meta=self.meta))
         if kwargs:
             update_dict.update(**kwargs)
 
