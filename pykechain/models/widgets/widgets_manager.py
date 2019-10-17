@@ -1117,16 +1117,16 @@ class WidgetsManager(Sized):
 
         :param image: AttachmentProperty2 providing the source of the image shown in the card widget.
         :param title: A custom title for the card widget
-            * False (default): Script name
+            * False (default): Card name
             * String value: Custom title
             * None: No title
         :param description: Custom text shown below the image in the card widget
-            * False (default): Script name
+            * False (default): Card name
             * String value: Custom title
             * None: No title
         :param link:
-        :param link_target:
-        :return:
+        :param link_target: how the link is opened, one of the values of CardWidgetLinkTarget enum.
+        :return: Card Widget
         """
         if 'custom_title' in kwargs and not title:
             warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
@@ -1134,20 +1134,7 @@ class WidgetsManager(Sized):
             title = kwargs.pop('custom_title')
 
         meta = _initiate_meta(kwargs, activity=self._activity_id)
-
-        # Process the title
-        if title is False or title is None:
-            show_title_value = "Default"
-            title = self._client.activity(id=self._activity_id).scope.name
-        elif isinstance(title, text_type):
-            show_title_value = "Custom title"
-        else:
-            raise IllegalArgumentError("When using the add_card_widget, 'title' must be 'text_type' or None or False. "
-                                       "Type is: {}".format(type(title)))
-        meta.update({
-            "showTitleValue": show_title_value,
-            "customTitle": title
-        })
+        meta, title = _set_title(meta, title, default_title=WidgetTypes.CARD)
 
         # Process the description
         if description is False or description is None:
