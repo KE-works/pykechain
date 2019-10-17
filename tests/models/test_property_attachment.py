@@ -8,81 +8,85 @@ from tests.classes import TestBetamax
 
 class TestAttachment(TestBetamax):
     test_dict = {'a': 1, 'b': 3}
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')))
+
+    def setUp(self):
+        super(TestAttachment, self).setUp()
+        self.property_name = 'Plot Attachment'
+
+        self.bike_model = self.project.model('Bike')
+        self.property_model = self.bike_model.add_property(
+            name=self.property_name,
+            property_type=PropertyType.ATTACHMENT_VALUE
+        )  # type: AttachmentProperty2
+
+        self.bike = self.bike_model.instance()
+        self.property = self.bike.property(name=self.property_name)
+
+    def tearDown(self):
+        self.property_model.delete()
+        super(TestAttachment, self).tearDown()
 
     def test_retrieve_attachment(self):
-        picture = self.project.part('Bike').property('Picture')
-
         data = ('data.json', json.dumps(self.test_dict), 'application/json')
 
-        picture._upload(data)
+        self.property._upload(data)
 
-        r = picture.json_load()
+        r = self.property.json_load()
 
         self.assertDictEqual(r, self.test_dict)
 
     def test_retrieve_value(self):
-        photo_attach = self.project.part('Bike').property('Picture')
-        photo_attach_expected_value = '[Attachment: Awesome.jpg]'
-        photo_attach_actual_value = photo_attach.value
+        self.assertIsNone(self.property.value)
 
-        self.assertIsNotNone(photo_attach_actual_value)
+        self.property.upload(self.project_root + '/requirements.txt')
+        self.property.refresh()
 
-        empty_attach = self.project.model('Bike').property('Picture')
-
-        self.assertIsNone(empty_attach.value)
+        self.assertIsNotNone(self.property.value)
 
     def test_set_value_none(self):
-        picture = self.project.part('Bike').property('Picture')
-        picture.value = None
+        self.property.value = None
+        self.assertFalse(self.property.has_value())
 
-    def test_set_value(self):
-        picture = self.project.part('Bike').property('Picture')
-
+    def test_set_value_not_a_path(self):
         with self.assertRaises(FileNotFoundError):
-            picture.value = 'String must be a filepath'
+            self.property.value = 'String must be a filepath'
 
     def test_upload(self):
-        # setup
-        plot_attach_model = self.project.model('Bike').add_property(
-            name='Plot Attachment',
-            property_type=PropertyType.ATTACHMENT_VALUE
-        )
-        plot_attach = self.project.part('Bike').property('Plot Attachment')
+        self.property.upload(self.project_root + '/requirements.txt')
+        self.property.refresh()
 
-        # Test the upload of regular data (such a .txt file)
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')))
-        requirements = project_root + '/requirements.txt'
-        plot_attach.upload(requirements)
-
-        # teardown
-        plot_attach_model.delete()
+        requirements = self.project_root + '/requirements.txt'
+        self.property.upload(requirements)
 
     # 1.11.1
     def test_clear_an_attachment_property(self):
         # setUp
-        plot_attach_model = self.project.model('Bike').add_property(
-            name='Plot Attachment',
-            property_type=PropertyType.ATTACHMENT_VALUE
-        )
-        plot_attach = self.project.part('Bike').property('Plot Attachment')
-
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')))
-        requirements = project_root + '/requirements.txt'
-        plot_attach.upload(requirements)
-        plot_attach_u = self.project.part('Bike').property('Plot Attachment')
+        self.property.upload(self.project_root + '/requirements.txt')
+        self.property.refresh()
 
         # testing
-        self.assertTrue(plot_attach_u.value.find('requirements.txt'))
+        self.assertTrue(self.property.has_value())
 
-        plot_attach.clear()
-        self.assertEqual(plot_attach.value, None)
-        self.assertEqual(plot_attach._value, None)
-
-        # teardown
-        plot_attach_model.delete()
+        self.property.clear()
+        self.assertIsNone(self.property.value)
+        self.assertIsNone(self.property._value)
 
     def test_retrieve_filename_from_value(self):
-        photo_attach = self.project.part('Bike').property('Picture')  # type: AttachmentProperty2
-        photo_attach_actual_filename = photo_attach.filename
+        # setUp
+        self.property.upload(self.project_root + '/requirements.txt')
+        self.property.refresh()
 
-        self.assertEqual(photo_attach.filename, photo_attach.filename)
+        # testing
+        self.assertEqual(self.property.filename, 'requirements.txt')
+
+    def test_has_value_true(self):
+        # setUp
+        self.property.upload(self.project_root + '/requirements.txt')
+        self.property.refresh()
+
+        # testing
+        self.assertTrue(self.property.has_value())
+
+    def test_has_value_false(self):
+        self.assertFalse(self.property.has_value())
