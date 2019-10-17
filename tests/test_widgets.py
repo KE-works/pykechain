@@ -8,7 +8,7 @@ from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Activity2
 from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, \
     SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, SignatureWidget, ServiceWidget, NotebookWidget, \
-    MulticolumnWidget, ProgressWidget, CardWidget
+    MulticolumnWidget, CardWidget, MetapanelWidget
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
@@ -137,6 +137,7 @@ class TestWidgetManagerInActivity(TestBetamax):
             meta=dict(htmlContent="Hello")
         )
 
+        self.assertIsInstance(metapanel, MetapanelWidget)
         self.assertIsInstance(htmlwidget, HtmlWidget)
         self.assertEqual(len(widget_manager), 1 + 1)
 
@@ -593,7 +594,7 @@ class TestCopyMoveWidgets(TestBetamax):
     def setUp(self):
         super(TestCopyMoveWidgets, self).setUp()
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
-        self.task_2 = self.project.create_activity(name="test_copy_widget") # type: Activity2
+        self.task_2 = self.project.create_activity(name="test_copy_widget")  # type: Activity2
 
     def tearDown(self):
         self.task.delete()
