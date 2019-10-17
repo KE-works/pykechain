@@ -149,7 +149,7 @@ class Property2(Property):
         :returns: True if the property has a value set, otherwise (also when value is None) returns False
         :rtype: Bool
         """
-        return self._value is not None
+        return bool(self._value)
 
     def edit(self, name=None, description=None, unit=None, options=None, **kwargs):
         # type: (Optional[Text], Optional[Text], Optional[Text], Optional[Dict], **Any) -> ()
