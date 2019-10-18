@@ -619,11 +619,13 @@ class FilterType(Enum):
     :cvar GREATER_THAN_EQUAL: 'gte'
     :cvar LOWER_THAN_EQUAL: 'lte'
     :cvar CONTAINS: 'icontains'
+    :cvar EXACT: 'exact'
     """
 
     GREATER_THAN_EQUAL = 'gte'
     LOWER_THAN_EQUAL = 'lte'
     CONTAINS = 'icontains'
+    EXACT = 'exact'
 
 
 class ProgressBarColors(Enum):
