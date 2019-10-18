@@ -1,4 +1,5 @@
 from six import text_type, string_types
+from typing import List, Optional, Text, Union, Any
 
 from pykechain.enums import Category, FilterType, PropertyType
 from pykechain.exceptions import IllegalArgumentError
@@ -152,13 +153,15 @@ class MultiReferenceProperty2(Property2):
         return possible_choices
 
     def set_prefilters(self, property_models, values, filters_type=FilterType.CONTAINS, overwrite=False):
+        # type: (List[Union[Text, Part2]], List[Any], List[FilterType], Optional[bool]) -> None
         """Sets the pre-filters on a `MultiReferenceProperty`.
 
-        :param property_models: `list` of `Property` models to set pre-filters on
+        :param property_models: `list` of `Property` models (or their IDs) to set pre-filters on
         :type property_models: list
-        :param values: `list` of values to pre-filter on
+        :param values: `list` of values to pre-filter on, value has to match the property type.
         :type values: list
-        :param filters_type: choose one of the :class:`enums.FilterType`, defaults to `FilterType.CONTAINS`
+        :param filters_type: `list` of filter types per pre-fitler, one of :class:`enums.FilterType`,
+                defaults to `FilterType.CONTAINS`
         :type filters_type: list
         :param overwrite: determines whether the pre-filters should be over-written or not, defaults to False
         :type overwrite: bool
@@ -206,6 +209,8 @@ class MultiReferenceProperty2(Property2):
                     new_prefilter_list = [property_id, datetime_value, filters_type[index]]
                     new_prefilter = '%3A'.join(new_prefilter_list)
                 else:
+                    if property_model.type == PropertyType.BOOLEAN_VALUE:
+                        values[index] = str(values[index]).lower()
                     new_prefilter_list = [property_id, str(values[index]), filters_type[index]]
                     new_prefilter = ':'.join(new_prefilter_list)
                 list_of_prefilters.append(new_prefilter)
@@ -216,6 +221,7 @@ class MultiReferenceProperty2(Property2):
         self.edit(options=options_to_set)
 
     def set_excluded_propmodels(self, property_models, overwrite=False):
+        # type: (List[Union[Text, Part2]], Optional[bool]) -> None
         """
 
         :param property_models:

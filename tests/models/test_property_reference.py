@@ -18,17 +18,9 @@ class TestMultiReferenceProperty(TestBetamax):
         # reference property model (with a value pointing to a target part model
         self.part_model = self.project.model('Bike')
 
-        self.fabrication_date_property = self.target_model.add_property(
-            name='Fabrication date',
-            property_type=PropertyType.DATETIME_VALUE,
-            default_value=datetime.datetime.now().isoformat()
-        )  # datetime
-        self.tyre_manufacturer_property = self.target_model.add_property(
-            name='Tyre manufacturer',
-            property_type=PropertyType.SINGLE_SELECT_VALUE,
-            options={'value_choices': ['Michelin', 'Pirelli', 'Bridgestone']},
-            default_value='Michelin'
-        )
+        self.target_datetime_prop = self.target_model.add_property(name='Fabrication date')
+        self.target_ssl_prop = self.target_model.property(name='Tyre manufacturer')
+        self.target_bool_prop = self.target_model.property(name='Flat tire')
 
         self.ref_prop_name = 'Test reference property ({})'.format(str(uuid.uuid4())[-8:])
         self.ref_model = self.part_model.add_property(
@@ -41,8 +33,6 @@ class TestMultiReferenceProperty(TestBetamax):
         self.ref = self.part_model.instance().property(name=self.ref_prop_name)
 
     def tearDown(self):
-        self.tyre_manufacturer_property.delete()
-        self.fabrication_date_property.delete()
         self.ref_model.delete()
         super(TestMultiReferenceProperty, self).tearDown()
 
@@ -216,18 +206,21 @@ class TestMultiReferenceProperty(TestBetamax):
             property_models=[diameter_property,
                              spokes_property,
                              rim_material_property,
-                             self.fabrication_date_property,
-                             self.tyre_manufacturer_property],
+                             self.target_datetime_prop,
+                             self.target_ssl_prop,
+                             self.target_bool_prop],
             values=[30.5,
                     7,
                     'Al',
                     datetime.datetime.now(),
-                    'Michelin'],
+                    'Michelin',
+                    True],
             filters_type=[FilterType.GREATER_THAN_EQUAL,
                           FilterType.LOWER_THAN_EQUAL,
                           FilterType.CONTAINS,
                           FilterType.GREATER_THAN_EQUAL,
-                          FilterType.CONTAINS]
+                          FilterType.CONTAINS,
+                          FilterType.EXACT]
         )
 
         # testing
@@ -238,8 +231,10 @@ class TestMultiReferenceProperty(TestBetamax):
                         self.ref_model._options['prefilters']['property_value'])
         self.assertTrue("{}:{}:{}".format(rim_material_property.id, 'Al', FilterType.CONTAINS) in
                         self.ref_model._options['prefilters']['property_value'])
+        self.assertTrue("{}:{}:{}".format(self.target_bool_prop.id, 'true', FilterType.EXACT) in
+                        self.ref_model._options['prefilters']['property_value'])
         # TODO - fix KEC-20504 and then check for DATETIME
-        self.assertTrue("{}:{}:{}".format(self.tyre_manufacturer_property.id, 'Michelin', FilterType.CONTAINS) in
+        self.assertTrue("{}:{}:{}".format(self.target_ssl_prop.id, 'Michelin', FilterType.CONTAINS) in
                         self.ref_model._options['prefilters']['property_value'])
 
     def test_set_prefilters_on_reference_property_with_excluded_propmodels_and_validators(self):
