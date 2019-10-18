@@ -519,7 +519,7 @@ class TestMultiReferencePropertyXScope(TestBetamax):
 
         # testing
         self.assertEqual(self.x_scope.id, self.x_reference_model.value[0].scope_id)
-        self.assertEqual(self.x_target_model.id, self.x_reference_model._value[0]['id'])
+        self.assertEqual(self.x_target_model.id, self.x_reference_model.value[0].id)
 
     def test_set_model_value_using_id(self):
         # setUp
@@ -528,7 +528,7 @@ class TestMultiReferencePropertyXScope(TestBetamax):
 
         # testing
         self.assertEqual(self.x_scope.id, self.x_reference_model.value[0].scope_id)
-        self.assertEqual(self.x_target_model.id, self.x_reference_model._value[0]['id'])
+        self.assertEqual(self.x_target_model.id, self.x_reference_model.value[0].id)
 
     def test_set_value(self):
         # setUp
@@ -536,4 +536,5 @@ class TestMultiReferencePropertyXScope(TestBetamax):
         self.x_reference.refresh()
         self.x_reference.value = [self.x_target]
 
-        self.assertEqual(self.x_target.id, self.x_reference._value[0]['id'])
+        self.assertTrue(len(self.x_reference.value) == 1)
+        self.assertEqual(self.x_target.id, self.x_reference.value[0].id)
