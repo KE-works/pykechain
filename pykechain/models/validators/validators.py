@@ -325,3 +325,11 @@ class RegexStringValidator(PropertyValidator):
             self._validation_reason = basereason.replace('should match', 'matches')
 
         return self._validation_result, self._validation_reason
+
+
+class EmailValidator(RegexStringValidator):
+
+    pattern = r'\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+'
+
+    def __init__(self, *args, **kwargs):
+        super(EmailValidator, self).__init__(pattern=self.pattern, *args, **kwargs)

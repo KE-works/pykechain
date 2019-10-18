@@ -8,7 +8,7 @@ from pykechain.models.validators import PropertyValidator, ValidatorEffect, Visu
 from pykechain.models.validators.validator_schemas import options_json_schema, validator_jsonschema_stub, \
     effects_jsonschema_stub
 from pykechain.models.validators.validators import RegexStringValidator, RequiredFieldValidator, EvenNumberValidator, \
-    OddNumberValidator, SingleReferenceValidator
+    OddNumberValidator, SingleReferenceValidator, EmailValidator
 from tests.classes import SixTestCase, TestBetamax
 
 
@@ -352,8 +352,7 @@ class TestRegexValidator(SixTestCase):
         self.assertFalse(validator.is_valid(None))
 
     def test_regex_validator_complex_email_regex(self):
-        email_re = r'\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+'
-        validator = RegexStringValidator(pattern=email_re)
+        validator = EmailValidator()
 
         self.assertTrue(validator.is_valid('support@ke-works.com'))
         self.assertFalse(validator.is_valid('___'))
