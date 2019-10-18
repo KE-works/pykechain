@@ -44,7 +44,7 @@ class Property2(Property):
         self._output = json.get('output')
         self._value = json.get('value')
         self._options = json.get('value_options')
-        self._part = None # Part2 storage
+        self._part = None  # Part2 storage
 
         self.part_id = json.get('part_id')
         self.scope_id = json.get('scope_id')
