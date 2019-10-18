@@ -223,10 +223,14 @@ class MultiReferenceProperty2(Property2):
     def set_excluded_propmodels(self, property_models, overwrite=False):
         # type: (List[Union[Text, Part2]], Optional[bool]) -> None
         """
+        Exclude a list of properties from being visible in the part-shop and modal (pop-up) of the reference property.
 
-        :param property_models:
-        :param overwrite:
-        :return:
+        :param property_models: `list` of Property2 models (or their IDs) to exclude.
+        :type property_models: list
+        :param overwrite: flag whether to overwrite existing (True) or append (False, default) to existing filter(s).
+        :type overwrite bool
+
+        :raises IllegalArgumentError
         """
         if not overwrite:
             list_of_propmodels_excl = self._options.get('propmodels_excl', [])
