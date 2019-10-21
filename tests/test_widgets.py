@@ -229,14 +229,14 @@ class TestWidgetManagerInActivity(TestBetamax):
         excluded_propmodels = [part_model.property(name='Spokes')]
         prefilters = dict(
             property_models=[part_model.property(name='Diameter')],
-            values=[16],
+            values=[66],
             filters_type=[FilterType.LOWER_THAN_EQUAL]
         )
         widget = widget_manager.add_filteredgrid_widget(
             part_model=part_model,
             parent_instance=parent_instance,
             edit=True,
-            # sort_property=part_model.property(name='Diameter'),
+            sort_name=True,
             emphasize_edit=True,
             all_writable=True,
             collapse_filters=False,
