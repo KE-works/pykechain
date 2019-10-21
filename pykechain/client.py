@@ -2031,8 +2031,12 @@ class Client(object):
 
         new_team.add_members([user], role=TeamRoles.OWNER)
         team_members = new_team.members()
-        new_team.remove_members([self.user(username=u.get('username')) for u in team_members if u.get(
-            'username') != user.username])
+
+        members_to_remove = [self.user(username=u.get('username')) for u in team_members if u.get(
+            'username') != user.username]
+
+        if members_to_remove:
+            new_team.remove_members(members_to_remove)
 
         new_team.refresh()
         return new_team
