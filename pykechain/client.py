@@ -1894,6 +1894,8 @@ class Client(object):
                 data_dict['start_date'] = start_date.isoformat(sep='T')
             else:
                 raise IllegalArgumentError('Start date should be a datetime.datetime() object')
+        else:
+            start_date = source_scope.start_date
 
         if due_date is not None:
             if isinstance(due_date, datetime.datetime):
@@ -1903,6 +1905,8 @@ class Client(object):
                 data_dict['due_date'] = due_date.isoformat(sep='T')
             else:
                 raise IllegalArgumentError('Due date should be a datetime.datetime() object')
+        else:
+            due_date = source_scope.due_date
 
         if description is not None:
             if not isinstance(description, (text_type, string_types)):
@@ -1923,6 +1927,8 @@ class Client(object):
             if not (all([isinstance(t, (str, text_type)) for t in tags])):
                 raise IllegalArgumentError("Each tag in the list of tags should be provided as a string")
             data_dict['tags'] = tags
+        else:
+            tags = source_scope.tags
 
         if team is not None:
             if isinstance(team, Team):
@@ -1968,7 +1974,13 @@ class Client(object):
                 raise APIError("Could not clone scope, {}: {}".format(str(response), response.content))
 
         if self.match_app_version(label="scope", version=">=3.0.0"):
-            return Scope2(response.json()['results'][0], client=source_scope._client)
+            cloned_scope = Scope2(response.json()['results'][0], client=source_scope._client)
+
+            # TODO work-around, some attributes are not (yet) in the KE-chain response.json()
+            cloned_scope._tags = tags
+            cloned_scope.start_date = start_date
+            cloned_scope.due_date = due_date
+            return cloned_scope
         else:
             return Scope(response.json()['results'][0], client=source_scope._client)
 
