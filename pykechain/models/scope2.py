@@ -45,7 +45,7 @@ class Scope2(Base, TagsMixin):
         self.workflow_root = json.get('workflow_root_id')
 
         self.ref = json.get('ref')
-        self.description = json.get('description')
+        self.description = json.get('text')
         self.status = json.get('status')
         self.category = json.get('category')
 
