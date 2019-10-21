@@ -251,9 +251,10 @@ class WidgetsManager(Sized):
     def add_filteredgrid_widget(self, part_model, parent_instance=None, title=False, new_instance=True,
                                 edit=True, clone=True, export=True, delete=False, incomplete_rows=True,
                                 emphasize_new_instance=True, emphasize_edit=False, emphasize_clone=False,
-                                emphasize_delete=False, sort_property=None, sort_direction=SortTable.ASCENDING,
-                                collapse_filters=False, page_size=25, readable_models=None, writable_models=None,
-                                all_readable=False, all_writable=False, excluded_propmodels=None, prefilters=None,
+                                emphasize_delete=False, sort_property=None, sort_name=False,
+                                sort_direction=SortTable.ASCENDING, collapse_filters=False, page_size=25,
+                                readable_models=None, writable_models=None, all_readable=False, all_writable=False,
+                                excluded_propmodels=None, prefilters=None,
                                 **kwargs):
         """
         Add a KE-chain superGrid (e.g. basic table widget) to the customization.
@@ -305,6 +306,8 @@ class WidgetsManager(Sized):
             * String value: Custom title
             * None: No title
         :type title: bool or basestring or None
+        :param sort_name: If set to True it will sort on name of the part. It is ignored if sort_property is None
+        :type sort_name: bool
         :param sort_property: The property model on which the part instances are being sorted on
         :type sort_property: :class:`Property` or UUID
         :param sort_direction: The direction on which the values of property instances are being sorted on:
@@ -325,6 +328,8 @@ class WidgetsManager(Sized):
         part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: Part2  # noqa
         parent_instance_id = _retrieve_object_id(obj=parent_instance)  # type: text_type
         sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
+        if not sort_property_id and sort_name:
+            sort_property_id = "name"
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
         if prefilters:
             list_of_prefilters = _check_prefilters(part_model=part_model, prefilters=prefilters)
