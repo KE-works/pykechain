@@ -36,6 +36,9 @@ class Base(object):
         else:
             return super().__eq__(other=other)
 
+    def __hash__(self):
+        return self.id
+
     def refresh(self, json=None, url=None, extra_params=None):
         """Refresh the object in place.
 
