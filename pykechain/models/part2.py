@@ -91,7 +91,8 @@ class Part2(Base):
 
         self._cached_children = None
 
-        self.properties = [Property2.create(p, client=self._client) for p in json['properties']]
+        self.properties = [Property2.create(p, client=self._client)
+                           for p in sorted(json['properties'], key=lambda p: p['order'])]
 
     def refresh(self, json=None, url=None, extra_params=None):
         """Refresh the object in place."""
