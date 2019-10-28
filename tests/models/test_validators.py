@@ -292,6 +292,7 @@ class TestNumericRangeValidator(SixTestCase):
         self.assertFalse(validator.is_valid(3333))
         self.assertRegex(validator.get_reason(), "Value '3333' should be between -inf and 1000")
 
+
 class TestBooleanFieldValidator(SixTestCase):
     def test_boolean_validator_without_settings(self):
         validator = BooleanFieldValidator()
@@ -311,6 +312,8 @@ class TestRequiredFieldValidator(SixTestCase):
         validator = RequiredFieldValidator()
         self.assertFalse(validator.is_valid(None))
         self.assertFalse(validator.is_valid(''))
+        self.assertFalse(validator.is_valid([]))
+        self.assertFalse(validator.is_valid(False))
 
     def test_requiredfield_validator_is_true_on_value(self):
         validator = RequiredFieldValidator()
