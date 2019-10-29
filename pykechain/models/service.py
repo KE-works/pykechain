@@ -2,6 +2,7 @@ import os
 
 import requests
 from six import string_types, text_type
+from typing import Text, Any
 
 from pykechain.enums import ServiceScriptUser
 from pykechain.exceptions import APIError, IllegalArgumentError
@@ -89,7 +90,8 @@ class Service(Base):
         data = response.json()
         return ServiceExecution(json=data.get('results')[0], client=self._client)
 
-    def edit(self, name=None, description=None, version=None, run_as=None, **kwargs):
+    def edit(self, name=None, description=None, version=None, run_as=None, trusted=False, **kwargs):
+        # type: (Text, Text, Text, ServiceScriptUser, bool, **Any) -> None
         """
         Edit Service details.
 
@@ -103,8 +105,8 @@ class Service(Base):
         :type version: basestring or None
         :param run_as: (optional) user to run the service as. Defaults to kenode user (bound to scope)
         :type run_as: basestring or None
-        :param kwargs: (optional) additional keyword arguments to change.
-        :type kwargs: dict or None
+        :param trusted: (optional) flag whether the service is trusted, default if False
+        :type trusted: bool
         :raises IllegalArgumentError: when you provide an illegal argument.
         :raises APIError: if the service could not be updated.
         """
@@ -126,6 +128,10 @@ class Service(Base):
                 raise IllegalArgumentError("run_as should be provided as one of '{}'".format(
                     ServiceScriptUser.values()))
             update_dict.update({'run_as': run_as})
+        if not isinstance(trusted, bool):
+            raise IllegalArgumentError("trusted should be provided as a boolean")
+        else:
+            update_dict.update({'trusted': trusted})
 
         if kwargs is not None:  # pragma: no cover
             update_dict.update(**kwargs)
