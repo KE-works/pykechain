@@ -461,10 +461,10 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertTrue(hasattr(widget_manager, 'add_navigation_bar_widget'))
 
 
-class TestNavigationBarWidget(TestBetamax):
+class TestWidgetNavigationBarWidget(TestBetamax):
 
     def setUp(self):
-        super(TestNavigationBarWidget, self).setUp()
+        super(TestWidgetNavigationBarWidget, self).setUp()
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
 
         self.frame = self.project.part(name='Frame')
@@ -482,7 +482,7 @@ class TestNavigationBarWidget(TestBetamax):
 
     def tearDown(self):
         self.task.delete()
-        super(TestNavigationBarWidget, self).tearDown()
+        super(TestWidgetNavigationBarWidget, self).tearDown()
 
     def test_add_navbar_widget(self):
         widget_manager = self.task.widgets()
@@ -558,16 +558,16 @@ class TestNavigationBarWidget(TestBetamax):
         self.assertTrue(widget.meta['taskButtons'][0]['isDisabled'])
 
 
-class TestCopyMoveWidgets(TestBetamax):
+class TestWidgetsCopyMove(TestBetamax):
     def setUp(self):
-        super(TestCopyMoveWidgets, self).setUp()
+        super(TestWidgetsCopyMove, self).setUp()
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
         self.task_2 = self.project.create_activity(name="test_copy_widget")  # type: Activity2
 
     def tearDown(self):
         self.task.delete()
         self.task_2.delete()
-        super(TestCopyMoveWidgets, self).tearDown()
+        super(TestWidgetsCopyMove, self).tearDown()
 
     def test_copy_widget(self):
         # setUp
