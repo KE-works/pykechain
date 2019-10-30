@@ -6,7 +6,7 @@ from pykechain.enums import ScopeStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from pykechain.models import Team
 from tests.classes import TestBetamax
-from tests.utils import TEST_FLAG_IS_PIM2
+from tests.utils import TEST_FLAG_IS_PIM3
 
 
 class TestScopes(TestBetamax):
@@ -180,7 +180,7 @@ class TestScopes(TestBetamax):
         self.assertIsInstance(team, Team)
 
 
-@skipIf(not TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 2, expected to fail on old PIM")
+@skipIf(not TEST_FLAG_IS_PIM3, reason="This tests is designed for PIM version 2, expected to fail on old PIM")
 class TestScopes2SpecificTests(TestBetamax):
 
     def setUp(self):

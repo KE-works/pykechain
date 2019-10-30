@@ -14,7 +14,6 @@ PSEUDO_PASSWORD = 'abc123!@#'
 PSEUDO_SCOPE_ID = 'eeb0937b-da50-4eb2-8d74-f36259cca96e'
 
 
-@skip("Cannot handle the testcassettes and versions retrievals")
 @pytest.mark.skipif("os.getenv('TRAVIS', False)",
                     reason="Skipping tests when using Travis, as not Auth can be provided")
 class TestGetProjectHelperNotForTravis(TestBetamax):
