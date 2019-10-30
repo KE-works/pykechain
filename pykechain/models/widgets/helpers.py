@@ -146,13 +146,29 @@ def _initiate_meta(kwargs, activity, ignores=()):
     return meta
 
 
-def _check_prefilters(part_model, prefilters):
-    """Checks the pre-filters on a `FilteredGridWidget`.
+def _check_prefilters(part_model: 'Part2', prefilters: Dict):
+    """
+    Check the pre-filters on a `FilteredGridWidget`.
 
+    The prefilters should comply to the prefilters schema as present in the backend.
+
+    ```
+    "prefilters": {
+        "type": ["object", "null"],
+        "additionalProperties": True,
+        "properties": {
+            "property_value": def_nullstring,
+            "name__icontains": def_nullstring
+        }
+    }
+    ```
+
+    :param part_model: The part model to check the prefilters agains.
+    :param prefilters: Dictionary with prefilters.
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
     list_of_prefilters = []
-    property_models = prefilters.get('property_models', [])  # type: List[Property2]  # noqa
+    property_models = prefilters.get('property_models', [])  # type: List[Text]  # noqa
     values = prefilters.get('values', [])
     filters_type = prefilters.get('filters_type', [])
     if any(len(lst) != len(property_models) for lst in [values, filters_type]):
@@ -162,7 +178,7 @@ def _check_prefilters(part_model, prefilters):
     for property_model in property_models:
         index = property_models.index(property_model)
         if is_uuid(property_model):
-            property_model = part_model.property(pk=property_model)
+            property_model = part_model.property(property_model)  # the finder can handle uuid, name or ref
 
         if property_model.category != Category.MODEL:
             raise IllegalArgumentError('Pre-filters can only be set on property models, found category "{}"'

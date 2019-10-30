@@ -1,15 +1,14 @@
-import warnings
 from typing import Any, Union, List, Dict, Optional, Text  # noqa: F401
 
 import requests
 from six import text_type, string_types
 
+from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import Category, Multiplicity
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance
-from pykechain.models import Part, Base
+from pykechain.models import Base, Scope
 from pykechain.models.property2 import Property2
-from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.utils import is_uuid, find
 
 
@@ -99,16 +98,15 @@ class Part2(Base):
         super(Part2, self).refresh(json=json,
                                    url=self._client._build_url('part2', part_id=self.id),
                                    extra_params=API_EXTRA_PARAMS['part2'])
+
     #
     # Family and structure methods
     #
 
-    def property(self, name=None):
-        # type: (str) -> Any
+    def property(self, name: Text = None) -> Property2:
         """Retrieve the property belonging to this part based on its name or uuid.
 
         :param name: property name, ref or property UUID to search for
-        :type name: basestring
         :return: a single :class:`Property`
         :raises NotFoundError: if the `Property` is not part of the `Part`
 
@@ -128,7 +126,6 @@ class Part2(Base):
         6
 
         """
-
         if is_uuid(name):
             found = find(self.properties, lambda p: name == p.id)
         else:
@@ -139,19 +136,18 @@ class Part2(Base):
 
         return found
 
-    def scope(self):
+    def scope(self) -> 'Scope':
         """Scope this Part belongs to.
 
         This property will return a `Scope` object. It will make an additional call to the KE-chain API.
 
         :return: the scope
-        :type: :class:`pykechain.models.Scope`
+        :rtype: :class:`pykechain.models.Scope`
         :raises NotFoundError: if the scope could not be found
         """
         return self._client.scope(pk=self.scope_id)
 
-    def parent(self):
-        # type: () -> Union[Part2, type(None)]
+    def parent(self) -> Union['Part2', type(None)]:
         """Retrieve the parent of this `Part`.
 
         :return: the parent :class:`Part` of this part
@@ -168,8 +164,7 @@ class Part2(Base):
         else:
             return None
 
-    def children(self, **kwargs):
-        # type: (**Any) -> Any
+    def children(self, **kwargs) -> Union['Partset', List['Part2']]:
         """Retrieve the children of this `Part` as `Partset`.
 
         When you call the :func:`Part.children()` method without any additional filtering options for the children,
@@ -209,8 +204,7 @@ class Part2(Base):
             # if kwargs are provided, we assume no use of cache as specific filtering on the children is performed.
             return self._client.parts(parent=self.id, category=self.category, **kwargs)
 
-    def populate_descendants(self, batch=200):
-        # type: (int) -> ()
+    def populate_descendants(self, batch: int = 200) -> Union['Partset', List['Part2']]:
         """
         Retrieve the descendants of a specific part in a list of dicts and populate the :func:`Part.children()` method.
 

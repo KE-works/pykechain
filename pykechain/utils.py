@@ -3,7 +3,7 @@ import re
 import unicodedata
 from contextlib import contextmanager
 from datetime import datetime, timedelta
-from typing import TypeVar, Iterable, Callable, Optional, AnyStr, Text, Union  # noqa: F401
+from typing import TypeVar, Iterable, Callable, Optional, Text  # noqa: F401
 
 import pytz
 import six
@@ -13,8 +13,7 @@ T = TypeVar('T')
 UUID_REGEX_PATTERN = r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 
 
-def find(iterable, predicate):
-    # type: (Iterable[T], Callable[[T], bool]) -> Optional[T]
+def find(iterable: Iterable[T], predicate: Callable[[T], bool]) -> Optional[T]:
     """Return the first item in the iterable that matches the predicate function."""
     for i in iterable:
         if predicate(i):
@@ -23,9 +22,9 @@ def find(iterable, predicate):
     return None
 
 
-def is_uuid(value):
-    # type: (AnyStr) -> bool
-    """Check if the string value is a proper UUID string.
+def is_uuid(value: Text) -> bool:
+    """
+    Check if the string value is a proper UUID string.
 
     UUID check is performed based on a regex pattern:
         `r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"`
@@ -40,7 +39,7 @@ def is_uuid(value):
 
 
 @contextmanager
-def temp_chdir(cwd=None):
+def temp_chdir(cwd: Optional[Text] = None):
     """
     Create and return a temporary directory which you can use as a context manager.
 
@@ -83,8 +82,7 @@ def temp_chdir(cwd=None):
             os.chdir(origin)
 
 
-def parse_datetime(value):
-    # type: (Text) -> Union[type(None), datetime]
+def parse_datetime(value: Text) -> Optional[datetime]:
     """
     Convert datetime string to datetime object.
 
@@ -150,14 +148,14 @@ def parse_datetime(value):
 # License: MIT
 #
 
-def camelcase(string):
+def camelcase(string: Text) -> Text:
     """Convert string into camel case.
 
     Inspired by: https://github.com/okunishinishi/python-stringcase
     License: MIT
 
     :param string: String to convert.
-    :returns: string: Camel case string.
+    :returns: Camel case string.
 
     Examples
     --------
@@ -173,7 +171,7 @@ def camelcase(string):
     return lowercase(string[0]) + re.sub(r"[\-_\.\s]([a-z])", lambda matched: uppercase(matched.group(1)), string[1:])
 
 
-def capitalcase(string):
+def capitalcase(string: Text) -> Text:
     """Convert string into capital case.
 
     First letters will be uppercase.
@@ -182,7 +180,7 @@ def capitalcase(string):
     License: MIT
 
     :param string: String to convert.
-    :returns: string: Capital case string.
+    :returns: Capital case string.
 
     Examples
     --------
@@ -198,14 +196,14 @@ def capitalcase(string):
     return uppercase(string[0]) + string[1:]
 
 
-def lowercase(string):
+def lowercase(string: Text) -> Text:
     """Convert string into lower case.
 
     Inspired by: https://github.com/okunishinishi/python-stringcase
     License: MIT
 
     :param string: String to convert.
-    :returns: string: lower case string.
+    :returns: lower case string.
 
     Examples
     --------
@@ -218,7 +216,7 @@ def lowercase(string):
     return str(string).lower()
 
 
-def snakecase(string):
+def snakecase(string: Text) -> Text:
     """Convert string into snake case.
 
     Join punctuation with underscore
@@ -228,7 +226,7 @@ def snakecase(string):
 
 
     :param string: String to convert.
-    :returns: string: Snake case string.
+    :returns: snake_case_string.
 
 
     Examples
@@ -245,14 +243,14 @@ def snakecase(string):
     return lowercase(string[0]) + re.sub(r"[A-Z]", lambda matched: '_' + lowercase(matched.group(0)), string[1:])
 
 
-def uppercase(string):
+def uppercase(string: Text) -> Text:
     """Convert string into upper case.
 
     Inspired by: https://github.com/okunishinishi/python-stringcase
     License: MIT
 
     :param string: String to convert.
-    :returns: string: Upper case string.
+    :returns: Upper case string.
 
     Examples
     --------
@@ -265,12 +263,16 @@ def uppercase(string):
     return str(string).upper()
 
 
-def slugify_ref(value, allow_unicode=False):
-    # type: (Text, bool) -> Text
+def slugify_ref(value: Text, allow_unicode: bool = False) -> Text:
     """
     Convert to ASCII if 'allow_unicode' is False. Convert spaces to hyphens.
-    Remove characters that aren't alphanumerics, underscores, or hyphens.
-    Convert to lowercase. Also strip leading and trailing whitespace.
+
+    Remove characters that aren't alphanumerics, underscores, or hyphens. Convert to lowercase.
+    Also strip leading and trailing whitespace.
+
+    :param value: text to slugify
+    :param allow_unicode: (optional) boolean to allow unicode processing, defaults to False
+    :return: slugified value
     """
     if allow_unicode:
         value = unicodedata.normalize('NFKC', value)

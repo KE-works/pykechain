@@ -328,8 +328,20 @@ class RegexStringValidator(PropertyValidator):
 
 
 class EmailValidator(RegexStringValidator):
+    """
+    A email string validator.
+
+    :cvar pattern: the email regex pattern to which the provided value is matched against.
+    """
 
     pattern = r'\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+'
 
-    def __init__(self, *args, **kwargs):
-        super(EmailValidator, self).__init__(pattern=self.pattern, *args, **kwargs)
+    def __init__(self, json=None, **kwargs):
+        """Construct an email string validator effect.
+
+        :param json: (optional) dict (json) object to construct the object from
+        :type json: dict
+        :param kwargs: (optional) additional kwargs to pass down
+        :type kwargs: dict
+        """
+        super(EmailValidator, self).__init__(json=json, pattern=self.pattern, **kwargs)

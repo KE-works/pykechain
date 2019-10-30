@@ -1,6 +1,7 @@
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widget_schemas import undefined_meta_schema
 
+
 # UNDEFINED = 'UNDEFINED'
 # PROPERTYGRID = 'PROPERTYGRID'
 # SUPERGRID = 'SUPERGRID'
@@ -88,4 +89,3 @@ class CardWidget(Widget):
 
 class ThirdpartyWidget(Widget):
     """Thirdparty Widget."""
-

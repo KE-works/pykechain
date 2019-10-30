@@ -6,7 +6,6 @@ from collections import Iterable
 from typing import Any, List, Union, Text
 
 import requests
-from pykechain.models import Base
 from requests.compat import urljoin  # type: ignore
 from six import text_type
 
@@ -14,6 +13,7 @@ from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
+from pykechain.models import Base
 from pykechain.models.tags import TagsMixin
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid, parse_datetime
@@ -284,7 +284,7 @@ class Activity2(Base, TagsMixin):
         :raises APIError: when other error occurs
 
         """
-        raise('Subprocess function is outdated in KE-chain 2.9.0, use `Activity2.parent()` method', DeprecationWarning)
+        raise ('Subprocess function is outdated in KE-chain 2.9.0, use `Activity2.parent()` method', DeprecationWarning)
         # return self.parent()
 
     def parent(self):
@@ -365,7 +365,7 @@ class Activity2(Base, TagsMixin):
 
     def edit(self, name=None, description=None, start_date=None, due_date=None, assignees=None, assignees_ids=None,
              status=None, tags=None):
-        # type: (Text, Text, datetime.datetime, datetime.datetime, List[Text], List[Text], Union[ActivityStatus, Text], Iterable[Text]) -> None
+        # type: (Text, Text, datetime.datetime, datetime.datetime, List[Text], List[Text], Union[ActivityStatus, Text], Iterable[Text]) -> None  # noqa: E501
         """Edit the details of an activity.
 
         :param name: (optionally) edit the name of the activity
