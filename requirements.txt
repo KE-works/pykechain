@@ -32,7 +32,7 @@ PyOpenSSL==19.0.0; python_version <= '2.7'
 twine==1.13.0
 
 # for version comparison
-semver==2.8.1
+semver==2.9.0
 
 
 
