@@ -41,7 +41,7 @@ features of `KE-chain <http://www.ke-chain.com>`__, the engineering platform of 
 With it you can interact with KE-chain, its product information model (PIM), its workflow information model (WIM) and
 many other aspects of KE-chain from python scripts or iPython / `Jupyter <http://jupyter.org>`__ notebooks.
 
-It requires normal user access to a KE-chain (version 2) instance for it to work.
+It requires normal user access to a KE-chain (version 3) instance for it to work.
 
 Basic usage
 -----------
@@ -49,7 +49,7 @@ Basic usage
 Ensure you have member access to a KE-chain instance and login::
 
     from pykechain import Client
-    kec = Client(url='https://kec2api.ke-chain.com')
+    kec = Client(url='https://kec3api.ke-chain.com')
     kec.login(username='demo_user', password='pastaplease')
 
 Now interact with it::
@@ -61,7 +61,7 @@ Now interact with it::
 Installation
 ------------
 
-pykechain is easily installed using pip. pykechain is Python 2.7, 3.4, 3.5, 3.6 and 3.7 compatible::
+pykechain is easily installed using pip. pykechain is Python `3.5`, `3.6`, `3.7` and `pypy3` compatible::
 
     pip install pykechain
 
