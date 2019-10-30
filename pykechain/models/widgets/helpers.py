@@ -146,7 +146,7 @@ def _initiate_meta(kwargs, activity, ignores=()):
     return meta
 
 
-def _check_prefilters(part_model: 'Part2', prefilters: Dict):
+def _check_prefilters(part_model: 'Part2', prefilters: Dict):  # noqa: F821
     """
     Check the pre-filters on a `FilteredGridWidget`.
 
