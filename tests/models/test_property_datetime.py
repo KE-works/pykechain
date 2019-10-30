@@ -8,18 +8,19 @@ from tests.classes import TestBetamax
 
 class TestDateTime(TestBetamax):
     example_time = datetime.datetime.now()
-    
+
     def setUp(self) -> None:
         super(TestDateTime, self).setUp()
 
         self.property_model = self.project.model('Bike').add_property(
             name='Testing date', property_type=PropertyType.DATETIME_VALUE)  # type: DatetimeProperty2
         self.property = self.project.part('Bike').property(name='Testing date')  # type: DatetimeProperty2
-        
+
         self.property.value = self.example_time
 
     def tearDown(self):
         self.property_model.delete()
+        super(TestDateTime, self).tearDown()
 
     def test_get_datetime(self):
         value = self.property.value
