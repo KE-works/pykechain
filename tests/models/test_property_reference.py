@@ -505,12 +505,12 @@ class TestMultiReferencePropertyXScope(TestBetamax):
         self.part_model = self.project.model('Bike')
 
         # Create reference property and retrieve its instance
-        prop_name = 'cross-scope reference property ({})'.format(str(uuid.uuid4())[-8:])
+        prop_name = 'cross-scope reference property'
         self.x_reference_model = self.part_model.add_property(
             name=prop_name,
             property_type=PropertyType.REFERENCES_VALUE,
         )
-        self.x_reference = self.part_model.instance().property(name=prop_name)
+        self.x_reference = self.part_model.instance().property(prop_name)
 
         # Define target model and create an instance
         product_root = self.x_scope.model('Product')

@@ -3,6 +3,7 @@ import warnings
 from datetime import datetime
 from unittest import skipIf
 
+import pytest
 import pytz
 import requests
 
@@ -373,6 +374,8 @@ class TestActivityDownloadAsPDF(TestBetamax):
             self.assertTrue(pdf_file)
             self.assertTrue(pdf_file_called_after_activity)
 
+    @pytest.mark.skipif("os.getenv('TRAVIS', False)",
+                        reason="Skipping tests when using Travis, as Async PDF is not doable without being live")
     def test_activity2_download_as_pdf_async(self):
         activity_name = 'Task - Form + Tables + Service'
         activity = self.project.activity(name=activity_name)
