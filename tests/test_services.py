@@ -317,7 +317,6 @@ class TestServiceExecutions(TestServiceSetup):
 
     @pytest.mark.skipif("os.getenv('TRAVIS', False)",
                         reason="Skipping tests when using Travis, as Service Execution cannot be provided")
-    @skip('This is not working at the moment as the kecrunch images do not have the PIM2 compatible images')
     def test_debug_service_execution_terminate(self):
         service_execution = self.service.execute()
         self.assertEqual(service_execution.status, ServiceExecutionStatus.LOADING)

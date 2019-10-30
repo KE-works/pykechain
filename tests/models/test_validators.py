@@ -313,7 +313,12 @@ class TestRequiredFieldValidator(SixTestCase):
         self.assertFalse(validator.is_valid(None))
         self.assertFalse(validator.is_valid(''))
         self.assertFalse(validator.is_valid([]))
-        self.assertFalse(validator.is_valid(False))
+        self.assertFalse(validator.is_valid(list()))
+        self.assertFalse(validator.is_valid(tuple()))
+        self.assertFalse(validator.is_valid(set()))
+
+        # the value 'False' is not a None value so that is True (placed in other test)
+        # self.assertFalse(validator.is_valid(False))
 
     def test_requiredfield_validator_is_true_on_value(self):
         validator = RequiredFieldValidator()

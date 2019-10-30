@@ -37,29 +37,6 @@ class TestScopes(TestBetamax):
         with self.assertRaises(MultipleFoundError):
             self.client.scope()
 
-    # 1.11
-    @skipIf(TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 1, expected to fail on new PIM2")
-    def test_retrieve_scope_members(self):
-        original_scope_members = [u.get('username') for u in self.project.members()]
-        original_scope_managers = [u.get('username') for u in self.project.members(is_manager=True)]
-        scope_managers = original_scope_managers + ['testmanager']
-        scope_members = original_scope_members + ['anotheruser', 'testuser']
-
-        self.project.add_manager('testmanager')
-        self.project.add_member('anotheruser')
-        self.project.add_member('testuser')
-
-        self.project.refresh()
-
-        members_usernames = [member['username'] for member in self.project.members()]
-        managers_usernames = [manager['username'] for manager in self.project.members(is_manager=True)]
-
-        self.assertSetEqual(set(scope_members), set(members_usernames))
-        self.assertSetEqual(set(scope_managers), set(managers_usernames))
-
-        # teardown
-        self.project.remove_member('anotheruser')
-
     def test_add_member(self):
         member_to_be_added = 'anotheruser'
         # testing
