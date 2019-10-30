@@ -1377,8 +1377,8 @@ class Client(object):
             required_new_property_keys = ['name', 'property_type']
             for new_prop in properties_fvalues:
                 if not all(k in new_prop.keys() for k in required_new_property_keys):
-                    raise IllegalArgumentError("New property '{}' does not have a required field provided in the "
-                                               "`properties_fvalues` list")
+                    raise IllegalArgumentError("New property '{}' does not have a required field ({}) provided in the "
+                                               "`properties_fvalues` list".format(new_prop, required_new_property_keys))
         else:
             raise IllegalArgumentError("`properties_fvalues` need to be provided as a list of dicts")
 
