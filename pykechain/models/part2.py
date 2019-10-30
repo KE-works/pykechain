@@ -550,7 +550,7 @@ class Part2(Base):
     def add_with_properties(self, model, name=None, update_dict=None, properties_fvalues=None, refresh=True, **kwargs):
         # type: (Part2, Optional[Text], Optional[Dict], Optional[List[Dict]], Optional[bool], **Any) -> Part2
         """
-        Add a part as a child of this part and update its properties in one go.
+        Add a new part instance of a model as a child of this part instance and update its properties in one go.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
         additional keyword=value argument to this method. This will improve performance of the backend
