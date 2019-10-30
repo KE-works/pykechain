@@ -4,13 +4,13 @@ from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text, Dict
 import requests
 from six import string_types, text_type
 
+from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes, \
     ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, CardWidgetLinkTarget
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
     _check_prefilters, _check_excluded_propmodels
-from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.utils import is_uuid, find
 
 
@@ -415,7 +415,8 @@ class WidgetsManager(Sized):
                           'accordingly to use `title`', PendingDeprecationWarning)
             title = kwargs.pop('custom_title')
 
-        attachment_property = _retrieve_object(attachment_property, method=self._client.property)  # type: Property2  # noqa
+        attachment_property = _retrieve_object(attachment_property,
+                                               method=self._client.property)  # type: Property2  # noqa
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
         if 'height' in kwargs:
@@ -580,7 +581,7 @@ class WidgetsManager(Sized):
             title = kwargs.pop('custom_title')
 
         # Check whether the part_model is uuid type or class `Part`
-        part_instance = _retrieve_object(part_instance, method=self._client.part)  # type: Part2
+        part_instance = _retrieve_object(part_instance, method=self._client.part)  # type: Part2  # noqa: F821
 
         if not show_columns:
             show_columns = list()
@@ -623,7 +624,7 @@ class WidgetsManager(Sized):
 
     def add_service_widget(self, service, title=False, custom_button_text=False, emphasize_run=True,
                            download_log=False, parent_widget=None, **kwargs):
-        # type: (Service, Optional[Union[type(None), bool, Text]], Optional[Union[type(None), bool, Text]], Optional[bool], Optional[bool], Optional[Union[Widget, Text]], **Any) -> Widget
+        # type: (Service, Optional[Union[type(None), bool, Text]], Optional[Union[type(None), bool, Text]], Optional[bool], Optional[bool], Optional[Union[Widget, Text]], **Any) -> Widget  # noqa: E501, F821
         """
         Add a KE-chain Service (e.g. script widget) to the widget manager.
 
@@ -894,7 +895,7 @@ class WidgetsManager(Sized):
                             color_in_progress=ProgressBarColors.DEFAULT_IN_PROGRESS,
                             color_in_progress_background=ProgressBarColors.DEFAULT_IN_PROGRESS_BACKGROUND,
                             show_progress_text=True, **kwargs):
-        # type: (Optional[int], Optional[Union[str, ProgressBarColors]], Optional[Union[str, ProgressBarColors]], Optional[Union[str, ProgressBarColors]], Optional[Union[str, ProgressBarColors]], Optional[bool], **Any) -> ()
+        # type: (Optional[int], Optional[Union[str, ProgressBarColors]], Optional[Union[str, ProgressBarColors]], Optional[Union[str, ProgressBarColors]], Optional[Union[str, ProgressBarColors]], Optional[bool], **Any) -> ()  # noqa: E501
         """
         Add a KE-chain progress bar widget to the WidgetManager.
 
@@ -1043,12 +1044,11 @@ class WidgetsManager(Sized):
 
     def add_signature_widget(self, attachment_property, title=False, custom_button_text=False,
                              custom_undo_button_text=False, **kwargs):
-        # type: (Property2, Optional[Union[bool, Text]], Optional[Union[bool, Text]], Optional[Union[bool, Text]], **Any) -> Widget
+        # type: (Property2, Optional[Union[bool, Text]], Optional[Union[bool, Text]], Optional[Union[bool, Text]], **Any) -> Widget  # noqa: F821, E501
         """
         Add a KE-chain Signature widget to the Widgetmanager and the activity.
 
         The widget will be saved in KE-chain.
-
 
         :param attachment_property: KE-chain Attachment property to display
         :type attachment_property: AttachmentProperty
@@ -1067,13 +1067,13 @@ class WidgetsManager(Sized):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-
         if 'custom_title' in kwargs and not title:
             warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
                           'accordingly to use `title`', PendingDeprecationWarning)
             title = kwargs.pop('custom_title')
 
-        attachment_property = _retrieve_object(attachment_property, method=self._client.property)  # type: Property2  # noqa
+        attachment_property = _retrieve_object(attachment_property,
+                                               method=self._client.property)  # type: Property2  # noqa
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
         meta, title = _set_title(meta, title, default_title=attachment_property.name)
@@ -1114,7 +1114,7 @@ class WidgetsManager(Sized):
 
     def add_card_widget(self, image=None, title=None, description=None, link=None,
                         link_target=CardWidgetLinkTarget.SAME_TAB, **kwargs):
-        # type: (Optional[Property2], Optional[Union[type(None), Text, bool]], Optional[Union[Text, bool]], Optional[Union[type(None), Text, Property2, bool]], Optional[Union[Text, CardWidgetLinkTarget]], **Any) -> Widget
+        # type: (Optional[Property2], Optional[Union[type(None), Text, bool]], Optional[Union[Text, bool]], Optional[Union[type(None), Text, Property2, bool]], Optional[Union[Text, CardWidgetLinkTarget]], **Any) -> Widget  # noqa: E501
         """
         Add a KE-chain Card widget to the WidgetManager and the activity.
 

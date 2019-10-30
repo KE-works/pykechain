@@ -74,7 +74,7 @@ class Property2(Property):
 
     @property
     def model_id(self):
-        # type: () -> (type(None), Part2)
+        # type: () -> (type(None), Part2)  # noqa: F821
         """Model id of the Property.
 
         Returns None if the property is a model of its own. It will not return the model object, only the uuid.
@@ -88,7 +88,7 @@ class Property2(Property):
 
     @property
     def part(self):
-        # type: () -> Part2
+        # type: () -> Part2  # noqa: F821
         """Retrieve the part that holds this Property.
 
         :returns: The :class:`Part` associated to this property
@@ -289,7 +289,7 @@ class Property2(Property):
                                        format(self.name, target_part.name))
 
     def move(self, target_part, name=None):
-        # type: (Part2, Optional[Text]) -> Property2
+        # type: (Part2, Optional[Text]) -> Property2  # noqa: F821
         """Move a property model or instance.
 
         :param target_part: `Part` object under which the desired `Property` is moved

@@ -103,4 +103,3 @@ API_EXTRA_PARAMS = {
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
          'parent_id', 'progress', 'has_subwidgets', 'scope_id'])}
 }
-

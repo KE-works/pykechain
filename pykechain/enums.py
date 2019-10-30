@@ -629,7 +629,9 @@ class FilterType(Enum):
 
 
 class ProgressBarColors(Enum):
-    """Some basic colors that can be set on a Progress Bar inside a Progress Bar Widget.
+    """
+    Some basic colors that can be set on a Progress Bar inside a Progress Bar Widget.
+
     .. versionadded:: 3.0
 
     :cvar BLACK: '#000000'
@@ -648,6 +650,10 @@ class ProgressBarColors(Enum):
     :cvar PURPLE: '#800080'
     :cvar TEAL: '#008080'
     :cvar NAVY: '#000080'
+    :cvar DEFAULT_COMPLETED: '#339447'
+    :cvar DEFAULT_IN_PROGRESS: '#FF6600'
+    :cvar DEFAULT_NO_PROGRESS: '#EEEEEE'
+    :cvar DEFAULT_IN_PROGRESS_BACKGROUND: '#FC7C3D'
     """
 
     BLACK = '#000000'
@@ -673,16 +679,44 @@ class ProgressBarColors(Enum):
 
 
 class CardWidgetLinkTarget(Enum):
+    """
+    Target for the CardWidget link.
+
+    .. versionadded:: 3.0
+
+    :cvar SAME_TAB: "_self"
+    :cvar NEW_TAB: "_blank"
+    """
+
     SAME_TAB = "_self"
     NEW_TAB = '_blank'
 
 
 class CardWidgetLinkValue(Enum):
+    """
+    Link Value for the CardWidget.
+
+    .. versionadded:: 3.0
+
+    :cvar EXTERNAL_LINK: "External link"
+    :cvar TASK_LINK: "Task link"
+    :cvar NO_LINK: "No link"
+    """
+
     EXTERNAL_LINK = "External link"
     TASK_LINK = "Task link"
     NO_LINK = "No link"
 
 
 class CardWidgetImageValue(Enum):
+    """
+    Image for the CardWidget.
+
+    .. versionadded:: 3.0
+
+    :cvar CUSTOM_IMAGE: "Custom image"
+    :cvar NO_IMAGE: "No image"
+    """
+
     CUSTOM_IMAGE = "Custom image"
     NO_IMAGE = "No image"

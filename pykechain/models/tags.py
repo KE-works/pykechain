@@ -1,6 +1,5 @@
 from abc import abstractmethod
-
-from typing import Iterable, Text, Any, Optional, List
+from typing import Iterable, Text, Optional, List
 
 from pykechain.exceptions import IllegalArgumentError
 
@@ -12,16 +11,16 @@ class TagsMixin:
     :ivar tags: list of tags
     :type tags: list
     """
+
     _tags = list()
 
     @abstractmethod
-    def edit(self, tags=None, *args, **kwargs):
-        # type: (Optional[Iterable[Text]], *Any, **Any) -> None
+    def edit(self, tags: Optional[Iterable[Text]] = None, *args, **kwargs) -> None:
+        """Edit the list of Tags."""
         pass
 
     @property
-    def tags(self):
-        # type: () -> List[Text]
+    def tags(self) -> List[Text]:
         """
         Get a list of tags, with each tag being a string.
 
@@ -31,8 +30,7 @@ class TagsMixin:
         return list(self._tags) if self._tags is not None else list()
 
     @tags.setter
-    def tags(self, new_tags):
-        # type: (Iterable[Text]) -> None
+    def tags(self, new_tags: Iterable[Text]) -> None:
         if new_tags is not None:
             if not isinstance(new_tags, (list, tuple, set)) or not all(isinstance(t, Text) for t in new_tags):
                 raise IllegalArgumentError("Provided tags should be a list, tuple or set of strings. "
@@ -45,8 +43,7 @@ class TagsMixin:
         self.edit(tags=unique_tags)
         self._tags = unique_tags
 
-    def remove_tag(self, tag):
-        # type: (Text) -> None
+    def remove_tag(self, tag: Text) -> None:
         """
         Remove a tag from the existing tags.
 
@@ -64,8 +61,7 @@ class TagsMixin:
         remaining_tags.remove(tag)
         self.tags = remaining_tags
 
-    def add_tag(self, tag):
-        # type: (Text) -> None
+    def add_tag(self, tag: Text) -> None:
         """
         Append a tag to the existing tags.
 
@@ -80,8 +76,7 @@ class TagsMixin:
         updated_tags.append(tag)
         self.tags = updated_tags
 
-    def has_tag(self, tag):
-        # type: (Text) -> bool
+    def has_tag(self, tag: Text) -> bool:
         """
         Check whether a tag is used.
 

@@ -144,7 +144,7 @@ class Scope2(Base, TagsMixin):
 
     def edit(self, name=None, description=None, start_date=None, due_date=None, status=None, tags=None, team=None,
              options=None):
-        # type: (Text, Text, datetime.datetime, datetime.datetime, Union[ScopeStatus, Text], Iterable[Text], Team, Dict) -> None
+        # type: (Text, Text, datetime.datetime, datetime.datetime, Union[ScopeStatus, Text], Iterable[Text], Team, Dict) -> None  # noqa: E501
         """Edit the details of a scope.
 
         :param name: (optionally) edit the name of the scope

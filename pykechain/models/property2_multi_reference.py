@@ -1,5 +1,6 @@
-from six import text_type, string_types
 from typing import List, Optional, Text, Union, Any
+
+from six import text_type, string_types
 
 from pykechain.enums import Category, FilterType, PropertyType
 from pykechain.exceptions import IllegalArgumentError
@@ -154,7 +155,8 @@ class MultiReferenceProperty2(Property2):
 
     def set_prefilters(self, property_models, values, filters_type=FilterType.CONTAINS, overwrite=False):
         # type: (List[Union[Text, Part2]], List[Any], List[FilterType], Optional[bool]) -> None
-        """Sets the pre-filters on a `MultiReferenceProperty`.
+        """
+        Set the pre-filters on a `MultiReferenceProperty`.
 
         :param property_models: `list` of `Property` models (or their IDs) to set pre-filters on
         :type property_models: list
@@ -252,8 +254,8 @@ class MultiReferenceProperty2(Property2):
             elif self.value[0].id != property_model._json_data.get('part_id', self.value[0].id):
                 raise IllegalArgumentError(
                     'A part reference property can only exclude properties belonging to the referenced Part model, '
-                    'found referenced Part model "{}" and Properties belonging to "{}"'.
-                        format(self.value[0].name, property_model.part.name))
+                    'found referenced Part model "{}" and Properties belonging to "{}"'.format(
+                        self.value[0].name, property_model.part.name))
             else:
                 list_of_propmodels_excl.append(property_model.id)
 

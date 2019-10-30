@@ -3,11 +3,11 @@ from typing import Any, Optional, List, AnyStr, Dict
 import requests
 from jsonschema import validate
 
+from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import WidgetTypes, Category
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Base
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
-from pykechain.defaults import API_EXTRA_PARAMS
 
 
 class Widget(Base):
@@ -278,7 +278,7 @@ class Widget(Base):
         return copied_widget
 
     def move(self, target_activity, order=None):
-        # type: (Activity2, Optional[int]) -> Widget
+        # type: (Activity2, Optional[int]) -> Widget # noqa: F821
         """Move the widget.
 
         :param target_activity: `Activity` object under which the desired `Widget` is moved
@@ -294,4 +294,3 @@ class Widget(Base):
         self.delete()
 
         return moved_widget
-
