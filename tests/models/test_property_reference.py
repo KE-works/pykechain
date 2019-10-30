@@ -40,7 +40,7 @@ class TestMultiReferenceProperty(TestBetamax):
         self.ref_target_spokes_prop = self.ref_target_model.property('__spokes')
         self.ref_target_material_prop = self.ref_target_model.property('__rim-material')
 
-        self.ref_prop_name = 'Test reference property ({})'.format(str(uuid.uuid4())[-8:])
+        self.ref_prop_name = '__Test reference property'
         self.ref_prop_model = self.part_model.add_property(
             name=self.ref_prop_name,
             property_type=PropertyType.REFERENCES_VALUE,
@@ -48,7 +48,7 @@ class TestMultiReferenceProperty(TestBetamax):
         )  # type: MultiReferenceProperty2
 
         # reference property instance (holding the value
-        self.ref = self.part_model.instance().property(name=self.ref_prop_name)
+        self.ref = self.part_model.instance().property(self.ref_prop_name)
 
     def tearDown(self):
         self.ref_target_model.delete()
