@@ -1,9 +1,6 @@
-import warnings
-from random import randrange
-
+from pykechain.enums import PropertyType, Category
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models import Property
-from pykechain.enums import PropertyType, Category
 from pykechain.models.validators import SingleReferenceValidator
 from tests.classes import TestBetamax
 
@@ -323,7 +320,8 @@ class TestProperties(TestBetamax):
     def test_copy_property_instance(self):
         # setUp
         self.test_property_instance.value = 200
-        copied_property = self.test_property_instance.copy(target_part=self.front_wheel, name='Copied property instance')
+        copied_property = self.test_property_instance.copy(target_part=self.front_wheel,
+                                                           name='Copied property instance')
 
         # testing
         self.assertEqual(copied_property.name, 'Copied property instance')
@@ -336,7 +334,8 @@ class TestProperties(TestBetamax):
 
     def test_copy_reference_property_with_options(self):
         # setUp
-        copied_ref_property = self.test_ref_property_model.copy(target_part=self.wheel_model, name='Copied ref property')
+        copied_ref_property = self.test_ref_property_model.copy(target_part=self.wheel_model,
+                                                                name='Copied ref property')
 
         # testing
         self.assertEqual(copied_ref_property.name, 'Copied ref property')

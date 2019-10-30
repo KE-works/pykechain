@@ -4,7 +4,7 @@ from pykechain.enums import Multiplicity, Category, Classification
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import Part, PartSet, Part2
 from tests.classes import TestBetamax
-from tests.utils import TEST_FLAG_IS_PIM2
+from tests.utils import TEST_FLAG_IS_PIM3
 
 
 class TestParts(TestBetamax):
@@ -15,7 +15,7 @@ class TestParts(TestBetamax):
         self.assertTrue(len(parts))
 
     def test_retrieve_single_part(self):
-        part_to_retrieve =self.project.parts()[0]
+        part_to_retrieve = self.project.parts()[0]
         part = self.project.part(part_to_retrieve.name)
 
         self.assertTrue(part)
@@ -414,43 +414,11 @@ class TestParts(TestBetamax):
         with self.assertRaises(APIError):
             seat.clone()
 
-    @skipIf(TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 1, expected to fail on new PIM2")
-    def test_clone_instance_with_sub_parts(self):
-        instance_name = 'Rear Wheel'
-        rear_wheel = self.project.part(instance_name)
 
-        # testing
-        with self.assertRaises(APIError):
-            rear_wheel.clone()
-
-
-@skipIf(TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 1, expected to fail on new PIM2")
-class TestPIM1SpecificPartTests(TestBetamax):
-    def test_retrieve_part_without_parent_id(self):
-        # only the root does not have a parent_id
-        product_root_node = self.project.part(name='Product container', classification=Classification.PRODUCT)
-        root_node = product_root_node.parent()
-        self.assertTrue(hasattr(root_node, 'parent_id'))
-        self.assertIsNone(root_node.parent_id)
-
-    def test_retrieve_parent_of_part_without_parent_id(self):
-        # only the root does not have a parent_id
-        product_root_node = self.project.part(name='Product container', classification=Classification.PRODUCT)
-        root_node = product_root_node.parent()
-        parent_of_root_node = root_node.parent()
-        self.assertIsNone(parent_of_root_node)
-
-    def test_retrieve_siblings_of_part_without_parent_id(self):
-        product_root_node = self.project.part(name='Product container', classification=Classification.PRODUCT)
-        root_node = product_root_node.parent()
-        siblings_of_root_node = root_node.siblings()
-        self.assertIsInstance(siblings_of_root_node, PartSet)
-        self.assertEqual(len(siblings_of_root_node), 0)
-
-
-@skipIf(not TEST_FLAG_IS_PIM2, reason="This tests is designed for PIM version 2, expected to fail on older PIM2")
+@skipIf(not TEST_FLAG_IS_PIM3, reason="This tests is designed for PIM version 3, expected to fail on older PIM3")
 class TestPIM2SpecificPartTests(TestBetamax):
     """Pim3 capable tests."""
+
     def test_retrieve_part_without_parent_id(self):
         # only the root does not have a parent_id
         product_root_node = self.project.part(name='Product', classification=Classification.PRODUCT)
@@ -474,5 +442,3 @@ class TestPIM2SpecificPartTests(TestBetamax):
         siblings_of_root_node = product_root_node.parent().siblings()
         self.assertIsInstance(siblings_of_root_node, PartSet)
         self.assertEqual(len(siblings_of_root_node), 0)
-
-
