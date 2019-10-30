@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pykechain.enums import PropertyType, Category
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models import Property
@@ -11,36 +13,25 @@ class TestProperties(TestBetamax):
 
         self.wheel_model = self.project.model('Wheel')
         self.bike = self.project.model('Bike')
-        self.test_property = self.bike.add_property(name="Test property",
-                                                    property_type=PropertyType.INT_VALUE,
-                                                    description='Description of test property',
-                                                    unit='metric units',
-                                                    default_value=29)
+        self.test_property_model = self.bike.add_property(name="__Test property @ {}".format(datetime.now()),
+                                                          property_type=PropertyType.INT_VALUE,
+                                                          description='Description of test property',
+                                                          unit='units',
+                                                          default_value=42)
         self.front_wheel = self.project.part(name='Front Wheel')
-        self.test_property_instance = self.bike.instance().property(name=self.test_property.name)
+        self.test_property_instance = self.bike.instance().property(name=self.test_property_model.name)
 
-        srv = SingleReferenceValidator()
-        self.test_ref_property_model = self.bike.add_property(name="Test ref property",
-                                                              property_type=PropertyType.REFERENCES_VALUE,
-                                                              description='Description of test ref property',
-                                                              unit='metric units',
-                                                              default_value=[self.wheel_model],
-                                                              )
-        self.test_ref_property_model.validators = [srv]
+        # single_reference_validator = SingleReferenceValidator()
+        # self.test_ref_property_model = self.bike.add_property(name="__Test ref property @ {}".format(datetime.now()),
+        #                                                       property_type=PropertyType.REFERENCES_VALUE,
+        #                                                       description='Description of test ref property',
+        #                                                       unit='no unit',
+        #                                                       default_value=[self.wheel_model])
+        # self.test_ref_property_model.validators = [single_reference_validator]
 
     def tearDown(self):
-        try:
-            self.test_property.delete()
-        except APIError:
-            pass
-        try:
-            self.test_property_instance.model().delete()
-        except APIError:
-            pass
-        try:
-            self.test_ref_property_model.delete()
-        except APIError:
-            pass
+        self.test_property_model.delete()
+        super(TestProperties, self).tearDown()
 
     def test_retrieve_properties(self):
         properties = self.project.properties('Diameter')
@@ -291,31 +282,32 @@ class TestProperties(TestBetamax):
     # 3.0
     def test_copy_property_model(self):
         # setUp
-        copied_property = self.test_property.copy(target_part=self.wheel_model, name='Copied property')
+        copied_property = self.test_property_model.copy(target_part=self.wheel_model, name='Copied property')
 
         # testing
         self.assertEqual(copied_property.name, 'Copied property')
-        self.assertEqual(copied_property.description, self.test_property.description)
-        self.assertEqual(copied_property.unit, self.test_property.unit)
-        self.assertEqual(copied_property.value, self.test_property.value)
+        self.assertEqual(copied_property.description, self.test_property_model.description)
+        self.assertEqual(copied_property.unit, self.test_property_model.unit)
+        self.assertEqual(copied_property.value, self.test_property_model.value)
 
         # tearDown
         copied_property.delete()
 
     def test_move_property_model(self):
         # setUp
-        moved_property = self.test_property.move(target_part=self.wheel_model, name='Copied property')
+        moved_property = self.test_property_model.move(target_part=self.wheel_model, name='Copied property')
 
         # testing
         self.assertEqual(moved_property.name, 'Copied property')
-        self.assertEqual(moved_property.description, self.test_property.description)
-        self.assertEqual(moved_property.unit, self.test_property.unit)
-        self.assertEqual(moved_property.value, self.test_property.value)
+        self.assertEqual(moved_property.description, self.test_property_model.description)
+        self.assertEqual(moved_property.unit, self.test_property_model.unit)
+        self.assertEqual(moved_property.value, self.test_property_model.value)
         with self.assertRaises(NotFoundError):
-            self.project.property(id=self.test_property.id)
+            self.project.property(id=self.test_property_model.id)
 
         # tearDown
-        moved_property.delete()
+        # for a correct teardown in the unittest we need to -reassign- the moved one to the self.test_property_model
+        self.test_property_model = moved_property
 
     def test_copy_property_instance(self):
         # setUp
@@ -332,13 +324,35 @@ class TestProperties(TestBetamax):
         # tearDown
         copied_property.model().delete()
 
+
+
+
+class TestPropertiesWithReferenceProperty(TestBetamax):
+    def setUp(self):
+        super(TestPropertiesWithReferenceProperty, self).setUp()
+
+        self.wheel_model = self.project.model('Wheel')
+        self.bike = self.project.model('Bike')
+
+
+        self.test_ref_property_model = self.bike.add_property(name="__Test ref property @ {}".format(datetime.now()),
+                                                              property_type=PropertyType.REFERENCES_VALUE,
+                                                              description='Description of test ref property',
+                                                              unit='no unit',
+                                                              default_value=[self.wheel_model])
+        self.test_ref_property_model.validators = [SingleReferenceValidator()]
+
+    def tearDown(self):
+        self.test_ref_property_model.delete()
+        super(TestPropertiesWithReferenceProperty, self).tearDown()
+
     def test_copy_reference_property_with_options(self):
         # setUp
         copied_ref_property = self.test_ref_property_model.copy(target_part=self.wheel_model,
-                                                                name='Copied ref property')
+                                                                name='__Copied ref property')
 
         # testing
-        self.assertEqual(copied_ref_property.name, 'Copied ref property')
+        self.assertEqual(copied_ref_property.name, '__Copied ref property')
         self.assertEqual(copied_ref_property.description, self.test_ref_property_model.description)
         self.assertEqual(copied_ref_property.unit, self.test_ref_property_model.unit)
         self.assertEqual(copied_ref_property.value, self.test_ref_property_model.value)
