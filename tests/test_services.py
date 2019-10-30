@@ -26,7 +26,8 @@ class TestServiceSetup(TestBetamax):
             name=name or 'Test upload script to service',
             description="Only used for testing - you can safely remove this"
         )
-        upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'uploaded', 'test_upload_script.py')
+        upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_script_to_service',
+                                   'test_upload_script.py')
 
         # testing
         new_service.upload(pkg_path=upload_path)
@@ -220,7 +221,8 @@ class TestServicesWithCustomUploadedService(TestServiceSetup):
 
     def test_upload_script_to_service(self):
         # setUp
-        upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'uploaded', 'test_upload_script.py')
+        upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_script_to_service',
+                                   'test_upload_script.py')
 
         # testing
         self.service.upload(pkg_path=upload_path)

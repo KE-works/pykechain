@@ -55,38 +55,6 @@ class TestWidgets(TestBetamax):
         self.assertIsInstance(obj, Widget)
         self.assertIsNotNone(obj.meta)
 
-
-@skip('This test is deprecated as we only support online widget_schema checking.')
-class TestWidgetsValidation(SixTestCase):
-
-    def test_create_widgets_from_all_widget_test_activity(self):
-        """Test a comprehensive list with all widgets created with the form editor. (JUN19)"""
-        fn = 'test_activity_widgets.json'
-
-        filepath = os.path.join(os.path.dirname(__file__), 'files', 'widget_tests', fn)
-        with open(filepath) as fd:
-            widget_raw_jsons = json.load(fd)
-        for widget in widget_raw_jsons:
-            w = Widget.create(json=widget, client=False)
-            self.assertIsInstance(w, Widget)
-            self.assertEqual(w.widget_type, widget.get('widget_type'))
-
-    def test_create_widgets_from_all_widget_test_activity_pt2(self):
-        """Test another comprehensive list with all widgets created with the form editor. (JUN19)
-
-        In this test the customHeight is set to "800" being a string, not an int.
-        """
-        fn = "test_activity_widgets_2.json"
-
-        filepath = os.path.join(os.path.dirname(__file__), 'files', 'widget_tests', fn)
-        with open(filepath) as fd:
-            widget_raw_jsons = json.load(fd)
-        for widget in widget_raw_jsons:
-            w = Widget.create(json=widget, client=False)
-            self.assertIsInstance(w, Widget)
-            self.assertEqual(w.widget_type, widget.get('widget_type'))
-
-
 class TestWidgetManager(TestBetamax):
     def test_activity_has_metapanel_in_widget_manager(self):
         activity = self.project.activity('Task - Form + Tables + Service')
