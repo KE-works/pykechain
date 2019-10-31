@@ -176,7 +176,6 @@ class Part2(Base):
 
         :param kwargs: Additional search arguments to search for, check :class:`pykechain.Client.parts`
                        for additional info
-        :type kwargs: dict
         :return: a set of `Parts` as a :class:`PartSet`. Will be empty if no children. Will be a `List` if the
                  children are retrieved from the cached children.
         :raises APIError: When an error occurs.
@@ -463,10 +462,8 @@ class Part2(Base):
         is refreshed.
 
         :param parent: part to add the new instance to
-        :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
-        :type kwargs: dict or None
         :type parent: :class:`Part2`
-        :param kwargs: (optional) additional keyword=value arguments
+        :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
         :return: :class:`Part` with category `INSTANCE`
         :raises APIError: if unable to add the new child instance
 
@@ -517,7 +514,6 @@ class Part2(Base):
         :param multiplicity: the multiplicity of the new proxy model (default ONE_MANY)
         :type multiplicity: basestring or None
         :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
-        :type kwargs: dict or None
         :return: the new proxied :class:`Part`.
         :raises APIError: in case an Error occurs
 
@@ -579,11 +575,10 @@ class Part2(Base):
         :param refresh: refresh the part after successful completion, default to True
         :type refresh: bool
         :param kwargs: (optional) additional keyword arguments that will be passed inside the update request
-        :type kwargs: dict or None
         :return: the newly created :class:`Part`
         :raises NotFoundError: when the property name is not a valid property of this part
         :raises APIError: in case an Error occurs
-        :raised IllegalArgumentError: in case of illegal arguments.
+        :raises IllegalArgumentError: in case of illegal arguments.
 
         Examples
         --------
@@ -804,8 +799,6 @@ class Part2(Base):
         :param properties_fvalues: (optional) keyword argument with raw list of properties update dicts
         :type properties_fvalues: list of dict or None
         :param kwargs: additional keyword-value arguments that will be passed into the part update request.
-        :type kwargs: dict or None
-
         :return: the updated :class:`Part`
         :raises NotFoundError: when the property name is not a valid property of this part
         :raises IllegalArgumentError: when the type or value of an argument provided is incorrect
