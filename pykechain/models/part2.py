@@ -7,7 +7,7 @@ from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import Category, Multiplicity
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance
-from pykechain.models import Base, Scope
+from pykechain.models import Base, Scope2
 from pykechain.models.property2 import Property2
 from pykechain.utils import is_uuid, find
 
@@ -136,7 +136,7 @@ class Part2(Base):
 
         return found
 
-    def scope(self) -> 'Scope':
+    def scope(self) -> 'Scope2':
         """Scope this Part belongs to.
 
         This property will return a `Scope` object. It will make an additional call to the KE-chain API.
