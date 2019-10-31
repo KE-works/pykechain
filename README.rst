@@ -43,6 +43,11 @@ many other aspects of KE-chain from python scripts or iPython / `Jupyter <http:/
 
 It requires normal user access to a KE-chain (version 3) instance for it to work.
 
+.. note::
+   This version of pykechain (> 3.0.0) is suited from KE-chain versions > 3 running on ``python >= 3.5`` exclusively.
+   If you desire to connect to an older version of KE-chain or run on ``python 2.7``, please use a `pykechain v2`
+   release.
+
 Basic usage
 -----------
 
@@ -61,13 +66,28 @@ Now interact with it::
 Installation
 ------------
 
-pykechain is easily installed using pip. pykechain is Python `3.5`, `3.6`, `3.7` and `pypy3` compatible::
+pykechain is easily installed using pip. pykechain is Python ``3.5``, ``3.6``, ``3.7``, ``3.8`` and ``pypy3`` compatible::
 
     pip install pykechain
 
 Or if you want to live on the edge, install the latest and greatest from the master branch::
 
     pip install https://github.com/KE-works/pykechain/archive/master.zip
+
+In scripts you can either use [Pipenv]() or a pip requirements.txt file to install pykechain as a requirement
+
+in a ``Pipfile``::
+
+    [packages]
+    pykechain = "*"
+    # or when you want to install a certain branch
+    pykechain = {ref = "master", git = "https://github.com/KE-works/pykechain"}
+
+in a pip ``requirements.txt``::
+
+    pykechain
+    # or when you want to install a certain branch i.e. `master`
+    git+https://github.com/KE-works/pykechain.git@master#egg=pykechain
 
 Changelog
 ---------

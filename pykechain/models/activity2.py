@@ -74,7 +74,7 @@ class Activity2(Base, TagsMixin):
         Provides a list of `User` objects or an empty list. If no `assignees_ids` are in the API call, then
         returns None.
 
-        :return: a list of `User`s or an empty list.
+        :return: a list of `User`'s or an empty list.
         :rtype: list or None
         """
         if 'assignees_ids' in self._json_data and self._json_data.get('assignees_ids') == list():

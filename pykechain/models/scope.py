@@ -419,11 +419,13 @@ class Scope(Base):
         return self._client.clone_scope(*args, source_scope=self, **kwargs)
 
     def delete(self):
-        """Delete the scope.
+        """
+        Delete the scope.
 
-        Only works with enough permissions
+        Only works with enough permissions.
 
         .. versionadded: 3.0
+
         :raises ForbiddenError: if you do not have the permissions to delete a scope
         """
         url = self._client._build_url('scope', scope_id=self.id)

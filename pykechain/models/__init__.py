@@ -3,6 +3,7 @@ from typing import Union
 
 from .base import Base
 from .scope import Scope
+from .scope2 import Scope2
 from .activity import Activity
 from .activity2 import Activity2
 from .part import Part
@@ -16,6 +17,7 @@ from .property2 import Property2
 from .property2_attachment import AttachmentProperty2
 from .property2_selectlist import SelectListProperty2
 from .property2_multi_reference import MultiReferenceProperty2
+from .property2_datetime import DatetimeProperty2
 from .partset import PartSet
 from .service import Service, ServiceExecution
 from .team import Team
@@ -24,6 +26,7 @@ from .user import User
 __all__ = (
     'Base',
     'Scope',
+    'Scope2',
     'Activity',
     'Activity2',
     'Part',
@@ -37,6 +40,7 @@ __all__ = (
     'Property2',
     'AttachmentProperty2',
     'SelectListProperty2',
+    'DatetimeProperty2',
     'MultiReferenceProperty2',
     'Service',
     'ServiceExecution',
