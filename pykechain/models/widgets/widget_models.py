@@ -89,3 +89,7 @@ class CardWidget(Widget):
 
 class ThirdpartyWidget(Widget):
     """Thirdparty Widget."""
+
+
+class TasksWidget(Widget):
+    """Tasks Widget."""
