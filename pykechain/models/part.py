@@ -605,8 +605,7 @@ class Part(Base):
                                                  model=model.id,
                                                  parent=self.id,
                                                  properties=json.dumps(properties_update_dict),
-                                                 **kwargs
-                                             ),
+                                                 **kwargs),
                                              params=dict(select_action=action))
 
             if response.status_code != requests.codes.created:  # pragma: no cover
@@ -678,9 +677,7 @@ class Part(Base):
                 order_dict[prop.id] = property_list.index(prop)
 
         response = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
-                                         data=dict(
-                                             property_order=json.dumps(order_dict)
-                                         ))
+                                         data=dict(property_order=json.dumps(order_dict)))
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not reorder properties")
 

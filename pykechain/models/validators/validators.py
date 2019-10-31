@@ -97,11 +97,10 @@ class NumericRangeValidator(PropertyValidator):
         if self.stepsize != 1 and self.enforce_stepsize:
             # to account also for floating point stepsize checks: https://stackoverflow.com/a/30445184/246235
             if self.minvalue == float('-inf'):
-                self._validation_result = abs(value / self.stepsize -
-                                              round(value / self.stepsize)) < self.accuracy
+                self._validation_result = abs(value / self.stepsize - round(value / self.stepsize)) < self.accuracy
             else:
-                self._validation_result = abs((value - self.minvalue) / self.stepsize -
-                                              round((value - self.minvalue) / self.stepsize)) < self.accuracy
+                self._validation_result = abs((value - self.minvalue) / self.stepsize - round(
+                    (value - self.minvalue) / self.stepsize)) < self.accuracy
 
             if not self._validation_result:
                 self._validation_reason = "Value '{}' is not in alignment with a stepsize of {}". \

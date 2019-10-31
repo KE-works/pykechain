@@ -96,7 +96,7 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
         if not os.getenv(kecenv.KECHAIN_URL):
             raise ClientError(
                 "Error: KECHAIN_URL should be provided as environment variable (use of env vars is enforced)")
-        if not (os.getenv(kecenv.KECHAIN_TOKEN) or
+        if not (os.getenv(kecenv.KECHAIN_TOKEN) or  # noqa: W504
                 (os.getenv(kecenv.KECHAIN_PASSWORD) and os.getenv(kecenv.KECHAIN_PASSWORD))):
             raise ClientError("Error: KECHAIN_TOKEN or KECHAIN_USERNAME and KECHAIN_PASSWORD should be provided as "
                               "environment variable(s) (use of env vars is enforced)")

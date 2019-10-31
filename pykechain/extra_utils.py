@@ -323,6 +323,6 @@ def map_property_instances(original_part, new_part):
 
     # Do the same for each Property of original part instance, using the 'model' id and the get_mapping_dictionary
     for prop_original in original_part.properties:
-        get_mapping_dictionary()[prop_original.id] = [prop_new for prop_new in new_part.properties if
-                                                      get_mapping_dictionary()[prop_original.model_id].id ==
-                                                      prop_new.model_id][0]
+        get_mapping_dictionary()[prop_original.id] = [
+            prop_new for prop_new in new_part.properties if
+            get_mapping_dictionary()[prop_original.model_id].id == prop_new.model_id][0]

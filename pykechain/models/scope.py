@@ -271,9 +271,7 @@ class Scope(Base):
             if manager_object:
                 url = self._client._build_url('scope', scope_id=self.id)
                 response = self._client._request('PUT', url, params={'select_action': select_action},
-                                                 data={
-                                                     'user_id': manager_object['pk']
-                                                 })
+                                                 data={'user_id': manager_object['pk']})
                 if response.status_code != requests.codes.ok:  # pragma: no cover
                     raise APIError("Could not {} {} in Scope".format(select_action.split('_')[0], user_type))
             else:
