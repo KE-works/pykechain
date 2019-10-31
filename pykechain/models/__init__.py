@@ -44,4 +44,4 @@ __all__ = (
     'Team'
 )
 
-AnyProperty = Union[Property2, MultiReferenceProperty2, AttachmentProperty2, SelectListProperty2]
+AnyProperty = Union['Property2', 'MultiReferenceProperty2', 'AttachmentProperty2', 'SelectListProperty2']
