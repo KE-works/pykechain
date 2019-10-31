@@ -3,6 +3,11 @@ Change Log
 
 pykechain changelog
 
+2.6.1 (17JUN19)
+---------------
+ * Fixed a bug where in the move/copy functionality the options to `ReferenceProperty` and `AttachmentProperty` where not passed down. Thanks to @raduiordache. (#502)
+ * Updated dependent versions for development: requests (2.22.0), pytest (4.6.3),tox (3.12.1), twine (1.13.0), matplotlib (3.1.0), Sphinx (2.1.1).
+
 2.6.0 (23APR19)
 ---------------
  * Added the possibility to create a scope, clone a scope, and delete a scope. Check `Client.create_scope()`, `Scope.clone` and `Scope.delete` for documentation. (#359)
