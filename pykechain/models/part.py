@@ -65,7 +65,7 @@ class Part(Base):
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
         self.multiplicity = json.get('multiplicity', None)
         self._cached_children = None
-        self._associated_activities_ids = set()  # type: Set[Any]
+        self._associated_activities_ids = set()
 
     def property(self, name):
         """Retrieve the property belonging to this part based on its name or uuid.

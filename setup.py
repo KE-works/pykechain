@@ -80,6 +80,15 @@ setup(
     # simple. Or you can use find_packages().
     packages=find_packages(exclude=['tests']),
 
+    # Project URLs
+    project_urls={
+        'Documentation': 'https://pykechain.readthedocs.io/en/latest',
+        'Changelog': 'https://github.com/KE-works/pykechain/blob/master/CHANGELOG.rst',
+        'Source': 'https://github.com/KE-works/pykechain/',
+        'Tracker': 'https://github.com/KE-works/pykechain/issues',
+        'Company Page': 'https://ke-chain.com'
+    },
+
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
     #   py_modules=["my_module"],
