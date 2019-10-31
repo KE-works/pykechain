@@ -55,4 +55,15 @@ class TestPartRetrieve(TestBetamax):
         self.assertEqual(len(bike_part._cached_children), 5)
         self.assertEqual(len(bike_model._cached_children), 5)
 
+    # test added in 2.7
+    def test_count_instances(self):
+        # setUp
+        wheel_model = self.project.model(name='Wheel')
+        nr_of_instances = wheel_model.count_instances()
+        wheel_instance = self.project.part(name='Front Wheel')
 
+        # testing
+        self.assertEqual(nr_of_instances, 6)
+
+        with self.assertRaises(NotFoundError):
+            wheel_instance.count_instances()
