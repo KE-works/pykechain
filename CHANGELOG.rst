@@ -5,9 +5,9 @@ pykechain changelog
 
 2.6.2 (31OKT19)
 ---------------
-This is the last release that is compatible with python 2.7 due to it sunsetting on Januari 2020.
-This is also the last release the is compatbile with thw KE-chain 2 API (KE-chain versions < 3.0) for KE-chain versions
-prior to v2.29.0-159.
+This is the last release that is compatible with `Python 2.7 due for sunsetting in Januari 2020 <https://www.python.org/dev/peps/pep-0373/>`_.
+
+This is also the last release the is compatbile with thw KE-chain 2 API (KE-chain versions < 3.0) for KE-chain versions prior to v2.29.0-159.
 
  * Updated dependent versions for development: pytest (5.2.2),tox (3.14.0), twine (2.0.0), matplotlib (3.1.1), Sphinx (2.2.1), semver (2.9.0), flake8 (3.7.9), mypy (0.740), jsonschema (3.1.1), nbsphinx (0.4.3), pydocstyle (4.0.1)
 
