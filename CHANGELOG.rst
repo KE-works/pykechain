@@ -3,20 +3,36 @@ Change Log
 
 pykechain changelog
 
-3.0.0 (UNRELEASED)
-------------------
-This is a next major release of pykechain, adding support for the legacy version of the Product Information Module (PIM) in KE-chain as well as the new version PIM3. Based on the version number of the PIM2, either an `Part` or an `Part2` class is provided.
+3.0.0 31OKT19
+-------------
 
-The main difference between PIM1 and PIM2 is that the backend is implemented as a graph database, which should provide additional scalability for large datasets.
+This is a next major release of pykechain, adding support for the legacy version of the Product Information Module (PIM) in KE-chain as well as the new version PIM3.
+
+Backward Incompatible Changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* this version is incompatible with Python version 2.7. It will produce a `RunTimeError` when trying to execute this in ``Python 2.7``. This is due to the fact we added Python 3 type hints to the source code to improve stability.
+* When connecting to KE-chain version 2 API backends, please refer to ``pykechain version 2.7``. This versions attempts to autodetect the version of the API and switch to legacy classes and methods accordingly, but YMMV. In your requirements you can place the following line: ``pykechain <= 2.7.99`` to ensure that the latest pykechain v2 is installed.
 
 Major differences
 ~~~~~~~~~~~~~~~~~
 
-
+ * Widgets are not part of KE-chain 3. The `Activity` object does provide a `WidgetManager` to add, remove, reorder, insert and manage `WidgetSets` in general.
+ * There are some new widgets introduced, please refer to `the documentation <https://pykechain.readthedocs.io/en/latest/developer_api.html>`_
+ * We have a new `Part2`, `Property2` and `Scope2` API endpoint (``/api/v3/...``). This API is faster but asks the call to be more explicit on what fields to return initially.
+ * KE-chain 3 has widget level associations, and not on activity anymore. That means that parts and part models are associated per widget.
+ * We made over 300 commits with updates, improvements and changes in relation to pykechain v2.
 
 Improvements
 ~~~~~~~~~~~~
  * Added `clone_scope()` method to the `Client` and the `Scope` object. With the right permissions you can now clone a project using pykechain.
+ * We added 'representation' for some property types in the KE-chain 3 backend. In such way we can support alternative representations of eg. single select list as a list of buttons in the frontend, greatly improving the usability on mobile devices.
+ * More consistent handling of pykechain base objects throughout the code. Now you can pass in a pykechain Base subclassed object almost anywhere, where in the past you could only have passed only the UUID/id.
+ * We added `ref` to most pykechain models. You can find `Properties` of a `Part` based on the `id`, `name` or `ref` now. You can also search most models for its `ref`. The `ref` is a slugified value of the original name of the object in KE-chain.
+ * We enabled the options `check_certificates` in the `pykechain.helpers.get_project()` function and the `Client`. You can use this to disable the check for https certificates in pykechain, eg. to connect to the local HTTPS host or to a on-premise host that has a self-assigned certificate.
+ * We added a `DatetimeProperty` to more precisely manage the conversion of datetimes back and forth with the API.
+ * We added type hints on most, if not all major methods.
+ * We updated the documentation.
+ * We test pykechain version 3 against python 3.5, 3.6, 3.7, 3.8 and pypy3 - and naturally all tests pass.
 
 2.7.0 (31OKT19)
 ---------------
