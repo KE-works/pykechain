@@ -1,4 +1,5 @@
 """All pykechain surrogate models based on KE-chain models."""
+from typing import Union
 
 from .base import Base
 from .scope import Scope
@@ -42,3 +43,5 @@ __all__ = (
     'User',
     'Team'
 )
+
+AnyProperty = Union[Property2, MultiReferenceProperty2, AttachmentProperty2, SelectListProperty2]
