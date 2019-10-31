@@ -739,7 +739,7 @@ class Client(object):
             return [Property.create(p, client=self) for p in data['results']]
 
     def property(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Union[Property, Property2]
+        # type: (*Any, **Any) -> Union[Property, AnyProperty]
         """Retrieve single KE-chain Property.
 
         Uses the same interface as the :func:`properties` method but returns only a single pykechain :class:

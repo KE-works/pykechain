@@ -103,7 +103,7 @@ class Part2(Base):
     # Family and structure methods
     #
 
-    def property(self, name: Text = None) -> Property2:
+    def property(self, name: Text = None) -> 'AnyProperty':
         """Retrieve the property belonging to this part based on its name or uuid.
 
         :param name: property name, ref or property UUID to search for
@@ -534,7 +534,7 @@ class Part2(Base):
         """
         return self._client.create_proxy_model(self, parent, name, multiplicity, **kwargs)
 
-    def add_property(self, *args, **kwargs) -> 'Property2':
+    def add_property(self, *args, **kwargs) -> 'AnyProperty':
         """Add a new property to this model.
 
         See :class:`pykechain.Client.create_property` for available parameters.
