@@ -3,12 +3,19 @@ Change Log
 
 pykechain changelog
 
+Pending Deprecation Warning
+---------------------------
+
+.. warning::
+   This is the **last release** that is compatible with **Python 2.7**, `which is due for sunsetting in Januari 2020 <https://www.python.org/dev/peps/pep-0373/>`_.
+
+   This is the **last release** that is compatible with the **KE-chain 2 API** (KE-chain API versions < 3.0).
+
+.. note::
+   For releases of ``KE-chain >= v3.0``, you need a ``pykechain >= 3.0``.
+
 2.7.0 (31OKT19)
 ---------------
-This is the last release that is compatible with `Python 2.7 due for sunsetting in Januari 2020 <https://www.python.org/dev/peps/pep-0373/>`_.
-
-This is also the last release that is compatible with the KE-chain 2 API (KE-chain API versions < 3.0) for KE-chain versions up to v2.29.0-158. Newer v2 releases may be available as patch releases.
-
  * Added a function to retrieve the associated activities of a part: `Part.associated_activities()` and `Property.associated_activities()`. (#503 - Thanks to @raduiordache for the PR)
  * Added a function to count parts `Part.count_instances()` using a lightweight call to the API. (#485 - Thanks to @raduiordache for the PR)
  * Updated dependent versions for development: pytest (5.2.2),tox (3.14.0), twine (2.0.0), matplotlib (3.1.1), Sphinx (2.2.1), semver (2.9.0), flake8 (3.7.9), mypy (0.740), jsonschema (3.1.1), nbsphinx (0.4.3), pydocstyle (4.0.1)
@@ -30,7 +37,7 @@ This is also the last release that is compatible with the KE-chain 2 API (KE-cha
  *  Updated dependent versions for development: pytest (4.4.1), mypy (0.701), tox (3.9.0).
 
 2.5.6 (13APR19)
------------------
+---------------
  * Small patch release to ensure that the `Activity2.assignees` returns an empty list when nobody is assigned to the task. #477. Thanks to @raduiordache for finding it out.
 
 2.5.5 (11APR19)
@@ -60,7 +67,7 @@ This is also the last release that is compatible with the KE-chain 2 API (KE-cha
  * Updated dependent versions for development: requests (2.20.1), sphinx (1.8.2), pytest (4.0.1), requests (2.20.0), matplotlib (3.0.2)
 
 2.5.1 (05NOV18)
---------------
+---------------
  * patch release to include the dependency pytz in the normal list of dependencies, not only for development.
 
 2.5.0 (1NOV18)

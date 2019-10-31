@@ -790,7 +790,7 @@ class Client(object):
         """
         Users of KE-chain.
 
-        Provide a list of :class:`User`s of KE-chain. You can filter on username or id or any other advanced filter.
+        Provide a list of :class:`User`'s of KE-chain. You can filter on username or id or any other advanced filter.
 
         :param username: (optional) username to filter
         :type username: basestring or None
@@ -872,7 +872,7 @@ class Client(object):
         """
         Teams of KE-chain.
 
-        Provide a list of :class:`Team`s of KE-chain. You can filter on teamname or id or any other advanced filter.
+        Provide a list of :class:`Team`'s of KE-chain. You can filter on teamname or id or any other advanced filter.
 
         :param name: (optional) teamname to filter
         :type name: basestring or None
@@ -1495,8 +1495,6 @@ class Client(object):
         :type description: basestring or None
         :param team: (optional) team_id or Team object to assign membership of scope to a team.
         :type team: basestring or :class:`models.Team` or None
-        # :param scope_options: (optional) dictionary with scope options (NO EFFECT)
-        # :type scope_options: dict or None
         :param asynchronous: (optional) option to use asynchronous cloning of the scope, default to False.
         :type asynchronous: bool or None
         :return: New scope that is cloned
