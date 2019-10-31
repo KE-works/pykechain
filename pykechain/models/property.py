@@ -4,7 +4,7 @@ import requests
 from jsonschema import validate
 from six import text_type, iteritems
 
-from pykechain.enums import PropertyType
+from pykechain.enums import PropertyType, Category
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models.base import Base
 from pykechain.models.validators.validator_schemas import options_json_schema
@@ -22,6 +22,8 @@ class Property(Base):
     :type part: :class:`Part`
     :ivar value: the property value, can be set as well as property
     :type value: Any
+    :ivar associated_activities_ids: the list of associated activities ids the are linked to this property
+    :type associated_activities_ids: list(UUIDs)
     :ivar validators: the list of validators that are available in the property
     :type validators: list(PropertyValidator)
     :ivar is_valid: if the property conforms to the validators
@@ -41,7 +43,7 @@ class Property(Base):
         self.type = json.get('property_type', None)
         self.description = json.get('description', None)
         self.unit = json.get('unit', None)
-
+        self._associated_activities_ids = list()  # type: List[Any]
         # set an empty internal validators variable
         self._validators = []  # type: List[Any]
 
@@ -324,3 +326,29 @@ class Property(Base):
             return list(zip(self._validation_results, self._validation_reasons))
         else:
             return self._validation_results
+
+    def associated_activities(self):
+        """Retrieve the associated `Activities` of the `Property`.
+
+        :return: :class:`List` of `Activity` ids in which the `Property` is selected.
+        :raises IllegalArgumentError: if property has different `Category` than `MODEL`
+        :raises APIError: when unable to retrieve the associated activities
+
+        Example
+        -------
+        >>> bike_model = client.model(name='Bike')
+        >>> gears_property = bike_model.property(name='Gears')
+        >>> list_of_activity_ids = gears_property.associated_activities()
+
+        """
+        if self.part.category != Category.MODEL:
+            raise IllegalArgumentError("Part {} should be a model.".format(self))
+        url = self._client._build_url('associations')
+        response = self._client._request('GET', url, params=dict(fields='activity', property=self.id))
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not retrieve associated activities of property '{}: {}'".
+                           format(self, (response.status_code, response.json())))
+        data = response.json()
+        self._associated_activities_ids = [el['activity'] for el in data['results']]
+        return self._associated_activities_ids
