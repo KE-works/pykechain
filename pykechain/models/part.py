@@ -65,6 +65,7 @@ class Part(Base):
         self.properties = [Property.create(p, client=self._client) for p in json['properties']]
         self.multiplicity = json.get('multiplicity', None)
         self._cached_children = None
+        self._associated_activities_ids = set()  # type: Set[Any]
 
     def property(self, name):
         """Retrieve the property belonging to this part based on its name or uuid.
@@ -837,3 +838,57 @@ class Part(Base):
             return moved_instance
         else:
             raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category')
+
+    def associated_activities(self):
+        """
+        Retrieve the `Activities` in which the `Part` is selected in.
+
+        .. versionadded:: 2.7
+
+        :returns: :class:`Set` of `Activity` ids in which the `Properties` of `Part` are selected.
+        :raises IllegalArgumentError: if part has different `Category` than `MODEL`
+        :raises APIError: when unable to retrieve the associated activities
+
+        Example
+        -------
+        >>> bike_model = client.model(name='Bike')
+        >>> set_of_activity_ids = bike_model.associated_activities()
+
+        """
+        if self.category != Category.MODEL:
+            raise IllegalArgumentError("Part {} should be a model.".format(self))
+        for prop in self.properties:
+            self._associated_activities_ids.update(prop.associated_activities())
+        return self._associated_activities_ids
+
+    def count_instances(self):
+        """
+        Retrieve the number of instances of this `Part`.
+
+        For instance, if you have a model part, you can get number of instances created based on the `Part`.
+
+        .. versionadded:: 2.7
+
+        :return: the number of instances of this part model :class: `int`
+
+        Example
+        -------
+        >>> wheel_model = project.model('Wheel')
+        >>> wheel_instance_set = wheel_model.count_instances()
+
+        """
+        if self.category == Category.MODEL:
+            params = {
+                'category': Category.INSTANCE,
+                'model': self.id,
+                'limit': 1
+            }
+            url = self._client._build_url('parts')
+            response = self._client._request('GET', url, params=params)
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise APIError("Could not count parts")
+            data = response.json()
+            count = data['count']
+            return count
+        else:
+            raise NotFoundError("Part {} is not a model".format(self.name))
