@@ -256,7 +256,6 @@ class Property(Base):
         >>> color_property.edit(name='Shade', description='Could also be called tint, depending on mixture',
         >>> unit='RGB')
 
-        --------
         >>> wheel_property_reference = self.project.model('Bike').property('Reference wheel')
         >>> wheel_model = self.project.model('Wheel')
         >>> diameter_property = wheel_model.property('Diameter')
@@ -338,7 +337,7 @@ class Property(Base):
         When no validators are configured, returns a None. It checks against all configured validators
         and returns a single boolean outcome.
 
-        :returns: True when the :ivar:`value` is valid
+        :returns: True when the `value` is valid
         :rtype: bool or None
         """
         if not hasattr(self, '_validators'):
@@ -359,7 +358,7 @@ class Property(Base):
         When no validators are configured, returns a None. It checks against all configured validators
         and returns a single boolean outcome.
 
-        :returns: True when the :ivar:`value` is invalid
+        :returns: True when the `value` is invalid
         :rtype: bool
         """
         if self.is_valid is not None:

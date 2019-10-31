@@ -894,7 +894,7 @@ class Client(object):
         """
         Users of KE-chain.
 
-        Provide a list of :class:`User`s of KE-chain. You can filter on username or id or any other advanced filter.
+        Provide a list of :class:`User`'s of KE-chain. You can filter on username or id or any other advanced filter.
 
         :param username: (optional) username to filter
         :type username: basestring or None
@@ -976,7 +976,7 @@ class Client(object):
         """
         Teams of KE-chain.
 
-        Provide a list of :class:`Team`s of KE-chain. You can filter on teamname or id or any other advanced filter.
+        Provide a list of :class:`Team`'s of KE-chain. You can filter on teamname or id or any other advanced filter.
 
         :param name: (optional) teamname to filter
         :type name: basestring or None

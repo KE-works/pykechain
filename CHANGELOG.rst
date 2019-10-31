@@ -18,17 +18,78 @@ Improvements
 ~~~~~~~~~~~~
  * Added `clone_scope()` method to the `Client` and the `Scope` object. With the right permissions you can now clone a project using pykechain.
 
-2.5.1 (5NOV18)
---------------
+2.7.0 (31OKT19)
+---------------
+
+.. warning::
+   This is the **last release** that is compatible with **Python 2.7**, `which is due for sunsetting in Januari 2020 <https://www.python.org/dev/peps/pep-0373/>`_.
+
+   This is the **last release** that is compatible with the **KE-chain 2 API** (KE-chain API versions < 3.0).
+
+.. note::
+   For releases of ``KE-chain >= v3.0``, you need a ``pykechain >= 3.0``.
+
+ * Added a function to retrieve the associated activities of a part: `Part.associated_activities()` and `Property.associated_activities()`. (#503 - Thanks to @raduiordache for the PR)
+ * Added a function to count parts `Part.count_instances()` using a lightweight call to the API. (#485 - Thanks to @raduiordache for the PR)
+ * Updated dependent versions for development: pytest (5.2.2),tox (3.14.0), twine (2.0.0), matplotlib (3.1.1), Sphinx (2.2.1), semver (2.9.0), flake8 (3.7.9), mypy (0.740), jsonschema (3.1.1), nbsphinx (0.4.3), pydocstyle (4.0.1)
+ * Added a source distribution to PyPI.
+
+2.6.1 (17JUN19)
+---------------
+ * Fixed a bug where in the move/copy functionality the options to `ReferenceProperty` and `AttachmentProperty` where not passed down. Thanks to @raduiordache. (#502)
+ * Updated dependent versions for development: requests (2.22.0), pytest (4.6.3),tox (3.12.1), twine (1.13.0), matplotlib (3.1.0), Sphinx (2.1.1).
+
+2.6.0 (23APR19)
+---------------
+ * Added the possibility to create a scope, clone a scope, and delete a scope. Check `Client.create_scope()`, `Scope.clone` and `Scope.delete` for documentation. (#359)
+
+2.5.7 (18APR19)
+---------------
+ * Added additional properties for the `Service` and `ServiceExecution` class. Now you can retrieve the `Service.filename` amoungst others. Please refer to the documentation of `Service` and `ServiceExecution` to see the properties that are now available (a feature request by @JelleBoersma). #480
+ * We added a utility function to `parse_datetime` strings into `datetime` objects. These strings are in a json response from the KE-chain backend and are now properly translated and timezoned. #482
+ *  Updated dependent versions for development: pytest (4.4.1), mypy (0.701), tox (3.9.0).
+
+2.5.6 (13APR19)
+---------------
+ * Small patch release to ensure that the `Activity2.assignees` returns an empty list when nobody is assigned to the task. #477. Thanks to @raduiordache for finding it out.
+
+2.5.5 (11APR19)
+---------------
+ * Added properties to the `Property` to directly access properties such as `unit`, `description` and `type`. `Property.type` refers to a `PropertyType` enum. #469
+ * Added a property to the `AttachmentProperty.filename` to return the filename of an attachment. #472
+ * Added a property to retrieve the assignees list of an activity through `Activity2.assignees`. This will return a list of `User`'s assigned to the activity. #473
+ * Added additional properties to `Service` such as `name`, `description` and `version` of a service. #469
+ * Added additional properties to `Scope` such as `description`, `status` and `type`. #469
+ * Updated dependent versions for development: matplotlib (3.0.3), jsonschema (3.0.1), pytest (4.4.0), sphinx (2.0.1), mypy (0.700), tox (3.8.6).
+
+2.5.4 (28FEB19)
+---------------
+ * Fixed a bug where the update of the single select list options could overwrite the existing validators. Thanks to @jelleboersma for finding this out and creating the PR. (#446)
+ * Updated dependent versions for development: sphinx (1.8.4), mypy (0.670), pytest (4.3.0), flake8 (3.7.7), jsonschema (3.0.0), pyOpenSSL (for python 2.7, 19.0.0).
+ * Updated security advisory to install requests package later than 2.20.0 (CVE-2018-18074).
+
+2.5.3 (21JAN19)
+---------------
+ * Fixed a bug where a numeric range validator from a property was not correctly instantiated for provided min/max values when the validator was retrieved from the KE-chain backend. Thanks to @bastiaanbeijer for finding this! (#435)
+ * Updated dependent versions for development: requests (2.21.0), sphinx (1.8.3), pytest (4.1.1), mypy (0.660), nbsphinx (0.4.2), tox (3.7.0).
+
+
+2.5.2 (30NOV18)
+---------------
+ * Fixed the customizations to be compatible with KE-chain 3: `Custom Title` replaced by `Custom title`; added the possibility to include the `Clone button` where applicable. The `metaWidget` now uses 'Set height' and 'Automatic height'. (#421) thanks to @raduiordache.
+ * Updated dependent versions for development: requests (2.20.1), sphinx (1.8.2), pytest (4.0.1), requests (2.20.0), matplotlib (3.0.2)
+
+2.5.1 (05NOV18)
+---------------
  * patch release to include the dependency pytz in the normal list of dependencies, not only for development.
 
 2.5.0 (1NOV18)
 --------------
- * Added the ability to set and retrieve the scope tags using the `Scope.tags` property (#367)
- * Added timezone, language and email to the user object. You can access this directly as a property on the `User` object (#378)
+ * Added the ability to set and retrieve the scope tags using the `Scope.tags` property. (#367)
+ * Added timezone, language and email to the user object. You can access this directly as a property on the `User` object. (#378)
  * Ensured that you can now filter users on their name, username and email. (#373)
  * Added the possibility to generate a PDF from an activity even with attachments included. The later is an async process on the KE-chain server and pykechain uses a 'hint' to retrieve the PDF once it becomes available on the server. It has an timeout of 100 seconds. (#406)
- * included many updated tests for the copy_move functionality including cross reference properties (#376)
+ * included many updated tests for the copy_move functionality including cross reference properties. (#376)
  * Updated dependent versions for development: semver (2.8.1), pydocstyle (3.0.0), mypy (0.641), requests (2.20.0), flake8 (3.6.0), matplotlib (3.0.1), pytest (3.9.3), tox (3.5.3)
 
 2.4.1 (26SEP18)
