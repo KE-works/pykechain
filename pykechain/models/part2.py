@@ -39,7 +39,7 @@ class Part2(Base):
     :ivar scope_id: scope UUID of the Part
     :type scope_id: basestring
     :ivar properties: the list of properties of this part
-    :type properties: List[Property2]
+    :type properties: List[AnyProperty]
 
     Examples
     --------
