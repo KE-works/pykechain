@@ -1,11 +1,11 @@
 import datetime
 import warnings
-from typing import Any, Union, Text, Iterable, Dict  # noqa: F401
+from typing import Any, Union, Text, Iterable, Dict, Optional  # noqa: F401
 
 import requests
 from six import text_type, string_types
 
-from pykechain.enums import Multiplicity, ScopeStatus
+from pykechain.enums import Multiplicity, ScopeStatus, WorkBreakdownDisplayMode, KEChainPages
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.team import Team
@@ -379,8 +379,46 @@ class Scope2(Base, TagsMixin):
             return self._client.create_activity(self.workflow_root, *args, **kwargs)
 
     def side_bar(self, *args, **kwargs):
-        # type: (*Any, **Any) -> SideBarManager
+        # type: (*Any, **Any) -> (None, SideBarManager)
+        """Retrieve the side-bar manager"""
+        # TODO identify from which WIM/PIM version the side bar has been available in KE-chain
+        # if self._client.match_app_version(label='wim', version='>=3.0.0', default=True):
+        #     return SideBarManager(scope=self, *args, **kwargs)
+        # else:
+        #     return None
         return SideBarManager(scope=self, *args, **kwargs)
+
+    def set_landing_page(self, activity, task_display_mode=WorkBreakdownDisplayMode.ACTIVITIES):
+        # type: (Union[Activity2, KEChainPages], Optional[WorkBreakdownDisplayMode]) -> None
+        """
+        Update the landing page of the scope.
+
+        :param activity: Activity2 object or KEChainPages option
+        :type activity: (Activity2, KEChainPages)
+        :param task_display_mode: display mode of the activity in KE-chain
+        :type task_display_mode: WorkBreakdownDisplayMode
+        :return: None
+        :rtype None
+        """
+
+        from pykechain.models import Activity2
+
+        if not (isinstance(activity, Activity2) or activity not in KEChainPages.values()):
+            raise IllegalArgumentError(
+                'activity must be of class Activity2 or a KEChainPages option, "{}" is not.'.format(activity))
+
+        if task_display_mode not in WorkBreakdownDisplayMode.values():
+            raise IllegalArgumentError('task_display_mode must be a WorkBreakdownDisplayMode option, '
+                                       '"{}" is not.'.format(task_display_mode))
+
+        if isinstance(activity, Activity2):
+            url = '#/scopes/{}/{}/{}'.format(self.id, task_display_mode, activity.id)
+        else:
+            url = '#/scopes/{}/{}'.format(self.id, activity)
+
+        options = dict(self.options)
+        options.update({'landingPage': url})
+        self.options = options
 
     #
     # Service Methods

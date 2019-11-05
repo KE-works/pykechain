@@ -2,7 +2,7 @@ import datetime
 from time import sleep
 from unittest import skipIf
 
-from pykechain.enums import ScopeStatus
+from pykechain.enums import ScopeStatus, KEChainPages
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from pykechain.models import Team
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
@@ -208,6 +208,22 @@ class TestScopes2SpecificTests(TestBetamax):
         side_bar_manager = self.project.side_bar()
 
         self.assertIsInstance(side_bar_manager, SideBarManager)
+
+    def test_set_landing_page_activity(self):
+        # TODO No cassette yet
+        self.scope = self.project.clone(asynchronous=False)
+
+        first_activity = self.scope.activities()[0]
+
+        self.scope.set_landing_page(activity=first_activity)
+
+    def test_set_landing_page_data_model(self):
+        # TODO No cassette yet
+        #  self.scope = self.project.clone(asynchronous=False)
+
+        data_model_page = KEChainPages.DATA_MODEL
+
+        self.scope.set_landing_page(activity=data_model_page)
 
     def test_retrieve_scope2_members(self):
         original_scope_members = [u.get('username') for u in self.project.members()]
