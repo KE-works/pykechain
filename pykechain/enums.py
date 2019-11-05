@@ -725,3 +725,58 @@ class CardWidgetImageValue(Enum):
 
     CUSTOM_IMAGE = "Custom image"
     NO_IMAGE = "No image"
+
+
+class KEChainPages(Enum):
+    """
+    URL names of built-in KE-chain pages.
+
+    :cvar DETAIL: "detail"
+    :cvar TASKS: "activities"
+    :cvar WORK_BREAKDOWN: "activitytree"
+    :cvar DATA_MODEL: "productmodel"
+    :cvar EXPLORER: "product"
+    :cvar SERVICES: "scripts"
+    """
+    DETAIL = 'detail'
+    TASKS = 'activities'
+    WORK_BREAKDOWN = 'activitytree'
+    DATA_MODEL = 'productmodel'
+    EXPLORER = 'product'
+    SERVICES = 'scripts'
+
+
+class WorkBreakdownDisplayMode(Enum):
+    """
+    URL variations to vary the display of a subprocess activity
+
+    :cvar ACTIVITIES: "activities"
+    :cvar TREEVIEW: "treeview"
+    """
+    ACTIVITIES = 'activities'
+    TREEVIEW = 'treeview'
+
+
+class URITarget(Enum):
+    """
+    Side-bar button redirect options.
+
+    :cvar INTERNAL: "internal"
+    :cvar EXTERNAL: "external"
+    """
+    INTERNAL = 'internal'
+    EXTERNAL = 'external'
+
+
+class FontAwesomeMode(Enum):
+    """
+    Options to display the same icon.
+    https://fontawesome.com/how-to-use/on-the-web/setup/getting-started
+
+    :cvar SOLID: "solid"
+    :cvar REGULAR: "regular"
+    :cvar LIGHT: "light"
+    """
+    SOLID = 'solid'
+    REGULAR = 'regular'
+    LIGHT = 'light'

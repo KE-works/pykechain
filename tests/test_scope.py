@@ -5,6 +5,7 @@ from unittest import skipIf
 from pykechain.enums import ScopeStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from pykechain.models import Team
+from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_PIM3
 
@@ -202,6 +203,11 @@ class TestScopes2SpecificTests(TestBetamax):
         if self.scope:
             self.scope.delete()
         super(TestScopes2SpecificTests, self).tearDown()
+
+    def test_side_bar(self):
+        side_bar_manager = self.project.side_bar()
+
+        self.assertIsInstance(side_bar_manager, SideBarManager)
 
     def test_retrieve_scope2_members(self):
         original_scope_members = [u.get('username') for u in self.project.members()]

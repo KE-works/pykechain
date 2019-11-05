@@ -7,6 +7,7 @@ from six import text_type, string_types
 
 from pykechain.enums import Multiplicity, ScopeStatus
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
+from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.team import Team
 from pykechain.models.base import Base
 from pykechain.defaults import API_EXTRA_PARAMS
@@ -376,6 +377,10 @@ class Scope2(Base, TagsMixin):
             return self._client.create_activity(self.process, *args, **kwargs)
         else:
             return self._client.create_activity(self.workflow_root, *args, **kwargs)
+
+    def side_bar(self, *args, **kwargs):
+        # type: (*Any, **Any) -> SideBarManager
+        return SideBarManager(scope=self, *args, **kwargs)
 
     #
     # Service Methods
