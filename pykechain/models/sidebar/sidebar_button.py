@@ -12,6 +12,24 @@ class SideBarButton(object):
         # type: (Any, Dict, int, str, str, str, URITarget, FontAwesomeMode, **Any) -> None
         super().__init__()
 
+        if json is None:
+            json = dict()
+
+        title = title if title else json.get('displayName')
+        order = order if order is not None else json.get('order')
+        icon = icon if icon else json.get('displayIcon')
+        uri = uri if uri else json.get('uri')
+        uri_target = json.get('uriTarget', uri_target)
+        icon_mode = json.get('displayIconMode', icon_mode)
+
+        if not isinstance(order, int):
+            raise IllegalArgumentError('order must be an integer, "{}" is not.'.format(order))
+        if not isinstance(title, str):
+            raise IllegalArgumentError('title must be a string, "{}" is not.'.format(title))
+        if not isinstance(icon, str):
+            raise IllegalArgumentError('icon must be a string, "{}" is not.'.format(icon))
+        if not isinstance(uri, str):
+            raise IllegalArgumentError('uri must be a string, "{}" is not.'.format(uri))
         if uri_target not in URITarget.values():
             raise IllegalArgumentError('uri_target must be a URITarget option, "{}" is not.'.format(uri_target))
         if icon_mode not in FontAwesomeMode.values():
@@ -22,16 +40,13 @@ class SideBarButton(object):
                 raise IllegalArgumentError(
                     'Attribute "{}" is not supported in the configuration of a side-bar button.'.format(key))
 
-        if json is None:
-            json = dict()
-
         self._manager = side_bar_manager
-        self.display_name = title if title else json.get('displayName')  # type: str
-        self.order = order if order is not None else json.get('order')  # type: int
-        self.display_icon = icon if icon else json.get('displayIcon')  # type: str
-        self.uri = uri if uri else json.get('uri')  # type: str
-        self.uri_target = json.get('uriTarget', uri_target)  # type: URITarget
-        self.display_icon_mode = json.get('displayIconMode', icon_mode)  # type: FontAwesomeMode
+        self.display_name = title  # type: str
+        self.order = order  # type: int
+        self.display_icon = icon  # type: str
+        self.uri = uri  # type: str
+        self.uri_target = uri_target  # type: URITarget
+        self.display_icon_mode = icon_mode  # type: FontAwesomeMode
 
         self._other_attributes = kwargs
 

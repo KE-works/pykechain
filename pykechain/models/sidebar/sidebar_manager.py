@@ -9,26 +9,52 @@ from pykechain.utils import find
 
 
 class SideBarManager(Sized):
+    """
+    Sidebar manager class.
 
-    def __init__(self, scope, *args, **kwargs):
-        # type: (Any, *Any, **Any) -> None
+    :ivar scope: Scope object for which the side-bar is managed.
+    :type scope: Scope2
+    :ivar bulk_creation: boolean to create buttons in bulk, postponing updating of KE-chain until the manager is
+     deleted from memory (end of your function)
+    :type bulk_creation: bool
+    """
+
+    __existing_managers = dict()  # storage of manager objects to enforce 1 manager object per Scope
+    _bulk_creation = None  # ensure every instance has this attribute, regardless of the __init__ function.
+
+    def __new__(cls, scope, *args, **kwargs):
+        instance = super().__new__(cls)
+
+        # Singleton manager per scope: this is required to support bulk_creation
+        if scope.id in cls.__existing_managers:
+            instance = cls.__existing_managers[scope.id]
+        else:
+            cls.__existing_managers[scope.id] = instance
+
+        return instance
+
+    def __init__(self, scope, bulk_creation=False, *args, **kwargs):
+        # type: (Any, Optional[bool], *Any, **Any) -> None
         super().__init__(*args, **kwargs)
 
         from pykechain.models import Scope2
         if not isinstance(scope, Scope2):
             raise IllegalArgumentError('scope must be of class Scope2, "{}" is not.'.format(scope))
 
-        self._buttons = list()  # type: list
-        self.scope = scope  # type: Scope2
-        self._iter = iter(self._buttons)
-        self._override = scope.options.get('overrideSidebar', False)  # type: bool
+        if not isinstance(bulk_creation, bool):
+            raise IllegalArgumentError('bulk_creation must be a boolean, "{}" is not.'.format(bulk_creation))
 
+        self.scope = scope  # type: Scope2
+        self._override = scope.options.get('overrideSidebar', False)  # type: bool
         self._scope_uri = "#/scopes/{}".format(self.scope.id)
 
-        for button_dict in scope.options.get('customNavigation', list()):
-            self.create_button(json=button_dict)
+        self._bulk_creation = bulk_creation  # type: bool
 
-        # TODO if overrideSidebar is False, should the default buttons be loaded too (details, Tasks, WBS)?
+        # Load existing buttons from the scope
+        self._buttons = list()  # type: list
+        for button_dict in scope.options.get('customNavigation', list()):
+            self._buttons.append(SideBarButton(side_bar_manager=self, json=button_dict))
+        self._iter = iter(self._buttons)
 
     def __repr__(self):  # pragma: no cover
         return "<pyke {} object {} buttons>".format(self.__class__.__name__, self.__len__())
@@ -56,6 +82,13 @@ class SideBarManager(Sized):
         if found is not None:
             return found
         raise NotFoundError("Could not find button with index or name '{}'".format(key))
+
+    def __del__(self):
+        """ Prior to deletion of the manager, an update to KE-chain is performed using the latest configuration. """
+        if self._bulk_creation:
+            # Set bulk creation to False in order for update to proceed correctly
+            self._bulk_creation = False
+            self._update(buttons=self._buttons, override_sidebar=self._override)
 
     def remove(self, key):
         self.delete_button(key=key)
@@ -112,7 +145,7 @@ class SideBarManager(Sized):
         if not isinstance(activity, Activity2):
             raise IllegalArgumentError('activity must be of class Activity2, "{}" is not.'.format(activity))
 
-        if task_display_mode not in KEChainPages.values:
+        if task_display_mode not in SubprocessDisplayMode.values():
             raise IllegalArgumentError('task_display_mode must be WorkBreakdownDisplayMode option, '
                                        '"{}" is not.'.format(task_display_mode))
 
@@ -144,7 +177,7 @@ class SideBarManager(Sized):
         :rtype SideBarButton
         """
 
-        if page_name not in KEChainPages.values:
+        if page_name not in KEChainPages.values():
             raise IllegalArgumentError('page_name must be KEChainPages option, "{}" is not.'.format(page_name))
 
         if title is not None:
@@ -157,18 +190,20 @@ class SideBarManager(Sized):
 
         return self.create_button(uri=uri, uri_target=URITarget.INTERNAL, title=title, *args, **kwargs)
 
-    def add_external_button(self, url, *args, **kwargs):
-        # type: (str, *Any, **Any) -> SideBarButton
+    def add_external_button(self, url, title, *args, **kwargs):
+        # type: (str, Text, *Any, **Any) -> SideBarButton
         """
         Add a side-bar button to an external page defined by an URL.
 
+        :param title: title of the button
+        :type title: str
         :param url: URL to an external page
         :type url: str
         :return: new side-bar button
         :rtype SideBarButton
         """
         # TODO test url input for valid URL
-        return self.create_button(uri=url, uri_target=URITarget.EXTERNAL, *args, **kwargs)
+        return self.create_button(title=title, uri=url, uri_target=URITarget.EXTERNAL, *args, **kwargs)
 
     def add_buttons(self, buttons, override_sidebar):
         # type: (List[Dict], bool) -> List[SideBarButton]
@@ -222,6 +257,11 @@ class SideBarManager(Sized):
         :return: None
         :rtype None
         """
+
+        if self._bulk_creation:
+            # Update will proceed during deletion of the manager.
+            return
+
         options = dict(self.scope.options)
 
         buttons = kwargs.pop('buttons', list())
