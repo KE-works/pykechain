@@ -1,8 +1,8 @@
-from typing import Sized, Any, Optional, Text
+from typing import Sized, Any, Optional, Text, List, Dict
 
 from six import string_types, text_type
 
-from pykechain.enums import URITarget, WorkBreakdownDisplayMode, KEChainPages, KEChainPageLabels
+from pykechain.enums import URITarget, SubprocessDisplayMode, KEChainPages, KEChainPageLabels
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from pykechain.models.sidebar.sidebar_button import SideBarButton
 from pykechain.utils import find
@@ -93,8 +93,8 @@ class SideBarManager(Sized):
 
         return button
 
-    def add_task_button(self, activity, title=None, task_display_mode=WorkBreakdownDisplayMode.ACTIVITIES, *args, **kwargs):
-        # type: (Activity2, Optional[Text], Optional[WorkBreakdownDisplayMode], *Any, **Any) -> SideBarButton
+    def add_task_button(self, activity, title=None, task_display_mode=SubprocessDisplayMode.ACTIVITIES, *args, **kwargs):
+        # type: (Activity2, Optional[Text], Optional[SubprocessDisplayMode], *Any, **Any) -> SideBarButton
         """
         Add a side-bar button to a KE-chain activity.
 
@@ -103,7 +103,7 @@ class SideBarManager(Sized):
         :param title: Title of the side-bar button, defaults to the activity name
         :type title: str
         :param task_display_mode: for sub-processes, vary the display mode in KE-chain
-        :type task_display_mode: WorkBreakdownDisplayMode
+        :type task_display_mode: SubprocessDisplayMode
         :return: new side-bar button
         :rtype SideBarButton
         """
@@ -161,6 +161,7 @@ class SideBarManager(Sized):
         # type: (str, *Any, **Any) -> SideBarButton
         """
         Add a side-bar button to an external page defined by an URL.
+
         :param url: URL to an external page
         :type url: str
         :return: new side-bar button
@@ -168,6 +169,32 @@ class SideBarManager(Sized):
         """
         # TODO test url input for valid URL
         return self.create_button(uri=url, uri_target=URITarget.EXTERNAL, *args, **kwargs)
+
+    def add_buttons(self, buttons, override_sidebar):
+        # type: (List[Dict], bool) -> List[SideBarButton]
+        """
+        Create a list of buttons in bulk. Each button is defined by a dict, provided in a sorted list.
+
+        :param buttons: list of dicts
+        :type buttons: list
+        :param override_sidebar: whether to override the default sidebar menu items.
+        :type override_sidebar: bool
+        :return: list of SideBarButton objects
+        :rtype List[SideBarButton]
+        """
+        if not isinstance(buttons, list) or not all(isinstance(button, dict) for button in buttons):
+            raise IllegalArgumentError('buttons must be a list of dictionaries, but received "{}"'.format(buttons))
+        if not isinstance(override_sidebar, bool):
+            raise IllegalArgumentError('override_sidebar must be a boolean, "{}" is not.'.format(override_sidebar))
+
+        for index, button in enumerate(buttons):
+            button = SideBarButton(side_bar_manager=self, order=index, json=button)
+
+            self._buttons.append(button)
+
+        self._update(buttons=self._buttons, override_sidebar=override_sidebar)
+
+        return self._buttons
 
     def delete_button(self, key):
         # type: (Any) -> None

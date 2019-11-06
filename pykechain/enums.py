@@ -765,7 +765,7 @@ KEChainPageLabels_nl = {
 }
 
 
-class WorkBreakdownDisplayMode(Enum):
+class SubprocessDisplayMode(Enum):
     """
     URL variations to vary the display of a subprocess activity
 

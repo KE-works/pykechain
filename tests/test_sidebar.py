@@ -1,4 +1,4 @@
-from pykechain.enums import WorkBreakdownDisplayMode, KEChainPages
+from pykechain.enums import SubprocessDisplayMode, KEChainPages
 from pykechain.models.sidebar.sidebar_button import SideBarButton
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from tests.classes import TestBetamax
@@ -12,7 +12,7 @@ class TestSideBar(TestBetamax):
         self.scope = self.project.clone(asynchronous=False)
         self.manager = SideBarManager(scope=self.scope)
         self.scope_uri = '#/scopes/{}'.format(self.scope.id)
-        self.scope_activity_uri = '{}/{}'.format(self.scope_uri, WorkBreakdownDisplayMode.ACTIVITIES)
+        self.scope_activity_uri = '{}/{}'.format(self.scope_uri, SubprocessDisplayMode.ACTIVITIES)
 
         self.default_button_config = {
             'title': 'new button',

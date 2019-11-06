@@ -5,7 +5,7 @@ from typing import Any, Union, Text, Iterable, Dict, Optional  # noqa: F401
 import requests
 from six import text_type, string_types
 
-from pykechain.enums import Multiplicity, ScopeStatus, WorkBreakdownDisplayMode, KEChainPages
+from pykechain.enums import Multiplicity, ScopeStatus, SubprocessDisplayMode, KEChainPages
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.team import Team
@@ -388,15 +388,15 @@ class Scope2(Base, TagsMixin):
         #     return None
         return SideBarManager(scope=self, *args, **kwargs)
 
-    def set_landing_page(self, activity, task_display_mode=WorkBreakdownDisplayMode.ACTIVITIES):
-        # type: (Union[Activity2, KEChainPages], Optional[WorkBreakdownDisplayMode]) -> None
+    def set_landing_page(self, activity, task_display_mode=SubprocessDisplayMode.ACTIVITIES):
+        # type: (Union[Activity2, KEChainPages], Optional[SubprocessDisplayMode]) -> None
         """
         Update the landing page of the scope.
 
         :param activity: Activity2 object or KEChainPages option
         :type activity: (Activity2, KEChainPages)
         :param task_display_mode: display mode of the activity in KE-chain
-        :type task_display_mode: WorkBreakdownDisplayMode
+        :type task_display_mode: SubprocessDisplayMode
         :return: None
         :rtype None
         """
@@ -407,7 +407,7 @@ class Scope2(Base, TagsMixin):
             raise IllegalArgumentError(
                 'activity must be of class Activity2 or a KEChainPages option, "{}" is not.'.format(activity))
 
-        if task_display_mode not in WorkBreakdownDisplayMode.values():
+        if task_display_mode not in SubprocessDisplayMode.values():
             raise IllegalArgumentError('task_display_mode must be a WorkBreakdownDisplayMode option, '
                                        '"{}" is not.'.format(task_display_mode))
 
