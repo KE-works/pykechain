@@ -599,6 +599,9 @@ class Part2(Base):
         properties_fvalues = properties_fvalues or list()
 
         for prop_name_or_id, property_value in update_dict.items():
+            if isinstance(property_value, Base):
+                # is the value is a reference property to another 'Base' Part.
+                property_value = property_value.id
             updated_p = dict(
                 value=property_value
             )
@@ -829,6 +832,9 @@ class Part2(Base):
         update_dict = update_dict or dict()
 
         for prop_name_or_id, property_value in update_dict.items():
+            if isinstance(property_value, Base):
+                # is the value is a reference property to another 'Base' Part.
+                property_value = property_value.id
             updated_p = dict(
                 value=property_value
             )
