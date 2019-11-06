@@ -1,3 +1,4 @@
+from collections import Iterable
 from typing import Any, Union, List, Dict, Optional, Text  # noqa: F401
 
 import requests
@@ -543,6 +544,50 @@ class Part2(Base):
 
         return self._client.create_property(self, *args, **kwargs)
 
+    @staticmethod
+    def _parse_update_dict(part, properties_fvalues, update_dict):
+        # type: (Part2, List, Dict) -> List[Dict]
+        """
+        Check the content of the update dict and insert them into the properties_fvalues list.
+
+        :param part: Depending on whether you add to or update a part, this is the model or the part itself, resp.
+        :param properties_fvalues: list of property values
+        :param update_dict: dictionory with property values, keyed by property names
+        :return: list of dicts
+        :rtype list
+        """
+        properties_fvalues = properties_fvalues or list()
+        update_dict = update_dict or dict()
+
+        if part.category == Category.INSTANCE:
+            key = 'id'
+        else:
+            key = 'model_id'
+
+        def make_serializable(value):
+            # if the value is a reference property to another 'Base' Part, replace with its ID
+            if isinstance(value, Base):
+                return value.id
+            else:
+                return value
+
+        for prop_name_or_id, property_value in update_dict.items():
+            if isinstance(property_value, Iterable):
+                property_value = list(map(make_serializable, property_value))
+            else:
+                make_serializable(property_value)
+
+            updated_p = dict(
+                value=property_value
+            )
+            if is_uuid(prop_name_or_id):
+                updated_p[key] = prop_name_or_id
+            else:
+                updated_p[key] = part.property(prop_name_or_id).id
+            properties_fvalues.append(updated_p)
+
+        return properties_fvalues
+
     def add_with_properties(self, model, name=None, update_dict=None, properties_fvalues=None, refresh=True, **kwargs):
         # type: (Part2, Optional[Text], Optional[Dict], Optional[List[Dict]], Optional[bool], **Any) -> Part2
         """
@@ -596,20 +641,7 @@ class Part2(Base):
         name = name or model.name
         url = self._client._build_url('parts2_new_instance')
 
-        properties_fvalues = properties_fvalues or list()
-
-        for prop_name_or_id, property_value in update_dict.items():
-            if isinstance(property_value, Base):
-                # is the value is a reference property to another 'Base' Part.
-                property_value = property_value.id
-            updated_p = dict(
-                value=property_value
-            )
-            if is_uuid(prop_name_or_id):
-                updated_p['model_id'] = prop_name_or_id
-            else:
-                updated_p['model_id'] = model.property(prop_name_or_id).id
-            properties_fvalues.append(updated_p)
+        properties_fvalues = self._parse_update_dict(model, properties_fvalues, update_dict)
 
         response = self._client._request(
             'POST', url,
@@ -828,21 +860,7 @@ class Part2(Base):
         if properties_fvalues and not isinstance(properties_fvalues, list):
             raise IllegalArgumentError("optional `properties_fvalues` need to be provided as a list of dicts")
 
-        properties_fvalues = properties_fvalues or list()
-        update_dict = update_dict or dict()
-
-        for prop_name_or_id, property_value in update_dict.items():
-            if isinstance(property_value, Base):
-                # is the value is a reference property to another 'Base' Part.
-                property_value = property_value.id
-            updated_p = dict(
-                value=property_value
-            )
-            if is_uuid(prop_name_or_id):
-                updated_p['id'] = prop_name_or_id
-            else:
-                updated_p['id'] = self.property(prop_name_or_id).id
-            properties_fvalues.append(updated_p)
+        properties_fvalues = self._parse_update_dict(self, properties_fvalues, update_dict)
 
         payload_json = dict(
             properties_fvalues=properties_fvalues,
