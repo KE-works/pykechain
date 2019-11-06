@@ -1,4 +1,3 @@
-from collections import Iterable
 from typing import Any, Union, List, Dict, Optional, Text  # noqa: F401
 
 import requests
@@ -572,7 +571,7 @@ class Part2(Base):
                 return value
 
         for prop_name_or_id, property_value in update_dict.items():
-            if isinstance(property_value, Iterable):
+            if isinstance(property_value, (list, set, tuple)):
                 property_value = list(map(make_serializable, property_value))
             else:
                 make_serializable(property_value)
