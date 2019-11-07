@@ -528,7 +528,7 @@ class Client(object):
     def parts(self,
               name=None,  # type: Optional[str]
               pk=None,  # type: Optional[str]
-              model=None,  # type: Optional[Part]
+              model=None,  # type: Optional[Part2]
               category=Category.INSTANCE,  # type: Optional[str]
               bucket=None,  # type: Optional[str]
               scope_id=None,  # type: Optional[str]
