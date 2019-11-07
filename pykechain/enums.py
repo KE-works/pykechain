@@ -577,6 +577,7 @@ class PropertyRepresentation(Enum):
     :cvar DECIMAL_PLACES: Amount of decimal places to show the number
     :cvar SIGNIFICANT_DIGITS: Number (count) of significant digits to display the number
     :cvar LINK_TARGET: configuration of a link to open the link in a new browsertab or not.
+    :cvar BUTTON: options to represent the choices of a select-list
     """
 
     DECIMAL_PLACES = "decimalPlaces"
@@ -684,9 +685,9 @@ class ProgressBarColors(Enum):
     DEFAULT_IN_PROGRESS_BACKGROUND = '#FC7C3D'
 
 
-class CardWidgetLinkTarget(Enum):
+class LinkTargets(Enum):
     """
-    Target for the CardWidget link.
+    Target for the CardWidget link and Link property representations.
 
     .. versionadded:: 3.0
 

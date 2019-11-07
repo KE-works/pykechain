@@ -1,5 +1,5 @@
-from typing import Dict
-
+from abc import abstractmethod
+from typing import Dict, Any
 from jsonschema import validate
 
 from pykechain.enums import PropertyRepresentation
@@ -15,11 +15,23 @@ class BaseRepresentation(object):
     """
 
     jsonschema = representation_jsonschema_stub
+    rtype = None
+    _config_value_key = None
 
-    def __init__(self, json=None, *args, **kwargs):
+    def __init__(self, prop, json=None, value=None):
         """Construct a base validator."""
-        self._json = json or dict(config=dict())
-        self._config = self._json.get('config', dict())
+        self._property = prop
+
+        self._json = json or dict(rtype=self.rtype, config=dict())  # type: dict
+
+        self._config = self._json.get('config', dict())  # type: dict
+
+        if value is None and self._config_value_key in self._config:
+            self._value = self._config[self._config_value_key]
+        else:
+            self.validate_representation(value)
+            self._config[self._config_value_key] = value
+            self._value = value
 
     def as_json(self):
         # type: () -> dict
@@ -32,8 +44,8 @@ class BaseRepresentation(object):
         return validate(self._json, self.jsonschema)
 
     @classmethod
-    def parse(cls, json):
-        # type: (Dict) -> BaseRepresentation
+    def parse(cls, prop, json):
+        # type: (AnyProperty, Dict) -> BaseRepresentation
         """Parse a json dict and return the correct subclass of :class:`BaseRepresentation`.
 
         It uses the 'effect' key to determine which :class:`BaseRepresentation` to instantiate.
@@ -49,10 +61,32 @@ class BaseRepresentation(object):
             if rtype not in PropertyRepresentation.values():
                 raise Exception("Representation unknown, incorrect json: '{}'".format(json))
 
-            from pykechain.models.validators import validators
+            from pykechain.models.representations import representations
             rtype_implementation_classname = "{}{}".format(rtype[0].upper(), rtype[1:])  # type: ignore
-            if hasattr(validators, rtype_implementation_classname):
-                return getattr(validators, rtype_implementation_classname)(json=json)
+            if hasattr(representations, rtype_implementation_classname):
+                return getattr(representations, rtype_implementation_classname)(prop=prop, json=json)
             else:
                 raise Exception('unknown rtype in json')
         raise Exception("Representation unknown, incorrect json: '{}'".format(json))
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self.validate_representation(value)
+
+        self._value = value
+        self._config[self._config_value_key] = value
+        self._property._dump_representations()
+
+    @abstractmethod
+    def validate_representation(self, value):
+        # type: (Any) -> None
+        """
+        :param value: value to be validated
+        :raises IllegalArgumentError
+        :returns None
+        """
+        pass

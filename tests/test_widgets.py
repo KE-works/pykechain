@@ -3,7 +3,7 @@ import os
 from unittest import skip
 
 from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors, \
-    Category, CardWidgetLinkTarget
+    Category, LinkTargets
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Activity2
 from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, \
@@ -265,9 +265,9 @@ class TestWidgetManagerInActivity(TestBetamax):
         activity = self.project.activity(name='test task')
 
         widget1 = widget_manager.add_card_widget(title="Some title", description='Some description',
-                                                 link='www.ke-chain.com', link_target=CardWidgetLinkTarget.NEW_TAB)
+                                                 link='www.ke-chain.com', link_target=LinkTargets.NEW_TAB)
         widget2 = widget_manager.add_card_widget(image=picture, title=False,
-                                                 link=activity.id, link_target=CardWidgetLinkTarget.SAME_TAB)
+                                                 link=activity.id, link_target=LinkTargets.SAME_TAB)
 
         # testing
         self.assertEqual(len(widget_manager), 1 + 2)

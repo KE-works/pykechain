@@ -140,7 +140,7 @@ class Property2(Property):
         self._representations = []
         representations_json = self._options.get('representations')
         for representation_json in representations_json:
-            self._representations.append(BaseRepresentation.parse(json=representation_json))
+            self._representations.append(BaseRepresentation.parse(prop=self, json=representation_json))
 
     def _dump_representations(self):
         """Dump the representations as json inside the _options dictionary with the key `representations`."""
