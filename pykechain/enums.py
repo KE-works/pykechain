@@ -582,6 +582,7 @@ class PropertyRepresentation(Enum):
     DECIMAL_PLACES = "decimalPlaces"
     SIGNIFICANT_DIGITS = "significantDigits"
     LINK_TARGET = "linkTarget"
+    BUTTON = 'buttonRepresentation'
 
 
 class ShowColumnTypes(Enum):
@@ -725,3 +726,16 @@ class CardWidgetImageValue(Enum):
 
     CUSTOM_IMAGE = "Custom image"
     NO_IMAGE = "No image"
+
+
+class SelectListRepresentations(Enum):
+    """
+    Options in which a single-select list property options are displayed.
+
+    :cvar DROP_DOWN: "dropdown"
+    :cvar CHECK_BOXES: "checkboxes"
+    :cvar BUTTONS: "buttons"
+    """
+    DROP_DOWN = 'dropdown'
+    CHECK_BOXES = 'checkboxes'
+    BUTTONS = 'buttons'

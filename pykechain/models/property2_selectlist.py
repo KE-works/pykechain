@@ -100,3 +100,7 @@ class SelectListProperty2(Property2):
             raise APIError("Could not update property value. Response: {}".format(str(response)))
         else:
             self._options = new_options  # save the new options as the options
+
+    @property
+    def display(self):
+        return self._options.get('representations')
