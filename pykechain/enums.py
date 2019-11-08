@@ -744,12 +744,14 @@ class KEChainPages(Enum):
     DATA_MODEL = 'productmodel'
     EXPLORER = 'product'
     SERVICES = 'scripts'
+    CATALOG_WBS = 'catalogtree'
 
 
 KEChainPageLabels = {
     KEChainPages.DETAIL: 'Project details',
     KEChainPages.TASKS: 'Tasks',
     KEChainPages.WORK_BREAKDOWN: 'Work Breakdown',
+    KEChainPages.CATALOG_WBS: 'Catalog',
     KEChainPages.DATA_MODEL: 'Data model',
     KEChainPages.EXPLORER: 'Explorer',
     KEChainPages.SERVICES: 'Scripts',
@@ -759,6 +761,7 @@ KEChainPageLabels_nl = {
     KEChainPages.DETAIL: 'Project details',
     KEChainPages.TASKS: 'Taken',
     KEChainPages.WORK_BREAKDOWN: 'Taakverdeling',
+    KEChainPages.CATALOG_WBS: 'Catalogus',
     KEChainPages.DATA_MODEL: 'Data model',
     KEChainPages.EXPLORER: 'Explorer',
     KEChainPages.SERVICES: 'Scripts',
