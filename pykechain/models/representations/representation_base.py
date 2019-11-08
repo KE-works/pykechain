@@ -51,6 +51,8 @@ class BaseRepresentation(object):
         It uses the 'effect' key to determine which :class:`BaseRepresentation` to instantiate.
         Please refer to :class:`pykechain.enums.PropertyRepresentation` for the supported representations.
 
+        :param prop: Property object to which the `BaseRepresentation` belongs.
+        :type: prop: AnyProperty
         :param json: dictionary containing the specific keys to parse into a :class:`BaseRepresentation`
         :type json: dict
         :returns: the instantiated subclass of :class:`BaseRepresentation`
@@ -79,7 +81,9 @@ class BaseRepresentation(object):
 
         self._value = value
         self._config[self._config_value_key] = value
-        self._property._dump_representations()
+
+        # Update the property in-place
+        self._property.representations = self._property.representations
 
     @abstractmethod
     def validate_representation(self, value):

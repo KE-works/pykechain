@@ -24,13 +24,16 @@ class TestRepresentationJSON(SixTestCase):
 
 
 class TestSignificantDigitsLive(TestBetamax):
-    # Specify these 2 class attributes in every sub-class
+    """
+    Specify these class attributes in every sub-class
+    """
     property_type = PropertyType.FLOAT_VALUE  # type: PropertyType
     representation_class = SignificantDigits  # type: type(BaseRepresentation)
     value = 3
+    new_value = 1
 
-    test_model_name = '__test model'
-    test_prop_name = '__test representation property'
+    test_model_name = '__test model for representations'
+    test_prop_name = '__test property for representations'
 
     def setUp(self):
         super().setUp()
@@ -65,6 +68,26 @@ class TestSignificantDigitsLive(TestBetamax):
         self.assertIsInstance(first_representation, self.representation_class)
         self.assertTrue(first_representation.value == self.value)
 
+    def test_set_value(self):
+        # Make sure there is a representation object
+        self.prop_model.representations = [
+            self.representation_class(
+                prop=self.prop_model,
+                value=self.value,
+            ),
+        ]
+
+        # Set new value
+        first_repr = self.prop_model.representations[0]
+        first_repr.value = self.new_value
+
+        # Retrieve representation again
+        model = self.project.model(name=self.test_model_name)
+        first_representation = model.property(name=self.test_prop_name).representations[0]
+
+        # testing
+        self.assertEqual(first_repr.value, first_representation.value)
+
     def test_unsupported_value(self):
 
         with self.assertRaises(IllegalArgumentError):
@@ -78,15 +101,18 @@ class TestDecimalPlacesLive(TestSignificantDigitsLive):
     property_type = PropertyType.FLOAT_VALUE
     representation_class = DecimalPlaces
     value = 3
+    new_value = 5
 
 
 class TestLinkTargetLive(TestSignificantDigitsLive):
     property_type = PropertyType.LINK_VALUE
     representation_class = LinkTarget
     value = LinkTargets.SAME_TAB
+    new_value = LinkTargets.NEW_TAB
 
 
 class TestButtonRepresentationLive(TestSignificantDigitsLive):
     property_type = PropertyType.SINGLE_SELECT_VALUE
     representation_class = ButtonRepresentation
     value = SelectListRepresentations.CHECK_BOXES
+    new_value = SelectListRepresentations.BUTTONS
