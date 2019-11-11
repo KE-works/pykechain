@@ -218,8 +218,7 @@ class TestScopes2SpecificTests(TestBetamax):
         self.scope.set_landing_page(activity=first_activity)
 
     def test_set_landing_page_data_model(self):
-        # TODO No cassette yet
-        #  self.scope = self.project.clone(asynchronous=False)
+        self.scope = self.project.clone(asynchronous=False)
 
         data_model_page = KEChainPages.DATA_MODEL
 

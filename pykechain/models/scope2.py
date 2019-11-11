@@ -403,7 +403,7 @@ class Scope2(Base, TagsMixin):
 
         from pykechain.models import Activity2
 
-        if not (isinstance(activity, Activity2) or activity not in KEChainPages.values()):
+        if not (isinstance(activity, Activity2) or activity in KEChainPages.values()):
             raise IllegalArgumentError(
                 'activity must be of class Activity2 or a KEChainPages option, "{}" is not.'.format(activity))
 
