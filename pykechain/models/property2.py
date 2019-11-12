@@ -99,8 +99,7 @@ class Property2(Property):
         return self._part
 
     @classmethod
-    def create(cls, json, **kwargs):
-        # type: (dict, **Any) -> Property2
+    def create(cls, json: dict, **kwargs) -> 'AnyProperty':
         """Create a property based on the json data.
 
         This method will attach the right class to a property, enabling the use of type-specific methods.
