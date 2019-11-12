@@ -25,7 +25,7 @@ class TestUsers(TestBetamax):
             self.client.user()
 
     def test_retrieve_single_user_with_known_id(self):
-        self.assertTrue(self.client.user(id=1))
+        self.assertTrue(self.client.user(pk=1))
 
     def test_retrieve_single_user_with_known_username(self):
         self.assertTrue(self.client.user(username='testuser'))
@@ -48,4 +48,4 @@ class TestUsers(TestBetamax):
     def test_retrieve_user_language(self):
         user_retrieved = self.client.user(username='testuser')
         language_retrieved = user_retrieved.language
-        self.assertIn(language_retrieved, ['fr','en','nl','de', ''])
+        self.assertIn(language_retrieved, ['fr', 'en', 'nl', 'de', ''])
