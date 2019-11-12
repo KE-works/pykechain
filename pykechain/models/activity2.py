@@ -315,7 +315,6 @@ class Activity2(Base, TagsMixin):
         Only when the activity is a Subprocess, otherwise it raises a NotFoundError
 
         :param kwargs: Additional search arguments, check :func:`pykechain.Client.activities` for additional info
-        :type kwargs: dict or None
         :return: a list of :class:`Activity2`
         :raises NotFoundError: when this task is not of type `ActivityType.PROCESS`
 
@@ -343,7 +342,6 @@ class Activity2(Base, TagsMixin):
         itself. This also works if the activity is of type `ActivityType.PROCESS`.
 
         :param kwargs: Additional search arguments, check :func:`pykechain.Client.activities` for additional info
-        :type kwargs: dict or None
         :return: list of :class:`Activity2`
         :raises NotFoundError: when it is a task in the top level of a project
 
@@ -577,7 +575,6 @@ class Activity2(Base, TagsMixin):
         Works with KE-chain version 3.
 
         :param kwargs: additional keyword arguments
-        :type kwargs: dict or None
         :return: A :class:`WidgetManager` list, containing the widgets
         :rtype: WidgetManager
         :raises NotFoundError: when the widgets could not be found
