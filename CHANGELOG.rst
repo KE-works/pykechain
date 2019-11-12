@@ -27,7 +27,7 @@ Backward Incompatible Changes
 Major differences
 ~~~~~~~~~~~~~~~~~
 
- * Widgets are not part of KE-chain 3. The `Activity` object does provide a `WidgetManager` to add, remove, reorder, insert and manage `WidgetSets` in general.
+ * Widgets are now part of KE-chain 3. The `Activity` object does provide a `WidgetManager` to add, remove, reorder, insert and manage `WidgetSets` in general.
  * There are some new widgets introduced, please refer to `the documentation <https://pykechain.readthedocs.io/en/latest/developer_api.html>`_
  * We have a new `Part2`, `Property2` and `Scope2` API endpoint (``/api/v3/...``). This API is faster but asks the call to be more explicit on what fields to return initially.
  * KE-chain 3 has widget level associations, and not on activity anymore. That means that parts and part models are associated per widget.
