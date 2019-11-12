@@ -288,14 +288,15 @@ def __dict_public__(cls):
     """
     Get the __dict__ of the class `cls`, excluding 'dunder' attributes and methods.
 
-    Examples
-    --------
+    :param cls: class object
+    :return: dictionary with public attributes
+
+    Example
+    -------
     >>> from pykechain.enums import Category
     >>> sorted(__dict_public__(cls=Category).values())
     ['INSTANCE', 'MODEL']
 
-    :param cls: class object
-    :return: dictionary with public attributes
     """
     return {k: v for (k, v) in cls.__dict__.items() if not k.startswith('__')}
 
@@ -305,12 +306,6 @@ def __dict__inherited__(cls, stop=type, public=True):
     """
     Get all __dict__ items of the class and its superclasses up to `type`, or the `stop` class given as input.
 
-    Example
-    --------
-    >>> from pykechain.enums import Enum, Category
-    >>> sorted(__dict__inherited__(cls=Category, stop=Enum, public=True).values())
-    ['INSTANCE', 'MODEL']
-
     :param cls: class from which to retrieve the dict.
     :type cls: type(object)
     :param stop: optional class to indicate up to which superclass the inheritance should accumulate the dict.
@@ -319,8 +314,14 @@ def __dict__inherited__(cls, stop=type, public=True):
     :type public: bool
     :return: dictionary of key, value pairs
     :rtype dict
-    """
 
+    Example
+    -------
+    >>> from pykechain.enums import Enum, Category
+    >>> sorted(__dict__inherited__(cls=Category, stop=Enum, public=True).values())
+    ['INSTANCE', 'MODEL']
+
+    """
     if public:
         _dict = __dict_public__(cls=cls)
     else:
@@ -336,4 +337,3 @@ def __dict__inherited__(cls, stop=type, public=True):
         _dict.update(super_class_dict)
 
     return _dict
-
