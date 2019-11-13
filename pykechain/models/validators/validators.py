@@ -1,7 +1,6 @@
 from __future__ import division
 
 import re
-from pathlib import Path
 from typing import Any, Union, Tuple, Optional, Text, Dict, List  # noqa: F401 # pylint: disable=unused-import
 
 from pykechain.enums import PropertyVTypes
@@ -367,18 +366,9 @@ class AlwaysAllowValidator(PropertyValidator):
         return self._validation_result, self._validation_reason
 
 
-class FileExtensionValidator(AlwaysAllowValidator):
+class FileExtensionValidator(PropertyValidator):
     """A file extension Validator."""
 
-    pass
-
-
-class FileSizeValidator(AlwaysAllowValidator):
-    """A file size Validator."""
-
-    pass
-
-class FileExtensionValidator(PropertyValidator):
     vtype = PropertyVTypes.FILEEXTENSION
     jsonschema = fileextensionvalidator_schema
 
@@ -413,6 +403,15 @@ class FileExtensionValidator(PropertyValidator):
 
 
 class FileSizeValidator(PropertyValidator):
+    """A file size Validator.
+
+    The actual size of the file cannot be checked in pykechain without downloading this from the server, hence
+    when the validator is used inside an attachment property, the validator returns always being valid.
+
+    :ivar max_size: maxium size tocheck
+    :type max_size: Union[int,float]
+    """
+
     vtype = PropertyVTypes.FILESIZE
     jsonschema = filesizevalidator_schema
 
@@ -423,11 +422,19 @@ class FileSizeValidator(PropertyValidator):
                 self._config['maxSize'] = int(max_size)
             else:
                 raise ValueError("`max_size` should be a number.")
-        self.max_size = self._config.get('maxSize', int(float('inf')))
+        self.max_size = self._config.get('maxSize', float('inf'))
 
     def _logic(self, value: Optional[Union[int, float]] = None) -> Tuple[Optional[bool], Optional[Text]]:
-        """Based on a filesize (numeric) or  filepath of the property (value), the filesize is checked"""
+        """Based on a filesize (numeric) or  filepath of the property (value), the filesize is checked."""
         if value is None:
-            return None, None
+            return None, "No reason"
+
+        basereason = "Value '{}' should be of a size less then '{}'".format(value, self.max_size)
+
+        if isinstance(value, (int, float)):
+            if int(value) <= self.max_size and int(value) >= 0:
+                return True, basereason.replace("should", "is")
+            else:
+                return False, basereason
 
         return True, "We determine the filesize of '{}' to be valid. We cannot check it at this end.".format(value)
