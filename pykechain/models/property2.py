@@ -93,7 +93,8 @@ class Property2(Property):
     @property
     def part(self):
         # type: () -> Part2  # noqa: F821
-        """Retrieve the part that holds this Property.
+        """
+        Retrieve the part that holds this Property.
 
         :returns: The :class:`Part` associated to this property
         :raises APIError: if the `Part` is not found
@@ -106,7 +107,8 @@ class Property2(Property):
     def representations(self):
         # type: () -> List[BaseRepresentation]
         """
-        Provide list of representation objects
+        Provide list of representation objects.
+
         :return: list of Representations
         """
         return self._representations

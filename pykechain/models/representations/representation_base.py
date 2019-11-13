@@ -11,7 +11,9 @@ class BaseRepresentation(object):
     Base class for all Representations.
 
     :cvar jsonschema: jsonschema to validate the json representation of the Validator
-    :type jsonschema: dict
+    :type jsonschema: Dict
+    :cvar rtype: type of representation
+    :type rtype: Text
     """
 
     jsonschema = representation_jsonschema_stub
@@ -73,10 +75,24 @@ class BaseRepresentation(object):
 
     @property
     def value(self):
+        """
+        The current representation value.
+
+        :return: value
+        :rtype Any
+        """
         return self._value
 
     @value.setter
     def value(self, value):
+        """
+        The new representation value to be set.
+
+        :param value: the new value to be set
+        :type value: Any
+        :return: the value
+        :rtype Any
+        """
         self.validate_representation(value)
 
         self._value = value
@@ -89,8 +105,11 @@ class BaseRepresentation(object):
     def validate_representation(self, value):
         # type: (Any) -> None
         """
-        :param value: value to be validated
+        Validate whether the representation value can be set.
+
+        :param value: representation value to set.
+        :type value: Any
         :raises IllegalArgumentError
-        :returns None
+        :return: None
         """
         pass
