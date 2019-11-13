@@ -76,7 +76,7 @@ class BaseRepresentation(object):
     @property
     def value(self):
         """
-        The current representation value.
+        Current representation value.
 
         :return: value
         :rtype Any
@@ -86,7 +86,7 @@ class BaseRepresentation(object):
     @value.setter
     def value(self, value):
         """
-        The new representation value to be set.
+        New representation value to be set.
 
         :param value: the new value to be set
         :type value: Any

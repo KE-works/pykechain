@@ -4,9 +4,7 @@ from pykechain.models.representations.representation_base import BaseRepresentat
 
 
 class DecimalPlaces(BaseRepresentation):
-    """
-    Representation for floating-point value properties.
-    """
+    """Representation for floating-point value properties."""
 
     rtype = PropertyRepresentation.DECIMAL_PLACES
     _config_value_key = 'amount'
@@ -26,17 +24,13 @@ class DecimalPlaces(BaseRepresentation):
 
 
 class SignificantDigits(DecimalPlaces):
-    """
-    Representation for floating-point value properties.
-    """
+    """Representation for floating-point value properties."""
 
     rtype = PropertyRepresentation.SIGNIFICANT_DIGITS
 
 
 class LinkTarget(BaseRepresentation):
-    """
-    Representation for HTML link reference properties.
-    """
+    """Representation for HTML link reference properties."""
 
     rtype = PropertyRepresentation.LINK_TARGET
     _config_value_key = 'target'
@@ -56,9 +50,7 @@ class LinkTarget(BaseRepresentation):
 
 
 class ButtonRepresentation(BaseRepresentation):
-    """
-    Representation for single-select list properties.
-    """
+    """Representation for single-select list properties."""
 
     rtype = PropertyRepresentation.BUTTON
     _config_value_key = PropertyRepresentation.BUTTON
