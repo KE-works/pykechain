@@ -747,6 +747,7 @@ class SelectListRepresentations(Enum):
     :cvar CHECK_BOXES: "checkboxes"
     :cvar BUTTONS: "buttons"
     """
+
     DROP_DOWN = 'dropdown'
     CHECK_BOXES = 'checkboxes'
     BUTTONS = 'buttons'
