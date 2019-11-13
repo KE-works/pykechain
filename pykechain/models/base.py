@@ -6,13 +6,13 @@ from pykechain.utils import parse_datetime
 class Base(object):
     """Base model connecting retrieved data to a KE-chain client.
 
-    :cvar id: The UUID of the object (corresponds with the UUID in KE-chain).
+    :ivar id: The UUID of the object (corresponds with the UUID in KE-chain).
     :type id: str
-    :cvar name: The name of the object.
+    :ivar name: The name of the object.
     :type name: basestring
-    :cvar created_at: the datetime when the object was created if available (otherwise None)
+    :ivar created_at: the datetime when the object was created if available (otherwise None)
     :type created_at: datetime or None
-    :cvar updated_at: the datetime when the object was last updated if available (otherwise None)
+    :ivar updated_at: the datetime when the object was last updated if available (otherwise None)
     :type updated_at: datetime or None
     """
 
@@ -34,7 +34,7 @@ class Base(object):
         if hasattr(self, 'id') and hasattr(other, 'id'):
             return self.id == other.id
         else:
-            return super().__eq__(other=other)
+            return super().__eq__(other)
 
     def __hash__(self):
         return hash(self.id)
