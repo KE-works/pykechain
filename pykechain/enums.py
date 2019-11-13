@@ -540,6 +540,8 @@ class PropertyVTypes(Enum):
     :cvar ODDNUMBER: oddNumberValidator
     :cvar REGEXSTRING: regexStringValidator
     :cvar SINGLEREFERENCE: 'singleReferenceValidator'
+    :cvar FILEEXTENSION: 'fileExtensionValidator'
+    :cvar FILESIZE: 'fileSizeValidator'
     """
 
     NONEVALIDATOR = 'noneValidator'
@@ -550,6 +552,11 @@ class PropertyVTypes(Enum):
     ODDNUMBER = 'oddNumberValidator'
     REGEXSTRING = 'regexStringValidator'
     SINGLEREFERENCE = 'singleReferenceValidator'
+    FILEEXTENSION = 'fileExtensionValidator'
+    FILESIZE = 'fileSizeValidator'
+
+    # fallback
+    ALWAYSALLOW = 'alwaysAllowValidator'
 
 
 class ValidatorEffectTypes(Enum):
@@ -728,3 +735,19 @@ class CardWidgetImageValue(Enum):
 
     CUSTOM_IMAGE = "Custom image"
     NO_IMAGE = "No image"
+
+
+class ImageFitValue(Enum):
+    """
+    Options to fit an image on a CardWidget or AttachmentViewerWidget.
+
+    This is a subset from the `object-fit property`_ in HTML.
+
+    :cvar CONTAIN: scale the image to fit within the widget
+    :cvar COVER: scale the image to cover the entire widget
+
+    .. _object-fit property: https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit
+    """
+
+    CONTAIN = 'contain'
+    COVER = 'cover'

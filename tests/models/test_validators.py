@@ -8,7 +8,8 @@ from pykechain.models.validators import PropertyValidator, ValidatorEffect, Visu
 from pykechain.models.validators.validator_schemas import options_json_schema, validator_jsonschema_stub, \
     effects_jsonschema_stub
 from pykechain.models.validators.validators import RegexStringValidator, RequiredFieldValidator, EvenNumberValidator, \
-    OddNumberValidator, SingleReferenceValidator, EmailValidator
+    OddNumberValidator, SingleReferenceValidator, EmailValidator, AlwaysAllowValidator, FileSizeValidator, \
+    FileExtensionValidator
 from tests.classes import SixTestCase, TestBetamax
 
 
@@ -470,6 +471,55 @@ class TestSingleReferenceValidator(SixTestCase):
         self.assertFalse(validator.is_valid(1.0))
         self.assertFalse(validator.is_valid(dict()))
 
+
+class TestAlwaysAllowValidator(SixTestCase):
+    def test_always_allow_validator_without_settings(self):
+        validator = AlwaysAllowValidator()
+        self.assertTrue(validator.is_valid('some text'))
+        self.assertTrue(validator.is_valid(42))
+        self.assertTrue(validator.is_valid(42.0))
+        self.assertTrue(validator.is_valid(['a', 'b']))
+        self.assertTrue(validator.is_valid(True))
+        self.assertTrue(validator.is_valid(False))
+        self.assertTrue(validator.is_valid(None))
+        self.assertTrue(validator.is_valid({"a":"b"}))
+        self.assertFalse(validator.is_invalid(None))
+        self.assertTrue(validator.is_valid(list()))
+        self.assertTrue(validator.is_valid(set()))
+        self.assertTrue(validator.is_valid(tuple()))
+        self.assertIsNone(validator.validate_json())
+
+    def test_filesizevalidator_being_a_always_allow_validator_without_settings(self):
+        validator = FileSizeValidator()
+        self.assertTrue(validator.is_valid('some text'))
+        self.assertTrue(validator.is_valid(42))
+        self.assertTrue(validator.is_valid(42.0))
+        self.assertTrue(validator.is_valid(['a', 'b']))
+        self.assertTrue(validator.is_valid(True))
+        self.assertTrue(validator.is_valid(False))
+        self.assertTrue(validator.is_valid(None))
+        self.assertTrue(validator.is_valid({"a":"b"}))
+        self.assertFalse(validator.is_invalid(None))
+        self.assertTrue(validator.is_valid(list()))
+        self.assertTrue(validator.is_valid(set()))
+        self.assertTrue(validator.is_valid(tuple()))
+        self.assertIsNone(validator.validate_json())
+
+    def test_fileextensionvalidator_being_a_always_allow_validator_without_settings(self):
+        validator = FileExtensionValidator()
+        self.assertTrue(validator.is_valid('some text'))
+        self.assertTrue(validator.is_valid(42))
+        self.assertTrue(validator.is_valid(42.0))
+        self.assertTrue(validator.is_valid(['a', 'b']))
+        self.assertTrue(validator.is_valid(True))
+        self.assertTrue(validator.is_valid(False))
+        self.assertTrue(validator.is_valid(None))
+        self.assertTrue(validator.is_valid({"a":"b"}))
+        self.assertFalse(validator.is_invalid(None))
+        self.assertTrue(validator.is_valid(list()))
+        self.assertTrue(validator.is_valid(set()))
+        self.assertTrue(validator.is_valid(tuple()))
+        self.assertIsNone(validator.validate_json())
 
 class TestPropertyWithValidator(SixTestCase):
 
