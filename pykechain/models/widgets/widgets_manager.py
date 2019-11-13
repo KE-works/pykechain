@@ -1,12 +1,12 @@
 import warnings
-from typing import Sized, Any, Iterable, Union, AnyStr, Optional as Opt, Text, Dict
+from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text, Dict
 
 import requests
 from six import string_types, text_type
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes, \
-    ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, CardWidgetLinkTarget, ImageFitTypes
+    ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, CardWidgetLinkTarget, ImageFitValue
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
@@ -22,7 +22,7 @@ class WidgetsManager(Sized):
     """
 
     def __init__(self, widgets, activity, client=None, **kwargs):
-        # type: (Iterable[Widget], Union[Activity2, Activity2, AnyStr], Opt[Client], **Any) -> None  # noqa: F821
+        # type: (Iterable[Widget], Union['Activity2', 'Activity2', AnyStr], Optional['Client'], **Any) -> None  # noqa: E501
         """Construct a Widget Manager from a list of widgets.
 
         You need to provide an :class:`Activity` to initiate the WidgetsManager. Alternatively you may provide both a
@@ -200,8 +200,8 @@ class WidgetsManager(Sized):
                           'accordingly to use `title`', PendingDeprecationWarning)
             title = kwargs.pop('custom_title')
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: Part2  # noqa
-        parent_instance = _retrieve_object_id(obj=parent_instance)  # type: Part2  # noqa
+        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: 'Part2'  # noqa
+        parent_instance = _retrieve_object_id(obj=parent_instance)  # type: 'Part2'  # noqa
         sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
 
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
@@ -325,7 +325,7 @@ class WidgetsManager(Sized):
                           'accordingly to use `title`', PendingDeprecationWarning)
             title = kwargs.pop('custom_title')
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: Part2  # noqa
+        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: 'Part2'  # noqa
         parent_instance_id = _retrieve_object_id(obj=parent_instance)  # type: text_type
         sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
         if not sort_property_id and sort_name:
@@ -387,8 +387,8 @@ class WidgetsManager(Sized):
         return widget
 
     def add_attachmentviewer_widget(self, attachment_property, title=False, alignment=None,
-                                    image_fit=ImageFitTypes.CONTAIN, **kwargs):
-        # type: (Union[Text, Property2], Opt[Text, bool], Opt[int], Opt[ImageFitTypes], **Any) -> Widget  # noqa
+                                    image_fit=ImageFitValue.CONTAIN, **kwargs):
+        # type: (Union[Text, 'Property2'], Optional[Text, bool], Optional[int], Optional[ImageFitValue], **Any) -> Widget  # noqa
         """
         Add a KE-chain Attachment widget widget manager.
 
@@ -417,7 +417,7 @@ class WidgetsManager(Sized):
             title = kwargs.pop('custom_title')
 
         attachment_property = _retrieve_object(attachment_property,
-                                               method=self._client.property)  # type: Property2  # noqa
+                                               method=self._client.property)  # type: 'Property2'  # noqa
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
         if 'height' in kwargs:
@@ -426,8 +426,8 @@ class WidgetsManager(Sized):
                           'to use `custom_height`', PendingDeprecationWarning)
             kwargs['custom_height'] = kwargs.pop('height')
 
-        if image_fit not in ImageFitTypes.values():
-            raise IllegalArgumentError('`image_fit` must be an ImageFitTypes option, "{}" is not.'.format(image_fit))
+        if image_fit not in ImageFitValue.values():
+            raise IllegalArgumentError('`image_fit` must be an ImageFitValue option, "{}" is not.'.format(image_fit))
 
         meta.update({
             "propertyInstanceId": attachment_property.id,
@@ -450,7 +450,7 @@ class WidgetsManager(Sized):
     def add_tasknavigationbar_widget(self, activities,
                                      alignment=NavigationBarAlignment.CENTER,
                                      parent_widget=None, **kwargs):
-        # type: (Union[Iterable[Dict]], Opt[Text], Opt[Widget,Text], **Any) -> Widget  # noqa
+        # type: (Union[Iterable[Dict]], Optional[Text], Optional[Widget,Text], **Any) -> Widget  # noqa
         """
         Add a KE-chain Navigation Bar (e.g. navigation bar widget) to the activity.
 
@@ -543,7 +543,7 @@ class WidgetsManager(Sized):
     def add_propertygrid_widget(self, part_instance, title=False, max_height=None, show_headers=True,
                                 show_columns=None, parent_widget=None, readable_models=None, writable_models=None,
                                 all_readable=False, all_writable=False, **kwargs):
-        # type: (Union[Property2, Text], Opt[Text, bool], Opt[int], bool, Opt[Iterable], Opt[Text, Widget], Opt[Iterable], Opt[Iterable], bool, bool, **Any ) -> Widget  # noqa: E501,F821
+        # type: (Union['Property2', Text], Optional[Text, bool], Optional[int], bool, Optional[Iterable], Optional[Text, Widget], Optional[Iterable], Optional[Iterable], bool, bool, **Any ) -> Widget  # noqa: E501,F821
         """
         Add a KE-chain Property Grid widget to the customization.
 
@@ -585,7 +585,7 @@ class WidgetsManager(Sized):
             title = kwargs.pop('custom_title')
 
         # Check whether the part_model is uuid type or class `Part`
-        part_instance = _retrieve_object(part_instance, method=self._client.part)  # type: Part2  # noqa: F821
+        part_instance = _retrieve_object(part_instance, method=self._client.part)  # type: 'Part2'  # noqa: F821
 
         if not show_columns:
             show_columns = list()
@@ -628,7 +628,7 @@ class WidgetsManager(Sized):
 
     def add_service_widget(self, service, title=False, custom_button_text=False, emphasize_run=True,
                            download_log=False, parent_widget=None, **kwargs):
-        # type: (Service, Opt[Union[type(None), bool, Text]], Opt[Union[type(None), bool, Text]], Opt[bool], Opt[bool], Opt[Union[Widget, Text]], **Any) -> Widget  # noqa: E501, F821
+        # type: ('Service', Optional[Union[type(None), bool, Text]], Optional[Union[type(None), bool, Text]], Optional[bool], Optional[bool], Optional[Union[Widget, Text]], **Any) -> Widget  # noqa: E501, F821
         """
         Add a KE-chain Service (e.g. script widget) to the widget manager.
 
@@ -667,7 +667,7 @@ class WidgetsManager(Sized):
 
         # Check whether the script is uuid type or class `Service`
 
-        service = _retrieve_object(obj=service, method=self._client.service)  # type: Service  # noqa
+        service = _retrieve_object(obj=service, method=self._client.service)  # type: 'Service'  # noqa
 
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
 
@@ -704,7 +704,7 @@ class WidgetsManager(Sized):
         return widget
 
     def add_html_widget(self, html, title=None, **kwargs):
-        # type: (Union[Text], Opt[Union[type(None), bool, Text]], **Any) -> Widget
+        # type: (Union[Text], Optional[Union[type(None), bool, Text]], **Any) -> Widget
         """
         Add a KE-chain HTML widget to the widget manager.
 
@@ -750,7 +750,7 @@ class WidgetsManager(Sized):
         return widget
 
     def add_notebook_widget(self, notebook, title=False, parent_widget=None, **kwargs):
-        # type: (Service, Opt[Union[type(None), bool, Text]], Opt[Widget, Text], **Any) -> Widget
+        # type: ('Service', Optional[Union[type(None), bool, Text]], Optional[Widget, Text], **Any) -> Widget
         """
         Add a KE-chain Notebook (e.g. notebook widget) to the WidgetManager.
 
@@ -814,7 +814,7 @@ class WidgetsManager(Sized):
                              show_due_date=False, show_start_date=False, show_title=False, show_status=False,
                              show_progress=False, show_assignees=False, show_breadcrumbs=False, show_menu=False,
                              show_download_pdf=False, show_progressbar=False, progress_bar=None, **kwargs):
-        # type: (bool, Opt[bool], Opt[bool], Opt[bool], Opt[bool], Opt[bool], Opt[bool], Opt[bool], Opt[bool], Opt[bool], Opt[bool], Opt[dict], **Any) -> Widget  # noqa: E501
+        # type: (bool, Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[dict], **Any) -> Widget  # noqa: E501
         """
         Add a KE-chain Metapanel to the WidgetManager.
 
@@ -899,7 +899,7 @@ class WidgetsManager(Sized):
                             color_in_progress=ProgressBarColors.DEFAULT_IN_PROGRESS,
                             color_in_progress_background=ProgressBarColors.DEFAULT_IN_PROGRESS_BACKGROUND,
                             show_progress_text=True, **kwargs):
-        # type: (Opt[int], Opt[Union[str, ProgressBarColors]], Opt[Union[str, ProgressBarColors]], Opt[Union[str, ProgressBarColors]], Opt[Union[str, ProgressBarColors]], Opt[bool], **Any) -> ()  # noqa: E501
+        # type: (Optional[int], Optional[Union[str, ProgressBarColors]], Optional[Union[str, ProgressBarColors]], Optional[Union[str, ProgressBarColors]], Optional[Union[str, ProgressBarColors]], Optional[bool], **Any) -> ()  # noqa: E501
         """
         Add a KE-chain progress bar widget to the WidgetManager.
 
@@ -933,7 +933,7 @@ class WidgetsManager(Sized):
         return widget
 
     def add_multicolumn_widget(self, title=None, **kwargs):
-        # type: (Opt[Text], **Any) -> Widget
+        # type: (Optional[Text], **Any) -> Widget
         """
         Add a KE-chain Multi Column widget to the WidgetManager.
 
@@ -976,7 +976,7 @@ class WidgetsManager(Sized):
     def add_scope_widget(self, team=None, title=None, show_columns=None, show_all_columns=True, tags=None,
                          sorted_column=ScopeWidgetColumnTypes.PROJECT_NAME, sorted_direction=SortTable.ASCENDING,
                          parent_widget=None, **kwargs):
-        # type: (Union[Team,Text], Opt[Text], Opt[Iterable[Text]], Opt[bool], Opt[Iterable[Text]], Opt[Text], Opt[Text], Opt[Widget,Text], **Any) -> Widget  # noqa: F821,E501
+        # type: (Union['Team',Text], Optional[Text], Optional[Iterable[Text]], Optional[bool], Optional[Iterable[Text]], Optional[Text], Optional[Text], Optional[Widget,Text], **Any) -> Widget  # noqa: F821,E501
         """
         Add a KE-chain Scope widget to the Widgetmanager and the activity.
 
@@ -1048,8 +1048,7 @@ class WidgetsManager(Sized):
 
     def add_signature_widget(self, attachment_property, title=False, custom_button_text=False,
                              custom_undo_button_text=False, **kwargs):
-        # type: (Property2, Opt[Union[bool, Text]], Opt[Union[bool, Text]], Opt[Union[bool, Text]], **Any) -> Widget
-        # noqa: F821, E501
+        # type: ('Property2', Optional[Union[bool, Text]], Optional[Union[bool, Text]], Optional[Union[bool, Text]], **Any) -> Widget # noqa: E501
         """
         Add a KE-chain Signature widget to the Widgetmanager and the activity.
 
@@ -1078,7 +1077,7 @@ class WidgetsManager(Sized):
             title = kwargs.pop('custom_title')
 
         attachment_property = _retrieve_object(attachment_property,
-                                               method=self._client.property)  # type: Property2  # noqa
+                                               method=self._client.property)  # type: 'Property2'  # noqa
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
         meta, title = _set_title(meta, title, default_title=attachment_property.name)
@@ -1118,8 +1117,8 @@ class WidgetsManager(Sized):
         return widget
 
     def add_card_widget(self, image=None, title=None, description=None, link=None,
-                        link_target=CardWidgetLinkTarget.SAME_TAB, image_fit=ImageFitTypes.CONTAIN, **kwargs):
-        # type: (Opt[Property2], Opt[Union[type(None), Text, bool]], Opt[Union[Text, bool]], Opt[Union[type(None), Text, Property2, bool]], Opt[Union[Text, CardWidgetLinkTarget]], Opt[ImageFitTypes], **Any) -> Widget  # noqa: E501
+                        link_target=CardWidgetLinkTarget.SAME_TAB, image_fit=ImageFitValue.CONTAIN, **kwargs):
+        # type: (Optional['Property2'], Optional[Union[type(None), Text, bool]], Optional[Union[Text, bool]], Optional[Union[type(None), Text, 'Property2', bool]], Optional[Union[Text, CardWidgetLinkTarget]], Optional[ImageFitValue], **Any) -> Widget  # noqa: E501
         """
         Add a KE-chain Card widget to the WidgetManager and the activity.
 
@@ -1138,7 +1137,7 @@ class WidgetsManager(Sized):
         :param link_target: how the link is opened, one of the values of CardWidgetLinkTarget enum.
         :param link_target: CardWidgetLinkTarget
         :param image_fit: how the image on the card widget is displayed
-        :type image_fit: ImageFitTypes
+        :type image_fit: ImageFitValue
         :return: Card Widget
         """
         if 'custom_title' in kwargs and not title:
@@ -1207,10 +1206,10 @@ class WidgetsManager(Sized):
             raise IllegalArgumentError("When using the add_card_widget, 'link_target' must be a '_blank' or '_self. "
                                        "link_target is: {}".format(link_target))
 
-        if image_fit in ImageFitTypes.values():
+        if image_fit in ImageFitValue.values():
             meta['imageFit'] = image_fit
         else:
-            raise IllegalArgumentError('`image_fit` must be an ImageFitTypes option, "{}" is not.'.format(image_fit))
+            raise IllegalArgumentError('`image_fit` must be an ImageFitValue option, "{}" is not.'.format(image_fit))
 
         widget = self.create_widget(
             widget_type=WidgetTypes.CARD,
