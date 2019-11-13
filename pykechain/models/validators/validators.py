@@ -1,11 +1,9 @@
 from __future__ import division
 
 import re
-from pathlib import Path
-from typing import Any, Union, Tuple, Optional, Text, Dict, List  # noqa: F401 # pylint: disable=unused-import
+from typing import Any, Union, Tuple  # noqa: F401 # pylint: disable=unused-import
 
 from pykechain.enums import PropertyVTypes
-from pykechain.models.validators.validator_schemas import filesizevalidator_schema, fileextensionvalidator_schema
 from pykechain.models.validators.validators_base import PropertyValidator
 
 
@@ -347,7 +345,14 @@ class EmailValidator(RegexStringValidator):
         """
         super(EmailValidator, self).__init__(json=json, pattern=self.pattern, **kwargs)
 
+
 class AlwaysAllowValidator(PropertyValidator):
+    """
+    An always allow Validator.
+
+    Will always return True.
+    """
+
     vtype = PropertyVTypes.ALWAYSALLOW
 
     def _logic(self, value=None):
@@ -359,7 +364,14 @@ class AlwaysAllowValidator(PropertyValidator):
         self._validation_result, self._validation_reason = True, 'Always True'
         return self._validation_result, self._validation_reason
 
+
 class FileExtensionValidator(AlwaysAllowValidator):
+    """A file extension Validator."""
+
     pass
+
+
 class FileSizeValidator(AlwaysAllowValidator):
+    """A file size Validator."""
+
     pass
