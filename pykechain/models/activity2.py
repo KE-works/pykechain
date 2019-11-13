@@ -116,7 +116,7 @@ class Activity2(Base, TagsMixin):
         :type: :class:`pykechain.models.Scope`
         :raises NotFoundError: if the scope could not be found
         """
-        return self._client.scope(pk=self._scope_id)
+        return self._client.scope(pk=self.scope_id, status=None)
 
     #
     # predicates
