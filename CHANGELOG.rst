@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+3.0.1.1 13NOV19
+---------------
+ * Ensured proper handling of filesize and fileextension validators in KE-chain. This is a temporary release for compatibility reasons. It will be replaced with fully blown Validators in the next release. (thanks to @bastiaanbeijer for finding it)
+
 3.0.1 12NOV19
 -------------
 As we dropped Python 2.7 support we improve the code throughout on type hinting and type checking. We do this for
