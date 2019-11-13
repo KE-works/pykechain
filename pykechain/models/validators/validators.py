@@ -1,9 +1,11 @@
 from __future__ import division
 
 import re
-from typing import Any, Union, Tuple  # noqa: F401 # pylint: disable=unused-import
+from pathlib import Path
+from typing import Any, Union, Tuple, Optional, Text, Dict, List  # noqa: F401 # pylint: disable=unused-import
 
 from pykechain.enums import PropertyVTypes
+from pykechain.models.validators.validator_schemas import filesizevalidator_schema, fileextensionvalidator_schema
 from pykechain.models.validators.validators_base import PropertyValidator
 
 
@@ -344,3 +346,57 @@ class EmailValidator(RegexStringValidator):
         :type kwargs: dict
         """
         super(EmailValidator, self).__init__(json=json, pattern=self.pattern, **kwargs)
+
+class FileExtensionValidator(PropertyValidator):
+    vtype = PropertyVTypes.FILEEXTENSION
+    jsonschema = fileextensionvalidator_schema
+
+    def __init__(self, json: Optional[Dict] = None, accept: Optional[List[Text]] = None, **kwargs):
+        super(FileExtensionValidator, self).__init__(json=json, **kwargs)
+        if accept is not None:
+            if isinstance(accept, Text):
+                self._config['accept'] = accept.split(',')
+            elif isinstance(accept, List):
+                self._config['accept'] = accept
+            else:
+                raise ValueError("`accept` should be a commaseparated list or a list of strings.")
+
+        self.accept = self._config.get('accept', ['*'])
+
+    def _logic(self, value: Optional[Text] = None) -> Tuple[Optional[bool], Optional[Text]]:
+        """Based on the filename of the property (value), the type is checked"""
+        if value is None:
+            return None, None
+
+        def _use_mimetypes(filepath):
+            import mimetypes
+            content_type, _ = mimetypes.guess_type(str(filepath))
+            return content_type or 'application/octet-stream'
+
+        basereason = "Value '{}' should match the mime types '{}'".format(value, self.accept)
+
+        if self.accept == ['*'] or _use_mimetypes(value) in self.accept:
+            return True, basereason.replace('match', 'matches')
+        else:
+            return False, basereason
+
+
+class FileSizeValidator(PropertyValidator):
+    vtype = PropertyVTypes.FILESIZE
+    jsonschema = filesizevalidator_schema
+
+    def __init__(self, json: Optional[Dict] = None, max_size: Optional[Union[int, float]] = None, **kwargs):
+        super(FileSizeValidator, self).__init__(json=json, **kwargs)
+        if max_size is not None:
+            if isinstance(max_size, (int, float)):
+                self._config['maxSize'] = int(max_size)
+            else:
+                raise ValueError("`max_size` should be a number.")
+        self.max_size = self._config.get('maxSize', int(float('inf')))
+
+    def _logic(self, value: Optional[Union[int, float]] = None) -> Tuple[Optional[bool], Optional[Text]]:
+        """Based on a filesize (numeric) or  filepath of the property (value), the filesize is checked"""
+        if value is None:
+            return None, None
+
+        return True, "We determine the filesize of '{}' to be valid. We cannot check it at this end.".format(value)

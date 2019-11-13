@@ -550,6 +550,8 @@ class PropertyVTypes(Enum):
     ODDNUMBER = 'oddNumberValidator'
     REGEXSTRING = 'regexStringValidator'
     SINGLEREFERENCE = 'singleReferenceValidator'
+    FILEEXTENSION = 'fileExtensionValidator'
+    FILESIZE = 'fileSizeValidator'
 
 
 class ValidatorEffectTypes(Enum):
