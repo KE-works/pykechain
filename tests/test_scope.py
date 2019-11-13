@@ -91,6 +91,30 @@ class TestScopes(TestBetamax):
         # teardown
         self.project.remove_member(manager_to_be_removed)
 
+    def test_add_leadmember(self):
+        leadmember_to_be_added = 'anotheruser'
+        # testing
+        self.project.add_leadmember(leadmember_to_be_added)
+        self.project = self.client.scope(pk=self.project.id)
+        project_leadmembers = self.project.members(is_leadmember=True)
+        self.assertTrue(leadmember_to_be_added in [leadmember['username'] for leadmember in project_leadmembers])
+        # teardown
+        self.project.remove_member(leadmember_to_be_added)
+
+    def test_remove_leadmember(self):
+        leadmember_to_be_removed = 'anotheruser'
+        # setUp
+        self.project.add_leadmember(leadmember_to_be_removed)
+        # testing
+        self.project.remove_leadmember(leadmember_to_be_removed)
+        self.project = self.client.scope(pk=self.project.id)
+        project_leadmembers = self.project.members(is_leadmember=True)
+        self.assertTrue(leadmember_to_be_removed not in [leadmember['username'] for leadmember in project_leadmembers])
+        project_leadmembers = self.project.members(is_leadmember=False)
+        self.assertTrue(leadmember_to_be_removed in [leadmember['username'] for leadmember in project_leadmembers])
+        # teardown
+        self.project.remove_member(leadmember_to_be_removed)
+
     # 2.2.0+
     def test_edit_scope(self):
         # setUp
