@@ -1048,7 +1048,7 @@ class WidgetsManager(Sized):
 
     def add_signature_widget(self, attachment_property, title=False, custom_button_text=False,
                              custom_undo_button_text=False, **kwargs):
-        # type: (Property2, Opt[Union[bool, Text]], Opt[Union[bool, Text]], Opt[Union[bool, Text]], **Any) -> Widget  # 
+        # type: (Property2, Opt[Union[bool, Text]], Opt[Union[bool, Text]], Opt[Union[bool, Text]], **Any) -> Widget
         # noqa: F821, E501
         """
         Add a KE-chain Signature widget to the Widgetmanager and the activity.
