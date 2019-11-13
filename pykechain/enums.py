@@ -737,5 +737,6 @@ class ImageFitTypes(Enum):
     :cvar CONTAIN: scale the image to fit within the widget
     :cvar COVER: scale the image to cover the entire widget
     """
+
     CONTAIN = 'contain'
     COVER = 'cover'
