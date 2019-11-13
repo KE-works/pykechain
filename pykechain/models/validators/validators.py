@@ -290,7 +290,7 @@ class RegexStringValidator(PropertyValidator):
     vtype = PropertyVTypes.REGEXSTRING
 
     def __init__(self, json=None, pattern=None, **kwargs):
-        """Construct an regex string validator effect.
+        """Construct an regex string validator.
 
         If no pattern is provided than the regexstring `'.+'` will be used, which matches all provided text with
         at least a single character. Does not match `''` (empty string).
@@ -337,7 +337,7 @@ class EmailValidator(RegexStringValidator):
     pattern = r'\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+'
 
     def __init__(self, json=None, **kwargs):
-        """Construct an email string validator effect.
+        """Construct an email string validator.
 
         :param json: (optional) dict (json) object to construct the object from
         :type json: dict
@@ -362,17 +362,47 @@ class AlwaysAllowValidator(PropertyValidator):
 
         The validation results are returned as tuple (boolean (true/false), reasontext)
         """
-        self._validation_result, self._validation_reason = True, 'Always True'
-        return self._validation_result, self._validation_reason
+        return True, 'Always True'
 
 
 class FileExtensionValidator(PropertyValidator):
-    """A file extension Validator."""
+    """A file extension Validator.
+
+    It checks the value of the property attachment against a list of acceptable mime types or file extensions.
+
+    Example
+    -------
+    >>> validator = FileExtensionValidator(accept=[".png", ".jpg"])
+    >>> validator.is_valid("picture.jpg")
+    True
+    >>> validator.is_valid("document.pdf")
+    False
+    >>> validator.is_valid("attachments/12345678-1234-5678-1234-567812345678/some_file.txt")
+    False
+
+    >>> validator = FileExtensionValidator(accept=["application/pdf",
+    ...                                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"])
+    >>> validator.is_valid("document.pdf")
+    True
+    >>> validator.is_valid("comma-separated-values.csv")
+    False
+    >>> validator.is_valid("attachments/12345678-1234-5678-1234-567812345678/modern_excel.xlsx")
+    True
+
+    """
 
     vtype = PropertyVTypes.FILEEXTENSION
     jsonschema = fileextensionvalidator_schema
 
     def __init__(self, json: Optional[Dict] = None, accept: Optional[List[Text]] = None, **kwargs):
+        """Construct a file extension validator.
+
+        :param json: (optional) dict (json) object to construct the object from
+        :type json: Optional[Dict]
+        :param accept: (optional) list of mimetypes or file extensions (including a `.`, eg `.csv`, `.pdf`)
+        :type accept: Optional[List[Text]]
+        :param kwargs: (optional) additional kwargs to pass down
+        """
         super(FileExtensionValidator, self).__init__(json=json, **kwargs)
         if accept is not None:
             if isinstance(accept, Text):
@@ -385,7 +415,7 @@ class FileExtensionValidator(PropertyValidator):
         self.accept = self._config.get('accept', ['*'])
 
     def _logic(self, value: Optional[Text] = None) -> Tuple[Optional[bool], Optional[Text]]:
-        """Based on the filename of the property (value), the type is checked"""
+        """Based on the filename of the property (value), the type is checked."""
         if value is None:
             return None, None
 
@@ -408,14 +438,35 @@ class FileSizeValidator(PropertyValidator):
     The actual size of the file cannot be checked in pykechain without downloading this from the server, hence
     when the validator is used inside an attachment property, the validator returns always being valid.
 
-    :ivar max_size: maxium size tocheck
+    :ivar max_size: maximum size to check
     :type max_size: Union[int,float]
+
+    Example
+    -------
+    >>> validator = FileSizeValidator(max_size=100)
+    >>> validator.is_valid(100)
+    True
+    >>> validator.is_valid(-1)
+    False
+    >>> validator.is_valid("attachments/12345678-1234-5678-1234-567812345678/some_file.txt")
+    True
+    >>> validator.get_reason()
+    We determine the filesize of 'some_file.txt' to be valid. We cannot check it at this end.
+
     """
 
     vtype = PropertyVTypes.FILESIZE
     jsonschema = filesizevalidator_schema
 
     def __init__(self, json: Optional[Dict] = None, max_size: Optional[Union[int, float]] = None, **kwargs):
+        """Construct a file size validator.
+
+        :param json: (optional) dict (json) object to construct the object from
+        :type json: Optional[Dict]
+        :param max_size: (optional) number that counts as maximum size of the file
+        :type accept: Optional[Union[int,float]]
+        :param kwargs: (optional) additional kwargs to pass down
+        """
         super(FileSizeValidator, self).__init__(json=json, **kwargs)
         if max_size is not None:
             if isinstance(max_size, (int, float)):
