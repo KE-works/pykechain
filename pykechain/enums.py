@@ -728,3 +728,14 @@ class CardWidgetImageValue(Enum):
 
     CUSTOM_IMAGE = "Custom image"
     NO_IMAGE = "No image"
+
+
+class ImageFitTypes(Enum):
+    """
+    Options to fit an image on a CardWidget or AttachmentViewerWidget.
+
+    :cvar CONTAIN: scale the image to fit within the widget
+    :cvar COVER: scale the image to cover the entire widget
+    """
+    CONTAIN = 'contain'
+    COVER = 'cover'
