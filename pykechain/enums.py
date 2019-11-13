@@ -1,3 +1,6 @@
+from pykechain.utils import __dict__inherited__
+
+
 class Enum(object):
     """Custom enumeration class to support class attributes as options.
 
@@ -13,7 +16,7 @@ class Enum(object):
     @classmethod
     def options(cls):
         """Provide a sorted list of options."""
-        return sorted((value, name) for (name, value) in cls.__dict__.items() if not name.startswith('__'))
+        return sorted((value, name) for (name, value) in __dict__inherited__(cls=cls, stop=Enum).items())
 
     @classmethod
     def values(cls):
