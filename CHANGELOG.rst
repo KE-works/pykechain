@@ -3,6 +3,21 @@ Change Log
 
 pykechain changelog
 
+3.0.2 13NOV19
+-------------
+ * Ensured proper handling of filesize and fileextension validators in KE-chain. This is a temporary release for compatibility reasons. It will be replaced with fully blown Validators in the next release. (thanks to @bastiaanbeijer for finding it)
+
+3.0.1 12NOV19
+-------------
+As we dropped Python 2.7 support we improve the code throughout on type hinting and type checking. We do this for
+better code and code that is less prone to errors while developing python applications on top of KE-chain
+with pykechain. This release improves the code in several places in this regard.
+
+ * (for developers) Additional type checking and type hinting consistencies fixed (thanks to @jelleboersma)
+ * (for developers) added enumerations inheritance (thanks to @jelleboersma)
+ * small fix for the `Client.user()` methods that expects a `id` keyword in the backend and got a `pk`. (thanks to @jelleboersma)
+ * refactored the `update_dict` for bulk actions where `fvalues` can be used such as part create with properties and part update with properties (thanks to @jelleboersma)
+
 3.0.0 31OKT19
 -------------
 

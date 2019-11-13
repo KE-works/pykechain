@@ -45,6 +45,8 @@ API_PATH = {
     'scope2_remove_member': 'api/v3/scopes/{scope_id}/remove_member',
     'scope2_add_manager': 'api/v3/scopes/{scope_id}/add_manager',
     'scope2_remove_manager': 'api/v3/scopes/{scope_id}/remove_manager',
+    'scope2_add_leadmember': 'api/v3/scopes/{scope_id}/add_leadmember',
+    'scope2_remove_leadmember': 'api/v3/scopes/{scope_id}/remove_leadmember',
     'scopes2': 'api/v3/scopes.json',
     'scopes2_clone': 'api/v3/scopes/clone',
     'parts2': 'api/v3/parts.json',
