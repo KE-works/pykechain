@@ -540,6 +540,8 @@ class PropertyVTypes(Enum):
     :cvar ODDNUMBER: oddNumberValidator
     :cvar REGEXSTRING: regexStringValidator
     :cvar SINGLEREFERENCE: 'singleReferenceValidator'
+    :cvar FILEEXTENSION: 'fileExtensionValidator'
+    :cvar FILESIZE: 'fileSizeValidator'
     """
 
     NONEVALIDATOR = 'noneValidator'
@@ -552,6 +554,9 @@ class PropertyVTypes(Enum):
     SINGLEREFERENCE = 'singleReferenceValidator'
     FILEEXTENSION = 'fileExtensionValidator'
     FILESIZE = 'fileSizeValidator'
+
+    # fallback
+    ALWAYSALLOW = 'alwaysAllowValidator'
 
 
 class ValidatorEffectTypes(Enum):

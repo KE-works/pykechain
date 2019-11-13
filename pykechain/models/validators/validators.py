@@ -347,6 +347,37 @@ class EmailValidator(RegexStringValidator):
         """
         super(EmailValidator, self).__init__(json=json, pattern=self.pattern, **kwargs)
 
+
+class AlwaysAllowValidator(PropertyValidator):
+    """
+    An always allow Validator.
+
+    Will always return True.
+    """
+
+    vtype = PropertyVTypes.ALWAYSALLOW
+
+    def _logic(self, value=None):
+        # type: (Any) -> Tuple[Union[bool, None], str]
+        """Process the inner logic of the validator.
+
+        The validation results are returned as tuple (boolean (true/false), reasontext)
+        """
+        self._validation_result, self._validation_reason = True, 'Always True'
+        return self._validation_result, self._validation_reason
+
+
+class FileExtensionValidator(AlwaysAllowValidator):
+    """A file extension Validator."""
+
+    pass
+
+
+class FileSizeValidator(AlwaysAllowValidator):
+    """A file size Validator."""
+
+    pass
+
 class FileExtensionValidator(PropertyValidator):
     vtype = PropertyVTypes.FILEEXTENSION
     jsonschema = fileextensionvalidator_schema
