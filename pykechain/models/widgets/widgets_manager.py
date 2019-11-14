@@ -6,7 +6,7 @@ from six import string_types, text_type
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes, \
-    ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, CardWidgetLinkTarget, ImageFitValue
+    ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
@@ -1117,8 +1117,8 @@ class WidgetsManager(Sized):
         return widget
 
     def add_card_widget(self, image=None, title=None, description=None, link=None,
-                        link_target=CardWidgetLinkTarget.SAME_TAB, image_fit=ImageFitValue.CONTAIN, **kwargs):
-        # type: (Optional['Property2'], Optional[Union[type(None), Text, bool]], Optional[Union[Text, bool]], Optional[Union[type(None), Text, 'Property2', bool]], Optional[Union[Text, CardWidgetLinkTarget]], Optional[ImageFitValue], **Any) -> Widget  # noqa: E501
+                        link_target=LinkTargets.SAME_TAB, image_fit=ImageFitValue.CONTAIN, **kwargs):
+        # type: (Optional['Property2'], Optional[Union[type(None), Text, bool]], Optional[Union[Text, bool]], Optional[Union[type(None), Text, 'Property2', bool]], Optional[Union[Text, LinkTargets]], Optional[ImageFitValue], **Any) -> Widget  # noqa: E501
         """
         Add a KE-chain Card widget to the WidgetManager and the activity.
 
@@ -1200,7 +1200,7 @@ class WidgetsManager(Sized):
                 'showLinkValue': CardWidgetLinkValue.EXTERNAL_LINK
             })
 
-        if link_target in CardWidgetLinkTarget.values():
+        if link_target in LinkTargets.values():
             meta['linkTarget'] = link_target
         else:
             raise IllegalArgumentError("When using the add_card_widget, 'link_target' must be a '_blank' or '_self. "
