@@ -709,6 +709,12 @@ class LinkTargets(Enum):
     NEW_TAB = '_blank'
 
 
+class CardWidgetLinkTarget(LinkTargets):
+    """Target for the CardWidget, remaining for backwards compatibility."""
+
+    pass
+
+
 class CardWidgetLinkValue(Enum):
     """
     Link Value for the CardWidget.
