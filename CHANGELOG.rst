@@ -3,9 +3,13 @@ Change Log
 
 pykechain changelog
 
-3.1.1 (14NOV19)
+3.1.2 (14NOV19)
 ---------------
  * small fix for backwards compatibility of `CardWidgetLinkTarget` enum.
+
+3.1.1 (UNRELEASED)
+------------------
+ * This version is never released to the public
 
 3.1.0 (14NOV19)
 ---------------
