@@ -710,7 +710,7 @@ class LinkTargets(Enum):
 
 
 class CardWidgetLinkTarget(LinkTargets):
-    """Target for the CardWidget, remaining for backwards compatibility. """
+    """Target for the CardWidget, remaining for backwards compatibility."""
 
     pass
 
