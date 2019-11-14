@@ -145,7 +145,7 @@ class PropertyValidator(BaseValidator):
         :type value: Any
         :return: bool
         """
-        self._logic(value)
+        self._validation_result, self._validation_reason = self._logic(value)
 
         if self._validation_result is not None and self._validation_result:
             for effect in self.on_valid:
