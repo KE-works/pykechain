@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+3.1.1 (14NOV19)
+---------------
+ * small fix for backwards compatibility of `CardWidgetLinkTarget` enum.
+
 3.1.0 (14NOV19)
 ---------------
  * Added `Activity2.move()` function to move an Activity somewhere else under another Activity into this code base. (#579 thanks to @raduiordache)
