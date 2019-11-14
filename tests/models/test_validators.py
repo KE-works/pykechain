@@ -512,6 +512,7 @@ class TestFileSizeValidator(SixTestCase):
         validator = FileSizeValidator()
         self.assertIsNone(validator.validate_json())
 
+    def test_validator_valid_json_with_additional_arguments(self):
         validator = FileSizeValidator(max_size=100, another_argument=False)
         # another_argument is not found in the json
         validator.validate_json()
@@ -559,6 +560,14 @@ class TestFileSizeValidator(SixTestCase):
 
 
 class TestFileExtensionValidator(SixTestCase):
+    def test_validator_valid_json_with_settings(self):
+        validator = FileExtensionValidator(accept=[".csv"])
+        self.assertIsNone(validator.validate_json())
+
+    def test_validator_valid_json_without_settings(self):
+        validator = FileExtensionValidator()
+        self.assertIsNone(validator.validate_json())
+
     def test_fileextensionvalidator_on_extension(self):
         validator = FileExtensionValidator(accept=[".csv"])
         self.assertTrue(validator.is_valid('file.csv'))
@@ -597,6 +606,10 @@ class TestFileExtensionValidator(SixTestCase):
         self.assertTrue(validator.is_valid('file.xlsx'))
         self.assertFalse(validator.is_valid('file.csv'))
 
+    def test_fileextensionvalidator_being_none(self):
+        validator = FileExtensionValidator(accept=["video/*"])
+
+        self.assertIsNone(validator.is_valid(None))
 
 class TestPropertyWithValidator(SixTestCase):
 
@@ -646,6 +659,28 @@ class TestPropertyWithValidator(SixTestCase):
             value=None,
             value_options=dict(
                 validators=[FileSizeValidator(max_size=100).as_json()]
+            ))
+        prop = AttachmentProperty2(json=prop_json, client=None)
+        self.assertIsNone(prop.is_valid)
+        self.assertIsNone(prop.is_invalid)
+        self.assertListEqual([(None, "No reason")], prop.validate())
+
+    def test_property_with_fileextension_validator(self):
+        prop_json = dict(
+            value="attachments/12345678-1234-5678-1234-567812345678/some_file.txt",
+            value_options=dict(
+                validators=[FileExtensionValidator(accept=['.txt', 'application/pdf']).as_json()]
+            ))
+        prop = AttachmentProperty2(json=prop_json, client=None)
+        self.assertTrue(prop.is_valid)
+        self.assertFalse(prop.is_invalid)
+        self.assertTrue(prop.validate())
+
+    def test_property_without_value_with_fileextension_validator(self):
+        prop_json = dict(
+            value=None,
+            value_options=dict(
+                validators=[FileExtensionValidator(accept=['.txt', 'application/pdf']).as_json()]
             ))
         prop = AttachmentProperty2(json=prop_json, client=None)
         self.assertIsNone(prop.is_valid)
