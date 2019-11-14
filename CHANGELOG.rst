@@ -3,10 +3,13 @@ Change Log
 
 pykechain changelog
 
-3.1.0 (UNRELEASED)
-------------------
+3.1.0 (14NOV19)
+---------------
  * Added `Activity2.move()` function to move an Activity somewhere else under another Activity into this code base. (#579 thanks to @raduiordache)
+ * Created a framework for Property Representation, similar to the ones provided in KE-chain. Using this framework you can add representation for e.g. the SelectList, such as shown as a dropdown, checkboxes or a button. Check out the documentation on `SelectListRepresentations`. We also added `DecimalPlaces`, `SignificantDigits`, `LinkTarget` and `ButtonRepresentation`. (#532 thanks to @jelleboersma)
+ * Added `FileSizeValidator` and `FileExtensionValidator` to pykechain. Now you can use it also to create these validators for `AttachmentProperty2`-ies. Also if these validators are active on properties you can use the `Property2.is_valid()` api to check if the property conforms to these validators. With `Property2.get_reason()` you retrieve the reason for the validator being either valid or invalid. This will override the patch release of 3.0.2. #573
  * Added `ImageFitValue` enum to better support the `CardWidget` and `AttachmentviewerWidget` generation and editing. #582 (thanks @jelleboersma)
+ * Updated dependent versions for development: tox (3.14.1)
 
 3.0.2 13NOV19
 -------------
