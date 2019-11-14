@@ -717,3 +717,23 @@ class Activity2(Base, TagsMixin):
         with open(full_path, 'wb') as f:
             for chunk in response.iter_content(1024):
                 f.write(chunk)
+
+    def move(self, parent, classification=None):
+        """
+        Move the `Activity` to a new parent.
+
+        See :func:`pykechain.Client.move_activity` for available parameters.
+
+        If you want to move an Activity from one classification to another, you need to provide the target
+        classification. The classificaiton of the parent should match the one provided in the function. This is
+        to ensure that you really want this to happen.
+
+        :param parent: parent object to move activity to
+        :type parent: Union[Activity2, Text]
+        :param classifiction: (optional) classification of the target parent if you want to change the classification.
+        :type classification: ActivityClassification or None
+        :raises IllegalArgumentError: if the 'parent' activity_type is not :class:`enums.ActivityType.SUBPROCESS`
+        :raises IllegalArgumentError: if the 'parent' type is not :class:`Activity2` or UUID
+        :raises APIError: if an Error occurs.
+        """
+        return self._client.move_activity(self, parent, classification=classification)
