@@ -1,10 +1,21 @@
-from unittest import skip
-
 from jsonschema import validate, ValidationError
 
 from pykechain.enums import PropertyVTypes, PropertyType
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Property, Property2, AttachmentProperty2
+from pykechain.models import Property2, AttachmentProperty2
+from pykechain.models.validators import PropertyValidator, ValidatorEffect, VisualEffect, ValidVisualEffect, \
+    InvalidVisualEffect, NumericRangeValidator, BooleanFieldValidator
+from pykechain.models.validators.validator_schemas import options_json_schema, validator_jsonschema_stub, \
+    effects_jsonschema_stub
+from pykechain.models.validators.validators import RegexStringValidator, RequiredFieldValidator, EvenNumberValidator, \
+    OddNumberValidator, SingleReferenceValidator, EmailValidator, AlwaysAllowValidator, FileSizeValidator, \
+    FileExtensionValidator
+from tests.classes import SixTestCase, TestBetamax
+from jsonschema import validate, ValidationError
+
+from pykechain.enums import PropertyVTypes, PropertyType
+from pykechain.exceptions import IllegalArgumentError
+from pykechain.models import Property2, AttachmentProperty2
 from pykechain.models.validators import PropertyValidator, ValidatorEffect, VisualEffect, ValidVisualEffect, \
     InvalidVisualEffect, NumericRangeValidator, BooleanFieldValidator
 from pykechain.models.validators.validator_schemas import options_json_schema, validator_jsonschema_stub, \
@@ -547,11 +558,45 @@ class TestFileSizeValidator(SixTestCase):
         self.assertIsNone(validator.is_valid(None))
 
 
-@skip
 class TestFileExtensionValidator(SixTestCase):
-    def test_fileextensionvalidator_being_a_always_allow_validator_without_settings(self):
-        validator = FileExtensionValidator()
-        raise
+    def test_fileextensionvalidator_on_extension(self):
+        validator = FileExtensionValidator(accept=[".csv"])
+        self.assertTrue(validator.is_valid('file.csv'))
+        self.assertFalse(validator.is_valid('file.tsv'))
+        self.assertFalse(validator.is_valid('file.txt'))
+
+    def test_fileextensionvalidator_on_extensions(self):
+        validator = FileExtensionValidator(accept=[".csv", ".pdf"])
+        self.assertTrue(validator.is_valid('file.csv'))
+        self.assertTrue(validator.is_valid('file.pdf'))
+        self.assertFalse(validator.is_valid('file.docx'))
+
+    def test_fileextensionvalidator_on_mimetype(self):
+        validator = FileExtensionValidator(accept=["application/pdf"])
+        self.assertTrue(validator.is_valid('file.pdf'))
+        self.assertFalse(validator.is_valid('file.docx'))
+
+    def test_fileextensionvalidator_on_expanded_mimetypes(self):
+        validator = FileExtensionValidator(accept=["video/*"])
+        self.assertTrue(validator.is_valid('file.mp4'))
+        self.assertTrue(validator.is_valid('file.mov'))
+        self.assertTrue(validator.is_valid('file.mpeg'))
+        self.assertTrue(validator.is_valid('file.flv'))
+        self.assertTrue(validator.is_valid('file.wmv'))
+        self.assertTrue(validator.is_valid('file.webm'))
+
+    def test_fileextensionvalidator_on_mixed_mode(self):
+        validator = FileExtensionValidator(accept=[".csv", "application/pdf"])
+        self.assertTrue(validator.is_valid('file.csv'))
+        self.assertTrue(validator.is_valid('file.pdf'))
+        self.assertFalse(validator.is_valid('file.docx'))
+
+    def test_fileextensionvalidator_on_excel(self):
+        validator = FileExtensionValidator(accept=[".xls", ".xlsx"])
+        self.assertTrue(validator.is_valid('file.xls'))
+        self.assertTrue(validator.is_valid('file.xlsx'))
+        self.assertFalse(validator.is_valid('file.csv'))
+
 
 class TestPropertyWithValidator(SixTestCase):
 
