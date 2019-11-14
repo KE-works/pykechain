@@ -2,7 +2,20 @@ from jsonschema import validate, ValidationError
 
 from pykechain.enums import PropertyVTypes, PropertyType
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Property
+from pykechain.models import Property2, AttachmentProperty2
+from pykechain.models.validators import PropertyValidator, ValidatorEffect, VisualEffect, ValidVisualEffect, \
+    InvalidVisualEffect, NumericRangeValidator, BooleanFieldValidator
+from pykechain.models.validators.validator_schemas import options_json_schema, validator_jsonschema_stub, \
+    effects_jsonschema_stub
+from pykechain.models.validators.validators import RegexStringValidator, RequiredFieldValidator, EvenNumberValidator, \
+    OddNumberValidator, SingleReferenceValidator, EmailValidator, AlwaysAllowValidator, FileSizeValidator, \
+    FileExtensionValidator
+from tests.classes import SixTestCase, TestBetamax
+from jsonschema import validate, ValidationError
+
+from pykechain.enums import PropertyVTypes, PropertyType
+from pykechain.exceptions import IllegalArgumentError
+from pykechain.models import Property2, AttachmentProperty2
 from pykechain.models.validators import PropertyValidator, ValidatorEffect, VisualEffect, ValidVisualEffect, \
     InvalidVisualEffect, NumericRangeValidator, BooleanFieldValidator
 from pykechain.models.validators.validator_schemas import options_json_schema, validator_jsonschema_stub, \
@@ -489,42 +502,119 @@ class TestAlwaysAllowValidator(SixTestCase):
         self.assertTrue(validator.is_valid(tuple()))
         self.assertIsNone(validator.validate_json())
 
-    def test_filesizevalidator_being_a_always_allow_validator_without_settings(self):
-        validator = FileSizeValidator()
-        self.assertTrue(validator.is_valid('some text'))
-        self.assertTrue(validator.is_valid(42))
-        self.assertTrue(validator.is_valid(42.0))
-        self.assertTrue(validator.is_valid(['a', 'b']))
-        self.assertTrue(validator.is_valid(True))
-        self.assertTrue(validator.is_valid(False))
-        self.assertTrue(validator.is_valid(None))
-        self.assertTrue(validator.is_valid({"a":"b"}))
-        self.assertFalse(validator.is_invalid(None))
-        self.assertTrue(validator.is_valid(list()))
-        self.assertTrue(validator.is_valid(set()))
-        self.assertTrue(validator.is_valid(tuple()))
+
+class TestFileSizeValidator(SixTestCase):
+    def test_validator_valid_json_with_settings(self):
+        validator = FileSizeValidator(max_size=100)
         self.assertIsNone(validator.validate_json())
 
-    def test_fileextensionvalidator_being_a_always_allow_validator_without_settings(self):
-        validator = FileExtensionValidator()
-        self.assertTrue(validator.is_valid('some text'))
-        self.assertTrue(validator.is_valid(42))
-        self.assertTrue(validator.is_valid(42.0))
-        self.assertTrue(validator.is_valid(['a', 'b']))
-        self.assertTrue(validator.is_valid(True))
-        self.assertTrue(validator.is_valid(False))
-        self.assertTrue(validator.is_valid(None))
-        self.assertTrue(validator.is_valid({"a":"b"}))
-        self.assertFalse(validator.is_invalid(None))
-        self.assertTrue(validator.is_valid(list()))
-        self.assertTrue(validator.is_valid(set()))
-        self.assertTrue(validator.is_valid(tuple()))
+    def test_validator_valid_json_without_settings(self):
+        validator = FileSizeValidator()
         self.assertIsNone(validator.validate_json())
+
+    def test_validator_valid_json_with_additional_arguments(self):
+        validator = FileSizeValidator(max_size=100, another_argument=False)
+        # another_argument is not found in the json
+        validator.validate_json()
+        validator.as_json()
+
+    def test_validator_invalid_arguments(self):
+        with self.assertRaisesRegex(ValueError, 'should be a number'):
+            FileSizeValidator(max_size=set())
+        with self.assertRaisesRegex(ValueError, 'should be a number'):
+            FileSizeValidator(max_size=list())
+        with self.assertRaisesRegex(ValueError, 'should be a number'):
+            FileSizeValidator(max_size=dict())
+        with self.assertRaisesRegex(ValueError, 'should be a number'):
+            FileSizeValidator(max_size=tuple())
+        with self.assertRaisesRegex(ValueError, 'should be a number'):
+            FileSizeValidator(max_size=tuple())
+        with self.assertRaisesRegex(ValueError, 'should be a number'):
+            FileSizeValidator(max_size='100')
+
+    def test_filesizevalidator_being_valid(self):
+        validator = FileSizeValidator(max_size=100)
+
+        self.assertTrue(validator.is_valid(100))
+        self.assertTrue(validator.is_valid(100.))
+        self.assertTrue(validator.is_valid(99))
+        self.assertTrue(validator.is_valid(0))
+
+        self.assertTrue(validator.is_valid('text'))
+        self.assertTrue(validator.is_valid(list()))
+        self.assertTrue(validator.is_valid(tuple()))
+        self.assertTrue(validator.is_valid(dict()))
+        self.assertTrue(validator.is_valid(set()))
+
+    def test_filesizevalidator_being_invalid(self):
+        validator = FileSizeValidator(max_size=100)
+
+        self.assertFalse(validator.is_valid(101))
+        self.assertFalse(validator.is_valid(101.))
+        self.assertFalse(validator.is_valid(-1))
+
+    def test_filesizevalidator_being_none(self):
+        validator = FileSizeValidator(max_size=100)
+
+        self.assertIsNone(validator.is_valid(None))
+
+
+class TestFileExtensionValidator(SixTestCase):
+    def test_validator_valid_json_with_settings(self):
+        validator = FileExtensionValidator(accept=[".csv"])
+        self.assertIsNone(validator.validate_json())
+
+    def test_validator_valid_json_without_settings(self):
+        validator = FileExtensionValidator()
+        self.assertIsNone(validator.validate_json())
+
+    def test_fileextensionvalidator_on_extension(self):
+        validator = FileExtensionValidator(accept=[".csv"])
+        self.assertTrue(validator.is_valid('file.csv'))
+        self.assertFalse(validator.is_valid('file.tsv'))
+        self.assertFalse(validator.is_valid('file.txt'))
+
+    def test_fileextensionvalidator_on_extensions(self):
+        validator = FileExtensionValidator(accept=[".csv", ".pdf"])
+        self.assertTrue(validator.is_valid('file.csv'))
+        self.assertTrue(validator.is_valid('file.pdf'))
+        self.assertFalse(validator.is_valid('file.docx'))
+
+    def test_fileextensionvalidator_on_mimetype(self):
+        validator = FileExtensionValidator(accept=["application/pdf"])
+        self.assertTrue(validator.is_valid('file.pdf'))
+        self.assertFalse(validator.is_valid('file.docx'))
+
+    def test_fileextensionvalidator_on_expanded_mimetypes(self):
+        validator = FileExtensionValidator(accept=["video/*"])
+        self.assertTrue(validator.is_valid('file.mp4'))
+        self.assertTrue(validator.is_valid('file.mov'))
+        self.assertTrue(validator.is_valid('file.mpeg'))
+        self.assertTrue(validator.is_valid('file.flv'))
+        self.assertTrue(validator.is_valid('file.wmv'))
+        self.assertTrue(validator.is_valid('file.webm'))
+
+    def test_fileextensionvalidator_on_mixed_mode(self):
+        validator = FileExtensionValidator(accept=[".csv", "application/pdf"])
+        self.assertTrue(validator.is_valid('file.csv'))
+        self.assertTrue(validator.is_valid('file.pdf'))
+        self.assertFalse(validator.is_valid('file.docx'))
+
+    def test_fileextensionvalidator_on_excel(self):
+        validator = FileExtensionValidator(accept=[".xls", ".xlsx"])
+        self.assertTrue(validator.is_valid('file.xls'))
+        self.assertTrue(validator.is_valid('file.xlsx'))
+        self.assertFalse(validator.is_valid('file.csv'))
+
+    def test_fileextensionvalidator_being_none(self):
+        validator = FileExtensionValidator(accept=["video/*"])
+
+        self.assertIsNone(validator.is_valid(None))
 
 class TestPropertyWithValidator(SixTestCase):
 
     def test_property_without_validator(self):
-        prop = Property(json={}, client=None)
+        prop = Property2(json={}, client=None)
         self.assertIsNone(prop.is_valid)
         self.assertIsNone(prop.is_invalid)
         self.assertEqual(prop._validators, list())
@@ -533,10 +623,10 @@ class TestPropertyWithValidator(SixTestCase):
     def test_property_with_numeric_range_validator(self):
         prop_json = dict(
             value=1,
-            options=dict(
+            value_options=dict(
                 validators=[NumericRangeValidator(minvalue=0, maxvalue=10).as_json()]
             ))
-        prop = Property(json=prop_json, client=None)
+        prop = Property2(json=prop_json, client=None)
         self.assertTrue(prop.is_valid)
         self.assertFalse(prop.is_invalid)
         self.assertTrue(prop.validate())
@@ -544,16 +634,58 @@ class TestPropertyWithValidator(SixTestCase):
     def test_property_with_numeric_range_validator_value_is_none(self):
         prop_json = dict(
             value=None,
-            options=dict(
+            value_options=dict(
                 validators=[NumericRangeValidator(minvalue=0, maxvalue=10).as_json()]
             ))
-        prop = Property(json=prop_json, client=None)
+        prop = Property2(json=prop_json, client=None)
         self.assertIsNone(prop.is_valid)
         self.assertIsNone(prop.is_invalid)
         self.assertListEqual([(None, "No reason")], prop.validate())
 
-    def test_property_with_boolean_validator(self):
-        pass
+
+    def test_property_with_filesize_validator(self):
+        prop_json = dict(
+            value="attachments/12345678-1234-5678-1234-567812345678/some_file.txt",
+            value_options=dict(
+                validators=[FileSizeValidator(max_size=100).as_json()]
+            ))
+        prop = AttachmentProperty2(json=prop_json, client=None)
+        self.assertTrue(prop.is_valid)
+        self.assertFalse(prop.is_invalid)
+        self.assertTrue(prop.validate())
+
+    def test_property_without_value_with_filesize_validator(self):
+        prop_json = dict(
+            value=None,
+            value_options=dict(
+                validators=[FileSizeValidator(max_size=100).as_json()]
+            ))
+        prop = AttachmentProperty2(json=prop_json, client=None)
+        self.assertIsNone(prop.is_valid)
+        self.assertIsNone(prop.is_invalid)
+        self.assertListEqual([(None, "No reason")], prop.validate())
+
+    def test_property_with_fileextension_validator(self):
+        prop_json = dict(
+            value="attachments/12345678-1234-5678-1234-567812345678/some_file.txt",
+            value_options=dict(
+                validators=[FileExtensionValidator(accept=['.txt', 'application/pdf']).as_json()]
+            ))
+        prop = AttachmentProperty2(json=prop_json, client=None)
+        self.assertTrue(prop.is_valid)
+        self.assertFalse(prop.is_invalid)
+        self.assertTrue(prop.validate())
+
+    def test_property_without_value_with_fileextension_validator(self):
+        prop_json = dict(
+            value=None,
+            value_options=dict(
+                validators=[FileExtensionValidator(accept=['.txt', 'application/pdf']).as_json()]
+            ))
+        prop = AttachmentProperty2(json=prop_json, client=None)
+        self.assertIsNone(prop.is_valid)
+        self.assertIsNone(prop.is_invalid)
+        self.assertListEqual([(None, "No reason")], prop.validate())
 
 class TestPropertyWithValidatorFromLiveServer(TestBetamax):
 
