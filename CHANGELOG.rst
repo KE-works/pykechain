@@ -3,8 +3,9 @@ Change Log
 
 pykechain changelog
 
-3.0.3 (UNRELEASED)
+3.1.0 (UNRELEASED)
 ------------------
+ * Added `Activity2.move()` function to move an Activity somewhere else under another Activity into this code base. (#579 thanks to @raduiordache)
  * Added `ImageFitValue` enum to better support the `CardWidget` and `AttachmentviewerWidget` generation and editing. #582 (thanks @jelleboersma)
 
 3.0.2 13NOV19

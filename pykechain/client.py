@@ -9,7 +9,8 @@ from six import text_type, string_types
 
 from pykechain.defaults import API_PATH, API_EXTRA_PARAMS
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
-    WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes
+    WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
+    ActivityClassification
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
 from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property
@@ -2224,3 +2225,50 @@ class Client(object):
             raise APIError("Could not update associations of the widget ({})".format((response, response.json())))
 
         return None
+
+    def move_activity(self, activity, parent, classification=None):
+        """
+        Move the `Activity` and, if applicable, its sub-tree to another parent.
+
+        If you want to move an Activity from one classification to another, you need to provide the target
+        classification. The classificaiton of the parent should match the one provided in the function. This is
+        to ensure that you really want this to happen.
+
+        .. versionadded:: 2.7
+
+        .. versionchanged:: 3.1
+           Add ability to move activity from one classification to another.
+
+        :param activity: The `Activity` object to be moved.
+        :type activity: :class: `Activity`
+        :param parent: The parent `Subprocess` under which this `Activity` will be moved.
+        :type parent: :class:`Activity` or UUID
+        :param classification: The target classification if it is desirable to change ActivityClassification
+        :type classification: Text
+        :raises IllegalArgumentError: if the 'parent' activity_type is not :class:`enums.ActivityType.SUBPROCESS`
+        :raises IllegalArgumentError: if the 'parent' type is not :class:`Activity2` or UUID
+        :raises APIError: if an Error occurs.
+        """
+        assert isinstance(activity, Activity2), 'activity "{}" is not an Activity2 object!'.format(activity.name)
+
+        if isinstance(parent, Activity2):
+            parent_id = parent.id
+        elif isinstance(parent, text_type) and is_uuid(parent):
+            parent_id = parent
+        else:
+            raise IllegalArgumentError("Please provide either an activity object or a UUID")
+        parent_object = self.activity(id=parent_id)
+
+        if parent_object.activity_type != ActivityType.PROCESS:
+            raise IllegalArgumentError("One can only move an `Activity` under a subprocess.")
+
+        update_dict = dict(parent_id=parent_id)
+
+        if classification is not None and classification in ActivityClassification.values():
+            update_dict['classification'] = classification
+
+        url = self._build_url('activity_move', activity_id=str(activity.id))
+        response = self._request('PUT', url, data=update_dict)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not move activity, {}: {}".format(str(response), response.content))
