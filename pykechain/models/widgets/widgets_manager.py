@@ -6,7 +6,7 @@ from six import string_types, text_type
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes, \
-    ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets
+    ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
@@ -22,7 +22,7 @@ class WidgetsManager(Sized):
     """
 
     def __init__(self, widgets, activity, client=None, **kwargs):
-        # type: (Iterable[Widget], Union[Activity2, Activity2, AnyStr], Optional[Client], **Any) -> None  # noqa: F821
+        # type: (Iterable[Widget], Union['Activity2', 'Activity2', AnyStr], Optional['Client'], **Any) -> None  # noqa: E501
         """Construct a Widget Manager from a list of widgets.
 
         You need to provide an :class:`Activity` to initiate the WidgetsManager. Alternatively you may provide both a
@@ -32,7 +32,7 @@ class WidgetsManager(Sized):
         :type widgets: List[Widget]
         :param activity: an :class:`Activity` object or an activity UUID
         :type activity: basestring or None
-        :param client: (optional) if the activity was provided as a UUID, also provide a :class:`Client` object.
+        :param client: (O) if the activity was provided as a UUID, also provide a :class:`Client` object.
         :type client: `Client` or None
         :param kwargs: additional keyword arguments
         :type kwargs: dict or None
@@ -105,17 +105,17 @@ class WidgetsManager(Sized):
         :type activity: :class:`Activity` or UUID
         :param widget_type: type of the widget, one of :class:`WidgetTypes`
         :type: string
-        :param title: (optional) title of the widget
+        :param title: (O) title of the widget
         :type title: basestring or None
         :param meta: meta dictionary of the widget.
         :type meta: dict
-        :param order: (optional) order in the activity of the widget.
+        :param order: (O) order in the activity of the widget.
         :type order: int or None
-        :param parent: (optional) parent of the widget for Multicolumn and Multirow widget.
+        :param parent: (O) parent of the widget for Multicolumn and Multirow widget.
         :type parent: :class:`Widget` or UUID
-        :param readable_models: (optional) list of property model ids to be configured as readable (alias = inputs)
+        :param readable_models: (O) list of property model ids to be configured as readable (alias = inputs)
         :type readable_models: list of properties or list of property id's
-        :param writable_models: (optional) list of property model ids to be configured as writable (alias = outputs)
+        :param writable_models: (O) list of property model ids to be configured as writable (alias = outputs)
         :type writable_models: list of properties or list of property id's
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
@@ -200,8 +200,8 @@ class WidgetsManager(Sized):
                           'accordingly to use `title`', PendingDeprecationWarning)
             title = kwargs.pop('custom_title')
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: Part2  # noqa
-        parent_instance = _retrieve_object_id(obj=parent_instance)  # type: Part2  # noqa
+        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: 'Part2'  # noqa
+        parent_instance = _retrieve_object_id(obj=parent_instance)  # type: 'Part2'  # noqa
         sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
 
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
@@ -325,7 +325,7 @@ class WidgetsManager(Sized):
                           'accordingly to use `title`', PendingDeprecationWarning)
             title = kwargs.pop('custom_title')
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: Part2  # noqa
+        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: 'Part2'  # noqa
         parent_instance_id = _retrieve_object_id(obj=parent_instance)  # type: text_type
         sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
         if not sort_property_id and sort_name:
@@ -386,8 +386,9 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_attachmentviewer_widget(self, attachment_property, title=False, alignment=None, image_fit=None, **kwargs):
-        # type: (Union[Text, Property2], Optional[Text, bool], Optional[int], Optional[Text], **Any) -> Widget  # noqa
+    def add_attachmentviewer_widget(self, attachment_property, title=False, alignment=None,
+                                    image_fit=ImageFitValue.CONTAIN, **kwargs):
+        # type: (Union[Text, 'Property2'], Optional[Text, bool], Optional[int], Optional[ImageFitValue], **Any) -> Widget  # noqa
         """
         Add a KE-chain Attachment widget widget manager.
 
@@ -416,7 +417,7 @@ class WidgetsManager(Sized):
             title = kwargs.pop('custom_title')
 
         attachment_property = _retrieve_object(attachment_property,
-                                               method=self._client.property)  # type: Property2  # noqa
+                                               method=self._client.property)  # type: 'Property2'  # noqa
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
         if 'height' in kwargs:
@@ -424,6 +425,9 @@ class WidgetsManager(Sized):
             warnings.warn('`height` attribute will be deprecated in version 3.4.0, please adapt your code accordingly '
                           'to use `custom_height`', PendingDeprecationWarning)
             kwargs['custom_height'] = kwargs.pop('height')
+
+        if image_fit not in ImageFitValue.values():
+            raise IllegalArgumentError('`image_fit` must be an ImageFitValue option, "{}" is not.'.format(image_fit))
 
         meta.update({
             "propertyInstanceId": attachment_property.id,
@@ -457,7 +461,7 @@ class WidgetsManager(Sized):
             a String value: Custom text
             * emphasized: bool which determines if the button should stand-out or not - default(False)
             * activityId: class `Activity` or UUID
-            * isDisabled: (optional) to disable the navbar button
+            * isDisabled: (O) to disable the navbar button
             * link: str URL to external web page
         :type activities: list of dict
         :param alignment: The alignment of the buttons inside navigation bar. One of :class:`NavigationBarAlignment`
@@ -539,7 +543,7 @@ class WidgetsManager(Sized):
     def add_propertygrid_widget(self, part_instance, title=False, max_height=None, show_headers=True,
                                 show_columns=None, parent_widget=None, readable_models=None, writable_models=None,
                                 all_readable=False, all_writable=False, **kwargs):
-        # type: (Union[Property2, Text], Optional[Text, bool], Optional[int], bool, Optional[Iterable], Optional[Text, Widget], Optional[Iterable], Optional[Iterable], bool, bool, **Any ) -> Widget  # noqa: E501,F821
+        # type: (Union['Property2', Text], Optional[Text, bool], Optional[int], bool, Optional[Iterable], Optional[Text, Widget], Optional[Iterable], Optional[Iterable], bool, bool, **Any ) -> Widget  # noqa: E501,F821
         """
         Add a KE-chain Property Grid widget to the customization.
 
@@ -557,16 +561,16 @@ class WidgetsManager(Sized):
         :type show_headers: bool
         :param show_columns: Columns to be hidden or shown (default to 'unit' and 'description')
         :type show_columns: list
-        :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
         :type parent_widget: Widget or basestring or None
         :param readable_models: list of property model ids to be configured as readable (alias = inputs)
         :type readable_models: list of properties or list of property id's
         :param writable_models: list of property model ids to be configured as writable (alias = outputs)
         :type writable_models: list of properties or list of property id's
-        :param all_readable: (optional) boolean indicating if all properties should automatically be configured as
+        :param all_readable: (O) boolean indicating if all properties should automatically be configured as
         readable (if True) or writable (if False).
         :type all_readable: bool
-        :param all_writable: (optional) boolean indicating if all properties should automatically be configured as
+        :param all_writable: (O) boolean indicating if all properties should automatically be configured as
         writable (if True) or writable (if False).
         :type all_writable: bool
         :param kwargs: additional keyword arguments to pass
@@ -581,7 +585,7 @@ class WidgetsManager(Sized):
             title = kwargs.pop('custom_title')
 
         # Check whether the part_model is uuid type or class `Part`
-        part_instance = _retrieve_object(part_instance, method=self._client.part)  # type: Part2  # noqa: F821
+        part_instance = _retrieve_object(part_instance, method=self._client.part)  # type: 'Part2'  # noqa: F821
 
         if not show_columns:
             show_columns = list()
@@ -624,7 +628,7 @@ class WidgetsManager(Sized):
 
     def add_service_widget(self, service, title=False, custom_button_text=False, emphasize_run=True,
                            download_log=False, parent_widget=None, **kwargs):
-        # type: (Service, Optional[Union[type(None), bool, Text]], Optional[Union[type(None), bool, Text]], Optional[bool], Optional[bool], Optional[Union[Widget, Text]], **Any) -> Widget  # noqa: E501, F821
+        # type: ('Service', Optional[Union[type(None), bool, Text]], Optional[Union[type(None), bool, Text]], Optional[bool], Optional[bool], Optional[Union[Widget, Text]], **Any) -> Widget  # noqa: E501, F821
         """
         Add a KE-chain Service (e.g. script widget) to the widget manager.
 
@@ -648,7 +652,7 @@ class WidgetsManager(Sized):
         :type download_log: bool
         :param download_log: Include the log message inside the activity (default True)
         :type download_log: bool
-        :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
         :type parent_widget: Widget or basestring or None
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
@@ -663,7 +667,7 @@ class WidgetsManager(Sized):
 
         # Check whether the script is uuid type or class `Service`
 
-        service = _retrieve_object(obj=service, method=self._client.service)  # type: Service  # noqa
+        service = _retrieve_object(obj=service, method=self._client.service)  # type: 'Service'  # noqa
 
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
 
@@ -746,7 +750,7 @@ class WidgetsManager(Sized):
         return widget
 
     def add_notebook_widget(self, notebook, title=False, parent_widget=None, **kwargs):
-        # type: (Service, Optional[Union[type(None), bool, Text]], Optional[Widget, Text], **Any) -> Widget
+        # type: ('Service', Optional[Union[type(None), bool, Text]], Optional[Widget, Text], **Any) -> Widget
         """
         Add a KE-chain Notebook (e.g. notebook widget) to the WidgetManager.
 
@@ -759,7 +763,7 @@ class WidgetsManager(Sized):
             * String value: Custom title
             * None: No title
         :type title: bool or basestring or None
-        :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
         :type parent_widget: Widget or basestring or None
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
@@ -972,7 +976,7 @@ class WidgetsManager(Sized):
     def add_scope_widget(self, team=None, title=None, show_columns=None, show_all_columns=True, tags=None,
                          sorted_column=ScopeWidgetColumnTypes.PROJECT_NAME, sorted_direction=SortTable.ASCENDING,
                          parent_widget=None, **kwargs):
-        # type: (Union[Team,Text], Optional[Text], Optional[Iterable[Text]], Optional[bool], Optional[Iterable[Text]], Optional[Text], Optional[Text], Optional[Widget,Text], **Any) -> Widget  # noqa: F821,E501
+        # type: (Union['Team',Text], Optional[Text], Optional[Iterable[Text]], Optional[bool], Optional[Iterable[Text]], Optional[Text], Optional[Text], Optional[Widget,Text], **Any) -> Widget  # noqa: F821,E501
         """
         Add a KE-chain Scope widget to the Widgetmanager and the activity.
 
@@ -985,11 +989,11 @@ class WidgetsManager(Sized):
             * String value: Custom title
             * None (default): No title
         :type title: bool or basestring or None
-        :param show_columns: (optional) list of column headers to show. One of `ScopeWidgetColumnTypes`.
+        :param show_columns: (O) list of column headers to show. One of `ScopeWidgetColumnTypes`.
         :type show_columns: list of basestring
         :param show_all_columns: boolean to show all columns (defaults to True). If True, will override `show_columns`
         :type show_all_columns: bool
-        :param tags: (optional) list of scope tags to filter the Scopes on
+        :param tags: (O) list of scope tags to filter the Scopes on
         :type tags: list of basestring
         :param sorted_column: column name to sort on. (defaults to project name column). One of `ScopeWidgetColumnTypes`
         :type sorted_column: basestring
@@ -997,7 +1001,7 @@ class WidgetsManager(Sized):
             * ASC (default): Sort in ascending order
             * DESC: Sort in descending order
         :type sorted_direction: basestring
-        :param parent_widget: (optional) parent of the widget for Multicolumn and Multirow widget.
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
         :type parent_widget: Widget or basestring or None
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
@@ -1044,7 +1048,7 @@ class WidgetsManager(Sized):
 
     def add_signature_widget(self, attachment_property, title=False, custom_button_text=False,
                              custom_undo_button_text=False, **kwargs):
-        # type: (Property2, Optional[Union[bool, Text]], Optional[Union[bool, Text]], Optional[Union[bool, Text]], **Any) -> Widget  # noqa: F821, E501
+        # type: ('Property2', Optional[Union[bool, Text]], Optional[Union[bool, Text]], Optional[Union[bool, Text]], **Any) -> Widget # noqa: E501
         """
         Add a KE-chain Signature widget to the Widgetmanager and the activity.
 
@@ -1073,7 +1077,7 @@ class WidgetsManager(Sized):
             title = kwargs.pop('custom_title')
 
         attachment_property = _retrieve_object(attachment_property,
-                                               method=self._client.property)  # type: Property2  # noqa
+                                               method=self._client.property)  # type: 'Property2'  # noqa
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
         meta, title = _set_title(meta, title, default_title=attachment_property.name)
@@ -1113,8 +1117,8 @@ class WidgetsManager(Sized):
         return widget
 
     def add_card_widget(self, image=None, title=None, description=None, link=None,
-                        link_target=LinkTargets.SAME_TAB, **kwargs):
-        # type: (Optional[Property2], Optional[Union[type(None), Text, bool]], Optional[Union[Text, bool]], Optional[Union[type(None), Text, Property2, bool]], Optional[Union[Text, LinkTargets]], **Any) -> Widget  # noqa: E501
+                        link_target=LinkTargets.SAME_TAB, image_fit=ImageFitValue.CONTAIN, **kwargs):
+        # type: (Optional['Property2'], Optional[Union[type(None), Text, bool]], Optional[Union[Text, bool]], Optional[Union[type(None), Text, 'Property2', bool]], Optional[Union[Text, LinkTargets]], Optional[ImageFitValue], **Any) -> Widget  # noqa: E501
         """
         Add a KE-chain Card widget to the WidgetManager and the activity.
 
@@ -1131,6 +1135,9 @@ class WidgetsManager(Sized):
             * None: No title
         :param link:
         :param link_target: how the link is opened, one of the values of CardWidgetLinkTarget enum.
+        :param link_target: CardWidgetLinkTarget
+        :param image_fit: how the image on the card widget is displayed
+        :type image_fit: ImageFitValue
         :return: Card Widget
         """
         if 'custom_title' in kwargs and not title:
@@ -1198,6 +1205,11 @@ class WidgetsManager(Sized):
         else:
             raise IllegalArgumentError("When using the add_card_widget, 'link_target' must be a '_blank' or '_self. "
                                        "link_target is: {}".format(link_target))
+
+        if image_fit in ImageFitValue.values():
+            meta['imageFit'] = image_fit
+        else:
+            raise IllegalArgumentError('`image_fit` must be an ImageFitValue option, "{}" is not.'.format(image_fit))
 
         widget = self.create_widget(
             widget_type=WidgetTypes.CARD,

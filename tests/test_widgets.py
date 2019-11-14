@@ -1,7 +1,3 @@
-import json
-import os
-from unittest import skip
-
 from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors, \
     Category, LinkTargets
 from pykechain.exceptions import IllegalArgumentError
@@ -12,7 +8,7 @@ from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWi
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
-from tests.classes import TestBetamax, SixTestCase
+from tests.classes import TestBetamax
 
 
 class TestWidgets(TestBetamax):
@@ -286,6 +282,10 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         with self.assertRaises(IllegalArgumentError):
             widget_manager.add_card_widget(link=activity, link_target='_somewhere')
+
+        with self.assertRaises(IllegalArgumentError):
+            # noinspection PyTypeChecker
+            widget_manager.add_card_widget(image_fit=3)
 
     def test_service_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
