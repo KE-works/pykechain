@@ -679,7 +679,7 @@ class Part2(Base):
                                  if p._json_data['model_id'] == property_model_id][0]
             property_instance.value = exception_fvalue['value']
 
-        return
+        return new_part_instance
 
     def clone(self, **kwargs):
         # type: (**Any) -> Part2
