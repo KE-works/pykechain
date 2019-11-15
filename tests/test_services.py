@@ -134,8 +134,8 @@ class TestServices(TestBetamax):
         self.assertEqual(service.verified_on, json_data.get('verified_on'))
         self.assertEqual(service.verification_results, json_data.get('verification_results'))
 
-    @pytest.mark.skipif("os.getenv('TRAVIS', False)",
-                        reason="Skipping tests when using Travis, as Service Execution cannot be provided")
+    @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+                        reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
     def test_debug_service_execute(self):
         service_name = 'Service Gears - Successful'
         service = self.project.service(name=service_name)
@@ -317,8 +317,8 @@ class TestServiceExecutions(TestServiceSetup):
         self.assertIsInstance(service_execution.started_at, datetime)
         self.assertIsInstance(service_execution.finished_at, datetime)
 
-    @pytest.mark.skipif("os.getenv('TRAVIS', False)",
-                        reason="Skipping tests when using Travis, as Service Execution cannot be provided")
+    @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+                        reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
     def test_debug_service_execution_terminate(self):
         service_execution = self.service.execute()
         self.assertEqual(service_execution.status, ServiceExecutionStatus.LOADING)
