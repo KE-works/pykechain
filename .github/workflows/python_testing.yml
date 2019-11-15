@@ -29,7 +29,6 @@ jobs:
         pip install pytest coverage coveralls
 
         coverage run --source pykechain setup.py test
-        coveralls
 
     - name: Check docs and distribution
       run: |
@@ -41,3 +40,7 @@ jobs:
         python setup.py bdist_wheel --universal
         twine check dist/*
 
+    - name: Coveralls GitHub Action
+      uses: coverallsapp/github-action@v1.0.1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
