@@ -1,4 +1,4 @@
-from typing import Any, Union, List, Dict, Optional, Text  # noqa: F401
+from typing import Any, Union, List, Dict, Optional, Text, Tuple  # noqa: F401
 
 import requests
 from six import text_type, string_types
@@ -545,17 +545,18 @@ class Part2(Base):
 
     @staticmethod
     def _parse_update_dict(part, properties_fvalues, update_dict):
-        # type: (Part2, List, Dict) -> List[Dict]
+        # type: (Part2, List, Dict) -> Tuple[List[Dict], List[Dict]]
         """
         Check the content of the update dict and insert them into the properties_fvalues list.
 
         :param part: Depending on whether you add to or update a part, this is the model or the part itself, resp.
         :param properties_fvalues: list of property values
-        :param update_dict: dictionory with property values, keyed by property names
-        :return: list of dicts
-        :rtype list
+        :param update_dict: dictionary with property values, keyed by property names
+        :return: Tuple with 2 lists of dicts
+        :rtype tuple
         """
         properties_fvalues = properties_fvalues or list()
+        exception_fvalues = list()
         update_dict = update_dict or dict()
 
         if part.category == Category.INSTANCE:
@@ -570,6 +571,8 @@ class Part2(Base):
             else:
                 return value
 
+        from pykechain.models import AttachmentProperty2
+
         for prop_name_or_id, property_value in update_dict.items():
             if isinstance(property_value, (list, set, tuple)):
                 property_value = list(map(make_serializable, property_value))
@@ -579,13 +582,18 @@ class Part2(Base):
             updated_p = dict(
                 value=property_value
             )
+            property_to_update = part.property(prop_name_or_id)
             if is_uuid(prop_name_or_id):
                 updated_p[key] = prop_name_or_id
             else:
-                updated_p[key] = part.property(prop_name_or_id).id
-            properties_fvalues.append(updated_p)
+                updated_p[key] = property_to_update.id
 
-        return properties_fvalues
+            if isinstance(property_to_update, AttachmentProperty2):
+                exception_fvalues.append(updated_p)
+            else:
+                properties_fvalues.append(updated_p)
+
+        return properties_fvalues, exception_fvalues
 
     def add_with_properties(self, model, name=None, update_dict=None, properties_fvalues=None, refresh=True, **kwargs):
         # type: (Part2, Optional[Text], Optional[Dict], Optional[List[Dict]], Optional[bool], **Any) -> Part2
@@ -640,7 +648,7 @@ class Part2(Base):
         name = name or model.name
         url = self._client._build_url('parts2_new_instance')
 
-        properties_fvalues = self._parse_update_dict(model, properties_fvalues, update_dict)
+        properties_fvalues, exception_fvalues = self._parse_update_dict(model, properties_fvalues, update_dict)
 
         response = self._client._request(
             'POST', url,
@@ -662,7 +670,16 @@ class Part2(Base):
         if refresh:
             self.children()
 
-        return Part2(response.json()['results'][0], client=self._client)
+        new_part_instance = Part2(response.json()['results'][0], client=self._client)
+
+        # If any values were not set via the json, set them individually
+        for exception_fvalue in exception_fvalues:
+            property_model_id = exception_fvalue['model_id']
+            property_instance = [p for p in new_part_instance.properties
+                                 if p._json_data['model_id'] == property_model_id][0]
+            property_instance.value = exception_fvalue['value']
+
+        return
 
     def clone(self, **kwargs):
         # type: (**Any) -> Part2
@@ -859,7 +876,7 @@ class Part2(Base):
         if properties_fvalues and not isinstance(properties_fvalues, list):
             raise IllegalArgumentError("optional `properties_fvalues` need to be provided as a list of dicts")
 
-        properties_fvalues = self._parse_update_dict(self, properties_fvalues, update_dict)
+        properties_fvalues, exception_fvalues = self._parse_update_dict(self, properties_fvalues, update_dict)
 
         payload_json = dict(
             properties_fvalues=properties_fvalues,
@@ -880,6 +897,10 @@ class Part2(Base):
 
         # update local properties (without a call)
         self.refresh(json=response.json()['results'][0])
+
+        # If any values were not set via the json, set them individually
+        for exception_fvalue in exception_fvalues:
+            self.property(exception_fvalue['id']).value = exception_fvalue['value']
 
     def delete(self):
         # type: () -> ()
