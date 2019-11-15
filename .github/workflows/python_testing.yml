@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
+      fail-fast: False
       matrix:
         python-version: [3.5, 3.6, 3.7]
 
@@ -35,10 +36,10 @@ jobs:
         pip install flake8 pydocstyle check-manifest readme_renderer[md] twine
 
         flake8 pykechain --count --show-source --statistics
-        check-manifest
+        # check-manifest
         # mypy pykechain
-        python setup.py bdist_wheel --universal
-        twine check dist/*
+        # python setup.py bdist_wheel --universal
+        # twine check dist/*
 
     - name: Coveralls GitHub Action
       uses: coverallsapp/github-action@v1.0.1
