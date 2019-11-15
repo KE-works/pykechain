@@ -25,11 +25,11 @@ jobs:
         pip install -U setuptools>=38.6.0 wheel>=0.31.0 six mypy
 
     - name: Testing with coverage
-        run: |
-          pip install pytest
+      run: |
+        pip install pytest
 
-          coverage run --source pykechain setup.py test
-          - coveralls
+        coverage run --source pykechain setup.py test
+        - coveralls
 
     - name: Check docs and distribution
       run: |
