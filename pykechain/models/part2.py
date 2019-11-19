@@ -1,3 +1,4 @@
+import datetime
 from typing import Any, Union, List, Dict, Optional, Text, Tuple  # noqa: F401
 
 import requests
@@ -571,18 +572,21 @@ class Part2(Base):
             else:
                 return value
 
-        from pykechain.models import AttachmentProperty2
+        from pykechain.models import AttachmentProperty2, DatetimeProperty2
 
         for prop_name_or_id, property_value in update_dict.items():
+            property_to_update = part.property(prop_name_or_id)
             if isinstance(property_value, (list, set, tuple)):
                 property_value = list(map(make_serializable, property_value))
             else:
                 make_serializable(property_value)
 
+            if isinstance(property_to_update, DatetimeProperty2) and isinstance(property_value, datetime.datetime):
+                property_value = DatetimeProperty2.to_iso_format(property_value)
+
             updated_p = dict(
                 value=property_value
             )
-            property_to_update = part.property(prop_name_or_id)
             if is_uuid(prop_name_or_id):
                 updated_p[key] = prop_name_or_id
             else:

@@ -1,7 +1,7 @@
 import datetime
 import warnings
 
-from typing import Union
+from typing import Union, Text
 
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Property2
@@ -39,10 +39,11 @@ class DatetimeProperty2(Property2):
 
     def to_datetime(self):
         # type: () -> Union[type(None), datetime.datetime]
-        """Retrieve the data value of a property.
+        """Convert the string value of the property to a datetime object."""
 
-        Setting this value will immediately update the property in KE-chain.
-
-        :returns: the value
-        """
         return parse_datetime(self._value)
+
+    @staticmethod
+    def to_iso_format(date_time):
+        # type: (datetime.datetime) -> Text
+        return date_time.isoformat()
