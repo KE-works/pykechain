@@ -30,7 +30,7 @@ PyOpenSSL==19.0.0; python_version <= '2.7'
 
 # for package management (uploads)
 twine>=2.0.0; python_version >= '3.6'
-twine<=1.99; python_version <= '3.5.99'
+twine==3.0.0; python_version <= '3.5.99'
 
 # for version comparison
 semver==2.9.0
