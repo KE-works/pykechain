@@ -40,10 +40,10 @@ class DatetimeProperty2(Property2):
     def to_datetime(self):
         # type: () -> Union[type(None), datetime.datetime]
         """Convert the string value of the property to a datetime object."""
-
         return parse_datetime(self._value)
 
     @staticmethod
     def to_iso_format(date_time):
         # type: (datetime.datetime) -> Text
+        """Convert a datetime object to isoformat."""
         return date_time.isoformat()
