@@ -11,7 +11,7 @@ from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
     _check_prefilters, _check_excluded_propmodels
-from pykechain.utils import is_uuid, find
+from pykechain.utils import is_uuid, find, snakecase
 
 
 class WidgetsManager(Sized):
@@ -1022,7 +1022,7 @@ class WidgetsManager(Sized):
                     not all([isinstance(i, string_types) for i in show_columns]):
                 raise IllegalArgumentError("`show_columns` should be a list of column header "
                                            "names: '{}'".format(show_columns))
-            meta['showColumns'] = show_columns
+            meta['showColumns'] = [snakecase(c) for c in show_columns]
 
         if tags:
             if not isinstance(tags, (list, tuple)) and not all([isinstance(i, string_types) for i in tags]):
@@ -1033,7 +1033,7 @@ class WidgetsManager(Sized):
             meta['teamId'] = _retrieve_object_id(team)
 
         meta.update({
-            'sortedColumn': sorted_column,
+            'sortedColumn': snakecase(sorted_column),
             'sortDirection': sorted_direction,
         })
 
