@@ -39,7 +39,12 @@ class DatetimeProperty2(Property2):
 
     def to_datetime(self):
         # type: () -> Union[type(None), datetime.datetime]
-        """Convert the string value of the property to a datetime object."""
+        """Retrieve the data value of a property.
+
+        Setting this value will immediately update the property in KE-chain.
+
+        :returns: the value
+        """
         return parse_datetime(self._value)
 
     @staticmethod
