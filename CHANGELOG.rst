@@ -3,6 +3,12 @@ Change Log
 
 pykechain changelog
 
+3.1.3 (22NOV19)
+---------------
+ * Fixed the bulk editing and creating of parts (`Part2`) which have attachments in the list of properties. In the background we now separate the upload of attachments from the update of the properties. #590 (Thanks to @jelleboersma)
+ * Fixed a bug with timezones.
+ * Updated dependent versions for development: nbsphinx (0.5.0), pytest (5.3.0), jsonschema (3.2.0), twine (3.0.0), pyopenssl (19.1.0).
+
 3.1.2 (14NOV19)
 ---------------
  * small fix for backwards compatibility of `CardWidgetLinkTarget` enum.
