@@ -1,3 +1,7 @@
+#
+# TRAVIS CI is disabled for pykechain from 3.2.0 onwards.
+#
+
 #sudo: false
 #language: python
 #
