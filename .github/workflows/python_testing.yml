@@ -10,8 +10,7 @@ jobs:
       max-parallel: 4
       fail-fast: False
       matrix:
-#        python-version: [3.5, 3.6, 3.7, 3.8-dev, pypy3]
-        python-version: [3.6, 3.7]
+        python-version: [3.5, 3.6, 3.7, 3.8-dev, pypy3]
 
     steps:
     - uses: actions/checkout@v1
@@ -31,11 +30,15 @@ jobs:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
         pip install pytest pytest-cov coverage coveralls
-        set | grep GITHUB
+
         pytest --cov=pykechain tests
+
+        {{ if matrix.python-version == 3.6 }}
         coveralls
+        {{ endif }}
 
     - name: Check docs and distribution
+      if: matrix.python-version == 3.6
       run: |
         pip install flake8 pydocstyle check-manifest readme_renderer[md] twine
 
