@@ -2,7 +2,7 @@ import os
 import re
 import unicodedata
 from contextlib import contextmanager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import TypeVar, Iterable, Callable, Optional, Text, Dict  # noqa: F401
 
 import pytz
@@ -111,11 +111,11 @@ def parse_datetime(value: Text) -> Optional[datetime]:
     def _get_fixed_timezone(offset):
         """Return a tzinfo instance with a fixed offset from UTC."""
         if isinstance(offset, timedelta):
-            offset = offset.seconds // 60
+            offset = offset.total_seconds() // 60
         sign = '-' if offset < 0 else '+'
         hhmm = '%02d%02d' % divmod(abs(offset), 60)
         name = sign + hhmm
-        return pytz.FixedOffset(offset, name)
+        return timezone(timedelta(minutes=offset), name)
 
     DATETIME_RE = re.compile(
         r'(?P<year>\d{4})-(?P<month>\d{1,2})-(?P<day>\d{1,2})'
