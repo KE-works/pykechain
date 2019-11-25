@@ -7,6 +7,6 @@ envparse
 typing
 six
 jsonschema
-semver
+semver==2.9.0
 pytz
 PyOpenSSL; python_version <= '2.7.99'
