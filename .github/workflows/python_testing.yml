@@ -27,11 +27,11 @@ jobs:
         pip install -U setuptools>=38.6.0 wheel>=0.31.0 six mypy
 
     - name: Testing with coverage
-      env: |
+      env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
         pip install pytest pytest-cov coverage coveralls
-
+        set | grep GITHUB
         pytest --cov=pykechain tests
         coveralls
 
