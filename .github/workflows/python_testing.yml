@@ -27,7 +27,7 @@ jobs:
 
     - name: Perform Testing
       run: |
-        pip install pytest pytest-runner pytest-cov coverage
+        pip install pytest betamax pytest-runner pytest-cov coverage
         pytest --cov=pykechain tests
 
     - name: Upload coverage to coveralls.io
