@@ -1,4 +1,4 @@
-name: pykechain testing
+name: Test pykechain
 
 on: [push]
 
