@@ -4,7 +4,7 @@
 
 requests>=2.20.0
 envparse
-typing
+typing==3.7.4.1
 six
 jsonschema
 semver
