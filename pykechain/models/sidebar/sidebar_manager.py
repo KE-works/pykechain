@@ -126,7 +126,8 @@ class SideBarManager(Sized):
 
         return button
 
-    def add_task_button(self, activity, title=None, task_display_mode=SubprocessDisplayMode.ACTIVITIES, *args, **kwargs):
+    def add_task_button(self, activity, title=None, task_display_mode=SubprocessDisplayMode.ACTIVITIES,
+                        *args, **kwargs):
         # type: (Activity2, Optional[Text], Optional[SubprocessDisplayMode], *Any, **Any) -> SideBarButton
         """
         Add a side-bar button to a KE-chain activity.
