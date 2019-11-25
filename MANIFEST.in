@@ -7,6 +7,8 @@ include mypy.ini
 include .env.template
 include Pipfile
 
+exclude requirements-ci.txt
+
 graft tests
 graft docs
 prune docs/_build
