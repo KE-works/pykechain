@@ -8,5 +8,5 @@ typing
 six
 jsonschema
 semver
-pytz
+pytz==2019.3
 PyOpenSSL; python_version <= '2.7.99'
