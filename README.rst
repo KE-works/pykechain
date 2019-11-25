@@ -9,8 +9,8 @@ KE-chain Python SDK
     :target: https://pypi.python.org/pypi/pykechain
     :alt: Supported Python Versions
 
-.. image:: https://travis-ci.org/KE-works/pykechain.svg?branch=master
-    :target: https://travis-ci.org/KE-works/pykechain
+.. image:: https://github.com/KE-works/pykechain/workflows/Test%20pykechain/badge.svg?branch=master
+    :target: https://github.com/KE-works/pykechain/actions?query=workflow%3A%22Test+pykechain%22+branch%3Amaster
     :alt: Build Status
 
 .. image:: https://readthedocs.org/projects/pykechain/badge/?version=latest
