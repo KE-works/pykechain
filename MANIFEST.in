@@ -7,9 +7,6 @@ include mypy.ini
 include .env.template
 include Pipfile
 
-exclude requirements-ci.txt
-exclude *-OFF
-
 graft tests
 graft docs
 prune docs/_build
@@ -17,3 +14,6 @@ prune docs/_build
 global-exclude *.pyc
 global-exclude .ipynb_checkpoints/*
 exclude *.sh
+exclude requirements-ci.txt
+exclude *-OFF
+exclude *.yml
