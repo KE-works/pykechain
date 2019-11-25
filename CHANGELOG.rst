@@ -3,6 +3,43 @@ Change Log
 
 pykechain changelog
 
+3.1.3 (22NOV19)
+---------------
+ * Fixed the bulk editing and creating of parts (`Part2`) which have attachments in the list of properties. In the background we now separate the upload of attachments from the update of the properties. #590 (Thanks to @jelleboersma)
+ * Fixed a bug with timezones.
+ * Updated dependent versions for development: nbsphinx (0.5.0), pytest (5.3.0), jsonschema (3.2.0), twine (3.0.0), pyopenssl (19.1.0).
+
+3.1.2 (14NOV19)
+---------------
+ * small fix for backwards compatibility of `CardWidgetLinkTarget` enum.
+
+3.1.1 (UNRELEASED)
+------------------
+ * This version is never released to the public
+
+3.1.0 (14NOV19)
+---------------
+ * Added `Activity2.move()` function to move an Activity somewhere else under another Activity into this code base. (#579 thanks to @raduiordache)
+ * Created a framework for Property Representation, similar to the ones provided in KE-chain. Using this framework you can add representation for e.g. the SelectList, such as shown as a dropdown, checkboxes or a button. Check out the documentation on `SelectListRepresentations`. We also added `DecimalPlaces`, `SignificantDigits`, `LinkTarget` and `ButtonRepresentation`. (#532 thanks to @jelleboersma)
+ * Added `FileSizeValidator` and `FileExtensionValidator` to pykechain. Now you can use it also to create these validators for `AttachmentProperty2`-ies. Also if these validators are active on properties you can use the `Property2.is_valid()` api to check if the property conforms to these validators. With `Property2.get_reason()` you retrieve the reason for the validator being either valid or invalid. This will override the patch release of 3.0.2. #573
+ * Added `ImageFitValue` enum to better support the `CardWidget` and `AttachmentviewerWidget` generation and editing. #582 (thanks @jelleboersma)
+ * Updated dependent versions for development: tox (3.14.1)
+
+3.0.2 13NOV19
+-------------
+ * Ensured proper handling of filesize and fileextension validators in KE-chain. This is a temporary release for compatibility reasons. It will be replaced with fully blown Validators in the next release. (thanks to @bastiaanbeijer for finding it)
+
+3.0.1 12NOV19
+-------------
+As we dropped Python 2.7 support we improve the code throughout on type hinting and type checking. We do this for
+better code and code that is less prone to errors while developing python applications on top of KE-chain
+with pykechain. This release improves the code in several places in this regard.
+
+ * (for developers) Additional type checking and type hinting consistencies fixed (thanks to @jelleboersma)
+ * (for developers) added enumerations inheritance (thanks to @jelleboersma)
+ * small fix for the `Client.user()` methods that expects a `id` keyword in the backend and got a `pk`. (thanks to @jelleboersma)
+ * refactored the `update_dict` for bulk actions where `fvalues` can be used such as part create with properties and part update with properties (thanks to @jelleboersma)
+
 3.0.0 31OKT19
 -------------
 

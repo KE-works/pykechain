@@ -20,6 +20,23 @@ class TestParts(TestBetamax):
 
         self.assertTrue(part)
 
+    def test_base_comparison(self):
+        all_parts = self.project.parts()
+
+        tip = ' See Base.__eq__() method.'
+        self.assertFalse(all_parts[0] == all_parts[1], msg='2 different parts must not be equal.' + tip)
+        self.assertTrue(all_parts[0] == all_parts[0], msg='The same part must be equal.' + tip)
+        self.assertFalse(all_parts[0] == 5, msg='A part must not be equal to a non-pykechain object.' + tip)
+
+    def test_base_hash(self):
+        wheel = self.project.model('Wheel')
+        a_dict = dict()
+
+        try:
+            a_dict[wheel] = 3
+        except TypeError:
+            self.assertTrue(False, msg='Parts must be hashable See Base.__hash__() method.')
+
     def test_part_attributes(self):
         attributes = ['_client', '_json_data', 'id', 'name', 'created_at', 'updated_at', 'ref',
                       'category', 'parent_id', 'description', 'multiplicity',

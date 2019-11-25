@@ -1,9 +1,5 @@
-import json
-import os
-from unittest import skip
-
 from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors, \
-    Category, CardWidgetLinkTarget
+    Category, LinkTargets
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Activity2
 from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, \
@@ -12,7 +8,7 @@ from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWi
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
-from tests.classes import TestBetamax, SixTestCase
+from tests.classes import TestBetamax
 
 
 class TestWidgets(TestBetamax):
@@ -265,9 +261,9 @@ class TestWidgetManagerInActivity(TestBetamax):
         activity = self.project.activity(name='test task')
 
         widget1 = widget_manager.add_card_widget(title="Some title", description='Some description',
-                                                 link='www.ke-chain.com', link_target=CardWidgetLinkTarget.NEW_TAB)
+                                                 link='www.ke-chain.com', link_target=LinkTargets.NEW_TAB)
         widget2 = widget_manager.add_card_widget(image=picture, title=False,
-                                                 link=activity.id, link_target=CardWidgetLinkTarget.SAME_TAB)
+                                                 link=activity.id, link_target=LinkTargets.SAME_TAB)
 
         # testing
         self.assertEqual(len(widget_manager), 1 + 2)
@@ -286,6 +282,10 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         with self.assertRaises(IllegalArgumentError):
             widget_manager.add_card_widget(link=activity, link_target='_somewhere')
+
+        with self.assertRaises(IllegalArgumentError):
+            # noinspection PyTypeChecker
+            widget_manager.add_card_widget(image_fit=3)
 
     def test_service_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager

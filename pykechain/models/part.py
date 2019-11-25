@@ -531,6 +531,9 @@ class Part(Base):
 
         request_body = dict()
         for prop_name_or_id, property_value in update_dict.items():
+            if isinstance(property_value, Base):
+                # is the value is a reference property to another 'Base' Part.
+                property_value = property_value.id
             if is_uuid(prop_name_or_id):
                 request_body[prop_name_or_id] = property_value
             else:

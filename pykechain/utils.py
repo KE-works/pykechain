@@ -2,8 +2,8 @@ import os
 import re
 import unicodedata
 from contextlib import contextmanager
-from datetime import datetime, timedelta
-from typing import TypeVar, Iterable, Callable, Optional, Text  # noqa: F401
+from datetime import datetime, timedelta, timezone
+from typing import TypeVar, Iterable, Callable, Optional, Text, Dict  # noqa: F401
 
 import pytz
 import six
@@ -111,11 +111,11 @@ def parse_datetime(value: Text) -> Optional[datetime]:
     def _get_fixed_timezone(offset):
         """Return a tzinfo instance with a fixed offset from UTC."""
         if isinstance(offset, timedelta):
-            offset = offset.seconds // 60
+            offset = offset.total_seconds() // 60
         sign = '-' if offset < 0 else '+'
         hhmm = '%02d%02d' % divmod(abs(offset), 60)
         name = sign + hhmm
-        return pytz.FixedOffset(offset, name)
+        return timezone(timedelta(minutes=offset), name)
 
     DATETIME_RE = re.compile(
         r'(?P<year>\d{4})-(?P<month>\d{1,2})-(?P<day>\d{1,2})'
@@ -281,3 +281,59 @@ def slugify_ref(value: Text, allow_unicode: bool = False) -> Text:
     value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
     value = re.sub(r'[^\w\s-]', '', value).strip().lower()
     return re.sub(r'[-\s]+', '-', value)
+
+
+def __dict_public__(cls):
+    # type: (type(object)) -> Dict
+    """
+    Get the __dict__ of the class `cls`, excluding 'dunder' attributes and methods.
+
+    :param cls: class object
+    :return: dictionary with public attributes
+
+    Example
+    -------
+    >>> from pykechain.enums import Category
+    >>> sorted(__dict_public__(cls=Category).values())
+    ['INSTANCE', 'MODEL']
+
+    """
+    return {k: v for (k, v) in cls.__dict__.items() if not k.startswith('__')}
+
+
+def __dict__inherited__(cls, stop=type, public=True):
+    # type: (type(object), type(object), bool) -> Dict
+    """
+    Get all __dict__ items of the class and its superclasses up to `type`, or the `stop` class given as input.
+
+    :param cls: class from which to retrieve the dict.
+    :type cls: type(object)
+    :param stop: optional class to indicate up to which superclass the inheritance should accumulate the dict.
+    :type stop: type(object)
+    :param public: optional flag, will only retrieve public (without double underscore) attributes and methods.
+    :type public: bool
+    :return: dictionary of key, value pairs
+    :rtype dict
+
+    Example
+    -------
+    >>> from pykechain.enums import Enum, Category
+    >>> sorted(__dict__inherited__(cls=Category, stop=Enum, public=True).values())
+    ['INSTANCE', 'MODEL']
+
+    """
+    if public:
+        _dict = __dict_public__(cls=cls)
+    else:
+        _dict = cls.__dict__
+
+    for super_class in cls.mro():
+        if super_class == stop:
+            break
+        if public:
+            super_class_dict = __dict_public__(cls=super_class)
+        else:
+            super_class_dict = super_class.__dict__
+        _dict.update(super_class_dict)
+
+    return _dict

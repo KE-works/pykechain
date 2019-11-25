@@ -24,7 +24,7 @@ matplotlib = "*"
 pydocstyle = "*"
 mypy = "*"
 twine = "*"
-Sphinx = "*"
+Sphinx = ">=2.0"
 tox = "*"
 coverage = "*"
 

@@ -1,4 +1,5 @@
-from typing import Any, Union, List, Dict, Optional, Text  # noqa: F401
+import datetime
+from typing import Any, Union, List, Dict, Optional, Text, Tuple  # noqa: F401
 
 import requests
 from six import text_type, string_types
@@ -7,7 +8,7 @@ from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import Category, Multiplicity
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance
-from pykechain.models import Base, Scope
+from pykechain.models import Base, Scope2
 from pykechain.models.property2 import Property2
 from pykechain.utils import is_uuid, find
 
@@ -39,7 +40,7 @@ class Part2(Base):
     :ivar scope_id: scope UUID of the Part
     :type scope_id: basestring
     :ivar properties: the list of properties of this part
-    :type properties: List[Property2]
+    :type properties: List[AnyProperty]
 
     Examples
     --------
@@ -136,7 +137,7 @@ class Part2(Base):
 
         return found
 
-    def scope(self) -> 'Scope':
+    def scope(self) -> 'Scope2':
         """Scope this Part belongs to.
 
         This property will return a `Scope` object. It will make an additional call to the KE-chain API.
@@ -543,6 +544,61 @@ class Part2(Base):
 
         return self._client.create_property(self, *args, **kwargs)
 
+    @staticmethod
+    def _parse_update_dict(part, properties_fvalues, update_dict):
+        # type: (Part2, List, Dict) -> Tuple[List[Dict], List[Dict]]
+        """
+        Check the content of the update dict and insert them into the properties_fvalues list.
+
+        :param part: Depending on whether you add to or update a part, this is the model or the part itself, resp.
+        :param properties_fvalues: list of property values
+        :param update_dict: dictionary with property values, keyed by property names
+        :return: Tuple with 2 lists of dicts
+        :rtype tuple
+        """
+        properties_fvalues = properties_fvalues or list()
+        exception_fvalues = list()
+        update_dict = update_dict or dict()
+
+        if part.category == Category.INSTANCE:
+            key = 'id'
+        else:
+            key = 'model_id'
+
+        def make_serializable(value):
+            # if the value is a reference property to another 'Base' Part, replace with its ID
+            if isinstance(value, Base):
+                return value.id
+            else:
+                return value
+
+        from pykechain.models import AttachmentProperty2, DatetimeProperty2
+
+        for prop_name_or_id, property_value in update_dict.items():
+            property_to_update = part.property(prop_name_or_id)
+            if isinstance(property_value, (list, set, tuple)):
+                property_value = list(map(make_serializable, property_value))
+            else:
+                make_serializable(property_value)
+
+            if isinstance(property_to_update, DatetimeProperty2) and isinstance(property_value, datetime.datetime):
+                property_value = DatetimeProperty2.to_iso_format(property_value)
+
+            updated_p = dict(
+                value=property_value
+            )
+            if is_uuid(prop_name_or_id):
+                updated_p[key] = prop_name_or_id
+            else:
+                updated_p[key] = property_to_update.id
+
+            if isinstance(property_to_update, AttachmentProperty2):
+                exception_fvalues.append(updated_p)
+            else:
+                properties_fvalues.append(updated_p)
+
+        return properties_fvalues, exception_fvalues
+
     def add_with_properties(self, model, name=None, update_dict=None, properties_fvalues=None, refresh=True, **kwargs):
         # type: (Part2, Optional[Text], Optional[Dict], Optional[List[Dict]], Optional[bool], **Any) -> Part2
         """
@@ -596,17 +652,7 @@ class Part2(Base):
         name = name or model.name
         url = self._client._build_url('parts2_new_instance')
 
-        properties_fvalues = properties_fvalues or list()
-
-        for prop_name_or_id, property_value in update_dict.items():
-            updated_p = dict(
-                value=property_value
-            )
-            if is_uuid(prop_name_or_id):
-                updated_p['model_id'] = prop_name_or_id
-            else:
-                updated_p['model_id'] = model.property(prop_name_or_id).id
-            properties_fvalues.append(updated_p)
+        properties_fvalues, exception_fvalues = self._parse_update_dict(model, properties_fvalues, update_dict)
 
         response = self._client._request(
             'POST', url,
@@ -628,7 +674,16 @@ class Part2(Base):
         if refresh:
             self.children()
 
-        return Part2(response.json()['results'][0], client=self._client)
+        new_part_instance = Part2(response.json()['results'][0], client=self._client)
+
+        # If any values were not set via the json, set them individually
+        for exception_fvalue in exception_fvalues:
+            property_model_id = exception_fvalue['model_id']
+            property_instance = [p for p in new_part_instance.properties
+                                 if p._json_data['model_id'] == property_model_id][0]
+            property_instance.value = exception_fvalue['value']
+
+        return new_part_instance
 
     def clone(self, **kwargs):
         # type: (**Any) -> Part2
@@ -825,18 +880,7 @@ class Part2(Base):
         if properties_fvalues and not isinstance(properties_fvalues, list):
             raise IllegalArgumentError("optional `properties_fvalues` need to be provided as a list of dicts")
 
-        properties_fvalues = properties_fvalues or list()
-        update_dict = update_dict or dict()
-
-        for prop_name_or_id, property_value in update_dict.items():
-            updated_p = dict(
-                value=property_value
-            )
-            if is_uuid(prop_name_or_id):
-                updated_p['id'] = prop_name_or_id
-            else:
-                updated_p['id'] = self.property(prop_name_or_id).id
-            properties_fvalues.append(updated_p)
+        properties_fvalues, exception_fvalues = self._parse_update_dict(self, properties_fvalues, update_dict)
 
         payload_json = dict(
             properties_fvalues=properties_fvalues,
@@ -857,6 +901,10 @@ class Part2(Base):
 
         # update local properties (without a call)
         self.refresh(json=response.json()['results'][0])
+
+        # If any values were not set via the json, set them individually
+        for exception_fvalue in exception_fvalues:
+            self.property(exception_fvalue['id']).value = exception_fvalue['value']
 
     def delete(self):
         # type: () -> ()

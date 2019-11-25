@@ -9,7 +9,8 @@ from six import text_type, string_types
 
 from pykechain.defaults import API_PATH, API_EXTRA_PARAMS
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
-    WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes
+    WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
+    ActivityClassification
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
 from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property
@@ -387,7 +388,6 @@ class Client(object):
         :param status: if provided, filter the search for the status. eg. 'ACTIVE', 'TEMPLATE', 'LIBRARY'
         :type status: basestring or None
         :param kwargs: optional additional search arguments
-        :type kwargs: dict or None
         :return: list of `Scopes`
         :rtype: list(:class:`models.Scope`)
         :raises NotFoundError: if no scopes are not found.
@@ -529,7 +529,7 @@ class Client(object):
     def parts(self,
               name=None,  # type: Optional[str]
               pk=None,  # type: Optional[str]
-              model=None,  # type: Optional[Part]
+              model=None,  # type: Optional[Part2]
               category=Category.INSTANCE,  # type: Optional[str]
               bucket=None,  # type: Optional[str]
               scope_id=None,  # type: Optional[str]
@@ -570,7 +570,6 @@ class Client(object):
         :param batch: limit the batch size to # items (defaults to 100 items per batch)
         :type batch: int or None
         :param kwargs: additional `keyword=value` arguments for the api
-        :type kwargs: dict or None
         :return: :class:`models.PartSet` which is an iterator of :class:`models.Part`
         :raises NotFoundError: If no `Part` is found
 
@@ -710,7 +709,6 @@ class Client(object):
         :param category: filter the properties by category. Defaults to INSTANCE. Other options MODEL or None
         :type category: basestring or None
         :param kwargs: (optional) additional search keyword arguments
-        :type kwargs: dict or None
         :return: list of :class:`models.Property`
         :raises NotFoundError: When no `Property` is found
         """
@@ -774,7 +772,6 @@ class Client(object):
         :param scope: (optional) id (UUID) of the scope to search in
         :type scope: basestring or None
         :param kwargs: (optional) additional search keyword arguments
-        :type kwargs: dict or None
         :return: list of :class:`models.Service` objects
         :raises NotFoundError: When no `Service` objects are found
         """
@@ -808,7 +805,6 @@ class Client(object):
         :param scope: (optional) id (UUID) of the scope to search in
         :type scope: basestring or None
         :param kwargs: (optional) additional search keyword arguments
-        :type kwargs: dict or None
         :return: a single :class:`models.Service` object
         :raises NotFoundError: When no `Service` object is found
         :raises MultipleFoundError: When more than a single `Service` object is found
@@ -838,7 +834,6 @@ class Client(object):
         :param service: (optional) service UUID to filter on
         :type service: basestring or None
         :param kwargs: (optional) additional search keyword arguments
-        :type kwargs: dict or None
         :return: a single :class:`models.ServiceExecution` object
         :raises NotFoundError: When no `ServiceExecution` object is found
         """
@@ -876,7 +871,6 @@ class Client(object):
         :param scope: (optional) id (UUID) of the scope to search in
         :type scope: basestring or None
         :param kwargs: (optional) additional search keyword arguments
-        :type kwargs: dict or None
         :return: a single :class:`models.ServiceExecution` object
         :raises NotFoundError: When no `ServiceExecution` object is found
         :raises MultipleFoundError: When more than a single `ServiceExecution` object is found
@@ -901,13 +895,12 @@ class Client(object):
         :param pk: (optional) id of the user to filter
         :type pk: basestring or None
         :param kwargs: Additional filtering keyword=value arguments
-        :type kwargs: dict or None
         :return: List of :class:`Users`
         :raises NotFoundError: when a user could not be found
         """
         request_params = {
             'username': username,
-            'pk': pk,
+            'id': pk,
         }
         if kwargs:
             request_params.update(**kwargs)
@@ -931,7 +924,6 @@ class Client(object):
         :param pk: (optional) id of the user to filter
         :type pk: basestring or None
         :param kwargs: Additional filtering keyword=value arguments
-        :type kwargs: dict or None
         :return: List of :class:`User`
         :raises NotFoundError: when a user could not be found
         :raises MultipleFoundError: when more than a single user can be found
@@ -958,7 +950,6 @@ class Client(object):
         :param is_hidden: (optional) boolean to show non-hidden or hidden teams or both (None) (default is non-hidden)
         :type is_hidden: bool or None
         :param kwargs: Additional filtering keyword=value arguments
-        :type kwargs: dict or None
         :return: List of :class:`Team`
         :raises NotFoundError: when a user could not be found
         :raises MultipleFoundError: when more than a single user can be found
@@ -985,7 +976,6 @@ class Client(object):
         :param is_hidden: (optional) boolean to show non-hidden or hidden teams or both (None) (default is non-hidden)
         :type is_hidden: bool or None
         :param kwargs: Additional filtering keyword=value arguments
-        :type kwargs: dict or None
         :return: List of :class:`Teams`
         :raises NotFoundError: when a team could not be found
         """
@@ -1017,7 +1007,6 @@ class Client(object):
         :param activity: (optional) the :class:`Activity` or UUID of the activity to filter the widgets for.
         :type activity: basestring or None
         :param kwargs: additional keyword arguments
-        :type kwargs: dict or None
         :return: A :class:`WidgetManager` list, containing the widgets
         :rtype: WidgetManager
         :raises NotFoundError: when the widgets could not be found
@@ -1290,7 +1279,6 @@ class Client(object):
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N  :class:`enums.Multiplicity`
         :type multiplicity: basestring
         :param kwargs: (optional) additional keyword=value arguments
-        :type kwargs: dict
         :return: :class:`models.Part` with category `MODEL` (from :class:`enums.Category`)
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
@@ -1339,7 +1327,6 @@ class Client(object):
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N of :class:`enums.Multiplicity`
         :type multiplicity: basestring
         :param kwargs: (optional) additional keyword=value arguments
-        :type kwargs: dict
         :return: :class:`models.Part` with category `MODEL` (of :class:`enums.Category`
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
@@ -1410,7 +1397,6 @@ class Client(object):
         :param name: (optional) Name of the to be cloned part
         :type name: basestring or None
         :param kwargs: (optional) additional keyword=value arguments
-        :type kwargs: dict
         :return: cloned :class:`models.Part`
         :raises APIError: if the `Part` could not be cloned
         """
@@ -1479,7 +1465,6 @@ class Client(object):
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N, default is `ZERO_MANY`
         :type multiplicity: basestring
         :param kwargs: (optional) additional keyword=value arguments
-        :type kwargs: dict
         :return: the new proxy :class:`models.Part` with category `MODEL`
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
@@ -1718,7 +1703,6 @@ class Client(object):
         :param team: (optional) team_id or Team object to assign membership of scope to a team.
         :type team: basestring or :class:`models.Team` or None
         :param kwargs: optional additional search arguments
-        :type kwargs: dict or None
         :return: the created :class:`models.Scope`
         :raises APIError: In case of failure of the creation of new Scope
         """
@@ -2081,7 +2065,6 @@ class Client(object):
         :param writable_models: (optional) list of property model ids to be configured as writable (alias = ouputs)
         :type writable_models: list of properties or list of property id's
         :param kwargs: (optional) additional keyword=value arguments to create widget
-        :type kwargs: dict or None
         :return: the created subclass of :class:`Widget`
         :rtype: :class:`Widget`
         :raises IllegalArgumentError: when an illegal argument is send.
@@ -2242,3 +2225,50 @@ class Client(object):
             raise APIError("Could not update associations of the widget ({})".format((response, response.json())))
 
         return None
+
+    def move_activity(self, activity, parent, classification=None):
+        """
+        Move the `Activity` and, if applicable, its sub-tree to another parent.
+
+        If you want to move an Activity from one classification to another, you need to provide the target
+        classification. The classificaiton of the parent should match the one provided in the function. This is
+        to ensure that you really want this to happen.
+
+        .. versionadded:: 2.7
+
+        .. versionchanged:: 3.1
+           Add ability to move activity from one classification to another.
+
+        :param activity: The `Activity` object to be moved.
+        :type activity: :class: `Activity`
+        :param parent: The parent `Subprocess` under which this `Activity` will be moved.
+        :type parent: :class:`Activity` or UUID
+        :param classification: The target classification if it is desirable to change ActivityClassification
+        :type classification: Text
+        :raises IllegalArgumentError: if the 'parent' activity_type is not :class:`enums.ActivityType.SUBPROCESS`
+        :raises IllegalArgumentError: if the 'parent' type is not :class:`Activity2` or UUID
+        :raises APIError: if an Error occurs.
+        """
+        assert isinstance(activity, Activity2), 'activity "{}" is not an Activity2 object!'.format(activity.name)
+
+        if isinstance(parent, Activity2):
+            parent_id = parent.id
+        elif isinstance(parent, text_type) and is_uuid(parent):
+            parent_id = parent
+        else:
+            raise IllegalArgumentError("Please provide either an activity object or a UUID")
+        parent_object = self.activity(id=parent_id)
+
+        if parent_object.activity_type != ActivityType.PROCESS:
+            raise IllegalArgumentError("One can only move an `Activity` under a subprocess.")
+
+        update_dict = dict(parent_id=parent_id)
+
+        if classification is not None and classification in ActivityClassification.values():
+            update_dict['classification'] = classification
+
+        url = self._build_url('activity_move', activity_id=str(activity.id))
+        response = self._request('PUT', url, data=update_dict)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not move activity, {}: {}".format(str(response), response.content))
