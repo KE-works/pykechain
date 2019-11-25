@@ -8,6 +8,7 @@ include .env.template
 include Pipfile
 
 exclude requirements-ci.txt
+exclude *-OFF
 
 graft tests
 graft docs
