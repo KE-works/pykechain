@@ -33,7 +33,6 @@ jobs:
         pytest --cov=pykechain tests
         coveralls
 
-
     - name: Check docs and distribution
       run: |
         pip install flake8 pydocstyle check-manifest readme_renderer[md] twine
