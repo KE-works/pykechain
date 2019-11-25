@@ -41,10 +41,9 @@ jobs:
     - name: Check docs and distribution
       if: matrix.python-version == 3.6
       run: |
-        pip install flake8 pydocstyle check-manifest mypy readme_renderer[md] twine>=2.0.0
+        pip install flake8 pydocstyle check-manifest readme_renderer[md] twine>=2.0.0
 
         flake8 pykechain --count --show-source --statistics
         check-manifest
-        mypy pykechain
         python setup.py bdist_wheel --universal
         twine check dist/*
