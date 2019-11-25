@@ -43,7 +43,7 @@ jobs:
       run: |
         pip install flake8 pydocstyle check-manifest readme_renderer[md] twine
         flake8 pykechain --count --show-source --statistics
-        # check-manifest
-        # mypy pykechain
-        # python setup.py bdist_wheel --universal
-        # twine check dist/*
+        check-manifest
+        mypy pykechain
+        python setup.py bdist_wheel --universal
+        twine check dist/*
