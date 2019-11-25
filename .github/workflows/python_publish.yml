@@ -20,8 +20,8 @@ jobs:
     - name: Build and publish
       env:
         TWINE_USERNAME: '__token__'
-        TWINE_PASSWORD: 'WRONG'  # ${{ secrets.PYPI_PYKECHAIN_TOKEN }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PYKECHAIN_TOKEN }}
         TWINE_NON_INTERACTIVE: '1'
       run: |
         python setup.py sdist bdist_wheel --universal
-        twine upload dist/pykechain-*  --skip-existing --disable-progress-bar
+        twine upload dist/pykechain-* --disable-progress-bar
