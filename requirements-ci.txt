@@ -9,4 +9,4 @@ six
 jsonschema
 semver
 pytz
-PyOpenSSL; python_version <= '2.7.99'
+PyOpenSSL==19.1.0; python_version <= '2.7.99'
