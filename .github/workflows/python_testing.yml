@@ -19,15 +19,15 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies
+    - name: Install basic dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -U setuptools>=38.6.0 wheel>=0.31.0 six mypy
+        pip install -U setuptools>=38.6.0 wheel>=0.31.0
+        pip install -r requirements-ci.txt
 
-    - name: Testing
+    - name: Perform Testing
       run: |
-        pip install pytest pytest-cov coverage
+        pip install pytest pytest-runner pytest-cov coverage
         pytest --cov=pykechain tests
 
     - name: Upload coverage to coveralls.io
@@ -41,7 +41,8 @@ jobs:
     - name: Check docs and distribution
       if: matrix.python-version == 3.6
       run: |
-        pip install flake8 pydocstyle check-manifest readme_renderer[md] twine
+        pip install flake8 pydocstyle check-manifest mypy readme_renderer[md] twine>=2.0.0
+
         flake8 pykechain --count --show-source --statistics
         check-manifest
         mypy pykechain
