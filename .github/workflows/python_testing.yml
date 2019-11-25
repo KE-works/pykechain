@@ -30,7 +30,7 @@ jobs:
       run: |
         pip install pytest pytest-cov coverage coveralls
 
-        pytest --cov=pykechain pykechain/tests
+        pytest --cov=pykechain tests
         coveralls
 
 
