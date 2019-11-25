@@ -3,6 +3,11 @@ Change Log
 
 pykechain changelog
 
+3.1.4 (25NOV19)
+---------------
+ * Updated the implementation of the `Scope.members()` method when dealing with `is_leadmember` and `is_manager` filters. (thanks to @jelleboersma)
+ * Updated CI tests to use Github Actions.
+
 3.1.3 (22NOV19)
 ---------------
  * Fixed the bulk editing and creating of parts (`Part2`) which have attachments in the list of properties. In the background we now separate the upload of attachments from the update of the properties. #590 (Thanks to @jelleboersma)
