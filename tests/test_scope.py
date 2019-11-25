@@ -234,7 +234,6 @@ class TestScopes2SpecificTests(TestBetamax):
         self.assertIsInstance(side_bar_manager, SideBarManager)
 
     def test_set_landing_page_activity(self):
-        # TODO No cassette yet
         self.scope = self.project.clone(asynchronous=False)
 
         first_activity = self.scope.activities()[0]
