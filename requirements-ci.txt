@@ -6,7 +6,7 @@ requests>=2.20.0
 envparse
 typing
 six
-jsonschema
+jsonschema==3.2.0
 semver
 pytz
 PyOpenSSL; python_version <= '2.7.99'
