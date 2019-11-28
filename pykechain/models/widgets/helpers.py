@@ -90,7 +90,7 @@ def _set_title(meta, custom_title, default_title=None):
             raise IllegalArgumentError("When the `custom_title` is set to False the `default_title` is used and "
                                        "cannot be None. Provide a `default_title` argument and ensure it is not None.")
         title = default_title
-    elif custom_title is None or custom_title is '':
+    elif custom_title is None or custom_title == '':
         show_title_value = "No title"
         title = ''
     else:
