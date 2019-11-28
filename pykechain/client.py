@@ -1668,7 +1668,7 @@ class Client(object):
             run_as=run_as
         )
 
-        response = self._request('POST', self._build_url('services'), json=data, params=API_EXTRA_PARAMS['services'])
+        response = self._request('POST', self._build_url('services'), json=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create service ({})".format((response, response.json())))
