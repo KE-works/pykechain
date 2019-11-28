@@ -325,8 +325,6 @@ class TestProperties(TestBetamax):
         copied_property.model().delete()
 
 
-
-
 class TestPropertiesWithReferenceProperty(TestBetamax):
     def setUp(self):
         super(TestPropertiesWithReferenceProperty, self).setUp()
