@@ -571,7 +571,7 @@ class TestWidgetsCopyMove(TestBetamax):
 
     def test_copy_widget(self):
         # setUp
-        title = "Widget to copy"
+        title = ""
         bike_part = self.project.part('Bike')
         widget_manager = self.task.widgets()  # type: WidgetsManager
         widget_1 = widget_manager.add_propertygrid_widget(part_instance=bike_part, all_writable=True,
@@ -582,7 +582,7 @@ class TestWidgetsCopyMove(TestBetamax):
 
         # testing
         self.assertEqual(widget_manager_2[0].widget_type, WidgetTypes.PROPERTYGRID)
-        self.assertEqual(widget_manager_2[0].title, title)
+        self.assertEqual(widget_manager_2[0].title, None)
         self.assertTrue(all(prop.output for prop in associated_model.properties))
         self.assertEqual(len(self.task.widgets()), 2)
 
