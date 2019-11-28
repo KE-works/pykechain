@@ -36,4 +36,4 @@ mypy==0.740; python_version >= '3.4'
 
 # for package management (uploads)
 twine>=3.0.0; python_version >= '3.6'
-twine<=1.99; python_version <= '3.5.99'
+twine==3.1.1; python_version <= '3.5.99'
