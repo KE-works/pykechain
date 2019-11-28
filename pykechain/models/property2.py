@@ -121,11 +121,11 @@ class Property2(Property):
                                        "`Property` of category 'MODEL'")
 
         if not isinstance(representations, (tuple, list)):
-            raise IllegalArgumentError('Should be a list or tuple with PropertyValidator objects, '
+            raise IllegalArgumentError('Should be a list or tuple with Representation objects, '
                                        'got {}'.format(type(representations)))
         for representation in representations:
             if not isinstance(representation, BaseRepresentation):
-                raise IllegalArgumentError("Validator '{}' should be a PropertyValidator object".format(representation))
+                raise IllegalArgumentError("Representation '{}' should be a Representation object".format(representation))
             representation.validate_json()
 
         # set the internal representation list
