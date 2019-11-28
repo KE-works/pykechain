@@ -1049,7 +1049,7 @@ class WidgetsManager(Sized):
             search_filter_visible = search_filter
         else:
             search_filter_visible = True
-            
+
         meta.update({
             'sortedColumn': snakecase(sorted_column),
             'sortDirection': sorted_direction,
