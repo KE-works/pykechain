@@ -3,6 +3,10 @@ Change Log
 
 pykechain changelog
 
+3.1.5 ()
+---------------
+ * Updated the implementation of the `add_scope_widget()` method to support filters.
+
 3.1.4 (25NOV19)
 ---------------
  * Updated the implementation of the `Scope.members()` method when dealing with `is_leadmember` and `is_manager` filters. (thanks to @jelleboersma)
