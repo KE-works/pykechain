@@ -125,7 +125,8 @@ class Property2(Property):
                                        'got {}'.format(type(representations)))
         for representation in representations:
             if not isinstance(representation, BaseRepresentation):
-                raise IllegalArgumentError("Representation '{}' should be a Representation object".format(representation))
+                raise IllegalArgumentError(
+                    "Representation '{}' should be a Representation object".format(representation))
             representation.validate_json()
 
         # set the internal representation list
