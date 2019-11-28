@@ -780,6 +780,9 @@ class Client(object):
             'id': pk,
             'scope': scope
         }
+        if self.match_app_version(label='sim', version='>=3.0.0', default=False):
+            request_params.update(API_EXTRA_PARAMS['service'])
+
         if kwargs:
             request_params.update(**kwargs)
 
@@ -1665,7 +1668,7 @@ class Client(object):
             run_as=run_as
         )
 
-        response = self._request('POST', self._build_url('services'), json=data)
+        response = self._request('POST', self._build_url('services'), json=data, params=API_EXTRA_PARAMS['services'])
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create service ({})".format((response, response.json())))

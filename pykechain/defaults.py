@@ -99,6 +99,12 @@ API_EXTRA_PARAMS = {
     'property2': {'fields': ",".join(
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'model_id', 'part_id', 'order', 'scope_id', 'category',
          'property_type', 'value', 'value_options', 'output', 'description', 'unit'])},
+    'service':  {'fields': ",".join(
+        ['id', 'name', 'ref', 'created_at', 'updated_at', 'script_type', 'script_file_name', 'description',
+         'env_version', 'scope_id', 'trusted'])},
+    'services': {'fields': ",".join(
+        ['id', 'name', 'ref', 'created_at', 'updated_at', 'script_type', 'script_file_name', 'description',
+         'env_version', 'scope_id', 'trusted'])},
     'widgets': {'fields': ",".join(
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
          'parent_id', 'progress', 'has_subwidgets', 'scope_id'])},

@@ -169,6 +169,18 @@ class TestServices(TestBetamax):
         # tearDown
         service.edit(name=name_before, description=description_before, version=version_before)
 
+    # test added in 3.0
+    @skip
+    def test_retrieve_services_with_refs(self):
+        # setup
+        service_ref = 'debug-pykechain'
+        service_name = 'debug pykechain'
+        service = self.project.services(ref=service_ref)
+
+        # testing
+        self.assertIsInstance(service, Service)
+        self.assertTrue(service.name, service_name)
+
 
 class TestServicesWithCustomUploadedService(TestServiceSetup):
 
