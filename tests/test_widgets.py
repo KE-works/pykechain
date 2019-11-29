@@ -1,8 +1,11 @@
-from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors, \
-    Category, LinkTargets
+from pykechain.enums import (WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors,
+                             Category, LinkTargets)
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Activity2
-from pykechain.models.widgets import *
+from pykechain.models.widgets import (UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget,
+                                      SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, SignatureWidget,
+                                      ServiceWidget, NotebookWidget,
+                                      MulticolumnWidget, CardWidget, MetapanelWidget, ScopeWidget)
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
@@ -522,7 +525,6 @@ class TestWidgetNavigationBarWidget(TestBetamax):
         self.assertEqual(original_bar, self.nav_bar_config)
 
     def test_add_navbar_widget_incorrect_keys(self):
-
         widget_manager = self.task.widgets()
 
         self.nav_bar_config[0]['emphasizeButton'] = True
