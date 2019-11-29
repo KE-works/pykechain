@@ -4,7 +4,7 @@ from unittest import skipIf
 
 from pykechain.enums import ScopeStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
-from pykechain.models import Team
+from pykechain.models import Team, Scope2
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_PIM3
 
@@ -317,3 +317,13 @@ class TestScopes2SpecificTests(TestBetamax):
         self.assertEqual(new_scope._json_data.get('text'), "new description")
         self.assertEqual(new_scope._json_data.get('status'), ScopeStatus.CLOSED)
         # self.assertListEqual(new_scope._json_data.get('tags'), ["a", "b", "c"])
+
+    def test_retrieve_scope_with_refs(self):
+        # setup
+        scope_ref = 'bike-project'
+        scope_name = 'Bike Project'
+        scope = self.client.scope(ref=scope_ref)
+
+        # testing
+        self.assertIsInstance(scope, Scope2)
+        self.assertTrue(scope.name, scope_name)

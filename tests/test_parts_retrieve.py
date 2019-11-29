@@ -1,6 +1,6 @@
 from pykechain.enums import Category, Multiplicity
 from pykechain.exceptions import NotFoundError, MultipleFoundError
-from pykechain.models import PartSet
+from pykechain.models import PartSet, Part2
 from tests.classes import TestBetamax
 
 
@@ -55,4 +55,19 @@ class TestPartRetrieve(TestBetamax):
         self.assertTrue(len(bike_part._cached_children) >= 5)
         self.assertTrue(len(bike_model._cached_children) >= 4)
 
+    # test added in 3.0
+    def test_retrieve_parts_with_refs(self):
+        # setup
+        front_fork_ref = 'front-fork'
+        front_fork_name = 'Front fork'
+        front_fork_part = self.project.part(ref=front_fork_ref)
+        front_fork_model = self.project.model(ref=front_fork_ref)
 
+        # testing
+        self.assertIsInstance(front_fork_part, Part2)
+        self.assertTrue(front_fork_part.name, front_fork_name)
+        self.assertTrue(front_fork_part.category, Category.INSTANCE)
+
+        self.assertIsInstance(front_fork_model, Part2)
+        self.assertTrue(front_fork_model.name, front_fork_name)
+        self.assertTrue(front_fork_model.category, Category.MODEL)
