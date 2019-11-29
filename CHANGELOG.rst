@@ -7,8 +7,9 @@ pykechain changelog
 ---------------
 This is the black friday edition of pykechain.
  * Changed the default upload of a sim script to use python 3.6 when executed on KE-chain as a script.
- * Added tests for retrieving objects by `ref`. (#608 - thanks to @raduiordache)
- * Updated the implementation of the `add_scope_widget()` method to support filters.
+ * Added tests for retrieving objects by `ref`. (#608 - thanks to @jelleboersma for the find and @raduiordache for the PR)
+ * Updated the implementation of the `add_scope_widget()` method to support filters. (thanks to @jelleboersma)
+ * Updated dependent versions for development: twine (3.1.1), pytest (5.3.1)
 
 3.1.4 (25NOV19)
 ---------------
