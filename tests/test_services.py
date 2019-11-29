@@ -5,7 +5,7 @@ from unittest import skip
 
 import pytest
 
-from pykechain.enums import ServiceExecutionStatus, ServiceType
+from pykechain.enums import ServiceExecutionStatus, ServiceType, ServiceEnvironmentVersion
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError, APIError
 # new in 1.13
 from pykechain.models import Service
@@ -24,7 +24,8 @@ class TestServiceSetup(TestBetamax):
         # setUp
         new_service = self.project.create_service(
             name=name or 'Test upload script to service',
-            description="Only used for testing - you can safely remove this"
+            description="Only used for testing - you can safely remove this",
+            environment_version = ServiceEnvironmentVersion.PYTHON_3_6
         )
         upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_script_to_service',
                                    'test_upload_script.py')
@@ -169,13 +170,12 @@ class TestServices(TestBetamax):
         # tearDown
         service.edit(name=name_before, description=description_before, version=version_before)
 
-    # test added in 3.0
-    @skip
+    # test added in 3.1
     def test_retrieve_services_with_refs(self):
         # setup
-        service_ref = 'debug-pykechain'
-        service_name = 'debug pykechain'
-        service = self.project.services(ref=service_ref)
+        service_ref = 'service-gears-successful'
+        service_name = 'Service Gears - Successful'
+        service = self.project.service(ref=service_ref)
 
         # testing
         self.assertIsInstance(service, Service)

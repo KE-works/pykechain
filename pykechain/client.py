@@ -1611,7 +1611,7 @@ class Client(object):
 
     def create_service(self, name, scope, description=None, version=None,
                        service_type=ServiceType.PYTHON_SCRIPT,
-                       environment_version=ServiceEnvironmentVersion.PYTHON_3_5,
+                       environment_version=ServiceEnvironmentVersion.PYTHON_3_6,
                        run_as=ServiceScriptUser.KENODE_USER,
                        pkg_path=None):
         """
@@ -1637,7 +1637,7 @@ class Client(object):
                              defaults to `PYTHON_SCRIPT`
         :type service_type: basestring or None
         :param environment_version: (optional) execution environment of the service (refer to
-         :class:`pykechain.enums.ServiceEnvironmentVersion`), defaults to `PYTHON_3_5`
+         :class:`pykechain.enums.ServiceEnvironmentVersion`), defaults to `PYTHON_3_6`
         :type environment_version: basestring or None
         :param run_as: (optional) user to run the service as. Defaults to kenode user (bound to scope)
         :type run_as: basestring or None

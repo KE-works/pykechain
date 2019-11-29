@@ -3,6 +3,13 @@ Change Log
 
 pykechain changelog
 
+3.1.5 (29NOV19)
+---------------
+This is the black friday edition of pykechain.
+ * Changed the default upload of a sim script to use python 3.6 when executed on KE-chain as a script.
+ * Added tests for retrieving objects by `ref`. (#608 - thanks to @raduiordache)
+ *
+
 3.1.4 (25NOV19)
 ---------------
  * Updated the implementation of the `Scope.members()` method when dealing with `is_leadmember` and `is_manager` filters. (thanks to @jelleboersma)
