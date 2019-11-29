@@ -975,8 +975,8 @@ class WidgetsManager(Sized):
 
     def add_scope_widget(self, team=None, title=None, show_columns=None, show_all_columns=True, tags=None,
                          sorted_column=ScopeWidgetColumnTypes.PROJECT_NAME, sorted_direction=SortTable.ASCENDING,
-                         parent_widget=None, **kwargs):
-        # type: (Union['Team',Text], Optional[Text], Optional[Iterable[Text]], Optional[bool], Optional[Iterable[Text]], Optional[Text], Optional[Text], Optional[Widget,Text], **Any) -> Widget  # noqa: F821,E501
+                         parent_widget=None, active_filter=None, search_filter=None, **kwargs):
+        # type: (Union['Team',Text], Optional[Text], Optional[Iterable[Text]], Optional[bool], Optional[Iterable[Text]], Optional[Text], Optional[Text], Optional[Widget,Text], Optional[bool], Optional[bool], **Any) -> Widget  # noqa: F821,E501
         """
         Add a KE-chain Scope widget to the Widgetmanager and the activity.
 
@@ -1003,6 +1003,10 @@ class WidgetsManager(Sized):
         :type sorted_direction: basestring
         :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
         :type parent_widget: Widget or basestring or None
+        :param active_filter: (O) whether to show the active-scopes filter, defaults to True
+        :type active_filter: bool
+        :param search_filter: (O) whether to show the search filter, defaults to True
+        :type search_filter: bool
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
         :rtype: Widget
@@ -1032,9 +1036,25 @@ class WidgetsManager(Sized):
         if team:
             meta['teamId'] = _retrieve_object_id(team)
 
+        if active_filter is not None:
+            if not isinstance(active_filter, bool):
+                raise IllegalArgumentError('`active_filter` must be a boolean, "{}" is not.'.format(active_filter))
+            active_filter_visible = active_filter
+        else:
+            active_filter_visible = True
+
+        if search_filter is not None:
+            if not isinstance(search_filter, bool):
+                raise IllegalArgumentError('`search_filter` must be a boolean, "{}" is not.'.format(search_filter))
+            search_filter_visible = search_filter
+        else:
+            search_filter_visible = True
+
         meta.update({
             'sortedColumn': snakecase(sorted_column),
             'sortDirection': sorted_direction,
+            'activeFilterVisible': active_filter_visible,
+            'searchFilterVisible': search_filter_visible,
         })
 
         widget = self.create_widget(

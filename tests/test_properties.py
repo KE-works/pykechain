@@ -348,7 +348,7 @@ class TestProperties(TestBetamax):
 
         self.assertEqual(dual_pad_prop_retrieved_from_seat.id, dual_pad_property.id)
 
-
+        
 class TestPropertiesWithReferenceProperty(TestBetamax):
     def setUp(self):
         super(TestPropertiesWithReferenceProperty, self).setUp()

@@ -2,9 +2,7 @@ from pykechain.enums import WidgetTypes, ShowColumnTypes, NavigationBarAlignment
     Category, LinkTargets
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Activity2
-from pykechain.models.widgets import UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, \
-    SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, SignatureWidget, ServiceWidget, NotebookWidget, \
-    MulticolumnWidget, CardWidget, MetapanelWidget
+from pykechain.models.widgets import *
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid
@@ -50,6 +48,7 @@ class TestWidgets(TestBetamax):
         obj = self.project.activity('Specify wheel diameter').widgets()[0]
         self.assertIsInstance(obj, Widget)
         self.assertIsNotNone(obj.meta)
+
 
 class TestWidgetManager(TestBetamax):
     def test_activity_has_metapanel_in_widget_manager(self):
@@ -411,6 +410,12 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertIsInstance(widget1, PropertygridWidget)
         self.assertIsInstance(widget2, AttachmentviewerWidget)
         self.assertEqual(len(widget_manager), 1 + 3)
+
+    def test_scope_widget(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        scope_widget = widget_manager.add_scope_widget()
+
+        self.assertIsInstance(scope_widget, ScopeWidget)
 
     def test_insert_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
