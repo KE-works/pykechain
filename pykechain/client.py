@@ -2123,9 +2123,6 @@ class Client(object):
                 else:
                     IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
 
-        if not title:
-            title = widget_type
-
         data = dict(
             activity_id=activity,
             widget_type=widget_type,
@@ -2133,6 +2130,9 @@ class Client(object):
             meta=meta,
             parent_id=parent
         )
+
+        if not title:
+            data.pop('title')
 
         if kwargs:
             data.update(**kwargs)
