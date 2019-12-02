@@ -534,7 +534,14 @@ class Activity2(Base, TagsMixin):
         >>> parts = task.parts(category=Category.MODEL)
 
         """
-        return self._client.parts(*args, activity=self.id, **kwargs)
+        if self._client.match_app_version(label='widget', version='>=3.0.0'):
+            widget_manager = self.widgets()
+            associated_parts = list()
+            for widget in widget_manager:
+                associated_parts.extend(widget.parts(*args, **kwargs))
+            return associated_parts
+        else:
+            return self._client.parts(*args, activity=self.id, **kwargs)
 
     def associated_parts(self, *args, **kwargs):
         """Retrieve models and instances belonging to this activity.
@@ -558,10 +565,22 @@ class Activity2(Base, TagsMixin):
         >>> all_models, all_instances = task.associated_parts()
 
         """
-        return (
-            self.parts(category=Category.MODEL, *args, **kwargs),
-            self.parts(category=Category.INSTANCE, *args, **kwargs)
-        )
+        if self._client.match_app_version(label='widget', version='>=3.0.0'):
+            widget_manager = self.widgets()
+            associated_models = list()
+            associated_instances = list()
+            for widget in widget_manager:
+                associated_models.extend(widget.parts(category=Category.MODEL, *args, **kwargs))
+                associated_instances.extend(widget.parts(category=Category.INSTANCE, *args, **kwargs))
+            return (
+                associated_models,
+                associated_instances
+            )
+        else:
+            return (
+                self.parts(category=Category.MODEL, *args, **kwargs),
+                self.parts(category=Category.INSTANCE, *args, **kwargs)
+            )
 
     #
     # Customizations
