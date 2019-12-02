@@ -448,10 +448,12 @@ class Client(object):
         """
         _scopes = self.scopes(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_scopes) == 0:
-            raise NotFoundError("No scope fits criteria")
+            raise NotFoundError("No scope fits criteria:{}".format(criteria))
         if len(_scopes) != 1:
-            raise MultipleFoundError("Multiple scopes fit criteria")
+            raise MultipleFoundError("Multiple scopes fit criteria:{}".format(criteria))
 
         return _scopes[0]
 
@@ -519,10 +521,12 @@ class Client(object):
         """
         _activities = self.activities(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_activities) == 0:
-            raise NotFoundError("No activity fits criteria")
+            raise NotFoundError("No activity fits criteria:{}".format(criteria))
         if len(_activities) != 1:
-            raise MultipleFoundError("Multiple activities fit criteria")
+            raise MultipleFoundError("Multiple activities fit criteria:{}".format(criteria))
 
         return _activities[0]
 
@@ -664,10 +668,12 @@ class Client(object):
         """
         _parts = self.parts(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_parts) == 0:
-            raise NotFoundError("No part fits criteria")
+            raise NotFoundError("No part fits criteria:{}".format(criteria))
         if len(_parts) != 1:
-            raise MultipleFoundError("Multiple parts fit criteria")
+            raise MultipleFoundError("Multiple parts fit criteria:{}".format(criteria))
 
         return _parts[0]
 
@@ -688,10 +694,12 @@ class Client(object):
         kwargs['category'] = Category.MODEL
         _parts = self.parts(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_parts) == 0:
-            raise NotFoundError("No model fits criteria")
+            raise NotFoundError("No model fits criteria:{}".format(criteria))
         if len(_parts) != 1:
-            raise MultipleFoundError("Multiple models fit criteria")
+            raise MultipleFoundError("Multiple models fit criteria:{}".format(criteria))
 
         return _parts[0]
 
@@ -751,10 +759,12 @@ class Client(object):
         """
         _properties = self.properties(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_properties) == 0:
-            raise NotFoundError("No property fits criteria")
+            raise NotFoundError("No property fits criteria:{}".format(criteria))
         if len(_properties) != 1:
-            raise MultipleFoundError("Multiple properties fit criteria")
+            raise MultipleFoundError("Multiple properties fit criteria:{}".format(criteria))
 
         return _properties[0]
 
@@ -814,10 +824,12 @@ class Client(object):
         """
         _services = self.services(name=name, pk=pk, scope=scope, **kwargs)
 
+        criteria = '\nname={}, pk={}, scope={}\nkwargs: {}'.format(name, pk, scope, kwargs)
+
         if len(_services) == 0:
-            raise NotFoundError("No service fits criteria")
+            raise NotFoundError("No service fits criteria:{}".format(criteria))
         if len(_services) != 1:
-            raise MultipleFoundError("Multiple services fit criteria")
+            raise MultipleFoundError("Multiple services fit criteria:{}".format(criteria))
 
         return _services[0]
 
@@ -873,6 +885,8 @@ class Client(object):
         :type pk: basestring or None
         :param scope: (optional) id (UUID) of the scope to search in
         :type scope: basestring or None
+        :param service: (optional) service UUID to filter on
+        :type service: basestring or None
         :param kwargs: (optional) additional search keyword arguments
         :return: a single :class:`models.ServiceExecution` object
         :raises NotFoundError: When no `ServiceExecution` object is found
@@ -880,10 +894,12 @@ class Client(object):
         """
         _service_executions = self.service_executions(name=name, pk=pk, scope=scope, service=service, **kwargs)
 
+        criteria = '\nname={}, pk={}, scope={}, service={}\nkwargs: {}'.format(name, pk, scope, service, kwargs)
+
         if len(_service_executions) == 0:
-            raise NotFoundError("No service execution fits criteria")
+            raise NotFoundError("No service execution fits criteria:{}".format(criteria))
         if len(_service_executions) != 1:
-            raise MultipleFoundError("Multiple service executions fit criteria")
+            raise MultipleFoundError("Multiple service executions fit criteria:{}".format(criteria))
 
         return _service_executions[0]
 
@@ -933,10 +949,12 @@ class Client(object):
         """
         _users = self.users(username=username, pk=pk, **kwargs)
 
+        criteria = '\nusername={}, pk={}\nkwargs: {}'.format(username, pk, kwargs)
+
         if len(_users) == 0:
-            raise NotFoundError("No user criteria matches")
+            raise NotFoundError("No user fits criteria:{}".format(criteria))
         if len(_users) != 1:
-            raise MultipleFoundError("Multiple users fit criteria")
+            raise MultipleFoundError("Multiple users fit criteria:{}".format(criteria))
 
         return _users[0]
 
@@ -959,10 +977,12 @@ class Client(object):
         """
         _teams = self.teams(name=name, pk=pk, **kwargs)
 
+        criteria = '\nusername={}, pk={}, is_hidden={}\nkwargs: {}'.format(name, pk, is_hidden, kwargs)
+
         if len(_teams) == 0:
-            raise NotFoundError("No team criteria matches")
+            raise NotFoundError("No team fits criteria:{}".format(criteria))
         if len(_teams) != 1:
-            raise MultipleFoundError("Multiple teams fit criteria")
+            raise MultipleFoundError("Multiple teams fit criteria:{}".format(criteria))
 
         return _teams[0]
 
