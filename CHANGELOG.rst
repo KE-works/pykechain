@@ -1,7 +1,9 @@
 Change Log
 ==========
 
-pykechain changelog
+3.1.6 (xxDEC19)
+---------------
+ * Bugfix: `Part.scope()` retrieves the part's scope regardless of its status.
 
 3.1.5 (29NOV19)
 ---------------
