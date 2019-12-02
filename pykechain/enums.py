@@ -816,6 +816,8 @@ class URITarget(Enum):
 class FontAwesomeMode(Enum):
     """
     Options to display the same icon.
+
+    Source:
     https://fontawesome.com/how-to-use/on-the-web/setup/getting-started
 
     :cvar SOLID: "solid"

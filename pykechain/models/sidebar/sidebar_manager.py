@@ -38,7 +38,6 @@ class SideBarManager(Sized):
         # type: (Any, Optional[bool], *Any, **Any) -> None
         """
         Create a side-bar manager object for the Scope2 object.
-        This also defines the type of KE-chain update.
 
         :param scope: Scope for which to create the side-bar manager.
         :type scope: Scope2
