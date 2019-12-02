@@ -3,6 +3,11 @@ Change Log
 
 pykechain changelog
 
+3.x.x (xxDEC19)
+---------------
+ * Added `SideBarManager` and `SideBarButton` classes to support configuration of the scope side-bar.
+ * Added Enumeration classes `KEChainPages`, `SubprocessDisplayMode`, `URITarget` and `FontAwesomeMode` to support configuration of the scope side-bar.
+
 3.1.5 (29NOV19)
 ---------------
 This is the black friday edition of pykechain.
