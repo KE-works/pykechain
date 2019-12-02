@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Any, Union, Text, Iterable, Dict  # noqa: F401
+from typing import Any, Union, Text, Iterable, Dict, Optional, List  # noqa: F401
 
 import requests
 from six import text_type, string_types
@@ -430,27 +430,35 @@ class Scope2(Base, TagsMixin):
     # User and Members of the Scope
     #
 
-    def members(self, is_manager=None):
+    def members(self, is_manager=None, is_leadmember=None):
+        # type: (Optional[bool], Optional[bool]) -> List[Dict]
         """
         Retrieve members of the scope.
 
-        :param is_manager: (optional) set to True to return only Scope members that are also managers.
+        :param is_manager: (otional) set to True/False to filter members that are/aren't managers, resp.
         :type is_manager: bool
-        :return: List of members (usernames)
+        :param is_leadmember: (optional) set to True/False to filter members that are/aren't leadmembers, resp.
+        :type is_leadmember: bool
+        :return: List of members, each defined as a dict
 
         Examples
         --------
         >>> members = project.members()
         >>> managers = project.members(is_manager=True)
+        >>> leadmembers = project.members(is_leadmember=True)
 
         """
-        if not is_manager:
-            return [member for member in self._json_data['members'] if member['is_active']]
-        else:
-            return [member for member in self._json_data['members'] if
-                    member.get('is_active', False) and member.get('is_manager', False)]
+        members = [member for member in self._json_data['members'] if member['is_active']]
+
+        if is_manager is not None:
+            members = [member for member in members if member.get('is_manager') == is_manager]
+        if is_leadmember is not None:
+            members = [member for member in members if member.get('is_leadmember') == is_leadmember]
+
+        return members
 
     def add_member(self, member):
+        # type: (Text) -> None
         """
         Add a single member to the scope.
 
@@ -465,6 +473,7 @@ class Scope2(Base, TagsMixin):
         self._update_scope_project_team(select_action=select_action, user=member, user_type='member')
 
     def remove_member(self, member):
+        # type: (Text) -> None
         """
         Remove a single member to the scope.
 
@@ -477,6 +486,7 @@ class Scope2(Base, TagsMixin):
         self._update_scope_project_team(select_action=select_action, user=member, user_type='member')
 
     def add_manager(self, manager):
+        # type: (Text) -> None
         """
         Add a single manager to the scope.
 
@@ -489,6 +499,7 @@ class Scope2(Base, TagsMixin):
         self._update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
 
     def remove_manager(self, manager):
+        # type: (Text) -> None
         """
         Remove a single manager to the scope.
 
@@ -499,3 +510,29 @@ class Scope2(Base, TagsMixin):
         select_action = 'remove_manager'
 
         self._update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
+
+    def add_leadmember(self, leadmember):
+        # type: (Text) -> None
+        """
+        Add a single leadmember to the scope.
+
+        :param leadmember: single username to be added to the scope list of leadmembers
+        :type leadmember: basestring
+        :raises APIError: when unable to update the scope leadmember
+        """
+        select_action = 'add_leadmember'
+
+        self._update_scope_project_team(select_action=select_action, user=leadmember, user_type='leadmember')
+
+    def remove_leadmember(self, leadmember):
+        # type: (Text) -> None
+        """
+        Remove a single leadmember to the scope.
+
+        :param leadmember: single username to be added to the scope list of leadmembers
+        :type leadmember: basestring
+        :raises APIError: when unable to update the scope leadmember
+        """
+        select_action = 'remove_leadmember'
+
+        self._update_scope_project_team(select_action=select_action, user=leadmember, user_type='leadmember')

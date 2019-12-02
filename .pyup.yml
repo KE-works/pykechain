@@ -1,0 +1,17 @@
+# search for requirement files
+# default: True
+# allowed: True, False
+search: False
+
+# Specify requirement files by hand, default is empty
+# default: empty
+# allowed: list
+requirements:
+  - requirements.txt:
+      # update all dependencies and pin them
+      update: all
+      pin: True
+  - requirements-ci.txt:
+      # don't update dependencies, use global 'pin' default
+      update: False
+      pin: False

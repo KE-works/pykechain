@@ -7,6 +7,7 @@ from six import text_type, iteritems
 from pykechain.enums import PropertyType, Category
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models.property import Property
+from pykechain.models.representations.representation_base import BaseRepresentation
 from pykechain.models.validators.validator_schemas import options_json_schema
 from pykechain.defaults import API_EXTRA_PARAMS
 
@@ -55,11 +56,14 @@ class Property2(Property):
 
         # set an empty internal validators variable
         self._validators = []  # type: List[Any]
+        self._representations = []  # type: List[BaseRepresentation]
 
         if self._options:
             validate(self._options, options_json_schema)
             if self._options.get('validators'):
                 self._parse_validators()
+            if self._options.get('representations'):
+                self._parse_representations()
 
     def _put_value(self, value):
         url = self._client._build_url('property2', property_id=self.id)
@@ -89,7 +93,8 @@ class Property2(Property):
     @property
     def part(self):
         # type: () -> Part2  # noqa: F821
-        """Retrieve the part that holds this Property.
+        """
+        Retrieve the part that holds this Property.
 
         :returns: The :class:`Part` associated to this property
         :raises APIError: if the `Part` is not found
@@ -97,6 +102,66 @@ class Property2(Property):
         if self._part is None:
             self._part = self._client.part(pk=self.part_id, category=self.category)
         return self._part
+
+    @property
+    def representations(self):
+        # type: () -> List[BaseRepresentation]
+        """
+        Provide list of representation objects.
+
+        :return: list of Representations
+        """
+        return self._representations
+
+    @representations.setter
+    def representations(self, representations):
+        # type: (List[BaseRepresentation]) -> None
+        if self.category != Category.MODEL:
+            raise IllegalArgumentError("To update the list of representations, it can only work on "
+                                       "`Property` of category 'MODEL'")
+
+        if not isinstance(representations, (tuple, list)):
+            raise IllegalArgumentError('Should be a list or tuple with Representation objects, '
+                                       'got {}'.format(type(representations)))
+        for representation in representations:
+            if not isinstance(representation, BaseRepresentation):
+                raise IllegalArgumentError(
+                    "Representation '{}' should be a Representation object".format(representation))
+            representation.validate_json()
+
+        # set the internal representation list
+        self._representations = list(set(representations))
+
+        # dump to _json options
+        self._dump_representations()
+
+        # update the options to KE-chain backend
+        self.edit(options=self._options)
+
+    def _parse_representations(self):
+        """Parse the representations in the options to representations."""
+        self._representations = []
+        representations_json = self._options.get('representations')
+        for representation_json in representations_json:
+            self._representations.append(BaseRepresentation.parse(prop=self, json=representation_json))
+
+    def _dump_representations(self):
+        """Dump the representations as json inside the _options dictionary with the key `representations`."""
+        if hasattr(self, '_representations'):
+            representations_json = []
+            for representation in self._representations:
+                if isinstance(representation, BaseRepresentation):
+                    representations_json.append(representation.as_json())
+                else:
+                    raise APIError("representation is not a BaseRepresentation: '{}'".format(representation))
+            if self._options.get('representations', list()) == representations_json:
+                # no change
+                pass
+            else:
+                new_options = self._options.copy()  # make a copy
+                new_options.update({'representations': representations_json})
+                validate(new_options, options_json_schema)
+                self._options = new_options
 
     @classmethod
     def create(cls, json: dict, **kwargs) -> 'AnyProperty':

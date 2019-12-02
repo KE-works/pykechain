@@ -1,7 +1,7 @@
 import datetime
 import warnings
 
-from typing import Union
+from typing import Union, Text
 
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Property2
@@ -46,3 +46,9 @@ class DatetimeProperty2(Property2):
         :returns: the value
         """
         return parse_datetime(self._value)
+
+    @staticmethod
+    def to_iso_format(date_time):
+        # type: (datetime.datetime) -> Text
+        """Convert a datetime object to isoformat."""
+        return date_time.isoformat()

@@ -9,7 +9,8 @@ from six import text_type, string_types
 
 from pykechain.defaults import API_PATH, API_EXTRA_PARAMS
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
-    WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes
+    WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
+    ActivityClassification
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
 from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property
@@ -447,10 +448,12 @@ class Client(object):
         """
         _scopes = self.scopes(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_scopes) == 0:
-            raise NotFoundError("No scope fits criteria")
+            raise NotFoundError("No scope fits criteria:{}".format(criteria))
         if len(_scopes) != 1:
-            raise MultipleFoundError("Multiple scopes fit criteria")
+            raise MultipleFoundError("Multiple scopes fit criteria:{}".format(criteria))
 
         return _scopes[0]
 
@@ -518,10 +521,12 @@ class Client(object):
         """
         _activities = self.activities(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_activities) == 0:
-            raise NotFoundError("No activity fits criteria")
+            raise NotFoundError("No activity fits criteria:{}".format(criteria))
         if len(_activities) != 1:
-            raise MultipleFoundError("Multiple activities fit criteria")
+            raise MultipleFoundError("Multiple activities fit criteria:{}".format(criteria))
 
         return _activities[0]
 
@@ -663,10 +668,12 @@ class Client(object):
         """
         _parts = self.parts(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_parts) == 0:
-            raise NotFoundError("No part fits criteria")
+            raise NotFoundError("No part fits criteria:{}".format(criteria))
         if len(_parts) != 1:
-            raise MultipleFoundError("Multiple parts fit criteria")
+            raise MultipleFoundError("Multiple parts fit criteria:{}".format(criteria))
 
         return _parts[0]
 
@@ -687,10 +694,12 @@ class Client(object):
         kwargs['category'] = Category.MODEL
         _parts = self.parts(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_parts) == 0:
-            raise NotFoundError("No model fits criteria")
+            raise NotFoundError("No model fits criteria:{}".format(criteria))
         if len(_parts) != 1:
-            raise MultipleFoundError("Multiple models fit criteria")
+            raise MultipleFoundError("Multiple models fit criteria:{}".format(criteria))
 
         return _parts[0]
 
@@ -750,10 +759,12 @@ class Client(object):
         """
         _properties = self.properties(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_properties) == 0:
-            raise NotFoundError("No property fits criteria")
+            raise NotFoundError("No property fits criteria:{}".format(criteria))
         if len(_properties) != 1:
-            raise MultipleFoundError("Multiple properties fit criteria")
+            raise MultipleFoundError("Multiple properties fit criteria:{}".format(criteria))
 
         return _properties[0]
 
@@ -779,6 +790,9 @@ class Client(object):
             'id': pk,
             'scope': scope
         }
+        if self.match_app_version(label='sim', version='>=3.0.0', default=False):
+            request_params.update(API_EXTRA_PARAMS['service'])
+
         if kwargs:
             request_params.update(**kwargs)
 
@@ -810,10 +824,12 @@ class Client(object):
         """
         _services = self.services(name=name, pk=pk, scope=scope, **kwargs)
 
+        criteria = '\nname={}, pk={}, scope={}\nkwargs: {}'.format(name, pk, scope, kwargs)
+
         if len(_services) == 0:
-            raise NotFoundError("No service fits criteria")
+            raise NotFoundError("No service fits criteria:{}".format(criteria))
         if len(_services) != 1:
-            raise MultipleFoundError("Multiple services fit criteria")
+            raise MultipleFoundError("Multiple services fit criteria:{}".format(criteria))
 
         return _services[0]
 
@@ -869,6 +885,8 @@ class Client(object):
         :type pk: basestring or None
         :param scope: (optional) id (UUID) of the scope to search in
         :type scope: basestring or None
+        :param service: (optional) service UUID to filter on
+        :type service: basestring or None
         :param kwargs: (optional) additional search keyword arguments
         :return: a single :class:`models.ServiceExecution` object
         :raises NotFoundError: When no `ServiceExecution` object is found
@@ -876,10 +894,12 @@ class Client(object):
         """
         _service_executions = self.service_executions(name=name, pk=pk, scope=scope, service=service, **kwargs)
 
+        criteria = '\nname={}, pk={}, scope={}, service={}\nkwargs: {}'.format(name, pk, scope, service, kwargs)
+
         if len(_service_executions) == 0:
-            raise NotFoundError("No service execution fits criteria")
+            raise NotFoundError("No service execution fits criteria:{}".format(criteria))
         if len(_service_executions) != 1:
-            raise MultipleFoundError("Multiple service executions fit criteria")
+            raise MultipleFoundError("Multiple service executions fit criteria:{}".format(criteria))
 
         return _service_executions[0]
 
@@ -929,10 +949,12 @@ class Client(object):
         """
         _users = self.users(username=username, pk=pk, **kwargs)
 
+        criteria = '\nusername={}, pk={}\nkwargs: {}'.format(username, pk, kwargs)
+
         if len(_users) == 0:
-            raise NotFoundError("No user criteria matches")
+            raise NotFoundError("No user fits criteria:{}".format(criteria))
         if len(_users) != 1:
-            raise MultipleFoundError("Multiple users fit criteria")
+            raise MultipleFoundError("Multiple users fit criteria:{}".format(criteria))
 
         return _users[0]
 
@@ -955,10 +977,12 @@ class Client(object):
         """
         _teams = self.teams(name=name, pk=pk, **kwargs)
 
+        criteria = '\nusername={}, pk={}, is_hidden={}\nkwargs: {}'.format(name, pk, is_hidden, kwargs)
+
         if len(_teams) == 0:
-            raise NotFoundError("No team criteria matches")
+            raise NotFoundError("No team fits criteria:{}".format(criteria))
         if len(_teams) != 1:
-            raise MultipleFoundError("Multiple teams fit criteria")
+            raise MultipleFoundError("Multiple teams fit criteria:{}".format(criteria))
 
         return _teams[0]
 
@@ -1607,7 +1631,7 @@ class Client(object):
 
     def create_service(self, name, scope, description=None, version=None,
                        service_type=ServiceType.PYTHON_SCRIPT,
-                       environment_version=ServiceEnvironmentVersion.PYTHON_3_5,
+                       environment_version=ServiceEnvironmentVersion.PYTHON_3_6,
                        run_as=ServiceScriptUser.KENODE_USER,
                        pkg_path=None):
         """
@@ -1633,7 +1657,7 @@ class Client(object):
                              defaults to `PYTHON_SCRIPT`
         :type service_type: basestring or None
         :param environment_version: (optional) execution environment of the service (refer to
-         :class:`pykechain.enums.ServiceEnvironmentVersion`), defaults to `PYTHON_3_5`
+         :class:`pykechain.enums.ServiceEnvironmentVersion`), defaults to `PYTHON_3_6`
         :type environment_version: basestring or None
         :param run_as: (optional) user to run the service as. Defaults to kenode user (bound to scope)
         :type run_as: basestring or None
@@ -2119,9 +2143,6 @@ class Client(object):
                 else:
                     IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
 
-        if not title:
-            title = widget_type
-
         data = dict(
             activity_id=activity,
             widget_type=widget_type,
@@ -2129,6 +2150,9 @@ class Client(object):
             meta=meta,
             parent_id=parent
         )
+
+        if not title:
+            data.pop('title')
 
         if kwargs:
             data.update(**kwargs)
@@ -2224,3 +2248,50 @@ class Client(object):
             raise APIError("Could not update associations of the widget ({})".format((response, response.json())))
 
         return None
+
+    def move_activity(self, activity, parent, classification=None):
+        """
+        Move the `Activity` and, if applicable, its sub-tree to another parent.
+
+        If you want to move an Activity from one classification to another, you need to provide the target
+        classification. The classificaiton of the parent should match the one provided in the function. This is
+        to ensure that you really want this to happen.
+
+        .. versionadded:: 2.7
+
+        .. versionchanged:: 3.1
+           Add ability to move activity from one classification to another.
+
+        :param activity: The `Activity` object to be moved.
+        :type activity: :class: `Activity`
+        :param parent: The parent `Subprocess` under which this `Activity` will be moved.
+        :type parent: :class:`Activity` or UUID
+        :param classification: The target classification if it is desirable to change ActivityClassification
+        :type classification: Text
+        :raises IllegalArgumentError: if the 'parent' activity_type is not :class:`enums.ActivityType.SUBPROCESS`
+        :raises IllegalArgumentError: if the 'parent' type is not :class:`Activity2` or UUID
+        :raises APIError: if an Error occurs.
+        """
+        assert isinstance(activity, Activity2), 'activity "{}" is not an Activity2 object!'.format(activity.name)
+
+        if isinstance(parent, Activity2):
+            parent_id = parent.id
+        elif isinstance(parent, text_type) and is_uuid(parent):
+            parent_id = parent
+        else:
+            raise IllegalArgumentError("Please provide either an activity object or a UUID")
+        parent_object = self.activity(id=parent_id)
+
+        if parent_object.activity_type != ActivityType.PROCESS:
+            raise IllegalArgumentError("One can only move an `Activity` under a subprocess.")
+
+        update_dict = dict(parent_id=parent_id)
+
+        if classification is not None and classification in ActivityClassification.values():
+            update_dict['classification'] = classification
+
+        url = self._build_url('activity_move', activity_id=str(activity.id))
+        response = self._request('PUT', url, data=update_dict)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not move activity, {}: {}".format(str(response), response.content))

@@ -14,6 +14,7 @@ API_PATH = {
     'activities': 'api/activities.json',
     'activity': 'api/activities/{activity_id}.json',
     'activity_export': 'api/activities/{activity_id}/export',
+    'activity_move': 'api/activities/{activity_id}/move_activity',
     'parts': 'api/parts.json',
     'part': 'api/parts/{part_id}.json',
     'properties': 'api/properties.json',
@@ -45,6 +46,8 @@ API_PATH = {
     'scope2_remove_member': 'api/v3/scopes/{scope_id}/remove_member',
     'scope2_add_manager': 'api/v3/scopes/{scope_id}/add_manager',
     'scope2_remove_manager': 'api/v3/scopes/{scope_id}/remove_manager',
+    'scope2_add_leadmember': 'api/v3/scopes/{scope_id}/add_leadmember',
+    'scope2_remove_leadmember': 'api/v3/scopes/{scope_id}/remove_leadmember',
     'scopes2': 'api/v3/scopes.json',
     'scopes2_clone': 'api/v3/scopes/clone',
     'parts2': 'api/v3/parts.json',
@@ -96,6 +99,12 @@ API_EXTRA_PARAMS = {
     'property2': {'fields': ",".join(
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'model_id', 'part_id', 'order', 'scope_id', 'category',
          'property_type', 'value', 'value_options', 'output', 'description', 'unit'])},
+    'service': {'fields': ",".join(
+        ['id', 'name', 'ref', 'created_at', 'updated_at', 'script_version', 'script_type', 'script_file_name',
+         'description', 'env_version', 'scope_id', 'runas', 'trusted'])},
+    'services': {'fields': ",".join(
+        ['id', 'name', 'ref', 'created_at', 'updated_at', 'script_version', 'script_type', 'script_file_name',
+         'description', 'env_version', 'scope_id', 'runas', 'trusted'])},
     'widgets': {'fields': ",".join(
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
          'parent_id', 'progress', 'has_subwidgets', 'scope_id'])},

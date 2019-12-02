@@ -14,8 +14,8 @@ PSEUDO_PASSWORD = 'abc123!@#'
 PSEUDO_SCOPE_ID = 'eeb0937b-da50-4eb2-8d74-f36259cca96e'
 
 
-@pytest.mark.skipif("os.getenv('TRAVIS', False)",
-                    reason="Skipping tests when using Travis, as not Auth can be provided")
+@pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+                    reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
 class TestGetProjectHelperNotForTravis(TestBetamax):
     def setUp(self):
         super(TestGetProjectHelperNotForTravis, self).setUp()

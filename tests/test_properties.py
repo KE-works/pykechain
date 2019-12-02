@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pykechain.enums import PropertyType, Category
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
-from pykechain.models import Property
+from pykechain.models import Property, Property2
 from pykechain.models.validators import SingleReferenceValidator
 from tests.classes import TestBetamax
 
@@ -324,7 +324,29 @@ class TestProperties(TestBetamax):
         # tearDown
         copied_property.model().delete()
 
+    def test_retrieve_properties_with_refs(self):
+        # setup
+        dual_pad_ref = 'dual-pad'
+        dual_pad_name = 'Dual Pad?'
+        dual_pad_property = self.project.property(ref=dual_pad_ref)
+        dual_pad_property_model = self.project.property(ref=dual_pad_ref, category=Category.MODEL)
+        seat_part = self.project.part(name='Seat')
+        dual_pad_prop_retrieved_from_seat = seat_part.property(name=dual_pad_ref)
 
+        # testing
+        self.assertIsInstance(dual_pad_property, Property2)
+        self.assertTrue(dual_pad_property.name, dual_pad_name)
+        self.assertTrue(dual_pad_property.category, Category.INSTANCE)
+
+        self.assertIsInstance(dual_pad_property_model, Property2)
+        self.assertTrue(dual_pad_property_model.name, dual_pad_name)
+        self.assertTrue(dual_pad_property_model.category, Category.MODEL)
+
+        self.assertIsInstance(dual_pad_prop_retrieved_from_seat, Property2)
+        self.assertTrue(dual_pad_prop_retrieved_from_seat.name, dual_pad_name)
+        self.assertTrue(dual_pad_prop_retrieved_from_seat.category, Category.INSTANCE)
+
+        self.assertEqual(dual_pad_prop_retrieved_from_seat.id, dual_pad_property.id)
 
 
 class TestPropertiesWithReferenceProperty(TestBetamax):
@@ -333,7 +355,6 @@ class TestPropertiesWithReferenceProperty(TestBetamax):
 
         self.wheel_model = self.project.model('Wheel')
         self.bike = self.project.model('Bike')
-
 
         self.test_ref_property_model = self.bike.add_property(name="__Test ref property @ {}".format(datetime.now()),
                                                               property_type=PropertyType.REFERENCES_VALUE,

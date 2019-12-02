@@ -540,6 +540,8 @@ class PropertyVTypes(Enum):
     :cvar ODDNUMBER: oddNumberValidator
     :cvar REGEXSTRING: regexStringValidator
     :cvar SINGLEREFERENCE: 'singleReferenceValidator'
+    :cvar FILEEXTENSION: 'fileExtensionValidator'
+    :cvar FILESIZE: 'fileSizeValidator'
     """
 
     NONEVALIDATOR = 'noneValidator'
@@ -550,6 +552,11 @@ class PropertyVTypes(Enum):
     ODDNUMBER = 'oddNumberValidator'
     REGEXSTRING = 'regexStringValidator'
     SINGLEREFERENCE = 'singleReferenceValidator'
+    FILEEXTENSION = 'fileExtensionValidator'
+    FILESIZE = 'fileSizeValidator'
+
+    # fallback
+    ALWAYSALLOW = 'alwaysAllowValidator'
 
 
 class ValidatorEffectTypes(Enum):
@@ -580,11 +587,13 @@ class PropertyRepresentation(Enum):
     :cvar DECIMAL_PLACES: Amount of decimal places to show the number
     :cvar SIGNIFICANT_DIGITS: Number (count) of significant digits to display the number
     :cvar LINK_TARGET: configuration of a link to open the link in a new browsertab or not.
+    :cvar BUTTON: options to represent the choices of a select-list
     """
 
     DECIMAL_PLACES = "decimalPlaces"
     SIGNIFICANT_DIGITS = "significantDigits"
     LINK_TARGET = "linkTarget"
+    BUTTON = 'buttonRepresentation'
 
 
 class ShowColumnTypes(Enum):
@@ -605,18 +614,20 @@ class ScopeWidgetColumnTypes(Enum):
 
     .. versionadded:: 3.0
 
-    :cvar PROJECT_NAME: Project Name
+    :cvar PROJECT_NAME: Name
     :cvar START_DATE: Start date
     :cvar DUE_DATE: Due date
     :cvar PROGRESS: Progress
     :cvar STATUS: Status
+    :cvar TAGS: Tags
     """
 
-    PROJECT_NAME = 'Project Name'
+    PROJECT_NAME = 'Name'
     START_DATE = 'Start date'
     DUE_DATE = 'Due date'
     PROGRESS = 'Progress'
     STATUS = 'Status'
+    TAGS = 'Tags'
 
 
 class FilterType(Enum):
@@ -686,9 +697,9 @@ class ProgressBarColors(Enum):
     DEFAULT_IN_PROGRESS_BACKGROUND = '#FC7C3D'
 
 
-class CardWidgetLinkTarget(Enum):
+class LinkTargets(Enum):
     """
-    Target for the CardWidget link.
+    Target for the CardWidget link and Link property representations.
 
     .. versionadded:: 3.0
 
@@ -698,6 +709,12 @@ class CardWidgetLinkTarget(Enum):
 
     SAME_TAB = "_self"
     NEW_TAB = '_blank'
+
+
+class CardWidgetLinkTarget(LinkTargets):
+    """Target for the CardWidget, remaining for backwards compatibility."""
+
+    pass
 
 
 class CardWidgetLinkValue(Enum):
@@ -728,3 +745,33 @@ class CardWidgetImageValue(Enum):
 
     CUSTOM_IMAGE = "Custom image"
     NO_IMAGE = "No image"
+
+
+class SelectListRepresentations(Enum):
+    """
+    Options in which a single-select list property options are displayed.
+
+    :cvar DROP_DOWN: "dropdown"
+    :cvar CHECK_BOXES: "checkboxes"
+    :cvar BUTTONS: "buttons"
+    """
+
+    DROP_DOWN = 'dropdown'
+    CHECK_BOXES = 'checkboxes'
+    BUTTONS = 'buttons'
+
+
+class ImageFitValue(Enum):
+    """
+    Options to fit an image on a CardWidget or AttachmentViewerWidget.
+
+    This is a subset from the `object-fit property`_ in HTML.
+
+    :cvar CONTAIN: scale the image to fit within the widget
+    :cvar COVER: scale the image to cover the entire widget
+
+    .. _object-fit property: https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit
+    """
+
+    CONTAIN = 'contain'
+    COVER = 'cover'

@@ -14,3 +14,6 @@ prune docs/_build
 global-exclude *.pyc
 global-exclude .ipynb_checkpoints/*
 exclude *.sh
+exclude requirements-ci.txt
+exclude *-OFF
+exclude *.yml

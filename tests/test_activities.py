@@ -9,7 +9,7 @@ import requests
 
 from pykechain.enums import ActivityType, ActivityStatus
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
-from pykechain.models import Activity
+from pykechain.models import Activity, Activity2
 from pykechain.utils import temp_chdir
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_WIM2
@@ -356,6 +356,62 @@ class TestActivity2SpecificTests(TestBetamax):
 
         self.assertListEqual(list(), activity.assignees, "Task has no assingees and should return Empty list")
 
+    def test_activity2_move(self):
+        # setUp
+        activity_name = 'test task'
+        activity_to_be_moved = self.project.activity(name=activity_name)
+        original_parent = activity_to_be_moved.parent()
+
+        new_parent_name = 'Subprocess'
+        new_parent = self.project.activity(name=new_parent_name)
+
+        activity_to_be_moved.move(parent=new_parent)
+
+        activity_to_be_moved.refresh()
+
+        # testing
+        self.assertTrue(activity_to_be_moved.parent().id == new_parent.id)
+
+        # tearDown
+        activity_to_be_moved.move(parent=original_parent.id)
+        activity_to_be_moved.refresh()
+        self.assertTrue(activity_to_be_moved.parent().id == original_parent.id)
+
+    def test_activity2_move_under_task_parent(self):
+        # setUp
+        activity_name = 'test task'
+        activity_to_be_moved = self.project.activity(name=activity_name)
+
+        new_parent_name = 'Specify wheel diameter'
+        new_parent = self.project.activity(name=new_parent_name)
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            activity_to_be_moved.move(parent=new_parent)
+
+    def test_activity2_move_under_part_object(self):
+        # setUp
+        activity_name = 'test task'
+        activity_to_be_moved = self.project.activity(name=activity_name)
+
+        new_parent_name = 'Bike'
+        new_parent = self.project.part(name=new_parent_name)
+
+        # testing
+        with self.assertRaises(IllegalArgumentError):
+            activity_to_be_moved.move(parent=new_parent)
+
+    # test added in 3.0
+    def test_activity2_retrieve_with_refs(self):
+        # setup
+        test_task_ref = 'test-task'
+        test_task_name = 'Test task'
+        test_task_activity = self.project.activity(ref=test_task_ref)
+
+        # testing
+        self.assertIsInstance(test_task_activity, Activity2)
+        self.assertTrue(test_task_activity.name, test_task_name)
+
 
 # @skip('Does not work in PIM2 until KEC-19193 is resolved')
 class TestActivityDownloadAsPDF(TestBetamax):
@@ -374,8 +430,8 @@ class TestActivityDownloadAsPDF(TestBetamax):
             self.assertTrue(pdf_file)
             self.assertTrue(pdf_file_called_after_activity)
 
-    @pytest.mark.skipif("os.getenv('TRAVIS', False)",
-                        reason="Skipping tests when using Travis, as Async PDF is not doable without being live")
+    @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+                        reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
     def test_activity2_download_as_pdf_async(self):
         activity_name = 'Task - Form + Tables + Service'
         activity = self.project.activity(name=activity_name)
@@ -387,3 +443,5 @@ class TestActivityDownloadAsPDF(TestBetamax):
             pdf_file_called_after_activity = os.path.join(target_dir, activity_name + '.pdf')
             self.assertTrue(pdf_file)
             self.assertTrue(pdf_file_called_after_activity)
+
+

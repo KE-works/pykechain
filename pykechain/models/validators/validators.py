@@ -1,9 +1,12 @@
 from __future__ import division
 
+import mimetypes
 import re
-from typing import Any, Union, Tuple  # noqa: F401 # pylint: disable=unused-import
+from typing import Any, Union, Tuple, Optional, Text, Dict, List  # noqa: F401 # pylint: disable=unused-import
 
 from pykechain.enums import PropertyVTypes
+from pykechain.models.validators.mime_types_defaults import predefined_mimes
+from pykechain.models.validators.validator_schemas import filesizevalidator_schema, fileextensionvalidator_schema
 from pykechain.models.validators.validators_base import PropertyValidator
 
 
@@ -289,7 +292,7 @@ class RegexStringValidator(PropertyValidator):
     vtype = PropertyVTypes.REGEXSTRING
 
     def __init__(self, json=None, pattern=None, **kwargs):
-        """Construct an regex string validator effect.
+        """Construct an regex string validator.
 
         If no pattern is provided than the regexstring `'.+'` will be used, which matches all provided text with
         at least a single character. Does not match `''` (empty string).
@@ -336,7 +339,7 @@ class EmailValidator(RegexStringValidator):
     pattern = r'\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+'
 
     def __init__(self, json=None, **kwargs):
-        """Construct an email string validator effect.
+        """Construct an email string validator.
 
         :param json: (optional) dict (json) object to construct the object from
         :type json: dict
@@ -344,3 +347,191 @@ class EmailValidator(RegexStringValidator):
         :type kwargs: dict
         """
         super(EmailValidator, self).__init__(json=json, pattern=self.pattern, **kwargs)
+
+
+class AlwaysAllowValidator(PropertyValidator):
+    """
+    An always allow Validator.
+
+    Will always return True.
+    """
+
+    vtype = PropertyVTypes.ALWAYSALLOW
+
+    def _logic(self, value=None):
+        # type: (Any) -> Tuple[Union[bool, None], str]
+        """Process the inner logic of the validator.
+
+        The validation results are returned as tuple (boolean (true/false), reasontext)
+        """
+        return True, 'Always True'
+
+
+class FileSizeValidator(PropertyValidator):
+    """A file size Validator.
+
+    The actual size of the file cannot be checked in pykechain without downloading this from the server, hence
+    when the validator is used inside an attachment property, the validator returns always being valid.
+
+    :ivar max_size: maximum size to check
+    :type max_size: Union[int,float]
+
+    Example
+    -------
+    >>> validator = FileSizeValidator(max_size=100)
+    >>> validator.is_valid(100)
+    True
+    >>> validator.is_valid(-1)
+    False
+    >>> validator.is_valid("attachments/12345678-1234-5678-1234-567812345678/some_file.txt")
+    True
+    >>> validator.get_reason()
+    We determine the filesize of 'some_file.txt' to be valid. We cannot check it at this end.
+
+    """
+
+    vtype = PropertyVTypes.FILESIZE
+    jsonschema = filesizevalidator_schema
+
+    def __init__(self, json: Optional[Dict] = None, max_size: Optional[Union[int, float]] = None, **kwargs):
+        """Construct a file size validator.
+
+        :param json: (optional) dict (json) object to construct the object from
+        :type json: Optional[Dict]
+        :param max_size: (optional) number that counts as maximum size of the file
+        :type accept: Optional[Union[int,float]]
+        :param kwargs: (optional) additional kwargs to pass down
+        """
+        super(FileSizeValidator, self).__init__(json=json, **kwargs)
+        if max_size is not None:
+            if isinstance(max_size, (int, float)):
+                self._config['maxSize'] = int(max_size)
+            else:
+                raise ValueError("`max_size` should be a number.")
+        self.max_size = self._config.get('maxSize', float('inf'))
+
+    def _logic(self, value: Optional[Union[int, float]] = None) -> Tuple[Optional[bool], Optional[Text]]:
+        """Based on a filesize (numeric) or  filepath of the property (value), the filesize is checked."""
+        if value is None:
+            return None, "No reason"
+
+        basereason = "Value '{}' should be of a size less then '{}'".format(value, self.max_size)
+
+        if isinstance(value, (int, float)):
+            if int(value) <= self.max_size and int(value) >= 0:
+                return True, basereason.replace("should", "is")
+            else:
+                return False, basereason
+
+        return True, "We determine the filesize of '{}' to be valid. We cannot check it at this end.".format(value)
+
+
+class FileExtensionValidator(PropertyValidator):
+    """A file extension Validator.
+
+    It checks the value of the property attachment against a list of acceptable mime types or file extensions.
+
+    Example
+    -------
+    >>> validator = FileExtensionValidator(accept=[".png", ".jpg"])
+    >>> validator.is_valid("picture.jpg")
+    True
+    >>> validator.is_valid("document.pdf")
+    False
+    >>> validator.is_valid("attachments/12345678-1234-5678-1234-567812345678/some_file.txt")
+    False
+
+    >>> validator = FileExtensionValidator(accept=["application/pdf",
+    ...                                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"])
+    >>> validator.is_valid("document.pdf")
+    True
+    >>> validator.is_valid("comma-separated-values.csv")
+    False
+    >>> validator.is_valid("attachments/12345678-1234-5678-1234-567812345678/modern_excel.xlsx")
+    True
+
+    """
+
+    vtype = PropertyVTypes.FILEEXTENSION
+    jsonschema = fileextensionvalidator_schema
+    mimetype_regex = r'^[-\w.]+/[-\w.\*]+$'
+
+    def __init__(self, json: Optional[Dict] = None, accept: Optional[List[Text]] = None, **kwargs):
+        """Construct a file extension validator.
+
+        :param json: (optional) dict (json) object to construct the object from
+        :type json: Optional[Dict]
+        :param accept: (optional) list of mimetypes or file extensions (including a `.`, eg `.csv`, `.pdf`)
+        :type accept: Optional[List[Text]]
+        :param kwargs: (optional) additional kwargs to pass down
+        """
+        super(FileExtensionValidator, self).__init__(json=json, **kwargs)
+        if accept is not None:
+            if isinstance(accept, Text):
+                self._config['accept'] = accept.split(',')
+            elif isinstance(accept, List):
+                self._config['accept'] = accept
+            else:
+                raise ValueError("`accept` should be a commaseparated list or a list of strings.")
+
+        self.accept = self._config.get('accept', None)
+        self._accepted_mimetypes = self._convert_to_mimetypes(self.accept)
+
+    def _convert_to_mimetypes(self, accept: List[Text]) -> Optional[List[Text]]:
+        """
+        Convert accept array to array of mimetypes.
+
+        1. convert accept list to array of mimetypes
+        2. convert aggregator (if inside mime_types_defaults) to list of mimetypes
+
+        :param accept: list of mimetypes or extensions
+        :type accept: List[Text]
+        :return: array of mimetypes:
+        :rtype: List[Text]
+        """
+        if accept is None:
+            return None
+
+        marray = []
+        for item in accept:
+            # check if the item in the accept array is a mimetype on its own.
+            if re.match(self.mimetype_regex, item):
+                if item in predefined_mimes:
+                    marray.extend(predefined_mimes.get(item))
+                else:
+                    marray.append(item)
+            else:
+                # we assume this is an extension.
+                # we can only guess a url, we make a url like: "file.ext" to check.
+                if item.startswith('.'):
+                    fake_filename = "file{}".format(item)
+                else:
+                    fake_filename = "file.{}".format(item)
+
+                # do guess
+                guess, _ = mimetypes.guess_type(fake_filename)
+                if guess is not None:
+                    marray.append(guess)
+                else:
+                    print(guess)
+
+        return marray
+
+    def _logic(self, value: Optional[Text] = None) -> Tuple[Optional[bool], Optional[Text]]:
+        """Based on the filename of the property (value), the type is checked.
+
+        1. convert filename to mimetype
+        3. check if the filename is inside the array of mimetypes. self._accepted_mimetypes
+        """
+        if value is None:
+            return None, "No reason"
+
+        basereason = "Value '{}' should match the mime types '{}'".format(value, self.accept)
+
+        guessed_type, _ = mimetypes.guess_type(value)
+        if guessed_type is None:
+            return False, "Could not determine the mimetype of '{}'".format(value)
+        elif guessed_type in self._accepted_mimetypes:
+            return True, basereason.replace('match', 'matches')
+
+        return False, basereason
