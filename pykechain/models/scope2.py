@@ -380,7 +380,7 @@ class Scope2(Base, TagsMixin):
 
     def side_bar(self, *args, **kwargs):
         # type: (*Any, **Any) -> (None, SideBarManager)
-        """Retrieve the side-bar manager"""
+        """Retrieve the side-bar manager."""
         # TODO identify from which WIM/PIM version the side bar has been available in KE-chain
         # if self._client.match_app_version(label='wim', version='>=3.0.0', default=True):
         #     return SideBarManager(scope=self, *args, **kwargs)
@@ -400,7 +400,6 @@ class Scope2(Base, TagsMixin):
         :return: None
         :rtype None
         """
-
         from pykechain.models import Activity2
 
         if not (isinstance(activity, Activity2) or activity in KEChainPages.values()):

@@ -7,9 +7,37 @@ allowed_attributes = ['displayName_nl', 'displayName_de', 'displayName_fr', 'dis
 
 
 class SideBarButton(object):
+    """
+    Side-bar button class.
+
+    Every custom button in the side-bar is maintained as an object of this class.
+    The original KE-chain buttons for the project detail, tasks and work breakdown structure are not separate buttons.
+    """
+
     def __init__(self, side_bar_manager, json=None, order=None, title=None, icon=None, uri=None,
                  uri_target=URITarget.INTERNAL, icon_mode=FontAwesomeMode.REGULAR, **kwargs):
         # type: (Any, Dict, int, str, str, str, URITarget, FontAwesomeMode, **Any) -> None
+        """
+        Create a side-bar button.
+
+        :param side_bar_manager: Manager object to which the button is linked.
+        :type side_bar_manager: SideBarManager
+        :param json: the json response to construct the :class:`SideBarButton` from
+        :type json: dict
+        :param order: index of the button
+        :type order: int
+        :param title: visible label of the button
+        :type title: str
+        :param icon: FontAwesome icon of the button
+        :type icon: str
+        :param uri: Uniform Resource Identifier, the address of the linked page
+        :type uri: str
+        :param uri_target: type of URI, either internal or external
+        :type uri_target: URITarget
+        :param icon_mode: FontAwesome display mode of the icon
+        :type icon_mode: FontAwesomeMode
+        :returns None
+        """
         super().__init__()
 
         if json is None:
@@ -54,10 +82,23 @@ class SideBarButton(object):
         return '{} {}: {}'.format(self.__class__.__name__, self.order, self.display_name)
 
     def refresh(self, json):
+        """
+        Refresh the object in-place using the provided json.
+
+        :param json: the json response to construct the :class:`SideBarButton` from
+        :type json: dict
+        :return: None
+        """
         self.__init__(side_bar_manager=self._manager, json=json)
 
     def edit(self, **kwargs):
         # type: (**Any) -> None
+        """
+        Edit the details of the button.
+
+        :param kwargs:
+        :return: None
+        """
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
@@ -66,11 +107,21 @@ class SideBarButton(object):
 
     def delete(self):
         # type: () -> None
+        """
+        Delete the side-bar button from the side-bar.
+
+        :return: None
+        """
         self._manager.delete_button(key=self)
 
     def as_dict(self):
         # type: () -> Dict
+        """
+        Retrieve the configuration data, or `meta`, of the side-bar button.
 
+        :return: dictionary of the configuration data
+        :rtype dict
+        """
         config = {
             "displayName": self.display_name,
             "displayIcon": self.display_icon,

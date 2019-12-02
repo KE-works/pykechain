@@ -758,6 +758,7 @@ class KEChainPages(Enum):
     :cvar EXPLORER: "product"
     :cvar SERVICES: "scripts"
     """
+
     DETAIL = 'detail'
     TASKS = 'activities'
     WORK_BREAKDOWN = 'activitytree'
@@ -790,11 +791,12 @@ KEChainPageLabels_nl = {
 
 class SubprocessDisplayMode(Enum):
     """
-    URL variations to vary the display of a subprocess activity
+    URL variations to vary the display of a subprocess activity.
 
     :cvar ACTIVITIES: "activities"
     :cvar TREEVIEW: "treeview"
     """
+
     ACTIVITIES = 'activities'
     TREEVIEW = 'treeview'
 
@@ -806,6 +808,7 @@ class URITarget(Enum):
     :cvar INTERNAL: "internal"
     :cvar EXTERNAL: "external"
     """
+
     INTERNAL = 'internal'
     EXTERNAL = 'external'
 
@@ -819,6 +822,7 @@ class FontAwesomeMode(Enum):
     :cvar REGULAR: "regular"
     :cvar LIGHT: "light"
     """
+
     SOLID = 'solid'
     REGULAR = 'regular'
     LIGHT = 'light'

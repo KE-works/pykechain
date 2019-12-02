@@ -23,6 +23,7 @@ class SideBarManager(Sized):
     _bulk_creation = None  # ensure every instance has this attribute, regardless of the __init__ function.
 
     def __new__(cls, scope, *args, **kwargs):
+        """Overwrite superclass method to enforce singleton manager per Scope2 object."""
         instance = super().__new__(cls)
 
         # Singleton manager per scope: this is required to support bulk_creation
@@ -35,6 +36,15 @@ class SideBarManager(Sized):
 
     def __init__(self, scope, bulk_creation=False, *args, **kwargs):
         # type: (Any, Optional[bool], *Any, **Any) -> None
+        """
+        Create a side-bar manager object for the Scope2 object.
+        This also defines the type of KE-chain update.
+
+        :param scope: Scope for which to create the side-bar manager.
+        :type scope: Scope2
+        :param bulk_creation: flag whether to update once (True) or continuously (False, default)
+        :type bulk_creation: bool
+        """
         super().__init__(*args, **kwargs)
 
         from pykechain.models import Scope2
@@ -84,18 +94,33 @@ class SideBarManager(Sized):
         raise NotFoundError("Could not find button with index or name '{}'".format(key))
 
     def __del__(self):
-        """ Prior to deletion of the manager, an update to KE-chain is performed using the latest configuration. """
+        """Prior to deletion of the manager, an update to KE-chain is performed using the latest configuration."""
         if self._bulk_creation:
             # Set bulk creation to False in order for update to proceed correctly
             self._bulk_creation = False
             self._update(buttons=self._buttons, override_sidebar=self._override)
 
     def remove(self, key):
+        # type: (Any) -> None
+        """
+        Remove a button from the side-bar.
+
+        :param key: either a button, index, or name.
+        :type key: Any
+        :returns None
+        """
         self.delete_button(key=key)
 
     def insert(self, index, button):
         # type: (int, SideBarButton) -> None
+        """
+        Place a button at index `index` of the button-list.
 
+        :param index: location index of the new button
+        :type index: int
+        :param button: a side-bar button object
+        :type button: SideBarButton
+        """
         if not isinstance(index, int):
             raise IllegalArgumentError('Index "{}" is not an integer!'.format(index))
 
@@ -177,7 +202,6 @@ class SideBarManager(Sized):
         :return: new side-bar button
         :rtype SideBarButton
         """
-
         if page_name not in KEChainPages.values():
             raise IllegalArgumentError('page_name must be KEChainPages option, "{}" is not.'.format(page_name))
 
@@ -234,16 +258,37 @@ class SideBarManager(Sized):
 
     def delete_button(self, key):
         # type: (Any) -> None
+        """
+        Similar to the `remove` method, deletes a button.
+
+        :param key: either a button, index or name
+        :return: None
+        """
         button = self[key]
         self._buttons.remove(button)
         self._update(buttons=self._buttons)
 
     @property
     def override_sidebar(self):
+        # type: () -> bool
+        """
+        Flag to indicate whether the original KE-chain side-bar is still shown.
+
+        :return: boolean, True if original side-bar is not visible
+        :rtype bool
+        """
         return self._override
 
     @override_sidebar.setter
     def override_sidebar(self, value):
+        # type: (bool) -> None
+        """
+        Flag to indicate whether the original KE-chain side-bar is still shown.
+
+        :param value: new boolean value
+        :type value: bool
+        :return: None
+        """
         if not isinstance(value, bool):
             raise IllegalArgumentError('Override sidebar must be a boolean, "{}" is not.'.format(value))
         self._override = value
@@ -258,7 +303,6 @@ class SideBarManager(Sized):
         :return: None
         :rtype None
         """
-
         if self._bulk_creation:
             # Update will proceed during deletion of the manager.
             return
