@@ -4,7 +4,7 @@ from unittest import skipIf
 
 from pykechain.enums import ScopeStatus, KEChainPages
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
-from pykechain.models import Team
+from pykechain.models import Team, Scope2
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_PIM3
@@ -268,6 +268,35 @@ class TestScopes2SpecificTests(TestBetamax):
         # teardown
         self.project.remove_member('anotheruser')
 
+    def test_members(self):
+
+        # Helper function:
+        def get_member_names(**kwargs):
+            return [member['username'] for member in self.project.members(**kwargs)]
+
+        all_members = set(get_member_names())
+        managers = set(get_member_names(is_manager=True))
+        non_managers = set(get_member_names(is_manager=False))
+        leads = set(get_member_names(is_leadmember=True))
+        non_leads = set(get_member_names(is_leadmember=False))
+        basic_members = set(get_member_names(is_manager=False, is_leadmember=False))
+        lead_and_manager = set(get_member_names(is_manager=True, is_leadmember=True))
+
+        self.assertTrue(len(all_members) == 4, msg='Number of default scope members has changed!')
+        self.assertTrue(basic_members and leads and managers and lead_and_manager,
+                        msg='Test scope must have a member of every type!')
+
+        all_roles = basic_members | leads | managers | lead_and_manager
+        remaining_non_leads = all_roles - leads
+        remaining_non_managers = all_roles - managers
+
+        self.assertSetEqual(all_roles, all_members, msg='The sum of all roles should equal all members.')
+        self.assertSetEqual(remaining_non_leads, non_leads)
+        self.assertSetEqual(remaining_non_managers, non_managers)
+
+        self.assertTrue(lead_and_manager <= managers)
+        self.assertTrue(lead_and_manager <= leads)
+
     def test_clone_scope_vanilla(self):
         self.scope = self.project.clone(asynchronous=False)
 
@@ -308,3 +337,13 @@ class TestScopes2SpecificTests(TestBetamax):
         self.assertEqual(new_scope._json_data.get('text'), "new description")
         self.assertEqual(new_scope._json_data.get('status'), ScopeStatus.CLOSED)
         # self.assertListEqual(new_scope._json_data.get('tags'), ["a", "b", "c"])
+
+    def test_retrieve_scope_with_refs(self):
+        # setup
+        scope_ref = 'bike-project'
+        scope_name = 'Bike Project'
+        scope = self.client.scope(ref=scope_ref)
+
+        # testing
+        self.assertIsInstance(scope, Scope2)
+        self.assertTrue(scope.name, scope_name)

@@ -3,6 +3,19 @@ Change Log
 
 pykechain changelog
 
+3.1.5 (29NOV19)
+---------------
+This is the black friday edition of pykechain.
+ * Changed the default upload of a sim script to use python 3.6 when executed on KE-chain as a script.
+ * Added tests for retrieving objects by `ref`. (#608 - thanks to @jelleboersma for the find and @raduiordache for the PR)
+ * Updated the implementation of the `add_scope_widget()` method to support filters. (thanks to @jelleboersma)
+ * Updated dependent versions for development: twine (3.1.1), pytest (5.3.1)
+
+3.1.4 (25NOV19)
+---------------
+ * Updated the implementation of the `Scope.members()` method when dealing with `is_leadmember` and `is_manager` filters. (thanks to @jelleboersma)
+ * Updated CI tests to use Github Actions.
+
 3.1.3 (22NOV19)
 ---------------
  * Fixed the bulk editing and creating of parts (`Part2`) which have attachments in the list of properties. In the background we now separate the upload of attachments from the update of the properties. #590 (Thanks to @jelleboersma)

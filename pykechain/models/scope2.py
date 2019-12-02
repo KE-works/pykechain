@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Any, Union, Text, Iterable, Dict, Optional  # noqa: F401
+from typing import Any, Union, Text, Iterable, Dict, Optional, List  # noqa: F401
 
 import requests
 from six import text_type, string_types
@@ -474,13 +474,13 @@ class Scope2(Base, TagsMixin):
     #
 
     def members(self, is_manager=None, is_leadmember=None):
-        # type: (bool, bool) -> List[Dict]
+        # type: (Optional[bool], Optional[bool]) -> List[Dict]
         """
         Retrieve members of the scope.
 
-        :param is_manager: (optional) set to True to return only Scope members that are also managers.
+        :param is_manager: (otional) set to True/False to filter members that are/aren't managers, resp.
         :type is_manager: bool
-        :param is_leadmember: (optional) set to True to return only Scope members that are also leadmembers.
+        :param is_leadmember: (optional) set to True/False to filter members that are/aren't leadmembers, resp.
         :type is_leadmember: bool
         :return: List of members, each defined as a dict
 
@@ -492,10 +492,11 @@ class Scope2(Base, TagsMixin):
 
         """
         members = [member for member in self._json_data['members'] if member['is_active']]
-        if is_manager:
-            members = [member for member in members if member.get('is_manager', False)]
-        if is_leadmember:
-            members = [member for member in members if member.get('is_leadmember', False)]
+
+        if is_manager is not None:
+            members = [member for member in members if member.get('is_manager') == is_manager]
+        if is_leadmember is not None:
+            members = [member for member in members if member.get('is_leadmember') == is_leadmember]
 
         return members
 

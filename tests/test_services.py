@@ -5,7 +5,7 @@ from unittest import skip
 
 import pytest
 
-from pykechain.enums import ServiceExecutionStatus, ServiceType
+from pykechain.enums import ServiceExecutionStatus, ServiceType, ServiceEnvironmentVersion
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError, APIError
 # new in 1.13
 from pykechain.models import Service
@@ -24,7 +24,8 @@ class TestServiceSetup(TestBetamax):
         # setUp
         new_service = self.project.create_service(
             name=name or 'Test upload script to service',
-            description="Only used for testing - you can safely remove this"
+            description="Only used for testing - you can safely remove this",
+            environment_version = ServiceEnvironmentVersion.PYTHON_3_6
         )
         upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_script_to_service',
                                    'test_upload_script.py')
@@ -134,8 +135,8 @@ class TestServices(TestBetamax):
         self.assertEqual(service.verified_on, json_data.get('verified_on'))
         self.assertEqual(service.verification_results, json_data.get('verification_results'))
 
-    @pytest.mark.skipif("os.getenv('TRAVIS', False)",
-                        reason="Skipping tests when using Travis, as Service Execution cannot be provided")
+    @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+                        reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
     def test_debug_service_execute(self):
         service_name = 'Service Gears - Successful'
         service = self.project.service(name=service_name)
@@ -168,6 +169,17 @@ class TestServices(TestBetamax):
 
         # tearDown
         service.edit(name=name_before, description=description_before, version=version_before)
+
+    # test added in 3.1
+    def test_retrieve_services_with_refs(self):
+        # setup
+        service_ref = 'service-gears-successful'
+        service_name = 'Service Gears - Successful'
+        service = self.project.service(ref=service_ref)
+
+        # testing
+        self.assertIsInstance(service, Service)
+        self.assertTrue(service.name, service_name)
 
 
 class TestServicesWithCustomUploadedService(TestServiceSetup):
@@ -317,8 +329,8 @@ class TestServiceExecutions(TestServiceSetup):
         self.assertIsInstance(service_execution.started_at, datetime)
         self.assertIsInstance(service_execution.finished_at, datetime)
 
-    @pytest.mark.skipif("os.getenv('TRAVIS', False)",
-                        reason="Skipping tests when using Travis, as Service Execution cannot be provided")
+    @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+                        reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
     def test_debug_service_execution_terminate(self):
         service_execution = self.service.execute()
         self.assertEqual(service_execution.status, ServiceExecutionStatus.LOADING)
