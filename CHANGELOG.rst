@@ -4,6 +4,7 @@ Change Log
 3.1.6 (xxDEC19)
 ---------------
  * Bugfix: `Part.scope()` retrieves the part's scope regardless of its status.
+ * Improved `Client` exception messages when retrieving singular objects, e.g. client.scope()
 
 3.1.5 (29NOV19)
 ---------------
