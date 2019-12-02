@@ -98,6 +98,19 @@ class TestActivities(TestBetamax):
         # tearDown
         task.delete()
 
+    def test_create_activity_incorrect_inputs(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.project.create_activity('__test_task', status='COMPLETE')
+
+        with self.assertRaises(IllegalArgumentError):
+            self.project.create_activity('__test_task', start_date=datetime.now().isoformat())
+
+        with self.assertRaises(IllegalArgumentError):
+            self.project.create_activity('__test_task', description=1234)
+
+        with self.assertRaises(IllegalArgumentError):
+            self.project.create_activity('__test_task', classification='PRODUCT')
+
     # new in 1.7
     def test_edit_activity_name(self):
         specify_wd = self.project.activity('Specify wheel diameter')

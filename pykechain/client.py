@@ -1199,15 +1199,15 @@ class Client(object):
 
         if status not in ActivityStatus.values():
             raise IllegalArgumentError('`status` must be an ActivityStatus option, "{}" is not.'.format(status))
-        
+
         if description is not None:
             if not isinstance(description, Text):
                 raise IllegalArgumentError('`description` must be text, "{}" is not.'.format(description))
-        
+
         if start_date is not None:
             if not isinstance(start_date, datetime.datetime):
                 raise IllegalArgumentError('`start_date` must be a datetime object, "{}" is not.'.format(start_date))
-            
+
         if due_date is not None:
             if not isinstance(due_date, datetime.datetime):
                 raise IllegalArgumentError('`due_date` must be a datetime object, "{}" is not.'.format(due_date))
