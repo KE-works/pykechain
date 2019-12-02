@@ -277,5 +277,5 @@ class SideBarManager(Sized):
             overrideSidebar=override,
             **kwargs
         )
-        
+
         self.scope.options = options
