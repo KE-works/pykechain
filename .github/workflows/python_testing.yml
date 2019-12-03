@@ -35,8 +35,8 @@ jobs:
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
-        pip install coveralls
-        coveralls
+        # pip install coveralls
+        # coveralls
 
     - name: Check docs and distribution
       if: matrix.python-version == 3.6
