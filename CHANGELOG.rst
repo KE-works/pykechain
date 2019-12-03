@@ -1,7 +1,11 @@
 Change Log
 ==========
 
-pykechain changelog
+3.1.6 (xxDEC19)
+---------------
+ * Bugfix: `Part.scope()` retrieves the part's scope regardless of its status.
+ * Improved `Client` exception messages when retrieving singular objects, e.g. client.scope()
+ * Added additional inputs to create an `Activity`: `status`, `start_date`, `due_date`, `description`, `classification`.
 
 3.1.5 (29NOV19)
 ---------------

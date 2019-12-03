@@ -10,7 +10,7 @@ from six import text_type, string_types
 from pykechain.defaults import API_PATH, API_EXTRA_PARAMS
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
-    ActivityClassification
+    ActivityClassification, ActivityStatus
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
 from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property
@@ -448,10 +448,12 @@ class Client(object):
         """
         _scopes = self.scopes(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_scopes) == 0:
-            raise NotFoundError("No scope fits criteria")
+            raise NotFoundError("No scope fits criteria:{}".format(criteria))
         if len(_scopes) != 1:
-            raise MultipleFoundError("Multiple scopes fit criteria")
+            raise MultipleFoundError("Multiple scopes fit criteria:{}".format(criteria))
 
         return _scopes[0]
 
@@ -519,10 +521,12 @@ class Client(object):
         """
         _activities = self.activities(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_activities) == 0:
-            raise NotFoundError("No activity fits criteria")
+            raise NotFoundError("No activity fits criteria:{}".format(criteria))
         if len(_activities) != 1:
-            raise MultipleFoundError("Multiple activities fit criteria")
+            raise MultipleFoundError("Multiple activities fit criteria:{}".format(criteria))
 
         return _activities[0]
 
@@ -664,10 +668,12 @@ class Client(object):
         """
         _parts = self.parts(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_parts) == 0:
-            raise NotFoundError("No part fits criteria")
+            raise NotFoundError("No part fits criteria:{}".format(criteria))
         if len(_parts) != 1:
-            raise MultipleFoundError("Multiple parts fit criteria")
+            raise MultipleFoundError("Multiple parts fit criteria:{}".format(criteria))
 
         return _parts[0]
 
@@ -688,10 +694,12 @@ class Client(object):
         kwargs['category'] = Category.MODEL
         _parts = self.parts(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_parts) == 0:
-            raise NotFoundError("No model fits criteria")
+            raise NotFoundError("No model fits criteria:{}".format(criteria))
         if len(_parts) != 1:
-            raise MultipleFoundError("Multiple models fit criteria")
+            raise MultipleFoundError("Multiple models fit criteria:{}".format(criteria))
 
         return _parts[0]
 
@@ -751,10 +759,12 @@ class Client(object):
         """
         _properties = self.properties(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_properties) == 0:
-            raise NotFoundError("No property fits criteria")
+            raise NotFoundError("No property fits criteria:{}".format(criteria))
         if len(_properties) != 1:
-            raise MultipleFoundError("Multiple properties fit criteria")
+            raise MultipleFoundError("Multiple properties fit criteria:{}".format(criteria))
 
         return _properties[0]
 
@@ -814,10 +824,12 @@ class Client(object):
         """
         _services = self.services(name=name, pk=pk, scope=scope, **kwargs)
 
+        criteria = '\nname={}, pk={}, scope={}\nkwargs: {}'.format(name, pk, scope, kwargs)
+
         if len(_services) == 0:
-            raise NotFoundError("No service fits criteria")
+            raise NotFoundError("No service fits criteria:{}".format(criteria))
         if len(_services) != 1:
-            raise MultipleFoundError("Multiple services fit criteria")
+            raise MultipleFoundError("Multiple services fit criteria:{}".format(criteria))
 
         return _services[0]
 
@@ -873,6 +885,8 @@ class Client(object):
         :type pk: basestring or None
         :param scope: (optional) id (UUID) of the scope to search in
         :type scope: basestring or None
+        :param service: (optional) service UUID to filter on
+        :type service: basestring or None
         :param kwargs: (optional) additional search keyword arguments
         :return: a single :class:`models.ServiceExecution` object
         :raises NotFoundError: When no `ServiceExecution` object is found
@@ -880,10 +894,12 @@ class Client(object):
         """
         _service_executions = self.service_executions(name=name, pk=pk, scope=scope, service=service, **kwargs)
 
+        criteria = '\nname={}, pk={}, scope={}, service={}\nkwargs: {}'.format(name, pk, scope, service, kwargs)
+
         if len(_service_executions) == 0:
-            raise NotFoundError("No service execution fits criteria")
+            raise NotFoundError("No service execution fits criteria:{}".format(criteria))
         if len(_service_executions) != 1:
-            raise MultipleFoundError("Multiple service executions fit criteria")
+            raise MultipleFoundError("Multiple service executions fit criteria:{}".format(criteria))
 
         return _service_executions[0]
 
@@ -933,10 +949,12 @@ class Client(object):
         """
         _users = self.users(username=username, pk=pk, **kwargs)
 
+        criteria = '\nusername={}, pk={}\nkwargs: {}'.format(username, pk, kwargs)
+
         if len(_users) == 0:
-            raise NotFoundError("No user criteria matches")
+            raise NotFoundError("No user fits criteria:{}".format(criteria))
         if len(_users) != 1:
-            raise MultipleFoundError("Multiple users fit criteria")
+            raise MultipleFoundError("Multiple users fit criteria:{}".format(criteria))
 
         return _users[0]
 
@@ -959,10 +977,12 @@ class Client(object):
         """
         _teams = self.teams(name=name, pk=pk, **kwargs)
 
+        criteria = '\nusername={}, pk={}, is_hidden={}\nkwargs: {}'.format(name, pk, is_hidden, kwargs)
+
         if len(_teams) == 0:
-            raise NotFoundError("No team criteria matches")
+            raise NotFoundError("No team fits criteria:{}".format(criteria))
         if len(_teams) != 1:
-            raise MultipleFoundError("Multiple teams fit criteria")
+            raise MultipleFoundError("Multiple teams fit criteria:{}".format(criteria))
 
         return _teams[0]
 
@@ -1128,7 +1148,9 @@ class Client(object):
         return Activity(data['results'][0], client=self)
 
     # WIM2
-    def _create_activity2(self, parent, name, activity_type=ActivityType.TASK, tags=None):
+    def _create_activity2(self, parent, name, activity_type=ActivityType.TASK, status=ActivityStatus.OPEN,
+                          description=None, start_date=None, due_date=None,
+                          classification=ActivityClassification.WORKFLOW, tags=None):
         """Create a new activity.
 
         .. important::
@@ -1144,6 +1166,16 @@ class Client(object):
         :type name: basestring
         :param activity_type: type of activity: TASK (default) or PROCESS
         :type activity_type: basestring
+        :param status: status of the activity: OPEN (default) or COMPLETED
+        :type status: ActivityStatus
+        :param description: description of the activity
+        :type description: basestring
+        :param start_date: starting date of the activity
+        :type start_date: datetime.datetime
+        :param due_date: due date of the activity
+        :type due_date: datetime.datetime
+        :param classification: classification of activity: WORKFLOW (default) or CATALOG
+        :type classification: ActivityClassification
         :param tags: list of activity tags
         :type tags: list
         :return: the created :class:`models.Activity2`
@@ -1165,10 +1197,34 @@ class Client(object):
         else:
             raise IllegalArgumentError("Please provide either an activity object or a UUID")
 
+        if status not in ActivityStatus.values():
+            raise IllegalArgumentError('`status` must be an ActivityStatus option, "{}" is not.'.format(status))
+
+        if description is not None:
+            if not isinstance(description, Text):
+                raise IllegalArgumentError('`description` must be text, "{}" is not.'.format(description))
+
+        if start_date is not None:
+            if not isinstance(start_date, datetime.datetime):
+                raise IllegalArgumentError('`start_date` must be a datetime object, "{}" is not.'.format(start_date))
+
+        if due_date is not None:
+            if not isinstance(due_date, datetime.datetime):
+                raise IllegalArgumentError('`due_date` must be a datetime object, "{}" is not.'.format(due_date))
+
+        if classification not in ActivityClassification.values():
+            raise IllegalArgumentError(
+                '`classification` must be an ActivityClassification option, "{}" is not.'.format(classification))
+
         data = {
             "name": name,
             "parent_id": parent,
+            "status": status,
             "activity_type": activity_type,
+            "classification": classification,
+            "description": description,
+            "start_date": start_date,
+            "due_date": due_date,
         }
 
         if self.match_app_version(label='wim', version='>=3.1.0', default=True):

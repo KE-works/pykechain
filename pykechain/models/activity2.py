@@ -36,7 +36,7 @@ class Activity2(Base, TagsMixin):
     :type description: basestring
     :ivar status: status of the activity. One of :class:`pykechain.enums.ActivityStatus`
     :type status: basestring
-    :ivar classification: classification of the activity. One of :class:`pykechain.enums.ActivityClassificiation`
+    :ivar classification: classification of the activity. One of :class:`pykechain.enums.ActivityClassification`
     :type classification: basestring
     :ivar activity_type: Type of the activity. One of :class:`pykechain.enums.ActivityType` for WIM version 2
     :type activity_type: basestring

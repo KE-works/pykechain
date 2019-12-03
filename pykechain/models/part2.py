@@ -146,7 +146,7 @@ class Part2(Base):
         :rtype: :class:`pykechain.models.Scope`
         :raises NotFoundError: if the scope could not be found
         """
-        return self._client.scope(pk=self.scope_id)
+        return self._client.scope(pk=self.scope_id, status=None)
 
     def parent(self) -> Union['Part2', type(None)]:
         """Retrieve the parent of this `Part`.
