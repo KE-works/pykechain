@@ -1,5 +1,5 @@
 import warnings
-from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text, Dict
+from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text, Dict, List
 
 import requests
 from six import string_types, text_type
@@ -90,6 +90,11 @@ class WidgetsManager(Sized):
         if found is not None:
             return found
         raise NotFoundError("Could not find widget with index, title, ref, or id '{}'".format(key))
+
+    def create_widgets(self, widgets):
+        # type: (List[Dict]) -> List[Widget]
+        """Bulk creation of widgets."""
+        return self._client.create_widgets(widgets=widgets)
 
     def create_widget(self, *args, **kwargs):
         # type: (*Any, **Any) -> Widget
