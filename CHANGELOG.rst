@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+3.2.1 (UNRELEASED)
+------------------
+ * Added pre commit hooks
+
 3.2.0 (03DEC19)
 ---------------
  * Added bulk widget creation and editing of widgets. #617 (thanks to @jelleboersma)
