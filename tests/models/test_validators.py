@@ -11,19 +11,6 @@ from pykechain.models.validators.validators import RegexStringValidator, Require
     OddNumberValidator, SingleReferenceValidator, EmailValidator, AlwaysAllowValidator, FileSizeValidator, \
     FileExtensionValidator
 from tests.classes import SixTestCase, TestBetamax
-from jsonschema import validate, ValidationError
-
-from pykechain.enums import PropertyVTypes, PropertyType
-from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Property2, AttachmentProperty2
-from pykechain.models.validators import PropertyValidator, ValidatorEffect, VisualEffect, ValidVisualEffect, \
-    InvalidVisualEffect, NumericRangeValidator, BooleanFieldValidator
-from pykechain.models.validators.validator_schemas import options_json_schema, validator_jsonschema_stub, \
-    effects_jsonschema_stub
-from pykechain.models.validators.validators import RegexStringValidator, RequiredFieldValidator, EvenNumberValidator, \
-    OddNumberValidator, SingleReferenceValidator, EmailValidator, AlwaysAllowValidator, FileSizeValidator, \
-    FileExtensionValidator
-from tests.classes import SixTestCase, TestBetamax
 
 
 class TestValidatorJSON(SixTestCase):
@@ -440,7 +427,6 @@ class TestOddEvenNumberValidator(SixTestCase):
         self.assertFalse(validator.is_valid(4.99))
         self.assertFalse(validator.is_valid(6.0))
 
-
     def test_even_number_validator_invalid_input(self):
         validator = EvenNumberValidator()
         self.assertFalse(validator.is_valid(dict()))
@@ -495,7 +481,7 @@ class TestAlwaysAllowValidator(SixTestCase):
         self.assertTrue(validator.is_valid(True))
         self.assertTrue(validator.is_valid(False))
         self.assertTrue(validator.is_valid(None))
-        self.assertTrue(validator.is_valid({"a":"b"}))
+        self.assertTrue(validator.is_valid({"a": "b"}))
         self.assertFalse(validator.is_invalid(None))
         self.assertTrue(validator.is_valid(list()))
         self.assertTrue(validator.is_valid(set()))
@@ -518,6 +504,7 @@ class TestFileSizeValidator(SixTestCase):
         validator.validate_json()
         validator.as_json()
 
+    # noinspection PyTypeChecker
     def test_validator_invalid_arguments(self):
         with self.assertRaisesRegex(ValueError, 'should be a number'):
             FileSizeValidator(max_size=set())
@@ -604,7 +591,7 @@ class TestFileExtensionValidator(SixTestCase):
         validator = FileExtensionValidator(accept=[".xls", ".xlsx"])
         self.assertTrue(validator.is_valid('file.xls'))
         self.assertTrue(validator.is_valid('file.xlsx'))
-        self.assertTrue(validator.is_valid('file.csv'))
+        self.assertFalse(validator.is_valid('file.csv'))
 
     def test_fileextensionvalidator_being_none(self):
         validator = FileExtensionValidator(accept=["video/*"])
@@ -642,7 +629,6 @@ class TestPropertyWithValidator(SixTestCase):
         self.assertIsNone(prop.is_valid)
         self.assertIsNone(prop.is_invalid)
         self.assertListEqual([(None, "No reason")], prop.validate())
-
 
     def test_property_with_filesize_validator(self):
         prop_json = dict(
@@ -687,6 +673,7 @@ class TestPropertyWithValidator(SixTestCase):
         self.assertIsNone(prop.is_valid)
         self.assertIsNone(prop.is_invalid)
         self.assertListEqual([(None, "No reason")], prop.validate())
+
 
 class TestPropertyWithValidatorFromLiveServer(TestBetamax):
 
