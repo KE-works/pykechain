@@ -65,8 +65,9 @@ API_PATH = {
     'property2_download': 'api/v3/properties/{property_id}/download',
     'widgets': 'api/widgets.json',
     'widget': 'api/widgets/{widget_id}.json',
-    'widgets_update_associations': 'api/widgets/update_associations.json',
+    'widgets_update_associations': 'api/widgets/bulk_update_associations.json',
     'widget_update_associations': 'api/widgets/{widget_id}/update_associations.json',
+    'widgets_bulk_create': 'api/widgets/bulk_create',
     'widgets_bulk_delete': 'api/widgets/bulk_delete',
     'widgets_bulk_update': 'api/widgets/bulk_update',
     'widgets_schemas': 'api/widgets/schemas',
@@ -110,5 +111,5 @@ API_EXTRA_PARAMS = {
          'parent_id', 'progress', 'has_subwidgets', 'scope_id'])},
     'widget': {'fields': ",".join(
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
-         'parent_id', 'progress', 'has_subwidgets', 'scope_id'])}
+         'parent_id', 'progress', 'has_subwidgets', 'scope_id'])},
 }
