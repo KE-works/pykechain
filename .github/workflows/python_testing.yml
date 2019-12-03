@@ -45,11 +45,6 @@ jobs:
       if: matrix.python-version == 3.6
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        SANTA: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
-        echo $SANTA
-        set | grep "COVERALLS"
-        set | grep "GITHUB"
-        set | grep "CI"
         pip install coveralls
         coveralls
