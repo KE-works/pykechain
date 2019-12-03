@@ -1991,6 +1991,7 @@ class Client(object):
             return Scope(response.json()['results'][0], client=source_scope._client)
 
     def create_team(self, name, user, description=None, options=None, is_hidden=False):
+        # type: (Text, Union[Text, int, User], Optional[Text], Optional[Text], Optional[bool]) -> Team
         """
         Create a team.
 
@@ -2017,12 +2018,20 @@ class Client(object):
         """
         if not isinstance(name, (string_types, text_type)):
             raise IllegalArgumentError('`name` should be string')
-        if not isinstance(description, (string_types, text_type)):
+
+        if description is None:
+            description = ''
+        elif not isinstance(description, (string_types, text_type)):
             raise IllegalArgumentError('`description` should be string')
-        if options and not isinstance(options, dict):
+
+        if options is None:
+            options = dict()
+        elif not isinstance(options, dict):
             raise IllegalArgumentError('`options` should be a dictionary')
-        if is_hidden and not isinstance(is_hidden, bool):
+
+        if not isinstance(is_hidden, bool):
             raise IllegalArgumentError('`is_hidden` should be a boolean')
+
         if isinstance(user, (string_types, text_type)):
             user = self.user(username=user)
         elif isinstance(user, int):

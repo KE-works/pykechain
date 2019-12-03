@@ -1,5 +1,6 @@
 from pykechain.enums import TeamRoles
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
+from pykechain.models import User
 from pykechain.models.team import Team
 from tests.classes import TestBetamax
 
@@ -8,7 +9,53 @@ class TestTeams(TestBetamax):
 
     def setUp(self):
         super(TestTeams, self).setUp()
-        self.team = self.client.team(name='Team No.1') # type: Team
+        self.team = self.client.team(name='Team No.1')  # type: Team
+
+        self.a_user = self.client.users()[0]  # type: User
+
+    def test_create_team(self):
+        # setUp
+        new_team = self.client.create_team(
+            name='_test team',
+            user=self.a_user,
+        )
+
+        # testing
+        self.assertIsInstance(new_team, Team)
+        self.assertEqual(len(new_team.members()), 1)
+        self.assertEqual(new_team.name, '_test team')
+
+        # tearDown
+        new_team.delete()
+
+    def test_create_team_with_inputs(self):
+        # setUp
+        landing_page = '#/scopes/{}'.format(self.project.id)
+        new_team = self.client.create_team(
+            name='_test team',
+            user=self.a_user,
+            description='This is the description',
+            options=dict(
+                landingPage=landing_page,
+            ),
+            is_hidden=True,
+        )
+
+        # testing
+        self.assertEqual(new_team.description, 'This is the description')
+        self.assertDictEqual(new_team.options, {'landingPage': landing_page})
+        self.assertTrue(new_team.is_hidden)
+
+        # tearDown
+        new_team.delete()
+
+    def test_create_team_incorrect_inputs(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.client.create_team(name='_test team', user=self.a_user, description=1)
+        with self.assertRaises(IllegalArgumentError):
+            self.client.create_team(name='_test team', user=self.a_user, options='#/scopes/{}'.format(self.project.id))
+        with self.assertRaises(IllegalArgumentError):
+            self.client.create_team(name='_test team', user=self.a_user, is_hidden='False')
 
     def test_retrieve_teams(self):
         self.assertTrue(self.client.teams())

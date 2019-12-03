@@ -17,7 +17,11 @@ class Team(Base):
     def __init__(self, json, **kwargs):
         """Construct a user from provided json data."""
         super(Team, self).__init__(json, **kwargs)
+
         self.ref = json.get('ref')
+        self.description = json.get('description')
+        self.options = json.get('options')
+        self.is_hidden = json.get('is_hidden')
 
     def _update(self, resource, update_dict=None, params=None, **kwargs):
         """Update the object."""
@@ -28,6 +32,20 @@ class Team(Base):
             raise APIError("Could not update {} ({})".format(self.__class__.__name__, response.json().get('results')))
 
         self.refresh(json=response.json().get('results')[0])
+
+    def delete(self):
+        # type: () -> None
+        """
+        Delete the team. Members of the team remain intact,.
+
+        :return: None
+        """
+
+        url = self._client._build_url(resource='team', team_id=self.id)
+        response = self._client._request('DELETE', url=url)
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            raise APIError("Could not delete team: {} with id {}".format(self.name, self.id))
 
     def members(self, role=None):
         # type: (Optional[Union[TeamRoles, Text]]) -> List[Dict]
