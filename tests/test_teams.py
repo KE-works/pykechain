@@ -9,14 +9,14 @@ class TestTeams(TestBetamax):
 
     def setUp(self):
         super(TestTeams, self).setUp()
-        
+
         self.required_kwargs = dict(
             name='_test team',
             user=self.client.users()[0]  # type: User
         )
-        
+
         self.team = self.client.create_team(**self.required_kwargs)  # type: Team
-                
+
     def tearDown(self):
         self.team.delete()
         super().tearDown()
