@@ -2216,21 +2216,19 @@ class Client(object):
 
         return widget
 
-    def create_widgets(self, widgets, associations=None, **kwargs):
-        # type: (List[Dict], Optional[List[Tuple]], **Any) -> List[Widget]
+    def create_widgets(self, widgets, **kwargs):
+        # type: (List[Dict], **Any) -> List[Widget]
         """
         Bulk-create of widgets.
 
         :param widgets: list of dictionaries defining the configuration of the widget.
-        :param associations: optional list of tuples to define the readable & writable models per widget.
-        :type associations: List[Tuple]
+        :type widgets: List[Dict]
         :return: list of `Widget` objects
         :rtype List[Widget]
         """
 
         bulk_data = list()
-        bulk_readable_ids = list()
-        bulk_writable_ids = list()
+        bulk_associations = list()
         for widget in widgets:
             data, readable_model_ids, writable_model_ids = self._validate_widget(
                 activity=widget.get('activity'),
@@ -2244,8 +2242,7 @@ class Client(object):
                 **widget.pop('kwargs', dict()),
             )
             bulk_data.append(data)
-            bulk_readable_ids.append(readable_model_ids)
-            bulk_writable_ids.append(writable_model_ids)
+            bulk_associations.append((readable_model_ids, writable_model_ids))
 
         url = self._build_url('widgets_bulk_create')
         response = self._request('POST', url, params=API_EXTRA_PARAMS['widgets'], json=bulk_data)
@@ -2259,8 +2256,7 @@ class Client(object):
             widget = Widget.create(json=widget_response, client=self)
             widgets.append(widget)
 
-        if associations:
-            self.update_widgets_associations(widgets=widgets, associations=associations, **kwargs)
+        self.update_widgets_associations(widgets=widgets, associations=bulk_associations, **kwargs)
 
         return widgets
 
