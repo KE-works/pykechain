@@ -3,19 +3,26 @@ repos:
     rev: v2.4.0
     hooks:
     -   id: check-ast
+        files: pykechain/.*
     -   id: check-case-conflict
+        files: pykechain/.*
     -   id: check-json
+        files: .*
     -   id: check-merge-conflict
     -   id: check-vcs-permalinks
     -   id: check-yaml
         args: [--allow-multiple-documents]
     -   id: debug-statements
     -   id: detect-private-key
+        files: pykechain/.*
     -   id: end-of-file-fixer
+        files: .*
         exclude: tests/cassettes/*
     -   id: mixed-line-ending
+        files: .*
         args: [--fix=lf]
     -   id: trailing-whitespace
+        files: .*
         args: [--markdown-linebreak-ext=md]
 -   repo: https://github.com/pre-commit/mirrors-autopep8
     rev: v1.4.4
@@ -26,15 +33,13 @@ repos:
     rev: 4.0.1
     hooks:
     -   id: pydocstyle
-        args:
-        - --ignore=D100,D105,D203,D212,D213,D416
+        args: [--ignore=D100,D105,D203,D212,D213,D416]
         files: pykechain/.*
 -   repo: https://gitlab.com/pycqa/flake8
     rev: 3.7.9
     hooks:
     -   id: flake8
-        args:
-        - --ignore=F821
+        args: [--ignore=F821]
         files: pykechain/.*
 -   repo: https://github.com/mgedmin/check-manifest
     rev: '0.40'
