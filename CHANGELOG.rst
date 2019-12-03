@@ -5,6 +5,7 @@ Change Log
 ---------------
  * Bugfix: `Part.scope()` retrieves the part's scope regardless of its status.
  * Improved `Client` exception messages when retrieving singular objects, e.g. client.scope()
+ * Added bulk widget creation and editing of widgets.
 
 3.1.5 (29NOV19)
 ---------------
