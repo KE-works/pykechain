@@ -5,7 +5,7 @@ Change Log
 ---------------
  * Bugfix: `Part.scope()` retrieves the part's scope regardless of its status.
  * Improved `Client` exception messages when retrieving singular objects, e.g. client.scope()
- * Added `delete` function to `Team` class and fixed some bugs relating to `Team` creation.
+ * Added `edit` and `delete` methods to `Team` class and fixed some bugs relating to `Team` creation.
 
 3.1.5 (29NOV19)
 ---------------
