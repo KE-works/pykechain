@@ -30,14 +30,6 @@ jobs:
         pip install pytest betamax pytest-runner pytest-cov coverage
         pytest --cov=pykechain tests
 
-    - name: Upload coverage to coveralls.io
-      if: matrix.python-version == 3.6
-      env:
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-      run: |
-        # pip install coveralls
-        # coveralls
-
     - name: Check docs and distribution
       if: matrix.python-version == 3.6
       run: |
@@ -48,3 +40,11 @@ jobs:
         check-manifest
         python setup.py bdist_wheel --universal
         twine check dist/*
+
+    - name: Upload coverage to coveralls.io
+      if: matrix.python-version == 3.6
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+      run: |
+        pip install -U coveralls>=1.9.2
+        coveralls
