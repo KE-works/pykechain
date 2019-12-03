@@ -2059,7 +2059,8 @@ class Client(object):
         new_team.refresh()
         return new_team
 
-    def _validate_widget(self, activity, widget_type, title, meta, order, parent, readable_models, writable_models, **kwargs):
+    def _validate_widget(self, activity, widget_type, title, meta, order, parent, readable_models, writable_models,
+                         **kwargs):
 
         if isinstance(activity, (Activity, Activity2)):
             activity = activity.id
@@ -2121,7 +2122,6 @@ class Client(object):
         :return: Tuple with both input lists, now with only UUIDs
         :rtype Tuple[List, List]
         """
-
         if kwargs.get('inputs'):
             readable_models = kwargs.pop('inputs')
         if kwargs.get('outputs'):
@@ -2187,7 +2187,6 @@ class Client(object):
         :raises IllegalArgumentError: when an illegal argument is send.
         :raises APIError: when an API Error occurs.
         """
-
         data, readable_model_ids, writable_model_ids = self._validate_widget(
             activity=activity,
             widget_type=widget_type,
@@ -2226,7 +2225,6 @@ class Client(object):
         :return: list of `Widget` objects
         :rtype List[Widget]
         """
-
         bulk_data = list()
         bulk_associations = list()
         for widget in widgets:
@@ -2280,11 +2278,10 @@ class Client(object):
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
         """
-
         self.update_widgets_associations(
             widgets=[widget],
             associations=[(readable_models, writable_models)],
-            **kwargs,
+            **kwargs
         )
 
     def update_widgets_associations(self, widgets, associations, **kwargs):
@@ -2304,7 +2301,6 @@ class Client(object):
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
         """
-
         if not isinstance(widgets, List):
             raise IllegalArgumentError("`widgets` must be provided as a list of widgets.")
 
