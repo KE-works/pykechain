@@ -1,5 +1,6 @@
-import requests
 from typing import Optional, Union, List, Text, Dict, Any
+
+import requests
 
 from pykechain.enums import TeamRoles, ScopeStatus
 from pykechain.exceptions import IllegalArgumentError, APIError
@@ -32,7 +33,7 @@ class Team(Base):
             raise APIError("Could not update {} ({})".format(self.__class__.__name__, response.json().get('results')))
 
         self.refresh(json=response.json().get('results')[0])
-        
+
     def edit(self, name=None, description=None, options=None, is_hidden=None):
         # type: (Text, Text, Dict, bool) -> None
         """
@@ -49,7 +50,6 @@ class Team(Base):
         :return: None
         :raises IllegalArgumentError whenever inputs are not of the correct type
         """
-
         update_dict = dict(id=self.id)
         if name is not None:
             if not isinstance(name, str):
@@ -76,11 +76,12 @@ class Team(Base):
     def delete(self):
         # type: () -> None
         """
-        Delete the team. Members of the team remain intact.
+        Delete the team.
+
+        Members of the team remain intact.
 
         :return: None
         """
-
         url = self._client._build_url(resource='team', team_id=self.id)
         response = self._client._request('DELETE', url=url)
 
