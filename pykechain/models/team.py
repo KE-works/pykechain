@@ -1,7 +1,7 @@
 import requests
-from typing import Optional, Union, List, Text, Dict
+from typing import Optional, Union, List, Text, Dict, Any
 
-from pykechain.enums import TeamRoles
+from pykechain.enums import TeamRoles, ScopeStatus
 from pykechain.exceptions import IllegalArgumentError, APIError
 from pykechain.models.user import User
 from .base import Base
@@ -11,11 +11,11 @@ class Team(Base):
     """A virtual object representing a KE-chain Team.
 
     :ivar name: team name
-    :ivar id: teamid of the user
+    :ivar id: uuid of the team
     """
 
     def __init__(self, json, **kwargs):
-        """Construct a user from provided json data."""
+        """Construct a team from provided json data."""
         super(Team, self).__init__(json, **kwargs)
 
         self.ref = json.get('ref')
@@ -24,7 +24,7 @@ class Team(Base):
         self.is_hidden = json.get('is_hidden')
 
     def _update(self, resource, update_dict=None, params=None, **kwargs):
-        """Update the object."""
+        """Update the team in-place."""
         url = self._client._build_url(resource, **kwargs)
         response = self._client._request('PUT', url, json=update_dict, params=params)
 
@@ -36,7 +36,7 @@ class Team(Base):
     def delete(self):
         # type: () -> None
         """
-        Delete the team. Members of the team remain intact,.
+        Delete the team. Members of the team remain intact.
 
         :return: None
         """
@@ -51,9 +51,9 @@ class Team(Base):
         # type: (Optional[Union[TeamRoles, Text]]) -> List[Dict]
         """Members of the team.
 
-        You may provide the role in the team, to retrieve only the teammmber with that role. Normally there is a
+        You may provide the role in the team, to retrieve only the team member with that role. Normally there is a
         single owner, that has administration rights of the team. Normal team members do not have any rights to
-        administer the team itself such as altering the teamname, team image and team members. Administrators do
+        administer the team itself such as altering the team name, team image and team members. Administrators do
         have the right to administer the the team members.
 
         :param role: (optional) member belonging to a role :class:`pykechain.enums.TeamRoles` to return.
@@ -86,7 +86,7 @@ class Team(Base):
         :type users: List of `User` or List of pk
         :param role: (optional) role of the users to add (default `TeamRoles.MEMBER`)
         :type role: basestring
-        :raises IllegalArgumentError: when providing incorrect roles
+        :raises IllegalArgumentError: when providing incorrect user information
 
         Example
         -------
@@ -119,11 +119,12 @@ class Team(Base):
 
     def remove_members(self, users=None):
         # type: (Optional[List[Union[User, Text]]]) -> ()
-        """Members to add to a team.
+        """
+        Remove members from the team.
 
         :param users: list of members, either `User` objects or usernames
         :type users: List of `User` or List of pk
-        :raises IllegalArgumentError: when providing incorrect roles
+        :raises IllegalArgumentError: when providing incorrect user information
 
 
         Example
@@ -151,6 +152,7 @@ class Team(Base):
                      update_dict=update_dict,
                      team_id=self.id)
 
-    def scopes(self, **kwargs):
+    def scopes(self, status=None, **kwargs):
+        # type: (ScopeStatus, **Any) -> List[Scope2]
         """Scopes associated to the team."""
-        return self._client.scopes(team=self.id, **kwargs)
+        return self._client.scopes(team=self.id, status=status, **kwargs)
