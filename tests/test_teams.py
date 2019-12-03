@@ -9,36 +9,33 @@ class TestTeams(TestBetamax):
 
     def setUp(self):
         super(TestTeams, self).setUp()
-        self.team = self.client.team(name='Team No.1')  # type: Team
-
-        self.a_user = self.client.users()[0]  # type: User
+        
+        self.required_kwargs = dict(
+            name='_test team',
+            user=self.client.users()[0]  # type: User
+        )
+        
+        self.team = self.client.create_team(**self.required_kwargs)  # type: Team
+                
+    def tearDown(self):
+        self.team.delete()
+        super().tearDown()
 
     def test_create_team(self):
-        # setUp
-        new_team = self.client.create_team(
-            name='_test team',
-            user=self.a_user,
-        )
-
-        # testing
-        self.assertIsInstance(new_team, Team)
-        self.assertEqual(len(new_team.members()), 1)
-        self.assertEqual(new_team.name, '_test team')
-
-        # tearDown
-        new_team.delete()
+        self.assertIsInstance(self.team, Team)
+        self.assertEqual(len(self.team.members()), 1)
+        self.assertEqual(self.team.name, '_test team')
 
     def test_create_team_with_inputs(self):
         # setUp
         landing_page = '#/scopes/{}'.format(self.project.id)
         new_team = self.client.create_team(
-            name='_test team',
-            user=self.a_user,
             description='This is the description',
             options=dict(
                 landingPage=landing_page,
             ),
             is_hidden=True,
+            **self.required_kwargs,
         )
 
         # testing
@@ -51,11 +48,11 @@ class TestTeams(TestBetamax):
 
     def test_create_team_incorrect_inputs(self):
         with self.assertRaises(IllegalArgumentError):
-            self.client.create_team(name='_test team', user=self.a_user, description=1)
+            self.client.create_team(description=1, **self.required_kwargs)
         with self.assertRaises(IllegalArgumentError):
-            self.client.create_team(name='_test team', user=self.a_user, options='#/scopes/{}'.format(self.project.id))
+            self.client.create_team(options='#/scopes/{}'.format(self.project.id), **self.required_kwargs)
         with self.assertRaises(IllegalArgumentError):
-            self.client.create_team(name='_test team', user=self.a_user, is_hidden='False')
+            self.client.create_team(is_hidden='False', **self.required_kwargs)
 
     def test_retrieve_teams(self):
         self.assertTrue(self.client.teams())
@@ -69,7 +66,7 @@ class TestTeams(TestBetamax):
             self.client.team()
 
     def test_retrieve_single_team_with_known_teamname(self):
-        self.assertTrue(self.client.team(name="Team No.1"))
+        self.assertTrue(self.client.team(name="_test team"))
 
     def test_retrieve_members(self):
         members = self.team.members()
@@ -98,17 +95,15 @@ class TestTeams(TestBetamax):
         a_user = self.client.user(username='anotheruser')
 
         self.team.add_members([a_user.id], role=TeamRoles.MEMBER)
-        # self.team.refresh()
 
-        self.assertIn(a_user.id,[member.get('pk') for member in self.team.members(role=TeamRoles.MEMBER)])
+        self.assertIn(a_user.id, [member.get('pk') for member in self.team.members(role=TeamRoles.MEMBER)])
 
         self.team.remove_members([a_user.id])
-        # self.team.refresh()
 
         self.assertListEqual(self.team.members(), members)
 
     def test_add_scope_to_team(self):
-        #setup
+        # setup
         old_team = self.project._json_data.get('team')
 
         self.project.edit(team=self.team.id)
@@ -118,7 +113,7 @@ class TestTeams(TestBetamax):
         team_scopes = self.team.scopes()
         self.assertEqual([t.id for t in team_scopes], [self.project.id])
 
-        #teardown
+        # teardown
         self.project.edit(team=old_team and old_team.get('id') or None)
 
     def test_team_attributes(self):
@@ -128,3 +123,32 @@ class TestTeams(TestBetamax):
         for attribute in attributes:
             self.assertTrue(hasattr(obj, attribute),
                             "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__))
+
+    def test_team_edit(self):
+        # setUp
+        options = dict(
+            landingPage='#/scopes/{}'.format(self.project.id)
+        )
+        self.team.edit(
+            name='renamed team',
+            description='My team description',
+            options=options,
+            is_hidden=True,
+        )
+
+        # testing
+        self.assertEqual(self.team.name, 'renamed team')
+        self.assertEqual(self.team.description, 'My team description')
+        self.assertDictEqual(self.team.options, options)
+        self.assertTrue(self.team.is_hidden)
+
+    # noinspection PyTypeChecker
+    def test_team_edit_wrong_inputs(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.team.edit(name=123)
+        with self.assertRaises(IllegalArgumentError):
+            self.team.edit(description=False)
+        with self.assertRaises(IllegalArgumentError):
+            self.team.edit(options='New scope')
+        with self.assertRaises(IllegalArgumentError):
+            self.team.edit(is_hidden=1)

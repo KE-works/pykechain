@@ -32,6 +32,46 @@ class Team(Base):
             raise APIError("Could not update {} ({})".format(self.__class__.__name__, response.json().get('results')))
 
         self.refresh(json=response.json().get('results')[0])
+        
+    def edit(self, name=None, description=None, options=None, is_hidden=None):
+        # type: (Text, Text, Dict, bool) -> None
+        """
+        Edit the attributes of the Team.
+
+        :param name: (o) name of the Team
+        :type name: str
+        :param description: (o) description of the Team
+        :type description: str
+        :param options: (o) options dictionary to set attributes such as `landingPage`.
+        :type options: dict
+        :param is_hidden: flag to hide the Team
+        :type is_hidden: bool
+        :return: None
+        :raises IllegalArgumentError whenever inputs are not of the correct type
+        """
+
+        update_dict = dict(id=self.id)
+        if name is not None:
+            if not isinstance(name, str):
+                raise IllegalArgumentError('`name` must be a string, "{}" is not.'.format(name))
+            update_dict.update({'name': name})
+
+        if description is not None:
+            if not isinstance(description, str):
+                raise IllegalArgumentError('`description` must be a string, "{}" is not.'.format(description))
+            update_dict.update({'description': description})
+
+        if options is not None:
+            if not isinstance(options, dict):
+                raise IllegalArgumentError('`options` must be a dictionary, "{}" is not.'.format(options))
+            update_dict.update({'options': options})
+
+        if is_hidden is not None:
+            if not isinstance(is_hidden, bool):
+                raise IllegalArgumentError('`is_hidden` must be a boolean, "{}" is not.'.format(is_hidden))
+            update_dict.update({'is_hidden': is_hidden})
+
+        self._update(resource='team', team_id=self.id, update_dict=update_dict)
 
     def delete(self):
         # type: () -> None
