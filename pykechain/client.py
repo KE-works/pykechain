@@ -10,7 +10,7 @@ from six import text_type, string_types
 from pykechain.defaults import API_PATH, API_EXTRA_PARAMS
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
-    ActivityClassification
+    ActivityClassification, ActivityStatus
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
 from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property
@@ -1148,7 +1148,9 @@ class Client(object):
         return Activity(data['results'][0], client=self)
 
     # WIM2
-    def _create_activity2(self, parent, name, activity_type=ActivityType.TASK, tags=None):
+    def _create_activity2(self, parent, name, activity_type=ActivityType.TASK, status=ActivityStatus.OPEN,
+                          description=None, start_date=None, due_date=None,
+                          classification=ActivityClassification.WORKFLOW, tags=None):
         """Create a new activity.
 
         .. important::
@@ -1164,6 +1166,16 @@ class Client(object):
         :type name: basestring
         :param activity_type: type of activity: TASK (default) or PROCESS
         :type activity_type: basestring
+        :param status: status of the activity: OPEN (default) or COMPLETED
+        :type status: ActivityStatus
+        :param description: description of the activity
+        :type description: basestring
+        :param start_date: starting date of the activity
+        :type start_date: datetime.datetime
+        :param due_date: due date of the activity
+        :type due_date: datetime.datetime
+        :param classification: classification of activity: WORKFLOW (default) or CATALOG
+        :type classification: ActivityClassification
         :param tags: list of activity tags
         :type tags: list
         :return: the created :class:`models.Activity2`
@@ -1185,10 +1197,34 @@ class Client(object):
         else:
             raise IllegalArgumentError("Please provide either an activity object or a UUID")
 
+        if status not in ActivityStatus.values():
+            raise IllegalArgumentError('`status` must be an ActivityStatus option, "{}" is not.'.format(status))
+
+        if description is not None:
+            if not isinstance(description, Text):
+                raise IllegalArgumentError('`description` must be text, "{}" is not.'.format(description))
+
+        if start_date is not None:
+            if not isinstance(start_date, datetime.datetime):
+                raise IllegalArgumentError('`start_date` must be a datetime object, "{}" is not.'.format(start_date))
+
+        if due_date is not None:
+            if not isinstance(due_date, datetime.datetime):
+                raise IllegalArgumentError('`due_date` must be a datetime object, "{}" is not.'.format(due_date))
+
+        if classification not in ActivityClassification.values():
+            raise IllegalArgumentError(
+                '`classification` must be an ActivityClassification option, "{}" is not.'.format(classification))
+
         data = {
             "name": name,
             "parent_id": parent,
+            "status": status,
             "activity_type": activity_type,
+            "classification": classification,
+            "description": description,
+            "start_date": start_date,
+            "due_date": due_date,
         }
 
         if self.match_app_version(label='wim', version='>=3.1.0', default=True):
