@@ -7,9 +7,9 @@ import pytest
 import pytz
 import requests
 
-from pykechain.enums import ActivityType, ActivityStatus
+from pykechain.enums import ActivityType, ActivityStatus, ActivityClassification
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
-from pykechain.models import Activity, Activity2
+from pykechain.models import Activity2
 from pykechain.utils import temp_chdir
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_WIM2
@@ -66,6 +66,50 @@ class TestActivities(TestBetamax):
 
         with self.assertRaises(IllegalArgumentError):
             task.create('This cannot happen')
+
+    def test_create_activity_catalog(self):
+        # setUp
+        catalog_task = self.project.create_activity(
+            name='Test catalog task',
+            classification=ActivityClassification.CATALOG,
+        )
+
+        # testing
+        self.assertTrue(catalog_task.classification == ActivityClassification.CATALOG)
+
+        # tearDown
+        catalog_task.delete()
+
+    def test_create_activity_with_inputs(self):
+        # setUp
+        task = self.project.create_activity(
+            name='Testing task',
+            status=ActivityStatus.OPEN,
+            description='My new task',
+            start_date=datetime.now(),
+            due_date=datetime.now(),
+            activity_type=ActivityType.TASK,
+            classification=ActivityClassification.WORKFLOW,
+        )
+
+        # testing
+        self.assertIsInstance(task, Activity2)
+
+        # tearDown
+        task.delete()
+
+    def test_create_activity_incorrect_inputs(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.project.create_activity('__test_task', status='COMPLETE')
+
+        with self.assertRaises(IllegalArgumentError):
+            self.project.create_activity('__test_task', start_date=datetime.now().isoformat())
+
+        with self.assertRaises(IllegalArgumentError):
+            self.project.create_activity('__test_task', description=1234)
+
+        with self.assertRaises(IllegalArgumentError):
+            self.project.create_activity('__test_task', classification='PRODUCT')
 
     # new in 1.7
     def test_edit_activity_name(self):
@@ -220,14 +264,14 @@ class TestActivities(TestBetamax):
             task.children()
 
     def test_retrieve_activity_by_id(self):
-        task = self.project.activity(name='Subprocess')  # type: Activity
+        task = self.project.activity(name='Subprocess')  # type: Activity2
 
         task_by_id = self.client.activity(pk=task.id)
 
         self.assertEqual(task.id, task_by_id.id)
 
     def test_retrieve_siblings_of_a_task_in_a_subprocess(self):
-        task = self.project.activity(name='Subprocess')  # type: Activity
+        task = self.project.activity(name='Subprocess')  # type: Activity2
         siblings = task.siblings()
 
         self.assertIn(task.id, [sibling.id for sibling in siblings])
@@ -236,7 +280,7 @@ class TestActivities(TestBetamax):
     # in 1.12
 
     def test_retrieve_siblings_of_a_task_in_a_subprocess_with_arguments(self):
-        task = self.project.activity(name='SubTask')  # type: Activity
+        task = self.project.activity(name='SubTask')  # type: Activity2
         siblings = task.siblings(name__icontains='sub')
 
         self.assertIn(task.id, [sibling.id for sibling in siblings])
@@ -259,6 +303,7 @@ class TestActivities(TestBetamax):
 @skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
 class TestActivity2SpecificTests(TestBetamax):
     # 2.0 new activity
+    # noinspection PyTypeChecker
     def test_edit_activity2_assignee(self):
         specify_wd = self.project.activity('Specify wheel diameter')  # type: Activity2
         original_assignee_ids = specify_wd._json_data.get('assignee_ids') or []
@@ -302,14 +347,14 @@ class TestActivity2SpecificTests(TestBetamax):
         self.assertTrue(workflow_root.is_workflow_root())
 
     def test_activity2_retrieve_children_of_parent(self):
-        subprocess = self.project.activity(name='Subprocess')  # type: Activity
+        subprocess = self.project.activity(name='Subprocess')  # type: Activity2
         children = subprocess.children()
         self.assertTrue(len(children) >= 1)
         for child in children:
             self.assertEqual(child._json_data.get('parent_id'), subprocess.id)
 
     def test_activity2_retrieve_children_of_subprocess_with_arguments(self):
-        subprocess = self.project.activity(name='Subprocess')  # type: Activity
+        subprocess = self.project.activity(name='Subprocess')  # type: Activity2
         children = subprocess.children(name__icontains='task')
         self.assertTrue(len(children) >= 1)
         for child in children:
