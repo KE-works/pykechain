@@ -606,6 +606,7 @@ class Activity2(Base, TagsMixin):
         >>> task = project.activity('Specify Wheel Diameter')
         >>> associated_object_ids = task.associated_object_ids()
         """
+        
         request_params = dict(
             activity=self.id,
         )
