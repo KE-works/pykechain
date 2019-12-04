@@ -582,6 +582,44 @@ class Activity2(Base, TagsMixin):
                 self.parts(category=Category.INSTANCE, *args, **kwargs)
             )
 
+    def associated_object_ids(self):
+        """Retrieve object ids associated to this activity.
+
+        This represents a more in-depth retrieval of objects associated to the activity. Each element in the list
+        represents a `Property` of `Category.INSTANCE`. Each element contains the following fields:
+
+        'id': The ID of the association
+        'widget': The ID of the widget to which the Property instance is associated
+        'activity': The ID of the activity
+        'model_property': The ID of the Property model
+        'model_part': The ID of the model of the Part containing said Property
+        'instance_property': The ID of the Property instance
+        'instance_part': The ID of the Part instance containing said Property
+        'writable': True if the Property is writable, False if is not
+
+        See :func:`pykechain.Client.parts` for additional available parameters.
+
+        :returns: a tuple(models of :class:`PartSet`, instances of :class:`PartSet`)
+
+        Example
+        -------
+        >>> task = project.activity('Specify Wheel Diameter')
+        >>> associated_object_ids = task.associated_object_ids()
+        """
+        request_params = dict(
+            activity=self.id,
+        )
+
+        url = self._client._build_url('associations')
+
+        response = self._client._request('GET', url, params=request_params)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve parts: {}".format(response.content))
+
+        data = response.json()
+        return data['results']
+
     #
     # Customizations
     #

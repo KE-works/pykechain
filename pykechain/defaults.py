@@ -39,6 +39,7 @@ API_PATH = {
     'team_add_members': 'api/teams/{team_id}/add_members',
     'team_remove_members': 'api/teams/{team_id}/remove_members',
     'versions': 'api/versions.json',
+    'associations': 'api/associations.json',
 
     # PIM3
     'scope2': 'api/v3/scopes/{scope_id}.json',

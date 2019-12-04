@@ -142,9 +142,9 @@ class TestProperties(TestBetamax):
 
         # Test whether an integer property model can be created with an incorrect default value
         with self.assertRaises(APIError):
-            bike_model.add_property(name='Integer',
-                                    property_type=PropertyType.INT_VALUE,
-                                    default_value='Why is there a string here?')
+            bike_model.add_property(name='Boolean',
+                                    property_type=PropertyType.BOOLEAN_VALUE,
+                                    default_value='Not gonna work')
 
     # 1.7.2
     def test_get_partmodel_of_propertymodel(self):
@@ -234,7 +234,7 @@ class TestProperties(TestBetamax):
         no_property_type_specified = bike_model.add_property(name='No property type specified')
         single_line_text = bike_model.add_property(name='Single line text', property_type=PropertyType.CHAR_VALUE)
         multi_line_text = bike_model.add_property(name='Multi line text', property_type=PropertyType.TEXT_VALUE)
-        integer = bike_model.add_property(name='Integer', property_type=PropertyType.INT_VALUE)
+        integer = bike_model.add_property(name='Bb', property_type=PropertyType.INT_VALUE)
         decimal = bike_model.add_property(name='Float', property_type=PropertyType.FLOAT_VALUE)
         boolean = bike_model.add_property(name='Boolean', property_type=PropertyType.BOOLEAN_VALUE)
         datetime = bike_model.add_property(name='Datetime', property_type=PropertyType.DATETIME_VALUE)
