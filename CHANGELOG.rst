@@ -1,11 +1,15 @@
 Change Log
 ==========
 
-3.1.6 (xxDEC19)
+3.2.0 (03DEC19)
 ---------------
- * Bugfix: `Part.scope()` retrieves the part's scope regardless of its status.
- * Improved `Client` exception messages when retrieving singular objects, e.g. client.scope()
- * Added additional inputs to create an `Activity`: `status`, `start_date`, `due_date`, `description`, `classification`.
+ * Added bulk widget creation and editing of widgets. #617 (thanks to @jelleboersma)
+ * Added methods to retrieve pykechain objects from the server via 'ref'. Including services. #608. (thanks to @raduiordache)
+ * Added `edit` and `delete` methods to `Team` class and fixed some bugs relating to `Team` creation. #620 (thanks to @jelleboersma)
+ * Added additional inputs to create an `Activity`: `status`, `start_date`, `due_date`, `description`, `classification`. #615 (thanks to @jelleboersma)
+ * Bugfix: `Part.scope()` retrieves the part's scope regardless of its status. (thanks to @jelleboersma)
+ * Improved `Client` exception messages when retrieving singular objects, e.g. `Client.scope()` (thanks to @jelleboersma)
+ * Updated dependent versions for development: mypy (0.750), tox (3.14.2), sphinx (2.2.2), coveralls (1.9.2 :vulcan_salute:️)
 
 3.1.5 (29NOV19)
 ---------------
