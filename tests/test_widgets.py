@@ -1,7 +1,9 @@
+from unittest import skip
+
 from pykechain.enums import (WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors,
                              Category, LinkTargets)
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Activity, Activity2
+from pykechain.models import Activity2
 from pykechain.models.widgets import (UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget,
                                       SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, SignatureWidget,
                                       ServiceWidget, NotebookWidget,
@@ -25,7 +27,7 @@ class TestWidgets(TestBetamax):
             self.assertIsInstance(w, Widget)
 
     def test_create_widget_in_activity(self):
-        activity = self.project.activity('test task')  # type: Activity
+        activity = self.project.activity('test task')  # type: Activity2
         created_widget = self.client.create_widget(
             title="Test_widget",
             activity=activity,
@@ -51,6 +53,37 @@ class TestWidgets(TestBetamax):
         obj = self.project.activity('Specify wheel diameter').widgets()[0]
         self.assertIsInstance(obj, Widget)
         self.assertIsNotNone(obj.meta)
+
+    @skip('API error is raised: Unknown whether KE-chain API is bugged or code does not work.')
+    def test_create_widgets(self):
+        # setUp
+        activity = self.project.activity('test task')
+        new_widgets = self.client.create_widgets(widgets=[
+            dict(
+                activity=activity,
+                widget_type=WidgetTypes.HTML,
+                title='A new text widget',
+                meta=dict(
+                    htmlContent='This is HTML text.'
+                ),
+            ),
+            dict(
+                activity=activity,
+                widget_type=WidgetTypes.HTML,
+                title='Another HTML widget',
+                meta=dict(
+                    htmlContent='They keep on multiplying.'
+                ),
+            ),
+        ])
+
+        # testing
+        self.assertIsInstance(new_widgets, list)
+        self.assertTrue(all(isinstance(w, Widget) for w in new_widgets))
+        self.assertEqual(len(new_widgets), 2)
+
+        # tearDown
+        [w.delete() for w in new_widgets]
 
 
 class TestWidgetManager(TestBetamax):
