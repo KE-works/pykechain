@@ -2363,11 +2363,13 @@ class Client(object):
             raise IllegalArgumentError(
                 '`associations` must be a list of tuples, defining the readable and writable models per widget.')
 
+        if not len(widgets) == len(associations):
+            raise IllegalArgumentError('The `widgets` and `associations` lists must be of equal length, '
+                                       'not {} and {}.'.format(len(widgets), len(associations)))
+
         bulk_data = list()
         for widget_id, association in zip(widget_ids, associations):
             readable_models, writable_models = association
-            if not (readable_models or writable_models):
-                continue
 
             readable_model_ids, writable_model_ids = self._validate_related_models(
                 readable_models=readable_models,
