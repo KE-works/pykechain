@@ -4,6 +4,7 @@ Change Log
 3.2.1 (UNRELEASED)
 ------------------
  * Added pre commit hooks.
+ * and more.
 
 3.2.0 (03DEC19)
 ---------------
