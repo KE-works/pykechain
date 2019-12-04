@@ -54,7 +54,7 @@ class TestWidgets(TestBetamax):
         self.assertIsInstance(obj, Widget)
         self.assertIsNotNone(obj.meta)
 
-    @skip('API error is raised: Unknown whether KE-chain API is bugged or code does not work.')
+    # @skip('API error is raised: Unknown whether KE-chain API is bugged or code does not work.')
     def test_create_widgets(self):
         # setUp
         activity = self.project.activity('test task')
