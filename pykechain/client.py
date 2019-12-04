@@ -2274,7 +2274,7 @@ class Client(object):
         bulk_associations = list()
         for widget in widgets:
             data, readable_model_ids, writable_model_ids = self._validate_widget(
-                activity=widget.get('activity', kwargs.get('activity')),
+                activity=widget.get('activity'),
                 widget_type=widget.get('widget_type'),
                 title=widget.get('title'),
                 meta=widget.get('meta'),
