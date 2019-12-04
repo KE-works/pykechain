@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-3.2.0 (03DEC19)
+3.2.0 (3DEC19)
 ---------------
  * Added bulk widget creation and editing of widgets. #617 (thanks to @jelleboersma)
  * Added methods to retrieve pykechain objects from the server via 'ref'. Including services. #608. (thanks to @raduiordache)
