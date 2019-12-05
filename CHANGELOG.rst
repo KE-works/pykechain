@@ -3,8 +3,8 @@ Change Log
 
 3.2.1 (UNRELEASED)
 ------------------
- * Added pre commit hooks.
- * and more.
+ * Update the `Client.create_widgets` (bulk create widgets) and `Client.update_widgets_associations` (bulk update widget associations) to work seamlessly with the backend on it as we discovered a bug in the backend during tests of these methods. Additional tests where added as well. #617, #626
+ * Added pre commit hooks for developers. Use `pre-commit install` to install the hooks in your local repo and while committing, whatch your git console (in Pycharm in the 'Version Control' tab (bottom) > 'Console' tab). If you want to run the pre-commit hooks on all files (not only those ones that changes in the commit) run `pre-commit run -a` on the command line (Terminal).
 
 3.2.0 (03DEC19)
 ---------------
