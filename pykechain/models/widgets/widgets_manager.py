@@ -93,8 +93,20 @@ class WidgetsManager(Sized):
 
     def create_widgets(self, widgets):
         # type: (List[Dict]) -> List[Widget]
-        """Bulk creation of widgets."""
-        return self._client.create_widgets(widgets=widgets, activity=self._activity_id)
+        """
+        Create widgets in bulk.
+
+        :param widgets: list of dicts defining the configuration per widget.
+        :type widgets: List[Dict]
+        :returns list of widgets
+        :rtype: List[Widget]
+        """
+
+        # Insert the current widget
+        for widget in widgets:
+            widget['activity'] = self._activity_id
+
+        return self._client.create_widgets(widgets=widgets)
 
     def create_widget(self, *args, **kwargs):
         # type: (*Any, **Any) -> Widget
