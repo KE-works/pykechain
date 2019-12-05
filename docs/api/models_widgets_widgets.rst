@@ -69,4 +69,3 @@ Widget Classes
 
 .. autoclass:: pykechain.models.widgets.widget_models.TasksWidget
    :members:
-

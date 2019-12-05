@@ -488,5 +488,3 @@ class TestActivityDownloadAsPDF(TestBetamax):
             pdf_file_called_after_activity = os.path.join(target_dir, activity_name + '.pdf')
             self.assertTrue(pdf_file)
             self.assertTrue(pdf_file_called_after_activity)
-
-
