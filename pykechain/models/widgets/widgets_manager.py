@@ -101,7 +101,6 @@ class WidgetsManager(Sized):
         :returns list of widgets
         :rtype: List[Widget]
         """
-
         # Insert the current widget
         for widget in widgets:
             widget['activity'] = self._activity_id
