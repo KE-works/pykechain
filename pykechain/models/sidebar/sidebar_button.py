@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Dict, Optional, Text
 
 from pykechain.enums import URITarget, FontAwesomeMode
 from pykechain.exceptions import IllegalArgumentError
@@ -14,9 +14,16 @@ class SideBarButton(object):
     The original KE-chain buttons for the project detail, tasks and work breakdown structure are not separate buttons.
     """
 
-    def __init__(self, side_bar_manager, json=None, order=None, title=None, icon=None, uri=None,
-                 uri_target=URITarget.INTERNAL, icon_mode=FontAwesomeMode.REGULAR, **kwargs):
-        # type: (Any, Dict, int, str, str, str, URITarget, FontAwesomeMode, **Any) -> None
+    def __init__(self,
+                 side_bar_manager: 'SideBarManager',
+                 json: Optional[Dict] = None,
+                 order: Optional[int] = None,
+                 title: Optional[Text] = None,
+                 icon: Optional[Text] = None,
+                 uri: Optional[Text] = None,
+                 uri_target: URITarget = URITarget.INTERNAL,
+                 icon_mode: FontAwesomeMode = FontAwesomeMode.REGULAR,
+                 **kwargs):
         """
         Create a side-bar button.
 
@@ -37,11 +44,12 @@ class SideBarButton(object):
         :param icon_mode: FontAwesome display mode of the icon
         :type icon_mode: FontAwesomeMode
         :returns None
+        :raises IllegalArgumentError: When the provided Argument is not according to the type.
         """
         super().__init__()
 
         if json is None:
-            json = dict()
+            json = {}
 
         title = title if title else json.get('displayName')
         order = order if order is not None else json.get('order')
@@ -68,7 +76,7 @@ class SideBarButton(object):
                 raise IllegalArgumentError(
                     'Attribute "{}" is not supported in the configuration of a side-bar button.'.format(key))
 
-        self._manager = side_bar_manager
+        self._manager = side_bar_manager  # type: 'SideBarManager'
         self.display_name = title  # type: str
         self.order = order  # type: int
         self.display_icon = icon  # type: str
@@ -78,10 +86,10 @@ class SideBarButton(object):
 
         self._other_attributes = kwargs
 
-    def __repr__(self):
+    def __repr__(self) -> Text:
         return '{} {}: {}'.format(self.__class__.__name__, self.order, self.display_name)
 
-    def refresh(self, json):
+    def refresh(self, json: Dict) -> None:
         """
         Refresh the object in-place using the provided json.
 
@@ -91,8 +99,7 @@ class SideBarButton(object):
         """
         self.__init__(side_bar_manager=self._manager, json=json)
 
-    def edit(self, **kwargs):
-        # type: (**Any) -> None
+    def edit(self, **kwargs) -> None:
         """
         Edit the details of the button.
 
@@ -105,8 +112,7 @@ class SideBarButton(object):
 
         self._manager._update(buttons=self._manager._buttons)
 
-    def delete(self):
-        # type: () -> None
+    def delete(self) -> None:
         """
         Delete the side-bar button from the side-bar.
 
@@ -114,8 +120,7 @@ class SideBarButton(object):
         """
         self._manager.delete_button(key=self)
 
-    def as_dict(self):
-        # type: () -> Dict
+    def as_dict(self) -> Dict:
         """
         Retrieve the configuration data, or `meta`, of the side-bar button.
 
