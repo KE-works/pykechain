@@ -1,4 +1,4 @@
-from typing import Sized, Any, Optional, Text, List, Dict
+from typing import Any, Optional, Text, List, Dict
 
 from six import string_types, text_type
 
@@ -8,21 +8,21 @@ from pykechain.models.sidebar.sidebar_button import SideBarButton
 from pykechain.utils import find
 
 
-class SideBarManager(Sized):
+class SideBarManager(object):
     """
     Sidebar manager class.
 
     :ivar scope: Scope object for which the side-bar is managed.
     :type scope: Scope2
     :ivar bulk_creation: boolean to create buttons in bulk, postponing updating of KE-chain until the manager is
-     deleted from memory (end of your function)
+                         deleted from memory (end of your function)
     :type bulk_creation: bool
     """
 
     __existing_managers = dict()  # storage of manager objects to enforce 1 manager object per Scope
-    _bulk_creation = None  # ensure every instance has this attribute, regardless of the __init__ function.
+    _perform_bulk_creation = None  # ensure every instance has this attribute, regardless of the __init__ function.
 
-    def __new__(cls, scope, *args, **kwargs):
+    def __new__(cls, scope: 'Scope2', *args, **kwargs):
         """Overwrite superclass method to enforce singleton manager per Scope2 object."""
         instance = super().__new__(cls)
 
@@ -34,8 +34,7 @@ class SideBarManager(Sized):
 
         return instance
 
-    def __init__(self, scope, bulk_creation=False, *args, **kwargs):
-        # type: (Any, Optional[bool], *Any, **Any) -> None
+    def __init__(self, scope: 'Scope2', bulk_creation: Optional[bool] = False, **kwargs):
         """
         Create a side-bar manager object for the Scope2 object.
 
@@ -44,7 +43,7 @@ class SideBarManager(Sized):
         :param bulk_creation: flag whether to update once (True) or continuously (False, default)
         :type bulk_creation: bool
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
         from pykechain.models import Scope2
         if not isinstance(scope, Scope2):
@@ -57,28 +56,28 @@ class SideBarManager(Sized):
         self._override = scope.options.get('overrideSidebar', False)  # type: bool
         self._scope_uri = "#/scopes/{}".format(self.scope.id)
 
-        self._bulk_creation = bulk_creation  # type: bool
+        self._perform_bulk_creation = bulk_creation  # type: bool
 
         # Load existing buttons from the scope
-        self._buttons = list()  # type: list
-        for button_dict in scope.options.get('customNavigation', list()):
+        self._buttons = []  # type: List[SideBarButton]
+        for button_dict in scope.options.get('customNavigation', []):
             self._buttons.append(SideBarButton(side_bar_manager=self, json=button_dict))
         self._iter = iter(self._buttons)
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> Text:  # pragma: no cover
         return "<pyke {} object {} buttons>".format(self.__class__.__name__, self.__len__())
 
     def __iter__(self):
         return self
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._buttons)
 
-    def __next__(self):
+    def __next__(self) -> SideBarButton:
         # py3.4 and up style next
         return next(self._iter)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: Any) -> SideBarButton:
 
         found = None
         if isinstance(key, SideBarButton):
@@ -92,15 +91,14 @@ class SideBarManager(Sized):
             return found
         raise NotFoundError("Could not find button with index or name '{}'".format(key))
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Prior to deletion of the manager, an update to KE-chain is performed using the latest configuration."""
-        if self._bulk_creation:
+        if self._perform_bulk_creation:
             # Set bulk creation to False in order for update to proceed correctly
-            self._bulk_creation = False
+            self._perform_bulk_creation = False
             self._update(buttons=self._buttons, override_sidebar=self._override)
 
-    def remove(self, key):
-        # type: (Any) -> None
+    def remove(self, key: Any) -> None:
         """
         Remove a button from the side-bar.
 
@@ -110,8 +108,7 @@ class SideBarManager(Sized):
         """
         self.delete_button(key=key)
 
-    def insert(self, index, button):
-        # type: (int, SideBarButton) -> None
+    def insert(self, index: int, button: SideBarButton) -> None:
         """
         Place a button at index `index` of the button-list.
 
@@ -125,8 +122,7 @@ class SideBarManager(Sized):
 
         self._buttons.insert(index, button)
 
-    def create_button(self, order=None, *args, **kwargs):
-        # type: (int, *Any, **Any) -> SideBarButton
+    def create_button(self, order: Optional[int] = None, *args, **kwargs) -> SideBarButton:
         """
         Create a side-bar button.
 
@@ -150,9 +146,11 @@ class SideBarManager(Sized):
 
         return button
 
-    def add_task_button(self, activity, title=None, task_display_mode=SubprocessDisplayMode.ACTIVITIES,
-                        *args, **kwargs):
-        # type: (Activity2, Optional[Text], Optional[SubprocessDisplayMode], *Any, **Any) -> SideBarButton
+    def add_task_button(self,
+                        activity: 'Activity2',
+                        title: Optional[Text] = None,
+                        task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
+                        *args, **kwargs) -> SideBarButton:
         """
         Add a side-bar button to a KE-chain activity.
 
@@ -189,8 +187,10 @@ class SideBarManager(Sized):
 
         return self.create_button(uri=uri, uri_target=uri_target, title=title, *args, **kwargs)
 
-    def add_ke_chain_page(self, page_name, title=None, *args, **kwargs):
-        # type: (KEChainPages, Optional[Text], *Any, **Any) -> SideBarButton
+    def add_ke_chain_page(self,
+                          page_name: KEChainPages,
+                          title: Optional[Text] = None,
+                          *args, **kwargs) -> SideBarButton:
         """
         Add a side-bar button to a built-in KE-chain page.
 
@@ -214,8 +214,7 @@ class SideBarManager(Sized):
 
         return self.create_button(uri=uri, uri_target=URITarget.INTERNAL, title=title, *args, **kwargs)
 
-    def add_external_button(self, url, title, *args, **kwargs):
-        # type: (str, Text, *Any, **Any) -> SideBarButton
+    def add_external_button(self, url: Text, title: Text, *args, **kwargs) -> SideBarButton:
         """
         Add a side-bar button to an external page defined by an URL.
 
@@ -229,8 +228,7 @@ class SideBarManager(Sized):
         # TODO test url input for valid URL
         return self.create_button(title=title, uri=url, uri_target=URITarget.EXTERNAL, *args, **kwargs)
 
-    def add_buttons(self, buttons, override_sidebar):
-        # type: (List[Dict], bool) -> List[SideBarButton]
+    def add_buttons(self, buttons: List[Dict], override_sidebar: bool) -> List[SideBarButton]:
         """
         Create a list of buttons in bulk. Each button is defined by a dict, provided in a sorted list.
 
@@ -255,8 +253,7 @@ class SideBarManager(Sized):
 
         return self._buttons
 
-    def delete_button(self, key):
-        # type: (Any) -> None
+    def delete_button(self, key: Any) -> None:
         """
         Similar to the `remove` method, deletes a button.
 
@@ -268,8 +265,7 @@ class SideBarManager(Sized):
         self._update(buttons=self._buttons)
 
     @property
-    def override_sidebar(self):
-        # type: () -> bool
+    def override_sidebar(self) -> bool:
         """
         Flag to indicate whether the original KE-chain side-bar is still shown.
 
@@ -279,8 +275,7 @@ class SideBarManager(Sized):
         return self._override
 
     @override_sidebar.setter
-    def override_sidebar(self, value):
-        # type: (bool) -> None
+    def override_sidebar(self, value: bool) -> None:
         """
         Flag to indicate whether the original KE-chain side-bar is still shown.
 
@@ -293,8 +288,7 @@ class SideBarManager(Sized):
         self._override = value
         self._update(override_sidebar=value)
 
-    def _update(self, **kwargs):
-        # type: (**Any) -> None
+    def _update(self, **kwargs) -> None:
         """
         Update the side-bar using the scope.options attribute.
 
@@ -302,7 +296,7 @@ class SideBarManager(Sized):
         :return: None
         :rtype None
         """
-        if self._bulk_creation:
+        if self._perform_bulk_creation:
             # Update will proceed during deletion of the manager.
             return
 
