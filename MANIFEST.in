@@ -17,3 +17,4 @@ exclude *.sh
 exclude requirements-ci.txt
 exclude *-OFF
 exclude *.yml
+exclude *.yaml
