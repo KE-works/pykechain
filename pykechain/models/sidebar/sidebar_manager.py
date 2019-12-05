@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import Iterable
 from typing import Any, Optional, Text, List, Dict
 
 from six import string_types, text_type
@@ -9,7 +9,7 @@ from pykechain.models.sidebar.sidebar_button import SideBarButton
 from pykechain.utils import find
 
 
-class SideBarManager(OrderedDict):
+class SideBarManager(Iterable):
     """
     Sidebar manager class.
 
