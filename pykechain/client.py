@@ -10,7 +10,7 @@ from six import text_type, string_types
 from pykechain.defaults import API_PATH, API_EXTRA_PARAMS
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
-    ActivityClassification
+    ActivityClassification, ActivityStatus
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
 from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property
@@ -448,10 +448,12 @@ class Client(object):
         """
         _scopes = self.scopes(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_scopes) == 0:
-            raise NotFoundError("No scope fits criteria")
+            raise NotFoundError("No scope fits criteria:{}".format(criteria))
         if len(_scopes) != 1:
-            raise MultipleFoundError("Multiple scopes fit criteria")
+            raise MultipleFoundError("Multiple scopes fit criteria:{}".format(criteria))
 
         return _scopes[0]
 
@@ -519,10 +521,12 @@ class Client(object):
         """
         _activities = self.activities(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_activities) == 0:
-            raise NotFoundError("No activity fits criteria")
+            raise NotFoundError("No activity fits criteria:{}".format(criteria))
         if len(_activities) != 1:
-            raise MultipleFoundError("Multiple activities fit criteria")
+            raise MultipleFoundError("Multiple activities fit criteria:{}".format(criteria))
 
         return _activities[0]
 
@@ -664,10 +668,12 @@ class Client(object):
         """
         _parts = self.parts(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_parts) == 0:
-            raise NotFoundError("No part fits criteria")
+            raise NotFoundError("No part fits criteria:{}".format(criteria))
         if len(_parts) != 1:
-            raise MultipleFoundError("Multiple parts fit criteria")
+            raise MultipleFoundError("Multiple parts fit criteria:{}".format(criteria))
 
         return _parts[0]
 
@@ -688,10 +694,12 @@ class Client(object):
         kwargs['category'] = Category.MODEL
         _parts = self.parts(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_parts) == 0:
-            raise NotFoundError("No model fits criteria")
+            raise NotFoundError("No model fits criteria:{}".format(criteria))
         if len(_parts) != 1:
-            raise MultipleFoundError("Multiple models fit criteria")
+            raise MultipleFoundError("Multiple models fit criteria:{}".format(criteria))
 
         return _parts[0]
 
@@ -751,10 +759,12 @@ class Client(object):
         """
         _properties = self.properties(*args, **kwargs)
 
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
         if len(_properties) == 0:
-            raise NotFoundError("No property fits criteria")
+            raise NotFoundError("No property fits criteria:{}".format(criteria))
         if len(_properties) != 1:
-            raise MultipleFoundError("Multiple properties fit criteria")
+            raise MultipleFoundError("Multiple properties fit criteria:{}".format(criteria))
 
         return _properties[0]
 
@@ -814,10 +824,12 @@ class Client(object):
         """
         _services = self.services(name=name, pk=pk, scope=scope, **kwargs)
 
+        criteria = '\nname={}, pk={}, scope={}\nkwargs: {}'.format(name, pk, scope, kwargs)
+
         if len(_services) == 0:
-            raise NotFoundError("No service fits criteria")
+            raise NotFoundError("No service fits criteria:{}".format(criteria))
         if len(_services) != 1:
-            raise MultipleFoundError("Multiple services fit criteria")
+            raise MultipleFoundError("Multiple services fit criteria:{}".format(criteria))
 
         return _services[0]
 
@@ -873,6 +885,8 @@ class Client(object):
         :type pk: basestring or None
         :param scope: (optional) id (UUID) of the scope to search in
         :type scope: basestring or None
+        :param service: (optional) service UUID to filter on
+        :type service: basestring or None
         :param kwargs: (optional) additional search keyword arguments
         :return: a single :class:`models.ServiceExecution` object
         :raises NotFoundError: When no `ServiceExecution` object is found
@@ -880,10 +894,12 @@ class Client(object):
         """
         _service_executions = self.service_executions(name=name, pk=pk, scope=scope, service=service, **kwargs)
 
+        criteria = '\nname={}, pk={}, scope={}, service={}\nkwargs: {}'.format(name, pk, scope, service, kwargs)
+
         if len(_service_executions) == 0:
-            raise NotFoundError("No service execution fits criteria")
+            raise NotFoundError("No service execution fits criteria:{}".format(criteria))
         if len(_service_executions) != 1:
-            raise MultipleFoundError("Multiple service executions fit criteria")
+            raise MultipleFoundError("Multiple service executions fit criteria:{}".format(criteria))
 
         return _service_executions[0]
 
@@ -933,10 +949,12 @@ class Client(object):
         """
         _users = self.users(username=username, pk=pk, **kwargs)
 
+        criteria = '\nusername={}, pk={}\nkwargs: {}'.format(username, pk, kwargs)
+
         if len(_users) == 0:
-            raise NotFoundError("No user criteria matches")
+            raise NotFoundError("No user fits criteria:{}".format(criteria))
         if len(_users) != 1:
-            raise MultipleFoundError("Multiple users fit criteria")
+            raise MultipleFoundError("Multiple users fit criteria:{}".format(criteria))
 
         return _users[0]
 
@@ -959,10 +977,12 @@ class Client(object):
         """
         _teams = self.teams(name=name, pk=pk, **kwargs)
 
+        criteria = '\nusername={}, pk={}, is_hidden={}\nkwargs: {}'.format(name, pk, is_hidden, kwargs)
+
         if len(_teams) == 0:
-            raise NotFoundError("No team criteria matches")
+            raise NotFoundError("No team fits criteria:{}".format(criteria))
         if len(_teams) != 1:
-            raise MultipleFoundError("Multiple teams fit criteria")
+            raise MultipleFoundError("Multiple teams fit criteria:{}".format(criteria))
 
         return _teams[0]
 
@@ -1128,7 +1148,9 @@ class Client(object):
         return Activity(data['results'][0], client=self)
 
     # WIM2
-    def _create_activity2(self, parent, name, activity_type=ActivityType.TASK, tags=None):
+    def _create_activity2(self, parent, name, activity_type=ActivityType.TASK, status=ActivityStatus.OPEN,
+                          description=None, start_date=None, due_date=None,
+                          classification=ActivityClassification.WORKFLOW, tags=None):
         """Create a new activity.
 
         .. important::
@@ -1144,6 +1166,16 @@ class Client(object):
         :type name: basestring
         :param activity_type: type of activity: TASK (default) or PROCESS
         :type activity_type: basestring
+        :param status: status of the activity: OPEN (default) or COMPLETED
+        :type status: ActivityStatus
+        :param description: description of the activity
+        :type description: basestring
+        :param start_date: starting date of the activity
+        :type start_date: datetime.datetime
+        :param due_date: due date of the activity
+        :type due_date: datetime.datetime
+        :param classification: classification of activity: WORKFLOW (default) or CATALOG
+        :type classification: ActivityClassification
         :param tags: list of activity tags
         :type tags: list
         :return: the created :class:`models.Activity2`
@@ -1165,10 +1197,34 @@ class Client(object):
         else:
             raise IllegalArgumentError("Please provide either an activity object or a UUID")
 
+        if status not in ActivityStatus.values():
+            raise IllegalArgumentError('`status` must be an ActivityStatus option, "{}" is not.'.format(status))
+
+        if description is not None:
+            if not isinstance(description, Text):
+                raise IllegalArgumentError('`description` must be text, "{}" is not.'.format(description))
+
+        if start_date is not None:
+            if not isinstance(start_date, datetime.datetime):
+                raise IllegalArgumentError('`start_date` must be a datetime object, "{}" is not.'.format(start_date))
+
+        if due_date is not None:
+            if not isinstance(due_date, datetime.datetime):
+                raise IllegalArgumentError('`due_date` must be a datetime object, "{}" is not.'.format(due_date))
+
+        if classification not in ActivityClassification.values():
+            raise IllegalArgumentError(
+                '`classification` must be an ActivityClassification option, "{}" is not.'.format(classification))
+
         data = {
             "name": name,
             "parent_id": parent,
+            "status": status,
             "activity_type": activity_type,
+            "classification": classification,
+            "description": description,
+            "start_date": start_date,
+            "due_date": due_date,
         }
 
         if self.match_app_version(label='wim', version='>=3.1.0', default=True):
@@ -1971,6 +2027,7 @@ class Client(object):
             return Scope(response.json()['results'][0], client=source_scope._client)
 
     def create_team(self, name, user, description=None, options=None, is_hidden=False):
+        # type: (Text, Union[Text, int, User], Optional[Text], Optional[Text], Optional[bool]) -> Team
         """
         Create a team.
 
@@ -1997,12 +2054,20 @@ class Client(object):
         """
         if not isinstance(name, (string_types, text_type)):
             raise IllegalArgumentError('`name` should be string')
-        if not isinstance(description, (string_types, text_type)):
+
+        if description is None:
+            description = ''
+        elif not isinstance(description, (string_types, text_type)):
             raise IllegalArgumentError('`description` should be string')
-        if options and not isinstance(options, dict):
+
+        if options is None:
+            options = dict()
+        elif not isinstance(options, dict):
             raise IllegalArgumentError('`options` should be a dictionary')
-        if is_hidden and not isinstance(is_hidden, bool):
+
+        if not isinstance(is_hidden, bool):
             raise IllegalArgumentError('`is_hidden` should be a boolean')
+
         if isinstance(user, (string_types, text_type)):
             user = self.user(username=user)
         elif isinstance(user, int):
@@ -2039,6 +2104,100 @@ class Client(object):
         new_team.refresh()
         return new_team
 
+    def _validate_widget(self, activity, widget_type, title, meta, order, parent, readable_models, writable_models,
+                         **kwargs):
+
+        if isinstance(activity, (Activity, Activity2)):
+            activity = activity.id
+        elif is_uuid(activity):
+            pass
+        else:
+            raise IllegalArgumentError("`activity` should be either an `Activity` or a uuid.")
+
+        if not isinstance(widget_type, (string_types, text_type)) and widget_type not in WidgetTypes.values():
+            raise IllegalArgumentError("`widget_type` should be one of '{}'".format(WidgetTypes.values()))
+        if order is not None and not isinstance(order, int):
+            raise IllegalArgumentError("`order` should be an integer or None")
+        if title is not None:
+            if not isinstance(title, (string_types, text_type)):
+                raise IllegalArgumentError("`title` should be a string, but received type '{}'.".format(type(title)))
+            elif title.strip() != title:
+                raise IllegalArgumentError("`title` can not be empty")
+        if parent is not None and isinstance(parent, Widget):
+            parent = parent.id
+        elif parent is not None and is_uuid(parent):
+            parent = parent
+        elif parent is not None:
+            raise IllegalArgumentError("`parent` should be provided as a widget or uuid")
+
+        data = dict(
+            activity_id=activity,
+            widget_type=widget_type,
+            title=title,
+            meta=meta,
+            parent_id=parent
+        )
+
+        if not title:
+            data.pop('title')
+
+        if order is not None:
+            data.update(dict(order=order))
+
+        if kwargs:
+            data.update(**kwargs)
+
+        readable_model_ids, writable_model_ids = self._validate_related_models(
+            readable_models=readable_models,
+            writable_models=writable_models,
+            **kwargs,
+        )
+
+        return data, readable_model_ids, writable_model_ids
+
+    @staticmethod
+    def _validate_related_models(readable_models, writable_models, **kwargs):
+        # type: (List, List, **Any) -> Tuple[List, List]
+        """
+        Verify the format and content of the readable and writable models.
+
+        :param readable_models: list of Properties or UUIDs
+        :param writable_models: list of Properties or UUIDs
+        :param kwargs: option to insert "inputs" and "outputs", instead of new inputs.
+        :return: Tuple with both input lists, now with only UUIDs
+        :rtype Tuple[List, List]
+        """
+        if kwargs.get('inputs'):
+            readable_models = kwargs.pop('inputs')
+        if kwargs.get('outputs'):
+            writable_models = kwargs.pop('outputs')
+
+        readable_model_ids = []
+        if readable_models is not None:
+            if not isinstance(readable_models, (list, tuple, set)):
+                raise IllegalArgumentError("`readable_models` should be provided as a list of uuids or property models")
+            for input in readable_models:
+                if is_uuid(input):
+                    readable_model_ids.append(input)
+                elif isinstance(input, (Property2, Property)):
+                    readable_model_ids.append(input.id)
+                else:
+                    IllegalArgumentError("`readable_models` should be provided as a list of uuids or property models")
+
+        writable_model_ids = []
+        if writable_models is not None:
+            if not isinstance(writable_models, (list, tuple, set)):
+                raise IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
+            for output in writable_models:
+                if is_uuid(output):
+                    writable_model_ids.append(output)
+                elif isinstance(output, (Property2, Property)):
+                    writable_model_ids.append(output.id)
+                else:
+                    IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
+
+        return readable_model_ids, writable_model_ids
+
     def create_widget(self, activity, widget_type, meta, title=None, order=None,
                       parent=None, readable_models=None, writable_models=None, **kwargs):
         # type: (Union[Activity,text_type], text_type, Optional[text_type], Optional[Text], Optional[int], Optional[Widget, text_type], Optional[List], Optional[List], **Any) -> Widget  # noqa:E501
@@ -2073,72 +2232,17 @@ class Client(object):
         :raises IllegalArgumentError: when an illegal argument is send.
         :raises APIError: when an API Error occurs.
         """
-        if isinstance(activity, (Activity, Activity2)):
-            activity = activity.id
-        elif is_uuid(activity):
-            pass
-        else:
-            raise IllegalArgumentError("`activity` should be either an `Activity` or a uuid.")
-        if not isinstance(widget_type, (string_types, text_type)) and widget_type not in WidgetTypes.values():
-            raise IllegalArgumentError("`widget_type` should be one of '{}'".format(WidgetTypes.values()))
-        if order is not None and not isinstance(order, int):
-            raise IllegalArgumentError("`order` should be an integer or None")
-        if title is not None:
-            if not isinstance(title, (string_types, text_type)):
-                raise IllegalArgumentError("`title` should be a string, but received type '{}'.".format(type(title)))
-            elif title.strip() != title:
-                raise IllegalArgumentError("`title` can not be empty")
-        if parent is not None and isinstance(parent, Widget):
-            parent = parent.id
-        elif parent is not None and is_uuid(parent):
-            parent = parent
-        elif parent is not None:
-            raise IllegalArgumentError("`parent` should be provided as a widget or uuid")
-        if kwargs.get('inputs'):
-            readable_models = kwargs.pop('inputs')
-        if kwargs.get('outputs'):
-            writable_models = kwargs.pop('outputs')
-
-        readable_model_ids = []
-        if readable_models is not None:
-            if not isinstance(readable_models, (list, tuple, set)):
-                raise IllegalArgumentError("`readable_models` should be provided as a list of uuids or property models")
-            for input in readable_models:
-                if is_uuid(input):
-                    readable_model_ids.append(input)
-                elif isinstance(input, (Property2, Property)):
-                    readable_model_ids.append(input.id)
-                else:
-                    IllegalArgumentError("`readable_models` should be provided as a list of uuids or property models")
-
-        writable_model_ids = []
-        if writable_models is not None:
-            if not isinstance(writable_models, (list, tuple, set)):
-                raise IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
-            for output in writable_models:
-                if is_uuid(output):
-                    writable_model_ids.append(output)
-                elif isinstance(output, (Property2, Property)):
-                    writable_model_ids.append(output.id)
-                else:
-                    IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
-
-        data = dict(
-            activity_id=activity,
+        data, readable_model_ids, writable_model_ids = self._validate_widget(
+            activity=activity,
             widget_type=widget_type,
             title=title,
             meta=meta,
-            parent_id=parent
+            order=order,
+            parent=parent,
+            readable_models=readable_models,
+            writable_models=writable_models,
+            **kwargs
         )
-
-        if not title:
-            data.pop('title')
-
-        if kwargs:
-            data.update(**kwargs)
-
-        if order is not None:
-            data.update(dict(order=order))
 
         # perform the call
         url = self._build_url('widgets')
@@ -2155,6 +2259,49 @@ class Client(object):
             widget.update_associations(readable_models=readable_model_ids, writable_models=writable_model_ids)
 
         return widget
+
+    def create_widgets(self, widgets, **kwargs):
+        # type: (List[Dict], **Any) -> List[Widget]
+        """
+        Bulk-create of widgets.
+
+        :param widgets: list of dictionaries defining the configuration of the widget.
+        :type widgets: List[Dict]
+        :return: list of `Widget` objects
+        :rtype List[Widget]
+        """
+        bulk_data = list()
+        bulk_associations = list()
+        for widget in widgets:
+            data, readable_model_ids, writable_model_ids = self._validate_widget(
+                activity=widget.get('activity', kwargs.get('activity')),
+                widget_type=widget.get('widget_type'),
+                title=widget.get('title'),
+                meta=widget.get('meta'),
+                order=widget.get('order'),
+                parent=widget.get('parent'),
+                readable_models=widget.get('readable_models'),
+                writable_models=widget.get('writable_models'),
+                **widget.pop('kwargs', dict()),
+            )
+            bulk_data.append(data)
+            bulk_associations.append((readable_model_ids, writable_model_ids))
+
+        url = self._build_url('widgets_bulk_create')
+        response = self._request('POST', url, params=API_EXTRA_PARAMS['widgets'], json=bulk_data)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create a widgets ({})\n\n{}".format(response, response.json().get('traceback')))
+
+        # create the widget and do postprocessing
+        widgets = list()
+        for widget_response in response.json().get('results')[0]:
+            widget = Widget.create(json=widget_response, client=self)
+            widgets.append(widget)
+
+        self.update_widgets_associations(widgets=widgets, associations=bulk_associations, **kwargs)
+
+        return widgets
 
     def update_widget_associations(self, widget, readable_models=None, writable_models=None, **kwargs):
         # type: (Union[Widget,text_type], Optional[List], Optional[List], **Any) -> None
@@ -2176,56 +2323,72 @@ class Client(object):
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
         """
-        if isinstance(widget, Widget):
-            widget_id = widget.id
-        elif is_uuid(widget):
-            widget_id = widget
-        else:
-            raise IllegalArgumentError("`widget` should be provided as a Widget or a uuid")
-
-        if kwargs.get('inputs'):
-            readable_models = kwargs.pop('inputs')
-        if kwargs.get('outputs'):
-            writable_models = kwargs.pop('outputs')
-
-        readable_model_properties_ids = []
-        if readable_models is not None:
-            if not isinstance(readable_models, (list, tuple, set)):
-                raise IllegalArgumentError("`readable_models` should be provided as a list of uuids or property models")
-            for input in readable_models:
-                if is_uuid(input):
-                    readable_model_properties_ids.append(input)
-                elif isinstance(input, (Property2, Property)):
-                    readable_model_properties_ids.append(input.id)
-                else:
-                    IllegalArgumentError("`readable_models` should be provided as a list of uuids or property models")
-
-        writable_model_properties_ids = []
-        if writable_models is not None:
-            if not isinstance(writable_models, (list, tuple, set)):
-                raise IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
-            for output in writable_models:
-                if is_uuid(output):
-                    writable_model_properties_ids.append(output)
-                elif isinstance(output, (Property2, Property)):
-                    writable_model_properties_ids.append(output.id)
-                else:
-                    IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
-        data = dict(
-            id=widget_id,
-            readable_model_properties_ids=readable_model_properties_ids,
-            writable_model_properties_ids=writable_model_properties_ids
+        self.update_widgets_associations(
+            widgets=[widget],
+            associations=[(readable_models, writable_models)],
+            **kwargs
         )
 
-        if kwargs:
-            data.update(**kwargs)
+    def update_widgets_associations(self, widgets, associations, **kwargs):
+        # type: (List[Union[Widget, text_type]], List[Tuple[List, List]], **Any) -> None
+        """
+        Update associations on multiple widgets in bulk.
+
+        This is an absolute list of associations. If no property model id's are provided, then the associations are
+        emptied out and replaced with no associations.
+
+        :param widgets: list of widgets to update associations for
+        :type widgets: :class: list
+        :param associations: list of tuples, each tuple containing 2 lists of properties
+                             (of :class:`Property` or property_ids (uuids)
+        :type associations: List[Tuple]
+        :return: None
+        :raises APIError: when the associations could not be changed
+        :raise IllegalArgumentError: when the list is not of the right type
+        """
+        if not isinstance(widgets, List):
+            raise IllegalArgumentError("`widgets` must be provided as a list of widgets.")
+
+        widget_ids = list()
+        for widget in widgets:
+            if isinstance(widget, Widget):
+                widget_id = widget.id
+            elif is_uuid(widget):
+                widget_id = widget
+            else:
+                raise IllegalArgumentError("Each widget should be provided as a Widget or a uuid")
+            widget_ids.append(widget_id)
+
+        if not isinstance(associations, List) and all(isinstance(a, tuple) and len(a) == 2 for a in associations):
+            raise IllegalArgumentError(
+                '`associations` must be a list of tuples, defining the readable and writable models per widget.')
+
+        bulk_data = list()
+        for widget_id, association in zip(widget_ids, associations):
+            readable_models, writable_models = association
+
+            readable_model_ids, writable_model_ids = self._validate_related_models(
+                readable_models=readable_models,
+                writable_models=writable_models,
+            )
+
+            data = dict(
+                id=widget_id,
+                readable_model_properties_ids=readable_model_ids,
+                writable_model_properties_ids=writable_model_ids,
+            )
+
+            if kwargs:
+                data.update(**kwargs)
+
+            bulk_data.append(data)
 
         # perform the call
-        url = self._build_url('widget_update_associations', widget_id=widget_id)
-        response = self._request('PUT', url, params=API_EXTRA_PARAMS['widget'], json=data)
+        url = self._build_url('widgets_update_associations')
+        response = self._request('PUT', url, params=API_EXTRA_PARAMS['widgets'], json=bulk_data)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update associations of the widget ({})".format((response, response.json())))
+            raise APIError("Could not update associations of the widgets ({})".format((response, response.json())))
 
         return None
 
