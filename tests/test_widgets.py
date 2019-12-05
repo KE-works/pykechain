@@ -1,5 +1,3 @@
-from unittest import skip
-
 from pykechain.enums import (WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors,
                              Category, LinkTargets)
 from pykechain.exceptions import IllegalArgumentError
@@ -54,7 +52,6 @@ class TestWidgets(TestBetamax):
         self.assertIsInstance(obj, Widget)
         self.assertIsNotNone(obj.meta)
 
-    @skip('API error is raised: Unknown whether KE-chain API is bugged or code does not work.')
     def test_create_widgets(self):
         # setUp
         activity = self.project.activity('test task')
@@ -487,6 +484,34 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(widget_manager[w3.id].order, 2)
         self.assertEqual(widget_manager[w1.id].order, 3)
         self.assertEqual(widget_manager[w2.id].order, 4)
+
+    def test_create_widgets(self):
+        # setUp
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        new_widgets = widget_manager.create_widgets(widgets=[
+            dict(
+                widget_type=WidgetTypes.HTML,
+                title='A new text widget',
+                meta=dict(
+                    htmlContent='This is HTML text.'
+                ),
+            ),
+            dict(
+                widget_type=WidgetTypes.HTML,
+                title='Another HTML widget',
+                meta=dict(
+                    htmlContent='They keep on multiplying.'
+                ),
+            ),
+        ])
+
+        # testing
+        self.assertIsInstance(new_widgets, list)
+        self.assertTrue(all(isinstance(w, Widget) for w in new_widgets))
+        self.assertEqual(len(new_widgets), 2)
+
+        # tearDown
+        [w.delete() for w in new_widgets]
 
     def test_compatibility_functions(self):
         """Testing various compatibility function for equavalence to the 'customization' in WIM1/PIM1"""
