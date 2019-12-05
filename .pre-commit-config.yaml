@@ -1,3 +1,8 @@
+# This is the configuration file for the `pre-commit` hook
+#
+# If you want to benefit from this hook, please execute `pre-commit` install using the terminal
+# If you want to run the checks on all files, run `pre-commit run -a` using the terminal
+#
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.4.0
