@@ -2294,8 +2294,8 @@ class Client(object):
             raise APIError("Could not create a widgets ({})\n\n{}".format(response, response.json().get('traceback')))
 
         # create the widget and do postprocessing
-        widgets = list()
-        for widget_response in response.json().get('results')[0]:
+        widgets = []
+        for widget_response in response.json().get('results'):
             widget = Widget.create(json=widget_response, client=self)
             widgets.append(widget)
 

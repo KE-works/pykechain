@@ -1,7 +1,7 @@
 from pykechain.enums import (WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors,
                              Category, LinkTargets)
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Activity, Activity2
+from pykechain.models import Activity2
 from pykechain.models.widgets import (UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget,
                                       SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, SignatureWidget,
                                       ServiceWidget, NotebookWidget,
@@ -25,7 +25,7 @@ class TestWidgets(TestBetamax):
             self.assertIsInstance(w, Widget)
 
     def test_create_widget_in_activity(self):
-        activity = self.project.activity('test task')  # type: Activity
+        activity = self.project.activity('test task')  # type: Activity2
         created_widget = self.client.create_widget(
             title="Test_widget",
             activity=activity,
@@ -51,6 +51,36 @@ class TestWidgets(TestBetamax):
         obj = self.project.activity('Specify wheel diameter').widgets()[0]
         self.assertIsInstance(obj, Widget)
         self.assertIsNotNone(obj.meta)
+
+    def test_create_widgets(self):
+        # setUp
+        activity = self.project.activity('test task')
+        new_widgets = self.client.create_widgets(widgets=[
+            dict(
+                activity=activity,
+                widget_type=WidgetTypes.HTML,
+                title='A new text widget',
+                meta=dict(
+                    htmlContent='This is HTML text.'
+                ),
+            ),
+            dict(
+                activity=activity,
+                widget_type=WidgetTypes.HTML,
+                title='Another HTML widget',
+                meta=dict(
+                    htmlContent='They keep on multiplying.'
+                ),
+            ),
+        ])
+
+        # testing
+        self.assertIsInstance(new_widgets, list)
+        self.assertTrue(all(isinstance(w, Widget) for w in new_widgets))
+        self.assertEqual(len(new_widgets), 2)
+
+        # tearDown
+        [w.delete() for w in new_widgets]
 
 
 class TestWidgetManager(TestBetamax):
@@ -454,6 +484,34 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(widget_manager[w3.id].order, 2)
         self.assertEqual(widget_manager[w1.id].order, 3)
         self.assertEqual(widget_manager[w2.id].order, 4)
+
+    def test_create_widgets(self):
+        # setUp
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        new_widgets = widget_manager.create_widgets(widgets=[
+            dict(
+                widget_type=WidgetTypes.HTML,
+                title='A new text widget',
+                meta=dict(
+                    htmlContent='This is HTML text.'
+                ),
+            ),
+            dict(
+                widget_type=WidgetTypes.HTML,
+                title='Another HTML widget',
+                meta=dict(
+                    htmlContent='They keep on multiplying.'
+                ),
+            ),
+        ])
+
+        # testing
+        self.assertIsInstance(new_widgets, list)
+        self.assertTrue(all(isinstance(w, Widget) for w in new_widgets))
+        self.assertEqual(len(new_widgets), 2)
+
+        # tearDown
+        [w.delete() for w in new_widgets]
 
     def test_compatibility_functions(self):
         """Testing various compatibility function for equavalence to the 'customization' in WIM1/PIM1"""
