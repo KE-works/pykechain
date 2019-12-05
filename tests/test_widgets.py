@@ -1,6 +1,6 @@
 from pykechain.enums import (WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors,
                              Category, LinkTargets)
-from pykechain.exceptions import IllegalArgumentError
+from pykechain.exceptions import IllegalArgumentError, APIError
 from pykechain.models import Activity2
 from pykechain.models.widgets import (UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget,
                                       SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, SignatureWidget,
@@ -679,3 +679,96 @@ class TestWidgetsCopyMove(TestBetamax):
         self.assertEqual(widget_manager_2[0].title, title)
         self.assertTrue(all(prop.output for prop in associated_model.properties))
         self.assertEqual(len(self.task.widgets()), 1)
+
+
+class TestAssociations(TestBetamax):
+
+    def setUp(self):
+        super().setUp()
+        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
+
+        # Exactly 1 model
+        self.frame = self.project.part(name='Frame')
+        self.frame_model = self.project.model(name='Frame')
+
+        # Zero or more model
+        self.wheel_parent = self.project.model(name='Bike')
+        self.wheel_model = self.project.model(name='Wheel')
+
+        widgets_manager = self.task.widgets()
+        self.form_widget = widgets_manager.add_propertygrid_widget(
+            part_instance=self.frame,
+            readable_models=self.frame_model.properties,
+            writable_models=[],
+        )
+
+        self.table_widget = widgets_manager.add_supergrid_widget(
+            part_model=self.wheel_model,
+            parent_instance=self.wheel_parent,
+            readable_models=[],
+            writable_models=self.frame_model.properties,
+        )
+
+    def tearDown(self):
+        self.task.delete()
+        super().tearDown()
+
+    def test_update_associations_empty(self):
+        self.client.update_widgets_associations(
+            widgets=[self.form_widget],
+            associations=[([], [])],
+        )
+
+    def test_update_widget_associations(self):
+        self.client.update_widget_associations(
+            widget=self.form_widget,
+            readable_models=[],
+            writable_models=self.frame_model.properties,
+        )
+
+    def test_input_lengths(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.client.update_widgets_associations(
+                widgets=list(self.task.widgets()),
+                associations=[([], [])],
+            )
+
+    def test_widget_inputs(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.client.update_widget_associations(
+                widget='Not a widget',
+            )
+
+    def test_readable_models(self):
+        self.client.update_widget_associations(
+            widget=self.form_widget,
+            readable_models=self.frame_model.properties,
+        )
+
+        self.client.update_widget_associations(
+            widget=self.table_widget,
+            readable_models=self.wheel_model.properties,
+        )
+
+        with self.assertRaises(APIError):
+            self.client.update_widget_associations(
+                widget=self.table_widget,
+                readable_models=self.frame.properties,
+            )
+
+    def test_writable_models(self):
+        self.client.update_widget_associations(
+            widget=self.form_widget,
+            writable_models=self.frame_model.properties,
+        )
+
+        self.client.update_widget_associations(
+            widget=self.table_widget,
+            writable_models=self.wheel_model.properties,
+        )
+
+        with self.assertRaises(APIError):
+            self.client.update_widget_associations(
+                widget=self.table_widget,
+                writable_models=self.frame.properties,
+            )
