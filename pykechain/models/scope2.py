@@ -5,13 +5,13 @@ from typing import Any, Union, Text, Iterable, Dict, Optional, List  # noqa: F40
 import requests
 from six import text_type, string_types
 
+from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import Multiplicity, ScopeStatus, SubprocessDisplayMode, KEChainPages
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
-from pykechain.models.sidebar.sidebar_manager import SideBarManager
-from pykechain.models.team import Team
 from pykechain.models.base import Base
-from pykechain.defaults import API_EXTRA_PARAMS
+from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
+from pykechain.models.team import Team
 from pykechain.utils import parse_datetime, is_uuid
 
 
@@ -378,8 +378,7 @@ class Scope2(Base, TagsMixin):
         else:
             return self._client.create_activity(self.workflow_root, *args, **kwargs)
 
-    def side_bar(self, *args, **kwargs):
-        # type: (*Any, **Any) -> (None, SideBarManager)
+    def side_bar(self, *args, **kwargs) -> Optional[SideBarManager]:
         """Retrieve the side-bar manager."""
         # TODO identify from which WIM/PIM version the side bar has been available in KE-chain
         # if self._client.match_app_version(label='wim', version='>=3.0.0', default=True):
@@ -388,8 +387,9 @@ class Scope2(Base, TagsMixin):
         #     return None
         return SideBarManager(scope=self, *args, **kwargs)
 
-    def set_landing_page(self, activity, task_display_mode=SubprocessDisplayMode.ACTIVITIES):
-        # type: (Union[Activity2, KEChainPages], Optional[SubprocessDisplayMode]) -> None
+    def set_landing_page(self,
+                         activity: Union['Activity2', KEChainPages],
+                         task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES) -> None:
         """
         Update the landing page of the scope.
 
