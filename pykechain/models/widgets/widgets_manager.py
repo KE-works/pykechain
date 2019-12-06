@@ -1,5 +1,5 @@
 import warnings
-from typing import Sized, Any, Iterable, Union, AnyStr, Optional, Text, Dict, List
+from typing import Any, Iterable, Union, AnyStr, Optional, Text, Dict, List
 
 import requests
 from six import string_types, text_type
@@ -11,18 +11,21 @@ from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
     _check_prefilters, _check_excluded_propmodels
-from pykechain.utils import is_uuid, find, snakecase
+from pykechain.utils import is_uuid, find, snakecase, is_url
 
 
-class WidgetsManager(Sized):
+class WidgetsManager(Iterable):
     """Manager for Widgets.
 
     This is the list of widgets. The widgets in the list are accessible directly using an index, uuid of the widget,
     widget title or widget 'ref'.
     """
 
-    def __init__(self, widgets, activity, client=None, **kwargs):
-        # type: (Iterable[Widget], Union['Activity2', 'Activity2', AnyStr], Optional['Client'], **Any) -> None  # noqa: E501
+    def __init__(self,
+                 widgets: Iterable[Widget],
+                 activity: Union['Activity2', 'Activity2', AnyStr],
+                 client: Optional['Client'] = None,
+                 **kwargs) -> None:
         """Construct a Widget Manager from a list of widgets.
 
         You need to provide an :class:`Activity` to initiate the WidgetsManager. Alternatively you may provide both a
@@ -39,7 +42,7 @@ class WidgetsManager(Sized):
         :returns: None
         :raises IllegalArgumentError: if not provided one of :class:`Activity` or activity uuid and a `Client`
         """
-        self._widgets = list(widgets)
+        self._widgets = list(widgets)  # type: List[Widget]
         from pykechain.models import Activity
         from pykechain.models import Activity2
         if isinstance(activity, (Activity, Activity2)):
@@ -54,23 +57,22 @@ class WidgetsManager(Sized):
 
         self._iter = iter(self._widgets)
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> Text:  # pragma: no cover
         return "<pyke {} object {} widgets>".format(self.__class__.__name__, self.__len__())
 
     def __iter__(self):
         return self
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._widgets)
 
-    def __next__(self):
+    def __next__(self) -> Widget:
         # py3.4 and up style next
         return next(self._iter)
 
     next = __next__  # py2.7 alias
 
-    def __getitem__(self, key):
-        # type: (Union[int, str]) -> Widget
+    def __getitem__(self, key: Union[int, str]) -> Widget:
         """Widget from the list of widgets based on index, uuid, title or ref.
 
         :param key: index, uuid, title or ref of the widget to retrieve
@@ -91,8 +93,7 @@ class WidgetsManager(Sized):
             return found
         raise NotFoundError("Could not find widget with index, title, ref, or id '{}'".format(key))
 
-    def create_widgets(self, widgets):
-        # type: (List[Dict]) -> List[Widget]
+    def create_widgets(self, widgets: List[Dict]) -> List[Widget]:
         """
         Create widgets in bulk.
 
@@ -107,8 +108,7 @@ class WidgetsManager(Sized):
 
         return self._client.create_widgets(widgets=widgets)
 
-    def create_widget(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Widget
+    def create_widget(self, *args, **kwargs) -> Widget:
         """Create a widget inside an activity.
 
         If you want to associate models (and instances) in a single go, you may provide a list of `Property`
@@ -147,12 +147,27 @@ class WidgetsManager(Sized):
             self.insert(kwargs.get('order'), widget)
         return widget
 
-    def add_supergrid_widget(self, part_model, parent_instance=None, title=False, new_instance=True,
-                             edit=True, clone=True, export=True, delete=False, incomplete_rows=True,
-                             emphasize_new_instance=True, emphasize_edit=False, emphasize_clone=False,
-                             emphasize_delete=False, sort_property=None, sort_direction=SortTable.ASCENDING,
-                             readable_models=None, writable_models=None, all_readable=False, all_writable=False,
-                             **kwargs):
+    def add_supergrid_widget(self,
+                             part_model: Union['Part2', Text],
+                             parent_instance: Optional[Union['Part2', Text]] = None,
+                             title: Optional[Union[type(None), Text, bool]] = False,
+                             new_instance: Optional[bool] = True,
+                             edit: Optional[bool] = True,
+                             clone: Optional[bool] = True,
+                             export: Optional[bool] = True,
+                             delete: Optional[bool] = False,
+                             incomplete_rows: Optional[bool] = True,
+                             emphasize_new_instance: Optional[bool] = True,
+                             emphasize_edit: Optional[bool] = False,
+                             emphasize_clone: Optional[bool] = False,
+                             emphasize_delete: Optional[bool] = False,
+                             sort_property: Optional[Union['Property2', Text]] = None,
+                             sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
+                             readable_models: Optional[List[Union['Property2', Text]]] = None,
+                             writable_models: Optional[List[Union['Property2', Text]]] = None,
+                             all_readable: Optional[bool] = False,
+                             all_writable: Optional[bool] = False,
+                             **kwargs) -> Widget:
         """
         Add a KE-chain superGrid (e.g. basic table widget) to the customization.
 
@@ -188,7 +203,7 @@ class WidgetsManager(Sized):
         :param delete: Show or hide the Delete button (default False)
         :type delete: bool
         :param part_model: The part model based on which all instances will be shown.
-        :type parent_instance: :class:`Part` or UUID
+        :type part_model: :class:`Part` or UUID
         :param parent_instance: The parent part instance for which the instances will be shown or to which new
             instances will be added.
         :type parent_instance: :class:`Part` or UUID
@@ -264,14 +279,32 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_filteredgrid_widget(self, part_model, parent_instance=None, title=False, new_instance=True,
-                                edit=True, clone=True, export=True, delete=False, incomplete_rows=True,
-                                emphasize_new_instance=True, emphasize_edit=False, emphasize_clone=False,
-                                emphasize_delete=False, sort_property=None, sort_name=False,
-                                sort_direction=SortTable.ASCENDING, collapse_filters=False, page_size=25,
-                                readable_models=None, writable_models=None, all_readable=False, all_writable=False,
-                                excluded_propmodels=None, prefilters=None,
-                                **kwargs):
+    def add_filteredgrid_widget(self,
+                                part_model: Union['Part2', Text],
+                                parent_instance: Optional[Union['Part2', Text]] = None,
+                                title: Optional[Union[type(None), Text, bool]] = False,
+                                new_instance: Optional[bool] = True,
+                                edit: Optional[bool] = True,
+                                clone: Optional[bool] = True,
+                                export: Optional[bool] = True,
+                                delete: Optional[bool] = False,
+                                incomplete_rows: Optional[bool] = True,
+                                emphasize_new_instance: Optional[bool] = True,
+                                emphasize_edit: Optional[bool] = False,
+                                emphasize_clone: Optional[bool] = False,
+                                emphasize_delete: Optional[bool] = False,
+                                sort_property: Optional[Union['Property2', Text]] = None,
+                                sort_name: Optional[Union[bool, Text]] = False,
+                                sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
+                                collapse_filters: Optional[bool] = False,
+                                page_size: Optional[int] = 25,
+                                readable_models: Optional[List[Union['Property2', Text]]] = None,
+                                writable_models: Optional[List[Union['Property2', Text]]] = None,
+                                all_readable: Optional[bool] = False,
+                                all_writable: Optional[bool] = False,
+                                excluded_propmodels: Optional[List[Union['Property2', Text]]] = None,
+                                prefilters: Optional[List[Union['Property2', Text]]] = None,
+                                **kwargs) -> Widget:
         """
         Add a KE-chain superGrid (e.g. basic table widget) to the customization.
 
@@ -402,9 +435,12 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_attachmentviewer_widget(self, attachment_property, title=False, alignment=None,
-                                    image_fit=ImageFitValue.CONTAIN, **kwargs):
-        # type: (Union[Text, 'Property2'], Optional[Text, bool], Optional[int], Optional[ImageFitValue], **Any) -> Widget  # noqa
+    def add_attachmentviewer_widget(self,
+                                    attachment_property: Union[Text, 'Property2'],
+                                    title: Optional[Union[Text, bool]] = False,
+                                    alignment: Optional[int] = None,
+                                    image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
+                                    **kwargs) -> Widget:
         """
         Add a KE-chain Attachment widget widget manager.
 
@@ -433,7 +469,7 @@ class WidgetsManager(Sized):
             title = kwargs.pop('custom_title')
 
         attachment_property = _retrieve_object(attachment_property,
-                                               method=self._client.property)  # type: 'Property2'  # noqa
+                                               method=self._client.property)  # type: 'Property2'
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
         if 'height' in kwargs:
@@ -463,10 +499,11 @@ class WidgetsManager(Sized):
 
         return widget
 
-    def add_tasknavigationbar_widget(self, activities,
-                                     alignment=NavigationBarAlignment.CENTER,
-                                     parent_widget=None, **kwargs):
-        # type: (Union[Iterable[Dict]], Optional[Text], Optional[Widget,Text], **Any) -> Widget  # noqa
+    def add_tasknavigationbar_widget(self,
+                                     activities: Union[Iterable[Dict]],
+                                     alignment: Optional[Text] = NavigationBarAlignment.CENTER,
+                                     parent_widget: Optional[Union[Widget, Text]] = None,
+                                     **kwargs) -> Widget:
         """
         Add a KE-chain Navigation Bar (e.g. navigation bar widget) to the activity.
 
@@ -512,7 +549,8 @@ class WidgetsManager(Sized):
                     raise IllegalArgumentError("When using the add_navigation_bar_widget, activityId must be an "
                                                "Activity or Activity id. Type is: {}".format(type(activity)))
             elif 'link' in input_dict:
-                # TODO Validate link url
+                if not is_url(input_dict['link']):
+                    raise IllegalArgumentError("The link should be an URL, got '{}'".format(input_dict['link']))
                 button_dict['link'] = input_dict['link']
             else:
                 raise IllegalArgumentError("Each button must have key 'activityId' or 'link'. "
@@ -556,10 +594,18 @@ class WidgetsManager(Sized):
 
         return widget
 
-    def add_propertygrid_widget(self, part_instance, title=False, max_height=None, show_headers=True,
-                                show_columns=None, parent_widget=None, readable_models=None, writable_models=None,
-                                all_readable=False, all_writable=False, **kwargs):
-        # type: (Union['Property2', Text], Optional[Text, bool], Optional[int], bool, Optional[Iterable], Optional[Text, Widget], Optional[Iterable], Optional[Iterable], bool, bool, **Any ) -> Widget  # noqa: E501,F821
+    def add_propertygrid_widget(self,
+                                part_instance: Union['Property2', Text],
+                                title: Optional[Union[Text, bool]] = False,
+                                max_height: Optional[int] = None,
+                                show_headers: Optional[bool] = True,
+                                show_columns: Optional[Iterable] = None,
+                                parent_widget: Optional[Union[Text, Widget]] = None,
+                                readable_models: Optional[Iterable] = None,
+                                writable_models: Optional[Iterable] = None,
+                                all_readable: Optional[bool] = False,
+                                all_writable: Optional[bool] = False,
+                                **kwargs) -> Widget:
         """
         Add a KE-chain Property Grid widget to the customization.
 
@@ -642,9 +688,14 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_service_widget(self, service, title=False, custom_button_text=False, emphasize_run=True,
-                           download_log=False, parent_widget=None, **kwargs):
-        # type: ('Service', Optional[Union[type(None), bool, Text]], Optional[Union[type(None), bool, Text]], Optional[bool], Optional[bool], Optional[Union[Widget, Text]], **Any) -> Widget  # noqa: E501, F821
+    def add_service_widget(self,
+                           service: 'Service',
+                           title: Optional[Union[type(None), bool, Text]] = False,
+                           custom_button_text: Optional[bool] = False,
+                           emphasize_run: Optional[bool] = True,
+                           download_log: Optional[bool] = False,
+                           parent_widget: Optional[Union[Widget, Text]] = None,
+                           **kwargs) -> Widget:
         """
         Add a KE-chain Service (e.g. script widget) to the widget manager.
 
@@ -719,8 +770,10 @@ class WidgetsManager(Sized):
 
         return widget
 
-    def add_html_widget(self, html, title=None, **kwargs):
-        # type: (Union[Text], Optional[Union[type(None), bool, Text]], **Any) -> Widget
+    def add_html_widget(self,
+                        html: Optional[Text],
+                        title: Optional[Union[type(None), bool, Text]] = None,
+                        **kwargs) -> Widget:
         """
         Add a KE-chain HTML widget to the widget manager.
 
@@ -765,8 +818,11 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_notebook_widget(self, notebook, title=False, parent_widget=None, **kwargs):
-        # type: ('Service', Optional[Union[type(None), bool, Text]], Optional[Widget, Text], **Any) -> Widget
+    def add_notebook_widget(self,
+                            notebook: 'Service',
+                            title: Optional[Union[type(None), bool, Text]] = False,
+                            parent_widget: Optional[Union[Widget, Text]] = None,
+                            **kwargs) -> Widget:
         """
         Add a KE-chain Notebook (e.g. notebook widget) to the WidgetManager.
 
@@ -826,11 +882,20 @@ class WidgetsManager(Sized):
 
         return widget
 
-    def add_metapanel_widget(self, show_all=True,
-                             show_due_date=False, show_start_date=False, show_title=False, show_status=False,
-                             show_progress=False, show_assignees=False, show_breadcrumbs=False, show_menu=False,
-                             show_download_pdf=False, show_progressbar=False, progress_bar=None, **kwargs):
-        # type: (bool, Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[bool], Optional[dict], **Any) -> Widget  # noqa: E501
+    def add_metapanel_widget(self,
+                             show_all: Optional[bool] = True,
+                             show_due_date: Optional[bool] = False,
+                             show_start_date: Optional[bool] = False,
+                             show_title: Optional[bool] = False,
+                             show_status: Optional[bool] = False,
+                             show_progress: Optional[bool] = False,
+                             show_assignees: Optional[bool] = False,
+                             show_breadcrumbs: Optional[bool] = False,
+                             show_menu: Optional[bool] = False,
+                             show_download_pdf: Optional[bool] = False,
+                             show_progressbar: Optional[bool] = False,
+                             progress_bar: Optional[Dict] = None,
+                             **kwargs) -> Widget:
         """
         Add a KE-chain Metapanel to the WidgetManager.
 
@@ -909,13 +974,18 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_progress_widget(self, height=25,
-                            color_no_progress=ProgressBarColors.DEFAULT_NO_PROGRESS,
-                            color_completed=ProgressBarColors.DEFAULT_COMPLETED,
-                            color_in_progress=ProgressBarColors.DEFAULT_IN_PROGRESS,
-                            color_in_progress_background=ProgressBarColors.DEFAULT_IN_PROGRESS_BACKGROUND,
-                            show_progress_text=True, **kwargs):
-        # type: (Optional[int], Optional[Union[str, ProgressBarColors]], Optional[Union[str, ProgressBarColors]], Optional[Union[str, ProgressBarColors]], Optional[Union[str, ProgressBarColors]], Optional[bool], **Any) -> ()  # noqa: E501
+    def add_progress_widget(self,
+                            height: Optional[int] = 25,
+                            color_no_progress: Optional[
+                                Union[str, ProgressBarColors]] = ProgressBarColors.DEFAULT_NO_PROGRESS,
+                            color_completed: Optional[
+                                Union[str, ProgressBarColors]] = ProgressBarColors.DEFAULT_COMPLETED,
+                            color_in_progress: Optional[
+                                Union[str, ProgressBarColors]] = ProgressBarColors.DEFAULT_IN_PROGRESS,
+                            color_in_progress_background: Optional[
+                                Union[str, ProgressBarColors]] = ProgressBarColors.DEFAULT_IN_PROGRESS_BACKGROUND,
+                            show_progress_text: Optional[bool] = True,
+                            **kwargs) -> Widget:
         """
         Add a KE-chain progress bar widget to the WidgetManager.
 
@@ -948,8 +1018,9 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_multicolumn_widget(self, title=None, **kwargs):
-        # type: (Optional[Text], **Any) -> Widget
+    def add_multicolumn_widget(self,
+                               title: Optional[Text] = None,
+                               **kwargs) -> Widget:
         """
         Add a KE-chain Multi Column widget to the WidgetManager.
 
@@ -989,10 +1060,18 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_scope_widget(self, team=None, title=None, show_columns=None, show_all_columns=True, tags=None,
-                         sorted_column=ScopeWidgetColumnTypes.PROJECT_NAME, sorted_direction=SortTable.ASCENDING,
-                         parent_widget=None, active_filter=None, search_filter=None, **kwargs):
-        # type: (Union['Team',Text], Optional[Text], Optional[Iterable[Text]], Optional[bool], Optional[Iterable[Text]], Optional[Text], Optional[Text], Optional[Widget,Text], Optional[bool], Optional[bool], **Any) -> Widget  # noqa: F821,E501
+    def add_scope_widget(self,
+                         team: Union['Team', Text] = None,
+                         title: Optional[Text] = None,
+                         show_columns: Optional[Iterable[Text]] = None,
+                         show_all_columns: Optional[bool] = True,
+                         tags: Optional[Iterable[Text]] = None,
+                         sorted_column: Optional[Text] = ScopeWidgetColumnTypes.PROJECT_NAME,
+                         sorted_direction: Optional[SortTable] = SortTable.ASCENDING,
+                         parent_widget: Optional[Union[Widget, Text]] = None,
+                         active_filter: Optional[bool] = None,
+                         search_filter: Optional[bool] = None,
+                         **kwargs) -> Widget:
         """
         Add a KE-chain Scope widget to the Widgetmanager and the activity.
 
@@ -1082,9 +1161,12 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_signature_widget(self, attachment_property, title=False, custom_button_text=False,
-                             custom_undo_button_text=False, **kwargs):
-        # type: ('Property2', Optional[Union[bool, Text]], Optional[Union[bool, Text]], Optional[Union[bool, Text]], **Any) -> Widget # noqa: E501
+    def add_signature_widget(self,
+                             attachment_property: 'Property2',
+                             title: Optional[Union[bool, Text]] = False,
+                             custom_button_text: Optional[Union[bool, Text]] = False,
+                             custom_undo_button_text: Optional[Union[bool, Text]] = False,
+                             **kwargs) -> Widget:
         """
         Add a KE-chain Signature widget to the Widgetmanager and the activity.
 
@@ -1152,9 +1234,14 @@ class WidgetsManager(Sized):
         )
         return widget
 
-    def add_card_widget(self, image=None, title=None, description=None, link=None,
-                        link_target=LinkTargets.SAME_TAB, image_fit=ImageFitValue.CONTAIN, **kwargs):
-        # type: (Optional['Property2'], Optional[Union[type(None), Text, bool]], Optional[Union[Text, bool]], Optional[Union[type(None), Text, 'Property2', bool]], Optional[Union[Text, LinkTargets]], Optional[ImageFitValue], **Any) -> Widget  # noqa: E501
+    def add_card_widget(self,
+                        image: Optional['Property2'] = None,
+                        title: Optional[Union[type(None), Text, bool]] = None,
+                        description: Optional[Union[Text, bool]] = None,
+                        link: Optional[Union[type(None), Text, 'Property2', bool]] = None,
+                        link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
+                        image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
+                        **kwargs) -> Widget:
         """
         Add a KE-chain Card widget to the WidgetManager and the activity.
 
@@ -1306,8 +1393,7 @@ class WidgetsManager(Sized):
     # Widget manager methods
     #
 
-    def insert(self, index, widget):
-        # type: (int, Widget) -> None
+    def insert(self, index: int, widget: Widget) -> None:
         """
         Insert a widget at index n, shifting the rest of the list to the right.
 
@@ -1344,8 +1430,7 @@ class WidgetsManager(Sized):
         new_widgets = [Widget.create(json=widget_json, client=self._client) for widget_json in widgets_response]
         self._widgets = new_widgets
 
-    def delete_widget(self, key):
-        # type: (Any) -> bool
+    def delete_widget(self, key: Any) -> bool:
         """
         Delete widgets by index.
 
@@ -1363,7 +1448,7 @@ class WidgetsManager(Sized):
                 self._widgets.remove(widget)
                 return True
 
-    def delete_all_widgets(self):
+    def delete_all_widgets(self) -> None:
         """Delete all widgets.
 
         :return: None
