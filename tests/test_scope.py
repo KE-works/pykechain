@@ -2,9 +2,10 @@ import datetime
 from time import sleep
 from unittest import skipIf
 
-from pykechain.enums import ScopeStatus
+from pykechain.enums import ScopeStatus, KEChainPages
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from pykechain.models import Team, Scope2
+from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_PIM3
 
@@ -226,6 +227,25 @@ class TestScopes2SpecificTests(TestBetamax):
         if self.scope:
             self.scope.delete()
         super(TestScopes2SpecificTests, self).tearDown()
+
+    def test_side_bar(self):
+        side_bar_manager = self.project.side_bar()
+
+        self.assertIsInstance(side_bar_manager, SideBarManager)
+
+    def test_set_landing_page_activity(self):
+        self.scope = self.project.clone(asynchronous=False)
+
+        first_activity = self.scope.activities()[0]
+
+        self.scope.set_landing_page(activity=first_activity)
+
+    def test_set_landing_page_data_model(self):
+        self.scope = self.project.clone(asynchronous=False)
+
+        data_model_page = KEChainPages.DATA_MODEL
+
+        self.scope.set_landing_page(activity=data_model_page)
 
     def test_retrieve_scope2_members(self):
         original_scope_members = [u.get('username') for u in self.project.members()]

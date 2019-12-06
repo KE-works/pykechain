@@ -16,6 +16,11 @@ Change Log
  * Improved `Client` exception messages when retrieving singular objects, e.g. `Client.scope()` (thanks to @jelleboersma)
  * Updated dependent versions for development: mypy (0.750), tox (3.14.2), sphinx (2.2.2), coveralls (1.9.2 :vulcan_salute:️)
 
+3.x.x (xxDEC19)
+---------------
+ * Added `SideBarManager` and `SideBarButton` classes to support configuration of the scope side-bar.
+ * Added Enumeration classes `KEChainPages`, `SubprocessDisplayMode`, `URITarget` and `FontAwesomeMode` to support configuration of the scope side-bar.
+
 3.1.5 (29NOV19)
 ---------------
 This is the black friday edition of pykechain.
