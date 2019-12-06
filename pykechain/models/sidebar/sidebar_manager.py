@@ -226,7 +226,6 @@ class SideBarManager(Iterable):
         :return: new side-bar button
         :rtype SideBarButton
         """
-        # TODO test url input for valid URL
         if not is_url(url):
             raise IllegalArgumentError("The `url` must be a proper URL, got '{}'".format(url))
         return self.create_button(title=title, uri=url, uri_target=URITarget.EXTERNAL, *args, **kwargs)

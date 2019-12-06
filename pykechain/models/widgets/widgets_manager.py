@@ -11,7 +11,7 @@ from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
     _check_prefilters, _check_excluded_propmodels
-from pykechain.utils import is_uuid, find, snakecase
+from pykechain.utils import is_uuid, find, snakecase, is_url
 
 
 class WidgetsManager(Iterable):
@@ -549,7 +549,8 @@ class WidgetsManager(Iterable):
                     raise IllegalArgumentError("When using the add_navigation_bar_widget, activityId must be an "
                                                "Activity or Activity id. Type is: {}".format(type(activity)))
             elif 'link' in input_dict:
-                # TODO Validate link url
+                if not is_url(input_dict['link']):
+                    raise IllegalArgumentError("The link should be an URL, got '{}'".format(input_dict['link']))
                 button_dict['link'] = input_dict['link']
             else:
                 raise IllegalArgumentError("Each button must have key 'activityId' or 'link'. "
