@@ -6,7 +6,7 @@ from six import string_types, text_type
 from pykechain.enums import URITarget, SubprocessDisplayMode, KEChainPages, KEChainPageLabels
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from pykechain.models.sidebar.sidebar_button import SideBarButton
-from pykechain.utils import find
+from pykechain.utils import find, is_url
 
 
 class SideBarManager(Iterable):
@@ -227,6 +227,8 @@ class SideBarManager(Iterable):
         :rtype SideBarButton
         """
         # TODO test url input for valid URL
+        if not is_url(url):
+            raise IllegalArgumentError("The `url` must be a proper URL, got '{}'".format(url))
         return self.create_button(title=title, uri=url, uri_target=URITarget.EXTERNAL, *args, **kwargs)
 
     def add_buttons(self, buttons: List[Dict], override_sidebar: bool) -> List[SideBarButton]:

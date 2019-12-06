@@ -380,11 +380,6 @@ class Scope2(Base, TagsMixin):
 
     def side_bar(self, *args, **kwargs) -> Optional[SideBarManager]:
         """Retrieve the side-bar manager."""
-        # TODO identify from which WIM/PIM version the side bar has been available in KE-chain
-        # if self._client.match_app_version(label='wim', version='>=3.0.0', default=True):
-        #     return SideBarManager(scope=self, *args, **kwargs)
-        # else:
-        #     return None
         return SideBarManager(scope=self, *args, **kwargs)
 
     def set_landing_page(self,
