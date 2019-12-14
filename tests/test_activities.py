@@ -7,7 +7,7 @@ import pytest
 import pytz
 import requests
 
-from pykechain.enums import ActivityType, ActivityStatus, ActivityClassification
+from pykechain.enums import ActivityType, ActivityStatus, ActivityClassification, Category
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from pykechain.models import Activity2
 from pykechain.utils import temp_chdir
@@ -446,7 +446,7 @@ class TestActivity2SpecificTests(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             activity_to_be_moved.move(parent=new_parent)
 
-    # test added in 3.0
+    # tests added in 3.0
     def test_activity2_retrieve_with_refs(self):
         # setup
         test_task_ref = 'test-task'
@@ -456,6 +456,56 @@ class TestActivity2SpecificTests(TestBetamax):
         # testing
         self.assertIsInstance(test_task_activity, Activity2)
         self.assertTrue(test_task_activity.name, test_task_name)
+
+    def test_activity2_associated_parts(self):
+        # setUp
+        activity_name = 'Task - Form + Tables + Service'
+        activity = self.project.activity(name=activity_name)
+        associated_models, associated_instances = activity.associated_parts()
+
+        # testing
+        for model in associated_models:
+            self.assertTrue(model.category == Category.MODEL)
+            if model.name == 'Bike':
+                self.assertTrue(model.property(name='Gears').output)
+                self.assertFalse(model.property(name='Total height').output)
+                self.assertFalse(model.property(name='Picture').output)
+                self.assertFalse(model.property(name='Description').output)
+                self.assertTrue(model.property(name='Website').output)
+                self.assertTrue(model.property(name='Sale?').output)
+
+        for instance in associated_instances:
+            self.assertTrue(instance.category == Category.INSTANCE)
+        self.assertTrue(len(associated_models) == 3)
+        self.assertTrue(len(associated_instances) == 4)
+
+    def test_activity2_associated_objects_ids(self):
+        # setUp
+        activity_name = 'Task - Form + Tables + Service'
+        activity = self.project.activity(name=activity_name)
+        associated_object_ids = activity.associated_object_ids()
+
+        # testing
+        self.assertTrue(len(associated_object_ids) == 17)
+
+    def test_activity2_parts_of_specific_type(self):
+        # setUp
+        activity_name = 'Task - Form + Tables + Service'
+        bike_model = self.project.model(name="Bike")
+        activity = self.project.activity(name=activity_name)
+        associated_models = activity.parts(category=Category.MODEL)
+
+        # testing
+        for model in associated_models:
+            self.assertTrue(model.category == Category.MODEL)
+            if model.name == 'Bike':
+                self.assertTrue(model.property(name='Gears').output)
+                self.assertFalse(model.property(name='Total height').output)
+                self.assertFalse(model.property(name='Picture').output)
+                self.assertFalse(model.property(name='Description').output)
+                self.assertTrue(model.property(name='Website').output)
+                self.assertTrue(model.property(name='Sale?').output)
+        self.assertTrue(len(associated_models) == 3)
 
 
 # @skip('Does not work in PIM2 until KEC-19193 is resolved')

@@ -3,7 +3,7 @@ import os
 import time
 import warnings
 from collections import Iterable
-from typing import Any, List, Union, Text
+from typing import Any, List, Union, Text, Dict
 
 import requests
 from requests.compat import urljoin  # type: ignore
@@ -534,7 +534,14 @@ class Activity2(Base, TagsMixin):
         >>> parts = task.parts(category=Category.MODEL)
 
         """
-        return self._client.parts(*args, activity=self.id, **kwargs)
+        if self._client.match_app_version(label='widget', version='>=3.0.0'):
+            widget_manager = self.widgets()
+            associated_parts = list()
+            for widget in widget_manager:
+                associated_parts.extend(widget.parts(*args, **kwargs))
+            return associated_parts
+        else:
+            return self._client.parts(*args, activity=self.id, **kwargs)
 
     def associated_parts(self, *args, **kwargs):
         """Retrieve models and instances belonging to this activity.
@@ -558,10 +565,62 @@ class Activity2(Base, TagsMixin):
         >>> all_models, all_instances = task.associated_parts()
 
         """
-        return (
-            self.parts(category=Category.MODEL, *args, **kwargs),
-            self.parts(category=Category.INSTANCE, *args, **kwargs)
+        if self._client.match_app_version(label='widget', version='>=3.0.0'):
+            widget_manager = self.widgets()
+            associated_models = list()
+            associated_instances = list()
+            for widget in widget_manager:
+                associated_models.extend(widget.parts(category=Category.MODEL, *args, **kwargs))
+                associated_instances.extend(widget.parts(category=Category.INSTANCE, *args, **kwargs))
+            return (
+                associated_models,
+                associated_instances
+            )
+        else:
+            return (
+                self.parts(category=Category.MODEL, *args, **kwargs),
+                self.parts(category=Category.INSTANCE, *args, **kwargs)
+            )
+
+    def associated_object_ids(self) -> List[Dict]:
+        """Retrieve object ids associated to this activity.
+
+        This represents a more in-depth retrieval of objects associated to the activity. Each element in the list
+        represents a `Property` of `Category.INSTANCE`. Each element contains the following fields:
+
+        'id': The ID of the association
+        'widget': The ID of the widget to which the Property instance is associated
+        'activity': The ID of the activity
+        'model_property': The ID of the Property model
+        'model_part': The ID of the model of the Part containing said Property
+        'instance_property': The ID of the Property instance
+        'instance_part': The ID of the Part instance containing said Property
+        'writable': True if the Property is writable, False if is not
+
+        See :func:`pykechain.Client.parts` for additional available parameters.
+
+        :returns: a list of dictonaries with association objects associated to the activity
+        :raises NotFoundError: When the response from the server was invalid.
+
+        Example
+        -------
+        >>> task = project.activity('Specify Wheel Diameter')
+        >>> associated_object_ids = task.associated_object_ids()
+
+        """
+        request_params = dict(
+            activity=self.id,
         )
+
+        url = self._client._build_url('associations')
+
+        response = self._client._request('GET', url, params=request_params)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve associations on activity: {}".format(response.content))
+
+        data = response.json()
+        return data['results']
 
     #
     # Customizations
