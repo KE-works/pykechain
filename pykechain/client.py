@@ -2274,7 +2274,7 @@ class Client(object):
         bulk_associations = list()
         for widget in widgets:
             data, readable_model_ids, writable_model_ids = self._validate_widget(
-                activity=widget.get('activity', kwargs.get('activity')),
+                activity=widget.get('activity'),
                 widget_type=widget.get('widget_type'),
                 title=widget.get('title'),
                 meta=widget.get('meta'),
@@ -2294,8 +2294,8 @@ class Client(object):
             raise APIError("Could not create a widgets ({})\n\n{}".format(response, response.json().get('traceback')))
 
         # create the widget and do postprocessing
-        widgets = list()
-        for widget_response in response.json().get('results')[0]:
+        widgets = []
+        for widget_response in response.json().get('results'):
             widget = Widget.create(json=widget_response, client=self)
             widgets.append(widget)
 
@@ -2363,11 +2363,13 @@ class Client(object):
             raise IllegalArgumentError(
                 '`associations` must be a list of tuples, defining the readable and writable models per widget.')
 
+        if not len(widgets) == len(associations):
+            raise IllegalArgumentError('The `widgets` and `associations` lists must be of equal length, '
+                                       'not {} and {}.'.format(len(widgets), len(associations)))
+
         bulk_data = list()
         for widget_id, association in zip(widget_ids, associations):
             readable_models, writable_models = association
-            if not (readable_models or writable_models):
-                continue
 
             readable_model_ids, writable_model_ids = self._validate_related_models(
                 readable_models=readable_models,
