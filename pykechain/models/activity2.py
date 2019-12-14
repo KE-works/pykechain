@@ -3,7 +3,7 @@ import os
 import time
 import warnings
 from collections import Iterable
-from typing import Any, List, Union, Text
+from typing import Any, List, Union, Text, Dict
 
 import requests
 from requests.compat import urljoin  # type: ignore
@@ -582,7 +582,7 @@ class Activity2(Base, TagsMixin):
                 self.parts(category=Category.INSTANCE, *args, **kwargs)
             )
 
-    def associated_object_ids(self):
+    def associated_object_ids(self) -> List[Dict]:
         """Retrieve object ids associated to this activity.
 
         This represents a more in-depth retrieval of objects associated to the activity. Each element in the list
@@ -599,7 +599,8 @@ class Activity2(Base, TagsMixin):
 
         See :func:`pykechain.Client.parts` for additional available parameters.
 
-        :returns: a tuple(models of :class:`PartSet`, instances of :class:`PartSet`)
+        :returns: a list of dictonaries with association objects associated to the activity
+        :raises NotFoundError: When the response from the server was invalid.
 
         Example
         -------
@@ -616,7 +617,7 @@ class Activity2(Base, TagsMixin):
         response = self._client._request('GET', url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve parts: {}".format(response.content))
+            raise NotFoundError("Could not retrieve associations on activity: {}".format(response.content))
 
         data = response.json()
         return data['results']
