@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+3.2.2 (14DEC19)
+---------------
+* made `Activity.associated_parts()` great again. #523 Thanks to @raduiordache
+* Added also the possibility to get the associated objects of an `Activity` with ids only. #523
+* Updated dependent versions for development: pydocstyle (5.0.1)
+
 3.2.1 (06DEC19)
 ---------------
 This is the day after 'Sinterklaasavond' :gift: edition of pykechain.
