@@ -14,7 +14,7 @@ PyOpenSSL==19.1.0; python_version <= '2.7'
 # testing
 pytest==5.3.1
 betamax==0.8.1
-coverage==4.5.4
+coverage==5.0
 pytest-cov==2.8.1
 coveralls==1.9.2
 
