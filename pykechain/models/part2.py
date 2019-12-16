@@ -7,7 +7,8 @@ from six import text_type, string_types
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import Category, Multiplicity
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
-from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance
+from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
+    get_edited_one_many
 from pykechain.models import Base, Scope2
 from pykechain.models.property2 import Property2
 from pykechain.utils import is_uuid, find
@@ -745,6 +746,9 @@ class Part2(Base):
         >>>                    include_instances=True)
 
         """
+        get_mapping_dictionary(clean=True)
+        get_edited_one_many(clean=True)
+
         if not isinstance(target_parent, Part2):
             raise IllegalArgumentError("`target_parent` needs to be a part, got '{}'".format(type(target_parent)))
 
@@ -799,6 +803,9 @@ class Part2(Base):
         >>>                    include_instances=True)
 
         """
+        get_mapping_dictionary(clean=True)
+        get_edited_one_many(clean=True)
+
         if not name:
             name = self.name
         if self.category == Category.MODEL and target_parent.category == Category.MODEL:
