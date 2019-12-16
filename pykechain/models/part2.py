@@ -746,6 +746,7 @@ class Part2(Base):
         >>>                    include_instances=True)
 
         """
+        self.refresh()
         get_mapping_dictionary(clean=True)
         get_edited_one_many(clean=True)
 
@@ -803,6 +804,7 @@ class Part2(Base):
         >>>                    include_instances=True)
 
         """
+        self.refresh()
         get_mapping_dictionary(clean=True)
         get_edited_one_many(clean=True)
 
