@@ -224,30 +224,24 @@ def move_part_instance(part_instance, target_parent, part_model, name=None, incl
 
     # Now act based on multiplicity
     if moved_model.multiplicity == Multiplicity.ONE:
-        # If multiplicity is 'Exactly 1', that means the instance was automatically created with the model, so just
-        # retrieve it, map the original instance with the moved one and update the name and property values.
+        # If multiplicity is 'Exactly 1', that means the instance was automatically created with the model.
         moved_instance = moved_model.instances(parent_id=target_parent.id)[0]
-        map_property_instances(part_instance, moved_instance)
-        moved_instance = update_part_with_properties(part_instance, moved_instance, name=str(name))
     elif moved_model.multiplicity == Multiplicity.ONE_MANY:
-        # If multiplicity is '1 or more', that means one instance has automatically been created with the model, so
-        # retrieve it, map the original instance with the moved one and update the name and property values. Store
-        # the model in a list, in case there are multiple instance those need to be recreated.
-        if target_parent.id not in get_edited_one_many():
+        # If multiplicity is '1 or more', that means one instance has automatically been created with the model.
+        # Store the model in a list, in case there are multiple instance that need to be recreated.
+        if moved_model.id not in get_edited_one_many():
             moved_instance = moved_model.instances(parent_id=target_parent.id)[0]
-            map_property_instances(part_instance, moved_instance)
-            moved_instance = update_part_with_properties(part_instance, moved_instance, name=str(name))
-            get_edited_one_many().append(target_parent.id)
+            get_edited_one_many().append(moved_model.id)
         else:
-            moved_instance = target_parent.add(name=part_instance.name, model=moved_model, suppress_kevents=True)
-            map_property_instances(part_instance, moved_instance)
-            moved_instance = update_part_with_properties(part_instance, moved_instance, name=str(name))
+            moved_instance = target_parent.add(name=name, model=moved_model, suppress_kevents=True)
     else:
         # If multiplicity is '0 or more' or '0 or 1', it means no instance has been created automatically with the
         # model, so then everything must be created and then updated.
         moved_instance = target_parent.add(name=name, model=moved_model, suppress_kevents=True)
-        map_property_instances(part_instance, moved_instance)
-        moved_instance = update_part_with_properties(part_instance, moved_instance, name=str(name))
+
+    # Update properties of the instance
+    map_property_instances(part_instance, moved_instance)
+    moved_instance = update_part_with_properties(part_instance, moved_instance, name=str(name))
 
     # If include_children is True, then recursively call this function for every descendant. Keep the name of the
     # original sub-instance.
