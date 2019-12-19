@@ -1,11 +1,11 @@
 Change Log
 ==========
 
-3.2.3 ()
+3.2.3 (19DEC19)
 ---------------
-* Bugfix: copying of (multiple) `1-or-many` Part models to the same parent is now fixed.
-* Bugfix: copy/move of a Part also refreshes the Part to ensure all properties are copied/moved.
-
+* :bug: copying of (multiple) `1-or-many` `Part` models to the same parent is now fixed. #636 Thanks to @jelleboersma
+* :bug: copy/move of a `Part` also refreshes the part to ensure all properties are copied/moved. #636
+* :point_up: dependent versions for development: pytest (5.3.2), coverage (pinned to < 5.0), Sphinx (2.3.0), mypy (0.760)
 
 3.2.2 (14DEC19)
 ---------------
