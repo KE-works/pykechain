@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+3.2.3 ()
+---------------
+* Bugfix: copying of (multiple) `1-or-many` Part models to the same parent is now fixed.
+* Bugfix: copy/move of a Part also refreshes the Part to ensure all properties are copied/moved.
+
+
 3.2.2 (14DEC19)
 ---------------
 * made `Activity.associated_parts()` great again. #523 Thanks to @raduiordache
