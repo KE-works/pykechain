@@ -746,9 +746,13 @@ class Part2(Base):
         >>>                    include_instances=True)
 
         """
-        self.refresh()
         get_mapping_dictionary(clean=True)
         get_edited_one_many(clean=True)
+
+        # to ensure that all properties are retrieved from the backend
+        # as it might be the case that a part is retrieved in the context of a widget and there could be a possibility
+        # that not all properties are retrieved we perform a refresh of the part itself first.
+        self.refresh()
 
         if not isinstance(target_parent, Part2):
             raise IllegalArgumentError("`target_parent` needs to be a part, got '{}'".format(type(target_parent)))
