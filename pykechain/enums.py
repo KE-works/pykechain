@@ -788,6 +788,16 @@ KEChainPageLabels_nl = {
     KEChainPages.SERVICES: 'Scripts',
 }
 
+CardWidgetKEChainPageLink = {
+    KEChainPages.DETAIL: 'Project',
+    KEChainPages.TASKS: 'Tasks',
+    KEChainPages.WORK_BREAKDOWN: 'Activities',
+    KEChainPages.CATALOG_WBS: 'Catalogus',
+    KEChainPages.DATA_MODEL: 'Model',
+    KEChainPages.EXPLORER: 'Explorer',
+    KEChainPages.SERVICES: 'Script',
+}
+
 
 class SubprocessDisplayMode(Enum):
     """

@@ -6,7 +6,8 @@ from six import string_types, text_type
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes, \
-    ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue
+    ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
+    KEChainPages, CardWidgetKEChainPageLink
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
@@ -1276,7 +1277,7 @@ class WidgetsManager(Iterable):
                         image: Optional['Property2'] = None,
                         title: Optional[Union[type(None), Text, bool]] = None,
                         description: Optional[Union[Text, bool]] = None,
-                        link: Optional[Union[type(None), Text, 'Property2', bool]] = None,
+                        link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
                         link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
                         image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
                         **kwargs) -> Widget:
@@ -1294,7 +1295,11 @@ class WidgetsManager(Iterable):
             * False (default): Card name
             * String value: Custom title
             * None: No title
-        :param link:
+        :param link: Where the card widget refers to. This can be one of the following:
+            * None (default): no link
+            * task: another KE-chain task, provided as an Activity2 object or its UUID
+            * String value: URL to a webpage
+            * KE-chain page: built-in KE-chain page of the current scope
         :param link_target: how the link is opened, one of the values of CardWidgetLinkTarget enum.
         :param link_target: CardWidgetLinkTarget
         :param image_fit: how the image on the card widget is displayed
@@ -1354,6 +1359,11 @@ class WidgetsManager(Iterable):
             meta.update({
                 'customLink': None,
                 'showLinkValue': CardWidgetLinkValue.NO_LINK
+            })
+        elif link in KEChainPages.values():
+            meta.update({
+                'customLink': "",
+                'showLinkValue': CardWidgetKEChainPageLink[link],
             })
         else:
             meta.update({

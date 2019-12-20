@@ -4,6 +4,7 @@ Change Log
 3.2.4 ()
 ---------------
 * Added scope widget button customization in the `WidgetManager` method `add_scope_widget`.
+* Added native KE-chain pages as option for the `Card` widget `link` value. Use the `KEChainPages` enum to set your target.
 
 3.2.3 (19DEC19)
 ---------------
