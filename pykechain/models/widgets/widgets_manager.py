@@ -1063,6 +1063,14 @@ class WidgetsManager(Iterable):
     def add_scope_widget(self,
                          team: Union['Team', Text] = None,
                          title: Optional[Text] = None,
+                         add: Optional[bool] = True,
+                         edit: Optional[bool] = True,
+                         clone: Optional[bool] = True,
+                         delete: Optional[bool] = True,
+                         emphasize_add: Optional[bool] = True,
+                         emphasize_edit: Optional[bool] = False,
+                         emphasize_clone: Optional[bool] = False,
+                         emphasize_delete: Optional[bool] = False,
                          show_columns: Optional[Iterable[Text]] = None,
                          show_all_columns: Optional[bool] = True,
                          tags: Optional[Iterable[Text]] = None,
@@ -1084,6 +1092,22 @@ class WidgetsManager(Iterable):
             * String value: Custom title
             * None (default): No title
         :type title: bool or basestring or None
+        :param add: (O) Show or hide the Add button (default True)
+        :type add: bool
+        :param clone: (O) Show or hide the Clone button (default True)
+        :type clone: bool
+        :param edit: (O) Show or hide the Edit button (default True)
+        :type edit: bool
+        :param delete: (O) Show or hide the Delete button (default True)
+        :type delete: bool
+        :param emphasize_add: (O) Emphasize the Add button (default True)
+        :type emphasize_add: bool
+        :param emphasize_clone: (O) Emphasize the Clone button (default False)
+        :type emphasize_clone: bool
+        :param emphasize_edit: (O) Emphasize the Edit button (default False)
+        :type emphasize_edit: bool
+        :param emphasize_delete: (O) Emphasize the Delete button (default False)
+        :type emphasize_delete: bool
         :param show_columns: (O) list of column headers to show. One of `ScopeWidgetColumnTypes`.
         :type show_columns: list of basestring
         :param show_all_columns: boolean to show all columns (defaults to True). If True, will override `show_columns`
@@ -1145,11 +1169,25 @@ class WidgetsManager(Iterable):
         else:
             search_filter_visible = True
 
+        for button_setting in [
+            add, edit, delete, clone, emphasize_add, emphasize_clone, emphasize_edit, emphasize_delete,
+        ]:
+            if not isinstance(button_setting, bool):
+                raise IllegalArgumentError('All button settings must be booleans.')
+
         meta.update({
             'sortedColumn': snakecase(sorted_column),
             'sortDirection': sorted_direction,
             'activeFilterVisible': active_filter_visible,
             'searchFilterVisible': search_filter_visible,
+            "addButtonVisible": add,
+            "editButtonVisible": edit,
+            "deleteButtonVisible": delete,
+            "cloneButtonVisible": clone,
+            "primaryAddUiValue": emphasize_add,
+            "primaryEditUiValue": emphasize_edit,
+            "primaryCloneUiValue": emphasize_clone,
+            "primaryDeleteUiValue": emphasize_delete,
         })
 
         widget = self.create_widget(
