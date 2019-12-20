@@ -5,6 +5,8 @@ Change Log
 ---------------
 * Added scope widget button customization in the `WidgetManager` method `add_scope_widget`.
 * Added native KE-chain pages as option for the `Card` widget `link` value. Use the `KEChainPages` enum to set your target.
+* Added `show_images` to the inputs of `add_supergrid_widget` and `add_filteredgrid_widget` methods.
+* Organized function headers of the `WidgetManager` methods to match the order of the inputs.
 
 3.2.3 (19DEC19)
 ---------------
