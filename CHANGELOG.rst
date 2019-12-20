@@ -7,6 +7,7 @@ Change Log
 * Added native KE-chain pages as option for the `Card` widget `link` value. Use the `KEChainPages` enum to set your target.
 * Added `show_images` to the inputs of `add_supergrid_widget` and `add_filteredgrid_widget` methods.
 * Organized function headers of the `WidgetManager` methods to match the order of the inputs.
+* Added `edit_cascade_down` method to the `Activity2` class to trickle-down the changes to the attributes of a subprocess.
 
 3.2.3 (19DEC19)
 ---------------

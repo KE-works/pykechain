@@ -2,8 +2,7 @@ import datetime
 import os
 import time
 import warnings
-from collections import Iterable
-from typing import Any, List, Union, Text, Dict
+from typing import Any, List, Text, Dict, Optional, Union
 
 import requests
 from requests.compat import urljoin  # type: ignore
@@ -68,7 +67,7 @@ class Activity2(Base, TagsMixin):
     #
 
     @property
-    def assignees(self):
+    def assignees(self) -> Optional[List['User']]:
         """List of assignees to the activity.
 
         Provides a list of `User` objects or an empty list. If no `assignees_ids` are in the API call, then
@@ -361,9 +360,94 @@ class Activity2(Base, TagsMixin):
                                 "as this task exist on top level.".format(self.name))
         return self._client.activities(parent_id=parent_id, scope=self.scope_id, **kwargs)
 
-    def edit(self, name=None, description=None, start_date=None, due_date=None, assignees=None, assignees_ids=None,
-             status=None, tags=None):
-        # type: (Text, Text, datetime.datetime, datetime.datetime, List[Text], List[Text], Union[ActivityStatus, Text], Iterable[Text]) -> None  # noqa: E501
+    def edit_cascade_down(
+        self,
+        start_date: Optional[datetime.datetime] = None,
+        due_date: Optional[datetime.datetime] = None,
+        assignees: Optional[List[Text]] = None,
+        assignees_ids: Optional[List[Text]] = None,
+        status: Optional[Union[ActivityStatus, Text]] = None,
+        overwrite: Optional[bool] = False,
+    ) -> None:
+        """
+        Edit the activity and all its descendants with a single operation.
+
+        :param start_date: (optionally) edit the start date of the activity as a datetime object (UTC time/timezone
+                            aware preferred)
+        :type start_date: datetime or None
+        :param due_date: (optionally) edit the due_date of the activity as a datetime object (UTC time/timzeone
+                            aware preferred)
+        :type due_date: datetime or None
+        :param assignees: (optionally) edit the assignees (usernames) of the activity as a list
+        :type assignees: list(basestring) or None
+        :param assignees_ids: (optionally) edit the assignees (user id's) of the activity as a list
+        :type assignees_ids: list(basestring) or None
+        :param status: (optionally) edit the status of the activity as a string based
+                       on :class:`~pykechain.enums.ActivityStatus`
+        :type status: ActivityStatus, basestring or None
+        :param overwrite: (optionally) whether to overwrite existing assignees (True) or
+                          merge with existing assignees (False, default)
+        :type overwrite: bool
+
+        :return: flat list of the current task all descendants that have been edited
+        :rtype list[Activity2]
+        """
+        if self.activity_type == ActivityType.TASK:
+            raise IllegalArgumentError('`edit_cascade_down` is only used for subprocesses, "{}" is not.'.format(self))
+
+        update_dict = {'id': self.id}
+
+        self._validate_edit_arguments(
+            update_dict=update_dict,
+            start_date=start_date,
+            due_date=due_date,
+            assignees=assignees,
+            assignees_ids=assignees_ids,
+            status=status,
+        )
+
+        from pykechain.helpers import get_all_children
+        all_tasks = [self] + get_all_children(self)
+
+        # Create update-json
+        data = list()
+        for task in all_tasks:
+            task_specific_update_dict = dict(update_dict)
+
+            if not overwrite:
+                # Append the existing assignees of the task to the new assignees
+                existing_assignees = [u.id for u in task.assignees]
+                new_assignees = task_specific_update_dict.get('assignees_ids', list())
+                task_specific_update_dict['assignees_ids'] = list(set(existing_assignees + new_assignees))
+
+            task_specific_update_dict.update({'id': task.id})
+            data.append(task_specific_update_dict)
+
+        # Perform bulk update
+        url = urljoin(self._client.api_root, 'api/activities/bulk_update')
+        response = self._client._request('PUT', url, json=data)
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Activity ({})".format(response))
+
+        # # Initialize all tasks with response
+        # for task, response_json in zip(all_tasks, response.json().get('results')):
+        #     task.__init__(client=self._client, json=response_json)
+        #     if task == self:
+        #         self.__init__(client=self._client, json=response_json)
+
+        # return all_tasks
+
+    def edit(
+            self,
+            name: Optional[Text] = None,
+            description: Optional[Text] = None,
+            start_date: Optional[datetime.datetime] = None,
+            due_date: Optional[datetime.datetime] = None,
+            assignees: Optional[List[Text]] = None,
+            assignees_ids: Optional[List[Text]] = None,
+            status: Optional[Union[ActivityStatus, Text]] = None,
+            tags: Optional[List[Text]] = None,
+    ) -> None:
         """Edit the details of an activity.
 
         :param name: (optionally) edit the name of the activity
@@ -383,8 +467,8 @@ class Activity2(Base, TagsMixin):
                              assignees
         :type assignees_ids: list(basestring) or None
         :param status: (optionally) edit the status of the activity as a string based
-                       on :class:`~pykechain.enums.ActivityType`
-        :type status: basestring or None
+                       on :class:`~pykechain.enums.ActivityStatus`
+        :type status: ActivityStatus or None
         :param tags: (optionally) replace the tags on an activity, which is a list of strings ["one","two","three"]
         :type tags: list of basestring or None
 
@@ -434,6 +518,32 @@ class Activity2(Base, TagsMixin):
             else:
                 raise IllegalArgumentError('Description should be a string')
 
+        if tags is not None:
+            if isinstance(tags, (list, tuple, set)):
+                update_dict.update({'tags': tags})
+            else:
+                raise IllegalArgumentError('tags should be a an array (list, tuple, set) of strings')
+
+        self._validate_edit_arguments(
+            update_dict=update_dict,
+            start_date=start_date,
+            due_date=due_date,
+            assignees=assignees,
+            assignees_ids=assignees_ids,
+            status=status,
+        )
+
+        url = self._client._build_url('activity', activity_id=self.id)
+
+        response = self._client._request('PUT', url, json=update_dict)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Activity ({})".format(response))
+
+        self.refresh(json=response.json().get('results')[0])
+
+    def _validate_edit_arguments(self, update_dict, start_date, due_date, assignees, assignees_ids, status):
+        """Verify inputs provided in both the `edit` and `edit_cascade_down` methods."""
         if start_date is not None:
             if isinstance(start_date, datetime.datetime):
                 if not start_date.tzinfo:
@@ -453,7 +563,6 @@ class Activity2(Base, TagsMixin):
                 raise IllegalArgumentError('Due date should be a datetime.datetime() object')
 
         if isinstance(assignees_ids, (list, tuple)) or isinstance(assignees, (list, tuple)):
-            update_assignees_ids = []
             if isinstance(assignees_ids, (list, tuple)):
                 users = self._client.users()
                 update_assignees_ids = [u.id for u in users if u.id in assignees_ids]
@@ -484,20 +593,7 @@ class Activity2(Base, TagsMixin):
                 raise IllegalArgumentError('Status should be a string and in the list of acceptable '
                                            'status strings: {}'.format(ActivityStatus.values()))
 
-        if tags is not None:
-            if isinstance(tags, (list, tuple, set)):
-                update_dict.update({'tags': tags})
-            else:
-                raise IllegalArgumentError('tags should be a an array (list, tuple, set) of strings')
-
-        url = self._client._build_url('activity', activity_id=self.id)
-
-        response = self._client._request('PUT', url, json=update_dict)
-
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Activity ({})".format(response))
-
-        self.refresh(json=response.json().get('results')[0])
+        return update_dict
 
     def delete(self):
         """Delete this activity.
@@ -789,7 +885,7 @@ class Activity2(Base, TagsMixin):
 
         :param parent: parent object to move activity to
         :type parent: Union[Activity2, Text]
-        :param classifiction: (optional) classification of the target parent if you want to change the classification.
+        :param classification: (optional) classification of the target parent if you want to change the classification.
         :type classification: ActivityClassification or None
         :raises IllegalArgumentError: if the 'parent' activity_type is not :class:`enums.ActivityType.SUBPROCESS`
         :raises IllegalArgumentError: if the 'parent' type is not :class:`Activity2` or UUID
