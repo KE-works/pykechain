@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+3.2.4 ()
+---------------
+* Added scope widget button customization in the `WidgetManager` method `add_scope_widget`.
+
 3.2.3 (19DEC19)
 ---------------
 * :bug: copying of (multiple) `1-or-many` `Part` models to the same parent is now fixed. #636 Thanks to @jelleboersma
