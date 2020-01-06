@@ -10,7 +10,7 @@ requirements:
   - requirements.txt:
       # update all dependencies and pin them
       update: all
-      pin: True
+      pin: False
   - requirements-ci.txt:
       # don't update dependencies, use global 'pin' default
       update: False

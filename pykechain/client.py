@@ -1865,7 +1865,10 @@ class Client(object):
         if not isinstance(scope, (Scope, Scope2)):
             raise IllegalArgumentError('Scope "{}" is not a scope!'.format(scope.name))
 
-        query_options = {"async": asynchronous}
+        if self.match_app_version(label="scope", version=">=3.1.0"):
+            query_options = {"async_mode": asynchronous}
+        else:
+            query_options = {"async": asynchronous}
 
         if self.match_app_version(label="scope", version=">=3.0.0"):
             response = self._request('DELETE', self._build_url('scope2', scope_id=str(scope.id)), params=query_options)
@@ -1918,10 +1921,15 @@ class Client(object):
         if not isinstance(source_scope, (Scope, Scope2)):
             raise IllegalArgumentError('`source_scope` should be a `Scope` object')
 
-        if self.match_app_version(label="scope", version=">=3.0.0"):
-            data_dict = {'scope_id': source_scope.id, 'async': asynchronous}
+        if self.match_app_version(label="scope", version=">=3.1.0"):
+            data_dict = {"async_mode": asynchronous}
         else:
-            data_dict = {'id': source_scope.id, 'async': asynchronous}
+            data_dict = {"async": asynchronous}
+
+        if self.match_app_version(label="scope", version=">=3.0.0"):
+            data_dict['scope_id'] = source_scope.id
+        else:
+            data_dict['id'] = source_scope.id
 
         if name is not None:
             if not isinstance(name, (string_types, text_type)):

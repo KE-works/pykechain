@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+3.3.0 (UNREALEASED)
+-------------------
+* Feature: migrating `async` to `async_mode` for all backend api's for future compatibility. Determines if backend lives on version 3.1.0 or above. (#649)
+
 3.2.3 (19DEC19)
 ---------------
 * :bug: copying of (multiple) `1-or-many` `Part` models to the same parent is now fixed. #636 Thanks to @jelleboersma
