@@ -1,9 +1,10 @@
 Change Log
 ==========
 
-3.3.0 (UNREALEASED)
--------------------
+3.2.4 (6JAN20)
+--------------
 * Feature: migrating `async` to `async_mode` for all backend api's for future compatibility. Determines if backend lives on version 3.1.0 or above. (#649)
+* dependent versions for development: coveralls (1.10.0), Sphinx (2.3.1), mypy (0.761), tox (3.14.3), pre-commit (1.21.0)
 
 3.2.3 (19DEC19)
 ---------------
