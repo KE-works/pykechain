@@ -19,7 +19,7 @@ pytest-cov==2.8.1
 coveralls==1.10.0
 
 # documentation
-Sphinx==2.3.0
+Sphinx==2.3.1
 nbsphinx==0.5.0
 
 # data science # not needed for local use
