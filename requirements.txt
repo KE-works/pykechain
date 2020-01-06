@@ -32,7 +32,7 @@ tox==3.14.2
 # code style
 flake8==3.7.9
 pydocstyle==5.0.1
-mypy==0.760; python_version >= '3.4'
+mypy==0.761; python_version >= '3.4'
 pre-commit==1.20.0
 
 # for package management (uploads)
