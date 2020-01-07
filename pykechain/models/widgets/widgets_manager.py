@@ -6,7 +6,8 @@ from six import string_types, text_type
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes, \
-    ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue
+    ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
+    KEChainPages, CardWidgetKEChainPageLink
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
@@ -163,6 +164,7 @@ class WidgetsManager(Iterable):
                              emphasize_delete: Optional[bool] = False,
                              sort_property: Optional[Union['Property2', Text]] = None,
                              sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
+                             show_images: Optional[bool] = False,
                              readable_models: Optional[List[Union['Property2', Text]]] = None,
                              writable_models: Optional[List[Union['Property2', Text]]] = None,
                              all_readable: Optional[bool] = False,
@@ -173,14 +175,29 @@ class WidgetsManager(Iterable):
 
         The widget will be saved to KE-chain.
 
-        :param readable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as readable
-        :type readable_models: list
-        :param writable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as writable
-        :type writable_models: list
-        :param all_readable: Selects all the `Properties` of part_model and configures them as readable in the widget
-        :type all_readable: bool
-        :param all_writable: Selects all the `Properties` of part_model and configures them as writable in the widget
-        :type all_writable: bool
+        :param part_model: The part model based on which all instances will be shown.
+        :type part_model: :class:`Part` or UUID
+        :param parent_instance: The parent part instance for which the instances will be shown or to which new
+            instances will be added.
+        :type parent_instance: :class:`Part` or UUID
+        :param title: A custom title for the supergrid::
+            * False (default): Part instance name
+            * String value: Custom title
+            * None: No title
+        :type title: bool or basestring or None
+        :param new_instance: Show or hide the New instance button (default False). You need to provide a
+            `parent_instance` in order for this to work.
+        :type new_instance: bool
+        :param edit: Show or hide the Edit button (default True)
+        :type edit: bool
+        :param clone: Show or hide the Clone button (default True)
+        :type clone: bool
+        :param export: Show or hide the Export Grid button (default True)
+        :type export: bool
+        :param delete: Show or hide the Delete button (default False)
+        :type delete: bool
+        :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
+        :type incomplete_rows: bool
         :param emphasize_new_instance: Emphasize the New instance button (default True)
         :type emphasize_new_instance: bool
         :param emphasize_edit: Emphasize the Edit button (default False)
@@ -189,37 +206,22 @@ class WidgetsManager(Iterable):
         :type emphasize_clone: bool
         :param emphasize_delete: Emphasize the Delete button (default False)
         :type emphasize_delete: bool
-        :param new_instance: Show or hide the New instance button (default False). You need to provide a
-            `parent_instance` in order for this to work.
-        :type new_instance: bool
-        :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
-        :type incomplete_rows: bool
-        :param export: Show or hide the Export Grid button (default True)
-        :type export: bool
-        :param edit: Show or hide the Edit button (default True)
-        :type edit: bool
-        :param clone: Show or hide the Clone button (default True)
-        :type clone: bool
-        :param delete: Show or hide the Delete button (default False)
-        :type delete: bool
-        :param part_model: The part model based on which all instances will be shown.
-        :type part_model: :class:`Part` or UUID
-        :param parent_instance: The parent part instance for which the instances will be shown or to which new
-            instances will be added.
-        :type parent_instance: :class:`Part` or UUID
-        :param custom_height: The height of the supergrid in pixels
-        :type custom_height: int or None
-        :param title: A custom title for the supergrid::
-            * False (default): Part instance name
-            * String value: Custom title
-            * None: No title
-        :type title: bool or basestring or None
         :param sort_property: The property model on which the part instances are being sorted on
         :type sort_property: :class:`Property` or UUID
         :param sort_direction: The direction on which the values of property instances are being sorted on:
             * ASC (default): Sort in ascending order
             * DESC: Sort in descending order
         :type sort_direction: basestring (see :class:`enums.SortTable`)
+        :param show_images: (O) show the attachments in the grid as images, not as hyperlinks (default False).
+        :type show_images: bool
+        :param readable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as readable
+        :type readable_models: list
+        :param writable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as writable
+        :type writable_models: list
+        :param all_readable: Selects all the `Properties` of part_model and configures them as readable in the widget
+        :type all_readable: bool
+        :param all_writable: Selects all the `Properties` of part_model and configures them as writable in the widget
+        :type all_writable: bool
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
         :rtype: Widget
@@ -242,6 +244,7 @@ class WidgetsManager(Iterable):
             # columns
             "sortedColumn": sort_property_id if sort_property_id else None,
             "sortDirection": sort_direction,
+            "showImages": show_images,
             # buttons
             "addButtonVisible": new_instance if parent_instance else False,
             "editButtonVisible": edit,
@@ -296,6 +299,7 @@ class WidgetsManager(Iterable):
                                 sort_property: Optional[Union['Property2', Text]] = None,
                                 sort_name: Optional[Union[bool, Text]] = False,
                                 sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
+                                show_images: Optional[bool] = False,
                                 collapse_filters: Optional[bool] = False,
                                 page_size: Optional[int] = 25,
                                 readable_models: Optional[List[Union['Property2', Text]]] = None,
@@ -303,21 +307,36 @@ class WidgetsManager(Iterable):
                                 all_readable: Optional[bool] = False,
                                 all_writable: Optional[bool] = False,
                                 excluded_propmodels: Optional[List[Union['Property2', Text]]] = None,
-                                prefilters: Optional[List[Union['Property2', Text]]] = None,
+                                prefilters: Optional[Dict] = None,
                                 **kwargs) -> Widget:
         """
         Add a KE-chain superGrid (e.g. basic table widget) to the customization.
 
         The widget will be saved to KE-chain.
 
-        :param readable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as readable
-        :type readable_models: list
-        :param writable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as writable
-        :type writable_models: list
-        :param all_readable: Selects all the `Properties` of part_model and configures them as readable in the widget
-        :type all_readable: bool
-        :param all_writable: Selects all the `Properties` of part_model and configures them as writable in the widget
-        :type all_writable: bool
+        :param part_model: The part model based on which all instances will be shown.
+        :type part_model: :class:`Part` or UUID
+        :param parent_instance: The parent part instance for which the instances will be shown or to which new
+            instances will be added.
+        :type parent_instance: :class:`Part` or UUID
+        :param title: A custom title for the supergrid:
+            * False (default): Part instance name
+            * String value: Custom title
+            * None: No title
+        :type title: bool or basestring or None
+        :param new_instance: Show or hide the New instance button (default False). You need to provide a
+            `parent_instance` in order for this to work.
+        :type new_instance: bool
+        :param edit: Show or hide the Edit button (default True)
+        :type edit: bool
+        :param clone: Show or hide the Clone button (default True)
+        :type clone: bool
+        :param export: Show or hide the Export Grid button (default True)
+        :type export: bool
+        :param delete: Show or hide the Delete button (default False)
+        :type delete: bool
+        :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
+        :type incomplete_rows: bool
         :param emphasize_new_instance: Emphasize the New instance button (default True)
         :type emphasize_new_instance: bool
         :param emphasize_edit: Emphasize the Edit button (default False)
@@ -326,43 +345,36 @@ class WidgetsManager(Iterable):
         :type emphasize_clone: bool
         :param emphasize_delete: Emphasize the Delete button (default False)
         :type emphasize_delete: bool
-        :param new_instance: Show or hide the New instance button (default False). You need to provide a
-            `parent_instance` in order for this to work.
-        :type new_instance: bool
-        :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
-        :type incomplete_rows: bool
-        :param export: Show or hide the Export Grid button (default True)
-        :type export: bool
-        :param edit: Show or hide the Edit button (default True)
-        :type edit: bool
-        :param clone: Show or hide the Clone button (default True)
-        :type clone: bool
-        :param delete: Show or hide the Delete button (default False)
-        :type delete: bool
-        :param collapse_filters: Hide or show the filters pane (default False)
-        :type collapse_filters: bool
-        :param page_size: Number of parts that will be shown per page in the grid.
-        :type page_size: int
-        :param part_model: The part model based on which all instances will be shown.
-        :type parent_instance: :class:`Part` or UUID
-        :param parent_instance: The parent part instance for which the instances will be shown or to which new
-            instances will be added.
-        :type parent_instance: :class:`Part` or UUID
-        :param custom_height: The height of the supergrid in pixels
-        :type custom_height: int or None
-        :param title: A custom title for the supergrid::
-            * False (default): Part instance name
-            * String value: Custom title
-            * None: No title
-        :type title: bool or basestring or None
-        :param sort_name: If set to True it will sort on name of the part. It is ignored if sort_property is None
-        :type sort_name: bool
         :param sort_property: The property model on which the part instances are being sorted on
         :type sort_property: :class:`Property` or UUID
+        :param sort_name: If set to True it will sort on name of the part. It is ignored if sort_property is None
+        :type sort_name: bool
         :param sort_direction: The direction on which the values of property instances are being sorted on:
             * ASC (default): Sort in ascending order
             * DESC: Sort in descending order
         :type sort_direction: basestring (see :class:`enums.SortTable`)
+        :param show_images: (O) show the attachments in the grid as images, not as hyperlinks (default False).
+        :type show_images: bool
+        :param collapse_filters: Hide or show the filters pane (default False)
+        :type collapse_filters: bool
+        :param page_size: Number of parts that will be shown per page in the grid.
+        :type page_size: int
+        :param readable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as readable
+        :type readable_models: list
+        :param writable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as writable
+        :type writable_models: list
+        :param all_readable: Selects all the `Properties` of part_model and configures them as readable in the widget
+        :type all_readable: bool
+        :param all_writable: Selects all the `Properties` of part_model and configures them as writable in the widget
+        :type all_writable: bool
+        :param excluded_propmodels: (O) list of properties not shown in the filter pane
+        :type excluded_propmodels: list
+        :param prefilters: (O) default filters active in the grid, defined as a dict with the following fields:
+            * property_models: list of Properties, defined as Property2 objects or UUIDs
+            * values: the pre-filter value for each property to filter on
+            * filters_type: the types of filters, either `le`, `ge`, `icontains` or `exact`
+        :type prefilters: dict
+
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
         :rtype: Widget
@@ -398,6 +410,7 @@ class WidgetsManager(Iterable):
             "showCollapseFiltersValue": "Collapsed" if collapse_filters else "Expanded",  # compatibility
             "collapseFilters": collapse_filters,
             "customPageSize": page_size,
+            "showImages": show_images,
             # buttons
             "addButtonVisible": new_instance if parent_instance_id else False,
             "editButtonVisible": edit,
@@ -1063,6 +1076,14 @@ class WidgetsManager(Iterable):
     def add_scope_widget(self,
                          team: Union['Team', Text] = None,
                          title: Optional[Text] = None,
+                         add: Optional[bool] = True,
+                         edit: Optional[bool] = True,
+                         clone: Optional[bool] = True,
+                         delete: Optional[bool] = True,
+                         emphasize_add: Optional[bool] = True,
+                         emphasize_edit: Optional[bool] = False,
+                         emphasize_clone: Optional[bool] = False,
+                         emphasize_delete: Optional[bool] = False,
                          show_columns: Optional[Iterable[Text]] = None,
                          show_all_columns: Optional[bool] = True,
                          tags: Optional[Iterable[Text]] = None,
@@ -1084,6 +1105,22 @@ class WidgetsManager(Iterable):
             * String value: Custom title
             * None (default): No title
         :type title: bool or basestring or None
+        :param add: (O) Show or hide the Add button (default True)
+        :type add: bool
+        :param clone: (O) Show or hide the Clone button (default True)
+        :type clone: bool
+        :param edit: (O) Show or hide the Edit button (default True)
+        :type edit: bool
+        :param delete: (O) Show or hide the Delete button (default True)
+        :type delete: bool
+        :param emphasize_add: (O) Emphasize the Add button (default True)
+        :type emphasize_add: bool
+        :param emphasize_clone: (O) Emphasize the Clone button (default False)
+        :type emphasize_clone: bool
+        :param emphasize_edit: (O) Emphasize the Edit button (default False)
+        :type emphasize_edit: bool
+        :param emphasize_delete: (O) Emphasize the Delete button (default False)
+        :type emphasize_delete: bool
         :param show_columns: (O) list of column headers to show. One of `ScopeWidgetColumnTypes`.
         :type show_columns: list of basestring
         :param show_all_columns: boolean to show all columns (defaults to True). If True, will override `show_columns`
@@ -1145,11 +1182,25 @@ class WidgetsManager(Iterable):
         else:
             search_filter_visible = True
 
+        for button_setting in [
+            add, edit, delete, clone, emphasize_add, emphasize_clone, emphasize_edit, emphasize_delete,
+        ]:
+            if not isinstance(button_setting, bool):
+                raise IllegalArgumentError('All button settings must be booleans.')
+
         meta.update({
             'sortedColumn': snakecase(sorted_column),
             'sortDirection': sorted_direction,
             'activeFilterVisible': active_filter_visible,
             'searchFilterVisible': search_filter_visible,
+            "addButtonVisible": add,
+            "editButtonVisible": edit,
+            "deleteButtonVisible": delete,
+            "cloneButtonVisible": clone,
+            "primaryAddUiValue": emphasize_add,
+            "primaryEditUiValue": emphasize_edit,
+            "primaryCloneUiValue": emphasize_clone,
+            "primaryDeleteUiValue": emphasize_delete,
         })
 
         widget = self.create_widget(
@@ -1238,7 +1289,7 @@ class WidgetsManager(Iterable):
                         image: Optional['Property2'] = None,
                         title: Optional[Union[type(None), Text, bool]] = None,
                         description: Optional[Union[Text, bool]] = None,
-                        link: Optional[Union[type(None), Text, 'Property2', bool]] = None,
+                        link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
                         link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
                         image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
                         **kwargs) -> Widget:
@@ -1256,7 +1307,11 @@ class WidgetsManager(Iterable):
             * False (default): Card name
             * String value: Custom title
             * None: No title
-        :param link:
+        :param link: Where the card widget refers to. This can be one of the following:
+            * None (default): no link
+            * task: another KE-chain task, provided as an Activity2 object or its UUID
+            * String value: URL to a webpage
+            * KE-chain page: built-in KE-chain page of the current scope
         :param link_target: how the link is opened, one of the values of CardWidgetLinkTarget enum.
         :param link_target: CardWidgetLinkTarget
         :param image_fit: how the image on the card widget is displayed
@@ -1316,6 +1371,11 @@ class WidgetsManager(Iterable):
             meta.update({
                 'customLink': None,
                 'showLinkValue': CardWidgetLinkValue.NO_LINK
+            })
+        elif link in KEChainPages.values():
+            meta.update({
+                'customLink': "",
+                'showLinkValue': CardWidgetKEChainPageLink[link],
             })
         else:
             meta.update({

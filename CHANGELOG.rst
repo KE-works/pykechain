@@ -1,6 +1,16 @@
 Change Log
 ==========
 
+3.3.0 (7JAN20)
+--------------
+* Added scope widget button customization in the `WidgetManager` method `add_scope_widget`.
+* Added native KE-chain pages as option for the `Card` widget `link` value. Use the `KEChainPages` enum to set your target.
+* Added `show_images` to the inputs of `add_supergrid_widget` and `add_filteredgrid_widget` methods.
+* Organized function headers of the `WidgetManager` methods to match the order of the inputs.
+* Added `edit_cascade_down` method to the `Activity2` class to trickle-down the changes to the attributes of a subprocess.
+* Added `APP` classification options to the tasks to actively work on the `APP` screens (not end-user editable)
+* Added support of Python 3.7 and 3.8 in sim scripts to support future unlocking of this feature in KE-chain 3.2 (FEB20).
+
 3.2.4 (6JAN20)
 --------------
 * Feature: migrating `async` to `async_mode` for all backend api's for future compatibility. Determines if backend lives on version 3.1.0 or above. (#649)

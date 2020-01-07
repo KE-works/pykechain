@@ -258,6 +258,31 @@ class TestActivities(TestBetamax):
             warnings.simplefilter("ignore")
             specify_wd.edit(start_date=old_start, due_date=old_due)
 
+    def test_edit_cascade_down(self):
+        # setup
+        subprocess = self.project.activity('Subprocess')  # type: Activity2
+        subtask = self.project.activity('SubTask')  # type: Activity2
+        testuser = self.client.user(username='testuser')
+
+        subprocess.edit_cascade_down(
+            assignees=['testuser'],
+            status=ActivityStatus.COMPLETED,
+            overwrite=False,
+        )
+
+        subprocess.refresh()
+        subtask.refresh()
+
+        # testing
+        self.assertIn(testuser, subprocess.assignees)
+        self.assertIn(testuser, subtask.assignees)
+        self.assertEqual(subprocess.status, ActivityStatus.COMPLETED)
+        self.assertEqual(subtask.status, ActivityStatus.COMPLETED)
+
+        # tearDown
+        subprocess.edit(assignees=[], status=ActivityStatus.OPEN)
+        subtask.edit(assignees=[], status=ActivityStatus.OPEN)
+
     def test_retrieve_children_of_task_fails_for_task(self):
         task = self.project.activity(name='Specify wheel diameter')
         with self.assertRaises(NotFoundError):
