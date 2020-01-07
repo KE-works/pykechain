@@ -1,5 +1,5 @@
 from pykechain.enums import (WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors,
-                             Category, LinkTargets)
+                             Category, LinkTargets, KEChainPages)
 from pykechain.exceptions import IllegalArgumentError, APIError
 from pykechain.models import Activity2
 from pykechain.models.widgets import (UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget,
@@ -318,6 +318,16 @@ class TestWidgetManagerInActivity(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             # noinspection PyTypeChecker
             widget_manager.add_card_widget(image_fit=3)
+
+    def test_add_card_widget_ke_chain_pages(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+
+        for native_page_name in KEChainPages.values():
+            with self.subTest(msg='Page {}'.format(native_page_name)):
+                card_widget = widget_manager.add_card_widget(title=native_page_name, link=native_page_name)
+                self.assertIsInstance(card_widget, CardWidget)
+
+        self.assertEqual(len(widget_manager), 8, msg='New KE-chain page has been added to the Enum.')
 
     def test_service_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager
