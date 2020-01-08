@@ -76,6 +76,7 @@ class TestParts(TestBetamax):
         part_set = self.project.parts()
 
         with self.assertRaises(NotImplementedError):
+            # noinspection PyStatementEffect
             part_set['testing']
 
     def test_wrongly_create_model(self):
