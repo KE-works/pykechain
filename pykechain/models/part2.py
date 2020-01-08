@@ -198,7 +198,7 @@ class Part2(Base):
         """
         if not kwargs:
             # no kwargs provided is the default, we aim to cache it.
-            if not self._cached_children:
+            if self._cached_children is None:
                 self._cached_children = list(self._client.parts(parent=self.id, category=self.category))
             return self._cached_children
         else:
@@ -670,12 +670,13 @@ class Part2(Base):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError('{}: {}'.format(str(response), response.content))
 
-        # ensure that cached children are reset such that next call the children are refreshed
-        self._cached_children = None
-        if refresh:
-            self.children()
-
         new_part_instance = Part2(response.json()['results'][0], client=self._client)
+
+        # ensure that cached children are updated
+        if self._cached_children is not None:
+            self._cached_children.append(new_part_instance)
+        elif refresh:
+            self.children()
 
         # If any values were not set via the json, set them individually
         for exception_fvalue in exception_fvalues:
