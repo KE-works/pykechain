@@ -72,8 +72,7 @@ class Part2(Base):
 
     """
 
-    def __init__(self, json, **kwargs):
-        # type: (dict, **Any) -> None
+    def __init__(self, json: Dict, **kwargs):
         """Construct a part from a KE-chain 2 json response.
 
         :param json: the json response to construct the :class:`Part` from
@@ -84,22 +83,25 @@ class Part2(Base):
 
         self.scope_id = json.get('scope_id')
 
-        self.ref = json.get('ref')
-        self.category = json.get('category')
-        self.parent_id = json.get('parent_id')
-        self.description = json.get('description')
-        self.multiplicity = json.get('multiplicity')
+        self.ref = json.get('ref')  # type: Text
+        self.category = json.get('category')  # type: Text
+        self.parent_id = json.get('parent_id')  # type: Text
+        self.description = json.get('description')  # type: Text
+        self.multiplicity = json.get('multiplicity')  # type: Text
 
-        self._cached_children = None
+        self._cached_children = None  # type: Optional[list]
 
         self.properties = [Property2.create(p, client=self._client)
-                           for p in sorted(json['properties'], key=lambda p: p.get('order', 0))]
+                           for p in sorted(json['properties'], key=lambda p: p.get('order', 0))]  # type: list
 
-    def refresh(self, json=None, url=None, extra_params=None):
+    def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional[Dict] = None):
         """Refresh the object in place."""
+        if extra_params is None:
+            extra_params = {}
+        extra_params.update(API_EXTRA_PARAMS['part2'])
         super(Part2, self).refresh(json=json,
                                    url=self._client._build_url('part2', part_id=self.id),
-                                   extra_params=API_EXTRA_PARAMS['part2'])
+                                   extra_params=extra_params)
 
     #
     # Family and structure methods
@@ -198,7 +200,7 @@ class Part2(Base):
         """
         if not kwargs:
             # no kwargs provided is the default, we aim to cache it.
-            if not self._cached_children:
+            if self._cached_children is None:
                 self._cached_children = list(self._client.parts(parent=self.id, category=self.category))
             return self._cached_children
         else:
@@ -234,8 +236,7 @@ class Part2(Base):
 
         self._cached_children = descendants_flat_list
 
-    def siblings(self, **kwargs):
-        # type: (**Any) -> Any
+    def siblings(self, **kwargs) -> Union['Partset', List['Part2']]:
         """Retrieve the siblings of this `Part` as `Partset`.
 
         Siblings are other Parts sharing the same parent of this `Part`, including the part itself.
@@ -255,8 +256,7 @@ class Part2(Base):
     # Model and Instance(s) methods
     #
 
-    def model(self):
-        # type: () -> Part2
+    def model(self) -> 'Part2':
         """
         Retrieve the model of this `Part` as `Part`.
 
@@ -280,8 +280,7 @@ class Part2(Base):
         else:
             raise NotFoundError("Part {} has no model".format(self.name))
 
-    def instances(self, **kwargs):
-        # type: (Any) -> Any
+    def instances(self, **kwargs) -> Union['PartSet', List['Part2']]:
         """
         Retrieve the instances of this `Part` as a `PartSet`.
 
@@ -310,8 +309,7 @@ class Part2(Base):
         else:
             raise NotFoundError("Part {} is not a model".format(self.name))
 
-    def instance(self):
-        # type: () -> Part2
+    def instance(self) -> 'Part2':
         """
         Retrieve the single (expected) instance of this 'Part' (of `Category.MODEL`) as a 'Part'.
 
@@ -334,8 +332,7 @@ class Part2(Base):
     # CRUD operations
     #
 
-    def edit(self, name=None, description=None, **kwargs):
-        # type: (Optional[Text], Optional[Text], **Any) -> Part2
+    def edit(self, name: Optional[Text] = None, description: Optional[Text] = None, **kwargs) -> 'Part2':
         """Edit the details of a part (model or instance).
 
         For an instance you can edit the Part instance name and the part instance description. To alter the values
@@ -392,8 +389,7 @@ class Part2(Base):
         if name:
             self.name = name
 
-    def proxy_model(self):
-        # type: () -> Part2
+    def proxy_model(self) -> 'Part2':
         """
         Retrieve the proxy model of this proxied `Part` as a `Part`.
 
@@ -422,8 +418,7 @@ class Part2(Base):
         else:
             raise NotFoundError("Part {} is not a proxy".format(self.name))
 
-    def add(self, model, **kwargs):
-        # type: (Part2, **Any) -> Part2
+    def add(self, model: 'Part2', **kwargs) -> 'Part2':
         """Add a new child instance, based on a model, to this part.
 
         This can only act on instances. It needs a model from which to create the child instance.
@@ -449,10 +444,14 @@ class Part2(Base):
         if self.category != Category.INSTANCE:
             raise APIError("Part should be of category INSTANCE")
 
-        return self._client.create_part(self, model, **kwargs)
+        new_instance = self._client.create_part(self, model, **kwargs)
 
-    def add_to(self, parent, **kwargs):
-        # type: (Part2, **Any) -> Part2
+        if self._cached_children is not None:
+            self._cached_children.append(new_instance)
+
+        return new_instance
+
+    def add_to(self, parent: 'Part2', **kwargs) -> 'Part2':
         """Add a new instance of this model to a part.
 
         This works if the current part is a model and an instance of this model is to be added
@@ -479,10 +478,14 @@ class Part2(Base):
         if self.category != Category.MODEL:
             raise APIError("Part should be of category MODEL")
 
-        return self._client.create_part(parent, self, **kwargs)
+        new_instance = self._client.create_part(parent, self, **kwargs)
 
-    def add_model(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Part2
+        if parent._cached_children is not None:
+            parent._cached_children.append(new_instance)
+
+        return new_instance
+
+    def add_model(self, *args, **kwargs) -> 'Part2':
         """Add a new child model to this model.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
@@ -495,10 +498,17 @@ class Part2(Base):
         if self.category != Category.MODEL:
             raise APIError("Part should be of category MODEL")
 
-        return self._client.create_model(self, *args, **kwargs)
+        new_model = self._client.create_model(self, *args, **kwargs)
 
-    def add_proxy_to(self, parent, name, multiplicity=Multiplicity.ONE_MANY, **kwargs):
-        # type: (Part2, Text, Optional[Union[Multiplicity, Text]], **Any) -> Part2
+        if self._cached_children is not None:
+            self._cached_children.append(new_model)
+
+        return new_model
+
+    def add_proxy_to(self, parent: 'Part2',
+                     name: Text,
+                     multiplicity: Multiplicity = Multiplicity.ONE_MANY,
+                     **kwargs) -> 'Part2':
         """Add this model as a proxy to another parent model.
 
         This will add the current model as a proxy model to another parent model. It ensure that it will copy the
@@ -546,8 +556,9 @@ class Part2(Base):
         return self._client.create_property(self, *args, **kwargs)
 
     @staticmethod
-    def _parse_update_dict(part, properties_fvalues, update_dict):
-        # type: (Part2, List, Dict) -> Tuple[List[Dict], List[Dict]]
+    def _parse_update_dict(part: 'Part2',
+                           properties_fvalues: List,
+                           update_dict: Dict) -> Tuple[List[Dict], List[Dict]]:
         """
         Check the content of the update dict and insert them into the properties_fvalues list.
 
@@ -600,8 +611,13 @@ class Part2(Base):
 
         return properties_fvalues, exception_fvalues
 
-    def add_with_properties(self, model, name=None, update_dict=None, properties_fvalues=None, refresh=True, **kwargs):
-        # type: (Part2, Optional[Text], Optional[Dict], Optional[List[Dict]], Optional[bool], **Any) -> Part2
+    def add_with_properties(self,
+                            model: 'Part2',
+                            name: Optional[Text] = None,
+                            update_dict: Optional[Dict] = None,
+                            properties_fvalues: Optional[List[Dict]] = None,
+                            refresh: Optional[bool] = None,
+                            **kwargs) -> 'Part2':
         """
         Add a new part instance of a model as a child of this part instance and update its properties in one go.
 
@@ -620,6 +636,13 @@ class Part2(Base):
            Added compatibility with KE-chain 3 backend. You may provide properties_fvalues as kwarg.
            Bulk option removed.
 
+        .. versionchanged:: 3.3
+           The 'refresh' flag is pending deprecation in version 3.4.. This flag had an effect of refreshing
+           the list of children of the current part and was default set to True. This resulted in large
+           processing times int he API as every `add_with_properties()` the children of the parent where all
+           retrieved. The default is now 'False'. The part just created is however to the internal list of children
+           once these children are retrieved earlier.
+
         :param model: model of the part which to add a new instance, should follow the model tree in KE-chain
         :type model: :class:`Part`
         :param name: (optional) name provided for the new instance as string otherwise use the name of the model
@@ -629,8 +652,8 @@ class Part2(Base):
         :type update_dict: dict or None
         :param properties_fvalues: (optional) keyword argument with raw list of properties update dicts
         :type properties_fvalues: list of dict or None
-        :param refresh: refresh the part after successful completion, default to True
-        :type refresh: bool
+        :param refresh: (optional) refresh the children of this part after successful completion, default to False
+        :type refresh: Optional[bool]
         :param kwargs: (optional) additional keyword arguments that will be passed inside the update request
         :return: the newly created :class:`Part`
         :raises NotFoundError: when the property name is not a valid property of this part
@@ -670,12 +693,19 @@ class Part2(Base):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError('{}: {}'.format(str(response), response.content))
 
-        # ensure that cached children are reset such that next call the children are refreshed
-        self._cached_children = None
-        if refresh:
-            self.children()
-
         new_part_instance = Part2(response.json()['results'][0], client=self._client)
+
+        # ensure that cached children are updated
+        if self._cached_children is not None:
+            self._cached_children.append(new_part_instance)
+        if refresh is not None:
+            import warnings
+            warnings.warn("The refresh argument on the `add_with_properties()` method will be removed in "
+                          "pykechain version 3.4.0 onwards. As the concept of 'refresh' had an effect based "
+                          "on deprecated behaviour of the KE-chain API.", PendingDeprecationWarning)
+            if refresh:
+                # refreshed the children of this part (which is the parent of the children to be refreshed.
+                self.children()
 
         # If any values were not set via the json, set them individually
         for exception_fvalue in exception_fvalues:
@@ -686,8 +716,7 @@ class Part2(Base):
 
         return new_part_instance
 
-    def clone(self, **kwargs):
-        # type: (**Any) -> Part2
+    def clone(self, **kwargs) -> 'Part2':
         """
         Clone a part.
 
@@ -718,8 +747,11 @@ class Part2(Base):
         parent = self.parent()
         return self._client._create_clone(parent, self, **kwargs)
 
-    def copy(self, target_parent, name=None, include_children=True, include_instances=True):
-        # type: (Part2, Optional[Text], Optional[bool], Optional[bool]) -> Part2
+    def copy(self,
+             target_parent: 'Part2',
+             name: Optional[Text] = None,
+             include_children: bool = True,
+             include_instances: bool = True) -> 'Part2':
         """
         Copy the `Part` to target parent, both of them having the same category.
 
@@ -780,8 +812,11 @@ class Part2(Base):
             raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category'.
                                        format(self.name, target_parent.name))
 
-    def move(self, target_parent, name=None, include_children=True, include_instances=True):
-        # type: (Part2, Optional[Text], Optional[bool], Optional[bool]) -> Part2
+    def move(self,
+             target_parent: 'Part2',
+             name: Optional[Text] = None,
+             include_children: bool = True,
+             include_instances: bool = True) -> 'Part2':
         """
         Move the `Part` to target parent, both of them the same category.
 
@@ -839,8 +874,11 @@ class Part2(Base):
         else:
             raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category')
 
-    def update(self, name=None, update_dict=None, properties_fvalues=None, **kwargs):
-        # type: (Optional[Text], Optional[Dict], Optional[List[Dict]], **Any) -> ()
+    def update(self,
+               name: Optional[Text] = None,
+               update_dict: Optional[Dict] = None,
+               properties_fvalues: Optional[List[Dict]] = None,
+               **kwargs) -> None:
         """
         Edit part name and property values in one go.
 
@@ -919,8 +957,7 @@ class Part2(Base):
         for exception_fvalue in exception_fvalues:
             self.property(exception_fvalue['id']).value = exception_fvalue['value']
 
-    def delete(self):
-        # type: () -> ()
+    def delete(self) -> None:
         """Delete this part.
 
         :return: None
@@ -931,8 +968,7 @@ class Part2(Base):
         if response.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete part: {} with id {}: ({})".format(self.name, self.id, response))
 
-    def order_properties(self, property_list=None):
-        # type: (Optional[List[Text]]) -> Part2
+    def order_properties(self, property_list: Optional[List[Text]] = None) -> None:
         """
         Order the properties of a part model using a list of property objects or property names or property id's.
 
@@ -995,9 +1031,13 @@ class Part2(Base):
     # Utility Functions
     #
 
-    def _repr_html_(self):
-        # type: () -> str
+    def _repr_html_(self) -> Text:
+        """
+        Represent the part in a HTML table for the use in notebooks.
 
+        :return: html text
+        :rtype: Text
+        """
         html = [
             "<table width=100%>",
             "<caption>{}</caption>".format(self.name),
@@ -1019,8 +1059,7 @@ class Part2(Base):
 
         return ''.join(html)
 
-    def as_dict(self):
-        # type: () -> Dict
+    def as_dict(self) -> Dict:
         """
         Retrieve the properties of a part inside a dict in this structure: {property_name: property_value}.
 

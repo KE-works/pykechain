@@ -51,10 +51,13 @@ class TestPartsCopyMove(TestBetamax):
         self.model_target_parent = self.project.model(ref='bike')
         self.instance_to_be_copied = self.model_to_be_copied.instances()[0]
         self.instance_target_parent = self.model_to_be_copied.parent().instances()[0]
+        self.dump_part = None
 
     def tearDown(self):
         self.model_to_be_copied.delete()
         self.cross_scope_wheel.delete()
+        if self.dump_part:
+            self.dump_part.delete()
         super(TestPartsCopyMove, self).tearDown()
 
     def test_copy_part_model_given_name_include_children(self):
@@ -66,6 +69,7 @@ class TestPartsCopyMove(TestBetamax):
             include_instances=False
         )
         copied_model.populate_descendants()
+        self.dump_part = copied_model
 
         # testing
         self.assertTrue(copied_model)
@@ -76,12 +80,9 @@ class TestPartsCopyMove(TestBetamax):
         self.assertEqual(copied_model.property('__Property single select list').options, ['a', 'b', 'c'])
         self.assertEqual(len(copied_model._cached_children), 2)
 
-        # tearDown
-        copied_model.delete()
-
     def test_copy_part_model_include_instances(self):
         model_target_parent = self.project.model('Bike')
-        copied_model = self.model_to_be_copied.copy(
+        self.dump_part = self.model_to_be_copied.copy(
             target_parent=model_target_parent,
             name='__Copied model under Bike',
             include_children=True,
@@ -101,9 +102,6 @@ class TestPartsCopyMove(TestBetamax):
 
         self.assertEqual(len(copied_instance._cached_children), 2)
 
-        # tearDown
-        copied_model.delete()
-
     def test_copy_part_model_empty_name_not_include_children(self):
         # setUp
         model_target_parent = self.project.model('Bike')
@@ -116,15 +114,13 @@ class TestPartsCopyMove(TestBetamax):
         )
 
         copied_model.populate_descendants()
+        self.dump_part = copied_model
 
         # testing
         self.assertTrue(copied_model)
         self.assertEqual(copied_model.name, name_of_part)
         self.assertEqual(len(copied_model.properties), 4)
         self.assertEqual(len(copied_model._cached_children), 0)
-
-        # tearDown
-        copied_model.delete()
 
     def test_move_part_model(self):
         # setUp
@@ -136,14 +132,11 @@ class TestPartsCopyMove(TestBetamax):
                                      name='__New part under bike',
                                      include_children=True)
 
-        moved_model = self.project.model(name='__New part under bike')
+        self.dump_part = self.project.model(name='__New part under bike')
 
         # testing
         with self.assertRaises(NotFoundError):
             self.project.model(name=clone_of_original_model.name)
-
-        # tearDown
-        moved_model.delete()
 
     def test_copy_part_instance(self):
         # setUp
@@ -153,6 +146,7 @@ class TestPartsCopyMove(TestBetamax):
 
         copied_instance = self.project.part(name='__Copied instance')
         copied_instance.populate_descendants()
+        self.dump_part = copied_instance.model()
 
         # testing
         self.assertTrue(copied_instance)
@@ -163,9 +157,6 @@ class TestPartsCopyMove(TestBetamax):
         self.assertEqual(copied_instance.property('__property-single-select-list').value, None)
 
         self.assertEqual(len(copied_instance._cached_children), 2)
-
-        # tearDown
-        copied_instance.model().delete()
 
     def test_move_part_instance(self):
         # setUp
@@ -189,6 +180,7 @@ class TestPartsCopyMove(TestBetamax):
                                                          include_children=False)
 
         moved_instance.populate_descendants()
+        self.dump_part = moved_instance.model()
 
         # testing
         with self.assertRaises(NotFoundError):
@@ -197,9 +189,6 @@ class TestPartsCopyMove(TestBetamax):
         self.assertTrue(moved_instance)
         self.assertEqual(len(moved_instance.properties), 0)
         # self.assertEqual(moved_instance.property('Property multi-text').value, 'Yes yes oh yes')
-
-        # tearDown
-        moved_instance.model().delete()
 
     def test_copy_different_categories(self):
         target_instance = self.project.part(name='Bike')

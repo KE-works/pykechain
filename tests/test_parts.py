@@ -68,6 +68,11 @@ class TestParts(TestBetamax):
         with self.assertRaises(MultipleFoundError):
             self.project.model()
 
+    def test_scope(self):
+        first_part = self.project.parts()[0]
+
+        self.assertEqual(first_part.scope(), self.project)
+
     def test_part_set_iterator(self):
         for part in self.project.parts():
             self.assertTrue(part.name)
@@ -76,6 +81,7 @@ class TestParts(TestBetamax):
         part_set = self.project.parts()
 
         with self.assertRaises(NotImplementedError):
+            # noinspection PyStatementEffect
             part_set['testing']
 
     def test_wrongly_create_model(self):
@@ -222,7 +228,7 @@ class TestParts(TestBetamax):
         children_of_parent_of_frame_ids = [p.id for p in children_of_parent_of_frame]
         for sibling in siblings_of_frame:
             self.assertIn(sibling.id, children_of_parent_of_frame_ids,
-                          'sibling {} is appearing in the siblings method and not in the children of ' \
+                          'sibling {} is appearing in the siblings method and not in the children of '
                           'parent method'.format(sibling))
 
     # new in 1.3+
@@ -385,7 +391,7 @@ class TestParts(TestBetamax):
     # new in 1.12
     def test_retrieve_children_of_part_with_additional_arguments(self):
         bike = self.project.part('Bike')  # type:Part
-        self.assertIsInstance(bike, (Part, Part2))
+        self.assertIsInstance(bike, Part2)
         children_of_bike = bike.children(name__icontains='Wheel')
         self.assertIsInstance(children_of_bike, PartSet)
         self.assertTrue(len(children_of_bike) >= 1)  # eg. Wheels ...
