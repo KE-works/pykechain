@@ -73,7 +73,6 @@ class Part2(Base):
     """
 
     def __init__(self, json: Dict, **kwargs):
-        # type: (dict, **Any) -> None
         """Construct a part from a KE-chain 2 json response.
 
         :param json: the json response to construct the :class:`Part` from
@@ -90,7 +89,7 @@ class Part2(Base):
         self.description = json.get('description')  # type: Text
         self.multiplicity = json.get('multiplicity')  # type: Text
 
-        self._cached_children = None  # type: list
+        self._cached_children = None  # type: (None, list)
 
         self.properties = [Property2.create(p, client=self._client)
                            for p in sorted(json['properties'], key=lambda p: p.get('order', 0))]  # type: list
@@ -99,9 +98,10 @@ class Part2(Base):
         """Refresh the object in place."""
         if extra_params is None:
             extra_params = {}
+        extra_params.update(API_EXTRA_PARAMS['part2'])
         super(Part2, self).refresh(json=json,
                                    url=self._client._build_url('part2', part_id=self.id),
-                                   extra_params=extra_params.update(API_EXTRA_PARAMS['part2']))
+                                   extra_params=extra_params)
 
     #
     # Family and structure methods
