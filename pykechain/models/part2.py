@@ -89,7 +89,7 @@ class Part2(Base):
         self.description = json.get('description')  # type: Text
         self.multiplicity = json.get('multiplicity')  # type: Text
 
-        self._cached_children = None  # type: (None, list)
+        self._cached_children = None  # type: Optional[list]
 
         self.properties = [Property2.create(p, client=self._client)
                            for p in sorted(json['properties'], key=lambda p: p.get('order', 0))]  # type: list
@@ -200,7 +200,7 @@ class Part2(Base):
         """
         if not kwargs:
             # no kwargs provided is the default, we aim to cache it.
-            if not self._cached_children:
+            if self._cached_children is None:
                 self._cached_children = list(self._client.parts(parent=self.id, category=self.category))
             return self._cached_children
         else:
@@ -616,7 +616,7 @@ class Part2(Base):
                             name: Optional[Text] = None,
                             update_dict: Optional[Dict] = None,
                             properties_fvalues: Optional[List[Dict]] = None,
-                            refresh: bool = True,
+                            refresh: Optional[bool] = None,
                             **kwargs) -> 'Part2':
         """
         Add a new part instance of a model as a child of this part instance and update its properties in one go.
@@ -636,6 +636,13 @@ class Part2(Base):
            Added compatibility with KE-chain 3 backend. You may provide properties_fvalues as kwarg.
            Bulk option removed.
 
+        .. versionchanged:: 3.3
+           The 'refresh' flag is pending deprecation in version 3.4.. This flag had an effect of refreshing
+           the list of children of the current part and was default set to True. This resulted in large
+           processing times int he API as every `add_with_properties()` the children of the parent where all
+           retrieved. The default is now 'False'. The part just created is however to the internal list of children
+           once these children are retrieved earlier.
+
         :param model: model of the part which to add a new instance, should follow the model tree in KE-chain
         :type model: :class:`Part`
         :param name: (optional) name provided for the new instance as string otherwise use the name of the model
@@ -645,8 +652,8 @@ class Part2(Base):
         :type update_dict: dict or None
         :param properties_fvalues: (optional) keyword argument with raw list of properties update dicts
         :type properties_fvalues: list of dict or None
-        :param refresh: refresh the part after successful completion, default to True
-        :type refresh: bool
+        :param refresh: (optional) refresh the children of this part after successful completion, default to False
+        :type refresh: Optional[bool]
         :param kwargs: (optional) additional keyword arguments that will be passed inside the update request
         :return: the newly created :class:`Part`
         :raises NotFoundError: when the property name is not a valid property of this part
@@ -691,8 +698,14 @@ class Part2(Base):
         # ensure that cached children are updated
         if self._cached_children is not None:
             self._cached_children.append(new_part_instance)
-        elif refresh:
-            self.children()
+        if refresh is not None:
+            import warnings
+            warnings.warn("The refresh argument on the `add_with_properties()` method will be removed in "
+                          "pykechain version 3.4.0 onwards. As the concept of 'refresh' had an effect based "
+                          "on deprecated behaviour of the KE-chain API.", PendingDeprecationWarning)
+            if refresh:
+                # refreshed the children of this part (which is the parent of the children to be refreshed.
+                self.children()
 
         # If any values were not set via the json, set them individually
         for exception_fvalue in exception_fvalues:
