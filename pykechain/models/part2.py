@@ -198,7 +198,7 @@ class Part2(Base):
         """
         if not kwargs:
             # no kwargs provided is the default, we aim to cache it.
-            if self._cached_children is None:
+            if not self._cached_children:
                 self._cached_children = list(self._client.parts(parent=self.id, category=self.category))
             return self._cached_children
         else:
@@ -449,7 +449,12 @@ class Part2(Base):
         if self.category != Category.INSTANCE:
             raise APIError("Part should be of category INSTANCE")
 
-        return self._client.create_part(self, model, **kwargs)
+        new_instance = self._client.create_part(self, model, **kwargs)
+
+        if self._cached_children is not None:
+            self._cached_children.append(new_instance)
+
+        return new_instance
 
     def add_to(self, parent, **kwargs):
         # type: (Part2, **Any) -> Part2
@@ -479,7 +484,12 @@ class Part2(Base):
         if self.category != Category.MODEL:
             raise APIError("Part should be of category MODEL")
 
-        return self._client.create_part(parent, self, **kwargs)
+        new_instance = self._client.create_part(parent, self, **kwargs)
+
+        if parent._cached_children is not None:
+            parent._cached_children.append(new_instance)
+
+        return new_instance
 
     def add_model(self, *args, **kwargs):
         # type: (*Any, **Any) -> Part2
@@ -495,7 +505,12 @@ class Part2(Base):
         if self.category != Category.MODEL:
             raise APIError("Part should be of category MODEL")
 
-        return self._client.create_model(self, *args, **kwargs)
+        new_model = self._client.create_model(self, *args, **kwargs)
+
+        if self._cached_children is not None:
+            self._cached_children.append(new_model)
+
+        return new_model
 
     def add_proxy_to(self, parent, name, multiplicity=Multiplicity.ONE_MANY, **kwargs):
         # type: (Part2, Text, Optional[Union[Multiplicity, Text]], **Any) -> Part2
@@ -543,7 +558,11 @@ class Part2(Base):
         if self.category != Category.MODEL:
             raise APIError("Part should be of category MODEL")
 
-        return self._client.create_property(self, *args, **kwargs)
+        new_property = self._client.create_property(self, *args, **kwargs)
+
+        self.properties.append(new_property)
+
+        return new_property
 
     @staticmethod
     def _parse_update_dict(part, properties_fvalues, update_dict):
