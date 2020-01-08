@@ -558,11 +558,7 @@ class Part2(Base):
         if self.category != Category.MODEL:
             raise APIError("Part should be of category MODEL")
 
-        new_property = self._client.create_property(self, *args, **kwargs)
-
-        self.properties.append(new_property)
-
-        return new_property
+        return self._client.create_property(self, *args, **kwargs)
 
     @staticmethod
     def _parse_update_dict(part, properties_fvalues, update_dict):
