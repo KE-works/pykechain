@@ -70,7 +70,7 @@ class Widget(Base):
         :return: The parent of this widget.
         :rtype: :class:`Widget`
         """
-        return self._client.widget(id=self._parent_id)
+        return self._client.widgets(id=self._parent_id)
 
     def validate_meta(self, meta):
         # type: (dict) -> dict
