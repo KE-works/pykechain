@@ -1476,19 +1476,9 @@ class WidgetsManager(Iterable):
             self._widgets.remove(widget)
         self._widgets.insert(index, widget)
 
-        # bulk update the order of the widgets:
-        fvalues = [dict(id=w.id, order=index) for index, w in enumerate(self._widgets)]
+        widgets = [dict(id=w.id, order=index) for index, w in enumerate(self._widgets)]
 
-        response = self._client._request("PUT", self._client._build_url('widgets_bulk_update'),
-                                         params=API_EXTRA_PARAMS['widgets'],
-                                         json=fvalues)
-
-        if response.status_code != requests.codes.ok:
-            raise APIError("Could not update the order of the widgets: {}: {}".format(str(response), response.content))
-
-        widgets_response = response.json().get('results')
-        new_widgets = [Widget.create(json=widget_json, client=self._client) for widget_json in widgets_response]
-        self._widgets = new_widgets
+        self._widgets = self._client.update_widgets(widgets=widgets)
 
     def delete_widget(self, key: Any) -> bool:
         """
