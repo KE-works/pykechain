@@ -1,6 +1,7 @@
 from pykechain.enums import Category, Multiplicity
 from pykechain.exceptions import NotFoundError, MultipleFoundError
 from pykechain.models import PartSet, Part2
+from pykechain.utils import find
 from tests.classes import TestBetamax
 
 
@@ -54,6 +55,20 @@ class TestPartRetrieve(TestBetamax):
         # testing
         self.assertTrue(len(bike_part._cached_children) >= 5)
         self.assertTrue(len(bike_model._cached_children) >= 4)
+
+    # test added in 3.2
+    def test_populate_descendants(self):
+        # setUp
+        root = self.project.part(name='Product')
+        descendants = root.populate_descendants()
+        # testing
+        self.assertIsInstance(descendants, list)
+        self.assertTrue(len(descendants), 8)
+
+        # follow-up
+        bike_part = find(descendants, lambda d: d.name == 'Bike')
+        self.assertIsNotNone(bike_part._cached_children)
+        self.assertTrue(len(bike_part._cached_children), 7)
 
     # test added in 3.0
     def test_retrieve_parts_with_refs(self):

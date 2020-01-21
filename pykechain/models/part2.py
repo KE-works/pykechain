@@ -228,13 +228,28 @@ class Part2(Base):
         >>> bike.populate_descendants(batch=150)
 
         """
-        descendants_flat_list = list(self._client.parts(
+        all_descendants = list(self._client.parts(
             parent_id=self.id,
             category=self.category,
-            batch=batch)
-        )
+            batch=batch,
+        ))
 
-        self._cached_children = descendants_flat_list
+        # Create mapping table from a parent part ID to its children
+        children_by_parent_id = dict()
+        for descendant in all_descendants:
+            if descendant.parent_id in children_by_parent_id:
+                children_by_parent_id[descendant.parent_id].append(descendant)
+            else:
+                children_by_parent_id[descendant.parent_id] = [descendant]
+
+        # Populate every descendant with its children
+        for descendant in all_descendants:
+            if descendant.id in children_by_parent_id:
+                descendant._cached_children = children_by_parent_id[descendant.id]
+
+        self._cached_children = children_by_parent_id.get(self.id, None)
+
+        return all_descendants
 
     def siblings(self, **kwargs) -> Union['Partset', List['Part2']]:
         """Retrieve the siblings of this `Part` as `Partset`.
