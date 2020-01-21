@@ -247,7 +247,7 @@ class Part2(Base):
             if descendant.id in children_by_parent_id:
                 descendant._cached_children = children_by_parent_id[descendant.id]
 
-        self._cached_children = children_by_parent_id.get(self.id, None)
+        self._cached_children = children_by_parent_id.get(self.id, list())
 
         return all_descendants
 
