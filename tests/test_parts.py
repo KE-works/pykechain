@@ -234,9 +234,9 @@ class TestParts(TestBetamax):
     # new in 1.3+
     def test_kwargs_on_part_retrieval(self):
         # test that the additional kwargs are added to the query filter on the api
-        bikes = self.project.parts('Bike', descendants=True)  # type:PartSet
+        bikes = self.project.parts('Bike', order=True)  # type:PartSet
         self.assertTrue(len(bikes) == 1)
-        self.assertTrue(self.client.last_url.find('descendants'))
+        self.assertTrue(self.client.last_url.find('order'))
 
     # new in 1.5+
     def test_edit_part_instance_name(self):
