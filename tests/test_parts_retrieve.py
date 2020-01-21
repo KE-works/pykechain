@@ -45,30 +45,35 @@ class TestPartRetrieve(TestBetamax):
         # tearDown
         model_without_instances.delete()
 
-    # test added in 2.1
+    # test added in 2.1, changed in 3.2
     def test_get_parts_with_descendants_tree(self):
-        # setUp
-        bike_part = self.project.part(name='Bike')
-        bike_part.populate_descendants()
-        bike_model = self.project.model(name='Bike')
-        bike_model.populate_descendants()
-        # testing
-        self.assertTrue(len(bike_part._cached_children) >= 5)
-        self.assertTrue(len(bike_model._cached_children) >= 4)
-
-    # test added in 3.2
-    def test_populate_descendants(self):
         # setUp
         root = self.project.part(name='Product')
         descendants = root.populate_descendants()
+
         # testing
         self.assertIsInstance(descendants, list)
-        self.assertTrue(len(descendants), 8)
+        self.assertEqual(len(descendants), 8, msg='Number of instances has changed, expected 8')
 
         # follow-up
         bike_part = find(descendants, lambda d: d.name == 'Bike')
         self.assertIsNotNone(bike_part._cached_children)
-        self.assertTrue(len(bike_part._cached_children), 7)
+        self.assertEqual(len(bike_part._cached_children), 7, msg='Number of child instances has changed, expected 7')
+
+    # test added in 2.1, changed in 3.2
+    def test_get_models_with_descendants_tree(self):
+        # setUp
+        root = self.project.model(name='Product')
+        descendants = root.populate_descendants()
+
+        # testing
+        self.assertIsInstance(descendants, list)
+        self.assertEqual(len(descendants), 6, msg='Number of models has changed, expected 6')
+
+        # follow-up
+        bike_model = find(descendants, lambda d: d.name == 'Bike')
+        self.assertIsNotNone(bike_model._cached_children)
+        self.assertEqual(len(bike_model._cached_children), 5, msg='Number of child models has changed, expected 5')
 
     # test added in 3.0
     def test_retrieve_parts_with_refs(self):

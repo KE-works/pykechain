@@ -229,10 +229,10 @@ class Part2(Base):
 
         """
         all_descendants = list(self._client.parts(
-            parent_id=self.id,
             category=self.category,
             batch=batch,
-        ))
+            descendants=self.id,
+        ))[1:]  # remove the part itself, which is returned on index 0
 
         # Create mapping table from a parent part ID to its children
         children_by_parent_id = dict()
