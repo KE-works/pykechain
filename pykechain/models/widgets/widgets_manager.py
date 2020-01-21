@@ -4,7 +4,6 @@ from typing import Any, Iterable, Union, AnyStr, Optional, Text, Dict, List
 import requests
 from six import string_types, text_type
 
-from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes, \
     ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
     KEChainPages, CardWidgetKEChainPageLink
