@@ -2450,3 +2450,23 @@ class Client(object):
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not move activity, {}: {}".format(str(response), response.content))
+
+    def update_properties(self, properties: List[Dict]) -> None:
+        """
+        Updates multiple properties simultaneously.
+
+        :param properties: list of dictionaries to set the properties
+        :type properties: List[Dict]
+        :return: None
+        """
+        response = self._request(
+            'POST',
+            self._build_url('property2_bulk_update'),
+            params=API_EXTRA_PARAMS['property2'],
+            json=properties,
+        )
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Properties ({})".format(response))
+
+        return None
