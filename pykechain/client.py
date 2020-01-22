@@ -2114,9 +2114,7 @@ class Client(object):
 
     @staticmethod
     def _validate_widget(activity, widget_type, title, meta, order, parent, **kwargs):
-        """
-        Validate the format and content of the configuration of a widget.
-        """
+        """Validate the format and content of the configuration of a widget."""
 
         if isinstance(activity, (Activity, Activity2)):
             activity = activity.id
@@ -2324,7 +2322,6 @@ class Client(object):
         :return: list of Widget objects
         :rtype List[Widget]
         """
-
         if not isinstance(widgets, list) or not all(isinstance(w, dict) for w in widgets):
             raise IllegalArgumentError('`widgets` must provided as a list of dictionaries.')
 
