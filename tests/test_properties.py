@@ -348,26 +348,74 @@ class TestProperties(TestBetamax):
 
         self.assertEqual(dual_pad_prop_retrieved_from_seat.id, dual_pad_property.id)
 
+
+class TestUpdateProperties(TestBetamax):
+    def setUp(self):
+        super().setUp()
+
+        self.bike = self.project.model('Bike')
+        self.submodel = self.project.create_model(name='_test submodel', parent=self.bike)
+
+        self.prop_1 = self.submodel.add_property(name=PropertyType.CHAR_VALUE, property_type=PropertyType.CHAR_VALUE)
+        self.prop_2 = self.submodel.add_property(name=PropertyType.TEXT_VALUE, property_type=PropertyType.TEXT_VALUE)
+        self.props = [self.prop_1, self.prop_2]
+
+    def tearDown(self):
+        self.submodel.delete()
+        super().tearDown()
+
+    def _refresh_prop(self, p):
+        return self.client.property(pk=p.id, category=p.category)
+
     def test_bulk_update(self):
-        # setUp
-        submodel = self.project.create_model(name='_test submodel', parent=self.bike)
-        new_properties = [submodel.add_property(name=pt, property_type=pt) for pt in
-                          [PropertyType.CHAR_VALUE, PropertyType.TEXT_VALUE]]
-
-        self.assertTrue(all(p.value is None for p in new_properties))
-
-        update = [dict(id=p.id, value='new value') for p in new_properties]
+        """Test the API using the Client method."""
+        update = [dict(id=p.id, value='new value') for p in self.props]
 
         updated_properties = self.client.update_properties(properties=update)
 
         # testing
         self.assertIsInstance(updated_properties, list)
-        self.assertTrue(all(p1 == p2 for p1, p2 in zip(new_properties, updated_properties)))
+        self.assertTrue(all(p1 == p2 for p1, p2 in zip(self.props, updated_properties)))
         self.assertTrue(all(isinstance(p, Property2) for p in updated_properties))
         self.assertTrue(all(p.value == 'new value' for p in updated_properties))
 
-        # tearDown
-        submodel.delete()
+    def test_bulk_update_manual(self):
+        """Test storing of value updates in the Property class."""
+        # setUp
+        Property.use_bulk_update = True
+        self.prop_1.value = 'new value'
+        self.prop_2.value = 'another value'
+
+        # testing
+        self.assertIsNone(self._refresh_prop(self.prop_1).value)
+        self.assertIsNone(self._refresh_prop(self.prop_2).value)
+
+        Property.update_values(client=self.client)
+
+        self.assertEqual(self._refresh_prop(self.prop_1).value, 'new value')
+        self.assertEqual(self._refresh_prop(self.prop_2).value, 'another value')
+
+    def test_bulk_update_reset(self):
+        """Test whether bulk update is reset to `False` after update is performed."""
+        # setUp
+        Property.use_bulk_update = True
+        self.prop_1.value = 'new value'
+
+        # testing
+        self.assertIsNone(self._refresh_prop(self.prop_1).value)
+        Property.update_values(client=self.client)
+        self.assertEqual(self._refresh_prop(self.prop_1).value, 'new value')
+        self.assertFalse(Property.use_bulk_update)
+
+        # setUp 2
+        Property.use_bulk_update = True
+        self.prop_2.value = 'another value'
+
+        # testing 2
+        self.assertIsNone(self._refresh_prop(self.prop_2).value)
+        Property.update_values(client=self.client, use_bulk_update=True)
+        self.assertEqual(self._refresh_prop(self.prop_2).value, 'another value')
+        self.assertTrue(Property.use_bulk_update)
 
 
 class TestPropertiesWithReferenceProperty(TestBetamax):

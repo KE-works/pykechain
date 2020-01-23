@@ -14,6 +14,8 @@ from pykechain.models.validators.validators_base import PropertyValidator
 class Property(Base):
     """A virtual object representing a KE-chain property.
 
+    :cvar bulk_update: flag to postpone update of properties until manually requested
+    :type bulk_update: bool
     :ivar type: The property type of the property. One of the types described in :class:`pykechain.enums.PropertyType`
     :type type: str
     :ivar category: The category of the property, either `Category.MODEL` of `Category.INSTANCE`
@@ -39,6 +41,9 @@ class Property(Base):
     :ivar is_invalid: if the property does not conform to the validator
     :type is_invalid: bool
     """
+
+    use_bulk_update = False
+    _update_package = list()
 
     def __init__(self, json, **kwargs):
         # type: (dict, **Any) -> None
@@ -87,7 +92,30 @@ class Property(Base):
     @value.setter
     def value(self, value):
         # type: (Any) -> None
-        self._put_value(value)
+        if self.use_bulk_update:
+            self.__class__._update_package.append(dict(
+                id=self.id,
+                value=value,
+            ))
+            self._value = value
+        else:
+            self._put_value(value)
+
+    @classmethod
+    def update_values(cls, client: 'Client', use_bulk_update: bool = False) -> None:
+        """
+        Perform the bulk update of property values using the stored values in the `Property` class.
+
+        :param client: Client object
+        :type client: Client
+        :param use_bulk_update: set the class attribute, defaults to False.
+        :type use_bulk_update: bool
+        :return: None
+        """
+        if cls.use_bulk_update:
+            client.update_properties(properties=cls._update_package)
+            cls._update_package = list()
+        cls.use_bulk_update = use_bulk_update
 
     @property
     def validators(self):
