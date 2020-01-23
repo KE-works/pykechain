@@ -221,7 +221,7 @@ class Part2(Base):
 
         :param batch: Number of Parts to be retrieved in a batch
         :type batch: int (defaults to 200)
-        :returns: list of `Parts` with `children`
+        :returns: None
         :raises APIError: if you cannot create the children tree.
 
         Example
