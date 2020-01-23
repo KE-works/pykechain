@@ -217,6 +217,8 @@ class Part2(Base):
 
         .. versionadded:: 2.1
 
+        .. versionchanged:: 3.3.2 now populates child parts instead of this part
+
         :param batch: Number of Parts to be retrieved in a batch
         :type batch: int (defaults to 200)
         :returns: list of `Parts` with `children`
