@@ -207,7 +207,7 @@ class Part2(Base):
             # if kwargs are provided, we assume no use of cache as specific filtering on the children is performed.
             return self._client.parts(parent=self.id, category=self.category, **kwargs)
 
-    def populate_descendants(self, batch: int = 200) -> Union['Partset', List['Part2']]:
+    def populate_descendants(self, batch: int = 200) -> None:
         """
         Retrieve the descendants of a specific part in a list of dicts and populate the :func:`Part.children()` method.
 
@@ -251,7 +251,7 @@ class Part2(Base):
 
         self._cached_children = children_by_parent_id.get(self.id, list())
 
-        return all_descendants
+        return None
 
     def siblings(self, **kwargs) -> Union['Partset', List['Part2']]:
         """Retrieve the siblings of this `Part` as `Partset`.
