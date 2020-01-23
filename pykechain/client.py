@@ -2451,17 +2451,22 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not move activity, {}: {}".format(str(response), response.content))
 
-    def update_properties(self, properties: List[Dict]) -> None:
+    def update_properties(self, properties: List[Dict]) -> List['AnyProperty']:
         """
-        Updates multiple properties simultaneously.
+        Update multiple properties simultaneously.
 
         :param properties: list of dictionaries to set the properties
         :type properties: List[Dict]
-        :return: None
+        :raises: IllegalArgumentError
+        :return: list of Properties
+        :rtype List[AnyProperty]
         """
+        if not isinstance(properties, list) or not all(isinstance(p, dict) for p in properties):
+            raise IllegalArgumentError('All properties must be provided in a list of dicts.')
+
         response = self._request(
             'POST',
-            self._build_url('property2_bulk_update'),
+            self._build_url('properties2_bulk_update'),
             params=API_EXTRA_PARAMS['property2'],
             json=properties,
         )
@@ -2469,4 +2474,6 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Properties ({})".format(response))
 
-        return None
+        properties = [Property2.create(client=self, json=js) for js in response.json()['results']]
+
+        return properties

@@ -348,6 +348,27 @@ class TestProperties(TestBetamax):
 
         self.assertEqual(dual_pad_prop_retrieved_from_seat.id, dual_pad_property.id)
 
+    def test_bulk_update(self):
+        # setUp
+        submodel = self.project.create_model(name='_test submodel', parent=self.bike)
+        new_properties = [submodel.add_property(name=pt, property_type=pt) for pt in
+                          [PropertyType.CHAR_VALUE, PropertyType.TEXT_VALUE]]
+
+        self.assertTrue(all(p.value is None for p in new_properties))
+
+        update = [dict(id=p.id, value='new value') for p in new_properties]
+
+        updated_properties = self.client.update_properties(properties=update)
+
+        # testing
+        self.assertIsInstance(updated_properties, list)
+        self.assertTrue(all(p1 == p2 for p1, p2 in zip(new_properties, updated_properties)))
+        self.assertTrue(all(isinstance(p, Property2) for p in updated_properties))
+        self.assertTrue(all(p.value == 'new value' for p in updated_properties))
+
+        # tearDown
+        submodel.delete()
+
 
 class TestPropertiesWithReferenceProperty(TestBetamax):
     def setUp(self):
