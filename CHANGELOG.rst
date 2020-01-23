@@ -1,6 +1,8 @@
 Change Log
 ==========
 
+* Added `Client` method for the bulk-update properties API endpoint.
+
 3.3.1 (8JAN19)
 --------------
 * Fixed a lingering performance issue with `Part.add_with_properties()`. In older KE-chain API versions a full part refresh was needed in order to re-retrieve the attributes of a `Part`. In the current backend API this is not needed anymore. The attribute that caused this was the `refresh` flag in the `Part.add_with_properties` method call and resulted in the re-retrieval of all children of a part and caused longer cycle times once the list of children grows longer (linear). This flag will be deprecated in the next release. Currently all Parts are automatically refreshed with information from the backend in a lightweight manner (without an extra API call). The part just created with the method `add_with_properties` is added to the `Part`'s children automatically if the children of the parent are already once retrieved (and cached). Many thanks to our committed users / customers for finding this and pointing this out.
