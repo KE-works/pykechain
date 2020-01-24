@@ -207,7 +207,7 @@ class Part2(Base):
             # if kwargs are provided, we assume no use of cache as specific filtering on the children is performed.
             return self._client.parts(parent=self.id, category=self.category, **kwargs)
 
-    def populate_descendants(self, batch: int = 200) -> Union['Partset', List['Part2']]:
+    def populate_descendants(self, batch: int = 200) -> None:
         """
         Retrieve the descendants of a specific part in a list of dicts and populate the :func:`Part.children()` method.
 
@@ -217,9 +217,11 @@ class Part2(Base):
 
         .. versionadded:: 2.1
 
+        .. versionchanged:: 3.3.2 now populates child parts instead of this part
+
         :param batch: Number of Parts to be retrieved in a batch
         :type batch: int (defaults to 200)
-        :returns: list of `Parts` with `children`
+        :returns: None
         :raises APIError: if you cannot create the children tree.
 
         Example
@@ -228,13 +230,28 @@ class Part2(Base):
         >>> bike.populate_descendants(batch=150)
 
         """
-        descendants_flat_list = list(self._client.parts(
-            parent_id=self.id,
+        all_descendants = list(self._client.parts(
             category=self.category,
-            batch=batch)
-        )
+            batch=batch,
+            descendants=self.id,
+        ))[1:]  # remove the part itself, which is returned on index 0
 
-        self._cached_children = descendants_flat_list
+        # Create mapping table from a parent part ID to its children
+        children_by_parent_id = dict()
+        for descendant in all_descendants:
+            if descendant.parent_id in children_by_parent_id:
+                children_by_parent_id[descendant.parent_id].append(descendant)
+            else:
+                children_by_parent_id[descendant.parent_id] = [descendant]
+
+        # Populate every descendant with its children
+        for descendant in all_descendants:
+            if descendant.id in children_by_parent_id:
+                descendant._cached_children = children_by_parent_id[descendant.id]
+
+        self._cached_children = children_by_parent_id.get(self.id, list())
+
+        return None
 
     def siblings(self, **kwargs) -> Union['Partset', List['Part2']]:
         """Retrieve the siblings of this `Part` as `Partset`.
