@@ -3,6 +3,7 @@ Change Log
 
 * Added `Client` method for the bulk-update properties API endpoint.
 * Added `Property` flag `use_bulk_update` and class method `update_values` to support bulk-update of property values while still using the `value` attribute.
+* Updated `populate_descendants()` to use new API and actually store the `_cached_children`.
 
 3.3.1 (8JAN19)
 --------------
