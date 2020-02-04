@@ -5,7 +5,7 @@ from jsonschema import validate
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import WidgetTypes, Category
-from pykechain.exceptions import APIError, IllegalArgumentError
+from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
 from pykechain.models import Base
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 
@@ -70,7 +70,16 @@ class Widget(Base):
         :return: The parent of this widget.
         :rtype: :class:`Widget`
         """
-        return self._client.widgets(id=self._parent_id)
+        if not self._parent_id:
+            raise NotFoundError('Widget has no parent widget (parent_id is null).')
+
+        parent_widgets = self._client.widgets(pk=self._parent_id)
+        if not parent_widgets:
+            raise NotFoundError('No parent widget with uuid "{}" was found.'.format(self._parent_id))
+        elif len(parent_widgets) > 1:
+            raise MultipleFoundError('There are multiple widgets with uuid "{}".'.format(self._parent_id))
+        else:
+            return parent_widgets[0]
 
     def validate_meta(self, meta):
         # type: (dict) -> dict

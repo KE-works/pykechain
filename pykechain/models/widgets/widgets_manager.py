@@ -23,7 +23,7 @@ class WidgetsManager(Iterable):
 
     def __init__(self,
                  widgets: Iterable[Widget],
-                 activity: Union['Activity2', 'Activity2', AnyStr],
+                 activity: Union['Activity', 'Activity2', AnyStr],
                  client: Optional['Client'] = None,
                  **kwargs) -> None:
         """Construct a Widget Manager from a list of widgets.

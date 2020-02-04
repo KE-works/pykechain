@@ -392,9 +392,6 @@ class Activity2(Base, TagsMixin):
         :return: flat list of the current task all descendants that have been edited
         :rtype list[Activity2]
         """
-        if self.activity_type == ActivityType.TASK:
-            raise IllegalArgumentError('`edit_cascade_down` is only used for subprocesses, "{}" is not.'.format(self))
-
         update_dict = {'id': self.id}
 
         self._validate_edit_arguments(

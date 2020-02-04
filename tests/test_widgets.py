@@ -1,6 +1,6 @@
 from pykechain.enums import (WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors,
                              Category, LinkTargets, KEChainPages)
-from pykechain.exceptions import IllegalArgumentError, APIError
+from pykechain.exceptions import IllegalArgumentError, APIError, NotFoundError
 from pykechain.models import Activity2
 from pykechain.models.widgets import (UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget,
                                       SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, SignatureWidget,
@@ -453,6 +453,20 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertIsInstance(widget1, PropertygridWidget)
         self.assertIsInstance(widget2, AttachmentviewerWidget)
         self.assertEqual(len(widget_manager), 1 + 3)
+
+    def test_parent(self):
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+        multi_column_widget = widget_manager.add_multicolumn_widget(title="Multi column widget")
+
+        child_widget = widget_manager.add_html_widget(
+            title='Text widget', html='Text', parent_widget=multi_column_widget)
+
+        parent_widget = child_widget.parent()
+
+        self.assertEqual(multi_column_widget, parent_widget)
+
+        with self.assertRaises(NotFoundError):
+            parent_widget.parent()
 
     def test_scope_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager

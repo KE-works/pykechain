@@ -1,6 +1,7 @@
 from pykechain.enums import Category, Multiplicity
 from pykechain.exceptions import NotFoundError, MultipleFoundError
 from pykechain.models import PartSet, Part2
+from pykechain.utils import find
 from tests.classes import TestBetamax
 
 
@@ -44,16 +45,35 @@ class TestPartRetrieve(TestBetamax):
         # tearDown
         model_without_instances.delete()
 
-    # test added in 2.1
+    # test added in 2.1, changed in 3.2
     def test_get_parts_with_descendants_tree(self):
         # setUp
-        bike_part = self.project.part(name='Bike')
-        bike_part.populate_descendants()
-        bike_model = self.project.model(name='Bike')
-        bike_model.populate_descendants()
+        root = self.project.part(name='Product')
+        root.populate_descendants()
+
         # testing
-        self.assertTrue(len(bike_part._cached_children) >= 5)
-        self.assertTrue(len(bike_model._cached_children) >= 4)
+        self.assertIsInstance(root._cached_children, list)
+        self.assertEqual(1, len(root._cached_children), msg='Number of instances has changed, expected 1')
+
+        # follow-up
+        bike_part = find(root._cached_children, lambda d: d.name == 'Bike')
+        self.assertIsNotNone(bike_part._cached_children)
+        self.assertEqual(7, len(bike_part._cached_children), msg='Number of child instances has changed, expected 7')
+
+    # test added in 2.1, changed in 3.2
+    def test_get_models_with_descendants_tree(self):
+        # setUp
+        root = self.project.model(name='Product')
+        root.populate_descendants()
+
+        # testing
+        self.assertIsInstance(root._cached_children, list)
+        self.assertEqual(1, len(root._cached_children), msg='Number of models has changed, expected 1')
+
+        # follow-up
+        bike_model = find(root._cached_children, lambda d: d.name == 'Bike')
+        self.assertIsNotNone(bike_model._cached_children)
+        self.assertEqual(5, len(bike_model._cached_children), msg='Number of child models has changed, expected 5')
 
     # test added in 3.0
     def test_retrieve_parts_with_refs(self):

@@ -1056,8 +1056,9 @@ class Client(object):
             raise NotFoundError("Could not find widgets: '{}'".format(response.json()))
 
         data = response.json()
-        return WidgetsManager([Widget.create(widget_json, client=self) for widget_json in data['results']],
-                              activity=request_params.get('activity_id'), client=self)
+        widgets = [Widget.create(widget_json, client=self) for widget_json in data['results']]
+        activity = activity if activity else request_params.get('activity_id', widgets[0].activity())
+        return WidgetsManager(widgets=widgets, activity=activity, client=self)
 
     #
     # Creators
