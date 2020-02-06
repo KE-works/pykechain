@@ -30,7 +30,7 @@ class SignificantDigits(DecimalPlaces):
 
 
 class ThousandsSeparator(BaseRepresentation):
-    """Representation for integer or floating-point value properties"""
+    """Representation for integer or floating-point value properties."""
 
     rtype = PropertyRepresentation.THOUSANDS_SEPARATOR
 
