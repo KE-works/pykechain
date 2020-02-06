@@ -29,6 +29,25 @@ class SignificantDigits(DecimalPlaces):
     rtype = PropertyRepresentation.SIGNIFICANT_DIGITS
 
 
+class ThousandsSeparator(BaseRepresentation):
+    """Representation for integer or floating-point value properties"""
+
+    rtype = PropertyRepresentation.THOUSANDS_SEPARATOR
+
+    def validate_representation(self, value):
+        # type: (None) -> None
+        """
+        Validate whether the representation value can be set.
+
+        :param value: representation value to set.
+        :type value: int or float
+        :return: None
+        """
+        if not (isinstance(value, type(None))):
+            raise IllegalArgumentError('{} value "{}" is not correct: not NoneType'.format(
+                self.__class__.__name__, value))
+
+
 class LinkTarget(BaseRepresentation):
     """Representation for HTML link reference properties."""
 
