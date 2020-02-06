@@ -613,6 +613,7 @@ class PropertyRepresentation(Enum):
     SIGNIFICANT_DIGITS = "significantDigits"
     LINK_TARGET = "linkTarget"
     BUTTON = 'buttonRepresentation'
+    THOUSANDS_SEPARATOR = "thousandsSeparator"
 
 
 class ShowColumnTypes(Enum):
