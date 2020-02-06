@@ -5,7 +5,7 @@ from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import AnyProperty
 from pykechain.models.representations.representation_base import BaseRepresentation
 from pykechain.models.representations.representations import ButtonRepresentation, LinkTarget, SignificantDigits, \
-    DecimalPlaces
+    DecimalPlaces, ThousandsSeparator
 from pykechain.models.validators.validator_schemas import options_json_schema
 from tests.classes import SixTestCase, TestBetamax
 
@@ -41,7 +41,7 @@ class TestSignificantDigitsLive(TestBetamax):
         self.test_model = product_root.add_model(name=self.test_model_name, multiplicity=Multiplicity.ONE)
         self.prop_model = self.test_model.add_property(
             name=self.test_prop_name,
-            type=self.property_type,
+            property_type=self.property_type,
         )  # type: AnyProperty
 
     def tearDown(self):
@@ -97,6 +97,13 @@ class TestSignificantDigitsLive(TestBetamax):
             )
 
 
+class TestThousandsSeparatorLive(TestSignificantDigitsLive):
+    property_type = PropertyType.FLOAT_VALUE
+    representation_class = ThousandsSeparator
+    value = None
+    new_value = None
+
+
 class TestDecimalPlacesLive(TestSignificantDigitsLive):
     property_type = PropertyType.FLOAT_VALUE
     representation_class = DecimalPlaces
@@ -116,3 +123,7 @@ class TestButtonRepresentationLive(TestSignificantDigitsLive):
     representation_class = ButtonRepresentation
     value = SelectListRepresentations.CHECK_BOXES
     new_value = SelectListRepresentations.BUTTONS
+
+    def setUp(self):
+        super().setUp()
+        self.prop_model.options = ['alpha', 'beta', 'gamma', 'omega']
