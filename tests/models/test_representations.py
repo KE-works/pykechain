@@ -31,7 +31,6 @@ class TestSignificantDigitsLive(TestBetamax):
     representation_class = SignificantDigits  # type: type(BaseRepresentation)
     value = 3
     new_value = 1
-    options = None
 
     test_model_name = '__test model for representations'
     test_prop_name = '__test property for representations'
@@ -44,8 +43,6 @@ class TestSignificantDigitsLive(TestBetamax):
             name=self.test_prop_name,
             property_type=self.property_type,
         )  # type: AnyProperty
-        if self.options:
-            self.prop_model.options = self.options
 
     def tearDown(self):
         self.test_model.delete()
@@ -124,6 +121,9 @@ class TestLinkTargetLive(TestSignificantDigitsLive):
 class TestButtonRepresentationLive(TestSignificantDigitsLive):
     property_type = PropertyType.SINGLE_SELECT_VALUE
     representation_class = ButtonRepresentation
-    options = ['alpha', 'beta', 'gamma', 'omega']
     value = SelectListRepresentations.CHECK_BOXES
     new_value = SelectListRepresentations.BUTTONS
+
+    def setUp(self):
+        super().setUp()
+        self.prop_model.options = ['alpha', 'beta', 'gamma', 'omega']
