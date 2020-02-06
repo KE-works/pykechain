@@ -1,6 +1,7 @@
 Change Log
 ==========
 
+* :bug: `Activity2` method `_validate_edit_arguments` now correctly checks for members of the scope prior to assigning new assignees.
 * Updated `populate_descendants()` to use new API and actually store the `_cached_children`.
 
 3.3.1 (8JAN19)
