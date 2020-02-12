@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+* :bug: `has_value` method of the `Property2` class now accurately predicts floats, integers and boolean values.
+* :bug: `value` attribute of `AttachmentProperty` class now refreshes automatically when uploading attachments.
+* Keyword-arguments (kwargs) provided when creating widgets via the `WidgetsManager` do now propagate successfully.
+* Improved unittests for `Property2`, `AttachmentProperty2` classes.
+
 3.3.2 (6FEB20)
 --------------
 
