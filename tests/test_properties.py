@@ -120,7 +120,7 @@ class TestProperties(TestBetamax):
 
         self.wheel_model = self.project.model('Wheel')
         self.bike_model = self.project.model('Bike')
-        self.prop_name = "__Test property @ {}".format(datetime.now())
+        self.prop_name = "__Test property"
         self.prop_model = self.bike_model.add_property(
             name=self.prop_name,
             property_type=PropertyType.INT_VALUE,
@@ -130,7 +130,7 @@ class TestProperties(TestBetamax):
         )
 
         self.bike = self.bike_model.instance()
-        self.prop = self.bike.property(name=self.prop_model.name)
+        self.prop = self.bike.property(name=self.prop_name)
 
     def tearDown(self):
         self.prop_model.delete()
@@ -189,7 +189,7 @@ class TestProperties(TestBetamax):
         self.assertNotEqual(new_value, self.prop.value)
 
         self.prop.value = new_value
-        refreshed_prop = self.bike.property(name=self.prop.name)
+        refreshed_prop = self.bike.property(name=self.prop_name)
 
         self.assertEqual(new_value, self.prop.value)
         self.assertEqual(new_value, self.prop._value)
@@ -207,12 +207,12 @@ class TestProperties(TestBetamax):
         # setUp
         new_name = 'Cogs'
         self.prop_model.edit(name=new_name)
-        refreshed_prop = self.bike_model.property(name=new_name)
+        reloaded_prop = self.bike_model.property(name=new_name)
 
         # testing
-        self.assertEqual(self.prop_model.id, refreshed_prop.id)
-        self.assertEqual(new_name, refreshed_prop.name)
-        self.assertEqual(self.prop_model.name, refreshed_prop.name)
+        self.assertEqual(self.prop_model.id, reloaded_prop.id)
+        self.assertEqual(new_name, reloaded_prop.name)
+        self.assertEqual(self.prop_model.name, reloaded_prop.name)
 
         with self.assertRaises(IllegalArgumentError):
             self.prop_model.edit(name=True)
@@ -221,11 +221,11 @@ class TestProperties(TestBetamax):
         # setUp
         new_description = 'Cogs, definitely cogs.'
         self.prop_model.edit(description=new_description)
-        refreshed_prop = self.bike_model.property(name=self.prop_name)
+        reloaded_prop = self.bike_model.property(name=self.prop_name)
 
         # testing
-        self.assertEqual(self.prop_model.id, refreshed_prop.id)
-        self.assertEqual(self.prop_model.description, refreshed_prop.description)
+        self.assertEqual(self.prop_model.id, reloaded_prop.id)
+        self.assertEqual(self.prop_model.description, reloaded_prop.description)
 
         with self.assertRaises(IllegalArgumentError):
             self.prop_model.edit(description=True)
@@ -234,11 +234,11 @@ class TestProperties(TestBetamax):
         # setUp
         new_unit = 'Totally new units'
         self.prop_model.edit(unit=new_unit)
-        refreshed_prop = self.bike_model.property(name=self.prop_name)
+        reloaded_prop = self.bike_model.property(name=self.prop_name)
 
         # testing
-        self.assertEqual(self.prop_model.id, refreshed_prop.id)
-        self.assertEqual(self.prop_model.unit, refreshed_prop.unit)
+        self.assertEqual(self.prop_model.id, reloaded_prop.id)
+        self.assertEqual(self.prop_model.unit, reloaded_prop.unit)
 
         with self.assertRaises(IllegalArgumentError):
             self.prop_model.edit(unit=4)
