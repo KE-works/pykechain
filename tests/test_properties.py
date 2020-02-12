@@ -1,10 +1,117 @@
 from datetime import datetime
 
-from pykechain.enums import PropertyType, Category
+from pykechain.enums import PropertyType, Category, Multiplicity
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
-from pykechain.models import Property, Property2
-from pykechain.models.validators import SingleReferenceValidator
+from pykechain.models import Property2
 from tests.classes import TestBetamax
+
+
+class TestPropertyCreation(TestBetamax):
+
+    def setUp(self):
+        super().setUp()
+        root = self.project.model(name='Product')
+        self.part_model = self.project.create_model(
+            name='__Test model',
+            parent=root,
+            multiplicity=Multiplicity.ONE,
+        )
+        self.part_instance = self.part_model.instance()
+
+    def tearDown(self):
+        self.part_model.delete()
+        super().tearDown()
+
+    def test_create_and_delete_property_model(self):
+        new_property = self.client.create_property(
+            model=self.part_model,
+            name='New property',
+            description='Nice prop',
+            property_type=PropertyType.CHAR_VALUE,
+            default_value='EUREKA!',
+        )
+
+        # check whether the property has been created and whether it's name and type are correct
+        self.part_model.refresh()
+        new_prop = self.part_model.property(name='New property')
+
+        self.assertEqual(new_property, new_prop)
+        self.assertIsInstance(new_prop, Property2)
+        self.assertEqual(new_prop.value, 'EUREKA!')
+        self.assertEqual(new_prop._json_data['property_type'], PropertyType.CHAR_VALUE)
+
+        # Now delete the property model
+        new_property.delete()
+
+        # Retrieve the model again
+        self.part_model.refresh()
+
+        # Check whether it still has the property model that has just been deleted
+        with self.assertRaises(NotFoundError):
+            self.part_model.property('New property')
+
+    def test_create_property_unknown_type(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.part_model.add_property(name='Incorrect property type', property_type='Incorrect property type')
+
+    def test_create_property_on_instance(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.client.create_property(name='Properties are created on models only', model=self.part_instance)
+
+    def test_create_property_incorrect_value(self):
+        with self.assertRaises(APIError):
+            self.part_model.add_property(
+                name='Boolean',
+                property_type=PropertyType.BOOLEAN_VALUE,
+                default_value='Not gonna work',
+            )
+
+    # 1.16
+    def test_creation_of_all_property_model_types(self):
+        # set up
+        types = [
+            PropertyType.CHAR_VALUE,
+            PropertyType.TEXT_VALUE,
+            PropertyType.INT_VALUE,
+            PropertyType.FLOAT_VALUE,
+            PropertyType.BOOLEAN_VALUE,
+            PropertyType.DATETIME_VALUE,
+            PropertyType.LINK_VALUE,
+            PropertyType.DATETIME_VALUE,
+            PropertyType.SINGLE_SELECT_VALUE,
+            PropertyType.REFERENCES_VALUE,
+        ]
+
+        values = [
+            'string',
+            'text',
+            0,
+            3.1415,
+            False,
+            datetime.now().isoformat(sep='T'),
+            'https://google.com',
+            None,
+            None,
+            None,
+        ]
+
+        for property_type, value in zip(types, values):
+            with self.subTest(msg=property_type):
+                # setUp
+                prop = self.part_model.add_property(
+                    name=property_type,
+                    property_type=property_type,
+                    default_value=value,
+                )
+
+                # testing
+                if value is not None:
+                    self.assertTrue(prop.has_value())
+                else:
+                    self.assertFalse(prop.has_value())
+
+                # tearDown
+                prop.delete()
 
 
 class TestProperties(TestBetamax):
@@ -12,46 +119,33 @@ class TestProperties(TestBetamax):
         super(TestProperties, self).setUp()
 
         self.wheel_model = self.project.model('Wheel')
-        self.bike = self.project.model('Bike')
-        self.test_property_model = self.bike.add_property(name="__Test property @ {}".format(datetime.now()),
-                                                          property_type=PropertyType.INT_VALUE,
-                                                          description='Description of test property',
-                                                          unit='units',
-                                                          default_value=42)
-        self.front_wheel = self.project.part(name='Front Wheel')
-        self.test_property_instance = self.bike.instance().property(name=self.test_property_model.name)
+        self.bike_model = self.project.model('Bike')
+        self.prop_name = "__Test property @ {}".format(datetime.now())
+        self.prop_model = self.bike_model.add_property(
+            name=self.prop_name,
+            property_type=PropertyType.INT_VALUE,
+            description='description of the property',
+            unit='unit of the property',
+            default_value=42,
+        )
 
-        # single_reference_validator = SingleReferenceValidator()
-        # self.test_ref_property_model = self.bike.add_property(name="__Test ref property @ {}".format(datetime.now()),
-        #                                                       property_type=PropertyType.REFERENCES_VALUE,
-        #                                                       description='Description of test ref property',
-        #                                                       unit='no unit',
-        #                                                       default_value=[self.wheel_model])
-        # self.test_ref_property_model.validators = [single_reference_validator]
+        self.bike = self.bike_model.instance()
+        self.prop = self.bike.property(name=self.prop_model.name)
 
     def tearDown(self):
-        self.test_property_model.delete()
+        self.prop_model.delete()
         super(TestProperties, self).tearDown()
 
     def test_retrieve_properties(self):
         properties = self.project.properties('Diameter')
 
+        self.assertIsInstance(properties, list)
         self.assertTrue(len(properties) > 0)
-
-    def test_retrieve_properties_with_kwargs(self):
-        # setUp
-        bike = self.project.part(name='Bike')
-        properties_with_kwargs = self.client.properties(part_id=bike.id)
-
-        self.assertTrue(properties_with_kwargs)
-
-        # testing
-        for prop in properties_with_kwargs:
-            self.assertEqual(prop.part.id, bike.id)
 
     def test_retrieve_property(self):
         prop = self.project.property(name='Cheap?', category=Category.MODEL)
 
+        self.assertIsInstance(prop, Property2)
         self.assertTrue(prop)
 
     def test_property_attributes(self):
@@ -64,262 +158,142 @@ class TestProperties(TestBetamax):
             self.assertTrue(hasattr(obj, attribute),
                             "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
 
-    def test_get_property_by_name(self):
-        bike = self.project.part('Bike')
-        # retrieve the property Gears directly via an API call
-        gears_property = self.project.properties(name='Gears', category=Category.INSTANCE)[0]
-
-        self.assertEqual(bike.property('Gears'), gears_property)
-
-    def test_get_property_by_uuid(self):
-        bike = self.project.part('Bike')
-        gears_id = bike.property('Gears').id
-        # retrieve the property Gears directly via an API call
-        gears_property = self.project.properties(pk=gears_id, category=Category.INSTANCE)[0]
-
-        self.assertEqual(bike.property(gears_id), gears_property)
-
-    def test_get_invalid_property(self):
-        bike = self.project.part('Bike')
-
-        with self.assertRaises(NotFoundError):
-            bike.property('Price')
-
-    def test_set_property(self):
-        gears = self.project.part('Bike').property('Gears')
-
-        gears.value = 5
-
-        self.assertEqual(gears.value, 5)
-
-        gears.value = 2
-
-        self.assertEqual(self.project.part('Bike').property('Gears').value, 2)
-
-        gears.value = 10
-
-    def test_property_to_part(self):
-        bike = self.project.part('Bike')
-
-        bike2 = bike.property('Gears').part
-
-        self.assertEqual(bike.id, bike2.id)
-
-    def test_create_and_delete_property_model(self):
-        # Retrieve the bike model
-        bike = self.project.model('Bike')
-
-        # test creation of new property model of bike
-        new_property = self.client.create_property(model=bike, name='New property', description='Nice prop',
-                                                   property_type=PropertyType.CHAR_VALUE, default_value='EUREKA!')
-
-        # check whether the property has been created and whether it's name and type are correct
-        self.assertIsInstance(bike.property('New property'), Property)
-        self.assertEqual(bike.property('New property').value, 'EUREKA!')
-        self.assertEqual(bike.property('New property')._json_data['property_type'], 'CHAR_VALUE')
-
-        # Now delete the property model
-        new_property.delete()
-
-        # Retrieve the bike model again
-        updated_bike = self.project.model('Bike')
-
-        # Check whether it still has the property model that has just been deleted
-        with self.assertRaises(NotFoundError):
-            updated_bike.property('New property')
-
-    def test_create_property_where_model_is_instance(self):
+    def test_retrieve_properties_with_kwargs(self):
         # setUp
-        bike_instance = self.project.part(name='Bike')
+        properties_with_kwargs = self.client.properties(part_id=self.bike.id)
+
+        self.assertTrue(properties_with_kwargs)
 
         # testing
-        with self.assertRaises(IllegalArgumentError):
-            self.client.create_property(name='Properties are created on models only', model=bike_instance)
+        for prop in properties_with_kwargs:
+            self.assertEqual(prop.part.id, self.bike.id)
 
-    def test_wrongly_creation_of_property(self):
-        # These actions should not be possible. This test is of course, expecting APIErrors to be raised
-        bike_model = self.project.model('Bike')
+    def test_get_property_by_name(self):
+        gears_property = self.project.properties(name='Gears', category=Category.INSTANCE)[0]
 
-        # Test whether an integer property model can be created with an incorrect default value
-        with self.assertRaises(APIError):
-            bike_model.add_property(name='Boolean',
-                                    property_type=PropertyType.BOOLEAN_VALUE,
-                                    default_value='Not gonna work')
+        self.assertEqual(self.bike.property('Gears'), gears_property)
 
-    # 1.7.2
-    def test_get_partmodel_of_propertymodel(self):
-        """As found by @joost.schut, see #119 - thanks!"""
+    def test_get_property_by_uuid(self):
+        gears_id = self.bike.property('Gears').id
 
-        wheel_model = self.project.model('Wheel')
-        spokes_model = wheel_model.property('Spokes')
-        part_of_spokes_model = spokes_model.part
+        gears_property = self.project.properties(pk=gears_id, category=Category.INSTANCE)[0]
 
-        self.assertTrue(wheel_model.id == part_of_spokes_model.id)
+        self.assertEqual(self.bike.property(gears_id), gears_property)
+
+    def test_get_invalid_property(self):
+        with self.assertRaises(NotFoundError):
+            self.bike.property('Price')
+
+    def test_set_property(self):
+        new_value = self.prop.value * 2
+        self.assertNotEqual(new_value, self.prop.value)
+
+        self.prop.value = new_value
+        refreshed_prop = self.bike.property(name=self.prop.name)
+
+        self.assertEqual(new_value, self.prop.value)
+        self.assertEqual(new_value, self.prop._value)
+        self.assertEqual(new_value, self.prop._json_data.get('value'))
+        self.assertEqual(self.prop, refreshed_prop)
+        self.assertEqual(self.prop.value, refreshed_prop.value)
+
+    def test_part_of_property(self):
+        bike2 = self.bike.property('Gears').part
+
+        self.assertEqual(self.bike.id, bike2.id)
 
     # 1.11
     def test_edit_property_model_name(self):
-        bike_model = self.project.model('Bike')
-        gears_property = bike_model.property(name='Gears')
-        gears_old_name = gears_property.name
-        gears_property.edit(name='Cogs')
-        gears_property_u = bike_model.property(name='Cogs')
+        # setUp
+        new_name = 'Cogs'
+        self.prop_model.edit(name=new_name)
+        refreshed_prop = self.bike_model.property(name=new_name)
 
-        self.assertEqual(gears_property.id, gears_property_u.id)
-        self.assertEqual(gears_property.name, gears_property_u.name)
-        self.assertEqual(gears_property.name, 'Cogs')
+        # testing
+        self.assertEqual(self.prop_model.id, refreshed_prop.id)
+        self.assertEqual(new_name, refreshed_prop.name)
+        self.assertEqual(self.prop_model.name, refreshed_prop.name)
 
         with self.assertRaises(IllegalArgumentError):
-            gears_property.edit(name=True)
-        # teardown
-        gears_property.edit(name=gears_old_name)
+            self.prop_model.edit(name=True)
 
     def test_edit_property_model_description(self):
-        bike_model = self.project.model('Bike')
-        gears_property = bike_model.property(name='Gears')
-        gears_old_description = str(gears_property._json_data.get('description'))
-
+        # setUp
         new_description = 'Cogs, definitely cogs.'
-        gears_property.edit(description=new_description)
-        gears_property_u = bike_model.property(name='Gears')
+        self.prop_model.edit(description=new_description)
+        refreshed_prop = self.bike_model.property(name=self.prop_name)
 
-        self.assertEqual(gears_property.id, gears_property_u.id)
+        # testing
+        self.assertEqual(self.prop_model.id, refreshed_prop.id)
+        self.assertEqual(self.prop_model.description, refreshed_prop.description)
+
         with self.assertRaises(IllegalArgumentError):
-            gears_property.edit(description=True)
-
-        # teardown
-        gears_property.edit(description=gears_old_description)
+            self.prop_model.edit(description=True)
 
     def test_edit_property_model_unit(self):
-        front_fork_model = self.project.model('Front Fork')
-        height_property = front_fork_model.property(name='Height')
-        height_old_unit = str(height_property._json_data.get('unit'))
-        new_unit = 'm'
+        # setUp
+        new_unit = 'Totally new units'
+        self.prop_model.edit(unit=new_unit)
+        refreshed_prop = self.bike_model.property(name=self.prop_name)
 
-        height_property.edit(unit=new_unit)
-
-        height_property_u = front_fork_model.property(name='Height')
-        self.assertEqual(height_property.id, height_property_u.id)
+        # testing
+        self.assertEqual(self.prop_model.id, refreshed_prop.id)
+        self.assertEqual(self.prop_model.unit, refreshed_prop.unit)
 
         with self.assertRaises(IllegalArgumentError):
-            height_property.edit(unit=4)
-
-        # teardown
-        height_property.edit(unit=height_old_unit)
-
-    # 1.11
-    def test_set_property_for_real(self):
-        gears = self.project.part('Bike').property('Gears')
-        old_value = int(gears.value)
-
-        # set the value
-        new_value = old_value * 20 + 1
-        self.assertNotEqual(new_value, old_value)
-
-        gears.value = new_value
-        self.assertEqual(gears.value, new_value)
-        self.assertEqual(gears._value, new_value)
-        self.assertEqual(gears._json_data.get('value'), new_value)
-
-        # teardown
-        gears.value = old_value
-
-    # 1.16
-    def test_creation_of_all_property_model_types(self):
-        # set up
-        bike_model = self.project.model(name='Bike')
-
-        # create a property model for each property type
-        no_value_property_type = bike_model.add_property(name='Not correct property type',
-                                                         property_type=PropertyType.CHAR_VALUE)
-        no_property_type_specified = bike_model.add_property(name='No property type specified')
-        single_line_text = bike_model.add_property(name='Single line text', property_type=PropertyType.CHAR_VALUE)
-        multi_line_text = bike_model.add_property(name='Multi line text', property_type=PropertyType.TEXT_VALUE)
-        integer = bike_model.add_property(name='Bb', property_type=PropertyType.INT_VALUE)
-        decimal = bike_model.add_property(name='Float', property_type=PropertyType.FLOAT_VALUE)
-        boolean = bike_model.add_property(name='Boolean', property_type=PropertyType.BOOLEAN_VALUE)
-        datetime = bike_model.add_property(name='Datetime', property_type=PropertyType.DATETIME_VALUE)
-        attachment = bike_model.add_property(name='Attachment', property_type=PropertyType.ATTACHMENT_VALUE)
-        link = bike_model.add_property(name='Link', property_type=PropertyType.LINK_VALUE)
-        single_select = bike_model.add_property(name='Single select', property_type=PropertyType.SINGLE_SELECT_VALUE)
-        reference = bike_model.add_property(name='Reference', property_type=PropertyType.REFERENCES_VALUE)
-
-        # teardown
-        no_value_property_type.delete()
-        no_property_type_specified.delete()
-        single_line_text.delete()
-        multi_line_text.delete()
-        integer.delete()
-        decimal.delete()
-        boolean.delete()
-        datetime.delete()
-        attachment.delete()
-        link.delete()
-        single_select.delete()
-        reference.delete()
+            self.prop_model.edit(unit=4)
 
     # 2.5.4
-    def test_property_type_property(self):
-        # set up
-        front_fork_model = self.project.model('Front Fork')
-        height_property = front_fork_model.property(name='Height')
+    def test_property_type(self):
+        self.assertEqual(PropertyType.INT_VALUE, str(self.prop_model.type))
 
-        self.assertEqual(str(height_property.type), PropertyType.FLOAT_VALUE)
+    def test_property_unit(self):
+        self.assertEqual('unit of the property', str(self.prop_model.unit))
 
-    def test_property_unit_property(self):
-        # set up
-        front_fork_model = self.project.model('Front Fork')
-        height_property = front_fork_model.property(name='Height')
-
-        self.assertEqual(str(height_property.unit), str(height_property._json_data.get('unit')))
-
-    def test_property_description_property(self):
-        # set up
-        front_fork_model = self.project.model('Front Fork')
-        height_property = front_fork_model.property(name='Height')
-
-        self.assertEqual(str(height_property.description), str(height_property._json_data.get('description')))
+    def test_property_description(self):
+        self.assertEqual('description of the property', str(self.prop_model.description))
 
     # 3.0
     def test_copy_property_model(self):
         # setUp
-        copied_property = self.test_property_model.copy(target_part=self.wheel_model, name='Copied property')
+        copied_property = self.prop_model.copy(target_part=self.wheel_model, name='Copied property')
 
         # testing
         self.assertEqual(copied_property.name, 'Copied property')
-        self.assertEqual(copied_property.description, self.test_property_model.description)
-        self.assertEqual(copied_property.unit, self.test_property_model.unit)
-        self.assertEqual(copied_property.value, self.test_property_model.value)
+        self.assertEqual(copied_property.description, self.prop_model.description)
+        self.assertEqual(copied_property.unit, self.prop_model.unit)
+        self.assertEqual(copied_property.value, self.prop_model.value)
 
         # tearDown
         copied_property.delete()
 
     def test_move_property_model(self):
         # setUp
-        moved_property = self.test_property_model.move(target_part=self.wheel_model, name='Copied property')
+        moved_property = self.prop_model.move(target_part=self.wheel_model, name='Copied property')
 
         # testing
         self.assertEqual(moved_property.name, 'Copied property')
-        self.assertEqual(moved_property.description, self.test_property_model.description)
-        self.assertEqual(moved_property.unit, self.test_property_model.unit)
-        self.assertEqual(moved_property.value, self.test_property_model.value)
+        self.assertEqual(moved_property.description, self.prop_model.description)
+        self.assertEqual(moved_property.unit, self.prop_model.unit)
+        self.assertEqual(moved_property.value, self.prop_model.value)
         with self.assertRaises(NotFoundError):
-            self.project.property(id=self.test_property_model.id)
+            self.project.property(id=self.prop_model.id)
 
         # tearDown
         # for a correct teardown in the unittest we need to -reassign- the moved one to the self.test_property_model
-        self.test_property_model = moved_property
+        self.prop_model = moved_property
 
     def test_copy_property_instance(self):
         # setUp
-        self.test_property_instance.value = 200
-        copied_property = self.test_property_instance.copy(target_part=self.front_wheel,
-                                                           name='Copied property instance')
+        self.prop.value = 200
+        copied_property = self.prop.copy(target_part=self.project.part(name='Front Wheel'),
+                                         name='Copied property instance')
 
         # testing
         self.assertEqual(copied_property.name, 'Copied property instance')
-        self.assertEqual(copied_property.description, self.test_property_instance.description)
-        self.assertEqual(copied_property.unit, self.test_property_instance.unit)
-        self.assertEqual(copied_property.value, self.test_property_instance.value)
+        self.assertEqual(copied_property.description, self.prop.description)
+        self.assertEqual(copied_property.unit, self.prop.unit)
+        self.assertEqual(copied_property.value, self.prop.value)
 
         # tearDown
         copied_property.model().delete()
@@ -347,37 +321,3 @@ class TestProperties(TestBetamax):
         self.assertTrue(dual_pad_prop_retrieved_from_seat.category, Category.INSTANCE)
 
         self.assertEqual(dual_pad_prop_retrieved_from_seat.id, dual_pad_property.id)
-
-
-class TestPropertiesWithReferenceProperty(TestBetamax):
-    def setUp(self):
-        super(TestPropertiesWithReferenceProperty, self).setUp()
-
-        self.wheel_model = self.project.model('Wheel')
-        self.bike = self.project.model('Bike')
-
-        self.test_ref_property_model = self.bike.add_property(name="__Test ref property @ {}".format(datetime.now()),
-                                                              property_type=PropertyType.REFERENCES_VALUE,
-                                                              description='Description of test ref property',
-                                                              unit='no unit',
-                                                              default_value=[self.wheel_model])
-        self.test_ref_property_model.validators = [SingleReferenceValidator()]
-
-    def tearDown(self):
-        self.test_ref_property_model.delete()
-        super(TestPropertiesWithReferenceProperty, self).tearDown()
-
-    def test_copy_reference_property_with_options(self):
-        # setUp
-        copied_ref_property = self.test_ref_property_model.copy(target_part=self.wheel_model,
-                                                                name='__Copied ref property')
-
-        # testing
-        self.assertEqual(copied_ref_property.name, '__Copied ref property')
-        self.assertEqual(copied_ref_property.description, self.test_ref_property_model.description)
-        self.assertEqual(copied_ref_property.unit, self.test_ref_property_model.unit)
-        self.assertEqual(copied_ref_property.value, self.test_ref_property_model.value)
-        self.assertEqual(copied_ref_property._options, self.test_ref_property_model._options)
-
-        # tearDown
-        copied_ref_property.delete()

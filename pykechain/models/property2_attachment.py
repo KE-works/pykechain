@@ -4,7 +4,7 @@ import os
 
 import requests
 from six import string_types, text_type
-from typing import Text, Any, Optional, Union
+from typing import Text, Any, Optional
 
 from pykechain.exceptions import APIError
 from pykechain.models.property2 import Property2
@@ -48,8 +48,8 @@ class AttachmentProperty2(Property2):
         ...     print('file attachment not set, its value is None')
 
         """
-        if 'value' in self._json_data and self._json_data['value']:
-            return "[Attachment: {}]".format(self._json_data['value'].split('/')[-1])
+        if self.has_value():
+            return "[Attachment: {}]".format(self.filename)
         else:
             return None
 
@@ -60,8 +60,7 @@ class AttachmentProperty2(Property2):
         else:
             self.upload(data=value)
 
-    def clear(self):
-        # type: () -> ()
+    def clear(self) -> None:
         """Clear the attachment from the attachment field.
 
         :raises APIError: if unable to remove the attachment
@@ -71,12 +70,9 @@ class AttachmentProperty2(Property2):
             self._json_data['value'] = None
 
     @property
-    def filename(self):
-        # type: () -> Union[type(None), Text]
+    def filename(self) -> Optional[Text]:
         """Filename of the attachment, without the full 'attachment' path."""
-        if self.value and 'value' in self._json_data and self._json_data['value']:
-            return self._json_data['value'].split('/')[-1]
-        return None
+        return self._value.split('/')[-1] if self.has_value() else None
 
     def json_load(self):
         """Download the data from the attachment and deserialise the contained json.
@@ -95,8 +91,7 @@ class AttachmentProperty2(Property2):
         """
         return self._download().json()
 
-    def upload(self, data, **kwargs):
-        # type: (Text, **Any) -> ()
+    def upload(self, data: Text, **kwargs: Any) -> None:
         """Upload a file to the attachment property.
 
         When providing a :class:`matplotlib.figure.Figure` object as data, the figure is uploaded as PNG.
@@ -123,9 +118,9 @@ class AttachmentProperty2(Property2):
                 self._upload(fp)
         else:
             self._upload_json(data, **kwargs)
+        self._value = data
 
-    def save_as(self, filename=None):
-        # type: (Optional[Text]) -> ()
+    def save_as(self, filename: Optional[Text] = None) -> None:
         """Download the attachment to a file.
 
         :param filename: (optional) File path. If not provided, will be saved to current working dir
@@ -153,6 +148,7 @@ class AttachmentProperty2(Property2):
         data = (name, buffer.getvalue(), 'image/png')
 
         self._upload(data)
+        self._value = name
 
     # custom for PIM2
     def _download(self):

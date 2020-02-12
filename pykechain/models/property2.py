@@ -200,8 +200,7 @@ class Property2(Property):
                                        url=self._client._build_url('property2', property_id=self.id),
                                        extra_params=API_EXTRA_PARAMS['property2'])
 
-    def has_value(self):
-        # type: () -> bool
+    def has_value(self) -> bool:
         """Predicate to indicate if the property has a value set.
 
         This predicate determines if the property has a value set. It will not make a call to KE-chain API (in case
@@ -213,7 +212,10 @@ class Property2(Property):
         :returns: True if the property has a value set, otherwise (also when value is None) returns False
         :rtype: Bool
         """
-        return bool(self._value)
+        if isinstance(self._value, (float, int, bool)):
+            return True  # to prevent "bool(0.00) = False" or "False = False"
+        else:
+            return bool(self._value)
 
     def edit(self, name=None, description=None, unit=None, options=None, **kwargs):
         # type: (Optional[Text], Optional[Text], Optional[Text], Optional[Dict], **Any) -> ()
