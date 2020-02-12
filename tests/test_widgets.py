@@ -175,10 +175,8 @@ class TestWidgetManagerInActivity(TestBetamax):
         foto_property = self.project.property("Picture")
 
         widget = widget_manager.add_attachmentviewer_widget(
-            widget_type=WidgetTypes.ATTACHMENTVIEWER,
             title="Attachment Viewer",
             attachment_property=foto_property,
-            readable_models=[foto_property.model_id]
         )
 
         self.assertIsInstance(widget, AttachmentviewerWidget)
