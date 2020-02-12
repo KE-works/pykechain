@@ -503,6 +503,12 @@ class WidgetsManager(Iterable):
             "imageFit": image_fit
         })
 
+        for deprecated_kw in ['widget_type', 'readable_models']:
+            if deprecated_kw in kwargs:
+                kwargs.pop(deprecated_kw)
+                warnings.warn('Argument "{}" is no longer supported as input to `add_attachment_viewer`.'.format(
+                    deprecated_kw), Warning)
+
         meta, title = _set_title(meta, title, default_title=attachment_property.name)
         widget = self.create_widget(
             widget_type=WidgetTypes.ATTACHMENTVIEWER,
