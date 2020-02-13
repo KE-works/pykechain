@@ -27,7 +27,7 @@ nbsphinx==0.5.1
 # matplotlib==3.1.1; python_version >= '3.6'
 
 # integration
-tox==3.14.3
+tox==3.14.4
 
 # code style
 flake8==3.7.9
