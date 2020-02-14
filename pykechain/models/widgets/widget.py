@@ -7,6 +7,7 @@ from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import WidgetTypes, Category
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
 from pykechain.models import Base
+from pykechain.models.widgets import WidgetsManager
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 
 
@@ -25,8 +26,11 @@ class Widget(Base):
 
     schema = widget_meta_schema
 
-    def __init__(self, json, **kwargs):
-        # type: (dict, **Any) -> None
+    def __init__(self,
+                 json,
+                 widget_manager: WidgetsManager,
+                 **kwargs):
+        # type: (dict, WidgetsManager, **Any) -> None
         """Construct a Widget from a KE-chain 2 json response.
 
         :param json: the json response to construct the :class:`Part` from
@@ -43,6 +47,7 @@ class Widget(Base):
         if self._client:
             self.schema = self._client.widget_schema(self.widget_type)
 
+        self_manager = widget_manager  # type: WidgetManager
         self.meta = self.validate_meta(json.get('meta'))
         self.order = json.get('order')
         self._activity_id = json.get('activity_id')
@@ -240,7 +245,6 @@ class Widget(Base):
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete Widget ({})".format(response))
-
         return True
 
     def copy(self, target_activity, order=None):

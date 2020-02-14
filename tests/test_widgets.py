@@ -16,6 +16,14 @@ class TestWidgets(TestBetamax):
 
     def setUp(self):
         super(TestWidgets, self).setUp()
+        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
+
+        self.frame = self.project.part(name='Frame')
+        self.frame_model = self.project.model(name='Frame')
+
+    def tearDown(self):
+        self.task.delete()
+        super(TestWidgets, self).tearDown()
 
     def test_retrieve_widgets_in_activity(self):
         activity = self.project.activity('Task - Form + Tables + Service')
@@ -25,7 +33,7 @@ class TestWidgets(TestBetamax):
             self.assertIsInstance(w, Widget)
 
     def test_create_widget_in_activity(self):
-        activity = self.project.activity('test task')  # type: Activity2
+        activity = self.task  # type: Activity2
         created_widget = self.client.create_widget(
             title="Test_widget",
             activity=activity,
@@ -54,7 +62,7 @@ class TestWidgets(TestBetamax):
 
     def test_create_widgets(self):
         # setUp
-        activity = self.project.activity('test task')
+        activity = self.task
         new_widgets = self.client.create_widgets(widgets=[
             dict(
                 activity=activity,
@@ -81,6 +89,20 @@ class TestWidgets(TestBetamax):
 
         # tearDown
         [w.delete() for w in new_widgets]
+
+    def test_delete_widget(self):
+        """Delete single widget from an activity"""
+
+        widget_manager = self.task.widgets()  # type: WidgetsManager
+
+        self.assertEqual(len(widget_manager), 1)
+
+        meta_panel_widget = widget_manager[0]
+
+        meta_panel_widget.delete()
+
+        self.assertEqual(len(widget_manager), 0)
+        self.assertEqual(len(self.task.widgets()), 0)
 
 
 class TestWidgetManager(TestBetamax):
@@ -400,7 +422,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(len(widget_manager), 0)
         self.assertEqual(len(self.task.widgets()), 0)
 
-    def test_delete_widget(self):
+    def test_delete_widget_from_widget_manager(self):
         """Delete single widget from an activity"""
 
         widget_manager = self.task.widgets()  # type: WidgetsManager
