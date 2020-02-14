@@ -1,6 +1,8 @@
 Change Log
 ==========
 
+* Added test to confirm a value of `None` clears a reference property. #468
+
 3.3.2 (6FEB20)
 --------------
 
