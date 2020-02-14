@@ -2451,17 +2451,3 @@ class Client(object):
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not move activity, {}: {}".format(str(response), response.content))
-
-    def delete_widget(self, widget):
-        """Delete the widget.
-
-        :return: True when successful
-        :rtype: bool
-        :raises APIError: when unable to delete the widget
-        """
-        url = self._build_url('widget', widget_id=widget.id)
-        response = self._request('DELETE', url)
-
-        if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Widget ({})".format(response))
-        return True
