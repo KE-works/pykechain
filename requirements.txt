@@ -16,10 +16,10 @@ pytest==5.3.5
 betamax==0.8.1
 coverage<=4.5.99
 pytest-cov==2.8.1
-coveralls==1.10.0
+coveralls==1.11.0
 
 # documentation
-Sphinx==2.3.1
+Sphinx==2.4.1
 nbsphinx==0.5.1
 
 # data science # not needed for local use
@@ -27,7 +27,7 @@ nbsphinx==0.5.1
 # matplotlib==3.1.1; python_version >= '3.6'
 
 # integration
-tox==3.14.3
+tox==3.14.4
 
 # code style
 flake8==3.7.9

@@ -1,6 +1,7 @@
 Change Log
 ==========
 
+* Added test to confirm a value of `None` clears a reference property. #468
 * :bug: `has_value` method of the `Property2` class now accurately predicts floats, integers and boolean values.
 * :bug: `value` attribute of `AttachmentProperty` class now refreshes automatically when uploading attachments.
 * Keyword-arguments (kwargs) provided when creating widgets via the `WidgetsManager` do now propagate successfully.
