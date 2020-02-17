@@ -1,7 +1,7 @@
 import json
 import os
 
-from pykechain.enums import PropertyType
+from pykechain.enums import PropertyType, Multiplicity
 from pykechain.models import AttachmentProperty2
 from tests.classes import TestBetamax
 
@@ -11,21 +11,21 @@ class TestAttachment(TestBetamax):
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')))
 
     def setUp(self):
-        super(TestAttachment, self).setUp()
+        super().setUp()
         self.property_name = 'Plot Attachment'
 
-        self.bike_model = self.project.model('Bike')
-        self.property_model = self.bike_model.add_property(
+        root = self.project.model(name='Product')
+        self.part_model = root.add_model(name='__Testing attachments', multiplicity=Multiplicity.ONE)
+        self.property_model = self.part_model.add_property(
             name=self.property_name,
             property_type=PropertyType.ATTACHMENT_VALUE
         )  # type: AttachmentProperty2
 
-        self.bike = self.bike_model.instance()
-        self.property = self.bike.property(name=self.property_name)
+        self.property = self.part_model.instance().property(name=self.property_name)  # type: AttachmentProperty2
 
     def tearDown(self):
-        self.property_model.delete()
-        super(TestAttachment, self).tearDown()
+        self.part_model.delete()
+        super().tearDown()
 
     def test_retrieve_attachment(self):
         data = ('data.json', json.dumps(self.test_dict), 'application/json')
@@ -40,7 +40,6 @@ class TestAttachment(TestBetamax):
         self.assertIsNone(self.property.value)
 
         self.property.upload(self.project_root + '/requirements.txt')
-        self.property.refresh()
 
         self.assertIsNotNone(self.property.value)
 
@@ -54,7 +53,6 @@ class TestAttachment(TestBetamax):
 
     def test_upload(self):
         self.property.upload(self.project_root + '/requirements.txt')
-        self.property.refresh()
 
         requirements = self.project_root + '/requirements.txt'
         self.property.upload(requirements)
@@ -63,7 +61,6 @@ class TestAttachment(TestBetamax):
     def test_clear_an_attachment_property(self):
         # setUp
         self.property.upload(self.project_root + '/requirements.txt')
-        self.property.refresh()
 
         # testing
         self.assertTrue(self.property.has_value())
@@ -75,7 +72,6 @@ class TestAttachment(TestBetamax):
     def test_retrieve_filename_from_value(self):
         # setUp
         self.property.upload(self.project_root + '/requirements.txt')
-        self.property.refresh()
 
         # testing
         self.assertEqual(self.property.filename, 'requirements.txt')
@@ -83,7 +79,6 @@ class TestAttachment(TestBetamax):
     def test_has_value_true(self):
         # setUp
         self.property.upload(self.project_root + '/requirements.txt')
-        self.property.refresh()
 
         # testing
         self.assertTrue(self.property.has_value())

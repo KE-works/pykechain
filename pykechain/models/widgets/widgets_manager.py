@@ -151,6 +151,7 @@ class WidgetsManager(Iterable):
                              part_model: Union['Part2', Text],
                              parent_instance: Optional[Union['Part2', Text]] = None,
                              title: Optional[Union[type(None), Text, bool]] = False,
+                             parent_widget: Optional[Union[Widget, Text]] = None,
                              new_instance: Optional[bool] = True,
                              edit: Optional[bool] = True,
                              clone: Optional[bool] = True,
@@ -274,10 +275,10 @@ class WidgetsManager(Iterable):
             widget_type=WidgetTypes.SUPERGRID,
             title=title,
             meta=meta,
-            order=kwargs.get("order"),
-            parent=kwargs.get("parent_widget"),
+            parent=parent_widget,
             readable_models=readable_models,
-            writable_models=writable_models
+            writable_models=writable_models,
+            **kwargs
         )
         return widget
 
@@ -285,6 +286,7 @@ class WidgetsManager(Iterable):
                                 part_model: Union['Part2', Text],
                                 parent_instance: Optional[Union['Part2', Text]] = None,
                                 title: Optional[Union[type(None), Text, bool]] = False,
+                                parent_widget: Optional[Union[Widget, Text]] = None,
                                 new_instance: Optional[bool] = True,
                                 edit: Optional[bool] = True,
                                 clone: Optional[bool] = True,
@@ -440,16 +442,17 @@ class WidgetsManager(Iterable):
             widget_type=WidgetTypes.FILTEREDGRID,
             title=title,
             meta=meta,
-            order=kwargs.get("order"),
-            parent=kwargs.get("parent_widget"),
+            parent=parent_widget,
             readable_models=readable_models,
-            writable_models=writable_models
+            writable_models=writable_models,
+            **kwargs,
         )
         return widget
 
     def add_attachmentviewer_widget(self,
                                     attachment_property: Union[Text, 'Property2'],
                                     title: Optional[Union[Text, bool]] = False,
+                                    parent_widget: Optional[Union[Widget, Text]] = None,
                                     alignment: Optional[int] = None,
                                     image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
                                     **kwargs) -> Widget:
@@ -499,14 +502,20 @@ class WidgetsManager(Iterable):
             "imageFit": image_fit
         })
 
+        for deprecated_kw in ['widget_type', 'readable_models']:
+            if deprecated_kw in kwargs:
+                kwargs.pop(deprecated_kw)
+                warnings.warn('Argument "{}" is no longer supported as input to `add_attachment_viewer`.'.format(
+                    deprecated_kw), Warning)
+
         meta, title = _set_title(meta, title, default_title=attachment_property.name)
         widget = self.create_widget(
             widget_type=WidgetTypes.ATTACHMENTVIEWER,
             meta=meta,
             title=title,
-            order=kwargs.get("order"),
-            parent=kwargs.get("parent_widget"),
+            parent=parent_widget,
             readable_models=[attachment_property.model()],
+            **kwargs,
         )
 
         return widget
@@ -694,16 +703,16 @@ class WidgetsManager(Iterable):
             title=title,
             meta=meta,
             parent=parent_widget,
-            order=kwargs.get("order"),
             readable_models=readable_models,
-            writable_models=writable_models
+            writable_models=writable_models,
+            **kwargs
         )
         return widget
 
     def add_service_widget(self,
                            service: 'Service',
                            title: Optional[Union[type(None), bool, Text]] = False,
-                           custom_button_text: Optional[bool] = False,
+                           custom_button_text: Optional[Text] = False,
                            emphasize_run: Optional[bool] = True,
                            download_log: Optional[bool] = False,
                            parent_widget: Optional[Union[Widget, Text]] = None,
@@ -777,7 +786,7 @@ class WidgetsManager(Iterable):
             title=title,
             meta=meta,
             parent=parent_widget,
-            order=kwargs.get("order")
+            **kwargs,
         )
 
         return widget
@@ -785,6 +794,7 @@ class WidgetsManager(Iterable):
     def add_html_widget(self,
                         html: Optional[Text],
                         title: Optional[Union[type(None), bool, Text]] = None,
+                        parent_widget: Optional[Union[Widget, Text]] = None,
                         **kwargs) -> Widget:
         """
         Add a KE-chain HTML widget to the widget manager.
@@ -797,10 +807,8 @@ class WidgetsManager(Iterable):
             * None (default): No title
             * String value: Custom title
         :type title: basestring or None
-        :param collapsible: A boolean to decide whether the panel is collapsible or not (default True)
-        :type collapsible: bool
-        :param collapsed: A boolean to decide whether the panel is collapsed or not (default False)
-        :type collapsed: bool
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or basestring or None
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
         :rtype: Widget
@@ -825,8 +833,8 @@ class WidgetsManager(Iterable):
             widget_type=WidgetTypes.HTML,
             title=title,
             meta=meta,
-            order=kwargs.get("order"),
-            parent=kwargs.get("parent_widget")
+            parent=parent_widget,
+            **kwargs,
         )
         return widget
 
@@ -889,7 +897,7 @@ class WidgetsManager(Iterable):
             title=title,
             meta=meta,
             parent=parent_widget,
-            order=kwargs.get("order")
+            **kwargs,
         )
 
         return widget
@@ -1068,7 +1076,7 @@ class WidgetsManager(Iterable):
             title=title,
             meta=meta,
             parent=None,
-            order=kwargs.get("order")
+            **kwargs,
         )
         return widget
 
@@ -1214,6 +1222,7 @@ class WidgetsManager(Iterable):
     def add_signature_widget(self,
                              attachment_property: 'Property2',
                              title: Optional[Union[bool, Text]] = False,
+                             parent_widget: Optional[Union[Widget, Text]] = None,
                              custom_button_text: Optional[Union[bool, Text]] = False,
                              custom_undo_button_text: Optional[Union[bool, Text]] = False,
                              **kwargs) -> Widget:
@@ -1278,15 +1287,16 @@ class WidgetsManager(Iterable):
             widget_type=WidgetTypes.SIGNATURE,
             meta=meta,
             title=title,
-            order=kwargs.get("order"),
-            parent=kwargs.get("parent_widget"),
+            parent=parent_widget,
             readable_models=[attachment_property.model()],
+            **kwargs,
         )
         return widget
 
     def add_card_widget(self,
                         image: Optional['Property2'] = None,
                         title: Optional[Union[type(None), Text, bool]] = None,
+                        parent_widget: Optional[Union[Widget, Text]] = None,
                         description: Optional[Union[Text, bool]] = None,
                         link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
                         link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
@@ -1397,8 +1407,8 @@ class WidgetsManager(Iterable):
             widget_type=WidgetTypes.CARD,
             meta=meta,
             title=title,
-            order=kwargs.get("order"),
-            parent=kwargs.get("parent_widget")
+            parent=parent_widget,
+            **kwargs,
         )
         return widget
 

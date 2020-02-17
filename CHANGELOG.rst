@@ -1,9 +1,22 @@
 Change Log
 ==========
 
-* Updated `populate_descendants()` to use new API and actually store the `_cached_children`.
+* Added test to confirm a value of `None` clears a reference property. #468
+* :bug: `has_value` method of the `Property2` class now accurately predicts floats, integers and boolean values.
+* :bug: `value` attribute of `AttachmentProperty` class now refreshes automatically when uploading attachments.
+* Keyword-arguments (kwargs) provided when creating widgets via the `WidgetsManager` do now propagate successfully.
+* Improved unittests for `Property2`, `AttachmentProperty2` classes.
 
-3.3.1 (8JAN19)
+3.3.2 (6FEB20)
+--------------
+
+* :bug: `Activity2` method `_validate_edit_arguments` now correctly checks for members of the scope prior to assigning new assignees.
+* :feature: added thousand separators representation on numeric properties to pykechain. #670 (thanks to @raduiordache)
+* Fix the `Widget.parent()` method call. #655
+* Updated `populate_descendants()` to use new API and actually store the `_cached_children`. #662
+* dependent versions for development: pydocstlye (5.0.2), nbsphinx (0.5.1), pytest (5.3.5), pre-commit (2.0.1)
+
+3.3.1 (8JAN20)
 --------------
 * Fixed a lingering performance issue with `Part.add_with_properties()`. In older KE-chain API versions a full part refresh was needed in order to re-retrieve the attributes of a `Part`. In the current backend API this is not needed anymore. The attribute that caused this was the `refresh` flag in the `Part.add_with_properties` method call and resulted in the re-retrieval of all children of a part and caused longer cycle times once the list of children grows longer (linear). This flag will be deprecated in the next release. Currently all Parts are automatically refreshed with information from the backend in a lightweight manner (without an extra API call). The part just created with the method `add_with_properties` is added to the `Part`'s children automatically if the children of the parent are already once retrieved (and cached). Many thanks to our committed users / customers for finding this and pointing this out.
 * Updated type hinting for all methods for `Part2` objects, to assist the user in capable Python Development Environments (IDE's - such as Pycharm or VSCode) to write error-free code.
