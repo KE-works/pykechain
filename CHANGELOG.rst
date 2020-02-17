@@ -9,6 +9,10 @@ Change Log
 * Added `Property` flag `use_bulk_update` and class method `update_values` to support bulk-update of property values while still using the `value` attribute.
 * Updated `populate_descendants()` to use new API and actually store the `_cached_children`.
 * Added test to confirm a value of `None` clears a reference property. #468
+* :bug: `has_value` method of the `Property2` class now accurately predicts floats, integers and boolean values.
+* :bug: `value` attribute of `AttachmentProperty` class now refreshes automatically when uploading attachments.
+* Keyword-arguments (kwargs) provided when creating widgets via the `WidgetsManager` do now propagate successfully.
+* Improved unittests for `Property2`, `AttachmentProperty2` classes.
 
 3.3.2 (6FEB20)
 --------------
