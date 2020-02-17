@@ -5,15 +5,16 @@ Change Log
 3.4.0 (17FEB20)
 ---------------
 
-* :star: Added `Client` method for the bulk-update properties API endpoint.
-* :star: Added `Property2` flag `use_bulk_update` and class method `update_values` to support bulk-update of property values while still using the `value` attribute.
+* :star: Added `Client` method for the bulk-update properties API endpoint. #663
+* :star: Added `Property2` flag `use_bulk_update` and class method `update_values` to support bulk-update of property values while still using the `value` attribute. #663
+* :bug: `has_value` method of the `Property2` class now accurately predicts floats, integers and boolean values. #675
+* :bug: `value` attribute of `AttachmentProperty` class now refreshes automatically when uploading attachments. #675
+* :+1: moved bulk-update of widgets to the client. Also split the `_validate_widget` and the `_validate_related_models` Client methods. #658
 * :+1: Updated `populate_descendants()` to use new API and actually store the `_cached_children`.
 * :+1: Added test to confirm a value of `None` clears a reference property. #468
-* :bug: `has_value` method of the `Property2` class now accurately predicts floats, integers and boolean values.
-* :bug: `value` attribute of `AttachmentProperty` class now refreshes automatically when uploading attachments.
 * :+1: Keyword-arguments provided when creating widgets via the `WidgetsManager` do now propagate successfully.
 * :+1: Improved unittests for `Property2`, `AttachmentProperty2` classes.
-
+* :+1: dependent versions for development: semver (2.9.1, coveralls (1.11.1), Sphinx (2.4.1), tox (3.14.5)
 
 3.3.2 (6FEB20)
 --------------
