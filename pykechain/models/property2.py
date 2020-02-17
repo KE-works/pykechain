@@ -18,14 +18,22 @@ class Property2(Property):
     .. versionadded: 3.0
        This is a `Property` to communicate with a KE-chain 3 backend.
 
+    :cvar bulk_update: flag to postpone update of properties until manually requested
+    :type bulk_update: bool
     :ivar type: The property type of the property. One of the types described in :class:`pykechain.enums.PropertyType`
     :type type: str
     :ivar category: The category of the property, either `Category.MODEL` of `Category.INSTANCE`
     :type category: str
+    :ivar description: description of the property
+    :type description: str or None
+    :ivar unit: unit of measure of the property
+    :type unit: str or None
     :ivar model: the id of the model (not the model object)
     :type model: str
     :ivar output: a boolean if the value is configured as an output (in an activity)
     :type output: bool
+    :ivar scope_id: the id of the Scope (not the `Scope` object)
+    :type scope_id: str
     :ivar part: The (parent) part in which this property is available
     :type part: :class:`Part2`
     :ivar value: the property value, can be set as well as property
@@ -38,6 +46,9 @@ class Property2(Property):
     :type is_invalid: bool
     """
 
+    use_bulk_update = False
+    _update_package = list()
+
     def __init__(self, json, **kwargs):
         """Construct a Property from a json object."""
         super(Property2, self).__init__(json, **kwargs)
@@ -46,12 +57,15 @@ class Property2(Property):
         self._value = json.get('value')
         self._options = json.get('value_options')
         self._part = None  # Part2 storage
+        self._model = None  # Model object storage
 
         self.part_id = json.get('part_id')
         self.scope_id = json.get('scope_id')
         self.ref = json.get('ref')
         self.type = json.get('property_type')
         self.category = json.get('category')
+        self.description = json.get('description', None)
+        self.unit = json.get('unit', None)
         self.order = json.get('order')
 
         # set an empty internal validators variable
@@ -64,6 +78,43 @@ class Property2(Property):
                 self._parse_validators()
             if self._options.get('representations'):
                 self._parse_representations()
+
+    @property
+    def value(self) -> Any:
+        """Retrieve the data value of a property.
+
+        Setting this value will immediately update the property in KE-chain.
+
+        :returns: the value
+        """
+        return self._value
+
+    @value.setter
+    def value(self, value: Any) -> None:
+        if self.use_bulk_update:
+            self.__class__._update_package.append(dict(
+                id=self.id,
+                value=value,
+            ))
+            self._value = value
+        else:
+            self._put_value(value)
+
+    @classmethod
+    def update_values(cls, client: 'Client', use_bulk_update: bool = False) -> None:
+        """
+        Perform the bulk update of property values using the stored values in the `Property` class.
+
+        :param client: Client object
+        :type client: Client
+        :param use_bulk_update: set the class attribute, defaults to False.
+        :type use_bulk_update: bool
+        :return: None
+        """
+        if cls.use_bulk_update:
+            client.update_properties(properties=cls._update_package)
+            cls._update_package = list()
+        cls.use_bulk_update = use_bulk_update
 
     def _put_value(self, value):
         url = self._client._build_url('property2', property_id=self.id)
