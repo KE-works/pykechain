@@ -100,6 +100,20 @@ class TestActivityConstruction(TestBetamax):
                 # tearDown
                 task.delete()
 
+    def test_create_with_incorrect_classification(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.project.create_activity(
+                name='Impossible classification',
+                classification='Gummy bears',
+            )
+
+    def test_create_with_incorrect_parent(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.client.create_activity(
+                name='Impossible parent',
+                parent='Darth vader',
+            )
+
     def test_create_with_task_as_parent(self):
         task = self.process.create(name='__Test task')
 
