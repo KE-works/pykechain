@@ -91,7 +91,6 @@ def _set_title(meta: Dict,
     :rtype: Tuple[Dict,Text]
     :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
-
     if custom_title and title is None:
         warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
                       'accordingly to use `title`.', PendingDeprecationWarning)
