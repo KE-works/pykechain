@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+
+3.4.0 (17FEB20)
+---------------
+
+* Added `Client` method for the bulk-update properties API endpoint.
+* Added `Property` flag `use_bulk_update` and class method `update_values` to support bulk-update of property values while still using the `value` attribute.
+* Updated `populate_descendants()` to use new API and actually store the `_cached_children`.
 * Added test to confirm a value of `None` clears a reference property. #468
 * :bug: `has_value` method of the `Property2` class now accurately predicts floats, integers and boolean values.
 * :bug: `value` attribute of `AttachmentProperty` class now refreshes automatically when uploading attachments.
@@ -9,7 +16,6 @@ Change Log
 
 3.3.2 (6FEB20)
 --------------
-
 * :bug: `Activity2` method `_validate_edit_arguments` now correctly checks for members of the scope prior to assigning new assignees.
 * :feature: added thousand separators representation on numeric properties to pykechain. #670 (thanks to @raduiordache)
 * Fix the `Widget.parent()` method call. #655
