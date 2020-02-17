@@ -1217,7 +1217,7 @@ class Client(object):
 
         if classification is None:
             if parent_classification is None:
-                classification = self.activity(id=parent).classification
+                classification = ActivityClassification.WORKFLOW
             else:
                 classification = parent_classification
         elif classification not in ActivityClassification.values():
