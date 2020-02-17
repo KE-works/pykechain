@@ -3,6 +3,7 @@ from datetime import datetime
 from pykechain.enums import PropertyType, Category, Multiplicity
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models import Property2
+from pykechain.models.validators import SingleReferenceValidator
 from tests.classes import TestBetamax
 
 
