@@ -1,8 +1,9 @@
+import warnings
 from typing import Dict, Optional, Union, Text, Tuple, List
 
 from six import text_type
 
-from pykechain.enums import Category, PropertyType
+from pykechain.enums import Category, PropertyType, WidgetTitleValue
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.utils import is_uuid, snakecase, camelcase
 
@@ -62,8 +63,12 @@ def _retrieve_object_id(obj):
                                    "Type is: {}".format(type(obj)))
 
 
-def _set_title(meta, custom_title, default_title=None):
-    # type: (Dict, Optional[Union[Text, bool]], Optional[Text]) -> Tuple[Dict, Text]
+def _set_title(meta: Dict,
+               title: Optional[Union[Text, bool]] = None,
+               custom_title: Optional[Union[Text, bool]] = None,
+               default_title: Optional[Text] = None,
+               show_title_value: Optional[WidgetTitleValue] = None,
+               **kwargs) -> (Dict, Text):
     """
     Set the customTitle in the meta based on provided optional custom title or default.
 
@@ -80,22 +85,35 @@ def _set_title(meta, custom_title, default_title=None):
     :type custom_title: basestring or bool or None
     :param default_title: (optional) If custom_title is False, the default title is injected as title
     :type default_title: basestring or None
+    :param show_title_value: (optional) Specify how the title is displayed, regardless of other inputs.
+    :type show_title_value: WidgetTitleValue
     :return: tuple of meta and the title
     :rtype: Tuple[Dict,Text]
     :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
-    if custom_title is False:
-        show_title_value = "Default"
-        if default_title is None:
-            raise IllegalArgumentError("When the `custom_title` is set to False the `default_title` is used and "
-                                       "cannot be None. Provide a `default_title` argument and ensure it is not None.")
-        title = default_title
-    elif custom_title is None or custom_title == '':
-        show_title_value = "No title"
-        title = ''
-    else:
-        show_title_value = "Custom title"
+
+    if custom_title and title is None:
+        warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
+                      'accordingly to use `title`.', PendingDeprecationWarning)
         title = custom_title
+
+    if show_title_value is None:
+        if title is False:
+            show_title_value = WidgetTitleValue.DEFAULT
+        elif title is None or title == '':
+            show_title_value = WidgetTitleValue.NO_TITLE
+        else:
+            show_title_value = WidgetTitleValue.CUSTOM_TITLE
+    elif show_title_value not in WidgetTitleValue.values():
+        raise IllegalArgumentError('`show_title_value` must be a WidgetTitleValue enum option, "{}" is not. '
+                                   'Choose from: {}'.format(show_title_value, WidgetTitleValue.values()))
+
+    if title is False:
+        if default_title is None:
+            raise IllegalArgumentError("If `title` is set to False the `default_title` is used and cannot be None. "
+                                       "Provide a `default_title` argument and ensure it is not None.")
+        else:
+            title = default_title
 
     meta.update({
         "showTitleValue": show_title_value,
