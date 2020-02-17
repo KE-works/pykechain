@@ -3,6 +3,7 @@ from datetime import datetime
 from pykechain.enums import PropertyType, Category, Multiplicity
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models import Property2
+from pykechain.models.validators import SingleReferenceValidator
 from tests.classes import TestBetamax
 
 
@@ -321,3 +322,106 @@ class TestProperties(TestBetamax):
         self.assertTrue(dual_pad_prop_retrieved_from_seat.category, Category.INSTANCE)
 
         self.assertEqual(dual_pad_prop_retrieved_from_seat.id, dual_pad_property.id)
+
+
+class TestUpdateProperties(TestBetamax):
+    def setUp(self):
+        super().setUp()
+
+        self.bike = self.project.model('Bike')
+        self.submodel = self.project.create_model(name='_test submodel', parent=self.bike)
+
+        self.prop_1 = self.submodel.add_property(name=PropertyType.CHAR_VALUE, property_type=PropertyType.CHAR_VALUE)
+        self.prop_2 = self.submodel.add_property(name=PropertyType.TEXT_VALUE, property_type=PropertyType.TEXT_VALUE)
+        self.props = [self.prop_1, self.prop_2]
+
+    def tearDown(self):
+        self.submodel.delete()
+        super().tearDown()
+
+    def _refresh_prop(self, p):
+        return self.client.property(pk=p.id, category=p.category)
+
+    def test_bulk_update(self):
+        """Test the API using the Client method."""
+        update = [dict(id=p.id, value='new value') for p in self.props]
+
+        updated_properties = self.client.update_properties(properties=update)
+
+        # testing
+        self.assertIsInstance(updated_properties, list)
+        self.assertTrue(all(p1 == p2 for p1, p2 in zip(self.props, updated_properties)))
+        self.assertTrue(all(isinstance(p, Property2) for p in updated_properties))
+        self.assertTrue(all(p.value == 'new value' for p in updated_properties))
+
+    def test_bulk_update_manual(self):
+        """Test storing of value updates in the Property class."""
+        # setUp
+        Property2.use_bulk_update = True
+        self.prop_1.value = 'new value'
+        self.prop_2.value = 'another value'
+
+        # testing
+        self.assertIsNone(self._refresh_prop(self.prop_1).value)
+        self.assertIsNone(self._refresh_prop(self.prop_2).value)
+
+        Property2.update_values(client=self.client)
+
+        self.assertEqual(self._refresh_prop(self.prop_1).value, 'new value')
+        self.assertEqual(self._refresh_prop(self.prop_2).value, 'another value')
+
+    def test_bulk_update_reset(self):
+        """Test whether bulk update is reset to `False` after update is performed."""
+        # setUp
+        Property2.use_bulk_update = True
+        self.prop_1.value = 'new value'
+
+        # testing
+        self.assertIsNone(self._refresh_prop(self.prop_1).value)
+        Property2.update_values(client=self.client)
+        self.assertEqual(self._refresh_prop(self.prop_1).value, 'new value')
+        self.assertFalse(Property2.use_bulk_update)
+
+        # setUp 2
+        Property2.use_bulk_update = True
+        self.prop_2.value = 'another value'
+
+        # testing 2
+        self.assertIsNone(self._refresh_prop(self.prop_2).value)
+        Property2.update_values(client=self.client, use_bulk_update=True)
+        self.assertEqual(self._refresh_prop(self.prop_2).value, 'another value')
+        self.assertTrue(Property2.use_bulk_update)
+
+
+class TestPropertiesWithReferenceProperty(TestBetamax):
+    def setUp(self):
+        super(TestPropertiesWithReferenceProperty, self).setUp()
+
+        self.wheel_model = self.project.model('Wheel')
+        self.bike = self.project.model('Bike')
+
+        self.test_ref_property_model = self.bike.add_property(name="__Test ref property @ {}".format(datetime.now()),
+                                                              property_type=PropertyType.REFERENCES_VALUE,
+                                                              description='Description of test ref property',
+                                                              unit='no unit',
+                                                              default_value=[self.wheel_model])
+        self.test_ref_property_model.validators = [SingleReferenceValidator()]
+
+    def tearDown(self):
+        self.test_ref_property_model.delete()
+        super(TestPropertiesWithReferenceProperty, self).tearDown()
+
+    def test_copy_reference_property_with_options(self):
+        # setUp
+        copied_ref_property = self.test_ref_property_model.copy(target_part=self.wheel_model,
+                                                                name='__Copied ref property')
+
+        # testing
+        self.assertEqual(copied_ref_property.name, '__Copied ref property')
+        self.assertEqual(copied_ref_property.description, self.test_ref_property_model.description)
+        self.assertEqual(copied_ref_property.unit, self.test_ref_property_model.unit)
+        self.assertEqual(copied_ref_property.value, self.test_ref_property_model.value)
+        self.assertEqual(copied_ref_property._options, self.test_ref_property_model._options)
+
+        # tearDown
+        copied_ref_property.delete()
