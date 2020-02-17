@@ -11,8 +11,9 @@ from pykechain.utils import is_uuid, snakecase, camelcase
 KECARD_COMMON_KEYS = ["collapsed", "collapsible", "noBackground", "noPadding", "isDisabled", "isMerged"]
 
 
-def _retrieve_object(obj, method):
-    # type: (Union[Part2, Property2, Team, Service, Text], Client) -> (Union[Part2, Team, Service, Property2])  # noqa
+def _retrieve_object(obj: Union['Part2', 'AnyProperty', 'Team', 'Service', Text],
+                     method: 'Client',
+                     ) -> Union['Part2', 'AnyProperty', 'Team', 'Service']:
     """
     Object if object or uuid of object is provided as argument.
 
@@ -38,8 +39,7 @@ def _retrieve_object(obj, method):
                                    " Part id, Property id, Service id or Team id. Type is: {}".format(type(obj)))
 
 
-def _retrieve_object_id(obj):
-    # type: (Optional[Union[Base, Text]]) -> Optional[Text]  # noqa
+def _retrieve_object_id(obj: Optional[Union['Base', Text]]) -> Optional[Text]:
     """
     Object id if object or uuid of object is provided as argument.
 
@@ -225,8 +225,8 @@ def _check_prefilters(part_model: 'Part2', prefilters: Dict):  # noqa: F821
     return list_of_prefilters
 
 
-def _check_excluded_propmodels(part_model, property_models):
-    list_of_propmodels_excl = list()  # type: List[Property2]  # noqa
+def _check_excluded_propmodels(part_model: 'Part2', property_models: List['AnyProperty']) -> List['AnyProperty']:
+    list_of_propmodels_excl = list()  # type: List['AnyProperty']
     for property_model in property_models:
         if is_uuid(property_model):
             property_model = part_model.property(id=property_model)
