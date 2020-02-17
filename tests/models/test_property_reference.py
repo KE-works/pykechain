@@ -76,9 +76,6 @@ class TestMultiReferenceProperty(TestBetamax):
         # testing
         self.assertTrue(len(self.ref.value) >= 2)
 
-        # tearDown
-        self.ref.value = None
-
     def test_referencing_multiple_instances_using_ids(self):
         # setUp
         wheel_model = self.project.model('Wheel')
@@ -92,9 +89,6 @@ class TestMultiReferenceProperty(TestBetamax):
 
         # testing
         self.assertTrue(len(self.ref.value) >= 2)
-
-        # tearDown
-        self.ref.value = None
 
     def test_referencing_a_part_not_in_a_list(self):
         # setUp
@@ -128,8 +122,6 @@ class TestMultiReferenceProperty(TestBetamax):
         all_referred_parts = self.ref.value
         self.assertEqual(len(all_referred_parts), len(self.ref._value))
 
-        # tearDown
-        self.ref.value = None
 
     def test_value_if_nothing_is_referenced(self):
         # setUp
@@ -146,7 +138,6 @@ class TestMultiReferenceProperty(TestBetamax):
         self.ref_prop_model.value = [self.ref_target_model]
         possible_options = self.ref.choices()
         self.assertEqual(2, len(possible_options))
-
 
     def test_create_ref_property_referencing_part_in_list(self):
         # setUp
@@ -494,6 +485,36 @@ class TestMultiReferenceProperty(TestBetamax):
         ref_to_wheel = frame.property(name='Ref to wheel')
 
         self.assertEqual(ref_to_wheel.scope_id, self.project.id)
+
+    def test_property_clear_selected_part_model(self):
+        # setUp
+        wheel_model = self.project.model('Wheel')
+        self.ref_prop_model.value = [wheel_model]
+
+        self.assertTrue(wheel_model.id == self.ref_prop_model.value[0].id)
+
+        self.ref_prop_model.value = None
+
+        # testing
+        self.assertIsNone(self.ref_prop_model.value)
+
+    def test_property_clear_referenced_part_instances(self):
+        # setUp
+        wheel_model = self.project.model('Wheel')
+        self.ref_prop_model.value = [wheel_model]
+
+        wheel_instances = wheel_model.instances()
+        wheel_instances_list = [instance.id for instance in wheel_instances]
+
+        # set ref value
+        self.ref.value = wheel_instances_list
+
+        # clear referenced part instances
+        self.ref.value = None
+
+        # testing
+        self.assertIsNone(self.ref.value)
+        self.assertIsNotNone(self.ref_prop_model.value)
 
 
 class TestMultiReferencePropertyXScope(TestBetamax):

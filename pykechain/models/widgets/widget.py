@@ -240,7 +240,6 @@ class Widget(Base):
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete Widget ({})".format(response))
-
         return True
 
     def copy(self, target_activity, order=None):

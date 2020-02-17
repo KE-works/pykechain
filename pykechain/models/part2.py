@@ -445,10 +445,10 @@ class Part2(Base):
         against a trade-off that someone looking at the frontend won't notice any changes unless the page
         is refreshed.
 
-        :type kwargs: dict or None
-        :type model: :class:`Part`
+        :param model: `Part2` object with category `MODEL`.
+        :type model: :class:`Part2`
         :param kwargs: (optional) additional keyword=value arguments
-        :return: :class:`Part` with category `INSTANCE`.
+        :return: :class:`Part2` with category `INSTANCE`.
         :raises APIError: if unable to add the new child instance
 
         Example

@@ -560,26 +560,20 @@ class Activity2(Base, TagsMixin):
                 raise IllegalArgumentError('Due date should be a datetime.datetime() object')
 
         if isinstance(assignees_ids, (list, tuple)) or isinstance(assignees, (list, tuple)):
+            members = self.scope.members()
+
             if isinstance(assignees_ids, (list, tuple)):
-                users = self._client.users()
-                update_assignees_ids = [u.id for u in users if u.id in assignees_ids]
+                update_assignees_ids = [m.get('id') for m in members if m.get('id') in assignees_ids]
                 if len(update_assignees_ids) != len(assignees_ids):
                     raise NotFoundError("All assignees should be a member of the project")
             elif isinstance(assignees, (list, tuple)):
-                users = self._client.users()
-                update_assignees_ids = [u.id for u in users if u.username in assignees]
+                update_assignees_ids = [m.get('id') for m in members if m.get('username') in assignees]
                 if len(update_assignees_ids) != len(assignees):
                     raise NotFoundError("All assignees should be a member of the project")
             else:
                 raise IllegalArgumentError("Provide the usernames either as list of usernames of user id's")
 
-            if isinstance(update_assignees_ids, list):
-                project = self._client.scope(pk=self.scope_id, status=None)
-                member_ids_list = [member['id'] for member in project._json_data['members']]
-                for assignee_id in update_assignees_ids:
-                    if assignee_id not in member_ids_list:
-                        raise NotFoundError("Assignee '{}' should be a member of the project".format(assignee_id))
-                update_dict.update({'assignees_ids': update_assignees_ids})
+            update_dict.update({'assignees_ids': update_assignees_ids})
         elif assignees_ids or assignees:
             raise IllegalArgumentError("If assignees_ids or assignees are provided, they should be a list or tuple")
 
