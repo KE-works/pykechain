@@ -261,6 +261,7 @@ class TestClientLive(TestBetamax):
         status = ScopeStatus.CLOSED
         description = 'test description'
         tags = ['one', 'two']
+        team = self.project.team
 
         client = self.client
         clone = client.clone_scope(
@@ -271,6 +272,7 @@ class TestClientLive(TestBetamax):
             due_date=now,
             description=description,
             tags=tags,
+            team=team,
         )
 
         try:
@@ -280,6 +282,7 @@ class TestClientLive(TestBetamax):
             self.assertEqual(clone.start_date, now)
             self.assertEqual(clone.due_date, now)
             self.assertEqual(clone.description, description)
+            self.assertEqual(clone.team, team)
             self.assertListEqual(clone.tags, tags)
         except Exception as e:
             clone.delete()

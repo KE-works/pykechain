@@ -1,5 +1,4 @@
 import datetime
-import uuid
 
 from pykechain.enums import PropertyType, FilterType, Multiplicity
 from pykechain.exceptions import IllegalArgumentError
@@ -9,6 +8,7 @@ from tests.classes import TestBetamax
 
 
 class TestMultiReferenceProperty(TestBetamax):
+
     def setUp(self):
         super(TestMultiReferenceProperty, self).setUp()
 
@@ -19,7 +19,7 @@ class TestMultiReferenceProperty(TestBetamax):
             parent=_wheel_model.parent_id,
             name="__Wheel",
             multiplicity=Multiplicity.ONE_MANY,
-            properties_fvalues = [
+            properties_fvalues=[
                 dict(name='__Fabrication date', property_type=PropertyType.DATETIME_VALUE),
                 dict(name='__Tyre manufacturer', property_type=PropertyType.SINGLE_SELECT_VALUE),
                 dict(name='__Flat tire', property_type=PropertyType.BOOLEAN_VALUE),
@@ -28,7 +28,6 @@ class TestMultiReferenceProperty(TestBetamax):
                 dict(name='__Rim Material', property_type=PropertyType.CHAR_VALUE)
             ]
         )
-          # integer property
 
         # reference property model (with a value pointing to a reference target part model
         self.part_model = self.project.model('Bike')
@@ -122,21 +121,21 @@ class TestMultiReferenceProperty(TestBetamax):
         all_referred_parts = self.ref.value
         self.assertEqual(len(all_referred_parts), len(self.ref._value))
 
-
     def test_value_if_nothing_is_referenced(self):
         # setUp
         value_of_multi_ref = self.ref.value
 
         # testing
+        self.assertFalse(self.ref.has_value())
         self.assertIsNone(value_of_multi_ref)
 
     def test_multi_ref_choices(self):
         # setUp
-        second_wheel = self.project.part(ref='bike').add(model=self.ref_target_model, name='__Wheel 2')
-
-        # testing
+        self.project.part(ref='bike').add(model=self.ref_target_model, name='__Wheel 2')
         self.ref_prop_model.value = [self.ref_target_model]
         possible_options = self.ref.choices()
+
+        # testing
         self.assertEqual(2, len(possible_options))
 
     def test_create_ref_property_referencing_part_in_list(self):
@@ -144,7 +143,7 @@ class TestMultiReferenceProperty(TestBetamax):
         new_reference_to_wheel = self.part_model.add_property(
             name=self.ref_prop_name,
             property_type=PropertyType.REFERENCES_VALUE,
-            default_value=[self.ref_target_model]
+            default_value=[self.ref_target_model],
         )
         # testing
         self.assertTrue(self.ref_prop_model.value[0].id, self.ref_target_model.id)
@@ -212,7 +211,7 @@ class TestMultiReferenceProperty(TestBetamax):
     # new in 3.0
     def test_set_prefilters_on_reference_property(self):
         # setUp
-        diameter_property = self.ref_target_diameter_prop # decimal property
+        diameter_property = self.ref_target_diameter_prop  # decimal property
         spokes_property = self.ref_target_spokes_prop  # integer property
         rim_material_property = self.ref_target_material_prop  # single line text
 
@@ -377,6 +376,7 @@ class TestMultiReferenceProperty(TestBetamax):
 
         # When prefilters are being set, but no UUIDs or `Property` objects are being used in property_models
         with self.assertRaises(IllegalArgumentError):
+            # noinspection PyTypeChecker
             self.ref_prop_model.set_prefilters(
                 property_models=[False, 301],
                 values=[3.33, 1.51],
@@ -449,6 +449,7 @@ class TestMultiReferenceProperty(TestBetamax):
 
         # When excluded propmodels are being set, but no UUIDs or `Property` objects are being used in property_models
         with self.assertRaises(IllegalArgumentError):
+            # noinspection PyTypeChecker
             self.ref_prop_model.set_excluded_propmodels(property_models=[False, 301])
 
     def test_add_excluded_propmodels_to_reference_property(self):
@@ -515,6 +516,21 @@ class TestMultiReferenceProperty(TestBetamax):
         # testing
         self.assertIsNone(self.ref.value)
         self.assertIsNotNone(self.ref_prop_model.value)
+
+    def test_copy_reference_property_with_options(self):
+        # setUp
+        copied_ref_property = self.ref_prop_model.copy(target_part=self.part_model,
+                                                       name='__Copied ref property')
+
+        # testing
+        self.assertEqual(copied_ref_property.name, '__Copied ref property')
+        self.assertEqual(copied_ref_property.description, self.ref_prop_model.description)
+        self.assertEqual(copied_ref_property.unit, self.ref_prop_model.unit)
+        self.assertEqual(copied_ref_property.value, self.ref_prop_model.value)
+        self.assertDictEqual(copied_ref_property._options, self.ref_prop_model._options)
+
+        # tearDown
+        copied_ref_property.delete()
 
 
 class TestMultiReferencePropertyXScope(TestBetamax):
