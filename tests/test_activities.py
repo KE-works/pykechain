@@ -7,8 +7,9 @@ import pytest
 import pytz
 import requests
 
-from pykechain.enums import ActivityType, ActivityStatus, ActivityClassification, Category
-from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
+from pykechain.enums import ActivityType, ActivityStatus, ActivityClassification, Category, \
+    activity_root_name_by_classification
+from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError, APIError
 from pykechain.models import Activity2
 from pykechain.utils import temp_chdir
 from tests.classes import TestBetamax
@@ -16,6 +17,124 @@ from tests.utils import TEST_FLAG_IS_WIM2
 
 ISOFORMAT = "%Y-%m-%dT%H:%M:%SZ"
 ISOFORMAT_HIGHPRECISION = "%Y-%m-%dT%H:%M:%S.%fZ"
+
+
+class TestActivityConstruction(TestBetamax):
+
+    def setUp(self):
+        super().setUp()
+        self.process = self.project.create_activity(
+            name='__Test process',
+            activity_type=ActivityType.PROCESS,
+        )
+        self.task = None
+
+    def tearDown(self):
+        for activity in [self.task, self.process]:
+            if activity:
+                try:
+                    activity.delete()
+                except APIError:
+                    pass
+        super().tearDown()
+
+    def test_create_with_inputs(self):
+        name = '__Testing task'
+        description = 'My new task'
+        status = ActivityStatus.OPEN
+        now = datetime.now()
+        activity_type = ActivityType.TASK
+        classification = ActivityClassification.WORKFLOW
+
+        # setUp
+        self.task = self.client.create_activity(
+            name=name,
+            parent=self.process,
+            status=status,
+            description=description,
+            start_date=now,
+            due_date=now,
+            activity_type=activity_type,
+            classification=classification,
+        )
+
+        # testing
+        self.assertIsInstance(self.task, Activity2)
+        self.assertEqual(name, self.task.name)
+        self.assertEqual(status, self.task.status)
+        self.assertTrue(description, self.task.description)
+        self.assertIsInstance(self.task.start_date, datetime)
+        self.assertIsInstance(self.task.due_date, datetime)
+        self.assertEqual(activity_type, self.task.activity_type)
+        self.assertEqual(classification, self.task.classification)
+
+    def test_create_on_scope(self):
+        self.task = self.project.create_activity('__Test task')
+
+        self.assertIsInstance(self.task, Activity2)
+        self.assertEqual(ActivityType.TASK, self.task.activity_type)
+        self.assertEqual(ActivityClassification.WORKFLOW, self.task.classification)
+
+    def test_create_with_classification(self):
+
+        for classification in ActivityClassification.values():
+            with self.subTest(msg='Classification: {}'.format(classification)):
+                # setUp 1
+                root_name = activity_root_name_by_classification[classification]
+                root = self.project.activity(name=root_name)
+
+                # testing 1
+                self.assertEqual(classification, root.classification)
+                self.assertEqual(ActivityType.PROCESS, root.activity_type)
+
+                # setUp 2
+                task = self.client.create_activity(
+                    parent=root,
+                    name='{}'.format(classification),
+                    classification=classification,
+                )
+
+                # testing 2
+                self.assertEqual(classification, task.classification)
+
+                # tearDown
+                task.delete()
+
+    def test_create_with_task_as_parent(self):
+        task = self.process.create(name='__Test task')
+
+        with self.assertRaises(IllegalArgumentError, msg='Tasks cannot be created below other tasks!'):
+            task.create('This cannot happen')
+
+    def test_create_with_incorrect_inputs(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.project.create_activity('__test_task', status='COMPLETE')
+
+        with self.assertRaises(IllegalArgumentError):
+            self.project.create_activity('__test_task', start_date=datetime.now().isoformat())
+
+        with self.assertRaises(IllegalArgumentError):
+            self.project.create_activity('__test_task', description=1234)
+
+        with self.assertRaises(IllegalArgumentError):
+            self.project.create_activity('__test_task', classification='PRODUCT')
+
+    def test_delete(self):
+        # setUp
+        sub_process_name = '__Test subprocess'
+        sub_task_name = '__Test subtask'
+
+        subprocess = self.process.create(name=sub_process_name, activity_type=ActivityType.PROCESS)
+        self.task = subprocess.create(name=sub_task_name)
+        subprocess.delete()
+
+        # testing
+        with self.assertRaises(APIError, msg='Cant delete the same Activity twice!'):
+            subprocess.delete()
+        with self.assertRaises(NotFoundError, msg='Deleted Activity cant be found!'):
+            self.project.activity(name=sub_process_name)
+        with self.assertRaises(NotFoundError, msg='Children of deleted Activities cant be found!'):
+            self.project.activity(name=sub_task_name)
 
 
 class TestActivities(TestBetamax):
@@ -42,74 +161,6 @@ class TestActivities(TestBetamax):
     def test_retrieve_too_many_activity(self):
         with self.assertRaises(MultipleFoundError):
             self.project.activity()
-
-    def test_create_activity(self):
-        # set up
-        project = self.project
-
-        subprocess = project.create_activity('Test subprocess creation', activity_type='PROCESS')
-        self.assertEqual(subprocess.name, 'Test subprocess creation')
-
-        task = subprocess.create('Test task creation')
-        self.assertEqual(task.name, 'Test task creation')
-
-        # teardown
-        subprocess.delete()
-
-        with self.assertRaises(NotFoundError):
-            project.activity(name='Test subprocess creation')
-        with self.assertRaises(NotFoundError):
-            project.activity(name='Test task creation')
-
-    def test_create_activity_under_task(self):
-        task = self.project.activity('Specify wheel diameter')
-
-        with self.assertRaises(IllegalArgumentError):
-            task.create('This cannot happen')
-
-    def test_create_activity_catalog(self):
-        # setUp
-        catalog_task = self.project.create_activity(
-            name='Test catalog task',
-            classification=ActivityClassification.CATALOG,
-        )
-
-        # testing
-        self.assertTrue(catalog_task.classification == ActivityClassification.CATALOG)
-
-        # tearDown
-        catalog_task.delete()
-
-    def test_create_activity_with_inputs(self):
-        # setUp
-        task = self.project.create_activity(
-            name='Testing task',
-            status=ActivityStatus.OPEN,
-            description='My new task',
-            start_date=datetime.now(),
-            due_date=datetime.now(),
-            activity_type=ActivityType.TASK,
-            classification=ActivityClassification.WORKFLOW,
-        )
-
-        # testing
-        self.assertIsInstance(task, Activity2)
-
-        # tearDown
-        task.delete()
-
-    def test_create_activity_incorrect_inputs(self):
-        with self.assertRaises(IllegalArgumentError):
-            self.project.create_activity('__test_task', status='COMPLETE')
-
-        with self.assertRaises(IllegalArgumentError):
-            self.project.create_activity('__test_task', start_date=datetime.now().isoformat())
-
-        with self.assertRaises(IllegalArgumentError):
-            self.project.create_activity('__test_task', description=1234)
-
-        with self.assertRaises(IllegalArgumentError):
-            self.project.create_activity('__test_task', classification='PRODUCT')
 
     # new in 1.7
     def test_edit_activity_name(self):
@@ -285,7 +336,7 @@ class TestActivities(TestBetamax):
 
     def test_retrieve_children_of_task_fails_for_task(self):
         task = self.project.activity(name='Specify wheel diameter')
-        with self.assertRaises(NotFoundError):
+        with self.assertRaises(NotFoundError, msg='Tasks have no children!'):
             task.children()
 
     def test_retrieve_activity_by_id(self):
@@ -316,7 +367,7 @@ class TestActivities(TestBetamax):
         specify_wheel_diam_cripled = self.project.activity(name='Specify wheel diameter', fields='id,name,status')
         self.assertFalse(specify_wheel_diam_cripled._json_data.get('scope_id'))
 
-        # now the self-healing will beging
+        # now the self-healing will begin
         self.assertEqual(specify_wheel_diam_cripled.scope_id, self.project.id)
 
     # in 1.13
