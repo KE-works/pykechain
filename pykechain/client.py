@@ -1175,7 +1175,7 @@ class Client(object):
         :type start_date: datetime.datetime
         :param due_date: due date of the activity
         :type due_date: datetime.datetime
-        :param classification: classification of activity: defaults to Parent classification
+        :param classification: classification of activity: defaults to `parent`'s if provided, WORKFLOW otherwise.
         :type classification: ActivityClassification
         :param tags: list of activity tags
         :type tags: list

@@ -1,6 +1,7 @@
 Change Log
 ==========
 
+* Creation of `Activity` now uses parent's `classification` if provided.
 
 3.4.0 (17FEB20)
 ---------------
