@@ -2120,9 +2120,9 @@ class Client(object):
         new_team.refresh()
         return new_team
 
-    def _validate_widget(self, activity, widget_type, title, meta, order, parent, readable_models, writable_models,
-                         **kwargs):
-
+    @staticmethod
+    def _validate_widget(activity, widget_type, title, meta, order, parent, **kwargs):
+        """Validate the format and content of the configuration of a widget."""
         if isinstance(activity, (Activity, Activity2)):
             activity = activity.id
         elif is_uuid(activity):
@@ -2163,13 +2163,7 @@ class Client(object):
         if kwargs:
             data.update(**kwargs)
 
-        readable_model_ids, writable_model_ids = self._validate_related_models(
-            readable_models=readable_models,
-            writable_models=writable_models,
-            **kwargs,
-        )
-
-        return data, readable_model_ids, writable_model_ids
+        return data
 
     @staticmethod
     def _validate_related_models(readable_models, writable_models, **kwargs):
@@ -2248,16 +2242,20 @@ class Client(object):
         :raises IllegalArgumentError: when an illegal argument is send.
         :raises APIError: when an API Error occurs.
         """
-        data, readable_model_ids, writable_model_ids = self._validate_widget(
+        data = self._validate_widget(
             activity=activity,
             widget_type=widget_type,
             title=title,
             meta=meta,
             order=order,
             parent=parent,
+            **kwargs
+        )
+
+        readable_model_ids, writable_model_ids = self._validate_related_models(
             readable_models=readable_models,
             writable_models=writable_models,
-            **kwargs
+            **kwargs,
         )
 
         # perform the call
@@ -2289,19 +2287,22 @@ class Client(object):
         bulk_data = list()
         bulk_associations = list()
         for widget in widgets:
-            data, readable_model_ids, writable_model_ids = self._validate_widget(
+            data = self._validate_widget(
                 activity=widget.get('activity'),
                 widget_type=widget.get('widget_type'),
                 title=widget.get('title'),
                 meta=widget.get('meta'),
                 order=widget.get('order'),
                 parent=widget.get('parent'),
-                readable_models=widget.get('readable_models'),
-                writable_models=widget.get('writable_models'),
                 **widget.pop('kwargs', dict()),
             )
             bulk_data.append(data)
-            bulk_associations.append((readable_model_ids, writable_model_ids))
+
+            bulk_associations.append(self._validate_related_models(
+                readable_models=widget.get('readable_models'),
+                writable_models=widget.get('writable_models'),
+                **widget.pop('kwargs', dict()),
+            ))
 
         url = self._build_url('widgets_bulk_create')
         response = self._request('POST', url, params=API_EXTRA_PARAMS['widgets'], json=bulk_data)
@@ -2318,6 +2319,31 @@ class Client(object):
         self.update_widgets_associations(widgets=widgets, associations=bulk_associations, **kwargs)
 
         return widgets
+
+    def update_widgets(self, widgets: List[Dict]) -> List[Widget]:
+        """
+        Bulk-update of widgets.
+
+        :param widgets: list of widget configurations.
+        :type widgets: List[Dict]
+        :return: list of Widget objects
+        :rtype List[Widget]
+        """
+        if not isinstance(widgets, list) or not all(isinstance(w, dict) for w in widgets):
+            raise IllegalArgumentError('`widgets` must provided as a list of dictionaries.')
+
+        response = self._request(
+            "PUT",
+            self._build_url('widgets_bulk_update'),
+            params=API_EXTRA_PARAMS['widgets'],
+            json=widgets,
+        )
+
+        if response.status_code != requests.codes.ok:
+            raise APIError("Could not update the widgets: {}: {}".format(str(response), response.content))
+
+        widgets_response = response.json().get('results')
+        return [Widget.create(json=widget_json, client=self) for widget_json in widgets_response]
 
     def update_widget_associations(self, widget, readable_models=None, writable_models=None, **kwargs):
         # type: (Union[Widget,text_type], Optional[List], Optional[List], **Any) -> None
