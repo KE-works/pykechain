@@ -175,46 +175,42 @@ def _check_prefilters(part_model: 'Part2', prefilters: Dict) -> List[Text]:  # n
 
     if any(len(lst) != len(property_models) for lst in [values, filters_type]):
         raise IllegalArgumentError('The lists of "property_models", "values" and "filters_type" should be the '
-                                   'same length')
+                                   'same length.')
 
     list_of_prefilters = []
-    for property_model in property_models:
-        index = property_models.index(property_model)
-        if is_uuid(property_model):
-            property_model = part_model.property(property_model)  # the finder can handle uuid, name or ref
+    for prop, value, filter_type in zip(property_models, values, filters_type):
+        if is_uuid(prop):
+            prop = part_model.property(prop)  # the finder can handle uuid, name or ref
 
-        if not isinstance(property_model, Property2) or property_model.category != Category.MODEL:
+        if not isinstance(prop, Property2) or prop.category != Category.MODEL:
             raise IllegalArgumentError(
-                'Pre-filters can only be set on property models, received "{}".'.format(property_model))
+                'Pre-filters can only be set on Property models, received "{}".'.format(prop))
 
         # TODO when a property is freshly created, the property has no "part_id" key in json_data.
-        elif part_model.id != property_model._json_data.get('part_id'):
+        elif part_model.id != prop.part_id:
             raise IllegalArgumentError(
                 'Pre-filters can only be set on properties belonging to the selected Part model, found '
                 'selected Part model "{}" and Properties belonging to "{}"'.format(part_model.name,
-                                                                                   property_model.part.name))
+                                                                                   prop.part.name))
         else:
-            property_id = property_model.id
-            if property_model.type == PropertyType.DATETIME_VALUE:
-                datetime_value = values[index]
+            if prop.type == PropertyType.DATETIME_VALUE:
+                datetime_value = value  # type: 'datetime.datetime'
                 # TODO really not elegant way to deal with DATETIME. Issue is that the value is being double
                 #  encoded (KEC-20504)
                 datetime_value = "{}-{}-{}T00%253A00%253A00.000Z".format(datetime_value.year,
                                                                          str(datetime_value.month).rjust(2, '0'),
                                                                          str(datetime_value.day).rjust(2, '0'))
-                new_prefilter_list = [property_id, datetime_value, filters_type[index]]
-                new_prefilter = '%3A'.join(new_prefilter_list)
+                new_pre_filter = '%3A'.join([prop.id, datetime_value, filter_type])
             else:
-                if property_model.type == PropertyType.BOOLEAN_VALUE:
-                    values[index] = str(values[index]).lower()
-                new_prefilter_list = [property_id, str(values[index]), filters_type[index]]
-                new_prefilter = ':'.join(new_prefilter_list)
-            list_of_prefilters.append(new_prefilter)
+                if prop.type == PropertyType.BOOLEAN_VALUE:
+                    value = str(value).lower()
+                new_pre_filter = ':'.join([prop.id, str(value), filter_type])
+            list_of_prefilters.append(new_pre_filter)
     return list_of_prefilters
 
 
 def _check_excluded_propmodels(part_model, property_models):
-    list_of_propmodels_excl = list()  # type: List[Property2]  # noqa
+    list_of_propmodels_excl = list()  # type: List['AnyProperty']  # noqa
     for property_model in property_models:
         if is_uuid(property_model):
             property_model = part_model.property(id=property_model)

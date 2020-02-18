@@ -176,9 +176,6 @@ class MultiReferenceProperty2(Property2):
 
         :raises IllegalArgumentError: when the type of the input is provided incorrect.
         """
-        if any(len(lst) != len(property_models) for lst in [values, filters_type]):
-            raise IllegalArgumentError('The lists of "property_models", "values" and "filters_type" should be the '
-                                       'same length')
         if not overwrite:
             initial_prefilters = self._options.get('prefilters', {})
             list_of_prefilters = initial_prefilters.get('property_value', [])
