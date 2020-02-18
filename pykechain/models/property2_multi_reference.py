@@ -189,7 +189,7 @@ class MultiReferenceProperty2(Property2):
         }
 
         list_of_prefilters.extend(_check_prefilters(
-            part_model=self.part,
+            part_model=self.value[0],
             prefilters=new_prefilters,
         ))
 

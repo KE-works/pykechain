@@ -163,7 +163,7 @@ def _check_prefilters(part_model: 'Part2', prefilters: Dict) -> List[Text]:  # n
     }
     ```
 
-    :param part_model: The part model to check the prefilters against.
+    :param part_model: The part model of which the properties are filtered.
     :param prefilters: Dictionary with prefilters.
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
