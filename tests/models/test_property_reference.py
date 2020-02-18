@@ -13,42 +13,44 @@ class TestMultiReferenceProperty(TestBetamax):
         # reference Part target (model and 1 instance)
         _wheel_model = self.project.model(ref='wheel')
 
-        self.ref_target_model = self.project.create_model_with_properties(
+        props = [
+            PropertyType.DATETIME_VALUE,
+            PropertyType.SINGLE_SELECT_VALUE,
+            PropertyType.BOOLEAN_VALUE,
+            PropertyType.FLOAT_VALUE,
+            PropertyType.INT_VALUE,
+            PropertyType.CHAR_VALUE,
+        ]
+
+        self.target_model = self.project.create_model_with_properties(
             parent=_wheel_model.parent_id,
             name="__Wheel",
             multiplicity=Multiplicity.ONE_MANY,
-            properties_fvalues=[
-                dict(name='__Fabrication date', property_type=PropertyType.DATETIME_VALUE),
-                dict(name='__Tyre manufacturer', property_type=PropertyType.SINGLE_SELECT_VALUE),
-                dict(name='__Flat tire', property_type=PropertyType.BOOLEAN_VALUE),
-                dict(name='__Diameter', property_type=PropertyType.FLOAT_VALUE),
-                dict(name='__Spokes', property_type=PropertyType.INT_VALUE),
-                dict(name='__Rim Material', property_type=PropertyType.CHAR_VALUE)
-            ]
+            properties_fvalues=[dict(name=p, property_type=p) for p in props],
         )
 
         # reference property model (with a value pointing to a reference target part model
         self.part_model = self.project.model('Bike')
 
-        self.ref_target_datetime_prop = self.ref_target_model.property('__fabrication-date')
-        self.ref_target_ssl_prop = self.ref_target_model.add_property('__tyre-manufacturer')
-        self.ref_target_bool_prop = self.ref_target_model.add_property('__flat-tyre')
-        self.ref_target_diameter_prop = self.ref_target_model.property('__diameter')
-        self.ref_target_spokes_prop = self.ref_target_model.property('__spokes')
-        self.ref_target_material_prop = self.ref_target_model.property('__rim-material')
+        self.datetime_prop = self.target_model.property(PropertyType.DATETIME_VALUE)
+        self.ssl_prop = self.target_model.property(PropertyType.SINGLE_SELECT_VALUE)
+        self.bool_prop = self.target_model.property(PropertyType.BOOLEAN_VALUE)
+        self.float_prop = self.target_model.property(PropertyType.FLOAT_VALUE)
+        self.integer_prop = self.target_model.property(PropertyType.INT_VALUE)
+        self.char_prop = self.target_model.property(PropertyType.CHAR_VALUE)
 
         self.ref_prop_name = '__Test reference property'
         self.ref_prop_model = self.part_model.add_property(
             name=self.ref_prop_name,
             property_type=PropertyType.REFERENCES_VALUE,
-            default_value=self.ref_target_model.id
+            default_value=self.target_model.id
         )  # type: MultiReferenceProperty2
 
-        # reference property instance (holding the value
+        # reference property instance holding the value
         self.ref = self.part_model.instance().property(self.ref_prop_name)
 
     def tearDown(self):
-        self.ref_target_model.delete()
+        self.target_model.delete()
         self.ref_prop_model.delete()
         super(TestMultiReferenceProperty, self).tearDown()
 
@@ -106,9 +108,9 @@ class TestMultiReferenceProperty(TestBetamax):
     def test_value_if_multi_ref_gives_back_all_parts(self):
         """because of #276 problem"""
         # setUp
-        self.ref_prop_model.value = [self.ref_target_model]
+        self.ref_prop_model.value = [self.target_model]
 
-        wheel_instances = self.ref_target_model.instances()
+        wheel_instances = self.target_model.instances()
         wheel_instances_list = [instance.id for instance in wheel_instances]
 
         # set ref value
@@ -129,8 +131,8 @@ class TestMultiReferenceProperty(TestBetamax):
 
     def test_multi_ref_choices(self):
         # setUp
-        self.project.part(ref='bike').add(model=self.ref_target_model, name='__Wheel 2')
-        self.ref_prop_model.value = [self.ref_target_model]
+        self.project.part(ref='bike').add(model=self.target_model, name='__Wheel 2')
+        self.ref_prop_model.value = [self.target_model]
         possible_options = self.ref.choices()
 
         # testing
@@ -141,10 +143,10 @@ class TestMultiReferenceProperty(TestBetamax):
         new_reference_to_wheel = self.part_model.add_property(
             name=self.ref_prop_name,
             property_type=PropertyType.REFERENCES_VALUE,
-            default_value=[self.ref_target_model],
+            default_value=[self.target_model],
         )
         # testing
-        self.assertTrue(self.ref_prop_model.value[0].id, self.ref_target_model.id)
+        self.assertTrue(self.ref_prop_model.value[0].id, self.target_model.id)
 
         # tearDown
         new_reference_to_wheel.delete()
@@ -154,10 +156,10 @@ class TestMultiReferenceProperty(TestBetamax):
         new_reference_to_wheel = self.part_model.add_property(
             name=self.ref_prop_name,
             property_type=PropertyType.REFERENCES_VALUE,
-            default_value=[self.ref_target_model.id]
+            default_value=[self.target_model.id]
         )
         # testing
-        self.assertTrue(self.ref_prop_model.value[0].id, self.ref_target_model.id)
+        self.assertTrue(self.ref_prop_model.value[0].id, self.target_model.id)
 
         # tearDown
         new_reference_to_wheel.delete()
@@ -176,10 +178,10 @@ class TestMultiReferenceProperty(TestBetamax):
         new_reference_to_wheel = self.part_model.add_property(
             name=self.ref_prop_name,
             property_type=PropertyType.REFERENCES_VALUE,
-            default_value=self.ref_target_model
+            default_value=self.target_model
         )
         # testing
-        self.assertTrue(self.ref_prop_model.value[0].id, self.ref_target_model.id)
+        self.assertTrue(self.ref_prop_model.value[0].id, self.target_model.id)
 
         # tearDown
         new_reference_to_wheel.delete()
@@ -189,10 +191,10 @@ class TestMultiReferenceProperty(TestBetamax):
         new_reference_to_wheel = self.part_model.add_property(
             name=self.ref_prop_name,
             property_type=PropertyType.REFERENCES_VALUE,
-            default_value=self.ref_target_model.id
+            default_value=self.target_model.id
         )
         # testing
-        self.assertTrue(self.ref_prop_model.value[0].id, self.ref_target_model.id)
+        self.assertTrue(self.ref_prop_model.value[0].id, self.target_model.id)
 
         # tearDown
         new_reference_to_wheel.delete()
@@ -209,9 +211,9 @@ class TestMultiReferenceProperty(TestBetamax):
     # new in 3.0
     def test_set_prefilters_on_reference_property(self):
         # setUp
-        diameter_property = self.ref_target_diameter_prop  # decimal property
-        spokes_property = self.ref_target_spokes_prop  # integer property
-        rim_material_property = self.ref_target_material_prop  # single line text
+        diameter_property = self.float_prop  # decimal property
+        spokes_property = self.integer_prop  # integer property
+        rim_material_property = self.char_prop  # single line text
         import datetime
         new_year_2020 = datetime.datetime(year=2020, month=1, day=1)
 
@@ -219,9 +221,9 @@ class TestMultiReferenceProperty(TestBetamax):
             property_models=[diameter_property,
                              spokes_property,
                              rim_material_property,
-                             self.ref_target_datetime_prop,
-                             self.ref_target_ssl_prop,
-                             self.ref_target_bool_prop],
+                             self.datetime_prop,
+                             self.ssl_prop,
+                             self.bool_prop],
             values=[30.5,
                     7,
                     'Al',
@@ -244,9 +246,9 @@ class TestMultiReferenceProperty(TestBetamax):
         self.assertIn("{}:{}:{}".format(diameter_property.id, 30.5, FilterType.GREATER_THAN_EQUAL), filters)
         self.assertIn("{}:{}:{}".format(spokes_property.id, 7, FilterType.LOWER_THAN_EQUAL), filters)
         self.assertIn("{}:{}:{}".format(rim_material_property.id, 'Al', FilterType.CONTAINS), filters)
-        self.assertIn("{}:{}:{}".format(self.ref_target_bool_prop.id, 'True', FilterType.EXACT), filters)
-        self.assertIn("{}:{}:{}".format(self.ref_target_ssl_prop.id, 'Michelin', FilterType.CONTAINS), filters)
-        self.assertIn("{}:{}:{}".format(self.ref_target_datetime_prop.id, new_year_2020, FilterType.GREATER_THAN_EQUAL),
+        self.assertIn("{}:{}:{}".format(self.bool_prop.id, 'true', FilterType.EXACT), filters)
+        self.assertIn("{}:{}:{}".format(self.ssl_prop.id, 'Michelin', FilterType.CONTAINS), filters)
+        self.assertIn("{}:{}:{}".format(self.datetime_prop.id, new_year_2020, FilterType.GREATER_THAN_EQUAL),
                       filters)
 
     def test_set_prefilters_on_reference_property_with_excluded_propmodels_and_validators(self):
@@ -254,8 +256,8 @@ class TestMultiReferenceProperty(TestBetamax):
         # setting prefilters
 
         # setUp
-        diameter_property = self.ref_target_diameter_prop
-        spokes_property = self.ref_target_spokes_prop
+        diameter_property = self.float_prop
+        spokes_property = self.integer_prop
 
         self.ref_prop_model.set_excluded_propmodels(property_models=[diameter_property, spokes_property])
         self.ref_prop_model.validators = [RequiredFieldValidator()]
@@ -285,13 +287,13 @@ class TestMultiReferenceProperty(TestBetamax):
     def test_add_prefilters_to_reference_property(self):
         # Set the initial prefilters
         self.ref_prop_model.set_prefilters(
-            property_models=[self.ref_target_diameter_prop],
+            property_models=[self.float_prop],
             values=[15.13],
             filters_type=[FilterType.GREATER_THAN_EQUAL]
         )
         # Add others, checks whether the initial ones are remembered (overwrite = False)
         self.ref_prop_model.set_prefilters(
-            property_models=[self.ref_target_spokes_prop],
+            property_models=[self.integer_prop],
             values=[2],
             filters_type=[FilterType.LOWER_THAN_EQUAL],
             overwrite=False
@@ -299,15 +301,15 @@ class TestMultiReferenceProperty(TestBetamax):
 
         # testing
         self.assertTrue('property_value' in self.ref_prop_model._options['prefilters'])
-        self.assertTrue("{}:{}:{}".format(self.ref_target_diameter_prop.id, 15.13, FilterType.GREATER_THAN_EQUAL) in
+        self.assertTrue("{}:{}:{}".format(self.float_prop.id, 15.13, FilterType.GREATER_THAN_EQUAL) in
                         self.ref_prop_model._options['prefilters']['property_value'])
-        self.assertTrue("{}:{}:{}".format(self.ref_target_spokes_prop.id, 2, FilterType.LOWER_THAN_EQUAL) in
+        self.assertTrue("{}:{}:{}".format(self.integer_prop.id, 2, FilterType.LOWER_THAN_EQUAL) in
                         self.ref_prop_model._options['prefilters']['property_value'])
 
     def test_overwrite_prefilters_on_reference_property(self):
         # setUp
-        diameter_property = self.ref_target_diameter_prop
-        spokes_property = self.ref_target_spokes_prop
+        diameter_property = self.float_prop
+        spokes_property = self.integer_prop
 
         # Set the initial prefilters
         self.ref_prop_model.set_prefilters(
@@ -330,8 +332,8 @@ class TestMultiReferenceProperty(TestBetamax):
 
     def test_set_prefilters_on_reference_property_using_uuid(self):
         # setUp
-        diameter_property = self.ref_target_diameter_prop
-        spokes_property = self.ref_target_spokes_prop
+        diameter_property = self.float_prop
+        spokes_property = self.integer_prop
 
         self.ref_prop_model.set_prefilters(
             property_models=[diameter_property.id,
@@ -352,8 +354,8 @@ class TestMultiReferenceProperty(TestBetamax):
     def test_set_prefilters_on_reference_property_the_wrong_way(self):
         # setUp
         bike_gears_property = self.part_model.property(name='Gears')
-        instance_diameter_property = self.ref_target_model.instances()[0].property('__diameter')
-        diameter_property = self.ref_target_diameter_prop
+        instance_diameter_property = self.target_model.instances()[0].property(PropertyType.FLOAT_VALUE)
+        diameter_property = self.float_prop
 
         # testing
         # When prefilters are being set, but the property does not belong to the referenced part
@@ -391,8 +393,8 @@ class TestMultiReferenceProperty(TestBetamax):
 
     def test_set_excluded_propmodels_on_reference_property(self):
         # setUp
-        diameter_property = self.ref_target_diameter_prop
-        spokes_property = self.ref_target_spokes_prop
+        diameter_property = self.float_prop
+        spokes_property = self.integer_prop
 
         self.ref_prop_model.set_excluded_propmodels(property_models=[diameter_property, spokes_property])
 
@@ -403,8 +405,8 @@ class TestMultiReferenceProperty(TestBetamax):
 
     def test_set_excluded_propmodels_on_reference_property_using_uuid(self):
         # setUp
-        diameter_property = self.ref_target_diameter_prop
-        spokes_property = self.ref_target_spokes_prop
+        diameter_property = self.float_prop
+        spokes_property = self.integer_prop
 
         self.ref_prop_model.set_excluded_propmodels(property_models=[diameter_property.id, spokes_property.id])
 
@@ -418,8 +420,8 @@ class TestMultiReferenceProperty(TestBetamax):
         # excluded propmodels
 
         # setUp
-        diameter_property = self.ref_target_diameter_prop
-        spokes_property = self.ref_target_spokes_prop
+        diameter_property = self.float_prop
+        spokes_property = self.integer_prop
         self.ref_prop_model.set_prefilters(
             property_models=[diameter_property],
             values=[15.13],
@@ -442,7 +444,7 @@ class TestMultiReferenceProperty(TestBetamax):
     def test_set_excluded_propmodels_on_reference_property_the_wrong_way(self):
         # setUp
         bike_gears_property = self.part_model.property(name='Gears')
-        instance_diameter_property = self.ref_target_model.instances()[0].property('__diameter')
+        instance_diameter_property = self.target_model.instances()[0].property(PropertyType.FLOAT_VALUE)
 
         # testing
         # When excluded propmodels are being set, but the property does not belong to the referenced part
@@ -460,20 +462,20 @@ class TestMultiReferenceProperty(TestBetamax):
 
     def test_add_excluded_propmodels_to_reference_property(self):
         # Set the initial excluded propmodels
-        self.ref_prop_model.set_excluded_propmodels(property_models=[self.ref_target_diameter_prop])
+        self.ref_prop_model.set_excluded_propmodels(property_models=[self.float_prop])
 
         # Add others, checks whether the initial ones are remembered (overwrite = False)
-        self.ref_prop_model.set_excluded_propmodels(property_models=[self.ref_target_spokes_prop], overwrite=False)
+        self.ref_prop_model.set_excluded_propmodels(property_models=[self.integer_prop], overwrite=False)
 
         # testing
         self.assertEqual(len(self.ref_prop_model._options['propmodels_excl']), 2)
-        self.assertTrue(self.ref_target_diameter_prop.id in self.ref_prop_model._options['propmodels_excl'])
-        self.assertTrue(self.ref_target_spokes_prop.id in self.ref_prop_model._options['propmodels_excl'])
+        self.assertTrue(self.float_prop.id in self.ref_prop_model._options['propmodels_excl'])
+        self.assertTrue(self.integer_prop.id in self.ref_prop_model._options['propmodels_excl'])
 
     def test_overwrite_excluded_propmodels_on_reference_property(self):
         # setUp
-        diameter_property = self.ref_target_diameter_prop
-        spokes_property = self.ref_target_spokes_prop
+        diameter_property = self.float_prop
+        spokes_property = self.integer_prop
 
         # Set the initial excluded propmodels
         self.ref_prop_model.set_excluded_propmodels(property_models=[diameter_property])
