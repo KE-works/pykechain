@@ -1,5 +1,3 @@
-import datetime
-
 from pykechain.enums import PropertyType, FilterType, Multiplicity
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import MultiReferenceProperty2
@@ -214,7 +212,8 @@ class TestMultiReferenceProperty(TestBetamax):
         diameter_property = self.ref_target_diameter_prop  # decimal property
         spokes_property = self.ref_target_spokes_prop  # integer property
         rim_material_property = self.ref_target_material_prop  # single line text
-        now = datetime.datetime.now()
+        import datetime
+        new_year_2020 = datetime.datetime(year=2020, month=1, day=1)
 
         self.ref_prop_model.set_prefilters(
             property_models=[diameter_property,
@@ -226,7 +225,7 @@ class TestMultiReferenceProperty(TestBetamax):
             values=[30.5,
                     7,
                     'Al',
-                    now,
+                    new_year_2020,
                     'Michelin',
                     True],
             filters_type=[FilterType.GREATER_THAN_EQUAL,
@@ -247,7 +246,8 @@ class TestMultiReferenceProperty(TestBetamax):
         self.assertIn("{}:{}:{}".format(rim_material_property.id, 'Al', FilterType.CONTAINS), filters)
         self.assertIn("{}:{}:{}".format(self.ref_target_bool_prop.id, 'True', FilterType.EXACT), filters)
         self.assertIn("{}:{}:{}".format(self.ref_target_ssl_prop.id, 'Michelin', FilterType.CONTAINS), filters)
-        self.assertIn("{}:{}:{}".format(self.ref_target_datetime_prop.id, now, FilterType.GREATER_THAN_EQUAL), filters)
+        self.assertIn("{}:{}:{}".format(self.ref_target_datetime_prop.id, new_year_2020, FilterType.GREATER_THAN_EQUAL),
+                      filters)
 
     def test_set_prefilters_on_reference_property_with_excluded_propmodels_and_validators(self):
         # The excluded propmodels and validators already set on the property should not be erased when
