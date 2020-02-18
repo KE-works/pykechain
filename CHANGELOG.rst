@@ -2,6 +2,7 @@ Change Log
 ==========
 
 * Added `Association` class and retrieval method `associations()` on the `Client` class.
+* Creation of `Activity` now uses parent's `classification` if provided.
 
 3.4.0 (17FEB20)
 ---------------
