@@ -214,6 +214,7 @@ class TestMultiReferenceProperty(TestBetamax):
         diameter_property = self.ref_target_diameter_prop  # decimal property
         spokes_property = self.ref_target_spokes_prop  # integer property
         rim_material_property = self.ref_target_material_prop  # single line text
+        now = datetime.datetime.now()
 
         self.ref_prop_model.set_prefilters(
             property_models=[diameter_property,
@@ -225,7 +226,7 @@ class TestMultiReferenceProperty(TestBetamax):
             values=[30.5,
                     7,
                     'Al',
-                    datetime.datetime.now(),
+                    now,
                     'Michelin',
                     True],
             filters_type=[FilterType.GREATER_THAN_EQUAL,
@@ -236,19 +237,17 @@ class TestMultiReferenceProperty(TestBetamax):
                           FilterType.EXACT]
         )
 
+        filter_string = self.ref_prop_model._options['prefilters']['property_value']
+        filters = set(filter_string.split(','))
+
         # testing
-        self.assertTrue('property_value' in self.ref_prop_model._options['prefilters'])
-        self.assertTrue("{}:{}:{}".format(diameter_property.id, 30.5, FilterType.GREATER_THAN_EQUAL) in
-                        self.ref_prop_model._options['prefilters']['property_value'])
-        self.assertTrue("{}:{}:{}".format(spokes_property.id, 7, FilterType.LOWER_THAN_EQUAL) in
-                        self.ref_prop_model._options['prefilters']['property_value'])
-        self.assertTrue("{}:{}:{}".format(rim_material_property.id, 'Al', FilterType.CONTAINS) in
-                        self.ref_prop_model._options['prefilters']['property_value'])
-        self.assertTrue("{}:{}:{}".format(self.ref_target_bool_prop.id, 'True', FilterType.EXACT) in
-                        self.ref_prop_model._options['prefilters']['property_value'])
-        # TODO - fix KEC-20504 and then check for DATETIME
-        self.assertTrue("{}:{}:{}".format(self.ref_target_ssl_prop.id, 'Michelin', FilterType.CONTAINS) in
-                        self.ref_prop_model._options['prefilters']['property_value'])
+        self.assertIn('property_value', self.ref_prop_model._options['prefilters'])
+        self.assertIn("{}:{}:{}".format(diameter_property.id, 30.5, FilterType.GREATER_THAN_EQUAL), filters)
+        self.assertIn("{}:{}:{}".format(spokes_property.id, 7, FilterType.LOWER_THAN_EQUAL), filters)
+        self.assertIn("{}:{}:{}".format(rim_material_property.id, 'Al', FilterType.CONTAINS), filters)
+        self.assertIn("{}:{}:{}".format(self.ref_target_bool_prop.id, 'True', FilterType.EXACT), filters)
+        self.assertIn("{}:{}:{}".format(self.ref_target_ssl_prop.id, 'Michelin', FilterType.CONTAINS), filters)
+        self.assertIn("{}:{}:{}".format(self.ref_target_datetime_prop.id, now, FilterType.GREATER_THAN_EQUAL), filters)
 
     def test_set_prefilters_on_reference_property_with_excluded_propmodels_and_validators(self):
         # The excluded propmodels and validators already set on the property should not be erased when

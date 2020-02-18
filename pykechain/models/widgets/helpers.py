@@ -193,18 +193,9 @@ def _check_prefilters(part_model: 'Part2', prefilters: Dict) -> List[Text]:  # n
                 'selected Part model "{}" and Properties belonging to "{}"'.format(part_model.name,
                                                                                    prop.part.name))
         else:
-            if prop.type == PropertyType.DATETIME_VALUE:
-                datetime_value = value  # type: 'datetime.datetime'
-                # TODO really not elegant way to deal with DATETIME. Issue is that the value is being double
-                #  encoded (KEC-20504)
-                datetime_value = "{}-{}-{}T00%253A00%253A00.000Z".format(datetime_value.year,
-                                                                         str(datetime_value.month).rjust(2, '0'),
-                                                                         str(datetime_value.day).rjust(2, '0'))
-                new_pre_filter = '%3A'.join([prop.id, datetime_value, filter_type])
-            else:
-                if prop.type == PropertyType.BOOLEAN_VALUE:
-                    value = str(value).lower()
-                new_pre_filter = ':'.join([prop.id, str(value), filter_type])
+            if prop.type == PropertyType.BOOLEAN_VALUE:
+                value = str(value).lower()
+            new_pre_filter = ':'.join([prop.id, str(value), filter_type])
             list_of_prefilters.append(new_pre_filter)
     return list_of_prefilters
 
