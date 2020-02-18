@@ -236,12 +236,12 @@ class TestMultiReferenceProperty(TestBetamax):
                           FilterType.CONTAINS,
                           FilterType.EXACT]
         )
+        self.assertIn('property_value', self.ref_prop_model._options['prefilters'])
 
         filter_string = self.ref_prop_model._options['prefilters']['property_value']
         filters = set(filter_string.split(','))
 
         # testing
-        self.assertIn('property_value', self.ref_prop_model._options['prefilters'])
         self.assertIn("{}:{}:{}".format(diameter_property.id, 30.5, FilterType.GREATER_THAN_EQUAL), filters)
         self.assertIn("{}:{}:{}".format(spokes_property.id, 7, FilterType.LOWER_THAN_EQUAL), filters)
         self.assertIn("{}:{}:{}".format(rim_material_property.id, 'Al', FilterType.CONTAINS), filters)
@@ -266,14 +266,21 @@ class TestMultiReferenceProperty(TestBetamax):
             filters_type=[FilterType.GREATER_THAN_EQUAL]
         )
 
-        # testing
-        self.assertTrue('property_value' in self.ref_prop_model._options['prefilters'])
-        self.assertTrue("{}:{}:{}".format(diameter_property.id, 15.13, FilterType.GREATER_THAN_EQUAL) in
-                        self.ref_prop_model._options['prefilters']['property_value'])
-        self.assertEqual(len(self.ref_prop_model._options['propmodels_excl']), 2)
-        self.assertTrue(diameter_property.id in self.ref_prop_model._options['propmodels_excl'])
-        self.assertTrue(spokes_property.id in self.ref_prop_model._options['propmodels_excl'])
-        self.assertTrue(isinstance(self.ref_prop_model._validators[0], RequiredFieldValidator))
+        # testing Filters
+        self.assertIn("{}:{}:{}".format(diameter_property.id, 15.13, FilterType.GREATER_THAN_EQUAL),
+                      self.ref_prop_model._options['prefilters']['property_value'])
+
+        # testing Excluded props
+        self.assertIn('propmodels_excl', self.ref_prop_model._options)
+        excluded = self.ref_prop_model._options['propmodels_excl']
+
+        self.assertEqual(len(excluded), 2)
+        self.assertIn(diameter_property.id, excluded)
+        self.assertIn(spokes_property.id, excluded)
+
+        # testing Validators
+        self.assertTrue(self.ref_prop_model.validators)
+        self.assertIsInstance(self.ref_prop_model._validators[0], RequiredFieldValidator)
 
     def test_add_prefilters_to_reference_property(self):
         # Set the initial prefilters
