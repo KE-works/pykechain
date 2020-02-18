@@ -2194,14 +2194,14 @@ class Client(object):
         model_ids = []
         if models is not None:
             if not isinstance(models, (list, tuple, set)):
-                raise IllegalArgumentError("`{}` should be provided as a list of uuids or property models".format(key))
+                raise IllegalArgumentError("`{}` must be provided as a list, tuple or set.".format(key))
             for model in models:
                 if is_uuid(model):
                     model_ids.append(model)
                 elif isinstance(model, (Property2, Property)):
                     model_ids.append(model.id)
                 else:
-                    raise IllegalArgumentError("`{}` should be provided as a list of uuids or property models".format(key))
+                    raise IllegalArgumentError("`{}` must consist out of uuids or property models.".format(key))
         return model_ids
 
     def create_widget(

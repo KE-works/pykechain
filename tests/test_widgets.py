@@ -478,13 +478,13 @@ class TestWidgetManagerInActivity(TestBetamax):
         bike_part = self.project.part('Bike')
         w0 = widget_manager[0]  # meta panel
         w1 = widget_manager.add_propertygrid_widget(part_instance=bike_part,
-                                                    writable_models=[bike_part.model().properties],
+                                                    writable_models=bike_part.model().properties,
                                                     title="Original widget 1 (w1)")
         w2 = widget_manager.add_propertygrid_widget(part_instance=bike_part,
-                                                    writable_models=[bike_part.model().properties],
+                                                    writable_models=bike_part.model().properties,
                                                     title="Original widget 2 (w2)")
         w3 = widget_manager.add_propertygrid_widget(part_instance=bike_part,
-                                                    writable_models=[bike_part.model().properties],
+                                                    writable_models=bike_part.model().properties,
                                                     title="Original widget 3 (w3)")
 
         # if widget order is `[w0,w1,w2]` and inserting `w3` at index 1 (before Widget1);
@@ -499,7 +499,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(widget_manager[w2.id].order, 3)
 
         added_widget = widget_manager.add_propertygrid_widget(part_instance=bike_part,
-                                                              writable_models=[bike_part.model().properties],
+                                                              writable_models=bike_part.model().properties,
                                                               title="Widget Finally Positioned Under Metapanel",
                                                               order=1)
 
