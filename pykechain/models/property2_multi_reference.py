@@ -6,6 +6,7 @@ from pykechain.enums import Category, FilterType, PropertyType
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.part2 import Part2
 from pykechain.models.property2 import Property2
+from pykechain.models.widgets.helpers import _check_prefilters
 from pykechain.utils import is_uuid
 
 
@@ -181,41 +182,16 @@ class MultiReferenceProperty2(Property2):
         else:
             list_of_prefilters = list()
 
-        for property_model in property_models:
-            index = property_models.index(property_model)
-            if not isinstance(property_model, Property2):
-                if is_uuid(property_model):
-                    property_model = self._client.property(id=property_model, category=Category.MODEL)
-                else:
-                    raise IllegalArgumentError('Pre-filters can only be set on `Property` models or their UUIDs, '
-                                               'found type "{}"'.format(type(property_model)))
+        new_prefilters = {
+            'property_models': property_models,
+            'values': values,
+            'filters_type': filters_type,
+        }
 
-            if property_model.category != Category.MODEL:
-                raise IllegalArgumentError('Pre-filters can only be set on property models, found category "{}"'
-                                           'on property "{}"'.format(property_model.category, property_model.name))
-            # TODO when a property is freshly created, the property has no "part_id" key in json_data.
-            elif self.value[0].id != property_model._json_data.get('part_id', self.value[0].id):
-                raise IllegalArgumentError(
-                    "Pre-filters can only be set on properties belonging to the referenced Part model, found "
-                    "referenced Part model '{}' and Properties belonging to '{}'".format(self.value[0].name,
-                                                                                         property_model.part.name))
-            else:
-                property_id = property_model.id
-                if property_model.type == PropertyType.DATETIME_VALUE:
-                    datetime_value = values[index]
-                    # TODO really not elegant way to deal with DATETIME. Issue is that the value is being double
-                    #  encoded (KEC-20504)
-                    datetime_value = "{}-{}-{}T00%253A00%253A00.000Z".format(datetime_value.year,
-                                                                             str(datetime_value.month).rjust(2, '0'),
-                                                                             str(datetime_value.day).rjust(2, '0'))
-                    new_prefilter_list = [property_id, datetime_value, filters_type[index]]
-                    new_prefilter = '%3A'.join(new_prefilter_list)
-                else:
-                    if property_model.type == PropertyType.BOOLEAN_VALUE:
-                        values[index] = str(values[index]).lower()
-                    new_prefilter_list = [property_id, str(values[index]), filters_type[index]]
-                    new_prefilter = ':'.join(new_prefilter_list)
-                list_of_prefilters.append(new_prefilter)
+        list_of_prefilters.extend(_check_prefilters(
+            part_model=self.part,
+            prefilters=new_prefilters,
+        ))
 
         options_to_set = self._options
         options_to_set['prefilters'] = {'property_value': ','.join(list_of_prefilters) if list_of_prefilters else {}}

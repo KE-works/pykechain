@@ -146,9 +146,9 @@ def _initiate_meta(kwargs, activity, ignores=()):
     return meta
 
 
-def _check_prefilters(part_model: 'Part2', prefilters: Dict):  # noqa: F821
+def _check_prefilters(part_model: 'Part2', prefilters: Dict) -> List[Text]:  # noqa: F821
     """
-    Check the pre-filters on a `FilteredGridWidget`.
+    Check the pre-filters on a `FilteredGridWidget` or `MultiReferenceProperty2.
 
     The prefilters should comply to the prefilters schema as present in the backend.
 
@@ -163,7 +163,7 @@ def _check_prefilters(part_model: 'Part2', prefilters: Dict):  # noqa: F821
     }
     ```
 
-    :param part_model: The part model to check the prefilters agains.
+    :param part_model: The part model to check the prefilters against.
     :param prefilters: Dictionary with prefilters.
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
@@ -201,6 +201,8 @@ def _check_prefilters(part_model: 'Part2', prefilters: Dict):  # noqa: F821
                 new_prefilter_list = [property_id, datetime_value, filters_type[index]]
                 new_prefilter = '%3A'.join(new_prefilter_list)
             else:
+                if property_model.type == PropertyType.BOOLEAN_VALUE:
+                    values[index] = str(values[index]).lower()
                 new_prefilter_list = [property_id, str(values[index]), filters_type[index]]
                 new_prefilter = ':'.join(new_prefilter_list)
             list_of_prefilters.append(new_prefilter)
