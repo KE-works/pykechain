@@ -2355,7 +2355,6 @@ class Client(object):
             associations: List[Tuple[List, List]],
     ) -> List[text_type]:
         """Perform the validation of the internal widgets and associations."""
-
         if not isinstance(widgets, List):
             raise IllegalArgumentError("`widgets` must be provided as a list of widgets.")
 
