@@ -2182,31 +2182,25 @@ class Client(object):
         if kwargs.get('outputs'):
             writable_models = kwargs.pop('outputs')
 
-        readable_model_ids = []
-        if readable_models is not None:
-            if not isinstance(readable_models, (list, tuple, set)):
-                raise IllegalArgumentError("`readable_models` should be provided as a list of uuids or property models")
-            for input in readable_models:
-                if is_uuid(input):
-                    readable_model_ids.append(input)
-                elif isinstance(input, (Property2, Property)):
-                    readable_model_ids.append(input.id)
-                else:
-                    IllegalArgumentError("`readable_models` should be provided as a list of uuids or property models")
-
-        writable_model_ids = []
-        if writable_models is not None:
-            if not isinstance(writable_models, (list, tuple, set)):
-                raise IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
-            for output in writable_models:
-                if is_uuid(output):
-                    writable_model_ids.append(output)
-                elif isinstance(output, (Property2, Property)):
-                    writable_model_ids.append(output.id)
-                else:
-                    IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
+        readable_model_ids = Client._validate_property_models(models=readable_models, key='readable_models')
+        writable_model_ids = Client._validate_property_models(models=writable_models, key='writable_models')
 
         return readable_model_ids, writable_model_ids
+
+    @staticmethod
+    def _validate_property_models(models: List, key: str = 'models') -> List[Text]:
+        model_ids = []
+        if models is not None:
+            if not isinstance(models, (list, tuple, set)):
+                raise IllegalArgumentError("`{}` should be provided as a list of uuids or property models".format(key))
+            for model in models:
+                if is_uuid(model):
+                    model_ids.append(model)
+                elif isinstance(model, (Property2, Property)):
+                    model_ids.append(model.id)
+                else:
+                    IllegalArgumentError("`{}` should be provided as a list of uuids or property models".format(key))
+        return model_ids
 
     def create_widget(
             self,
@@ -2569,6 +2563,45 @@ class Client(object):
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not clear associations of widget ({})".format((response, response.json())))
+
+        return None
+
+    def remove_widget_associations(
+            self,
+            widget: Widget,
+            models: List['AnyProperty', text_type],
+            **kwargs
+    ) -> None:
+        """
+        Remove specific associations from a widget.
+
+        :param widget: widget to remove associations from.
+        :type widget: Widget
+        :param models: list of Property models or their UUIDs
+        :type models: list
+        :return: None
+        :raises APIError: when the associations could not be removed
+        :raise IllegalArgumentError: if the widget is not of type Widget
+        """
+        if isinstance(widget, Widget):
+            raise IllegalArgumentError('`widget` is not of type Widget, but type "{}".'.format(type(widget)))
+
+        model_ids = self._validate_property_models(models=models)
+
+        if not model_ids:
+            return None
+
+        data = dict(
+            id=widget.id,
+            model_properties_ids=model_ids,
+        )
+
+        # perform the call
+        url = self._build_url('widget_remove_associations', widget_id=widget.id)
+        response = self._request(method='PUT', url=url, params=API_EXTRA_PARAMS['widget'], json=data)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not remove associations of widget ({})".format((response, response.json())))
 
         return None
 

@@ -68,6 +68,7 @@ API_PATH = {
     'widgets': 'api/widgets.json',
     'widget': 'api/widgets/{widget_id}.json',
     'widget_clear_associations': 'api/widgets/{widget_id}/clear_associations.json',
+    'widget_remove_associations': 'api/widgets/{widget_id}/remove_associations.json',
     'widgets_update_associations': 'api/widgets/bulk_update_associations.json',
     'widget_update_associations': 'api/widgets/{widget_id}/update_associations.json',
     'widgets_set_associations': 'api/widgets/bulk_set_associations.json',
