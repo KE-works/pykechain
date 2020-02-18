@@ -1,6 +1,7 @@
 Change Log
 ==========
 
+* Creation of `Widgets` without a title but with a reference (or `ref`) now supported via the `show_title_value` keyword.
 
 3.4.0 (17FEB20)
 ---------------
