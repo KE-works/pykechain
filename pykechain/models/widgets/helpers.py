@@ -167,22 +167,26 @@ def _check_prefilters(part_model: 'Part2', prefilters: Dict) -> List[Text]:  # n
     :param prefilters: Dictionary with prefilters.
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
-    list_of_prefilters = []
-    property_models = prefilters.get('property_models', [])  # type: List[Text]  # noqa
+    from pykechain.models import Property2
+
+    property_models = prefilters.get('property_models', [])  # type: List[Property2, Text]  # noqa
     values = prefilters.get('values', [])
     filters_type = prefilters.get('filters_type', [])
+
     if any(len(lst) != len(property_models) for lst in [values, filters_type]):
         raise IllegalArgumentError('The lists of "property_models", "values" and "filters_type" should be the '
                                    'same length')
 
+    list_of_prefilters = []
     for property_model in property_models:
         index = property_models.index(property_model)
         if is_uuid(property_model):
             property_model = part_model.property(property_model)  # the finder can handle uuid, name or ref
 
-        if property_model.category != Category.MODEL:
-            raise IllegalArgumentError('Pre-filters can only be set on property models, found category "{}"'
-                                       'on property "{}"'.format(property_model.category, property_model.name))
+        if not isinstance(property_model, Property2) or property_model.category != Category.MODEL:
+            raise IllegalArgumentError(
+                'Pre-filters can only be set on property models, received "{}".'.format(property_model))
+
         # TODO when a property is freshly created, the property has no "part_id" key in json_data.
         elif part_model.id != property_model._json_data.get('part_id'):
             raise IllegalArgumentError(

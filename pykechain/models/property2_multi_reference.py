@@ -2,7 +2,7 @@ from typing import List, Optional, Text, Union, Any
 
 from six import text_type, string_types
 
-from pykechain.enums import Category, FilterType, PropertyType
+from pykechain.enums import Category, FilterType
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.part2 import Part2
 from pykechain.models.property2 import Property2
@@ -154,8 +154,13 @@ class MultiReferenceProperty2(Property2):
 
         return possible_choices
 
-    def set_prefilters(self, property_models, values, filters_type=FilterType.CONTAINS, overwrite=False):
-        # type: (List[Union[Text, Part2]], List[Any], List[FilterType], Optional[bool]) -> None
+    def set_prefilters(
+            self,
+            property_models: List[Union[Text, Part2]],
+            values: List[Any],
+            filters_type: List[FilterType],
+            overwrite: Optional[bool] = False
+    ) -> None:
         """
         Set the pre-filters on a `MultiReferenceProperty`.
 
@@ -198,8 +203,11 @@ class MultiReferenceProperty2(Property2):
 
         self.edit(options=options_to_set)
 
-    def set_excluded_propmodels(self, property_models, overwrite=False):
-        # type: (List[Union[Text, Part2]], Optional[bool]) -> None
+    def set_excluded_propmodels(
+            self,
+            property_models: List[Union[Text, Part2]],
+            overwrite: Optional[bool] = False,
+    ) -> None:
         """
         Exclude a list of properties from being visible in the part-shop and modal (pop-up) of the reference property.
 
