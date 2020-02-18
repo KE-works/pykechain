@@ -1,3 +1,5 @@
+from unittest import TestCase
+
 from pykechain.enums import (WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors,
                              Category, LinkTargets, KEChainPages, WidgetTitleValue)
 from pykechain.exceptions import IllegalArgumentError, APIError, NotFoundError
@@ -6,10 +8,87 @@ from pykechain.models.widgets import (UndefinedWidget, HtmlWidget, PropertygridW
                                       SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, SignatureWidget,
                                       ServiceWidget, NotebookWidget,
                                       MulticolumnWidget, CardWidget, MetapanelWidget, ScopeWidget)
+from pykechain.models.widgets.helpers import _set_title
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid, slugify_ref
 from tests.classes import TestBetamax
+
+
+class TestSetTitle(TestCase):
+
+    def test_interface(self):
+        title_in = 'title'
+        meta_in = dict()
+        output = _set_title(meta_in, title_in, useless_input=3)
+
+        self.assertIsInstance(output, tuple)
+        self.assertTrue(len(output) == 2)
+
+        meta, title = output
+
+        self.assertIsInstance(meta, dict)
+        self.assertIsInstance(title, str)
+        self.assertIs(meta_in, meta, msg='Meta must be updated in-place!')
+        self.assertIn('showTitleValue', meta)
+        self.assertIn('customTitle', meta)
+
+    def test_title(self):
+        title_in = 'title'
+        meta, title = _set_title(dict(), title=title_in)
+        self.assertEqual(title_in, title)
+        self.assertEqual(title_in, meta['customTitle'])
+        self.assertEqual(WidgetTitleValue.CUSTOM_TITLE, meta['showTitleValue'])
+
+        title_in = False
+        default = 'default'
+        meta, title = _set_title(dict(), title=title_in, default_title=default)
+        self.assertEqual(default, title)
+        self.assertEqual(default, meta['customTitle'])
+        self.assertEqual(WidgetTitleValue.DEFAULT, meta['showTitleValue'])
+
+        title_in = None
+        default = 'default'
+        meta, title = _set_title(dict(), title=title_in, default_title=default)
+        self.assertEqual(title_in, title)
+        self.assertEqual(title_in, meta['customTitle'])
+        self.assertEqual(WidgetTitleValue.NO_TITLE, meta['showTitleValue'])
+
+    def test_custom_title(self):
+        custom_title = 'custom title'
+        meta, title = _set_title(dict(), custom_title=custom_title)
+
+        self.assertEqual(custom_title, title)
+
+        with self.assertWarns(PendingDeprecationWarning):
+            _set_title(dict(), custom_title=custom_title)
+
+    def test_default_title(self):
+        default = 'default title'
+        meta, title = _set_title(dict(), title=False, default_title=default)
+
+        self.assertEqual(default, title)
+
+        title = 'title'
+
+        meta, title = _set_title(dict(), title=title, default_title=default)
+        self.assertNotEqual(default, title)
+
+        with self.assertRaises(IllegalArgumentError, msg='`default_title` must provided if title is `False`!'):
+            _set_title(dict(), title=False)
+
+    def test_show_title_value(self):
+        title_in = 'title'
+        for show_title_value in WidgetTitleValue.values():
+            with self.subTest(msg=show_title_value):
+                meta, title = _set_title(dict(), title=title_in, show_title_value=show_title_value)
+
+                self.assertEqual(show_title_value, meta['showTitleValue'])
+                self.assertEqual(title_in, title, msg='Title should not change depending on `show_title_value`!')
+
+        with self.assertRaises(IllegalArgumentError, msg='Unrecognized show_title_value must be caught!'):
+            # noinspection PyTypeChecker
+            _set_title(dict(), 'title', show_title_value='Maybe')
 
 
 class TestWidgets(TestBetamax):
