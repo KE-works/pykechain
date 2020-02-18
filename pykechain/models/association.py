@@ -14,7 +14,8 @@ class Association(Base):
     :ivar scope_id
     :ivar writable
     """
-    def __init__(self, json, client, **kwargs):
+    def __init__(self, json, client):
+        """Construct an association from provided json data."""
         super().__init__(json=json, client=client)
 
         self.property_instance_id = json.get('instance_property')

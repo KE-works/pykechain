@@ -1,6 +1,6 @@
 from pykechain.exceptions import IllegalArgumentError, APIError
 from pykechain.models import Activity2, Part2, Property2
-from pykechain.models.associations import Association
+from pykechain.models.association import Association
 from pykechain.utils import is_uuid
 from tests.classes import TestBetamax
 

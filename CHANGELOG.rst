@@ -1,6 +1,7 @@
 Change Log
 ==========
 
+* Added `Association` class and retrieval method `associations()` on the `Client` class.
 
 3.4.0 (17FEB20)
 ---------------

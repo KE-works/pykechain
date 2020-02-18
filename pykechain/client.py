@@ -14,6 +14,7 @@ from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, Ser
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
 from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property, AnyProperty
+from pykechain.models.association import Association
 from pykechain.models.activity2 import Activity2
 from pykechain.models.scope2 import Scope2
 from pykechain.models.service import Service, ServiceExecution
@@ -23,7 +24,6 @@ from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid, find
 from .__about__ import version
-from .models.associations import Association
 
 
 class Client(object):
