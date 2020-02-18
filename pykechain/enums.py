@@ -178,6 +178,13 @@ class ActivityRootNames(Enum):
     APP_ROOT = 'APP_ROOT'
 
 
+activity_root_name_by_classification = {
+    ActivityClassification.WORKFLOW: ActivityRootNames.WORKFLOW_ROOT,
+    ActivityClassification.CATALOG: ActivityRootNames.CATALOG_ROOT,
+    ActivityClassification.APP: ActivityRootNames.APP_ROOT,
+}
+
+
 class ComponentXType(Enum):
     """The various inspectortypes supported in the customized task in KE-chain.
 
