@@ -13,7 +13,7 @@ from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, Ser
     ActivityClassification, ActivityStatus
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
-from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property
+from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property, AnyProperty
 from pykechain.models.activity2 import Activity2
 from pykechain.models.scope2 import Scope2
 from pykechain.models.service import Service, ServiceExecution
@@ -23,6 +23,7 @@ from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid, find
 from .__about__ import version
+from .models.associations import Association
 
 
 class Client(object):
@@ -2120,7 +2121,7 @@ class Client(object):
             title: Optional[Text],
             meta: Dict,
             order: Optional[int],
-            parent: Optional[Widget, text_type],
+            parent: Optional[Union[Widget, text_type]],
             **kwargs
     ) -> Dict:
         """Validate the format and content of the configuration of a widget."""
@@ -2189,6 +2190,7 @@ class Client(object):
 
     @staticmethod
     def _validate_property_models(models: List, key: str = 'models') -> List[Text]:
+        assert isinstance(key, str), '`key` must be a string.'
         model_ids = []
         if models is not None:
             if not isinstance(models, (list, tuple, set)):
@@ -2199,7 +2201,7 @@ class Client(object):
                 elif isinstance(model, (Property2, Property)):
                     model_ids.append(model.id)
                 else:
-                    IllegalArgumentError("`{}` should be provided as a list of uuids or property models".format(key))
+                    raise IllegalArgumentError("`{}` should be provided as a list of uuids or property models".format(key))
         return model_ids
 
     def create_widget(
@@ -2209,7 +2211,7 @@ class Client(object):
             meta: Dict,
             title: Optional[Text] = None,
             order: Optional[int] = None,
-            parent: Optional[Widget, text_type] = None,
+            parent: Optional[Union[Widget, text_type]] = None,
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
             **kwargs
@@ -2376,6 +2378,106 @@ class Client(object):
                                        'not {} and {}.'.format(len(widgets), len(associations)))
 
         return widget_ids
+
+    def associations(
+            self,
+            widget: Optional[Widget] = None,
+            activity: Optional[Activity2] = None,
+            part: Optional[Part2] = None,
+            property: Optional[AnyProperty] = None,
+            scope: Optional[Scope2] = None,
+            limit: Optional[int] = None,
+    ) -> List[Association]:
+        """
+        Retrieve a list of associations.
+
+        :param widget: widget for which to retrieve associations
+        :type widget: Widget
+        :param activity: activity for which to retrieve associations
+        :type activity: Activity2
+        :param part: part for which to retrieve associations
+        :type part: Part2
+        :param property: property for which to retrieve associations
+        :type property: Property2
+        :param scope: scope for which to retrieve associations
+        :type scope: Scope2
+        :param limit: maximum number of associations to retrieve
+        :type limit: int
+        :return: list of association objects
+        :rtype List[Association]
+        """
+        if widget is None:
+            widget = ''
+        elif not isinstance(widget, Widget):
+            raise IllegalArgumentError('`widget` is not of type Widget, but type "{}".'.format(type(widget)))
+        else:
+            widget = widget.id
+
+        if activity is None:
+            activity = ''
+        elif not isinstance(activity, Activity2):
+            raise IllegalArgumentError('`activity` is not of type Activity2, but type "{}".'.format(type(activity)))
+        else:
+            activity = activity.id
+
+        if part is None:
+            part_instance = ''
+            part_model = ''
+        elif not isinstance(part, Part2):
+            raise IllegalArgumentError('`part` is not of type Part2, but type "{}".'.format(type(part)))
+        elif part.category == Category.MODEL:
+            part_instance = ''
+            part_model = part.id
+        else:
+            part_instance = part.id
+            part_model = ''
+
+        if property is None:
+            property_instance = ''
+            property_model = ''
+        elif not isinstance(property, Property2):
+            raise IllegalArgumentError('`property` is not of type Property, but type "{}".'.format(type(property)))
+        elif property.category == Category.MODEL:
+            property_model = property.id
+            property_instance = ''
+        else:
+            property_model = ''
+            property_instance = property.id
+
+        if scope is None:
+            scope = ''
+        elif not isinstance(scope, Scope2):
+            raise IllegalArgumentError('`scope` is not of type Scope2, but type "{}".'.format(type(scope)))
+        else:
+            scope = scope.id
+
+        if limit is None:
+            limit = ''
+        elif not isinstance(limit, int):
+            raise IllegalArgumentError('`limit` is not of type integer, but type "{}".'.format(type(limit)))
+        elif limit < 1:
+            raise IllegalArgumentError('`limit` is not a positive integer!')
+
+        request_params = {
+            'limit': limit,
+            'widget': widget,
+            'activity': activity,
+            'scope': scope,
+            'instance_part': part_instance,
+            'instance_property': property_instance,
+            'model_part': part_model,
+            'model_property': property_model,
+        }
+
+        url = self._build_url('associations')
+        response = self._request('GET', url, params=request_params)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not retrieve associations ({})".format((response, response.json())))
+
+        associations = [Association(json=r, client=self) for r in response.json()['results']]
+
+        return associations
 
     def update_widget_associations(
             self,
@@ -2554,7 +2656,7 @@ class Client(object):
         :raises APIError: when the associations could not be cleared.
         :raise IllegalArgumentError: if the widget is not of type Widget
         """
-        if isinstance(widget, Widget):
+        if not isinstance(widget, Widget):
             raise IllegalArgumentError('`widget` is not of type Widget, but type "{}".'.format(type(widget)))
 
         # perform the call
@@ -2569,7 +2671,7 @@ class Client(object):
     def remove_widget_associations(
             self,
             widget: Widget,
-            models: List['AnyProperty', text_type],
+            models: Optional[List[Union['AnyProperty', text_type]]] = (),
             **kwargs
     ) -> None:
         """
@@ -2583,7 +2685,7 @@ class Client(object):
         :raises APIError: when the associations could not be removed
         :raise IllegalArgumentError: if the widget is not of type Widget
         """
-        if isinstance(widget, Widget):
+        if not isinstance(widget, Widget):
             raise IllegalArgumentError('`widget` is not of type Widget, but type "{}".'.format(type(widget)))
 
         model_ids = self._validate_property_models(models=models)
