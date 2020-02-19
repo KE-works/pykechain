@@ -1,6 +1,7 @@
 Change Log
 ==========
 
+* Moved creation of WidgetsManager instances from the `widgets()` method of the Client to Activity class. The Client's method output is now consistent with the `create_widget(s)` methods. Moved `delete_widget(s)` methods from WidgetsManager to Client class. Widget's `delete` method now calls its WidgetManager, if available, to maintain a consistent Widget list.
 
 3.4.0 (17FEB20)
 ---------------

@@ -2,7 +2,7 @@ import datetime
 import os
 import time
 import warnings
-from typing import Any, List, Text, Dict, Optional, Union
+from typing import List, Text, Dict, Optional, Union
 
 import requests
 from requests.compat import urljoin  # type: ignore

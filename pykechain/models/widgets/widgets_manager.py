@@ -1,13 +1,12 @@
 import warnings
-from typing import Any, Iterable, Union, AnyStr, Optional, Text, Dict, List
+from typing import Iterable, Union, AnyStr, Optional, Text, Dict, List
 
-import requests
 from six import string_types, text_type
 
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes, \
     ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
     KEChainPages, CardWidgetKEChainPageLink
-from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
+from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
     _check_prefilters, _check_excluded_propmodels
