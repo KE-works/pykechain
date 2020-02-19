@@ -100,6 +100,15 @@ class TestWidgetManager(TestBetamax):
 
         self.assertEqual(widgets[metapanel.id], metapanel)
 
+    def test_widget_in_widget_manager(self):
+        activity = self.project.activity('Task - Form + Tables + Service')
+        widgets = activity.widgets()
+
+        for key in [0, widgets[0], widgets[0].id]:
+            with self.subTest(msg='key: {} {}'.format(type(key), key)):
+                widget = widgets[key]
+                self.assertIn(widget, widgets._widgets)
+
     def test_widgetmanager_has_activity_and_client(self):
         activity = self.project.activity('Task - Form + Tables + Service')
         widgets = activity.widgets()
@@ -410,6 +419,15 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertEqual(len(widget_manager), 0)
         self.assertEqual(len(self.task.widgets()), 0)
+
+    def test_delete_widget_stand_alone(self):
+
+        widget_manager = self.task.widgets()
+
+        widget_one = widget_manager[0]
+        widget_one.delete()
+
+        self.assertNotIn(widget_one, widget_manager)
 
     def test_notebook_widget(self):
         widget_manager = self.task.widgets()  # type: WidgetsManager

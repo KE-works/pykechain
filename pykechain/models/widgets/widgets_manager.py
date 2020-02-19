@@ -1,5 +1,5 @@
 import warnings
-from typing import Iterable, Union, AnyStr, Optional, Text, Dict, List
+from typing import Iterable, Union, AnyStr, Optional, Text, Dict, List, Any
 
 from six import string_types, text_type
 
@@ -72,7 +72,7 @@ class WidgetsManager(Iterable):
 
     next = __next__  # py2.7 alias
 
-    def __getitem__(self, key: Union[int, str]) -> Widget:
+    def __getitem__(self, key: Union[int, str, Widget]) -> Widget:
         """Widget from the list of widgets based on index, uuid, title or ref.
 
         :param key: index, uuid, title or ref of the widget to retrieve
@@ -82,7 +82,9 @@ class WidgetsManager(Iterable):
         :raises NotFoundError: when the widget could not be found
         """
         found = None
-        if isinstance(key, int):
+        if isinstance(key, Widget) and key in self._widgets:
+            found = key
+        elif isinstance(key, int):
             found = self._widgets[key]
         elif is_uuid(key):
             found = find(self._widgets, lambda p: key == p.id)
@@ -92,6 +94,9 @@ class WidgetsManager(Iterable):
         if found is not None:
             return found
         raise NotFoundError("Could not find widget with index, title, ref, or id '{}'".format(key))
+
+    def __contains__(self, item: Widget) -> bool:
+        return item in self._widgets
 
     def create_widgets(self, widgets: List[Dict]) -> List[Widget]:
         """
@@ -1489,7 +1494,7 @@ class WidgetsManager(Iterable):
 
         self._widgets = self._client.update_widgets(widgets=widgets)
 
-    def delete_widget(self, key: Union[int, text_type, Widget]) -> bool:
+    def delete_widget(self, key: Any) -> bool:
         """
         Delete a widget in the task.
 
@@ -1499,10 +1504,7 @@ class WidgetsManager(Iterable):
         :raises APIError: if the widget could not be deleted
         :raises NotFoundError: if the WidgetsManager (activity) has no such widget
         """
-        if isinstance(key, Widget):
-            widget = key
-        else:
-            widget = self[key]
+        widget = self[key]
         self._client.delete_widget(widget=widget)
         self._widgets.remove(widget)
         return True
