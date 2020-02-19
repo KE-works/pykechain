@@ -181,13 +181,10 @@ class TestWidgetManager(TestBetamax):
         self.assertEqual(self.wm[meta_panel.id], meta_panel)
 
     def test_widget_in_widget_manager(self):
-        activity = self.project.activity('Task - Form + Tables + Service')
-        widgets = activity.widgets()
-
-        for key in [0, widgets[0], widgets[0].id]:
+        for key in [0, self.wm[0], self.wm[0].id]:
             with self.subTest(msg='key: {} {}'.format(type(key), key)):
-                widget = widgets[key]
-                self.assertIn(widget, widgets)
+                widget = self.wm[key]
+                self.assertIn(widget, self.wm)
 
     def test_widgetmanager_has_activity_and_client(self):
         self.assertIsNotNone(self.wm._client)
