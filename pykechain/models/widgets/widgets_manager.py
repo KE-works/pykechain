@@ -1093,6 +1093,7 @@ class WidgetsManager(Iterable):
                          emphasize_delete: Optional[bool] = False,
                          show_columns: Optional[Iterable[Text]] = None,
                          show_all_columns: Optional[bool] = True,
+                         page_size: Optional[int] = 25,
                          tags: Optional[Iterable[Text]] = None,
                          sorted_column: Optional[Text] = ScopeWidgetColumnTypes.PROJECT_NAME,
                          sorted_direction: Optional[SortTable] = SortTable.ASCENDING,
@@ -1132,6 +1133,8 @@ class WidgetsManager(Iterable):
         :type show_columns: list of basestring
         :param show_all_columns: boolean to show all columns (defaults to True). If True, will override `show_columns`
         :type show_all_columns: bool
+        :param page_size: number of scopes to show per page (defaults to 25)
+        :type page_size: int
         :param tags: (O) list of scope tags to filter the Scopes on
         :type tags: list of basestring
         :param sorted_column: column name to sort on. (defaults to project name column). One of `ScopeWidgetColumnTypes`
@@ -1166,6 +1169,9 @@ class WidgetsManager(Iterable):
                 raise IllegalArgumentError("`show_columns` should be a list of column header "
                                            "names: '{}'".format(show_columns))
             meta['showColumns'] = [snakecase(c) for c in show_columns]
+
+        if not isinstance(page_size, int) or page_size < 1:
+            raise IllegalArgumentError('`page_size` must be a positive integer, "{}" is not.'.format(page_size))
 
         if tags:
             if not isinstance(tags, (list, tuple)) and not all([isinstance(i, string_types) for i in tags]):
@@ -1208,6 +1214,7 @@ class WidgetsManager(Iterable):
             "primaryEditUiValue": emphasize_edit,
             "primaryCloneUiValue": emphasize_clone,
             "primaryDeleteUiValue": emphasize_delete,
+            "customPageSize": page_size,
         })
 
         widget = self.create_widget(
