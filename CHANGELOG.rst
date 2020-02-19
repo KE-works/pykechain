@@ -1,6 +1,7 @@
 Change Log
 ==========
 
+* Creation of `Widgets` without a title but with a reference (or `ref`) now supported via the `show_title_value` keyword.
 * Added `Association` class and retrieval method `associations()` on the `Client` class.
 * Creation of `Activity` now uses parent's `classification` if provided.
 
