@@ -488,13 +488,11 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(len(self.task.widgets()), 0)
 
     def test_delete_widget_stand_alone(self):
-
-        widget_manager = self.task.widgets()
-
-        widget_one = widget_manager[0]
+        """Delete a widget by itself and check the manager"""
+        widget_one = self.wm[0]
         widget_one.delete()
 
-        self.assertNotIn(widget_one, widget_manager)
+        self.assertNotIn(widget_one, self.wm)
 
     def test_notebook_widget(self):
         notebook = self.project.service(name="Service Gears - Successful")
