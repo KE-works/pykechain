@@ -1,8 +1,11 @@
 Change Log
 ==========
 
+
+* Creation of `Widgets` without a title but with a reference (or `ref`) now supported via the `show_title_value` keyword.
 * Creation of `Activity` now uses parent's `classification` if provided.
 * Added `page_size` input the `add_scope_widget` method of the WidgetManager class.
+
 
 3.4.0 (17FEB20)
 ---------------

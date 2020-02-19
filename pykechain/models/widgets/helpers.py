@@ -1,8 +1,9 @@
+import warnings
 from typing import Dict, Optional, Union, Text, Tuple, List
 
 from six import text_type
 
-from pykechain.enums import Category, PropertyType
+from pykechain.enums import Category, PropertyType, WidgetTitleValue
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.utils import is_uuid, snakecase, camelcase
 
@@ -10,8 +11,9 @@ from pykechain.utils import is_uuid, snakecase, camelcase
 KECARD_COMMON_KEYS = ["collapsed", "collapsible", "noBackground", "noPadding", "isDisabled", "isMerged"]
 
 
-def _retrieve_object(obj, method):
-    # type: (Union[Part2, Property2, Team, Service, Text], Client) -> (Union[Part2, Team, Service, Property2])  # noqa
+def _retrieve_object(obj: Union['Part2', 'AnyProperty', 'Team', 'Service', Text],
+                     method: 'Client',
+                     ) -> Union['Part2', 'AnyProperty', 'Team', 'Service']:
     """
     Object if object or uuid of object is provided as argument.
 
@@ -37,8 +39,7 @@ def _retrieve_object(obj, method):
                                    " Part id, Property id, Service id or Team id. Type is: {}".format(type(obj)))
 
 
-def _retrieve_object_id(obj):
-    # type: (Optional[Union[Base, Text]]) -> Optional[Text]  # noqa
+def _retrieve_object_id(obj: Optional[Union['Base', Text]]) -> Optional[Text]:
     """
     Object id if object or uuid of object is provided as argument.
 
@@ -62,8 +63,12 @@ def _retrieve_object_id(obj):
                                    "Type is: {}".format(type(obj)))
 
 
-def _set_title(meta, custom_title, default_title=None):
-    # type: (Dict, Optional[Union[Text, bool]], Optional[Text]) -> Tuple[Dict, Text]
+def _set_title(meta: Dict,
+               title: Optional[Union[Text, bool]] = None,
+               custom_title: Optional[Union[Text, bool]] = None,
+               default_title: Optional[Text] = None,
+               show_title_value: Optional[WidgetTitleValue] = None,
+               **kwargs) -> Tuple[Dict, Text]:
     """
     Set the customTitle in the meta based on provided optional custom title or default.
 
@@ -80,22 +85,34 @@ def _set_title(meta, custom_title, default_title=None):
     :type custom_title: basestring or bool or None
     :param default_title: (optional) If custom_title is False, the default title is injected as title
     :type default_title: basestring or None
+    :param show_title_value: (optional) Specify how the title is displayed, regardless of other inputs.
+    :type show_title_value: WidgetTitleValue
     :return: tuple of meta and the title
     :rtype: Tuple[Dict,Text]
     :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
-    if custom_title is False:
-        show_title_value = "Default"
-        if default_title is None:
-            raise IllegalArgumentError("When the `custom_title` is set to False the `default_title` is used and "
-                                       "cannot be None. Provide a `default_title` argument and ensure it is not None.")
-        title = default_title
-    elif custom_title is None or custom_title == '':
-        show_title_value = "No title"
-        title = ''
-    else:
-        show_title_value = "Custom title"
+    if custom_title and title is None:
+        warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
+                      'accordingly to use `title`.', PendingDeprecationWarning)
         title = custom_title
+
+    if show_title_value is None:
+        if title is False:
+            show_title_value = WidgetTitleValue.DEFAULT
+        elif title is None or title == '':
+            show_title_value = WidgetTitleValue.NO_TITLE
+        else:
+            show_title_value = WidgetTitleValue.CUSTOM_TITLE
+    elif show_title_value not in WidgetTitleValue.values():
+        raise IllegalArgumentError('`show_title_value` must be a WidgetTitleValue enum option, "{}" is not. '
+                                   'Choose from: {}'.format(show_title_value, WidgetTitleValue.values()))
+
+    if title is False:
+        if default_title is None:
+            raise IllegalArgumentError("If `title` is set to False the `default_title` is used and cannot be None. "
+                                       "Provide a `default_title` argument and ensure it is not None.")
+        else:
+            title = default_title
 
     meta.update({
         "showTitleValue": show_title_value,
@@ -207,8 +224,8 @@ def _check_prefilters(part_model: 'Part2', prefilters: Dict):  # noqa: F821
     return list_of_prefilters
 
 
-def _check_excluded_propmodels(part_model, property_models):
-    list_of_propmodels_excl = list()  # type: List[Property2]  # noqa
+def _check_excluded_propmodels(part_model: 'Part2', property_models: List['AnyProperty']) -> List['AnyProperty']:
+    list_of_propmodels_excl = list()  # type: List['AnyProperty']
     for property_model in property_models:
         if is_uuid(property_model):
             property_model = part_model.property(id=property_model)

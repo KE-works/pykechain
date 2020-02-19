@@ -139,6 +139,9 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
+        if 'parent_widget' in kwargs:
+            kwargs['parent'] = kwargs.pop('parent_widget')
+
         widget = self._client.create_widget(*args, activity=self._activity_id, **kwargs)
 
         if kwargs.get('order') is None:
@@ -228,10 +231,6 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        if 'custom_title' in kwargs and not title:
-            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
-                          'accordingly to use `title`', PendingDeprecationWarning)
-            title = kwargs.pop('custom_title')
         # Check whether the part_model is uuid type or class `Part`
         part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: 'Part2'  # noqa
         parent_instance = _retrieve_object_id(obj=parent_instance)  # type: 'Part2'  # noqa
@@ -269,7 +268,7 @@ class WidgetsManager(Iterable):
         if all_writable and not writable_models:
             writable_models = part_model.properties
 
-        meta, title = _set_title(meta, title, default_title=part_model.name)
+        meta, title = _set_title(meta, title=title, default_title=part_model.name, **kwargs)
 
         widget = self.create_widget(
             widget_type=WidgetTypes.SUPERGRID,
@@ -382,10 +381,6 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        if 'custom_title' in kwargs and not title:
-            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
-                          'accordingly to use `title`', PendingDeprecationWarning)
-            title = kwargs.pop('custom_title')
         # Check whether the part_model is uuid type or class `Part`
         part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: 'Part2'  # noqa
         parent_instance_id = _retrieve_object_id(obj=parent_instance)  # type: text_type
@@ -436,7 +431,7 @@ class WidgetsManager(Iterable):
         if all_writable and not writable_models:
             writable_models = part_model.properties
 
-        meta, title = _set_title(meta, title, default_title=part_model.name)
+        meta, title = _set_title(meta, title=title, default_title=part_model.name, **kwargs)
 
         widget = self.create_widget(
             widget_type=WidgetTypes.FILTEREDGRID,
@@ -478,11 +473,6 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        if 'custom_title' in kwargs and not title:
-            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
-                          'accordingly to use `title`', PendingDeprecationWarning)
-            title = kwargs.pop('custom_title')
-
         attachment_property = _retrieve_object(attachment_property,
                                                method=self._client.property)  # type: 'Property2'
         meta = _initiate_meta(kwargs, activity=self._activity_id)
@@ -508,7 +498,8 @@ class WidgetsManager(Iterable):
                 warnings.warn('Argument "{}" is no longer supported as input to `add_attachment_viewer`.'.format(
                     deprecated_kw), Warning)
 
-        meta, title = _set_title(meta, title, default_title=attachment_property.name)
+        meta, title = _set_title(meta, title=title, default_title=attachment_property.name, **kwargs)
+
         widget = self.create_widget(
             widget_type=WidgetTypes.ATTACHMENTVIEWER,
             meta=meta,
@@ -662,11 +653,6 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        if 'custom_title' in kwargs and not title:
-            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
-                          'accordingly to use `title`', PendingDeprecationWarning)
-            title = kwargs.pop('custom_title')
-
         # Check whether the part_model is uuid type or class `Part`
         part_instance = _retrieve_object(part_instance, method=self._client.part)  # type: 'Part2'  # noqa: F821
 
@@ -691,7 +677,7 @@ class WidgetsManager(Iterable):
             "showHeaders": show_headers,
         })
 
-        meta, title = _set_title(meta, title, default_title=part_instance.name)
+        meta, title = _set_title(meta, title=title, default_title=part_instance.name, **kwargs)
 
         if all_readable and not readable_models:
             readable_models = part_instance.model().properties
@@ -748,13 +734,7 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        if 'custom_title' in kwargs and not title:
-            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
-                          'accordingly to use `title`', PendingDeprecationWarning)
-            title = kwargs.pop('custom_title')
-
         # Check whether the script is uuid type or class `Service`
-
         service = _retrieve_object(obj=service, method=self._client.service)  # type: 'Service'  # noqa
 
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
@@ -779,7 +759,7 @@ class WidgetsManager(Iterable):
             'showLog': kwargs.get('show_log', True)
         })
 
-        meta, title = _set_title(meta, title, default_title=service.name)
+        meta, title = _set_title(meta, title=title, default_title=service.name, **kwargs)
 
         widget = self.create_widget(
             widget_type=WidgetTypes.SERVICE,
@@ -815,17 +795,12 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        if 'custom_title' in kwargs and not title:
-            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
-                          'accordingly to use `title`', PendingDeprecationWarning)
-            title = kwargs.pop('custom_title')
-
         if not isinstance(html, (str, text_type)):
             raise IllegalArgumentError("Text injected in the HTML widget must be string. Type is: {}".
                                        format(type(html)))
 
         meta = _initiate_meta(kwargs, activity=self._activity_id)
-        meta, title = _set_title(meta, title, default_title=WidgetTypes.HTML)
+        meta, title = _set_title(meta, title=title, default_title=WidgetTypes.HTML, **kwargs)
 
         meta["htmlContent"] = html
 
@@ -864,11 +839,6 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
 
         """
-        if 'custom_title' in kwargs and not title:
-            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
-                          'accordingly to use `title`', PendingDeprecationWarning)
-            title = kwargs.pop('custom_title')
-
         from pykechain.models import Service
         if isinstance(notebook, Service):
             notebook_id = notebook.id
@@ -886,7 +856,7 @@ class WidgetsManager(Iterable):
             kwargs['custom_height'] = kwargs.pop('height')
 
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
-        meta, title = _set_title(meta, title, default_title=notebook.name)
+        meta, title = _set_title(meta, title=title, default_title=notebook.name, **kwargs)
 
         meta.update({
             'serviceId': notebook_id
@@ -1057,13 +1027,8 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        if 'custom_title' in kwargs and not title:
-            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
-                          'accordingly to use `title`', PendingDeprecationWarning)
-            title = kwargs.pop('custom_title')
-
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
-        meta, title = _set_title(meta, title, default_title=WidgetTypes.MULTICOLUMN)
+        meta, title = _set_title(meta, title=title, default_title=WidgetTypes.MULTICOLUMN, **kwargs)
 
         if 'height' in kwargs:
             # TODO: Pending deprecation 3.4.0.
@@ -1155,13 +1120,8 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        if 'custom_title' in kwargs and not title:
-            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
-                          'accordingly to use `title`', PendingDeprecationWarning)
-            title = kwargs.pop('custom_title')
-
         meta = _initiate_meta(kwargs, activity=self._activity_id)
-        meta, title = _set_title(meta, title, default_title=WidgetTypes.SCOPE)
+        meta, title = _set_title(meta, title=title, default_title=WidgetTypes.SCOPE, **kwargs)
 
         if not show_all_columns and show_columns:
             if not isinstance(show_columns, (list, tuple)) and \
@@ -1255,16 +1215,10 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        if 'custom_title' in kwargs and not title:
-            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
-                          'accordingly to use `title`', PendingDeprecationWarning)
-            title = kwargs.pop('custom_title')
-
         attachment_property = _retrieve_object(attachment_property,
                                                method=self._client.property)  # type: 'Property2'  # noqa
         meta = _initiate_meta(kwargs, activity=self._activity_id)
-
-        meta, title = _set_title(meta, title, default_title=attachment_property.name)
+        meta, title = _set_title(meta, title=title, default_title=attachment_property.name, **kwargs)
 
         # Add custom button text
         if not custom_button_text:
@@ -1334,13 +1288,8 @@ class WidgetsManager(Iterable):
         :type image_fit: ImageFitValue
         :return: Card Widget
         """
-        if 'custom_title' in kwargs and not title:
-            warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
-                          'accordingly to use `title`', PendingDeprecationWarning)
-            title = kwargs.pop('custom_title')
-
         meta = _initiate_meta(kwargs, activity=self._activity_id)
-        meta, title = _set_title(meta, title, default_title=WidgetTypes.CARD)
+        meta, title = _set_title(meta, title=title, default_title=WidgetTypes.CARD, **kwargs)
 
         # Process the description
         if description is False or description is None:
