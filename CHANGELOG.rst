@@ -2,6 +2,7 @@ Change Log
 ==========
 
 * Creation of `Activity` now uses parent's `classification` if provided.
+* Added `page_size` input the `add_scope_widget` method of the WidgetManager class.
 
 3.4.0 (17FEB20)
 ---------------
