@@ -713,8 +713,7 @@ class Activity2(Base, TagsMixin):
     # Customizations
     #
 
-    def widgets(self, **kwargs):
-        # type: (**Any) -> WidgetsManager
+    def widgets(self, **kwargs) -> 'WidgetsManager':
         """
         Widgets of the activity.
 
@@ -726,7 +725,8 @@ class Activity2(Base, TagsMixin):
         :raises NotFoundError: when the widgets could not be found
         :raises APIError: when the API does not support the widgets, or when the API gives an error.
         """
-        return self._client.widgets(activity=self.id, **kwargs)
+        widgets = self._client.widgets(activity=self.id, **kwargs)
+        return WidgetsManager(widgets=widgets, activity=self, client=self._client)
 
     def customization(self):
         """

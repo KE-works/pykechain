@@ -43,12 +43,13 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: if not provided one of :class:`Activity` or activity uuid and a `Client`
         """
         self._widgets = list(widgets)  # type: List[Widget]
-        from pykechain.models import Activity
-        from pykechain.models import Activity2
+        for widget in self._widgets:
+            widget.manager = self
+        from pykechain.models import Activity, Activity2
         if isinstance(activity, (Activity, Activity2)):
             self._activity_id = activity.id
             self._client = activity._client
-        elif isinstance(activity, (text_type)) and client is not None:
+        elif isinstance(activity, text_type) and client is not None:
             self._activity_id = activity
             self._client = client
         else:
@@ -1489,35 +1490,31 @@ class WidgetsManager(Iterable):
 
         self._widgets = self._client.update_widgets(widgets=widgets)
 
-    def delete_widget(self, key: Any) -> bool:
+    def delete_widget(self, key: Union[int, text_type, Widget]) -> bool:
         """
-        Delete widgets by index.
+        Delete a widget in the task.
 
-        The widgets are saved to KE-chain.
-
-        :param key: index, uuid, title or ref of the widget to delete
-        :type key: int or basestring
+        :param key: index, uuid, title or ref of the widget to delete, or the widget itself.
+        :type key: Widget, int or basestring
         :return: True if the widget is deleted successfully
         :raises APIError: if the widget could not be deleted
-        :raises NotFoundError: if the widgetmanager (activity) has no such widget
+        :raises NotFoundError: if the WidgetsManager (activity) has no such widget
         """
-        widget = self[key]
-        if isinstance(widget, Widget):
-            if widget.delete():
-                self._widgets.remove(widget)
-                return True
+        if isinstance(key, Widget):
+            widget = key
+        else:
+            widget = self[key]
+        self._client.delete_widget(widget=widget)
+        self._widgets.remove(widget)
+        return True
 
     def delete_all_widgets(self) -> None:
-        """Delete all widgets.
+        """
+        Delete all widgets in the activity.
 
         :return: None
         :raises ApiError: When the deletion of the widgets was not successful
         """
-        widget_ids = [dict(id=w.id) for w in self.__iter__()]
-        url = self._client._build_url('widgets_bulk_delete')
-        response = self._client._request('DELETE', url, json=widget_ids)
-
-        if response.status_code != requests.codes.no_content:
-            raise APIError("Could not delete the widgets: {}: {}".format(str(response), response.content))
-
+        self._client.delete_widgets(list(self))
         self._widgets = []
+        return None
