@@ -267,7 +267,7 @@ class Activity2(Base, TagsMixin):
         """
         if self.activity_type != ActivityType.PROCESS:
             raise IllegalArgumentError("One can only create a task under a subprocess.")
-        return self._client.create_activity(self.id, *args, **kwargs)
+        return self._client.create_activity(self, *args, **kwargs)
 
     def subprocess(self):
         """Retrieve the subprocess in which this activity is defined.

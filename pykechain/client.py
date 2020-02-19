@@ -1147,7 +1147,7 @@ class Client(object):
     # WIM2
     def _create_activity2(self, parent, name, activity_type=ActivityType.TASK, status=ActivityStatus.OPEN,
                           description=None, start_date=None, due_date=None,
-                          classification=ActivityClassification.WORKFLOW, tags=None):
+                          classification=None, tags=None):
         """Create a new activity.
 
         .. important::
@@ -1171,13 +1171,13 @@ class Client(object):
         :type start_date: datetime.datetime
         :param due_date: due date of the activity
         :type due_date: datetime.datetime
-        :param classification: classification of activity: WORKFLOW (default) or CATALOG
+        :param classification: classification of activity: defaults to `parent`'s if provided, WORKFLOW otherwise.
         :type classification: ActivityClassification
         :param tags: list of activity tags
         :type tags: list
         :return: the created :class:`models.Activity2`
         :raises APIError: When the object could not be created
-        :raises IllegalArgumentError: When an incorrect activitytype or parent is provided
+        :raises IllegalArgumentError: When an incorrect arguments are provided
         """
         # WIM1: activity_class, WIM2: activity_type
         if self.match_app_version(label='wim', version='<2.0.0', default=True):
@@ -1188,11 +1188,13 @@ class Client(object):
             raise IllegalArgumentError("Please provide accepted activity_type (provided:{} accepted:{})".
                                        format(activity_type, ActivityType.values()))
         if isinstance(parent, (Activity, Activity2)):
+            parent_classification = parent.classification
             parent = parent.id
         elif is_uuid(parent):
+            parent_classification = None
             parent = parent
         else:
-            raise IllegalArgumentError("Please provide either an activity object or a UUID")
+            raise IllegalArgumentError('`parent` must be an Activity or UUID, "{}" is neither'.format(parent))
 
         if status not in ActivityStatus.values():
             raise IllegalArgumentError('`status` must be an ActivityStatus option, "{}" is not.'.format(status))
@@ -1209,7 +1211,12 @@ class Client(object):
             if not isinstance(due_date, datetime.datetime):
                 raise IllegalArgumentError('`due_date` must be a datetime object, "{}" is not.'.format(due_date))
 
-        if classification not in ActivityClassification.values():
+        if classification is None:
+            if parent_classification is None:
+                classification = ActivityClassification.WORKFLOW
+            else:
+                classification = parent_classification
+        elif classification not in ActivityClassification.values():
             raise IllegalArgumentError(
                 '`classification` must be an ActivityClassification option, "{}" is not.'.format(classification))
 

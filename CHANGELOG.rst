@@ -6,6 +6,10 @@ Change Log
 * Refactored Widget's `delete` method to now calls its WidgetManager, if available, to maintain a consistent Widget list.
 * Added `__contains__` method to WidgetsManager to support "widget in manager" comparisons.
 
+* Creation of `Widgets` without a title but with a reference (or `ref`) now supported via the `show_title_value` keyword.
+* Creation of `Activity` now uses parent's `classification` if provided.
+
+
 3.4.0 (17FEB20)
 ---------------
 
