@@ -107,7 +107,7 @@ class TestWidgetManager(TestBetamax):
         for key in [0, widgets[0], widgets[0].id]:
             with self.subTest(msg='key: {} {}'.format(type(key), key)):
                 widget = widgets[key]
-                self.assertIn(widget, widgets._widgets)
+                self.assertIn(widget, widgets)
 
     def test_widgetmanager_has_activity_and_client(self):
         activity = self.project.activity('Task - Form + Tables + Service')
