@@ -4,10 +4,11 @@ from pykechain.enums import (WidgetTypes, ShowColumnTypes, NavigationBarAlignmen
                              Category, LinkTargets, KEChainPages, WidgetTitleValue)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Activity2
-from pykechain.models.widgets import (UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget,
-                                      SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, SignatureWidget,
-                                      ServiceWidget, NotebookWidget,
-                                      MulticolumnWidget, CardWidget, MetapanelWidget, ScopeWidget)
+from pykechain.models.widgets import (
+    UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, SupergridWidget, FilteredgridWidget,
+    TasknavigationbarWidget, SignatureWidget, ServiceWidget, NotebookWidget, MulticolumnWidget, CardWidget,
+    MetapanelWidget, ScopeWidget,
+)
 from pykechain.models.widgets.helpers import _set_title
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
