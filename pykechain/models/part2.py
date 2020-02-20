@@ -212,7 +212,17 @@ class Part2(TreeObject):
               name: Optional[Text] = None,
               pk: Optional[Text] = None,
               **kwargs) -> 'Part2':
+        """
+        Retrieve a child object.
 
+        :param name: optional, name of the child
+        :type name: str
+        :param pk: optional, UUID of the child
+        :type: pk: str
+        :return: Child object
+        :raises MultipleFoundError: whenever multiple children fit match inputs.
+        :raises NotFoundError: whenever no child matching the inputs could be found.
+        """
         if not (name or pk):
             raise IllegalArgumentError('You need to provide either "name" or "pk".')
 
@@ -285,6 +295,16 @@ class Part2(TreeObject):
         self._cached_children = children_by_parent_id.get(self.id, list())
 
         return None
+
+    def all_children(self) -> List['Part2']:
+        """
+        Retrieve a flat list of all descendants, sorted depth-first. Also populates all descendants.
+
+        :returns list of child objects
+        :rtype List
+        """
+        self.populate_descendants()
+        return super().all_children()
 
     def siblings(self, **kwargs) -> Union['Partset', List['Part2']]:
         """Retrieve the siblings of this `Part` as `Partset`.

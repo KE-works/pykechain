@@ -1,13 +1,11 @@
 from abc import ABC
-from typing import Optional, Text, Iterable
+from typing import Optional, Text, Iterable, List
 
 from pykechain.models import Base
 
 
 class TreeObject(Base, ABC):
-    """
-    Object class to include methods used to traverse a tree-structure.
-    """
+    """Object class to include methods used to traverse a tree-structure."""
 
     def __call__(self, *args, **kwargs) -> Base:
         """Short-hand version of the `child` method."""
@@ -58,14 +56,12 @@ class TreeObject(Base, ABC):
         """
         raise NotImplementedError
 
-    def all_children(self) -> Iterable['TreeObject']:
+    def all_children(self) -> List['TreeObject']:
         """
         Retrieve a flat list of all descendants, sorted depth-first.
 
-        It is highly advised to populate the descendants prior to generating this list.
-
-        :returns iterable of child objects
-        :rtype Iterable
+        :returns list of child objects
+        :rtype List
         """
         all_children = list(self.children())
 

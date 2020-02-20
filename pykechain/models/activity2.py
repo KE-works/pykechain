@@ -338,7 +338,17 @@ class Activity2(TreeObject, TagsMixin):
               name: Optional[Text] = None,
               pk: Optional[Text] = None,
               **kwargs) -> 'Activity2':
+        """
+        Retrieve a child object.
 
+        :param name: optional, name of the child
+        :type name: str
+        :param pk: optional, UUID of the child
+        :type: pk: str
+        :return: Child object
+        :raises MultipleFoundError: whenever multiple children fit match inputs.
+        :raises NotFoundError: whenever no child matching the inputs could be found.
+        """
         activity_list = list(self.children(name=name, pk=pk, **kwargs))
 
         if len(activity_list) == 1:
@@ -377,9 +387,17 @@ class Activity2(TreeObject, TagsMixin):
         return self._client.activities(parent_id=parent_id, scope=self.scope_id, **kwargs)
 
     def all_children(self) -> List['Activity2']:
+        """
+        Retrieve a flat list of all descendants, sorted depth-first.
+
+        Returns an empty list for Activities of type TASK.
+
+        :returns list of child objects
+        :rtype List
+        """
         if self.activity_type == ActivityType.TASK:
             return []
-        return list(super().all_children())
+        return super().all_children()
 
     def edit_cascade_down(
         self,
