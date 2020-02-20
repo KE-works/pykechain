@@ -349,6 +349,9 @@ class Activity2(TreeObject, TagsMixin):
         :raises MultipleFoundError: whenever multiple children fit match inputs.
         :raises NotFoundError: whenever no child matching the inputs could be found.
         """
+        if not (name or pk):
+            raise IllegalArgumentError('You need to provide either "name" or "pk".')
+
         activity_list = list(self.children(name=name, pk=pk, **kwargs))
 
         if len(activity_list) == 1:
@@ -360,7 +363,7 @@ class Activity2(TreeObject, TagsMixin):
             raise NotFoundError('{} has no matching child.'.format(self))
         return child
 
-    def siblings(self, **kwargs):
+    def siblings(self, **kwargs) -> List['Activity2']:
         """Retrieve the other activities that also belong to the parent.
 
         It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the level of the current task, including

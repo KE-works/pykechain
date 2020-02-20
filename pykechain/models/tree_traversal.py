@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Optional, Text, Iterable, List
+from typing import Optional, Text, List
 
 from pykechain.models import Base
 
@@ -37,7 +37,7 @@ class TreeObject(Base, ABC):
         """
         raise NotImplementedError
 
-    def siblings(self, **kwargs) -> Iterable['TreeObject']:
+    def siblings(self, **kwargs) -> List['TreeObject']:
         """
         Retrieve all objects that have the same parent as the current object, thereby including itself.
 
@@ -46,7 +46,7 @@ class TreeObject(Base, ABC):
         """
         raise NotImplementedError
 
-    def children(self, **kwargs) -> Iterable['TreeObject']:
+    def children(self, **kwargs) -> List['TreeObject']:
         """
         Retrieve all children objects.
 

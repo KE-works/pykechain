@@ -8,7 +8,7 @@ import pytz
 import requests
 
 from pykechain.enums import ActivityType, ActivityStatus, ActivityClassification, Category, \
-    activity_root_name_by_classification
+    activity_root_name_by_classification, ActivityRootNames
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError, APIError
 from pykechain.models import Activity2
 from pykechain.utils import temp_chdir
@@ -352,6 +352,25 @@ class TestActivities(TestBetamax):
         task = self.project.activity(name='Specify wheel diameter')
         with self.assertRaises(NotFoundError, msg='Tasks have no children!'):
             task.children()
+
+    def test_child(self):
+        workflow_root = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
+
+        child_task = workflow_root.child(name='Specify wheel diameter')
+
+        self.assertIsInstance(child_task, Activity2)
+        self.assertEqual(child_task._json_data['parent_id'], workflow_root.id)
+
+        with self.assertRaises(IllegalArgumentError):
+            workflow_root.child()
+
+    def test_retrieve_all_children(self):
+        workflow_root = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
+
+        all_tasks = workflow_root.all_children()
+
+        self.assertIsInstance(all_tasks, list)
+        self.assertEqual(12, len(all_tasks), msg='Number of tasks has changed, expected 12.')
 
     def test_retrieve_activity_by_id(self):
         task = self.project.activity(name='Subprocess')  # type: Activity2

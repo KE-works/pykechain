@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-* Implemented `child` method for `Part2` and `Activity2` class.
+* Implemented `child` method for `Part2` and `Activity2` class. Also implemented "dunder" method `__call__()` as short-hand for `child()`, making tree searching much simpler to code, e.g: `child = root('part')('child')`
 * Deprecated `get_all_children` helper function. It is replaced by the `all_children` method on the `Part2` and `Activity2` classes.
 * Creation of `Widgets` without a title but with a reference (or `ref`) now supported via the `show_title_value` keyword.
 * Creation of `Activity` now uses parent's `classification` if provided.
