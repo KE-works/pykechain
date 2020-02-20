@@ -211,8 +211,7 @@ class Part2(TreeObject):
     def child(self,
               name: Optional[Text] = None,
               pk: Optional[Text] = None,
-              **kwargs,
-              ) -> 'Part2':
+              **kwargs) -> 'Part2':
 
         if not (name or pk):
             raise IllegalArgumentError('You need to provide either "name" or "pk".')

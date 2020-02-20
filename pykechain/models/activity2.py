@@ -337,8 +337,7 @@ class Activity2(TreeObject, TagsMixin):
     def child(self,
               name: Optional[Text] = None,
               pk: Optional[Text] = None,
-              **kwargs,
-              ) -> 'Activity2':
+              **kwargs) -> 'Activity2':
 
         activity_list = list(self.children(name=name, pk=pk, **kwargs))
 

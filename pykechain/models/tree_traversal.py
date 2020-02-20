@@ -16,8 +16,7 @@ class TreeObject(Base, ABC):
     def child(self,
               name: Optional[Text] = None,
               pk: Optional[Text] = None,
-              **kwargs,
-              ) -> 'TreeObject':
+              **kwargs) -> 'TreeObject':
         """
         Retrieve a child object.
 
