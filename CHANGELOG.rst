@@ -1,7 +1,8 @@
 Change Log
 ==========
 
-
+* Implemented `child` method for `Part2` and `Activity2` class.
+* Deprecated `get_all_children` helper function. It is replaced by the `all_children` method on the `Part2` and `Activity2` classes.
 * Creation of `Widgets` without a title but with a reference (or `ref`) now supported via the `show_title_value` keyword.
 * Creation of `Activity` now uses parent's `classification` if provided.
 * :+1: dependent versions for development: sphinx (2.4.2), pre-commit (2.1.0), requests (2.23.0)
