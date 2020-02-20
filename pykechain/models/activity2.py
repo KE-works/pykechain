@@ -376,6 +376,11 @@ class Activity2(TreeObject, TagsMixin):
                                 "as this task exist on top level.".format(self.name))
         return self._client.activities(parent_id=parent_id, scope=self.scope_id, **kwargs)
 
+    def all_children(self) -> List['Activity2']:
+        if self.activity_type == ActivityType.TASK:
+            return []
+        return list(super().all_children())
+
     def edit_cascade_down(
         self,
         start_date: Optional[datetime.datetime] = None,
@@ -419,8 +424,7 @@ class Activity2(TreeObject, TagsMixin):
             status=status,
         )
 
-        from pykechain.helpers import get_all_children
-        all_tasks = [self] + get_all_children(self)
+        all_tasks = [self] + self.all_children()
 
         # Create update-json
         data = list()

@@ -39,7 +39,7 @@ class TreeObject(Base, ABC):
         """
         raise NotImplementedError
 
-    def siblings(self, **kwargs) -> Iterable:
+    def siblings(self, **kwargs) -> Iterable['TreeObject']:
         """
         Retrieve all objects that have the same parent as the current object, thereby including itself.
 
