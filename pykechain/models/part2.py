@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Union, List, Dict, Optional, Text, Tuple  # noqa: F401
+from typing import Union, List, Dict, Optional, Text, Tuple  # noqa: F401
 
 import requests
 from six import text_type, string_types
@@ -9,12 +9,13 @@ from pykechain.enums import Category, Multiplicity
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
     get_edited_one_many
-from pykechain.models import Base, Scope2
+from pykechain.models import Scope2
 from pykechain.models.property2 import Property2
+from pykechain.models.tree_traversal import TreeObject
 from pykechain.utils import is_uuid, find
 
 
-class Part2(Base):
+class Part2(TreeObject):
     """A virtual object representing a KE-chain part.
 
     :ivar id: UUID of the part
@@ -206,6 +207,39 @@ class Part2(Base):
         else:
             # if kwargs are provided, we assume no use of cache as specific filtering on the children is performed.
             return self._client.parts(parent=self.id, category=self.category, **kwargs)
+
+    def child(self,
+              name: Optional[Text] = None,
+              pk: Optional[Text] = None,
+              **kwargs,
+              ) -> 'Part2':
+
+        if not (name or pk):
+            raise IllegalArgumentError('You need to provide either "name" or "pk".')
+
+        if self._cached_children:
+            # First try to find the child without calling KE-chain.
+            if name:
+                part_list = [c for c in self.children() if c.name == name]
+            else:
+                part_list = [c for c in self.children() if c.id == pk]
+        else:
+            # Refresh children list from KE-chain by using a keyword-argument.
+            if name:
+                part_list = self.children(name=name)
+            else:
+                part_list = self.children(pk=pk)
+
+        # If there is only one, then that is the part you are looking for
+        if len(part_list) == 1:
+            part = part_list[0]
+
+        # Otherwise raise the appropriate error
+        elif len(part_list) > 1:
+            raise MultipleFoundError('{} has more than one matching child.'.format(self))
+        else:
+            raise NotFoundError('{} has no matching child.'.format(self))
+        return part
 
     def populate_descendants(self, batch: int = 200) -> None:
         """
@@ -593,6 +627,8 @@ class Part2(Base):
             key = 'id'
         else:
             key = 'model_id'
+
+        from pykechain.models import Base
 
         def make_serializable(value):
             # if the value is a reference property to another 'Base' Part, replace with its ID

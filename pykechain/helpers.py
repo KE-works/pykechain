@@ -1,10 +1,11 @@
 import os
+import warnings
 from typing import Union, Optional, List
 
 from envparse import env
 
 from pykechain.client import Client
-from pykechain.enums import KechainEnv as kecenv, ScopeStatus, ActivityType
+from pykechain.enums import KechainEnv as kecenv, ScopeStatus
 from pykechain.exceptions import ClientError
 
 
@@ -143,14 +144,6 @@ def get_all_children(
     :returns list of child Parts or Activities
     :rtype List
     """
-    if children is None:
-        children = list()
-
-    if hasattr(obj, 'activity_type') and obj.activity_type == ActivityType.TASK:
-        return children
-
-    for child in obj.children():
-        children.append(child)
-        get_all_children(obj=child, children=children)
-
-    return children
+    # TODO specify deprecation date.
+    warnings.warn('This helper function has been replaced by the `all_children` method.', PendingDeprecationWarning)
+    return obj.all_children()

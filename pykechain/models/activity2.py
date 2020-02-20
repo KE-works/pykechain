@@ -11,14 +11,14 @@ from six import text_type
 from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_EXTRA_PARAMS
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
-from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
-from pykechain.models import Base
+from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
 from pykechain.models.tags import TagsMixin
+from pykechain.models.tree_traversal import TreeObject
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid, parse_datetime
 
 
-class Activity2(Base, TagsMixin):
+class Activity2(TreeObject, TagsMixin):
     """A virtual object representing a KE-chain activity.
 
     .. versionadded:: 2.0
@@ -333,6 +333,23 @@ class Activity2(Base, TagsMixin):
                                 "(activity '{}')".format(self.activity_type, self.name))
 
         return self._client.activities(parent_id=self.id, scope=self.scope_id, **kwargs)
+
+    def child(self,
+              name: Optional[Text] = None,
+              pk: Optional[Text] = None,
+              **kwargs,
+              ) -> 'Activity2':
+
+        activity_list = list(self.children(name=name, pk=pk, **kwargs))
+
+        if len(activity_list) == 1:
+            child = activity_list[0]
+
+        elif len(activity_list) > 1:
+            raise MultipleFoundError('{} has more than one matching child.'.format(self))
+        else:
+            raise NotFoundError('{} has no matching child.'.format(self))
+        return child
 
     def siblings(self, **kwargs):
         """Retrieve the other activities that also belong to the parent.
