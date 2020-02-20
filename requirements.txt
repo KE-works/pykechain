@@ -1,5 +1,5 @@
 # basis
-requests==2.22.0
+requests==2.23.0
 envparse==0.2.0
 
 # json validation (inspector)
@@ -19,7 +19,7 @@ pytest-cov==2.8.1
 coveralls==1.11.1
 
 # documentation
-Sphinx==2.4.1
+Sphinx==2.4.2
 nbsphinx==0.5.1
 
 # data science # not needed for local use
@@ -33,7 +33,7 @@ tox==3.14.5
 flake8==3.7.9
 pydocstyle==5.0.2
 mypy==0.761; python_version >= '3.4'
-pre-commit==2.0.1
+pre-commit==2.1.0
 
 
 # for package management (uploads)
