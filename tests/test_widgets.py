@@ -542,6 +542,28 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertIsInstance(scope_widget, ScopeWidget)
 
+    def test_scope_widget_invalid_inputs(self):
+        for inputs in [
+            dict(team='5'),
+            dict(add=1),
+            dict(edit=0),
+            dict(emphasize_add='True'),
+            dict(emphasize_edit=1.0),
+            dict(show_columns='All', show_all_columns=False),
+            dict(show_columns=['Any'], show_all_columns=False),
+            dict(show_all_columns=0),
+            dict(page_size=0),
+            dict(tags='one'),
+            dict(tags=['one', 2, 'three']),
+            dict(sorted_column='Project name'),
+            dict(sorted_direction='Alphabetical'),
+            dict(active_filter='Active'),
+            dict(search_filter='Project'),
+        ]:
+            with self.subTest(msg=inputs):
+                with self.assertRaises(IllegalArgumentError):
+                    self.wm.add_scope_widget(**inputs)
+
     def test_insert_widget(self):
         bike_part = self.project.part('Bike')
         w0 = self.wm[0]  # meta panel
