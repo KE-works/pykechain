@@ -354,13 +354,15 @@ class Activity2(TreeObject, TagsMixin):
 
         activity_list = list(self.children(name=name, pk=pk, **kwargs))
 
+        criteria = '\nname: {}\npk: {}\nkwargs: {}'.format(name, pk, kwargs)
+
         if len(activity_list) == 1:
             child = activity_list[0]
 
         elif len(activity_list) > 1:
-            raise MultipleFoundError('{} has more than one matching child.'.format(self))
+            raise MultipleFoundError('{} has more than one matching child.{}'.format(self, criteria))
         else:
-            raise NotFoundError('{} has no matching child.'.format(self))
+            raise NotFoundError('{} has no matching child.{}'.format(self, criteria))
         return child
 
     def siblings(self, **kwargs) -> List['Activity2']:

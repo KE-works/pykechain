@@ -239,15 +239,17 @@ class Part2(TreeObject):
             else:
                 part_list = self.children(pk=pk)
 
+        criteria = '\nname: {}\npk: {}\nkwargs: {}'.format(name, pk, kwargs)
+
         # If there is only one, then that is the part you are looking for
         if len(part_list) == 1:
             part = part_list[0]
 
         # Otherwise raise the appropriate error
         elif len(part_list) > 1:
-            raise MultipleFoundError('{} has more than one matching child.'.format(self))
+            raise MultipleFoundError('{} has more than one matching child.{}'.format(self, criteria))
         else:
-            raise NotFoundError('{} has no matching child.'.format(self))
+            raise NotFoundError('{} has no matching child.{}'.format(self, criteria))
         return part
 
     def populate_descendants(self, batch: int = 200) -> None:

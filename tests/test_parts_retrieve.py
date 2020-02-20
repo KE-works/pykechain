@@ -104,8 +104,19 @@ class TestPartRetrieve(TestBetamax):
 
         self.assertEqual(bike, bike_via_call)
 
+    def test_child_invalid(self):
+        root = self.project.model(name='Product')
+
         with self.assertRaises(IllegalArgumentError):
             root.child()
+
+        second_bike_model = root.add_model(name='Bike')
+        with self.assertRaises(MultipleFoundError):
+            root.child(name='Bike')
+        second_bike_model.delete()
+
+        with self.assertRaises(NotFoundError):
+            root.child(name="It's only a model")
 
     def test_all_children(self):
         root = self.project.model(name='Product')

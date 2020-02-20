@@ -361,8 +361,19 @@ class TestActivities(TestBetamax):
         self.assertIsInstance(child_task, Activity2)
         self.assertEqual(child_task._json_data['parent_id'], workflow_root.id)
 
+    def test_child_invalid(self):
+        workflow_root = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
+
         with self.assertRaises(IllegalArgumentError):
             workflow_root.child()
+
+        second_process = workflow_root.create(name='Specify wheel diameter')
+        with self.assertRaises(MultipleFoundError):
+            workflow_root.child(name='Specify wheel diameter')
+        second_process.delete()
+
+        with self.assertRaises(NotFoundError):
+            workflow_root.child(name='Just a scratch')
 
     def test_retrieve_all_children(self):
         workflow_root = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
