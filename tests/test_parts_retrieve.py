@@ -100,9 +100,29 @@ class TestPartRetrieve(TestBetamax):
         self.assertIsInstance(bike, Part2)
         self.assertEqual(bike.parent_id, root.id)
 
-        bike_via_call = root('Bike')
+        bike_via__call__ = root('Bike')
 
-        self.assertEqual(bike, bike_via_call)
+        self.assertEqual(bike, bike_via__call__)
+
+    def test_child_caching(self):
+        root = self.project.model(name='Product')
+        self.assertIsNone(root._cached_children, msg='No cached children yet')
+
+        root.children()
+        self.assertTrue(root._cached_children, msg='Children should be cached')
+
+        bike = root.child(name='Bike')
+        self.assertTrue(root._cached_children, msg='Cache was used and should still be intact')
+
+        bike_again = root.child(pk=bike.id)
+        self.assertEqual(bike, bike_again, msg='Bike should be retrieved from cache, based on ID')
+
+        still_the_bike = root.child(name=bike.name)
+        self.assertEqual(bike, still_the_bike, msg='Bike should be retrieved from cache, based on name')
+
+        root._cached_children = None
+        more_bike = root.child(pk=bike.id)
+        self.assertEqual(bike, more_bike, msg='Cache should be cleared, bike has to be retrieved anew.')
 
     def test_child_invalid(self):
         root = self.project.model(name='Product')
