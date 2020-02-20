@@ -4,7 +4,7 @@ Change Log
 
 * Creation of `Widgets` without a title but with a reference (or `ref`) now supported via the `show_title_value` keyword.
 * Creation of `Activity` now uses parent's `classification` if provided.
-
+* :+1: dependent versions for development: sphinx (2.4.2), pre-commit (2.1.0), requests (2.23.0)
 
 3.4.0 (17FEB20)
 ---------------
@@ -18,7 +18,7 @@ Change Log
 * :+1: Added test to confirm a value of `None` clears a reference property. #468
 * :+1: Keyword-arguments provided when creating widgets via the `WidgetsManager` do now propagate successfully.
 * :+1: Improved unittests for `Property2`, `AttachmentProperty2` classes.
-* :+1: dependent versions for development: semver (2.9.1, coveralls (1.11.1), Sphinx (2.4.1), tox (3.14.5)
+* :+1: dependent versions for development: semver (2.9.1), coveralls (1.11.1), Sphinx (2.4.1), tox (3.14.5)
 
 3.3.2 (6FEB20)
 --------------
