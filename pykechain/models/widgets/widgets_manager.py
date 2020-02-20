@@ -1058,12 +1058,13 @@ class WidgetsManager(Iterable):
                          emphasize_delete: Optional[bool] = False,
                          show_columns: Optional[Iterable[Text]] = None,
                          show_all_columns: Optional[bool] = True,
+                         page_size: Optional[int] = 25,
                          tags: Optional[Iterable[Text]] = None,
                          sorted_column: Optional[Text] = ScopeWidgetColumnTypes.PROJECT_NAME,
                          sorted_direction: Optional[SortTable] = SortTable.ASCENDING,
                          parent_widget: Optional[Union[Widget, Text]] = None,
-                         active_filter: Optional[bool] = None,
-                         search_filter: Optional[bool] = None,
+                         active_filter: Optional[bool] = True,
+                         search_filter: Optional[bool] = True,
                          **kwargs) -> Widget:
         """
         Add a KE-chain Scope widget to the Widgetmanager and the activity.
@@ -1097,6 +1098,8 @@ class WidgetsManager(Iterable):
         :type show_columns: list of basestring
         :param show_all_columns: boolean to show all columns (defaults to True). If True, will override `show_columns`
         :type show_all_columns: bool
+        :param page_size: number of scopes to show per page (defaults to 25)
+        :type page_size: int
         :param tags: (O) list of scope tags to filter the Scopes on
         :type tags: list of basestring
         :param sorted_column: column name to sort on. (defaults to project name column). One of `ScopeWidgetColumnTypes`
@@ -1120,34 +1123,33 @@ class WidgetsManager(Iterable):
         meta = _initiate_meta(kwargs, activity=self._activity_id)
         meta, title = _set_title(meta, title=title, default_title=WidgetTypes.SCOPE, **kwargs)
 
+        if show_all_columns is not None and not isinstance(show_all_columns, bool):
+            raise IllegalArgumentError('`show_all_columns` must be a boolean, "{}" is not.'.format(show_all_columns))
+
         if not show_all_columns and show_columns:
-            if not isinstance(show_columns, (list, tuple)) and \
-                    not all([isinstance(i, string_types) for i in show_columns]):
-                raise IllegalArgumentError("`show_columns` should be a list of column header "
-                                           "names: '{}'".format(show_columns))
+            if not isinstance(show_columns, (list, tuple)):
+                raise IllegalArgumentError('`show_columns` must be a list or tuple, "{}" is not.'.format(show_columns))
+            options = set(ScopeWidgetColumnTypes.values())
+            if not all(sc in options for sc in show_columns):
+                raise IllegalArgumentError("`show_columns` must consist out of ScopeWidgetColumnTypes options.")
             meta['showColumns'] = [snakecase(c) for c in show_columns]
 
+        if not isinstance(page_size, int) or page_size < 1:
+            raise IllegalArgumentError('`page_size` must be a positive integer, "{}" is not.'.format(page_size))
+
         if tags:
-            if not isinstance(tags, (list, tuple)) and not all([isinstance(i, string_types) for i in tags]):
+            if not isinstance(tags, (list, tuple)) or not all([isinstance(i, string_types) for i in tags]):
                 raise IllegalArgumentError("`tags` should be a list of strings: '{}'".format(tags))
             meta['tags'] = tags
 
         if team:
             meta['teamId'] = _retrieve_object_id(team)
 
-        if active_filter is not None:
-            if not isinstance(active_filter, bool):
-                raise IllegalArgumentError('`active_filter` must be a boolean, "{}" is not.'.format(active_filter))
-            active_filter_visible = active_filter
-        else:
-            active_filter_visible = True
+        if not isinstance(active_filter, bool):
+            raise IllegalArgumentError('`active_filter` must be a boolean, "{}" is not.'.format(active_filter))
 
-        if search_filter is not None:
-            if not isinstance(search_filter, bool):
-                raise IllegalArgumentError('`search_filter` must be a boolean, "{}" is not.'.format(search_filter))
-            search_filter_visible = search_filter
-        else:
-            search_filter_visible = True
+        if not isinstance(search_filter, bool):
+            raise IllegalArgumentError('`search_filter` must be a boolean, "{}" is not.'.format(search_filter))
 
         for button_setting in [
             add, edit, delete, clone, emphasize_add, emphasize_clone, emphasize_edit, emphasize_delete,
@@ -1155,11 +1157,19 @@ class WidgetsManager(Iterable):
             if not isinstance(button_setting, bool):
                 raise IllegalArgumentError('All button settings must be booleans.')
 
+        if sorted_column not in ScopeWidgetColumnTypes.values():
+            raise IllegalArgumentError('`sorted_column` must be a ScopeWidgetColumnTypes option, "{}" is not. '
+                                       'Select from: {}'.format(sorted_column, ScopeWidgetColumnTypes.values()))
+
+        if sorted_direction not in SortTable.values():
+            raise IllegalArgumentError('`sorted_direction` must be a SortTable option, "{}" is not. '
+                                       'Select from: {}'.format(sorted_direction, SortTable.values()))
+
         meta.update({
             'sortedColumn': snakecase(sorted_column),
             'sortDirection': sorted_direction,
-            'activeFilterVisible': active_filter_visible,
-            'searchFilterVisible': search_filter_visible,
+            'activeFilterVisible': active_filter,
+            'searchFilterVisible': search_filter,
             "addButtonVisible": add,
             "editButtonVisible": edit,
             "deleteButtonVisible": delete,
@@ -1168,6 +1178,7 @@ class WidgetsManager(Iterable):
             "primaryEditUiValue": emphasize_edit,
             "primaryCloneUiValue": emphasize_clone,
             "primaryDeleteUiValue": emphasize_delete,
+            "customPageSize": page_size,
         })
 
         widget = self.create_widget(
