@@ -159,6 +159,12 @@ class TestWidgetManager(TestBetamax):
         self.assertTrue(meta_panel, WidgetTypes.METAPANEL)
         self.assertEqual(self.wm[meta_panel.id], meta_panel)
 
+    def test_widget_in_widget_manager(self):
+        for key in [0, self.wm[0], self.wm[0].id]:
+            with self.subTest(msg='key: {} {}'.format(type(key), key)):
+                widget = self.wm[key]
+                self.assertIn(widget, self.wm)
+
     def test_widgetmanager_has_activity_and_client(self):
         self.assertIsNotNone(self.wm._client)
         self.assertIsNotNone(self.wm._activity_id)
@@ -458,6 +464,13 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertEqual(len(self.wm), 0)
         self.assertEqual(len(self.task.widgets()), 0)
+
+    def test_delete_widget_stand_alone(self):
+        """Delete a widget by itself and check the manager"""
+        widget_one = self.wm[0]
+        widget_one.delete()
+
+        self.assertNotIn(widget_one, self.wm)
 
     def test_notebook_widget(self):
         notebook = self.project.service(name="Service Gears - Successful")

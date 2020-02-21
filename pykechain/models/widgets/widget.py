@@ -25,8 +25,7 @@ class Widget(Base):
 
     schema = widget_meta_schema
 
-    def __init__(self, json, **kwargs):
-        # type: (dict, **Any) -> None
+    def __init__(self, json: Dict, manager: 'WidgetsManager' = None, **kwargs) -> None:
         """Construct a Widget from a KE-chain 2 json response.
 
         :param json: the json response to construct the :class:`Part` from
@@ -36,6 +35,7 @@ class Widget(Base):
         super(Widget, self).__init__(json, **kwargs)
         del self.name
 
+        self.manager = manager
         self.title = json.get('title')
         self.ref = json.get('ref')
         self.widget_type = json.get('widget_type')
@@ -93,8 +93,7 @@ class Widget(Base):
         return validate(meta, self.schema) is None and meta
 
     @classmethod
-    def create(cls, json, **kwargs):
-        # type: (dict, **Any) -> Widget
+    def create(cls, json: Dict, **kwargs) -> 'Widget':
         """Create a widget based on the json data.
 
         This method will attach the right class to a widget, enabling the use of type-specific methods.
@@ -227,20 +226,17 @@ class Widget(Base):
 
         self.refresh(json=response.json().get('results')[0])
 
-    def delete(self):
-        # type: () -> bool
+    def delete(self) -> bool:
         """Delete the widget.
 
         :return: True when successful
         :rtype: bool
         :raises APIError: when unable to delete the activity
         """
-        url = self._client._build_url('widget', widget_id=self.id)
-        response = self._client._request('DELETE', url)
-
-        if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Widget ({})".format(response))
-        return True
+        if self.manager:
+            return self.manager.delete_widget(self)
+        else:
+            self._client.delete_widget(widget=self)
 
     def copy(self, target_activity, order=None):
         # type: (Activity2, Optional[int]) -> Widget
