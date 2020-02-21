@@ -6,6 +6,7 @@ from .scope import Scope
 from .scope2 import Scope2
 from .activity import Activity
 from .activity2 import Activity2
+from .association import Association
 from .part import Part
 from .part2 import Part2
 from .property import Property
@@ -28,6 +29,7 @@ __all__ = (
     'Scope',
     'Scope2',
     'Activity',
+    'Association',
     'Activity2',
     'Part',
     'Part2',
