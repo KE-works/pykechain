@@ -163,9 +163,9 @@ def _initiate_meta(kwargs, activity, ignores=()):
     return meta
 
 
-def _check_prefilters(part_model: 'Part2', prefilters: Dict):  # noqa: F821
+def _check_prefilters(part_model: 'Part2', prefilters: Dict) -> List[Text]:  # noqa: F821
     """
-    Check the pre-filters on a `FilteredGridWidget`.
+    Check the pre-filters on a `FilteredGridWidget` or `MultiReferenceProperty2.
 
     The prefilters should comply to the prefilters schema as present in the backend.
 
@@ -180,47 +180,40 @@ def _check_prefilters(part_model: 'Part2', prefilters: Dict):  # noqa: F821
     }
     ```
 
-    :param part_model: The part model to check the prefilters agains.
+    :param part_model: The part model of which the properties are filtered.
     :param prefilters: Dictionary with prefilters.
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
-    list_of_prefilters = []
-    property_models = prefilters.get('property_models', [])  # type: List[Text]  # noqa
+    from pykechain.models import Property2
+
+    property_models = prefilters.get('property_models', [])  # type: List[Property2, Text]  # noqa
     values = prefilters.get('values', [])
     filters_type = prefilters.get('filters_type', [])
+
     if any(len(lst) != len(property_models) for lst in [values, filters_type]):
         raise IllegalArgumentError('The lists of "property_models", "values" and "filters_type" should be the '
-                                   'same length')
+                                   'same length.')
 
-    for property_model in property_models:
-        index = property_models.index(property_model)
-        if is_uuid(property_model):
-            property_model = part_model.property(property_model)  # the finder can handle uuid, name or ref
+    list_of_prefilters = []
+    for prop, value, filter_type in zip(property_models, values, filters_type):
+        if is_uuid(prop):
+            prop = part_model.property(prop)  # the finder can handle uuid, name or ref
 
-        if property_model.category != Category.MODEL:
-            raise IllegalArgumentError('Pre-filters can only be set on property models, found category "{}"'
-                                       'on property "{}"'.format(property_model.category, property_model.name))
+        if not isinstance(prop, Property2) or prop.category != Category.MODEL:
+            raise IllegalArgumentError(
+                'Pre-filters can only be set on Property models, received "{}".'.format(prop))
+
         # TODO when a property is freshly created, the property has no "part_id" key in json_data.
-        elif part_model.id != property_model._json_data.get('part_id'):
+        elif part_model.id != prop.part_id:
             raise IllegalArgumentError(
                 'Pre-filters can only be set on properties belonging to the selected Part model, found '
                 'selected Part model "{}" and Properties belonging to "{}"'.format(part_model.name,
-                                                                                   property_model.part.name))
+                                                                                   prop.part.name))
         else:
-            property_id = property_model.id
-            if property_model.type == PropertyType.DATETIME_VALUE:
-                datetime_value = values[index]
-                # TODO really not elegant way to deal with DATETIME. Issue is that the value is being double
-                #  encoded (KEC-20504)
-                datetime_value = "{}-{}-{}T00%253A00%253A00.000Z".format(datetime_value.year,
-                                                                         str(datetime_value.month).rjust(2, '0'),
-                                                                         str(datetime_value.day).rjust(2, '0'))
-                new_prefilter_list = [property_id, datetime_value, filters_type[index]]
-                new_prefilter = '%3A'.join(new_prefilter_list)
-            else:
-                new_prefilter_list = [property_id, str(values[index]), filters_type[index]]
-                new_prefilter = ':'.join(new_prefilter_list)
-            list_of_prefilters.append(new_prefilter)
+            if prop.type == PropertyType.BOOLEAN_VALUE:
+                value = str(value).lower()
+            new_pre_filter = ':'.join([prop.id, str(value), filter_type])
+            list_of_prefilters.append(new_pre_filter)
     return list_of_prefilters
 
 
