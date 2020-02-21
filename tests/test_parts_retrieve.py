@@ -1,5 +1,5 @@
 from pykechain.enums import Category, Multiplicity
-from pykechain.exceptions import NotFoundError, MultipleFoundError
+from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from pykechain.models import PartSet, Part2
 from pykechain.utils import find
 from tests.classes import TestBetamax
@@ -79,15 +79,69 @@ class TestPartRetrieve(TestBetamax):
     def test_retrieve_parts_with_refs(self):
         # setup
         front_fork_ref = 'front-fork'
-        front_fork_name = 'Front fork'
+        front_fork_name = 'Front Fork'
         front_fork_part = self.project.part(ref=front_fork_ref)
         front_fork_model = self.project.model(ref=front_fork_ref)
 
         # testing
         self.assertIsInstance(front_fork_part, Part2)
-        self.assertTrue(front_fork_part.name, front_fork_name)
-        self.assertTrue(front_fork_part.category, Category.INSTANCE)
+        self.assertEqual(front_fork_name, front_fork_part.name)
+        self.assertEqual(Category.INSTANCE, front_fork_part.category)
 
         self.assertIsInstance(front_fork_model, Part2)
-        self.assertTrue(front_fork_model.name, front_fork_name)
-        self.assertTrue(front_fork_model.category, Category.MODEL)
+        self.assertEqual(front_fork_name, front_fork_model.name)
+        self.assertEqual(Category.MODEL, front_fork_model.category)
+
+    def test_child(self):
+        root = self.project.model(name='Product')
+
+        bike = root.child(name='Bike')
+
+        self.assertIsInstance(bike, Part2)
+        self.assertEqual(bike.parent_id, root.id)
+
+        bike_via__call__ = root('Bike')
+
+        self.assertEqual(bike, bike_via__call__)
+
+    def test_child_caching(self):
+        root = self.project.model(name='Product')
+        self.assertIsNone(root._cached_children, msg='No cached children yet')
+
+        root.children()
+        self.assertTrue(root._cached_children, msg='Children should be cached')
+
+        bike = root.child(name='Bike')
+        self.assertTrue(root._cached_children, msg='Cache was used and should still be intact')
+
+        bike_again = root.child(pk=bike.id)
+        self.assertEqual(bike, bike_again, msg='Bike should be retrieved from cache, based on ID')
+
+        still_the_bike = root.child(name=bike.name)
+        self.assertEqual(bike, still_the_bike, msg='Bike should be retrieved from cache, based on name')
+
+        root._cached_children = None
+        more_bike = root.child(pk=bike.id)
+        self.assertEqual(bike, more_bike, msg='Cache should be cleared, bike has to be retrieved anew.')
+
+    def test_child_invalid(self):
+        root = self.project.model(name='Product')
+
+        with self.assertRaises(IllegalArgumentError):
+            root.child()
+
+        second_bike_model = root.add_model(name='Bike')
+        with self.assertRaises(MultipleFoundError):
+            root.child(name='Bike')
+        second_bike_model.delete()
+
+        with self.assertRaises(NotFoundError):
+            root.child(name="It's only a model")
+
+    def test_all_children(self):
+        root = self.project.model(name='Product')
+
+        all_children = root.all_children()
+
+        self.assertIsInstance(all_children, list)
+        self.assertEqual(6, len(all_children), msg='Number of models has changed, expected 6')
