@@ -2,10 +2,11 @@ from typing import List, Optional, Text, Union, Any
 
 from six import text_type, string_types
 
-from pykechain.enums import Category, FilterType, PropertyType
+from pykechain.enums import Category, FilterType
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.part2 import Part2
 from pykechain.models.property2 import Property2
+from pykechain.models.widgets.helpers import _check_prefilters
 from pykechain.utils import is_uuid
 
 
@@ -153,8 +154,13 @@ class MultiReferenceProperty2(Property2):
 
         return possible_choices
 
-    def set_prefilters(self, property_models, values, filters_type=FilterType.CONTAINS, overwrite=False):
-        # type: (List[Union[Text, Part2]], List[Any], List[FilterType], Optional[bool]) -> None
+    def set_prefilters(
+            self,
+            property_models: List[Union[Text, Part2]],
+            values: List[Any],
+            filters_type: List[FilterType],
+            overwrite: Optional[bool] = False
+    ) -> None:
         """
         Set the pre-filters on a `MultiReferenceProperty`.
 
@@ -170,9 +176,6 @@ class MultiReferenceProperty2(Property2):
 
         :raises IllegalArgumentError: when the type of the input is provided incorrect.
         """
-        if any(len(lst) != len(property_models) for lst in [values, filters_type]):
-            raise IllegalArgumentError('The lists of "property_models", "values" and "filters_type" should be the '
-                                       'same length')
         if not overwrite:
             initial_prefilters = self._options.get('prefilters', {})
             list_of_prefilters = initial_prefilters.get('property_value', [])
@@ -181,49 +184,27 @@ class MultiReferenceProperty2(Property2):
         else:
             list_of_prefilters = list()
 
-        for property_model in property_models:
-            index = property_models.index(property_model)
-            if not isinstance(property_model, Property2):
-                if is_uuid(property_model):
-                    property_model = self._client.property(id=property_model, category=Category.MODEL)
-                else:
-                    raise IllegalArgumentError('Pre-filters can only be set on `Property` models or their UUIDs, '
-                                               'found type "{}"'.format(type(property_model)))
+        new_prefilters = {
+            'property_models': property_models,
+            'values': values,
+            'filters_type': filters_type,
+        }
 
-            if property_model.category != Category.MODEL:
-                raise IllegalArgumentError('Pre-filters can only be set on property models, found category "{}"'
-                                           'on property "{}"'.format(property_model.category, property_model.name))
-            # TODO when a property is freshly created, the property has no "part_id" key in json_data.
-            elif self.value[0].id != property_model._json_data.get('part_id', self.value[0].id):
-                raise IllegalArgumentError(
-                    "Pre-filters can only be set on properties belonging to the referenced Part model, found "
-                    "referenced Part model '{}' and Properties belonging to '{}'".format(self.value[0].name,
-                                                                                         property_model.part.name))
-            else:
-                property_id = property_model.id
-                if property_model.type == PropertyType.DATETIME_VALUE:
-                    datetime_value = values[index]
-                    # TODO really not elegant way to deal with DATETIME. Issue is that the value is being double
-                    #  encoded (KEC-20504)
-                    datetime_value = "{}-{}-{}T00%253A00%253A00.000Z".format(datetime_value.year,
-                                                                             str(datetime_value.month).rjust(2, '0'),
-                                                                             str(datetime_value.day).rjust(2, '0'))
-                    new_prefilter_list = [property_id, datetime_value, filters_type[index]]
-                    new_prefilter = '%3A'.join(new_prefilter_list)
-                else:
-                    if property_model.type == PropertyType.BOOLEAN_VALUE:
-                        values[index] = str(values[index]).lower()
-                    new_prefilter_list = [property_id, str(values[index]), filters_type[index]]
-                    new_prefilter = ':'.join(new_prefilter_list)
-                list_of_prefilters.append(new_prefilter)
+        list_of_prefilters.extend(_check_prefilters(
+            part_model=self.value[0],
+            prefilters=new_prefilters,
+        ))
 
         options_to_set = self._options
         options_to_set['prefilters'] = {'property_value': ','.join(list_of_prefilters) if list_of_prefilters else {}}
 
         self.edit(options=options_to_set)
 
-    def set_excluded_propmodels(self, property_models, overwrite=False):
-        # type: (List[Union[Text, Part2]], Optional[bool]) -> None
+    def set_excluded_propmodels(
+            self,
+            property_models: List[Union[Text, Part2]],
+            overwrite: Optional[bool] = False,
+    ) -> None:
         """
         Exclude a list of properties from being visible in the part-shop and modal (pop-up) of the reference property.
 

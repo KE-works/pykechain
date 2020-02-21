@@ -293,6 +293,8 @@ class Part2(TreeObject):
         for descendant in all_descendants:
             if descendant.id in children_by_parent_id:
                 descendant._cached_children = children_by_parent_id[descendant.id]
+            else:
+                descendant._cached_children = []
 
         self._cached_children = children_by_parent_id.get(self.id, list())
 
