@@ -14,14 +14,13 @@ from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, Ser
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
 from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property, AnyProperty
-from pykechain.models.association import Association
 from pykechain.models.activity2 import Activity2
+from pykechain.models.association import Association
 from pykechain.models.scope2 import Scope2
 from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.widgets.widget import Widget
-from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid, find
 from .__about__ import version
 
@@ -1020,7 +1019,7 @@ class Client(object):
         return [Team(team, client=self) for team in data['results']]
 
     def widgets(self, pk=None, activity=None, **kwargs):
-        # type: (Optional[AnyStr], Optional[Union[Activity, Activity2, AnyStr]], **Any) -> WidgetsManager
+        # type: (Optional[AnyStr], Optional[Union[Activity, Activity2, AnyStr]], **Any) -> List[Widget]
         """
         Widgets of an activity.
 
@@ -1056,10 +1055,7 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not find widgets: '{}'".format(response.json()))
 
-        data = response.json()
-        widgets = [Widget.create(widget_json, client=self) for widget_json in data['results']]
-        activity = activity if activity else request_params.get('activity_id', widgets[0].activity())
-        return WidgetsManager(widgets=widgets, activity=activity, client=self)
+        return [Widget.create(json=json, client=self) for json in response.json()['results']]
 
     #
     # Creators
@@ -2355,6 +2351,55 @@ class Client(object):
 
         widgets_response = response.json().get('results')
         return [Widget.create(json=widget_json, client=self) for widget_json in widgets_response]
+
+    def delete_widget(self, widget: Union[Widget, text_type]) -> None:
+        """
+        Delete a single Widget.
+
+        :param widget: Widget or its UUID to be deleted
+        :type widget: Widget or basestring
+        :return: None
+        :raises APIError: whenever the widget could not be deleted
+        :raises IllegalArgumentError: whenever the input `widget` is invalid
+        """
+        if isinstance(widget, Widget):
+            widget = widget.id
+        elif not is_uuid(widget):
+            raise IllegalArgumentError('`widget` must be a Widget or its UUID, "{}" is neither.'.format(widget))
+
+        url = self._build_url('widget', widget_id=widget)
+        response = self._request('DELETE', url)
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            raise APIError("Could not delete Widget ({})".format(response))
+
+    def delete_widgets(self, widgets: List[Union[Widget, text_type]]) -> None:
+        """
+        Delete multiple Widgets.
+
+        :param widgets: List, Tuple or Set of Widgets or their UUIDs to be deleted
+        :type widgets: List[Union[Widget, text_type]]
+        :return: None
+        :raises APIError: whenever the widgets could not be deleted
+        :raises IllegalArgumentError: whenever the input `widgets` is invalid
+        """
+        if not isinstance(widgets, (tuple, list, set)):
+            raise IllegalArgumentError('`widgets` must be a list, tuple or set of widgets, '
+                                       '"{}" is not.'.format(widgets))
+        else:
+            widget_ids = list()
+            for widget in widgets:
+                if isinstance(widget, Widget):
+                    widget = widget.id
+                elif not is_uuid(widget):
+                    raise IllegalArgumentError('`widget` must be a Widget or its UUID, "{}" is neither.'.format(widget))
+                widget_ids.append(dict(id=widget))
+
+        url = self._build_url('widgets_bulk_delete')
+        response = self._request('DELETE', url, json=widget_ids)
+
+        if response.status_code != requests.codes.no_content:
+            raise APIError("Could not delete the widgets: {}: {}".format(str(response), response.content))
 
     @staticmethod
     def _validate_associations(

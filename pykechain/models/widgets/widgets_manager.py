@@ -1,13 +1,12 @@
 import warnings
-from typing import Any, Iterable, Union, AnyStr, Optional, Text, Dict, List
+from typing import Iterable, Union, AnyStr, Optional, Text, Dict, List, Any
 
-import requests
 from six import string_types, text_type
 
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes, \
     ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
     KEChainPages, CardWidgetKEChainPageLink
-from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
+from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
     _check_prefilters, _check_excluded_propmodels
@@ -43,12 +42,13 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: if not provided one of :class:`Activity` or activity uuid and a `Client`
         """
         self._widgets = list(widgets)  # type: List[Widget]
-        from pykechain.models import Activity
-        from pykechain.models import Activity2
+        for widget in self._widgets:
+            widget.manager = self
+        from pykechain.models import Activity, Activity2
         if isinstance(activity, (Activity, Activity2)):
             self._activity_id = activity.id
             self._client = activity._client
-        elif isinstance(activity, (text_type)) and client is not None:
+        elif isinstance(activity, text_type) and client is not None:
             self._activity_id = activity
             self._client = client
         else:
@@ -72,7 +72,7 @@ class WidgetsManager(Iterable):
 
     next = __next__  # py2.7 alias
 
-    def __getitem__(self, key: Union[int, str]) -> Widget:
+    def __getitem__(self, key: Union[int, str, Widget]) -> Widget:
         """Widget from the list of widgets based on index, uuid, title or ref.
 
         :param key: index, uuid, title or ref of the widget to retrieve
@@ -82,7 +82,9 @@ class WidgetsManager(Iterable):
         :raises NotFoundError: when the widget could not be found
         """
         found = None
-        if isinstance(key, int):
+        if isinstance(key, Widget) and key in self._widgets:
+            found = key
+        elif isinstance(key, int):
             found = self._widgets[key]
         elif is_uuid(key):
             found = find(self._widgets, lambda p: key == p.id)
@@ -92,6 +94,9 @@ class WidgetsManager(Iterable):
         if found is not None:
             return found
         raise NotFoundError("Could not find widget with index, title, ref, or id '{}'".format(key))
+
+    def __contains__(self, item: Widget) -> bool:
+        return item in self._widgets
 
     def create_widgets(self, widgets: List[Dict]) -> List[Widget]:
         """
@@ -1451,33 +1456,26 @@ class WidgetsManager(Iterable):
 
     def delete_widget(self, key: Any) -> bool:
         """
-        Delete widgets by index.
+        Delete a widget in the task.
 
-        The widgets are saved to KE-chain.
-
-        :param key: index, uuid, title or ref of the widget to delete
-        :type key: int or basestring
+        :param key: index, uuid, title or ref of the widget to delete, or the widget itself.
+        :type key: Widget, int or basestring
         :return: True if the widget is deleted successfully
         :raises APIError: if the widget could not be deleted
-        :raises NotFoundError: if the widgetmanager (activity) has no such widget
+        :raises NotFoundError: if the WidgetsManager (activity) has no such widget
         """
         widget = self[key]
-        if isinstance(widget, Widget):
-            if widget.delete():
-                self._widgets.remove(widget)
-                return True
+        self._client.delete_widget(widget=widget)
+        self._widgets.remove(widget)
+        return True
 
     def delete_all_widgets(self) -> None:
-        """Delete all widgets.
+        """
+        Delete all widgets in the activity.
 
         :return: None
         :raises ApiError: When the deletion of the widgets was not successful
         """
-        widget_ids = [dict(id=w.id) for w in self.__iter__()]
-        url = self._client._build_url('widgets_bulk_delete')
-        response = self._client._request('DELETE', url, json=widget_ids)
-
-        if response.status_code != requests.codes.no_content:
-            raise APIError("Could not delete the widgets: {}: {}".format(str(response), response.content))
-
+        self._client.delete_widgets(list(self))
         self._widgets = []
+        return None
