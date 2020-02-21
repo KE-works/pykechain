@@ -14,8 +14,8 @@ from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, Ser
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
 from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property, AnyProperty
-from pykechain.models.association import Association
 from pykechain.models.activity2 import Activity2
+from pykechain.models.association import Association
 from pykechain.models.scope2 import Scope2
 from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.team import Team
@@ -2530,13 +2530,12 @@ class Client(object):
 
         return associations
 
-      
     def update_widget_associations(
-        self,
-        widget: Union[Widget, text_type],
-        readable_models: Optional[List] = None,
-        writable_models: Optional[List] = None,
-        **kwargs
+            self,
+            widget: Union[Widget, text_type],
+            readable_models: Optional[List] = None,
+            writable_models: Optional[List] = None,
+            **kwargs
     ) -> None:
         """
         Update associations on this widget.
