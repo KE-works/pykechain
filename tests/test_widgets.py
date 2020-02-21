@@ -2,12 +2,12 @@ from unittest import TestCase
 
 from pykechain.enums import (WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors,
                              Category, LinkTargets, KEChainPages, WidgetTitleValue)
-from pykechain.exceptions import IllegalArgumentError, APIError, NotFoundError
+from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Activity2
-from pykechain.models.widgets import (UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget,
-                                      SupergridWidget, FilteredgridWidget, TasknavigationbarWidget, SignatureWidget,
-                                      ServiceWidget, NotebookWidget,
-                                      MulticolumnWidget, CardWidget, MetapanelWidget, ScopeWidget)
+from pykechain.models.widgets import (
+    UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, SupergridWidget, FilteredgridWidget,
+    TasknavigationbarWidget, SignatureWidget, ServiceWidget, NotebookWidget, MulticolumnWidget, CardWidget,
+    MetapanelWidget, ScopeWidget)
 from pykechain.models.widgets.helpers import _set_title
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
@@ -142,11 +142,11 @@ class TestWidgets(TestBetamax):
 
 
 class TestWidgetManager(TestBetamax):
-    
+
     def setUp(self):
         super().setUp()
         self.wm = self.project.activity('Task - Form + Tables + Service').widgets()  # type: WidgetsManager
-        
+
     def test_activity_has_metapanel_in_widget_manager(self):
         self.assertIsInstance(self.wm, WidgetsManager)
         self.assertTrue(len(self.wm) >= 5)
@@ -545,10 +545,10 @@ class TestWidgetManagerInActivity(TestBetamax):
     def test_insert_widget(self):
         bike_part = self.project.part('Bike')
         w0 = self.wm[0]  # meta panel
-        
+
         w1, w2, w3 = [self.wm.add_propertygrid_widget(
             part_instance=bike_part,
-            writable_models=[bike_part.model().properties],
+            writable_models=bike_part.model().properties,
             title='Original widget {i} (w{i})'.format(i=i+1),
         ) for i in range(3)]
 
@@ -565,7 +565,7 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         added_widget = self.wm.add_propertygrid_widget(
             part_instance=bike_part,
-            writable_models=[bike_part.model().properties],
+            writable_models=bike_part.model().properties,
             title="Widget Finally Positioned Under Metapanel",
             order=1,
         )
@@ -759,96 +759,3 @@ class TestWidgetsCopyMove(TestBetamax):
         self.assertEqual(widget_manager_2[0].title, title)
         self.assertTrue(all(prop.output for prop in associated_model.properties))
         self.assertEqual(len(self.task.widgets()), 1)
-
-
-class TestAssociations(TestBetamax):
-
-    def setUp(self):
-        super().setUp()
-        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
-
-        # Exactly 1 model
-        self.frame = self.project.part(name='Frame')
-        self.frame_model = self.project.model(name='Frame')
-
-        # Zero or more model
-        self.wheel_parent = self.project.model(name='Bike')
-        self.wheel_model = self.project.model(name='Wheel')
-
-        widgets_manager = self.task.widgets()
-        self.form_widget = widgets_manager.add_propertygrid_widget(
-            part_instance=self.frame,
-            readable_models=self.frame_model.properties,
-            writable_models=[],
-        )
-
-        self.table_widget = widgets_manager.add_supergrid_widget(
-            part_model=self.wheel_model,
-            parent_instance=self.wheel_parent,
-            readable_models=[],
-            writable_models=self.frame_model.properties,
-        )
-
-    def tearDown(self):
-        self.task.delete()
-        super().tearDown()
-
-    def test_update_associations_empty(self):
-        self.client.update_widgets_associations(
-            widgets=[self.form_widget],
-            associations=[([], [])],
-        )
-
-    def test_update_widget_associations(self):
-        self.client.update_widget_associations(
-            widget=self.form_widget,
-            readable_models=[],
-            writable_models=self.frame_model.properties,
-        )
-
-    def test_input_lengths(self):
-        with self.assertRaises(IllegalArgumentError):
-            self.client.update_widgets_associations(
-                widgets=list(self.task.widgets()),
-                associations=[([], [])],
-            )
-
-    def test_widget_inputs(self):
-        with self.assertRaises(IllegalArgumentError):
-            self.client.update_widget_associations(
-                widget='Not a widget',
-            )
-
-    def test_readable_models(self):
-        self.client.update_widget_associations(
-            widget=self.form_widget,
-            readable_models=self.frame_model.properties,
-        )
-
-        self.client.update_widget_associations(
-            widget=self.table_widget,
-            readable_models=self.wheel_model.properties,
-        )
-
-        with self.assertRaises(APIError):
-            self.client.update_widget_associations(
-                widget=self.table_widget,
-                readable_models=self.frame.properties,
-            )
-
-    def test_writable_models(self):
-        self.client.update_widget_associations(
-            widget=self.form_widget,
-            writable_models=self.frame_model.properties,
-        )
-
-        self.client.update_widget_associations(
-            widget=self.table_widget,
-            writable_models=self.wheel_model.properties,
-        )
-
-        with self.assertRaises(APIError):
-            self.client.update_widget_associations(
-                widget=self.table_widget,
-                writable_models=self.frame.properties,
-            )
