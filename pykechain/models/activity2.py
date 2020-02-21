@@ -2,7 +2,7 @@ import datetime
 import os
 import time
 import warnings
-from typing import Any, List, Text, Dict, Optional, Union
+from typing import List, Text, Dict, Optional, Union
 
 import requests
 from requests.compat import urljoin  # type: ignore
@@ -11,14 +11,14 @@ from six import text_type
 from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_EXTRA_PARAMS
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
-from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
-from pykechain.models import Base
+from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
 from pykechain.models.tags import TagsMixin
+from pykechain.models.tree_traversal import TreeObject
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid, parse_datetime
 
 
-class Activity2(Base, TagsMixin):
+class Activity2(TreeObject, TagsMixin):
     """A virtual object representing a KE-chain activity.
 
     .. versionadded:: 2.0
@@ -334,7 +334,38 @@ class Activity2(Base, TagsMixin):
 
         return self._client.activities(parent_id=self.id, scope=self.scope_id, **kwargs)
 
-    def siblings(self, **kwargs):
+    def child(self,
+              name: Optional[Text] = None,
+              pk: Optional[Text] = None,
+              **kwargs) -> 'Activity2':
+        """
+        Retrieve a child object.
+
+        :param name: optional, name of the child
+        :type name: str
+        :param pk: optional, UUID of the child
+        :type: pk: str
+        :return: Child object
+        :raises MultipleFoundError: whenever multiple children fit match inputs.
+        :raises NotFoundError: whenever no child matching the inputs could be found.
+        """
+        if not (name or pk):
+            raise IllegalArgumentError('You need to provide either "name" or "pk".')
+
+        activity_list = list(self.children(name=name, pk=pk, **kwargs))
+
+        criteria = '\nname: {}\npk: {}\nkwargs: {}'.format(name, pk, kwargs)
+
+        if len(activity_list) == 1:
+            child = activity_list[0]
+
+        elif len(activity_list) > 1:
+            raise MultipleFoundError('{} has more than one matching child.{}'.format(self, criteria))
+        else:
+            raise NotFoundError('{} has no matching child.{}'.format(self, criteria))
+        return child
+
+    def siblings(self, **kwargs) -> List['Activity2']:
         """Retrieve the other activities that also belong to the parent.
 
         It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the level of the current task, including
@@ -359,6 +390,19 @@ class Activity2(Base, TagsMixin):
             raise NotFoundError("Cannot find subprocess for this task '{}', "
                                 "as this task exist on top level.".format(self.name))
         return self._client.activities(parent_id=parent_id, scope=self.scope_id, **kwargs)
+
+    def all_children(self) -> List['Activity2']:
+        """
+        Retrieve a flat list of all descendants, sorted depth-first.
+
+        Returns an empty list for Activities of type TASK.
+
+        :returns list of child objects
+        :rtype List
+        """
+        if self.activity_type == ActivityType.TASK:
+            return []
+        return super().all_children()
 
     def edit_cascade_down(
         self,
@@ -403,8 +447,7 @@ class Activity2(Base, TagsMixin):
             status=status,
         )
 
-        from pykechain.helpers import get_all_children
-        all_tasks = [self] + get_all_children(self)
+        all_tasks = [self] + self.all_children()
 
         # Create update-json
         data = list()
@@ -713,8 +756,7 @@ class Activity2(Base, TagsMixin):
     # Customizations
     #
 
-    def widgets(self, **kwargs):
-        # type: (**Any) -> WidgetsManager
+    def widgets(self, **kwargs) -> 'WidgetsManager':
         """
         Widgets of the activity.
 
@@ -726,7 +768,8 @@ class Activity2(Base, TagsMixin):
         :raises NotFoundError: when the widgets could not be found
         :raises APIError: when the API does not support the widgets, or when the API gives an error.
         """
-        return self._client.widgets(activity=self.id, **kwargs)
+        widgets = self._client.widgets(activity=self.id, **kwargs)
+        return WidgetsManager(widgets=widgets, activity=self, client=self._client)
 
     def customization(self):
         """

@@ -13,14 +13,14 @@ from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, Ser
     ActivityClassification, ActivityStatus
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
-from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property
+from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property, AnyProperty
 from pykechain.models.activity2 import Activity2
+from pykechain.models.association import Association
 from pykechain.models.scope2 import Scope2
 from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.widgets.widget import Widget
-from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import is_uuid, find
 from .__about__ import version
 
@@ -1019,7 +1019,7 @@ class Client(object):
         return [Team(team, client=self) for team in data['results']]
 
     def widgets(self, pk=None, activity=None, **kwargs):
-        # type: (Optional[AnyStr], Optional[Union[Activity, Activity2, AnyStr]], **Any) -> WidgetsManager
+        # type: (Optional[AnyStr], Optional[Union[Activity, Activity2, AnyStr]], **Any) -> List[Widget]
         """
         Widgets of an activity.
 
@@ -1055,10 +1055,7 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not find widgets: '{}'".format(response.json()))
 
-        data = response.json()
-        widgets = [Widget.create(widget_json, client=self) for widget_json in data['results']]
-        activity = activity if activity else request_params.get('activity_id', widgets[0].activity())
-        return WidgetsManager(widgets=widgets, activity=activity, client=self)
+        return [Widget.create(json=json, client=self) for json in response.json()['results']]
 
     #
     # Creators
@@ -2121,7 +2118,15 @@ class Client(object):
         return new_team
 
     @staticmethod
-    def _validate_widget(activity, widget_type, title, meta, order, parent, **kwargs):
+    def _validate_widget(
+            activity: Union[Activity, Activity2, text_type],
+            widget_type: Union[WidgetTypes, text_type],
+            title: Optional[Text],
+            meta: Dict,
+            order: Optional[int],
+            parent: Optional[Union[Widget, text_type]],
+            **kwargs
+    ) -> Dict:
         """Validate the format and content of the configuration of a widget."""
         if isinstance(activity, (Activity, Activity2)):
             activity = activity.id
@@ -2166,8 +2171,7 @@ class Client(object):
         return data
 
     @staticmethod
-    def _validate_related_models(readable_models, writable_models, **kwargs):
-        # type: (List, List, **Any) -> Tuple[List, List]
+    def _validate_related_models(readable_models: List, writable_models: List, **kwargs) -> Tuple[List, List]:
         """
         Verify the format and content of the readable and writable models.
 
@@ -2182,35 +2186,39 @@ class Client(object):
         if kwargs.get('outputs'):
             writable_models = kwargs.pop('outputs')
 
-        readable_model_ids = []
-        if readable_models is not None:
-            if not isinstance(readable_models, (list, tuple, set)):
-                raise IllegalArgumentError("`readable_models` should be provided as a list of uuids or property models")
-            for input in readable_models:
-                if is_uuid(input):
-                    readable_model_ids.append(input)
-                elif isinstance(input, (Property2, Property)):
-                    readable_model_ids.append(input.id)
-                else:
-                    IllegalArgumentError("`readable_models` should be provided as a list of uuids or property models")
-
-        writable_model_ids = []
-        if writable_models is not None:
-            if not isinstance(writable_models, (list, tuple, set)):
-                raise IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
-            for output in writable_models:
-                if is_uuid(output):
-                    writable_model_ids.append(output)
-                elif isinstance(output, (Property2, Property)):
-                    writable_model_ids.append(output.id)
-                else:
-                    IllegalArgumentError("`writable_models` should be provided as a list of uuids or property models")
+        readable_model_ids = Client._validate_property_models(models=readable_models, key='readable_models')
+        writable_model_ids = Client._validate_property_models(models=writable_models, key='writable_models')
 
         return readable_model_ids, writable_model_ids
 
-    def create_widget(self, activity, widget_type, meta, title=None, order=None,
-                      parent=None, readable_models=None, writable_models=None, **kwargs):
-        # type: (Union[Activity,text_type], text_type, Optional[text_type], Optional[Text], Optional[int], Optional[Widget, text_type], Optional[List], Optional[List], **Any) -> Widget  # noqa:E501
+    @staticmethod
+    def _validate_property_models(models: List, key: str = 'models') -> List[Text]:
+        assert isinstance(key, str), '`key` must be a string.'
+        model_ids = []
+        if models is not None:
+            if not isinstance(models, (list, tuple, set)):
+                raise IllegalArgumentError("`{}` must be provided as a list, tuple or set.".format(key))
+            for model in models:
+                if is_uuid(model):
+                    model_ids.append(model)
+                elif isinstance(model, (Property2, Property)):
+                    model_ids.append(model.id)
+                else:
+                    raise IllegalArgumentError("`{}` must consist out of uuids or property models.".format(key))
+        return model_ids
+
+    def create_widget(
+            self,
+            activity: Union[Activity2, text_type],
+            widget_type: Union[WidgetTypes, text_type],
+            meta: Dict,
+            title: Optional[Text] = None,
+            order: Optional[int] = None,
+            parent: Optional[Union[Widget, text_type]] = None,
+            readable_models: Optional[List] = None,
+            writable_models: Optional[List] = None,
+            **kwargs
+    ) -> Widget:
         """
         Create a widget inside an activity.
 
@@ -2274,8 +2282,7 @@ class Client(object):
 
         return widget
 
-    def create_widgets(self, widgets, **kwargs):
-        # type: (List[Dict], **Any) -> List[Widget]
+    def create_widgets(self, widgets: List[Dict], **kwargs) -> List[Widget]:
         """
         Bulk-create of widgets.
 
@@ -2345,49 +2352,61 @@ class Client(object):
         widgets_response = response.json().get('results')
         return [Widget.create(json=widget_json, client=self) for widget_json in widgets_response]
 
-    def update_widget_associations(self, widget, readable_models=None, writable_models=None, **kwargs):
-        # type: (Union[Widget,text_type], Optional[List], Optional[List], **Any) -> None
+    def delete_widget(self, widget: Union[Widget, text_type]) -> None:
         """
-        Update associations on this widget.
+        Delete a single Widget.
 
-        This is an absolute list of associations. If no property model id's are provided, then the associations are
-        emptied out and replaced with no associations.
-
-        :param widget: widget to update associations for
-        :type widget: :class:`Widget` or UUID
-        :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
-                                   read rights
-        :type readable_models: List[Property] or List[UUID] or None
-        :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
-                                   write rights
-        :type writable_models: List[Property] or List[UUID] or None
+        :param widget: Widget or its UUID to be deleted
+        :type widget: Widget or basestring
         :return: None
-        :raises APIError: when the associations could not be changed
-        :raise IllegalArgumentError: when the list is not of the right type
+        :raises APIError: whenever the widget could not be deleted
+        :raises IllegalArgumentError: whenever the input `widget` is invalid
         """
-        self.update_widgets_associations(
-            widgets=[widget],
-            associations=[(readable_models, writable_models)],
-            **kwargs
-        )
+        if isinstance(widget, Widget):
+            widget = widget.id
+        elif not is_uuid(widget):
+            raise IllegalArgumentError('`widget` must be a Widget or its UUID, "{}" is neither.'.format(widget))
 
-    def update_widgets_associations(self, widgets, associations, **kwargs):
-        # type: (List[Union[Widget, text_type]], List[Tuple[List, List]], **Any) -> None
+        url = self._build_url('widget', widget_id=widget)
+        response = self._request('DELETE', url)
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            raise APIError("Could not delete Widget ({})".format(response))
+
+    def delete_widgets(self, widgets: List[Union[Widget, text_type]]) -> None:
         """
-        Update associations on multiple widgets in bulk.
+        Delete multiple Widgets.
 
-        This is an absolute list of associations. If no property model id's are provided, then the associations are
-        emptied out and replaced with no associations.
-
-        :param widgets: list of widgets to update associations for
-        :type widgets: :class: list
-        :param associations: list of tuples, each tuple containing 2 lists of properties
-                             (of :class:`Property` or property_ids (uuids)
-        :type associations: List[Tuple]
+        :param widgets: List, Tuple or Set of Widgets or their UUIDs to be deleted
+        :type widgets: List[Union[Widget, text_type]]
         :return: None
-        :raises APIError: when the associations could not be changed
-        :raise IllegalArgumentError: when the list is not of the right type
+        :raises APIError: whenever the widgets could not be deleted
+        :raises IllegalArgumentError: whenever the input `widgets` is invalid
         """
+        if not isinstance(widgets, (tuple, list, set)):
+            raise IllegalArgumentError('`widgets` must be a list, tuple or set of widgets, '
+                                       '"{}" is not.'.format(widgets))
+        else:
+            widget_ids = list()
+            for widget in widgets:
+                if isinstance(widget, Widget):
+                    widget = widget.id
+                elif not is_uuid(widget):
+                    raise IllegalArgumentError('`widget` must be a Widget or its UUID, "{}" is neither.'.format(widget))
+                widget_ids.append(dict(id=widget))
+
+        url = self._build_url('widgets_bulk_delete')
+        response = self._request('DELETE', url, json=widget_ids)
+
+        if response.status_code != requests.codes.no_content:
+            raise APIError("Could not delete the widgets: {}: {}".format(str(response), response.content))
+
+    @staticmethod
+    def _validate_associations(
+            widgets: List[Union[Widget, text_type]],
+            associations: List[Tuple[List, List]],
+    ) -> List[text_type]:
+        """Perform the validation of the internal widgets and associations."""
         if not isinstance(widgets, List):
             raise IllegalArgumentError("`widgets` must be provided as a list of widgets.")
 
@@ -2408,6 +2427,160 @@ class Client(object):
         if not len(widgets) == len(associations):
             raise IllegalArgumentError('The `widgets` and `associations` lists must be of equal length, '
                                        'not {} and {}.'.format(len(widgets), len(associations)))
+
+        return widget_ids
+
+    def associations(
+            self,
+            widget: Optional[Widget] = None,
+            activity: Optional[Activity2] = None,
+            part: Optional[Part2] = None,
+            property: Optional[AnyProperty] = None,
+            scope: Optional[Scope2] = None,
+            limit: Optional[int] = None,
+    ) -> List[Association]:
+        """
+        Retrieve a list of associations.
+
+        :param widget: widget for which to retrieve associations
+        :type widget: Widget
+        :param activity: activity for which to retrieve associations
+        :type activity: Activity2
+        :param part: part for which to retrieve associations
+        :type part: Part2
+        :param property: property for which to retrieve associations
+        :type property: Property2
+        :param scope: scope for which to retrieve associations
+        :type scope: Scope2
+        :param limit: maximum number of associations to retrieve
+        :type limit: int
+        :return: list of association objects
+        :rtype List[Association]
+        """
+        if widget is None:
+            widget = ''
+        elif not isinstance(widget, Widget):
+            raise IllegalArgumentError('`widget` is not of type Widget, but type "{}".'.format(type(widget)))
+        else:
+            widget = widget.id
+
+        if activity is None:
+            activity = ''
+        elif not isinstance(activity, Activity2):
+            raise IllegalArgumentError('`activity` is not of type Activity2, but type "{}".'.format(type(activity)))
+        else:
+            activity = activity.id
+
+        if part is None:
+            part_instance = ''
+            part_model = ''
+        elif not isinstance(part, Part2):
+            raise IllegalArgumentError('`part` is not of type Part2, but type "{}".'.format(type(part)))
+        elif part.category == Category.MODEL:
+            part_instance = ''
+            part_model = part.id
+        else:
+            part_instance = part.id
+            part_model = ''
+
+        if property is None:
+            property_instance = ''
+            property_model = ''
+        elif not isinstance(property, Property2):
+            raise IllegalArgumentError('`property` is not of type Property, but type "{}".'.format(type(property)))
+        elif property.category == Category.MODEL:
+            property_model = property.id
+            property_instance = ''
+        else:
+            property_model = ''
+            property_instance = property.id
+
+        if scope is None:
+            scope = ''
+        elif not isinstance(scope, Scope2):
+            raise IllegalArgumentError('`scope` is not of type Scope2, but type "{}".'.format(type(scope)))
+        else:
+            scope = scope.id
+
+        if limit is None:
+            limit = ''
+        elif not isinstance(limit, int):
+            raise IllegalArgumentError('`limit` is not of type integer, but type "{}".'.format(type(limit)))
+        elif limit < 1:
+            raise IllegalArgumentError('`limit` is not a positive integer!')
+
+        request_params = {
+            'limit': limit,
+            'widget': widget,
+            'activity': activity,
+            'scope': scope,
+            'instance_part': part_instance,
+            'instance_property': property_instance,
+            'model_part': part_model,
+            'model_property': property_model,
+        }
+
+        url = self._build_url('associations')
+        response = self._request('GET', url, params=request_params)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not retrieve associations ({})".format((response, response.json())))
+
+        associations = [Association(json=r, client=self) for r in response.json()['results']]
+
+        return associations
+
+    def update_widget_associations(
+            self,
+            widget: Union[Widget, text_type],
+            readable_models: Optional[List] = None,
+            writable_models: Optional[List] = None,
+            **kwargs
+    ) -> None:
+        """
+        Update associations on this widget.
+
+        This is a patch to the list list of associations. Existing associations are not replaced.
+
+        :param widget: widget to update associations for
+        :type widget: :class:`Widget` or UUID
+        :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
+                                   read rights
+        :type readable_models: List[Property] or List[UUID] or None
+        :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
+                                   write rights
+        :type writable_models: List[Property] or List[UUID] or None
+        :return: None
+        :raises APIError: when the associations could not be changed
+        :raise IllegalArgumentError: when the list is not of the right type
+        """
+        self.update_widgets_associations(
+            widgets=[widget],
+            associations=[(readable_models, writable_models)],
+            **kwargs
+        )
+
+    def update_widgets_associations(
+            self,
+            widgets: List[Union[Widget, text_type]],
+            associations: List[Tuple[List, List]],
+            **kwargs
+    ) -> None:
+        """
+        Update associations on multiple widgets in bulk.
+
+        This is patch to the list of associations. Existing associations are not replaced.
+
+        :param widgets: list of widgets to update associations for.
+        :type widgets: :class: list
+        :param associations: list of tuples, each tuple containing 2 lists of properties
+                             (of :class:`Property` or property_ids (uuids)
+        :type associations: List[Tuple]
+        :return: None
+        :raises APIError: when the associations could not be changed
+        :raise IllegalArgumentError: when the list is not of the right type
+        """
+        widget_ids = self._validate_associations(widgets, associations)
 
         bulk_data = list()
         for widget_id, association in zip(widget_ids, associations):
@@ -2435,6 +2608,153 @@ class Client(object):
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update associations of the widgets ({})".format((response, response.json())))
+
+        return None
+
+    def set_widget_associations(
+            self,
+            widget: Union[Widget, text_type],
+            readable_models: Optional[List] = None,
+            writable_models: Optional[List] = None,
+            **kwargs
+    ) -> None:
+        """
+        Update associations on this widget.
+
+        This is an absolute list of associations. If no property model id's are provided, then the associations are
+        emptied out and replaced with no associations.
+
+        :param widget: widget to set associations for.
+        :type widget: :class:`Widget` or UUID
+        :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
+                                   read rights
+        :type readable_models: List[Property] or List[UUID] or None
+        :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
+                                   write rights
+        :type writable_models: List[Property] or List[UUID] or None
+        :return: None
+        :raises APIError: when the associations could not be changed
+        :raise IllegalArgumentError: when the list is not of the right type
+        """
+        self.set_widgets_associations(
+            widgets=[widget],
+            associations=[(readable_models, writable_models)],
+            **kwargs
+        )
+
+    def set_widgets_associations(
+            self,
+            widgets: List[Union[Widget, text_type]],
+            associations: List[Tuple[List, List]],
+            **kwargs
+    ) -> None:
+        """
+        Set associations on multiple widgets in bulk.
+
+        This is an absolute list of associations. If no property model id's are provided, then the associations are
+        emptied out and replaced with no associations.
+
+        :param widgets: list of widgets to set associations for.
+        :type widgets: :class: list
+        :param associations: list of tuples, each tuple containing 2 lists of properties
+                             (of :class:`Property` or property_ids (uuids)
+        :type associations: List[Tuple]
+        :return: None
+        :raises APIError: when the associations could not be changed
+        :raise IllegalArgumentError: when the list is not of the right type
+        """
+        widget_ids = self._validate_associations(widgets, associations)
+
+        bulk_data = list()
+        for widget_id, association in zip(widget_ids, associations):
+            readable_models, writable_models = association
+
+            readable_model_ids, writable_model_ids = self._validate_related_models(
+                readable_models=readable_models,
+                writable_models=writable_models,
+            )
+
+            data = dict(
+                id=widget_id,
+                readable_model_properties_ids=readable_model_ids,
+                writable_model_properties_ids=writable_model_ids,
+            )
+
+            if kwargs:
+                data.update(**kwargs)
+
+            bulk_data.append(data)
+
+        # perform the call
+        url = self._build_url('widgets_set_associations')
+        response = self._request('PUT', url, params=API_EXTRA_PARAMS['widgets'], json=bulk_data)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not set associations of the widgets ({})".format((response, response.json())))
+
+        return None
+
+    def clear_widget_associations(
+            self,
+            widget: Widget,
+    ) -> None:
+        """
+        Remove all associations of a widget.
+
+        :param widget: widget to clear associations from.
+        :type widget: Widget
+        :return: None
+        :raises APIError: when the associations could not be cleared.
+        :raise IllegalArgumentError: if the widget is not of type Widget
+        """
+        if not isinstance(widget, Widget):
+            raise IllegalArgumentError('`widget` is not of type Widget, but type "{}".'.format(type(widget)))
+
+        # perform the call
+        url = self._build_url('widget_clear_associations', widget_id=widget.id)
+        response = self._request(method='PUT', url=url)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not clear associations of widget ({})".format((response, response.json())))
+
+        return None
+
+    def remove_widget_associations(
+            self,
+            widget: Widget,
+            models: Optional[List[Union['AnyProperty', text_type]]] = (),
+            **kwargs
+    ) -> None:
+        """
+        Remove specific associations from a widget.
+
+        :param widget: widget to remove associations from.
+        :type widget: Widget
+        :param models: list of Property models or their UUIDs
+        :type models: list
+        :return: None
+        :raises APIError: when the associations could not be removed
+        :raise IllegalArgumentError: if the widget is not of type Widget
+        """
+        if not isinstance(widget, Widget):
+            raise IllegalArgumentError('`widget` is not of type Widget, but type "{}".'.format(type(widget)))
+
+        model_ids = self._validate_property_models(models=models)
+
+        if not model_ids:
+            return None
+
+        data = dict(
+            id=widget.id,
+            model_properties_ids=model_ids,
+        )
+
+        # perform the call
+        url = self._build_url('widget_remove_associations', widget_id=widget.id)
+        response = self._request(method='PUT', url=url, params=API_EXTRA_PARAMS['widget'], json=data)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not remove associations of widget ({})".format((response, response.json())))
 
         return None
 

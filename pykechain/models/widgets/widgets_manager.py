@@ -1,13 +1,12 @@
 import warnings
-from typing import Any, Iterable, Union, AnyStr, Optional, Text, Dict, List
+from typing import Iterable, Union, AnyStr, Optional, Text, Dict, List, Any
 
-import requests
 from six import string_types, text_type
 
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes, \
     ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
     KEChainPages, CardWidgetKEChainPageLink
-from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
+from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
     _check_prefilters, _check_excluded_propmodels
@@ -43,12 +42,13 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: if not provided one of :class:`Activity` or activity uuid and a `Client`
         """
         self._widgets = list(widgets)  # type: List[Widget]
-        from pykechain.models import Activity
-        from pykechain.models import Activity2
+        for widget in self._widgets:
+            widget.manager = self
+        from pykechain.models import Activity, Activity2
         if isinstance(activity, (Activity, Activity2)):
             self._activity_id = activity.id
             self._client = activity._client
-        elif isinstance(activity, (text_type)) and client is not None:
+        elif isinstance(activity, text_type) and client is not None:
             self._activity_id = activity
             self._client = client
         else:
@@ -72,7 +72,7 @@ class WidgetsManager(Iterable):
 
     next = __next__  # py2.7 alias
 
-    def __getitem__(self, key: Union[int, str]) -> Widget:
+    def __getitem__(self, key: Union[int, str, Widget]) -> Widget:
         """Widget from the list of widgets based on index, uuid, title or ref.
 
         :param key: index, uuid, title or ref of the widget to retrieve
@@ -82,7 +82,9 @@ class WidgetsManager(Iterable):
         :raises NotFoundError: when the widget could not be found
         """
         found = None
-        if isinstance(key, int):
+        if isinstance(key, Widget) and key in self._widgets:
+            found = key
+        elif isinstance(key, int):
             found = self._widgets[key]
         elif is_uuid(key):
             found = find(self._widgets, lambda p: key == p.id)
@@ -92,6 +94,9 @@ class WidgetsManager(Iterable):
         if found is not None:
             return found
         raise NotFoundError("Could not find widget with index, title, ref, or id '{}'".format(key))
+
+    def __contains__(self, item: Widget) -> bool:
+        return item in self._widgets
 
     def create_widgets(self, widgets: List[Dict]) -> List[Widget]:
         """
@@ -1058,12 +1063,13 @@ class WidgetsManager(Iterable):
                          emphasize_delete: Optional[bool] = False,
                          show_columns: Optional[Iterable[Text]] = None,
                          show_all_columns: Optional[bool] = True,
+                         page_size: Optional[int] = 25,
                          tags: Optional[Iterable[Text]] = None,
                          sorted_column: Optional[Text] = ScopeWidgetColumnTypes.PROJECT_NAME,
                          sorted_direction: Optional[SortTable] = SortTable.ASCENDING,
                          parent_widget: Optional[Union[Widget, Text]] = None,
-                         active_filter: Optional[bool] = None,
-                         search_filter: Optional[bool] = None,
+                         active_filter: Optional[bool] = True,
+                         search_filter: Optional[bool] = True,
                          **kwargs) -> Widget:
         """
         Add a KE-chain Scope widget to the Widgetmanager and the activity.
@@ -1097,6 +1103,8 @@ class WidgetsManager(Iterable):
         :type show_columns: list of basestring
         :param show_all_columns: boolean to show all columns (defaults to True). If True, will override `show_columns`
         :type show_all_columns: bool
+        :param page_size: number of scopes to show per page (defaults to 25)
+        :type page_size: int
         :param tags: (O) list of scope tags to filter the Scopes on
         :type tags: list of basestring
         :param sorted_column: column name to sort on. (defaults to project name column). One of `ScopeWidgetColumnTypes`
@@ -1120,34 +1128,33 @@ class WidgetsManager(Iterable):
         meta = _initiate_meta(kwargs, activity=self._activity_id)
         meta, title = _set_title(meta, title=title, default_title=WidgetTypes.SCOPE, **kwargs)
 
+        if show_all_columns is not None and not isinstance(show_all_columns, bool):
+            raise IllegalArgumentError('`show_all_columns` must be a boolean, "{}" is not.'.format(show_all_columns))
+
         if not show_all_columns and show_columns:
-            if not isinstance(show_columns, (list, tuple)) and \
-                    not all([isinstance(i, string_types) for i in show_columns]):
-                raise IllegalArgumentError("`show_columns` should be a list of column header "
-                                           "names: '{}'".format(show_columns))
+            if not isinstance(show_columns, (list, tuple)):
+                raise IllegalArgumentError('`show_columns` must be a list or tuple, "{}" is not.'.format(show_columns))
+            options = set(ScopeWidgetColumnTypes.values())
+            if not all(sc in options for sc in show_columns):
+                raise IllegalArgumentError("`show_columns` must consist out of ScopeWidgetColumnTypes options.")
             meta['showColumns'] = [snakecase(c) for c in show_columns]
 
+        if not isinstance(page_size, int) or page_size < 1:
+            raise IllegalArgumentError('`page_size` must be a positive integer, "{}" is not.'.format(page_size))
+
         if tags:
-            if not isinstance(tags, (list, tuple)) and not all([isinstance(i, string_types) for i in tags]):
+            if not isinstance(tags, (list, tuple)) or not all([isinstance(i, string_types) for i in tags]):
                 raise IllegalArgumentError("`tags` should be a list of strings: '{}'".format(tags))
             meta['tags'] = tags
 
         if team:
             meta['teamId'] = _retrieve_object_id(team)
 
-        if active_filter is not None:
-            if not isinstance(active_filter, bool):
-                raise IllegalArgumentError('`active_filter` must be a boolean, "{}" is not.'.format(active_filter))
-            active_filter_visible = active_filter
-        else:
-            active_filter_visible = True
+        if not isinstance(active_filter, bool):
+            raise IllegalArgumentError('`active_filter` must be a boolean, "{}" is not.'.format(active_filter))
 
-        if search_filter is not None:
-            if not isinstance(search_filter, bool):
-                raise IllegalArgumentError('`search_filter` must be a boolean, "{}" is not.'.format(search_filter))
-            search_filter_visible = search_filter
-        else:
-            search_filter_visible = True
+        if not isinstance(search_filter, bool):
+            raise IllegalArgumentError('`search_filter` must be a boolean, "{}" is not.'.format(search_filter))
 
         for button_setting in [
             add, edit, delete, clone, emphasize_add, emphasize_clone, emphasize_edit, emphasize_delete,
@@ -1155,11 +1162,19 @@ class WidgetsManager(Iterable):
             if not isinstance(button_setting, bool):
                 raise IllegalArgumentError('All button settings must be booleans.')
 
+        if sorted_column not in ScopeWidgetColumnTypes.values():
+            raise IllegalArgumentError('`sorted_column` must be a ScopeWidgetColumnTypes option, "{}" is not. '
+                                       'Select from: {}'.format(sorted_column, ScopeWidgetColumnTypes.values()))
+
+        if sorted_direction not in SortTable.values():
+            raise IllegalArgumentError('`sorted_direction` must be a SortTable option, "{}" is not. '
+                                       'Select from: {}'.format(sorted_direction, SortTable.values()))
+
         meta.update({
             'sortedColumn': snakecase(sorted_column),
             'sortDirection': sorted_direction,
-            'activeFilterVisible': active_filter_visible,
-            'searchFilterVisible': search_filter_visible,
+            'activeFilterVisible': active_filter,
+            'searchFilterVisible': search_filter,
             "addButtonVisible": add,
             "editButtonVisible": edit,
             "deleteButtonVisible": delete,
@@ -1168,6 +1183,7 @@ class WidgetsManager(Iterable):
             "primaryEditUiValue": emphasize_edit,
             "primaryCloneUiValue": emphasize_clone,
             "primaryDeleteUiValue": emphasize_delete,
+            "customPageSize": page_size,
         })
 
         widget = self.create_widget(
@@ -1440,33 +1456,26 @@ class WidgetsManager(Iterable):
 
     def delete_widget(self, key: Any) -> bool:
         """
-        Delete widgets by index.
+        Delete a widget in the task.
 
-        The widgets are saved to KE-chain.
-
-        :param key: index, uuid, title or ref of the widget to delete
-        :type key: int or basestring
+        :param key: index, uuid, title or ref of the widget to delete, or the widget itself.
+        :type key: Widget, int or basestring
         :return: True if the widget is deleted successfully
         :raises APIError: if the widget could not be deleted
-        :raises NotFoundError: if the widgetmanager (activity) has no such widget
+        :raises NotFoundError: if the WidgetsManager (activity) has no such widget
         """
         widget = self[key]
-        if isinstance(widget, Widget):
-            if widget.delete():
-                self._widgets.remove(widget)
-                return True
+        self._client.delete_widget(widget=widget)
+        self._widgets.remove(widget)
+        return True
 
     def delete_all_widgets(self) -> None:
-        """Delete all widgets.
+        """
+        Delete all widgets in the activity.
 
         :return: None
         :raises ApiError: When the deletion of the widgets was not successful
         """
-        widget_ids = [dict(id=w.id) for w in self.__iter__()]
-        url = self._client._build_url('widgets_bulk_delete')
-        response = self._client._request('DELETE', url, json=widget_ids)
-
-        if response.status_code != requests.codes.no_content:
-            raise APIError("Could not delete the widgets: {}: {}".format(str(response), response.content))
-
+        self._client.delete_widgets(list(self))
         self._widgets = []
+        return None
