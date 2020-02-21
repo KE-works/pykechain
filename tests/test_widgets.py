@@ -147,6 +147,14 @@ class TestWidgetManager(TestBetamax):
         super().setUp()
         self.wm = self.project.activity('Task - Form + Tables + Service').widgets()  # type: WidgetsManager
 
+    def test_widget_manager_creation(self):
+        with self.assertRaises(IllegalArgumentError):
+            WidgetsManager(widgets=[], activity='Run away!')
+
+    def test_widget_not_found(self):
+        with self.assertRaises(NotFoundError):
+            widget = self.wm['unladen swallow']
+
     def test_activity_has_metapanel_in_widget_manager(self):
         self.assertIsInstance(self.wm, WidgetsManager)
         self.assertTrue(len(self.wm) >= 5)
