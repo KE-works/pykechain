@@ -8,6 +8,11 @@ class TreeObject(Base, ABC):
     """Object class to include methods used to traverse a tree-structure."""
 
     def __init__(self, json, **kwargs):
+        """
+        Initialize the object with attributes related to a tree-structure.
+
+        :param json: data dict from KE-chain.
+        """
         super().__init__(json=json, **kwargs)
 
         self.parent_id = json.get('parent_id', None)  # type: Optional[Text]
