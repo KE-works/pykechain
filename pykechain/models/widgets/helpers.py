@@ -218,17 +218,26 @@ def _check_prefilters(part_model: 'Part2', prefilters: Dict) -> List[Text]:  # n
 
 
 def _check_excluded_propmodels(part_model: 'Part2', property_models: List['AnyProperty']) -> List['AnyProperty']:
+    """
+    Validate the excluded property models of the referenced part.
+
+    :param part_model: Part model that is referenced
+    :param property_models: Properties of the part model to be excluded.
+    :return: list of property IDs
+    :rtype list
+    :raises IllegalArgumentError: whenever the properties are not of category MODEL or do not belong to the part model.
+    """
     list_of_propmodels_excl = list()  # type: List['AnyProperty']
     for property_model in property_models:
         if is_uuid(property_model):
             property_model = part_model.property(id=property_model)
 
         if property_model.category != Category.MODEL:
-            raise IllegalArgumentError('A part reference property can only excluded `Property` models, found '
+            raise IllegalArgumentError('A part reference property can only exclude `Property` models, found '
                                        'category "{}" on property "{}"'.format(property_model.category,
                                                                                property_model.name))
         # TODO when a property is freshly created, the property has no "part_id" key in json_data.
-        elif part_model.id != property_model._json_data.get('part_id'):
+        elif part_model.id != property_model.part_id:
             raise IllegalArgumentError(
                 'A part reference property can only exclude properties belonging to the referenced Part model, '
                 'found referenced Part model "{}" and Properties belonging to "{}"'.format(
