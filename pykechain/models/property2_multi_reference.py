@@ -3,10 +3,9 @@ from typing import List, Optional, Text, Union, Any
 from six import text_type, string_types
 
 from pykechain.enums import Category, FilterType
-from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.part2 import Part2
 from pykechain.models.property2 import Property2
-from pykechain.models.widgets.helpers import _check_prefilters
+from pykechain.models.widgets.helpers import _check_prefilters, _check_excluded_propmodels
 from pykechain.utils import is_uuid
 
 
@@ -70,21 +69,12 @@ class MultiReferenceProperty2(Property2):
             return None
         if not self._cached_values and isinstance(self._value, (list, tuple)):
             assert all([isinstance(v, dict) for v in self._value]), \
-                "Expect all elements in the _value to be a dict with 'name' and 'id', got '{}'".format(self._value)
+                "Expect all elements in the _value to be a dict with 'name' and 'id', got '{}'.".format(self._value)
             ids = [v.get('id') for v in self._value]
-            # TODO: this will change when the configured model is put in the value_options. Now we configure a single
-            # ...   part_model_id in the multirefproperty_model.value as
             if self.category == Category.MODEL and len(ids) == 1:
                 self._cached_values = [self._client.part(pk=ids[0], category=None)]
             elif self.category == Category.INSTANCE:
-                referred_partmodels = self.model().value
-                if referred_partmodels:
-                    referred_partmodel = referred_partmodels[0]  # get the only one, which is the right part_model
-                else:
-                    referred_partmodel = None
-                self._cached_values = list(self._client.parts(id__in=','.join(ids),
-                                                              model=referred_partmodel,
-                                                              category=None))
+                self._cached_values = list(self._client.parts(id__in=','.join(ids), category=None))
         return self._cached_values
 
     @value.setter
@@ -220,25 +210,10 @@ class MultiReferenceProperty2(Property2):
         else:
             list_of_propmodels_excl = list()
 
-        for property_model in property_models:
-            if not isinstance(property_model, Property2):
-                if is_uuid(property_model):
-                    property_model = self._client.property(id=property_model, category=Category.MODEL)
-                else:
-                    raise IllegalArgumentError('A part reference property can only exclude `Property` models or their '
-                                               'UUIDs, found type "{}"'.format(type(property_model)))
-            if property_model.category != Category.MODEL:
-                raise IllegalArgumentError("A part reference property can only excluded `Property` models, found "
-                                           "category '{}' on property '{}'".format(property_model.category,
-                                                                                   property_model.name))
-            # TODO when a property is freshly created, the property has no "part_id" key in json_data.
-            elif self.value[0].id != property_model._json_data.get('part_id', self.value[0].id):
-                raise IllegalArgumentError(
-                    'A part reference property can only exclude properties belonging to the referenced Part model, '
-                    'found referenced Part model "{}" and Properties belonging to "{}"'.format(
-                        self.value[0].name, property_model.part.name))
-            else:
-                list_of_propmodels_excl.append(property_model.id)
+        list_of_propmodels_excl.extend(_check_excluded_propmodels(
+            part_model=self.value[0],
+            property_models=property_models,
+        ))
 
         options_to_set = self._options
         options_to_set['propmodels_excl'] = list_of_propmodels_excl
