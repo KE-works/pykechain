@@ -3,6 +3,8 @@ Change Log
 
 This release brings some interesting changes to pykechain. We discovered suddenly that the `Activity` and `Part` where actual trees, being a sustainable company,we also implemented them as such.
 
+* :+1: Added `classification` attribute to the `Part2` class.
+* :+1: Added caching of children to the `Activity2.children()` method.
 * :+1: Moved creation of WidgetsManager instances from the `widgets()` method of the Client to Activity class. The Client's method output is now consistent with the `create_widget(s)` methods. #693
 * :+1: Moved `delete_widget(s)` methods from WidgetsManager to Client class.
 * :+1: Refactored Widget's `delete` method to now calls its WidgetManager, if available, to maintain a consistent Widget list.
