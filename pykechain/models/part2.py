@@ -85,17 +85,16 @@ class Part2(TreeObject):
         self.scope_id = json.get('scope_id')
 
         self.ref = json.get('ref')  # type: Text
-        self.category = json.get('category')  # type: Text
-        self.parent_id = json.get('parent_id')  # type: Text
+        self.category = json.get('category')  # type: Category
         self.description = json.get('description')  # type: Text
         self.multiplicity = json.get('multiplicity')  # type: Text
-        self.classification = json.get('classification')  # type: Text
-        self._proxy_model_id = json.get('proxy_source_id_name', None).get('id', None)  # type: Optional[Text]
-
-        self._cached_children = None  # type: Optional[list]
+        self.classification = json.get('classification')  # type: Classification
 
         self.properties = [Property2.create(p, client=self._client)
                            for p in sorted(json['properties'], key=lambda p: p.get('order', 0))]  # type: list
+
+        proxy_data = json.get('proxy_source_id_name', dict())  # type: Optional[Dict]
+        self._proxy_model_id = proxy_data.get('id') if proxy_data else None  # type: Optional[Text]
 
     def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional[Dict] = None):
         """Refresh the object in place."""
@@ -154,7 +153,7 @@ class Part2(TreeObject):
         """
         return self._client.scope(pk=self.scope_id, status=None)
 
-    def parent(self) -> Union['Part2', type(None)]:
+    def parent(self) -> Optional['Part2']:
         """Retrieve the parent of this `Part`.
 
         :return: the parent :class:`Part` of this part
@@ -166,10 +165,7 @@ class Part2(TreeObject):
         >>> bike = part.parent()
 
         """
-        if self.parent_id:
-            return self._client.part(pk=self.parent_id, category=self.category)
-        else:
-            return None
+        return self._client.part(pk=self.parent_id, category=self.category) if self.parent_id else None
 
     def children(self, **kwargs) -> Union['Partset', List['Part2']]:
         """Retrieve the children of this `Part` as `Partset`.
@@ -487,9 +483,11 @@ class Part2(TreeObject):
         >>> proxy_basis_for_the_material_model = proxied_material_of_the_bolt_model.proxy_model()
 
         """
-        if self.category != Category.MODEL or self.classification != Classification.PRODUCT or not self._proxy_model_id:
+        if self.category != Category.MODEL:
             raise IllegalArgumentError(
                 'Part "{}" is not a product model, therefore it cannot have a proxy model'.format(self))
+        if self.classification != Classification.PRODUCT or not self._proxy_model_id:
+            raise NotFoundError('Part "{}" is not a product model, therefore it cannot have a proxy model'.format(self))
 
         return self._client.model(pk=self._proxy_model_id)
 

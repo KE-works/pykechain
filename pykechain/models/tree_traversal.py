@@ -7,6 +7,13 @@ from pykechain.models import Base
 class TreeObject(Base, ABC):
     """Object class to include methods used to traverse a tree-structure."""
 
+    def __init__(self, json, **kwargs):
+        super().__init__(json=json, **kwargs)
+
+        self.parent_id = json.get('parent_id', None)  # type: Optional[Text]
+
+        self._cached_children = None  # type: Optional[List['TreeObject']]
+
     def __call__(self, *args, **kwargs) -> Base:
         """Short-hand version of the `child` method."""
         return self.child(*args, **kwargs)

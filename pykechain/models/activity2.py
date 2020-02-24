@@ -50,8 +50,8 @@ class Activity2(TreeObject, TagsMixin):
         self.ref = json.get('ref')
         self.description = json.get('description', '')
         self.status = json.get('status')
-        self.classification = json.get('classification')
-        self.activity_type = json.get('activity_type')
+        self.classification = json.get('classification')  # type: ActivityClassification
+        self.activity_type = json.get('activity_type')  # type: ActivityType
         self.start_date = parse_datetime(json.get('start_date'))
         self.due_date = parse_datetime(json.get('due_date'))
 
@@ -123,7 +123,7 @@ class Activity2(TreeObject, TagsMixin):
 
     def is_rootlevel(self):
         """
-        Determine if the Activity is at the toplevel of a project.
+        Determine if the Activity is at the toplevel of a project, i.e. below the root itself.
 
         It will look for the name of the parent which should be either ActivityRootNames.WORKFLOW_ROOT or
         ActivityRootNames.CATALOG_ROOT. If the name of the parent cannot be found an additional API call is made
@@ -142,10 +142,9 @@ class Activity2(TreeObject, TagsMixin):
         if parent_dict and 'name' in parent_dict:
             parent_name = parent_dict.get('name')
         if not parent_dict:
-            parent_name = self._client.activity(id=self._json_data.get('parent_id')).name
-        if parent_name in ActivityRootNames.values():
-            return True
-        return False
+            parent_name = self._client.activity(id=self.parent_id).name
+
+        return parent_name in ActivityRootNames.values()
 
     def is_task(self):
         """
@@ -220,7 +219,7 @@ class Activity2(TreeObject, TagsMixin):
         :return: Return True if it is a root object, otherwise return False
         :rtype: bool
         """
-        return self.name in ActivityRootNames.values() and self._json_data.get('parent_id', False) is None
+        return self.name in ActivityRootNames.values() and self.parent_id is None
 
     def is_configured(self):
         """
@@ -232,11 +231,7 @@ class Activity2(TreeObject, TagsMixin):
         :rtype: bool
         """
         # check configured based on if we get at least 1 part back
-        associated_models = self.parts(category=Category.MODEL, limit=1)
-        if associated_models:
-            return True
-        else:
-            return False
+        return bool(self.parts(category=Category.MODEL, limit=1))
 
     def is_customized(self):
         """
@@ -248,10 +243,7 @@ class Activity2(TreeObject, TagsMixin):
         :return: Return True if it is customized, otherwise return False
         :rtype: bool
         """
-        if self._json_data.get('customization', False):
-            return True
-        else:
-            return False
+        return bool(self._json_data.get('customization', False))
 
     #
     # methods
@@ -301,13 +293,12 @@ class Activity2(TreeObject, TagsMixin):
         >>> parent_of_task = task.parent()
 
         """
-        parent_id = self._json_data.get('parent_id')
-        if parent_id is None:
+        if self.parent_id is None:
             raise NotFoundError("Cannot find subprocess for this task '{}', "
                                 "as this task exist on top level.".format(self.name))
-        return self._client.activity(pk=parent_id, scope=self.scope_id)
+        return self._client.activity(pk=self.parent_id, scope=self.scope_id)
 
-    def children(self, **kwargs):
+    def children(self, **kwargs) -> List['Activity2']:
         """Retrieve the direct activities of this subprocess.
 
         It returns a combination of Tasks (a.o. UserTasks) and Subprocesses on the direct descending level.
@@ -319,20 +310,24 @@ class Activity2(TreeObject, TagsMixin):
 
         Example
         -------
-        >>> parent = project.parent('Subprocess')
-        >>> children = subprocess.children()
+        >>> task = project.activity('Subprocess')
+        >>> children = task.children()
 
-        Example searching for children of a subprocess which contains a name (icontains searches case insensitive
+        Example searching for children of a subprocess which contains a name (icontains searches case insensitive)
 
-        >>> parent = project.parent('Subprocess')
-        >>> children = subprocess.children(name__icontains='more work')
+        >>> task = project.activity('Subprocess')
+        >>> children = task.children(name__icontains='more work')
 
         """
         if self.activity_type != ActivityType.PROCESS:
             raise NotFoundError("Only subprocesses can have children, please choose a subprocess instead of a '{}' "
                                 "(activity '{}')".format(self.activity_type, self.name))
-
-        return self._client.activities(parent_id=self.id, scope=self.scope_id, **kwargs)
+        if not kwargs:
+            if self._cached_children is None:
+                self._cached_children = self._client.activities(parent_id=self.id, scope=self.scope_id, **kwargs)
+            return self._cached_children
+        else:
+            return self._client.activities(parent_id=self.id, scope=self.scope_id, **kwargs)
 
     def child(self,
               name: Optional[Text] = None,
@@ -385,11 +380,10 @@ class Activity2(TreeObject, TagsMixin):
         >>> siblings = task.siblings(name__contains='Another Task')
 
         """
-        parent_id = self._json_data.get('parent_id')
-        if parent_id is None:
+        if self.parent_id is None:
             raise NotFoundError("Cannot find subprocess for this task '{}', "
                                 "as this task exist on top level.".format(self.name))
-        return self._client.activities(parent_id=parent_id, scope=self.scope_id, **kwargs)
+        return self._client.activities(parent_id=self.parent_id, scope=self.scope_id, **kwargs)
 
     def all_children(self) -> List['Activity2']:
         """
