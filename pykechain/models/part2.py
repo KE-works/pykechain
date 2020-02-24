@@ -5,7 +5,7 @@ import requests
 from six import text_type, string_types
 
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.enums import Category, Multiplicity
+from pykechain.enums import Category, Multiplicity, Classification
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
     get_edited_one_many
@@ -89,6 +89,8 @@ class Part2(TreeObject):
         self.parent_id = json.get('parent_id')  # type: Text
         self.description = json.get('description')  # type: Text
         self.multiplicity = json.get('multiplicity')  # type: Text
+        self.classification = json.get('classification')  # type: Text
+        self._proxy_model_id = json.get('proxy_source_id_name', None).get('id', None)  # type: Optional[Text]
 
         self._cached_children = None  # type: Optional[list]
 
@@ -485,12 +487,11 @@ class Part2(TreeObject):
         >>> proxy_basis_for_the_material_model = proxied_material_of_the_bolt_model.proxy_model()
 
         """
-        if self.category != Category.MODEL:
-            raise IllegalArgumentError("Part {} is not a model, therefore it cannot have a proxy model".format(self))
-        if self._json_data.get('proxy_source_id_name') and is_uuid(self._json_data['proxy_source_id_name'].get('id')):
-            return self._client.model(pk=self._json_data['proxy_source_id_name'].get('id'))
-        else:
-            raise NotFoundError("Part {} is not a proxy".format(self.name))
+        if self.category != Category.MODEL or self.classification != Classification.PRODUCT or not self._proxy_model_id:
+            raise IllegalArgumentError(
+                'Part "{}" is not a product model, therefore it cannot have a proxy model'.format(self))
+
+        return self._client.model(pk=self._proxy_model_id)
 
     def add(self, model: 'Part2', **kwargs) -> 'Part2':
         """Add a new child instance, based on a model, to this part.
