@@ -39,7 +39,7 @@ class TestParts(TestBetamax):
 
     def test_part_attributes(self):
         attributes = ['_client', '_json_data', 'id', 'name', 'created_at', 'updated_at', 'ref',
-                      'category', 'parent_id', 'description', 'multiplicity',
+                      'category', 'classification', 'parent_id', 'description', 'multiplicity',
                       '_cached_children', 'properties']
 
         obj = self.project.parts(limit=1)[0]
