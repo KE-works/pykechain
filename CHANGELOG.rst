@@ -1,23 +1,26 @@
 Change Log
 ==========
 
-This release brings some interesting changes to pykechain. We discovered suddenly that the `Activity` and `Part` where actual trees, being a sustainable company,we also implemented them as such.
+v3.5.0 (24FEB20)
+----------------
 
+This release brings some interesting changes to pykechain. We discovered suddenly that the `Activity` and `Part` where actual trees, being a sustainable company, we also implemented them as such. You will find additional helper methods on both models such as `child()`, `all_children()`, and `siblings()`. This release also bring many small updates from two 'bug hunting' pull requests.
+
+* :star: Creation of `Widgets` without a title but with a reference (or `ref`) now supported via the `show_title_value` keyword.
+* :star: Implemented `child` method for `Part2` and `Activity2` class. Also implemented "dunder" method `__call__()` as short-hand for `child()`, making tree searching much simpler to code, e.g: `child = root('part')('child')`
+* :star: Creation of `Widgets` without a title but with a reference (or `ref`) now supported via the `show_title_value` keyword.
+* :star: Added `Association` class and retrieval method `associations()` on the `Client` class.
+* :bug: Creation of `Activity` now uses parent's `classification` if provided.
+* :+1: Deprecated `get_all_children` helper function. It is replaced by the `all_children` method on the `Part2` and `Activity2` classes.
 * :+1: Added `classification` attribute to the `Part2` class.
 * :+1: Added caching of children to the `Activity2.children()` method.
 * :+1: Moved creation of WidgetsManager instances from the `widgets()` method of the Client to Activity class. The Client's method output is now consistent with the `create_widget(s)` methods. #693
 * :+1: Moved `delete_widget(s)` methods from WidgetsManager to Client class.
 * :+1: Refactored Widget's `delete` method to now calls its WidgetManager, if available, to maintain a consistent Widget list.
 * :+1: Added `__contains__` method to WidgetsManager to support "widget in manager" comparisons.
-* :star: Creation of `Widgets` without a title but with a reference (or `ref`) now supported via the `show_title_value` keyword.
-* :bug: Creation of `Activity` now uses parent's `classification` if provided.
-* :star: Implemented `child` method for `Part2` and `Activity2` class. Also implemented "dunder" method `__call__()` as short-hand for `child()`, making tree searching much simpler to code, e.g: `child = root('part')('child')`
-* :+1: Deprecated `get_all_children` helper function. It is replaced by the `all_children` method on the `Part2` and `Activity2` classes.
-* :star: Creation of `Widgets` without a title but with a reference (or `ref`) now supported via the `show_title_value` keyword.
-* :star: Added `Association` class and retrieval method `associations()` on the `Client` class.
 * :+1: Creation of `Activity` now uses parent's `classification` if provided.
 * :+1: Added `page_size` input to the `add_scope_widget` method of the WidgetManager class to set the pagination of the `Scope` widget.
-* :+1: dependent versions for development: sphinx (2.4.2), pre-commit (2.1.0), requests (2.23.0)
+* :+1: dependent versions for development: sphinx (2.4.3), pre-commit (2.1.0), requests (2.23.0)
 
 Backward incompatible changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
