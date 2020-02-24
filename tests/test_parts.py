@@ -44,8 +44,9 @@ class TestParts(TestBetamax):
 
         obj = self.project.parts(limit=1)[0]
         for attribute in attributes:
-            self.assertTrue(hasattr(obj, attribute),
-                            "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
+            with self.subTest(msg=attribute):
+                self.assertTrue(hasattr(obj, attribute), "Could not find '{}' in the object: '{}'".format(
+                    attribute, obj.__dict__.keys()))
 
     def test_retrieve_single_unknown(self):
         with self.assertRaises(NotFoundError):
