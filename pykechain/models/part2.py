@@ -5,7 +5,7 @@ import requests
 from six import text_type, string_types
 
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.enums import Category, Multiplicity
+from pykechain.enums import Category, Multiplicity, Classification
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
     get_edited_one_many
@@ -85,15 +85,16 @@ class Part2(TreeObject):
         self.scope_id = json.get('scope_id')
 
         self.ref = json.get('ref')  # type: Text
-        self.category = json.get('category')  # type: Text
-        self.parent_id = json.get('parent_id')  # type: Text
+        self.category = json.get('category')  # type: Category
         self.description = json.get('description')  # type: Text
         self.multiplicity = json.get('multiplicity')  # type: Text
-
-        self._cached_children = None  # type: Optional[list]
+        self.classification = json.get('classification')  # type: Classification
 
         self.properties = [Property2.create(p, client=self._client)
                            for p in sorted(json['properties'], key=lambda p: p.get('order', 0))]  # type: list
+
+        proxy_data = json.get('proxy_source_id_name', dict())  # type: Optional[Dict]
+        self._proxy_model_id = proxy_data.get('id') if proxy_data else None  # type: Optional[Text]
 
     def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional[Dict] = None):
         """Refresh the object in place."""
@@ -152,7 +153,7 @@ class Part2(TreeObject):
         """
         return self._client.scope(pk=self.scope_id, status=None)
 
-    def parent(self) -> Union['Part2', type(None)]:
+    def parent(self) -> Optional['Part2']:
         """Retrieve the parent of this `Part`.
 
         :return: the parent :class:`Part` of this part
@@ -164,10 +165,7 @@ class Part2(TreeObject):
         >>> bike = part.parent()
 
         """
-        if self.parent_id:
-            return self._client.part(pk=self.parent_id, category=self.category)
-        else:
-            return None
+        return self._client.part(pk=self.parent_id, category=self.category) if self.parent_id else None
 
     def children(self, **kwargs) -> Union['Partset', List['Part2']]:
         """Retrieve the children of this `Part` as `Partset`.
@@ -486,11 +484,12 @@ class Part2(TreeObject):
 
         """
         if self.category != Category.MODEL:
-            raise IllegalArgumentError("Part {} is not a model, therefore it cannot have a proxy model".format(self))
-        if self._json_data.get('proxy_source_id_name') and is_uuid(self._json_data['proxy_source_id_name'].get('id')):
-            return self._client.model(pk=self._json_data['proxy_source_id_name'].get('id'))
-        else:
-            raise NotFoundError("Part {} is not a proxy".format(self.name))
+            raise IllegalArgumentError(
+                'Part "{}" is not a product model, therefore it cannot have a proxy model'.format(self))
+        if self.classification != Classification.PRODUCT or not self._proxy_model_id:
+            raise NotFoundError('Part "{}" is not a product model, therefore it cannot have a proxy model'.format(self))
+
+        return self._client.model(pk=self._proxy_model_id)
 
     def add(self, model: 'Part2', **kwargs) -> 'Part2':
         """Add a new child instance, based on a model, to this part.
