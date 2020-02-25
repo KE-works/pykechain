@@ -55,15 +55,6 @@ class TestSetTitle(TestCase):
         self.assertEqual(title_in, meta['customTitle'])
         self.assertEqual(WidgetTitleValue.NO_TITLE, meta['showTitleValue'])
 
-    def test_custom_title(self):
-        custom_title = 'custom title'
-        meta, title = _set_title(dict(), custom_title=custom_title)
-
-        self.assertEqual(custom_title, title)
-
-        with self.assertWarns(PendingDeprecationWarning):
-            _set_title(dict(), custom_title=custom_title)
-
     def test_default_title(self):
         default = 'default title'
 

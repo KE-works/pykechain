@@ -691,7 +691,6 @@ class Part2(TreeObject):
                             name: Optional[Text] = None,
                             update_dict: Optional[Dict] = None,
                             properties_fvalues: Optional[List[Dict]] = None,
-                            refresh: Optional[bool] = None,
                             **kwargs) -> 'Part2':
         """
         Add a new part instance of a model as a child of this part instance and update its properties in one go.
@@ -727,8 +726,6 @@ class Part2(TreeObject):
         :type update_dict: dict or None
         :param properties_fvalues: (optional) keyword argument with raw list of properties update dicts
         :type properties_fvalues: list of dict or None
-        :param refresh: (optional) refresh the children of this part after successful completion, default to False
-        :type refresh: Optional[bool]
         :param kwargs: (optional) additional keyword arguments that will be passed inside the update request
         :return: the newly created :class:`Part`
         :raises NotFoundError: when the property name is not a valid property of this part
@@ -773,14 +770,6 @@ class Part2(TreeObject):
         # ensure that cached children are updated
         if self._cached_children is not None:
             self._cached_children.append(new_part_instance)
-        if refresh is not None:
-            import warnings
-            warnings.warn("The refresh argument on the `add_with_properties()` method will be removed in "
-                          "pykechain version 3.4.0 onwards. As the concept of 'refresh' had an effect based "
-                          "on deprecated behaviour of the KE-chain API.", PendingDeprecationWarning)
-            if refresh:
-                # refreshed the children of this part (which is the parent of the children to be refreshed.
-                self.children()
 
         # If any values were not set via the json, set them individually
         for exception_fvalue in exception_fvalues:
