@@ -9,7 +9,7 @@ from pykechain.enums import Category, Multiplicity, Classification
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
     get_edited_one_many
-from pykechain.models import Scope2, AnyProperty, PartSet
+from pykechain.models import Scope2
 from pykechain.models.property2 import Property2
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.utils import is_uuid, find
