@@ -642,20 +642,6 @@ class TestWidgetManagerInActivity(TestBetamax):
         # tearDown
         [w.delete() for w in new_widgets]
 
-    def test_compatibility_functions(self):
-        """Testing various compatibility function for equivalence to the 'customization' in WIM1/PIM1"""
-        for deprecated_method in [
-            'add_text_widget',
-            'add_super_grid_widget',
-            'add_property_grid_widget',
-            'add_paginated_grid_widget',
-            'add_script_widget',
-            'add_attachment_viewer_widget',
-            'add_navigation_bar_widget',
-        ]:
-            with self.subTest(msg=deprecated_method):
-                self.assertTrue(hasattr(self.wm, deprecated_method))
-
 
 class TestWidgetNavigationBarWidget(TestBetamax):
 
