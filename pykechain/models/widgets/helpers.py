@@ -207,7 +207,6 @@ def _check_prefilters(part_model: 'Part2', prefilters: Dict) -> List[Text]:  # n
             raise IllegalArgumentError(
                 'Pre-filters can only be set on Property models, received "{}".'.format(prop))
 
-        # TODO when a property is freshly created, the property has no "part_id" key in json_data.
         elif part_model.id != prop.part_id:
             raise IllegalArgumentError(
                 'Pre-filters can only be set on properties belonging to the selected Part model, found '
@@ -249,7 +248,6 @@ def _check_excluded_propmodels(part_model: 'Part2', property_models: List['AnyPr
             raise IllegalArgumentError('A part reference property can only exclude `Property` models, found '
                                        'category "{}" on property "{}"'.format(property_model.category,
                                                                                property_model.name))
-        # TODO when a property is freshly created, the property has no "part_id" key in json_data.
         elif part_model.id != property_model.part_id:
             raise IllegalArgumentError(
                 'A part reference property can only exclude properties belonging to the referenced Part model, '

@@ -482,12 +482,6 @@ class WidgetsManager(Iterable):
                                                method=self._client.property)  # type: 'Property2'
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
-        if 'height' in kwargs:
-            # TODO: Pending deprecation 3.4.0.
-            warnings.warn('`height` attribute will be deprecated in version 3.4.0, please adapt your code accordingly '
-                          'to use `custom_height`', PendingDeprecationWarning)
-            kwargs['custom_height'] = kwargs.pop('height')
-
         if image_fit not in ImageFitValue.values():
             raise IllegalArgumentError('`image_fit` must be an ImageFitValue option, "{}" is not.'.format(image_fit))
 
@@ -578,24 +572,12 @@ class WidgetsManager(Iterable):
             else:
                 button_dict['customText'] = str(input_dict['customText'])
 
-            if 'emphasized' in input_dict:  # emphasize is to be moved to emphasized
-                # TODO: pending deprecation in version 3.4.0
-                warnings.warn("The `emphasized` key in the navbar button will be deprecated in pykechain 3.4.0",
-                              PendingDeprecationWarning)
-                input_dict['emphasize'] = input_dict.pop('emphasized')
             button_dict['emphasize'] = input_dict.get('emphasize', False)
 
             button_dict['isDisabled'] = input_dict.get('isDisabled', False)
 
         meta = _initiate_meta(kwargs, activity=self._activity_id, ignores=('showHeightValue',))
         meta['taskButtons'] = task_buttons
-
-        # TODO: pending deprecation in version 3.4.0
-        if alignment and alignment is NavigationBarAlignment.START:
-            warnings.warn("In KE-chain 3 we use the LEFT alignment, instead of START alignment of the task "
-                          "navigationbar widgets. Will be autocorrected to LEFT alignment for now. Please correct "
-                          "your code as this is pending deprecation at version 3.4.0", PendingDeprecationWarning)
-            alignment = NavigationBarAlignment.LEFT
 
         if alignment and alignment not in NavigationBarAlignment.values():
             raise IllegalArgumentError("`alignment` should be one of '{}'".format(NavigationBarAlignment.values()))
@@ -854,12 +836,6 @@ class WidgetsManager(Iterable):
             raise IllegalArgumentError("When using the add_notebook_widget, notebook must be a Service or Service id. "
                                        "Type is: {}".format(type(notebook)))
 
-        if 'height' in kwargs:
-            # TODO: Pending deprecation 3.4.0.
-            warnings.warn('`height` attribute will be deprecated in version 3.4.0, please '
-                          'adapt your code accordingly to use `custom_height`', PendingDeprecationWarning)
-            kwargs['custom_height'] = kwargs.pop('height')
-
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
         meta, title = _set_title(meta, title=title, default_title=notebook.name, **kwargs)
 
@@ -1034,12 +1010,6 @@ class WidgetsManager(Iterable):
         """
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
         meta, title = _set_title(meta, title=title, default_title=WidgetTypes.MULTICOLUMN, **kwargs)
-
-        if 'height' in kwargs:
-            # TODO: Pending deprecation 3.4.0.
-            warnings.warn('`height` attribute will be deprecated in version 3.4.0, please adapt your code accordingly '
-                          'to use `custom_height`', PendingDeprecationWarning)
-            kwargs['custom_height'] = kwargs.pop('height')
 
         widget = self.create_widget(
             widget_type=WidgetTypes.MULTICOLUMN,
@@ -1376,52 +1346,6 @@ class WidgetsManager(Iterable):
             **kwargs,
         )
         return widget
-
-    # Compatibility Functions
-    #
-
-    # TODO: this is pending deprecation in version 3.4.0
-    def add_text_widget(self, *args, **kwargs):
-        """Add a KE-chain HTML widget to the activity."""
-        warnings.warn("The `add_text_widget()` method will be deprecated in favor of `add_html_widget` in version "
-                      "3.4.0", PendingDeprecationWarning)
-        return self.add_html_widget(*args, **kwargs)
-
-    def add_super_grid_widget(self, *args, **kwargs):
-        """Add a KE-chain Supergrid widget to the activity."""
-        warnings.warn("The `add_super_grid_widget()` method will be deprecated in favor of `add_supergrid_widget` "
-                      "in version 3.4.0", PendingDeprecationWarning)
-        return self.add_supergrid_widget(*args, **kwargs)
-
-    def add_property_grid_widget(self, *args, **kwargs):
-        """Add a KE-chain Propertygrid widget to the activity."""
-        warnings.warn("The `add_property_grid_widget()` method will be deprecated in favor of "
-                      "`add_propertygrid_widget` in version 3.4.0", PendingDeprecationWarning)
-        return self.add_propertygrid_widget(*args, **kwargs)
-
-    def add_paginated_grid_widget(self, *args, **kwargs):
-        """Add a KE-chain Filteredgrid widget to the activity."""
-        warnings.warn("The `add_paginated_grid_widget()` method will be deprecated in favor of "
-                      "`add_filteredgrid_widget` in version 3.4.0", PendingDeprecationWarning)
-        return self.add_filteredgrid_widget(*args, **kwargs)
-
-    def add_script_widget(self, *args, **kwargs):
-        """Add a KE-chain Service widget to the activity."""
-        warnings.warn("The `add_script_widget()` method will be deprecated in favor of `add_service_widget` in "
-                      "version 3.4.0", PendingDeprecationWarning)
-        return self.add_service_widget(*args, **kwargs)
-
-    def add_attachment_viewer_widget(self, *args, **kwargs):
-        """Add a KE-chain Attachmentviewer widget to the activity."""
-        warnings.warn("The `add_attachment_viewer_widget()` method will be deprecated in favor of "
-                      "`add_attachmentviewer_widget` in version 3.4.0", PendingDeprecationWarning)
-        return self.add_attachmentviewer_widget(*args, **kwargs)
-
-    def add_navigation_bar_widget(self, *args, **kwargs):
-        """Add a KE-chain Tasknavigationbar widget to the activity."""
-        warnings.warn("The `add_navigation_bar_widget()` method will be deprecated in favor of "
-                      "`add_tasknavigationbar_widget` in version 3.4.0", PendingDeprecationWarning)
-        return self.add_tasknavigationbar_widget(*args, **kwargs)
 
     #
     # Widget manager methods
