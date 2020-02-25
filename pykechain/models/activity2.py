@@ -81,7 +81,6 @@ class Activity2(TreeObject, TagsMixin):
         elif 'assignees_ids' in self._json_data and self._json_data.get('assignees_ids'):
             assignees_ids_str = ','.join([str(id) for id in self._json_data.get('assignees_ids')])
             return self._client.users(id__in=assignees_ids_str, is_hidden=False)
-        return None
 
     @property
     def scope_id(self):
@@ -100,8 +99,7 @@ class Activity2(TreeObject, TagsMixin):
         if self._scope_id is None:
             self.refresh()
             if self._scope_id is None:
-                raise NotFoundError("This activity '{}'({}) does not belong to a scope, something is weird!".
-                                    format(self.name, self.id))
+                raise NotFoundError("Activity '{}' has no related scope!".format(self))
         return self._scope_id
 
     @property
@@ -261,23 +259,6 @@ class Activity2(TreeObject, TagsMixin):
             raise IllegalArgumentError("One can only create a task under a subprocess.")
         return self._client.create_activity(self, *args, **kwargs)
 
-    def subprocess(self) -> 'Activity2':
-        """Retrieve the subprocess in which this activity is defined.
-
-        .. warning::
-            This method is deprecated for newer releases of KE-chain (version 2.9.0 and higher). Please
-            use the :func:`Activity2.parent()` method.
-
-        If this is a task on top level, it raises NotFounderror.
-
-        :return: a subprocess :class:`Activity2`
-        :raises NotFoundError: when it is a task in the top level of a project
-        :raises APIError: when other error occurs
-
-        """
-        raise ('Subprocess function is outdated in KE-chain 2.9.0, use `Activity2.parent()` method', DeprecationWarning)
-        # return self.parent()
-
     def parent(self) -> 'Activity2':
         """Retrieve the parent in which this activity is defined.
 
@@ -294,8 +275,7 @@ class Activity2(TreeObject, TagsMixin):
 
         """
         if self.parent_id is None:
-            raise NotFoundError("Cannot find subprocess for this task '{}', "
-                                "as this task exist on top level.".format(self.name))
+            raise NotFoundError("Cannot find parent for task '{}', as this task exist on top level.".format(self))
         return self._client.activity(pk=self.parent_id, scope=self.scope_id)
 
     def children(self, **kwargs) -> List['Activity2']:
@@ -381,8 +361,7 @@ class Activity2(TreeObject, TagsMixin):
 
         """
         if self.parent_id is None:
-            raise NotFoundError("Cannot find subprocess for this task '{}', "
-                                "as this task exist on top level.".format(self.name))
+            raise NotFoundError("Cannot find siblings for task '{}', as this task exist on top level.".format(self))
         return self._client.activities(parent_id=self.parent_id, scope=self.scope_id, **kwargs)
 
     def all_children(self) -> List['Activity2']:
@@ -764,68 +743,6 @@ class Activity2(TreeObject, TagsMixin):
         """
         widgets = self._client.widgets(activity=self.id, **kwargs)
         return WidgetsManager(widgets=widgets, activity=self, client=self._client)
-
-    def customization(self):
-        """
-        Get a customization object representing the customization of the activity.
-
-        .. versionadded:: 1.11
-
-        :return: An instance of :class:`customization.ExtCustomization`
-
-        Example
-        -------
-        >>> activity = project.activity(name='Customizable activity')
-        >>> customization = activity.customization()
-        >>> part_to_show = project.part(name='Bike')
-        >>> customization.add_property_grid_widget(part_to_show,custom_title="My super bike")
-
-        """
-        from .customization import ExtCustomization
-        if self._client.match_app_version(label='widget', version='>=3.0.0'):
-            raise DeprecationWarning("Customizations are deprecated. We introduced the `Widget` concept in version 3.")
-
-        # For now, we only allow customization in an Ext JS context
-        return ExtCustomization(activity=self, client=self._client)
-
-    def configure(self, inputs, outputs):
-        """
-        Configure activity input and output.
-
-        You need to provide a list of input and output :class:`Property`. Does not work with lists of propery id's.
-
-        :param inputs: iterable of input property models
-        :type inputs: list(:class:`Property`)
-        :param outputs: iterable of output property models
-        :type outputs: list(:class:`Property`)
-        :raises APIError: when unable to configure the activity
-        """
-        def _get_propertyset(proplist):
-            """Make it into a unique list of properties to configure for either inputs or outputs."""
-            from pykechain.models import Property
-            propertyset = []
-            for property in proplist:
-                if isinstance(property, Property):
-                    propertyset.append(property.id)
-                elif is_uuid(property):
-                    propertyset.append(property)
-            return list(set(propertyset))
-
-        url = self._client._build_url('activity', activity_id='{}/update_associations'.format(self.id))
-
-        if not all([p._json_data.get('category') == Category.MODEL for p in inputs]) and \
-                not all([p._json_data.get('category') == Category.MODEL for p in outputs]):
-            raise IllegalArgumentError('All Properties need to be of category MODEL to configure a task')
-
-        response = self._client._request('PUT', url, json={
-            'inputs': _get_propertyset(inputs),
-            'outputs': _get_propertyset(outputs)
-        })
-
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not configure activity")
-
-        self.refresh(json=response.json().get('results')[0])
 
     def download_as_pdf(self, target_dir=None, pdf_filename=None, paper_size=PaperSize.A4,
                         paper_orientation=PaperOrientation.PORTRAIT, include_appendices=False):
