@@ -1,4 +1,3 @@
-import warnings
 from typing import Dict, Optional, Union, Text, Tuple, List
 
 from six import text_type
