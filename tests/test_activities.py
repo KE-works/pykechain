@@ -165,8 +165,9 @@ class TestActivities(TestBetamax):
 
         obj = self.project.activity('Specify wheel diameter')
         for attribute in attributes:
-            self.assertTrue(hasattr(obj, attribute),
-                            "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
+            with self.subTest(msg=attribute):
+                self.assertTrue(hasattr(obj, attribute),
+                                "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
 
     def test_retrieve_unknown_activity(self):
         with self.assertRaises(NotFoundError):
@@ -628,7 +629,6 @@ class TestActivity2SpecificTests(TestBetamax):
         self.assertTrue(len(associated_models) == 3)
 
 
-# @skip('Does not work in PIM2 until KEC-19193 is resolved')
 class TestActivityDownloadAsPDF(TestBetamax):
 
     def test_activity2_download_as_pdf(self):

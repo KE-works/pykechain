@@ -15,7 +15,7 @@ from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, 
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.models.widgets.widgets_manager import WidgetsManager
-from pykechain.utils import is_uuid, parse_datetime
+from pykechain.utils import parse_datetime
 
 
 class Activity2(TreeObject, TagsMixin):
