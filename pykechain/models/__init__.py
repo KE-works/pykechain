@@ -24,6 +24,14 @@ from .service import Service, ServiceExecution
 from .team import Team
 from .user import User
 
+AnyProperty = Union[
+    'Property2',
+    'MultiReferenceProperty2',
+    'AttachmentProperty2',
+    'SelectListProperty2',
+    'DatetimeProperty2'
+]
+
 __all__ = (
     'Base',
     'Scope',
@@ -47,13 +55,6 @@ __all__ = (
     'Service',
     'ServiceExecution',
     'User',
-    'Team'
+    'Team',
+    'AnyProperty'
 )
-
-AnyProperty = Union[
-    'Property2',
-    'MultiReferenceProperty2',
-    'AttachmentProperty2',
-    'SelectListProperty2',
-    'DatetimeProperty2'
-]

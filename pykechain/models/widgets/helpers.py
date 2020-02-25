@@ -103,22 +103,26 @@ def _set_title(meta: Dict,
             show_title_value = WidgetTitleValue.NO_TITLE
         else:
             show_title_value = WidgetTitleValue.CUSTOM_TITLE
+
     elif show_title_value not in WidgetTitleValue.values():
         raise IllegalArgumentError('`show_title_value` must be a WidgetTitleValue enum option, "{}" is not. '
                                    'Choose from: {}'.format(show_title_value, WidgetTitleValue.values()))
 
-    if title is False:
+    if show_title_value == WidgetTitleValue.DEFAULT:
+        title_meta = None
         if default_title is None:
             raise IllegalArgumentError("If `title` is set to False the `default_title` is used and cannot be None. "
                                        "Provide a `default_title` argument and ensure it is not None.")
-        else:
-            title = default_title
+        title_ref = default_title
+    else:
+        title_meta = title
+        title_ref = title
 
     meta.update({
         "showTitleValue": show_title_value,
-        "customTitle": title
+        "customTitle": title_meta,
     })
-    return meta, title
+    return meta, title_ref
 
 
 def _initiate_meta(kwargs, activity, ignores=()):
