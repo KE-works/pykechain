@@ -34,6 +34,7 @@ class TestSetTitle(TestCase):
         self.assertIn('customTitle', meta)
 
     def test_title(self):
+        """Test parser when changing the `title` input."""
         title_in = 'title'
         meta, title = _set_title(dict(), title=title_in)
         self.assertEqual(title_in, title)
@@ -44,7 +45,7 @@ class TestSetTitle(TestCase):
         default = 'default'
         meta, title = _set_title(dict(), title=title_in, default_title=default)
         self.assertEqual(default, title)
-        self.assertEqual(default, meta['customTitle'])
+        self.assertIsNone(meta['customTitle'])
         self.assertEqual(WidgetTitleValue.DEFAULT, meta['showTitleValue'])
 
         title_in = None
@@ -65,26 +66,45 @@ class TestSetTitle(TestCase):
 
     def test_default_title(self):
         default = 'default title'
-        meta, title = _set_title(dict(), title=False, default_title=default)
+
+        title_in = False
+        meta, title = _set_title(dict(), title=title_in, default_title=default)
 
         self.assertEqual(default, title)
 
-        title = 'title'
+        title_in = 'title'
+        meta, title = _set_title(dict(), title=title_in, default_title=default)
 
-        meta, title = _set_title(dict(), title=title, default_title=default)
         self.assertNotEqual(default, title)
 
         with self.assertRaises(IllegalArgumentError, msg='`default_title` must provided if title is `False`!'):
             _set_title(dict(), title=False)
 
     def test_show_title_value(self):
+        """Test parser when changing the `show_title_value` input."""
         title_in = 'title'
-        for show_title_value in WidgetTitleValue.values():
-            with self.subTest(msg=show_title_value):
-                meta, title = _set_title(dict(), title=title_in, show_title_value=show_title_value)
+        default = 'default'
 
-                self.assertEqual(show_title_value, meta['showTitleValue'])
-                self.assertEqual(title_in, title, msg='Title should not change depending on `show_title_value`!')
+        meta, title = _set_title(
+            dict(), title=title_in, show_title_value=WidgetTitleValue.NO_TITLE, default_title=default)
+
+        self.assertEqual(title_in, title)
+        self.assertEqual(title_in, meta['customTitle'])
+        self.assertEqual(WidgetTitleValue.NO_TITLE, meta['showTitleValue'])
+
+        meta, title = _set_title(
+            dict(), title=title_in, show_title_value=WidgetTitleValue.CUSTOM_TITLE, default_title=default)
+
+        self.assertEqual(title_in, title)
+        self.assertEqual(title_in, meta['customTitle'])
+        self.assertEqual(WidgetTitleValue.CUSTOM_TITLE, meta['showTitleValue'])
+
+        meta, title = _set_title(
+            dict(), title=title_in, show_title_value=WidgetTitleValue.DEFAULT, default_title=default)
+
+        self.assertEqual(default, title)
+        self.assertIsNone(meta['customTitle'])
+        self.assertEqual(WidgetTitleValue.DEFAULT, meta['showTitleValue'])
 
         with self.assertRaises(IllegalArgumentError, msg='Unrecognized show_title_value must be caught!'):
             # noinspection PyTypeChecker
@@ -423,10 +443,18 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(len(self.wm), 1 + 3)
 
     def test_add_html_widget(self):
-        widget = self.wm.add_html_widget(html='Or is this just fantasy?', title='Is this the real life?')
+        widget_1 = self.wm.add_html_widget(html='Or is this just fantasy?', title='Is this the real life?')
 
-        self.assertIsInstance(widget, HtmlWidget)
+        self.assertIsInstance(widget_1, HtmlWidget)
         self.assertEqual(len(self.wm), 1 + 1)
+
+        widget_2 = self.wm.add_html_widget(
+            title='Caught in a landslide',
+            show_title_value=WidgetTitleValue.NO_TITLE,
+            html='No escape from reality',
+        )
+
+        self.assertEqual(widget_2.ref, slugify_ref('Caught in a landslide'))
 
     def test_metapanel_widget(self):
         self.wm.add_metapanel_widget(
