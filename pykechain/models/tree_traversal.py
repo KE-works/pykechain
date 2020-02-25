@@ -19,7 +19,7 @@ class TreeObject(Base, ABC):
 
         self._cached_children = None  # type: Optional[List['TreeObject']]
 
-    def __call__(self, *args, **kwargs) -> Base:
+    def __call__(self, *args, **kwargs) -> 'TreeObject':
         """Short-hand version of the `child` method."""
         return self.child(*args, **kwargs)
 

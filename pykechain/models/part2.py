@@ -9,7 +9,7 @@ from pykechain.enums import Category, Multiplicity, Classification
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
     get_edited_one_many
-from pykechain.models import Scope2
+from pykechain.models import Scope2, AnyProperty, PartSet
 from pykechain.models.property2 import Property2
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.utils import is_uuid, find
@@ -153,7 +153,7 @@ class Part2(TreeObject):
         """
         return self._client.scope(pk=self.scope_id, status=None)
 
-    def parent(self) -> Optional['Part2']:
+    def parent(self) -> 'Part2':
         """Retrieve the parent of this `Part`.
 
         :return: the parent :class:`Part` of this part
@@ -167,8 +167,8 @@ class Part2(TreeObject):
         """
         return self._client.part(pk=self.parent_id, category=self.category) if self.parent_id else None
 
-    def children(self, **kwargs) -> Union['Partset', List['Part2']]:
-        """Retrieve the children of this `Part` as `Partset`.
+    def children(self, **kwargs) -> Union['PartSet', List['Part2']]:
+        """Retrieve the children of this `Part` as `PartSet`.
 
         When you call the :func:`Part.children()` method without any additional filtering options for the children,
         the children are cached to help speed up subsequent calls to retrieve the children. The cached children are
@@ -269,7 +269,7 @@ class Part2(TreeObject):
 
         Example
         -------
-        >>> bike = client.part('Bike')
+        >>> bike = project.part('Bike')
         >>> bike.populate_descendants(batch=150)
 
         """
@@ -308,8 +308,8 @@ class Part2(TreeObject):
         self.populate_descendants()
         return super().all_children()
 
-    def siblings(self, **kwargs) -> Union['Partset', List['Part2']]:
-        """Retrieve the siblings of this `Part` as `Partset`.
+    def siblings(self, **kwargs) -> Union['PartSet', List['Part2']]:
+        """Retrieve the siblings of this `Part` as `PartSet`.
 
         Siblings are other Parts sharing the same parent of this `Part`, including the part itself.
 
@@ -404,7 +404,7 @@ class Part2(TreeObject):
     # CRUD operations
     #
 
-    def edit(self, name: Optional[Text] = None, description: Optional[Text] = None, **kwargs) -> 'Part2':
+    def edit(self, name: Optional[Text] = None, description: Optional[Text] = None, **kwargs) -> None:
         """Edit the details of a part (model or instance).
 
         For an instance you can edit the Part instance name and the part instance description. To alter the values
@@ -419,7 +419,7 @@ class Part2(TreeObject):
         :param description: (optional) description of the part
         :type description: basestring or None
         :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
-        :return: the updated object if successful
+        :return: None
         :raises IllegalArgumentError: when the type or value of an argument provided is incorrect
         :raises APIError: in case an Error occurs
 
@@ -737,8 +737,8 @@ class Part2(TreeObject):
 
         Examples
         --------
-        >>> bike = client.scope('Bike Project').part('Bike')
-        >>> wheel_model = client.scope('Bike Project').model('Wheel')
+        >>> bike = project.part('Bike')
+        >>> wheel_model = project.model('Wheel')
         >>> bike.add_with_properties(wheel_model, 'Wooden Wheel', {'Spokes': 11, 'Material': 'Wood'})
 
         """
@@ -846,8 +846,8 @@ class Part2(TreeObject):
 
         Example
         -------
-        >>> model_to_copy = client.model(name='Model to be copied')
-        >>> bike = client.model('Bike')
+        >>> model_to_copy = project.model(name='Model to be copied')
+        >>> bike = project.model('Bike')
         >>> model_to_copy.copy(target_parent=bike, name='Copied model',
         >>>                    include_children=True,
         >>>                    include_instances=True)
@@ -911,8 +911,8 @@ class Part2(TreeObject):
 
         Example
         -------
-        >>> model_to_move = client.model(name='Model to be moved')
-        >>> bike = client.model('Bike')
+        >>> model_to_move = project.model(name='Model to be moved')
+        >>> bike = project.model('Bike')
         >>> model_to_move.move(target_parent=bike, name='Moved model',
         >>>                    include_children=True,
         >>>                    include_instances=True)
@@ -1145,7 +1145,7 @@ class Part2(TreeObject):
 
         Example
         -------
-        >>> front_wheel = client.scope('Bike Project').part('Front Wheel')
+        >>> front_wheel = project.part('Front Wheel')
         >>> front_wheel_properties = front_wheel.as_dict()
         {'Diameter': 60.8,
          'Spokes': 24,

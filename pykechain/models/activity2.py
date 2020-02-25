@@ -249,7 +249,7 @@ class Activity2(TreeObject, TagsMixin):
     # methods
     #
 
-    def create(self, *args, **kwargs):
+    def create(self, *args, **kwargs) -> 'Activity2':
         """Create a new activity belonging to this subprocess.
 
         See :func:`pykechain.Client.create_activity` for available parameters.
@@ -261,7 +261,7 @@ class Activity2(TreeObject, TagsMixin):
             raise IllegalArgumentError("One can only create a task under a subprocess.")
         return self._client.create_activity(self, *args, **kwargs)
 
-    def subprocess(self):
+    def subprocess(self) -> 'Activity2':
         """Retrieve the subprocess in which this activity is defined.
 
         .. warning::
@@ -278,7 +278,7 @@ class Activity2(TreeObject, TagsMixin):
         raise ('Subprocess function is outdated in KE-chain 2.9.0, use `Activity2.parent()` method', DeprecationWarning)
         # return self.parent()
 
-    def parent(self):
+    def parent(self) -> 'Activity2':
         """Retrieve the parent in which this activity is defined.
 
         If this is a task on top level, it raises NotFounderror.
@@ -623,7 +623,7 @@ class Activity2(TreeObject, TagsMixin):
 
         return update_dict
 
-    def delete(self):
+    def delete(self) -> bool:
         """Delete this activity.
 
         :return: True when successful
