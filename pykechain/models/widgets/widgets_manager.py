@@ -510,7 +510,7 @@ class WidgetsManager(Iterable):
             meta=meta,
             title=title,
             parent=parent_widget,
-            readable_models=[attachment_property.model()],
+            readable_models=[attachment_property.model_id],
             **kwargs,
         )
 
@@ -685,9 +685,9 @@ class WidgetsManager(Iterable):
         meta, title = _set_title(meta, title=title, default_title=part_instance.name, **kwargs)
 
         if all_readable and not readable_models:
-            readable_models = part_instance.model().properties
+            readable_models = [p.model_id for p in part_instance.properties]
         if all_writable and not writable_models:
-            writable_models = part_instance.model().properties
+            writable_models = [p.model_id for p in part_instance.properties]
 
         widget = self.create_widget(
             widget_type=WidgetTypes.PROPERTYGRID,
@@ -1258,7 +1258,7 @@ class WidgetsManager(Iterable):
             meta=meta,
             title=title,
             parent=parent_widget,
-            readable_models=[attachment_property.model()],
+            readable_models=[attachment_property.model_id],
             **kwargs,
         )
         return widget
