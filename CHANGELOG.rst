@@ -1,9 +1,11 @@
 Change Log
 ==========
 
+v3.5.1 (25FEB20)
+----------------
+
 * :bug: Default widget title is now respected when widgets are created with `title=False`.
 * :+1: Improved typing of `TreeObject` methods in its subclasses.
-
 
 v3.5.0 (24FEB20)
 ----------------
