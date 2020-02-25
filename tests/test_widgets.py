@@ -423,10 +423,18 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(len(self.wm), 1 + 3)
 
     def test_add_html_widget(self):
-        widget = self.wm.add_html_widget(html='Or is this just fantasy?', title='Is this the real life?')
+        widget_1 = self.wm.add_html_widget(html='Or is this just fantasy?', title='Is this the real life?')
 
-        self.assertIsInstance(widget, HtmlWidget)
+        self.assertIsInstance(widget_1, HtmlWidget)
         self.assertEqual(len(self.wm), 1 + 1)
+
+        widget_2 = self.wm.add_html_widget(
+            title='Caught in a landslide',
+            show_title_value=WidgetTitleValue.NO_TITLE,
+            html='No escape from reality',
+        )
+
+        self.assertEqual(widget_2.ref, slugify_ref('Caught in a landslide'))
 
     def test_metapanel_widget(self):
         self.wm.add_metapanel_widget(
