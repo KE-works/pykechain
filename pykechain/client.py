@@ -608,7 +608,7 @@ class Client(object):
             activity_id=activity,
             widget_id=widget,
             limit=batch,
-            scope_id=scope_id
+            scope_id=scope_id,
         )
 
         if self.match_app_version(label='pim', version='>=3.0.0'):
@@ -622,7 +622,7 @@ class Client(object):
             request_params.update(dict(
                 bucket=bucket,
                 parent=parent,
-                model=model.id if model else None
+                model=model.id if model else None,
             ))
             url = self._build_url('parts')
 
@@ -632,7 +632,8 @@ class Client(object):
         response = self._request('GET', url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve parts: {}".format(response.content))
+            raise NotFoundError("Could not retrieve parts. Request: {}\nResponse: {}".format(
+                request_params, response.content))
 
         data = response.json()
 
