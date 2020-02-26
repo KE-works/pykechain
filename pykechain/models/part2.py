@@ -231,6 +231,9 @@ class Part2(TreeObject):
             else:
                 part_list = [c for c in self.children() if c.id == pk]
         else:
+            part_list = []
+
+        if not part_list:
             # Refresh children list from KE-chain by using a keyword-argument.
             if name:
                 part_list = self.children(name=name)
