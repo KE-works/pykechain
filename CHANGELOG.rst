@@ -1,6 +1,8 @@
 Change Log
 ==========
 
+* :bug: `child()` method of Part2 now robustly retrieves child parts created after retrieval of the parent itself, regardless of the `_cached_children`.
+
 v3.5.1 (25FEB20)
 ----------------
 
