@@ -68,13 +68,14 @@ class MultiReferenceProperty2(Property2):
         if not self._value:
             return None
         if not self._cached_values and isinstance(self._value, (list, tuple)):
-            assert all([isinstance(v, dict) for v in self._value]), \
+            assert all([isinstance(v, dict) and 'id' in v for v in self._value]), \
                 "Expect all elements in the _value to be a dict with 'name' and 'id', got '{}'.".format(self._value)
             ids = [v.get('id') for v in self._value]
-            if self.category == Category.MODEL and len(ids) == 1:
-                self._cached_values = [self._client.part(pk=ids[0], category=None)]
-            elif self.category == Category.INSTANCE:
-                self._cached_values = list(self._client.parts(id__in=','.join(ids), category=None))
+            if ids:
+                if self.category == Category.MODEL:
+                    self._cached_values = [self._client.part(pk=ids[0], category=None)]
+                elif self.category == Category.INSTANCE:
+                    self._cached_values = list(self._client.parts(id__in=','.join(ids), category=None))
         return self._cached_values
 
     @value.setter
