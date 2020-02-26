@@ -75,7 +75,17 @@ class MultiReferenceProperty2(Property2):
                 if self.category == Category.MODEL:
                     self._cached_values = [self._client.part(pk=ids[0], category=None)]
                 elif self.category == Category.INSTANCE:
-                    self._cached_values = list(self._client.parts(id__in=','.join(ids), category=None))
+                    # Retrieve the referenced model for low-permissions scripts to enable use of the `id__in` key
+                    if False:  # TODO Check for script permissions in order to skip the model() retrieval
+                        models = [None]
+                    else:
+                        models = self.model().value
+                    if models:
+                        self._cached_values = list(self._client.parts(
+                            id__in=','.join(ids),
+                            model=models[0],
+                            category=None,
+                        ))
         return self._cached_values
 
     @value.setter
