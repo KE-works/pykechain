@@ -145,3 +145,23 @@ class TestPartRetrieve(TestBetamax):
 
         self.assertIsInstance(all_children, list)
         self.assertEqual(6, len(all_children), msg='Number of models has changed, expected 6')
+
+    def test_child_after_construction(self):
+        """Test retrieval of child after creating the model via another Part2 object of the same KE-chain Part."""
+        bike_for_adding = self.project.model(name='Bike')
+        bike_for_getting = self.project.model(name='Bike')
+
+        current_children = bike_for_getting.children()
+
+        self.assertEqual(5, len(current_children))
+
+        child = bike_for_adding.add_model(name='__Temp child')
+        try:
+            retrieved_child = bike_for_getting.child('__Temp child')
+
+            self.assertEqual(child, retrieved_child)
+        except NotFoundError as e:
+            raise e
+        finally:
+            # tearDown
+            child.delete()
