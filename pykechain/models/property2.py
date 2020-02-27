@@ -52,7 +52,7 @@ class Property2(Base):
 
     def __init__(self, json, **kwargs):
         """Construct a Property from a json object."""
-        super(Property2, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self.output = json.get('output')  # type: bool
         self.model_id = json.get('model_id')  # type: Optional[Text]
@@ -84,9 +84,9 @@ class Property2(Base):
 
     def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional = None) -> None:
         """Refresh the object in place."""
-        super(Property2, self).refresh(json=json,
-                                       url=self._client._build_url('property2', property_id=self.id),
-                                       extra_params=API_EXTRA_PARAMS['property2'])
+        super().refresh(json=json,
+                        url=self._client._build_url('property2', property_id=self.id),
+                        extra_params=API_EXTRA_PARAMS['property2'])
 
     def has_value(self) -> bool:
         """Predicate to indicate if the property has a value set.
