@@ -1,17 +1,16 @@
 import datetime
 import os
 import time
-import warnings
 from typing import List, Text, Dict, Optional, Union
 
 import requests
 from requests.compat import urljoin  # type: ignore
-from six import text_type
 
 from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_EXTRA_PARAMS
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
+from pykechain.models.input_checks import check_datetime, check_text, check_list_of_text, check_enum
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.models.widgets.widgets_manager import WidgetsManager
@@ -47,15 +46,16 @@ class Activity2(TreeObject, TagsMixin):
 
         self._scope_id = json.get('scope_id')
 
-        self.ref = json.get('ref')
-        self.description = json.get('description', '')
-        self.status = json.get('status')
+        self.ref = json.get('ref')  # type: Text
+        self.description = json.get('description', '')  # type: Text
+        self.status = json.get('status')  # type: ActivityStatus
         self.classification = json.get('classification')  # type: ActivityClassification
         self.activity_type = json.get('activity_type')  # type: ActivityType
         self.start_date = parse_datetime(json.get('start_date'))
         self.due_date = parse_datetime(json.get('due_date'))
+        self.assignees_ids = json.get('assignees_ids', [])  # type: List[Text]
 
-        self._tags = json.get('tags')
+        self._tags = json.get('tags', [])  # type: List[Text]
 
     def refresh(self, *args, **kwargs):
         """Refresh the object in place."""
@@ -67,20 +67,15 @@ class Activity2(TreeObject, TagsMixin):
     #
 
     @property
-    def assignees(self) -> Optional[List['User']]:
+    def assignees(self) -> List['User']:
         """List of assignees to the activity.
 
-        Provides a list of `User` objects or an empty list. If no `assignees_ids` are in the API call, then
-        returns None.
+        Provides a list of `User` objects or an empty list.
 
-        :return: a list of `User`'s or an empty list.
-        :rtype: list or None
+        :return: a list of `User` objects or an empty list.
+        :rtype: list
         """
-        if 'assignees_ids' in self._json_data and self._json_data.get('assignees_ids') == list():
-            return []
-        elif 'assignees_ids' in self._json_data and self._json_data.get('assignees_ids'):
-            assignees_ids_str = ','.join([str(id) for id in self._json_data.get('assignees_ids')])
-            return self._client.users(id__in=assignees_ids_str, is_hidden=False)
+        return self._client.users(id__in=self.assignees_ids, is_hidden=False) if self.assignees_ids else []
 
     @property
     def scope_id(self):
@@ -421,6 +416,7 @@ class Activity2(TreeObject, TagsMixin):
         )
 
         all_tasks = [self] + self.all_children()
+        new_assignees = update_dict.get('assignees_ids', list())
 
         # Create update-json
         data = list()
@@ -430,7 +426,6 @@ class Activity2(TreeObject, TagsMixin):
             if not overwrite:
                 # Append the existing assignees of the task to the new assignees
                 existing_assignees = [u.id for u in task.assignees]
-                new_assignees = task_specific_update_dict.get('assignees_ids', list())
                 task_specific_update_dict['assignees_ids'] = list(set(existing_assignees + new_assignees))
 
             task_specific_update_dict.update({'id': task.id})
@@ -441,14 +436,6 @@ class Activity2(TreeObject, TagsMixin):
         response = self._client._request('PUT', url, json=data)
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Activity ({})".format(response))
-
-        # # Initialize all tasks with response
-        # for task, response_json in zip(all_tasks, response.json().get('results')):
-        #     task.__init__(client=self._client, json=response_json)
-        #     if task == self:
-        #         self.__init__(client=self._client, json=response_json)
-
-        # return all_tasks
 
     def edit(
             self,
@@ -516,26 +503,15 @@ class Activity2(TreeObject, TagsMixin):
         >>> my_task.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
 
         """
-        update_dict = {'id': self.id}
-        if name is not None:
-            if isinstance(name, (str, text_type)):
-                update_dict.update({'name': name})
-                self.name = name
-            else:
-                raise IllegalArgumentError('Name should be a string')
+        self.name = check_text(text=name, key='name') or self.name
+        self.description = check_text(text=description, key='description') or self.description
 
-        if description is not None:
-            if isinstance(description, (str, text_type)):
-                update_dict.update({'description': description})
-                self.description = description
-            else:
-                raise IllegalArgumentError('Description should be a string')
-
-        if tags is not None:
-            if isinstance(tags, (list, tuple, set)):
-                update_dict.update({'tags': tags})
-            else:
-                raise IllegalArgumentError('tags should be a an array (list, tuple, set) of strings')
+        update_dict = {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'tags': check_list_of_text(tags, 'tags')
+        }
 
         self._validate_edit_arguments(
             update_dict=update_dict,
@@ -557,48 +533,24 @@ class Activity2(TreeObject, TagsMixin):
 
     def _validate_edit_arguments(self, update_dict, start_date, due_date, assignees, assignees_ids, status):
         """Verify inputs provided in both the `edit` and `edit_cascade_down` methods."""
-        if start_date is not None:
-            if isinstance(start_date, datetime.datetime):
-                if not start_date.tzinfo:
-                    warnings.warn("The startdate '{}' is naive and not timezone aware, use pytz.timezone info. "
-                                  "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
-                update_dict.update({'start_date': start_date.isoformat(sep='T')})
-            else:
-                raise IllegalArgumentError('Start date should be a datetime.datetime() object')
+        if assignees and assignees_ids:
+            raise IllegalArgumentError('Provide either assignee names or their ids, but not both.')
 
-        if due_date is not None:
-            if isinstance(due_date, datetime.datetime):
-                if not due_date.tzinfo:
-                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
-                                  "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
-                update_dict.update({'due_date': due_date.isoformat(sep='T')})
-            else:
-                raise IllegalArgumentError('Due date should be a datetime.datetime() object')
+        assignees = set(assignees) or set(assignees_ids)
 
-        if isinstance(assignees_ids, (list, tuple)) or isinstance(assignees, (list, tuple)):
-            members = self.scope.members()
+        check_list_of_text(assignees, 'assignees')
+        update_assignees_ids = [m.get('id') for m in self.scope.members()
+                                if m.get('id') in assignees or m.get('username') in assignees]
 
-            if isinstance(assignees_ids, (list, tuple)):
-                update_assignees_ids = [m.get('id') for m in members if m.get('id') in assignees_ids]
-                if len(update_assignees_ids) != len(assignees_ids):
-                    raise NotFoundError("All assignees should be a member of the project")
-            elif isinstance(assignees, (list, tuple)):
-                update_assignees_ids = [m.get('id') for m in members if m.get('username') in assignees]
-                if len(update_assignees_ids) != len(assignees):
-                    raise NotFoundError("All assignees should be a member of the project")
-            else:
-                raise IllegalArgumentError("Provide the usernames either as list of usernames of user id's")
+        if len(update_assignees_ids) != len(assignees):
+            raise NotFoundError('All assignees should be a member of the project.')
 
-            update_dict.update({'assignees_ids': update_assignees_ids})
-        elif assignees_ids or assignees:
-            raise IllegalArgumentError("If assignees_ids or assignees are provided, they should be a list or tuple")
-
-        if status is not None:
-            if isinstance(status, (str, text_type)) and status in ActivityStatus.values():
-                update_dict.update({'status': status})
-            else:
-                raise IllegalArgumentError('Status should be a string and in the list of acceptable '
-                                           'status strings: {}'.format(ActivityStatus.values()))
+        update_dict.update({
+            'assignees_ids': update_assignees_ids,
+            'start_date': check_datetime(dt=start_date, key='start_date'),
+            'due_date': check_datetime(dt=due_date, key='due_date'),
+            'status': check_enum(status, ActivityStatus, 'status'),
+        })
 
         return update_dict
 

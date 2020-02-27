@@ -10,6 +10,7 @@ from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, 
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
     get_edited_one_many
 from pykechain.models import Scope2
+from pykechain.models.input_checks import check_text
 from pykechain.models.property2 import Property2
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.utils import is_uuid, find
@@ -308,7 +309,8 @@ class Part2(TreeObject):
         :returns list of child objects
         :rtype List
         """
-        self.populate_descendants()
+        if self._cached_children is None:
+            self.populate_descendants()
         return super().all_children()
 
     def siblings(self, **kwargs) -> Union['PartSet', List['Part2']]:
@@ -353,7 +355,7 @@ class Part2(TreeObject):
             model_id = self._json_data.get('model_id')
             return self._client.model(pk=model_id)
         else:
-            raise NotFoundError("Part {} has no model".format(self.name))
+            raise NotFoundError('Part "{}" already is a model'.format(self))
 
     def instances(self, **kwargs) -> Union['PartSet', List['Part2']]:
         """
@@ -382,7 +384,7 @@ class Part2(TreeObject):
         if self.category == Category.MODEL:
             return self._client.parts(model=self, category=Category.INSTANCE, **kwargs)
         else:
-            raise NotFoundError("Part {} is not a model".format(self.name))
+            raise NotFoundError('Part "{}" is not a model, hence it has no instances.'.format(self))
 
     def instance(self) -> 'Part2':
         """
@@ -399,9 +401,9 @@ class Part2(TreeObject):
             return instances_list[0]
         elif len(instances_list) > 1:
             raise MultipleFoundError("Part {} has more than a single instance. "
-                                     "Use the `Part.instances()` method".format(self.name))
+                                     "Use the `Part.instances()` method".format(self))
         else:
-            raise NotFoundError("Part {} has no instance".format(self.name))
+            raise NotFoundError("Part {} has no instance".format(self))
 
     #
     # CRUD operations
@@ -440,17 +442,16 @@ class Part2(TreeObject):
         >>> front_fork.edit(name='Front Fork basemodel', description='Some description here')
 
         """
-        update_dict = {'id': self.id}
-        if name is not None:
-            if not isinstance(name, (string_types, text_type)):
-                raise IllegalArgumentError("name should be provided as a string")
-            update_dict.update({'name': name})
-        if description is not None:
-            if not isinstance(description, (string_types, text_type)):
-                raise IllegalArgumentError("description should be provided as a string")
-            update_dict.update({'description': description})
+        self.name = check_text(name, 'name') or self.name
+        self.description = check_text(description, 'description') or self.description
 
-        if kwargs is not None:  # pragma: no cover
+        update_dict = {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description
+        }
+
+        if kwargs:  # pragma: no cover
             update_dict.update(**kwargs)
 
         response = self._client._request('PUT',
@@ -460,9 +461,6 @@ class Part2(TreeObject):
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Part ({})".format(response))
-
-        if name:
-            self.name = name
 
     def proxy_model(self) -> 'Part2':
         """
@@ -648,21 +646,13 @@ class Part2(TreeObject):
         exception_fvalues = list()
         update_dict = update_dict or dict()
 
-        if part.category == Category.INSTANCE:
-            key = 'id'
-        else:
-            key = 'model_id'
+        key = 'id' if part.category == Category.INSTANCE else 'model_id'
 
-        from pykechain.models import Base
+        from pykechain.models import Base, AttachmentProperty2, DatetimeProperty2
 
         def make_serializable(value):
             # if the value is a reference property to another 'Base' Part, replace with its ID
-            if isinstance(value, Base):
-                return value.id
-            else:
-                return value
-
-        from pykechain.models import AttachmentProperty2, DatetimeProperty2
+            return value.id if isinstance(value, Base) else value
 
         for prop_name_or_id, property_value in update_dict.items():
             property_to_update = part.property(prop_name_or_id)
@@ -674,13 +664,10 @@ class Part2(TreeObject):
             if isinstance(property_to_update, DatetimeProperty2) and isinstance(property_value, datetime.datetime):
                 property_value = DatetimeProperty2.to_iso_format(property_value)
 
-            updated_p = dict(
-                value=property_value
-            )
-            if is_uuid(prop_name_or_id):
-                updated_p[key] = prop_name_or_id
-            else:
-                updated_p[key] = property_to_update.id
+            updated_p = {
+                'value': property_value,
+                key: property_to_update.id,
+            }
 
             if isinstance(property_to_update, AttachmentProperty2):
                 exception_fvalues.append(updated_p)
@@ -745,19 +732,21 @@ class Part2(TreeObject):
         if self.category != Category.INSTANCE:
             raise APIError("Part should be of category INSTANCE")
 
+        if not isinstance(model, Part2) or model.category != Category.MODEL:
+            raise IllegalArgumentError('`model` must be a Part2 object of category MODEL, "{}" is not.'.format(model))
+
         if properties_fvalues and not isinstance(properties_fvalues, list):
             raise IllegalArgumentError("optional `properties_fvalues` need to be provided as a list of dicts")
 
-        name = name or model.name
-        url = self._client._build_url('parts2_new_instance')
-
+        instance_name = check_text(name, 'name') or model.name
         properties_fvalues, exception_fvalues = self._parse_update_dict(model, properties_fvalues, update_dict)
 
+        url = self._client._build_url('parts2_new_instance')
         response = self._client._request(
             'POST', url,
             params=API_EXTRA_PARAMS['parts2'],
             json=dict(
-                name=name,
+                name=instance_name,
                 model_id=model.id,
                 parent_id=self.id,
                 properties_fvalues=properties_fvalues,
@@ -768,7 +757,7 @@ class Part2(TreeObject):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError('{}: {}'.format(str(response), response.content))
 
-        new_part_instance = Part2(response.json()['results'][0], client=self._client)
+        new_part_instance = Part2(response.json()['results'][0], client=self._client)  # type: Part2
 
         # ensure that cached children are updated
         if self._cached_children is not None:
@@ -777,8 +766,7 @@ class Part2(TreeObject):
         # If any values were not set via the json, set them individually
         for exception_fvalue in exception_fvalues:
             property_model_id = exception_fvalue['model_id']
-            property_instance = [p for p in new_part_instance.properties
-                                 if p._json_data['model_id'] == property_model_id][0]
+            property_instance = find(new_part_instance.properties, lambda p: p.model_id == property_model_id)
             property_instance.value = exception_fvalue['value']
 
         return new_part_instance
@@ -812,7 +800,7 @@ class Part2(TreeObject):
 
         """
         parent = self.parent()
-        return self._client._create_clone(parent, self, **kwargs)
+        return self._client._create_clone(parent=parent, part=self, **kwargs)
 
     def copy(self,
              target_parent: 'Part2',
@@ -1035,7 +1023,7 @@ class Part2(TreeObject):
         if response.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete part: {} with id {}: ({})".format(self.name, self.id, response))
 
-    def order_properties(self, property_list: Optional[List[Text]] = None) -> None:
+    def order_properties(self, property_list: Optional[List[Union['AnyProperty', Text]]] = None) -> None:
         """
         Order the properties of a part model using a list of property objects or property names or property id's.
 
@@ -1077,7 +1065,7 @@ class Part2(TreeObject):
 
         if self.category != Category.MODEL:
             raise APIError("Part should be of category MODEL")
-        if not isinstance(property_list, list):
+        if not isinstance(property_list, list) or not all(isinstance(p, (str, Property2)) for p in property_list):
             raise IllegalArgumentError('Expected a list of strings or Property() objects, got a {} object'.
                                        format(type(property_list)))
 
