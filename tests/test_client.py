@@ -9,7 +9,6 @@ import warnings
 from pykechain.enums import ScopeStatus
 from pykechain.models import Team
 from pykechain.models.scope2 import Scope2
-from pykechain.utils import parse_datetime
 from pykechain.client import Client
 from pykechain.exceptions import ForbiddenError, ClientError, NotFoundError, IllegalArgumentError
 from tests.classes import TestBetamax
@@ -85,20 +84,17 @@ class TestClient(TestCase):
 class TestClientLive(TestBetamax):
 
     def setUp(self):
-        """
-        SetUp the test.
-        """
-        super(TestClientLive, self).setUp()
+        super().setUp()
         self.temp_scope = None
 
     def tearDown(self):
         """Teardown the test, remove the scope.
 
-        When you create a scope, assign it to self.scope such that it is deleted when the test is complete
+        When you create a scope, assign it to self.temp_scope such that it is deleted when the test is complete
         """
         if self.temp_scope:
             self.temp_scope.delete()
-        super(TestClientLive, self).tearDown()
+        super().tearDown()
 
     def test_login(self):
         self.assertTrue(self.project.parts())
@@ -113,7 +109,7 @@ class TestClientLive(TestBetamax):
     def test_create_scope(self):
         # setUp
         client = self.client
-        scope_name = 'New scope (pykchain testing - remove me)'
+        scope_name = 'New scope (pykechain testing - remove me)'
         scope_description = 'This is a new scope for testing'
         scope_status = ScopeStatus.ACTIVE
         scope_tags = ['test_tag', 'new_project_tag']
@@ -133,19 +129,18 @@ class TestClientLive(TestBetamax):
 
         # testing
         self.assertEqual(self.temp_scope.name, scope_name)
-        self.assertEqual(scope_start_date, parse_datetime(self.temp_scope._json_data['start_date']))
-        self.assertEqual(scope_due_date, parse_datetime(self.temp_scope._json_data['due_date']))
+        self.assertEqual(scope_start_date, self.temp_scope.start_date)
+        self.assertEqual(scope_due_date, self.temp_scope.due_date)
         self.assertIn(scope_tags[0], self.temp_scope.tags)
         self.assertIn(scope_tags[1], self.temp_scope.tags)
+        self.assertEqual(scope_team, self.temp_scope.team)
 
     def test_create_scope_with_team_name(self):
         # setUp
-        client = self.client
-
         scope_name = 'New scope with the team name'
         scope_team_name = 'Team No.1'
 
-        self.temp_scope = client.create_scope(
+        self.temp_scope = self.client.create_scope(
             name=scope_name,
             team=scope_team_name
         )
@@ -157,13 +152,11 @@ class TestClientLive(TestBetamax):
 
     def test_create_scope_with_team_uuid(self):
         # setUp
-        client = self.client
-
         scope_name = 'New scope with team uuid'
         scope_team_name = 'Team No.1'
-        scope_team_id = client.team(name=scope_team_name).id
+        scope_team_id = self.client.team(name=scope_team_name).id
 
-        self.temp_scope = client.create_scope(
+        self.temp_scope = self.client.create_scope(
             name=scope_name,
             team=scope_team_id
         )
@@ -175,8 +168,7 @@ class TestClientLive(TestBetamax):
 
     def test_create_scope_no_arguments(self):
         # setUp
-        client = self.client
-        self.temp_scope = client.create_scope(name='New scope no arguments')
+        self.temp_scope = self.client.create_scope(name='New scope no arguments')
 
         # testing
         self.assertEqual(self.temp_scope.name, 'New scope no arguments')
@@ -184,75 +176,32 @@ class TestClientLive(TestBetamax):
         self.assertFalse(self.temp_scope.tags)
 
     def test_create_scope_with_wrong_arguments(self):
-        # setUp
-        client = self.client
-
         # testing
         with self.assertRaises(IllegalArgumentError):
-            client.create_scope(name=12)
+            self.client.create_scope(name=12)
         with self.assertRaises(IllegalArgumentError):
-            client.create_scope(name='Failed scope', status='LIMBO')
+            self.client.create_scope(name='Failed scope', status='LIMBO')
         with self.assertRaises(IllegalArgumentError):
-            client.create_scope(name='Failed scope', description=True)
+            self.client.create_scope(name='Failed scope', description=True)
         with self.assertRaises(IllegalArgumentError):
-            client.create_scope(name='Failed scope', tags='One tag no list')
+            self.client.create_scope(name='Failed scope', tags='One tag no list')
         with self.assertRaises(IllegalArgumentError):
-            client.create_scope(name='Failed scope', tags=[12, 'this', 'fails'])
+            self.client.create_scope(name='Failed scope', tags=[12, 'this', 'fails'])
         with self.assertRaises(IllegalArgumentError):
-            client.create_scope(name='Failed scope', team=['Fake team'])
+            self.client.create_scope(name='Failed scope', team=['Fake team'])
 
     def test_clone_scope(self):
         # setUp
-        client = self.client
-        clone = client.clone_scope(source_scope=self.project)
+        self.temp_scope = self.client.clone_scope(source_scope=self.project)
 
         # testing
-        try:
-            self.assertIsInstance(clone, Scope2)
-            self.assertEqual(clone.name, 'CLONE - {}'.format(self.project.name))
-            self.assertEqual(clone.status, self.project.status)
-            self.assertEqual(clone.start_date, self.project.start_date)
-            self.assertEqual(clone.due_date, self.project.due_date)
-            self.assertEqual(clone.description, self.project.description)
-            self.assertListEqual(clone.tags, self.project.tags)
-        except Exception as e:
-            clone.delete()
-            raise Exception(e)
-
-    @skip("Test does not work at all")
-    def test_clone_asynchronous(self):
-        """ Careful with deleting the cloned scope if async=True: The response is the source scope! """
-
-        client = self.client
-        name = '___Async cloned scope TARGETCLONE'
-
-        original_scope = client.create_scope(
-            name='___Async to be cloned scope SOURCE',
-        )
-        time.sleep(3)
-        clone = client.clone_scope(
-            name=name,
-            source_scope=original_scope,
-            asynchronous=True,
-        )
-
-        # testing
-        self.assertIsInstance(clone, Scope2)
-        self.assertEqual(original_scope.id, clone.id)
-
-        # teardown
-        counter = 0
-        retrieved_clone = None
-        while counter < 5:
-            try:
-                retrieved_clone = client.scope(name=name, counter=counter) # add counter to the query to ensure that the casettes are recorded correctly
-            except NotFoundError:
-                counter += 1
-                time.sleep(3)
-            if retrieved_clone:
-
-                break
-        self.assertIsInstance(retrieved_clone, Scope2)
+        self.assertIsInstance(self.temp_scope, Scope2)
+        self.assertEqual(self.temp_scope.name, 'CLONE - {}'.format(self.project.name))
+        self.assertEqual(self.temp_scope.status, self.project.status)
+        self.assertEqual(self.temp_scope.start_date, self.project.start_date)
+        self.assertEqual(self.temp_scope.due_date, self.project.due_date)
+        self.assertEqual(self.temp_scope.description, self.project.description)
+        self.assertListEqual(self.temp_scope.tags, self.project.tags)
 
     def test_clone_scope_with_arguments(self):
         # setUp
@@ -263,8 +212,7 @@ class TestClientLive(TestBetamax):
         tags = ['one', 'two']
         team = self.project.team
 
-        client = self.client
-        clone = client.clone_scope(
+        self.temp_scope = self.client.clone_scope(
             name=name,
             source_scope=self.project,
             status=status,
@@ -275,18 +223,54 @@ class TestClientLive(TestBetamax):
             team=team,
         )
 
-        try:
-            self.assertIsInstance(clone, Scope2)
-            self.assertEqual(clone.name, name)
-            self.assertEqual(clone.status, status)
-            self.assertEqual(clone.start_date, now)
-            self.assertEqual(clone.due_date, now)
-            self.assertEqual(clone.description, description)
-            self.assertEqual(clone.team, team)
-            self.assertListEqual(clone.tags, tags)
-        except Exception as e:
-            clone.delete()
-            raise Exception(e)
+        self.assertIsInstance(self.temp_scope, Scope2)
+        self.assertEqual(self.temp_scope.name, name)
+        self.assertEqual(self.temp_scope.status, status)
+        self.assertEqual(self.temp_scope.start_date, now)
+        self.assertEqual(self.temp_scope.due_date, now)
+        self.assertEqual(self.temp_scope.description, description)
+        self.assertEqual(self.temp_scope.team, team)
+        self.assertListEqual(self.temp_scope.tags, tags)
+
+
+@skip(reason='Not supported yet due to AssertionError within KE-chain itself (clone_scope_async `text` assertion.)')
+class TestCloneScopeAsync(TestBetamax):
+
+    def setUp(self):
+        super().setUp()
+        self.temp_scope = None
+        self.source = self.client.create_scope(
+            name='_Async to be cloned scope SOURCE',
+        )
+        time.sleep(3)
+
+    def tearDown(self):
+        self.source.delete()
+        if self.temp_scope:
+            self.temp_scope.delete()
+        super().tearDown()
+
+    def test_clone_asynchronous(self):
+        # setUp
+        clone_name = '_Async cloned scope TARGET'
+
+        self.client.clone_scope(
+            name=clone_name,
+            source_scope=self.source,
+            asynchronous=True,
+        )
+
+        for _ in range(5):
+            try:
+                self.temp_scope = self.client.scope(name=clone_name)
+            except NotFoundError:
+                time.sleep(3)
+                continue
+            else:
+                break
+
+        # testing
+        self.assertIsInstance(self.temp_scope, Scope2)
 
 
 @skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")

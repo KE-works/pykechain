@@ -23,7 +23,7 @@ from pykechain.models.user import User
 from pykechain.models.widgets.widget import Widget
 from pykechain.utils import is_uuid, find
 from .__about__ import version as pykechain_version
-from .models.input_checks import _check_datetime, _check_tags, _check_team
+from .models.input_checks import check_datetime, check_list_of_text, check_team, check_text, check_enum
 
 
 class Client(object):
@@ -412,9 +412,9 @@ class Client(object):
 
         """
         request_params = {
-            'name': name,
+            'name': check_text(text=name, key='name'),
             'id': pk,
-            'status': status,
+            'status': check_enum(status, ScopeStatus, 'status'),
         }
 
         if self.match_app_version(label='scope', version='>=3.0.0', default=False):
@@ -484,7 +484,7 @@ class Client(object):
         """
         request_params = {
             'id': pk,
-            'name': name,
+            'name': check_text(text=name, key='name'),
             'scope': scope
         }
 
@@ -612,8 +612,8 @@ class Client(object):
 
         request_params = dict(
             id=pk,
-            name=name,
-            category=category,
+            name=check_text(text=name, key='name'),
+            category=check_enum(category, Category, 'category'),
             activity_id=activity,
             widget_id=widget,
             limit=batch,
@@ -734,9 +734,9 @@ class Client(object):
         :raises NotFoundError: When no `Property` is found
         """
         request_params = {
-            'name': name,
+            'name': check_text(text=name, key='name'),
             'id': pk,
-            'category': category
+            'category': check_enum(category, Category, 'category')
         }
         if kwargs:
             request_params.update(**kwargs)
@@ -805,7 +805,7 @@ class Client(object):
         :raises NotFoundError: When no `Service` objects are found
         """
         request_params = {
-            'name': name,
+            'name': check_text(text=name, key='name'),
             'id': pk,
             'scope': scope
         }
@@ -873,7 +873,7 @@ class Client(object):
         :raises NotFoundError: When no `ServiceExecution` object is found
         """
         request_params = {
-            'name': name,
+            'name': check_text(text=name, key='name'),
             'id': pk,
             'service': service,
             'scope': scope
@@ -930,7 +930,7 @@ class Client(object):
         :raises NotFoundError: when a user could not be found
         """
         request_params = {
-            'username': username,
+            'username': check_text(text=username, key='username'),
             'id': pk,
         }
         if kwargs:
@@ -989,7 +989,7 @@ class Client(object):
         :raises NotFoundError: when a team could not be found
         """
         request_params = {
-            'name': name,
+            'name': check_text(text=name, key='name'),
             'id': pk,
             'is_hidden': is_hidden
         }
@@ -1119,49 +1119,24 @@ class Client(object):
         else:
             raise IllegalArgumentError('`parent` must be an Activity or UUID, "{}" is neither'.format(parent))
 
-        if activity_type not in ActivityType.values():
-            raise IllegalArgumentError("Please provide accepted activity_type (provided:{} accepted:{})".
-                                       format(activity_type, ActivityType.values()))
-
-        if status not in ActivityStatus.values():
-            raise IllegalArgumentError('`status` must be an ActivityStatus option, "{}" is not.'.format(status))
-
-        if description is not None:
-            if not isinstance(description, Text):
-                raise IllegalArgumentError('`description` must be text, "{}" is not.'.format(description))
-
-        if start_date is not None:
-            if not isinstance(start_date, datetime.datetime):
-                raise IllegalArgumentError('`start_date` must be a datetime object, "{}" is not.'.format(start_date))
-
-        if due_date is not None:
-            if not isinstance(due_date, datetime.datetime):
-                raise IllegalArgumentError('`due_date` must be a datetime object, "{}" is not.'.format(due_date))
-
         if classification is None:
             if parent_classification is None:
                 classification = ActivityClassification.WORKFLOW
             else:
                 classification = parent_classification
-        elif classification not in ActivityClassification.values():
-            raise IllegalArgumentError(
-                '`classification` must be an ActivityClassification option, "{}" is not.'.format(classification))
-
-        if tags is not None:
-            if not isinstance(tags, (list, tuple, set)) or not all(isinstance(t, Text) for t in tags):
-                raise IllegalArgumentError("Provided tags should be a list, tuple or set of strings. "
-                                           "Received type '{}'.".format(type(tags)))
+        else:
+            classification = check_enum(classification, ActivityClassification, 'classification')
 
         data = {
-            "name": name,
+            "name": check_text(text=name, key='name'),
             "parent_id": parent,
-            "status": status,
-            "activity_type": activity_type,
+            "status": check_enum(status, ActivityStatus, 'status'),
+            "activity_type": check_enum(activity_type, ActivityType, 'activity_type'),
             "classification": classification,
-            "description": description,
-            "start_date": start_date,
-            "due_date": due_date,
-            "tags": tags,
+            "description": check_text(text=description, key='description'),
+            "start_date": check_datetime(dt=start_date, key='start_date'),
+            "due_date": check_datetime(dt=due_date, key='due_date'),
+            "tags": check_list_of_text(tags, key='tags'),
         }
 
         response = self._request('POST', self._build_url('activities'), data=data,
@@ -1220,8 +1195,7 @@ class Client(object):
         if model.category != Category.MODEL:
             raise IllegalArgumentError("The models should be of category 'MODEL'")
 
-        if not name:
-            name = model.name
+        name = check_text(text=name, key='name') or model.name
 
         data = dict(name=name, parent_id=parent.id, model_id=model.id)
         return self._create_part(action="new_instance", data=data, **kwargs)
@@ -1255,6 +1229,7 @@ class Client(object):
         else:
             raise IllegalArgumentError("`parent` should be either a parent part or a uuid, got '{}'".format(parent))
 
+        name = check_text(text=name, key='name')
         data = dict(name=name, parent_id=parent.id, multiplicity=multiplicity)
         return self._create_part(action="create_child_model", data=data, **kwargs)
 
@@ -1323,7 +1298,7 @@ class Client(object):
             raise IllegalArgumentError("`properties_fvalues` need to be provided as a list of dicts")
 
         data = dict(
-            name=name,
+            name=check_text(text=name, key='name'),
             parent_id=parent.id,
             multiplicity=multiplicity,
             category=Category.MODEL,
@@ -1435,6 +1410,7 @@ class Client(object):
         if parent.category != Category.MODEL:
             raise IllegalArgumentError("The parent should be of category MODEL")
 
+        name = check_text(text=name, key='name')
         data = dict(name=name, model_id=model.id, parent_id=parent.id, multiplicity=multiplicity)
         return self._create_part(action='create_proxy_model', data=data, **kwargs)
 
@@ -1485,9 +1461,8 @@ class Client(object):
         #                   "values to the backend.", UserWarning)
         #     property_type = '{}_VALUE'.format(property_type.upper())
 
-        if property_type not in PropertyType.values():
-            raise IllegalArgumentError("Please provide a valid propertytype, please use one of `enums.PropertyType`. "
-                                       "Got: '{}'".format(property_type))
+        check_text(text=name, key='name')
+        check_enum(property_type, PropertyType, 'property_type')
 
         # because the references value only accepts a single 'model_id' in the default value, we need to convert this
         # to a single value from the list of values.
@@ -1617,24 +1592,14 @@ class Client(object):
         :raises APIError: In case of failure of the creation or failure to upload the pkg_path
         :raises OSError: In case of failure to locate the `pkg_path`
         """
-        if service_type not in ServiceType.values():
-            raise IllegalArgumentError("The type should be of one of {}".format(ServiceType.values()))
-
-        if environment_version not in ServiceEnvironmentVersion.values():
-            raise IllegalArgumentError("The environment version should be of one of {}".
-                                       format(ServiceEnvironmentVersion.values()))
-
-        version = version or '1.0'  # 'script_version': ['This field may not be null.']
-        description = description or ''  # 'description': ['This field may not be null.']
-
         data = dict(
-            name=name,
+            name=check_text(name, 'name'),
             scope=scope,  # not scope_id!
-            description=description,
-            script_type=service_type,
-            script_version=version,
-            env_version=environment_version,
-            run_as=run_as
+            description=check_text(text=description, key='description') or '',
+            script_type=check_enum(service_type, ServiceType, 'service_type'),
+            script_version=check_text(text=version, key='version') or '1.0',
+            env_version=check_enum(environment_version, ServiceEnvironmentVersion, 'environment_version'),
+            run_as=check_enum(run_as, ServiceScriptUser, 'run_as')
         )
 
         response = self._request('POST', self._build_url('services'), json=data)
@@ -1687,33 +1652,16 @@ class Client(object):
         :return: the created :class:`models.Scope`
         :raises APIError: In case of failure of the creation of new Scope
         """
-        if not isinstance(name, (str, text_type)):
-            raise IllegalArgumentError("'Name' should be provided as a string, was provided as '{}'".
-                                       format(type(name)))
-        if status not in ScopeStatus.values():
-            raise IllegalArgumentError("Please provide a valid scope status, please use one of `enums.ScopeStatus`. "
-                                       "Got: '{}'".format(status))
-        if description and not isinstance(description, (str, text_type)):
-            raise IllegalArgumentError("'Description' should be provided as a string, was provided as '{}'".
-                                       format(type(description)))
-
-        tags = _check_tags(tags)
-
-        start_date = _check_datetime(dt=start_date, key='start_date')
-        start_date = start_date if start_date else datetime.datetime.now().isoformat(sep='T')
-
-        due_date = _check_datetime(dt=due_date, key='due_date')
-
-        team_id = _check_team(team=team, method=self.team)
+        start_date = start_date if start_date else datetime.datetime.now()
 
         data_dict = {
-            'name': name,
-            'status': status,
-            'text': description,
-            'tags': tags,
-            'start_date': start_date,
-            'due_date': due_date,
-            'team_id': team_id,
+            'name': check_text(name, 'name'),
+            'status': check_enum(status, ScopeStatus, 'status'),
+            'text': check_text(description, 'description'),
+            'tags': check_list_of_text(tags, 'tags'),
+            'start_date': check_datetime(dt=start_date, key='start_date'),
+            'due_date': check_datetime(dt=due_date, key='due_date'),
+            'team_id': check_team(team=team, method=self.team),
         }
 
         # injecting additional kwargs for those cases that you need to add extra options.
@@ -1767,8 +1715,19 @@ class Client(object):
 
         return True
 
-    def clone_scope(self, source_scope, name=None, status=None, start_date=None, due_date=None,
-                    description=None, tags=None, team=None, scope_options=None, asynchronous=False):
+    def clone_scope(
+            self,
+            source_scope: Union[Scope, Scope2],
+            name: Optional[Text] = None,
+            status: Optional[ScopeStatus] = None,
+            start_date: Optional[datetime.datetime] = None,
+            due_date: Optional[datetime.datetime] = None,
+            description: Optional[Text] = None,
+            tags: Optional[List[Text]] = None,
+            team: Optional[Union[Team, Text]] = None,
+            scope_options: Optional[Dict] = None,
+            asynchronous: Optional[bool] = False,
+    ) -> Optional[Union[Scope, Scope2]]:
         """
         Clone a Scope.
 
@@ -1808,88 +1767,32 @@ class Client(object):
         if not isinstance(source_scope, (Scope, Scope2)):
             raise IllegalArgumentError('`source_scope` should be a `Scope` object')
 
-        if self.match_app_version(label="scope", version=">=3.1.0"):
-            data_dict = {"async_mode": asynchronous}
+        if scope_options is not None and not isinstance(scope_options, dict):
+            raise IllegalArgumentError("`scope_options` need to be a dictionary")
+
+        if self.match_app_version(label="pim", version=">=3.0.0"):
+            options_key = 'scope_options'
+            team_key = 'team_id'
+            async_key = 'async_mode'
+            scope_key = 'scope_id'
         else:
-            data_dict = {"async": asynchronous}
+            options_key = 'options'
+            team_key = 'team'
+            async_key = 'async'
+            scope_key = 'id'
 
-        if self.match_app_version(label="scope", version=">=3.0.0"):
-            data_dict['scope_id'] = source_scope.id
-        else:
-            data_dict['id'] = source_scope.id
-
-        if name is not None:
-            if not isinstance(name, (string_types, text_type)):
-                raise IllegalArgumentError("`name` should be a string")
-            data_dict['name'] = str(name)
-
-        if start_date is not None:
-            if isinstance(start_date, datetime.datetime):
-                if not start_date.tzinfo:
-                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
-                                  "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
-                data_dict['start_date'] = start_date.isoformat(sep='T')
-            else:
-                raise IllegalArgumentError('Start date should be a datetime.datetime() object')
-        else:
-            start_date = source_scope.start_date
-
-        if due_date is not None:
-            if isinstance(due_date, datetime.datetime):
-                if not due_date.tzinfo:
-                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
-                                  "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
-                data_dict['due_date'] = due_date.isoformat(sep='T')
-            else:
-                raise IllegalArgumentError('Due date should be a datetime.datetime() object')
-        else:
-            due_date = source_scope.due_date
-
-        if description is not None:
-            if not isinstance(description, (text_type, string_types)):
-                raise IllegalArgumentError("`description` should be a string")
-            else:
-                data_dict['text'] = description
-
-        if status is not None:
-            if status not in ScopeStatus.values():
-                raise IllegalArgumentError("`status` should be one of '{}'".format(ScopeStatus.values()))
-            else:
-                data_dict['status'] = str(status)
-
-        if tags is not None:
-            if not isinstance(tags, (list, tuple, set)):
-                raise IllegalArgumentError("'Tags' should be provided as a list, tuple or set, was provided as '{}'".
-                                           format(type(tags)))
-            if not (all([isinstance(t, (str, text_type)) for t in tags])):
-                raise IllegalArgumentError("Each tag in the list of tags should be provided as a string")
-            data_dict['tags'] = tags
-        else:
-            tags = source_scope.tags
-
-        if team is not None:
-            if isinstance(team, Team):
-                team_id = team.id
-            elif is_uuid(team):
-                team_id = team
-            elif isinstance(team, (text_type, string_types)):
-                team_id = self.team(name=team).id
-            else:
-                raise IllegalArgumentError("`team` should be a name of an existing team or UUID of a team")
-
-            if self.match_app_version(label="scope", version=">=3.0.0"):
-                data_dict['team_id'] = team_id
-            else:
-                data_dict['team'] = team_id
-
-        if scope_options is not None:
-            if not isinstance(scope_options, dict):
-                raise IllegalArgumentError("`scope_options` need to be a dictionary")
-            else:
-                if self.match_app_version(label="pim", version=">=3.0.0"):
-                    data_dict['scope_options'] = scope_options
-                else:
-                    data_dict['options'] = scope_options
+        data_dict = {
+            scope_key: source_scope.id,
+            'name': check_text(name, 'name') or 'CLONE - {}'.format(source_scope.name),
+            'start_date': check_datetime(dt=start_date, key='start_date') or source_scope.start_date,
+            'due_date': check_datetime(dt=due_date, key='due_date') or source_scope.due_date,
+            'text': check_text(description, 'description') or '',
+            'status': check_enum(status, ScopeStatus, 'status'),
+            'tags': check_list_of_text(tags, 'tags') or source_scope.tags,
+            options_key: scope_options,
+            team_key: check_team(team=team, method=self.team),
+            async_key: asynchronous,
+        }
 
         if self.match_app_version(label="scope", version=">=3.0.0"):
             url = self._build_url('scopes2_clone')
@@ -1909,6 +1812,9 @@ class Client(object):
                 raise ForbiddenError("Could not clone scope, {}: {}".format(str(response), response.content))
             else:
                 raise APIError("Could not clone scope, {}: {}".format(str(response), response.content))
+
+        if asynchronous:
+            return None
 
         if self.match_app_version(label="scope", version=">=3.0.0"):
             cloned_scope = Scope2(response.json()['results'][0], client=source_scope._client)
@@ -1947,14 +1853,6 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: When an API Error occurs
         """
-        if not isinstance(name, (string_types, text_type)):
-            raise IllegalArgumentError('`name` should be string')
-
-        if description is None:
-            description = ''
-        elif not isinstance(description, (string_types, text_type)):
-            raise IllegalArgumentError('`description` should be string')
-
         if options is None:
             options = dict()
         elif not isinstance(options, dict):
@@ -1973,8 +1871,8 @@ class Client(object):
             raise IllegalArgumentError('the `user` is not of a type `User`, a `username` or a user id')
 
         data = dict(
-            name=name,
-            description=description,
+            name=check_text(name, 'name'),
+            description=check_text(description, 'description'),
             options=options,
             is_hidden=is_hidden
         )
@@ -2017,8 +1915,8 @@ class Client(object):
         else:
             raise IllegalArgumentError("`activity` should be either an `Activity` or a uuid.")
 
-        if not isinstance(widget_type, (string_types, text_type)) and widget_type not in WidgetTypes.values():
-            raise IllegalArgumentError("`widget_type` should be one of '{}'".format(WidgetTypes.values()))
+        check_enum(widget_type, WidgetTypes, 'widget_type')
+
         if order is not None and not isinstance(order, int):
             raise IllegalArgumentError("`order` should be an integer or None")
         if title is not None:
@@ -2666,20 +2564,20 @@ class Client(object):
         assert isinstance(activity, Activity2), 'activity "{}" is not an Activity2 object!'.format(activity.name)
 
         if isinstance(parent, Activity2):
-            parent_id = parent.id
+            parent_object = parent
         elif isinstance(parent, text_type) and is_uuid(parent):
-            parent_id = parent
+            parent_object = self.activity(id=parent)
         else:
             raise IllegalArgumentError("Please provide either an activity object or a UUID")
-        parent_object = self.activity(id=parent_id)
 
         if parent_object.activity_type != ActivityType.PROCESS:
             raise IllegalArgumentError("One can only move an `Activity` under a subprocess.")
 
-        update_dict = dict(parent_id=parent_id)
-
-        if classification is not None and classification in ActivityClassification.values():
-            update_dict['classification'] = classification
+        update_dict = {
+            'parent_id': parent.id,
+            'classification': check_enum(classification, ActivityClassification, 'classification')
+                              or parent.classification,
+        }
 
         url = self._build_url('activity_move', activity_id=str(activity.id))
         response = self._request('PUT', url, data=update_dict)

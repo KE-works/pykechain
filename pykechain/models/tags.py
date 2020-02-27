@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import Iterable, Text, Optional, List
 
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models.input_checks import _check_tags
+from pykechain.models.input_checks import check_list_of_text
 
 
 class TagsMixin:
@@ -32,7 +32,7 @@ class TagsMixin:
 
     @tags.setter
     def tags(self, new_tags: Iterable[Text]) -> None:
-        unique_tags = _check_tags(new_tags)
+        unique_tags = check_list_of_text(new_tags)
         self.edit(tags=unique_tags)
         self._tags = unique_tags
 

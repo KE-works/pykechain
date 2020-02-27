@@ -144,8 +144,7 @@ class Service(Base):
 
         self.refresh(json=response.json()['results'][0])
 
-    def delete(self):
-        # type: () -> None
+    def delete(self) -> None:
         """Delete this service.
 
         :raises APIError: if delete was not successful.
@@ -269,7 +268,7 @@ class ServiceExecution(Base):
         return "<pyke ServiceExecution '{}' id {}>".format(self.name, self.id[-8:])
 
     @property
-    def service(self):
+    def service(self) -> Service:
         """Retrieve the `Service` object to which this execution is associated."""
         if not self._service:
             self._service = self._client.service(id=self.service_id)
