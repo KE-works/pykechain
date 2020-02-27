@@ -1,10 +1,11 @@
 import os
+from datetime import datetime
 
 import requests
 from six import string_types, text_type
-from typing import Text, Any
+from typing import Text, Any, Dict, Optional
 
-from pykechain.enums import ServiceScriptUser
+from pykechain.enums import ServiceScriptUser, ServiceExecutionStatus
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models.base import Base
 from pykechain.utils import parse_datetime
@@ -46,20 +47,20 @@ class Service(Base):
     def __init__(self, json, **kwargs):
         """Construct a scope from provided json data."""
         super(Service, self).__init__(json, **kwargs)
+        del self.created_at
 
         self.description = json.get('description', '')
         self.version = json.get('script_version', '')
         self.filename = json.get('script_file_name')
         self.type = json.get('script_type')
         self.environment = json.get('env_version')
-        self.scope_id = json.get('scope')
-        self.updated_at = parse_datetime(json.get('updated_at'))
+        self.scope_id = json.get('scope')  # type: Text
 
         # for SIM3 version
-        self.trusted = json.get('trusted')
-        self.run_as = json.get('run_as')
-        self.verified_on = parse_datetime(json.get('verified_on'))
-        self.verification_results = json.get('verification_results')
+        self.trusted = json.get('trusted')  # type: bool
+        self.run_as = json.get('run_as')  # type: Text
+        self.verified_on = parse_datetime(json.get('verified_on'))  # type: Optional[datetime]
+        self.verification_results = json.get('verification_results')  # type: Dict
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Service '{}' id {}>".format(self.name, self.id[-8:])
@@ -246,22 +247,23 @@ class ServiceExecution(Base):
     def __init__(self, json, **kwargs):
         """Construct a scope from provided json data."""
         super(ServiceExecution, self).__init__(json, **kwargs)
+        del self.created_at
+        del self.updated_at
 
         self.name = json.get('service_name')
-        self.ref = json.get('ref')
         self.service_id = json.get('service')
-        self.status = json.get('status', '')
+        self.status = json.get('status', '')  # type: ServiceExecutionStatus
 
         self.user = json.get('username')
         if json.get('activity') is not None:
-            self.activity_id = json['activity'].get('id')
+            self.activity_id = json['activity'].get('id')  # type: Optional[Text]
         else:
             self.activity_id = None
 
-        self.started_at = parse_datetime(json.get('started_at'))
-        self.finished_at = parse_datetime(json.get('finished_at'))
+        self.started_at = parse_datetime(json.get('started_at'))  # type: Optional[datetime]
+        self.finished_at = parse_datetime(json.get('finished_at'))  # type: Optional[datetime]
 
-        self._service = None
+        self._service = None  # type: Optional[Service]
 
     def __repr__(self):  # pragma: no cover
         return "<pyke ServiceExecution '{}' id {}>".format(self.name, self.id[-8:])

@@ -1,6 +1,8 @@
 Change Log
 ==========
 
+* :bug: Updated the API parameters for the `service` class to include additional attributes on its objects.
+
 v3.5.2 (26FEB20)
 ----------------
 
