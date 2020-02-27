@@ -25,6 +25,7 @@ from .team import Team
 from .user import User
 
 AnyProperty = Union[
+    'Property',
     'Property2',
     'MultiReferenceProperty2',
     'AttachmentProperty2',

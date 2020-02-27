@@ -2,6 +2,7 @@ from abc import abstractmethod
 from typing import Iterable, Text, Optional, List
 
 from pykechain.exceptions import IllegalArgumentError
+from pykechain.models.input_checks import _check_tags
 
 
 class TagsMixin:
@@ -31,15 +32,7 @@ class TagsMixin:
 
     @tags.setter
     def tags(self, new_tags: Iterable[Text]) -> None:
-        if new_tags is not None:
-            if not isinstance(new_tags, (list, tuple, set)) or not all(isinstance(t, Text) for t in new_tags):
-                raise IllegalArgumentError("Provided tags should be a list, tuple or set of strings. "
-                                           "Received type '{}'.".format(type(new_tags)))
-
-            unique_tags = list(set(new_tags))
-        else:
-            unique_tags = list()
-
+        unique_tags = _check_tags(new_tags)
         self.edit(tags=unique_tags)
         self._tags = unique_tags
 

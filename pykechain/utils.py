@@ -203,7 +203,7 @@ def temp_chdir(cwd: Optional[Text] = None):
             os.chdir(origin)
 
 
-def parse_datetime(value: Text) -> Optional[datetime]:
+def parse_datetime(value: Optional[Text]) -> Optional[datetime]:
     """
     Convert datetime string to datetime object.
 
