@@ -108,10 +108,10 @@ API_EXTRA_PARAMS = {
          'property_type', 'value', 'value_options', 'output', 'description', 'unit'])},
     'service': {'fields': ",".join(
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'script_version', 'script_type', 'script_file_name',
-         'description', 'env_version', 'scope_id', 'runas', 'trusted'])},
+         'description', 'env_version', 'scope', 'run_as', 'trusted', 'verified_on', 'verification_results'])},
     'services': {'fields': ",".join(
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'script_version', 'script_type', 'script_file_name',
-         'description', 'env_version', 'scope_id', 'runas', 'trusted'])},
+         'description', 'env_version', 'scope', 'run_as', 'trusted', 'verified_on', 'verification_results'])},
     'widgets': {'fields': ",".join(
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
          'parent_id', 'progress', 'has_subwidgets', 'scope_id'])},
