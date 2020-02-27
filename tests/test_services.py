@@ -1,7 +1,6 @@
 import os
 import time
 from datetime import datetime
-from unittest import skip
 
 import pytest
 
@@ -70,19 +69,19 @@ class TestServices(TestBetamax):
 
     def test_retrieve_services_with_kwargs(self):
         # setUp
-        retrieved_services_with_kwargs = self.project.services(env_version="3.5")
+        retrieved_services_with_kwargs = self.project.services(script_type=ServiceType.PYTHON_SCRIPT)
 
         # testing
         self.assertTrue(retrieved_services_with_kwargs)
         for service in retrieved_services_with_kwargs:
-            self.assertEqual(service._json_data['env_version'], '3.5')
+            self.assertEqual(ServiceType.PYTHON_SCRIPT, service._json_data['script_type'])
 
     def test_retrieve_service_but_found_multiple(self):
         with self.assertRaises(MultipleFoundError):
             self.project.service(script_type=ServiceType.PYTHON_SCRIPT)
 
     def test_retrieve_single_service(self):
-        services = self.project.services()  # type: Service
+        services = self.project.services()
         self.assertTrue(services)
         service_1 = services[0]
 
@@ -95,45 +94,19 @@ class TestServices(TestBetamax):
         self.assertEqual(service.name, service_name)
 
     def test_properties_of_service(self):
-        """
-        :ivar id: id of the service
-        :type id: uuid
-        :ivar name: name of the service
-        :type name: str
-        :ivar description: description of the service
-        :type description: str
-        :ivar version: version number of the service, as provided by uploaded
-        :type version: str
-        :ivar scope_id: uuid of the scope to which the service belongs
-        :type scope_id: uuid
-        :ivar type: type of the service. One of the :class:`ServiceType`
-        :type type: str
-        :ivar filename: filename of the service
-        :type filename: str
-        :ivar environment: environment in which the service will execute. One of :class:`ServiceEnvironmentVersion`
-        :type environment: str
-
-        --- 3.0 features
-        :ivar trusted: Trusted flag. If the kecpkg is trusted.
-        :ivar run_as: User to run the script as. One of :class:`ServiceScriptUser`.
-        :ivar verified_on: Date when the kecpkg was verified by KE-chain (if verification pipeline is enabled)
-        :ivar verification_results: Results of the verification (if verification pipeline is enabled)
-        """
         service_name = 'Service Gears - Successful with Package'
         service = self.project.service(name=service_name)
-        json_data = service._json_data
-        self.assertEqual(service.filename, json_data.get('script_file_name'))
-        self.assertEqual(service.type, json_data.get('script_type'))
-        self.assertEqual(service.version, json_data.get('script_version'))
-        self.assertEqual(service.environment, json_data.get('env_version'))
-        self.assertEqual(service.description, json_data.get('description'))
-        self.assertEqual(service.name, json_data.get('name'))
-        self.assertEqual(service.scope_id, json_data.get('scope'))
 
-        self.assertEqual(service.trusted, json_data.get('trusted'))
-        self.assertEqual(service.run_as, json_data.get('run_as'))
-        self.assertEqual(service.verified_on, json_data.get('verified_on'))
-        self.assertEqual(service.verification_results, json_data.get('verification_results'))
+        for key, value in service.__dict__.items():
+            if str(key).startswith('_'):
+                continue
+
+            # Verified on is an optional variable
+            if key == 'verified_on':
+                continue
+
+            with self.subTest(msg='{}: {}'.format(key, value)):
+                self.assertIsNotNone(value)
 
     @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
                         reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
@@ -296,38 +269,27 @@ class TestServiceExecutions(TestServiceSetup):
             self.service.execute()
 
     def test_properties_of_service_execution(self):
-        """
-        :ivar id: id of the service execution
-        :type id: uuid
-        :ivar name: name of the service to which the execution is associated
-        :type name: str
-        :ivar status: status of the service. One of :class:`ServiceExecutionStatus`
-        :type status: str
-        :ivar service: the :class:`Service` object associated to this service execution
-        :type service: :class:`Service`
-        :ivar service_id: the uuid of the associated Service object
-        :type service_id: uuid
-        :ivar user: (optional) username of the user that executed the service
-        :type user: str or None
-        :ivar activity_id: (optional) the uuid of the activity where the service was executed from
-        :type activity_id: uuid or None
-        """
         service_name = 'Service Gears - Successful'
         service = self.project.service(name=service_name)
         service_executions = self.project.service_executions(service=service.id, limit=1)
         self.assertTrue(service_executions)
+
         service_execution = service_executions[0]
-        json_data = service_execution._json_data
 
-        self.assertEqual(service_execution.name, json_data.get('service_name'))
-        self.assertEqual(service_execution.status, json_data.get('status'))
-        self.assertEqual(service_execution.user, json_data.get('username'))
-        self.assertEqual(service_execution.activity_id, json_data['activity'].get('id') if json_data.get('activity') else json_data.get('activity'))
-        self.assertEqual(service_execution.service_id, json_data.get('service'))
         self.assertIsInstance(service_execution.service, Service)
-
         self.assertIsInstance(service_execution.started_at, datetime)
         self.assertIsInstance(service_execution.finished_at, datetime)
+
+        for key, value in service_execution.__dict__.items():
+            if str(key).startswith('_'):
+                continue
+
+            # Originating activity is an optional variable
+            if key == 'activity_id':
+                continue
+
+            with self.subTest(msg='{}: {}'.format(key, value)):
+                self.assertIsNotNone(value)
 
     @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
                         reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
