@@ -269,7 +269,7 @@ class Widget(Base):
         readable_models = list()
         writable_models = list()
         for associated_property in associated_part.properties:
-            if associated_property._output:
+            if associated_property.output:
                 writable_models.append(associated_property)
             else:
                 readable_models.append(associated_property)

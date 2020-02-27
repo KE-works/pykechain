@@ -233,7 +233,7 @@ class TestClientLive(TestBetamax):
         self.assertListEqual(self.temp_scope.tags, tags)
 
 
-@skip(reason='Not supported yet due to AssertionError within KE-chain itself (clone_scope_async `text` assertion.)')
+# @skip(reason='Not supported yet due to AssertionError within KE-chain itself (clone_scope_async `text` assertion.)')
 class TestCloneScopeAsync(TestBetamax):
 
     def setUp(self):

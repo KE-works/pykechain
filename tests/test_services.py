@@ -191,11 +191,11 @@ class TestServicesWithCustomUploadedService(TestServiceSetup):
             self.project.service(pk=new_service.id)
 
     def test_create_service_with_wrong_service_type(self):
-        with self.assertRaisesRegex(IllegalArgumentError, 'The type should be of one of'):
+        with self.assertRaisesRegex(IllegalArgumentError, 'must be an option from enum'):
             self.project.create_service(name='This service type does not exist', service_type='RUBY_SCRIPT')
 
     def test_create_service_with_wrong_environment_version(self):
-        with self.assertRaisesRegex(IllegalArgumentError, 'The environment version should be of one of'):
+        with self.assertRaisesRegex(IllegalArgumentError, 'must be an option from enum'):
             self.project.create_service(name='This env version does not exist', environment_version='0.0')
 
     def test_save_service_script(self):

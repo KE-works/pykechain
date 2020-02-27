@@ -417,7 +417,7 @@ class TestActivities(TestBetamax):
 
     # in 1.13
     def test_create_activity_with_incorrect_activity_class_fails(self):
-        with self.assertRaisesRegex(IllegalArgumentError, 'Please provide accepted activity_type'):
+        with self.assertRaisesRegex(IllegalArgumentError, 'must be an option from enum'):
             self.project.create_activity(name='New', activity_type='DEFUNCTActivity')
 
 

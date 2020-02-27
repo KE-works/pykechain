@@ -151,13 +151,14 @@ class TestProperties(TestBetamax):
 
     def test_property_attributes(self):
         attributes = ['_client', '_json_data', 'id', 'name', 'created_at', 'updated_at', 'ref',
-                      '_output', '_value', '_options', 'type', 'category',
+                      'output', '_value', '_options', 'type', 'category',
                       '_validators']
 
         obj = self.project.property(name='Cheap?', category=Category.MODEL)
         for attribute in attributes:
-            self.assertTrue(hasattr(obj, attribute),
-                            "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
+            with self.subTest(msg=attribute):
+                self.assertTrue(hasattr(obj, attribute),
+                                "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
 
     def test_retrieve_properties_with_kwargs(self):
         # setUp

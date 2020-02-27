@@ -536,14 +536,20 @@ class Activity2(TreeObject, TagsMixin):
         if assignees and assignees_ids:
             raise IllegalArgumentError('Provide either assignee names or their ids, but not both.')
 
-        assignees = set(assignees) or set(assignees_ids)
+        assignees = assignees if assignees is not None else assignees_ids
 
-        check_list_of_text(assignees, 'assignees')
-        update_assignees_ids = [m.get('id') for m in self.scope.members()
-                                if m.get('id') in assignees or m.get('username') in assignees]
+        if assignees:
+            if not isinstance(assignees, (list, tuple, set)) or not all(isinstance(a, (str, int)) for a in assignees):
+                raise IllegalArgumentError('All assignees must be provided as list, tuple or set of names or IDs.')
 
-        if len(update_assignees_ids) != len(assignees):
-            raise NotFoundError('All assignees should be a member of the project.')
+            update_assignees_ids = [m.get('id') for m in self.scope.members()
+                                    if m.get('id') in assignees or m.get('username') in set(assignees)]
+
+            if len(update_assignees_ids) != len(assignees):
+
+                raise NotFoundError('All assignees should be a member of the project.')
+        else:
+            update_assignees_ids = []
 
         update_dict.update({
             'assignees_ids': update_assignees_ids,

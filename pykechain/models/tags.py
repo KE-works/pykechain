@@ -32,7 +32,7 @@ class TagsMixin:
 
     @tags.setter
     def tags(self, new_tags: Iterable[Text]) -> None:
-        unique_tags = check_list_of_text(new_tags)
+        unique_tags = check_list_of_text(new_tags, 'tags')
         self.edit(tags=unique_tags)
         self._tags = unique_tags
 

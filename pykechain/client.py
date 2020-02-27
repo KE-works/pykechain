@@ -1770,29 +1770,38 @@ class Client(object):
         if scope_options is not None and not isinstance(scope_options, dict):
             raise IllegalArgumentError("`scope_options` need to be a dictionary")
 
+        if self.match_app_version(label="pim", version=">=3.1.0"):
+            async_key = 'async_mode'
+        else:
+            async_key = 'async'
+
         if self.match_app_version(label="pim", version=">=3.0.0"):
             options_key = 'scope_options'
             team_key = 'team_id'
-            async_key = 'async_mode'
             scope_key = 'scope_id'
         else:
             options_key = 'options'
             team_key = 'team'
-            async_key = 'async'
             scope_key = 'id'
+
+        start_date = start_date or source_scope.start_date
+        due_date = due_date or source_scope.due_date
 
         data_dict = {
             scope_key: source_scope.id,
             'name': check_text(name, 'name') or 'CLONE - {}'.format(source_scope.name),
-            'start_date': check_datetime(dt=start_date, key='start_date') or source_scope.start_date,
-            'due_date': check_datetime(dt=due_date, key='due_date') or source_scope.due_date,
-            'text': check_text(description, 'description') or '',
+            'start_date': check_datetime(dt=start_date, key='start_date'),
+            'due_date': check_datetime(dt=due_date, key='due_date'),
+            'text': check_text(description, 'description') or source_scope.description,
             'status': check_enum(status, ScopeStatus, 'status'),
             'tags': check_list_of_text(tags, 'tags') or source_scope.tags,
-            options_key: scope_options,
-            team_key: check_team(team=team, method=self.team),
+            options_key: scope_options or dict(),
             async_key: asynchronous,
         }
+
+        team = check_team(team=team, method=self.team)
+        if team:
+            data_dict[team_key] = team
 
         if self.match_app_version(label="scope", version=">=3.0.0"):
             url = self._build_url('scopes2_clone')
@@ -2574,9 +2583,9 @@ class Client(object):
             raise IllegalArgumentError("One can only move an `Activity` under a subprocess.")
 
         update_dict = {
-            'parent_id': parent.id,
-            'classification': check_enum(classification, ActivityClassification, 'classification')
-                              or parent.classification,
+            'parent_id': parent_object.id,
+            'classification': check_enum(classification, ActivityClassification, 'classification') or
+            parent_object.classification,
         }
 
         url = self._build_url('activity_move', activity_id=str(activity.id))
