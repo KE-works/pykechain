@@ -2326,10 +2326,10 @@ class Client(object):
         :type widget: :class:`Widget` or UUID
         :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    read rights
-        :type readable_models: List[Property] or List[UUID] or None
+        :type readable_models: List[Property2] or List[UUID] or None
         :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    write rights
-        :type writable_models: List[Property] or List[UUID] or None
+        :type writable_models: List[Property2] or List[UUID] or None
         :return: None
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
@@ -2408,10 +2408,10 @@ class Client(object):
         :type widget: :class:`Widget` or UUID
         :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    read rights
-        :type readable_models: List[Property] or List[UUID] or None
+        :type readable_models: List[Property2] or List[UUID] or None
         :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    write rights
-        :type writable_models: List[Property] or List[UUID] or None
+        :type writable_models: List[Property2] or List[UUID] or None
         :return: None
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
