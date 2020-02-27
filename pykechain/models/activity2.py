@@ -626,22 +626,16 @@ class Activity2(TreeObject, TagsMixin):
         >>> all_models, all_instances = task.associated_parts()
 
         """
-        if self._client.match_app_version(label='widget', version='>=3.0.0'):
-            widget_manager = self.widgets()
-            associated_models = list()
-            associated_instances = list()
-            for widget in widget_manager:
-                associated_models.extend(widget.parts(category=Category.MODEL, *args, **kwargs))
-                associated_instances.extend(widget.parts(category=Category.INSTANCE, *args, **kwargs))
-            return (
-                associated_models,
-                associated_instances
-            )
-        else:
-            return (
-                self.parts(category=Category.MODEL, *args, **kwargs),
-                self.parts(category=Category.INSTANCE, *args, **kwargs)
-            )
+        associated_models = list()
+        associated_instances = list()
+        for widget in self.widgets():
+            associated_models.extend(widget.parts(category=Category.MODEL, *args, **kwargs))
+            associated_instances.extend(widget.parts(category=Category.INSTANCE, *args, **kwargs))
+
+        return (
+            associated_models,
+            associated_instances
+        )
 
     def associated_object_ids(self) -> List[Dict]:
         """Retrieve object ids associated to this activity.

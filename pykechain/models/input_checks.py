@@ -61,18 +61,3 @@ def check_team(team: Optional[Union[Text, 'Team']], method: Optional[callable]) 
             raise IllegalArgumentError("`team` should be provided as a `models.Team` object, UUID or name, "
                                        "was provided as a {}".format(type(team)))
     return team
-
-
-def check_user(user: Optional[Union[Text, 'User']], method: callable) -> Optional['User']:
-    """Validate the user input, retrieving the object if not provided."""
-    if user is not None:
-        from pykechain.models import User
-        if isinstance(user, str):
-            user = method(username=user)
-        elif isinstance(user, int):
-            user = method(pk=user)
-        elif isinstance(user, User):
-            pass
-        else:
-            raise IllegalArgumentError('`user` must be of type `User`, `username` or an id: "{}" is not.'.format(user))
-    return user
