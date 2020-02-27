@@ -1,7 +1,12 @@
 Change Log
 ==========
 
-* :bug: Updated the API parameters for the `service` class to include additional attributes on its objects.
+v3.5.3 (27FEB20)
+----------------
+
+This is release :100: of pykechain! That means :cake:!
+
+* :bug: Fixed a bug whete the API parameters for the `Service` now includes additional attributes on its objects. #709. Thanks to @bastiaanbeijer and @raduiordache for finding it and @jelleboersma for providing the fast resolution.
 
 v3.5.2 (26FEB20)
 ----------------
