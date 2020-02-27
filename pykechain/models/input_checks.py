@@ -8,6 +8,7 @@ from pykechain.utils import is_uuid
 
 
 def check_text(text: Optional[Text], key: Text) -> Optional[Text]:
+    """Validate text input to be a string."""
     if text is not None:
         if not isinstance(text, str):
             raise IllegalArgumentError('`{}` should be a string, "{}" is not.'.format(key, text))
@@ -15,6 +16,7 @@ def check_text(text: Optional[Text], key: Text) -> Optional[Text]:
 
 
 def check_list_of_text(list_of_text: Optional[Iterable[Text]], key: Text) -> Optional[List[Text]]:
+    """Validate iterable input to be a list/tuple/set of strings."""
     if list_of_text is not None:
         if not isinstance(list_of_text, (list, tuple, set)) or not all(isinstance(t, Text) for t in list_of_text):
             raise IllegalArgumentError(
@@ -24,6 +26,7 @@ def check_list_of_text(list_of_text: Optional[Iterable[Text]], key: Text) -> Opt
 
 
 def check_enum(value: Optional[Any], enum: type(Enum), key: Text) -> Optional[Any]:
+    """Validate input to be an option from an enum class."""
     if value is not None:
         if value not in enum.values():
             raise IllegalArgumentError('`{}` must be an option from enum {}, "{}" is not.\nChoose from: {}'.format(
@@ -32,6 +35,7 @@ def check_enum(value: Optional[Any], enum: type(Enum), key: Text) -> Optional[An
 
 
 def check_datetime(dt: Optional[datetime], key: Text) -> Optional[Text]:
+    """Validate a datetime value to be a datetime and be timezone aware."""
     if dt is not None:
         if isinstance(dt, datetime):
             if not dt.tzinfo:
@@ -44,6 +48,7 @@ def check_datetime(dt: Optional[datetime], key: Text) -> Optional[Text]:
 
 
 def check_team(team: Optional[Union[Text, 'Team']], method: Optional[callable]) -> Optional[Text]:
+    """Validate team input, optionally retrieving the team object."""
     if team is not None:
         from pykechain.models import Team
         if isinstance(team, Team):
@@ -59,6 +64,7 @@ def check_team(team: Optional[Union[Text, 'Team']], method: Optional[callable]) 
 
 
 def check_user(user: Optional[Union[Text, 'User']], method: callable) -> Optional['User']:
+    """Validate the user input, retrieving the object if not provided."""
     if user is not None:
         from pykechain.models import User
         if isinstance(user, str):

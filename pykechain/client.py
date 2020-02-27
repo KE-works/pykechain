@@ -2584,8 +2584,8 @@ class Client(object):
 
         update_dict = {
             'parent_id': parent_object.id,
-            'classification': check_enum(classification, ActivityClassification, 'classification') or
-            parent_object.classification,
+            'classification': check_enum(
+                classification, ActivityClassification, 'classification') or parent_object.classification,
         }
 
         url = self._build_url('activity_move', activity_id=str(activity.id))
