@@ -50,7 +50,7 @@ class TestScopes(TestBetamax):
 
     def test_add_member_by_id(self):
         member_id = 4
-        with self.assertRaises(TypeError):
+        with self.assertRaises(IllegalArgumentError):
             self.project.add_member(member_id)
 
     def test_add_non_existing_member(self):

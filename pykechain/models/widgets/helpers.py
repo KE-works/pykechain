@@ -26,8 +26,8 @@ def _retrieve_object(obj: Union['Part2', 'AnyProperty', 'Team', 'Service', Text]
     :raises IllegalArgumentError: if the object provided is not a Part, Property2 or UUID.
     """
     # Check whether the part_model is uuid type or class `Part`
-    from pykechain.models import Part, Part2, Property, Property2, Service, Team
-    if isinstance(obj, (Part, Part2, Property, Property2, Service, Team)):
+    from pykechain.models import Part2, Property2, Service, Team
+    if isinstance(obj, (Part2, Property2, Service, Team)):
         return obj
     elif isinstance(obj, text_type) and is_uuid(obj):
         obj_id = obj

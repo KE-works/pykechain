@@ -1,3 +1,5 @@
+import warnings
+
 from requests import Response
 
 
@@ -72,3 +74,19 @@ class InspectorComponentError(Exception):
     """Error in the InspectorComponent."""
 
     pass
+
+
+class DeprecationMixin:
+
+    __notified = False
+
+    def __new__(cls, *args, **kwargs):
+        # TODO Deprecate all "Class2" classes at v3.8.0
+        if not cls.__notified:
+
+            new_name = str(cls.__name__)[:-1]
+            warnings.warn(f'`{cls.__name__}` is a wrapping class for `{new_name}`. '
+                          f'`{cls.__name__}` will be deprecated in version v3.8.0.', PendingDeprecationWarning)
+            cls.__notified = True
+
+        return super().__new__(cls)

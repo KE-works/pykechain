@@ -13,13 +13,8 @@ from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, Ser
     ActivityClassification, ActivityStatus
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
-from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property, AnyProperty, Base
-from pykechain.models.activity2 import Activity2
-from pykechain.models.association import Association
-from pykechain.models.scope2 import Scope2
-from pykechain.models.service import Service, ServiceExecution
-from pykechain.models.team import Team
-from pykechain.models.user import User
+from pykechain.models import Part2, Property2, Activity2, Scope2, Scope, PartSet, AnyProperty, Base, Association, \
+    Service, ServiceExecution, Team, User
 from pykechain.models.widgets.widget import Widget
 from pykechain.utils import is_uuid, find
 from .__about__ import version as pykechain_version
@@ -467,7 +462,7 @@ class Client(object):
         pk: Optional[Text] = None,
         scope: Optional[Text] = None,
         **kwargs
-    ) -> List[Union[Activity, Activity2]]:
+    ) -> List[Activity2]:
         """Search for activities with optional name, pk and scope filter.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -502,16 +497,9 @@ class Client(object):
             raise NotFoundError("Could not retrieve activities. Server responded with {}".format(str(response)))
 
         data = response.json()
+        return [Activity2(a, client=self) for a in data['results']]
 
-        # for 'kechain.core.wim >= 2.0.0' we return Activity2, otherwise Activity1
-        if self.match_app_version(label='wim', version='<2.0.0', default=True):
-            # WIM1
-            return [Activity(a, client=self) for a in data['results']]
-        else:
-            # WIM2
-            return [Activity2(a, client=self) for a in data['results']]
-
-    def activity(self, *args, **kwargs) -> Union[Activity, Activity2]:
+    def activity(self, *args, **kwargs) -> Activity2:
         """Search for a single activity.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -657,12 +645,9 @@ class Client(object):
                 data = response.json()
                 part_results.extend(data['results'])
 
-        if self.match_app_version(label='pim', version='>=3.0.0'):
-            return PartSet((Part2(p, client=self) for p in part_results))
-        else:
-            return PartSet((Part(p, client=self) for p in part_results))
+        return PartSet((Part2(p, client=self) for p in part_results))
 
-    def part(self, *args, **kwargs) -> Union[Part, Part2]:
+    def part(self, *args, **kwargs) -> Part2:
         """Retrieve single KE-chain part.
 
         Uses the same interface as the :func:`parts` method but returns only a single pykechain :class:`models.Part`
@@ -686,7 +671,7 @@ class Client(object):
 
         return _parts[0]
 
-    def model(self, *args, **kwargs) -> Union[Part, Part2]:
+    def model(self, *args, **kwargs) -> Part2:
         """Retrieve single KE-chain part model.
 
         Uses the same interface as the :func:`part` method but returns only a single pykechain
@@ -752,10 +737,7 @@ class Client(object):
 
         data = response.json()
 
-        if self.match_app_version(label='pim', version='>=3.0.0'):
-            return [Property2.create(p, client=self) for p in data['results']]
-        else:
-            return [Property.create(p, client=self) for p in data['results']]
+        return [Property2.create(p, client=self) for p in data['results']]
 
     def property(self, *args, **kwargs) -> 'AnyProperty':  # noqa: F
         """Retrieve single KE-chain Property.
@@ -1029,7 +1011,7 @@ class Client(object):
     def widgets(
             self,
             pk: Optional[Text] = None,
-            activity: Optional[Union[Activity, Activity2, Text]] = None,
+            activity: Optional[Union[Activity2, Text]] = None,
             **kwargs
     ) -> List[Widget]:
         """
@@ -1054,7 +1036,7 @@ class Client(object):
         request_params = dict(API_EXTRA_PARAMS['widgets'])
         request_params['id'] = pk
 
-        if isinstance(activity, (Activity, Activity2)):
+        if isinstance(activity, Activity2):
             request_params.update(dict(activity_id=activity.id))
         elif is_uuid(activity):
             request_params.update(dict(activity_id=activity))
@@ -1110,7 +1092,7 @@ class Client(object):
         :raises APIError: When the object could not be created
         :raises IllegalArgumentError: When an incorrect arguments are provided
         """
-        if isinstance(parent, (Activity, Activity2)):
+        if isinstance(parent, Activity2):
             parent_classification = parent.classification
             parent = parent.id
         elif is_uuid(parent):
@@ -1188,7 +1170,7 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
-        if not isinstance(parent, (Part, Part2)) or not isinstance(model, (Part, Part2)):
+        if not isinstance(parent, Part2) or not isinstance(model, Part2):
             raise IllegalArgumentError("The parent and model should be a 'Part' object")
         if parent.category != Category.INSTANCE:
             raise IllegalArgumentError("The parent should be an category 'INSTANCE'")
@@ -1222,7 +1204,7 @@ class Client(object):
         if parent.category != Category.MODEL:
             raise IllegalArgumentError("The parent should be of category 'MODEL'")
 
-        if isinstance(parent, (Part, Part2)):
+        if isinstance(parent, Part2):
             pass
         elif is_uuid(parent):
             parent = self.model(id=parent)
@@ -1278,7 +1260,7 @@ class Client(object):
         ...                                                  properties_fvalues=properties_fvalues)
 
         """
-        if isinstance(parent, (Part, Part2)):
+        if isinstance(parent, Part2):
             pass
         elif is_uuid(parent):
             parent = self.model(id=parent)
@@ -1333,7 +1315,7 @@ class Client(object):
             select_action = 'clone_model'
         else:
             select_action = 'clone_instance'
-        if not isinstance(part, (Part, Part2)) and not isinstance(parent, (Part, Part2)):
+        if not isinstance(part, Part2) and not isinstance(parent, Part2):
             raise IllegalArgumentError("Either part and parent need to be of class `Part`. "
                                        "We got: part: '{}' and parent '{}'".format(type(part), type(parent)))
 
@@ -1369,10 +1351,7 @@ class Client(object):
         if response.status_code != requests.codes.created:
             raise APIError("Could not clone part, {}: {}".format(str(response), response.content))
 
-        if self.match_app_version(label="pim", version=">=3.0.0"):
-            return Part2(response.json()['results'][0], client=self)
-        else:
-            return Part(response.json()['results'][0], client=self)
+        return Part2(response.json()['results'][0], client=self)
 
     def create_proxy_model(
             self,
@@ -1424,7 +1403,7 @@ class Client(object):
             unit: Optional[Text] = None,
             options: Optional[Dict] = None,
             **kwargs
-    ) -> Union[Property, Property2]:
+    ) -> Property2:
         """Create a new property model under a given model.
 
         Use the :class:`enums.PropertyType` to select which property type to create to ensure that you
@@ -1468,7 +1447,7 @@ class Client(object):
         # to a single value from the list of values.
         if property_type in (PropertyType.REFERENCE_VALUE, PropertyType.REFERENCES_VALUE) and default_value:
             if isinstance(default_value, (list, tuple)):
-                if isinstance(default_value[0], (Part, Part2)):
+                if isinstance(default_value[0], Part2):
                     scope_options = dict(
                         scope_id=default_value[0]._json_data["scope_id"]
                     )
@@ -1484,7 +1463,7 @@ class Client(object):
                         "Please provide a valid default_value being a `Part` of category `MODEL` "
                         "or a model uuid, got: '{}'".format(default_value))
 
-            elif isinstance(default_value, (Part, Part2)):
+            elif isinstance(default_value, Part2):
                 scope_options = dict(
                     scope_id=default_value._json_data["scope_id"]
                 )
@@ -1538,10 +1517,7 @@ class Client(object):
         if response.status_code != requests.codes.created:
             raise APIError("Could not create property, {}: {}".format(str(response), response.content))
 
-        if self.match_app_version(label="pim", version=">=3.0.0"):
-            prop = Property2.create(response.json()['results'][0], client=self)
-        else:
-            prop = Property.create(response.json()['results'][0], client=self)
+        prop = Property2.create(response.json()['results'][0], client=self)
 
         model.properties.append(prop)
 
@@ -1908,7 +1884,7 @@ class Client(object):
 
     @staticmethod
     def _validate_widget(
-            activity: Union[Activity, Activity2, text_type],
+            activity: Union[Activity2, text_type],
             widget_type: Union[WidgetTypes, text_type],
             title: Optional[Text],
             meta: Dict,
@@ -1917,7 +1893,7 @@ class Client(object):
             **kwargs
     ) -> Dict:
         """Validate the format and content of the configuration of a widget."""
-        if isinstance(activity, (Activity, Activity2)):
+        if isinstance(activity, Activity2):
             activity = activity.id
         elif is_uuid(activity):
             pass
@@ -1990,7 +1966,7 @@ class Client(object):
             for model in models:
                 if is_uuid(model):
                     model_ids.append(model)
-                elif isinstance(model, (Property2, Property)):
+                elif isinstance(model, Property2):
                     model_ids.append(model.id)
                 else:
                     raise IllegalArgumentError("`{}` must consist out of uuids or property models.".format(key))

@@ -1,18 +1,13 @@
 import datetime
-import warnings
-
 from typing import Union, Text
-
-from pykechain.exceptions import IllegalArgumentError
+from pykechain.exceptions import IllegalArgumentError, DeprecationMixin
 from pykechain.models import Property2
+from pykechain.models.input_checks import check_datetime
 from pykechain.utils import parse_datetime
 
 
-class DatetimeProperty2(Property2):
+class DatetimeProperty(Property2):
     """A virtual object representing a KE-chain reference property."""
-
-    def __index__(self, json, **kwargs):
-        super(DatetimeProperty2, self).__init__(json, **kwargs)
 
     @property
     def value(self):
@@ -29,11 +24,7 @@ class DatetimeProperty2(Property2):
         if value is None:
             self._put_value(None)
         elif isinstance(value, datetime.datetime):
-            if not value.tzinfo:
-                warnings.warn("The value '{}' is naive and not timezone aware, use pytz.timezone info. "
-                              "This date is interpreted as UTC time.".format(value.isoformat(sep=' ')))
-
-            self._put_value(value.isoformat(sep='T'))
+            self._put_value(check_datetime(dt=value, key='value'))
         else:
             raise IllegalArgumentError('value should be a datetime.datetime() object')
 
@@ -52,3 +43,7 @@ class DatetimeProperty2(Property2):
         # type: (datetime.datetime) -> Text
         """Convert a datetime object to isoformat."""
         return date_time.isoformat()
+
+
+class DatetimeProperty2(DatetimeProperty, DeprecationMixin):
+    pass

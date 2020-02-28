@@ -22,7 +22,7 @@ class WidgetsManager(Iterable):
 
     def __init__(self,
                  widgets: Iterable[Widget],
-                 activity: Union['Activity', 'Activity2', AnyStr],
+                 activity: Union['Activity2', AnyStr],
                  client: Optional['Client'] = None,
                  **kwargs) -> None:
         """Construct a Widget Manager from a list of widgets.
@@ -44,8 +44,8 @@ class WidgetsManager(Iterable):
         self._widgets = list(widgets)  # type: List[Widget]
         for widget in self._widgets:
             widget.manager = self
-        from pykechain.models import Activity, Activity2
-        if isinstance(activity, (Activity, Activity2)):
+        from pykechain.models import Activity2
+        if isinstance(activity, Activity2):
             self._activity_id = activity.id
             self._client = activity._client
         elif isinstance(activity, text_type) and client is not None:

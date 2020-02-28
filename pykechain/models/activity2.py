@@ -9,7 +9,7 @@ from requests.compat import urljoin  # type: ignore
 from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_EXTRA_PARAMS
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
-from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
+from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError, DeprecationMixin
 from pykechain.models.input_checks import check_datetime, check_text, check_list_of_text, check_enum
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
@@ -17,7 +17,7 @@ from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import parse_datetime
 
 
-class Activity2(TreeObject, TagsMixin):
+class Activity(TreeObject, TagsMixin):
     """A virtual object representing a KE-chain activity.
 
     .. versionadded:: 2.0
@@ -42,7 +42,7 @@ class Activity2(TreeObject, TagsMixin):
 
     def __init__(self, json, **kwargs):
         """Construct an Activity from a json object."""
-        super(Activity2, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self._scope_id = json.get('scope_id')
 
@@ -59,8 +59,8 @@ class Activity2(TreeObject, TagsMixin):
 
     def refresh(self, *args, **kwargs):
         """Refresh the object in place."""
-        super(Activity2, self).refresh(url=self._client._build_url('activity', activity_id=self.id),
-                                       extra_params=API_EXTRA_PARAMS['activity'])
+        super().refresh(url=self._client._build_url('activity', activity_id=self.id),
+                        extra_params=API_EXTRA_PARAMS['activity'])
 
     #
     # additional properties
@@ -777,7 +777,7 @@ class Activity2(TreeObject, TagsMixin):
         See :func:`pykechain.Client.move_activity` for available parameters.
 
         If you want to move an Activity from one classification to another, you need to provide the target
-        classification. The classificaiton of the parent should match the one provided in the function. This is
+        classification. The classification of the parent should match the one provided in the function. This is
         to ensure that you really want this to happen.
 
         :param parent: parent object to move activity to
@@ -789,3 +789,7 @@ class Activity2(TreeObject, TagsMixin):
         :raises APIError: if an Error occurs.
         """
         return self._client.move_activity(self, parent, classification=classification)
+
+
+class Activity2(Activity, DeprecationMixin):
+    pass

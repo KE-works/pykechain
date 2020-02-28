@@ -5,7 +5,7 @@ import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import Multiplicity, ScopeStatus, SubprocessDisplayMode, KEChainPages
-from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
+from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError, DeprecationMixin
 from pykechain.models.base import Base
 from pykechain.models.input_checks import check_text, check_datetime, check_enum, check_list_of_text, check_team
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
@@ -14,7 +14,7 @@ from pykechain.models.team import Team
 from pykechain.utils import parse_datetime, find
 
 
-class Scope2(Base, TagsMixin):
+class Scope(Base, TagsMixin):
     """A virtual object representing a KE-chain scope.
 
     :ivar id: id of the activity
@@ -102,7 +102,7 @@ class Scope2(Base, TagsMixin):
         users = self._client._retrieve_users()['results']  # type: List[Dict]
         user_object = find(users, lambda u: u['username'] == user)  # type: Dict
         if user_object is None:
-            raise NotFoundError("User {} does not exist".format(user))
+            raise NotFoundError('User "{}" does not exist'.format(user))
 
         url = self._client._build_url('scope2_{}'.format(select_action), scope_id=self.id)
 
@@ -522,3 +522,7 @@ class Scope2(Base, TagsMixin):
         select_action = 'remove_leadmember'
 
         self._update_scope_project_team(select_action=select_action, user=leadmember, user_type='leadmember')
+
+
+class Scope2(Scope, DeprecationMixin):
+    pass

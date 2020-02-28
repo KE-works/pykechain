@@ -1,17 +1,17 @@
 from jsonschema import validate
 
 from pykechain.enums import Category
-from pykechain.exceptions import APIError, IllegalArgumentError
+from pykechain.exceptions import APIError, IllegalArgumentError, DeprecationMixin
 from pykechain.models.property2 import Property2
 from pykechain.models.validators.validator_schemas import options_json_schema
 
 
-class SelectListProperty2(Property2):
+class SelectListProperty(Property2):
     """A select list property that needs to update its options."""
 
     def __init__(self, json, **kwargs):
         """Construct a Property from a json object."""
-        super(SelectListProperty2, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
         self._value_choices = json.get('value_options').get('value_choices')
 
     @property
@@ -100,3 +100,7 @@ class SelectListProperty2(Property2):
             raise APIError("Could not update property value. Response: {}".format(str(response)))
         else:
             self._options = new_options  # save the new options as the options
+
+
+class SelectListProperty2(SelectListProperty, DeprecationMixin):
+    pass

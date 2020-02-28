@@ -1,6 +1,5 @@
-from typing import Sized, Any, Iterable, Union  # noqa: F401
+from typing import Sized, Any, Iterable, Union, Text  # noqa: F401
 
-from pykechain.models.part import Part  # noqa: F401
 from pykechain.models.part2 import Part2  # noqa: F401
 
 
@@ -14,8 +13,7 @@ class PartSet(Sized):
      * iPython notebook support for HTML table
     """
 
-    def __init__(self, parts):
-        # type: (Iterable[Union[Part, Part2]]) -> None
+    def __init__(self, parts: Iterable[Part2]):
         """Construct a PartSet from a part iterable."""
         self._parts = list(parts)
         self._iter = iter(self._parts)
@@ -35,15 +33,13 @@ class PartSet(Sized):
 
     next = __next__  # py2.7 alias
 
-    def __getitem__(self, k):
-        # type: (Any) -> Union[Part, Part2]
+    def __getitem__(self, k: Any) -> Part2:
         if isinstance(k, int):
             return self._parts[k]
 
         raise NotImplementedError
 
-    def _repr_html_(self):
-        # type: () -> str
+    def _repr_html_(self) -> Text:
         all_instances = all(p.category == 'INSTANCE' for p in self._parts)
 
         html = [

@@ -1,10 +1,10 @@
-from typing import Any, List, Dict, Optional, Text, Union, Tuple  # noqa: F401
+from typing import Any, List, Dict, Optional, Text, Union, Tuple
 
 import requests
 from jsonschema import validate
 
 from pykechain.enums import PropertyType, Category
-from pykechain.exceptions import APIError, IllegalArgumentError
+from pykechain.exceptions import APIError, IllegalArgumentError, DeprecationMixin
 from pykechain.models import Base
 from pykechain.models.input_checks import check_text
 from pykechain.models.representations.representation_base import BaseRepresentation
@@ -13,7 +13,7 @@ from pykechain.models.validators.validator_schemas import options_json_schema
 from pykechain.defaults import API_EXTRA_PARAMS
 
 
-class Property2(Base):
+class Property(Base):
     """A virtual object representing a KE-chain property.
 
     .. versionadded: 3.0
@@ -535,3 +535,7 @@ class Property2(Base):
         else:
             self.model().delete()
         return moved_property
+
+
+class Property2(Property, DeprecationMixin):
+    pass

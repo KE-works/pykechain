@@ -2,7 +2,7 @@ from unittest import skipIf
 
 from pykechain.enums import Multiplicity, Category, Classification
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
-from pykechain.models import Part, PartSet, Part2
+from pykechain.models import PartSet, Part2
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_PIM3
 
@@ -204,21 +204,21 @@ class TestParts(TestBetamax):
 
     # version 1.1.3 and later
     def test_retrieve_parent_of_part(self):
-        frame = self.project.part('Frame')  # type:Part
+        frame = self.project.part('Frame')  # type: Part2
         self.assertTrue(hasattr(frame, 'parent_id'))
         parent_of_frame = frame.parent()
         self.assertIsInstance(parent_of_frame, type(frame))
 
     def test_retrieve_children_of_part(self):
-        bike = self.project.part('Bike')  # type:Part
-        self.assertIsInstance(bike, (Part, Part2))
+        bike = self.project.part('Bike')  # type: Part2
+        self.assertIsInstance(bike, Part2)
         children_of_bike = bike.children()
         self.assertIsInstance(children_of_bike, (PartSet, list))
         self.assertTrue(len(children_of_bike) >= 1)  # eg. Wheels ...
 
     def test_retrieve_siblings_of_part(self):
         """Test if the siblings of a part is the same as the children of the parent of the part"""
-        frame = self.project.part('Frame')  # type:Part
+        frame = self.project.part('Frame')  # type: Part2
         siblings_of_frame = frame.siblings()
         self.assertIsInstance(siblings_of_frame, PartSet)
         self.assertTrue(len(siblings_of_frame) >= 1)  # eg. Wheels ...
@@ -391,7 +391,7 @@ class TestParts(TestBetamax):
 
     # new in 1.12
     def test_retrieve_children_of_part_with_additional_arguments(self):
-        bike = self.project.part('Bike')  # type:Part
+        bike = self.project.part('Bike')  # type: Part2
         self.assertIsInstance(bike, Part2)
         children_of_bike = bike.children(name__icontains='Wheel')
         self.assertIsInstance(children_of_bike, PartSet)
@@ -399,7 +399,7 @@ class TestParts(TestBetamax):
 
     def test_retrieve_siblings_of_part_with_additional_arguments(self):
         """Test if the siblings of a part is the same as the children of the parent of the part"""
-        frame = self.project.part('Frame')  # type:Part
+        frame = self.project.part('Frame')  # type: Part2
         siblings_of_frame = frame.siblings(name__icontains='Wheel')
         self.assertIsInstance(siblings_of_frame, PartSet)
         self.assertTrue(len(siblings_of_frame) >= 1)  # eg. Wheels ...

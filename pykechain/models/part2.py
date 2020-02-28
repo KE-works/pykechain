@@ -6,7 +6,7 @@ from six import text_type, string_types
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import Category, Multiplicity, Classification
-from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
+from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError, DeprecationMixin
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
     get_edited_one_many
 from pykechain.models import Scope2
@@ -16,7 +16,7 @@ from pykechain.models.tree_traversal import TreeObject
 from pykechain.utils import is_uuid, find
 
 
-class Part2(TreeObject):
+class Part(TreeObject):
     """A virtual object representing a KE-chain part.
 
     :ivar id: UUID of the part
@@ -81,7 +81,7 @@ class Part2(TreeObject):
         :type json: dict
         """
         # we need to run the init of 'Base' instead of 'Part' as we do not need the instantiation of properties
-        super(Part2, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self.scope_id = json.get('scope_id')
 
@@ -102,9 +102,9 @@ class Part2(TreeObject):
         if extra_params is None:
             extra_params = {}
         extra_params.update(API_EXTRA_PARAMS['part2'])
-        super(Part2, self).refresh(json=json,
-                                   url=self._client._build_url('part2', part_id=self.id),
-                                   extra_params=extra_params)
+        super().refresh(json=json,
+                        url=self._client._build_url('part2', part_id=self.id),
+                        extra_params=extra_params)
 
     #
     # Family and structure methods
@@ -1137,3 +1137,7 @@ class Part2(TreeObject):
         for prop in self.properties:
             properties_dict[prop.name] = prop.value
         return properties_dict
+
+
+class Part2(Part, DeprecationMixin):
+    pass
