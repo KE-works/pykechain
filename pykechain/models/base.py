@@ -16,11 +16,10 @@ class Base(object):
     :type updated_at: datetime or None
     """
 
-    def __init__(self, json, client):
-        # type: (Dict, Client) -> None  # noqa: F821 cannot import to prevent circular imports
+    def __init__(self, json: Dict, client: 'Client'):
         """Construct a model from provided json data."""
         self._json_data = json
-        self._client = client
+        self._client = client  # type: 'Client'
 
         self.id = json.get('id', None)
         self.name = json.get('name', None)

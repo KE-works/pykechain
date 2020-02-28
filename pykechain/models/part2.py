@@ -10,7 +10,7 @@ from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, 
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
     get_edited_one_many
 from pykechain.models import Scope2
-from pykechain.models.input_checks import check_text
+from pykechain.models.input_checks import check_text, check_type
 from pykechain.models.property2 import Property2
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.utils import is_uuid, find
@@ -841,8 +841,7 @@ class Part(TreeObject):
         # that not all properties are retrieved we perform a refresh of the part itself first.
         self.refresh()
 
-        if not isinstance(target_parent, Part2):
-            raise IllegalArgumentError("`target_parent` needs to be a part, got '{}'".format(type(target_parent)))
+        check_type(target_parent, Part2, 'target_parent')
 
         if self.category == Category.MODEL and target_parent.category == Category.MODEL:
             # Cannot add a model under an instance or vice versa
@@ -865,7 +864,7 @@ class Part(TreeObject):
             return copied_instance
         else:
             raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category'.
-                                       format(self.name, target_parent.name))
+                                       format(self, target_parent))
 
     def move(self,
              target_parent: 'Part2',
@@ -927,7 +926,8 @@ class Part(TreeObject):
                 model_of_instance.delete()
             return moved_instance
         else:
-            raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category')
+            raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category'.format(
+                self, target_parent))
 
     def update(self,
                name: Optional[Text] = None,

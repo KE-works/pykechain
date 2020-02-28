@@ -1,14 +1,13 @@
 import datetime
 import warnings
-from typing import Any  # noqa: F401
+from typing import Any, Text, List  # noqa: F401
 
 import requests
 from six import text_type, string_types
 
 from pykechain.enums import Multiplicity, ScopeStatus
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError, ForbiddenError
-from pykechain.models.base import Base
-from pykechain.models.team import Team
+from pykechain.models import Team, Base
 from pykechain.utils import is_uuid, parse_datetime
 
 
@@ -69,7 +68,7 @@ class Scope(Base):
             return None
 
     @property
-    def tags(self):
+    def tags(self) -> List[Text]:
         """
         Tags of the scope.
 
@@ -80,14 +79,14 @@ class Scope(Base):
         """
         return self._json_data.get('tags')
 
-    def parts(self, *args, **kwargs):
+    def parts(self, *args, **kwargs) -> 'PartSet':
         """Retrieve parts belonging to this scope.
 
         See :class:`pykechain.Client.parts` for available parameters.
         """
         return self._client.parts(*args, bucket=self.bucket.get('id'), **kwargs)
 
-    def part(self, *args, **kwargs):
+    def part(self, *args, **kwargs) -> 'Part2':
         """Retrieve a single part belonging to this scope.
 
         See :class:`pykechain.Client.part` for available parameters.

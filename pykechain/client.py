@@ -1,8 +1,8 @@
 import datetime
 import warnings
-from typing import Dict, Tuple, Optional, Any, List, Union, Text  # noqa: F401 pragma: no cover
-
 import requests
+
+from typing import Dict, Tuple, Optional, Any, List, Union, Text  # noqa: F401 pragma: no cover
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
 from six import text_type, string_types
@@ -18,7 +18,7 @@ from pykechain.models import Part2, Property2, Activity2, Scope2, Scope, PartSet
 from pykechain.models.widgets.widget import Widget
 from pykechain.utils import is_uuid, find
 from .__about__ import version as pykechain_version
-from .models.input_checks import check_datetime, check_list_of_text, check_team, check_text, check_enum
+from .models.input_checks import check_datetime, check_list_of_text, check_team, check_text, check_enum, check_type
 
 
 class Client(object):
@@ -412,11 +412,8 @@ class Client(object):
             'status': check_enum(status, ScopeStatus, 'status'),
         }
 
-        if self.match_app_version(label='scope', version='>=3.0.0', default=False):
-            request_params.update(API_EXTRA_PARAMS['scope2'])
-            url = self._build_url('scopes2')
-        else:
-            url = self._build_url('scopes')
+        request_params.update(API_EXTRA_PARAMS['scope2'])
+        url = self._build_url('scopes2')
 
         if kwargs:
             request_params.update(**kwargs)
@@ -428,12 +425,7 @@ class Client(object):
 
         data = response.json()
 
-        # for 'kechain.gcore.gscope >= 2.0.0 we return Scope2 otherwiser Scope
-        if self.match_app_version(label='scope', version='>=3.0.0', default=False):
-            # Scope2
-            return [Scope2(s, client=self) for s in data['results']]
-        else:
-            return [Scope(s, client=self) for s in data['results']]
+        return [Scope2(s, client=self) for s in data['results']]
 
     def scope(self, *args, **kwargs) -> Union[Scope, Scope2]:
         """Return a single scope based on the provided name.
@@ -483,10 +475,7 @@ class Client(object):
             'scope': scope
         }
 
-        # update the fields query params
-        # for 'kechain.core.wim >= 2.0.0' add additional API params
-        if self.match_app_version(label='wim', version='>=3.0.0', default=False):
-            request_params.update(API_EXTRA_PARAMS['activity'])
+        request_params.update(API_EXTRA_PARAMS['activity'])
 
         if kwargs:
             request_params.update(**kwargs)
@@ -532,7 +521,6 @@ class Client(object):
         pk: Optional[Text] = None,
         model: Optional[Part2] = None,
         category: Optional[Union[Category, Text]] = Category.INSTANCE,
-        bucket: Optional[Text] = None,
         scope_id: Optional[Text] = None,
         parent: Optional[Text] = None,
         activity: Optional[Text] = None,
@@ -556,9 +544,7 @@ class Client(object):
         :type model: basestring or None
         :param category: filter on category (INSTANCE, MODEL, None)
         :type category: basestring or None
-        :param bucket: filter on bucket_id  # only relevant for KE-chain 2
-        :type bucket: basestring or None
-        :param scope_id: filter on scope_id # relevant for KE-chain 2 and 3
+        :param scope_id: filter on scope_id
         :type scope_id: basestring or None
         :param parent: filter on the parent_id, returns all children of the parent_id
         :type parent: basestring or None
@@ -606,22 +592,11 @@ class Client(object):
             widget_id=widget,
             limit=batch,
             scope_id=scope_id,
+            parent_id=parent,
+            model_id=model.id if model else None,
         )
-
-        if self.match_app_version(label='pim', version='>=3.0.0'):
-            request_params.update(dict(
-                parent_id=parent,
-                model_id=model.id if model else None,
-            ))
-            url = self._build_url('parts2')
-            request_params.update(API_EXTRA_PARAMS['parts2'])
-        else:
-            request_params.update(dict(
-                bucket=bucket,
-                parent=parent,
-                model=model.id if model else None,
-            ))
-            url = self._build_url('parts')
+        url = self._build_url('parts2')
+        request_params.update(API_EXTRA_PARAMS['parts2'])
 
         if kwargs:
             request_params.update(**kwargs)
@@ -726,18 +701,13 @@ class Client(object):
         if kwargs:
             request_params.update(**kwargs)
 
-        if self.match_app_version(label='pim', version='>=3.0.0'):
-            request_params.update(API_EXTRA_PARAMS['properties2'])
-            response = self._request('GET', self._build_url('properties2'), params=request_params)
-        else:
-            response = self._request('GET', self._build_url('properties'), params=request_params)
+        request_params.update(API_EXTRA_PARAMS['properties2'])
+        response = self._request('GET', self._build_url('properties2'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve properties: '{}'".format(response.content))
 
-        data = response.json()
-
-        return [Property2.create(p, client=self) for p in data['results']]
+        return [Property2.create(p, client=self) for p in response.json()['results']]
 
     def property(self, *args, **kwargs) -> 'AnyProperty':  # noqa: F
         """Retrieve single KE-chain Property.
@@ -791,8 +761,7 @@ class Client(object):
             'id': pk,
             'scope': scope
         }
-        if self.match_app_version(label='sim', version='>=3.0.0', default=False):
-            request_params.update(API_EXTRA_PARAMS['service'])
+        request_params.update(API_EXTRA_PARAMS['service'])
 
         if kwargs:
             request_params.update(**kwargs)
@@ -802,8 +771,7 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve services")
 
-        data = response.json()
-        return [Service(service, client=self) for service in data['results']]
+        return [Service(service, client=self) for service in response.json()['results']]
 
     def service(self, *args, **kwargs):
         """
@@ -868,8 +836,7 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve service executions")
 
-        data = response.json()
-        return [ServiceExecution(service_exeuction, client=self) for service_exeuction in data['results']]
+        return [ServiceExecution(service_exeuction, client=self) for service_exeuction in response.json()['results']]
 
     def service_execution(self, *args, **kwargs):
         """
@@ -923,8 +890,7 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not find users: '{}'".format(response.json()))
 
-        data = response.json()
-        return [User(user, client=self) for user in data['results']]
+        return [User(user, client=self) for user in response.json()['results']]
 
     def user(self, *args, **kwargs):
         """
@@ -983,8 +949,7 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not find teams: '{}'".format(response.json()))
 
-        data = response.json()
-        return [Team(team, client=self) for team in data['results']]
+        return [Team(team, client=self) for team in response.json()['results']]
 
     def team(self, *args, **kwargs):
         """
@@ -1030,9 +995,6 @@ class Client(object):
         :raises APIError: when the API does not support the widgets, or when the API gives an error.
         """
         """Widgets of an activity."""
-        if self.match_app_version(label='widget', version='<3.0.0'):
-            raise APIError("The widget concept is not introduced yet for this KE-chain version")
-
         request_params = dict(API_EXTRA_PARAMS['widgets'])
         request_params['id'] = pk
 
@@ -1127,9 +1089,7 @@ class Client(object):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create activity {}: {}".format(str(response), response.content))
 
-        data = response.json()
-
-        return Activity2(data['results'][0], client=self)
+        return Activity2(response.json()['results'][0], client=self)
 
     def _create_part(self, action, data, **kwargs):
         """Create a part for PIM 2 internal core function."""
@@ -1150,7 +1110,7 @@ class Client(object):
 
         return Part2(response.json()['results'][0], client=self)
 
-    def create_part(self, parent, model, name=None, **kwargs):
+    def create_part(self, parent: Part2, model: Part2, name: Optional[Text] = None, **kwargs) -> Part2:
         """Create a new part instance from a given model under a given parent.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
@@ -1171,18 +1131,22 @@ class Client(object):
         :raises APIError: if the `Part` could not be created
         """
         if not isinstance(parent, Part2) or not isinstance(model, Part2):
-            raise IllegalArgumentError("The parent and model should be a 'Part' object")
+            raise IllegalArgumentError("The `parent` and `model` should be 'Part' objects")
         if parent.category != Category.INSTANCE:
-            raise IllegalArgumentError("The parent should be an category 'INSTANCE'")
+            raise IllegalArgumentError("The `parent` should be of category 'INSTANCE'")
         if model.category != Category.MODEL:
-            raise IllegalArgumentError("The models should be of category 'MODEL'")
+            raise IllegalArgumentError("The `model` should be of category 'MODEL'")
 
         name = check_text(text=name, key='name') or model.name
 
         data = dict(name=name, parent_id=parent.id, model_id=model.id)
         return self._create_part(action="new_instance", data=data, **kwargs)
 
-    def create_model(self, parent, name, multiplicity=Multiplicity.ZERO_MANY, **kwargs):
+    def create_model(self,
+                     parent: Part2,
+                     name: Text,
+                     multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
+                     **kwargs) -> Part2:
         """Create a new child model under a given parent.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
@@ -1215,8 +1179,12 @@ class Client(object):
         data = dict(name=name, parent_id=parent.id, multiplicity=multiplicity)
         return self._create_part(action="create_child_model", data=data, **kwargs)
 
-    def create_model_with_properties(self, parent, name, multiplicity=Multiplicity.ZERO_MANY, properties_fvalues=None,
-                                     **kwargs):
+    def create_model_with_properties(
+            self,
+            parent: Part2, name: Text,
+            multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
+            properties_fvalues: Optional[List[Dict]] = None,
+            **kwargs) -> Part2:
         """Create a model with its properties in a single API request.
 
         With KE-chain 3 backends you may now provide a whole set of properties to create using a `properties_fvalues`
@@ -1241,8 +1209,10 @@ class Client(object):
         :type name: basestring
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N of :class:`enums.Multiplicity`
         :type multiplicity: basestring
+        :param properties_fvalues: list of dicts per property, each must have fields `name` and `property_type`.
+        :type properties_fvalues: list
         :param kwargs: (optional) additional keyword=value arguments
-        :return: :class:`models.Part` with category `MODEL` (of :class:`enums.Category`
+        :return: :class:`models.Part` with category `MODEL` (of :class:`enums.Category`)
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
 
@@ -1268,7 +1238,7 @@ class Client(object):
             raise IllegalArgumentError("`parent` should be either a parent part or a uuid, got '{}'".format(parent))
 
         if parent.category != Category.MODEL:
-            raise IllegalArgumentError("The parent should be of category 'MODEL'")
+            raise IllegalArgumentError("`parent` should be of category 'MODEL'")
 
         if isinstance(properties_fvalues, list) and all(isinstance(p, dict) for p in properties_fvalues):
             required_new_property_keys = {'name', 'property_type'}
@@ -1284,7 +1254,7 @@ class Client(object):
             parent_id=parent.id,
             multiplicity=multiplicity,
             category=Category.MODEL,
-            properties_fvalues=properties_fvalues
+            properties_fvalues=properties_fvalues,
         )
 
         return self._create_part(action="create_child_model", data=data, **kwargs)
@@ -1311,40 +1281,31 @@ class Client(object):
         :return: cloned :class:`models.Part`
         :raises APIError: if the `Part` could not be cloned
         """
+        check_type(part, Part2, 'part')
+        check_type(parent, Part2, 'parent')
+
+        data = dict(
+            name=check_text(name, 'name') or "CLONE - {}".format(part.name),
+            parent_id=parent.id,
+            suppress_kevents=kwargs.pop('suppress_kevents', None),
+        )
+
+        if part.category == Category.MODEL:
+            data.update(dict(
+                multiplicity=kwargs.pop('multiplicity', part.multiplicity),
+                model_id=part.id)
+            )
+        else:
+            data['instance_id'] = part.id
+
         if part.category == Category.MODEL:
             select_action = 'clone_model'
         else:
             select_action = 'clone_instance'
-        if not isinstance(part, Part2) and not isinstance(parent, Part2):
-            raise IllegalArgumentError("Either part and parent need to be of class `Part`. "
-                                       "We got: part: '{}' and parent '{}'".format(type(part), type(parent)))
 
-        if self.match_app_version(label="pim", version=">=3.0.0"):
-            data = dict(
-                name=name or "CLONE - {}".format(part.name),
-                parent_id=parent.id,
-                suppress_kevents=kwargs.pop('suppress_kevents', None),
-            )
-            if part.category == Category.MODEL:
-                data.update(dict(
-                    multiplicity=kwargs.pop('multiplicity', part.multiplicity),
-                    model_id=part.id)
-                )
-            else:
-                data['instance_id'] = part.id
-            query_params = kwargs
-            query_params.update(API_EXTRA_PARAMS['parts2'])
-            url = self._build_url('parts2_{}'.format(select_action))
-        else:
-            data = dict(
-                part=part.id,
-                parent=parent.id,
-                suppress_kevents=kwargs.pop('suppress_kevents', None)
-            )
-            # prepare url query parameters
-            query_params = kwargs
-            query_params['select_action'] = select_action
-            url = self._build_url('parts')
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['parts2'])
+        url = self._build_url('parts2_{}'.format(select_action))
 
         response = self._request('POST', url, params=query_params, data=data)
 
@@ -1384,13 +1345,20 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
+        check_type(model, Part2, 'model')
+        check_type(parent, Part2, 'parent')
+
         if model.category != Category.MODEL:
             raise IllegalArgumentError("The model should be of category MODEL")
         if parent.category != Category.MODEL:
             raise IllegalArgumentError("The parent should be of category MODEL")
 
-        name = check_text(text=name, key='name')
-        data = dict(name=name, model_id=model.id, parent_id=parent.id, multiplicity=multiplicity)
+        data = dict(
+            name=check_text(text=name, key='name'),
+            model_id=model.id,
+            arent_id=parent.id,
+            multiplicity=check_enum(multiplicity, Multiplicity, 'multiplicity'),
+        )
         return self._create_part(action='create_proxy_model', data=data, **kwargs)
 
     def create_property(
@@ -1432,38 +1400,21 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Property` model could not be created
         """
-        if model.category != Category.MODEL:
-            raise IllegalArgumentError("The model should be of category MODEL")
-
-        # if not property_type.endswith('_VALUE'):
-        #     warnings.warn("Please use the `PropertyType` enumeration to ensure providing correct "
-        #                   "values to the backend.", UserWarning)
-        #     property_type = '{}_VALUE'.format(property_type.upper())
-
-        check_text(text=name, key='name')
         check_enum(property_type, PropertyType, 'property_type')
+        check_type(model, Part2, 'model')
+        if model.category != Category.MODEL:
+            raise IllegalArgumentError("`model` should be of category MODEL")
 
-        # because the references value only accepts a single 'model_id' in the default value, we need to convert this
-        # to a single value from the list of values.
+        options = check_type(options, dict, 'options') or dict()
+
         if property_type in (PropertyType.REFERENCE_VALUE, PropertyType.REFERENCES_VALUE) and default_value:
+            # References only accept a single 'model_id' in the default value, we need to convert
+            # this to a single value from the list of values.
             if isinstance(default_value, (list, tuple)):
-                if isinstance(default_value[0], Part2):
-                    scope_options = dict(
-                        scope_id=default_value[0]._json_data["scope_id"]
-                    )
-                    default_value = [default_value[0].id]
+                default_value = default_value[0]
 
-                elif is_uuid(default_value[0]):
-                    scope_options = dict(
-                        scope_id=self.model(id=default_value[0])._json_data["scope_id"]
-                    )
-                    default_value = [default_value[0]]
-                else:
-                    raise IllegalArgumentError(
-                        "Please provide a valid default_value being a `Part` of category `MODEL` "
-                        "or a model uuid, got: '{}'".format(default_value))
-
-            elif isinstance(default_value, Part2):
+            # Retrieve the referenced Scope from the default value
+            if isinstance(default_value, Part2):
                 scope_options = dict(
                     scope_id=default_value._json_data["scope_id"]
                 )
@@ -1474,43 +1425,22 @@ class Client(object):
                 )
                 default_value = [default_value]
             else:
-                raise IllegalArgumentError("Please provide a valid default_value being a `Part` of category `MODEL` "
+                raise IllegalArgumentError("Please provide a valid `default_value` being a `Part` of category `MODEL` "
                                            "or a model uuid, got: '{}'".format(default_value))
-            if isinstance(options, dict):
-                options.update(scope_options)
-            else:
-                options = scope_options
+            options.update(scope_options)
 
-        if self.match_app_version(label="pim", version=">=3.0.0"):
-            data = dict(
-                name=name,
-                part_id=model.id,
-                description=description or '',
-                property_type=property_type.upper(),
-                value=default_value,
-                unit=unit or '',
-                value_options=options or {}
-            )
-            url = self._build_url('properties2_create_model')
-            query_params = kwargs
-            query_params.update(API_EXTRA_PARAMS['properties2'])
-        else:
-            data = dict(
-                name=name,
-                part=model.id,
-                description=description or '',
-                property_type=property_type.upper(),
-                value=default_value,
-                unit=unit or '',
-                options=options or {}
-            )
-            url = self._build_url('properties')
-            query_params = kwargs
-
-        # # We add options after the fact only if they are available, otherwise the options will be set to null in the
-        # # request and that can't be handled by KE-chain.
-        # if options:
-        #     data['options'] = options
+        data = dict(
+            name=check_text(name, 'name'),
+            part_id=model.id,
+            description=check_text(description, 'description') or '',
+            property_type=property_type.upper(),
+            value=default_value,
+            unit=unit or '',
+            value_options=options,
+        )
+        url = self._build_url('properties2_create_model')
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['properties2'])
 
         response = self._request('POST', url, params=query_params, json=data)
 
@@ -1642,21 +1572,15 @@ class Client(object):
 
         # injecting additional kwargs for those cases that you need to add extra options.
         data_dict.update(kwargs)
-        if self.match_app_version(label="scope", version=">=3.0.0"):
-            url = self._build_url('scopes2')
-            query_params = API_EXTRA_PARAMS['scopes2']
-            response = self._request('POST', url, params=query_params, data=data_dict)
-        else:
-            url = self._build_url('scopes')
-            response = self._request('POST', url, data=data_dict)
+
+        url = self._build_url('scopes2')
+        query_params = API_EXTRA_PARAMS['scopes2']
+        response = self._request('POST', url, params=query_params, data=data_dict)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create scope, {}:\n\n{}'".format(str(response), response.json()))
 
-        if self.match_app_version(label="scope", version=">=3.0.0"):
-            return Scope2(response.json()['results'][0], client=self)
-        else:
-            return Scope(response.json()['results'][0], client=self)
+        return Scope2(response.json()['results'][0], client=self)
 
     def delete_scope(self, scope: Union[Scope, Scope2], asynchronous: Optional[bool] = True) -> bool:
         """
@@ -1673,18 +1597,15 @@ class Client(object):
         :return: True when the delete is a success.
         :raises APIError: in case of failure in the deletion of the scope
         """
-        if not isinstance(scope, (Scope, Scope2)):
-            raise IllegalArgumentError('Scope "{}" is not a scope!'.format(scope.name))
+        check_type(scope, Scope2, 'scope')
 
-        if self.match_app_version(label="scope", version=">=3.1.0"):
-            query_options = {"async_mode": asynchronous}
-        else:
-            query_options = {"async": asynchronous}
+        query_options = {
+            "async_mode": check_type(asynchronous, bool, 'asynchronous'),
+        }
 
-        if self.match_app_version(label="scope", version=">=3.0.0"):
-            response = self._request('DELETE', self._build_url('scope2', scope_id=str(scope.id)), params=query_options)
-        else:
-            response = self._request('DELETE', self._build_url('scope', scope_id=str(scope.id)))
+        response = self._request('DELETE',
+                                 url=self._build_url('scope2', scope_id=str(scope.id)),
+                                 params=query_options)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete scope, {}: {}".format(str(response), response.content))
@@ -1740,57 +1661,33 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: When the server is unable to clone the scope (eg. permissions)
         """
-        if not isinstance(source_scope, (Scope, Scope2)):
-            raise IllegalArgumentError('`source_scope` should be a `Scope` object')
-
-        if scope_options is not None and not isinstance(scope_options, dict):
-            raise IllegalArgumentError("`scope_options` need to be a dictionary")
-
-        if self.match_app_version(label="pim", version=">=3.1.0"):
-            async_key = 'async_mode'
-        else:
-            async_key = 'async'
-
-        if self.match_app_version(label="pim", version=">=3.0.0"):
-            options_key = 'scope_options'
-            team_key = 'team_id'
-            scope_key = 'scope_id'
-        else:
-            options_key = 'options'
-            team_key = 'team'
-            scope_key = 'id'
+        check_type(source_scope, Scope2, 'scope')
+        check_type(scope_options, dict, 'scope_options')
 
         start_date = start_date or source_scope.start_date
         due_date = due_date or source_scope.due_date
 
         data_dict = {
-            scope_key: source_scope.id,
+            'scope_id': source_scope.id,
             'name': check_text(name, 'name') or 'CLONE - {}'.format(source_scope.name),
             'start_date': check_datetime(dt=start_date, key='start_date'),
             'due_date': check_datetime(dt=due_date, key='due_date'),
             'text': check_text(description, 'description') or source_scope.description,
             'status': check_enum(status, ScopeStatus, 'status'),
             'tags': check_list_of_text(tags, 'tags') or source_scope.tags,
-            options_key: scope_options or dict(),
-            async_key: asynchronous,
+            'scope_options': scope_options or dict(),
+            'async_mode': asynchronous,
         }
 
         team = check_team(team=team, method=self.team)
         if team:
-            data_dict[team_key] = team
+            data_dict['team_id'] = team
 
-        if self.match_app_version(label="scope", version=">=3.0.0"):
-            url = self._build_url('scopes2_clone')
-            query_params = API_EXTRA_PARAMS['scopes2']
-            response = self._request('POST', url,
-                                     params=query_params,
-                                     json=data_dict)
-        else:
-            url = self._build_url('scope')
-            query_params = dict(select_action='clone')
-            response = self._request('POST', url,
-                                     params=query_params,
-                                     json=data_dict)
+        url = self._build_url('scopes2_clone')
+        query_params = API_EXTRA_PARAMS['scopes2']
+        response = self._request('POST', url,
+                                 params=query_params,
+                                 json=data_dict)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             if response.status_code == requests.codes.forbidden:
@@ -1801,19 +1698,22 @@ class Client(object):
         if asynchronous:
             return None
 
-        if self.match_app_version(label="scope", version=">=3.0.0"):
-            cloned_scope = Scope2(response.json()['results'][0], client=source_scope._client)
+        cloned_scope = Scope2(response.json()['results'][0], client=source_scope._client)
 
-            # TODO work-around, some attributes are not (yet) in the KE-chain response.json()
-            cloned_scope._tags = tags
-            cloned_scope.start_date = start_date
-            cloned_scope.due_date = due_date
-            return cloned_scope
-        else:
-            return Scope(response.json()['results'][0], client=source_scope._client)
+        # TODO work-around, some attributes are not (yet) in the KE-chain response.json()
+        cloned_scope._tags = tags
+        cloned_scope.start_date = start_date
+        cloned_scope.due_date = due_date
+        return cloned_scope
 
-    def create_team(self, name, user, description=None, options=None, is_hidden=False):
-        # type: (Text, Union[Text, int, User], Optional[Text], Optional[Text], Optional[bool]) -> Team
+    def create_team(
+        self,
+        name: Text,
+        user: Union[Text, int, User],
+        description: Optional[Text] = None,
+        options: Optional[Dict] = None,
+        is_hidden: Optional[bool] = False
+    ) -> Team:
         """
         Create a team.
 
@@ -1838,14 +1738,6 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: When an API Error occurs
         """
-        if options is None:
-            options = dict()
-        elif not isinstance(options, dict):
-            raise IllegalArgumentError('`options` should be a dictionary')
-
-        if not isinstance(is_hidden, bool):
-            raise IllegalArgumentError('`is_hidden` should be a boolean')
-
         if isinstance(user, (string_types, text_type)):
             user = self.user(username=user)
         elif isinstance(user, int):
@@ -1858,8 +1750,8 @@ class Client(object):
         data = dict(
             name=check_text(name, 'name'),
             description=check_text(description, 'description'),
-            options=options,
-            is_hidden=is_hidden
+            options=check_type(options, Dict, 'options') or dict(),
+            is_hidden=check_type(is_hidden, bool, 'is_hidden'),
         )
 
         url = self._build_url('teams')
@@ -1868,7 +1760,7 @@ class Client(object):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create a team ({})".format((response, response.json())))
 
-        new_team = Team(response.json().get('results')[0], client=self)
+        new_team = Team(json=response.json().get('results')[0], client=self)
 
         new_team.add_members([user], role=TeamRoles.OWNER)
         team_members = new_team.members()
@@ -1878,8 +1770,8 @@ class Client(object):
 
         if members_to_remove:
             new_team.remove_members(members_to_remove)
+            new_team.refresh()
 
-        new_team.refresh()
         return new_team
 
     @staticmethod

@@ -32,10 +32,7 @@ def is_uuid(value: Text) -> bool:
     :return: True if there is a match, otherwise False
     :rtype: bool
     """
-    if re.match(UUID_REGEX_PATTERN, str(value)):
-        return True
-    else:
-        return False
+    return bool(re.match(UUID_REGEX_PATTERN, str(value)))
 
 
 def is_url(value: Text) -> bool:
@@ -153,10 +150,7 @@ def is_url(value: Text) -> bool:
         r"$",
         re.UNICODE | re.IGNORECASE
     )
-    result = regex.match(value)
-    if result:
-        return True
-    return False
+    return bool(regex.match(value))
 
 
 @contextmanager
@@ -404,8 +398,7 @@ def slugify_ref(value: Text, allow_unicode: bool = False) -> Text:
     return re.sub(r'[-\s]+', '-', value)
 
 
-def __dict_public__(cls):
-    # type: (type(object)) -> Dict
+def __dict_public__(cls: type(object)) -> Dict:
     """
     Get the __dict__ of the class `cls`, excluding 'dunder' attributes and methods.
 
@@ -422,8 +415,7 @@ def __dict_public__(cls):
     return {k: v for (k, v) in cls.__dict__.items() if not k.startswith('__')}
 
 
-def __dict__inherited__(cls, stop=type, public=True):
-    # type: (type(object), type(object), bool) -> Dict
+def __dict__inherited__(cls: type(object), stop: type(object) = type, public: Optional[bool] = True) -> Dict:
     """
     Get all __dict__ items of the class and its superclasses up to `type`, or the `stop` class given as input.
 

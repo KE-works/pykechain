@@ -1,4 +1,4 @@
-from typing import Any, List, Dict, Optional, Text, Union, Tuple
+from typing import Any, List, Dict, Optional, Text, Union, Tuple, Iterable
 
 import requests
 from jsonschema import validate
@@ -66,14 +66,14 @@ class Property(Base):
         self.order = json.get('order')
 
         # Create protected variables
-        self._value = json.get('value')
-        self._options = json.get('value_options')
+        self._value = json.get('value')  # type: Any
+        self._options = json.get('value_options')  # type: Dict
         self._part = None  # type: Optional['Part2']
         self._model = None  # type: Optional['Property2']
-        self._validators = []  # type: List[Any]
+        self._validators = []  # type: List[PropertyValidator]
         self._representations = []  # type: List[BaseRepresentation]
-        self._validation_results = []
-        self._validation_reasons = []
+        self._validation_results = []  # type: List
+        self._validation_reasons = []  # type: List
 
         if self._options:
             validate(self._options, options_json_schema)
@@ -165,7 +165,7 @@ class Property(Base):
             self._part = self._client.part(pk=self.part_id, category=self.category)
         return self._part
 
-    def model(self) -> 'Property2':
+    def model(self) -> 'AnyProperty':
         """
         Model object of the property if the property is an instance otherwise itself.
 
@@ -173,7 +173,7 @@ class Property(Base):
         to the backend to retrieve its model object.
 
         :return: `Property` model object if the current `Property` is an instance.
-        :rtype: :class:`pykechain.models.Property2`
+        :rtype: :class:`pykechain.models.AnyProperty`
         """
         if self.category == Category.MODEL:
             return self
@@ -191,8 +191,7 @@ class Property(Base):
         return self._validators
 
     @validators.setter
-    def validators(self, validators):
-        # type: (Union[list, tuple]) -> None
+    def validators(self, validators: Iterable[PropertyValidator]) -> None:
         if self.category != Category.MODEL:
             raise IllegalArgumentError("To update the list of validators, it can only work on "
                                        "`Property` of category 'MODEL'")
@@ -221,21 +220,20 @@ class Property(Base):
 
     def _dump_validators(self):
         """Dump the validators as json inside the _options dictionary with the key `validators`."""
-        if hasattr(self, '_validators'):
-            validators_json = []
-            for validator in self._validators:
-                if isinstance(validator, PropertyValidator):
-                    validators_json.append(validator.as_json())
-                else:
-                    raise APIError("validator is not a PropertyValidator: '{}'".format(validator))
-            if self._options.get('validators', list()) == validators_json:
-                # no change
-                pass
+        validators_json = []
+        for validator in self._validators:
+            if isinstance(validator, PropertyValidator):
+                validators_json.append(validator.as_json())
             else:
-                new_options = self._options.copy()  # make a copy
-                new_options.update({'validators': validators_json})
-                validate(new_options, options_json_schema)
-                self._options = new_options
+                raise APIError("validator is not a PropertyValidator: '{}'".format(validator))
+        if self._options.get('validators', list()) == validators_json:
+            # no change
+            pass
+        else:
+            new_options = self._options.copy()  # make a copy
+            new_options.update({'validators': validators_json})
+            validate(new_options, options_json_schema)
+            self._options = new_options
 
     @property
     def is_valid(self) -> Optional[bool]:
@@ -248,7 +246,7 @@ class Property(Base):
         :returns: True when the `value` is valid
         :rtype: bool or None
         """
-        if not hasattr(self, '_validators'):
+        if not self._validators:
             return None
         else:
             self.validate(reason=False)
@@ -284,8 +282,8 @@ class Property(Base):
         :rtype: list(bool) or list((bool, str))
         :raises Exception: for incorrect validators or incompatible values
         """
-        self._validation_results = [validator.is_valid(self._value) for validator in getattr(self, '_validators')]
-        self._validation_reasons = [validator.get_reason() for validator in getattr(self, '_validators')]
+        self._validation_results = [validator.is_valid(self._value) for validator in self._validators]
+        self._validation_reasons = [validator.get_reason() for validator in self._validators]
 
         if reason:
             return list(zip(self._validation_results, self._validation_reasons))
