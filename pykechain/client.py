@@ -4,8 +4,10 @@ from typing import Dict, Tuple, Optional, Any, List, Union, AnyStr, Text  # noqa
 
 import requests
 from envparse import env
+from requests.adapters import HTTPAdapter
 from requests.compat import urljoin, urlparse  # type: ignore
 from six import text_type, string_types
+from urllib3 import Retry
 
 from pykechain.defaults import API_PATH, API_EXTRA_PARAMS
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
@@ -75,12 +77,20 @@ class Client(object):
         if check_certificates is False:
             self.session.verify = False
 
+        # Retry implementation
+        adapter = HTTPAdapter(max_retries=Retry(connect=3, backoff_factor=0.5))
+        self.session.mount('https://', adapter=adapter)
+        self.session.mount('http://', adapter=adapter)
+
     def __del__(self):
         """Destroy the client object."""
-        self.session.close()
-        del self.auth
-        del self.headers
-        del self.session
+        if hasattr(self, 'session'):
+            self.session.close()
+            del self.session
+        if hasattr(self, 'auth'):
+            del self.auth
+        if hasattr(self, 'headers'):
+            del self.headers
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Client '{}'>".format(self.api_root)
