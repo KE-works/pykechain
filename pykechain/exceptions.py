@@ -83,10 +83,8 @@ class DeprecationMixin:
     def __new__(cls, *args, **kwargs):
         # TODO Deprecate all "Class2" classes at v3.8.0
         if not cls.__notified:
-
-            new_name = str(cls.__name__)[:-1]
-            warnings.warn(f'`{cls.__name__}` is a wrapping class for `{new_name}`. '
-                          f'`{cls.__name__}` will be deprecated in version v3.8.0.', PendingDeprecationWarning)
+            warnings.warn('`{n}` is a wrapping class for `{nn}`. `{n}` will be deprecated in version v3.8.0.'
+                          .format(n=cls.__name__, nn=str(cls.__name__)[:-1]), PendingDeprecationWarning)
             cls.__notified = True
 
         return super().__new__(cls)
