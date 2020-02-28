@@ -1582,7 +1582,7 @@ class Client(object):
 
         return Scope2(response.json()['results'][0], client=self)
 
-    def delete_scope(self, scope: Union[Scope, Scope2], asynchronous: Optional[bool] = True) -> bool:
+    def delete_scope(self, scope: Scope2, asynchronous: Optional[bool] = True) -> bool:
         """
         Delete a scope.
 
@@ -1750,7 +1750,7 @@ class Client(object):
         data = dict(
             name=check_text(name, 'name'),
             description=check_text(description, 'description'),
-            options=check_type(options, Dict, 'options') or dict(),
+            options=check_type(options, dict, 'options') or dict(),
             is_hidden=check_type(is_hidden, bool, 'is_hidden'),
         )
 

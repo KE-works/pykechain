@@ -7,7 +7,7 @@ from six import text_type, string_types
 
 from pykechain.enums import Multiplicity, ScopeStatus
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError, ForbiddenError
-from pykechain.models import Team, Base
+from pykechain.models import Base
 from pykechain.utils import is_uuid, parse_datetime
 
 

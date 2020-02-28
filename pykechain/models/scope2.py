@@ -207,14 +207,16 @@ class Scope(Base, TagsMixin):
         update_dict = {
             'id': self.id,
             'name': self.name,
-            'description': self.description,
+            'text': self.description,
             'start_date': check_datetime(start_date, 'start_date'),
             'due_date': check_datetime(due_date, 'due_date'),
-            'status': check_enum(status, ScopeStatus, 'status'),
-            'tags': check_list_of_text(tags, 'tags'),
-            'team_id': check_team(team, method=self._client.team),
+            'status': check_enum(status, ScopeStatus, 'status') or self.status,
+            'tags': check_list_of_text(tags, 'tags') or [],
             'options': options or dict(),
         }
+        team = check_team(team, method=self._client.team)
+        if team:
+            update_dict['team_id'] = team
 
         # do the update itself in an protected function.
         self._edit(update_dict)
