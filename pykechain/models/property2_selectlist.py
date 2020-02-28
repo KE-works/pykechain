@@ -1,7 +1,7 @@
 from jsonschema import validate
 
 from pykechain.enums import Category
-from pykechain.exceptions import APIError, IllegalArgumentError, DeprecationMixin
+from pykechain.exceptions import APIError, IllegalArgumentError, _DeprecationMixin
 from pykechain.models.property2 import Property2
 from pykechain.models.validators.validator_schemas import options_json_schema
 
@@ -102,5 +102,7 @@ class SelectListProperty(Property2):
             self._options = new_options  # save the new options as the options
 
 
-class SelectListProperty2(SelectListProperty, DeprecationMixin):
+class SelectListProperty2(SelectListProperty, _DeprecationMixin):
+    """A select list property that needs to update its options."""
+
     pass

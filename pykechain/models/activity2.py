@@ -9,7 +9,7 @@ from requests.compat import urljoin  # type: ignore
 from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_EXTRA_PARAMS
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
-from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError, DeprecationMixin
+from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError, _DeprecationMixin
 from pykechain.models.input_checks import check_datetime, check_text, check_list_of_text, check_enum
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
@@ -791,5 +791,27 @@ class Activity(TreeObject, TagsMixin):
         return self._client.move_activity(self, parent, classification=classification)
 
 
-class Activity2(Activity, DeprecationMixin):
+class Activity2(Activity, _DeprecationMixin):
+    """A virtual object representing a KE-chain activity.
+
+    .. versionadded:: 2.0
+
+    :ivar id: id of the activity
+    :type id: uuid
+    :ivar name: name of the activity
+    :type name: basestring
+    :ivar created_at: created datetime of the activity
+    :type created_at: datetime
+    :ivar updated_at: updated datetime of the activity
+    :type updated_at: datetime
+    :ivar description: description of the activity
+    :type description: basestring
+    :ivar status: status of the activity. One of :class:`pykechain.enums.ActivityStatus`
+    :type status: basestring
+    :ivar classification: classification of the activity. One of :class:`pykechain.enums.ActivityClassification`
+    :type classification: basestring
+    :ivar activity_type: Type of the activity. One of :class:`pykechain.enums.ActivityType` for WIM version 2
+    :type activity_type: basestring
+    """
+
     pass

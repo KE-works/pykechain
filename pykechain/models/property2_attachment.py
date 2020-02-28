@@ -6,31 +6,12 @@ import requests
 from six import string_types, text_type
 from typing import Text, Any, Optional
 
-from pykechain.exceptions import APIError, DeprecationMixin
+from pykechain.exceptions import APIError, _DeprecationMixin
 from pykechain.models.property2 import Property2
 
 
 class AttachmentProperty(Property2):
-    """
-    A virtual object representing a KE-chain attachment property.
-
-    :ivar type: The property type of the property. One of the types described in :class:`pykechain.enums.PropertyType`
-    :type type: str
-    :ivar output: a boolean if the value is configured as an output (in an activity)
-    :type output: bool
-    :ivar part: The (parent) part in which this property is available
-    :type part: :class:`Part`
-    :ivar value: the property value, can be set as well as property
-    :type value: Any
-    :ivar filename: the filename and extension of the attachment
-    :type filename: str or None
-    :ivar validators: the list of validators that are available in the property
-    :type validators: list(PropertyValidator)
-    :ivar is_valid: if the property conforms to the validators
-    :type is_valid: bool
-    :ivar is_invalid: if the property does not conform to the validator
-    :type is_invalid: bool
-    """
+    """A virtual object representing a KE-chain attachment property."""
 
     @property
     def value(self):
@@ -173,5 +154,7 @@ class AttachmentProperty(Property2):
             raise APIError("Could not upload attachment: {}".format(response.content))
 
 
-class AttachmentProperty2(AttachmentProperty, DeprecationMixin):
+class AttachmentProperty2(AttachmentProperty, _DeprecationMixin):
+    """A virtual object representing a KE-chain attachment property."""
+
     pass

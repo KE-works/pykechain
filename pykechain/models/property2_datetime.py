@@ -1,6 +1,6 @@
 import datetime
 from typing import Union, Text
-from pykechain.exceptions import IllegalArgumentError, DeprecationMixin
+from pykechain.exceptions import IllegalArgumentError, _DeprecationMixin
 from pykechain.models import Property2
 from pykechain.models.input_checks import check_datetime
 from pykechain.utils import parse_datetime
@@ -45,5 +45,7 @@ class DatetimeProperty(Property2):
         return date_time.isoformat()
 
 
-class DatetimeProperty2(DatetimeProperty, DeprecationMixin):
+class DatetimeProperty2(DatetimeProperty, _DeprecationMixin):
+    """A virtual object representing a KE-chain reference property."""
+
     pass

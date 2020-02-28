@@ -76,7 +76,7 @@ class InspectorComponentError(Exception):
     pass
 
 
-class DeprecationMixin:
+class _DeprecationMixin:
 
     __notified = False
 

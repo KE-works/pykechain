@@ -1,6 +1,6 @@
 from typing import List, Optional, Text, Union, Any
 from pykechain.enums import Category, FilterType
-from pykechain.exceptions import DeprecationMixin
+from pykechain.exceptions import _DeprecationMixin
 from pykechain.models.part2 import Part2
 from pykechain.models.property2 import Property2
 from pykechain.models.widgets.helpers import _check_prefilters, _check_excluded_propmodels
@@ -230,5 +230,10 @@ class MultiReferenceProperty(Property2):
         self.edit(options=options_to_set)
 
 
-class MultiReferenceProperty2(MultiReferenceProperty, DeprecationMixin):
+class MultiReferenceProperty2(MultiReferenceProperty, _DeprecationMixin):
+    """A virtual object representing a KE-chain multi-references property.
+
+    .. versionadded:: 1.14
+    """
+
     pass
