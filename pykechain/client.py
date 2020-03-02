@@ -39,10 +39,6 @@ class Client(object):
     .. _requests.Response: http://docs.python-requests.org/en/master/api/#requests.Response
     """
 
-    session = None  # type: requests.Session
-    auth = None  # type: Optional[Tuple[str, str]]
-    headers = {'X-Requested-With': 'XMLHttpRequest', 'PyKechain-Version': version}  # type: Dict[str, str]
-
     def __init__(self, url='http://localhost:8000/', check_certificates=None):
         # type: (str, bool) -> None
         """Create a KE-chain client with given settings.
@@ -61,11 +57,14 @@ class Client(object):
         >>> client = Client(url='https://default-tst.localhost:9443', check_certificates=False)
 
         """
+        self.auth = None  # type: Optional[Tuple[str, str]]
+        self.headers = {'X-Requested-With': 'XMLHttpRequest', 'PyKechain-Version': version}  # type: Dict[str, str]
+        self.session = requests.Session()  # type: requests.Session
+
         parsed_url = urlparse(url)
         if not (parsed_url.scheme and parsed_url.netloc):
             raise ClientError("Please provide a valid URL to a KE-chain instance")
 
-        self.session = requests.Session()
         self.api_root = url
         self.last_request = None  # type: Optional[requests.PreparedRequest]
         self.last_response = None  # type: Optional[requests.Response]
@@ -86,8 +85,7 @@ class Client(object):
 
     def __del__(self):
         """Destroy the client object."""
-        if self.session:
-            self.session.close()
+        self.session.close()
         del self.session
         del self.auth
         del self.headers
