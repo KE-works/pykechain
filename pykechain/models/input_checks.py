@@ -1,6 +1,6 @@
 import warnings
 from datetime import datetime
-from typing import Text, Optional, List, Iterable, Union, Any
+from typing import Text, Optional, List, Iterable, Any, Callable
 
 from pykechain.enums import Enum
 from pykechain.exceptions import IllegalArgumentError
@@ -18,6 +18,13 @@ def check_type(value: Optional[Any], cls: Any, key: Text) -> Optional[Any]:
             raise IllegalArgumentError('`{}` should be of type {}, "{}" ({}) is not.'.format(
                 key, types, value, type(value)))
     return value
+
+
+def check_uuid(uuid: Optional[Text], key: Optional[Text] = 'pk') -> Optional[Text]:
+    if uuid is not None:
+        if not is_uuid(uuid):
+            raise IllegalArgumentError('`{}` must be a valid UUID, "{}" ({}) is not.'.format(key, uuid, type(uuid)))
+    return uuid
 
 
 def check_text(text: Optional[Text], key: Text) -> Optional[Text]:
@@ -62,17 +69,58 @@ def check_datetime(dt: Optional[datetime], key: Text) -> Optional[Text]:
     return dt
 
 
-def check_team(team: Optional[Union[Text, 'Team']], method: Optional[callable]) -> Optional[Text]:
-    """Validate team input, optionally retrieving the team object."""
-    if team is not None:
-        from pykechain.models import Team
-        if isinstance(team, Team):
-            team = team.id
-        elif is_uuid(team):
-            team = team
-        elif isinstance(team, str) and method:
-            team = method(team).id
+def check_base(obj: Optional[Any],
+               cls: Optional[type(object)] = None,
+               key: Optional[Text] = 'object',
+               method: Optional[Callable] = None,
+               ) -> Optional[Text]:
+    """Validate the object provided as input, return its ID."""
+    if obj is not None:
+
+        if cls is None:
+            from pykechain.models import Base
+            cls = Base
+
+        if isinstance(obj, cls):
+            obj = obj.id
+        elif isinstance(obj, int):
+            obj = str(obj)
+        elif isinstance(obj, str) and is_uuid(obj):
+            pass
+        elif isinstance(obj, str) and method:
+            obj = method(obj).id
         else:
-            raise IllegalArgumentError('`team` should be provided as a `models.Team` object, UUID or name, "{}" ({}) '
-                                       'is not.'.format(team, type(team)))
-    return team
+            raise IllegalArgumentError(
+                '`{}` must be an ID, UUID or `{}` object, "{}" ({}) is not.'.format(key, cls.__name__, obj, type(obj)))
+    return obj
+
+
+def check_list_of_base(
+        objects: Optional[List[Any]],
+        cls: Optional[type(object)] = None,
+        key: Optional[Text] = 'objects',
+        method: Optional[Callable] = None,
+) -> Optional[List[Text]]:
+    """Validate the iterable of objects provided as input, return a list of IDs."""
+    ids = None
+    if objects is not None:
+        check_type(objects, list, 'users')
+
+        if cls is None:
+            from pykechain.models import Base
+            cls = Base
+
+        ids = []
+        not_recognized = []
+        for obj in objects:
+            try:
+                ids.append(check_base(obj=obj, cls=cls, key=key, method=method))
+            except IllegalArgumentError:
+                not_recognized.append(obj)
+
+        if not_recognized:
+            raise IllegalArgumentError(
+                'All `{}` must be IDs, UUIDs or `{}` objects, "{}" are not.'.format(
+                    key, cls.__name__, '", "'.join(not_recognized))
+            )
+    return ids

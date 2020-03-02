@@ -1,8 +1,7 @@
 from abc import abstractmethod
 from typing import Iterable, Text, Optional, List
 
-from pykechain.exceptions import IllegalArgumentError
-from pykechain.models.input_checks import check_list_of_text
+from pykechain.models.input_checks import check_list_of_text, check_type
 
 
 class TagsMixin:
@@ -18,7 +17,7 @@ class TagsMixin:
     @abstractmethod
     def edit(self, tags: Optional[Iterable[Text]] = None, *args, **kwargs) -> None:
         """Edit the list of Tags."""
-        pass
+        pass  # pragma: no cover
 
     @property
     def tags(self) -> List[Text]:
@@ -44,8 +43,8 @@ class TagsMixin:
         :type tag: str
         :return: None
         """
-        if not isinstance(tag, Text):
-            raise IllegalArgumentError('Tag must be a string, received "{}".'.format(type(tag)))
+        check_type(tag, Text, 'tag')
+
         if tag not in self.tags:
             raise ValueError("Tag '{}' is not among the existing tags. Existing tags: '{}'.".format(
                 tag, "', '".join(self.tags)))
@@ -62,9 +61,7 @@ class TagsMixin:
         :type tag: str
         :return: None
         """
-        if not isinstance(tag, Text):
-            raise IllegalArgumentError('Tag must be a string, received "{}".'.format(type(tag)))
-
+        check_type(tag, Text, 'tag')
         updated_tags = self.tags
         updated_tags.append(tag)
         self.tags = updated_tags
@@ -77,6 +74,5 @@ class TagsMixin:
         :return: boolean
         :rtype bool
         """
-        if not isinstance(tag, Text):
-            raise IllegalArgumentError('Tag must be a string, received "{}".'.format(type(tag)))
+        check_type(tag, Text, 'tag')
         return tag in self.tags

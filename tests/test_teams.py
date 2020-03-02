@@ -87,7 +87,7 @@ class TestTeams(TestBetamax):
         self.assertEqual(len(all_members), len(manager)+len(owner)+len(members))
 
     def test_retrieve_member_with_invalid_role(self):
-        with self.assertRaisesRegex(IllegalArgumentError, 'role should be one of `TeamRoles`'):
+        with self.assertRaisesRegex(IllegalArgumentError, 'must be an option from enum'):
             self.team.members(role="FOOBARROLE")
 
     def test_add_and_remove_member(self):

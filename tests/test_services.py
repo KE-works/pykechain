@@ -24,7 +24,7 @@ class TestServiceSetup(TestBetamax):
         new_service = self.project.create_service(
             name=name or 'Test upload script to service',
             description="Only used for testing - you can safely remove this",
-            environment_version = ServiceEnvironmentVersion.PYTHON_3_6
+            environment_version=ServiceEnvironmentVersion.PYTHON_3_6,
         )
         upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_script_to_service',
                                    'test_upload_script.py')

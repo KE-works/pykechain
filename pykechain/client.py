@@ -13,12 +13,13 @@ from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, Ser
     ActivityClassification, ActivityStatus
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
-from pykechain.models import Part2, Property2, Activity2, Scope2, Scope, PartSet, AnyProperty, Base, Association, \
+from pykechain.models import Part2, Property2, Activity2, Scope2, PartSet, AnyProperty, Base, Association, \
     Service, ServiceExecution, Team, User
 from pykechain.models.widgets.widget import Widget
 from pykechain.utils import is_uuid, find
 from .__about__ import version as pykechain_version
-from .models.input_checks import check_datetime, check_list_of_text, check_team, check_text, check_enum, check_type
+from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
+    check_list_of_base, check_base, check_uuid
 
 
 class Client(object):
@@ -259,9 +260,8 @@ class Client(object):
         :raises APIError: When it could not retrieve the jsonschema from KE-chain
         :raises NotFoundError: When it could not find the correct schema
         """
-        if widget_type not in WidgetTypes.values():
-            raise IllegalArgumentError("`widget_type` should be one of "
-                                       "'{}', got '{}'".format(WidgetTypes.values(), widget_type))
+        check_enum(widget_type, WidgetTypes, 'widget_type')
+
         found = find(self.widget_schemas, lambda ws: ws.get('widget_type') == widget_type)
         if not found:
             raise NotFoundError("Could not find a widget_schema for widget_type: `{}`".format(widget_type))
@@ -375,7 +375,7 @@ class Client(object):
         pk: Optional[Text] = None,
         status: Optional[Union[ScopeStatus, Text]] = ScopeStatus.ACTIVE,
         **kwargs
-    ) -> List[Union[Scope, Scope2]]:
+    ) -> List[Scope2]:
         """Return all scopes visible / accessible for the logged in user.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -408,7 +408,7 @@ class Client(object):
         """
         request_params = {
             'name': check_text(text=name, key='name'),
-            'id': pk,
+            'id': check_uuid(pk),
             'status': check_enum(status, ScopeStatus, 'status'),
         }
 
@@ -427,7 +427,7 @@ class Client(object):
 
         return [Scope2(s, client=self) for s in data['results']]
 
-    def scope(self, *args, **kwargs) -> Union[Scope, Scope2]:
+    def scope(self, *args, **kwargs) -> Scope2:
         """Return a single scope based on the provided name.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -470,7 +470,7 @@ class Client(object):
         :raises NotFoundError: If no `Activities` are found
         """
         request_params = {
-            'id': pk,
+            'id': check_uuid(pk),
             'name': check_text(text=name, key='name'),
             'scope': scope
         }
@@ -585,7 +585,7 @@ class Client(object):
             batch = limit
 
         request_params = dict(
-            id=pk,
+            id=check_uuid(pk),
             name=check_text(text=name, key='name'),
             category=check_enum(category, Category, 'category'),
             activity_id=activity,
@@ -695,7 +695,7 @@ class Client(object):
         """
         request_params = {
             'name': check_text(text=name, key='name'),
-            'id': pk,
+            'id': check_uuid(pk),
             'category': check_enum(category, Category, 'category')
         }
         if kwargs:
@@ -758,7 +758,7 @@ class Client(object):
         """
         request_params = {
             'name': check_text(text=name, key='name'),
-            'id': pk,
+            'id': check_uuid(pk),
             'scope': scope
         }
         request_params.update(API_EXTRA_PARAMS['service'])
@@ -824,7 +824,7 @@ class Client(object):
         """
         request_params = {
             'name': check_text(text=name, key='name'),
-            'id': pk,
+            'id': check_uuid(pk),
             'service': service,
             'scope': scope
         }
@@ -880,7 +880,7 @@ class Client(object):
         """
         request_params = {
             'username': check_text(text=username, key='username'),
-            'id': pk,
+            'id': check_type(pk, (str, int), 'pk'),
         }
         if kwargs:
             request_params.update(**kwargs)
@@ -938,7 +938,7 @@ class Client(object):
         """
         request_params = {
             'name': check_text(text=name, key='name'),
-            'id': pk,
+            'id': check_uuid(pk),
             'is_hidden': is_hidden
         }
         if kwargs:
@@ -996,7 +996,7 @@ class Client(object):
         """
         """Widgets of an activity."""
         request_params = dict(API_EXTRA_PARAMS['widgets'])
-        request_params['id'] = pk
+        request_params['id'] = check_uuid(pk)
 
         if isinstance(activity, Activity2):
             request_params.update(dict(activity_id=activity.id))
@@ -1143,7 +1143,7 @@ class Client(object):
         return self._create_part(action="new_instance", data=data, **kwargs)
 
     def create_model(self,
-                     parent: Part2,
+                     parent: Union[Part2, Text],
                      name: Text,
                      multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
                      **kwargs) -> Part2:
@@ -1181,7 +1181,8 @@ class Client(object):
 
     def create_model_with_properties(
             self,
-            parent: Part2, name: Text,
+            parent: Union[Part2, Text],
+            name: Text,
             multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
             properties_fvalues: Optional[List[Dict]] = None,
             **kwargs) -> Part2:
@@ -1371,7 +1372,7 @@ class Client(object):
             unit: Optional[Text] = None,
             options: Optional[Dict] = None,
             **kwargs
-    ) -> Property2:
+    ) -> AnyProperty:
         """Create a new property model under a given model.
 
         Use the :class:`enums.PropertyType` to select which property type to create to ensure that you
@@ -1500,7 +1501,7 @@ class Client(object):
         """
         data = dict(
             name=check_text(name, 'name'),
-            scope=scope,  # not scope_id!
+            scope=check_base(scope, Scope2, 'scope'),  # not scope_id!
             description=check_text(text=description, key='description') or '',
             script_type=check_enum(service_type, ServiceType, 'service_type'),
             script_version=check_text(text=version, key='version') or '1.0',
@@ -1531,7 +1532,7 @@ class Client(object):
             due_date: Optional[datetime.datetime] = None,
             team: Optional[Union[Team, Text]] = None,
             **kwargs
-    ) -> Union[Scope, Scope2]:
+    ) -> Scope2:
         """
         Create a Scope.
 
@@ -1567,7 +1568,7 @@ class Client(object):
             'tags': check_list_of_text(tags, 'tags'),
             'start_date': check_datetime(dt=start_date, key='start_date'),
             'due_date': check_datetime(dt=due_date, key='due_date'),
-            'team_id': check_team(team=team, method=self.team),
+            'team_id': check_base(team, Team, 'team', method=self.team),
         }
 
         # injecting additional kwargs for those cases that you need to add extra options.
@@ -1614,7 +1615,7 @@ class Client(object):
 
     def clone_scope(
             self,
-            source_scope: Union[Scope, Scope2],
+            source_scope: Scope2,
             name: Optional[Text] = None,
             status: Optional[ScopeStatus] = None,
             start_date: Optional[datetime.datetime] = None,
@@ -1624,7 +1625,7 @@ class Client(object):
             team: Optional[Union[Team, Text]] = None,
             scope_options: Optional[Dict] = None,
             asynchronous: Optional[bool] = False,
-    ) -> Optional[Union[Scope, Scope2]]:
+    ) -> Optional[Scope2]:
         """
         Clone a Scope.
 
@@ -1679,7 +1680,7 @@ class Client(object):
             'async_mode': asynchronous,
         }
 
-        team = check_team(team=team, method=self.team)
+        team = check_base(team, Team, 'team', method=self.team)
         if team:
             data_dict['team_id'] = team
 
@@ -1785,42 +1786,22 @@ class Client(object):
             **kwargs
     ) -> Dict:
         """Validate the format and content of the configuration of a widget."""
-        if isinstance(activity, Activity2):
-            activity = activity.id
-        elif is_uuid(activity):
-            pass
-        else:
-            raise IllegalArgumentError("`activity` should be either an `Activity` or a uuid.")
-
-        check_enum(widget_type, WidgetTypes, 'widget_type')
-
-        if order is not None and not isinstance(order, int):
-            raise IllegalArgumentError("`order` should be an integer or None")
-        if title is not None:
-            if not isinstance(title, (string_types, text_type)):
-                raise IllegalArgumentError("`title` should be a string, but received type '{}'.".format(type(title)))
-            elif title.strip() != title:
-                raise IllegalArgumentError("`title` can not be empty")
-        if parent is not None and isinstance(parent, Widget):
-            parent = parent.id
-        elif parent is not None and is_uuid(parent):
-            parent = parent
-        elif parent is not None:
-            raise IllegalArgumentError("`parent` should be provided as a widget or uuid")
-
         data = dict(
-            activity_id=activity,
-            widget_type=widget_type,
-            title=title,
+            activity_id=check_base(activity, Activity2, 'activity'),
+            widget_type=check_enum(widget_type, WidgetTypes, 'widget_type'),
             meta=meta,
-            parent_id=parent
+            parent_id=check_base(parent, Widget, 'parent')
         )
 
-        if not title:
-            data.pop('title')
+        title = check_text(title, 'title')
+        if title is not None and not title.strip():
+            raise IllegalArgumentError("`title` can not be empty")
+        if title:
+            data['title'] = title
 
+        check_type(order, int, 'order')
         if order is not None:
-            data.update(dict(order=order))
+            data['order'] = order
 
         if kwargs:
             data.update(**kwargs)
@@ -1843,26 +1824,10 @@ class Client(object):
         if kwargs.get('outputs'):
             writable_models = kwargs.pop('outputs')
 
-        readable_model_ids = Client._validate_property_models(models=readable_models, key='readable_models')
-        writable_model_ids = Client._validate_property_models(models=writable_models, key='writable_models')
+        readable_model_ids = check_list_of_base(readable_models, Property2, 'readable_models')
+        writable_model_ids = check_list_of_base(writable_models, Property2, 'writable_models')
 
         return readable_model_ids, writable_model_ids
-
-    @staticmethod
-    def _validate_property_models(models: List, key: str = 'models') -> List[Text]:
-        assert isinstance(key, str), '`key` must be a string.'
-        model_ids = []
-        if models is not None:
-            if not isinstance(models, (list, tuple, set)):
-                raise IllegalArgumentError("`{}` must be provided as a list, tuple or set.".format(key))
-            for model in models:
-                if is_uuid(model):
-                    model_ids.append(model)
-                elif isinstance(model, Property2):
-                    model_ids.append(model.id)
-                else:
-                    raise IllegalArgumentError("`{}` must consist out of uuids or property models.".format(key))
-        return model_ids
 
     def create_widget(
             self,
@@ -2019,11 +1984,7 @@ class Client(object):
         :raises APIError: whenever the widget could not be deleted
         :raises IllegalArgumentError: whenever the input `widget` is invalid
         """
-        if isinstance(widget, Widget):
-            widget = widget.id
-        elif not is_uuid(widget):
-            raise IllegalArgumentError('`widget` must be a Widget or its UUID, "{}" is neither.'.format(widget))
-
+        widget = check_base(widget, Widget, 'widget')
         url = self._build_url('widget', widget_id=widget)
         response = self._request('DELETE', url)
 
@@ -2064,18 +2025,7 @@ class Client(object):
             associations: List[Tuple[List, List]],
     ) -> List[text_type]:
         """Perform the validation of the internal widgets and associations."""
-        if not isinstance(widgets, List):
-            raise IllegalArgumentError("`widgets` must be provided as a list of widgets.")
-
-        widget_ids = list()
-        for widget in widgets:
-            if isinstance(widget, Widget):
-                widget_id = widget.id
-            elif is_uuid(widget):
-                widget_id = widget
-            else:
-                raise IllegalArgumentError("Each widget should be provided as a Widget or a uuid")
-            widget_ids.append(widget_id)
+        widget_ids = check_list_of_base(widgets, Widget, 'widgets')
 
         if not isinstance(associations, List) and all(isinstance(a, tuple) and len(a) == 2 for a in associations):
             raise IllegalArgumentError(
@@ -2106,7 +2056,7 @@ class Client(object):
         :param part: part for which to retrieve associations
         :type part: Part2
         :param property: property for which to retrieve associations
-        :type property: Property2
+        :type property: AnyProperty
         :param scope: scope for which to retrieve associations
         :type scope: Scope2
         :param limit: maximum number of associations to retrieve
@@ -2114,63 +2064,39 @@ class Client(object):
         :return: list of association objects
         :rtype List[Association]
         """
-        if widget is None:
-            widget = ''
-        elif not isinstance(widget, Widget):
-            raise IllegalArgumentError('`widget` is not of type Widget, but type "{}".'.format(type(widget)))
+        part = check_type(part, Part2, 'part')
+        if part is not None:
+            if part.category == Category.MODEL:
+                part_instance = ''
+                part_model = part.id
+            else:
+                part_instance = part.id
+                part_model = ''
         else:
-            widget = widget.id
-
-        if activity is None:
-            activity = ''
-        elif not isinstance(activity, Activity2):
-            raise IllegalArgumentError('`activity` is not of type Activity2, but type "{}".'.format(type(activity)))
-        else:
-            activity = activity.id
-
-        if part is None:
             part_instance = ''
             part_model = ''
-        elif not isinstance(part, Part2):
-            raise IllegalArgumentError('`part` is not of type Part2, but type "{}".'.format(type(part)))
-        elif part.category == Category.MODEL:
-            part_instance = ''
-            part_model = part.id
-        else:
-            part_instance = part.id
-            part_model = ''
 
-        if property is None:
+        prop = check_type(property, Property2, 'property')
+        if prop is not None:
+            if prop.category == Category.MODEL:
+                property_model = prop.id
+                property_instance = ''
+            else:
+                property_model = ''
+                property_instance = prop.id
+        else:
             property_instance = ''
             property_model = ''
-        elif not isinstance(property, Property2):
-            raise IllegalArgumentError('`property` is not of type Property, but type "{}".'.format(type(property)))
-        elif property.category == Category.MODEL:
-            property_model = property.id
-            property_instance = ''
-        else:
-            property_model = ''
-            property_instance = property.id
 
-        if scope is None:
-            scope = ''
-        elif not isinstance(scope, Scope2):
-            raise IllegalArgumentError('`scope` is not of type Scope2, but type "{}".'.format(type(scope)))
-        else:
-            scope = scope.id
-
-        if limit is None:
-            limit = ''
-        elif not isinstance(limit, int):
-            raise IllegalArgumentError('`limit` is not of type integer, but type "{}".'.format(type(limit)))
-        elif limit < 1:
+        limit = check_type(limit, int, 'limit') or ''
+        if limit and limit < 1:
             raise IllegalArgumentError('`limit` is not a positive integer!')
 
         request_params = {
             'limit': limit,
-            'widget': widget,
-            'activity': activity,
-            'scope': scope,
+            'widget': check_base(widget, Widget, 'widget') or '',
+            'activity': check_base(activity, Activity2, 'activity') or '',
+            'scope': check_base(scope, Scope2, 'scope') or '',
             'instance_part': part_instance,
             'instance_property': property_instance,
             'model_part': part_model,
@@ -2213,7 +2139,10 @@ class Client(object):
         """
         self.update_widgets_associations(
             widgets=[widget],
-            associations=[(readable_models, writable_models)],
+            associations=[(
+                readable_models if readable_models else [],
+                writable_models if writable_models else [],
+            )],
             **kwargs
         )
 
@@ -2396,7 +2325,7 @@ class Client(object):
         if not isinstance(widget, Widget):
             raise IllegalArgumentError('`widget` is not of type Widget, but type "{}".'.format(type(widget)))
 
-        model_ids = self._validate_property_models(models=models)
+        model_ids = check_list_of_base(models, Property2, 'models')
 
         if not model_ids:
             return None

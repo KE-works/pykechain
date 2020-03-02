@@ -7,7 +7,8 @@ from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import Multiplicity, ScopeStatus, SubprocessDisplayMode, KEChainPages
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError, _DeprecationMixin
 from pykechain.models.base import Base
-from pykechain.models.input_checks import check_text, check_datetime, check_enum, check_list_of_text, check_team
+from pykechain.models.input_checks import check_text, check_datetime, check_enum, check_list_of_text, \
+    check_base
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
@@ -214,7 +215,7 @@ class Scope(Base, TagsMixin):
             'tags': check_list_of_text(tags, 'tags') or [],
             'options': options or dict(),
         }
-        team = check_team(team, method=self._client.team)
+        team = check_base(team, Team, 'team', method=self._client.team)
         if team:
             update_dict['team_id'] = team
 
