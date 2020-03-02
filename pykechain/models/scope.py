@@ -11,7 +11,7 @@ from pykechain.models import Base
 from pykechain.utils import is_uuid, parse_datetime
 
 
-class Scope(Base):
+class Scope(Base):  # pragma: no cover
     """A virtual object representing a KE-chain scope.
 
     :ivar name: Name of the scope
@@ -391,6 +391,7 @@ class Scope(Base):
                 raise IllegalArgumentError('tags should be a an array (list, tuple, set) of strings')
 
         if team is not None:
+            from pykechain.models import Team
             if isinstance(team, (str, text_type)) and is_uuid(team):
                 update_dict.update({'team_id': team})
             elif isinstance(team, Team):
