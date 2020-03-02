@@ -595,7 +595,7 @@ class Activity(TreeObject, TagsMixin):
         >>> parts = task.parts(category=Category.MODEL)
 
         """
-        return [w.parts(*args, **kwargs) for w in self.widgets()]
+        return [p for w in self.widgets() for p in w.parts(*args, **kwargs)]
 
     def associated_parts(self, *args, **kwargs):
         """Retrieve models and instances belonging to this activity.
