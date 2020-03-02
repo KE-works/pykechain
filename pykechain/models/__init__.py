@@ -36,5 +36,9 @@ __all__ = (
     'User',
     'Team',
     'Property2',
+    'MultiReferenceProperty2',
+    'AttachmentProperty2',
+    'SelectListProperty2',
+    'DatetimeProperty2',
     'AnyProperty',
 )
