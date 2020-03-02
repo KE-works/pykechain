@@ -435,7 +435,7 @@ class Property(Base):
         if options:
             update_dict['value_options'] = options
 
-        if kwargs:
+        if kwargs:  # pragma: no cover
             update_dict.update(kwargs)
 
         response = self._client._request('PUT',

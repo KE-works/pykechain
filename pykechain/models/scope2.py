@@ -8,7 +8,7 @@ from pykechain.enums import Multiplicity, ScopeStatus, SubprocessDisplayMode, KE
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError, _DeprecationMixin
 from pykechain.models.base import Base
 from pykechain.models.input_checks import check_text, check_datetime, check_enum, check_list_of_text, \
-    check_base
+    check_base, check_type
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
@@ -202,9 +202,6 @@ class Scope(Base, TagsMixin):
         self.name = check_text(name, 'name') or self.name
         self.description = check_text(description, 'description') or self.description
 
-        if options is not None and not isinstance(options, dict):
-            raise IllegalArgumentError('`options` must be a dict, "{}" is not.'.format(options))
-
         update_dict = {
             'id': self.id,
             'name': self.name,
@@ -213,7 +210,7 @@ class Scope(Base, TagsMixin):
             'due_date': check_datetime(due_date, 'due_date'),
             'status': check_enum(status, ScopeStatus, 'status') or self.status,
             'tags': check_list_of_text(tags, 'tags') or [],
-            'options': options or dict(),
+            'options': check_type(options, dict, 'options') or dict(),
         }
         team = check_base(team, Team, 'team', method=self._client.team)
         if team:
@@ -311,30 +308,21 @@ class Scope(Base, TagsMixin):
 
         See :class:`pykechain.Client.activities` for available parameters.
         """
-        if self._client.match_app_version(label='wim', version='<2.0.0', default=True):
-            return self._client.activities(*args, scope=self.id, **kwargs)
-        else:
-            return self._client.activities(*args, scope_id=self.id, **kwargs)
+        return self._client.activities(*args, scope_id=self.id, **kwargs)
 
     def activity(self, *args, **kwargs):
         """Retrieve a single activity belonging to this scope.
 
         See :class:`pykechain.Client.activity` for available parameters.
         """
-        if self._client.match_app_version(label='wim', version='<2.0.0', default=True):
-            return self._client.activity(*args, scope=self.id, **kwargs)
-        else:
-            return self._client.activity(*args, scope_id=self.id, **kwargs)
+        return self._client.activity(*args, scope_id=self.id, **kwargs)
 
     def create_activity(self, *args, **kwargs):
         """Create a new activity belonging to this scope.
 
         See :class:`pykechain.Client.create_activity` for available parameters.
         """
-        if self._client.match_app_version(label='wim', version='<2.0.0', default=True):
-            return self._client.create_activity(self.process, *args, **kwargs)
-        else:
-            return self._client.create_activity(self.workflow_root, *args, **kwargs)
+        return self._client.create_activity(self.workflow_root, *args, **kwargs)
 
     def side_bar(self, *args, **kwargs) -> Optional[SideBarManager]:
         """Retrieve the side-bar manager."""
@@ -360,9 +348,7 @@ class Scope(Base, TagsMixin):
             raise IllegalArgumentError(
                 'activity must be of class Activity2 or a KEChainPages option, "{}" is not.'.format(activity))
 
-        if task_display_mode not in SubprocessDisplayMode.values():
-            raise IllegalArgumentError('task_display_mode must be a WorkBreakdownDisplayMode option, '
-                                       '"{}" is not.'.format(task_display_mode))
+        check_enum(task_display_mode, SubprocessDisplayMode, 'task_display_mode')
 
         if isinstance(activity, Activity2):
             url = '#/scopes/{}/{}/{}'.format(self.id, task_display_mode, activity.id)

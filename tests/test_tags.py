@@ -54,6 +54,10 @@ class TestTags(TestCase):
 
         self.assertNotIn('two', self.obj.tags)
 
+    def test_remove_tag_failure(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.obj.remove_tag(tag='just a flesh wound')
+
     def test_add_tag(self):
         self.obj.add_tag(tag='four')
 

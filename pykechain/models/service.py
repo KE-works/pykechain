@@ -2,12 +2,12 @@ import os
 from datetime import datetime
 
 import requests
-from six import string_types, text_type
-from typing import Text, Any, Dict, Optional
+from typing import Text, Dict, Optional
 
 from pykechain.enums import ServiceScriptUser, ServiceExecutionStatus
-from pykechain.exceptions import APIError, IllegalArgumentError
+from pykechain.exceptions import APIError
 from pykechain.models.base import Base
+from pykechain.models.input_checks import check_text, check_enum, check_type
 from pykechain.utils import parse_datetime
 
 
@@ -65,7 +65,7 @@ class Service(Base):
     def __repr__(self):  # pragma: no cover
         return "<pyke Service '{}' id {}>".format(self.name, self.id[-8:])
 
-    def execute(self, interactive=False):
+    def execute(self, interactive: Optional[bool] = False) -> 'ServiceExecution':
         """
         Execute the service.
 
@@ -91,8 +91,15 @@ class Service(Base):
         data = response.json()
         return ServiceExecution(json=data.get('results')[0], client=self._client)
 
-    def edit(self, name=None, description=None, version=None, run_as=None, trusted=False, **kwargs):
-        # type: (Text, Text, Text, ServiceScriptUser, bool, **Any) -> None
+    def edit(
+            self,
+            name: Optional[Text] = None,
+            description: Optional[Text] = None,
+            version: Optional[Text] = None,
+            run_as: Optional[ServiceScriptUser] = None,
+            trusted: Optional[bool] = False,
+            **kwargs
+    ) -> None:
         """
         Edit Service details.
 
@@ -111,31 +118,18 @@ class Service(Base):
         :raises IllegalArgumentError: when you provide an illegal argument.
         :raises APIError: if the service could not be updated.
         """
-        update_dict = {'id': self.id}
-        if name is not None:
-            if not isinstance(name, (string_types, text_type)):
-                raise IllegalArgumentError("name should be provided as a string")
-            update_dict.update({'name': name})
-        if description is not None:
-            if not isinstance(description, (string_types, text_type)):
-                raise IllegalArgumentError("description should be provided as a string")
-            update_dict.update({'description': description})
-        if version is not None:
-            if not isinstance(version, (string_types, text_type)):
-                raise IllegalArgumentError("description should be provided as a string")
-            update_dict.update({'script_version': version})
-        if run_as is not None:
-            if not isinstance(run_as, (string_types, text_type)) and run_as not in ServiceScriptUser.values():
-                raise IllegalArgumentError("run_as should be provided as one of '{}'".format(
-                    ServiceScriptUser.values()))
-            update_dict.update({'run_as': run_as})
-        if not isinstance(trusted, bool):
-            raise IllegalArgumentError("trusted should be provided as a boolean")
-        else:
-            update_dict.update({'trusted': trusted})
+        update_dict = {
+            'id': self.id,
+            'name': check_text(name, 'name'),
+            'description': check_text(description, 'descriptions'),
+            'script_version': check_text(version, 'version'),
+            'run_as': check_enum(run_as, ServiceScriptUser, 'run_as'),
+            'trusted': check_type(trusted, bool, 'trusted')
+        }
 
-        if kwargs is not None:  # pragma: no cover
+        if kwargs:  # pragma: no cover
             update_dict.update(**kwargs)
+
         response = self._client._request('PUT', self._client._build_url('service', service_id=self.id),
                                          json=update_dict)
 

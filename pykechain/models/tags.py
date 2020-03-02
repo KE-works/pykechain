@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from typing import Iterable, Text, Optional, List
 
+from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_list_of_text, check_type
 
 
@@ -46,7 +47,7 @@ class TagsMixin:
         check_type(tag, Text, 'tag')
 
         if tag not in self.tags:
-            raise ValueError("Tag '{}' is not among the existing tags. Existing tags: '{}'.".format(
+            raise IllegalArgumentError("Tag '{}' is not among the existing tags. Existing tags: '{}'.".format(
                 tag, "', '".join(self.tags)))
 
         remaining_tags = self.tags

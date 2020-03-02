@@ -398,6 +398,11 @@ class TestActivities(TestBetamax):
         self.assertIn(task.id, [sibling.id for sibling in siblings])
         self.assertTrue(len(siblings) >= 1)
 
+    def test_retrieve_siblings_of_root(self):
+        task = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
+        with self.assertRaises(NotFoundError):
+            task.siblings()
+
     # in 1.12
 
     def test_retrieve_siblings_of_a_task_in_a_subprocess_with_arguments(self):
@@ -456,6 +461,11 @@ class TestActivity2SpecificTests(TestBetamax):
         subprocess = task.parent()  # type Activity
         self.assertEqual(subprocess.activity_type, ActivityType.PROCESS)
 
+    def test_activity2_retrieve_parent_of_root(self):
+        task = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
+        with self.assertRaises(NotFoundError):
+            task.parent()
+
     def test_activity2_retrieve_parent_of_a_toplevel_task_returns_workflow_root_id(self):
         task = self.project.activity('Specify wheel diameter')
         parent = task.parent()
@@ -486,11 +496,14 @@ class TestActivity2SpecificTests(TestBetamax):
 
         self.assertTrue(specify_wd.is_rootlevel())
 
+        root_itself = self.project.activity(ActivityRootNames.WORKFLOW_ROOT)
+
+        self.assertFalse(root_itself.is_rootlevel())
+
     def test_subtask_activity2_is_not_rootlevel(self):
         subprocess_subtask = self.project.activity('SubTask')
 
         self.assertFalse(subprocess_subtask.is_rootlevel())
-        # self.assertTrue(subprocess_subtask.subprocess())
 
     def test_activity2_is_task(self):
         specify_wd = self.project.activity('Specify wheel diameter')

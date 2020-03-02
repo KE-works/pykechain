@@ -595,14 +595,7 @@ class Activity(TreeObject, TagsMixin):
         >>> parts = task.parts(category=Category.MODEL)
 
         """
-        if self._client.match_app_version(label='widget', version='>=3.0.0'):
-            widget_manager = self.widgets()
-            associated_parts = list()
-            for widget in widget_manager:
-                associated_parts.extend(widget.parts(*args, **kwargs))
-            return associated_parts
-        else:
-            return self._client.parts(*args, activity=self.id, **kwargs)
+        return [w.parts(*args, **kwargs) for w in self.widgets()]
 
     def associated_parts(self, *args, **kwargs):
         """Retrieve models and instances belonging to this activity.
@@ -743,7 +736,7 @@ class Activity(TreeObject, TagsMixin):
 
         # If appendices are included, the request becomes asynchronous
 
-        if include_appendices:
+        if include_appendices:  # pragma: no cover
             data = response.json()
 
             # Download the pdf async
