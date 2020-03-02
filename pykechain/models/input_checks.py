@@ -21,6 +21,7 @@ def check_type(value: Optional[Any], cls: Any, key: Text) -> Optional[Any]:
 
 
 def check_uuid(uuid: Optional[Text], key: Optional[Text] = 'pk') -> Optional[Text]:
+    """Validate the UUID input to be a correct UUID."""
     if uuid is not None:
         if not is_uuid(uuid):
             raise IllegalArgumentError('`{}` must be a valid UUID, "{}" ({}) is not.'.format(key, uuid, type(uuid)))
