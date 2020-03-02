@@ -105,7 +105,7 @@ def check_list_of_base(
     """Validate the iterable of objects provided as input, return a list of IDs."""
     ids = None
     if objects is not None:
-        check_type(objects, list, 'users')
+        check_type(objects, (list, tuple, set), key=key)
 
         if cls is None:
             from pykechain.models import Base
@@ -115,7 +115,7 @@ def check_list_of_base(
         not_recognized = []
         for obj in objects:
             try:
-                ids.append(check_base(obj=obj, cls=cls, key=key, method=method))
+                ids.append(check_base(obj=obj, cls=cls, method=method))
             except IllegalArgumentError:
                 not_recognized.append(obj)
 

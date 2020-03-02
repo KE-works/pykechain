@@ -2,7 +2,6 @@ import datetime
 from typing import Union, List, Dict, Optional, Text, Tuple  # noqa: F401
 
 import requests
-from six import text_type, string_types
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import Category, Multiplicity, Classification
@@ -10,7 +9,7 @@ from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, 
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
     get_edited_one_many
 from pykechain.models import Scope2
-from pykechain.models.input_checks import check_text, check_type
+from pykechain.models.input_checks import check_text, check_type, check_list_of_base
 from pykechain.models.property2 import Property2
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.utils import is_uuid, find
@@ -980,8 +979,7 @@ class Part(TreeObject):
         """
         # dict(name=name, properties=json.dumps(update_dict))) with property ids:value
         # action = 'bulk_update_properties'  # not for KEC3
-        if name and not isinstance(name, (string_types, text_type)):
-            raise IllegalArgumentError("Name of the part should be provided as a string")
+        check_text(name, 'name')
 
         if properties_fvalues and not isinstance(properties_fvalues, list):
             raise IllegalArgumentError("optional `properties_fvalues` need to be provided as a list of dicts")
@@ -1060,25 +1058,12 @@ class Part(TreeObject):
         ...                                        {'id': color.id, 'order':  30, 'name': 'Colour'}])
 
         """
-        # in KEC3 backend we can (re)use the part update endpoint with a properties_fvalues list of dicts
-        # properties_fvalues = [ {'model_id':<uuid>, 'order': <int> ]
-
         if self.category != Category.MODEL:
-            raise APIError("Part should be of category MODEL")
-        if not isinstance(property_list, list) or not all(isinstance(p, (str, Property2)) for p in property_list):
-            raise IllegalArgumentError('Expected a list of strings or Property() objects, got a {} object'.
-                                       format(type(property_list)))
+            raise APIError("Ordering of properties must be done on a Part of category MODEL.")
 
-        properties_fvalues = list()
-        for order, prop_name_or_id in enumerate(property_list):
-            updated_p = {'order': order}
-            if is_uuid(prop_name_or_id):
-                updated_p['id'] = prop_name_or_id
-            elif isinstance(prop_name_or_id, Property2):
-                updated_p['id'] = prop_name_or_id.id
-            else:
-                updated_p['id'] = self.property(prop_name_or_id).id
-            properties_fvalues.append(updated_p)
+        property_ids = check_list_of_base(property_list, Property2, 'property_list', method=self.property)
+
+        properties_fvalues = [dict(order=order, id=pk) for order, pk in enumerate(property_ids)]
 
         return self.update(properties_fvalues=properties_fvalues)
 

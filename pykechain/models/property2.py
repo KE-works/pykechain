@@ -6,7 +6,7 @@ from jsonschema import validate
 from pykechain.enums import PropertyType, Category
 from pykechain.exceptions import APIError, IllegalArgumentError, _DeprecationMixin
 from pykechain.models import Base
-from pykechain.models.input_checks import check_text
+from pykechain.models.input_checks import check_text, check_type
 from pykechain.models.representations.representation_base import BaseRepresentation
 from pykechain.models.validators import PropertyValidator
 from pykechain.models.validators.validator_schemas import options_json_schema
@@ -424,16 +424,16 @@ class Property(Base):
         self.name = check_text(name, 'name') or self.name
         self.description = check_text(description, 'description') or self.description
 
-        if options is not None and not isinstance(options, dict):
-            raise IllegalArgumentError('`options` must be provided as a dict, "{]" is not'.format(options))
-
         update_dict = {
             'id': self.id,
             'name': self.name,
             'description': self.description,
             'unit': check_text(unit, 'unit'),
-            'value_options': options,
         }
+
+        options = check_type(options, dict, 'options')
+        if options:
+            update_dict['value_options'] = options
 
         if kwargs:
             update_dict.update(kwargs)
@@ -477,8 +477,7 @@ class Property(Base):
 
         """
         from pykechain.models import Part2
-        if not isinstance(target_part, Part2):
-            raise IllegalArgumentError("`target_part` needs to be a part, got '{}'".format(type(target_part)))
+        check_type(target_part, Part2, 'target_part')
 
         name = check_text(name, 'name') or self.name
         if self.category == Category.MODEL and target_part.category == Category.MODEL:
