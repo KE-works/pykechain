@@ -6,7 +6,7 @@ from pykechain.models.property import Property
 from pykechain.utils import parse_datetime
 
 
-class DatetimeProperty(Property):
+class DatetimeProperty(Property):  # pragma: no cover
     """A virtual object representing a KE-chain reference property."""
 
     def __index__(self, json, **kwargs):

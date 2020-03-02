@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union, Text, Tuple, List
+from typing import Dict, Optional, Union, Text, Tuple, List, Callable
 
 from six import text_type
 
@@ -10,9 +10,7 @@ from pykechain.utils import is_uuid, snakecase, camelcase
 KECARD_COMMON_KEYS = ["collapsed", "collapsible", "noBackground", "noPadding", "isDisabled", "isMerged"]
 
 
-def _retrieve_object(obj: Union['Part2', 'AnyProperty', 'Team', 'Service', Text],
-                     method: 'Client',
-                     ) -> Union['Part2', 'AnyProperty', 'Team', 'Service']:
+def _retrieve_object(obj: Union['Base', Text], method: Callable) -> Union['Base']:
     """
     Object if object or uuid of object is provided as argument.
 

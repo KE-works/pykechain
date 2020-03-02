@@ -170,11 +170,11 @@ class WidgetsManager(Iterable):
                              emphasize_edit: Optional[bool] = False,
                              emphasize_clone: Optional[bool] = False,
                              emphasize_delete: Optional[bool] = False,
-                             sort_property: Optional[Union['Property2', Text]] = None,
+                             sort_property: Optional[Union['AnyProperty', Text]] = None,
                              sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
                              show_images: Optional[bool] = False,
-                             readable_models: Optional[List[Union['Property2', Text]]] = None,
-                             writable_models: Optional[List[Union['Property2', Text]]] = None,
+                             readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+                             writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
                              all_readable: Optional[bool] = False,
                              all_writable: Optional[bool] = False,
                              **kwargs) -> Widget:
@@ -301,17 +301,17 @@ class WidgetsManager(Iterable):
                                 emphasize_edit: Optional[bool] = False,
                                 emphasize_clone: Optional[bool] = False,
                                 emphasize_delete: Optional[bool] = False,
-                                sort_property: Optional[Union['Property2', Text]] = None,
+                                sort_property: Optional[Union['AnyProperty', Text]] = None,
                                 sort_name: Optional[Union[bool, Text]] = False,
                                 sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
                                 show_images: Optional[bool] = False,
                                 collapse_filters: Optional[bool] = False,
                                 page_size: Optional[int] = 25,
-                                readable_models: Optional[List[Union['Property2', Text]]] = None,
-                                writable_models: Optional[List[Union['Property2', Text]]] = None,
+                                readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+                                writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
                                 all_readable: Optional[bool] = False,
                                 all_writable: Optional[bool] = False,
-                                excluded_propmodels: Optional[List[Union['Property2', Text]]] = None,
+                                excluded_propmodels: Optional[List[Union['AnyProperty', Text]]] = None,
                                 prefilters: Optional[Dict] = None,
                                 **kwargs) -> Widget:
         """
@@ -450,7 +450,7 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_attachmentviewer_widget(self,
-                                    attachment_property: Union[Text, 'Property2'],
+                                    attachment_property: Union[Text, 'AttachmentProperty2'],
                                     title: Optional[Union[Text, bool]] = False,
                                     parent_widget: Optional[Union[Widget, Text]] = None,
                                     alignment: Optional[int] = None,
@@ -594,7 +594,7 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_propertygrid_widget(self,
-                                part_instance: Union['Property2', Text],
+                                part_instance: Union['Part2', Text],
                                 title: Optional[Union[Text, bool]] = False,
                                 max_height: Optional[int] = None,
                                 show_headers: Optional[bool] = True,
@@ -1166,7 +1166,7 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_signature_widget(self,
-                             attachment_property: 'Property2',
+                             attachment_property: 'AttachmentProperty2',
                              title: Optional[Union[bool, Text]] = False,
                              parent_widget: Optional[Union[Widget, Text]] = None,
                              custom_button_text: Optional[Union[bool, Text]] = False,
@@ -1195,7 +1195,7 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         attachment_property = _retrieve_object(attachment_property,
-                                               method=self._client.property)  # type: 'Property2'  # noqa
+                                               method=self._client.property)  # type: 'AttachmentProperty2'  # noqa
         meta = _initiate_meta(kwargs, activity=self._activity_id)
         meta, title = _set_title(meta, title=title, default_title=attachment_property.name, **kwargs)
 
@@ -1234,7 +1234,7 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_card_widget(self,
-                        image: Optional['Property2'] = None,
+                        image: Optional['AttachmentProperty2'] = None,
                         title: Optional[Union[type(None), Text, bool]] = None,
                         parent_widget: Optional[Union[Widget, Text]] = None,
                         description: Optional[Union[Text, bool]] = None,

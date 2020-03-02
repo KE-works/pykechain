@@ -1,4 +1,3 @@
-# pragma: no cover
 import requests
 from jsonschema import validate
 from six import text_type, string_types
