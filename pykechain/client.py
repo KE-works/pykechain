@@ -39,6 +39,10 @@ class Client(object):
     .. _requests.Response: http://docs.python-requests.org/en/master/api/#requests.Response
     """
 
+    session = None  # type: requests.Session
+    auth = None  # type: Optional[Tuple[str, str]]
+    headers = {'X-Requested-With': 'XMLHttpRequest', 'PyKechain-Version': version}  # type: Dict[str, str]
+
     def __init__(self, url='http://localhost:8000/', check_certificates=None):
         # type: (str, bool) -> None
         """Create a KE-chain client with given settings.
@@ -63,8 +67,6 @@ class Client(object):
 
         self.session = requests.Session()
         self.api_root = url
-        self.headers = {'X-Requested-With': 'XMLHttpRequest', 'PyKechain-Version': version}  # type: Dict[str, str]
-        self.auth = None  # type: Optional[Tuple[str, str]]
         self.last_request = None  # type: Optional[requests.PreparedRequest]
         self.last_response = None  # type: Optional[requests.Response]
         self.last_url = None  # type: Optional[str]
@@ -84,13 +86,11 @@ class Client(object):
 
     def __del__(self):
         """Destroy the client object."""
-        if hasattr(self, 'session'):
+        if self.session:
             self.session.close()
-            del self.session
-        if hasattr(self, 'auth'):
-            del self.auth
-        if hasattr(self, 'headers'):
-            del self.headers
+        del self.session
+        del self.auth
+        del self.headers
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Client '{}'>".format(self.api_root)
