@@ -421,13 +421,10 @@ class Property(Base):
         >>> wheel_property_reference.edit(options=options)
 
         """
-        self.name = check_text(name, 'name') or self.name
-        self.description = check_text(description, 'description') or self.description
-
         update_dict = {
             'id': self.id,
-            'name': self.name,
-            'description': self.description,
+            'name': check_text(name, 'name') or self.name,
+            'description': check_text(description, 'description') or self.description,
             'unit': check_text(unit, 'unit'),
         }
 

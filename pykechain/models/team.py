@@ -56,22 +56,13 @@ class Team(Base):
         :return: None
         :raises IllegalArgumentError whenever inputs are not of the correct type
         """
-        update_dict = dict(id=self.id)
-        if name is not None:
-            check_text(name, 'name')
-            update_dict.update({'name': name})
-
-        if description is not None:
-            check_text(description, 'description')
-            update_dict.update({'description': description})
-
-        if options is not None:
-            check_type(options, dict, 'options')
-            update_dict.update({'options': options})
-
-        if is_hidden is not None:
-            check_type(is_hidden, bool, 'is_hidden')
-            update_dict.update({'is_hidden': is_hidden})
+        update_dict = {
+            'id': self.id,
+            'name': check_text(name, 'name') or self.name,
+            'description': check_text(description, 'description') or self.description,
+            'options': check_type(options, dict, 'options') or self.options,
+            'is_hidden': check_type(is_hidden, bool, 'is_hidden') or self.is_hidden,
+        }
 
         self._update(resource='team', team_id=self.id, update_dict=update_dict)
 

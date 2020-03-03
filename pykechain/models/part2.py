@@ -441,13 +441,10 @@ class Part(TreeObject):
         >>> front_fork.edit(name='Front Fork basemodel', description='Some description here')
 
         """
-        self.name = check_text(name, 'name') or self.name
-        self.description = check_text(description, 'description') or self.description
-
         update_dict = {
             'id': self.id,
-            'name': self.name,
-            'description': self.description
+            'name': check_text(name, 'name') or self.name,
+            'description': check_text(description, 'description') or self.description,
         }
 
         if kwargs:  # pragma: no cover

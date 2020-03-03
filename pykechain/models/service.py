@@ -120,8 +120,8 @@ class Service(Base):
         """
         update_dict = {
             'id': self.id,
-            'name': check_text(name, 'name'),
-            'description': check_text(description, 'descriptions'),
+            'name': check_text(name, 'name') or self.name,
+            'description': check_text(description, 'description') or self.description,
             'script_version': check_text(version, 'version'),
             'run_as': check_enum(run_as, ServiceScriptUser, 'run_as'),
             'trusted': check_type(trusted, bool, 'trusted')

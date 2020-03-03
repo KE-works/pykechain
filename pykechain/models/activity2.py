@@ -503,13 +503,10 @@ class Activity(TreeObject, TagsMixin):
         >>> my_task.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
 
         """
-        self.name = check_text(text=name, key='name') or self.name
-        self.description = check_text(text=description, key='description') or self.description
-
         update_dict = {
             'id': self.id,
-            'name': self.name,
-            'description': self.description,
+            'name': check_text(text=name, key='name') or self.name,
+            'description': check_text(text=description, key='description') or self.description,
             'tags': check_list_of_text(tags, 'tags')
         }
 

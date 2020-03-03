@@ -198,13 +198,10 @@ class Scope(Base, TagsMixin):
         >>> project.edit(team=my_team)
 
         """
-        self.name = check_text(name, 'name') or self.name
-        self.description = check_text(description, 'description') or self.description
-
         update_dict = {
             'id': self.id,
-            'name': self.name,
-            'text': self.description,
+            'name': check_text(name, 'name') or self.name,
+            'text': check_text(description, 'description') or self.description,
             'start_date': check_datetime(start_date, 'start_date'),
             'due_date': check_datetime(due_date, 'due_date'),
             'status': check_enum(status, ScopeStatus, 'status') or self.status,
