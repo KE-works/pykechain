@@ -4,6 +4,7 @@ from six import text_type
 
 from pykechain.enums import Category, PropertyType, WidgetTitleValue
 from pykechain.exceptions import IllegalArgumentError
+from pykechain.models.input_checks import check_enum
 from pykechain.utils import is_uuid, snakecase, camelcase
 
 # these are the common keys to all kecards.
@@ -68,18 +69,18 @@ def _set_title(meta: Dict,
     """
     Set the customTitle in the meta based on provided optional custom title or default.
 
-    This will inject into the meta the `customTitle` and `showTitleValue` if the custom_title is provided as
+    This will inject into the meta the `customTitle` and `showTitleValue` if the `title` is provided as
     argument, otherwise it will inject the `defaultTitle`. It returns the meta definition of the widget and the
     title of the widget (to be used to set `widget.title`).
 
     :param meta: meta dictionary to augment
     :type meta: dict
-    :param custom_title: A custom title for the multi column widget
+    :param title: A title for the multi column widget
             * False: use the default title
-            * String value: use the Custom title
+            * String value: use the title
             * None: No title at all.
-    :type custom_title: basestring or bool or None
-    :param default_title: (optional) If custom_title is False, the default title is injected as title
+    :type title: basestring or bool or None
+    :param default_title: (optional) If title is False, the default title is injected as title
     :type default_title: basestring or None
     :param show_title_value: (optional) Specify how the title is displayed, regardless of other inputs.
     :type show_title_value: WidgetTitleValue
@@ -87,6 +88,8 @@ def _set_title(meta: Dict,
     :rtype: Tuple[Dict,Text]
     :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
+    check_enum(show_title_value, WidgetTitleValue, 'show_title_value')
+
     if show_title_value is None:
         if title is False:
             show_title_value = WidgetTitleValue.DEFAULT
@@ -94,10 +97,6 @@ def _set_title(meta: Dict,
             show_title_value = WidgetTitleValue.NO_TITLE
         else:
             show_title_value = WidgetTitleValue.CUSTOM_TITLE
-
-    elif show_title_value not in WidgetTitleValue.values():
-        raise IllegalArgumentError('`show_title_value` must be a WidgetTitleValue enum option, "{}" is not. '
-                                   'Choose from: {}'.format(show_title_value, WidgetTitleValue.values()))
 
     if show_title_value == WidgetTitleValue.DEFAULT:
         title_meta = None

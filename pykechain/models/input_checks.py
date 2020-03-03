@@ -75,7 +75,7 @@ def check_base(obj: Optional[Any],
                key: Optional[Text] = 'object',
                method: Optional[Callable] = None,
                ) -> Optional[Text]:
-    """Validate the object provided as input, return its ID."""
+    """Validate whether the object provided as input is a Base (or subclass) instance and return its ID."""
     if obj is not None:
 
         if cls is None:
@@ -102,7 +102,7 @@ def check_list_of_base(
         key: Optional[Text] = 'objects',
         method: Optional[Callable] = None,
 ) -> Optional[List[Text]]:
-    """Validate the iterable of objects provided as input, return a list of IDs."""
+    """Validate the iterable of objects provided as input are Base (or subclass) instances and return a list of IDs."""
     ids = None
     if objects is not None:
         check_type(objects, (list, tuple, set), key=key)

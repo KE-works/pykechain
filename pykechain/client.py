@@ -2001,17 +2001,7 @@ class Client(object):
         :raises APIError: whenever the widgets could not be deleted
         :raises IllegalArgumentError: whenever the input `widgets` is invalid
         """
-        if not isinstance(widgets, (tuple, list, set)):
-            raise IllegalArgumentError('`widgets` must be a list, tuple or set of widgets, '
-                                       '"{}" is not.'.format(widgets))
-        else:
-            widget_ids = list()
-            for widget in widgets:
-                if isinstance(widget, Widget):
-                    widget = widget.id
-                elif not is_uuid(widget):
-                    raise IllegalArgumentError('`widget` must be a Widget or its UUID, "{}" is neither.'.format(widget))
-                widget_ids.append(dict(id=widget))
+        widget_ids = check_list_of_base(widgets, Widget, 'widgets')
 
         url = self._build_url('widgets_bulk_delete')
         response = self._request('DELETE', url, json=widget_ids)
@@ -2266,7 +2256,7 @@ class Client(object):
                 writable_model_properties_ids=writable_model_ids,
             )
 
-            if kwargs:
+            if kwargs:  # pragma: no cover
                 data.update(**kwargs)
 
             bulk_data.append(data)
@@ -2293,8 +2283,7 @@ class Client(object):
         :raises APIError: when the associations could not be cleared.
         :raise IllegalArgumentError: if the widget is not of type Widget
         """
-        if not isinstance(widget, Widget):
-            raise IllegalArgumentError('`widget` is not of type Widget, but type "{}".'.format(type(widget)))
+        check_type(widget, Widget, 'widget')
 
         # perform the call
         url = self._build_url('widget_clear_associations', widget_id=widget.id)
@@ -2322,13 +2311,12 @@ class Client(object):
         :raises APIError: when the associations could not be removed
         :raise IllegalArgumentError: if the widget is not of type Widget
         """
-        if not isinstance(widget, Widget):
-            raise IllegalArgumentError('`widget` is not of type Widget, but type "{}".'.format(type(widget)))
+        check_type(widget, Widget, 'widget')
 
         model_ids = check_list_of_base(models, Property2, 'models')
 
         if not model_ids:
-            return None
+            return
 
         data = dict(
             id=widget.id,
@@ -2342,7 +2330,7 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not remove associations of widget ({})".format((response, response.json())))
 
-        return None
+        return
 
     def move_activity(self, activity, parent, classification=None):
         """
@@ -2367,7 +2355,7 @@ class Client(object):
         :raises IllegalArgumentError: if the 'parent' type is not :class:`Activity2` or UUID
         :raises APIError: if an Error occurs.
         """
-        assert isinstance(activity, Activity2), 'activity "{}" is not an Activity2 object!'.format(activity.name)
+        activity = check_type(activity, Activity2, 'activity')
 
         if isinstance(parent, Activity2):
             parent_object = parent

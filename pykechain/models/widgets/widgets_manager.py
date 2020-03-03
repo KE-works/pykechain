@@ -7,6 +7,7 @@ from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationB
     ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
     KEChainPages, CardWidgetKEChainPageLink
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
+from pykechain.models.input_checks import check_enum, check_text, check_base, check_type, check_list_of_text
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
     _check_prefilters, _check_excluded_propmodels
@@ -155,6 +156,48 @@ class WidgetsManager(Iterable):
             self.insert(kwargs.get('order'), widget)
         return widget
 
+    def create_configured_widget(
+            self,
+            part: 'Part2',
+            all_readable: Optional[bool] = None,
+            all_writable: Optional[bool] = None,
+            readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+            writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+            **kwargs,
+    ) -> Widget:
+        """
+        Create a widget with configured properties.
+
+        :param part: Part to retrieve the properties from if all_readable or all_writable is True.
+        :type part: Part2
+        :param all_readable: Selects all the `Properties` of part_model and configures them as readable in the widget
+        :type all_readable: bool
+        :param all_writable: Selects all the `Properties` of part_model and configures them as writable in the widget
+        :type all_writable: bool
+        :param readable_models: (O) list of property model ids to be configured as readable (alias = inputs)
+        :type readable_models: list of properties or list of property id's
+        :param writable_models: (O) list of property model ids to be configured as writable (alias = outputs)
+        :type writable_models: list of properties or list of property id's
+        :param kwargs: additional keyword arguments to pass
+
+        :param kwargs:
+        :return:
+        """
+        if all_readable and all_writable:
+            raise IllegalArgumentError('Properties can be either writable or readable, but not both.')
+
+        all_property_models = [p.model_id if p.model_id else p for p in part.properties]
+
+        if all_readable and not readable_models:
+            readable_models = all_property_models
+        if all_writable and not writable_models:
+            writable_models = all_property_models
+
+        return self.create_widget(
+            readable_models=readable_models,
+            writable_models=writable_models,
+            **kwargs)
+
     def add_supergrid_widget(self,
                              part_model: Union['Part2', Text],
                              parent_instance: Optional[Union['Part2', Text]] = None,
@@ -265,21 +308,14 @@ class WidgetsManager(Iterable):
         if parent_instance:
             meta['parentInstanceId'] = parent_instance
 
-        if all_readable and all_writable:
-            raise IllegalArgumentError('Properties can be either writable or readable, but not both')
-
-        if all_readable and not readable_models:
-            readable_models = part_model.properties
-        if all_writable and not writable_models:
-            writable_models = part_model.properties
-
         meta, title = _set_title(meta, title=title, default_title=part_model.name, **kwargs)
 
-        widget = self.create_widget(
+        widget = self.create_configured_widget(
             widget_type=WidgetTypes.SUPERGRID,
             title=title,
             meta=meta,
             parent=parent_widget,
+            part=part_model,
             readable_models=readable_models,
             writable_models=writable_models,
             **kwargs
@@ -428,21 +464,14 @@ class WidgetsManager(Iterable):
         if parent_instance_id:
             meta['parentInstanceId'] = parent_instance_id
 
-        if all_readable and all_writable:
-            raise IllegalArgumentError('Properties can be either writable or readable, but not both')
-
-        if all_readable and not readable_models:
-            readable_models = part_model.properties
-        if all_writable and not writable_models:
-            writable_models = part_model.properties
-
         meta, title = _set_title(meta, title=title, default_title=part_model.name, **kwargs)
 
-        widget = self.create_widget(
+        widget = self.create_configured_widget(
             widget_type=WidgetTypes.FILTEREDGRID,
             title=title,
             meta=meta,
             parent=parent_widget,
+            part=part_model,
             readable_models=readable_models,
             writable_models=writable_models,
             **kwargs,
@@ -482,8 +511,7 @@ class WidgetsManager(Iterable):
                                                method=self._client.property)  # type: 'Property2'
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
-        if image_fit not in ImageFitValue.values():
-            raise IllegalArgumentError('`image_fit` must be an ImageFitValue option, "{}" is not.'.format(image_fit))
+        check_enum(image_fit, ImageFitValue, 'image_fit')
 
         meta.update({
             "propertyInstanceId": attachment_property.id,
@@ -578,11 +606,7 @@ class WidgetsManager(Iterable):
 
         meta = _initiate_meta(kwargs, activity=self._activity_id, ignores=('showHeightValue',))
         meta['taskButtons'] = task_buttons
-
-        if alignment and alignment not in NavigationBarAlignment.values():
-            raise IllegalArgumentError("`alignment` should be one of '{}'".format(NavigationBarAlignment.values()))
-        elif alignment:
-            meta['alignment'] = alignment
+        meta['alignment'] = check_enum(alignment, NavigationBarAlignment, 'alignment')
 
         widget = self.create_widget(
             widget_type=WidgetTypes.TASKNAVIGATIONBAR,
@@ -666,16 +690,12 @@ class WidgetsManager(Iterable):
 
         meta, title = _set_title(meta, title=title, default_title=part_instance.name, **kwargs)
 
-        if all_readable and not readable_models:
-            readable_models = [p.model_id for p in part_instance.properties]
-        if all_writable and not writable_models:
-            writable_models = [p.model_id for p in part_instance.properties]
-
-        widget = self.create_widget(
+        widget = self.create_configured_widget(
             widget_type=WidgetTypes.PROPERTYGRID,
             title=title,
             meta=meta,
             parent=parent_widget,
+            part=part_instance,
             readable_models=readable_models,
             writable_models=writable_models,
             **kwargs
@@ -688,6 +708,7 @@ class WidgetsManager(Iterable):
                            custom_button_text: Optional[Text] = False,
                            emphasize_run: Optional[bool] = True,
                            download_log: Optional[bool] = False,
+                           show_log: Optional[bool] = True,
                            parent_widget: Optional[Union[Widget, Text]] = None,
                            **kwargs) -> Widget:
         """
@@ -711,8 +732,8 @@ class WidgetsManager(Iterable):
         :type emphasize_run: bool
         :param download_log: Include the possibility of downloading the log inside the activity (default False)
         :type download_log: bool
-        :param download_log: Include the log message inside the activity (default True)
-        :type download_log: bool
+        :param show_log: Include the log message inside the activity (default True)
+        :type show_log: bool
         :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
         :type parent_widget: Widget or basestring or None
         :param kwargs: additional keyword arguments to pass
@@ -737,13 +758,16 @@ class WidgetsManager(Iterable):
             show_button_value = "Custom text"
             button_text = str(custom_button_text)
 
+        from pykechain.models import Service
+        service_id = check_base(service, Service, 'service', method=self._client.service)
+
         meta.update({
             'showButtonValue': show_button_value,
             'customText': button_text,
-            'serviceId': service.id,
+            'serviceId': service_id,
             'emphasizeButton': emphasize_run,
-            'showDownloadLog': download_log,
-            'showLog': kwargs.get('show_log', True)
+            'showDownloadLog': check_type(download_log, bool, 'download_log'),
+            'showLog': True if download_log else check_type(show_log, bool, 'show_log'),
         })
 
         meta, title = _set_title(meta, title=title, default_title=service.name, **kwargs)
@@ -782,9 +806,7 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        if not isinstance(html, (str, text_type)):
-            raise IllegalArgumentError("Text injected in the HTML widget must be string. Type is: {}".
-                                       format(type(html)))
+        check_text(html, 'html')
 
         meta = _initiate_meta(kwargs, activity=self._activity_id)
         meta, title = _set_title(meta, title=title, default_title=WidgetTypes.HTML, **kwargs)
@@ -1098,8 +1120,7 @@ class WidgetsManager(Iterable):
         meta = _initiate_meta(kwargs, activity=self._activity_id)
         meta, title = _set_title(meta, title=title, default_title=WidgetTypes.SCOPE, **kwargs)
 
-        if show_all_columns is not None and not isinstance(show_all_columns, bool):
-            raise IllegalArgumentError('`show_all_columns` must be a boolean, "{}" is not.'.format(show_all_columns))
+        check_type(show_all_columns, bool, 'show_all_columns')
 
         if not show_all_columns and show_columns:
             if not isinstance(show_columns, (list, tuple)):
@@ -1112,39 +1133,19 @@ class WidgetsManager(Iterable):
         if not isinstance(page_size, int) or page_size < 1:
             raise IllegalArgumentError('`page_size` must be a positive integer, "{}" is not.'.format(page_size))
 
-        if tags:
-            if not isinstance(tags, (list, tuple)) or not all([isinstance(i, string_types) for i in tags]):
-                raise IllegalArgumentError("`tags` should be a list of strings: '{}'".format(tags))
-            meta['tags'] = tags
-
         if team:
             meta['teamId'] = _retrieve_object_id(team)
-
-        if not isinstance(active_filter, bool):
-            raise IllegalArgumentError('`active_filter` must be a boolean, "{}" is not.'.format(active_filter))
-
-        if not isinstance(search_filter, bool):
-            raise IllegalArgumentError('`search_filter` must be a boolean, "{}" is not.'.format(search_filter))
 
         for button_setting in [
             add, edit, delete, clone, emphasize_add, emphasize_clone, emphasize_edit, emphasize_delete,
         ]:
-            if not isinstance(button_setting, bool):
-                raise IllegalArgumentError('All button settings must be booleans.')
-
-        if sorted_column not in ScopeWidgetColumnTypes.values():
-            raise IllegalArgumentError('`sorted_column` must be a ScopeWidgetColumnTypes option, "{}" is not. '
-                                       'Select from: {}'.format(sorted_column, ScopeWidgetColumnTypes.values()))
-
-        if sorted_direction not in SortTable.values():
-            raise IllegalArgumentError('`sorted_direction` must be a SortTable option, "{}" is not. '
-                                       'Select from: {}'.format(sorted_direction, SortTable.values()))
+            check_type(button_setting, bool, 'buttons')
 
         meta.update({
-            'sortedColumn': snakecase(sorted_column),
-            'sortDirection': sorted_direction,
-            'activeFilterVisible': active_filter,
-            'searchFilterVisible': search_filter,
+            'sortedColumn': snakecase(check_enum(sorted_column, ScopeWidgetColumnTypes, 'sorted_column')),
+            'sortDirection': check_enum(sorted_direction, SortTable, 'sorted_direction'),
+            'activeFilterVisible': check_type(active_filter, bool, 'active_filter'),
+            'searchFilterVisible': check_type(search_filter, bool, 'search_filter'),
             "addButtonVisible": add,
             "editButtonVisible": edit,
             "deleteButtonVisible": delete,
@@ -1154,6 +1155,7 @@ class WidgetsManager(Iterable):
             "primaryCloneUiValue": emphasize_clone,
             "primaryDeleteUiValue": emphasize_delete,
             "customPageSize": page_size,
+            "tags": check_list_of_text(tags, 'tags'),
         })
 
         widget = self.create_widget(
@@ -1327,16 +1329,8 @@ class WidgetsManager(Iterable):
                 'showLinkValue': CardWidgetLinkValue.EXTERNAL_LINK
             })
 
-        if link_target in LinkTargets.values():
-            meta['linkTarget'] = link_target
-        else:
-            raise IllegalArgumentError("When using the add_card_widget, 'link_target' must be a '_blank' or '_self. "
-                                       "link_target is: {}".format(link_target))
-
-        if image_fit in ImageFitValue.values():
-            meta['imageFit'] = image_fit
-        else:
-            raise IllegalArgumentError('`image_fit` must be an ImageFitValue option, "{}" is not.'.format(image_fit))
+        meta['linkTarget'] = check_enum(link_target, LinkTargets, 'link_target')
+        meta['imageFit'] = check_enum(image_fit, ImageFitValue, 'image_fit')
 
         widget = self.create_widget(
             widget_type=WidgetTypes.CARD,
