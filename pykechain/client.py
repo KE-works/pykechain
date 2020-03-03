@@ -19,7 +19,7 @@ from pykechain.models.widgets.widget import Widget
 from pykechain.utils import is_uuid, find
 from .__about__ import version as pykechain_version
 from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
-    check_list_of_base, check_base, check_uuid
+    check_list_of_base, check_base, check_uuid, check_list_of_dicts
 
 
 class Client(object):
@@ -1241,14 +1241,7 @@ class Client(object):
         if parent.category != Category.MODEL:
             raise IllegalArgumentError("`parent` should be of category 'MODEL'")
 
-        if isinstance(properties_fvalues, list) and all(isinstance(p, dict) for p in properties_fvalues):
-            required_new_property_keys = {'name', 'property_type'}
-            for new_prop in properties_fvalues:
-                if not all(k in new_prop.keys() for k in required_new_property_keys):
-                    raise IllegalArgumentError("New property '{}' does not have a required field ({}) provided in the "
-                                               "`properties_fvalues` list".format(new_prop, required_new_property_keys))
-        else:
-            raise IllegalArgumentError("`properties_fvalues` need to be provided as a list of dicts")
+        check_list_of_dicts(properties_fvalues, 'properties_fvalues', ['name', 'property_type'])
 
         data = dict(
             name=check_text(text=name, key='name'),
@@ -1958,8 +1951,7 @@ class Client(object):
         :return: list of Widget objects
         :rtype List[Widget]
         """
-        if not isinstance(widgets, list) or not all(isinstance(w, dict) for w in widgets):
-            raise IllegalArgumentError('`widgets` must provided as a list of dictionaries.')
+        check_list_of_dicts(widgets, 'widgets')
 
         response = self._request(
             "PUT",
@@ -2389,8 +2381,7 @@ class Client(object):
         :return: list of Properties
         :rtype List[AnyProperty]
         """
-        if not isinstance(properties, list) or not all(isinstance(p, dict) for p in properties):
-            raise IllegalArgumentError('All properties must be provided in a list of dicts.')
+        check_list_of_dicts(properties, 'properties')
 
         response = self._request(
             'POST',

@@ -114,8 +114,7 @@ class Scope(Base, TagsMixin):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not {} {} in Scope".format(select_action.split('_')[0], user_type))
 
-        # TODO Test whether the Scope2 must be refreshed using the json_data below
-        self._json_data = response.json().get('results')[0]
+        self.refresh(json=response.json().get('results')[0])
 
     def _edit(self, update_dict):
         if update_dict.get('options'):

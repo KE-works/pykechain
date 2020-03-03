@@ -9,7 +9,7 @@ from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, 
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
     get_edited_one_many
 from pykechain.models import Scope2
-from pykechain.models.input_checks import check_text, check_type, check_list_of_base
+from pykechain.models.input_checks import check_text, check_type, check_list_of_base, check_list_of_dicts
 from pykechain.models.property2 import Property2
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.utils import is_uuid, find
@@ -641,7 +641,8 @@ class Part(TreeObject):
         :return: Tuple with 2 lists of dicts
         :rtype tuple
         """
-        properties_fvalues = properties_fvalues or list()
+        properties_fvalues = check_list_of_dicts(properties_fvalues, 'properties_fvalues') or list()
+
         exception_fvalues = list()
         update_dict = update_dict or dict()
 
@@ -733,9 +734,6 @@ class Part(TreeObject):
 
         if not isinstance(model, Part2) or model.category != Category.MODEL:
             raise IllegalArgumentError('`model` must be a Part2 object of category MODEL, "{}" is not.'.format(model))
-
-        if properties_fvalues and not isinstance(properties_fvalues, list):
-            raise IllegalArgumentError("optional `properties_fvalues` need to be provided as a list of dicts")
 
         instance_name = check_text(name, 'name') or model.name
         properties_fvalues, exception_fvalues = self._parse_update_dict(model, properties_fvalues, update_dict)
@@ -980,9 +978,6 @@ class Part(TreeObject):
         # dict(name=name, properties=json.dumps(update_dict))) with property ids:value
         # action = 'bulk_update_properties'  # not for KEC3
         check_text(name, 'name')
-
-        if properties_fvalues and not isinstance(properties_fvalues, list):
-            raise IllegalArgumentError("optional `properties_fvalues` need to be provided as a list of dicts")
 
         properties_fvalues, exception_fvalues = self._parse_update_dict(self, properties_fvalues, update_dict)
 

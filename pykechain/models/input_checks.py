@@ -1,17 +1,19 @@
 import warnings
 from datetime import datetime
-from typing import Text, Optional, List, Iterable, Any, Callable
+from typing import Text, Optional, List, Iterable, Any, Callable, Dict
 
 from pykechain.enums import Enum
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.utils import is_uuid
+
+iter_types = (list, tuple, set)
 
 
 def check_type(value: Optional[Any], cls: Any, key: Text) -> Optional[Any]:
     """Validate any input to be an instance a specific class."""
     if value is not None:
         if not isinstance(value, cls):
-            if isinstance(cls, (list, tuple, set)):
+            if isinstance(cls, iter_types):
                 types = ', '.join(c.__name__ for c in cls)
             else:
                 types = cls.__name__
@@ -39,12 +41,38 @@ def check_text(text: Optional[Text], key: Text) -> Optional[Text]:
 def check_list_of_text(list_of_text: Optional[Iterable[Text]], key: Text) -> Optional[List[Text]]:
     """Validate iterable input to be a list/tuple/set of strings."""
     if list_of_text is not None:
-        if not isinstance(list_of_text, (list, tuple, set)) or not all(isinstance(t, Text) for t in list_of_text):
+        if not isinstance(list_of_text, iter_types) or not all(isinstance(t, Text) for t in list_of_text):
             raise IllegalArgumentError(
                 '`{}` should be a list, tuple or set of strings, "{}" ({}) is not.'.format(key, list_of_text,
                                                                                            type(list_of_text)))
         list_of_text = list(set(list_of_text))
     return list_of_text
+
+
+def check_list_of_dicts(list_of_dicts: Optional[Iterable[Dict]],
+                        key: Text,
+                        fields: Optional[List[Text]] = None) -> Optional[List[Dict]]:
+    """Validate iterable input to be a list/tuple/set of dicts, optionally checking for required field names."""
+    if list_of_dicts is not None:
+        if not isinstance(list_of_dicts, iter_types) or not all(isinstance(d, dict) for d in list_of_dicts):
+            raise IllegalArgumentError(
+                '`{}` should be a list, tuple or set of dicts, "{}" ({}) is not.'.format(key, list_of_dicts,
+                                                                                         type(list_of_dicts))
+            )
+        if fields:
+            assert isinstance(fields, list) and all(isinstance(f, str) for f in fields), \
+                '`fields` must be a list of strings.'
+            missing_fields = set()
+            for dictionary in list_of_dicts:
+                for field in fields:
+                    if field not in dictionary:
+                        missing_fields.add(field)
+            if missing_fields:
+                raise IllegalArgumentError('Not every dict contains the required fields: "{}".\n'
+                                           'Missing fields: "{}"'.format('", "'.join(fields),
+                                                                         '", "'.join(list(missing_fields))))
+
+    return list_of_dicts
 
 
 def check_enum(value: Optional[Any], enum: type(Enum), key: Text) -> Optional[Any]:
@@ -105,7 +133,7 @@ def check_list_of_base(
     """Validate the iterable of objects provided as input are Base (or subclass) instances and return a list of IDs."""
     ids = None
     if objects is not None:
-        check_type(objects, (list, tuple, set), key=key)
+        check_type(objects, iter_types, key=key)
 
         if cls is None:
             from pykechain.models import Base

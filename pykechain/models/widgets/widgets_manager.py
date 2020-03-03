@@ -46,12 +46,13 @@ class WidgetsManager(Iterable):
         for widget in self._widgets:
             widget.manager = self
         from pykechain.models import Activity2
+        from pykechain import Client
         if isinstance(activity, Activity2):
             self._activity_id = activity.id
-            self._client = activity._client
+            self._client = activity._client  # type: Client
         elif isinstance(activity, text_type) and client is not None:
             self._activity_id = activity
-            self._client = client
+            self._client = client  # type: Client
         else:
             raise IllegalArgumentError("The `WidgetsManager` should be provided either an :class:`Activity` or "
                                        "an activity uuid and a `Client` to function properly.")
@@ -179,9 +180,7 @@ class WidgetsManager(Iterable):
         :param writable_models: (O) list of property model ids to be configured as writable (alias = outputs)
         :type writable_models: list of properties or list of property id's
         :param kwargs: additional keyword arguments to pass
-
-        :param kwargs:
-        :return:
+        :return: Widget
         """
         if all_readable and all_writable:
             raise IllegalArgumentError('Properties can be either writable or readable, but not both.')
@@ -318,6 +317,8 @@ class WidgetsManager(Iterable):
             part=part_model,
             readable_models=readable_models,
             writable_models=writable_models,
+            all_readable=all_readable,
+            all_writable=all_writable,
             **kwargs
         )
         return widget
@@ -474,6 +475,8 @@ class WidgetsManager(Iterable):
             part=part_model,
             readable_models=readable_models,
             writable_models=writable_models,
+            all_readable=all_readable,
+            all_writable=all_writable,
             **kwargs,
         )
         return widget
@@ -698,6 +701,8 @@ class WidgetsManager(Iterable):
             part=part_instance,
             readable_models=readable_models,
             writable_models=writable_models,
+            all_readable=all_readable,
+            all_writable=all_writable,
             **kwargs
         )
         return widget
