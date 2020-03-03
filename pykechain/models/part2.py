@@ -458,6 +458,8 @@ class Part(TreeObject):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Part ({})".format(response))
 
+        self.refresh(json=response.json().get('results')[0])
+
     def proxy_model(self) -> 'Part2':
         """
         Retrieve the proxy model of this proxied `Part` as a `Part`.

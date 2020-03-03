@@ -507,8 +507,9 @@ class Activity(TreeObject, TagsMixin):
             'id': self.id,
             'name': check_text(text=name, key='name') or self.name,
             'description': check_text(text=description, key='description') or self.description,
-            'tags': check_list_of_text(tags, 'tags')
         }
+        if tags is not None:
+            update_dict['tags'] = check_list_of_text(tags, 'tags')
 
         self._validate_edit_arguments(
             update_dict=update_dict,

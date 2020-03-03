@@ -116,23 +116,6 @@ class Scope(Base, TagsMixin):
 
         self.refresh(json=response.json().get('results')[0])
 
-    def _edit(self, update_dict):
-        if update_dict.get('options'):
-            update_dict['scope_options'] = update_dict.pop('options')
-        if update_dict.get('team'):
-            update_dict['team_id'] = update_dict.pop('team')
-
-        url = self._client._build_url('scope2', scope_id=self.id)
-
-        response = self._client._request('PUT', url,
-                                         params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
-                                         json=update_dict)
-
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Scope ({})".format(response))
-
-        self.refresh(json=response.json().get('results')[0])
-
     def edit(
             self,
             name: Optional[Text] = None,
@@ -206,14 +189,22 @@ class Scope(Base, TagsMixin):
             'due_date': check_datetime(due_date, 'due_date'),
             'status': check_enum(status, ScopeStatus, 'status') or self.status,
             'tags': check_list_of_text(tags, 'tags') or [],
-            'options': check_type(options, dict, 'options') or dict(),
+            'scope_options': check_type(options, dict, 'options') or dict(),
         }
         team = check_base(team, Team, 'team', method=self._client.team)
         if team:
             update_dict['team_id'] = team
 
-        # do the update itself in an protected function.
-        self._edit(update_dict)
+        url = self._client._build_url('scope2', scope_id=self.id)
+
+        response = self._client._request('PUT', url,
+                                         params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
+                                         json=update_dict)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Scope ({})".format(response))
+
+        self.refresh(json=response.json().get('results')[0])
 
     def clone(self, **kwargs):
         """Clone a scope.
