@@ -313,7 +313,7 @@ class TestScopes2SpecificTests(TestBetamax):
         self.assertNotEqual(self.project.id, new_scope.id)
         new_scope.delete(asynchronous=False)
 
-        with self.assertRaisesRegex(NotFoundError, 'No scope fits criteria'):
+        with self.assertRaisesRegex(NotFoundError, 'fit criteria'):
             # throw in arbitrary sleep to give backend time to actually delete the scope.
             sleep(1)
             self.client.scope(pk=new_scope.id)

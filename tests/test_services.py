@@ -187,7 +187,7 @@ class TestServicesWithCustomUploadedService(TestServiceSetup):
 
         # tearDown
         new_service.delete()
-        with self.assertRaisesRegex(NotFoundError, 'No service fits criteria'):
+        with self.assertRaisesRegex(NotFoundError, 'fit criteria'):
             self.project.service(pk=new_service.id)
 
     def test_create_service_with_wrong_service_type(self):

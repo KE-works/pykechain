@@ -90,7 +90,7 @@ class TestParts(TestBetamax):
         bike_model = self.project.model(name='Bike')
 
         # testing
-        with self.assertRaises(APIError):
+        with self.assertRaises(IllegalArgumentError):
             self.client.create_model(name='Multiplicity does not exist', parent=bike_model, multiplicity='TEN')
 
     def test_part_add_delete_part(self):
