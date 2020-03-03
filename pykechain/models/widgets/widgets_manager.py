@@ -163,7 +163,7 @@ class WidgetsManager(Iterable):
             all_writable: Optional[bool] = None,
             readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
             writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
-            **kwargs,
+            **kwargs
     ) -> Widget:
         """
         Create a widget with configured properties.
