@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional, Text
 
 from pykechain.utils import parse_datetime
 
@@ -38,7 +38,7 @@ class Base(object):
     def __hash__(self):
         return hash(self.id)
 
-    def refresh(self, json=None, url=None, extra_params=None):
+    def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional[Dict] = None):
         """Refresh the object in place.
 
         Can be called on the object without any arguments and should refresh the object inplace. If you want to

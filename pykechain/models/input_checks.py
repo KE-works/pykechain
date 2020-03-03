@@ -51,7 +51,8 @@ def check_list_of_text(list_of_text: Optional[Iterable[Text]], key: Text) -> Opt
 
 def check_list_of_dicts(list_of_dicts: Optional[Iterable[Dict]],
                         key: Text,
-                        fields: Optional[List[Text]] = None) -> Optional[List[Dict]]:
+                        fields: Optional[List[Text]] = None,
+                        ) -> Optional[List[Dict]]:
     """Validate iterable input to be a list/tuple/set of dicts, optionally checking for required field names."""
     if list_of_dicts is not None:
         if not isinstance(list_of_dicts, iter_types) or not all(isinstance(d, dict) for d in list_of_dicts):
@@ -68,10 +69,9 @@ def check_list_of_dicts(list_of_dicts: Optional[Iterable[Dict]],
                     if field not in dictionary:
                         missing_fields.add(field)
             if missing_fields:
-                raise IllegalArgumentError('Not every dict contains the required fields: "{}".\n'
+                raise IllegalArgumentError('Not every dict contains the required fields: "{}"\n'
                                            'Missing fields: "{}"'.format('", "'.join(fields),
                                                                          '", "'.join(list(missing_fields))))
-
     return list_of_dicts
 
 

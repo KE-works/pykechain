@@ -2,10 +2,9 @@ import datetime
 import warnings
 import requests
 
-from typing import Dict, Tuple, Optional, Any, List, Union, Text, Callable  # noqa: F401 pragma: no cover
+from typing import Dict, Tuple, Optional, Any, List, Union, Text, Callable
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
-from six import text_type, string_types
 
 from pykechain.defaults import API_PATH, API_EXTRA_PARAMS
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
@@ -33,7 +32,7 @@ class Client(object):
     .. _requests.Response: http://docs.python-requests.org/en/master/api/#requests.Response
     """
 
-    def __init__(self, url: text_type = 'http://localhost:8000/', check_certificates: Optional[bool] = None) -> None:
+    def __init__(self, url: Text = 'http://localhost:8000/', check_certificates: Optional[bool] = None) -> None:
         """Create a KE-chain client with given settings.
 
         :param url: the url of the KE-chain instance to connect to (defaults to http://localhost:8000)
@@ -168,7 +167,7 @@ class Client(object):
     def _build_url(self, resource: Text, **kwargs) -> Text:
         """Build the correct API url.
 
-        :param resource: name the resouce from the API_PATH
+        :param resource: name the resource from the API_PATH
         :type resource: basestring
         :param kwargs: (optional) id of the detail path to follow, eg. activity_id=...
         :return: url of the resource to the resource (id)
@@ -283,6 +282,7 @@ class Client(object):
 
         Examples
         --------
+        >>> client = Client()
         >>> client.match_app_version(label='wim', version=">=1.99")
         >>> True
 
@@ -347,6 +347,9 @@ class Client(object):
         :raises NotFoundError: if original object is not found or deleted in the mean time
         """
         if not url and not obj._json_data.get('url'):
+            # TODO Throw an error instead of building the URL?
+            #  This .__name__ method does not work for subclasses (e.g. MultiReferenceProperty).
+
             # build the url from the class name (in lower case) `obj.__class__.__name__.lower()`
             # get the id from the `obj.id` which is normally a keyname `<class_name>_id` (without the '2' if so)
 
@@ -372,24 +375,22 @@ class Client(object):
     @staticmethod
     def _retrieve_singular(method: Callable, *args, **kwargs):
         """
-        Use a known method to retrieve a single item, raising the appropriate errors.
+        Use the method for multiple objects to retrieve a single object, raising the appropriate errors.
 
-        :param method: function used to retrieve multiple instances.
+        :param method: function used to retrieve multiple objects.
         :type method: callable
         :return the single result
         :raises NotFoundError: When no result is found.
         :raises MultipleFoundError: When more than a single result is found.
         """
         results = method(*args, **kwargs)
-        plural = method.__name__
-        singular = plural[:-1]
 
         criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
 
         if len(results) == 0:
-            raise NotFoundError("No {} fits criteria:{}".format(singular, criteria))
+            raise NotFoundError("No {} fit criteria:{}".format(method.__name__, criteria))
         if len(results) != 1:
-            raise MultipleFoundError("Multiple {} fit criteria:{}".format(plural, criteria))
+            raise MultipleFoundError("Multiple {} fit criteria:{}".format(method.__name__, criteria))
 
         return results[0]
 
@@ -962,15 +963,15 @@ class Client(object):
 
     def create_activity(
         self,
-        parent: Union[Activity2, text_type],
-        name: text_type,
+        parent: Union[Activity2, Text],
+        name: Text,
         activity_type: ActivityType = ActivityType.TASK,
         status: ActivityStatus = ActivityStatus.OPEN,
-        description: Optional[text_type] = None,
+        description: Optional[Text] = None,
         start_date: Optional[datetime.datetime] = None,
         due_date: Optional[datetime.datetime] = None,
         classification: ActivityClassification = None,
-        tags: Optional[List[text_type]] = None,
+        tags: Optional[List[Text]] = None,
     ) -> Activity2:
         """
         Create a new activity.
@@ -1034,7 +1035,7 @@ class Client(object):
 
         return Activity2(response.json()['results'][0], client=self)
 
-    def _create_part(self, action, data, **kwargs):
+    def _create_part(self, action: Text, data: Dict, **kwargs) -> Optional[Part2]:
         """Create a part for PIM 2 internal core function."""
         # suppress_kevents should be in the data (not the query_params)
         if 'suppress_kevents' in kwargs:
@@ -1108,9 +1109,6 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
-        if parent.category != Category.MODEL:
-            raise IllegalArgumentError("The parent should be of category 'MODEL'")
-
         if isinstance(parent, Part2):
             pass
         elif is_uuid(parent):
@@ -1118,8 +1116,14 @@ class Client(object):
         else:
             raise IllegalArgumentError("`parent` should be either a parent part or a uuid, got '{}'".format(parent))
 
-        name = check_text(text=name, key='name')
-        data = dict(name=name, parent_id=parent.id, multiplicity=multiplicity)
+        if parent.category != Category.MODEL:
+            raise IllegalArgumentError("The parent should be of category 'MODEL'")
+
+        data = dict(
+            name=check_text(name, 'name'),
+            parent_id=parent.id,
+            multiplicity=check_enum(multiplicity, Multiplicity, 'multiplicity'),
+        )
         return self._create_part(action="create_child_model", data=data, **kwargs)
 
     def create_model_with_properties(
@@ -1163,15 +1167,17 @@ class Client(object):
 
         Example
         -------
+        >>> from pykechain.models.validators import RequiredFieldValidator
         >>> properties_fvalues = [
         ...     {"name": "char prop", "property_type": PropertyType.CHAR_VALUE, "order": 1},
         ...     {"name": "number prop", "property_type": PropertyType.FLOAT_VALUE, "value": 3.14, "order": 2},
         ...     {"name": "boolean_prop", "property_type": PropertyType.BOOLEAN_VALUE, "value": False,
         ...      "value_options": {"validators": [RequiredFieldValidator().as_json()]}, "order":3}
         ... ]
-        >>> new_model = project.create_model_with_properties(name='A new model', parent='<uuid>',
-        ...                                                  multiplicity=Multiplicity.ONE,
-        ...                                                  properties_fvalues=properties_fvalues)
+        >>> client = Client()
+        >>> new_model = client.create_model_with_properties(name='A new model', parent='<uuid>',
+        ...                                                 multiplicity=Multiplicity.ONE,
+        ...                                                 properties_fvalues=properties_fvalues)
 
         """
         if isinstance(parent, Part2):
@@ -1184,25 +1190,27 @@ class Client(object):
         if parent.category != Category.MODEL:
             raise IllegalArgumentError("`parent` should be of category 'MODEL'")
 
-        check_list_of_dicts(properties_fvalues, 'properties_fvalues', ['name', 'property_type'])
-
         data = dict(
             name=check_text(text=name, key='name'),
             parent_id=parent.id,
-            multiplicity=multiplicity,
+            multiplicity=check_enum(multiplicity, Multiplicity, 'multiplicity'),
             category=Category.MODEL,
-            properties_fvalues=properties_fvalues,
+            properties_fvalues=check_list_of_dicts(properties_fvalues, 'properties_fvalues', ['name', 'property_type']),
         )
 
         return self._create_part(action="create_child_model", data=data, **kwargs)
 
-    def _create_clone(self, parent, part, name=None, **kwargs):
+    def _create_clone(self,
+                      parent: Part2,
+                      part: Part2,
+                      name: Optional[Text] = None,
+                      multiplicity: Optional[Multiplicity] = None,
+                      **kwargs
+                      ) -> Part2:
         """Create a new `Part` clone under the `Parent`.
 
         An optional name of the cloned part may be provided. If not provided the name will be set
         to "CLONE - <part name>". (KE-chain 3 backends only)
-        An optional multiplicity, may be added as paremeter for the cloning of models. If not
-        provided the multiplicity of the part will be used.
 
         .. versionadded:: 2.3
         .. versionchanged:: 3.0
@@ -1214,6 +1222,8 @@ class Client(object):
         :type part: :class:`models.Part`
         :param name: (optional) Name of the to be cloned part
         :type name: basestring or None
+        :param multiplicity: In case of Models, to specify a new multiplicity. Defaults to the `part` multiplicity.
+        :type multiplicity: Multiplicity
         :param kwargs: (optional) additional keyword=value arguments
         :return: cloned :class:`models.Part`
         :raises APIError: if the `Part` could not be cloned
@@ -1228,10 +1238,10 @@ class Client(object):
         )
 
         if part.category == Category.MODEL:
-            data.update(dict(
-                multiplicity=kwargs.pop('multiplicity', part.multiplicity),
-                model_id=part.id)
-            )
+            data.update({
+                'multiplicity': check_enum(multiplicity, Multiplicity, 'multiplicity') or part.multiplicity,
+                'model_id': part.id,
+            })
         else:
             data['instance_id'] = part.id
 
@@ -1675,7 +1685,7 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: When an API Error occurs
         """
-        if isinstance(user, (string_types, text_type)):
+        if isinstance(user, str):
             user = self.user(username=user)
         elif isinstance(user, int):
             user = self.user(pk=user)
@@ -1713,12 +1723,12 @@ class Client(object):
 
     @staticmethod
     def _validate_widget(
-            activity: Union[Activity2, text_type],
-            widget_type: Union[WidgetTypes, text_type],
+            activity: Union[Activity2, Text],
+            widget_type: Union[WidgetTypes, Text],
             title: Optional[Text],
             meta: Dict,
             order: Optional[int],
-            parent: Optional[Union[Widget, text_type]],
+            parent: Optional[Union[Widget, Text]],
             **kwargs
     ) -> Dict:
         """Validate the format and content of the configuration of a widget."""
@@ -1767,12 +1777,12 @@ class Client(object):
 
     def create_widget(
             self,
-            activity: Union[Activity2, text_type],
-            widget_type: Union[WidgetTypes, text_type],
+            activity: Union[Activity2, Text],
+            widget_type: Union[WidgetTypes, Text],
             meta: Dict,
             title: Optional[Text] = None,
             order: Optional[int] = None,
-            parent: Optional[Union[Widget, text_type]] = None,
+            parent: Optional[Union[Widget, Text]] = None,
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
             **kwargs
@@ -1909,7 +1919,7 @@ class Client(object):
         widgets_response = response.json().get('results')
         return [Widget.create(json=widget_json, client=self) for widget_json in widgets_response]
 
-    def delete_widget(self, widget: Union[Widget, text_type]) -> None:
+    def delete_widget(self, widget: Union[Widget, Text]) -> None:
         """
         Delete a single Widget.
 
@@ -1926,12 +1936,12 @@ class Client(object):
         if response.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete Widget ({})".format(response))
 
-    def delete_widgets(self, widgets: List[Union[Widget, text_type]]) -> None:
+    def delete_widgets(self, widgets: List[Union[Widget, Text]]) -> None:
         """
         Delete multiple Widgets.
 
         :param widgets: List, Tuple or Set of Widgets or their UUIDs to be deleted
-        :type widgets: List[Union[Widget, text_type]]
+        :type widgets: List[Union[Widget, Text]]
         :return: None
         :raises APIError: whenever the widgets could not be deleted
         :raises IllegalArgumentError: whenever the input `widgets` is invalid
@@ -1946,9 +1956,9 @@ class Client(object):
 
     @staticmethod
     def _validate_associations(
-            widgets: List[Union[Widget, text_type]],
+            widgets: List[Union[Widget, Text]],
             associations: List[Tuple[List, List]],
-    ) -> List[text_type]:
+    ) -> List[Text]:
         """Perform the validation of the internal widgets and associations."""
         widget_ids = check_list_of_base(widgets, Widget, 'widgets')
 
@@ -2040,7 +2050,7 @@ class Client(object):
 
     def update_widget_associations(
             self,
-            widget: Union[Widget, text_type],
+            widget: Union[Widget, Text],
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
             **kwargs
@@ -2073,7 +2083,7 @@ class Client(object):
 
     def update_widgets_associations(
             self,
-            widgets: List[Union[Widget, text_type]],
+            widgets: List[Union[Widget, Text]],
             associations: List[Tuple[List, List]],
             **kwargs
     ) -> None:
@@ -2124,7 +2134,7 @@ class Client(object):
 
     def set_widget_associations(
             self,
-            widget: Union[Widget, text_type],
+            widget: Union[Widget, Text],
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
             **kwargs
@@ -2155,7 +2165,7 @@ class Client(object):
 
     def set_widgets_associations(
             self,
-            widgets: List[Union[Widget, text_type]],
+            widgets: List[Union[Widget, Text]],
             associations: List[Tuple[List, List]],
             **kwargs
     ) -> None:
@@ -2232,7 +2242,7 @@ class Client(object):
     def remove_widget_associations(
             self,
             widget: Widget,
-            models: Optional[List[Union['AnyProperty', text_type]]] = (),
+            models: Optional[List[Union['AnyProperty', Text]]] = (),
             **kwargs
     ) -> None:
         """
@@ -2294,7 +2304,7 @@ class Client(object):
 
         if isinstance(parent, Activity2):
             parent_object = parent
-        elif isinstance(parent, text_type) and is_uuid(parent):
+        elif isinstance(parent, str) and is_uuid(parent):
             parent_object = self.activity(id=parent)
         else:
             raise IllegalArgumentError("Please provide either an activity object or a UUID")
