@@ -1,8 +1,6 @@
 from collections import Iterable
 from typing import Any, Optional, Text, List, Dict
 
-from six import string_types, text_type
-
 from pykechain.enums import URITarget, SubprocessDisplayMode, KEChainPages, KEChainPageLabels
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from pykechain.models.sidebar.sidebar_button import SideBarButton
@@ -85,7 +83,7 @@ class SideBarManager(Iterable):
             found = find(self._buttons, lambda b: b == key)
         if isinstance(key, int):
             found = self._buttons[key]
-        elif isinstance(key, (string_types, text_type)):
+        elif isinstance(key, str):
             found = find(self._buttons, lambda p: key == p.title or key == p.ref)
 
         if found is not None:

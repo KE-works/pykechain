@@ -3,7 +3,6 @@ import json
 import os
 
 import requests
-from six import string_types, text_type
 from typing import Text, Any, Optional
 
 from pykechain.exceptions import APIError, _DeprecationMixin
@@ -94,7 +93,7 @@ class AttachmentProperty(Property2):
         except ImportError:
             pass
 
-        if isinstance(data, (string_types, text_type)):
+        if isinstance(data, str):
             with open(data, 'rb') as fp:
                 self._upload(fp)
         else:

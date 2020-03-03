@@ -1,8 +1,6 @@
 import warnings
 from typing import Iterable, Union, AnyStr, Optional, Text, Dict, List, Any
 
-from six import string_types, text_type
-
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes, \
     ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
     KEChainPages, CardWidgetKEChainPageLink
@@ -50,7 +48,7 @@ class WidgetsManager(Iterable):
         if isinstance(activity, Activity2):
             self._activity_id = activity.id
             self._client = activity._client  # type: Client
-        elif isinstance(activity, text_type) and client is not None:
+        elif isinstance(activity, str) and client is not None:
             self._activity_id = activity
             self._client = client  # type: Client
         else:
@@ -90,7 +88,7 @@ class WidgetsManager(Iterable):
             found = self._widgets[key]
         elif is_uuid(key):
             found = find(self._widgets, lambda p: key == p.id)
-        elif isinstance(key, (string_types, text_type)):
+        elif isinstance(key, str):
             found = find(self._widgets, lambda p: key == p.title or key == p.ref)
 
         if found is not None:
@@ -281,7 +279,7 @@ class WidgetsManager(Iterable):
         # Check whether the part_model is uuid type or class `Part`
         part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: 'Part2'  # noqa
         parent_instance = _retrieve_object_id(obj=parent_instance)  # type: 'Part2'  # noqa
-        sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
+        sort_property_id = _retrieve_object_id(obj=sort_property)
 
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
         meta.update({
@@ -585,7 +583,7 @@ class WidgetsManager(Iterable):
                 activity = input_dict['activityId']
                 if isinstance(activity, Activity2):
                     button_dict['activityId'] = activity.id
-                elif isinstance(activity, text_type) and is_uuid(activity):
+                elif isinstance(activity, str) and is_uuid(activity):
                     button_dict['activityId'] = activity
                 else:
                     raise IllegalArgumentError("When using the add_navigation_bar_widget, activityId must be an "
@@ -856,7 +854,7 @@ class WidgetsManager(Iterable):
         from pykechain.models import Service
         if isinstance(notebook, Service):
             notebook_id = notebook.id
-        elif isinstance(notebook, (string_types, text_type)) and is_uuid(notebook):
+        elif isinstance(notebook, str) and is_uuid(notebook):
             notebook_id = notebook
             notebook = self._client.service(id=notebook_id)
         else:
@@ -1281,7 +1279,7 @@ class WidgetsManager(Iterable):
         if description is False or description is None:
             show_description_value = "No description"
             description = ""
-        elif isinstance(description, text_type):
+        elif isinstance(description, str):
             show_description_value = "Custom description"
         else:
             raise IllegalArgumentError("When using the add_card_widget, 'description' must be 'text_type' or None or "
@@ -1313,7 +1311,7 @@ class WidgetsManager(Iterable):
                 'customLink': link.id,
                 'showLinkValue': CardWidgetLinkValue.TASK_LINK
             })
-        elif isinstance(link, text_type) and is_uuid(link):
+        elif isinstance(link, str) and is_uuid(link):
             meta.update({
                 'customLink': link,
                 'showLinkValue': CardWidgetLinkValue.TASK_LINK

@@ -1,7 +1,5 @@
 from typing import Dict, Optional, Union, Text, Tuple, List, Callable
 
-from six import text_type
-
 from pykechain.enums import Category, PropertyType, WidgetTitleValue
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_enum
@@ -28,7 +26,7 @@ def _retrieve_object(obj: Union['Base', Text], method: Callable) -> Union['Base'
     from pykechain.models import Part2, Property2, Service, Team
     if isinstance(obj, (Part2, Property2, Service, Team)):
         return obj
-    elif isinstance(obj, text_type) and is_uuid(obj):
+    elif isinstance(obj, str) and is_uuid(obj):
         obj_id = obj
         obj = method(id=obj_id)
         return obj
@@ -52,7 +50,7 @@ def _retrieve_object_id(obj: Optional[Union['Base', Text]]) -> Optional[Text]:
     from pykechain.models import Base
     if issubclass(type(obj), Base):
         return obj.id
-    elif isinstance(obj, text_type) and is_uuid(obj):
+    elif isinstance(obj, str) and is_uuid(obj):
         return obj
     elif isinstance(obj, type(None)):
         return None
