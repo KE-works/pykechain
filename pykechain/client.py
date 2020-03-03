@@ -2,7 +2,7 @@ import datetime
 import warnings
 import requests
 
-from typing import Dict, Tuple, Optional, Any, List, Union, Text  # noqa: F401 pragma: no cover
+from typing import Dict, Tuple, Optional, Any, List, Union, Text, Callable  # noqa: F401 pragma: no cover
 from envparse import env
 from requests.compat import urljoin, urlparse  # type: ignore
 from six import text_type, string_types
@@ -369,6 +369,30 @@ class Client(object):
 
         return obj.__class__(data['results'][0], client=self)
 
+    @staticmethod
+    def _retrieve_singular(method: Callable, *args, **kwargs):
+        """
+        Use a known method to retrieve a single item, raising the appropriate errors.
+
+        :param method: function used to retrieve multiple instances.
+        :type method: callable
+        :return the single result
+        :raises NotFoundError: When no result is found.
+        :raises MultipleFoundError: When more than a single result is found.
+        """
+        results = method(*args, **kwargs)
+        plural = method.__name__
+        singular = plural[:-1]
+
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
+        if len(results) == 0:
+            raise NotFoundError("No {} fits criteria:{}".format(singular, criteria))
+        if len(results) != 1:
+            raise MultipleFoundError("Multiple {} fit criteria:{}".format(plural, criteria))
+
+        return results[0]
+
     def scopes(
         self,
         name: Optional[Text] = None,
@@ -437,16 +461,7 @@ class Client(object):
         :raises NotFoundError: When no `Scope` is found
         :raises MultipleFoundError: When more than a single `Scope` is found
         """
-        _scopes = self.scopes(*args, **kwargs)
-
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_scopes) == 0:
-            raise NotFoundError("No scope fits criteria:{}".format(criteria))
-        if len(_scopes) != 1:
-            raise MultipleFoundError("Multiple scopes fit criteria:{}".format(criteria))
-
-        return _scopes[0]
+        return self._retrieve_singular(self.scopes, *args, **kwargs)
 
     def activities(
         self,
@@ -504,16 +519,8 @@ class Client(object):
         :raises NotFoundError: When no `Activity` is found
         :raises MultipleFoundError: When more than a single `Activity` is found
         """
-        _activities = self.activities(*args, **kwargs)
+        return self._retrieve_singular(self.activities, *args, **kwargs)
 
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_activities) == 0:
-            raise NotFoundError("No activity fits criteria:{}".format(criteria))
-        if len(_activities) != 1:
-            raise MultipleFoundError("Multiple activities fit criteria:{}".format(criteria))
-
-        return _activities[0]
 
     def parts(
         self,
@@ -635,16 +642,7 @@ class Client(object):
         :raises NotFoundError: When no `Part` is found
         :raises MultipleFoundError: When more than a single `Part` is found
         """
-        _parts = self.parts(*args, **kwargs)
-
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_parts) == 0:
-            raise NotFoundError("No part fits criteria:{}".format(criteria))
-        if len(_parts) != 1:
-            raise MultipleFoundError("Multiple parts fit criteria:{}".format(criteria))
-
-        return _parts[0]
+        return self._retrieve_singular(self.parts, *args, **kwargs)
 
     def model(self, *args, **kwargs) -> Part2:
         """Retrieve single KE-chain part model.
@@ -660,16 +658,7 @@ class Client(object):
         :raises MultipleFoundError: When more than a single `Part` is found
         """
         kwargs['category'] = Category.MODEL
-        _parts = self.parts(*args, **kwargs)
-
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_parts) == 0:
-            raise NotFoundError("No model fits criteria:{}".format(criteria))
-        if len(_parts) != 1:
-            raise MultipleFoundError("Multiple models fit criteria:{}".format(criteria))
-
-        return _parts[0]
+        return self._retrieve_singular(self.parts, *args, **kwargs)
 
     def properties(
         self,
@@ -722,16 +711,7 @@ class Client(object):
         :raises NotFoundError: When no `Property` is found
         :raises MultipleFoundError: When more than a single `Property` is found
         """
-        _properties = self.properties(*args, **kwargs)
-
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_properties) == 0:
-            raise NotFoundError("No property fits criteria:{}".format(criteria))
-        if len(_properties) != 1:
-            raise MultipleFoundError("Multiple properties fit criteria:{}".format(criteria))
-
-        return _properties[0]
+        return self._retrieve_singular(self.property, *args, **kwargs)
 
     def services(
         self,
@@ -785,16 +765,7 @@ class Client(object):
         :raises NotFoundError: When no `Service` object is found
         :raises MultipleFoundError: When more than a single `Service` object is found
         """
-        _services = self.services(*args, **kwargs)
-
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_services) == 0:
-            raise NotFoundError("No service fits criteria:{}".format(criteria))
-        if len(_services) != 1:
-            raise MultipleFoundError("Multiple services fit criteria:{}".format(criteria))
-
-        return _services[0]
+        return self._retrieve_singular(self.services, *args, **kwargs)
 
     def service_executions(
         self,
@@ -853,16 +824,7 @@ class Client(object):
         :raises NotFoundError: When no `ServiceExecution` object is found
         :raises MultipleFoundError: When more than a single `ServiceExecution` object is found
         """
-        _service_executions = self.service_executions(*args, **kwargs)
-
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_service_executions) == 0:
-            raise NotFoundError("No service execution fits criteria:{}".format(criteria))
-        if len(_service_executions) != 1:
-            raise MultipleFoundError("Multiple service executions fit criteria:{}".format(criteria))
-
-        return _service_executions[0]
+        return self._retrieve_singular(self.service_executions, *args, **kwargs)
 
     def users(self, username: Optional[Text] = None, pk: Optional[Text] = None, **kwargs) -> List[User]:
         """
@@ -903,16 +865,7 @@ class Client(object):
         :raises NotFoundError: when a user could not be found
         :raises MultipleFoundError: when more than a single user can be found
         """
-        _users = self.users(*args, **kwargs)
-
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_users) == 0:
-            raise NotFoundError("No user fits criteria:{}".format(criteria))
-        if len(_users) != 1:
-            raise MultipleFoundError("Multiple users fit criteria:{}".format(criteria))
-
-        return _users[0]
+        return self._retrieve_singular(self.users, *args, **kwargs)
 
     def teams(
             self,
@@ -962,16 +915,7 @@ class Client(object):
         :raises NotFoundError: when a user could not be found
         :raises MultipleFoundError: when more than a single user can be found
         """
-        _teams = self.teams(*args, **kwargs)
-
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_teams) == 0:
-            raise NotFoundError("No team fits criteria:{}".format(criteria))
-        if len(_teams) != 1:
-            raise MultipleFoundError("Multiple teams fit criteria:{}".format(criteria))
-
-        return _teams[0]
+        return self._retrieve_singular(self.teams, *args, **kwargs)
 
     def widgets(
             self,
