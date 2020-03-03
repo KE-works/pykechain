@@ -521,7 +521,6 @@ class Client(object):
         """
         return self._retrieve_singular(self.activities, *args, **kwargs)
 
-
     def parts(
         self,
         name: Optional[Text] = None,
@@ -687,7 +686,7 @@ class Client(object):
             'id': check_uuid(pk),
             'category': check_enum(category, Category, 'category')
         }
-        if kwargs:
+        if kwargs:  # pragma: no cover
             request_params.update(**kwargs)
 
         request_params.update(API_EXTRA_PARAMS['properties2'])
@@ -711,7 +710,7 @@ class Client(object):
         :raises NotFoundError: When no `Property` is found
         :raises MultipleFoundError: When more than a single `Property` is found
         """
-        return self._retrieve_singular(self.property, *args, **kwargs)
+        return self._retrieve_singular(self.properties, *args, **kwargs)
 
     def services(
         self,
