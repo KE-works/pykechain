@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from pykechain.enums import (WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors,
-                             Category, LinkTargets, KEChainPages, WidgetTitleValue)
+from pykechain.enums import (WidgetTypes, ShowColumnTypes, FilterType, ProgressBarColors,
+                             Category, LinkTargets, KEChainPages, WidgetTitleValue, Alignment)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Activity2
 from pykechain.models.widgets import (
@@ -267,6 +267,19 @@ class TestWidgetManagerInActivity(TestBetamax):
             widget_type=WidgetTypes.ATTACHMENTVIEWER,
             title="Attachment Viewer",
             attachment_property=photo_property,
+        )
+
+        self.assertIsInstance(widget, AttachmentviewerWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+
+    def test_attachment_widget_with_editable_association(self):
+        photo_property = self.project.property("Picture")
+
+        widget = self.wm.add_attachmentviewer_widget(
+            widget_type=WidgetTypes.ATTACHMENTVIEWER,
+            title="Attachment Viewer",
+            attachment_property=photo_property,
+            editable=True,
         )
 
         self.assertIsInstance(widget, AttachmentviewerWidget)
@@ -671,7 +684,7 @@ class TestWidgetNavigationBarWidget(TestBetamax):
         widget = self.wm.add_tasknavigationbar_widget(
             activities=self.nav_bar_config,
             title="Navbar",
-            alignment=NavigationBarAlignment.LEFT
+            alignment=Alignment.LEFT
         )
 
         self.assertIsInstance(widget, TasknavigationbarWidget)
@@ -689,7 +702,7 @@ class TestWidgetNavigationBarWidget(TestBetamax):
 
         self.wm.add_tasknavigationbar_widget(
             activities=self.nav_bar_config,
-            alignment=NavigationBarAlignment.LEFT,
+            alignment=Alignment.LEFT,
         )
 
         self.assertEqual(original_bar, self.nav_bar_config)
@@ -700,7 +713,7 @@ class TestWidgetNavigationBarWidget(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             self.wm.add_tasknavigationbar_widget(
                 activities=self.nav_bar_config,
-                alignment=NavigationBarAlignment.LEFT,
+                alignment=Alignment.LEFT,
             )
 
     def test_add_navbar_external_link(self):
@@ -712,7 +725,7 @@ class TestWidgetNavigationBarWidget(TestBetamax):
 
         widget = self.wm.add_tasknavigationbar_widget(
             activities=self.nav_bar_config,
-            alignment=NavigationBarAlignment.LEFT,
+            alignment=Alignment.LEFT,
         )
 
         self.assertEqual(widget.meta['taskButtons'][0]['link'], link)
@@ -723,7 +736,7 @@ class TestWidgetNavigationBarWidget(TestBetamax):
 
         widget = self.wm.add_tasknavigationbar_widget(
             activities=self.nav_bar_config,
-            alignment=NavigationBarAlignment.LEFT,
+            alignment=Alignment.LEFT,
         )
 
         self.assertTrue(widget.meta['taskButtons'][0]['isDisabled'])

@@ -1,9 +1,9 @@
 import warnings
 from typing import Iterable, Union, AnyStr, Optional, Text, Dict, List, Any
 
-from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, NavigationBarAlignment, ScopeWidgetColumnTypes, \
+from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, ScopeWidgetColumnTypes, \
     ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
-    KEChainPages, CardWidgetKEChainPageLink
+    KEChainPages, CardWidgetKEChainPageLink, Alignment
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from pykechain.models.input_checks import check_enum, check_text, check_base, check_type, check_list_of_text
 from pykechain.models.widgets import Widget
@@ -481,9 +481,10 @@ class WidgetsManager(Iterable):
 
     def add_attachmentviewer_widget(self,
                                     attachment_property: Union[Text, 'AttachmentProperty2'],
+                                    editable: Optional[bool] = False,
                                     title: Optional[Union[Text, bool]] = False,
                                     parent_widget: Optional[Union[Widget, Text]] = None,
-                                    alignment: Optional[int] = None,
+                                    alignment: Optional[Alignment] = None,
                                     image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
                                     **kwargs) -> Widget:
         """
@@ -493,13 +494,15 @@ class WidgetsManager(Iterable):
 
         :param attachment_property: KE-chain Attachment property to display
         :type attachment_property: AttachmentProperty
+        :param editable: Whether the attachment can be added, edited or deleted (default: False)
+        :type editable: bool
         :param title: A custom title for the script widget
             * False (default): Script name
             * String value: Custom title
             * None: No title
         :type title: bool or basestring or None
-        :param alignment: Alignment of the previewed attachment (left, center, right, cover)
-        :type alignment: basestring or None
+        :param alignment: Alignment of the previewed attachment (Alignment enum class)
+        :type alignment: Alignment
         :param image_fit: enumeration to address the image_fit (defaults to 'contain', otherwise 'cover')
         :type image_fit: basestring or None
         :param kwargs: additional keyword arguments to pass
@@ -512,12 +515,10 @@ class WidgetsManager(Iterable):
                                                method=self._client.property)  # type: 'Property2'
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
-        check_enum(image_fit, ImageFitValue, 'image_fit')
-
         meta.update({
             "propertyInstanceId": attachment_property.id,
-            "alignment": alignment,
-            "imageFit": image_fit
+            "alignment": check_enum(alignment, Alignment, 'alignment'),
+            "imageFit": check_enum(image_fit, ImageFitValue, 'image_fit'),
         })
 
         for deprecated_kw in ['widget_type', 'readable_models']:
@@ -528,12 +529,16 @@ class WidgetsManager(Iterable):
 
         meta, title = _set_title(meta, title=title, default_title=attachment_property.name, **kwargs)
 
+        if check_type(editable, bool, 'editable'):
+            kwargs.update({'writable_models': [attachment_property.model_id]})
+        else:
+            kwargs.update({'readable_models': [attachment_property.model_id]})
+
         widget = self.create_widget(
             widget_type=WidgetTypes.ATTACHMENTVIEWER,
             meta=meta,
             title=title,
             parent=parent_widget,
-            readable_models=[attachment_property.model_id],
             **kwargs,
         )
 
@@ -541,7 +546,7 @@ class WidgetsManager(Iterable):
 
     def add_tasknavigationbar_widget(self,
                                      activities: Union[Iterable[Dict]],
-                                     alignment: Optional[Text] = NavigationBarAlignment.CENTER,
+                                     alignment: Optional[Text] = Alignment.CENTER,
                                      parent_widget: Optional[Union[Widget, Text]] = None,
                                      **kwargs) -> Widget:
         """
@@ -557,9 +562,10 @@ class WidgetsManager(Iterable):
             * isDisabled: (O) to disable the navbar button
             * link: str URL to external web page
         :type activities: list of dict
-        :param alignment: The alignment of the buttons inside navigation bar. One of :class:`NavigationBarAlignment`
+        :param alignment: The alignment of the buttons inside navigation bar. One of :class:`Alignment`
+            * left: Left aligned
             * center (default): Center aligned
-            * start: left aligned
+            * right: Right aligned
         :type alignment: basestring (see :class:`enums.NavigationBarAlignment`)
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
@@ -607,7 +613,7 @@ class WidgetsManager(Iterable):
 
         meta = _initiate_meta(kwargs, activity=self._activity_id, ignores=('showHeightValue',))
         meta['taskButtons'] = task_buttons
-        meta['alignment'] = check_enum(alignment, NavigationBarAlignment, 'alignment')
+        meta['alignment'] = check_enum(alignment, Alignment, 'alignment')
 
         widget = self.create_widget(
             widget_type=WidgetTypes.TASKNAVIGATIONBAR,

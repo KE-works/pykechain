@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+* :+1: Added `editable` argument to the `add_attachmentviewer_widget` method of the WidgetsManager.
+* :+1: Added `Alignment` enum class, leaving `NavigationBarAlignment` as wrapper for backwards compatibility.
+
 v3.5.3 (27FEB20)
 ----------------
 
