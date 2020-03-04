@@ -486,6 +486,7 @@ class Alignment(Enum):
     :cvar CENTER: Aligned to the center
     :cvar RIGHT: Aligned to the right
     """
+
     LEFT = 'left'
     CENTER = 'center'
     RIGHT = 'right'
