@@ -3,7 +3,8 @@ Change Log
 
 v3.5.4 (UNRELEASED)
 -------------------
-* :+1: implemented retry on connection errors for the `Client`. This will ensure that if the client connection to the server has been dropped, the client will retry the request again with an exponentional backoff not to overload.
+* :star: implemented retry on connection errors for the `Client`. This will ensure that if the client connection to the server has been dropped, the client will retry the request again with an exponentional backoff not to overload.
+* :+1: dependent versions for development: sphinx (2.4.4)
 
 v3.5.3 (27FEB20)
 ----------------
@@ -16,7 +17,7 @@ v3.5.2 (26FEB20)
 ----------------
 
 * :bug: Fixed a bug in the multi references property where the call made to the backend with a normal user would require more information than only the id's of the parts, this resulted in an API error in the retrieval of the referred instances. #707 Thanks @BastiaanBeijer for the discovery and @JelleBoersma for the quick fix.
-*: bug: `child()` method of Part2 now robustly retrieves child parts created after retrieval of the parent itself, regardless of the `_cached_children`.
+* :bug: `child()` method of Part2 now robustly retrieves child parts created after retrieval of the parent itself, regardless of the `_cached_children`.
 
 v3.5.1 (25FEB20)
 ----------------
