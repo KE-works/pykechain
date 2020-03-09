@@ -53,7 +53,8 @@ class Client(object):
 
         """
         self.auth = None  # type: Optional[Tuple[str, str]]
-        self.headers = {'X-Requested-With': 'XMLHttpRequest', 'PyKechain-Version': version}  # type: Dict[str, str]
+        self.headers = {'X-Requested-With': 'XMLHttpRequest',
+                        'PyKechain-Version': pykechain_version}  # type: Dict[str, str]
         self.session = requests.Session()  # type: requests.Session
 
         parsed_url = urlparse(url)
