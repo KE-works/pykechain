@@ -6,6 +6,32 @@ ASYNC_REFRESH_INTERVAL = 2  # seconds
 ASYNC_TIMEOUT_LIMIT = 100  # seconds
 
 #
+# Configuration of the retry options for the client requests based on `urlib3.utils.Retry`.
+#
+
+# How many connection-related errors to retry on.
+# These are errors raised before the request is sent to the remote server,
+# which we assume has not triggered the server to process the request.
+RETRY_ON_CONNECTION_ERRORS = 3  # times
+
+# How many times to retry on read errors.
+# These errors are raised after the request was sent to the server, so the request may have side-effects.
+RETRY_ON_READ_ERRORS = 2
+
+# How many redirects to perform. Limit this to avoid infinite redirect loops.
+# A redirect is a HTTP response with a status code 301, 302, 303, 307 or 30
+RETRY_ON_REDIRECT_ERRORS = 1
+
+# Total number of retries to allow. Takes precedence over other counts
+RETRY_TOTAL = 10
+
+# A backoff factor to apply between attempts after the second try (most errors are resolved
+# immediately by a second try without a delay). urllib3 will sleep for:
+# {backoff factor} * (2 ** ({number of total retries} - 1)) seconds.
+# If the backoff_factor is 0.1, then sleep() will sleep for [0.0s, 0.2s, 0.4s, …] between retries.
+RETRY_BACKOFF_FACTOR = 0.8
+
+#
 # API Paths and API Extra Parameters
 #
 API_PATH = {

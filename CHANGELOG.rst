@@ -1,8 +1,23 @@
 Change Log
 ==========
 
+v3.6.0 (UNRELEASED)
+-------------------
+
+In this release we deprecated feature that were announced to be deprecated some time ago. We deprecated all compatibility function with 'KE-chain 2'.
+
 * :+1: Added `editable` argument to the `add_attachmentviewer_widget` method of the WidgetsManager.
 * :+1: Added `Alignment` enum class, leaving `NavigationBarAlignment` as wrapper for backwards compatibility.
+
+BIX - Backward Incompatbile Changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We deprecated ... TODO: fill this
+
+
+v3.5.4 (UNRELEASED)
+-------------------
+* :+1: implemented retry on connection errors for the `Client`. This will ensure that if the client connection to the server has been dropped, the client will retry the request again with an exponentional backoff not to overload.
 
 v3.5.3 (27FEB20)
 ----------------

@@ -1,12 +1,15 @@
 import datetime
 import warnings
-import requests
-
 from typing import Dict, Tuple, Optional, Any, List, Union, Text, Callable
-from envparse import env
-from requests.compat import urljoin, urlparse  # type: ignore
 
-from pykechain.defaults import API_PATH, API_EXTRA_PARAMS
+import requests
+from envparse import env
+from requests.adapters import HTTPAdapter
+from requests.compat import urljoin, urlparse  # type: ignore
+from urllib3 import Retry
+
+from pykechain.defaults import API_PATH, API_EXTRA_PARAMS, RETRY_ON_CONNECTION_ERRORS, RETRY_BACKOFF_FACTOR, \
+    RETRY_TOTAL, RETRY_ON_READ_ERRORS, RETRY_ON_REDIRECT_ERRORS
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
     ActivityClassification, ActivityStatus
@@ -49,11 +52,14 @@ class Client(object):
         >>> client = Client(url='https://default-tst.localhost:9443', check_certificates=False)
 
         """
+        self.auth = None  # type: Optional[Tuple[str, str]]
+        self.headers = {'X-Requested-With': 'XMLHttpRequest', 'PyKechain-Version': version}  # type: Dict[str, str]
+        self.session = requests.Session()  # type: requests.Session
+
         parsed_url = urlparse(url)
         if not (parsed_url.scheme and parsed_url.netloc):
             raise ClientError("Please provide a valid URL to a KE-chain instance")
 
-        self.session = requests.Session()
         self.api_root = url
         self.headers = {'X-Requested-With': 'XMLHttpRequest',
                         'PyKechain-Version': pykechain_version}  # type: Dict[Text, Text]
@@ -70,12 +76,23 @@ class Client(object):
         if check_certificates is False:
             self.session.verify = False
 
+        # Retry implementation
+        adapter = HTTPAdapter(
+            max_retries=Retry(total=RETRY_TOTAL,
+                              connect=RETRY_ON_CONNECTION_ERRORS,
+                              read=RETRY_ON_READ_ERRORS,
+                              redirect=RETRY_ON_REDIRECT_ERRORS,
+                              backoff_factor=RETRY_BACKOFF_FACTOR)
+        )
+        self.session.mount('https://', adapter=adapter)
+        self.session.mount('http://', adapter=adapter)
+
     def __del__(self):
         """Destroy the client object."""
         self.session.close()
+        del self.session
         del self.auth
         del self.headers
-        del self.session
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Client '{}'>".format(self.api_root)
@@ -267,11 +284,11 @@ class Client(object):
         return found
 
     def match_app_version(
-        self,
-        app: Optional[Text] = None,
-        label: Optional[Text] = None,
-        version: Optional[Text] = None,
-        default: Optional[bool] = False,
+            self,
+            app: Optional[Text] = None,
+            label: Optional[Text] = None,
+            version: Optional[Text] = None,
+            default: Optional[bool] = False,
     ) -> bool:
         """Match app version against a semantic version string.
 
@@ -395,11 +412,11 @@ class Client(object):
         return results[0]
 
     def scopes(
-        self,
-        name: Optional[Text] = None,
-        pk: Optional[Text] = None,
-        status: Optional[Union[ScopeStatus, Text]] = ScopeStatus.ACTIVE,
-        **kwargs
+            self,
+            name: Optional[Text] = None,
+            pk: Optional[Text] = None,
+            status: Optional[Union[ScopeStatus, Text]] = ScopeStatus.ACTIVE,
+            **kwargs
     ) -> List[Scope2]:
         """Return all scopes visible / accessible for the logged in user.
 
@@ -465,11 +482,11 @@ class Client(object):
         return self._retrieve_singular(self.scopes, *args, **kwargs)
 
     def activities(
-        self,
-        name: Optional[Text] = None,
-        pk: Optional[Text] = None,
-        scope: Optional[Text] = None,
-        **kwargs
+            self,
+            name: Optional[Text] = None,
+            pk: Optional[Text] = None,
+            scope: Optional[Text] = None,
+            **kwargs
     ) -> List[Activity2]:
         """Search for activities with optional name, pk and scope filter.
 
@@ -523,18 +540,18 @@ class Client(object):
         return self._retrieve_singular(self.activities, *args, **kwargs)
 
     def parts(
-        self,
-        name: Optional[Text] = None,
-        pk: Optional[Text] = None,
-        model: Optional[Part2] = None,
-        category: Optional[Union[Category, Text]] = Category.INSTANCE,
-        scope_id: Optional[Text] = None,
-        parent: Optional[Text] = None,
-        activity: Optional[Text] = None,
-        widget: Optional[Text] = None,
-        limit: Optional[int] = None,
-        batch: Optional[int] = 100,
-        **kwargs
+            self,
+            name: Optional[Text] = None,
+            pk: Optional[Text] = None,
+            model: Optional[Part2] = None,
+            category: Optional[Union[Category, Text]] = Category.INSTANCE,
+            scope_id: Optional[Text] = None,
+            parent: Optional[Text] = None,
+            activity: Optional[Text] = None,
+            widget: Optional[Text] = None,
+            limit: Optional[int] = None,
+            batch: Optional[int] = 100,
+            **kwargs
     ) -> PartSet:
         """Retrieve multiple KE-chain parts.
 
@@ -661,11 +678,11 @@ class Client(object):
         return self._retrieve_singular(self.parts, *args, **kwargs)
 
     def properties(
-        self,
-        name: Optional[Text] = None,
-        pk: Optional[Text] = None,
-        category: Optional[Union[Category, Text]] = Category.INSTANCE,
-        **kwargs
+            self,
+            name: Optional[Text] = None,
+            pk: Optional[Text] = None,
+            category: Optional[Union[Category, Text]] = Category.INSTANCE,
+            **kwargs
     ) -> List['AnyProperty']:
         """Retrieve properties.
 
@@ -714,11 +731,11 @@ class Client(object):
         return self._retrieve_singular(self.properties, *args, **kwargs)
 
     def services(
-        self,
-        name: Optional[Text] = None,
-        pk: Optional[Text] = None,
-        scope: Optional[Text] = None,
-        **kwargs
+            self,
+            name: Optional[Text] = None,
+            pk: Optional[Text] = None,
+            scope: Optional[Text] = None,
+            **kwargs
     ) -> List[Service]:
         """
         Retrieve Services.
@@ -768,12 +785,12 @@ class Client(object):
         return self._retrieve_singular(self.services, *args, **kwargs)
 
     def service_executions(
-        self,
-        name: Optional[Text] = None,
-        pk: Optional[Text] = None,
-        scope: Optional[Text] = None,
-        service: Optional[Text] = None,
-        **kwargs
+            self,
+            name: Optional[Text] = None,
+            pk: Optional[Text] = None,
+            scope: Optional[Text] = None,
+            service: Optional[Text] = None,
+            **kwargs
     ) -> List[ServiceExecution]:
         """
         Retrieve Service Executions.
@@ -962,16 +979,16 @@ class Client(object):
     #
 
     def create_activity(
-        self,
-        parent: Union[Activity2, Text],
-        name: Text,
-        activity_type: ActivityType = ActivityType.TASK,
-        status: ActivityStatus = ActivityStatus.OPEN,
-        description: Optional[Text] = None,
-        start_date: Optional[datetime.datetime] = None,
-        due_date: Optional[datetime.datetime] = None,
-        classification: ActivityClassification = None,
-        tags: Optional[List[Text]] = None,
+            self,
+            parent: Union[Activity2, Text],
+            name: Text,
+            activity_type: ActivityType = ActivityType.TASK,
+            status: ActivityStatus = ActivityStatus.OPEN,
+            description: Optional[Text] = None,
+            start_date: Optional[datetime.datetime] = None,
+            due_date: Optional[datetime.datetime] = None,
+            classification: ActivityClassification = None,
+            tags: Optional[List[Text]] = None,
     ) -> Activity2:
         """
         Create a new activity.
@@ -1654,12 +1671,12 @@ class Client(object):
         return cloned_scope
 
     def create_team(
-        self,
-        name: Text,
-        user: Union[Text, int, User],
-        description: Optional[Text] = None,
-        options: Optional[Dict] = None,
-        is_hidden: Optional[bool] = False
+            self,
+            name: Text,
+            user: Union[Text, int, User],
+            description: Optional[Text] = None,
+            options: Optional[Dict] = None,
+            is_hidden: Optional[bool] = False
     ) -> Team:
         """
         Create a team.
