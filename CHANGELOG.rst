@@ -1,8 +1,9 @@
 Change Log
 ==========
 
-v3.5.4 (UNRELEASED)
--------------------
+v3.5.4 (9MAR20)
+---------------
+
 * :star: implemented retry on connection errors for the `Client`. This will ensure that if the client connection to the server has been dropped, the client will retry the request again with an exponentional backoff not to overload. #714
 * :+1: dependent versions for development: sphinx (2.4.4)
 
