@@ -4,8 +4,10 @@ from typing import Dict, Tuple, Optional, Any, List, Union, AnyStr, Text  # noqa
 
 import requests
 from envparse import env
+from requests.adapters import HTTPAdapter
 from requests.compat import urljoin, urlparse  # type: ignore
 from six import text_type, string_types
+from urllib3 import Retry
 
 from pykechain.defaults import API_PATH, API_EXTRA_PARAMS
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
@@ -55,14 +57,15 @@ class Client(object):
         >>> client = Client(url='https://default-tst.localhost:9443', check_certificates=False)
 
         """
+        self.auth = None  # type: Optional[Tuple[str, str]]
+        self.headers = {'X-Requested-With': 'XMLHttpRequest', 'PyKechain-Version': version}  # type: Dict[str, str]
+        self.session = requests.Session()  # type: requests.Session
+
         parsed_url = urlparse(url)
         if not (parsed_url.scheme and parsed_url.netloc):
             raise ClientError("Please provide a valid URL to a KE-chain instance")
 
-        self.session = requests.Session()
         self.api_root = url
-        self.headers = {'X-Requested-With': 'XMLHttpRequest', 'PyKechain-Version': version}  # type: Dict[str, str]
-        self.auth = None  # type: Optional[Tuple[str, str]]
         self.last_request = None  # type: Optional[requests.PreparedRequest]
         self.last_response = None  # type: Optional[requests.Response]
         self.last_url = None  # type: Optional[str]
@@ -75,12 +78,17 @@ class Client(object):
         if check_certificates is False:
             self.session.verify = False
 
+        # Retry implementation
+        adapter = HTTPAdapter(max_retries=Retry(connect=3, backoff_factor=0.5))
+        self.session.mount('https://', adapter=adapter)
+        self.session.mount('http://', adapter=adapter)
+
     def __del__(self):
         """Destroy the client object."""
         self.session.close()
+        del self.session
         del self.auth
         del self.headers
-        del self.session
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Client '{}'>".format(self.api_root)
