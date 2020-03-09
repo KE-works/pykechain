@@ -4,15 +4,21 @@ Change Log
 v3.6.0 (UNRELEASED)
 -------------------
 
-In this release we deprecated feature that were announced to be deprecated some time ago. We deprecated all compatibility function with 'KE-chain 2'.
+In this release we deprecated feature that were announced to be deprecated some time ago. We deprecated all compatibility to 'KE-chain 2'.
 
-* :+1: Added `editable` argument to the `add_attachmentviewer_widget` method of the WidgetsManager.
+* :+1: Added `editable` argument to the `add_attachmentviewer_widget` method of the WidgetsManager, to enable both viewing and editing of the attachment.
 * :+1: Added `Alignment` enum class, leaving `NavigationBarAlignment` as wrapper for backwards compatibility.
+* :+1: Large clean-up for user-input validation for most `Client` methods to provide consistent error messages.
 
-BIX - Backward Incompatbile Changes
+
+Backward incompatible changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We deprecated ... TODO: fill this
+We deprecated the following:
+
+* Options USERTASK, SERVICETASK and SUBPROCESS from `ActivityType` enum class.
+* Option START from `NavigationBarAlignment` enum class.
+* Mapping table `WIMCompatibleActivityTypes`.
 
 v3.5.4 (9MAR20)
 ---------------
@@ -25,7 +31,7 @@ v3.5.3 (27FEB20)
 
 This is release :100: of pykechain! That means :cake:!
 
-* :bug: Fixed a bug whete the API parameters for the `Service` now includes additional attributes on its objects. #709. Thanks to @bastiaanbeijer and @raduiordache for finding it and @jelleboersma for providing the fast resolution.
+* :bug: Fixed a bug where the API parameters for the `Service` now includes additional attributes on its objects. #709. Thanks to @bastiaanbeijer and @raduiordache for finding it and @jelleboersma for providing the fast resolution.
 
 v3.5.2 (26FEB20)
 ----------------

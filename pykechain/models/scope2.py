@@ -98,7 +98,7 @@ class Scope(Base, TagsMixin):
         :type user_type: basestring
         :raises APIError: When unable to update the scope project team.
         """
-        user = check_text(user, user_type)
+        user = check_text(user, 'user')
 
         users = self._client._retrieve_users()['results']  # type: List[Dict]
         user_object = find(users, lambda u: u['username'] == user)  # type: Dict
