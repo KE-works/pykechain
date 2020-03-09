@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Dict, Tuple, Optional, Any, List, Union, AnyStr, Text  # noqa: F401 pragma: no cover
+from typing import Dict, Tuple, Optional, Any, List, Union, Text
 
 import requests
 from envparse import env
@@ -9,7 +9,8 @@ from requests.compat import urljoin, urlparse  # type: ignore
 from six import text_type, string_types
 from urllib3 import Retry
 
-from pykechain.defaults import API_PATH, API_EXTRA_PARAMS
+from pykechain.defaults import API_PATH, API_EXTRA_PARAMS, RETRY_ON_CONNECTION_ERRORS, RETRY_BACKOFF_FACTOR, \
+    RETRY_TOTAL, RETRY_ON_READ_ERRORS, RETRY_ON_REDIRECT_ERRORS
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
     ActivityClassification, ActivityStatus
@@ -79,7 +80,13 @@ class Client(object):
             self.session.verify = False
 
         # Retry implementation
-        adapter = HTTPAdapter(max_retries=Retry(connect=3, backoff_factor=0.5))
+        adapter = HTTPAdapter(
+            max_retries=Retry(total=RETRY_TOTAL,
+                              connect=RETRY_ON_CONNECTION_ERRORS,
+                              read=RETRY_ON_READ_ERRORS,
+                              redirect=RETRY_ON_REDIRECT_ERRORS,
+                              backoff_factor=RETRY_BACKOFF_FACTOR)
+        )
         self.session.mount('https://', adapter=adapter)
         self.session.mount('http://', adapter=adapter)
 
