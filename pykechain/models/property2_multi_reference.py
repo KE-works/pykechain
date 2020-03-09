@@ -155,7 +155,7 @@ class MultiReferenceProperty(Property2):
 
     def set_prefilters(
             self,
-            property_models: List[Union[Text, Part2]],
+            property_models: List[Union[Text, 'AnyProperty']],
             values: List[Any],
             filters_type: List[FilterType],
             overwrite: Optional[bool] = False
