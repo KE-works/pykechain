@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v3.5.4 (UNRELEASED)
+-------------------
+* :+1: implemented retry on connection errors for the `Client`. This will ensure that if the client connection to the server has been dropped, the client will retry the request again with an exponentional backoff not to overload.
+
 v3.5.3 (27FEB20)
 ----------------
 
