@@ -96,6 +96,9 @@ class Part(TreeObject):
         proxy_data = json.get('proxy_source_id_name', dict())  # type: Optional[Dict]
         self._proxy_model_id = proxy_data.get('id') if proxy_data else None  # type: Optional[Text]
 
+    def __call__(self, *args, **kwargs) -> 'Part':
+        return super().__call__(*args, **kwargs)
+
     def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional[Dict] = None):
         """Refresh the object in place."""
         if extra_params is None:
