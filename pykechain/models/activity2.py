@@ -58,6 +58,7 @@ class Activity(TreeObject, TagsMixin):
         self._tags = json.get('tags', [])  # type: List[Text]
 
     def __call__(self, *args, **kwargs) -> 'Activity':
+        """Short-hand version of the `child` method."""
         return super().__call__(*args, **kwargs)
 
     def refresh(self, *args, **kwargs):
