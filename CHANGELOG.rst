@@ -1,6 +1,8 @@
 Change Log
 ==========
 
+* :bug: Adding a new `Activity2` to a parent now updates the `_cached_children`.
+
 v3.5.4 (9MAR20)
 ---------------
 

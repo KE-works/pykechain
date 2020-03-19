@@ -1206,10 +1206,10 @@ class Client(object):
                                        format(activity_type, ActivityType.values()))
         if isinstance(parent, (Activity, Activity2)):
             parent_classification = parent.classification
-            parent = parent.id
+            parent_id = parent.id
         elif is_uuid(parent):
             parent_classification = None
-            parent = parent
+            parent_id = parent
         else:
             raise IllegalArgumentError('`parent` must be an Activity or UUID, "{}" is neither'.format(parent))
 
@@ -1239,7 +1239,7 @@ class Client(object):
 
         data = {
             "name": name,
-            "parent_id": parent,
+            "parent_id": parent_id,
             "status": status,
             "activity_type": activity_type,
             "classification": classification,
