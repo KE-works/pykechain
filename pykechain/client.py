@@ -1265,7 +1265,10 @@ class Client(object):
 
         data = response.json()
 
-        return Activity2(data['results'][0], client=self)
+        new_activity = Activity2(data['results'][0], client=self)
+        if isinstance(parent, Activity2) and parent._cached_children is not None:
+            parent._cached_children.append(new_activity)
+        return new_activity
 
     def _create_part1(self, action, data, **kwargs):
         """Create a part internal core function."""
