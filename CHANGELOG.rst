@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-* :bug: Adding a new `Activity2` to a parent now updates the `_cached_children`.
+* :bug: Adding a new `Activity2` to a parent now cache its childeren in case the parent also have the children cached. In essence it updates the `_cached_children`. #722 
 
 v3.5.4 (9MAR20)
 ---------------
