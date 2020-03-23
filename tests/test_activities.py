@@ -1,7 +1,7 @@
 import os
 import warnings
 from datetime import datetime
-from unittest import skipIf
+from unittest import skipIf, skip
 
 import pytest
 import pytz
@@ -659,6 +659,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
             self.assertTrue(pdf_file)
             self.assertTrue(pdf_file_called_after_activity)
 
+    @skip
     def test_activity2_share_link(self):
         activity_name = 'Task - Form + Tables + Service'
         message = 'EXAMPLE_MESSAGE'
@@ -671,6 +672,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
                             message=message,
                             recipient_users=recipient_users)
 
+    @skip
     def test_activity2_share_pdf(self):
         activity_name = 'Task - Form + Tables + Service'
         message = 'EXAMPLE_MESSAGE'
