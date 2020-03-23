@@ -922,7 +922,7 @@ class Activity2(TreeObject, TagsMixin):
         """
         return self._client.move_activity(self, parent, classification=classification)
 
-    def share_activity_link(self, subject=None, message=None, recipient_users=None):
+    def share_link(self, subject=None, message=None, recipient_users=None):
         """
         Share the link of the `Activity` through email.
 
@@ -965,8 +965,8 @@ class Activity2(TreeObject, TagsMixin):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not share the link to Activity, {}:\n\n{}'".format(str(response), response.json()))
 
-    def share_activity_pdf(self, subject=None, message=None, recipient_users=None, paper_size=PaperSize.A4,
-                           paper_orientation=PaperOrientation.PORTRAIT, include_appendices=False):
+    def share_pdf(self, subject=None, message=None, recipient_users=None, paper_size=PaperSize.A4,
+                  paper_orientation=PaperOrientation.PORTRAIT, include_appendices=False):
         """
         Share the PDF of the `Activity` through email.
 
@@ -976,6 +976,19 @@ class Activity2(TreeObject, TagsMixin):
         :type message: basestring
         :param recipient_users: users that will receive the email
         :type recipient_users: list(Union(User, Id))
+        :param paper_size: The size of the paper to which the PDF is downloaded:
+                               - a4paper (default): A4 paper size
+                               - a3paper: A3 paper size
+                               - a2paper: A2 paper size
+                               - a1paper: A1 paper size
+                               - a0paper: A0 paper size
+        :type paper_size: basestring (see :class:`enums.PaperSize`)
+        :param paper_orientation: The orientation of the paper to which the PDF is downloaded:
+                               - portrait (default): portrait orientation
+                               - landscape: landscape orientation
+        :type paper_size: basestring (see :class:`enums.PaperOrientation`)
+        :param include_appendices: True if the PDF should contain appendices, False (default) if otherwise.
+        :type include_appendices: bool
         :raises IllegalArgumentError: if no 'message' is specified
         :raises IllegalArgumentError: if no 'subject' is specified
         :raises IllegalArgumentError: if no 'recipient_users' is specified

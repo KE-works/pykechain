@@ -667,9 +667,9 @@ class TestActivityDownloadAsPDF(TestBetamax):
 
         activity = self.project.activity(name=activity_name)
 
-        activity.share_activity_link(subject=subject,
-                                     message=message,
-                                     recipient_users=recipient_users)
+        activity.share_link(subject=subject,
+                            message=message,
+                            recipient_users=recipient_users)
 
     def test_activity2_share_pdf(self):
         activity_name = 'Task - Form + Tables + Service'
@@ -681,10 +681,10 @@ class TestActivityDownloadAsPDF(TestBetamax):
 
         activity = self.project.activity(name=activity_name)
 
-        activity.share_activity_pdf(subject=subject,
-                                    message=message,
-                                    recipient_users=recipient_users,
-                                    paper_size=paper_size,
-                                    paper_orientation=paper_orientation,
-                                    include_appendices=False
-                                    )
+        activity.share_pdf(subject=subject,
+                           message=message,
+                           recipient_users=recipient_users,
+                           paper_size=paper_size,
+                           paper_orientation=paper_orientation,
+                           include_appendices=False
+                           )
