@@ -103,6 +103,10 @@ API_PATH = {
     'widgets_bulk_delete': 'api/widgets/bulk_delete',
     'widgets_bulk_update': 'api/widgets/bulk_update',
     'widgets_schemas': 'api/widgets/schemas',
+    'notifications': 'api/v3/notifications.json',
+    'notification': 'api/v3/notifications/{notification_id}.json',
+    'notification_share_activity_link': 'api/v3/notifications/share_activity_link',
+    'notification_share_activity_pdf': 'api/v3/notifications/share_activity_pdf'
 }
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
 API_EXTRA_PARAMS = {
@@ -144,4 +148,8 @@ API_EXTRA_PARAMS = {
     'widget': {'fields': ",".join(
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
          'parent_id', 'progress', 'has_subwidgets', 'scope_id'])},
+    'notifications': {'fields': ",".join(
+        ['id', 'subject', 'status', 'message', 'team', 'created_at', 'updated_at'])},
+    'notification': {'fields': ",".join(
+        ['id', 'subject', 'status', 'message', 'team', 'created_at', 'updated_at'])},
 }

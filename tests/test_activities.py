@@ -8,7 +8,7 @@ import pytz
 import requests
 
 from pykechain.enums import ActivityType, ActivityStatus, ActivityClassification, Category, \
-    activity_root_name_by_classification, ActivityRootNames
+    activity_root_name_by_classification, ActivityRootNames, PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError, APIError
 from pykechain.models import Activity2
 from pykechain.utils import temp_chdir
@@ -658,3 +658,33 @@ class TestActivityDownloadAsPDF(TestBetamax):
             pdf_file_called_after_activity = os.path.join(target_dir, activity_name + '.pdf')
             self.assertTrue(pdf_file)
             self.assertTrue(pdf_file_called_after_activity)
+
+    def test_activity2_share_link(self):
+        activity_name = 'Task - Form + Tables + Service'
+        message = 'EXAMPLE_MESSAGE'
+        subject = 'EXAMPLE_SUBJECT'
+        recipient_users = [96]
+
+        activity = self.project.activity(name=activity_name)
+
+        activity.share_activity_link(subject=subject,
+                                     message=message,
+                                     recipient_users=recipient_users)
+
+    def test_activity2_share_pdf(self):
+        activity_name = 'Task - Form + Tables + Service'
+        message = 'EXAMPLE_MESSAGE'
+        subject = 'EXAMPLE_SUBJECT'
+        paper_size = PaperSize.A2
+        paper_orientation = PaperOrientation.PORTRAIT
+        recipient_users = [96]
+
+        activity = self.project.activity(name=activity_name)
+
+        activity.share_activity_pdf(subject=subject,
+                                    message=message,
+                                    recipient_users=recipient_users,
+                                    paper_size=paper_size,
+                                    paper_orientation=paper_orientation,
+                                    include_appendices=False
+                                    )

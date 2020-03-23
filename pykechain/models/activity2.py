@@ -12,6 +12,7 @@ from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
+from pykechain.models.user import User
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.models.widgets.widgets_manager import WidgetsManager
@@ -920,3 +921,100 @@ class Activity2(TreeObject, TagsMixin):
         :raises APIError: if an Error occurs.
         """
         return self._client.move_activity(self, parent, classification=classification)
+
+    def share_activity_link(self, subject=None, message=None, recipient_users=None):
+        """
+        Share the link of the `Activity` through email.
+
+        :param subject: subject of email
+        :type subject: basestring
+        :param message: message of email
+        :type message: basestring
+        :param recipient_users: users that will receive the email
+        :type recipient_users: list(Union(User, Id))
+        :raises IllegalArgumentError: if no 'message' is specified
+        :raises IllegalArgumentError: if no 'subject' is specified
+        :raises IllegalArgumentError: if no 'recipient_users' is specified
+        :raises APIError: if an Error occurs.
+        """
+        if not message:
+            raise IllegalArgumentError('Sharing an activity link requires a message')
+        if not subject:
+            raise IllegalArgumentError('Sharing an activity link requires a subject')
+        if not recipient_users:
+            raise IllegalArgumentError('Sharing an activity link requires recipient users')
+        else:
+            recipient_users_ids = list()
+            for user in recipient_users:
+                if isinstance(user, User):
+                    recipient_users_ids.append(user.id)
+                else:
+                    recipient_users_ids.append(user)
+
+        params = dict(
+            message=message,
+            subject=subject,
+            recipient_users=recipient_users_ids,
+            activity_id=self.id
+        )
+
+        url = self._client._build_url('notification_share_activity_link')
+
+        response = self._client._request('POST', url, data=params)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not share the link to Activity, {}:\n\n{}'".format(str(response), response.json()))
+
+    def share_activity_pdf(self, subject=None, message=None, recipient_users=None, paper_size=PaperSize.A4,
+                           paper_orientation=PaperOrientation.PORTRAIT, include_appendices=False):
+        """
+        Share the PDF of the `Activity` through email.
+
+        :param subject: subject of email
+        :type subject: basestring
+        :param message: message of email
+        :type message: basestring
+        :param recipient_users: users that will receive the email
+        :type recipient_users: list(Union(User, Id))
+        :raises IllegalArgumentError: if no 'message' is specified
+        :raises IllegalArgumentError: if no 'subject' is specified
+        :raises IllegalArgumentError: if no 'recipient_users' is specified
+        :raises APIError: if an Error occurs.
+        """
+        if not message:
+            raise IllegalArgumentError('Sharing an activity link requires a message')
+        if not subject:
+            raise IllegalArgumentError('Sharing an activity link requires a subject')
+        if not recipient_users:
+            raise IllegalArgumentError('Sharing an activity link requires recipient users')
+        else:
+            recipient_emails = list()
+            recipient_users_ids = list()
+            for user in recipient_users:
+                if isinstance(user, User):
+                    recipient_emails.append(user.email)
+                    recipient_users_ids.append(user.id)
+                else:
+                    recipient_users_ids.append(user)
+                    recipient_emails.append(self._client.user(pk=user).email)
+
+        params = dict(
+            message=message,
+            subject=subject,
+            recipient_users=recipient_users_ids,
+            recipient_emails=recipient_emails,
+            activity_id=self.id,
+            papersize=paper_size,
+            orientation=paper_orientation,
+            appendices=include_appendices
+        )
+
+        url = self._client._build_url('notification_share_activity_pdf')
+
+        response = self._client._request('POST', url, data=params)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not share the link to Activity, {}:\n\n{}'".format(str(response), response.json()))
+
+
+

@@ -23,6 +23,7 @@ from pykechain.models.scope2 import Scope2
 from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.team import Team
 from pykechain.models.user import User
+from pykechain.models.notification import Notification
 from pykechain.models.widgets.widget import Widget
 from pykechain.utils import is_uuid, find
 from .__about__ import version
@@ -2847,3 +2848,78 @@ class Client(object):
         properties = [Property2.create(client=self, json=js) for js in response.json()['results']]
 
         return properties
+
+
+    def notifications(self, pk=None, **kwargs):
+        """
+
+        :param pk:
+        :param kwargs:
+        :return:
+        """
+        request_params = {
+            'id': pk
+        }
+
+        if kwargs:
+            request_params.update(**kwargs)
+
+        response = self._request('GET', self._build_url('notifications'), params=request_params)
+
+        data = response.json()
+
+        return [Notification(notification, client=self) for notification in data['results']]
+
+    def notification(self, pk=None, **kwargs):
+        """
+
+        :param pk:
+        :param kwargs:
+        :return:
+        """
+        _notifications = self.notifications(pk=pk, **kwargs)
+
+        criteria = '\npk={}\nkwargs: {}'.format(pk, kwargs)
+
+        if len(_notifications) == 0:
+            raise NotFoundError("No notification found with id:{}".format(criteria))
+        if len(_notifications) != 1:
+            raise MultipleFoundError("Multiple users fit criteria:{}".format(criteria))
+
+        return _notifications[0]
+
+    def create_notification(self, **kwargs):
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['notifications'])
+
+        url = self._build_url('notifications')
+
+        response = self._request('POST', url, data=query_params)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create notification, {}:\n\n{}'".format(str(response), response.json()))
+
+        notification = Notification(response.json().get('results')[0], client=self)
+        return notification
+
+    def delete_notification(self, notification: Union[Widget, text_type]) -> None:
+        """
+        Delete a single Notification.
+
+        :param notification: Notification or its UUID to be deleted
+        :type notification: Notification or basestring
+        :return: None
+        :raises APIError: whenever the notification could not be deleted
+        :raises IllegalArgumentError: whenever the input `notification` is invalid
+        """
+        if isinstance(notification, Notification):
+            notification = notification.id
+        elif not is_uuid(notification):
+            raise IllegalArgumentError('`notification` must be a Notification or its UUID, '
+                                       '"{}" is neither.'.format(notification))
+
+        url = self._build_url('notification', notification_id=notification)
+        response = self._request('DELETE', url)
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            raise APIError("Could not delete Notification ({})".format(response))
