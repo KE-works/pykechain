@@ -1,21 +1,23 @@
 import datetime
+import pytz
 
 from pykechain.exceptions import APIError, NotFoundError, MultipleFoundError
 from pykechain.models.banner import Banner
 from tests.classes import TestBetamax
+
+NEW_YEAR_2020_naive = datetime.datetime.fromisoformat('2020-01-01T00:01:00:000000')
+NEW_YEAR_2020 = NEW_YEAR_2020_naive.replace(tzinfo=pytz.UTC)
 
 
 class TestBanners(TestBetamax):
     TEXT = '__This is a test banner__'
     URL = 'https://www.ke-chain.nl/'
     ICON = 'poo-storm'
-    TZ = datetime.timezone(offset=datetime.timedelta(hours=1))
-    NOW = datetime.datetime.now(tz=TZ)
 
     def setUp(self):
         super().setUp()
         self.banner = self.client.create_banner(
-            active_from=self.NOW,
+            active_from=NEW_YEAR_2020,
             text=self.TEXT,
             icon=self.ICON,
             url=self.URL,
@@ -40,7 +42,7 @@ class TestBanners(TestBetamax):
     def test_create_empty(self):
         banner = self.client.create_banner(
             text=self.TEXT,
-            active_from=self.NOW,
+            active_from=NEW_YEAR_2020,
             icon=self.ICON,
         )
         banner.delete()
@@ -84,12 +86,12 @@ class TestBanners(TestBetamax):
         text = '__RENAMED BANNER'
         icon = 'site-map'
         url = 'https://www.google.com/'
-        later = datetime.datetime.now(tz=self.TZ)
+        later = NEW_YEAR_2020 + datetime.timedelta(hours=1)
 
         self.banner.edit(
             text=text,
             icon=icon,
-            active_from=self.NOW,
+            active_from=NEW_YEAR_2020,
             active_until=later,
             is_active=False,
             url=url,
@@ -97,7 +99,7 @@ class TestBanners(TestBetamax):
 
         self.assertEqual(text, self.banner.text)
         self.assertEqual(icon, self.banner.icon)
-        self.assertEqual(self.NOW, self.banner.active_from)
+        self.assertEqual(NEW_YEAR_2020, self.banner.active_from)
         self.assertEqual(later, self.banner.active_until)
         self.assertFalse(self.banner.is_active)
         self.assertEqual(url, self.banner.url)
