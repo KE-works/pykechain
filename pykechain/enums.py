@@ -915,6 +915,20 @@ class NotificationStatus(Enum):
     """
     Options to retrieve a Notification based on its status.
 
+    normal lifecycle:
+    - DRAFT, when a message is first saved to the backend and the status is still in draft.
+        next states: READY
+    - READY: when the message is ready for processing, it is complete and is to be processed
+        next states: PROCESSING
+    - PROCESSING: when the message is in the process of being send out
+        next states: COMPLETED, FAILED
+    - COMPLETED: when the message is successfully sent out
+        next states: ARCHIVED
+    - FAILED: when the message is not successfully sent out
+        next states: ARCHIVED
+    - ARCHIVED: when the message is archives and waiting for its deletion against a certain retention policy
+        next states: None
+
     :cvar ARCHIVED: "archived" notifications
     :cvar COMPLETED: "completed" notifications
     :cvar DRAFT: "draft" notifications

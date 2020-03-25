@@ -2849,13 +2849,17 @@ class Client(object):
 
         return properties
 
-
     def notifications(self, pk=None, **kwargs):
-        """
+        """Retrieve one or more notifications stored on the instance.
 
-        :param pk:
-        :param kwargs:
-        :return:
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
+        :param pk: if provided, filter the search by notification_id
+        :type pk: basestring or None
+        :param kwargs: (optional) additional search keyword arguments
+        :return: list of :class:`models.Notification` objects
+        :raises APIError: When the retrieval call failed due to various reasons
         """
         request_params = {
             'id': pk
@@ -2866,16 +2870,29 @@ class Client(object):
 
         response = self._request('GET', self._build_url('notifications'), params=request_params)
 
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not retrieve Notifications. Request: {}\nResponse: {}".format(
+                request_params, response.content))
+
         data = response.json()
 
         return [Notification(notification, client=self) for notification in data['results']]
 
     def notification(self, pk=None, **kwargs):
-        """
+        """Retrieve a single KE-chain notification.
 
-        :param pk:
-        :param kwargs:
-        :return:
+        Uses the same interface as the :func:`notifications` method but returns only a single pykechain
+        :class:`models.Notification` object.
+
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
+        :param pk: if provided, filter the search by notification_id
+        :type pk: basestring or None
+        :param kwargs: (optional) additional search keyword arguments
+        :return: a single :class:`models.Notification`
+        :raises NotFoundError: When no `Notification` is found based on the search arguments
+        :raises MultipleFoundError: When more than a single `Notification` is found based on the search arguments
         """
         _notifications = self.notifications(pk=pk, **kwargs)
 
@@ -2889,6 +2906,13 @@ class Client(object):
         return _notifications[0]
 
     def create_notification(self, **kwargs):
+        """
+        Create a single `Notification`.
+
+        :param kwargs: (optional) keyword=value arguments
+        :return: the newly created `Notification`
+        :raises: APIError: when the `Notification` could not be created
+        """
         query_params = kwargs
         query_params.update(API_EXTRA_PARAMS['notifications'])
 

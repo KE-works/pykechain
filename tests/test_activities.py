@@ -8,7 +8,7 @@ import pytz
 import requests
 
 from pykechain.enums import ActivityType, ActivityStatus, ActivityClassification, Category, \
-    activity_root_name_by_classification, ActivityRootNames, PaperSize, PaperOrientation
+    activity_root_name_by_classification, ActivityRootNames, PaperSize, PaperOrientation, NotificationEvent
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError, APIError
 from pykechain.models import Activity2
 from pykechain.utils import temp_chdir
@@ -630,7 +630,6 @@ class TestActivity2SpecificTests(TestBetamax):
 
 # @skip('Does not work in PIM2 until KEC-19193 is resolved')
 class TestActivityDownloadAsPDF(TestBetamax):
-
     def test_activity2_download_as_pdf(self):
         # setUp
         activity_name = 'Task - Form'
@@ -659,12 +658,14 @@ class TestActivityDownloadAsPDF(TestBetamax):
             self.assertTrue(pdf_file)
             self.assertTrue(pdf_file_called_after_activity)
 
-    @skip
     def test_activity2_share_link(self):
+        # setUp
+        test_user = self.client.user(username='testuser')
+
         activity_name = 'Task - Form + Tables + Service'
         message = 'EXAMPLE_MESSAGE'
         subject = 'EXAMPLE_SUBJECT'
-        recipient_users = [96]
+        recipient_users = [test_user]
 
         activity = self.project.activity(name=activity_name)
 
@@ -672,14 +673,24 @@ class TestActivityDownloadAsPDF(TestBetamax):
                             message=message,
                             recipient_users=recipient_users)
 
-    @skip
+        # testing
+        notifications = self.client.notifications(subject=subject, message=message,
+                                                  event=NotificationEvent.SHARE_ACTIVITY_LINK)
+        self.assertTrue(len(notifications), 1)
+
+        # tearDown
+        notifications[0].delete()
+
     def test_activity2_share_pdf(self):
+        # setUp
+        test_user = self.client.user(username='testuser')
+
         activity_name = 'Task - Form + Tables + Service'
         message = 'EXAMPLE_MESSAGE'
         subject = 'EXAMPLE_SUBJECT'
         paper_size = PaperSize.A2
         paper_orientation = PaperOrientation.PORTRAIT
-        recipient_users = [96]
+        recipient_users = [test_user]
 
         activity = self.project.activity(name=activity_name)
 
@@ -688,5 +699,13 @@ class TestActivityDownloadAsPDF(TestBetamax):
                            recipient_users=recipient_users,
                            paper_size=paper_size,
                            paper_orientation=paper_orientation,
-                           include_appendices=False
+                           include_appendices=True
                            )
+
+        # testing
+        notifications = self.client.notifications(subject=subject, message=message,
+                                                  event=NotificationEvent.SHARE_ACTIVITY_PDF)
+        self.assertTrue(len(notifications), 1)
+
+        # tearDown
+        notifications[0].delete()

@@ -149,7 +149,7 @@ API_EXTRA_PARAMS = {
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
          'parent_id', 'progress', 'has_subwidgets', 'scope_id'])},
     'notifications': {'fields': ",".join(
-        ['id', 'subject', 'status', 'message', 'team', 'created_at', 'updated_at'])},
+        ['id', 'subject', 'status', 'message', 'team', 'created_at', 'options', 'updated_at'])},
     'notification': {'fields': ",".join(
-        ['id', 'subject', 'status', 'message', 'team', 'created_at', 'updated_at'])},
+        ['id', 'subject', 'status', 'message', 'team', 'created_at', 'options', 'updated_at'])},
 }

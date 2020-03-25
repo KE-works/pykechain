@@ -55,4 +55,7 @@ class Notification(Base):
         self.from_user = self._client.user(pk=self.from_user_id)
 
     def delete(self):
+        """
+        Deletes the notification
+        """
         self._client.delete_notification(notification=self)
