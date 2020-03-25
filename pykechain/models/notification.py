@@ -19,7 +19,9 @@ class Notification(Base):
     :type event: basestring or None
     :ivar recipient_users: The list of ids of the users
     :type recipient_users: List[User ids]
+
     """
+
     def __init__(self, json, **kwargs):
         # type: (dict, *Any) -> None
         """Construct a notification from a KE-chain 2 json response.
@@ -43,19 +45,13 @@ class Notification(Base):
         return "<pyke Notification id {}>".format(self.id[-8:])
 
     def get_recipient_users(self):
-        """
-        Returns the list of actual `User` objects based on recipient_users_ids
-        """
+        """Return the list of actual `User` objects based on recipient_users_ids."""
         self.recipient_users = [self._client.user(pk=user_id) for user_id in self.recipient_user_ids]
 
     def get_from_user(self):
-        """
-        Returns the actual `User` object based on from_user_id
-        """
+        """Return the actual `User` object based on from_user_id."""
         self.from_user = self._client.user(pk=self.from_user_id)
 
     def delete(self):
-        """
-        Deletes the notification
-        """
+        """Delete the notification."""
         self._client.delete_notification(notification=self)
