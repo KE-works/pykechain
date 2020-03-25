@@ -1207,10 +1207,10 @@ class Client(object):
                                        format(activity_type, ActivityType.values()))
         if isinstance(parent, (Activity, Activity2)):
             parent_classification = parent.classification
-            parent = parent.id
+            parent_id = parent.id
         elif is_uuid(parent):
             parent_classification = None
-            parent = parent
+            parent_id = parent
         else:
             raise IllegalArgumentError('`parent` must be an Activity or UUID, "{}" is neither'.format(parent))
 
@@ -1240,7 +1240,7 @@ class Client(object):
 
         data = {
             "name": name,
-            "parent_id": parent,
+            "parent_id": parent_id,
             "status": status,
             "activity_type": activity_type,
             "classification": classification,
@@ -1266,7 +1266,10 @@ class Client(object):
 
         data = response.json()
 
-        return Activity2(data['results'][0], client=self)
+        new_activity = Activity2(data['results'][0], client=self)
+        if isinstance(parent, Activity2) and parent._cached_children is not None:
+            parent._cached_children.append(new_activity)
+        return new_activity
 
     def _create_part1(self, action, data, **kwargs):
         """Create a part internal core function."""

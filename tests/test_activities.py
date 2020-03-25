@@ -75,6 +75,20 @@ class TestActivityConstruction(TestBetamax):
         self.assertEqual(ActivityType.TASK, self.task.activity_type)
         self.assertEqual(ActivityClassification.WORKFLOW, self.task.classification)
 
+    def test_create_below_parent(self):
+        self.process.children()  # populate `_cached_children`.
+        self.assertIsNotNone(self.process._cached_children, 'Cached children should be an (empty) list.')
+
+        new_task = self.process.create(
+            name='__Testing task',
+            activity_type=ActivityType.TASK,
+        )
+
+        current_children = self.process.children()
+
+        self.assertTrue(current_children)
+        self.assertIn(new_task, current_children, msg='New child task should be among the children.')
+
     def test_create_with_classification(self):
 
         for classification in ActivityClassification.values():

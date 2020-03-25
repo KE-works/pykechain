@@ -12,7 +12,7 @@ semver==2.9.1
 PyOpenSSL==19.1.0; python_version <= '2.7'
 
 # testing
-pytest==5.3.5
+pytest==5.4.1
 betamax==0.8.1
 coverage<=4.5.99
 pytest-cov==2.8.1
@@ -32,9 +32,8 @@ tox==3.14.5
 # code style
 flake8==3.7.9
 pydocstyle==5.0.2
-mypy==0.761; python_version >= '3.4'
-pre-commit==2.1.1
-
+mypy==0.770; python_version >= '3.4'
+pre-commit==2.2.0
 
 # for package management (uploads)
 twine>=3.0.0; python_version >= '3.6'

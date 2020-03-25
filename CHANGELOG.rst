@@ -1,9 +1,7 @@
 Change Log
 ==========
 
-v3.6.0 (XMAR20)
----------------
-
+* :bug: Adding a new `Activity2` to a parent now cache its childeren in case the parent also have the children cached. In essence it updates the `_cached_children`. #722
 * Added possibility to retrieve, create and delete `Notifications`.
 * `share_pdf()` and `share_link()` added to `Activity`.
 
