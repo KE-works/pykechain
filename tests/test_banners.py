@@ -5,7 +5,7 @@ from pykechain.exceptions import APIError, NotFoundError, MultipleFoundError
 from pykechain.models.banner import Banner
 from tests.classes import TestBetamax
 
-NEW_YEAR_2020_naive = datetime.datetime.fromisoformat('2020-01-01T00:01:00:000000')
+NEW_YEAR_2020_naive = datetime.datetime.strptime('2020-01-01T00:01:00', '%Y-%m-%dT%H:%M:%S')
 NEW_YEAR_2020 = NEW_YEAR_2020_naive.replace(tzinfo=pytz.UTC)
 
 
