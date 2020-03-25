@@ -16,6 +16,7 @@ class TestNotifications(TestBetamax):
 
     def tearDown(self):
         self.testing_notification.delete()
+        super(TestNotifications, self).tearDown()
 
     def test_all_notifications_retrieval(self):
         # setUp

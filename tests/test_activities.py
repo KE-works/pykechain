@@ -699,7 +699,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
                            recipient_users=recipient_users,
                            paper_size=paper_size,
                            paper_orientation=paper_orientation,
-                           include_appendices=True
+                           include_appendices=False
                            )
 
         # testing
