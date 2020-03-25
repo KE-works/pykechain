@@ -1028,6 +1028,3 @@ class Activity2(TreeObject, TagsMixin):
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not share the link to Activity, {}:\n\n{}'".format(str(response), response.json()))
-
-
-
