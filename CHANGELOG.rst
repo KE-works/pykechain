@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+v3.6.0 (XMAR20)
+---------------
+
+* Added possibility to retrieve, create and delete `Notifications`.
+* `share_pdf()` and `share_link()` added to `Activity`.
+
 v3.5.4 (9MAR20)
 ---------------
 
