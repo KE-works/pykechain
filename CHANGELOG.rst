@@ -1,11 +1,18 @@
 Change Log
 ==========
 
+v3.6.0 (26MAR20)
+----------------
 
-* :star: Implemented `Banner` model and methods to create, delete and retrieve them.
-* :bug: Adding a new `Activity2` to a parent now cache its childeren in case the parent also have the children cached. In essence it updates the `_cached_children`. #722
-* Added possibility to retrieve, create and delete `Notifications`.
-* `share_pdf()` and `share_link()` added to `Activity`.
+This minor releases adds two new concepts (:star: :star:) that also exist in the KE-chain backend. We added a `Banner` concept that allows powerusers
+to set an announcement banner which is displayed (and can be dismissed) in KE-chain for all logged-in users within a certain timeperiod. We also added the concept of a `Notification` in KE-chain, where email or in-app notification can be displayed suchs as sharing a link of
+a task to another user, or sharing a PDF of a task to another user or and external email address.
+
+* :star: Implemented `Banner` model and methods to create, delete and retrieve them. #725 (Thanks to @jelleboersma for the implementation)
+* :star: Added the concept of a `Notification` including the possibility to retrieve, create(send) and delete `Notifications`. #467 (thanks to @raduiordache for the implementation)
+* :star: Added the possibility to share a link or PDF of an activity using the `Activity2.share_pdf()` or `Activity2.share_link()`. #467 (thanks to @raduiordache for the implementation)
+* :bug: When adding a new `Activity2` to a parent, it will now cache its childeren in case the parent also have the children cached. In essence it updates the `_cached_children`. #722 (thanks to @jelleboersma)
+* :+1: dependent versions for development: pytest (5.4.1), mypy (0.770), tox (3.14.6)
 
 v3.5.4 (9MAR20)
 ---------------
@@ -18,7 +25,7 @@ v3.5.3 (27FEB20)
 
 This is release :100: of pykechain! That means :cake:!
 
-* :bug: Fixed a bug whete the API parameters for the `Service` now includes additional attributes on its objects. #709. Thanks to @bastiaanbeijer and @raduiordache for finding it and @jelleboersma for providing the fast resolution.
+* :bug: Fixed a bug where the API parameters for the `Service` now includes additional attributes on its objects. #709. Thanks to @bastiaanbeijer and @raduiordache for finding it and @jelleboersma for providing the fast resolution.
 
 v3.5.2 (26FEB20)
 ----------------
