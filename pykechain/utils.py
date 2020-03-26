@@ -11,6 +11,8 @@ import six
 T = TypeVar('T')
 
 UUID_REGEX_PATTERN = r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+EMAIL_REGEX_PATTERN = r"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@" \
+                      r"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"
 
 
 def find(iterable: Iterable[T], predicate: Callable[[T], bool]) -> Optional[T]:
@@ -157,6 +159,34 @@ def is_url(value: Text) -> bool:
     if result:
         return True
     return False
+
+
+def is_valid_email(value: Text) -> bool:
+    """
+    Return whether or not given value is a valid email address.
+
+    If the value is valid email this function returns ``True``.
+    The email will only be checked if it contains the right form, not if the email
+    address exist. There are many and better ways to check if the email is valid, but
+    in this case we check if the email has the form of `name@domain.tld`.
+
+    :param value: an alleged email
+    :type value: Text
+    :return: True if it is an email, otherwise False
+    :rtype: bool
+
+    Examples
+    --------
+    >>> is_valid_email("valid_email-address@example.com")
+    True
+    >>> is_valid_email("invalid@email")
+    False
+
+    """
+    if re.match(EMAIL_REGEX_PATTERN, str(value)):
+        return True
+    else:
+        return False
 
 
 @contextmanager

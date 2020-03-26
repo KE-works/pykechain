@@ -12,10 +12,11 @@ from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
+from pykechain.models.user import User
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.models.widgets.widgets_manager import WidgetsManager
-from pykechain.utils import is_uuid, parse_datetime
+from pykechain.utils import is_uuid, parse_datetime, is_valid_email
 
 
 class Activity2(TreeObject, TagsMixin):
@@ -920,3 +921,116 @@ class Activity2(TreeObject, TagsMixin):
         :raises APIError: if an Error occurs.
         """
         return self._client.move_activity(self, parent, classification=classification)
+
+    def share_link(self, subject, message, recipient_users):
+        """
+        Share the link of the `Activity` through email.
+
+        :param subject: subject of email
+        :type subject: basestring
+        :param message: message of email
+        :type message: basestring
+        :param recipient_users: users that will receive the email
+        :type recipient_users: list(Union(User, Id))
+        :raises IllegalArgumentError: if no 'message' is specified
+        :raises IllegalArgumentError: if no 'subject' is specified
+        :raises IllegalArgumentError: if no 'recipient_users' is specified
+        :raises APIError: if an Error occurs.
+        """
+        if not message:
+            raise IllegalArgumentError('Sharing an activity link requires a message')
+        if not subject:
+            raise IllegalArgumentError('Sharing an activity link requires a subject')
+        if not recipient_users:
+            raise IllegalArgumentError('Sharing an activity link requires recipient users')
+        else:
+            recipient_users_ids = list()
+            for user in recipient_users:
+                if isinstance(user, User):
+                    recipient_users_ids.append(user.id)
+                else:
+                    recipient_users_ids.append(user)
+
+        params = dict(
+            message=message,
+            subject=subject,
+            recipient_users=recipient_users_ids,
+            activity_id=self.id
+        )
+
+        url = self._client._build_url('notification_share_activity_link')
+
+        response = self._client._request('POST', url, data=params)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not share the link to Activity, {}:\n\n{}'".format(str(response), response.json()))
+
+    def share_pdf(self, subject, message, recipient_users, paper_size=PaperSize.A3,
+                  paper_orientation=PaperOrientation.PORTRAIT, include_appendices=False):
+        """
+        Share the PDF of the `Activity` through email.
+
+        :param subject: subject of email
+        :type subject: basestring
+        :param message: message of email
+        :type message: basestring
+        :param recipient_users: users that will receive the email
+        :type recipient_users: list(Union(User, Id))
+        :param paper_size: The size of the paper to which the PDF is downloaded:
+                               - a4paper (default): A4 paper size
+                               - a3paper: A3 paper size
+                               - a2paper: A2 paper size
+                               - a1paper: A1 paper size
+                               - a0paper: A0 paper size
+        :type paper_size: basestring (see :class:`enums.PaperSize`)
+        :param paper_orientation: The orientation of the paper to which the PDF is downloaded:
+                               - portrait (default): portrait orientation
+                               - landscape: landscape orientation
+        :type paper_size: basestring (see :class:`enums.PaperOrientation`)
+        :param include_appendices: True if the PDF should contain appendices, False (default) if otherwise.
+        :type include_appendices: bool
+        :raises IllegalArgumentError: if no 'message' is specified
+        :raises IllegalArgumentError: if no 'subject' is specified
+        :raises IllegalArgumentError: if no 'recipient_users' is specified
+        :raises APIError: if an Error occurs.
+        """
+        if not recipient_users:
+            raise IllegalArgumentError(
+                "Sharing an activity pdf requires a list of recipient users "
+                "(User objects, user id's or email addresses)"
+            )
+        else:
+            recipient_emails = list()
+            recipient_users_ids = list()
+            for user in recipient_users:
+                if isinstance(user, User):
+                    recipient_users_ids.append(user.id)
+                elif isinstance(user, int):
+                    recipient_users_ids.append(user)
+                elif is_valid_email(user):
+                    recipient_emails.append(user)
+                else:
+                    raise IllegalArgumentError(
+                        "Sharing an activity pdf requires a list of recipient users "
+                        "(User objects, user id's or email addresses), got invalid email address: '{}".format(
+                            user
+                        )
+                    )
+
+        params = dict(
+            message=message,
+            subject=subject,
+            recipient_users=recipient_users_ids,
+            recipient_emails=recipient_emails or [''],
+            activity_id=self.id,
+            papersize=paper_size,
+            orientation=paper_orientation,
+            appendices=include_appendices,
+        )
+
+        url = self._client._build_url('notification_share_activity_pdf')
+
+        response = self._client._request('POST', url, data=params)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not share the link to Activity, {}:\n\n{}'".format(str(response), response.json()))
