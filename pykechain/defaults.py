@@ -106,7 +106,10 @@ API_PATH = {
     'notifications': 'api/v3/notifications.json',
     'notification': 'api/v3/notifications/{notification_id}.json',
     'notification_share_activity_link': 'api/v3/notifications/share_activity_link',
-    'notification_share_activity_pdf': 'api/v3/notifications/share_activity_pdf'
+    'notification_share_activity_pdf': 'api/v3/notifications/share_activity_pdf',
+    'banners': 'api/v3/banners.json',
+    'banner': 'api/v3/banners/{banner_id}.json',
+    'banner_active': 'api/v3/banners/active.json',
 }
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
 API_EXTRA_PARAMS = {
@@ -116,6 +119,10 @@ API_EXTRA_PARAMS = {
     'activities': {'fields': ",".join(
         ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'activity_type', 'classification', 'tags',
          'progress', 'assignees_ids', 'start_date', 'due_date', 'status', 'parent_id', 'scope_id', 'customization'])},
+    'banner': {'fields': ",".join(
+        ['id', 'text', 'icon', 'is_active', 'active_from', 'active_until', 'url', 'created_at', 'updated_at'])},
+    'banners': {'fields': ",".join(
+        ['id', 'text', 'icon', 'is_active', 'active_from', 'active_until', 'url', 'created_at', 'updated_at'])},
     'scope2': {'fields': ",".join(
         ['id', 'name', 'ref', 'text', 'created_at', 'updated_at', 'start_date', 'due_date', 'status', 'category',
          'progress', 'members', 'team', 'tags', 'scope_options', 'team_id_name', 'workflow_root_id'])},

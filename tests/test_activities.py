@@ -641,8 +641,6 @@ class TestActivity2SpecificTests(TestBetamax):
                 self.assertTrue(model.property(name='Sale?').output)
         self.assertTrue(len(associated_models) == 3)
 
-
-# @skip('Does not work in PIM2 until KEC-19193 is resolved')
 class TestActivityDownloadAsPDF(TestBetamax):
     def test_activity2_download_as_pdf(self):
         # setUp
@@ -690,6 +688,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
         # testing
         notifications = self.client.notifications(subject=subject, message=message,
                                                   event=NotificationEvent.SHARE_ACTIVITY_LINK)
+        self.assertEqual(self.client.last_response.status_code, requests.codes.ok)
         self.assertTrue(len(notifications), 1)
 
         # tearDown
@@ -719,6 +718,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
         # testing
         notifications = self.client.notifications(subject=subject, message=message,
                                                   event=NotificationEvent.SHARE_ACTIVITY_PDF)
+        self.assertEqual(self.client.last_response.status_code, requests.codes.ok)
         self.assertTrue(len(notifications), 1)
 
         # tearDown
