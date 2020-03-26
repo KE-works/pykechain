@@ -965,7 +965,7 @@ class Activity2(TreeObject, TagsMixin):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not share the link to Activity, {}:\n\n{}'".format(str(response), response.json()))
 
-    def share_pdf(self, subject=None, message=None, recipient_users=None, paper_size=PaperSize.A4,
+    def share_pdf(self, subject, message, recipient_users, paper_size=PaperSize.A3,
                   paper_orientation=PaperOrientation.PORTRAIT, include_appendices=False):
         """
         Share the PDF of the `Activity` through email.
