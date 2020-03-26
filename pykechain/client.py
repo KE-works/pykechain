@@ -26,6 +26,7 @@ from pykechain.models.user import User
 from pykechain.models.widgets.widget import Widget
 from pykechain.utils import is_uuid, find
 from .__about__ import version
+from .models.banner import Banner
 
 
 class Client(object):
@@ -2850,3 +2851,121 @@ class Client(object):
         properties = [Property2.create(client=self, json=js) for js in response.json()['results']]
 
         return properties
+
+    def banners(
+            self,
+            pk: Optional[Text] = None,
+            text: Optional[Text] = None,
+            is_active: Optional[bool] = None,
+            **kwargs
+    ) -> List[Banner]:
+        """
+        Retrieve Banners.
+
+        :param pk: ID of the banner
+        :param text: Text displayed in the banner
+        :param is_active: Whether the banner is currently active
+        :return: list of Banner objects
+        :rtype list
+        """
+        request_params = {
+            'text': text,
+            'id': pk,
+            'is_active': is_active,
+        }
+        request_params.update(API_EXTRA_PARAMS['banners'])
+
+        if kwargs:
+            request_params.update(**kwargs)
+
+        response = self._request('GET', self._build_url('banners'), params=request_params)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve banners")
+
+        data = response.json()
+        return [Banner(banner, client=self) for banner in data['results']]
+
+    def banner(self, *args, **kwargs) -> Banner:
+        """
+        Retrieve a single Banner, see `banners()` for available arguments.
+
+        :return: single banner
+        :rtype Banner
+        """
+        _banners = self.banners(*args, **kwargs)
+
+        criteria = 'args: {}\nkwargs: {}'.format(args, kwargs)
+
+        if len(_banners) == 0:
+            raise NotFoundError("No banner fits criteria:{}".format(criteria))
+        if len(_banners) != 1:
+            raise MultipleFoundError("Multiple banners fit criteria:{}".format(criteria))
+
+        return _banners[0]
+
+    def create_banner(
+            self,
+            text: Text,
+            icon: Text,
+            active_from: datetime.datetime,
+            active_until: Optional[datetime.datetime] = None,
+            is_active: Optional[bool] = False,
+            url: Optional[Text] = None,
+            **kwargs
+    ) -> Banner:
+        """
+        Create a new banner.
+
+        :param text: Text to display in the banner. May use HTML.
+        :type text: str
+        :param icon: Font-awesome icon to stylize the banner
+        :type icon: str
+        :param active_from: Datetime from when the banner will become active.
+        :type active_from: datetime.datetime
+        :param active_until: Datetime from when the banner will no longer be active.
+        :type active_until: datetime.datetime
+        :param is_active: Boolean whether to set the banner as active, defaults to False.
+        :type is_active: bool
+        :param url: target for the "more info" button within the banner.
+        :param url: str
+        :param kwargs: additional arguments for the request
+        :return: the new banner
+        :rtype Banner
+        """
+        data = {
+            'text': text,
+            'icon': icon,
+            'active_from': active_from.isoformat(sep='T'),
+            'active_until': active_until.isoformat(sep='T') if active_until else None,
+            'is_active': is_active,
+            'url': url,
+        }
+
+        # prepare url query parameters
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['banners'])
+
+        response = self._request('POST', self._build_url('banners'),
+                                 params=query_params,
+                                 json=data)
+
+        if response.status_code != requests.codes.created:
+            raise APIError("Could not create banner, {}: {}".format(str(response), response.content))
+
+        return Banner(response.json()['results'][0], client=self)
+
+    def active_banner(self) -> Optional[Banner]:
+        """
+        Retrieve the currently active banner.
+
+        :return: Banner object. If no banner is active, returns None.
+        :rtype Banner
+        """
+        response = self._request('GET', self._build_url('banner_active'))
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve banners")
+
+        data = response.json()['results'][0]
+        return Banner(json=data, client=self) if data else None
