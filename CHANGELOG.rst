@@ -3,7 +3,9 @@ Change Log
 
 
 * :star: Implemented `Banner` model and methods to create, delete and retrieve them.
-* :bug: Adding a new `Activity2` to a parent now cache its childeren in case the parent also have the children cached. In essence it updates the `_cached_children`. #722 
+* :bug: Adding a new `Activity2` to a parent now cache its childeren in case the parent also have the children cached. In essence it updates the `_cached_children`. #722
+* Added possibility to retrieve, create and delete `Notifications`.
+* `share_pdf()` and `share_link()` added to `Activity`.
 
 v3.5.4 (9MAR20)
 ---------------
