@@ -922,7 +922,7 @@ class Activity2(TreeObject, TagsMixin):
         """
         return self._client.move_activity(self, parent, classification=classification)
 
-    def share_link(self, subject=None, message=None, recipient_users=None):
+    def share_link(self, subject, message, recipient_users):
         """
         Share the link of the `Activity` through email.
 
