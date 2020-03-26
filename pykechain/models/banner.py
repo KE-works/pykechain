@@ -3,9 +3,9 @@ from typing import Text, Optional
 
 import requests
 
-from pykechain.exceptions import APIError
+from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Base
-from pykechain.utils import parse_datetime
+from pykechain.utils import parse_datetime, is_url
 
 
 class Banner(Base):
@@ -54,6 +54,27 @@ class Banner(Base):
         :param url: str
         :return: None
         """
+        if text is not None and not isinstance(text, str):
+            raise IllegalArgumentError('`text` must be a string, "{}" ({}) is not.'.format(text, type(text)))
+
+        if icon is not None and not isinstance(icon, str):
+            raise IllegalArgumentError('`icon` must be a string, "{}" ({}) is not.'.format(icon, type(icon)))
+
+        if active_from is not None and not isinstance(active_from, datetime.datetime):
+            raise IllegalArgumentError('`active_from` must be a datetime.datetime value, "{}" ({}) is not.'.format(
+                active_from, type(active_from)))
+
+        if active_until is not None and not isinstance(active_until, datetime.datetime):
+            raise IllegalArgumentError('`active_until` must be a datetime.datetime value, "{}" ({}) is not.'.format(
+                active_until, type(active_until)))
+
+        if is_active is not None and not isinstance(is_active, bool):
+            raise IllegalArgumentError('`is_active` must be a boolean, "{}" ({}) is not.'.format(is_active,
+                                                                                                 type(is_active)))
+
+        if url is not None and (not isinstance(url, str) or not is_url(url)):
+            raise IllegalArgumentError('`url` must be a URL string, "{}" ({}) is not.'.format(url, type(url)))
+
         update_dict = {
             'text': text,
             'icon': icon,

@@ -24,7 +24,7 @@ from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.widgets.widget import Widget
-from pykechain.utils import is_uuid, find
+from pykechain.utils import is_uuid, find, is_url
 from .__about__ import version
 from .models.banner import Banner
 
@@ -2868,6 +2868,16 @@ class Client(object):
         :return: list of Banner objects
         :rtype list
         """
+        if pk is not None and (not isinstance(pk, str) or not is_uuid(pk)):
+            raise IllegalArgumentError('`pk` must be a valid UUID, "{}" ({}) is not.'.format(pk, type(pk)))
+
+        if text is not None and not isinstance(text, str):
+            raise IllegalArgumentError('`text` must be a string, "{}" ({}) is not.'.format(text, type(text)))
+
+        if is_active is not None and not isinstance(is_active, bool):
+            raise IllegalArgumentError('`is_active` must be a boolean, "{}" ({}) is not.'.format(is_active,
+                                                                                                 type(is_active)))
+
         request_params = {
             'text': text,
             'id': pk,
@@ -2875,7 +2885,7 @@ class Client(object):
         }
         request_params.update(API_EXTRA_PARAMS['banners'])
 
-        if kwargs:
+        if kwargs:  # pragma: no cover
             request_params.update(**kwargs)
 
         response = self._request('GET', self._build_url('banners'), params=request_params)
@@ -2933,6 +2943,27 @@ class Client(object):
         :return: the new banner
         :rtype Banner
         """
+        if not isinstance(text, str):
+            raise IllegalArgumentError('`text` must be a string, "{}" ({}) is not.'.format(text, type(text)))
+
+        if not isinstance(icon, str):
+            raise IllegalArgumentError('`icon` must be a string, "{}" ({}) is not.'.format(icon, type(icon)))
+
+        if not isinstance(active_from, datetime.datetime):
+            raise IllegalArgumentError('`active_from` must be a datetime.datetime value, "{}" ({}) is not.'.format(
+                active_from, type(active_from)))
+
+        if active_until is not None and not isinstance(active_until, datetime.datetime):
+            raise IllegalArgumentError('`active_until` must be a datetime.datetime value, "{}" ({}) is not.'.format(
+                active_until, type(active_until)))
+
+        if is_active is not None and not isinstance(is_active, bool):
+            raise IllegalArgumentError('`is_active` must be a boolean, "{}" ({}) is not.'.format(is_active,
+                                                                                                 type(is_active)))
+
+        if url is not None and (not isinstance(url, str) or not is_url(url)):
+            raise IllegalArgumentError('`url` must be a URL string, "{}" ({}) is not.'.format(url, type(url)))
+
         data = {
             'text': text,
             'icon': icon,
@@ -2950,7 +2981,7 @@ class Client(object):
                                  params=query_params,
                                  json=data)
 
-        if response.status_code != requests.codes.created:
+        if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create banner, {}: {}".format(str(response), response.content))
 
         return Banner(response.json()['results'][0], client=self)
