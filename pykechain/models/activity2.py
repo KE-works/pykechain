@@ -16,7 +16,7 @@ from pykechain.models.user import User
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.models.widgets.widgets_manager import WidgetsManager
-from pykechain.utils import is_uuid, parse_datetime
+from pykechain.utils import is_uuid, parse_datetime, is_valid_email
 
 
 class Activity2(TreeObject, TagsMixin):
@@ -994,32 +994,38 @@ class Activity2(TreeObject, TagsMixin):
         :raises IllegalArgumentError: if no 'recipient_users' is specified
         :raises APIError: if an Error occurs.
         """
-        if not message:
-            raise IllegalArgumentError('Sharing an activity link requires a message')
-        if not subject:
-            raise IllegalArgumentError('Sharing an activity link requires a subject')
         if not recipient_users:
-            raise IllegalArgumentError('Sharing an activity link requires recipient users')
+            raise IllegalArgumentError(
+                "Sharing an activity pdf requires a list of recipient users "
+                "(User objects, user id's or email addresses)"
+            )
         else:
             recipient_emails = list()
             recipient_users_ids = list()
             for user in recipient_users:
                 if isinstance(user, User):
-                    recipient_emails.append(user.email)
                     recipient_users_ids.append(user.id)
-                else:
+                elif isinstance(user, int):
                     recipient_users_ids.append(user)
-                    recipient_emails.append(self._client.user(pk=user).email)
+                elif is_valid_email(user):
+                    recipient_emails.append(user)
+                else:
+                    raise IllegalArgumentError(
+                        "Sharing an activity pdf requires a list of recipient users "
+                        "(User objects, user id's or email addresses), got invalid email address: '{}".format(
+                            user
+                        )
+                    )
 
         params = dict(
             message=message,
             subject=subject,
             recipient_users=recipient_users_ids,
-            recipient_emails=recipient_emails,
+            recipient_emails=recipient_emails or [''],
             activity_id=self.id,
             papersize=paper_size,
             orientation=paper_orientation,
-            appendices=include_appendices
+            appendices=include_appendices,
         )
 
         url = self._client._build_url('notification_share_activity_pdf')

@@ -661,7 +661,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
     @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
                         reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
     def test_activity2_download_as_pdf_async(self):
-        activity_name = 'Task - Form + Tables + Service'
+        activity_name = 'Task - Form'
         activity = self.project.activity(name=activity_name)
 
         # testing
@@ -676,7 +676,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
         # setUp
         test_user = self.client.user(username='testuser')
 
-        activity_name = 'Task - Form + Tables + Service'
+        activity_name = 'Task - Form'
         message = 'EXAMPLE_MESSAGE'
         subject = 'EXAMPLE_SUBJECT'
         recipient_users = [test_user]
@@ -699,7 +699,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
         # setUp
         test_user = self.client.user(username='testuser')
 
-        activity_name = 'Task - Form + Tables + Service'
+        activity_name = 'Task - Form'
         message = 'EXAMPLE_MESSAGE'
         subject = 'EXAMPLE_SUBJECT'
         paper_size = PaperSize.A2
