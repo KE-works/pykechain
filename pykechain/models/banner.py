@@ -3,9 +3,10 @@ from typing import Text, Optional
 
 import requests
 
-from pykechain.exceptions import APIError, IllegalArgumentError
+from pykechain.exceptions import APIError
 from pykechain.models import Base
-from pykechain.utils import parse_datetime, is_url
+from pykechain.models.input_checks import check_text, check_datetime, check_type, check_url
+from pykechain.utils import parse_datetime
 
 
 class Banner(Base):
@@ -54,34 +55,13 @@ class Banner(Base):
         :param url: str
         :return: None
         """
-        if text is not None and not isinstance(text, str):
-            raise IllegalArgumentError('`text` must be a string, "{}" ({}) is not.'.format(text, type(text)))
-
-        if icon is not None and not isinstance(icon, str):
-            raise IllegalArgumentError('`icon` must be a string, "{}" ({}) is not.'.format(icon, type(icon)))
-
-        if active_from is not None and not isinstance(active_from, datetime.datetime):
-            raise IllegalArgumentError('`active_from` must be a datetime.datetime value, "{}" ({}) is not.'.format(
-                active_from, type(active_from)))
-
-        if active_until is not None and not isinstance(active_until, datetime.datetime):
-            raise IllegalArgumentError('`active_until` must be a datetime.datetime value, "{}" ({}) is not.'.format(
-                active_until, type(active_until)))
-
-        if is_active is not None and not isinstance(is_active, bool):
-            raise IllegalArgumentError('`is_active` must be a boolean, "{}" ({}) is not.'.format(is_active,
-                                                                                                 type(is_active)))
-
-        if url is not None and (not isinstance(url, str) or not is_url(url)):
-            raise IllegalArgumentError('`url` must be a URL string, "{}" ({}) is not.'.format(url, type(url)))
-
         update_dict = {
-            'text': text,
-            'icon': icon,
-            'active_from': active_from.isoformat(sep='T') if active_from else None,
-            'active_until': active_until.isoformat(sep='T') if active_until else None,
-            'is_active': is_active,
-            'url': url,
+            'text': check_text(text, 'text'),
+            'icon': check_text(icon, 'icon'),
+            'active_from': check_datetime(active_from, 'active_from'),
+            'active_until': check_datetime(active_until, 'active_until'),
+            'is_active': check_type(is_active, bool, 'is_active'),
+            'url': check_url(url),
         }
 
         url = self._client._build_url('banner', banner_id=self.id)

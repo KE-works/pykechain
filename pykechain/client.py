@@ -16,17 +16,17 @@ from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, Ser
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
 
-from pykechain.models import Part2, Property2, Activity2, Scope2, PartSet, Base, Part, Property, AnyProperty, Service, \
-    ServiceExecution
+from pykechain.models import Part2, Property2, Activity2, Scope2, PartSet, Base, AnyProperty, Service, \
+        ServiceExecution
 from pykechain.models.association import Association
 from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.notification import Notification
 from pykechain.models.widgets.widget import Widget
-from pykechain.utils import is_uuid, find, is_url
+from pykechain.utils import is_uuid, find
 from .__about__ import version as pykechain_version
 from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
-    check_list_of_base, check_base, check_uuid, check_list_of_dicts
+    check_list_of_base, check_base, check_uuid, check_list_of_dicts, check_url
 from .models.banner import Banner
 
 
@@ -2377,7 +2377,7 @@ class Client(object):
 
         return properties
 
-    def notifications(self, pk=None, **kwargs):
+    def notifications(self, pk: Optional[Text] = None, **kwargs) -> List[Notification]:
         """Retrieve one or more notifications stored on the instance.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -2390,7 +2390,7 @@ class Client(object):
         :raises APIError: When the retrieval call failed due to various reasons
         """
         request_params = {
-            'id': pk
+            'id': check_uuid(pk)
         }
 
         if kwargs:
@@ -2406,7 +2406,7 @@ class Client(object):
 
         return [Notification(notification, client=self) for notification in data['results']]
 
-    def notification(self, pk=None, **kwargs):
+    def notification(self, pk: Optional[Text] = None, *args, **kwargs) -> Notification:
         """Retrieve a single KE-chain notification.
 
         Uses the same interface as the :func:`notifications` method but returns only a single pykechain
@@ -2422,18 +2422,9 @@ class Client(object):
         :raises NotFoundError: When no `Notification` is found based on the search arguments
         :raises MultipleFoundError: When more than a single `Notification` is found based on the search arguments
         """
-        _notifications = self.notifications(pk=pk, **kwargs)
+        return self._retrieve_singular(self.notifications, pk=pk, *args, **kwargs)
 
-        criteria = '\npk={}\nkwargs: {}'.format(pk, kwargs)
-
-        if len(_notifications) == 0:
-            raise NotFoundError("No notification found with id:{}".format(criteria))
-        if len(_notifications) != 1:
-            raise MultipleFoundError("Multiple users fit criteria:{}".format(criteria))
-
-        return _notifications[0]
-
-    def create_notification(self, **kwargs):
+    def create_notification(self, **kwargs) -> Notification:
         """
         Create a single `Notification`.
 
@@ -2454,7 +2445,7 @@ class Client(object):
         notification = Notification(response.json().get('results')[0], client=self)
         return notification
 
-    def delete_notification(self, notification: Union[Widget, text_type]) -> None:
+    def delete_notification(self, notification: Union[Notification, Text]) -> None:
         """
         Delete a single Notification.
 
@@ -2464,11 +2455,7 @@ class Client(object):
         :raises APIError: whenever the notification could not be deleted
         :raises IllegalArgumentError: whenever the input `notification` is invalid
         """
-        if isinstance(notification, Notification):
-            notification = notification.id
-        elif not is_uuid(notification):
-            raise IllegalArgumentError('`notification` must be a Notification or its UUID, '
-                                       '"{}" is neither.'.format(notification))
+        notification = check_base(notification, Notification, 'notification')
 
         url = self._build_url('notification', notification_id=notification)
         response = self._request('DELETE', url)
@@ -2492,20 +2479,10 @@ class Client(object):
         :return: list of Banner objects
         :rtype list
         """
-        if pk is not None and (not isinstance(pk, str) or not is_uuid(pk)):
-            raise IllegalArgumentError('`pk` must be a valid UUID, "{}" ({}) is not.'.format(pk, type(pk)))
-
-        if text is not None and not isinstance(text, str):
-            raise IllegalArgumentError('`text` must be a string, "{}" ({}) is not.'.format(text, type(text)))
-
-        if is_active is not None and not isinstance(is_active, bool):
-            raise IllegalArgumentError('`is_active` must be a boolean, "{}" ({}) is not.'.format(is_active,
-                                                                                                 type(is_active)))
-
         request_params = {
-            'text': text,
-            'id': pk,
-            'is_active': is_active,
+            'text': check_text(text, 'text'),
+            'id': check_uuid(pk),
+            'is_active': check_type(is_active, bool, 'is_active'),
         }
         request_params.update(API_EXTRA_PARAMS['banners'])
 
@@ -2527,16 +2504,7 @@ class Client(object):
         :return: single banner
         :rtype Banner
         """
-        _banners = self.banners(*args, **kwargs)
-
-        criteria = 'args: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_banners) == 0:
-            raise NotFoundError("No banner fits criteria:{}".format(criteria))
-        if len(_banners) != 1:
-            raise MultipleFoundError("Multiple banners fit criteria:{}".format(criteria))
-
-        return _banners[0]
+        return self._retrieve_singular(self.banners, *args, **kwargs)
 
     def create_banner(
             self,
@@ -2567,34 +2535,13 @@ class Client(object):
         :return: the new banner
         :rtype Banner
         """
-        if not isinstance(text, str):
-            raise IllegalArgumentError('`text` must be a string, "{}" ({}) is not.'.format(text, type(text)))
-
-        if not isinstance(icon, str):
-            raise IllegalArgumentError('`icon` must be a string, "{}" ({}) is not.'.format(icon, type(icon)))
-
-        if not isinstance(active_from, datetime.datetime):
-            raise IllegalArgumentError('`active_from` must be a datetime.datetime value, "{}" ({}) is not.'.format(
-                active_from, type(active_from)))
-
-        if active_until is not None and not isinstance(active_until, datetime.datetime):
-            raise IllegalArgumentError('`active_until` must be a datetime.datetime value, "{}" ({}) is not.'.format(
-                active_until, type(active_until)))
-
-        if is_active is not None and not isinstance(is_active, bool):
-            raise IllegalArgumentError('`is_active` must be a boolean, "{}" ({}) is not.'.format(is_active,
-                                                                                                 type(is_active)))
-
-        if url is not None and (not isinstance(url, str) or not is_url(url)):
-            raise IllegalArgumentError('`url` must be a URL string, "{}" ({}) is not.'.format(url, type(url)))
-
         data = {
-            'text': text,
-            'icon': icon,
-            'active_from': active_from.isoformat(sep='T'),
-            'active_until': active_until.isoformat(sep='T') if active_until else None,
-            'is_active': is_active,
-            'url': url,
+            'text': check_text(text, 'text'),
+            'icon': check_text(icon, 'icon'),
+            'active_from': check_datetime(active_from, 'active_from'),
+            'active_until': check_datetime(active_until, 'active_until'),
+            'is_active': check_type(is_active, bool, 'is_active'),
+            'url': check_url(url),
         }
 
         # prepare url query parameters
