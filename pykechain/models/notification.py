@@ -1,5 +1,5 @@
 from pykechain.models import Base
-from typing import Text, List, Any
+from typing import Text, List, Optional, Dict
 
 
 class Notification(Base):
@@ -22,8 +22,7 @@ class Notification(Base):
 
     """
 
-    def __init__(self, json, **kwargs):
-        # type: (dict, *Any) -> None
+    def __init__(self, json: Dict, **kwargs) -> None:
         """Construct a notification from a KE-chain 2 json response.
 
         :param json: the json response to construct the :class:`Notification` from
@@ -37,21 +36,26 @@ class Notification(Base):
         self.event = json.get('event', '')  # type: Text
         self.channels = json.get('channels', '')  # type: List
         self.recipient_user_ids = json.get('recipient_users', '')  # type: List
-        self.from_user_id = json.get('from user', '')
-        self.from_user = None
-        self.recipient_users = None
+        self.from_user_id = json.get('from_user', '')
+
+        self._from_user = None  # type: Optional['User']
+        self._recipient_users = None  # type: Optional[List['User']]
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Notification id {}>".format(self.id[-8:])
 
-    def get_recipient_users(self):
+    def get_recipient_users(self) -> List['User']:
         """Return the list of actual `User` objects based on recipient_users_ids."""
-        self.recipient_users = [self._client.user(pk=user_id) for user_id in self.recipient_user_ids]
+        if self._recipient_users is None:
+            self._recipient_users = self._client.users(id__in=','.join([str(pk) for pk in self.recipient_user_ids]))
+        return self._recipient_users
 
-    def get_from_user(self):
+    def get_from_user(self) -> 'User':
         """Return the actual `User` object based on from_user_id."""
-        self.from_user = self._client.user(pk=self.from_user_id)
+        if self._from_user is None:
+            self._from_user = self._client.user(pk=self.from_user_id)
+        return self._from_user
 
     def delete(self):
         """Delete the notification."""
-        self._client.delete_notification(notification=self)
+        return self._client.delete_notification(notification=self)

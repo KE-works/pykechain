@@ -10,6 +10,10 @@ class TestNotifications(TestBetamax):
 
         self.subject = 'TEST_SUBJECT'
         self.message = 'TEST_MESSAGE'
+
+        for old_notification in self.client.notifications(name=self.subject):
+            old_notification.delete()
+
         self.recipient_users = [1]
         self.testing_notification = self.client.create_notification(subject=self.subject, message=self.message,
                                                                     recipient_users=self.recipient_users)
@@ -89,10 +93,20 @@ class TestNotifications(TestBetamax):
             self.client.notification(message=message, subject=subject)
 
     def test_get_recipient_users(self):
-        self.testing_notification.get_recipient_users()
+        recipients = self.testing_notification.get_recipient_users()
 
         # testing
-        self.assertIsInstance(self.testing_notification.recipient_users, list)
-        self.assertIsInstance(self.testing_notification.recipient_users[0], User)
-        self.assertTrue(self.testing_notification.recipient_users[0].username == 'superuser')
+        self.assertIsInstance(recipients, list)
+        self.assertTrue(recipients)
 
+        first_recipient = recipients[0]
+
+        self.assertIsInstance(first_recipient, User)
+        self.assertEqual('superuser', first_recipient.username)
+
+    def test_get_from_user(self):
+        from_user = self.testing_notification.get_from_user()
+
+        self.assertTrue(from_user)
+        self.assertIsInstance(from_user, User)
+        self.assertEqual('pykechain_user', from_user.username)

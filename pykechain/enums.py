@@ -957,3 +957,14 @@ class NotificationEvent(Enum):
     SHARE_ACTIVITY_LINK = 'SHARE_ACTIVITY_LINK'
     EXPORT_ACTIVITY_ASYNC = 'EXPORT_ACTIVITY_ASYNC'
     SHARE_ACTIVITY_PDF = 'SHARE_ACTIVITY_PDF'
+
+
+class NotificationChannels(Enum):
+    """
+    Options to retrieve a Notification based on its channel.
+
+    :cvar EMAIL: email notification
+    :cvar APP: app notification
+    """
+    EMAIL = 'EMAIL'
+    APP = 'APP'
