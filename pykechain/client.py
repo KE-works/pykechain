@@ -407,6 +407,8 @@ class Client(object):
         :raises NotFoundError: When no result is found.
         :raises MultipleFoundError: When more than a single result is found.
         """
+        # TODO set limit=2 to reduce query (but allow MultipleFoundError)?
+        #  Will require updating of many cassettes.
         results = method(*args, **kwargs)
 
         criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
@@ -2354,6 +2356,12 @@ class Client(object):
     def update_properties(self, properties: List[Dict]) -> List['AnyProperty']:
         """
         Update multiple properties simultaneously.
+
+        Examples
+        --------
+        >>> properties = client.properties(limit=3)
+        >>> update_dicts = [dict(id=p.id, value=p.value) for p in properties]
+        >>> client.update_properties(properties=update_dicts)
 
         :param properties: list of dictionaries to set the properties
         :type properties: List[Dict]
