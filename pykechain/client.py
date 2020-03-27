@@ -1057,7 +1057,7 @@ class Client(object):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create activity {}: {}".format(str(response), response.content))
 
-        new_activity = Activity2(data['results'][0], client=self)
+        new_activity = Activity2(response.json()['results'][0], client=self)
         if isinstance(parent, Activity2) and parent._cached_children is not None:
             parent._cached_children.append(new_activity)
         return new_activity
