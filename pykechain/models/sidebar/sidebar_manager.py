@@ -2,9 +2,10 @@ from collections import Iterable
 from typing import Any, Optional, Text, List, Dict
 
 from pykechain.enums import URITarget, SubprocessDisplayMode, KEChainPages, KEChainPageLabels
-from pykechain.exceptions import NotFoundError, IllegalArgumentError
+from pykechain.exceptions import NotFoundError
+from pykechain.models.input_checks import check_url, check_text, check_enum, check_list_of_dicts, check_type
 from pykechain.models.sidebar.sidebar_button import SideBarButton
-from pykechain.utils import find, is_url
+from pykechain.utils import find
 
 
 class SideBarManager(Iterable):
@@ -45,11 +46,8 @@ class SideBarManager(Iterable):
         super().__init__(**kwargs)
 
         from pykechain.models import Scope2
-        if not isinstance(scope, Scope2):
-            raise IllegalArgumentError('scope must be of class Scope2, "{}" is not.'.format(scope))
-
-        if not isinstance(bulk_creation, bool):
-            raise IllegalArgumentError('bulk_creation must be a boolean, "{}" is not.'.format(bulk_creation))
+        check_type(scope, Scope2, 'scope')
+        check_type(bulk_creation, bool, 'bulk_creation')
 
         self.scope = scope  # type: Scope2
         self._override = scope.options.get('overrideSidebar', False)  # type: bool
@@ -116,10 +114,7 @@ class SideBarManager(Iterable):
         :param button: a side-bar button object
         :type button: SideBarButton
         """
-        if not isinstance(index, int):
-            raise IllegalArgumentError('Index "{}" is not an integer!'.format(index))
-
-        self._buttons.insert(index, button)
+        self._buttons.insert(check_type(index, int, 'index'), button)
 
     def create_button(self, order: Optional[int] = None, *args, **kwargs) -> SideBarButton:
         """
@@ -133,9 +128,7 @@ class SideBarManager(Iterable):
         if order is None:
             index = len(self._buttons)
         else:
-            if not isinstance(order, int):
-                raise IllegalArgumentError('order must be an integer, "{}" is not.'.format(order))
-            index = order
+            index = check_type(order, int, 'order')
 
         button = SideBarButton(side_bar_manager=self, order=index, *args, **kwargs)
 
@@ -163,19 +156,9 @@ class SideBarManager(Iterable):
         :rtype SideBarButton
         """
         from pykechain.models import Activity2
-
-        if not isinstance(activity, Activity2):
-            raise IllegalArgumentError('activity must be of class Activity2, "{}" is not.'.format(activity))
-
-        if task_display_mode not in SubprocessDisplayMode.values():
-            raise IllegalArgumentError('task_display_mode must be WorkBreakdownDisplayMode option, '
-                                       '"{}" is not.'.format(task_display_mode))
-
-        if title is not None:
-            if not isinstance(title, str):
-                raise IllegalArgumentError('title must be a string, "{}" is not.'.format(title))
-        else:
-            title = activity.name
+        check_type(activity, Activity2, 'activity')
+        check_enum(task_display_mode, SubprocessDisplayMode, 'task_display_mode')
+        title = check_text(title, 'title') or activity.name
 
         uri = '{}/{}/{}'.format(self._scope_uri, task_display_mode, activity.id)
 
@@ -200,14 +183,8 @@ class SideBarManager(Iterable):
         :return: new side-bar button
         :rtype SideBarButton
         """
-        if page_name not in KEChainPages.values():
-            raise IllegalArgumentError('page_name must be KEChainPages option, "{}" is not.'.format(page_name))
-
-        if title is not None:
-            if not isinstance(title, str):
-                raise IllegalArgumentError('title must be a string, "{}" is not.'.format(title))
-        else:
-            title = KEChainPageLabels[page_name]
+        page_name = check_enum(page_name, KEChainPages, 'page_name')
+        title = check_text(title, 'title') or KEChainPageLabels[page_name]
 
         uri = '{}/{}'.format(self._scope_uri, page_name)
 
@@ -224,9 +201,13 @@ class SideBarManager(Iterable):
         :return: new side-bar button
         :rtype SideBarButton
         """
-        if not is_url(url):
-            raise IllegalArgumentError("The `url` must be a proper URL, got '{}'".format(url))
-        return self.create_button(title=title, uri=url, uri_target=URITarget.EXTERNAL, *args, **kwargs)
+        button = self.create_button(
+            title=check_text(title, 'title'),
+            uri=check_url(url),
+            uri_target=URITarget.EXTERNAL,
+            *args, **kwargs
+        )
+        return button
 
     def add_buttons(self, buttons: List[Dict], override_sidebar: bool) -> List[SideBarButton]:
         """
@@ -239,10 +220,8 @@ class SideBarManager(Iterable):
         :return: list of SideBarButton objects
         :rtype List[SideBarButton]
         """
-        if not isinstance(buttons, list) or not all(isinstance(button, dict) for button in buttons):
-            raise IllegalArgumentError('buttons must be a list of dictionaries, but received "{}"'.format(buttons))
-        if not isinstance(override_sidebar, bool):
-            raise IllegalArgumentError('override_sidebar must be a boolean, "{}" is not.'.format(override_sidebar))
+        check_list_of_dicts(buttons, 'buttons')
+        check_type(override_sidebar, bool, 'override_sidebar')
 
         for index, button in enumerate(buttons):
             button = SideBarButton(side_bar_manager=self, order=index, json=button)
@@ -283,8 +262,7 @@ class SideBarManager(Iterable):
         :type value: bool
         :return: None
         """
-        if not isinstance(value, bool):
-            raise IllegalArgumentError('Override sidebar must be a boolean, "{}" is not.'.format(value))
+        check_type(value, bool, 'override_sidebar')
         self._override = value
         self._update(override_sidebar=value)
 

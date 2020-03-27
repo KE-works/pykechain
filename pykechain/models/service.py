@@ -45,7 +45,7 @@ class Service(Base):
     """
 
     def __init__(self, json, **kwargs):
-        """Construct a scope from provided json data."""
+        """Construct a service from provided json data."""
         super(Service, self).__init__(json, **kwargs)
         del self.created_at
 

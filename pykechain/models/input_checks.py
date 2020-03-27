@@ -4,7 +4,7 @@ from typing import Text, Optional, List, Iterable, Any, Callable, Dict
 
 from pykechain.enums import Enum
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.utils import is_uuid
+from pykechain.utils import is_uuid, is_url
 
 iter_types = (list, tuple, set)
 
@@ -36,6 +36,15 @@ def check_text(text: Optional[Text], key: Text) -> Optional[Text]:
         if not isinstance(text, str):
             raise IllegalArgumentError('`{}` should be a string, "{}" ({}) is not.'.format(key, text, type(text)))
     return text
+
+
+def check_url(url: Optional[Text], key: Text = 'url') -> Optional[Text]:
+    """Validate text input to be a valid format URL."""
+    url = check_text(text=url, key=key)
+    if url is not None:
+        if not is_url(url):
+            raise IllegalArgumentError('`{}` should be a valid URL, "{}" ({}) is not.'.format(key, url, type(url)))
+    return url
 
 
 def check_list_of_text(list_of_text: Optional[Iterable[Text]], key: Text) -> Optional[List[Text]]:

@@ -15,13 +15,19 @@ from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, Ser
     ActivityClassification, ActivityStatus
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
-from pykechain.models import Part2, Property2, Activity2, Scope2, PartSet, AnyProperty, Base, Association, \
-    Service, ServiceExecution, Team, User
+
+from pykechain.models import Part2, Property2, Activity2, Scope2, PartSet, Base, AnyProperty, Service, \
+    ServiceExecution
+from pykechain.models.association import Association
+from pykechain.models.team import Team
+from pykechain.models.user import User
+from pykechain.models.notification import Notification
 from pykechain.models.widgets.widget import Widget
 from pykechain.utils import is_uuid, find
 from .__about__ import version as pykechain_version
 from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
-    check_list_of_base, check_base, check_uuid, check_list_of_dicts
+    check_list_of_base, check_base, check_uuid, check_list_of_dicts, check_url
+from .models.banner import Banner
 
 
 class Client(object):
@@ -1018,10 +1024,10 @@ class Client(object):
         """
         if isinstance(parent, Activity2):
             parent_classification = parent.classification
-            parent = parent.id
+            parent_id = parent.id
         elif is_uuid(parent):
             parent_classification = None
-            parent = parent
+            parent_id = parent
         else:
             raise IllegalArgumentError('`parent` must be an Activity or UUID, "{}" is neither'.format(parent))
 
@@ -1035,7 +1041,7 @@ class Client(object):
 
         data = {
             "name": check_text(text=name, key='name'),
-            "parent_id": parent,
+            "parent_id": parent_id,
             "status": check_enum(status, ActivityStatus, 'status'),
             "activity_type": check_enum(activity_type, ActivityType, 'activity_type'),
             "classification": classification,
@@ -1051,7 +1057,10 @@ class Client(object):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create activity {}: {}".format(str(response), response.content))
 
-        return Activity2(response.json()['results'][0], client=self)
+        new_activity = Activity2(response.json()['results'][0], client=self)
+        if isinstance(parent, Activity2) and parent._cached_children is not None:
+            parent._cached_children.append(new_activity)
+        return new_activity
 
     def _create_part(self, action: Text, data: Dict, **kwargs) -> Optional[Part2]:
         """Create a part for PIM 2 internal core function."""
@@ -2367,3 +2376,198 @@ class Client(object):
         properties = [Property2.create(client=self, json=js) for js in response.json()['results']]
 
         return properties
+
+    def notifications(self, pk: Optional[Text] = None, **kwargs) -> List[Notification]:
+        """Retrieve one or more notifications stored on the instance.
+
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
+        :param pk: if provided, filter the search by notification_id
+        :type pk: basestring or None
+        :param kwargs: (optional) additional search keyword arguments
+        :return: list of :class:`models.Notification` objects
+        :raises APIError: When the retrieval call failed due to various reasons
+        """
+        request_params = {
+            'id': check_uuid(pk)
+        }
+
+        if kwargs:
+            request_params.update(**kwargs)
+
+        response = self._request('GET', self._build_url('notifications'), params=request_params)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not retrieve Notifications. Request: {}\nResponse: {}".format(
+                request_params, response.content))
+
+        data = response.json()
+
+        return [Notification(notification, client=self) for notification in data['results']]
+
+    def notification(self, pk: Optional[Text] = None, *args, **kwargs) -> Notification:
+        """Retrieve a single KE-chain notification.
+
+        Uses the same interface as the :func:`notifications` method but returns only a single pykechain
+        :class:`models.Notification` object.
+
+        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
+        refer to the documentation of the KE-chain API for additional query parameters.
+
+        :param pk: if provided, filter the search by notification_id
+        :type pk: basestring or None
+        :param kwargs: (optional) additional search keyword arguments
+        :return: a single :class:`models.Notification`
+        :raises NotFoundError: When no `Notification` is found based on the search arguments
+        :raises MultipleFoundError: When more than a single `Notification` is found based on the search arguments
+        """
+        return self._retrieve_singular(self.notifications, pk=pk, *args, **kwargs)
+
+    def create_notification(self, **kwargs) -> Notification:
+        """
+        Create a single `Notification`.
+
+        :param kwargs: (optional) keyword=value arguments
+        :return: the newly created `Notification`
+        :raises: APIError: when the `Notification` could not be created
+        """
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['notifications'])
+
+        url = self._build_url('notifications')
+
+        response = self._request('POST', url, data=query_params)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create notification, {}:\n\n{}'".format(str(response), response.json()))
+
+        notification = Notification(response.json().get('results')[0], client=self)
+        return notification
+
+    def delete_notification(self, notification: Union[Notification, Text]) -> None:
+        """
+        Delete a single Notification.
+
+        :param notification: Notification or its UUID to be deleted
+        :type notification: Notification or basestring
+        :return: None
+        :raises APIError: whenever the notification could not be deleted
+        :raises IllegalArgumentError: whenever the input `notification` is invalid
+        """
+        notification = check_base(notification, Notification, 'notification')
+
+        url = self._build_url('notification', notification_id=notification)
+        response = self._request('DELETE', url)
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            raise APIError("Could not delete Notification ({})".format(response))
+
+    def banners(
+            self,
+            pk: Optional[Text] = None,
+            text: Optional[Text] = None,
+            is_active: Optional[bool] = None,
+            **kwargs
+    ) -> List[Banner]:
+        """
+        Retrieve Banners.
+
+        :param pk: ID of the banner
+        :param text: Text displayed in the banner
+        :param is_active: Whether the banner is currently active
+        :return: list of Banner objects
+        :rtype list
+        """
+        request_params = {
+            'text': check_text(text, 'text'),
+            'id': check_uuid(pk),
+            'is_active': check_type(is_active, bool, 'is_active'),
+        }
+        request_params.update(API_EXTRA_PARAMS['banners'])
+
+        if kwargs:  # pragma: no cover
+            request_params.update(**kwargs)
+
+        response = self._request('GET', self._build_url('banners'), params=request_params)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve banners")
+
+        data = response.json()
+        return [Banner(banner, client=self) for banner in data['results']]
+
+    def banner(self, *args, **kwargs) -> Banner:
+        """
+        Retrieve a single Banner, see `banners()` for available arguments.
+
+        :return: single banner
+        :rtype Banner
+        """
+        return self._retrieve_singular(self.banners, *args, **kwargs)
+
+    def create_banner(
+            self,
+            text: Text,
+            icon: Text,
+            active_from: datetime.datetime,
+            active_until: Optional[datetime.datetime] = None,
+            is_active: Optional[bool] = False,
+            url: Optional[Text] = None,
+            **kwargs
+    ) -> Banner:
+        """
+        Create a new banner.
+
+        :param text: Text to display in the banner. May use HTML.
+        :type text: str
+        :param icon: Font-awesome icon to stylize the banner
+        :type icon: str
+        :param active_from: Datetime from when the banner will become active.
+        :type active_from: datetime.datetime
+        :param active_until: Datetime from when the banner will no longer be active.
+        :type active_until: datetime.datetime
+        :param is_active: Boolean whether to set the banner as active, defaults to False.
+        :type is_active: bool
+        :param url: target for the "more info" button within the banner.
+        :param url: str
+        :param kwargs: additional arguments for the request
+        :return: the new banner
+        :rtype Banner
+        """
+        data = {
+            'text': check_text(text, 'text'),
+            'icon': check_text(icon, 'icon'),
+            'active_from': check_datetime(active_from, 'active_from'),
+            'active_until': check_datetime(active_until, 'active_until'),
+            'is_active': check_type(is_active, bool, 'is_active'),
+            'url': check_url(url),
+        }
+
+        # prepare url query parameters
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['banners'])
+
+        response = self._request('POST', self._build_url('banners'),
+                                 params=query_params,
+                                 json=data)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create banner, {}: {}".format(str(response), response.content))
+
+        return Banner(response.json()['results'][0], client=self)
+
+    def active_banner(self) -> Optional[Banner]:
+        """
+        Retrieve the currently active banner.
+
+        :return: Banner object. If no banner is active, returns None.
+        :rtype Banner
+        """
+        response = self._request('GET', self._build_url('banner_active'))
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve banners")
+
+        data = response.json()['results'][0]
+        return Banner(json=data, client=self) if data else None

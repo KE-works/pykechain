@@ -103,6 +103,13 @@ API_PATH = {
     'widgets_bulk_delete': 'api/widgets/bulk_delete',
     'widgets_bulk_update': 'api/widgets/bulk_update',
     'widgets_schemas': 'api/widgets/schemas',
+    'notifications': 'api/v3/notifications.json',
+    'notification': 'api/v3/notifications/{notification_id}.json',
+    'notification_share_activity_link': 'api/v3/notifications/share_activity_link',
+    'notification_share_activity_pdf': 'api/v3/notifications/share_activity_pdf',
+    'banners': 'api/v3/banners.json',
+    'banner': 'api/v3/banners/{banner_id}.json',
+    'banner_active': 'api/v3/banners/active.json',
 }
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
 API_EXTRA_PARAMS = {
@@ -112,6 +119,10 @@ API_EXTRA_PARAMS = {
     'activities': {'fields': ",".join(
         ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'activity_type', 'classification', 'tags',
          'progress', 'assignees_ids', 'start_date', 'due_date', 'status', 'parent_id', 'scope_id', 'customization'])},
+    'banner': {'fields': ",".join(
+        ['id', 'text', 'icon', 'is_active', 'active_from', 'active_until', 'url', 'created_at', 'updated_at'])},
+    'banners': {'fields': ",".join(
+        ['id', 'text', 'icon', 'is_active', 'active_from', 'active_until', 'url', 'created_at', 'updated_at'])},
     'scope2': {'fields': ",".join(
         ['id', 'name', 'ref', 'text', 'created_at', 'updated_at', 'start_date', 'due_date', 'status', 'category',
          'progress', 'members', 'team', 'tags', 'scope_options', 'team_id_name', 'workflow_root_id'])},
@@ -144,4 +155,8 @@ API_EXTRA_PARAMS = {
     'widget': {'fields': ",".join(
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
          'parent_id', 'progress', 'has_subwidgets', 'scope_id'])},
+    'notifications': {'fields': ",".join(
+        ['id', 'subject', 'status', 'message', 'team', 'created_at', 'options', 'updated_at'])},
+    'notification': {'fields': ",".join(
+        ['id', 'subject', 'status', 'message', 'team', 'created_at', 'options', 'updated_at'])},
 }
