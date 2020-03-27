@@ -9,6 +9,7 @@ In this release we deprecated feature that were announced to be deprecated some 
 * :+1: Added `editable` argument to the `add_attachmentviewer_widget` method of the WidgetsManager, to enable both viewing and editing of the attachment.
 * :+1: Added `Alignment` enum class, leaving `NavigationBarAlignment` as wrapper for backwards compatibility.
 * :+1: Large clean-up for user-input validation for most `Client` methods to provide consistent error messages.
+* :+1: Introduced pending deprecation for `version2` classes, such as `Part2`, `Activity2`, etc. Direct use of the (renamed) `Part` and `Activity` classes is advised.
 
 
 Backward incompatible changes
