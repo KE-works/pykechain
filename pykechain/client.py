@@ -17,7 +17,7 @@ from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentErr
     APIError
 
 from pykechain.models import Part2, Property2, Activity2, Scope2, PartSet, Base, AnyProperty, Service, \
-        ServiceExecution
+    ServiceExecution
 from pykechain.models.association import Association
 from pykechain.models.team import Team
 from pykechain.models.user import User
