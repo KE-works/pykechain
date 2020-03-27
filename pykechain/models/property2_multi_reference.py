@@ -201,7 +201,7 @@ class MultiReferenceProperty(Property2):
 
     def set_excluded_propmodels(
             self,
-            property_models: List[Union[Text, Part2]],
+            property_models: List[Union[Text, 'AnyProperty']],
             overwrite: Optional[bool] = False,
     ) -> None:
         """

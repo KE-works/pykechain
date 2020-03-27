@@ -1,14 +1,14 @@
 import os
 import warnings
 from datetime import datetime
-from unittest import skipIf
+from unittest import skipIf, skip
 
 import pytest
 import pytz
 import requests
 
 from pykechain.enums import ActivityType, ActivityStatus, ActivityClassification, Category, \
-    activity_root_name_by_classification, ActivityRootNames
+    activity_root_name_by_classification, ActivityRootNames, PaperSize, PaperOrientation, NotificationEvent
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError, APIError
 from pykechain.models import Activity2
 from pykechain.utils import temp_chdir
@@ -74,6 +74,20 @@ class TestActivityConstruction(TestBetamax):
         self.assertIsInstance(self.task, Activity2)
         self.assertEqual(ActivityType.TASK, self.task.activity_type)
         self.assertEqual(ActivityClassification.WORKFLOW, self.task.classification)
+
+    def test_create_below_parent(self):
+        self.process.children()  # populate `_cached_children`.
+        self.assertIsNotNone(self.process._cached_children, 'Cached children should be an (empty) list.')
+
+        new_task = self.process.create(
+            name='__Testing task',
+            activity_type=ActivityType.TASK,
+        )
+
+        current_children = self.process.children()
+
+        self.assertTrue(current_children)
+        self.assertIn(new_task, current_children, msg='New child task should be among the children.')
 
     def test_create_with_classification(self):
 
@@ -643,7 +657,6 @@ class TestActivity2SpecificTests(TestBetamax):
 
 
 class TestActivityDownloadAsPDF(TestBetamax):
-
     def test_activity2_download_as_pdf(self):
         # setUp
         activity_name = 'Task - Form'
@@ -661,7 +674,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
     @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
                         reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
     def test_activity2_download_as_pdf_async(self):
-        activity_name = 'Task - Form + Tables + Service'
+        activity_name = 'Task - Form'
         activity = self.project.activity(name=activity_name)
 
         # testing
@@ -671,3 +684,57 @@ class TestActivityDownloadAsPDF(TestBetamax):
             pdf_file_called_after_activity = os.path.join(target_dir, activity_name + '.pdf')
             self.assertTrue(pdf_file)
             self.assertTrue(pdf_file_called_after_activity)
+
+    def test_activity2_share_link(self):
+        # setUp
+        test_user = self.client.user(username='testuser')
+
+        activity_name = 'Task - Form'
+        message = 'EXAMPLE_MESSAGE'
+        subject = 'EXAMPLE_SUBJECT'
+        recipient_users = [test_user]
+
+        activity = self.project.activity(name=activity_name)
+
+        activity.share_link(subject=subject,
+                            message=message,
+                            recipient_users=recipient_users)
+
+        # testing
+        notifications = self.client.notifications(subject=subject, message=message,
+                                                  event=NotificationEvent.SHARE_ACTIVITY_LINK)
+        self.assertEqual(self.client.last_response.status_code, requests.codes.ok)
+        self.assertTrue(len(notifications), 1)
+
+        # tearDown
+        notifications[0].delete()
+
+    def test_activity2_share_pdf(self):
+        # setUp
+        test_user = self.client.user(username='testuser')
+
+        activity_name = 'Task - Form'
+        message = 'EXAMPLE_MESSAGE'
+        subject = 'EXAMPLE_SUBJECT'
+        paper_size = PaperSize.A2
+        paper_orientation = PaperOrientation.PORTRAIT
+        recipient_users = [test_user]
+
+        activity = self.project.activity(name=activity_name)
+
+        activity.share_pdf(subject=subject,
+                           message=message,
+                           recipient_users=recipient_users,
+                           paper_size=paper_size,
+                           paper_orientation=paper_orientation,
+                           include_appendices=False
+                           )
+
+        # testing
+        notifications = self.client.notifications(subject=subject, message=message,
+                                                  event=NotificationEvent.SHARE_ACTIVITY_PDF)
+        self.assertEqual(self.client.last_response.status_code, requests.codes.ok)
+        self.assertTrue(len(notifications), 1)
+
+        # tearDown
+        notifications[0].delete()
