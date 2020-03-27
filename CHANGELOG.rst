@@ -1,10 +1,15 @@
 Change Log
 ==========
 
-v3.6.1 (27MAR20)
+v3.6.2 (27MAR20)
 ----------------
 
 * :bug: We found out that the regex to validate the email addresses was incorrectly defined. We added additional tests to fix this. (thanks to @jberends for the omission and the fix)
+
+v3.6.1 (UNRELEASED)
+-------------------
+
+This was never released due to some inappropriate tagged.
 
 v3.6.0 (26MAR20)
 ----------------
