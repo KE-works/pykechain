@@ -977,7 +977,14 @@ class Client(object):
         return _users[0]
 
     def current_user(self) -> User:
-        """Retrieve the User object logged in to the Client."""
+        """
+        Retrieve the User object logged in to the Client.
+
+        # TODO Produce a more precise Exception, even with the retry adapter.
+        :raises Exception if not logged in yet.
+        :returns User
+        :rtype User
+        """
         response = self._request(method='GET', url=self._build_url(resource='user_current'))
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
