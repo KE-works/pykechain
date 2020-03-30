@@ -2929,11 +2929,11 @@ class Client(object):
             self,
             subject: Text,
             message: Text,
-            event: Optional[NotificationEvent] = None,
             status: Optional[NotificationStatus] = NotificationStatus.DRAFT,
             recipients: Optional[List[Union[User, Text]]] = None,
             team: Optional[Union[Team, Text]] = None,
             from_user: Optional[Union[User, Text]] = None,
+            event: Optional[NotificationEvent] = None,
             channel: Optional[NotificationChannels] = NotificationChannels.EMAIL,
             **kwargs
     ) -> Notification:
@@ -2996,18 +2996,16 @@ class Client(object):
                                            '"{}" ({}) is neither.'.format(team, type(team)))
 
         if from_user is None:
-            from_user = self.current_user().id
+            from_user_id = self.current_user().id
         elif isinstance(from_user, User):
-            from_user = from_user.id
-        elif not isinstance(from_user, (int, str)):
-            raise IllegalArgumentError('`from_user` must be a string or integer, '
-                                       '"{}" ({}) is not.'.format(from_user, type(from_user)))
+            from_user_id = from_user.id
+        elif isinstance(from_user, (int, str)):
+            from_user_id = str(from_user)
         else:
-            from_user = str(from_user)
+            raise IllegalArgumentError('`from_user` must be a User, string or integer, '
+                                       '"{}" ({}) is not.'.format(from_user, type(from_user)))
 
-        if event is None:
-            event = ''
-        elif event not in NotificationEvent.values():
+        if event is not None and event not in NotificationEvent.values():
             raise IllegalArgumentError('`event` must be a NotificationEvent option, "{}" is not.\n'
                                        'Select from: {}'.format(event, NotificationEvent.values()))
 
@@ -3023,7 +3021,7 @@ class Client(object):
             'recipient_users': recipient_users,
             'recipient_emails': recipient_emails,
             'team': team,
-            'from_user': from_user,
+            'from_user': from_user_id,
             'channels': [channel],
         }
 
