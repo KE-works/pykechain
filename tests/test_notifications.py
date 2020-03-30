@@ -208,3 +208,25 @@ class TestNotifications(_TestNotification):
         self.assertEqual(from_user, self.notification.from_user_id)
         self.assertEqual(event, self.notification.event)
         self.assertEqual(channel, self.notification.channels[0])
+
+    def test_edit_incorrect_inputs(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.notification.edit(subject=['Not a string'])
+        with self.assertRaises(IllegalArgumentError):
+            self.notification.edit(message=False)
+        with self.assertRaises(IllegalArgumentError):
+            self.notification.edit(status='Deleting')
+        with self.assertRaises(IllegalArgumentError):
+            self.notification.edit(recipients=True)
+        with self.assertRaises(IllegalArgumentError):
+            self.notification.edit(recipients=['Not a user ID'])
+        with self.assertRaises(IllegalArgumentError):
+            self.notification.edit(team=5)
+        with self.assertRaises(IllegalArgumentError):
+            self.notification.edit(from_user='self')
+        with self.assertRaises(IllegalArgumentError):
+            self.notification.edit(from_user=5.3)
+        with self.assertRaises(IllegalArgumentError):
+            self.notification.edit(event='Update')
+        with self.assertRaises(IllegalArgumentError):
+            self.notification.edit(channel=[NotificationChannels.APP])
