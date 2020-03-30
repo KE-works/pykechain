@@ -39,12 +39,14 @@ class Notification(Base):
         self.subject = json.get('subject', '')  # type: Text
         self.status = json.get('status', '')  # type: Text
         self.event = json.get('event', '')  # type: Text
-        self.channels = json.get('channels', '')  # type: List
-        self.recipient_user_ids = json.get('recipient_users', '')  # type: List
-        self.from_user_id = json.get('from_user', '')
+        self.channels = json.get('channels', list())  # type: List
+        self.recipient_user_ids = json.get('recipient_users', list())  # type: List
+        self.team_id = json.get('team', '')  # type: Text
+        self.from_user_id = json.get('from_user', '')  # type: Text
 
         self._from_user = None  # type: Optional['User']
         self._recipient_users = None  # type: Optional[List['User']]
+        self._team = None  # type: Optional['Team']
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Notification id {}>".format(self.id[-8:])
@@ -56,10 +58,16 @@ class Notification(Base):
         return self._recipient_users
 
     def get_from_user(self) -> 'User':
-        """Return the actual `User` object based on from_user_id."""
-        if self._from_user is None:
+        """Return the actual `User` object based on the from_user_id."""
+        if self._from_user is None and self.from_user_id:
             self._from_user = self._client.user(pk=self.from_user_id)
         return self._from_user
+
+    def get_team(self) -> 'Team':
+        """Return the actual `Team` object based on the team_id."""
+        if self._team is None and self.team_id:
+            self._team = self._client.team(pk=self.team_id)
+        return self._team
 
     def delete(self):
         """Delete the notification."""
@@ -103,7 +111,7 @@ class Notification(Base):
         if subject is not None and not isinstance(subject, str):
             raise IllegalArgumentError('`subject` must be a string, "{}" ({}) is not.'.format(subject, type(subject)))
 
-        if message is not None and  not isinstance(message, str):
+        if message is not None and not isinstance(message, str):
             raise IllegalArgumentError('`message` must be a string, "{}" ({}) is not.'.format(message, type(message)))
 
         if status is not None and status not in NotificationStatus.values():
@@ -119,9 +127,13 @@ class Notification(Base):
                 for recipient in recipients:
                     if is_valid_email(recipient):
                         recipient_emails.append(recipient)
+                    elif isinstance(recipient, User):
+                        recipient_users.append(recipient.id)
                     else:
-                        user_id = recipient.id if isinstance(recipient, User) else recipient
-                        recipient_users.append(user_id)
+                        try:
+                            recipient_users.append(int(recipient))
+                        except ValueError:
+                            raise IllegalArgumentError('`recipient` "{}" is not a User or user ID!'.format(recipient))
 
             else:
                 raise IllegalArgumentError('`recipients` must be a list of User objects, IDs or email addresses, '
@@ -130,7 +142,7 @@ class Notification(Base):
         if team is not None:
             from pykechain.models import Team
             if isinstance(team, Team):
-                team = team.id,
+                team = team.id
             elif is_uuid(team):
                 pass
             else:
@@ -143,7 +155,10 @@ class Notification(Base):
             if isinstance(from_user, User):
                 from_user_id = from_user.id
             elif isinstance(from_user, (int, str)):
-                from_user_id = str(from_user)
+                try:
+                    from_user_id = int(from_user)
+                except ValueError:
+                    raise IllegalArgumentError('`from_user` "{}" is not a User or user ID!'.format(from_user))
             else:
                 raise IllegalArgumentError('`from_user` must be a User, string or integer, '
                                            '"{}" ({}) is not.'.format(from_user, type(from_user)))

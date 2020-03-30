@@ -1,26 +1,123 @@
-from pykechain.exceptions import NotFoundError, MultipleFoundError
-from pykechain.models import User
+from pykechain.enums import NotificationEvent, NotificationChannels, NotificationStatus
+from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
+from pykechain.models import User, Team
 from pykechain.models.notification import Notification
 from tests.classes import TestBetamax
 
 
-class TestNotifications(TestBetamax):
-    def setUp(self):
-        super(TestNotifications, self).setUp()
+class _TestNotification(TestBetamax):
+    SUBJECT = '_TEST_SUBJECT'
+    MESSAGE = '_TEST_MESSAGE'
+    USER_ID = 1
 
-        self.subject = 'TEST_SUBJECT'
-        self.message = 'TEST_MESSAGE'
+    def setUp(self) -> None:
+        super().setUp()
+        self.USER = self.client.user(pk=self.USER_ID)
+        self.TEAM = self.client.teams()[0]
 
-        for old_notification in self.client.notifications(name=self.subject):
+        for old_notification in self.client.notifications(subject=self.SUBJECT):
             old_notification.delete()
 
-        self.recipient_users = [1]
-        self.testing_notification = self.client.create_notification(subject=self.subject, message=self.message,
-                                                                    recipient_users=self.recipient_users)
+
+class TestNotificationCreation(_TestNotification):
+
+    def setUp(self):
+        super().setUp()
+        self.bucket = list()
 
     def tearDown(self):
-        self.testing_notification.delete()
-        super(TestNotifications, self).tearDown()
+        for obj in self.bucket:
+            try:
+                obj.delete()
+            except APIError:
+                pass
+        super().tearDown()
+
+    def test_create(self):
+        # setUp
+        notification = self.client.create_notification(subject=self.SUBJECT,
+                                                       message=self.MESSAGE)
+        self.bucket.append(notification)
+
+        # testing
+        self.assertIsInstance(notification, Notification)
+        self.assertEqual(self.SUBJECT, notification.subject)
+        self.assertEqual(self.MESSAGE, notification.message)
+
+    def test_create_with_inputs(self):
+        notification = self.client.create_notification(
+            subject=self.SUBJECT,
+            message=self.MESSAGE,
+            status=NotificationStatus.READY,
+            recipients=[self.USER_ID],
+            team=self.TEAM,
+            from_user=self.USER_ID,
+            event=NotificationEvent.EXPORT_ACTIVITY_ASYNC,
+            channel=NotificationChannels.EMAIL,
+        )
+        self.bucket.append(notification)
+
+        self.assertIsInstance(notification, Notification)
+        self.assertEqual(NotificationStatus.READY, notification.status)
+        self.assertEqual(self.USER_ID, notification.recipient_user_ids[0])
+        self.assertEqual(self.TEAM, notification.get_team())
+        self.assertEqual(self.USER, notification.get_from_user())
+        self.assertEqual(NotificationEvent.EXPORT_ACTIVITY_ASYNC, notification.event)
+        self.assertEqual(NotificationChannels.EMAIL, notification.channels[0])
+
+    def test_create_invalid_inputs(self):
+        kwargs = dict(subject=self.SUBJECT, message=self.MESSAGE)
+        with self.assertRaises(IllegalArgumentError):
+            self.bucket.append(self.client.create_notification(subject=False, message=self.MESSAGE))
+        with self.assertRaises(IllegalArgumentError):
+            self.bucket.append(self.client.create_notification(subject=self.SUBJECT, message=[self.MESSAGE]))
+        with self.assertRaises(IllegalArgumentError):
+            self.bucket.append(self.client.create_notification(status='sending', **kwargs))
+        with self.assertRaises(IllegalArgumentError):
+            self.bucket.append(self.client.create_notification(recipients='not a list', **kwargs))
+        with self.assertRaises(IllegalArgumentError):
+            self.bucket.append(self.client.create_notification(recipients=['not a user id'], **kwargs))
+        with self.assertRaises(IllegalArgumentError):
+            self.bucket.append(self.client.create_notification(team=0, **kwargs))
+        with self.assertRaises(IllegalArgumentError):
+            self.bucket.append(self.client.create_notification(from_user='Myself', **kwargs))
+        with self.assertRaises(IllegalArgumentError):
+            self.bucket.append(self.client.create_notification(event='Update', **kwargs))
+        with self.assertRaises(IllegalArgumentError):
+            self.bucket.append(self.client.create_notification(channel=[NotificationChannels.EMAIL], **kwargs))
+
+    def test_delete_notification_from_client(self):
+        # setUp
+        notification = self.client.create_notification(message=self.MESSAGE, subject=self.SUBJECT)
+        self.client.delete_notification(notification=notification)
+
+        # testing
+        with self.assertRaises(NotFoundError):
+            self.client.notification(message=self.MESSAGE, subject=self.SUBJECT)
+
+    def test_delete_notification(self):
+        # setUp
+        notification = self.client.create_notification(message=self.MESSAGE, subject=self.SUBJECT)
+        notification.delete()
+
+        # testing
+        with self.assertRaises(NotFoundError):
+            self.client.notification(message=self.MESSAGE, subject=self.SUBJECT)
+
+
+class TestNotifications(_TestNotification):
+    def setUp(self):
+        super().setUp()
+        self.notification = self.client.create_notification(
+            subject=self.SUBJECT,
+            message=self.MESSAGE,
+            recipients=[self.USER_ID],
+            team=self.TEAM,
+        )
+
+    def tearDown(self):
+        self.notification.delete()
+        super().tearDown()
 
     def test_all_notifications_retrieval(self):
         # setUp
@@ -38,8 +135,10 @@ class TestNotifications(TestBetamax):
 
     def test_retrieve_notification(self):
         # testing
-        retrieved_notification = self.client.notification(message=self.message, subject=self.subject)
+        retrieved_notification = self.client.notification(message=self.MESSAGE, subject=self.SUBJECT)
+
         self.assertIsInstance(retrieved_notification, Notification)
+        self.assertEqual(self.notification, retrieved_notification)
 
     def test_retrieve_notification_raise_not_found(self):
         with self.assertRaises(NotFoundError):
@@ -47,53 +146,17 @@ class TestNotifications(TestBetamax):
 
     def test_retrieve_notification_raise_multiple_found(self):
         # setUp
-        clone_testing_notification = self.client.create_notification(subject=self.subject, message=self.message)
+        clone_testing_notification = self.client.create_notification(subject=self.SUBJECT, message=self.MESSAGE)
 
         # testing
         with self.assertRaises(MultipleFoundError):
-            self.client.notification(message=self.message, subject=self.subject)
+            self.client.notification(message=self.MESSAGE, subject=self.SUBJECT)
 
         # tearDown
         clone_testing_notification.delete()
 
-    def test_create_notification(self):
-        # setUp
-        subject = "This is testing the creation"
-        message = "Will it work?"
-        notification_created = self.client.create_notification(subject=subject,
-                                                               message=message)
-        # testing
-        self.assertIsInstance(notification_created, Notification)
-        self.assertEqual(notification_created.subject, subject)
-        self.assertEqual(notification_created.message, message)
-
-        # tearDown
-        self.client.delete_notification(notification=notification_created)
-
-    def test_delete_notification_from_client(self):
-        # setUp
-        message = "Testing deletion of notification"
-        subject = "Testing deletion"
-        notification = self.client.create_notification(message=message, subject=subject)
-        self.client.delete_notification(notification=notification)
-
-        # testing
-        with self.assertRaises(NotFoundError):
-            self.client.notification(message=message, subject=subject)
-
-    def test_delete_notification(self):
-        # setUp
-        message = "Testing deletion of notification"
-        subject = "Testing deletion"
-        notification = self.client.create_notification(message=message, subject=subject)
-        notification.delete()
-
-        # testing
-        with self.assertRaises(NotFoundError):
-            self.client.notification(message=message, subject=subject)
-
     def test_get_recipient_users(self):
-        recipients = self.testing_notification.get_recipient_users()
+        recipients = self.notification.get_recipient_users()
 
         # testing
         self.assertIsInstance(recipients, list)
@@ -105,8 +168,43 @@ class TestNotifications(TestBetamax):
         self.assertEqual('superuser', first_recipient.username)
 
     def test_get_from_user(self):
-        from_user = self.testing_notification.get_from_user()
+        from_user = self.notification.get_from_user()
 
         self.assertTrue(from_user)
         self.assertIsInstance(from_user, User)
         self.assertEqual('pykechain_user', from_user.username)
+
+    def test_get_team(self):
+        team = self.notification.get_team()
+
+        self.assertIsInstance(team, Team)
+        self.assertEqual(self.TEAM, team)
+
+    def test_edit(self):
+        subject = 'NEW SUBJECT'
+        message = 'NEW MESSAGE'
+        status = NotificationStatus.ARCHIVED
+        recipients = [4]
+        from_user = 4
+        event = NotificationEvent.EXPORT_ACTIVITY_ASYNC
+        channel = NotificationChannels.APP
+
+        self.notification.edit(
+            subject=subject,
+            message=message,
+            status=status,
+            recipients=recipients,
+            team=self.TEAM,
+            from_user=from_user,
+            event=event,
+            channel=channel,
+        )
+
+        self.assertEqual(subject, self.notification.subject)
+        self.assertEqual(message, self.notification.message)
+        self.assertEqual(status, self.notification.status)
+        self.assertListEqual(recipients, self.notification.recipient_user_ids)
+        self.assertEqual(self.TEAM.id, self.notification.team_id)
+        self.assertEqual(from_user, self.notification.from_user_id)
+        self.assertEqual(event, self.notification.event)
+        self.assertEqual(channel, self.notification.channels[0])

@@ -966,5 +966,6 @@ class NotificationChannels(Enum):
     :cvar EMAIL: email notification
     :cvar APP: app notification
     """
+
     EMAIL = 'EMAIL'
     APP = 'APP'

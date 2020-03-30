@@ -2978,9 +2978,13 @@ class Client(object):
                 for recipient in recipients:
                     if is_valid_email(recipient):
                         recipient_emails.append(recipient)
+                    elif isinstance(recipient, User):
+                        recipient_users.append(recipient.id)
                     else:
-                        user_id = recipient.id if isinstance(recipient, User) else recipient
-                        recipient_users.append(user_id)
+                        try:
+                            recipient_users.append(int(recipient))
+                        except ValueError:
+                            raise IllegalArgumentError('`recipient` "{}" is not a User or user ID!'.format(recipient))
 
             else:
                 raise IllegalArgumentError('`recipients` must be a list of User objects, IDs or email addresses, '
@@ -3000,7 +3004,10 @@ class Client(object):
         elif isinstance(from_user, User):
             from_user_id = from_user.id
         elif isinstance(from_user, (int, str)):
-            from_user_id = str(from_user)
+            try:
+                from_user_id = int(from_user)
+            except ValueError:
+                raise IllegalArgumentError('`from_user` "{}" is not a User or user ID!'.format(from_user))
         else:
             raise IllegalArgumentError('`from_user` must be a User, string or integer, '
                                        '"{}" ({}) is not.'.format(from_user, type(from_user)))
