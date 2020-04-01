@@ -81,6 +81,14 @@ class TestClient(TestCase):
                 client = Client.from_env()
                 self.assertEqual(len(captured_warnings), 0)
 
+    # 3.6.3
+    def test_get_current_user(self):
+        client = Client()
+
+        # TODO Produce a more precise Exception, even with the retry adapter.
+        with self.assertRaises(Exception):
+            client.current_user()
+
 
 class TestClientLive(TestBetamax):
 
@@ -108,6 +116,13 @@ class TestClientLive(TestBetamax):
 
         with self.assertRaises(ForbiddenError):
             self.client.parts()
+
+    # 3.6.3
+    def test_get_current_user(self):
+        user = self.client.current_user()
+
+        from pykechain.models import User
+        self.assertIsInstance(user, User)
 
     # 2.6.0
     def test_create_scope(self):

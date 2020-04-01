@@ -60,6 +60,7 @@ API_PATH = {
     'service_execution_notebook_url': 'api/service_executions/{service_execution_id}/notebook_url',
     'service_execution_log': 'api/service_executions/{service_execution_id}/log',
     'users': 'api/users.json',
+    'user_current': 'api/users/get_current_user',
     'teams': 'api/teams.json',
     'team': 'api/teams/{team_id}.json',
     'team_add_members': 'api/teams/{team_id}/add_members',
