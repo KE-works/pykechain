@@ -13,7 +13,7 @@ from pykechain.defaults import API_PATH, API_EXTRA_PARAMS, RETRY_ON_CONNECTION_E
     RETRY_TOTAL, RETRY_ON_READ_ERRORS, RETRY_ON_REDIRECT_ERRORS
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
-    ActivityClassification, ActivityStatus
+    ActivityClassification, ActivityStatus, NotificationStatus, NotificationEvent, NotificationChannels
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
 from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property, AnyProperty
@@ -25,7 +25,7 @@ from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.notification import Notification
 from pykechain.models.widgets.widget import Widget
-from pykechain.utils import is_uuid, find, is_url
+from pykechain.utils import is_uuid, find, is_url, is_valid_email
 from .__about__ import version
 from .models.banner import Banner
 
@@ -191,7 +191,7 @@ class Client(object):
         # type: (str, **str) -> str
         """Build the correct API url.
 
-        :param resource: name the resouce from the API_PATH
+        :param resource: name the resource from the API_PATH
         :type resource: basestring
         :param kwargs: (optional) id of the detail path to follow, eg. activity_id=...
         :type kwargs: dict
@@ -975,6 +975,22 @@ class Client(object):
             raise MultipleFoundError("Multiple users fit criteria:{}".format(criteria))
 
         return _users[0]
+
+    def current_user(self) -> User:
+        """
+        Retrieve the User object logged in to the Client.
+
+        # TODO Produce a more precise Exception, even with the retry adapter.
+        :raises Exception if not logged in yet.
+        :returns User
+        :rtype User
+        """
+        response = self._request(method='GET', url=self._build_url(resource='user_current'))
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not find current user: '{}'".format(response.json()))
+
+        return User(response.json()['results'][0], client=self)
 
     def team(self, name=None, pk=None, is_hidden=False, **kwargs):
         """
@@ -2909,20 +2925,119 @@ class Client(object):
 
         return _notifications[0]
 
-    def create_notification(self, **kwargs):
+    def create_notification(
+            self,
+            subject: Text,
+            message: Text,
+            status: Optional[NotificationStatus] = NotificationStatus.DRAFT,
+            recipients: Optional[List[Union[User, Text]]] = None,
+            team: Optional[Union[Team, Text]] = None,
+            from_user: Optional[Union[User, Text]] = None,
+            event: Optional[NotificationEvent] = None,
+            channel: Optional[NotificationChannels] = NotificationChannels.EMAIL,
+            **kwargs
+    ) -> Notification:
         """
         Create a single `Notification`.
 
+        :param subject: Header text of the notification
+        :type subject: str
+        :param message: Content message of the notification
+        :type message: str
+        :param status: (O) life-cycle status of the notification, defaults to "DRAFT".
+        :type status: NotificationStatus
+        :param recipients: (O) list of recipients, each being a User object, user ID or an email address.
+        :type recipients: list
+        :param team: (O) team object to which the notification is constrained
+        :type team: Team object or Team UUID
+        :param from_user: (O) Sender of the notification, either a User object or user ID. Defaults to script user.
+        :type from_user: User or user ID
+        :param event: (O) originating event of the notification.
+        :type event: NotificationEvent
+        :param channel: (O) method used to send the notification, defaults to "EMAIL".
+        :type channel: NotificationChannels
         :param kwargs: (optional) keyword=value arguments
         :return: the newly created `Notification`
         :raises: APIError: when the `Notification` could not be created
         """
-        query_params = kwargs
-        query_params.update(API_EXTRA_PARAMS['notifications'])
+        if not isinstance(subject, str):
+            raise IllegalArgumentError('`subject` must be a string, "{}" ({}) is not.'.format(subject, type(subject)))
+
+        if not isinstance(message, str):
+            raise IllegalArgumentError('`message` must be a string, "{}" ({}) is not.'.format(message, type(message)))
+
+        if status not in NotificationStatus.values():
+            raise IllegalArgumentError('`status` must be a NotificationStatus option, "{}" is not.\n'
+                                       'Select from: {}'.format(status, NotificationStatus.values()))
+
+        recipient_users = list()
+        recipient_emails = list()
+
+        if recipients is not None:
+            if isinstance(recipients, list) and all(isinstance(r, (str, int, User)) for r in recipients):
+                for recipient in recipients:
+                    if is_valid_email(recipient):
+                        recipient_emails.append(recipient)
+                    elif isinstance(recipient, User):
+                        recipient_users.append(recipient.id)
+                    else:
+                        try:
+                            recipient_users.append(int(recipient))
+                        except ValueError:
+                            raise IllegalArgumentError('`recipient` "{}" is not a User or user ID!'.format(recipient))
+
+            else:
+                raise IllegalArgumentError('`recipients` must be a list of User objects, IDs or email addresses, '
+                                           '"{}" ({}) is not.'.format(recipients, type(recipients)))
+
+        if team is not None:
+            if isinstance(team, Team):
+                team = team.id,
+            elif is_uuid(team):
+                pass
+            else:
+                raise IllegalArgumentError('`team` must be a Team object or team UUID, '
+                                           '"{}" ({}) is neither.'.format(team, type(team)))
+
+        if from_user is None:
+            from_user_id = self.current_user().id
+        elif isinstance(from_user, User):
+            from_user_id = from_user.id
+        elif isinstance(from_user, (int, str)):
+            try:
+                from_user_id = int(from_user)
+            except ValueError:
+                raise IllegalArgumentError('`from_user` "{}" is not a User or user ID!'.format(from_user))
+        else:
+            raise IllegalArgumentError('`from_user` must be a User, string or integer, '
+                                       '"{}" ({}) is not.'.format(from_user, type(from_user)))
+
+        if event is not None and event not in NotificationEvent.values():
+            raise IllegalArgumentError('`event` must be a NotificationEvent option, "{}" is not.\n'
+                                       'Select from: {}'.format(event, NotificationEvent.values()))
+
+        if channel not in NotificationChannels.values():
+            raise IllegalArgumentError('`channel` must be a NotificationChannels option, "{}" is not.\n'
+                                       'Select from: {}'.format(status, NotificationChannels.values()))
+
+        data = {
+            'status': status,
+            'event': event,
+            'subject': subject,
+            'message': message,
+            'recipient_users': recipient_users,
+            'recipient_emails': recipient_emails,
+            'team': team,
+            'from_user': from_user_id,
+            'channels': [channel],
+        }
+
+        data.update(kwargs)
+        data.update(API_EXTRA_PARAMS['notifications'])
 
         url = self._build_url('notifications')
 
-        response = self._request('POST', url, data=query_params)
+        response = self._request('POST', url, data=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create notification, {}:\n\n{}'".format(str(response), response.json()))
@@ -2930,7 +3045,7 @@ class Client(object):
         notification = Notification(response.json().get('results')[0], client=self)
         return notification
 
-    def delete_notification(self, notification: Union[Widget, text_type]) -> None:
+    def delete_notification(self, notification: Union[Notification, Text]) -> None:
         """
         Delete a single Notification.
 
