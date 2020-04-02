@@ -26,7 +26,7 @@ from pykechain.models.widgets.widget import Widget
 from pykechain.utils import is_uuid, find, is_valid_email
 from .__about__ import version as pykechain_version
 from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
-    check_list_of_base, check_base, check_uuid, check_list_of_dicts, check_url
+    check_list_of_base, check_base, check_uuid, check_list_of_dicts, check_url, check_user
 from .models.banner import Banner
 
 
@@ -2483,6 +2483,9 @@ class Client(object):
         :return: the newly created `Notification`
         :raises: APIError: when the `Notification` could not be created
         """
+        if from_user is None:
+            from_user = self.current_user()
+
         recipient_users = list()
         recipient_emails = list()
 
@@ -2491,30 +2494,12 @@ class Client(object):
                 for recipient in recipients:
                     if is_valid_email(recipient):
                         recipient_emails.append(recipient)
-                    elif isinstance(recipient, User):
-                        recipient_users.append(recipient.id)
                     else:
-                        try:
-                            recipient_users.append(int(recipient))
-                        except ValueError:
-                            raise IllegalArgumentError('`recipient` "{}" is not a User or user ID!'.format(recipient))
+                        recipient_users.append(check_user(recipient, User, 'recipient'))
 
             else:
                 raise IllegalArgumentError('`recipients` must be a list of User objects, IDs or email addresses, '
                                            '"{}" ({}) is not.'.format(recipients, type(recipients)))
-
-        if from_user is None:
-            from_user_id = self.current_user().id
-        elif isinstance(from_user, User):
-            from_user_id = from_user.id
-        elif isinstance(from_user, (int, str)):
-            try:
-                from_user_id = int(from_user)
-            except ValueError:
-                raise IllegalArgumentError('`from_user` "{}" is not a User or user ID!'.format(from_user))
-        else:
-            raise IllegalArgumentError('`from_user` must be a User, string or integer, '
-                                       '"{}" ({}) is not.'.format(from_user, type(from_user)))
 
         data = {
             'status': check_enum(status, NotificationStatus, 'status'),
@@ -2524,7 +2509,7 @@ class Client(object):
             'recipient_users': recipient_users,
             'recipient_emails': recipient_emails,
             'team': check_base(team, Team, 'team'),
-            'from_user': from_user_id,
+            'from_user': check_user(from_user, User, 'from_user'),
             'channels': [channel] if check_enum(channel, NotificationChannels, 'channel') else [],
         }
 

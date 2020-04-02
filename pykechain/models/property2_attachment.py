@@ -5,11 +5,11 @@ import os
 import requests
 from typing import Text, Any, Optional
 
-from pykechain.exceptions import APIError, _DeprecationMixin
+from pykechain.exceptions import APIError
 from pykechain.models.property2 import Property2
 
 
-class AttachmentProperty(Property2):
+class AttachmentProperty2(Property2):
     """A virtual object representing a KE-chain attachment property."""
 
     @property
@@ -151,9 +151,3 @@ class AttachmentProperty(Property2):
 
         if response.status_code != requests.codes.ok:
             raise APIError("Could not upload attachment: {}".format(response.content))
-
-
-class AttachmentProperty2(AttachmentProperty, _DeprecationMixin):
-    """A virtual object representing a KE-chain attachment property."""
-
-    pass

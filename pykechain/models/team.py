@@ -6,7 +6,7 @@ from pykechain.enums import TeamRoles, ScopeStatus
 from pykechain.exceptions import APIError
 from pykechain.models.user import User
 from .base import Base
-from .input_checks import check_text, check_type, check_enum, check_list_of_base
+from .input_checks import check_text, check_type, check_enum, check_user
 
 
 class Team(Base):
@@ -131,7 +131,7 @@ class Team(Base):
         """
         update_dict = {
             'role': check_enum(role, TeamRoles, 'role'),
-            'users': check_list_of_base(users, User, 'users'),
+            'users': [check_user(user, User, 'users') for user in users],
         }
 
         self._update('team_add_members', team_id=self.id, update_dict=update_dict)
@@ -152,7 +152,7 @@ class Team(Base):
         >>> my_team.remove_members([other_user])
 
         """
-        update_dict = {'users': check_list_of_base(users, User, 'users')}
+        update_dict = {'users': [check_user(user, User, 'users') for user in users]}
 
         self._update('team_remove_members',
                      update_dict=update_dict,

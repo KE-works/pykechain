@@ -121,8 +121,6 @@ def check_base(obj: Optional[Any],
 
         if isinstance(obj, cls):
             obj = obj.id
-        elif isinstance(obj, int):
-            obj = str(obj)
         elif isinstance(obj, str) and is_uuid(obj):
             pass
         elif isinstance(obj, str) and method:
@@ -130,6 +128,34 @@ def check_base(obj: Optional[Any],
         else:
             raise IllegalArgumentError(
                 '`{}` must be an ID, UUID or `{}` object, "{}" ({}) is not.'.format(key, cls.__name__, obj, type(obj)))
+    return obj
+
+
+def check_user(obj: Optional[Any],
+               cls: Optional[type(object)] = None,
+               key: Optional[Text] = 'user',
+               method: Optional[Callable] = None,
+               ) -> Optional[int]:
+    """Same functionality as check_base(), although users dont use UUID but integers."""
+    if obj is not None:
+
+        if cls is None:
+            from pykechain.models import User
+            cls = User
+
+        if isinstance(obj, cls):
+            obj = obj.id
+        elif isinstance(obj, str):
+            try:
+                obj = int(obj)
+            except ValueError:
+                raise IllegalArgumentError(
+                    '`{}` must be an ID or `{}` object, "{}" ({}) is not.'.format(key, cls.__name__, obj, type(obj)))
+        elif method:
+            obj = method(obj).id
+        else:
+            raise IllegalArgumentError(
+                '`{}` must be an ID or `{}` object, "{}" ({}) is not.'.format(key, cls.__name__, obj, type(obj)))
     return obj
 
 
@@ -158,7 +184,7 @@ def check_list_of_base(
 
         if not_recognized:
             raise IllegalArgumentError(
-                'All `{}` must be IDs, UUIDs or `{}` objects, "{}" are not.'.format(
-                    key, cls.__name__, '", "'.join(not_recognized))
+                'All `{}` must be IDs, UUIDs or `{}` objects, "{}" is/are not.'.format(
+                    key, cls.__name__, '", "'.join([str(n) for n in not_recognized]))
             )
     return ids

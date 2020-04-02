@@ -5,7 +5,7 @@ import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import Multiplicity, ScopeStatus, SubprocessDisplayMode, KEChainPages
-from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError, _DeprecationMixin
+from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
 from pykechain.models.input_checks import check_text, check_datetime, check_enum, check_list_of_text, \
     check_base, check_type
@@ -15,7 +15,7 @@ from pykechain.models.team import Team
 from pykechain.utils import parse_datetime, find
 
 
-class Scope(Base, TagsMixin):
+class Scope2(Base, TagsMixin):
     """A virtual object representing a KE-chain scope.
 
     :ivar id: id of the activity
@@ -498,27 +498,3 @@ class Scope(Base, TagsMixin):
         select_action = 'remove_leadmember'
 
         self._update_scope_project_team(select_action=select_action, user=leadmember, user_type='leadmember')
-
-
-class Scope2(Scope, _DeprecationMixin):
-    """A virtual object representing a KE-chain scope.
-
-    :ivar id: id of the activity
-    :type id: uuid
-    :ivar name: name of the activity
-    :type name: basestring
-    :ivar created_at: created datetime of the activity
-    :type created_at: datetime
-    :ivar updated_at: updated datetime of the activity
-    :type updated_at: datetime
-    :ivar description: description of the activity
-    :type description: basestring
-    :ivar workflow_root: uuid of the workflow root object
-    :type workflow_root: uuid
-    :ivar status: status of the scope. One of :class:`pykechain.enums.ScopeStatus`
-    :type status: basestring
-    :ivar type: Type of the Scope. One of :class:`pykechain.enums.ScopeType` for WIM version 2
-    :type type: basestring
-    """
-
-    pass

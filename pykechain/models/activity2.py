@@ -9,8 +9,9 @@ from requests.compat import urljoin  # type: ignore
 from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_EXTRA_PARAMS
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
-from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError, _DeprecationMixin
-from pykechain.models.input_checks import check_datetime, check_text, check_list_of_text, check_enum
+from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
+from pykechain.models.input_checks import check_datetime, check_text, check_list_of_text, check_enum, check_user, \
+    check_type
 from pykechain.models.user import User
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
@@ -18,7 +19,7 @@ from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import parse_datetime, is_valid_email
 
 
-class Activity(TreeObject, TagsMixin):
+class Activity2(TreeObject, TagsMixin):
     """A virtual object representing a KE-chain activity.
 
     .. versionadded:: 2.0
@@ -786,7 +787,7 @@ class Activity(TreeObject, TagsMixin):
         """
         return self._client.move_activity(self, parent, classification=classification)
 
-    def share_link(self, subject, message, recipient_users):
+    def share_link(self, subject: Text, message: Text, recipient_users: List[Union[User, Text]]) -> None:
         """
         Share the link of the `Activity` through email.
 
@@ -796,29 +797,12 @@ class Activity(TreeObject, TagsMixin):
         :type message: basestring
         :param recipient_users: users that will receive the email
         :type recipient_users: list(Union(User, Id))
-        :raises IllegalArgumentError: if no 'message' is specified
-        :raises IllegalArgumentError: if no 'subject' is specified
-        :raises IllegalArgumentError: if no 'recipient_users' is specified
-        :raises APIError: if an Error occurs.
+        :raises APIError: if an internal server error occurred.
         """
-        if not message:
-            raise IllegalArgumentError('Sharing an activity link requires a message')
-        if not subject:
-            raise IllegalArgumentError('Sharing an activity link requires a subject')
-        if not recipient_users:
-            raise IllegalArgumentError('Sharing an activity link requires recipient users')
-        else:
-            recipient_users_ids = list()
-            for user in recipient_users:
-                if isinstance(user, User):
-                    recipient_users_ids.append(user.id)
-                else:
-                    recipient_users_ids.append(user)
-
         params = dict(
-            message=message,
-            subject=subject,
-            recipient_users=recipient_users_ids,
+            message=check_text(message, 'message'),
+            subject=check_text(subject, 'subject'),
+            recipient_users=[check_user(recipient, User, 'recipient') for recipient in recipient_users],
             activity_id=self.id
         )
 
@@ -829,8 +813,15 @@ class Activity(TreeObject, TagsMixin):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not share the link to Activity, {}:\n\n{}'".format(str(response), response.json()))
 
-    def share_pdf(self, subject, message, recipient_users, paper_size=PaperSize.A3,
-                  paper_orientation=PaperOrientation.PORTRAIT, include_appendices=False):
+    def share_pdf(
+            self,
+            subject: Text,
+            message: Text,
+            recipient_users: List[Union[User, Text]],
+            paper_size: Optional[PaperSize] = PaperSize.A3,
+            paper_orientation: Optional[PaperOrientation] = PaperOrientation.PORTRAIT,
+            include_appendices: Optional[bool] = False
+    ) -> None:
         """
         Share the PDF of the `Activity` through email.
 
@@ -841,8 +832,8 @@ class Activity(TreeObject, TagsMixin):
         :param recipient_users: users that will receive the email
         :type recipient_users: list(Union(User, Id))
         :param paper_size: The size of the paper to which the PDF is downloaded:
-                               - a4paper (default): A4 paper size
-                               - a3paper: A3 paper size
+                               - a4paper: A4 paper size
+                               - a3paper: A3 paper size (default)
                                - a2paper: A2 paper size
                                - a1paper: A1 paper size
                                - a0paper: A0 paper size
@@ -853,43 +844,29 @@ class Activity(TreeObject, TagsMixin):
         :type paper_size: basestring (see :class:`enums.PaperOrientation`)
         :param include_appendices: True if the PDF should contain appendices, False (default) if otherwise.
         :type include_appendices: bool
-        :raises IllegalArgumentError: if no 'message' is specified
-        :raises IllegalArgumentError: if no 'subject' is specified
-        :raises IllegalArgumentError: if no 'recipient_users' is specified
-        :raises APIError: if an Error occurs.
+        :raises APIError: if an internal server error occurred.
         """
-        if not recipient_users:
-            raise IllegalArgumentError(
-                "Sharing an activity pdf requires a list of recipient users "
-                "(User objects, user id's or email addresses)"
-            )
-        else:
-            recipient_emails = list()
-            recipient_users_ids = list()
+        recipient_emails = list()
+        recipient_users_ids = list()
+        if isinstance(recipient_users, list) and all(isinstance(r, (str, int, User)) for r in recipient_users):
             for user in recipient_users:
-                if isinstance(user, User):
-                    recipient_users_ids.append(user.id)
-                elif isinstance(user, int):
-                    recipient_users_ids.append(user)
-                elif is_valid_email(user):
+                if is_valid_email(user):
                     recipient_emails.append(user)
                 else:
-                    raise IllegalArgumentError(
-                        "Sharing an activity pdf requires a list of recipient users "
-                        "(User objects, user id's or email addresses), got invalid email address: '{}".format(
-                            user
-                        )
-                    )
+                    recipient_users_ids.append(check_user(user, User, 'recipient'))
+        else:
+            raise IllegalArgumentError('`recipients` must be a list of User objects, IDs or email addresses, '
+                                       '"{}" ({}) is not.'.format(recipient_users, type(recipient_users)))
 
         params = dict(
-            message=message,
-            subject=subject,
+            message=check_text(message, 'message'),
+            subject=check_text(subject, 'subject'),
             recipient_users=recipient_users_ids,
-            recipient_emails=recipient_emails or [''],
+            recipient_emails=recipient_emails,
             activity_id=self.id,
-            papersize=paper_size,
-            orientation=paper_orientation,
-            appendices=include_appendices,
+            papersize=check_enum(paper_size, PaperSize, 'paper_size'),
+            orientation=check_enum(paper_orientation, PaperOrientation, 'paper_orientation'),
+            appendices=check_type(include_appendices, bool, 'bool'),
         )
 
         url = self._client._build_url('notification_share_activity_pdf')
@@ -898,29 +875,3 @@ class Activity(TreeObject, TagsMixin):
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not share the link to Activity, {}:\n\n{}'".format(str(response), response.json()))
-
-
-class Activity2(Activity, _DeprecationMixin):
-    """A virtual object representing a KE-chain activity.
-
-    .. versionadded:: 2.0
-
-    :ivar id: id of the activity
-    :type id: uuid
-    :ivar name: name of the activity
-    :type name: basestring
-    :ivar created_at: created datetime of the activity
-    :type created_at: datetime
-    :ivar updated_at: updated datetime of the activity
-    :type updated_at: datetime
-    :ivar description: description of the activity
-    :type description: basestring
-    :ivar status: status of the activity. One of :class:`pykechain.enums.ActivityStatus`
-    :type status: basestring
-    :ivar classification: classification of the activity. One of :class:`pykechain.enums.ActivityClassification`
-    :type classification: basestring
-    :ivar activity_type: Type of the activity. One of :class:`pykechain.enums.ActivityType` for WIM version 2
-    :type activity_type: basestring
-    """
-
-    pass
