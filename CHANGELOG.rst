@@ -4,11 +4,15 @@ Change Log
 v3.x.x (UNRELEASED)
 -------------------
 
-In this release we deprecated feature that were announced to be deprecated some time ago. We deprecated all compatibility to 'KE-chain 2'.
+In this release we deprecated functionality that were announced to be deprecated some time ago. We deprecated all compatibility to 'KE-chain 2'.
 
 * :+1: Added `editable` argument to the `add_attachmentviewer_widget` method of the WidgetsManager, to enable both viewing and editing of the attachment.
+* :+1: Added `show_log` argument to the `add_service_widget` method of the WidgetsManager, to separate the log file and log message.
 * :+1: Added `Alignment` enum class, leaving `NavigationBarAlignment` as wrapper for backwards compatibility.
+* :+1: Added intermediate `create_configured_widget` method in WidgetsManager  for widgets with associated properties.
+* :+1: Moved all inherited `Property` methods into the `Property2` class and removed Property as its superclass.
 * :+1: Large clean-up for user-input validation for most `Client` methods to provide consistent error messages.
+* :+1: Added intermediate `_retrieve_singular` method in `Client` class to simplify other methods intended to get 1 object. These other methods all had identical dependency on methods to retrieve more than 1 object, such as `part()` on `parts()`.
 
 
 Backward incompatible changes
