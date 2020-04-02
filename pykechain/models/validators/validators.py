@@ -8,6 +8,7 @@ from pykechain.enums import PropertyVTypes
 from pykechain.models.validators.mime_types_defaults import predefined_mimes
 from pykechain.models.validators.validator_schemas import filesizevalidator_schema, fileextensionvalidator_schema
 from pykechain.models.validators.validators_base import PropertyValidator
+from pykechain.utils import EMAIL_REGEX_PATTERN
 
 
 class NumericRangeValidator(PropertyValidator):
@@ -336,7 +337,7 @@ class EmailValidator(RegexStringValidator):
     :cvar pattern: the email regex pattern to which the provided value is matched against.
     """
 
-    pattern = r'\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+'
+    pattern = EMAIL_REGEX_PATTERN
 
     def __init__(self, json=None, **kwargs):
         """Construct an email string validator.

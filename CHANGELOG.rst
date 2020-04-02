@@ -21,6 +21,14 @@ We deprecated the following:
 * Option START from `NavigationBarAlignment` enum class.
 * Mapping table `WIMCompatibleActivityTypes`.
 
+
+v3.6.X (UNRELEASED)
+---------------
+
+* :+1: Added `current_user` method on the Client class to return the `User` object of the user connected to KE-chain.
+* :+1: Added various arguments to the `create_notification` method.
+* :+1: Added `edit` method to the Notification class.
+
 v3.6.2 (27MAR20)
 ----------------
 
