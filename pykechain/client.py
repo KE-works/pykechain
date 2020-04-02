@@ -2373,17 +2373,19 @@ class Client(object):
         """
         Update multiple properties simultaneously.
 
+        :param properties: list of dictionaries to set the properties
+        :type properties: List[Dict]
+        :raises: IllegalArgumentError
+        :return: list of Properties
+        :rtype List[AnyProperty]
+
+
         Examples
         --------
         >>> properties = client.properties(limit=3)
         >>> update_dicts = [dict(id=p.id, value=p.value) for p in properties]
         >>> client.update_properties(properties=update_dicts)
 
-        :param properties: list of dictionaries to set the properties
-        :type properties: List[Dict]
-        :raises: IllegalArgumentError
-        :return: list of Properties
-        :rtype List[AnyProperty]
         """
         check_list_of_dicts(properties, 'properties')
 

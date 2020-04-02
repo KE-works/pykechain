@@ -136,7 +136,7 @@ def check_user(obj: Optional[Any],
                key: Optional[Text] = 'user',
                method: Optional[Callable] = None,
                ) -> Optional[int]:
-    """Same functionality as check_base(), although users dont use UUID but integers."""
+    """Provide same functionality as check_base(), although users dont use UUID but integers."""
     if obj is not None:
 
         if cls is None:
@@ -145,7 +145,7 @@ def check_user(obj: Optional[Any],
 
         if isinstance(obj, cls):
             obj = obj.id
-        elif isinstance(obj, str):
+        elif isinstance(obj, (int, str)):
             try:
                 obj = int(obj)
             except ValueError:
