@@ -23,7 +23,7 @@ from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.notification import Notification
 from pykechain.models.widgets.widget import Widget
-from pykechain.utils import is_uuid, find, is_url, is_valid_email
+from pykechain.utils import is_uuid, find, is_valid_email
 from .__about__ import version as pykechain_version
 from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
     check_list_of_base, check_base, check_uuid, check_list_of_dicts, check_url
@@ -2483,16 +2483,6 @@ class Client(object):
         :return: the newly created `Notification`
         :raises: APIError: when the `Notification` could not be created
         """
-        if not isinstance(subject, str):
-            raise IllegalArgumentError('`subject` must be a string, "{}" ({}) is not.'.format(subject, type(subject)))
-
-        if not isinstance(message, str):
-            raise IllegalArgumentError('`message` must be a string, "{}" ({}) is not.'.format(message, type(message)))
-
-        if status not in NotificationStatus.values():
-            raise IllegalArgumentError('`status` must be a NotificationStatus option, "{}" is not.\n'
-                                       'Select from: {}'.format(status, NotificationStatus.values()))
-
         recipient_users = list()
         recipient_emails = list()
 
@@ -2513,15 +2503,6 @@ class Client(object):
                 raise IllegalArgumentError('`recipients` must be a list of User objects, IDs or email addresses, '
                                            '"{}" ({}) is not.'.format(recipients, type(recipients)))
 
-        if team is not None:
-            if isinstance(team, Team):
-                team = team.id,
-            elif is_uuid(team):
-                pass
-            else:
-                raise IllegalArgumentError('`team` must be a Team object or team UUID, '
-                                           '"{}" ({}) is neither.'.format(team, type(team)))
-
         if from_user is None:
             from_user_id = self.current_user().id
         elif isinstance(from_user, User):
@@ -2535,24 +2516,16 @@ class Client(object):
             raise IllegalArgumentError('`from_user` must be a User, string or integer, '
                                        '"{}" ({}) is not.'.format(from_user, type(from_user)))
 
-        if event is not None and event not in NotificationEvent.values():
-            raise IllegalArgumentError('`event` must be a NotificationEvent option, "{}" is not.\n'
-                                       'Select from: {}'.format(event, NotificationEvent.values()))
-
-        if channel not in NotificationChannels.values():
-            raise IllegalArgumentError('`channel` must be a NotificationChannels option, "{}" is not.\n'
-                                       'Select from: {}'.format(status, NotificationChannels.values()))
-
         data = {
-            'status': status,
-            'event': event,
-            'subject': subject,
-            'message': message,
+            'status': check_enum(status, NotificationStatus, 'status'),
+            'event': check_enum(event, NotificationEvent, 'event'),
+            'subject': check_text(subject, 'subject'),
+            'message': check_text(message, 'message'),
             'recipient_users': recipient_users,
             'recipient_emails': recipient_emails,
-            'team': team,
+            'team': check_base(team, Team, 'team'),
             'from_user': from_user_id,
-            'channels': [channel],
+            'channels': [channel] if check_enum(channel, NotificationChannels, 'channel') else [],
         }
 
         data.update(kwargs)
