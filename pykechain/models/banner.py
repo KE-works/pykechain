@@ -76,20 +76,22 @@ class Banner(Base):
             raise IllegalArgumentError('`url` must be a URL string, "{}" ({}) is not.'.format(url, type(url)))
 
         update_dict = {
-            'text': text,
-            'icon': icon,
-            'active_from': active_from.isoformat(sep='T') if active_from else None,
+            'text': text or self.text,
             'active_until': active_until.isoformat(sep='T') if active_until else None,
-            'is_active': is_active,
+            'is_active': is_active if is_active is not None else self.is_active,
             'url': url,
         }
+        if icon:
+            update_dict['icon'] = icon
+        if active_from:
+            update_dict['active_from'] = active_from.isoformat(sep='T') if active_from else self.active_from
 
         url = self._client._build_url('banner', banner_id=self.id)
 
         response = self._client._request('PUT', url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Banner ({})".format(response))
+            raise APIError("Could not update Banner ({}) {}".format(response, response.json()))
 
         self.refresh(json=response.json().get('results')[0])
 
