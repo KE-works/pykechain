@@ -127,6 +127,18 @@ class TestBanners(TestBetamax):
         self.assertFalse(self.banner.is_active)
         self.assertEqual(url, self.banner.url)
 
+    def test_edit_single_inputs(self):
+        for kwarg in [
+            dict(text='New text'),
+            dict(icon='gifts'),
+            dict(active_from=NEW_YEAR_2020 - datetime.timedelta(days=1)),
+            dict(active_until=NEW_YEAR_2020 + datetime.timedelta(weeks=1)),
+            dict(is_active=False),
+            dict(url='https://www.google.com'),
+        ]:
+            with self.subTest(msg=kwarg):
+                self.banner.edit(**kwarg)
+
     # noinspection PyTypeChecker
     def test_edit_invalid_inputs(self):
         with self.assertRaises(IllegalArgumentError):

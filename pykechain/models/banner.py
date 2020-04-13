@@ -63,13 +63,17 @@ class Banner(Base):
             'is_active': check_type(is_active, bool, 'is_active'),
             'url': check_url(url),
         }
+        if icon:
+            update_dict['icon'] = icon
+        if active_from:
+            update_dict['active_from'] = active_from.isoformat(sep='T') if active_from else self.active_from
 
         url = self._client._build_url('banner', banner_id=self.id)
 
         response = self._client._request('PUT', url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Banner ({})".format(response))
+            raise APIError("Could not update Banner ({}) {}".format(response, response.json()))
 
         self.refresh(json=response.json().get('results')[0])
 
