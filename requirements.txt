@@ -20,7 +20,7 @@ coveralls==1.11.1
 
 # documentation
 Sphinx==2.4.4
-nbsphinx==0.5.1
+nbsphinx==0.6.0
 
 # data science # not needed for local use
 # jupyter==1.0.0
