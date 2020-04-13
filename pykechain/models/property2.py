@@ -425,12 +425,15 @@ class Property2(Base):
             'id': self.id,
             'name': check_text(name, 'name') or self.name,
             'description': check_text(description, 'description') or self.description,
-            'unit': check_text(unit, 'unit'),
         }
 
         options = check_type(options, dict, 'options')
         if options:
             update_dict['value_options'] = options
+
+        unit = check_text(unit, 'unit')
+        if unit:
+            update_dict['unit'] = unit
 
         if kwargs:  # pragma: no cover
             update_dict.update(kwargs)
