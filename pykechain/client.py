@@ -1,11 +1,11 @@
 import datetime
 import warnings
 from typing import Dict, Tuple, Optional, Any, List, Union, Text, Callable
+from urllib.parse import urljoin, urlparse
 
 import requests
 from envparse import env
-from requests.adapters import HTTPAdapter
-from requests.compat import urljoin, urlparse  # type: ignore
+from requests.adapters import HTTPAdapter  # type: ignore
 from urllib3 import Retry
 
 from pykechain.defaults import API_PATH, API_EXTRA_PARAMS, RETRY_ON_CONNECTION_ERRORS, RETRY_BACKOFF_FACTOR, \
@@ -239,7 +239,7 @@ class Client(object):
             elif response.status_code == requests.codes.forbidden:
                 raise ForbiddenError(response.json()['results'][0]['detail'])
             elif response.status_code != requests.codes.ok:
-                raise APIError("Could not retrieve app versions: {}".format(response))
+                raise APIError("Could not retrieve app versions: {}".format(response.json()))
             else:
                 self._app_versions = response.json().get('results')
 
@@ -472,7 +472,7 @@ class Client(object):
         response = self._request('GET', url=url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve scopes: '{}'".format(response.content))
+            raise NotFoundError("Could not retrieve scopes: '{}'".format(response.json()))
 
         data = response.json()
 
@@ -638,7 +638,7 @@ class Client(object):
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve parts. Request: {}\nResponse: {}".format(
-                request_params, response.content))
+                request_params, response.json()))
 
         data = response.json()
 
@@ -720,7 +720,7 @@ class Client(object):
         response = self._request('GET', self._build_url('properties2'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve properties: '{}'".format(response.content))
+            raise NotFoundError("Could not retrieve properties: '{}'".format(response.json()))
 
         return [Property2.create(p, client=self) for p in response.json()['results']]
 
@@ -1073,7 +1073,7 @@ class Client(object):
                                  params=API_EXTRA_PARAMS['activities'])
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create activity {}: {}".format(str(response), response.content))
+            raise APIError("Could not create activity {}: {}".format(str(response), response.json()))
 
         new_activity = Activity2(response.json()['results'][0], client=self)
         if isinstance(parent, Activity2) and parent._cached_children is not None:
@@ -1095,7 +1095,7 @@ class Client(object):
                                  json=data)
 
         if response.status_code != requests.codes.created:
-            raise APIError("Could not create part, {}: {}".format(str(response), response.content))
+            raise APIError("Could not create part, {}: {}".format(str(response), response.json()))
 
         return Part2(response.json()['results'][0], client=self)
 
@@ -1302,7 +1302,7 @@ class Client(object):
         response = self._request('POST', url, params=query_params, data=data)
 
         if response.status_code != requests.codes.created:
-            raise APIError("Could not clone part, {}: {}".format(str(response), response.content))
+            raise APIError("Could not clone part, {}: {}".format(str(response), response.json()))
 
         return Part2(response.json()['results'][0], client=self)
 
@@ -1437,7 +1437,7 @@ class Client(object):
         response = self._request('POST', url, params=query_params, json=data)
 
         if response.status_code != requests.codes.created:
-            raise APIError("Could not create property, {}: {}".format(str(response), response.content))
+            raise APIError("Could not create property, {}: {}".format(str(response), response.json()))
 
         prop = Property2.create(response.json()['results'][0], client=self)
 
@@ -1503,7 +1503,7 @@ class Client(object):
         response = self._request('POST', self._build_url('services'), json=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create service ({})".format((response, response.json())))
+            raise APIError("Could not create service ({})".format(response, response.json()))
 
         service = Service(response.json().get('results')[0], client=self)
 
@@ -1600,7 +1600,7 @@ class Client(object):
                                  params=query_options)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete scope, {}: {}".format(str(response), response.content))
+            raise APIError("Could not delete scope, {}: {}".format(str(response), response.json()))
 
         return True
 
@@ -1683,9 +1683,9 @@ class Client(object):
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             if response.status_code == requests.codes.forbidden:
-                raise ForbiddenError("Could not clone scope, {}: {}".format(str(response), response.content))
+                raise ForbiddenError("Could not clone scope, {}: {}".format(str(response), response.json()))
             else:
-                raise APIError("Could not clone scope, {}: {}".format(str(response), response.content))
+                raise APIError("Could not clone scope, {}: {}".format(str(response), response.json()))
 
         if asynchronous:
             return None
@@ -1884,7 +1884,7 @@ class Client(object):
         response = self._request('POST', url, params=API_EXTRA_PARAMS['widgets'], json=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create a widget ({})\n\n{}".format(response, response.json().get('traceback')))
+            raise APIError("Could not create a widget ({})\n\n{}".format(response, response.json()))
 
         # create the widget and do postprocessing
         widget = Widget.create(json=response.json().get('results')[0], client=self)
@@ -1928,7 +1928,7 @@ class Client(object):
         response = self._request('POST', url, params=API_EXTRA_PARAMS['widgets'], json=bulk_data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create a widgets ({})\n\n{}".format(response, response.json().get('traceback')))
+            raise APIError("Could not create a widgets ({})\n\n{}".format(response, response.json()))
 
         # create the widget and do postprocessing
         widgets = []
@@ -1959,7 +1959,7 @@ class Client(object):
         )
 
         if response.status_code != requests.codes.ok:
-            raise APIError("Could not update the widgets: {}: {}".format(str(response), response.content))
+            raise APIError("Could not update the widgets: {}: {}".format(str(response), response.json()))
 
         widgets_response = response.json().get('results')
         return [Widget.create(json=widget_json, client=self) for widget_json in widgets_response]
@@ -1979,7 +1979,7 @@ class Client(object):
         response = self._request('DELETE', url)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Widget ({})".format(response))
+            raise APIError("Could not delete Widget ({})".format(response.json()))
 
     def delete_widgets(self, widgets: List[Union[Widget, Text]]) -> None:
         """
@@ -1997,7 +1997,7 @@ class Client(object):
         response = self._request('DELETE', url, json=widget_ids)
 
         if response.status_code != requests.codes.no_content:
-            raise APIError("Could not delete the widgets: {}: {}".format(str(response), response.content))
+            raise APIError("Could not delete the widgets: {}: {}".format(str(response), response.json()))
 
     @staticmethod
     def _validate_associations(
@@ -2367,7 +2367,7 @@ class Client(object):
         response = self._request('PUT', url, data=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not move activity, {}: {}".format(str(response), response.content))
+            raise APIError("Could not move activity, {}: {}".format(str(response), response.json()))
 
     def update_properties(self, properties: List[Dict]) -> List['AnyProperty']:
         """
@@ -2426,7 +2426,7 @@ class Client(object):
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not retrieve Notifications. Request: {}\nResponse: {}".format(
-                request_params, response.content))
+                request_params, response.json()))
 
         data = response.json()
 
@@ -2544,7 +2544,7 @@ class Client(object):
         response = self._request('DELETE', url)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Notification ({})".format(response))
+            raise APIError("Could not delete Notification ({})".format(response.json()))
 
     def banners(
             self,
@@ -2636,7 +2636,7 @@ class Client(object):
                                  json=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create banner, {}: {}".format(str(response), response.content))
+            raise APIError("Could not create banner, {}: {}".format(str(response), response.json()))
 
         return Banner(response.json()['results'][0], client=self)
 

@@ -2,9 +2,9 @@ import datetime
 import os
 import time
 from typing import List, Text, Dict, Optional, Union
+from urllib.parse import urljoin
 
 import requests
-from requests.compat import urljoin  # type: ignore
 
 from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_EXTRA_PARAMS
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
@@ -12,9 +12,9 @@ from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClas
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
 from pykechain.models.input_checks import check_datetime, check_text, check_list_of_text, check_enum, check_user, \
     check_type
-from pykechain.models.user import User
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
+from pykechain.models.user import User
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import parse_datetime, is_valid_email
 
@@ -379,13 +379,13 @@ class Activity2(TreeObject, TagsMixin):
         return super().all_children()
 
     def edit_cascade_down(
-        self,
-        start_date: Optional[datetime.datetime] = None,
-        due_date: Optional[datetime.datetime] = None,
-        assignees: Optional[List[Text]] = None,
-        assignees_ids: Optional[List[Text]] = None,
-        status: Optional[Union[ActivityStatus, Text]] = None,
-        overwrite: Optional[bool] = False,
+            self,
+            start_date: Optional[datetime.datetime] = None,
+            due_date: Optional[datetime.datetime] = None,
+            assignees: Optional[List[Text]] = None,
+            assignees_ids: Optional[List[Text]] = None,
+            status: Optional[Union[ActivityStatus, Text]] = None,
+            overwrite: Optional[bool] = False,
     ) -> None:
         """
         Edit the activity and all its descendants with a single operation.
@@ -438,10 +438,10 @@ class Activity2(TreeObject, TagsMixin):
             data.append(task_specific_update_dict)
 
         # Perform bulk update
-        url = urljoin(self._client.api_root, 'api/activities/bulk_update')
+        url = self._client._build_url('activities_bulk_update')
         response = self._client._request('PUT', url, json=data)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Activity ({})".format(response))
+            raise APIError("Could not update Activity ({})".format(response.json()))
 
     def edit(
             self,
@@ -531,7 +531,7 @@ class Activity2(TreeObject, TagsMixin):
         response = self._client._request('PUT', url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Activity ({})".format(response))
+            raise APIError("Could not update Activity ({})".format(response.json()))
 
         self.refresh(json=response.json().get('results')[0])
 
@@ -550,7 +550,6 @@ class Activity2(TreeObject, TagsMixin):
                                     if m.get('id') in assignees or m.get('username') in set(assignees)]
 
             if len(update_assignees_ids) != len(assignees):
-
                 raise NotFoundError('All assignees should be a member of the project.')
         else:
             update_assignees_ids = []
@@ -573,7 +572,8 @@ class Activity2(TreeObject, TagsMixin):
         response = self._client._request('DELETE', self._client._build_url('activity', activity_id=self.id))
 
         if response.status_code != requests.codes.no_content:
-            raise APIError("Could not delete activity: {} with id {}".format(self.name, self.id))
+            raise APIError(
+                "Could not delete activity: {} with id {}, ({})".format(self.name, self.id, response.json()))
         return True
 
     #
@@ -669,7 +669,7 @@ class Activity2(TreeObject, TagsMixin):
         response = self._client._request('GET', url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve associations on activity: {}".format(response.content))
+            raise NotFoundError("Could not retrieve associations on activity: {}".format(response.json()))
 
         data = response.json()
         return data['results']
@@ -736,7 +736,7 @@ class Activity2(TreeObject, TagsMixin):
         url = self._client._build_url('activity_export', activity_id=self.id)
         response = self._client._request('GET', url, params=request_params)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not download PDF of activity '{}': '{}'".format(self.name, response.content))
+            raise APIError("Could not download PDF of activity '{}': '{}'".format(self.name, response.json()))
 
         # If appendices are included, the request becomes asynchronous
 
