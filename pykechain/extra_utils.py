@@ -154,8 +154,7 @@ def get_illegal_targets(part, include):
     :rtype: list
     """
     list_of_illegal_targets = include or set()
-    for descendant in part.children(descendants='children'):
-        list_of_illegal_targets.add(descendant.id)
+    list_of_illegal_targets.update({c.id for c in part.all_children()})
     return list_of_illegal_targets
 
 
