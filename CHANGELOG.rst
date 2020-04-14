@@ -4,6 +4,8 @@ Change Log
 * :+1: Added `current_user` method on the Client class to return the `User` object of the user connected to KE-chain.
 * :+1: Added various arguments to the `create_notification` method.
 * :+1: Added `edit` method to the Notification class.
+* :bug: Removed old API usage of `descendants` from `copy()` of the Part class.
+* :bug: Raising correct errors whenever no (or multiple) active banner exist in the `active_banner()` method.
 
 v3.6.2 (27MAR20)
 ----------------
