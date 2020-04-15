@@ -92,7 +92,9 @@ class TestSideBar(TestBetamax):
             icon='site-map'
         )
 
+        self.assertIn('customNavigation', self.scope.options)
         original_side_bar_buttons = self.scope.options.get('customNavigation')
+
         self.assertTrue(len(original_side_bar_buttons) == 0,
                         msg='During bulk creation of buttons, KE-chain should not be updated yet.')
 

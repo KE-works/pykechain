@@ -1,7 +1,7 @@
 import os
 import warnings
 from datetime import datetime
-from unittest import skipIf, skip
+from unittest import skipIf
 
 import pytest
 import pytz
@@ -11,7 +11,7 @@ from pykechain.enums import ActivityType, ActivityStatus, ActivityClassification
     activity_root_name_by_classification, ActivityRootNames, PaperSize, PaperOrientation, NotificationEvent
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError, APIError
 from pykechain.models import Activity2
-from pykechain.utils import temp_chdir
+from pykechain.utils import temp_chdir, slugify_ref
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_WIM2
 
@@ -222,8 +222,8 @@ class TestActivities(TestBetamax):
     def test_edit_activity_naive_dates(self):
         specify_wd = self.project.activity('Specify wheel diameter')
 
-        old_start, old_due = self._convert_timestamp(specify_wd._json_data.get('start_date')), \
-                             self._convert_timestamp(specify_wd._json_data.get('due_date'))
+        old_start, old_due = specify_wd.start_date, specify_wd.due_date
+
         start_time = datetime(2000, 1, 1, 0, 0, 0)
         due_time = datetime(2019, 12, 31, 0, 0, 0)
 
@@ -251,8 +251,7 @@ class TestActivities(TestBetamax):
         specify_wd = self.project.activity('Specify wheel diameter')
 
         # save old values
-        old_start, old_due = self._convert_timestamp(specify_wd._json_data.get('start_date')), \
-                             self._convert_timestamp(specify_wd._json_data.get('due_date'))
+        old_start, old_due = specify_wd.start_date, specify_wd.due_date
 
         startdate = datetime.now(pytz.utc)
         duedate = datetime(2019, 1, 1, 0, 0, 0, tzinfo=pytz.timezone('Europe/Amsterdam'))
@@ -282,16 +281,6 @@ class TestActivities(TestBetamax):
         # Return the status to how it used to be
         specify_wd.edit(status=original_status)
 
-    def _convert_timestamp(self, value):
-        try:
-            r = datetime.strptime(value, ISOFORMAT)
-        except ValueError:
-            r = datetime.strptime(value, ISOFORMAT_HIGHPRECISION)
-        if isinstance(r, datetime):
-            return r
-        else:
-            raise ValueError
-
     # 1.7.2
     def test_datetime_with_naive_duedate_only_fails(self):
         """reference to #121 - thanks to @joost.schut"""
@@ -299,8 +288,8 @@ class TestActivities(TestBetamax):
         specify_wd = self.project.activity('Specify wheel diameter')
 
         # save old values
-        old_start, old_due = self._convert_timestamp(specify_wd._json_data.get('start_date')), \
-                             self._convert_timestamp(specify_wd._json_data.get('due_date'))
+        old_start, old_due = specify_wd.start_date, specify_wd.due_date
+
         naive_duedate = datetime(2017, 6, 5, 5, 0, 0)
         with warnings.catch_warnings(record=False) as w:
             warnings.simplefilter("ignore")
@@ -319,8 +308,7 @@ class TestActivities(TestBetamax):
         # setup
         specify_wd = self.project.activity('Specify wheel diameter')
         # save old values
-        old_start, old_due = self._convert_timestamp(specify_wd._json_data.get('start_date')), \
-                             self._convert_timestamp(specify_wd._json_data.get('due_date'))
+        old_start, old_due = specify_wd.start_date, specify_wd.due_date
 
         tz = pytz.timezone('Europe/Amsterdam')
         tzaware_due = tz.localize(datetime(2017, 7, 1))
@@ -395,7 +383,7 @@ class TestActivities(TestBetamax):
         all_tasks = workflow_root.all_children()
 
         self.assertIsInstance(all_tasks, list)
-        self.assertEqual(12, len(all_tasks), msg='Number of tasks has changed, expected 12.')
+        self.assertEqual(11, len(all_tasks), msg='Number of tasks has changed, expected 12.')
 
     def test_retrieve_activity_by_id(self):
         task = self.project.activity(name='Subprocess')  # type: Activity2
@@ -436,6 +424,17 @@ class TestActivities(TestBetamax):
 
 @skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
 class TestActivity2SpecificTests(TestBetamax):
+
+    def setUp(self):
+        super().setUp()
+        self.root = self.project.activity(ActivityRootNames.WORKFLOW_ROOT)
+        self.task = self.root.create(name='test task', activity_type=ActivityType.TASK)
+
+    def tearDown(self):
+        if self.task:
+            self.task.delete()
+        super().tearDown()
+
     # 2.0 new activity
     # noinspection PyTypeChecker
     def test_edit_activity2_assignee(self):
@@ -518,11 +517,8 @@ class TestActivity2SpecificTests(TestBetamax):
         self.assertFalse(subprocess.is_task())
 
     def test_activity2_assignees_list(self):
-        activity_name = 'test task'
-        activity = self.project.activity(name=activity_name)  # type: Activity2
-
-        list_of_assignees_in_data = activity._json_data.get('assignees_ids')
-        assignees_list = activity.assignees
+        list_of_assignees_in_data = self.task._json_data.get('assignees_ids')
+        assignees_list = self.task.assignees
 
         self.assertSetEqual(set(list_of_assignees_in_data), set([u.id for u in assignees_list]))
 
@@ -533,63 +529,47 @@ class TestActivity2SpecificTests(TestBetamax):
         list_of_assignees_in_data = activity._json_data.get('assignees_ids')
         assignees_list = activity.assignees
 
-        self.assertListEqual(list(), activity.assignees, "Task has no assingees and should return Empty list")
+        self.assertListEqual(list(), activity.assignees, "Task has no assignees and should return Empty list")
 
     def test_activity2_move(self):
         # setUp
-        activity_name = 'test task'
-        activity_to_be_moved = self.project.activity(name=activity_name)
-        original_parent = activity_to_be_moved.parent()
+        activity_to_be_moved = self.task
 
         new_parent_name = 'Subprocess'
         new_parent = self.project.activity(name=new_parent_name)
 
         activity_to_be_moved.move(parent=new_parent)
 
-        activity_to_be_moved.refresh()
-
         # testing
-        self.assertTrue(activity_to_be_moved.parent().id == new_parent.id)
-
-        # tearDown
-        activity_to_be_moved.move(parent=original_parent.id)
-        activity_to_be_moved.refresh()
-        self.assertTrue(activity_to_be_moved.parent().id == original_parent.id)
+        self.assertEqual(new_parent, activity_to_be_moved.parent())
 
     def test_activity2_move_under_task_parent(self):
         # setUp
-        activity_name = 'test task'
-        activity_to_be_moved = self.project.activity(name=activity_name)
-
         new_parent_name = 'Specify wheel diameter'
         new_parent = self.project.activity(name=new_parent_name)
 
         # testing
         with self.assertRaises(IllegalArgumentError):
-            activity_to_be_moved.move(parent=new_parent)
+            self.task.move(parent=new_parent)
 
     def test_activity2_move_under_part_object(self):
         # setUp
-        activity_name = 'test task'
-        activity_to_be_moved = self.project.activity(name=activity_name)
-
         new_parent_name = 'Bike'
         new_parent = self.project.part(name=new_parent_name)
 
         # testing
         with self.assertRaises(IllegalArgumentError):
-            activity_to_be_moved.move(parent=new_parent)
+            self.task.move(parent=new_parent)
 
     # tests added in 3.0
     def test_activity2_retrieve_with_refs(self):
         # setup
-        test_task_ref = 'test-task'
-        test_task_name = 'Test task'
+        test_task_ref = slugify_ref(self.task.name)
         test_task_activity = self.project.activity(ref=test_task_ref)
 
         # testing
         self.assertIsInstance(test_task_activity, Activity2)
-        self.assertTrue(test_task_activity.name, test_task_name)
+        self.assertEqual(self.task, test_task_activity)
 
     def test_activity2_associated_parts(self):
         # setUp
@@ -640,6 +620,7 @@ class TestActivity2SpecificTests(TestBetamax):
                 self.assertTrue(model.property(name='Website').output)
                 self.assertTrue(model.property(name='Sale?').output)
         self.assertTrue(len(associated_models) == 3)
+
 
 class TestActivityDownloadAsPDF(TestBetamax):
     def test_activity2_download_as_pdf(self):

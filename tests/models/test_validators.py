@@ -591,7 +591,7 @@ class TestFileExtensionValidator(SixTestCase):
         validator = FileExtensionValidator(accept=[".xls", ".xlsx"])
         self.assertTrue(validator.is_valid('file.xls'))
         self.assertTrue(validator.is_valid('file.xlsx'))
-        self.assertFalse(validator.is_valid('file.csv'))
+        self.assertFalse(validator.is_valid('file.docx'))
 
     def test_fileextensionvalidator_being_none(self):
         validator = FileExtensionValidator(accept=["video/*"])

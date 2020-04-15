@@ -134,7 +134,7 @@ class TestClientLive(TestBetamax):
         scope_tags = ['test_tag', 'new_project_tag']
         scope_start_date = datetime.datetime(2019, 4, 12, tzinfo=pytz.UTC)
         scope_due_date = datetime.datetime(2020, 4, 12, tzinfo=pytz.UTC)
-        scope_team = client.team(name='Team No.1')
+        scope_team = client.teams()[0]
 
         self.temp_scope = client.create_scope(
             name=scope_name,
@@ -155,38 +155,31 @@ class TestClientLive(TestBetamax):
 
     def test_create_scope_with_team_name(self):
         # setUp
-        client = self.client
+        team_name = self.client.teams()[0].name
 
-        scope_name = 'New scope with the team name'
-        scope_team_name = 'Team No.1'
-
-        self.temp_scope = client.create_scope(
-            name=scope_name,
-            team=scope_team_name
+        self.temp_scope = self.client.create_scope(
+            name='New scope using the team name',
+            team=team_name
         )
 
         # testing
         self.assertTrue(self.temp_scope.team)
-        self.assertTrue(isinstance(self.temp_scope.team, Team))
-        self.assertEqual(self.temp_scope.team.name, scope_team_name)
+        self.assertIsInstance(self.temp_scope.team, Team)
+        self.assertEqual(team_name, self.temp_scope.team.name)
 
     def test_create_scope_with_team_uuid(self):
         # setUp
-        client = self.client
+        team_id = self.client.teams()[0].id
 
-        scope_name = 'New scope with team uuid'
-        scope_team_name = 'Team No.1'
-        scope_team_id = client.team(name=scope_team_name).id
-
-        self.temp_scope = client.create_scope(
-            name=scope_name,
-            team=scope_team_id
+        self.temp_scope = self.client.create_scope(
+            name='New scope using the team ID',
+            team=team_id
         )
 
         # testing
         self.assertTrue(self.temp_scope.team)
-        self.assertTrue(isinstance(self.temp_scope.team, Team))
-        self.assertEqual(self.temp_scope.team.name, scope_team_name)
+        self.assertIsInstance(self.temp_scope.team, Team)
+        self.assertEqual(team_id, self.temp_scope.team.id)
 
     def test_create_scope_no_arguments(self):
         # setUp

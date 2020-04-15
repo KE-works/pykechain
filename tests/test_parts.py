@@ -8,6 +8,16 @@ from tests.utils import TEST_FLAG_IS_PIM3
 
 
 class TestParts(TestBetamax):
+
+    def setUp(self):
+        super().setUp()
+        self._part = None
+
+    def tearDown(self):
+        if self._part:
+            self._part.delete()
+        super().tearDown()
+
     def test_retrieve_parts(self):
         parts = self.project.parts()
 
@@ -91,7 +101,8 @@ class TestParts(TestBetamax):
 
         # testing
         with self.assertRaises(APIError):
-            self.client.create_model(name='Multiplicity does not exist', parent=bike_model, multiplicity='TEN')
+            self._part = self.client.create_model(name='Multiplicity does not exist',
+                                                  parent=bike_model, multiplicity='TEN')
 
     def test_part_add_delete_part(self):
         bike = self.project.part('Bike')
@@ -112,7 +123,8 @@ class TestParts(TestBetamax):
 
         # testing
         with self.assertRaises(IllegalArgumentError):
-            self.client.create_part(name='Parent should be instance', parent=bike_model, model=bike_model)
+            self._part = self.client.create_part(name='Parent should be instance',
+                                                 parent=bike_model, model=bike_model)
 
     def test_create_part_where_model_is_instance(self):
         # setUp
@@ -120,7 +132,8 @@ class TestParts(TestBetamax):
 
         # testing
         with self.assertRaises(IllegalArgumentError):
-            self.client.create_part(name='Model should not be instance', parent=bike_instance, model=bike_instance)
+            self._part = self.client.create_part(name='Model should not be instance',
+                                                 parent=bike_instance, model=bike_instance)
 
     def test_create_model_where_parent_is_instance(self):
         # setUp
@@ -128,7 +141,8 @@ class TestParts(TestBetamax):
 
         # testing
         with self.assertRaises(IllegalArgumentError):
-            self.client.create_model(name='Parent should be model', parent=bike_instance, multiplicity=Multiplicity.ONE)
+            self._part = self.client.create_model(name='Parent should be model',
+                                                  parent=bike_instance, multiplicity=Multiplicity.ONE)
 
     def test_create_proxy_model_where_model_is_instance(self):
         # setUp
@@ -136,8 +150,8 @@ class TestParts(TestBetamax):
 
         # testing
         with self.assertRaises(IllegalArgumentError):
-            self.client.create_proxy_model(name='Model should not be instance', model=bike_instance,
-                                           parent=bike_instance)
+            self._part = self.client.create_proxy_model(name='Model should not be instance',
+                                                        model=bike_instance, parent=bike_instance)
 
     def test_create_proxy_model_where_parent_is_instance(self):
         # setUp
@@ -146,7 +160,8 @@ class TestParts(TestBetamax):
 
         # testing
         with self.assertRaises(IllegalArgumentError):
-            self.client.create_proxy_model(name='Parent should not be instance', model=bike_model, parent=bike_instance)
+            self._part = self.client.create_proxy_model(name='Parent should not be instance',
+                                                        model=bike_model, parent=bike_instance)
 
     def test_add_to_wrong_categories(self):
         # This test has the purpose of testing of whether APIErrors are raised when illegal operations are
@@ -159,21 +174,21 @@ class TestParts(TestBetamax):
         wheel_model = project.model('Wheel')
 
         with self.assertRaises(APIError):
-            bike_model.add(wheel_model)
+            self._part = bike_model.add(wheel_model)
 
         front_fork_instance = project.part('Front Fork')
 
         with self.assertRaises(APIError):
-            front_fork_instance.add_to(bike_instance)
+            self._part = front_fork_instance.add_to(bike_instance)
 
         with self.assertRaises(APIError):
-            bike_instance.add_model('Engine')
+            self._part = bike_instance.add_model('Engine')
 
         with self.assertRaises(APIError):
-            bike_instance.add_property('Electrical Power')
+            self._part = bike_instance.add_property('Electrical Power')
 
         with self.assertRaises(APIError):
-            bike_model.add_with_properties(wheel_model)
+            self._part = bike_model.add_with_properties(wheel_model)
 
     def test_part_html_table(self):
         part = self.project.part('Front Wheel')
@@ -242,7 +257,7 @@ class TestParts(TestBetamax):
     # new in 1.5+
     def test_edit_part_instance_name(self):
         front_fork = self.project.part('Front Fork')
-        front_fork_oldname = str(front_fork.name)
+        front_fork_old_name = str(front_fork.name)
         front_fork.edit(name='Front Fork - updated')
 
         front_fork_updated = self.project.part('Front Fork - updated')
@@ -254,11 +269,11 @@ class TestParts(TestBetamax):
             front_fork.edit(name=True)
 
         # teardown
-        front_fork.edit(name=front_fork_oldname)
+        front_fork.edit(name=front_fork_old_name)
 
     def test_edit_part_instance_description(self):
         front_fork = self.project.part('Front Fork')
-        front_fork_olddescription = str(front_fork._json_data.get('description'))
+        front_fork_old_description = str(front_fork._json_data.get('description'))
         front_fork.edit(description='A normal Front Fork')
 
         front_fork_updated = self.project.part('Front Fork')
@@ -268,7 +283,7 @@ class TestParts(TestBetamax):
             front_fork.edit(description=42)
 
         # teardown
-        front_fork.edit(description=front_fork_olddescription)
+        front_fork.edit(description=front_fork_old_description)
 
     def test_edit_part_model_name(self):
         front_fork = self.project.model('Front Fork')
@@ -285,12 +300,11 @@ class TestParts(TestBetamax):
     def test_create_model(self):
         bike = self.project.model('Bike')
         pedal = self.project.create_model(bike, 'Pedal', multiplicity=Multiplicity.ONE)
+        self._part = pedal
         pedal_model = self.project.model('Pedal')
+
         self.assertTrue(pedal.id, pedal_model.id)
         self.assertTrue(pedal._json_data['multiplicity'], 'ONE')
-
-        # teardown
-        pedal_model.delete()
 
     def test_add_proxy_to(self):
         catalog_container = self.project.model(name__startswith='Catalog')
@@ -409,34 +423,31 @@ class TestParts(TestBetamax):
         # setUp
         model_name = 'Seat'
         seat = self.project.model(model_name)
-        seat.clone()
+        self._part = seat.clone()
 
         # testing
         clone_seat_model = self.project.model('CLONE - {}'.format(model_name))
         self.assertTrue(clone_seat_model)
 
-        # tearDown
-        clone_seat_model.delete()
-
     def test_clone_instance(self):
         instance_name = 'Front Wheel'
         wheel = self.project.part(instance_name)
-        wheel.clone()
+        self._part = wheel.clone()
 
         # testing
         clone_spoke_instance = self.project.part('CLONE - {}'.format(instance_name))
         self.assertTrue(clone_spoke_instance)
 
-        # tearDown
-        clone_spoke_instance.delete()
-
     def test_clone_instance_with_multiplicity_violation(self):
         instance_name = 'Seat'
         seat = self.project.part(instance_name)
 
+        seat_model = seat.model()
+
         # testing
+        self.assertEqual(Multiplicity.ONE, seat_model.multiplicity)
         with self.assertRaises(APIError):
-            seat.clone()
+            self._part = seat.clone()
 
 
 @skipIf(not TEST_FLAG_IS_PIM3, reason="This tests is designed for PIM version 3, expected to fail on older PIM3")

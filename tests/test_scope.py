@@ -164,44 +164,23 @@ class TestScopes(TestBetamax):
     def test_edit_scope_team(self):
         """Test capabilities of changing team scope."""
 
-        # setup
-        team_url = self.project._client._build_url('teams')
+        team_one, team_two = self.client.teams()[:2]
+        original_team = self.project.team
 
-        r = self.project._client._request('get', team_url, params=dict(name='Team No.1'))
-        team_kew_id = r.json().get('results')[0].get('id')  # no iffer as it should fail hard when not a respcode =ok
+        self.project.edit(team=team_one)
+        self.assertEqual(self.project.team, team_one)
 
-        r = self.project._client._request('get', team_url, params=dict(name='Second Team'))
-        team_b_id = r.json().get('results')[0].get('id')
+        self.project.edit(team=team_two)
+        self.assertEqual(self.project.team, team_two)
 
-        # save current team
-        if self.client.match_app_version(label="pim", version=">=3.0.0"):
-            team_dict = self.project._json_data.get('team_id_name')
-            saved_team_id = team_dict and team_dict.get('id')
-        else:
-            team_dict = self.project._json_data.get('team')
-            saved_team_id = team_dict and team_dict.get('id')
-
-        self.project.edit(team=team_b_id)
-        if self.client.match_app_version(label="pim", version=">=3.0.0"):
-            self.assertEqual(self.project._json_data.get('team_id_name').get('id'), team_b_id)
-        else:
-            self.assertEqual(self.project._json_data.get('team').get('id'), team_b_id)
-
-        self.project.edit(team=team_kew_id)
-        if self.client.match_app_version(label="pim", version=">=3.0.0"):
-            self.assertEqual(self.project._json_data.get('team_id_name').get('id'), team_kew_id)
-        else:
-            self.assertEqual(self.project._json_data.get('team').get('id'), team_kew_id)
-
-        self.project.edit(team=saved_team_id)
-        if self.client.match_app_version(label="pim", version=">=3.0.0"):
-            self.assertEqual(self.project._json_data.get('team_id_name').get('id'), saved_team_id)
-        else:
-            self.assertEqual(self.project._json_data.get('team').get('id'), saved_team_id)
+        # teardown
+        self.project.edit(team=original_team)
 
     def test_team_property_of_scope(self):
         """Test for the property 'team' of a scope."""
         team = self.project.team
+
+        self.assertIsNotNone(team)
         self.assertIsInstance(team, Team)
 
 
