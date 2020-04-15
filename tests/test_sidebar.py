@@ -92,13 +92,12 @@ class TestSideBar(TestBetamax):
             icon='site-map'
         )
 
-        self.assertIn('customNavigation', self.scope.options)
-        original_side_bar_buttons = self.scope.options.get('customNavigation')
-
-        self.assertTrue(len(original_side_bar_buttons) == 0,
-                        msg='During bulk creation of buttons, KE-chain should not be updated yet.')
+        self.assertNotIn('customNavigation', self.scope.options,
+                         msg='During bulk creation of buttons, KE-chain should not be updated yet.')
 
         bulk_creation_manager.__del__()  # deleting the manager updates KE-chain
+
+        self.assertIn('customNavigation', self.scope.options)
 
         updated_side_bar_buttons = self.scope.options.get('customNavigation')
         self.assertTrue(len(updated_side_bar_buttons) == 3,
