@@ -1,4 +1,5 @@
 import warnings
+from typing import Text
 
 from requests import Response
 
@@ -9,7 +10,7 @@ class APIError(Exception):
     A end-user descriptive message is required.
 
     :ivar response: response object
-    :ivar request: request object that preceedes the response
+    :ivar request: request object that precedes the response
     :ivar msg: error message in the response
     :ivar traceback: traceback in the response (from the KE-chain server)
     :ivar detail: details of the error
@@ -24,7 +25,7 @@ class APIError(Exception):
         response = kwargs.pop('response', None)
         self.response = response
         self.request = kwargs.pop('request', None)
-        if (response is not None and not self.request and hasattr(response, 'request')):
+        if response is not None and not self.request and hasattr(response, 'request'):
             self.request = self.response.request
         self.msg, self.traceback, self.detail = None, None, None
         super(APIError, self).__init__(*args, **kwargs)
@@ -87,3 +88,31 @@ class _DeprecationMixin:
             cls.__notified = True
 
         return super().__new__(cls)
+
+
+def api_error_traceback(message: Text, response: Response) -> APIError:
+    """
+    Convert the API response into an APIError with more context.
+
+    :param message: Custom text message, e.g. "Could not update Part."
+    :type message: str
+    :param response: Response object from the request.
+    :type response: Response
+    :return: APIError object that must be raised to throw the error during runtime.
+    :rtype APIError
+    """
+    import ast
+    import json
+
+    request = response.request
+    body = ast.literal_eval(request.body.decode("UTF-8"))  # Convert byte-string to Python list or dict
+    context_list = [
+        message,
+        'Server {}'.format(response.json().get('traceback', 'provided no traceback.')),
+        'Elapsed timedelta: {}'.format(response.elapsed),
+        'Request URL: {}'.format(request.url),
+        'Request method: {}'.format(request.method),
+        'Request JSON:\n{}'.format(json.dumps(body, indent=4)),  # pretty printing of a json
+    ]
+    context = '\n\n'.join(context_list)
+    return APIError(context)
