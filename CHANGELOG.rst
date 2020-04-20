@@ -1,6 +1,15 @@
 Change Log
 ==========
 
+v3.6.4 (20APR20)
+----------------
+
+* :bug: removed use of the old API usage of `descendants`. (#741)
+* :+1: We will now raise the correct errors when retrieving an `active banner`. (#741)
+* :+1: We now use actual depth-first sorting of children. (#741)
+* :+1: For testing and development: Less hard-coded and centralized teardowns, using `assertEqual(expected, received)` format. (#741)
+* :+1: dependent versions for development: Sphinx (3.0.2), nbsphinx (0.6.1)
+
 v3.6.3 (14APR20)
 ----------------
 
