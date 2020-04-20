@@ -156,8 +156,9 @@ class TestProperties(TestBetamax):
 
         obj = self.project.property(name='Cheap?', category=Category.MODEL)
         for attribute in attributes:
-            self.assertTrue(hasattr(obj, attribute),
-                            "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
+            with self.subTest(msg=attribute):
+                self.assertTrue(hasattr(obj, attribute),
+                                "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
 
     def test_retrieve_properties_with_kwargs(self):
         # setUp
@@ -167,7 +168,8 @@ class TestProperties(TestBetamax):
 
         # testing
         for prop in properties_with_kwargs:
-            self.assertEqual(prop.part.id, self.bike.id)
+            with self.subTest(msg=prop.name):
+                self.assertEqual(prop.part.id, self.bike.id)
 
     def test_get_property_by_name(self):
         gears_property = self.project.properties(name='Gears', category=Category.INSTANCE)[0]
@@ -310,18 +312,18 @@ class TestProperties(TestBetamax):
 
         # testing
         self.assertIsInstance(dual_pad_property, Property2)
-        self.assertTrue(dual_pad_property.name, dual_pad_name)
-        self.assertTrue(dual_pad_property.category, Category.INSTANCE)
+        self.assertEqual(dual_pad_name, dual_pad_property.name)
+        self.assertEqual(Category.INSTANCE, dual_pad_property.category)
 
         self.assertIsInstance(dual_pad_property_model, Property2)
-        self.assertTrue(dual_pad_property_model.name, dual_pad_name)
-        self.assertTrue(dual_pad_property_model.category, Category.MODEL)
+        self.assertEqual(dual_pad_name, dual_pad_property_model.name)
+        self.assertEqual(Category.MODEL, dual_pad_property_model.category)
 
         self.assertIsInstance(dual_pad_prop_retrieved_from_seat, Property2)
-        self.assertTrue(dual_pad_prop_retrieved_from_seat.name, dual_pad_name)
-        self.assertTrue(dual_pad_prop_retrieved_from_seat.category, Category.INSTANCE)
+        self.assertEqual(dual_pad_name, dual_pad_prop_retrieved_from_seat.name)
+        self.assertEqual(Category.INSTANCE, dual_pad_prop_retrieved_from_seat.category)
 
-        self.assertEqual(dual_pad_prop_retrieved_from_seat.id, dual_pad_property.id)
+        self.assertEqual(dual_pad_property.id, dual_pad_prop_retrieved_from_seat.id)
 
 
 class TestUpdateProperties(TestBetamax):
