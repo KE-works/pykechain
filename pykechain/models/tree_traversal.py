@@ -75,9 +75,10 @@ class TreeObject(Base, ABC):
         :returns list of child objects
         :rtype List
         """
-        all_children = list(self.children())
+        all_children = list()
 
         for child in self.children():
+            all_children.append(child)
             all_children.extend(child.all_children())
 
         return all_children

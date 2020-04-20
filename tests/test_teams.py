@@ -12,7 +12,7 @@ class TestTeams(TestBetamax):
 
         self.required_kwargs = dict(
             name='_test team',
-            user=self.client.users()[0]  # type: User
+            user=self.client.user('testuser')  # type: User
         )
 
         self.team = self.client.create_team(**self.required_kwargs)  # type: Team
@@ -100,7 +100,7 @@ class TestTeams(TestBetamax):
 
         self.team.remove_members([a_user.id])
 
-        self.assertListEqual(self.team.members(), members)
+        self.assertListEqual(members, self.team.members())
 
     def test_add_scope_to_team(self):
         # setup
