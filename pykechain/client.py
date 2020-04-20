@@ -2842,6 +2842,8 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not move activity, {}: {}".format(str(response), response.content))
 
+        activity.parent_id = parent_id
+
     def update_properties(self, properties: List[Dict]) -> List['AnyProperty']:
         """
         Update multiple properties simultaneously.
@@ -2863,7 +2865,7 @@ class Client(object):
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Properties ({})".format(response))
+            raise APIError("Could not update Properties {}: {}".format(str(response), response.json()))
 
         properties = [Property2.create(client=self, json=js) for js in response.json()['results']]
 
