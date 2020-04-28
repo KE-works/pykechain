@@ -8,7 +8,7 @@ class APIError(Exception):
     A end-user descriptive message is required.
 
     :ivar response: response object
-    :ivar request: request object that preceedes the response
+    :ivar request: request object that precedes the response
     :ivar msg: error message in the response
     :ivar traceback: traceback in the response (from the KE-chain server)
     :ivar detail: details of the error
@@ -29,7 +29,11 @@ class APIError(Exception):
 
         self.msg, self.traceback, self.detail = None, None, None
 
-        context = [args[0]] if args else []
+        if args:
+            arg = args[0]
+            context = [arg if isinstance(arg, str) else arg.__repr__()]
+        else:
+            context = []
 
         if self.response is not None and isinstance(self.response, Response):
             response_json = self.response.json()
@@ -47,19 +51,19 @@ class APIError(Exception):
                 'Elapsed: {}'.format(self.response.elapsed),
             ])
 
-        if self.request is not None and isinstance(self.request, PreparedRequest) and self.request.body:
-            import ast
-            import json
-            body = ast.literal_eval(self.request.body.decode("UTF-8"))  # Convert byte-string to Python list or dict
-
+        if self.request is not None and isinstance(self.request, PreparedRequest):
             context.extend([
                 'Request URL: {}'.format(self.request.url),
                 'Request method: {}'.format(self.request.method),
-                'Request JSON:\n{}'.format(json.dumps(body, indent=4)),  # pretty printing of a json
             ])
+            if self.request.body:
+                import ast
+                import json
+                body = ast.literal_eval(self.request.body.decode("UTF-8"))  # Convert byte-string to Python list or dict
+                context.append('Request JSON:\n{}'.format(json.dumps(body, indent=4)))  # pretty printing of a json
 
-        new_args = list(args) if args else ['']
-        new_args[0] = '\n\n'.join(context)
+        message = '\n\n'.join(context)
+        new_args = [message]
 
         super().__init__(*new_args)
 
