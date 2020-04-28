@@ -14,7 +14,7 @@ class APIError(Exception):
     :ivar detail: details of the error
     """
 
-    def __init__(self, text, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """Initialise the `APIError` with `response`, `request`, `msg`, `traceback` and `detail`.
 
         :param response:
@@ -29,14 +29,14 @@ class APIError(Exception):
 
         self.msg, self.traceback, self.detail = None, None, None
 
-        context = [text]
+        context = [args[0]] if args else []
 
         if self.response is not None and isinstance(self.response, Response):
             response_json = self.response.json()
             # may be a KE-chain API response error
             if response_json:
                 self.msg = response_json.get('msg')
-                self.traceback = response_json.get('traceback')
+                self.traceback = response_json.get('traceback', 'provided no traceback.')
                 self.detail = response_json.get('detail')
             else:
                 self.traceback = self.response.text
@@ -47,7 +47,7 @@ class APIError(Exception):
                 'Elapsed: {}'.format(self.response.elapsed),
             ])
 
-        if self.request is not None and isinstance(self.request, PreparedRequest):
+        if self.request is not None and isinstance(self.request, PreparedRequest) and self.request.body:
             import ast
             import json
             body = ast.literal_eval(self.request.body.decode("UTF-8"))  # Convert byte-string to Python list or dict
@@ -58,9 +58,10 @@ class APIError(Exception):
                 'Request JSON:\n{}'.format(json.dumps(body, indent=4)),  # pretty printing of a json
             ])
 
-        text = '\n\n'.join(context)
+        new_args = list(args) if args else ['']
+        new_args[0] = '\n\n'.join(context)
 
-        super().__init__(text, *args)
+        super().__init__(*new_args)
 
 
 class ForbiddenError(APIError):
