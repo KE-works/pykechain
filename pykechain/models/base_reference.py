@@ -6,6 +6,12 @@ from pykechain.utils import is_uuid
 
 
 class _ReferenceProperty(Property2):
+    """
+    Private base class for the KE-chain reference properties.
+
+    .. versionadded:: 3.7
+    :cvar REFERENCED_CLASS: handle to the Pykechain class that is referenced using this ReferenceProperty class.
+    """
 
     REFERENCED_CLASS = Base  # type: type(Base)
 
@@ -17,6 +23,7 @@ class _ReferenceProperty(Property2):
 
     @property
     def cls(self) -> Text:
+        """Get the name of the referenced Pykechain class."""
         return self.REFERENCED_CLASS.__name__
 
     @property
@@ -25,7 +32,7 @@ class _ReferenceProperty(Property2):
         Retrieve the referenced objects of this reference property.
 
         :return: list or generator of `Base` objects.
-        :rtype Sized
+        :rtype list
         """
         if not self._value:
             return None
@@ -35,6 +42,15 @@ class _ReferenceProperty(Property2):
 
     @abstractmethod
     def _retrieve_objects(self, object_ids: Iterable[Any], **kwargs) -> Iterable[Base]:
+        """
+        Retrieve a list of Pykechain objects, type depending on the reference property type.
+
+        This method is abstract because the exact method of the Client class changes per subclass.
+
+        :param object_ids: list of KE-chain UUIDs.
+        :param kwargs: optional inputs
+        :return: list of Pykechain objects
+        """
         pass
 
     @value.setter

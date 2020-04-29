@@ -13,7 +13,13 @@ class MultiReferenceProperty2(_ReferenceProperty):
     """
 
     def _retrieve_objects(self, object_ids: Iterable[Text], **kwargs) -> Iterable[Part2]:
-        """Retrieves Part2 objects."""
+        """
+        Retrieve a list of Parts.
+
+        :param object_ids: list of Part UUIDs.
+        :param kwargs: optional inputs
+        :return: list of Part2 objects
+        """
         assert all([isinstance(v, dict) and 'id' in v for v in self._value]), \
             "Expect all elements in the _value to be a dict with 'name' and 'id', got '{}'.".format(self._value)
 
