@@ -33,21 +33,28 @@ class APIError(Exception):
             arg = args[0]
             context = [arg if isinstance(arg, str) else arg.__repr__()]
         else:
-            context = []
+            context = ['Error in request to the server.']  # Default message if `APIError()`, without inputs,  is used.
+
+        import json
 
         if self.response is not None and isinstance(self.response, Response):
             response_json = self.response.json()
-            # may be a KE-chain API response error
+
             if response_json:
                 self.msg = response_json.get('msg')
                 self.traceback = response_json.get('traceback', 'provided no traceback.')
                 self.detail = response_json.get('detail')
+                self.results = response_json.get('results')
             else:
                 self.traceback = self.response.text
                 self.msg = self.traceback.split(r'\n'[-1])
+                self.detail = None
+                self.results = None
 
             context.extend([
                 'Server {}'.format(self.traceback),
+                'Results:\n{}'.format(json.dumps(self.results), indent=4),
+                'Detail: {}'.format(self.detail),
                 'Elapsed: {}'.format(self.response.elapsed),
             ])
 
@@ -57,19 +64,17 @@ class APIError(Exception):
                 'Request method: {}'.format(self.request.method),
             ])
             if self.request.body:
-                import ast
-                import json
                 try:
                     decoded_body = self.request.body.decode("UTF-8")  # Convert byte-string to string
                 except AttributeError:
                     decoded_body = self.request.body  # strings (e.g. from testing cassettes) cant be decoded
                 try:
-                    body = ast.literal_eval(decoded_body)  # Convert string to Python object(s)
-                except SyntaxError:
-                    body = decoded_body  # In case of strings, no literal evaluation is possible / necessary
-                context.append('Request JSON:\n{}'.format(json.dumps(body, indent=4)))  # pretty printing of a json
+                    body = json.loads(decoded_body)  # Convert string to Python object(s)
+                except json.decoder.JSONDecodeError:
+                    body = decoded_body.split('&')  # parameters in URL
+                context.append('Request data:\n{}'.format(json.dumps(body, indent=4)))  # pretty printing of a json
 
-        message = '\n\n'.join(context)
+        message = '\n'.join(context)
         new_args = [message]
 
         super().__init__(*new_args)
