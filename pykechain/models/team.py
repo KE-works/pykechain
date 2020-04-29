@@ -31,7 +31,7 @@ class Team(Base):
         response = self._client._request('PUT', url, json=update_dict, params=params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update {} ({})".format(self.__class__.__name__, response.json().get('results')))
+            raise APIError("Could not update Team {}".format(self), response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
@@ -78,7 +78,7 @@ class Team(Base):
         response = self._client._request('DELETE', url=url)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete team: {} with id {}".format(self.name, self.id))
+            raise APIError("Could not delete Team {}".format(self), response=response)
 
     def members(self, role: Optional[Union[TeamRoles, Text]] = None) -> List[Dict]:
         """Members of the team.

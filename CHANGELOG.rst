@@ -13,6 +13,7 @@ In this release we deprecated functionality that were announced to be deprecated
 * :+1: Moved all inherited `Property` methods into the `Property2` class and removed Property as its superclass.
 * :+1: Large clean-up for user-input validation for most `Client` methods to provide consistent error messages.
 * :+1: Added intermediate `_retrieve_singular` method in `Client` class to simplify other methods intended to get 1 object. These other methods all had identical dependency on methods to retrieve more than 1 object, such as `part()` on `parts()`.
+* :+1: Improved traceback of any `APIError` by printing content from the `response` and/or `request` if provided by keyword arguments, e.g. `APIError("Incorrect value!", response=response)`. (#742)
 
 
 Backward incompatible changes

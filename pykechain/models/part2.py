@@ -460,7 +460,7 @@ class Part2(TreeObject):
                                          json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Part ({})".format(response))
+            raise APIError("Could not update Part {}".format(self), response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
@@ -755,7 +755,7 @@ class Part2(TreeObject):
         )
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError('{}: {}'.format(str(response), response.content))
+            raise APIError("Could not add to Part {}".format(self), response=response)
 
         new_part_instance = Part2(response.json()['results'][0], client=self._client)  # type: Part2
 
@@ -999,7 +999,7 @@ class Part2(TreeObject):
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update the part '{}', got: '{}'".format(self, response.content))
+            raise APIError("Could not update Part {}".format(self), response=response)
 
         # update local properties (without a call)
         self.refresh(json=response.json()['results'][0])
@@ -1017,7 +1017,7 @@ class Part2(TreeObject):
         response = self._client._request('DELETE', self._client._build_url('part2', part_id=self.id))
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete part: {} with id {}: ({})".format(self.name, self.id, response))
+            raise APIError("Could not delete Part {}".format(self), response=response)
 
     def order_properties(self, property_list: Optional[List[Union['AnyProperty', Text]]] = None) -> None:
         """
@@ -1057,7 +1057,7 @@ class Part2(TreeObject):
 
         """
         if self.category != Category.MODEL:
-            raise APIError("Ordering of properties must be done on a Part of category MODEL.")
+            raise APIError("Ordering of properties must be done on a Part of category {}.".format(Category.MODEL))
 
         property_ids = check_list_of_base(property_list, Property2, 'property_list', method=self.property)
 

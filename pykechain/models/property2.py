@@ -148,7 +148,7 @@ class Property2(Base):
         response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['property2'], json={'value': value})
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update property value: '{}'".format(response.content))
+            raise APIError("Could not update Property {}".format(self), response=response)
 
         self.refresh(json=response.json()['results'][0])
         return self._value
@@ -444,7 +444,7 @@ class Property2(Base):
                                          json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Property ({})".format(response))
+            raise APIError("Could not update Property {}".format(self), response=response)
 
         self.refresh(json=response.json()['results'][0])
 
@@ -457,7 +457,7 @@ class Property2(Base):
         response = self._client._request('DELETE', self._client._build_url('property2', property_id=self.id))
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete property: {} with id {}".format(self.name, self.id))
+            raise APIError("Could not delete Property {}".format(self), response=response)
 
     def copy(self, target_part: 'Part2', name: Optional[Text] = None) -> 'Property2':
         """Copy a property model or instance.

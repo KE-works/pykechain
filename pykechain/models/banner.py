@@ -73,7 +73,7 @@ class Banner(Base):
         response = self._client._request('PUT', url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Banner ({}) {}".format(response, response.json()))
+            raise APIError("Could not update Banner {}".format(self), response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
@@ -82,5 +82,5 @@ class Banner(Base):
         response = self._client._request('DELETE', self._client._build_url('banner', banner_id=self.id))
 
         if response.status_code != requests.codes.no_content:
-            raise APIError("Could not delete banner: {} with id {}".format(self.name, self.id))
+            raise APIError("Could not delete Banner: {}".format(self), response=response)
         return True

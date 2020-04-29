@@ -112,7 +112,7 @@ class Scope2(Base, TagsMixin):
                                          data={'user_id': user_object['pk']})
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not {} {} in Scope".format(select_action.split('_')[0], user_type))
+            raise APIError("Could not {} {} in Scope".format(select_action.split('_')[0], user_type), response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
@@ -202,7 +202,7 @@ class Scope2(Base, TagsMixin):
                                          json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Scope ({})".format(response))
+            raise APIError("Could not update Scope {}".format(self), response=response)
 
         self.refresh(json=response.json().get('results')[0])
 

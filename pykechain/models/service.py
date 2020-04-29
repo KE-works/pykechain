@@ -82,11 +82,11 @@ class Service(Base):
         response = self._client._request('GET', url, params=dict(interactive=interactive, format='json'))
 
         if response.status_code == requests.codes.conflict:  # pragma: no cover
-            raise APIError("Conflict: Could not execute service as it is already running '{}': {}".
-                           format(self, (response.status_code, response.json())))
+            raise APIError(
+                "Conflict: Could not execute Service {} as it is already running.".format(self), response=response)
         elif response.status_code != requests.codes.accepted:  # pragma: no cover
             raise APIError(
-                "Could not execute service '{}': {}".format(self, (response.status_code, response.json())))
+                "Could not execute Service {}".format(self), response=response)
 
         data = response.json()
         return ServiceExecution(json=data.get('results')[0], client=self._client)
@@ -134,7 +134,7 @@ class Service(Base):
                                          json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Service ({})".format(response))
+            raise APIError("Could not update Service {}".format(self), response=response)
 
         self.refresh(json=response.json()['results'][0])
 
@@ -146,7 +146,7 @@ class Service(Base):
         response = self._client._request('DELETE', self._client._build_url('service', service_id=self.id))
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete service: {} with id {}".format(self.name, self.id))
+            raise APIError("Could not delete Service {}".format(self), response=response)
 
     def upload(self, pkg_path):
         """
@@ -174,7 +174,7 @@ class Service(Base):
             )
 
         if response.status_code != requests.codes.accepted:  # pragma: no cover
-            raise APIError("Could not upload service script file (or kecpkg) ({})".format(response))
+            raise APIError("Could not upload script file (or kecpkg) to Service {}".format(self), response=response)
 
         self.refresh(json=response.json()['results'][0])
 
@@ -196,7 +196,7 @@ class Service(Base):
         url = self._client._build_url('service_download', service_id=self.id)
         response = self._client._request('GET', url)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not download service script file ({})".format(response))
+            raise APIError("Could not download script file from Service {}".format(self), response=response)
 
         with open(full_path, 'w+b') as f:
             for chunk in response:
@@ -281,7 +281,7 @@ class ServiceExecution(Base):
         response = self._client._request('GET', url, params=dict(format='json'))
 
         if response.status_code != requests.codes.accepted:  # pragma: no cover
-            raise APIError("Could not execute service '{}': {}".format(self, response))
+            raise APIError("Could not terminate Service {}".format(self), response=response)
 
     def get_log(self, target_dir=None, log_filename='log.txt'):
         """
@@ -301,7 +301,7 @@ class ServiceExecution(Base):
         url = self._client._build_url('service_execution_log', service_execution_id=self.id)
         response = self._client._request('GET', url)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not download service execution log")
+            raise APIError("Could not download execution log of Service {}".format(self), response=response)
 
         with open(full_path, 'w+b') as f:
             for chunk in response:
@@ -320,7 +320,7 @@ class ServiceExecution(Base):
         response = self._client._request('GET', url, params=dict(format='json'))
 
         if response.status_code != requests.codes.ok:
-            raise APIError("Could not retrieve notebook url '{}': {}".format(self, response))
+            raise APIError("Could not retrieve notebook url of Service {}".format(self), response=response)
 
         data = response.json()
         url = data.get('results')[0].get('url')

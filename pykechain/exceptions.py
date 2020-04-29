@@ -1,6 +1,5 @@
 import warnings
-
-from requests import Response
+from requests import Response, PreparedRequest
 
 
 class APIError(Exception):
@@ -9,7 +8,7 @@ class APIError(Exception):
     A end-user descriptive message is required.
 
     :ivar response: response object
-    :ivar request: request object that preceedes the response
+    :ivar request: request object that precedes the response
     :ivar msg: error message in the response
     :ivar traceback: traceback in the response (from the KE-chain server)
     :ivar detail: details of the error
@@ -21,23 +20,59 @@ class APIError(Exception):
         :param response:
         :param kwargs:
         """
-        response = kwargs.pop('response', None)
-        self.response = response
-        self.request = kwargs.pop('request', None)
-        if (response is not None and not self.request and hasattr(response, 'request')):
-            self.request = self.response.request
-        self.msg, self.traceback, self.detail = None, None, None
-        super(APIError, self).__init__(*args, **kwargs)
+        self.response = kwargs.pop('response', None)
 
-        if isinstance(self.response, Response) and 'content' in self.response:
+        if hasattr(self.response, 'request'):
+            self.request = self.response.request
+        else:
+            self.request = kwargs.pop('request', None)
+
+        self.msg, self.traceback, self.detail = None, None, None
+
+        if args:
+            arg = args[0]
+            context = [arg if isinstance(arg, str) else arg.__repr__()]
+        else:
+            context = []
+
+        if self.response is not None and isinstance(self.response, Response):
+            response_json = self.response.json()
             # may be a KE-chain API response error
-            if self.response.json():
-                self.msg = self.response.json().get('msg')
-                self.traceback = self.response.json().get('traceback')
-                self.detail = self.response.json().get('detail')
+            if response_json:
+                self.msg = response_json.get('msg')
+                self.traceback = response_json.get('traceback', 'provided no traceback.')
+                self.detail = response_json.get('detail')
             else:
                 self.traceback = self.response.text
                 self.msg = self.traceback.split(r'\n'[-1])
+
+            context.extend([
+                'Server {}'.format(self.traceback),
+                'Elapsed: {}'.format(self.response.elapsed),
+            ])
+
+        if self.request is not None and isinstance(self.request, PreparedRequest):
+            context.extend([
+                'Request URL: {}'.format(self.request.url),
+                'Request method: {}'.format(self.request.method),
+            ])
+            if self.request.body:
+                import ast
+                import json
+                try:
+                    decoded_body = self.request.body.decode("UTF-8")  # Convert byte-string to string
+                except AttributeError:
+                    decoded_body = self.request.body  # strings (e.g. from testing cassettes) cant be decoded
+                try:
+                    body = ast.literal_eval(decoded_body)  # Convert string to Python object(s)
+                except SyntaxError:
+                    body = decoded_body  # In case of strings, no literal evaluation is possible / necessary
+                context.append('Request JSON:\n{}'.format(json.dumps(body, indent=4)))  # pretty printing of a json
+
+        message = '\n\n'.join(context)
+        new_args = [message]
+
+        super().__init__(*new_args)
 
 
 class ForbiddenError(APIError):

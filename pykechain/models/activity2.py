@@ -441,7 +441,7 @@ class Activity2(TreeObject, TagsMixin):
         url = self._client._build_url('activities_bulk_update')
         response = self._client._request('PUT', url, json=data)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Activity ({})".format(response.json()))
+            raise APIError("Could not update Activity {}".format(self), response=response)
 
     def edit(
             self,
@@ -531,7 +531,7 @@ class Activity2(TreeObject, TagsMixin):
         response = self._client._request('PUT', url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Activity ({})".format(response.json()))
+            raise APIError("Could not update Activity {}".format(self), response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
@@ -572,8 +572,7 @@ class Activity2(TreeObject, TagsMixin):
         response = self._client._request('DELETE', self._client._build_url('activity', activity_id=self.id))
 
         if response.status_code != requests.codes.no_content:
-            raise APIError(
-                "Could not delete activity: {} with id {}, ({})".format(self.name, self.id, response.json()))
+            raise APIError("Could not delete Activity {}.".format(self), response=response)
         return True
 
     #
@@ -669,7 +668,7 @@ class Activity2(TreeObject, TagsMixin):
         response = self._client._request('GET', url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve associations on activity: {}".format(response.json()))
+            raise NotFoundError("Could not retrieve Associations on Activity {}".format(self), response=response)
 
         data = response.json()
         return data['results']
@@ -736,7 +735,7 @@ class Activity2(TreeObject, TagsMixin):
         url = self._client._build_url('activity_export', activity_id=self.id)
         response = self._client._request('GET', url, params=request_params)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not download PDF of activity '{}': '{}'".format(self.name, response.json()))
+            raise APIError("Could not download PDF of Activity {}".format(self), response=response)
 
         # If appendices are included, the request becomes asynchronous
 
@@ -760,8 +759,8 @@ class Activity2(TreeObject, TagsMixin):
                 count += ASYNC_REFRESH_INTERVAL
                 time.sleep(ASYNC_REFRESH_INTERVAL)
 
-            raise APIError("Could not download PDF of activity {} within the time-out limit of {} "
-                           "seconds".format(self.name, ASYNC_TIMEOUT_LIMIT))
+            raise APIError("Could not download PDF of Activity {} within the time-out limit of {} "
+                           "seconds".format(self, ASYNC_TIMEOUT_LIMIT), response=response)
 
         with open(full_path, 'wb') as f:
             for chunk in response.iter_content(1024):
@@ -811,7 +810,7 @@ class Activity2(TreeObject, TagsMixin):
         response = self._client._request('POST', url, data=params)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not share the link to Activity, {}:\n\n{}'".format(str(response), response.json()))
+            raise APIError("Could not share the link to Activity {}".format(self), response=response)
 
     def share_pdf(
             self,
@@ -874,4 +873,4 @@ class Activity2(TreeObject, TagsMixin):
         response = self._client._request('POST', url, data=params)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not share the link to Activity, {}:\n\n{}'".format(str(response), response.json()))
+            raise APIError("Could not share the link to Activity {}".format(self), response=response)
