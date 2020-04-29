@@ -102,7 +102,7 @@ class Team(Base):
         """
         check_enum(role, TeamRoles, 'role')
 
-        member_list = self._json_data.get('members')
+        member_list = list(self._json_data.get('members'))
         if role:
             return [teammember for teammember in member_list if teammember.get('role') == role]
         else:

@@ -25,13 +25,23 @@ We deprecated the following:
 * Option START from `NavigationBarAlignment` enum class.
 * Mapping table `WIMCompatibleActivityTypes`.
 
+v3.6.4 (20APR20)
+----------------
 
-v3.6.X (UNRELEASED)
----------------
+* :bug: removed use of the old API usage of `descendants`. (#741)
+* :+1: We will now raise the correct errors when retrieving an `active banner`. (#741)
+* :+1: We now use actual depth-first sorting of children. (#741)
+* :+1: For testing and development: Less hard-coded and centralized teardowns, using `assertEqual(expected, received)` format. (#741)
+* :+1: dependent versions for development: Sphinx (3.0.2), nbsphinx (0.6.1)
 
-* :+1: Added `current_user` method on the Client class to return the `User` object of the user connected to KE-chain.
-* :+1: Added various arguments to the `create_notification` method.
-* :+1: Added `edit` method to the Notification class.
+v3.6.3 (14APR20)
+----------------
+
+* :+1: Added `current_user()` method on the Client class to return the `User` object of the user connected to KE-chain.
+* :+1: Added various arguments to the `create_notification()` method.
+* :+1: Added `edit()` method to the Notification class.
+* :bug: Removed old API usage of `descendants` from `copy()` of the Part class.
+* :bug: Raising correct errors whenever no (or multiple) active banner exist in the `active_banner()` method.
 
 v3.6.2 (27MAR20)
 ----------------

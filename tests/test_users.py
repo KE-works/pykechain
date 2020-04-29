@@ -17,8 +17,9 @@ class TestUsers(TestBetamax):
 
         obj = self.client.users()[0]
         for attribute in attributes:
-            self.assertTrue(hasattr(obj, attribute),
-                            "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__))
+            with self.subTest(msg=attribute):
+                self.assertTrue(hasattr(obj, attribute),
+                                "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__))
 
     def test_retrieve_single_multiple_user_raises_error(self):
         with self.assertRaises(MultipleFoundError):
@@ -43,7 +44,7 @@ class TestUsers(TestBetamax):
     def test_retrieve_user_email(self):
         user_retrieved = self.client.user(username='testuser')
         email_retrieved = user_retrieved.email
-        self.assertEqual(email_retrieved, 'a@b.nl')
+        self.assertEqual('a@b.nl', email_retrieved)
 
     def test_retrieve_user_language(self):
         user_retrieved = self.client.user(username='testuser')

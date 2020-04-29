@@ -19,8 +19,8 @@ pytest-cov==2.8.1
 coveralls==2.0.0
 
 # documentation
-Sphinx==3.0.1
-nbsphinx==0.6.0
+Sphinx==3.0.3
+nbsphinx==0.6.1
 
 # data science # not needed for local use
 # jupyter==1.0.0
@@ -33,7 +33,7 @@ tox==3.14.6
 flake8==3.7.9
 pydocstyle==5.0.2
 mypy==0.770; python_version >= '3.4'
-pre-commit==2.2.0
+pre-commit==2.3.0
 
 # for package management (uploads)
 twine>=3.0.0; python_version >= '3.6'

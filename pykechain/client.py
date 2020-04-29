@@ -2368,6 +2368,8 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not move Activity {}".format(activity), response=response)
 
+        activity.parent_id = parent_id
+
     def update_properties(self, properties: List[Dict]) -> List['AnyProperty']:
         """
         Update multiple properties simultaneously.
@@ -2638,17 +2640,27 @@ class Client(object):
 
         return Banner(response.json()['results'][0], client=self)
 
-    def active_banner(self) -> Optional[Banner]:
+    def active_banner(self) -> Banner:
         """
         Retrieve the currently active banner.
 
         :return: Banner object. If no banner is active, returns None.
         :rtype Banner
+        :raise APIError whenever the banners could not be retrieved properly.
+        :raises NotFoundError whenever there is no active banner.
+        :raises MultipleFoundError whenever multiple banners are active.
         """
         response = self._request('GET', self._build_url('banner_active'))
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve active Banner", response=response)
 
-        data = response.json()['results'][0]
-        return Banner(json=data, client=self) if data else None
+        active_banner_list = response.json()['results']
+        if not active_banner_list:
+            raise NotFoundError('No current active banner.')
+        elif len(active_banner_list) > 1:
+            raise MultipleFoundError('There are multiple active banners.')
+        else:
+            data = active_banner_list[0]
+
+        return Banner(json=data, client=self)
