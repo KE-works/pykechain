@@ -265,7 +265,7 @@ class TestServiceExecutions(TestServiceSetup):
         self.service.execute()
 
         # testing
-        with self.assertRaisesRegex(APIError, "Conflict: Could not execute service as it is already running"):
+        with self.assertRaisesRegex(APIError, "Conflict: Could not execute"):
             self.service.execute()
 
     def test_properties_of_service_execution(self):

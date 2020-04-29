@@ -59,7 +59,14 @@ class APIError(Exception):
             if self.request.body:
                 import ast
                 import json
-                body = ast.literal_eval(self.request.body.decode("UTF-8"))  # Convert byte-string to Python list or dict
+                try:
+                    decoded_body = self.request.body.decode("UTF-8")  # Convert byte-string to string
+                except AttributeError:
+                    decoded_body = self.request.body  # strings (e.g. from testing cassettes) cant be decoded
+                try:
+                    body = ast.literal_eval(decoded_body)  # Convert string to Python object(s)
+                except SyntaxError:
+                    body = decoded_body  # In case of strings, no literal evaluation is possible / necessary
                 context.append('Request JSON:\n{}'.format(json.dumps(body, indent=4)))  # pretty printing of a json
 
         message = '\n\n'.join(context)
