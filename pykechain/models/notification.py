@@ -145,6 +145,6 @@ class Notification(Base):
         response = self._client._request('PUT', url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Notification ({})".format(response))
+            raise APIError("Could not update Notification {}".format(self), response=response)
 
         self.refresh(json=response.json().get('results')[0])

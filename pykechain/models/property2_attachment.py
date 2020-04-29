@@ -137,7 +137,7 @@ class AttachmentProperty2(Property2):
         response = self._client._request('GET', url)
 
         if response.status_code != requests.codes.ok:
-            raise APIError("Could not download property value")
+            raise APIError("Could not download property value.", response=response)
 
         return response
 
@@ -150,4 +150,4 @@ class AttachmentProperty2(Property2):
                                          files={"attachment": data})
 
         if response.status_code != requests.codes.ok:
-            raise APIError("Could not upload attachment: {}".format(response.content))
+            raise APIError("Could not upload attachment", response=response)

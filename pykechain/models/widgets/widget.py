@@ -222,7 +222,7 @@ class Widget(Base):
         response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['widgets'], json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Widget ({})".format(response))
+            raise APIError("Could not update Widget {}".format(self), response=response)
 
         self.refresh(json=response.json().get('results')[0])
 

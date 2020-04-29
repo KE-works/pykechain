@@ -239,7 +239,7 @@ class Client(object):
             elif response.status_code == requests.codes.forbidden:
                 raise ForbiddenError(response.json()['results'][0]['detail'])
             elif response.status_code != requests.codes.ok:
-                raise APIError("Could not retrieve app versions: {}".format(response.json()))
+                raise APIError("Could not retrieve app versions", response=response)
             else:
                 self._app_versions = response.json().get('results')
 
@@ -266,7 +266,7 @@ class Client(object):
         if not self._widget_schemas:
             response = self._request('GET', self._build_url('widgets_schemas'))
             if response.status_code != requests.codes.ok:  # pragma: no cover
-                raise APIError("Could not retrieve widgets schemas ({})".format((response, response.json())))
+                raise APIError("Could not retrieve widgets schemas.", response=response)
             self._widget_schemas = response.json().get('results')
 
         return self._widget_schemas
@@ -390,7 +390,7 @@ class Client(object):
         response = self._request('GET', url, params=extra_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not reload object ({})".format(response))
+            raise NotFoundError("Could not reload {} {}".format(obj.__class__.__name__, obj), response=response)
 
         data = response.json()
 
@@ -472,7 +472,7 @@ class Client(object):
         response = self._request('GET', url=url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve scopes: '{}'".format(response.json()))
+            raise NotFoundError("Could not retrieve Scopes", response=response)
 
         data = response.json()
 
@@ -525,7 +525,7 @@ class Client(object):
         response = self._request('GET', self._build_url('activities'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve activities. Server responded with {}".format(str(response)))
+            raise NotFoundError("Could not retrieve Activities", response=response)
 
         data = response.json()
         return [Activity2(a, client=self) for a in data['results']]
@@ -637,8 +637,7 @@ class Client(object):
         response = self._request('GET', url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve parts. Request: {}\nResponse: {}".format(
-                request_params, response.json()))
+            raise NotFoundError("Could not retrieve Parts", response=response)
 
         data = response.json()
 
@@ -720,7 +719,7 @@ class Client(object):
         response = self._request('GET', self._build_url('properties2'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve properties: '{}'".format(response.json()))
+            raise NotFoundError("Could not retrieve Properties", response=response)
 
         return [Property2.create(p, client=self) for p in response.json()['results']]
 
@@ -775,7 +774,7 @@ class Client(object):
         response = self._request('GET', self._build_url('services'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve services")
+            raise NotFoundError("Could not retrieve Services", response=response)
 
         return [Service(service, client=self) for service in response.json()['results']]
 
@@ -831,7 +830,7 @@ class Client(object):
         response = self._request('GET', self._build_url('service_executions'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve service executions")
+            raise NotFoundError("Could not retrieve Service Executions", response=response)
 
         return [ServiceExecution(service_exeuction, client=self) for service_exeuction in response.json()['results']]
 
@@ -876,7 +875,7 @@ class Client(object):
         response = self._request('GET', self._build_url('users'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not find users: '{}'".format(response.json()))
+            raise NotFoundError("Could not retrieve Users", response=response)
 
         return [User(user, client=self) for user in response.json()['results']]
 
@@ -905,7 +904,7 @@ class Client(object):
         response = self._request(method='GET', url=self._build_url(resource='user_current'))
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not find current user: '{}'".format(response.json()))
+            raise NotFoundError("Could not retrieve current User", response=response)
 
         return User(response.json()['results'][0], client=self)
 
@@ -942,7 +941,7 @@ class Client(object):
         response = self._request('GET', self._build_url('teams'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not find teams: '{}'".format(response.json()))
+            raise NotFoundError("Could not retrieve Teams", response=response)
 
         return [Team(team, client=self) for team in response.json()['results']]
 
@@ -995,7 +994,7 @@ class Client(object):
         response = self._request('GET', self._build_url('widgets'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not find widgets: '{}'".format(response.json()))
+            raise NotFoundError("Could not retrieve Widgets", response=response)
 
         return [Widget.create(json=json, client=self) for json in response.json()['results']]
 
@@ -1073,7 +1072,7 @@ class Client(object):
                                  params=API_EXTRA_PARAMS['activities'])
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create activity {}: {}".format(str(response), response.json()))
+            raise APIError("Could not create Activity.", response=response)
 
         new_activity = Activity2(response.json()['results'][0], client=self)
         if isinstance(parent, Activity2) and parent._cached_children is not None:
@@ -1095,7 +1094,7 @@ class Client(object):
                                  json=data)
 
         if response.status_code != requests.codes.created:
-            raise APIError("Could not create part, {}: {}".format(str(response), response.json()))
+            raise APIError("Could not create Part", response=response)
 
         return Part2(response.json()['results'][0], client=self)
 
@@ -1302,7 +1301,7 @@ class Client(object):
         response = self._request('POST', url, params=query_params, data=data)
 
         if response.status_code != requests.codes.created:
-            raise APIError("Could not clone part, {}: {}".format(str(response), response.json()))
+            raise APIError("Could not clone Part", response=response)
 
         return Part2(response.json()['results'][0], client=self)
 
@@ -1437,7 +1436,7 @@ class Client(object):
         response = self._request('POST', url, params=query_params, json=data)
 
         if response.status_code != requests.codes.created:
-            raise APIError("Could not create property, {}: {}".format(str(response), response.json()))
+            raise APIError("Could not create Property", response=response)
 
         prop = Property2.create(response.json()['results'][0], client=self)
 
@@ -1503,7 +1502,7 @@ class Client(object):
         response = self._request('POST', self._build_url('services'), json=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create service ({})".format(response, response.json()))
+            raise APIError("Could not create Service", response=response)
 
         service = Service(response.json().get('results')[0], client=self)
 
@@ -1570,7 +1569,7 @@ class Client(object):
         response = self._request('POST', url, params=query_params, data=data_dict)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create scope, {}:\n\n{}'".format(str(response), response.json()))
+            raise APIError("Could not create Scope", response=response)
 
         return Scope2(response.json()['results'][0], client=self)
 
@@ -1600,7 +1599,7 @@ class Client(object):
                                  params=query_options)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete scope, {}: {}".format(str(response), response.json()))
+            raise APIError("Could not delete Scope {}".format(scope), response=response)
 
         return True
 
@@ -1683,9 +1682,9 @@ class Client(object):
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             if response.status_code == requests.codes.forbidden:
-                raise ForbiddenError("Could not clone scope, {}: {}".format(str(response), response.json()))
+                raise ForbiddenError("Forbidden to clone Scope {}".format(source_scope), response=response)
             else:
-                raise APIError("Could not clone scope, {}: {}".format(str(response), response.json()))
+                raise APIError("Could not clone Scope {}".format(source_scope), response=response)
 
         if asynchronous:
             return None
@@ -1750,7 +1749,7 @@ class Client(object):
         response = self._request('POST', url, json=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create a team ({})".format((response, response.json())))
+            raise APIError("Could not create Team", response=response)
 
         new_team = Team(json=response.json().get('results')[0], client=self)
 
@@ -1884,7 +1883,7 @@ class Client(object):
         response = self._request('POST', url, params=API_EXTRA_PARAMS['widgets'], json=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create a widget ({})\n\n{}".format(response, response.json()))
+            raise APIError("Could not create Widget", response=response)
 
         # create the widget and do postprocessing
         widget = Widget.create(json=response.json().get('results')[0], client=self)
@@ -1928,7 +1927,7 @@ class Client(object):
         response = self._request('POST', url, params=API_EXTRA_PARAMS['widgets'], json=bulk_data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create a widgets ({})\n\n{}".format(response, response.json()))
+            raise APIError("Could not create Widgets", response=response)
 
         # create the widget and do postprocessing
         widgets = []
@@ -1959,7 +1958,7 @@ class Client(object):
         )
 
         if response.status_code != requests.codes.ok:
-            raise APIError("Could not update the widgets: {}: {}".format(str(response), response.json()))
+            raise APIError("Could not update Widgets", response=response)
 
         widgets_response = response.json().get('results')
         return [Widget.create(json=widget_json, client=self) for widget_json in widgets_response]
@@ -1979,7 +1978,7 @@ class Client(object):
         response = self._request('DELETE', url)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Widget ({})".format(response.json()))
+            raise APIError("Could not delete Widget {}".format(widget), response=response)
 
     def delete_widgets(self, widgets: List[Union[Widget, Text]]) -> None:
         """
@@ -1997,7 +1996,7 @@ class Client(object):
         response = self._request('DELETE', url, json=widget_ids)
 
         if response.status_code != requests.codes.no_content:
-            raise APIError("Could not delete the widgets: {}: {}".format(str(response), response.json()))
+            raise APIError("Could not delete Widgets", response=response)
 
     @staticmethod
     def _validate_associations(
@@ -2087,7 +2086,7 @@ class Client(object):
         response = self._request('GET', url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not retrieve associations ({})".format((response, response.json())))
+            raise APIError("Could not retrieve Associations", response=response)
 
         associations = [Association(json=r, client=self) for r in response.json()['results']]
 
@@ -2173,7 +2172,7 @@ class Client(object):
         response = self._request('PUT', url, params=API_EXTRA_PARAMS['widgets'], json=bulk_data)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update associations of the widgets ({})".format((response, response.json())))
+            raise APIError("Could not update Associations", response=response)
 
         return None
 
@@ -2256,7 +2255,7 @@ class Client(object):
         response = self._request('PUT', url, params=API_EXTRA_PARAMS['widgets'], json=bulk_data)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not set associations of the widgets ({})".format((response, response.json())))
+            raise APIError("Could not set Associations", response=response)
 
         return None
 
@@ -2280,7 +2279,7 @@ class Client(object):
         response = self._request(method='PUT', url=url)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not clear associations of widget ({})".format((response, response.json())))
+            raise APIError("Could not clear Associations of Widget {}".format(widget), response=response)
 
         return None
 
@@ -2318,7 +2317,7 @@ class Client(object):
         response = self._request(method='PUT', url=url, params=API_EXTRA_PARAMS['widget'], json=data)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not remove associations of widget ({})".format((response, response.json())))
+            raise APIError("Could not remove Associations of Widget {}".format(widget), response=response)
 
         return
 
@@ -2367,7 +2366,7 @@ class Client(object):
         response = self._request('PUT', url, data=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not move activity, {}: {}".format(str(response), response.json()))
+            raise APIError("Could not move Activity {}".format(activity), response=response)
 
     def update_properties(self, properties: List[Dict]) -> List['AnyProperty']:
         """
@@ -2397,7 +2396,7 @@ class Client(object):
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Properties ({})".format(response))
+            raise APIError("Could not update Properties", response=response)
 
         properties = [Property2.create(client=self, json=js) for js in response.json()['results']]
 
@@ -2425,8 +2424,7 @@ class Client(object):
         response = self._request('GET', self._build_url('notifications'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not retrieve Notifications. Request: {}\nResponse: {}".format(
-                request_params, response.json()))
+            raise APIError("Could not retrieve Notifications", response=response)
 
         data = response.json()
 
@@ -2523,7 +2521,7 @@ class Client(object):
         response = self._request('POST', url, data=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create notification, {}:\n\n{}'".format(str(response), response.json()))
+            raise APIError("Could not create Notification", response=response)
 
         notification = Notification(response.json().get('results')[0], client=self)
         return notification
@@ -2544,7 +2542,7 @@ class Client(object):
         response = self._request('DELETE', url)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Notification ({})".format(response.json()))
+            raise APIError("Could not delete Notification {}".format(notification), response=response)
 
     def banners(
             self,
@@ -2575,7 +2573,7 @@ class Client(object):
         response = self._request('GET', self._build_url('banners'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve banners")
+            raise NotFoundError("Could not retrieve Banners", response=response)
 
         data = response.json()
         return [Banner(banner, client=self) for banner in data['results']]
@@ -2636,7 +2634,7 @@ class Client(object):
                                  json=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create banner, {}: {}".format(str(response), response.json()))
+            raise APIError("Could not create Banner", response=response)
 
         return Banner(response.json()['results'][0], client=self)
 
@@ -2650,7 +2648,7 @@ class Client(object):
         response = self._request('GET', self._build_url('banner_active'))
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve banners")
+            raise NotFoundError("Could not retrieve active Banner", response=response)
 
         data = response.json()['results'][0]
         return Banner(json=data, client=self) if data else None

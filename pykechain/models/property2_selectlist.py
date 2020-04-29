@@ -97,6 +97,6 @@ class SelectListProperty2(Property2):
         response = self._client._request('PUT', url, json={'value_options': new_options})
 
         if response.status_code != 200:  # pragma: no cover
-            raise APIError("Could not update property value. Response: {}".format(str(response)))
+            raise APIError("Could not update options of Property {}".format(self), response=response)
         else:
             self._options = new_options  # save the new options as the options
