@@ -22,9 +22,9 @@ class APIError(Exception):
         """
         self.response = kwargs.pop('response', None)
 
-        try:
+        if hasattr(self.response, 'request'):
             self.request = self.response.request
-        except AttributeError:
+        else:
             self.request = kwargs.pop('request', None)
 
         self.msg, self.traceback, self.detail = None, None, None
