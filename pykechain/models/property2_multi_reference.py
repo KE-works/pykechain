@@ -1,4 +1,4 @@
-from typing import List, Optional, Text, Union, Any, Sized, Iterable
+from typing import List, Optional, Text, Union, Any, Iterable
 
 from pykechain.enums import Category, FilterType
 from pykechain.models.base_reference import _ReferenceProperty
@@ -12,7 +12,7 @@ class MultiReferenceProperty2(_ReferenceProperty):
     .. versionadded:: 1.14
     """
 
-    def _retrieve_objects(self, object_ids: Iterable[Text], **kwargs) -> Sized[Part2]:
+    def _retrieve_objects(self, object_ids: Iterable[Text], **kwargs) -> Iterable[Part2]:
         """Retrieves Part2 objects."""
         assert all([isinstance(v, dict) and 'id' in v for v in self._value]), \
             "Expect all elements in the _value to be a dict with 'name' and 'id', got '{}'.".format(self._value)

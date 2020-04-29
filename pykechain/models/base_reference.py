@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Optional, Sized, Any, Text, Iterable
+from typing import Optional, Any, Text, Iterable
 
 from pykechain.models import Property2, Base
 from pykechain.utils import is_uuid
@@ -20,7 +20,7 @@ class _ReferenceProperty(Property2):
         return self.REFERENCED_CLASS.__name__
 
     @property
-    def value(self) -> Optional[Sized[Base]]:
+    def value(self) -> Optional[Iterable[Base]]:
         """
         Retrieve the referenced objects of this reference property.
 
@@ -34,7 +34,7 @@ class _ReferenceProperty(Property2):
         return self._cached_values
 
     @abstractmethod
-    def _retrieve_objects(self, object_ids: Iterable[Any], **kwargs) -> Sized[Base]:
+    def _retrieve_objects(self, object_ids: Iterable[Any], **kwargs) -> Iterable[Base]:
         pass
 
     @value.setter
