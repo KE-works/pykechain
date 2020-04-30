@@ -82,8 +82,6 @@ class Part2(TreeObject):
         # we need to run the init of 'Base' instead of 'Part' as we do not need the instantiation of properties
         super(Part2, self).__init__(json, **kwargs)
 
-        self.scope_id = json.get('scope_id')
-
         self.ref = json.get('ref')  # type: Text
         self.category = json.get('category')  # type: Category
         self.description = json.get('description')  # type: Text

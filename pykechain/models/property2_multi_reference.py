@@ -1,12 +1,12 @@
 from typing import List, Optional, Text, Union, Any, Iterable
 
 from pykechain.enums import Category, FilterType
-from pykechain.models.base_reference import _ReferenceProperty
+from pykechain.models.base_reference import _ReferencePropertyInScope
 from pykechain.models.part2 import Part2
 from pykechain.models.widgets.helpers import _check_prefilters, _check_excluded_propmodels
 
 
-class MultiReferenceProperty2(_ReferenceProperty):
+class MultiReferenceProperty2(_ReferencePropertyInScope):
     """A virtual object representing a KE-chain multi-references property.
 
     .. versionadded:: 1.14

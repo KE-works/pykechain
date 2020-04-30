@@ -1,10 +1,10 @@
 from typing import Iterable, Any
 
 from pykechain.models import Activity2
-from pykechain.models.base_reference import _ReferenceProperty
+from pykechain.models.base_reference import _ReferencePropertyInScope
 
 
-class ActivityReferenceProperty(_ReferenceProperty):
+class ActivityReferenceProperty(_ReferencePropertyInScope):
     """A virtual object representing a KE-chain Activity Reference property.
 
     .. versionadded:: 3.7

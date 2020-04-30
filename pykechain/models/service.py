@@ -7,11 +7,11 @@ from typing import Text, Any, Dict, Optional
 
 from pykechain.enums import ServiceScriptUser, ServiceExecutionStatus
 from pykechain.exceptions import APIError, IllegalArgumentError
-from pykechain.models.base import Base
+from pykechain.models.base import BaseInScope, Base
 from pykechain.utils import parse_datetime
 
 
-class Service(Base):
+class Service(BaseInScope):
     """
     A virtual object representing a KE-chain Service.
 
@@ -54,7 +54,6 @@ class Service(Base):
         self.filename = json.get('script_file_name')
         self.type = json.get('script_type')
         self.environment = json.get('env_version')
-        self.scope_id = json.get('scope')  # type: Text
 
         # for SIM3 version
         self.trusted = json.get('trusted')  # type: bool

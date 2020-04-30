@@ -6,12 +6,12 @@ from six import text_type, iteritems
 
 from pykechain.enums import PropertyType, Category
 from pykechain.exceptions import APIError, IllegalArgumentError
-from pykechain.models.base import Base
+from pykechain.models.base import BaseInScope
 from pykechain.models.validators.validator_schemas import options_json_schema
 from pykechain.models.validators.validators_base import PropertyValidator
 
 
-class Property(Base):
+class Property(BaseInScope):
     """A virtual object representing a KE-chain property.
 
     :ivar type: The property type of the property. One of the types described in :class:`pykechain.enums.PropertyType`
@@ -54,7 +54,6 @@ class Property(Base):
         self.description = json.get('description', None)
         self.unit = json.get('unit', None)
         self.order = json.get('order', None)
-        self.scope_id = json.get('scope_id', None)
 
         # set an empty internal validators variable
         self._validators = []  # type: List[Any]

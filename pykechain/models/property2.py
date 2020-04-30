@@ -4,7 +4,7 @@ import requests
 from jsonschema import validate
 from six import text_type, iteritems
 
-from pykechain.enums import PropertyType, Category
+from pykechain.enums import Category
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models.property import Property
 from pykechain.models.representations.representation_base import BaseRepresentation
@@ -60,7 +60,6 @@ class Property2(Property):
         self._model = None  # Model object storage
 
         self.part_id = json.get('part_id')
-        self.scope_id = json.get('scope_id')
         self.ref = json.get('ref')
         self.type = json.get('property_type')
         self.category = json.get('category')
@@ -228,21 +227,27 @@ class Property2(Property):
         """
         property_type = json.get('property_type')
 
-        # changed for PIM2
-        if property_type == PropertyType.ATTACHMENT_VALUE:
-            from .property2_attachment import AttachmentProperty2
-            return AttachmentProperty2(json, **kwargs)
-        elif property_type == PropertyType.SINGLE_SELECT_VALUE:
-            from .property2_selectlist import SelectListProperty2
-            return SelectListProperty2(json, **kwargs)
-        elif property_type == PropertyType.REFERENCES_VALUE:
-            from .property2_multi_reference import MultiReferenceProperty2
-            return MultiReferenceProperty2(json, **kwargs)
-        elif property_type == PropertyType.DATETIME_VALUE:
-            from .property2_datetime import DatetimeProperty2
-            return DatetimeProperty2(json, **kwargs)
-        else:
-            return Property2(json, **kwargs)
+        from pykechain.models import property_type_to_class_map
+
+        property_class = property_type_to_class_map.get(property_type, Property2)
+
+        return property_class(json, **kwargs)
+        #
+        # # changed for PIM2
+        # if property_type == PropertyType.ATTACHMENT_VALUE:
+        #     from .property2_attachment import AttachmentProperty2
+        #     return AttachmentProperty2(json, **kwargs)
+        # elif property_type == PropertyType.SINGLE_SELECT_VALUE:
+        #     from .property2_selectlist import SelectListProperty2
+        #     return SelectListProperty2(json, **kwargs)
+        # elif property_type == PropertyType.REFERENCES_VALUE:
+        #     from .property2_multi_reference import MultiReferenceProperty2
+        #     return MultiReferenceProperty2(json, **kwargs)
+        # elif property_type == PropertyType.DATETIME_VALUE:
+        #     from .property2_datetime import DatetimeProperty2
+        #     return DatetimeProperty2(json, **kwargs)
+        # else:
+        #     return Property2(json, **kwargs)
 
     def refresh(self, json=None, url=None, extra_params=None):
         # type: (Optional[Dict], Optional[Text], Optional) -> ()

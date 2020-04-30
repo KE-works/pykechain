@@ -1,7 +1,8 @@
-from abc import abstractmethod
-from typing import Optional, Any, Text, Iterable
+from abc import abstractmethod, ABC
+from typing import Optional, Any, Text, Iterable, Union, Tuple, List
 
 from pykechain.models import Property2, Base
+from pykechain.models.base import BaseInScope
 from pykechain.utils import is_uuid
 
 
@@ -54,7 +55,8 @@ class _ReferenceProperty(Property2):
         pass
 
     @value.setter
-    def value(self, value):
+    def value(self, value: Union[List, Tuple]):
+        # Sanitize the inputs
         value_to_set = []
         if isinstance(value, (list, tuple)):
             for item in value:
@@ -66,32 +68,62 @@ class _ReferenceProperty(Property2):
                     raise ValueError("References must be of {cls}, {cls} id or None. type: {}".format(type(item),
                                                                                                       cls=self.cls))
         elif value is None:
-            # clear out the list
-            value_to_set = None
+            value_to_set = None  # clear out the list
         else:
             raise ValueError(
                 "Reference must be a list (or tuple) of {cls}, {cls} id or None. type: {}".format(type(value),
                                                                                                   cls=self.cls))
 
-        # consistency check for references model that should include a scope_id in the value_options.
-        if self._options and 'scope_id' not in self._options and value_to_set is not None:
-            # if value_to_set is not None, retrieve the scope_id from the first value_to_set
-            # we do this smart by checking if we got provided a full Part; that is easier.
-            if isinstance(value[0], self.REFERENCED_CLASS):
-                x_scope_id = value[0].scope_id
+        # do the update
+        self._put_value(value_to_set)
+
+
+class _ReferencePropertyInScope(_ReferenceProperty, ABC):
+    """
+    Private base class for the KE-chain reference properties pointing to objects confined to a scope.
+
+    .. versionadded:: 3.7
+    """
+
+    REFERENCED_CLASS = BaseInScope
+
+    @property
+    def value(self) -> Optional[Iterable[Base]]:
+        """
+        Retrieve the referenced objects of this reference property.
+
+        :return: list or generator of `Base` objects.
+        :rtype list
+        """
+        return super().value
+
+    @value.setter
+    def value(self, value: Union[List, Tuple]):
+        super().value = value
+        if value is not None:
+            self._check_x_scope_id(referenced_object=value)
+
+    def _check_x_scope_id(self, referenced_object: Union[Any, BaseInScope]) -> None:
+        """
+        Check whether this reference property has the `scope_id` in its `value_options`.
+
+        :param referenced_object: Either a pykechain object or a UUID string.
+        :return: None
+        """
+        if self._options and 'scope_id' not in self._options:
+            # See whether the referenced model is an object with an ID
+            if isinstance(referenced_object, self.REFERENCED_CLASS):
+                x_scope_id = referenced_object.scope_id
             else:
-                # retrieve the scope_id from the model value[0] (which is an object in a scope (x_scope))
-                referenced_model = self.model().value
-                if not referenced_model or not isinstance(referenced_model[0], self.REFERENCED_CLASS):
-                    # if the referenced model is not set or the referenced value is not a Part set to current scope
+                # retrieve the scope_id from the property model's value (which is an object in a scope (x_scope))
+                referenced_models = self.model().value
+                if not referenced_models or not isinstance(referenced_models[0], self.REFERENCED_CLASS):
+                    # if the referenced model is not set or the referenced value is not in current scope
                     x_scope_id = self.scope_id
                 else:
                     # get the scope_id from the referenced model
-                    x_scope_id = referenced_model[0].scope_id
+                    x_scope_id = referenced_models[0].scope_id
             self._options['scope_id'] = x_scope_id
 
             # edit the model of the property, such that all instances are updated as well.
             self.model().edit(options=self._options)
-
-        # do the update
-        self._put_value(value_to_set)
