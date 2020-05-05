@@ -56,17 +56,17 @@ class Banner(Base):
         :return: None
         """
         update_dict = {
-            'text': check_text(text, 'text'),
+            'text': check_text(text, 'text') or self.text,
             'icon': check_text(icon, 'icon'),
             'active_from': check_datetime(active_from, 'active_from'),
             'active_until': check_datetime(active_until, 'active_until'),
             'is_active': check_type(is_active, bool, 'is_active'),
             'url': check_url(url),
         }
-        if icon:
-            update_dict['icon'] = icon
-        if active_from:
-            update_dict['active_from'] = active_from.isoformat(sep='T') if active_from else self.active_from
+
+        # Remove None values
+        items = [(key, value) for key, value in update_dict.items()]
+        [update_dict.pop(key) for key, value in items if value is None]
 
         url = self._client._build_url('banner', banner_id=self.id)
 

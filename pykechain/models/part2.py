@@ -581,7 +581,8 @@ class Part2(TreeObject):
 
         return new_model
 
-    def add_proxy_to(self, parent: 'Part2',
+    def add_proxy_to(self,
+                     parent: 'Part2',
                      name: Text,
                      multiplicity: Multiplicity = Multiplicity.ONE_MANY,
                      **kwargs) -> 'Part2':

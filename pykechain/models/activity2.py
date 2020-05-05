@@ -512,10 +512,10 @@ class Activity2(TreeObject, TagsMixin):
         update_dict = {
             'id': self.id,
             'name': check_text(text=name, key='name') or self.name,
-            'description': check_text(text=description, key='description') or self.description,
+            'description': check_text(text=description, key='description') or self.description or '',
         }
         if tags is not None:
-            update_dict['tags'] = check_list_of_text(tags, 'tags')
+            update_dict['tags'] = check_list_of_text(tags, 'tags', True)
 
         self._validate_edit_arguments(
             update_dict=update_dict,
@@ -558,7 +558,7 @@ class Activity2(TreeObject, TagsMixin):
             'assignees_ids': update_assignees_ids,
             'start_date': check_datetime(dt=start_date, key='start_date'),
             'due_date': check_datetime(dt=due_date, key='due_date'),
-            'status': check_enum(status, ActivityStatus, 'status'),
+            'status': check_enum(status, ActivityStatus, 'status') or self.status,
         })
 
         return update_dict

@@ -1065,7 +1065,7 @@ class Client(object):
             "description": check_text(text=description, key='description'),
             "start_date": check_datetime(dt=start_date, key='start_date'),
             "due_date": check_datetime(dt=due_date, key='due_date'),
-            "tags": check_list_of_text(tags, key='tags'),
+            "tags": check_list_of_text(tags, key='tags', unique=True),
         }
 
         response = self._request('POST', self._build_url('activities'), data=data,
@@ -1347,7 +1347,7 @@ class Client(object):
         data = dict(
             name=check_text(text=name, key='name'),
             model_id=model.id,
-            arent_id=parent.id,
+            parent_id=parent.id,
             multiplicity=check_enum(multiplicity, Multiplicity, 'multiplicity'),
         )
         return self._create_part(action='create_proxy_model', data=data, **kwargs)
@@ -1555,7 +1555,7 @@ class Client(object):
             'name': check_text(name, 'name'),
             'status': check_enum(status, ScopeStatus, 'status'),
             'text': check_text(description, 'description'),
-            'tags': check_list_of_text(tags, 'tags'),
+            'tags': check_list_of_text(tags, 'tags', True),
             'start_date': check_datetime(dt=start_date, key='start_date'),
             'due_date': check_datetime(dt=due_date, key='due_date'),
             'team_id': check_base(team, Team, 'team', method=self.team),
@@ -1657,7 +1657,7 @@ class Client(object):
 
         start_date = start_date or source_scope.start_date
         due_date = due_date or source_scope.due_date
-
+        tags = check_list_of_text(tags, 'tags', True) or source_scope.tags
         data_dict = {
             'scope_id': source_scope.id,
             'name': check_text(name, 'name') or 'CLONE - {}'.format(source_scope.name),
@@ -1665,7 +1665,7 @@ class Client(object):
             'due_date': check_datetime(dt=due_date, key='due_date'),
             'text': check_text(description, 'description') or source_scope.description,
             'status': check_enum(status, ScopeStatus, 'status'),
-            'tags': check_list_of_text(tags, 'tags') or source_scope.tags,
+            'tags': tags,
             'scope_options': scope_options or dict(),
             'async_mode': asynchronous,
         }
@@ -1740,7 +1740,7 @@ class Client(object):
 
         data = dict(
             name=check_text(name, 'name'),
-            description=check_text(description, 'description'),
+            description=check_text(description, 'description') or '',
             options=check_type(options, dict, 'options') or dict(),
             is_hidden=check_type(is_hidden, bool, 'is_hidden'),
         )
@@ -1814,8 +1814,8 @@ class Client(object):
         if kwargs.get('outputs'):
             writable_models = kwargs.pop('outputs')
 
-        readable_model_ids = check_list_of_base(readable_models, Property2, 'readable_models')
-        writable_model_ids = check_list_of_base(writable_models, Property2, 'writable_models')
+        readable_model_ids = check_list_of_base(readable_models, Property2, 'readable_models') or []
+        writable_model_ids = check_list_of_base(writable_models, Property2, 'writable_models') or []
 
         return readable_model_ids, writable_model_ids
 
@@ -1992,8 +1992,10 @@ class Client(object):
         """
         widget_ids = check_list_of_base(widgets, Widget, 'widgets')
 
+        data = [dict(id=pk) for pk in widget_ids]
+
         url = self._build_url('widgets_bulk_delete')
-        response = self._request('DELETE', url, json=widget_ids)
+        response = self._request('DELETE', url, json=data)
 
         if response.status_code != requests.codes.no_content:
             raise APIError("Could not delete Widgets", response=response)
@@ -2348,7 +2350,9 @@ class Client(object):
 
         if isinstance(parent, Activity2):
             parent_object = parent
+            parent_id = parent.id
         elif isinstance(parent, str) and is_uuid(parent):
+            parent_id = parent
             parent_object = self.activity(id=parent)
         else:
             raise IllegalArgumentError("Please provide either an activity object or a UUID")

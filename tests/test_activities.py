@@ -702,13 +702,14 @@ class TestActivityDownloadAsPDF(TestBetamax):
 
         activity = self.project.activity(name=activity_name)
 
-        activity.share_pdf(subject=subject,
-                           message=message,
-                           recipient_users=recipient_users,
-                           paper_size=paper_size,
-                           paper_orientation=paper_orientation,
-                           include_appendices=False
-                           )
+        activity.share_pdf(
+            subject=subject,
+            message=message,
+            recipient_users=recipient_users,
+            paper_size=paper_size,
+            paper_orientation=paper_orientation,
+            include_appendices=False,
+        )
 
         # testing
         notifications = self.client.notifications(subject=subject, message=message,

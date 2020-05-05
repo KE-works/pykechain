@@ -47,14 +47,15 @@ def check_url(url: Optional[Text], key: Text = 'url') -> Optional[Text]:
     return url
 
 
-def check_list_of_text(list_of_text: Optional[Iterable[Text]], key: Text) -> Optional[List[Text]]:
+def check_list_of_text(list_of_text: Optional[Iterable[Text]], key: Text, unique: bool = False) -> Optional[List[Text]]:
     """Validate iterable input to be a list/tuple/set of strings."""
     if list_of_text is not None:
         if not isinstance(list_of_text, iter_types) or not all(isinstance(t, Text) for t in list_of_text):
             raise IllegalArgumentError(
                 '`{}` should be a list, tuple or set of strings, "{}" ({}) is not.'.format(key, list_of_text,
                                                                                            type(list_of_text)))
-        list_of_text = list(set(list_of_text))
+        if unique:
+            list_of_text = [t for i, t in enumerate(list_of_text) if list_of_text.index(t) == i]
     return list_of_text
 
 

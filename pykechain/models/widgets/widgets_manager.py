@@ -1164,7 +1164,7 @@ class WidgetsManager(Iterable):
             "primaryCloneUiValue": emphasize_clone,
             "primaryDeleteUiValue": emphasize_delete,
             "customPageSize": page_size,
-            "tags": check_list_of_text(tags, 'tags'),
+            "tags": check_list_of_text(tags, 'tags', True) or [],
         })
 
         widget = self.create_widget(

@@ -115,17 +115,17 @@ class TestTagsActivity(TestBetamax):
         # setup
         new_tags = ['four', 'five', 'six']
         self.task.tags = new_tags
-        reloaded = self.project.activity(name='SubTask')
+        reloaded = self.project.activity(pk=self.task.id)
 
-        self.assertTrue(len(new_tags) == len(reloaded.tags))
-        self.assertTrue(sorted(new_tags) == sorted(reloaded.tags))
+        self.assertEqual(len(new_tags), len(reloaded.tags))
+        self.assertListEqual(sorted(new_tags), sorted(reloaded.tags))
 
     def test_activity_tags_may_be_emptied(self):
         # setup
-        self.task.tags = None
-        reloaded_task = self.project.activity(name='SubTask')
+        self.task.tags = []
+        reloaded_task = self.project.activity(pk=self.task.id)
 
-        self.assertTrue(len(reloaded_task.tags) == 0)
+        self.assertEqual(0, len(reloaded_task.tags))
 
 
 class ConcreteTagsBase(TagsMixin):
