@@ -143,9 +143,9 @@ def is_url(value: Text) -> bool:
         # host name
         u"(?:(?:[a-z\u00a1-\uffff0-9]-?)*[a-z\u00a1-\uffff0-9]+)"
         # domain name
-        u"(?:\.(?:[a-z\u00a1-\uffff0-9]-?)*[a-z\u00a1-\uffff0-9]+)*"
+        r"(?:\.(?:[a-z\u00a1-\uffff0-9]-?)*[a-z\u00a1-\uffff0-9]+)*"
         # TLD identifier
-        u"(?:\.(?:[a-z\u00a1-\uffff]{2,}))" r")"
+        r"(?:\.(?:[a-z\u00a1-\uffff]{2,}))" r")"
         # port number
         r"(?::\d{2,5})?"
         # resource path
