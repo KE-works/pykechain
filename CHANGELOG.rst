@@ -1,8 +1,8 @@
 Change Log
 ==========
 
-v3.x.x (UNRELEASED)
--------------------
+v3.7.0-rc1 (not released)
+-------------------------
 
 In this release we deprecated functionality that were announced to be deprecated some time ago. We deprecated all compatibility to 'KE-chain 2'.
 
