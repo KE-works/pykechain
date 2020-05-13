@@ -10,7 +10,7 @@ from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
 
 
-class Activity(Base):
+class Activity(Base):  # pragma: no cover
     """A virtual object representing a KE-chain activity."""
 
     def __init__(self, json, **kwargs):

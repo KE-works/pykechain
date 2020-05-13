@@ -3,7 +3,6 @@ import json
 import os
 
 import requests
-from six import string_types, text_type
 from typing import Text, Any, Optional
 
 from pykechain.exceptions import APIError
@@ -11,26 +10,7 @@ from pykechain.models.property2 import Property2
 
 
 class AttachmentProperty2(Property2):
-    """
-    A virtual object representing a KE-chain attachment property.
-
-    :ivar type: The property type of the property. One of the types described in :class:`pykechain.enums.PropertyType`
-    :type type: str
-    :ivar output: a boolean if the value is configured as an output (in an activity)
-    :type output: bool
-    :ivar part: The (parent) part in which this property is available
-    :type part: :class:`Part`
-    :ivar value: the property value, can be set as well as property
-    :type value: Any
-    :ivar filename: the filename and extension of the attachment
-    :type filename: str or None
-    :ivar validators: the list of validators that are available in the property
-    :type validators: list(PropertyValidator)
-    :ivar is_valid: if the property conforms to the validators
-    :type is_valid: bool
-    :ivar is_invalid: if the property does not conform to the validator
-    :type is_invalid: bool
-    """
+    """A virtual object representing a KE-chain attachment property."""
 
     @property
     def value(self):
@@ -113,7 +93,7 @@ class AttachmentProperty2(Property2):
         except ImportError:
             pass
 
-        if isinstance(data, (string_types, text_type)):
+        if isinstance(data, str):
             with open(data, 'rb') as fp:
                 self._upload(fp)
         else:
@@ -157,7 +137,7 @@ class AttachmentProperty2(Property2):
         response = self._client._request('GET', url)
 
         if response.status_code != requests.codes.ok:
-            raise APIError("Could not download property value")
+            raise APIError("Could not download property value.", response=response)
 
         return response
 
@@ -170,4 +150,4 @@ class AttachmentProperty2(Property2):
                                          files={"attachment": data})
 
         if response.status_code != requests.codes.ok:
-            raise APIError("Could not upload attachment: {}".format(response.content))
+            raise APIError("Could not upload attachment", response=response)

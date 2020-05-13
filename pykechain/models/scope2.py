@@ -1,18 +1,18 @@
-import datetime
-import warnings
-from typing import Any, Union, Text, Iterable, Dict, Optional, List  # noqa: F401
+from datetime import datetime
+from typing import Union, Text, Dict, Optional, List  # noqa: F401
 
 import requests
-from six import text_type, string_types
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import Multiplicity, ScopeStatus, SubprocessDisplayMode, KEChainPages
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
+from pykechain.models.input_checks import check_text, check_datetime, check_enum, check_list_of_text, \
+    check_base, check_type
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
-from pykechain.utils import parse_datetime, is_uuid
+from pykechain.utils import parse_datetime, find
 
 
 class Scope2(Base, TagsMixin):
@@ -36,10 +36,9 @@ class Scope2(Base, TagsMixin):
     :type type: basestring
     """
 
-    def __init__(self, json, **kwargs):
-        # type: (dict, **Any) -> None
+    def __init__(self, json: Dict, **kwargs) -> None:
         """Construct a scope from provided json data."""
-        super(Scope2, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         # for 'kechain2.core.wim <2.0.0'
         self.process = json.get('process')
@@ -55,15 +54,6 @@ class Scope2(Base, TagsMixin):
 
         self.start_date = parse_datetime(json.get('start_date'))
         self.due_date = parse_datetime(json.get('due_date'))
-
-    @property
-    def bucket(self):
-        """Bucket of the scope is deprecated in version 2.
-
-        .. deprecated:: 3.0
-           A `bucket` is a deprecated concept in KE-chain 3 backends. Use `scope_id` instead.
-        """
-        raise DeprecationWarning("Bucket has been deprecated in scope version 2")
 
     @property
     def team(self):
@@ -88,9 +78,9 @@ class Scope2(Base, TagsMixin):
 
     def refresh(self, json=None, url=None, extra_params=None):
         """Refresh the object in place."""
-        super(Scope2, self).refresh(json=json,
-                                    url=self._client._build_url('scope2', scope_id=self.id),
-                                    extra_params=API_EXTRA_PARAMS['scope2'])
+        super().refresh(json=json,
+                        url=self._client._build_url('scope2', scope_id=self.id),
+                        extra_params=API_EXTRA_PARAMS['scope2'])
 
     #
     # CRUD methods
@@ -108,45 +98,35 @@ class Scope2(Base, TagsMixin):
         :type user_type: basestring
         :raises APIError: When unable to update the scope project team.
         """
-        if isinstance(user, (string_types, text_type)):
-            users = self._client._retrieve_users()
-            user_object = next((item for item in users['results'] if item["username"] == user), None)
-            if user_object:
-                url = self._client._build_url('scope2_{}'.format(select_action), scope_id=self.id)
+        user = check_text(user, 'user')
 
-                response = self._client._request('PUT', url,
-                                                 params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
-                                                 data={'user_id': user_object['pk']})
-                if response.status_code != requests.codes.ok:  # pragma: no cover
-                    raise APIError("Could not {} {} in Scope".format(select_action.split('_')[0], user_type))
+        users = self._client._retrieve_users()['results']  # type: List[Dict]
+        user_object = find(users, lambda u: u['username'] == user)  # type: Dict
+        if user_object is None:
+            raise NotFoundError('User "{}" does not exist'.format(user))
 
-                self._json_data = response.json().get('results')[0]
-            else:
-                raise NotFoundError("User {} does not exist".format(user))
-        else:
-            raise TypeError("User {} should be defined as a string".format(user))
+        url = self._client._build_url('scope2_{}'.format(select_action), scope_id=self.id)
 
-    def _edit(self, update_dict):
-        if update_dict.get('options'):
-            update_dict['scope_options'] = update_dict.get('options')
-            del update_dict['options']
-        if update_dict.get('team'):
-            update_dict['team_id'] = update_dict.get('team')
-            del update_dict['team']
-
-        url = self._client._build_url('scope2', scope_id=self.id)
-
-        response = self._client._request('PUT', url, params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
-                                         json=update_dict)
+        response = self._client._request('PUT', url,
+                                         params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
+                                         data={'user_id': user_object['pk']})
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Scope ({})".format(response))
+            raise APIError("Could not {} {} in Scope".format(select_action.split('_')[0], user_type), response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
-    def edit(self, name=None, description=None, start_date=None, due_date=None, status=None, tags=None, team=None,
-             options=None):
-        # type: (Text, Text, datetime.datetime, datetime.datetime, Union[ScopeStatus, Text], Iterable[Text], Team, Dict) -> None  # noqa: E501
+    def edit(
+            self,
+            name: Optional[Text] = None,
+            description: Optional[Text] = None,
+            start_date: Optional[datetime] = None,
+            due_date: Optional[datetime] = None,
+            status: Optional[Union[Text, ScopeStatus]] = None,
+            tags: Optional[List[Text]] = None,
+            team: Optional[Union[Team, Text]] = None,
+            options: Optional[Dict] = None,
+    ) -> None:
         """Edit the details of a scope.
 
         :param name: (optionally) edit the name of the scope
@@ -176,7 +156,7 @@ class Scope2(Base, TagsMixin):
         >>> from datetime import datetime
         >>> project.edit(name='New project name',
         ...              description='Changing the description just because I can',
-        ...              start_date=datetime.utcnow(),  # naive time is interpreted as UTC time
+        ...              start_date=datetime.now(),  # naive time is interpreted as UTC time
         ...              status=ScopeStatus.CLOSED)
 
         If we want to provide timezone aware datetime objects we can use the 3rd party convenience library :mod:`pytz`.
@@ -201,73 +181,35 @@ class Scope2(Base, TagsMixin):
         >>> project.edit(team=my_team)
 
         """
-        update_dict = {'id': self.id}
-        if name is not None:
-            if isinstance(name, (str, text_type)):
-                update_dict.update({'name': name})
-                self.name = name
-            else:
-                raise IllegalArgumentError('Name should be a string')
+        update_dict = {
+            'id': self.id,
+            'name': check_text(name, 'name') or self.name,
+            'text': check_text(description, 'description') or self.description,
+            'start_date': check_datetime(start_date, 'start_date'),
+            'due_date': check_datetime(due_date, 'due_date'),
+            'status': check_enum(status, ScopeStatus, 'status') or self.status,
+            'tags': check_list_of_text(tags, 'tags', True) or [],
+            'scope_options': check_type(options, dict, 'options') or dict(),
+        }
+        team = check_base(team, Team, 'team', method=self._client.team)
+        if team:
+            update_dict['team_id'] = team
 
-        if description is not None:  # isinstance(description, (str, text_type)):
-            if isinstance(description, (str, text_type)):
-                update_dict.update({'text': description})
-                self.text = description
-            else:
-                raise IllegalArgumentError('Description should be a string')
+        url = self._client._build_url('scope2', scope_id=self.id)
 
-        if start_date is not None:
-            if isinstance(start_date, datetime.datetime):
-                if not start_date.tzinfo:
-                    warnings.warn("The startdate '{}' is naive and not timezone aware, use pytz.timezone info. "
-                                  "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
-                update_dict.update({'start_date': start_date.isoformat(sep='T')})
-            else:
-                raise IllegalArgumentError('Start date should be a datetime.datetime() object')
+        response = self._client._request('PUT', url,
+                                         params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
+                                         json=update_dict)
 
-        if due_date is not None:
-            if isinstance(due_date, datetime.datetime):
-                if not due_date.tzinfo:
-                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
-                                  "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
-                update_dict.update({'due_date': due_date.isoformat(sep='T')})
-            else:
-                raise IllegalArgumentError('Due date should be a datetime.datetime() object')
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Scope {}".format(self), response=response)
 
-        if status is not None:
-            if isinstance(status, (str, text_type)) and status in ScopeStatus.values():
-                update_dict.update({'status': status})
-            else:
-                raise IllegalArgumentError('Status should be a string and in the list of acceptable '
-                                           'status strings: {}'.format(ScopeStatus.values()))
+        self.refresh(json=response.json().get('results')[0])
 
-        if tags is not None:
-            if isinstance(tags, (list, tuple, set)):
-                update_dict.update({'tags': tags})
-            else:
-                raise IllegalArgumentError('tags should be a an array (list, tuple, set) of strings')
-
-        if team is not None:
-            if isinstance(team, (str, text_type)) and is_uuid(team):
-                update_dict.update({'team_id': team})
-            elif isinstance(team, Team):
-                update_dict.update({'team_id': team.id})
-            else:
-                raise IllegalArgumentError("team should be the uuid of a team")
-
-        if options is not None:
-            if isinstance(options, dict):
-                update_dict.update({'options': options})
-            else:
-                raise IllegalArgumentError("options should be a dictionary")
-
-        # do the update itself in an abstracted function.
-        self._edit(update_dict)
-
-    def clone(self, *args, **kwargs):
+    def clone(self, **kwargs):
         """Clone a scope.
 
-        See :method:`pykechain.Client.clone_scope()` for available paramters.
+        See :method:`pykechain.Client.clone_scope()` for available parameters.
         """
         return self._client.clone_scope(source_scope=self, **kwargs)
 
@@ -353,30 +295,21 @@ class Scope2(Base, TagsMixin):
 
         See :class:`pykechain.Client.activities` for available parameters.
         """
-        if self._client.match_app_version(label='wim', version='<2.0.0', default=True):
-            return self._client.activities(*args, scope=self.id, **kwargs)
-        else:
-            return self._client.activities(*args, scope_id=self.id, **kwargs)
+        return self._client.activities(*args, scope_id=self.id, **kwargs)
 
     def activity(self, *args, **kwargs):
         """Retrieve a single activity belonging to this scope.
 
         See :class:`pykechain.Client.activity` for available parameters.
         """
-        if self._client.match_app_version(label='wim', version='<2.0.0', default=True):
-            return self._client.activity(*args, scope=self.id, **kwargs)
-        else:
-            return self._client.activity(*args, scope_id=self.id, **kwargs)
+        return self._client.activity(*args, scope_id=self.id, **kwargs)
 
     def create_activity(self, *args, **kwargs):
         """Create a new activity belonging to this scope.
 
         See :class:`pykechain.Client.create_activity` for available parameters.
         """
-        if self._client.match_app_version(label='wim', version='<2.0.0', default=True):
-            return self._client.create_activity(self.process, *args, **kwargs)
-        else:
-            return self._client.create_activity(self.workflow_root, *args, **kwargs)
+        return self._client.create_activity(self.workflow_root, *args, **kwargs)
 
     def side_bar(self, *args, **kwargs) -> Optional[SideBarManager]:
         """Retrieve the side-bar manager."""
@@ -384,7 +317,8 @@ class Scope2(Base, TagsMixin):
 
     def set_landing_page(self,
                          activity: Union['Activity2', KEChainPages],
-                         task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES) -> None:
+                         task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
+                         ) -> None:
         """
         Update the landing page of the scope.
 
@@ -401,9 +335,7 @@ class Scope2(Base, TagsMixin):
             raise IllegalArgumentError(
                 'activity must be of class Activity2 or a KEChainPages option, "{}" is not.'.format(activity))
 
-        if task_display_mode not in SubprocessDisplayMode.values():
-            raise IllegalArgumentError('task_display_mode must be a WorkBreakdownDisplayMode option, '
-                                       '"{}" is not.'.format(task_display_mode))
+        check_enum(task_display_mode, SubprocessDisplayMode, 'task_display_mode')
 
         if isinstance(activity, Activity2):
             url = '#/scopes/{}/{}/{}'.format(self.id, task_display_mode, activity.id)
@@ -467,8 +399,7 @@ class Scope2(Base, TagsMixin):
     # User and Members of the Scope
     #
 
-    def members(self, is_manager=None, is_leadmember=None):
-        # type: (Optional[bool], Optional[bool]) -> List[Dict]
+    def members(self, is_manager: Optional[bool] = None, is_leadmember: Optional[bool] = None) -> List[Dict]:
         """
         Retrieve members of the scope.
 
@@ -494,8 +425,7 @@ class Scope2(Base, TagsMixin):
 
         return members
 
-    def add_member(self, member):
-        # type: (Text) -> None
+    def add_member(self, member: Text) -> None:
         """
         Add a single member to the scope.
 
@@ -509,8 +439,7 @@ class Scope2(Base, TagsMixin):
 
         self._update_scope_project_team(select_action=select_action, user=member, user_type='member')
 
-    def remove_member(self, member):
-        # type: (Text) -> None
+    def remove_member(self, member: Text) -> None:
         """
         Remove a single member to the scope.
 
@@ -522,8 +451,7 @@ class Scope2(Base, TagsMixin):
 
         self._update_scope_project_team(select_action=select_action, user=member, user_type='member')
 
-    def add_manager(self, manager):
-        # type: (Text) -> None
+    def add_manager(self, manager: Text) -> None:
         """
         Add a single manager to the scope.
 
@@ -535,8 +463,7 @@ class Scope2(Base, TagsMixin):
 
         self._update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
 
-    def remove_manager(self, manager):
-        # type: (Text) -> None
+    def remove_manager(self, manager: Text) -> None:
         """
         Remove a single manager to the scope.
 
@@ -548,8 +475,7 @@ class Scope2(Base, TagsMixin):
 
         self._update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
 
-    def add_leadmember(self, leadmember):
-        # type: (Text) -> None
+    def add_leadmember(self, leadmember: Text) -> None:
         """
         Add a single leadmember to the scope.
 
@@ -561,8 +487,7 @@ class Scope2(Base, TagsMixin):
 
         self._update_scope_project_team(select_action=select_action, user=leadmember, user_type='leadmember')
 
-    def remove_leadmember(self, leadmember):
-        # type: (Text) -> None
+    def remove_leadmember(self, leadmember: Text) -> None:
         """
         Remove a single leadmember to the scope.
 

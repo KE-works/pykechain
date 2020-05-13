@@ -1,4 +1,4 @@
-from typing import Any, AnyStr, Union, Tuple, Dict  # noqa: F401 # pylint: disable=unused-import
+from typing import Any, AnyStr, Union, Tuple, Dict, Optional, Text  # noqa: F401 # pylint: disable=unused-import
 
 from jsonschema import validate
 
@@ -27,19 +27,16 @@ class BaseValidator(object):
         self._json = json or dict(config=dict())
         self._config = self._json.get('config', dict())
 
-    def as_json(self):
-        # type: () -> dict
+    def as_json(self) -> Dict:
         """Parse the validator to a proper validator json."""
         return self._json
 
-    def validate_json(self):
-        # type: () -> Any
+    def validate_json(self) -> Any:
         """Validate the json representation of the validator against the validator jsonschema."""
         return validate(self._json, self.jsonschema)
 
     @classmethod
-    def parse(cls, json):
-        # type: (dict) -> Any
+    def parse(cls, json: Dict) -> Any:
         """Parse a json dict and return the correct subclass."""
         raise NotImplementedError
 
@@ -78,8 +75,8 @@ class PropertyValidator(BaseValidator):
         else:
             self.on_invalid = kwargs.get('on_invalid') or []
 
-    def _parse_effects(self, effects_json=None):
-        # type: (dict) -> Any
+    @staticmethod
+    def _parse_effects(effects_json: Optional[Dict] = None) -> Any:
         """Parse multiple effects from an effects(list) json."""
         if isinstance(effects_json, list):
             return [ValidatorEffect.parse(effect) for effect in effects_json]
@@ -90,8 +87,7 @@ class PropertyValidator(BaseValidator):
                             "or a single effect. Got '{}'".format(effects_json))
 
     @classmethod
-    def parse(cls, json):
-        # type: (Dict) -> Any
+    def parse(cls, json: Dict) -> 'PropertyValidator':
         """Parse a json dict and return the correct subclass of :class:`PropertyValidator`.
 
         It uses the 'effect' key to determine which :class:`PropertyValidator` to instantiate.
@@ -115,8 +111,7 @@ class PropertyValidator(BaseValidator):
                 raise Exception('unknown vtype in json')
         raise Exception("Validator unknown, incorrect json: '{}'".format(json))
 
-    def as_json(self):
-        # type: () -> dict
+    def as_json(self) -> Dict:
         """JSON representation of the effect.
 
         :returns: a python dictionary, serializable as json of the effect
@@ -135,8 +130,7 @@ class PropertyValidator(BaseValidator):
         self._json = new_json
         return self._json
 
-    def __call__(self, value):
-        # type: (Any) -> bool
+    def __call__(self, value: Any) -> bool:
         """Trigger the validation of the validator.
 
         The reason may retrieved by the :func:`get_reason()` method.
@@ -156,8 +150,7 @@ class PropertyValidator(BaseValidator):
 
         return self._validation_result
 
-    def is_valid(self, value):
-        # type: (Any) -> bool
+    def is_valid(self, value: Any) -> bool:
         """Check if the validation against a value, returns a boolean.
 
         This is the logical inverse of the :func:`is_invalid()` method.
@@ -169,8 +162,7 @@ class PropertyValidator(BaseValidator):
         """
         return self.__call__(value)
 
-    def is_invalid(self, value):
-        # type: (Any) -> bool
+    def is_invalid(self, value: Any) -> bool:
         """Check if the validation against a value, returns a boolean.
 
         This is the logical inverse of the :func:`is_valid()` method.
@@ -182,8 +174,7 @@ class PropertyValidator(BaseValidator):
         """
         return not self.is_valid(value)
 
-    def get_reason(self):
-        # type: () -> AnyStr
+    def get_reason(self) -> AnyStr:
         """Retrieve the reason of the (in)validation.
 
         :return: reason text
@@ -191,8 +182,7 @@ class PropertyValidator(BaseValidator):
         """
         return self._validation_reason
 
-    def _logic(self, value=None):
-        # type: (Any) -> Tuple[Union[bool, None], str]
+    def _logic(self, value: Optional[Any] = None) -> Tuple[Optional[bool], Text]:
         """Process the inner logic of the validator.
 
         The validation results are returned as tuple (boolean (true/false), reasontext)
@@ -228,8 +218,7 @@ class ValidatorEffect(BaseValidator):
         return True
 
     @classmethod
-    def parse(cls, json):
-        # type: (dict) -> Any
+    def parse(cls, json: Dict) -> 'ValidatorEffect':
         """Parse a json dict and return the correct subclass of :class:`ValidatorEffect`.
 
         It uses the 'effect' key to determine which :class:`ValidatorEffect` to instantiate.
@@ -250,8 +239,7 @@ class ValidatorEffect(BaseValidator):
                 raise Exception('unknown effect in json')
         raise Exception("Effect unknown, incorrect json: '{}'".format(json))
 
-    def as_json(self):
-        # type: () -> dict
+    def as_json(self) -> Dict:
         """JSON representation of the effect.
 
         :returns: a python dictionary, serializable as json of the effect

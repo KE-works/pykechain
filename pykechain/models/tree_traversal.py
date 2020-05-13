@@ -38,7 +38,7 @@ class TreeObject(Base, ABC):
         :raises MultipleFoundError: whenever multiple children fit match inputs.
         :raises NotFoundError: whenever no child matching the inputs could be found.
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def parent(self) -> 'TreeObject':
         """
@@ -47,7 +47,7 @@ class TreeObject(Base, ABC):
         :return: Parent object
         :raises APIError: whenever the parent could not be retrieved
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def siblings(self, **kwargs) -> List['TreeObject']:
         """
@@ -56,7 +56,7 @@ class TreeObject(Base, ABC):
         :return: iterable of objects
         :raises NotFoundError: whenever the current object is a root object, thereby having no siblings.
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def children(self, **kwargs) -> List['TreeObject']:
         """
@@ -66,7 +66,7 @@ class TreeObject(Base, ABC):
         :rtype Iterable
         :raises APIError:
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def all_children(self) -> List['TreeObject']:
         """

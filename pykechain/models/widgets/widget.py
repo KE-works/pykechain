@@ -222,7 +222,7 @@ class Widget(Base):
         response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['widgets'], json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Widget ({})".format(response))
+            raise APIError("Could not update Widget {}".format(self), response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
@@ -269,7 +269,7 @@ class Widget(Base):
         readable_models = list()
         writable_models = list()
         for associated_property in associated_part.properties:
-            if associated_property._output:
+            if associated_property.output:
                 writable_models.append(associated_property)
             else:
                 readable_models.append(associated_property)

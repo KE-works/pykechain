@@ -5,7 +5,7 @@ from pykechain.models.property import Property
 from pykechain.utils import is_uuid
 
 
-class MultiReferenceProperty(Property):
+class MultiReferenceProperty(Property):  # pragma: no cover
     """A virtual object representing a KE-chain multi-references property.
 
     .. versionadded:: 1.14
