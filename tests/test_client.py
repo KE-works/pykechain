@@ -187,6 +187,7 @@ class TestClientLive(TestBetamax):
         self.assertTrue(self.temp_scope._json_data['start_date'])
         self.assertFalse(self.temp_scope.tags)
 
+    # noinspection PyTypeChecker
     def test_create_scope_with_wrong_arguments(self):
         # testing
         with self.assertRaises(IllegalArgumentError):
@@ -243,6 +244,16 @@ class TestClientLive(TestBetamax):
         self.assertEqual(self.temp_scope.description, description)
         self.assertEqual(self.temp_scope.team, team)
         self.assertListEqual(self.temp_scope.tags, tags)
+
+    def test_scope_delete(self):
+        new_scope = self.project.clone(asynchronous=False)
+        self.assertNotEqual(self.project.id, new_scope.id)
+        new_scope.delete(asynchronous=False)
+
+        with self.assertRaisesRegex(NotFoundError, 'fit criteria'):
+            # throw in arbitrary sleep to give backend time to actually delete the scope.
+            time.sleep(1)
+            self.client.scope(pk=new_scope.id)
 
 
 class TestCloneScopeAsync(TestBetamax):

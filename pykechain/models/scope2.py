@@ -86,7 +86,7 @@ class Scope2(Base, TagsMixin):
     # CRUD methods
     #
 
-    def _update_scope_project_team(self, select_action, user, user_type):
+    def _update_scope_project_team(self, select_action, user):
         """
         Update the Project Team of the Scope. Updates include addition or removing of managers or members.
 
@@ -94,8 +94,6 @@ class Scope2(Base, TagsMixin):
         :type select_action: basestring
         :param user: the username of the user to which the action applies to
         :type user: basestring
-        :param user_type: the type of the user (member or manager)
-        :type user_type: basestring
         :raises APIError: When unable to update the scope project team.
         """
         user = check_text(user, 'user')
@@ -112,7 +110,7 @@ class Scope2(Base, TagsMixin):
                                          data={'user_id': user_object['pk']})
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not {} {} in Scope".format(select_action.split('_')[0], user_type), response=response)
+            raise APIError("Could not {} {} in Scope".format(*select_action.split('_')), response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
@@ -441,7 +439,7 @@ class Scope2(Base, TagsMixin):
         """
         select_action = 'add_member'
 
-        self._update_scope_project_team(select_action=select_action, user=member, user_type='member')
+        self._update_scope_project_team(select_action=select_action, user=member)
 
     def remove_member(self, member: Text) -> None:
         """
@@ -453,7 +451,7 @@ class Scope2(Base, TagsMixin):
         """
         select_action = 'remove_member'
 
-        self._update_scope_project_team(select_action=select_action, user=member, user_type='member')
+        self._update_scope_project_team(select_action=select_action, user=member)
 
     def add_manager(self, manager: Text) -> None:
         """
@@ -465,7 +463,7 @@ class Scope2(Base, TagsMixin):
         """
         select_action = 'add_manager'
 
-        self._update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
+        self._update_scope_project_team(select_action=select_action, user=manager)
 
     def remove_manager(self, manager: Text) -> None:
         """
@@ -477,7 +475,7 @@ class Scope2(Base, TagsMixin):
         """
         select_action = 'remove_manager'
 
-        self._update_scope_project_team(select_action=select_action, user=manager, user_type='manager')
+        self._update_scope_project_team(select_action=select_action, user=manager)
 
     def add_leadmember(self, leadmember: Text) -> None:
         """
@@ -489,7 +487,7 @@ class Scope2(Base, TagsMixin):
         """
         select_action = 'add_leadmember'
 
-        self._update_scope_project_team(select_action=select_action, user=leadmember, user_type='leadmember')
+        self._update_scope_project_team(select_action=select_action, user=leadmember)
 
     def remove_leadmember(self, leadmember: Text) -> None:
         """
@@ -501,4 +499,4 @@ class Scope2(Base, TagsMixin):
         """
         select_action = 'remove_leadmember'
 
-        self._update_scope_project_team(select_action=select_action, user=leadmember, user_type='leadmember')
+        self._update_scope_project_team(select_action=select_action, user=leadmember)
