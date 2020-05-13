@@ -1,11 +1,8 @@
 import os
-from typing import Optional
 from unittest import TestCase
 
 import six
 from betamax import Betamax
-
-from pykechain.models import Scope2
 
 if six.PY2:
     from test.test_support import EnvironmentVarGuard
@@ -36,45 +33,37 @@ class SixTestCase(TestCase):
 
 
 class TestBetamax(SixTestCase):
-    env = None
-    client = None  # type: Optional[Client]
-    project = None  # type: Optional[Scope2]
 
     @property
     def cassette_name(self):
         test = self._testMethodName
         return '{0}.{1}'.format(self.__class__.__name__, test)
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         # use self.env.set('var', 'value') and with self.env: ... to use custom environmental variables
-        cls.env = EnvironmentVarGuard()
-        cls.client = Client(url=TEST_URL)
+        self.env = EnvironmentVarGuard()
+        self.client = Client(url=TEST_URL)
 
         if TEST_TOKEN:
-            cls.client.login(token=TEST_TOKEN)
+            self.client.login(token=TEST_TOKEN)
 
-        cls.recorder = Betamax(session=cls.client.session)
+        self.recorder = Betamax(session=self.client.session)
 
-        if TEST_SCOPE_NAME:
-            cls.project = cls.client.scope(name=TEST_SCOPE_NAME)
-        elif TEST_SCOPE_ID:
-            cls.project = cls.client.scope(id=TEST_SCOPE_ID)
-        else:
-            raise Exception('Could not retrieve the test scope, you need to provide a '
-                            '`TEST_SCOPE_ID` or `TEST_SCOPE_NAME` in your `.env` file')
-
-    def setUp(self) -> None:
         if TEST_RECORD_CASSETTES:
             self.recorder.use_cassette(self.cassette_name)
             self.recorder.start()
         else:
             self.recorder.config.record_mode = None
 
+        if TEST_SCOPE_NAME:
+            self.project = self.client.scope(name=TEST_SCOPE_NAME)
+        elif TEST_SCOPE_ID:
+            self.project = self.client.scope(id=TEST_SCOPE_ID)
+        else:
+            raise Exception('Could not retrieve the test scope, you need to provide a '
+                            '`TEST_SCOPE_ID` or `TEST_SCOPE_NAME` in your `.env` file')
+
     def tearDown(self):
         self.recorder.stop()
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        del cls.env
-        del cls.client
+        del self.env
+        del self.client
