@@ -188,12 +188,16 @@ class Scope2(Base, TagsMixin):
             'start_date': check_datetime(start_date, 'start_date'),
             'due_date': check_datetime(due_date, 'due_date'),
             'status': check_enum(status, ScopeStatus, 'status') or self.status,
-            'tags': check_list_of_text(tags, 'tags', True) or [],
-            'scope_options': check_type(options, dict, 'options') or dict(),
         }
         team = check_base(team, Team, 'team', method=self._client.team)
         if team:
             update_dict['team_id'] = team
+        tags = check_list_of_text(tags, 'tags', True)
+        if tags:
+            update_dict['tags'] = tags
+        scope_options = check_type(options, dict, 'options')
+        if scope_options:
+            update_dict['scope_options'] = scope_options
 
         url = self._client._build_url('scope2', scope_id=self.id)
 
