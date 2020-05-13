@@ -1,11 +1,12 @@
-from typing import Optional, Union, List, Text, Dict, Any
+from typing import Optional, Union, List, Text, Dict
 
 import requests
 
 from pykechain.enums import TeamRoles, ScopeStatus
-from pykechain.exceptions import IllegalArgumentError, APIError
+from pykechain.exceptions import APIError
 from pykechain.models.user import User
 from .base import Base
+from .input_checks import check_text, check_type, check_enum, check_user
 
 
 class Team(Base):
@@ -30,12 +31,17 @@ class Team(Base):
         response = self._client._request('PUT', url, json=update_dict, params=params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update {} ({})".format(self.__class__.__name__, response.json().get('results')))
+            raise APIError("Could not update Team {}".format(self), response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
-    def edit(self, name=None, description=None, options=None, is_hidden=None):
-        # type: (Text, Text, Dict, bool) -> None
+    def edit(
+            self,
+            name: Optional[Text] = None,
+            description: Optional[Text] = None,
+            options: Optional[Dict] = None,
+            is_hidden: Optional[bool] = None
+    ) -> None:
         """
         Edit the attributes of the Team.
 
@@ -50,31 +56,17 @@ class Team(Base):
         :return: None
         :raises IllegalArgumentError whenever inputs are not of the correct type
         """
-        update_dict = dict(id=self.id)
-        if name is not None:
-            if not isinstance(name, str):
-                raise IllegalArgumentError('`name` must be a string, "{}" is not.'.format(name))
-            update_dict.update({'name': name})
-
-        if description is not None:
-            if not isinstance(description, str):
-                raise IllegalArgumentError('`description` must be a string, "{}" is not.'.format(description))
-            update_dict.update({'description': description})
-
-        if options is not None:
-            if not isinstance(options, dict):
-                raise IllegalArgumentError('`options` must be a dictionary, "{}" is not.'.format(options))
-            update_dict.update({'options': options})
-
-        if is_hidden is not None:
-            if not isinstance(is_hidden, bool):
-                raise IllegalArgumentError('`is_hidden` must be a boolean, "{}" is not.'.format(is_hidden))
-            update_dict.update({'is_hidden': is_hidden})
+        update_dict = {
+            'id': self.id,
+            'name': check_text(name, 'name') or self.name,
+            'description': check_text(description, 'description') or self.description,
+            'options': check_type(options, dict, 'options') or self.options,
+            'is_hidden': check_type(is_hidden, bool, 'is_hidden') or self.is_hidden,
+        }
 
         self._update(resource='team', team_id=self.id, update_dict=update_dict)
 
-    def delete(self):
-        # type: () -> None
+    def delete(self) -> None:
         """
         Delete the team.
 
@@ -86,10 +78,9 @@ class Team(Base):
         response = self._client._request('DELETE', url=url)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete team: {} with id {}".format(self.name, self.id))
+            raise APIError("Could not delete Team {}".format(self), response=response)
 
-    def members(self, role=None):
-        # type: (Optional[Union[TeamRoles, Text]]) -> List[Dict]
+    def members(self, role: Optional[Union[TeamRoles, Text]] = None) -> List[Dict]:
         """Members of the team.
 
         You may provide the role in the team, to retrieve only the team member with that role. Normally there is a
@@ -109,9 +100,7 @@ class Team(Base):
         [{"pk":1, "username"="first user", "role"="OWNER", "email":"email@address.com"}, ...]
 
         """
-        if role and role not in TeamRoles.values():
-            raise IllegalArgumentError("role should be one of `TeamRoles` {}, got '{}'".format(TeamRoles.values(),
-                                                                                               role))
+        check_enum(role, TeamRoles, 'role')
 
         member_list = list(self._json_data.get('members'))
         if role:
@@ -119,8 +108,10 @@ class Team(Base):
         else:
             return member_list
 
-    def add_members(self, users=None, role=TeamRoles.MEMBER):
-        # type: (Optional[List[Union[User, Text]]], Optional[Union[TeamRoles, Text]]) -> ()
+    def add_members(self,
+                    users: Optional[List[Union[User, Text]]] = None,
+                    role: Optional[Union[TeamRoles, Text]] = TeamRoles.MEMBER,
+                    ) -> None:
         """Members to add to a team.
 
         :param users: list of members, either `User` objects or usernames
@@ -138,28 +129,14 @@ class Team(Base):
         >>> my_team.add_members([other_user], role=TeamRoles.MEMBER)
 
         """
-        if role and role not in TeamRoles.values():
-            raise IllegalArgumentError("role should be one of `TeamRoles` {}, got '{}'".format(TeamRoles.values(),
-                                                                                               role))
-
-        if not users or not isinstance(users, (list, tuple, set)):
-            raise IllegalArgumentError("users should be a list of user_ids or `User` objects, got '{}'".
-                                       format(users))
-
-        update_dict = dict(role=role)
-
-        if all(isinstance(user, int) for user in users):
-            update_dict['users'] = users
-        elif all(isinstance(user, User) for user in users):
-            update_dict['users'] = [user.id for user in users]
-        else:
-            raise IllegalArgumentError("All users should be a list of user_ids or `User` objects, got '{}'".
-                                       format(users))
+        update_dict = {
+            'role': check_enum(role, TeamRoles, 'role'),
+            'users': [check_user(user, User, 'users') for user in users],
+        }
 
         self._update('team_add_members', team_id=self.id, update_dict=update_dict)
 
-    def remove_members(self, users=None):
-        # type: (Optional[List[Union[User, Text]]]) -> ()
+    def remove_members(self, users: Optional[List[Union[User, Text]]] = None) -> None:
         """
         Remove members from the team.
 
@@ -175,25 +152,12 @@ class Team(Base):
         >>> my_team.remove_members([other_user])
 
         """
-        if not users or not isinstance(users, (list, tuple, set)):
-            raise IllegalArgumentError("Member should be a list of user_ids or `User` objects, got '{}'".
-                                       format(users))
-
-        update_dict = dict()
-
-        if all(isinstance(user, int) for user in users):
-            update_dict['users'] = users
-        elif all(isinstance(user, User) for user in users):
-            update_dict['users'] = [user.id for user in users]
-        else:
-            raise IllegalArgumentError("All users should be a list of user_ids or `User` objects, got '{}'".
-                                       format(users))
+        update_dict = {'users': [check_user(user, User, 'users') for user in users]}
 
         self._update('team_remove_members',
                      update_dict=update_dict,
                      team_id=self.id)
 
-    def scopes(self, status=None, **kwargs):
-        # type: (ScopeStatus, **Any) -> List[Scope2]
+    def scopes(self, status: Optional[ScopeStatus] = None, **kwargs) -> List['Scope2']:
         """Scopes associated to the team."""
         return self._client.scopes(team=self.id, status=status, **kwargs)

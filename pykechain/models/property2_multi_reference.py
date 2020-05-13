@@ -1,7 +1,4 @@
 from typing import List, Optional, Text, Union, Any
-
-from six import text_type, string_types
-
 from pykechain.enums import Category, FilterType
 from pykechain.models.part2 import Part2
 from pykechain.models.property2 import Property2
@@ -17,7 +14,7 @@ class MultiReferenceProperty2(Property2):
 
     def __init__(self, json, **kwargs):
         """Construct a MultiReferenceProperty from a json object."""
-        super(MultiReferenceProperty2, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self._cached_values = None
 
@@ -37,7 +34,7 @@ class MultiReferenceProperty2(Property2):
 
         >>> part = project.part('Bike')
         >>> wheels_ref_property = part.property('Wheels')
-        >>> isinstance(wheels_ref_property, MultiReferenceProperty2)
+        >>> isinstance(wheels_ref_property, MultiReferenceProperty)
         True
 
         The value returns a list of Parts or is an empty list
@@ -96,7 +93,7 @@ class MultiReferenceProperty2(Property2):
             for item in value:
                 if isinstance(item, Part2):
                     value_to_set.append(item.id)
-                elif isinstance(item, (string_types, text_type)) and is_uuid(item):
+                elif isinstance(item, Text) and is_uuid(item):
                     # tested against a six.text_type (found in the requests' urllib3 package) for unicode
                     # conversion in py27
                     value_to_set.append(item)
@@ -157,7 +154,7 @@ class MultiReferenceProperty2(Property2):
 
     def set_prefilters(
             self,
-            property_models: List[Union[Text, Part2]],
+            property_models: List[Union[Text, 'AnyProperty']],
             values: List[Any],
             filters_type: List[FilterType],
             overwrite: Optional[bool] = False

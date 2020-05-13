@@ -5,7 +5,7 @@
 #
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.4.0
+    rev: v2.5.0
     hooks:
     -   id: check-ast
     -   id: check-case-conflict
@@ -23,12 +23,12 @@ repos:
     -   id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
 -   repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v1.4.4
+    rev: v1.5.1
     hooks:
     -   id: autopep8
         files: pykechain/.*
 -   repo: https://github.com/PyCQA/pydocstyle
-    rev: 4.0.1
+    rev: 5.0.2
     hooks:
     -   id: pydocstyle
         args:
@@ -42,6 +42,6 @@ repos:
         - --ignore=F821
         files: pykechain/.*
 -   repo: https://github.com/mgedmin/check-manifest
-    rev: '0.40'
+    rev: '0.41'
     hooks:
     -   id: check-manifest

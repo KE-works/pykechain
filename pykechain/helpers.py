@@ -144,6 +144,7 @@ def get_all_children(
     :returns list of child Parts or Activities
     :rtype List
     """
-    # TODO specify deprecation date.
-    warnings.warn('This helper function has been replaced by the `all_children` method.', PendingDeprecationWarning)
+    # TODO Deprecate v3.7.0
+    warnings.warn('This helper function has been replaced by the `all_children` method. '
+                  'This function will be deprecated in version 3.7.0.', PendingDeprecationWarning)
     return obj.all_children()

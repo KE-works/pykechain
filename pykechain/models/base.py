@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional, Text
 
 from pykechain.utils import parse_datetime
 
@@ -16,11 +16,10 @@ class Base(object):
     :type updated_at: datetime or None
     """
 
-    def __init__(self, json, client):
-        # type: (Dict, Client) -> None  # noqa: F821 cannot import to prevent circular imports
+    def __init__(self, json: Dict, client: 'Client'):
         """Construct a model from provided json data."""
         self._json_data = json
-        self._client = client
+        self._client = client  # type: 'Client'
 
         self.id = json.get('id', None)
         self.name = json.get('name', None)
@@ -39,7 +38,7 @@ class Base(object):
     def __hash__(self):
         return hash(self.id)
 
-    def refresh(self, json=None, url=None, extra_params=None):
+    def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional[Dict] = None):
         """Refresh the object in place.
 
         Can be called on the object without any arguments and should refresh the object inplace. If you want to
