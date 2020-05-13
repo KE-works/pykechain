@@ -53,7 +53,7 @@ class APIError(Exception):
 
             context.extend([
                 'Server {}'.format(self.traceback),
-                'Results:\n{}'.format(json.dumps(self.results), indent=4),
+                'Results:\n{}'.format(json.dumps(self.results, indent=4)),
                 'Detail: {}'.format(self.detail),
                 'Elapsed: {}'.format(self.response.elapsed),
             ])
