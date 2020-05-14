@@ -1,19 +1,15 @@
-import warnings
-from typing import Dict, Optional, Union, Text, Tuple, List
-
-from six import text_type
+from typing import Dict, Optional, Union, Text, Tuple, List, Callable
 
 from pykechain.enums import Category, PropertyType, WidgetTitleValue
 from pykechain.exceptions import IllegalArgumentError
+from pykechain.models.input_checks import check_enum
 from pykechain.utils import is_uuid, snakecase, camelcase
 
 # these are the common keys to all kecards.
 KECARD_COMMON_KEYS = ["collapsed", "collapsible", "noBackground", "noPadding", "isDisabled", "isMerged"]
 
 
-def _retrieve_object(obj: Union['Part2', 'AnyProperty', 'Team', 'Service', Text],
-                     method: 'Client',
-                     ) -> Union['Part2', 'AnyProperty', 'Team', 'Service']:
+def _retrieve_object(obj: Union['Base', Text], method: Callable) -> Union['Base']:
     """
     Object if object or uuid of object is provided as argument.
 
@@ -27,10 +23,10 @@ def _retrieve_object(obj: Union['Part2', 'AnyProperty', 'Team', 'Service', Text]
     :raises IllegalArgumentError: if the object provided is not a Part, Property2 or UUID.
     """
     # Check whether the part_model is uuid type or class `Part`
-    from pykechain.models import Part, Part2, Property, Property2, Service, Team
-    if isinstance(obj, (Part, Part2, Property, Property2, Service, Team)):
+    from pykechain.models import Part2, Property2, Service, Team
+    if isinstance(obj, (Part2, Property2, Service, Team)):
         return obj
-    elif isinstance(obj, text_type) and is_uuid(obj):
+    elif isinstance(obj, str) and is_uuid(obj):
         obj_id = obj
         obj = method(id=obj_id)
         return obj
@@ -54,7 +50,7 @@ def _retrieve_object_id(obj: Optional[Union['Base', Text]]) -> Optional[Text]:
     from pykechain.models import Base
     if issubclass(type(obj), Base):
         return obj.id
-    elif isinstance(obj, text_type) and is_uuid(obj):
+    elif isinstance(obj, str) and is_uuid(obj):
         return obj
     elif isinstance(obj, type(None)):
         return None
@@ -65,25 +61,24 @@ def _retrieve_object_id(obj: Optional[Union['Base', Text]]) -> Optional[Text]:
 
 def _set_title(meta: Dict,
                title: Optional[Union[Text, bool]] = None,
-               custom_title: Optional[Union[Text, bool]] = None,
                default_title: Optional[Text] = None,
                show_title_value: Optional[WidgetTitleValue] = None,
                **kwargs) -> Tuple[Dict, Text]:
     """
     Set the customTitle in the meta based on provided optional custom title or default.
 
-    This will inject into the meta the `customTitle` and `showTitleValue` if the custom_title is provided as
+    This will inject into the meta the `customTitle` and `showTitleValue` if the `title` is provided as
     argument, otherwise it will inject the `defaultTitle`. It returns the meta definition of the widget and the
     title of the widget (to be used to set `widget.title`).
 
     :param meta: meta dictionary to augment
     :type meta: dict
-    :param custom_title: A custom title for the multi column widget
+    :param title: A title for the multi column widget
             * False: use the default title
-            * String value: use the Custom title
+            * String value: use the title
             * None: No title at all.
-    :type custom_title: basestring or bool or None
-    :param default_title: (optional) If custom_title is False, the default title is injected as title
+    :type title: basestring or bool or None
+    :param default_title: (optional) If title is False, the default title is injected as title
     :type default_title: basestring or None
     :param show_title_value: (optional) Specify how the title is displayed, regardless of other inputs.
     :type show_title_value: WidgetTitleValue
@@ -91,10 +86,7 @@ def _set_title(meta: Dict,
     :rtype: Tuple[Dict,Text]
     :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
-    if custom_title and title is None:
-        warnings.warn('`custom_title` attribute will be deprecated in version 3.4.0, please adapt your code '
-                      'accordingly to use `title`.', PendingDeprecationWarning)
-        title = custom_title
+    check_enum(show_title_value, WidgetTitleValue, 'show_title_value')
 
     if show_title_value is None:
         if title is False:
@@ -103,10 +95,6 @@ def _set_title(meta: Dict,
             show_title_value = WidgetTitleValue.NO_TITLE
         else:
             show_title_value = WidgetTitleValue.CUSTOM_TITLE
-
-    elif show_title_value not in WidgetTitleValue.values():
-        raise IllegalArgumentError('`show_title_value` must be a WidgetTitleValue enum option, "{}" is not. '
-                                   'Choose from: {}'.format(show_title_value, WidgetTitleValue.values()))
 
     if show_title_value == WidgetTitleValue.DEFAULT:
         title_meta = None
@@ -207,7 +195,6 @@ def _check_prefilters(part_model: 'Part2', prefilters: Dict) -> List[Text]:  # n
             raise IllegalArgumentError(
                 'Pre-filters can only be set on Property models, received "{}".'.format(prop))
 
-        # TODO when a property is freshly created, the property has no "part_id" key in json_data.
         elif part_model.id != prop.part_id:
             raise IllegalArgumentError(
                 'Pre-filters can only be set on properties belonging to the selected Part model, found '
@@ -249,7 +236,6 @@ def _check_excluded_propmodels(part_model: 'Part2', property_models: List['AnyPr
             raise IllegalArgumentError('A part reference property can only exclude `Property` models, found '
                                        'category "{}" on property "{}"'.format(property_model.category,
                                                                                property_model.name))
-        # TODO when a property is freshly created, the property has no "part_id" key in json_data.
         elif part_model.id != property_model.part_id:
             raise IllegalArgumentError(
                 'A part reference property can only exclude properties belonging to the referenced Part model, '

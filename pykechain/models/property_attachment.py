@@ -8,7 +8,7 @@ from pykechain.exceptions import APIError
 from pykechain.models.property import Property
 
 
-class AttachmentProperty(Property):
+class AttachmentProperty(Property):  # pragma: no cover
     """
     A virtual object representing a KE-chain attachment property.
 

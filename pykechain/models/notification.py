@@ -5,7 +5,8 @@ from pykechain.exceptions import IllegalArgumentError, APIError
 from pykechain.models import Base
 from typing import Text, List, Optional, Dict, Union
 
-from pykechain.utils import is_valid_email, is_uuid
+from pykechain.models.input_checks import check_text, check_enum, check_base, check_user
+from pykechain.utils import is_valid_email
 
 
 class Notification(Base):
@@ -78,7 +79,7 @@ class Notification(Base):
             subject: Optional[Text] = None,
             message: Optional[Text] = None,
             status: Optional[NotificationStatus] = None,
-            recipients: Optional[List[Union['User', Text]]] = None,
+            recipients: Optional[List[Union['User', Text, int]]] = None,
             team: Optional[Union['Team', Text]] = None,
             from_user: Optional[Union['User', Text]] = None,
             event: Optional[NotificationEvent] = None,
@@ -108,81 +109,32 @@ class Notification(Base):
         :return: None
         :raises: APIError: when the `Notification` could not be updated
         """
-        if subject is not None and not isinstance(subject, str):
-            raise IllegalArgumentError('`subject` must be a string, "{}" ({}) is not.'.format(subject, type(subject)))
-
-        if message is not None and not isinstance(message, str):
-            raise IllegalArgumentError('`message` must be a string, "{}" ({}) is not.'.format(message, type(message)))
-
-        if status is not None and status not in NotificationStatus.values():
-            raise IllegalArgumentError('`status` must be a NotificationStatus option, "{}" is not.\n'
-                                       'Select from: {}'.format(status, NotificationStatus.values()))
+        from pykechain.models import Team, User
 
         recipient_users = list()
         recipient_emails = list()
 
         if recipients is not None:
-            from pykechain.models import User
             if isinstance(recipients, list) and all(isinstance(r, (str, int, User)) for r in recipients):
                 for recipient in recipients:
                     if is_valid_email(recipient):
                         recipient_emails.append(recipient)
-                    elif isinstance(recipient, User):
-                        recipient_users.append(recipient.id)
                     else:
-                        try:
-                            recipient_users.append(int(recipient))
-                        except ValueError:
-                            raise IllegalArgumentError('`recipient` "{}" is not a User or user ID!'.format(recipient))
-
+                        recipient_users.append(check_user(recipient, User, 'recipient'))
             else:
                 raise IllegalArgumentError('`recipients` must be a list of User objects, IDs or email addresses, '
                                            '"{}" ({}) is not.'.format(recipients, type(recipients)))
 
-        if team is not None:
-            from pykechain.models import Team
-            if isinstance(team, Team):
-                team = team.id
-            elif is_uuid(team):
-                pass
-            else:
-                raise IllegalArgumentError('`team` must be a Team object or team UUID, '
-                                           '"{}" ({}) is neither.'.format(team, type(team)))
-
-        if from_user is not None:
-            from pykechain.models import User
-
-            if isinstance(from_user, User):
-                from_user_id = from_user.id
-            elif isinstance(from_user, (int, str)):
-                try:
-                    from_user_id = int(from_user)
-                except ValueError:
-                    raise IllegalArgumentError('`from_user` "{}" is not a User or user ID!'.format(from_user))
-            else:
-                raise IllegalArgumentError('`from_user` must be a User, string or integer, '
-                                           '"{}" ({}) is not.'.format(from_user, type(from_user)))
-        else:
-            from_user_id = None
-
-        if event is not None and event not in NotificationEvent.values():
-            raise IllegalArgumentError('`event` must be a NotificationEvent option, "{}" is not.\n'
-                                       'Select from: {}'.format(event, NotificationEvent.values()))
-
-        if channel is not None and channel not in NotificationChannels.values():
-            raise IllegalArgumentError('`channel` must be a NotificationChannels option, "{}" is not.\n'
-                                       'Select from: {}'.format(status, NotificationChannels.values()))
-
         update_dict = {
-            'status': status,
-            'event': event,
-            'subject': subject,
-            'message': message,
+            'status': check_enum(status, NotificationStatus, 'status'),
+            'event': check_enum(event, NotificationEvent, 'event'),
+            'subject': check_text(subject, 'subject'),
+            'message': check_text(message, 'message'),
             'recipient_users': recipient_users,
             'recipient_emails': recipient_emails,
-            'team': team,
-            'from_user': from_user_id,
-            'channels': [channel],
+            'team': check_base(team, Team, 'team'),
+            'from_user': check_user(from_user, User, 'from_user'),
+            'channels': [channel] if check_enum(channel, NotificationChannels, 'channel') else [],
         }
 
         if kwargs:
@@ -193,6 +145,6 @@ class Notification(Base):
         response = self._client._request('PUT', url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Notification ({})".format(response))
+            raise APIError("Could not update Notification {}".format(self), response=response)
 
         self.refresh(json=response.json().get('results')[0])

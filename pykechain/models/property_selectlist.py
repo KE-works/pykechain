@@ -6,7 +6,7 @@ from pykechain.models.property import Property
 from pykechain.models.validators.validator_schemas import options_json_schema
 
 
-class SelectListProperty(Property):
+class SelectListProperty(Property):  # pragma: no cover
     """A select list property that needs to update its options."""
 
     def __init__(self, json, **kwargs):

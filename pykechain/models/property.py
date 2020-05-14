@@ -11,7 +11,7 @@ from pykechain.models.validators.validator_schemas import options_json_schema
 from pykechain.models.validators.validators_base import PropertyValidator
 
 
-class Property(Base):
+class Property(Base):  # pragma: no cover
     """A virtual object representing a KE-chain property.
 
     :ivar type: The property type of the property. One of the types described in :class:`pykechain.enums.PropertyType`

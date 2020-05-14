@@ -1,6 +1,7 @@
 from pykechain.exceptions import IllegalArgumentError, APIError
 from pykechain.models import Activity2, Part2, Property2
 from pykechain.models.association import Association
+from pykechain.models.input_checks import check_list_of_base
 from pykechain.utils import is_uuid
 from tests.classes import TestBetamax
 
@@ -167,23 +168,19 @@ class TestAssociations(TestBetamax):
                 associations=[([], [])],
             )
 
+    # noinspection PyTypeChecker
     def test_validate_model_input(self):
-        model_ids = self.client._validate_property_models(
-            models=self.frame_model.properties,
-        )
+        model_ids = check_list_of_base(self.frame_model.properties, Property2)
 
         self.assertIsInstance(model_ids, list)
         self.assertTrue(all(is_uuid(model_id) for model_id in model_ids))
         self.assertEqual(len(self.frame_model.properties), len(model_ids))
 
         with self.assertRaises(IllegalArgumentError):
-            self.client._validate_property_models(
-                models='not a list',
-            )
+            check_list_of_base(objects='not a list')
+
         with self.assertRaises(IllegalArgumentError):
-            self.client._validate_property_models(
-                models=[self.frame_model.properties[0], 'Not a property']
-            )
+            check_list_of_base(objects=[self.frame_model.properties[0], 'Not a property'], cls=Property2)
 
     def test_validate_widget_input(self):
         for method in [
