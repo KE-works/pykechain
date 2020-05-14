@@ -2,6 +2,7 @@ from abc import abstractmethod
 from typing import Iterable, Text, Optional, List
 
 from pykechain.exceptions import IllegalArgumentError
+from pykechain.models.input_checks import check_list_of_text, check_type
 
 
 class TagsMixin:
@@ -12,12 +13,12 @@ class TagsMixin:
     :type tags: list
     """
 
-    _tags = list()
+    _tags = list()  # type: List[Text]
 
     @abstractmethod
     def edit(self, tags: Optional[Iterable[Text]] = None, *args, **kwargs) -> None:
         """Edit the list of Tags."""
-        pass
+        pass  # pragma: no cover
 
     @property
     def tags(self) -> List[Text]:
@@ -31,15 +32,7 @@ class TagsMixin:
 
     @tags.setter
     def tags(self, new_tags: Iterable[Text]) -> None:
-        if new_tags is not None:
-            if not isinstance(new_tags, (list, tuple, set)) or not all(isinstance(t, Text) for t in new_tags):
-                raise IllegalArgumentError("Provided tags should be a list, tuple or set of strings. "
-                                           "Received type '{}'.".format(type(new_tags)))
-
-            unique_tags = list(set(new_tags))
-        else:
-            unique_tags = list()
-
+        unique_tags = check_list_of_text(new_tags, 'tags', True)
         self.edit(tags=unique_tags)
         self._tags = unique_tags
 
@@ -51,10 +44,10 @@ class TagsMixin:
         :type tag: str
         :return: None
         """
-        if not isinstance(tag, Text):
-            raise IllegalArgumentError('Tag must be a string, received "{}".'.format(type(tag)))
+        check_type(tag, Text, 'tag')
+
         if tag not in self.tags:
-            raise ValueError("Tag '{}' is not among the existing tags. Existing tags: '{}'.".format(
+            raise IllegalArgumentError("Tag '{}' is not among the existing tags. Existing tags: '{}'.".format(
                 tag, "', '".join(self.tags)))
 
         remaining_tags = self.tags
@@ -69,9 +62,7 @@ class TagsMixin:
         :type tag: str
         :return: None
         """
-        if not isinstance(tag, Text):
-            raise IllegalArgumentError('Tag must be a string, received "{}".'.format(type(tag)))
-
+        check_type(tag, Text, 'tag')
         updated_tags = self.tags
         updated_tags.append(tag)
         self.tags = updated_tags
@@ -84,6 +75,5 @@ class TagsMixin:
         :return: boolean
         :rtype bool
         """
-        if not isinstance(tag, Text):
-            raise IllegalArgumentError('Tag must be a string, received "{}".'.format(type(tag)))
+        check_type(tag, Text, 'tag')
         return tag in self.tags

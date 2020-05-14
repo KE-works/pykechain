@@ -40,10 +40,7 @@ def is_uuid(value: Text) -> bool:
     :return: True if there is a match, otherwise False
     :rtype: bool
     """
-    if re.match(UUID_REGEX_PATTERN, str(value)):
-        return True
-    else:
-        return False
+    return bool(re.match(UUID_REGEX_PATTERN, str(value)))
 
 
 def is_url(value: Text) -> bool:
@@ -141,11 +138,11 @@ def is_url(value: Text) -> bool:
         # (IPv4-Embedded IPv6 Address)
         r"(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])" r")\]|"
         # host name
-        u"(?:(?:[a-z\u00a1-\uffff0-9]-?)*[a-z\u00a1-\uffff0-9]+)"
+        r"(?:(?:[a-z\u00a1-\uffff0-9]-?)*[a-z\u00a1-\uffff0-9]+)"
         # domain name
-        u"(?:\.(?:[a-z\u00a1-\uffff0-9]-?)*[a-z\u00a1-\uffff0-9]+)*"
+        r"(?:\.(?:[a-z\u00a1-\uffff0-9]-?)*[a-z\u00a1-\uffff0-9]+)*"
         # TLD identifier
-        u"(?:\.(?:[a-z\u00a1-\uffff]{2,}))" r")"
+        r"(?:\.(?:[a-z\u00a1-\uffff]{2,}))" r")"
         # port number
         r"(?::\d{2,5})?"
         # resource path
@@ -156,10 +153,7 @@ def is_url(value: Text) -> bool:
         r"(?:#\S*)?" r"$",
         re.UNICODE | re.IGNORECASE,
     )
-    result = regex.match(value)
-    if result:
-        return True
-    return False
+    return bool(regex.match(value))
 
 
 def is_valid_email(value: Text) -> bool:
@@ -236,7 +230,7 @@ def temp_chdir(cwd: Optional[Text] = None):
             os.chdir(origin)
 
 
-def parse_datetime(value: Text) -> Optional[datetime]:
+def parse_datetime(value: Optional[Text]) -> Optional[datetime]:
     """
     Convert datetime string to datetime object.
 
@@ -444,8 +438,7 @@ def slugify_ref(value: Text, allow_unicode: bool = False) -> Text:
     return re.sub(r"[-\s]+", "-", value)
 
 
-def __dict_public__(cls):
-    # type: (type(object)) -> Dict
+def __dict_public__(cls: type(object)) -> Dict:
     """
     Get the __dict__ of the class `cls`, excluding 'dunder' attributes and methods.
 
@@ -462,8 +455,7 @@ def __dict_public__(cls):
     return {k: v for (k, v) in cls.__dict__.items() if not k.startswith("__")}
 
 
-def __dict__inherited__(cls, stop=type, public=True):
-    # type: (type(object), type(object), bool) -> Dict
+def __dict__inherited__(cls: type(object), stop: type(object) = type, public: Optional[bool] = True) -> Dict:
     """
     Get all __dict__ items of the class and its superclasses up to `type`, or the `stop` class given as input.
 

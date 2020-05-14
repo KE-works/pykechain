@@ -24,7 +24,7 @@ class TestServiceSetup(TestBetamax):
         new_service = self.project.create_service(
             name=name or 'Test upload script to service',
             description="Only used for testing - you can safely remove this",
-            environment_version = ServiceEnvironmentVersion.PYTHON_3_6
+            environment_version=ServiceEnvironmentVersion.PYTHON_3_6,
         )
         upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_script_to_service',
                                    'test_upload_script.py')
@@ -187,15 +187,15 @@ class TestServicesWithCustomUploadedService(TestServiceSetup):
 
         # tearDown
         new_service.delete()
-        with self.assertRaisesRegex(NotFoundError, 'No service fits criteria'):
+        with self.assertRaisesRegex(NotFoundError, 'fit criteria'):
             self.project.service(pk=new_service.id)
 
     def test_create_service_with_wrong_service_type(self):
-        with self.assertRaisesRegex(IllegalArgumentError, 'The type should be of one of'):
+        with self.assertRaisesRegex(IllegalArgumentError, 'must be an option from enum'):
             self.project.create_service(name='This service type does not exist', service_type='RUBY_SCRIPT')
 
     def test_create_service_with_wrong_environment_version(self):
-        with self.assertRaisesRegex(IllegalArgumentError, 'The environment version should be of one of'):
+        with self.assertRaisesRegex(IllegalArgumentError, 'must be an option from enum'):
             self.project.create_service(name='This env version does not exist', environment_version='0.0')
 
     def test_save_service_script(self):
@@ -265,7 +265,7 @@ class TestServiceExecutions(TestServiceSetup):
         self.service.execute()
 
         # testing
-        with self.assertRaisesRegex(APIError, "Conflict: Could not execute service as it is already running"):
+        with self.assertRaisesRegex(APIError, "Conflict: Could not execute"):
             self.service.execute()
 
     def test_properties_of_service_execution(self):

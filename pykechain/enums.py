@@ -113,34 +113,10 @@ class ActivityType(Enum):
 
     :cvar TASK: a normal task
     :cvar PROCESS: a subprocess (container) containing other tasks
-
-    For WIM version 1:
-
-    :cvar USERTASK: a normal usertask
-    :cvar SUBPROCESS: a subprocess (container) containing other tasks
-    :cvar SERVICETASK: a service taks (this concept is only availabe in RND KE-chain and will be deprecated)
     """
 
-    # WIM2:
     PROCESS = 'PROCESS'
     TASK = 'TASK'
-
-    # WIM1:
-    USERTASK = "UserTask"
-    SERVICETASK = "ServiceTask"  # RND code only
-    SUBPROCESS = "Subprocess"
-
-
-WIMCompatibleActivityTypes = {
-    # backwards pykechain script compatible with wim2
-    # from WIM1 to WIM2:
-    ActivityType.USERTASK: ActivityType.TASK,
-    ActivityType.SUBPROCESS: ActivityType.PROCESS,
-
-    # forwarde pykechain scripts made for wim2, compatible with wim1
-    # from WIM2 to WIM1:
-    ActivityType.PROCESS: ActivityType.SUBPROCESS,
-    ActivityType.TASK: ActivityType.USERTASK}
 
 
 class ActivityClassification(Enum):
@@ -503,22 +479,23 @@ class SortTable(Enum):
     DESCENDING = 'DESC'
 
 
-class NavigationBarAlignment(Enum):
-    """The acceptable alignment options for a Navigation Bar Widget.
+class Alignment(Enum):
+    """The acceptable alignment options for attachment viewer and navigation bar widgets.
 
-    :cvar START: Buttons are aligned to the left (for KE-chain 2)
-    :cvar LEFT: Buttons are aligned to the left (for KE-chain 3)
-    :cvar CENTER: Buttons are aligned to the center
+    :cvar LEFT: Aligned to the left
+    :cvar CENTER: Aligned to the center
+    :cvar RIGHT: Aligned to the right
     """
 
-    CENTER = 'center'
-
-    # for KE-chain 2
-    START = 'start'
-
-    # for KE-chain 3
     LEFT = 'left'
+    CENTER = 'center'
     RIGHT = 'right'
+
+
+class NavigationBarAlignment(Alignment):
+    """The acceptable alignment options for a Navigation Bar Widget."""
+
+    pass
 
 
 class PaperSize(Enum):

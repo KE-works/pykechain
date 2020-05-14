@@ -50,7 +50,7 @@ class TestScopes(TestBetamax):
 
     def test_add_member_by_id(self):
         member_id = 4
-        with self.assertRaises(TypeError):
+        with self.assertRaises(IllegalArgumentError):
             self.project.add_member(member_id)
 
     def test_add_non_existing_member(self):
@@ -292,7 +292,7 @@ class TestScopes2SpecificTests(TestBetamax):
         self.assertNotEqual(self.project.id, new_scope.id)
         new_scope.delete(asynchronous=False)
 
-        with self.assertRaisesRegex(NotFoundError, 'No scope fits criteria'):
+        with self.assertRaisesRegex(NotFoundError, 'fit criteria'):
             # throw in arbitrary sleep to give backend time to actually delete the scope.
             sleep(1)
             self.client.scope(pk=new_scope.id)

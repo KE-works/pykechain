@@ -2,6 +2,7 @@ from pykechain.enums import PropertyType, FilterType, Multiplicity
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import MultiReferenceProperty2
 from pykechain.models.validators import RequiredFieldValidator
+from pykechain.utils import find
 from tests.classes import TestBetamax
 
 
@@ -43,11 +44,12 @@ class TestMultiReferenceProperty(TestBetamax):
         self.ref_prop_model = self.part_model.add_property(
             name=self.ref_prop_name,
             property_type=PropertyType.REFERENCES_VALUE,
-            default_value=self.target_model.id
+            default_value=self.target_model.id,
         )  # type: MultiReferenceProperty2
 
         # reference property instance holding the value
-        self.ref = self.part_model.instance().property(self.ref_prop_name)
+        part_instance = self.part_model.instance()
+        self.ref = find(part_instance.properties, lambda p: p.model_id == self.ref_prop_model.id)
 
     def tearDown(self):
         self.target_model.delete()
