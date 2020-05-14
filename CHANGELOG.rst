@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v3.7.0-rc2 (not released)
+
+* :bug: Scope edit cleared some properties from the scope if they were not provided.
+: :+1: Improved robustness of teardown for tests for the `Scope2` class.
+
 v3.7.0-rc1 (not released)
 -------------------------
 
