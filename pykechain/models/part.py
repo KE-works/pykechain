@@ -12,7 +12,7 @@ from pykechain.models.property import Property
 from pykechain.utils import find, is_uuid
 
 
-class Part(Base):
+class Part(Base):  # pragma: no cover
     """A virtual object representing a KE-chain part.
 
     :cvar basestring category: The category of the part, either 'MODEL' or 'INSTANCE'

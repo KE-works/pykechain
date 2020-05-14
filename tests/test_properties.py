@@ -134,7 +134,8 @@ class TestProperties(TestBetamax):
         self.prop = self.bike.property(name=self.prop_name)
 
     def tearDown(self):
-        self.prop_model.delete()
+        if self.prop_model:
+            self.prop_model.delete()
         super(TestProperties, self).tearDown()
 
     def test_retrieve_properties(self):
@@ -149,9 +150,18 @@ class TestProperties(TestBetamax):
         self.assertIsInstance(prop, Property2)
         self.assertTrue(prop)
 
+    def test_retrieve_property_model(self):
+        model = self.prop.model()
+
+        self.assertEqual(self.prop_model, model)
+
+        models_model = self.prop_model.model()
+
+        self.assertEqual(self.prop_model, models_model)
+
     def test_property_attributes(self):
         attributes = ['_client', '_json_data', 'id', 'name', 'created_at', 'updated_at', 'ref',
-                      '_output', '_value', '_options', 'type', 'category',
+                      'output', '_value', '_options', 'type', 'category',
                       '_validators']
 
         obj = self.project.property(name='Cheap?', category=Category.MODEL)
@@ -270,22 +280,6 @@ class TestProperties(TestBetamax):
         # tearDown
         copied_property.delete()
 
-    def test_move_property_model(self):
-        # setUp
-        moved_property = self.prop_model.move(target_part=self.wheel_model, name='Copied property')
-
-        # testing
-        self.assertEqual(moved_property.name, 'Copied property')
-        self.assertEqual(moved_property.description, self.prop_model.description)
-        self.assertEqual(moved_property.unit, self.prop_model.unit)
-        self.assertEqual(moved_property.value, self.prop_model.value)
-        with self.assertRaises(NotFoundError):
-            self.project.property(id=self.prop_model.id)
-
-        # tearDown
-        # for a correct teardown in the unittest we need to -reassign- the moved one to the self.test_property_model
-        self.prop_model = moved_property
-
     def test_copy_property_instance(self):
         # setUp
         self.prop.value = 200
@@ -300,6 +294,38 @@ class TestProperties(TestBetamax):
 
         # tearDown
         copied_property.model().delete()
+
+    def test_copy_property_instance_to_model(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.prop.copy(target_part=self.prop_model)
+
+    def test_move_property_model(self):
+        # setUp
+        moved_property = self.prop_model.move(target_part=self.wheel_model, name='Moved property')
+
+        # testing
+        self.assertEqual(moved_property.name, 'Moved property')
+        self.assertEqual(moved_property.description, self.prop_model.description)
+        self.assertEqual(moved_property.unit, self.prop_model.unit)
+        self.assertEqual(moved_property.value, self.prop_model.value)
+        with self.assertRaises(NotFoundError):
+            self.project.property(id=self.prop_model.id)
+
+        # tearDown
+        # for a correct teardown in the unittest we need to -reassign- the moved one to the self.test_property_model
+        self.prop_model = moved_property
+
+    def test_move_property_instance(self):
+        # setUp
+        moved_property = self.prop.move(target_part=self.wheel_model.instances()[0], name='moved property')
+
+        # testing
+        with self.assertRaises(APIError):
+            self.project.property(id=self.prop_model.id)
+
+        # tearDown
+        # for a correct teardown in the unittest we need to -reassign- the moved one to the self.test_property_model
+        self.prop_model = moved_property.model()
 
     def test_retrieve_properties_with_refs(self):
         # setup

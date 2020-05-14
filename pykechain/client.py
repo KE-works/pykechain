@@ -1,32 +1,32 @@
 import datetime
 import warnings
-from typing import Dict, Tuple, Optional, Any, List, Union, Text
+from typing import Dict, Tuple, Optional, Any, List, Union, Text, Callable
+from urllib.parse import urljoin, urlparse
 
 import requests
 from envparse import env
-from requests.adapters import HTTPAdapter
-from requests.compat import urljoin, urlparse  # type: ignore
-from six import text_type, string_types
+from requests.adapters import HTTPAdapter  # type: ignore
 from urllib3 import Retry
 
 from pykechain.defaults import API_PATH, API_EXTRA_PARAMS, RETRY_ON_CONNECTION_ERRORS, RETRY_BACKOFF_FACTOR, \
     RETRY_TOTAL, RETRY_ON_READ_ERRORS, RETRY_ON_REDIRECT_ERRORS
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
-    WIMCompatibleActivityTypes, PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
+    PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
     ActivityClassification, ActivityStatus, NotificationStatus, NotificationEvent, NotificationChannels
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
-from pykechain.models import Part2, Property2, Activity, Scope, PartSet, Part, Property, AnyProperty
-from pykechain.models.activity2 import Activity2
+
+from pykechain.models import Part2, Property2, Activity2, Scope2, PartSet, Base, AnyProperty, Service, \
+    ServiceExecution
 from pykechain.models.association import Association
-from pykechain.models.scope2 import Scope2
-from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.notification import Notification
 from pykechain.models.widgets.widget import Widget
-from pykechain.utils import is_uuid, find, is_url, is_valid_email
-from .__about__ import version
+from pykechain.utils import is_uuid, find, is_valid_email
+from .__about__ import version as pykechain_version
+from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
+    check_list_of_base, check_base, check_uuid, check_list_of_dicts, check_url, check_user
 from .models.banner import Banner
 
 
@@ -35,15 +35,13 @@ class Client(object):
 
     :ivar last_request: last executed request. Which is of type `requests.Request`_
     :ivar last_response: last executed response. Which is of type `requests.Response`_
-    :ivar str last_url: last called api url
-    :ivar app_versions: a list of the versions of the internal KE-chain 'app' modules
+    :ivar last_url: last called api url
 
     .. _requests.Request: http://docs.python-requests.org/en/master/api/#requests.Request
     .. _requests.Response: http://docs.python-requests.org/en/master/api/#requests.Response
     """
 
-    def __init__(self, url='http://localhost:8000/', check_certificates=None):
-        # type: (str, bool) -> None
+    def __init__(self, url: Text = 'http://localhost:8000/', check_certificates: Optional[bool] = None) -> None:
         """Create a KE-chain client with given settings.
 
         :param url: the url of the KE-chain instance to connect to (defaults to http://localhost:8000)
@@ -61,7 +59,8 @@ class Client(object):
 
         """
         self.auth = None  # type: Optional[Tuple[str, str]]
-        self.headers = {'X-Requested-With': 'XMLHttpRequest', 'PyKechain-Version': version}  # type: Dict[str, str]
+        self.headers = {'X-Requested-With': 'XMLHttpRequest',
+                        'PyKechain-Version': pykechain_version}  # type: Dict[str, str]
         self.session = requests.Session()  # type: requests.Session
 
         parsed_url = urlparse(url)
@@ -69,11 +68,14 @@ class Client(object):
             raise ClientError("Please provide a valid URL to a KE-chain instance")
 
         self.api_root = url
+        self.headers = {'X-Requested-With': 'XMLHttpRequest',
+                        'PyKechain-Version': pykechain_version}  # type: Dict[Text, Text]
+        self.auth = None  # type: Optional[Tuple[Text, Text]]
         self.last_request = None  # type: Optional[requests.PreparedRequest]
         self.last_response = None  # type: Optional[requests.Response]
-        self.last_url = None  # type: Optional[str]
-        self._app_versions = None  # type: Optional[List[dict]]
-        self._widget_schemas = None  # type: Optional[List[dict]]
+        self.last_url = None  # type: Optional[Text]
+        self._app_versions = None  # type: Optional[List[Dict]]
+        self._widget_schemas = None  # type: Optional[List[Dict]]
 
         if check_certificates is None:
             check_certificates = env.bool(KechainEnv.KECHAIN_CHECK_CERTIFICATES, default=True)
@@ -103,8 +105,7 @@ class Client(object):
         return "<pyke Client '{}'>".format(self.api_root)
 
     @classmethod
-    def from_env(cls, env_filename=None, check_certificates=None):
-        # type: (Optional[str]) -> Client
+    def from_env(cls, env_filename: Optional[Text] = None, check_certificates: Optional[bool] = None) -> 'Client':
         """Create a client from environment variable settings.
 
         :param env_filename: filename of the environment file, defaults to '.env' in the local dir
@@ -153,8 +154,8 @@ class Client(object):
 
         return client
 
-    def login(self, username=None, password=None, token=None):
-        # type: (Optional[str], Optional[str], Optional[str]) -> None
+    def login(self,
+              username: Optional[Text] = None, password: Optional[Text] = None, token: Optional[Text] = None) -> None:
         """Login into KE-chain with either username/password or token.
 
         :param username: username for your user from KE-chain
@@ -187,19 +188,17 @@ class Client(object):
             self.headers.pop('Authorization', None)
             self.auth = (username, password)
 
-    def _build_url(self, resource, **kwargs):
-        # type: (str, **str) -> str
+    def _build_url(self, resource: Text, **kwargs) -> Text:
         """Build the correct API url.
 
         :param resource: name the resource from the API_PATH
         :type resource: basestring
         :param kwargs: (optional) id of the detail path to follow, eg. activity_id=...
-        :type kwargs: dict
         :return: url of the resource to the resource (id)
         """
         return urljoin(self.api_root, API_PATH[resource].format(**kwargs))
 
-    def _retrieve_users(self):
+    def _retrieve_users(self) -> List[Dict]:
         """
         Retrieve user objects of the entire administration.
 
@@ -213,8 +212,7 @@ class Client(object):
         users = response.json()
         return users
 
-    def _request(self, method, url, **kwargs):
-        # type: (str, str, **Any) -> requests.Response
+    def _request(self, method: Text, url: Text, **kwargs) -> requests.Response:
         """Perform the request on the API."""
         self.last_request = None
         if method in ('PUT', 'POST', 'DELETE'):
@@ -229,7 +227,7 @@ class Client(object):
         return self.last_response
 
     @property
-    def app_versions(self):
+    def app_versions(self) -> List[Dict]:
         """List of the versions of the internal KE-chain 'app' modules."""
         if not self._app_versions:
             app_versions_url = self._build_url('versions')
@@ -241,15 +239,14 @@ class Client(object):
             elif response.status_code == requests.codes.forbidden:
                 raise ForbiddenError(response.json()['results'][0]['detail'])
             elif response.status_code != requests.codes.ok:
-                raise APIError("Could not retrieve app versions: {}".format(response))
+                raise APIError("Could not retrieve app versions", response=response)
             else:
                 self._app_versions = response.json().get('results')
 
         return self._app_versions
 
     @property
-    def widget_schemas(self):
-        # type: () -> List[Dict]
+    def widget_schemas(self) -> Dict:
         """
         Widget meta schemas for all widgets in KE-chain 3.
 
@@ -269,13 +266,12 @@ class Client(object):
         if not self._widget_schemas:
             response = self._request('GET', self._build_url('widgets_schemas'))
             if response.status_code != requests.codes.ok:  # pragma: no cover
-                raise APIError("Could not retrieve widgets schemas ({})".format((response, response.json())))
+                raise APIError("Could not retrieve widgets schemas.", response=response)
             self._widget_schemas = response.json().get('results')
 
         return self._widget_schemas
 
-    def widget_schema(self, widget_type):
-        # type: (Text) -> Dict
+    def widget_schema(self, widget_type: Text) -> Dict:
         """Widget schema for widget type.
 
         ..versionadded:: 3.0
@@ -287,15 +283,20 @@ class Client(object):
         :raises APIError: When it could not retrieve the jsonschema from KE-chain
         :raises NotFoundError: When it could not find the correct schema
         """
-        if widget_type not in WidgetTypes.values():
-            raise IllegalArgumentError("`widget_type` should be one of "
-                                       "'{}', got '{}'".format(WidgetTypes.values(), widget_type))
+        check_enum(widget_type, WidgetTypes, 'widget_type')
+
         found = find(self.widget_schemas, lambda ws: ws.get('widget_type') == widget_type)
         if not found:
             raise NotFoundError("Could not find a widget_schema for widget_type: `{}`".format(widget_type))
         return found
 
-    def match_app_version(self, app=None, label=None, version=None, default=False):
+    def match_app_version(
+            self,
+            app: Optional[Text] = None,
+            label: Optional[Text] = None,
+            version: Optional[Text] = None,
+            default: Optional[bool] = False,
+    ) -> bool:
         """Match app version against a semantic version string.
 
         Checks if a KE-chain app matches a version comparison. Uses the `semver` matcher to check.
@@ -305,6 +306,7 @@ class Client(object):
 
         Examples
         --------
+        >>> client = Client()
         >>> client.match_app_version(label='wim', version=">=1.99")
         >>> True
 
@@ -350,7 +352,7 @@ class Client(object):
             else:
                 raise NotFoundError("No version found on the app '{}'".format(target_app[0].get('app')))
 
-    def reload(self, obj, url=None, extra_params=None):
+    def reload(self, obj: Base, url: Optional[Text] = None, extra_params: Optional[Dict] = None):
         """Reload an object from server. The original object is immutable and it will return a new object.
 
         The object will be refetched from KE-chain. If the object has a 'url' field the url will be taken from
@@ -369,6 +371,9 @@ class Client(object):
         :raises NotFoundError: if original object is not found or deleted in the mean time
         """
         if not url and not obj._json_data.get('url'):
+            # TODO Throw an error instead of building the URL?
+            #  This .__name__ method does not work for subclasses (e.g. MultiReferenceProperty).
+
             # build the url from the class name (in lower case) `obj.__class__.__name__.lower()`
             # get the id from the `obj.id` which is normally a keyname `<class_name>_id` (without the '2' if so)
 
@@ -385,14 +390,43 @@ class Client(object):
         response = self._request('GET', url, params=extra_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not reload object ({})".format(response))
+            raise NotFoundError("Could not reload {} {}".format(obj.__class__.__name__, obj), response=response)
 
         data = response.json()
 
         return obj.__class__(data['results'][0], client=self)
 
-    def scopes(self, name=None, pk=None, status=ScopeStatus.ACTIVE, **kwargs):
-        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Union[Scope, Scope2]]
+    @staticmethod
+    def _retrieve_singular(method: Callable, *args, **kwargs):
+        """
+        Use the method for multiple objects to retrieve a single object, raising the appropriate errors.
+
+        :param method: function used to retrieve multiple objects.
+        :type method: callable
+        :return the single result
+        :raises NotFoundError: When no result is found.
+        :raises MultipleFoundError: When more than a single result is found.
+        """
+        # TODO set limit=2 to reduce query (but allow MultipleFoundError)?
+        #  Will require updating of many cassettes.
+        results = method(*args, **kwargs)
+
+        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+
+        if len(results) == 0:
+            raise NotFoundError("No {} fit criteria:{}".format(method.__name__, criteria))
+        if len(results) != 1:
+            raise MultipleFoundError("Multiple {} fit criteria:{}".format(method.__name__, criteria))
+
+        return results[0]
+
+    def scopes(
+            self,
+            name: Optional[Text] = None,
+            pk: Optional[Text] = None,
+            status: Optional[Union[ScopeStatus, Text]] = ScopeStatus.ACTIVE,
+            **kwargs
+    ) -> List[Scope2]:
         """Return all scopes visible / accessible for the logged in user.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -424,16 +458,13 @@ class Client(object):
 
         """
         request_params = {
-            'name': name,
-            'id': pk,
-            'status': status,
+            'name': check_text(text=name, key='name'),
+            'id': check_uuid(pk),
+            'status': check_enum(status, ScopeStatus, 'status'),
         }
 
-        if self.match_app_version(label='scope', version='>=3.0.0', default=False):
-            request_params.update(API_EXTRA_PARAMS['scope2'])
-            url = self._build_url('scopes2')
-        else:
-            url = self._build_url('scopes')
+        request_params.update(API_EXTRA_PARAMS['scope2'])
+        url = self._build_url('scopes2')
 
         if kwargs:
             request_params.update(**kwargs)
@@ -441,19 +472,13 @@ class Client(object):
         response = self._request('GET', url=url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve scopes: '{}'".format(response.content))
+            raise NotFoundError("Could not retrieve Scopes", response=response)
 
         data = response.json()
 
-        # for 'kechain.gcore.gscope >= 2.0.0 we return Scope2 otherwiser Scope
-        if self.match_app_version(label='scope', version='>=3.0.0', default=False):
-            # Scope2
-            return [Scope2(s, client=self) for s in data['results']]
-        else:
-            return [Scope(s, client=self) for s in data['results']]
+        return [Scope2(s, client=self) for s in data['results']]
 
-    def scope(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Union[Scope, Scope2]
+    def scope(self, *args, **kwargs) -> Scope2:
         """Return a single scope based on the provided name.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -463,19 +488,15 @@ class Client(object):
         :raises NotFoundError: When no `Scope` is found
         :raises MultipleFoundError: When more than a single `Scope` is found
         """
-        _scopes = self.scopes(*args, **kwargs)
+        return self._retrieve_singular(self.scopes, *args, **kwargs)
 
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_scopes) == 0:
-            raise NotFoundError("No scope fits criteria:{}".format(criteria))
-        if len(_scopes) != 1:
-            raise MultipleFoundError("Multiple scopes fit criteria:{}".format(criteria))
-
-        return _scopes[0]
-
-    def activities(self, name=None, pk=None, scope=None, **kwargs):
-        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Union[Activity, Activity2]]
+    def activities(
+            self,
+            name: Optional[Text] = None,
+            pk: Optional[Text] = None,
+            scope: Optional[Text] = None,
+            **kwargs
+    ) -> List[Activity2]:
         """Search for activities with optional name, pk and scope filter.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -491,15 +512,12 @@ class Client(object):
         :raises NotFoundError: If no `Activities` are found
         """
         request_params = {
-            'id': pk,
-            'name': name,
+            'id': check_uuid(pk),
+            'name': check_text(text=name, key='name'),
             'scope': scope
         }
 
-        # update the fields query params
-        # for 'kechain.core.wim >= 2.0.0' add additional API params
-        if self.match_app_version(label='wim', version='>=3.0.0', default=False):
-            request_params.update(API_EXTRA_PARAMS['activity'])
+        request_params.update(API_EXTRA_PARAMS['activity'])
 
         if kwargs:
             request_params.update(**kwargs)
@@ -507,20 +525,12 @@ class Client(object):
         response = self._request('GET', self._build_url('activities'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve activities. Server responded with {}".format(str(response)))
+            raise NotFoundError("Could not retrieve Activities", response=response)
 
         data = response.json()
+        return [Activity2(a, client=self) for a in data['results']]
 
-        # for 'kechain.core.wim >= 2.0.0' we return Activity2, otherwise Activity1
-        if self.match_app_version(label='wim', version='<2.0.0', default=True):
-            # WIM1
-            return [Activity(a, client=self) for a in data['results']]
-        else:
-            # WIM2
-            return [Activity2(a, client=self) for a in data['results']]
-
-    def activity(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Union[Activity, Activity2]
+    def activity(self, *args, **kwargs) -> Activity2:
         """Search for a single activity.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -536,31 +546,22 @@ class Client(object):
         :raises NotFoundError: When no `Activity` is found
         :raises MultipleFoundError: When more than a single `Activity` is found
         """
-        _activities = self.activities(*args, **kwargs)
+        return self._retrieve_singular(self.activities, *args, **kwargs)
 
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_activities) == 0:
-            raise NotFoundError("No activity fits criteria:{}".format(criteria))
-        if len(_activities) != 1:
-            raise MultipleFoundError("Multiple activities fit criteria:{}".format(criteria))
-
-        return _activities[0]
-
-    def parts(self,
-              name=None,  # type: Optional[str]
-              pk=None,  # type: Optional[str]
-              model=None,  # type: Optional[Part2]
-              category=Category.INSTANCE,  # type: Optional[str]
-              bucket=None,  # type: Optional[str]
-              scope_id=None,  # type: Optional[str]
-              parent=None,  # type: Optional[str]
-              activity=None,  # type: Optional[str]
-              widget=None,  # type: Optional[str]
-              limit=None,  # type: Optional[int]
-              batch=100,  # type: int
-              **kwargs):
-        # type: (...) -> PartSet
+    def parts(
+            self,
+            name: Optional[Text] = None,
+            pk: Optional[Text] = None,
+            model: Optional[Part2] = None,
+            category: Optional[Union[Category, Text]] = Category.INSTANCE,
+            scope_id: Optional[Text] = None,
+            parent: Optional[Text] = None,
+            activity: Optional[Text] = None,
+            widget: Optional[Text] = None,
+            limit: Optional[int] = None,
+            batch: Optional[int] = 100,
+            **kwargs
+    ) -> PartSet:
         """Retrieve multiple KE-chain parts.
 
         If no parameters are provided, all parts are retrieved.
@@ -576,9 +577,7 @@ class Client(object):
         :type model: basestring or None
         :param category: filter on category (INSTANCE, MODEL, None)
         :type category: basestring or None
-        :param bucket: filter on bucket_id  # only relevant for KE-chain 2
-        :type bucket: basestring or None
-        :param scope_id: filter on scope_id # relevant for KE-chain 2 and 3
+        :param scope_id: filter on scope_id
         :type scope_id: basestring or None
         :param parent: filter on the parent_id, returns all children of the parent_id
         :type parent: basestring or None
@@ -619,29 +618,18 @@ class Client(object):
             batch = limit
 
         request_params = dict(
-            id=pk,
-            name=name,
-            category=category,
+            id=check_uuid(pk),
+            name=check_text(text=name, key='name'),
+            category=check_enum(category, Category, 'category'),
             activity_id=activity,
             widget_id=widget,
             limit=batch,
             scope_id=scope_id,
+            parent_id=parent,
+            model_id=model.id if model else None,
         )
-
-        if self.match_app_version(label='pim', version='>=3.0.0'):
-            request_params.update(dict(
-                parent_id=parent,
-                model_id=model.id if model else None,
-            ))
-            url = self._build_url('parts2')
-            request_params.update(API_EXTRA_PARAMS['parts2'])
-        else:
-            request_params.update(dict(
-                bucket=bucket,
-                parent=parent,
-                model=model.id if model else None,
-            ))
-            url = self._build_url('parts')
+        url = self._build_url('parts2')
+        request_params.update(API_EXTRA_PARAMS['parts2'])
 
         if kwargs:
             request_params.update(**kwargs)
@@ -649,8 +637,7 @@ class Client(object):
         response = self._request('GET', url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve parts. Request: {}\nResponse: {}".format(
-                request_params, response.content))
+            raise NotFoundError("Could not retrieve Parts", response=response)
 
         data = response.json()
 
@@ -665,13 +652,9 @@ class Client(object):
                 data = response.json()
                 part_results.extend(data['results'])
 
-        if self.match_app_version(label='pim', version='>=3.0.0'):
-            return PartSet((Part2(p, client=self) for p in part_results))
-        else:
-            return PartSet((Part(p, client=self) for p in part_results))
+        return PartSet((Part2(p, client=self) for p in part_results))
 
-    def part(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Union[Part, Part2]
+    def part(self, *args, **kwargs) -> Part2:
         """Retrieve single KE-chain part.
 
         Uses the same interface as the :func:`parts` method but returns only a single pykechain :class:`models.Part`
@@ -684,19 +667,9 @@ class Client(object):
         :raises NotFoundError: When no `Part` is found
         :raises MultipleFoundError: When more than a single `Part` is found
         """
-        _parts = self.parts(*args, **kwargs)
+        return self._retrieve_singular(self.parts, *args, **kwargs)
 
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_parts) == 0:
-            raise NotFoundError("No part fits criteria:{}".format(criteria))
-        if len(_parts) != 1:
-            raise MultipleFoundError("Multiple parts fit criteria:{}".format(criteria))
-
-        return _parts[0]
-
-    def model(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Union[Part, Part2]
+    def model(self, *args, **kwargs) -> Part2:
         """Retrieve single KE-chain part model.
 
         Uses the same interface as the :func:`part` method but returns only a single pykechain
@@ -710,19 +683,15 @@ class Client(object):
         :raises MultipleFoundError: When more than a single `Part` is found
         """
         kwargs['category'] = Category.MODEL
-        _parts = self.parts(*args, **kwargs)
+        return self._retrieve_singular(self.parts, *args, **kwargs)
 
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_parts) == 0:
-            raise NotFoundError("No model fits criteria:{}".format(criteria))
-        if len(_parts) != 1:
-            raise MultipleFoundError("Multiple models fit criteria:{}".format(criteria))
-
-        return _parts[0]
-
-    def properties(self, name=None, pk=None, category=Category.INSTANCE, **kwargs):
-        # type: (Optional[str], Optional[str], Optional[str], **Any) -> List[Union[Property, Property2]]
+    def properties(
+            self,
+            name: Optional[Text] = None,
+            pk: Optional[Text] = None,
+            category: Optional[Union[Category, Text]] = Category.INSTANCE,
+            **kwargs
+    ) -> List['AnyProperty']:
         """Retrieve properties.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -739,28 +708,20 @@ class Client(object):
         :raises NotFoundError: When no `Property` is found
         """
         request_params = {
-            'name': name,
-            'id': pk,
-            'category': category
+            'name': check_text(text=name, key='name'),
+            'id': check_uuid(pk),
+            'category': check_enum(category, Category, 'category')
         }
-        if kwargs:
+        if kwargs:  # pragma: no cover
             request_params.update(**kwargs)
 
-        if self.match_app_version(label='pim', version='>=3.0.0'):
-            request_params.update(API_EXTRA_PARAMS['properties2'])
-            response = self._request('GET', self._build_url('properties2'), params=request_params)
-        else:
-            response = self._request('GET', self._build_url('properties'), params=request_params)
+        request_params.update(API_EXTRA_PARAMS['properties2'])
+        response = self._request('GET', self._build_url('properties2'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve properties: '{}'".format(response.content))
+            raise NotFoundError("Could not retrieve Properties", response=response)
 
-        data = response.json()
-
-        if self.match_app_version(label='pim', version='>=3.0.0'):
-            return [Property2.create(p, client=self) for p in data['results']]
-        else:
-            return [Property.create(p, client=self) for p in data['results']]
+        return [Property2.create(p, client=self) for p in response.json()['results']]
 
     def property(self, *args, **kwargs) -> 'AnyProperty':  # noqa: F
         """Retrieve single KE-chain Property.
@@ -775,18 +736,15 @@ class Client(object):
         :raises NotFoundError: When no `Property` is found
         :raises MultipleFoundError: When more than a single `Property` is found
         """
-        _properties = self.properties(*args, **kwargs)
+        return self._retrieve_singular(self.properties, *args, **kwargs)
 
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_properties) == 0:
-            raise NotFoundError("No property fits criteria:{}".format(criteria))
-        if len(_properties) != 1:
-            raise MultipleFoundError("Multiple properties fit criteria:{}".format(criteria))
-
-        return _properties[0]
-
-    def services(self, name=None, pk=None, scope=None, **kwargs):
+    def services(
+            self,
+            name: Optional[Text] = None,
+            pk: Optional[Text] = None,
+            scope: Optional[Text] = None,
+            **kwargs
+    ) -> List[Service]:
         """
         Retrieve Services.
 
@@ -804,12 +762,11 @@ class Client(object):
         :raises NotFoundError: When no `Service` objects are found
         """
         request_params = {
-            'name': name,
-            'id': pk,
+            'name': check_text(text=name, key='name'),
+            'id': check_uuid(pk),
             'scope': scope
         }
-        if self.match_app_version(label='sim', version='>=3.0.0', default=False):
-            request_params.update(API_EXTRA_PARAMS['service'])
+        request_params.update(API_EXTRA_PARAMS['service'])
 
         if kwargs:
             request_params.update(**kwargs)
@@ -817,41 +774,32 @@ class Client(object):
         response = self._request('GET', self._build_url('services'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve services")
+            raise NotFoundError("Could not retrieve Services", response=response)
 
-        data = response.json()
-        return [Service(service, client=self) for service in data['results']]
+        return [Service(service, client=self) for service in response.json()['results']]
 
-    def service(self, name=None, pk=None, scope=None, **kwargs):
+    def service(self, *args, **kwargs):
         """
         Retrieve single KE-chain Service.
 
         Uses the same interface as the :func:`services` method but returns only a single pykechain
         :class:`models.Service` instance.
 
-        :param name: (optional) name to limit the search for
-        :type name: basestring or None
-        :param pk: (optional) primary key or id (UUID) of the service to search for
-        :type pk: basestring or None
-        :param scope: (optional) id (UUID) of the scope to search in
-        :type scope: basestring or None
         :param kwargs: (optional) additional search keyword arguments
         :return: a single :class:`models.Service` object
         :raises NotFoundError: When no `Service` object is found
         :raises MultipleFoundError: When more than a single `Service` object is found
         """
-        _services = self.services(name=name, pk=pk, scope=scope, **kwargs)
+        return self._retrieve_singular(self.services, *args, **kwargs)
 
-        criteria = '\nname={}, pk={}, scope={}\nkwargs: {}'.format(name, pk, scope, kwargs)
-
-        if len(_services) == 0:
-            raise NotFoundError("No service fits criteria:{}".format(criteria))
-        if len(_services) != 1:
-            raise MultipleFoundError("Multiple services fit criteria:{}".format(criteria))
-
-        return _services[0]
-
-    def service_executions(self, name=None, pk=None, scope=None, service=None, **kwargs):
+    def service_executions(
+            self,
+            name: Optional[Text] = None,
+            pk: Optional[Text] = None,
+            scope: Optional[Text] = None,
+            service: Optional[Text] = None,
+            **kwargs
+    ) -> List[ServiceExecution]:
         """
         Retrieve Service Executions.
 
@@ -871,8 +819,8 @@ class Client(object):
         :raises NotFoundError: When no `ServiceExecution` object is found
         """
         request_params = {
-            'name': name,
-            'id': pk,
+            'name': check_text(text=name, key='name'),
+            'id': check_uuid(pk),
             'service': service,
             'scope': scope
         }
@@ -882,12 +830,11 @@ class Client(object):
         response = self._request('GET', self._build_url('service_executions'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve service executions")
+            raise NotFoundError("Could not retrieve Service Executions", response=response)
 
-        data = response.json()
-        return [ServiceExecution(service_exeuction, client=self) for service_exeuction in data['results']]
+        return [ServiceExecution(service_exeuction, client=self) for service_exeuction in response.json()['results']]
 
-    def service_execution(self, name=None, pk=None, scope=None, service=None, **kwargs):
+    def service_execution(self, *args, **kwargs):
         """
         Retrieve single KE-chain ServiceExecution.
 
@@ -897,31 +844,14 @@ class Client(object):
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
         refer to the documentation of the KE-chain API for additional query parameters.
 
-        :param name: (optional) name to limit the search for
-        :type name: basestring or None
-        :param pk: (optional) primary key or id (UUID) of the service to search for
-        :type pk: basestring or None
-        :param scope: (optional) id (UUID) of the scope to search in
-        :type scope: basestring or None
-        :param service: (optional) service UUID to filter on
-        :type service: basestring or None
         :param kwargs: (optional) additional search keyword arguments
         :return: a single :class:`models.ServiceExecution` object
         :raises NotFoundError: When no `ServiceExecution` object is found
         :raises MultipleFoundError: When more than a single `ServiceExecution` object is found
         """
-        _service_executions = self.service_executions(name=name, pk=pk, scope=scope, service=service, **kwargs)
+        return self._retrieve_singular(self.service_executions, *args, **kwargs)
 
-        criteria = '\nname={}, pk={}, scope={}, service={}\nkwargs: {}'.format(name, pk, scope, service, kwargs)
-
-        if len(_service_executions) == 0:
-            raise NotFoundError("No service execution fits criteria:{}".format(criteria))
-        if len(_service_executions) != 1:
-            raise MultipleFoundError("Multiple service executions fit criteria:{}".format(criteria))
-
-        return _service_executions[0]
-
-    def users(self, username=None, pk=None, **kwargs):
+    def users(self, username: Optional[Text] = None, pk: Optional[Text] = None, **kwargs) -> List[User]:
         """
         Users of KE-chain.
 
@@ -936,8 +866,8 @@ class Client(object):
         :raises NotFoundError: when a user could not be found
         """
         request_params = {
-            'username': username,
-            'id': pk,
+            'username': check_text(text=username, key='username'),
+            'id': check_type(pk, (str, int), 'pk'),
         }
         if kwargs:
             request_params.update(**kwargs)
@@ -945,36 +875,22 @@ class Client(object):
         response = self._request('GET', self._build_url('users'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not find users: '{}'".format(response.json()))
+            raise NotFoundError("Could not retrieve Users", response=response)
 
-        data = response.json()
-        return [User(user, client=self) for user in data['results']]
+        return [User(user, client=self) for user in response.json()['results']]
 
-    def user(self, username=None, pk=None, **kwargs):
+    def user(self, *args, **kwargs):
         """
         User of KE-chain.
 
         Provides single user of :class:`User` of KE-chain. You can filter on username or id or an advanced filter.
 
-        :param username: (optional) username to filter
-        :type username: basestring or None
-        :param pk: (optional) id of the user to filter
-        :type pk: basestring or None
         :param kwargs: Additional filtering keyword=value arguments
         :return: List of :class:`User`
         :raises NotFoundError: when a user could not be found
         :raises MultipleFoundError: when more than a single user can be found
         """
-        _users = self.users(username=username, pk=pk, **kwargs)
-
-        criteria = '\nusername={}, pk={}\nkwargs: {}'.format(username, pk, kwargs)
-
-        if len(_users) == 0:
-            raise NotFoundError("No user fits criteria:{}".format(criteria))
-        if len(_users) != 1:
-            raise MultipleFoundError("Multiple users fit criteria:{}".format(criteria))
-
-        return _users[0]
+        return self._retrieve_singular(self.users, *args, **kwargs)
 
     def current_user(self) -> User:
         """
@@ -988,39 +904,17 @@ class Client(object):
         response = self._request(method='GET', url=self._build_url(resource='user_current'))
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not find current user: '{}'".format(response.json()))
+            raise NotFoundError("Could not retrieve current User", response=response)
 
         return User(response.json()['results'][0], client=self)
 
-    def team(self, name=None, pk=None, is_hidden=False, **kwargs):
-        """
-        Team of KE-chain.
-
-        Provides a team of :class:`Team` of KE-chain. You can filter on team name or provide id.
-
-        :param name: (optional) team name to filter
-        :type name: basestring or None
-        :param pk: (optional) id of the user to filter
-        :type pk: basestring or None
-        :param is_hidden: (optional) boolean to show non-hidden or hidden teams or both (None) (default is non-hidden)
-        :type is_hidden: bool or None
-        :param kwargs: Additional filtering keyword=value arguments
-        :return: List of :class:`Team`
-        :raises NotFoundError: when a user could not be found
-        :raises MultipleFoundError: when more than a single user can be found
-        """
-        _teams = self.teams(name=name, pk=pk, **kwargs)
-
-        criteria = '\nusername={}, pk={}, is_hidden={}\nkwargs: {}'.format(name, pk, is_hidden, kwargs)
-
-        if len(_teams) == 0:
-            raise NotFoundError("No team fits criteria:{}".format(criteria))
-        if len(_teams) != 1:
-            raise MultipleFoundError("Multiple teams fit criteria:{}".format(criteria))
-
-        return _teams[0]
-
-    def teams(self, name=None, pk=None, is_hidden=False, **kwargs):
+    def teams(
+            self,
+            name: Optional[Text] = None,
+            pk: Optional[Text] = None,
+            is_hidden: Optional[bool] = False,
+            **kwargs
+    ) -> List[Team]:
         """
         Teams of KE-chain.
 
@@ -1037,8 +931,8 @@ class Client(object):
         :raises NotFoundError: when a team could not be found
         """
         request_params = {
-            'name': name,
-            'id': pk,
+            'name': check_text(text=name, key='name'),
+            'id': check_uuid(pk),
             'is_hidden': is_hidden
         }
         if kwargs:
@@ -1047,13 +941,29 @@ class Client(object):
         response = self._request('GET', self._build_url('teams'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not find teams: '{}'".format(response.json()))
+            raise NotFoundError("Could not retrieve Teams", response=response)
 
-        data = response.json()
-        return [Team(team, client=self) for team in data['results']]
+        return [Team(team, client=self) for team in response.json()['results']]
 
-    def widgets(self, pk=None, activity=None, **kwargs):
-        # type: (Optional[AnyStr], Optional[Union[Activity, Activity2, AnyStr]], **Any) -> List[Widget]
+    def team(self, *args, **kwargs):
+        """
+        Team of KE-chain.
+
+        Provides a team of :class:`Team` of KE-chain. You can filter on team name or provide id.
+
+        :param kwargs: Additional filtering keyword=value arguments
+        :return: List of :class:`Team`
+        :raises NotFoundError: when a user could not be found
+        :raises MultipleFoundError: when more than a single user can be found
+        """
+        return self._retrieve_singular(self.teams, *args, **kwargs)
+
+    def widgets(
+            self,
+            pk: Optional[Text] = None,
+            activity: Optional[Union[Activity2, Text]] = None,
+            **kwargs
+    ) -> List[Widget]:
         """
         Widgets of an activity.
 
@@ -1070,13 +980,10 @@ class Client(object):
         :raises APIError: when the API does not support the widgets, or when the API gives an error.
         """
         """Widgets of an activity."""
-        if self.match_app_version(label='widget', version='<3.0.0'):
-            raise APIError("The widget concept is not introduced yet for this KE-chain version")
-
         request_params = dict(API_EXTRA_PARAMS['widgets'])
-        request_params['id'] = pk
+        request_params['id'] = check_uuid(pk)
 
-        if isinstance(activity, (Activity, Activity2)):
+        if isinstance(activity, Activity2):
             request_params.update(dict(activity_id=activity.id))
         elif is_uuid(activity):
             request_params.update(dict(activity_id=activity))
@@ -1087,7 +994,7 @@ class Client(object):
         response = self._request('GET', self._build_url('widgets'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not find widgets: '{}'".format(response.json()))
+            raise NotFoundError("Could not retrieve Widgets", response=response)
 
         return [Widget.create(json=json, client=self) for json in response.json()['results']]
 
@@ -1095,102 +1002,20 @@ class Client(object):
     # Creators
     #
 
-    def create_activity(self, *args, **kwargs):
+    def create_activity(
+            self,
+            parent: Union[Activity2, Text],
+            name: Text,
+            activity_type: ActivityType = ActivityType.TASK,
+            status: ActivityStatus = ActivityStatus.OPEN,
+            description: Optional[Text] = None,
+            start_date: Optional[datetime.datetime] = None,
+            due_date: Optional[datetime.datetime] = None,
+            classification: ActivityClassification = None,
+            tags: Optional[List[Text]] = None,
+    ) -> Activity2:
         """
         Create a new activity.
-
-        .. important::
-            This is a shim function that based on the implementation of KE-chain will determine to create
-            the activity using the legacy WIM API (KE-chain < 2.9.0) or the newer WIM2 API (KE-chain >= 2.9.0).
-            It will either return a :class:`Activity` or a :class:`Activity2`.
-
-        :param args:
-        :param kwargs:
-        :return: the created :class:`models.Activity` or :class:`models.Activity2`
-        :raises APIError: When the object could not be created
-        :raises IllegalArgumentError: When the provided arguments are incompatible with the WIM API implementation.
-        """
-        if self.match_app_version(label='wim', version='<2.0.0', default=True):
-            # for wim1
-            if 'activity_type' in kwargs:
-                warnings.warn('For WIM versions 1, you need to ensure to use `activity_class`. Update your code; '
-                              'This will be deprecated in APR2018.')
-                activity_type = kwargs.pop('activity_type')
-                if activity_type not in ActivityType.values():
-                    raise IllegalArgumentError(
-                        "Please provide accepted activity_type: '{}' not allowed".format(activity_type))
-                kwargs['activity_class'] = WIMCompatibleActivityTypes.get(activity_type)
-            if 'parent' in kwargs:
-                warnings.warn('For WIM versions 1, you need to ensure to use `process`. Update your code; '
-                              'This will be deprecated in APR2018.')
-                kwargs['process'] = kwargs.pop('parent')
-            return self._create_activity1(*args, **kwargs)
-        else:
-            # for wim2
-            # make old calls compatible with WIM2
-            if 'activity_class' in kwargs:
-                warnings.warn('For WIM versions 2, you need to ensure to use `activity_type`. Update your code; '
-                              'This will be deprecated in APR2018.')
-                activity_class = kwargs.pop('activity_class')
-                if activity_class not in ActivityType.values():
-                    raise IllegalArgumentError(
-                        "Please provide accepted activity_type: '{}' not allowed".format(activity_class))
-                kwargs['activity_type'] = WIMCompatibleActivityTypes.get(activity_class)
-            if 'process' in kwargs:
-                warnings.warn('For WIM versions 2, you need to ensure to use `parent` instead of `process`. Update '
-                              'your code; This will be deprecated in APR2018.')
-                kwargs['parent'] = kwargs.pop('process')
-            return self._create_activity2(*args, **kwargs)
-
-    # WIM1
-    def _create_activity1(self, process, name, activity_class="UserTask"):
-        """Create a new activity.
-
-        :param process: parent process id
-        :type process: basestring
-        :param name: new activity name
-        :type name: basestring
-        :param activity_class: type of activity: UserTask (default) or Subprocess
-        :type activity_class: basestring
-        :return: the created :class:`models.Activity`
-        :raises IllegalArgumentError: When the provided arguments are incorrect
-        :raises APIError: When the object could not be created
-        """
-        if self.match_app_version(label='wim', version='>=3.0.0', default=False):
-            raise APIError('This method is only compatible with versions of KE-chain where the internal `wim` module '
-                           'has a version <=2.0.0. Use the `Client.create_activity2()` method.')
-
-        if activity_class and activity_class not in ActivityType.values():
-            raise IllegalArgumentError(
-                "Please provide accepted activity_class (provided:{} accepted:{})".format(
-                    activity_class, (ActivityType.USERTASK, ActivityType.SUBPROCESS, ActivityType.SERVICETASK)))
-        data = {
-            "name": name,
-            "process": process,
-            "activity_class": activity_class
-        }
-
-        response = self._request('POST', self._build_url('activities'), data=data)
-
-        if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create activity")
-
-        data = response.json()
-
-        return Activity(data['results'][0], client=self)
-
-    # WIM2
-    def _create_activity2(self, parent, name, activity_type=ActivityType.TASK, status=ActivityStatus.OPEN,
-                          description=None, start_date=None, due_date=None,
-                          classification=None, tags=None):
-        """Create a new activity.
-
-        .. important::
-            This function creates activities for KE-chain versions later than 2.9.0-135
-            In effect where the module 'wim' has version '>=2.0.0'.
-            The version of 'wim' in KE-chain can be found in the property :attr:`Client.app_versions`
-
-        In WIM2 the type of the activity is called activity_type
 
         :param parent: parent under which to create the activity
         :type parent: basestring or :class:`models.Activity2`
@@ -1214,15 +1039,7 @@ class Client(object):
         :raises APIError: When the object could not be created
         :raises IllegalArgumentError: When an incorrect arguments are provided
         """
-        # WIM1: activity_class, WIM2: activity_type
-        if self.match_app_version(label='wim', version='<2.0.0', default=True):
-            raise APIError('This method is only compatible with versions of KE-chain where the internal `wim` module '
-                           'has a version >=2.0.0. Use the `Client.create_activity()` method.')
-
-        if activity_type and activity_type not in ActivityType.values():
-            raise IllegalArgumentError("Please provide accepted activity_type (provided:{} accepted:{})".
-                                       format(activity_type, ActivityType.values()))
-        if isinstance(parent, (Activity, Activity2)):
+        if isinstance(parent, Activity2):
             parent_classification = parent.classification
             parent_id = parent.id
         elif is_uuid(parent):
@@ -1231,83 +1048,38 @@ class Client(object):
         else:
             raise IllegalArgumentError('`parent` must be an Activity or UUID, "{}" is neither'.format(parent))
 
-        if status not in ActivityStatus.values():
-            raise IllegalArgumentError('`status` must be an ActivityStatus option, "{}" is not.'.format(status))
-
-        if description is not None:
-            if not isinstance(description, Text):
-                raise IllegalArgumentError('`description` must be text, "{}" is not.'.format(description))
-
-        if start_date is not None:
-            if not isinstance(start_date, datetime.datetime):
-                raise IllegalArgumentError('`start_date` must be a datetime object, "{}" is not.'.format(start_date))
-
-        if due_date is not None:
-            if not isinstance(due_date, datetime.datetime):
-                raise IllegalArgumentError('`due_date` must be a datetime object, "{}" is not.'.format(due_date))
-
         if classification is None:
             if parent_classification is None:
                 classification = ActivityClassification.WORKFLOW
             else:
                 classification = parent_classification
-        elif classification not in ActivityClassification.values():
-            raise IllegalArgumentError(
-                '`classification` must be an ActivityClassification option, "{}" is not.'.format(classification))
+        else:
+            classification = check_enum(classification, ActivityClassification, 'classification')
 
         data = {
-            "name": name,
+            "name": check_text(text=name, key='name'),
             "parent_id": parent_id,
-            "status": status,
-            "activity_type": activity_type,
+            "status": check_enum(status, ActivityStatus, 'status'),
+            "activity_type": check_enum(activity_type, ActivityType, 'activity_type'),
             "classification": classification,
-            "description": description,
-            "start_date": start_date,
-            "due_date": due_date,
+            "description": check_text(text=description, key='description'),
+            "start_date": check_datetime(dt=start_date, key='start_date'),
+            "due_date": check_datetime(dt=due_date, key='due_date'),
+            "tags": check_list_of_text(tags, key='tags', unique=True),
         }
-
-        if self.match_app_version(label='wim', version='>=3.1.0', default=True):
-            if isinstance(tags, (list, tuple, set)) and all(isinstance(t, Text) for t in tags):
-                data.update({
-                    'tags': tags,
-                })
-            elif tags is not None:
-                raise IllegalArgumentError("Provided tags should be a list, tuple or set of strings. "
-                                           "Received type '{}'.".format(type(tags)))
 
         response = self._request('POST', self._build_url('activities'), data=data,
                                  params=API_EXTRA_PARAMS['activities'])
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create activity {}: {}".format(str(response), response.content))
+            raise APIError("Could not create Activity.", response=response)
 
-        data = response.json()
-
-        new_activity = Activity2(data['results'][0], client=self)
+        new_activity = Activity2(response.json()['results'][0], client=self)
         if isinstance(parent, Activity2) and parent._cached_children is not None:
             parent._cached_children.append(new_activity)
         return new_activity
 
-    def _create_part1(self, action, data, **kwargs):
-        """Create a part internal core function."""
-        # suppress_kevents should be in the data (not the query_params)
-        if 'suppress_kevents' in kwargs:
-            data['suppress_kevents'] = kwargs.pop('suppress_kevents')
-
-        # prepare url query parameters
-        query_params = kwargs
-        query_params['select_action'] = action
-
-        response = self._request('POST', self._build_url('parts'),
-                                 params=query_params,  # {"select_action": action},
-                                 data=data)
-
-        if response.status_code != requests.codes.created:
-            raise APIError("Could not create part, {}: {}".format(str(response), response.content))
-
-        return Part(response.json()['results'][0], client=self)
-
-    def _create_part2(self, action, data, **kwargs):
+    def _create_part(self, action: Text, data: Dict, **kwargs) -> Optional[Part2]:
         """Create a part for PIM 2 internal core function."""
         # suppress_kevents should be in the data (not the query_params)
         if 'suppress_kevents' in kwargs:
@@ -1322,11 +1094,11 @@ class Client(object):
                                  json=data)
 
         if response.status_code != requests.codes.created:
-            raise APIError("Could not create part, {}: {}".format(str(response), response.content))
+            raise APIError("Could not create Part", response=response)
 
         return Part2(response.json()['results'][0], client=self)
 
-    def create_part(self, parent, model, name=None, **kwargs):
+    def create_part(self, parent: Part2, model: Part2, name: Optional[Text] = None, **kwargs) -> Part2:
         """Create a new part instance from a given model under a given parent.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
@@ -1346,26 +1118,23 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
-        if not isinstance(parent, (Part, Part2)) or not isinstance(model, (Part, Part2)):
-            raise IllegalArgumentError("The parent and model should be a 'Part' object")
+        if not isinstance(parent, Part2) or not isinstance(model, Part2):
+            raise IllegalArgumentError("The `parent` and `model` should be 'Part' objects")
         if parent.category != Category.INSTANCE:
-            raise IllegalArgumentError("The parent should be an category 'INSTANCE'")
+            raise IllegalArgumentError("The `parent` should be of category 'INSTANCE'")
         if model.category != Category.MODEL:
-            raise IllegalArgumentError("The models should be of category 'MODEL'")
+            raise IllegalArgumentError("The `model` should be of category 'MODEL'")
 
-        if not name:
-            name = model.name
+        name = check_text(text=name, key='name') or model.name
 
-        if self.match_app_version(label="pim", version=">=3.0.0"):
-            # PIM2
-            data = dict(name=name, parent_id=parent.id, model_id=model.id)
-            return self._create_part2(action="new_instance", data=data, **kwargs)
-        else:
-            # PIM1
-            data = dict(name=name, parent=parent.id, model=model.id)
-            return self._create_part1(action="new_instance", data=data, **kwargs)
+        data = dict(name=name, parent_id=parent.id, model_id=model.id)
+        return self._create_part(action="new_instance", data=data, **kwargs)
 
-    def create_model(self, parent, name, multiplicity=Multiplicity.ZERO_MANY, **kwargs):
+    def create_model(self,
+                     parent: Union[Part2, Text],
+                     name: Text,
+                     multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
+                     **kwargs) -> Part2:
         """Create a new child model under a given parent.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
@@ -1384,25 +1153,30 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
-        if parent.category != Category.MODEL:
-            raise IllegalArgumentError("The parent should be of category 'MODEL'")
-
-        if isinstance(parent, (Part, Part2)):
+        if isinstance(parent, Part2):
             pass
         elif is_uuid(parent):
             parent = self.model(id=parent)
         else:
             raise IllegalArgumentError("`parent` should be either a parent part or a uuid, got '{}'".format(parent))
 
-        if self.match_app_version(label="pim", version=">=3.0.0"):
-            data = dict(name=name, parent_id=parent.id, multiplicity=multiplicity)
-            return self._create_part2(action="create_child_model", data=data, **kwargs)
-        else:
-            data = dict(name=name, parent=parent.id, multiplicity=multiplicity)
-            return self._create_part1(action="create_child_model", data=data, **kwargs)
+        if parent.category != Category.MODEL:
+            raise IllegalArgumentError("The parent should be of category 'MODEL'")
 
-    def create_model_with_properties(self, parent, name, multiplicity=Multiplicity.ZERO_MANY, properties_fvalues=None,
-                                     **kwargs):
+        data = dict(
+            name=check_text(name, 'name'),
+            parent_id=parent.id,
+            multiplicity=check_enum(multiplicity, Multiplicity, 'multiplicity'),
+        )
+        return self._create_part(action="create_child_model", data=data, **kwargs)
+
+    def create_model_with_properties(
+            self,
+            parent: Union[Part2, Text],
+            name: Text,
+            multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
+            properties_fvalues: Optional[List[Dict]] = None,
+            **kwargs) -> Part2:
         """Create a model with its properties in a single API request.
 
         With KE-chain 3 backends you may now provide a whole set of properties to create using a `properties_fvalues`
@@ -1427,30 +1201,30 @@ class Client(object):
         :type name: basestring
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N of :class:`enums.Multiplicity`
         :type multiplicity: basestring
+        :param properties_fvalues: list of dicts per property, each must have fields `name` and `property_type`.
+        :type properties_fvalues: list
         :param kwargs: (optional) additional keyword=value arguments
-        :return: :class:`models.Part` with category `MODEL` (of :class:`enums.Category`
+        :return: :class:`models.Part` with category `MODEL` (of :class:`enums.Category`)
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
 
 
         Example
         -------
+        >>> from pykechain.models.validators import RequiredFieldValidator
         >>> properties_fvalues = [
         ...     {"name": "char prop", "property_type": PropertyType.CHAR_VALUE, "order": 1},
         ...     {"name": "number prop", "property_type": PropertyType.FLOAT_VALUE, "value": 3.14, "order": 2},
         ...     {"name": "boolean_prop", "property_type": PropertyType.BOOLEAN_VALUE, "value": False,
         ...      "value_options": {"validators": [RequiredFieldValidator().as_json()]}, "order":3}
         ... ]
-        >>> new_model = project.create_model_with_properties(name='A new model', parent='<uuid>',
-        ...                                                  multiplicity=Multiplicity.ONE,
-        ...                                                  properties_fvalues=properties_fvalues)
+        >>> client = Client()
+        >>> new_model = client.create_model_with_properties(name='A new model', parent='<uuid>',
+        ...                                                 multiplicity=Multiplicity.ONE,
+        ...                                                 properties_fvalues=properties_fvalues)
 
         """
-        if not self.match_app_version(label="pim", version=">=3.0.0"):
-            # PIM1 world
-            raise ClientError("This function only works for KE-chain 3 backends.")
-
-        if isinstance(parent, (Part, Part2)):
+        if isinstance(parent, Part2):
             pass
         elif is_uuid(parent):
             parent = self.model(id=parent)
@@ -1458,34 +1232,29 @@ class Client(object):
             raise IllegalArgumentError("`parent` should be either a parent part or a uuid, got '{}'".format(parent))
 
         if parent.category != Category.MODEL:
-            raise IllegalArgumentError("The parent should be of category 'MODEL'")
-
-        if isinstance(properties_fvalues, list):
-            required_new_property_keys = ['name', 'property_type']
-            for new_prop in properties_fvalues:
-                if not all(k in new_prop.keys() for k in required_new_property_keys):
-                    raise IllegalArgumentError("New property '{}' does not have a required field ({}) provided in the "
-                                               "`properties_fvalues` list".format(new_prop, required_new_property_keys))
-        else:
-            raise IllegalArgumentError("`properties_fvalues` need to be provided as a list of dicts")
+            raise IllegalArgumentError("`parent` should be of category 'MODEL'")
 
         data = dict(
-            name=name,
+            name=check_text(text=name, key='name'),
             parent_id=parent.id,
-            multiplicity=multiplicity,
+            multiplicity=check_enum(multiplicity, Multiplicity, 'multiplicity'),
             category=Category.MODEL,
-            properties_fvalues=properties_fvalues
+            properties_fvalues=check_list_of_dicts(properties_fvalues, 'properties_fvalues', ['name', 'property_type']),
         )
 
-        return self._create_part2(action="create_child_model", data=data, **kwargs)
+        return self._create_part(action="create_child_model", data=data, **kwargs)
 
-    def _create_clone(self, parent, part, name=None, **kwargs):
+    def _create_clone(self,
+                      parent: Part2,
+                      part: Part2,
+                      name: Optional[Text] = None,
+                      multiplicity: Optional[Multiplicity] = None,
+                      **kwargs
+                      ) -> Part2:
         """Create a new `Part` clone under the `Parent`.
 
         An optional name of the cloned part may be provided. If not provided the name will be set
         to "CLONE - <part name>". (KE-chain 3 backends only)
-        An optional multiplicity, may be added as paremeter for the cloning of models. If not
-        provided the multiplicity of the part will be used.
 
         .. versionadded:: 2.3
         .. versionchanged:: 3.0
@@ -1497,56 +1266,53 @@ class Client(object):
         :type part: :class:`models.Part`
         :param name: (optional) Name of the to be cloned part
         :type name: basestring or None
+        :param multiplicity: In case of Models, to specify a new multiplicity. Defaults to the `part` multiplicity.
+        :type multiplicity: Multiplicity
         :param kwargs: (optional) additional keyword=value arguments
         :return: cloned :class:`models.Part`
         :raises APIError: if the `Part` could not be cloned
         """
+        check_type(part, Part2, 'part')
+        check_type(parent, Part2, 'parent')
+
+        data = dict(
+            name=check_text(name, 'name') or "CLONE - {}".format(part.name),
+            parent_id=parent.id,
+            suppress_kevents=kwargs.pop('suppress_kevents', None),
+        )
+
+        if part.category == Category.MODEL:
+            data.update({
+                'multiplicity': check_enum(multiplicity, Multiplicity, 'multiplicity') or part.multiplicity,
+                'model_id': part.id,
+            })
+        else:
+            data['instance_id'] = part.id
+
         if part.category == Category.MODEL:
             select_action = 'clone_model'
         else:
             select_action = 'clone_instance'
-        if not isinstance(part, (Part, Part2)) and not isinstance(parent, (Part, Part2)):
-            raise IllegalArgumentError("Either part and parent need to be of class `Part`. "
-                                       "We got: part: '{}' and parent '{}'".format(type(part), type(parent)))
 
-        if self.match_app_version(label="pim", version=">=3.0.0"):
-            data = dict(
-                name=name or "CLONE - {}".format(part.name),
-                parent_id=parent.id,
-                suppress_kevents=kwargs.pop('suppress_kevents', None),
-            )
-            if part.category == Category.MODEL:
-                data.update(dict(
-                    multiplicity=kwargs.pop('multiplicity', part.multiplicity),
-                    model_id=part.id)
-                )
-            else:
-                data['instance_id'] = part.id
-            query_params = kwargs
-            query_params.update(API_EXTRA_PARAMS['parts2'])
-            url = self._build_url('parts2_{}'.format(select_action))
-        else:
-            data = dict(
-                part=part.id,
-                parent=parent.id,
-                suppress_kevents=kwargs.pop('suppress_kevents', None)
-            )
-            # prepare url query parameters
-            query_params = kwargs
-            query_params['select_action'] = select_action
-            url = self._build_url('parts')
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['parts2'])
+        url = self._build_url('parts2_{}'.format(select_action))
 
         response = self._request('POST', url, params=query_params, data=data)
 
         if response.status_code != requests.codes.created:
-            raise APIError("Could not clone part, {}: {}".format(str(response), response.content))
+            raise APIError("Could not clone Part", response=response)
 
-        if self.match_app_version(label="pim", version=">=3.0.0"):
-            return Part2(response.json()['results'][0], client=self)
-        else:
-            return Part(response.json()['results'][0], client=self)
+        return Part2(response.json()['results'][0], client=self)
 
-    def create_proxy_model(self, model, parent, name, multiplicity=Multiplicity.ZERO_MANY, **kwargs):
+    def create_proxy_model(
+            self,
+            model: Part2,
+            parent: Part2,
+            name: Text,
+            multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
+            **kwargs
+    ) -> Part2:
         """Add this model as a proxy to another parent model.
 
         This will add a model as a proxy model to another parent model. It ensure that it will copy the
@@ -1570,20 +1336,33 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
+        check_type(model, Part2, 'model')
+        check_type(parent, Part2, 'parent')
+
         if model.category != Category.MODEL:
             raise IllegalArgumentError("The model should be of category MODEL")
         if parent.category != Category.MODEL:
             raise IllegalArgumentError("The parent should be of category MODEL")
 
-        if self.match_app_version(label="pim", version=">=3.0.0"):
-            data = dict(name=name, model_id=model.id, parent_id=parent.id, multiplicity=multiplicity)
-            return self._create_part2(action='create_proxy_model', data=data, **kwargs)
-        else:
-            data = dict(name=name, model=model.id, parent=parent.id, multiplicity=multiplicity)
-            return self._create_part1(action='create_proxy_model', data=data, **kwargs)
+        data = dict(
+            name=check_text(text=name, key='name'),
+            model_id=model.id,
+            parent_id=parent.id,
+            multiplicity=check_enum(multiplicity, Multiplicity, 'multiplicity'),
+        )
+        return self._create_part(action='create_proxy_model', data=data, **kwargs)
 
-    def create_property(self, model, name, description=None, property_type=PropertyType.CHAR_VALUE, default_value=None,
-                        unit=None, options=None, **kwargs):
+    def create_property(
+            self,
+            model: Part2,
+            name: Text,
+            description: Optional[Text] = None,
+            property_type: Optional[Union[PropertyType, Text]] = PropertyType.CHAR_VALUE,
+            default_value: Optional[Any] = None,
+            unit: Optional[Text] = None,
+            options: Optional[Dict] = None,
+            **kwargs
+    ) -> AnyProperty:
         """Create a new property model under a given model.
 
         Use the :class:`enums.PropertyType` to select which property type to create to ensure that you
@@ -1612,39 +1391,21 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Property` model could not be created
         """
+        check_enum(property_type, PropertyType, 'property_type')
+        check_type(model, Part2, 'model')
         if model.category != Category.MODEL:
-            raise IllegalArgumentError("The model should be of category MODEL")
+            raise IllegalArgumentError("`model` should be of category MODEL")
 
-        # if not property_type.endswith('_VALUE'):
-        #     warnings.warn("Please use the `PropertyType` enumeration to ensure providing correct "
-        #                   "values to the backend.", UserWarning)
-        #     property_type = '{}_VALUE'.format(property_type.upper())
+        options = check_type(options, dict, 'options') or dict()
 
-        if property_type not in PropertyType.values():
-            raise IllegalArgumentError("Please provide a valid propertytype, please use one of `enums.PropertyType`. "
-                                       "Got: '{}'".format(property_type))
-
-        # because the references value only accepts a single 'model_id' in the default value, we need to convert this
-        # to a single value from the list of values.
         if property_type in (PropertyType.REFERENCE_VALUE, PropertyType.REFERENCES_VALUE) and default_value:
+            # References only accept a single 'model_id' in the default value, we need to convert
+            # this to a single value from the list of values.
             if isinstance(default_value, (list, tuple)):
-                if isinstance(default_value[0], (Part, Part2)):
-                    scope_options = dict(
-                        scope_id=default_value[0]._json_data["scope_id"]
-                    )
-                    default_value = [default_value[0].id]
+                default_value = default_value[0]
 
-                elif is_uuid(default_value[0]):
-                    scope_options = dict(
-                        scope_id=self.model(id=default_value[0])._json_data["scope_id"]
-                    )
-                    default_value = [default_value[0]]
-                else:
-                    raise IllegalArgumentError(
-                        "Please provide a valid default_value being a `Part` of category `MODEL` "
-                        "or a model uuid, got: '{}'".format(default_value))
-
-            elif isinstance(default_value, (Part, Part2)):
+            # Retrieve the referenced Scope from the default value
+            if isinstance(default_value, Part2):
                 scope_options = dict(
                     scope_id=default_value._json_data["scope_id"]
                 )
@@ -1655,63 +1416,45 @@ class Client(object):
                 )
                 default_value = [default_value]
             else:
-                raise IllegalArgumentError("Please provide a valid default_value being a `Part` of category `MODEL` "
+                raise IllegalArgumentError("Please provide a valid `default_value` being a `Part` of category `MODEL` "
                                            "or a model uuid, got: '{}'".format(default_value))
-            if isinstance(options, dict):
-                options.update(scope_options)
-            else:
-                options = scope_options
+            options.update(scope_options)
 
-        if self.match_app_version(label="pim", version=">=3.0.0"):
-            data = dict(
-                name=name,
-                part_id=model.id,
-                description=description or '',
-                property_type=property_type.upper(),
-                value=default_value,
-                unit=unit or '',
-                value_options=options or {}
-            )
-            url = self._build_url('properties2_create_model')
-            query_params = kwargs
-            query_params.update(API_EXTRA_PARAMS['properties2'])
-        else:
-            data = dict(
-                name=name,
-                part=model.id,
-                description=description or '',
-                property_type=property_type.upper(),
-                value=default_value,
-                unit=unit or '',
-                options=options or {}
-            )
-            url = self._build_url('properties')
-            query_params = kwargs
-
-        # # We add options after the fact only if they are available, otherwise the options will be set to null in the
-        # # request and that can't be handled by KE-chain.
-        # if options:
-        #     data['options'] = options
+        data = dict(
+            name=check_text(name, 'name'),
+            part_id=model.id,
+            description=check_text(description, 'description') or '',
+            property_type=property_type.upper(),
+            value=default_value,
+            unit=unit or '',
+            value_options=options,
+        )
+        url = self._build_url('properties2_create_model')
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['properties2'])
 
         response = self._request('POST', url, params=query_params, json=data)
 
         if response.status_code != requests.codes.created:
-            raise APIError("Could not create property, {}: {}".format(str(response), response.content))
+            raise APIError("Could not create Property", response=response)
 
-        if self.match_app_version(label="pim", version=">=3.0.0"):
-            prop = Property2.create(response.json()['results'][0], client=self)
-        else:
-            prop = Property.create(response.json()['results'][0], client=self)
+        prop = Property2.create(response.json()['results'][0], client=self)
 
         model.properties.append(prop)
 
         return prop
 
-    def create_service(self, name, scope, description=None, version=None,
-                       service_type=ServiceType.PYTHON_SCRIPT,
-                       environment_version=ServiceEnvironmentVersion.PYTHON_3_6,
-                       run_as=ServiceScriptUser.KENODE_USER,
-                       pkg_path=None):
+    def create_service(
+            self,
+            name: Text,
+            scope: Scope2,
+            description: Optional[Text] = None,
+            version: Optional[Text] = None,
+            service_type: Optional[ServiceType] = ServiceType.PYTHON_SCRIPT,
+            environment_version: Optional[ServiceEnvironmentVersion] = ServiceEnvironmentVersion.PYTHON_3_6,
+            run_as: Optional[ServiceScriptUser] = ServiceScriptUser.KENODE_USER,
+            pkg_path: Optional[Text] = None
+    ) -> Service:
         """
         Create a Service.
 
@@ -1746,30 +1489,20 @@ class Client(object):
         :raises APIError: In case of failure of the creation or failure to upload the pkg_path
         :raises OSError: In case of failure to locate the `pkg_path`
         """
-        if service_type not in ServiceType.values():
-            raise IllegalArgumentError("The type should be of one of {}".format(ServiceType.values()))
-
-        if environment_version not in ServiceEnvironmentVersion.values():
-            raise IllegalArgumentError("The environment version should be of one of {}".
-                                       format(ServiceEnvironmentVersion.values()))
-
-        version = version or '1.0'  # 'script_version': ['This field may not be null.']
-        description = description or ''  # 'description': ['This field may not be null.']
-
         data = dict(
-            name=name,
-            scope=scope,  # not scope_id!
-            description=description,
-            script_type=service_type,
-            script_version=version,
-            env_version=environment_version,
-            run_as=run_as
+            name=check_text(name, 'name'),
+            scope=check_base(scope, Scope2, 'scope'),  # not scope_id!
+            description=check_text(text=description, key='description') or '',
+            script_type=check_enum(service_type, ServiceType, 'service_type'),
+            script_version=check_text(text=version, key='version') or '1.0',
+            env_version=check_enum(environment_version, ServiceEnvironmentVersion, 'environment_version'),
+            run_as=check_enum(run_as, ServiceScriptUser, 'run_as')
         )
 
         response = self._request('POST', self._build_url('services'), json=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create service ({})".format((response, response.json())))
+            raise APIError("Could not create Service", response=response)
 
         service = Service(response.json().get('results')[0], client=self)
 
@@ -1779,8 +1512,17 @@ class Client(object):
 
         return service
 
-    def create_scope(self, name, status=ScopeStatus.ACTIVE, description=None, tags=None, start_date=None, due_date=None,
-                     team=None, **kwargs):
+    def create_scope(
+            self,
+            name: Text,
+            status: Optional[ScopeStatus] = ScopeStatus.ACTIVE,
+            description: Optional[Text] = None,
+            tags: Optional[List[Text]] = None,
+            start_date: Optional[datetime.datetime] = None,
+            due_date: Optional[datetime.datetime] = None,
+            team: Optional[Union[Team, Text]] = None,
+            **kwargs
+    ) -> Scope2:
         """
         Create a Scope.
 
@@ -1807,89 +1549,31 @@ class Client(object):
         :return: the created :class:`models.Scope`
         :raises APIError: In case of failure of the creation of new Scope
         """
-        if not isinstance(name, (str, text_type)):
-            raise IllegalArgumentError("'Name' should be provided as a string, was provided as '{}'".
-                                       format(type(name)))
-        if status not in ScopeStatus.values():
-            raise IllegalArgumentError("Please provide a valid scope status, please use one of `enums.ScopeStatus`. "
-                                       "Got: '{}'".format(status))
-        if description and not isinstance(description, (str, text_type)):
-            raise IllegalArgumentError("'Description' should be provided as a string, was provided as '{}'".
-                                       format(type(description)))
-        if tags and not isinstance(tags, list):
-            raise IllegalArgumentError("'Tags' should be provided as a list, was provided as '{}'".
-                                       format(type(tags)))
-        if tags and not (all([isinstance(t, (str, text_type)) for t in tags])):
-            raise IllegalArgumentError("Each tag in the list of tags should be provided as a string")
-
-        if not start_date:
-            start_date = datetime.datetime.now()
-        if not tags:
-            tags = list()
+        start_date = start_date if start_date else datetime.datetime.now()
 
         data_dict = {
-            'name': name,
-            'status': status,
-            'text': description,
-            'tags': tags,
+            'name': check_text(name, 'name'),
+            'status': check_enum(status, ScopeStatus, 'status'),
+            'text': check_text(description, 'description'),
+            'tags': check_list_of_text(tags, 'tags', True),
+            'start_date': check_datetime(dt=start_date, key='start_date'),
+            'due_date': check_datetime(dt=due_date, key='due_date'),
+            'team_id': check_base(team, Team, 'team', method=self.team),
         }
-
-        if start_date is not None:
-            if isinstance(start_date, datetime.datetime):
-                if not start_date.tzinfo:
-                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
-                                  "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
-                data_dict['start_date'] = start_date.isoformat(sep='T')
-            else:
-                raise IllegalArgumentError('Start date should be a datetime.datetime() object')
-        else:
-            # defaults to now
-            data_dict['start_date'] = datetime.datetime.now()
-
-        if due_date is not None:
-            if isinstance(due_date, datetime.datetime):
-                if not due_date.tzinfo:
-                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
-                                  "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
-                data_dict['due_date'] = due_date.isoformat(sep='T')
-            else:
-                raise IllegalArgumentError('Due date should be a datetime.datetime() object')
-
-        if team is not None:
-            if isinstance(team, Team):
-                team_id = team.id
-            elif is_uuid(team):
-                team_id = team
-            elif isinstance(team, (text_type, string_types)):
-                team_id = self.team(name=team).id
-            else:
-                raise IllegalArgumentError("'Team' should be provided as a `models.Team` object or UUID or team name, "
-                                           "was provided as a {}".format(type(team)))
-
-            if self.match_app_version(label="scope", version=">=3.0.0"):
-                data_dict['team_id'] = team_id
-            else:
-                data_dict['team'] = team_id
 
         # injecting additional kwargs for those cases that you need to add extra options.
         data_dict.update(kwargs)
-        if self.match_app_version(label="scope", version=">=3.0.0"):
-            url = self._build_url('scopes2')
-            query_params = API_EXTRA_PARAMS['scopes2']
-            response = self._request('POST', url, params=query_params, data=data_dict)
-        else:
-            url = self._build_url('scopes')
-            response = self._request('POST', url, data=data_dict)
+
+        url = self._build_url('scopes2')
+        query_params = API_EXTRA_PARAMS['scopes2']
+        response = self._request('POST', url, params=query_params, data=data_dict)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create scope, {}:\n\n{}'".format(str(response), response.json()))
+            raise APIError("Could not create Scope", response=response)
 
-        if self.match_app_version(label="scope", version=">=3.0.0"):
-            return Scope2(response.json()['results'][0], client=self)
-        else:
-            return Scope(response.json()['results'][0], client=self)
+        return Scope2(response.json()['results'][0], client=self)
 
-    def delete_scope(self, scope, asynchronous=True):
+    def delete_scope(self, scope: Scope2, asynchronous: Optional[bool] = True) -> bool:
         """
         Delete a scope.
 
@@ -1904,26 +1588,34 @@ class Client(object):
         :return: True when the delete is a success.
         :raises APIError: in case of failure in the deletion of the scope
         """
-        if not isinstance(scope, (Scope, Scope2)):
-            raise IllegalArgumentError('Scope "{}" is not a scope!'.format(scope.name))
+        check_type(scope, Scope2, 'scope')
 
-        if self.match_app_version(label="scope", version=">=3.1.0"):
-            query_options = {"async_mode": asynchronous}
-        else:
-            query_options = {"async": asynchronous}
+        query_options = {
+            "async_mode": check_type(asynchronous, bool, 'asynchronous'),
+        }
 
-        if self.match_app_version(label="scope", version=">=3.0.0"):
-            response = self._request('DELETE', self._build_url('scope2', scope_id=str(scope.id)), params=query_options)
-        else:
-            response = self._request('DELETE', self._build_url('scope', scope_id=str(scope.id)))
+        response = self._request('DELETE',
+                                 url=self._build_url('scope2', scope_id=str(scope.id)),
+                                 params=query_options)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete scope, {}: {}".format(str(response), response.content))
+            raise APIError("Could not delete Scope {}".format(scope), response=response)
 
         return True
 
-    def clone_scope(self, source_scope, name=None, status=None, start_date=None, due_date=None,
-                    description=None, tags=None, team=None, scope_options=None, asynchronous=False):
+    def clone_scope(
+            self,
+            source_scope: Scope2,
+            name: Optional[Text] = None,
+            status: Optional[ScopeStatus] = None,
+            start_date: Optional[datetime.datetime] = None,
+            due_date: Optional[datetime.datetime] = None,
+            description: Optional[Text] = None,
+            tags: Optional[List[Text]] = None,
+            team: Optional[Union[Team, Text]] = None,
+            scope_options: Optional[Dict] = None,
+            asynchronous: Optional[bool] = False,
+    ) -> Optional[Scope2]:
         """
         Clone a Scope.
 
@@ -1960,124 +1652,59 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: When the server is unable to clone the scope (eg. permissions)
         """
-        if not isinstance(source_scope, (Scope, Scope2)):
-            raise IllegalArgumentError('`source_scope` should be a `Scope` object')
+        check_type(source_scope, Scope2, 'scope')
+        check_type(scope_options, dict, 'scope_options')
 
-        if self.match_app_version(label="scope", version=">=3.1.0"):
-            data_dict = {"async_mode": asynchronous}
-        else:
-            data_dict = {"async": asynchronous}
+        start_date = start_date or source_scope.start_date
+        due_date = due_date or source_scope.due_date
+        tags = check_list_of_text(tags, 'tags', True) or source_scope.tags
+        data_dict = {
+            'scope_id': source_scope.id,
+            'name': check_text(name, 'name') or 'CLONE - {}'.format(source_scope.name),
+            'start_date': check_datetime(dt=start_date, key='start_date'),
+            'due_date': check_datetime(dt=due_date, key='due_date'),
+            'text': check_text(description, 'description') or source_scope.description,
+            'status': check_enum(status, ScopeStatus, 'status'),
+            'tags': tags,
+            'scope_options': scope_options or dict(),
+            'async_mode': asynchronous,
+        }
 
-        if self.match_app_version(label="scope", version=">=3.0.0"):
-            data_dict['scope_id'] = source_scope.id
-        else:
-            data_dict['id'] = source_scope.id
+        team = check_base(team, Team, 'team', method=self.team)
+        if team:
+            data_dict['team_id'] = team
 
-        if name is not None:
-            if not isinstance(name, (string_types, text_type)):
-                raise IllegalArgumentError("`name` should be a string")
-            data_dict['name'] = str(name)
-
-        if start_date is not None:
-            if isinstance(start_date, datetime.datetime):
-                if not start_date.tzinfo:
-                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
-                                  "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
-                data_dict['start_date'] = start_date.isoformat(sep='T')
-            else:
-                raise IllegalArgumentError('Start date should be a datetime.datetime() object')
-        else:
-            start_date = source_scope.start_date
-
-        if due_date is not None:
-            if isinstance(due_date, datetime.datetime):
-                if not due_date.tzinfo:
-                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
-                                  "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
-                data_dict['due_date'] = due_date.isoformat(sep='T')
-            else:
-                raise IllegalArgumentError('Due date should be a datetime.datetime() object')
-        else:
-            due_date = source_scope.due_date
-
-        if description is not None:
-            if not isinstance(description, (text_type, string_types)):
-                raise IllegalArgumentError("`description` should be a string")
-            else:
-                data_dict['text'] = description
-
-        if status is not None:
-            if status not in ScopeStatus.values():
-                raise IllegalArgumentError("`status` should be one of '{}'".format(ScopeStatus.values()))
-            else:
-                data_dict['status'] = str(status)
-
-        if tags is not None:
-            if not isinstance(tags, (list, tuple, set)):
-                raise IllegalArgumentError("'Tags' should be provided as a list, tuple or set, was provided as '{}'".
-                                           format(type(tags)))
-            if not (all([isinstance(t, (str, text_type)) for t in tags])):
-                raise IllegalArgumentError("Each tag in the list of tags should be provided as a string")
-            data_dict['tags'] = tags
-        else:
-            tags = source_scope.tags
-
-        if team is not None:
-            if isinstance(team, Team):
-                team_id = team.id
-            elif is_uuid(team):
-                team_id = team
-            elif isinstance(team, (text_type, string_types)):
-                team_id = self.team(name=team).id
-            else:
-                raise IllegalArgumentError("`team` should be a name of an existing team or UUID of a team")
-
-            if self.match_app_version(label="scope", version=">=3.0.0"):
-                data_dict['team_id'] = team_id
-            else:
-                data_dict['team'] = team_id
-
-        if scope_options is not None:
-            if not isinstance(scope_options, dict):
-                raise IllegalArgumentError("`scope_options` need to be a dictionary")
-            else:
-                if self.match_app_version(label="pim", version=">=3.0.0"):
-                    data_dict['scope_options'] = scope_options
-                else:
-                    data_dict['options'] = scope_options
-
-        if self.match_app_version(label="scope", version=">=3.0.0"):
-            url = self._build_url('scopes2_clone')
-            query_params = API_EXTRA_PARAMS['scopes2']
-            response = self._request('POST', url,
-                                     params=query_params,
-                                     json=data_dict)
-        else:
-            url = self._build_url('scope')
-            query_params = dict(select_action='clone')
-            response = self._request('POST', url,
-                                     params=query_params,
-                                     json=data_dict)
+        url = self._build_url('scopes2_clone')
+        query_params = API_EXTRA_PARAMS['scopes2']
+        response = self._request('POST', url,
+                                 params=query_params,
+                                 json=data_dict)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             if response.status_code == requests.codes.forbidden:
-                raise ForbiddenError("Could not clone scope, {}: {}".format(str(response), response.content))
+                raise ForbiddenError("Forbidden to clone Scope {}".format(source_scope), response=response)
             else:
-                raise APIError("Could not clone scope, {}: {}".format(str(response), response.content))
+                raise APIError("Could not clone Scope {}".format(source_scope), response=response)
 
-        if self.match_app_version(label="scope", version=">=3.0.0"):
-            cloned_scope = Scope2(response.json()['results'][0], client=source_scope._client)
+        if asynchronous:
+            return None
 
-            # TODO work-around, some attributes are not (yet) in the KE-chain response.json()
-            cloned_scope._tags = tags
-            cloned_scope.start_date = start_date
-            cloned_scope.due_date = due_date
-            return cloned_scope
-        else:
-            return Scope(response.json()['results'][0], client=source_scope._client)
+        cloned_scope = Scope2(response.json()['results'][0], client=source_scope._client)
 
-    def create_team(self, name, user, description=None, options=None, is_hidden=False):
-        # type: (Text, Union[Text, int, User], Optional[Text], Optional[Text], Optional[bool]) -> Team
+        # TODO work-around, some attributes are not (yet) in the KE-chain response.json()
+        cloned_scope._tags = tags
+        cloned_scope.start_date = start_date
+        cloned_scope.due_date = due_date
+        return cloned_scope
+
+    def create_team(
+            self,
+            name: Text,
+            user: Union[Text, int, User],
+            description: Optional[Text] = None,
+            options: Optional[Dict] = None,
+            is_hidden: Optional[bool] = False
+    ) -> Team:
         """
         Create a team.
 
@@ -2102,23 +1729,7 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: When an API Error occurs
         """
-        if not isinstance(name, (string_types, text_type)):
-            raise IllegalArgumentError('`name` should be string')
-
-        if description is None:
-            description = ''
-        elif not isinstance(description, (string_types, text_type)):
-            raise IllegalArgumentError('`description` should be string')
-
-        if options is None:
-            options = dict()
-        elif not isinstance(options, dict):
-            raise IllegalArgumentError('`options` should be a dictionary')
-
-        if not isinstance(is_hidden, bool):
-            raise IllegalArgumentError('`is_hidden` should be a boolean')
-
-        if isinstance(user, (string_types, text_type)):
+        if isinstance(user, str):
             user = self.user(username=user)
         elif isinstance(user, int):
             user = self.user(pk=user)
@@ -2128,19 +1739,19 @@ class Client(object):
             raise IllegalArgumentError('the `user` is not of a type `User`, a `username` or a user id')
 
         data = dict(
-            name=name,
-            description=description,
-            options=options,
-            is_hidden=is_hidden
+            name=check_text(name, 'name'),
+            description=check_text(description, 'description') or '',
+            options=check_type(options, dict, 'options') or dict(),
+            is_hidden=check_type(is_hidden, bool, 'is_hidden'),
         )
 
         url = self._build_url('teams')
         response = self._request('POST', url, json=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create a team ({})".format((response, response.json())))
+            raise APIError("Could not create Team", response=response)
 
-        new_team = Team(response.json().get('results')[0], client=self)
+        new_team = Team(json=response.json().get('results')[0], client=self)
 
         new_team.add_members([user], role=TeamRoles.OWNER)
         team_members = new_team.members()
@@ -2150,57 +1761,37 @@ class Client(object):
 
         if members_to_remove:
             new_team.remove_members(members_to_remove)
+            new_team.refresh()
 
-        new_team.refresh()
         return new_team
 
     @staticmethod
     def _validate_widget(
-            activity: Union[Activity, Activity2, text_type],
-            widget_type: Union[WidgetTypes, text_type],
+            activity: Union[Activity2, Text],
+            widget_type: Union[WidgetTypes, Text],
             title: Optional[Text],
             meta: Dict,
             order: Optional[int],
-            parent: Optional[Union[Widget, text_type]],
+            parent: Optional[Union[Widget, Text]],
             **kwargs
     ) -> Dict:
         """Validate the format and content of the configuration of a widget."""
-        if isinstance(activity, (Activity, Activity2)):
-            activity = activity.id
-        elif is_uuid(activity):
-            pass
-        else:
-            raise IllegalArgumentError("`activity` should be either an `Activity` or a uuid.")
-
-        if not isinstance(widget_type, (string_types, text_type)) and widget_type not in WidgetTypes.values():
-            raise IllegalArgumentError("`widget_type` should be one of '{}'".format(WidgetTypes.values()))
-        if order is not None and not isinstance(order, int):
-            raise IllegalArgumentError("`order` should be an integer or None")
-        if title is not None:
-            if not isinstance(title, (string_types, text_type)):
-                raise IllegalArgumentError("`title` should be a string, but received type '{}'.".format(type(title)))
-            elif title.strip() != title:
-                raise IllegalArgumentError("`title` can not be empty")
-        if parent is not None and isinstance(parent, Widget):
-            parent = parent.id
-        elif parent is not None and is_uuid(parent):
-            parent = parent
-        elif parent is not None:
-            raise IllegalArgumentError("`parent` should be provided as a widget or uuid")
-
         data = dict(
-            activity_id=activity,
-            widget_type=widget_type,
-            title=title,
+            activity_id=check_base(activity, Activity2, 'activity'),
+            widget_type=check_enum(widget_type, WidgetTypes, 'widget_type'),
             meta=meta,
-            parent_id=parent
+            parent_id=check_base(parent, Widget, 'parent')
         )
 
-        if not title:
-            data.pop('title')
+        title = check_text(title, 'title')
+        if title is not None and not title.strip():
+            raise IllegalArgumentError("`title` can not be empty")
+        if title:
+            data['title'] = title
 
+        check_type(order, int, 'order')
         if order is not None:
-            data.update(dict(order=order))
+            data['order'] = order
 
         if kwargs:
             data.update(**kwargs)
@@ -2223,35 +1814,19 @@ class Client(object):
         if kwargs.get('outputs'):
             writable_models = kwargs.pop('outputs')
 
-        readable_model_ids = Client._validate_property_models(models=readable_models, key='readable_models')
-        writable_model_ids = Client._validate_property_models(models=writable_models, key='writable_models')
+        readable_model_ids = check_list_of_base(readable_models, Property2, 'readable_models') or []
+        writable_model_ids = check_list_of_base(writable_models, Property2, 'writable_models') or []
 
         return readable_model_ids, writable_model_ids
 
-    @staticmethod
-    def _validate_property_models(models: List, key: str = 'models') -> List[Text]:
-        assert isinstance(key, str), '`key` must be a string.'
-        model_ids = []
-        if models is not None:
-            if not isinstance(models, (list, tuple, set)):
-                raise IllegalArgumentError("`{}` must be provided as a list, tuple or set.".format(key))
-            for model in models:
-                if is_uuid(model):
-                    model_ids.append(model)
-                elif isinstance(model, (Property2, Property)):
-                    model_ids.append(model.id)
-                else:
-                    raise IllegalArgumentError("`{}` must consist out of uuids or property models.".format(key))
-        return model_ids
-
     def create_widget(
             self,
-            activity: Union[Activity2, text_type],
-            widget_type: Union[WidgetTypes, text_type],
+            activity: Union[Activity2, Text],
+            widget_type: Union[WidgetTypes, Text],
             meta: Dict,
             title: Optional[Text] = None,
             order: Optional[int] = None,
-            parent: Optional[Union[Widget, text_type]] = None,
+            parent: Optional[Union[Widget, Text]] = None,
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
             **kwargs
@@ -2308,7 +1883,7 @@ class Client(object):
         response = self._request('POST', url, params=API_EXTRA_PARAMS['widgets'], json=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create a widget ({})\n\n{}".format(response, response.json().get('traceback')))
+            raise APIError("Could not create Widget", response=response)
 
         # create the widget and do postprocessing
         widget = Widget.create(json=response.json().get('results')[0], client=self)
@@ -2352,7 +1927,7 @@ class Client(object):
         response = self._request('POST', url, params=API_EXTRA_PARAMS['widgets'], json=bulk_data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create a widgets ({})\n\n{}".format(response, response.json().get('traceback')))
+            raise APIError("Could not create Widgets", response=response)
 
         # create the widget and do postprocessing
         widgets = []
@@ -2373,8 +1948,7 @@ class Client(object):
         :return: list of Widget objects
         :rtype List[Widget]
         """
-        if not isinstance(widgets, list) or not all(isinstance(w, dict) for w in widgets):
-            raise IllegalArgumentError('`widgets` must provided as a list of dictionaries.')
+        check_list_of_dicts(widgets, 'widgets')
 
         response = self._request(
             "PUT",
@@ -2384,12 +1958,12 @@ class Client(object):
         )
 
         if response.status_code != requests.codes.ok:
-            raise APIError("Could not update the widgets: {}: {}".format(str(response), response.content))
+            raise APIError("Could not update Widgets", response=response)
 
         widgets_response = response.json().get('results')
         return [Widget.create(json=widget_json, client=self) for widget_json in widgets_response]
 
-    def delete_widget(self, widget: Union[Widget, text_type]) -> None:
+    def delete_widget(self, widget: Union[Widget, Text]) -> None:
         """
         Delete a single Widget.
 
@@ -2399,63 +1973,40 @@ class Client(object):
         :raises APIError: whenever the widget could not be deleted
         :raises IllegalArgumentError: whenever the input `widget` is invalid
         """
-        if isinstance(widget, Widget):
-            widget = widget.id
-        elif not is_uuid(widget):
-            raise IllegalArgumentError('`widget` must be a Widget or its UUID, "{}" is neither.'.format(widget))
-
+        widget = check_base(widget, Widget, 'widget')
         url = self._build_url('widget', widget_id=widget)
         response = self._request('DELETE', url)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Widget ({})".format(response))
+            raise APIError("Could not delete Widget {}".format(widget), response=response)
 
-    def delete_widgets(self, widgets: List[Union[Widget, text_type]]) -> None:
+    def delete_widgets(self, widgets: List[Union[Widget, Text]]) -> None:
         """
         Delete multiple Widgets.
 
         :param widgets: List, Tuple or Set of Widgets or their UUIDs to be deleted
-        :type widgets: List[Union[Widget, text_type]]
+        :type widgets: List[Union[Widget, Text]]
         :return: None
         :raises APIError: whenever the widgets could not be deleted
         :raises IllegalArgumentError: whenever the input `widgets` is invalid
         """
-        if not isinstance(widgets, (tuple, list, set)):
-            raise IllegalArgumentError('`widgets` must be a list, tuple or set of widgets, '
-                                       '"{}" is not.'.format(widgets))
-        else:
-            widget_ids = list()
-            for widget in widgets:
-                if isinstance(widget, Widget):
-                    widget = widget.id
-                elif not is_uuid(widget):
-                    raise IllegalArgumentError('`widget` must be a Widget or its UUID, "{}" is neither.'.format(widget))
-                widget_ids.append(dict(id=widget))
+        widget_ids = check_list_of_base(widgets, Widget, 'widgets')
+
+        data = [dict(id=pk) for pk in widget_ids]
 
         url = self._build_url('widgets_bulk_delete')
-        response = self._request('DELETE', url, json=widget_ids)
+        response = self._request('DELETE', url, json=data)
 
         if response.status_code != requests.codes.no_content:
-            raise APIError("Could not delete the widgets: {}: {}".format(str(response), response.content))
+            raise APIError("Could not delete Widgets", response=response)
 
     @staticmethod
     def _validate_associations(
-            widgets: List[Union[Widget, text_type]],
+            widgets: List[Union[Widget, Text]],
             associations: List[Tuple[List, List]],
-    ) -> List[text_type]:
+    ) -> List[Text]:
         """Perform the validation of the internal widgets and associations."""
-        if not isinstance(widgets, List):
-            raise IllegalArgumentError("`widgets` must be provided as a list of widgets.")
-
-        widget_ids = list()
-        for widget in widgets:
-            if isinstance(widget, Widget):
-                widget_id = widget.id
-            elif is_uuid(widget):
-                widget_id = widget
-            else:
-                raise IllegalArgumentError("Each widget should be provided as a Widget or a uuid")
-            widget_ids.append(widget_id)
+        widget_ids = check_list_of_base(widgets, Widget, 'widgets')
 
         if not isinstance(associations, List) and all(isinstance(a, tuple) and len(a) == 2 for a in associations):
             raise IllegalArgumentError(
@@ -2486,7 +2037,7 @@ class Client(object):
         :param part: part for which to retrieve associations
         :type part: Part2
         :param property: property for which to retrieve associations
-        :type property: Property2
+        :type property: AnyProperty
         :param scope: scope for which to retrieve associations
         :type scope: Scope2
         :param limit: maximum number of associations to retrieve
@@ -2494,63 +2045,39 @@ class Client(object):
         :return: list of association objects
         :rtype List[Association]
         """
-        if widget is None:
-            widget = ''
-        elif not isinstance(widget, Widget):
-            raise IllegalArgumentError('`widget` is not of type Widget, but type "{}".'.format(type(widget)))
+        part = check_type(part, Part2, 'part')
+        if part is not None:
+            if part.category == Category.MODEL:
+                part_instance = ''
+                part_model = part.id
+            else:
+                part_instance = part.id
+                part_model = ''
         else:
-            widget = widget.id
-
-        if activity is None:
-            activity = ''
-        elif not isinstance(activity, Activity2):
-            raise IllegalArgumentError('`activity` is not of type Activity2, but type "{}".'.format(type(activity)))
-        else:
-            activity = activity.id
-
-        if part is None:
             part_instance = ''
             part_model = ''
-        elif not isinstance(part, Part2):
-            raise IllegalArgumentError('`part` is not of type Part2, but type "{}".'.format(type(part)))
-        elif part.category == Category.MODEL:
-            part_instance = ''
-            part_model = part.id
-        else:
-            part_instance = part.id
-            part_model = ''
 
-        if property is None:
+        prop = check_type(property, Property2, 'property')
+        if prop is not None:
+            if prop.category == Category.MODEL:
+                property_model = prop.id
+                property_instance = ''
+            else:
+                property_model = ''
+                property_instance = prop.id
+        else:
             property_instance = ''
             property_model = ''
-        elif not isinstance(property, Property2):
-            raise IllegalArgumentError('`property` is not of type Property, but type "{}".'.format(type(property)))
-        elif property.category == Category.MODEL:
-            property_model = property.id
-            property_instance = ''
-        else:
-            property_model = ''
-            property_instance = property.id
 
-        if scope is None:
-            scope = ''
-        elif not isinstance(scope, Scope2):
-            raise IllegalArgumentError('`scope` is not of type Scope2, but type "{}".'.format(type(scope)))
-        else:
-            scope = scope.id
-
-        if limit is None:
-            limit = ''
-        elif not isinstance(limit, int):
-            raise IllegalArgumentError('`limit` is not of type integer, but type "{}".'.format(type(limit)))
-        elif limit < 1:
+        limit = check_type(limit, int, 'limit') or ''
+        if limit and limit < 1:
             raise IllegalArgumentError('`limit` is not a positive integer!')
 
         request_params = {
             'limit': limit,
-            'widget': widget,
-            'activity': activity,
-            'scope': scope,
+            'widget': check_base(widget, Widget, 'widget') or '',
+            'activity': check_base(activity, Activity2, 'activity') or '',
+            'scope': check_base(scope, Scope2, 'scope') or '',
             'instance_part': part_instance,
             'instance_property': property_instance,
             'model_part': part_model,
@@ -2561,7 +2088,7 @@ class Client(object):
         response = self._request('GET', url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not retrieve associations ({})".format((response, response.json())))
+            raise APIError("Could not retrieve Associations", response=response)
 
         associations = [Association(json=r, client=self) for r in response.json()['results']]
 
@@ -2569,7 +2096,7 @@ class Client(object):
 
     def update_widget_associations(
             self,
-            widget: Union[Widget, text_type],
+            widget: Union[Widget, Text],
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
             **kwargs
@@ -2583,23 +2110,26 @@ class Client(object):
         :type widget: :class:`Widget` or UUID
         :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    read rights
-        :type readable_models: List[Property] or List[UUID] or None
+        :type readable_models: List[Property2] or List[UUID] or None
         :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    write rights
-        :type writable_models: List[Property] or List[UUID] or None
+        :type writable_models: List[Property2] or List[UUID] or None
         :return: None
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
         """
         self.update_widgets_associations(
             widgets=[widget],
-            associations=[(readable_models, writable_models)],
+            associations=[(
+                readable_models if readable_models else [],
+                writable_models if writable_models else [],
+            )],
             **kwargs
         )
 
     def update_widgets_associations(
             self,
-            widgets: List[Union[Widget, text_type]],
+            widgets: List[Union[Widget, Text]],
             associations: List[Tuple[List, List]],
             **kwargs
     ) -> None:
@@ -2644,13 +2174,13 @@ class Client(object):
         response = self._request('PUT', url, params=API_EXTRA_PARAMS['widgets'], json=bulk_data)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update associations of the widgets ({})".format((response, response.json())))
+            raise APIError("Could not update Associations", response=response)
 
         return None
 
     def set_widget_associations(
             self,
-            widget: Union[Widget, text_type],
+            widget: Union[Widget, Text],
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
             **kwargs
@@ -2665,10 +2195,10 @@ class Client(object):
         :type widget: :class:`Widget` or UUID
         :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    read rights
-        :type readable_models: List[Property] or List[UUID] or None
+        :type readable_models: List[Property2] or List[UUID] or None
         :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    write rights
-        :type writable_models: List[Property] or List[UUID] or None
+        :type writable_models: List[Property2] or List[UUID] or None
         :return: None
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
@@ -2681,7 +2211,7 @@ class Client(object):
 
     def set_widgets_associations(
             self,
-            widgets: List[Union[Widget, text_type]],
+            widgets: List[Union[Widget, Text]],
             associations: List[Tuple[List, List]],
             **kwargs
     ) -> None:
@@ -2717,7 +2247,7 @@ class Client(object):
                 writable_model_properties_ids=writable_model_ids,
             )
 
-            if kwargs:
+            if kwargs:  # pragma: no cover
                 data.update(**kwargs)
 
             bulk_data.append(data)
@@ -2727,7 +2257,7 @@ class Client(object):
         response = self._request('PUT', url, params=API_EXTRA_PARAMS['widgets'], json=bulk_data)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not set associations of the widgets ({})".format((response, response.json())))
+            raise APIError("Could not set Associations", response=response)
 
         return None
 
@@ -2744,22 +2274,21 @@ class Client(object):
         :raises APIError: when the associations could not be cleared.
         :raise IllegalArgumentError: if the widget is not of type Widget
         """
-        if not isinstance(widget, Widget):
-            raise IllegalArgumentError('`widget` is not of type Widget, but type "{}".'.format(type(widget)))
+        check_type(widget, Widget, 'widget')
 
         # perform the call
         url = self._build_url('widget_clear_associations', widget_id=widget.id)
         response = self._request(method='PUT', url=url)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not clear associations of widget ({})".format((response, response.json())))
+            raise APIError("Could not clear Associations of Widget {}".format(widget), response=response)
 
         return None
 
     def remove_widget_associations(
             self,
             widget: Widget,
-            models: Optional[List[Union['AnyProperty', text_type]]] = (),
+            models: Optional[List[Union['AnyProperty', Text]]] = (),
             **kwargs
     ) -> None:
         """
@@ -2773,13 +2302,12 @@ class Client(object):
         :raises APIError: when the associations could not be removed
         :raise IllegalArgumentError: if the widget is not of type Widget
         """
-        if not isinstance(widget, Widget):
-            raise IllegalArgumentError('`widget` is not of type Widget, but type "{}".'.format(type(widget)))
+        check_type(widget, Widget, 'widget')
 
-        model_ids = self._validate_property_models(models=models)
+        model_ids = check_list_of_base(models, Property2, 'models')
 
         if not model_ids:
-            return None
+            return
 
         data = dict(
             id=widget.id,
@@ -2791,9 +2319,9 @@ class Client(object):
         response = self._request(method='PUT', url=url, params=API_EXTRA_PARAMS['widget'], json=data)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not remove associations of widget ({})".format((response, response.json())))
+            raise APIError("Could not remove Associations of Widget {}".format(widget), response=response)
 
-        return None
+        return
 
     def move_activity(self, activity, parent, classification=None):
         """
@@ -2818,29 +2346,31 @@ class Client(object):
         :raises IllegalArgumentError: if the 'parent' type is not :class:`Activity2` or UUID
         :raises APIError: if an Error occurs.
         """
-        assert isinstance(activity, Activity2), 'activity "{}" is not an Activity2 object!'.format(activity.name)
+        activity = check_type(activity, Activity2, 'activity')
 
         if isinstance(parent, Activity2):
+            parent_object = parent
             parent_id = parent.id
-        elif isinstance(parent, text_type) and is_uuid(parent):
+        elif isinstance(parent, str) and is_uuid(parent):
             parent_id = parent
+            parent_object = self.activity(id=parent)
         else:
             raise IllegalArgumentError("Please provide either an activity object or a UUID")
-        parent_object = self.activity(id=parent_id)
 
         if parent_object.activity_type != ActivityType.PROCESS:
             raise IllegalArgumentError("One can only move an `Activity` under a subprocess.")
 
-        update_dict = dict(parent_id=parent_id)
-
-        if classification is not None and classification in ActivityClassification.values():
-            update_dict['classification'] = classification
+        update_dict = {
+            'parent_id': parent_object.id,
+            'classification': check_enum(
+                classification, ActivityClassification, 'classification') or parent_object.classification,
+        }
 
         url = self._build_url('activity_move', activity_id=str(activity.id))
         response = self._request('PUT', url, data=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not move activity, {}: {}".format(str(response), response.content))
+            raise APIError("Could not move Activity {}".format(activity), response=response)
 
         activity.parent_id = parent_id
 
@@ -2853,9 +2383,16 @@ class Client(object):
         :raises: IllegalArgumentError
         :return: list of Properties
         :rtype List[AnyProperty]
+
+
+        Examples
+        --------
+        >>> properties = client.properties(limit=3)
+        >>> update_dicts = [dict(id=p.id, value=p.value) for p in properties]
+        >>> client.update_properties(properties=update_dicts)
+
         """
-        if not isinstance(properties, list) or not all(isinstance(p, dict) for p in properties):
-            raise IllegalArgumentError('All properties must be provided in a list of dicts.')
+        check_list_of_dicts(properties, 'properties')
 
         response = self._request(
             'POST',
@@ -2865,13 +2402,13 @@ class Client(object):
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Properties {}: {}".format(str(response), response.json()))
+            raise APIError("Could not update Properties", response=response)
 
         properties = [Property2.create(client=self, json=js) for js in response.json()['results']]
 
         return properties
 
-    def notifications(self, pk=None, **kwargs):
+    def notifications(self, pk: Optional[Text] = None, **kwargs) -> List[Notification]:
         """Retrieve one or more notifications stored on the instance.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -2884,7 +2421,7 @@ class Client(object):
         :raises APIError: When the retrieval call failed due to various reasons
         """
         request_params = {
-            'id': pk
+            'id': check_uuid(pk)
         }
 
         if kwargs:
@@ -2893,14 +2430,13 @@ class Client(object):
         response = self._request('GET', self._build_url('notifications'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not retrieve Notifications. Request: {}\nResponse: {}".format(
-                request_params, response.content))
+            raise APIError("Could not retrieve Notifications", response=response)
 
         data = response.json()
 
         return [Notification(notification, client=self) for notification in data['results']]
 
-    def notification(self, pk=None, **kwargs):
+    def notification(self, pk: Optional[Text] = None, *args, **kwargs) -> Notification:
         """Retrieve a single KE-chain notification.
 
         Uses the same interface as the :func:`notifications` method but returns only a single pykechain
@@ -2916,16 +2452,7 @@ class Client(object):
         :raises NotFoundError: When no `Notification` is found based on the search arguments
         :raises MultipleFoundError: When more than a single `Notification` is found based on the search arguments
         """
-        _notifications = self.notifications(pk=pk, **kwargs)
-
-        criteria = '\npk={}\nkwargs: {}'.format(pk, kwargs)
-
-        if len(_notifications) == 0:
-            raise NotFoundError("No notification found with id:{}".format(criteria))
-        if len(_notifications) != 1:
-            raise MultipleFoundError("Multiple users fit criteria:{}".format(criteria))
-
-        return _notifications[0]
+        return self._retrieve_singular(self.notifications, pk=pk, *args, **kwargs)
 
     def create_notification(
             self,
@@ -2962,15 +2489,8 @@ class Client(object):
         :return: the newly created `Notification`
         :raises: APIError: when the `Notification` could not be created
         """
-        if not isinstance(subject, str):
-            raise IllegalArgumentError('`subject` must be a string, "{}" ({}) is not.'.format(subject, type(subject)))
-
-        if not isinstance(message, str):
-            raise IllegalArgumentError('`message` must be a string, "{}" ({}) is not.'.format(message, type(message)))
-
-        if status not in NotificationStatus.values():
-            raise IllegalArgumentError('`status` must be a NotificationStatus option, "{}" is not.\n'
-                                       'Select from: {}'.format(status, NotificationStatus.values()))
+        if from_user is None:
+            from_user = self.current_user()
 
         recipient_users = list()
         recipient_emails = list()
@@ -2980,58 +2500,23 @@ class Client(object):
                 for recipient in recipients:
                     if is_valid_email(recipient):
                         recipient_emails.append(recipient)
-                    elif isinstance(recipient, User):
-                        recipient_users.append(recipient.id)
                     else:
-                        try:
-                            recipient_users.append(int(recipient))
-                        except ValueError:
-                            raise IllegalArgumentError('`recipient` "{}" is not a User or user ID!'.format(recipient))
+                        recipient_users.append(check_user(recipient, User, 'recipient'))
 
             else:
                 raise IllegalArgumentError('`recipients` must be a list of User objects, IDs or email addresses, '
                                            '"{}" ({}) is not.'.format(recipients, type(recipients)))
 
-        if team is not None:
-            if isinstance(team, Team):
-                team = team.id,
-            elif is_uuid(team):
-                pass
-            else:
-                raise IllegalArgumentError('`team` must be a Team object or team UUID, '
-                                           '"{}" ({}) is neither.'.format(team, type(team)))
-
-        if from_user is None:
-            from_user_id = self.current_user().id
-        elif isinstance(from_user, User):
-            from_user_id = from_user.id
-        elif isinstance(from_user, (int, str)):
-            try:
-                from_user_id = int(from_user)
-            except ValueError:
-                raise IllegalArgumentError('`from_user` "{}" is not a User or user ID!'.format(from_user))
-        else:
-            raise IllegalArgumentError('`from_user` must be a User, string or integer, '
-                                       '"{}" ({}) is not.'.format(from_user, type(from_user)))
-
-        if event is not None and event not in NotificationEvent.values():
-            raise IllegalArgumentError('`event` must be a NotificationEvent option, "{}" is not.\n'
-                                       'Select from: {}'.format(event, NotificationEvent.values()))
-
-        if channel not in NotificationChannels.values():
-            raise IllegalArgumentError('`channel` must be a NotificationChannels option, "{}" is not.\n'
-                                       'Select from: {}'.format(status, NotificationChannels.values()))
-
         data = {
-            'status': status,
-            'event': event,
-            'subject': subject,
-            'message': message,
+            'status': check_enum(status, NotificationStatus, 'status'),
+            'event': check_enum(event, NotificationEvent, 'event'),
+            'subject': check_text(subject, 'subject'),
+            'message': check_text(message, 'message'),
             'recipient_users': recipient_users,
             'recipient_emails': recipient_emails,
-            'team': team,
-            'from_user': from_user_id,
-            'channels': [channel],
+            'team': check_base(team, Team, 'team'),
+            'from_user': check_user(from_user, User, 'from_user'),
+            'channels': [channel] if check_enum(channel, NotificationChannels, 'channel') else [],
         }
 
         data.update(kwargs)
@@ -3042,7 +2527,7 @@ class Client(object):
         response = self._request('POST', url, data=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create notification, {}:\n\n{}'".format(str(response), response.json()))
+            raise APIError("Could not create Notification", response=response)
 
         notification = Notification(response.json().get('results')[0], client=self)
         return notification
@@ -3057,17 +2542,13 @@ class Client(object):
         :raises APIError: whenever the notification could not be deleted
         :raises IllegalArgumentError: whenever the input `notification` is invalid
         """
-        if isinstance(notification, Notification):
-            notification = notification.id
-        elif not is_uuid(notification):
-            raise IllegalArgumentError('`notification` must be a Notification or its UUID, '
-                                       '"{}" is neither.'.format(notification))
+        notification = check_base(notification, Notification, 'notification')
 
         url = self._build_url('notification', notification_id=notification)
         response = self._request('DELETE', url)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Notification ({})".format(response))
+            raise APIError("Could not delete Notification {}".format(notification), response=response)
 
     def banners(
             self,
@@ -3085,20 +2566,10 @@ class Client(object):
         :return: list of Banner objects
         :rtype list
         """
-        if pk is not None and (not isinstance(pk, str) or not is_uuid(pk)):
-            raise IllegalArgumentError('`pk` must be a valid UUID, "{}" ({}) is not.'.format(pk, type(pk)))
-
-        if text is not None and not isinstance(text, str):
-            raise IllegalArgumentError('`text` must be a string, "{}" ({}) is not.'.format(text, type(text)))
-
-        if is_active is not None and not isinstance(is_active, bool):
-            raise IllegalArgumentError('`is_active` must be a boolean, "{}" ({}) is not.'.format(is_active,
-                                                                                                 type(is_active)))
-
         request_params = {
-            'text': text,
-            'id': pk,
-            'is_active': is_active,
+            'text': check_text(text, 'text'),
+            'id': check_uuid(pk),
+            'is_active': check_type(is_active, bool, 'is_active'),
         }
         request_params.update(API_EXTRA_PARAMS['banners'])
 
@@ -3108,7 +2579,7 @@ class Client(object):
         response = self._request('GET', self._build_url('banners'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve banners")
+            raise NotFoundError("Could not retrieve Banners", response=response)
 
         data = response.json()
         return [Banner(banner, client=self) for banner in data['results']]
@@ -3120,16 +2591,7 @@ class Client(object):
         :return: single banner
         :rtype Banner
         """
-        _banners = self.banners(*args, **kwargs)
-
-        criteria = 'args: {}\nkwargs: {}'.format(args, kwargs)
-
-        if len(_banners) == 0:
-            raise NotFoundError("No banner fits criteria:{}".format(criteria))
-        if len(_banners) != 1:
-            raise MultipleFoundError("Multiple banners fit criteria:{}".format(criteria))
-
-        return _banners[0]
+        return self._retrieve_singular(self.banners, *args, **kwargs)
 
     def create_banner(
             self,
@@ -3160,34 +2622,13 @@ class Client(object):
         :return: the new banner
         :rtype Banner
         """
-        if not isinstance(text, str):
-            raise IllegalArgumentError('`text` must be a string, "{}" ({}) is not.'.format(text, type(text)))
-
-        if not isinstance(icon, str):
-            raise IllegalArgumentError('`icon` must be a string, "{}" ({}) is not.'.format(icon, type(icon)))
-
-        if not isinstance(active_from, datetime.datetime):
-            raise IllegalArgumentError('`active_from` must be a datetime.datetime value, "{}" ({}) is not.'.format(
-                active_from, type(active_from)))
-
-        if active_until is not None and not isinstance(active_until, datetime.datetime):
-            raise IllegalArgumentError('`active_until` must be a datetime.datetime value, "{}" ({}) is not.'.format(
-                active_until, type(active_until)))
-
-        if is_active is not None and not isinstance(is_active, bool):
-            raise IllegalArgumentError('`is_active` must be a boolean, "{}" ({}) is not.'.format(is_active,
-                                                                                                 type(is_active)))
-
-        if url is not None and (not isinstance(url, str) or not is_url(url)):
-            raise IllegalArgumentError('`url` must be a URL string, "{}" ({}) is not.'.format(url, type(url)))
-
         data = {
-            'text': text,
-            'icon': icon,
-            'active_from': active_from.isoformat(sep='T'),
-            'active_until': active_until.isoformat(sep='T') if active_until else None,
-            'is_active': is_active,
-            'url': url,
+            'text': check_text(text, 'text'),
+            'icon': check_text(icon, 'icon'),
+            'active_from': check_datetime(active_from, 'active_from'),
+            'active_until': check_datetime(active_until, 'active_until'),
+            'is_active': check_type(is_active, bool, 'is_active'),
+            'url': check_url(url),
         }
 
         # prepare url query parameters
@@ -3199,7 +2640,7 @@ class Client(object):
                                  json=data)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not create banner, {}: {}".format(str(response), response.content))
+            raise APIError("Could not create Banner", response=response)
 
         return Banner(response.json()['results'][0], client=self)
 
@@ -3216,7 +2657,7 @@ class Client(object):
         response = self._request('GET', self._build_url('banner_active'))
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not retrieve banners")
+            raise NotFoundError("Could not retrieve active Banner", response=response)
 
         active_banner_list = response.json()['results']
         if not active_banner_list:

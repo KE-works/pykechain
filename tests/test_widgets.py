@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from pykechain.enums import (WidgetTypes, ShowColumnTypes, NavigationBarAlignment, FilterType, ProgressBarColors,
-                             Category, LinkTargets, KEChainPages, WidgetTitleValue)
+from pykechain.enums import (WidgetTypes, ShowColumnTypes, FilterType, ProgressBarColors,
+                             Category, LinkTargets, KEChainPages, WidgetTitleValue, Alignment)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Activity2
 from pykechain.models.widgets import (
@@ -54,15 +54,6 @@ class TestSetTitle(TestCase):
         self.assertEqual(title_in, title)
         self.assertEqual(title_in, meta['customTitle'])
         self.assertEqual(WidgetTitleValue.NO_TITLE, meta['showTitleValue'])
-
-    def test_custom_title(self):
-        custom_title = 'custom title'
-        meta, title = _set_title(dict(), custom_title=custom_title)
-
-        self.assertEqual(custom_title, title)
-
-        with self.assertWarns(PendingDeprecationWarning):
-            _set_title(dict(), custom_title=custom_title)
 
     def test_default_title(self):
         default = 'default title'
@@ -276,6 +267,19 @@ class TestWidgetManagerInActivity(TestBetamax):
             widget_type=WidgetTypes.ATTACHMENTVIEWER,
             title="Attachment Viewer",
             attachment_property=photo_property,
+        )
+
+        self.assertIsInstance(widget, AttachmentviewerWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+
+    def test_attachment_widget_with_editable_association(self):
+        photo_property = self.project.property("Picture")
+
+        widget = self.wm.add_attachmentviewer_widget(
+            widget_type=WidgetTypes.ATTACHMENTVIEWER,
+            title="Attachment Viewer",
+            attachment_property=photo_property,
+            editable=True,
         )
 
         self.assertIsInstance(widget, AttachmentviewerWidget)
@@ -651,20 +655,6 @@ class TestWidgetManagerInActivity(TestBetamax):
         # tearDown
         [w.delete() for w in new_widgets]
 
-    def test_compatibility_functions(self):
-        """Testing various compatibility function for equivalence to the 'customization' in WIM1/PIM1"""
-        for deprecated_method in [
-            'add_text_widget',
-            'add_super_grid_widget',
-            'add_property_grid_widget',
-            'add_paginated_grid_widget',
-            'add_script_widget',
-            'add_attachment_viewer_widget',
-            'add_navigation_bar_widget',
-        ]:
-            with self.subTest(msg=deprecated_method):
-                self.assertTrue(hasattr(self.wm, deprecated_method))
-
 
 class TestWidgetNavigationBarWidget(TestBetamax):
 
@@ -694,7 +684,7 @@ class TestWidgetNavigationBarWidget(TestBetamax):
         widget = self.wm.add_tasknavigationbar_widget(
             activities=self.nav_bar_config,
             title="Navbar",
-            alignment=NavigationBarAlignment.LEFT
+            alignment=Alignment.LEFT
         )
 
         self.assertIsInstance(widget, TasknavigationbarWidget)
@@ -712,7 +702,7 @@ class TestWidgetNavigationBarWidget(TestBetamax):
 
         self.wm.add_tasknavigationbar_widget(
             activities=self.nav_bar_config,
-            alignment=NavigationBarAlignment.LEFT,
+            alignment=Alignment.LEFT,
         )
 
         self.assertEqual(original_bar, self.nav_bar_config)
@@ -723,7 +713,7 @@ class TestWidgetNavigationBarWidget(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             self.wm.add_tasknavigationbar_widget(
                 activities=self.nav_bar_config,
-                alignment=NavigationBarAlignment.LEFT,
+                alignment=Alignment.LEFT,
             )
 
     def test_add_navbar_external_link(self):
@@ -735,7 +725,7 @@ class TestWidgetNavigationBarWidget(TestBetamax):
 
         widget = self.wm.add_tasknavigationbar_widget(
             activities=self.nav_bar_config,
-            alignment=NavigationBarAlignment.LEFT,
+            alignment=Alignment.LEFT,
         )
 
         self.assertEqual(widget.meta['taskButtons'][0]['link'], link)
@@ -746,7 +736,7 @@ class TestWidgetNavigationBarWidget(TestBetamax):
 
         widget = self.wm.add_tasknavigationbar_widget(
             activities=self.nav_bar_config,
-            alignment=NavigationBarAlignment.LEFT,
+            alignment=Alignment.LEFT,
         )
 
         self.assertTrue(widget.meta['taskButtons'][0]['isDisabled'])
