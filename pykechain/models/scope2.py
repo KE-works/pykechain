@@ -4,7 +4,8 @@ from typing import Union, Text, Dict, Optional, List  # noqa: F401
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.enums import Multiplicity, ScopeStatus, SubprocessDisplayMode, KEChainPages
+from pykechain.enums import Multiplicity, ScopeStatus, SubprocessDisplayMode, KEChainPages, ScopeRoles, \
+    ScopeMemberActions
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
 from pykechain.models.input_checks import check_text, check_datetime, check_enum, check_list_of_text, \
@@ -86,16 +87,20 @@ class Scope2(Base, TagsMixin):
     # CRUD methods
     #
 
-    def _update_scope_project_team(self, select_action, user):
+    def _update_scope_project_team(self, action, role, user):
         """
         Update the Project Team of the Scope. Updates include addition or removing of managers or members.
 
-        :param select_action: type of action to be applied
-        :type select_action: basestring
+        :param action: type of action to be applied
+        :type action: ScopeMemberActions
+        :param role: type of role to be applied to the user
+        :type role: ScopeRoles
         :param user: the username of the user to which the action applies to
         :type user: basestring
         :raises APIError: When unable to update the scope project team.
         """
+        action = check_enum(action, ScopeMemberActions, 'action')
+        role = check_enum(role, ScopeRoles, 'role')
         user = check_text(user, 'user')
 
         users = self._client._retrieve_users()['results']  # type: List[Dict]
@@ -103,14 +108,14 @@ class Scope2(Base, TagsMixin):
         if user_object is None:
             raise NotFoundError('User "{}" does not exist'.format(user))
 
-        url = self._client._build_url('scope2_{}'.format(select_action), scope_id=self.id)
+        url = self._client._build_url('scope2_{}_{}'.format(action, role), scope_id=self.id)
 
         response = self._client._request('PUT', url,
                                          params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
                                          data={'user_id': user_object['pk']})
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not {} {} in Scope".format(*select_action.split('_')), response=response)
+            raise APIError("Could not {} {} in Scope".format(action, role), response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
@@ -437,9 +442,7 @@ class Scope2(Base, TagsMixin):
         :type member: basestring
         :raises APIError: when unable to update the scope member
         """
-        select_action = 'add_member'
-
-        self._update_scope_project_team(select_action=select_action, user=member)
+        self._update_scope_project_team(action=ScopeMemberActions.ADD, role=ScopeRoles.MEMBER, user=member)
 
     def remove_member(self, member: Text) -> None:
         """
@@ -449,9 +452,7 @@ class Scope2(Base, TagsMixin):
         :type member: basestring
         :raises APIError: when unable to update the scope member
         """
-        select_action = 'remove_member'
-
-        self._update_scope_project_team(select_action=select_action, user=member)
+        self._update_scope_project_team(action=ScopeMemberActions.REMOVE, role=ScopeRoles.MEMBER, user=member)
 
     def add_manager(self, manager: Text) -> None:
         """
@@ -461,9 +462,7 @@ class Scope2(Base, TagsMixin):
         :type manager: basestring
         :raises APIError: when unable to update the scope manager
         """
-        select_action = 'add_manager'
-
-        self._update_scope_project_team(select_action=select_action, user=manager)
+        self._update_scope_project_team(action=ScopeMemberActions.ADD, role=ScopeRoles.MANAGER, user=manager)
 
     def remove_manager(self, manager: Text) -> None:
         """
@@ -473,9 +472,7 @@ class Scope2(Base, TagsMixin):
         :type manager: basestring
         :raises APIError: when unable to update the scope manager
         """
-        select_action = 'remove_manager'
-
-        self._update_scope_project_team(select_action=select_action, user=manager)
+        self._update_scope_project_team(action=ScopeMemberActions.REMOVE, role=ScopeRoles.MANAGER, user=manager)
 
     def add_leadmember(self, leadmember: Text) -> None:
         """
@@ -485,9 +482,7 @@ class Scope2(Base, TagsMixin):
         :type leadmember: basestring
         :raises APIError: when unable to update the scope leadmember
         """
-        select_action = 'add_leadmember'
-
-        self._update_scope_project_team(select_action=select_action, user=leadmember)
+        self._update_scope_project_team(action=ScopeMemberActions.ADD, role=ScopeRoles.LEADMEMBER, user=leadmember)
 
     def remove_leadmember(self, leadmember: Text) -> None:
         """
@@ -497,6 +492,4 @@ class Scope2(Base, TagsMixin):
         :type leadmember: basestring
         :raises APIError: when unable to update the scope leadmember
         """
-        select_action = 'remove_leadmember'
-
-        self._update_scope_project_team(select_action=select_action, user=leadmember)
+        self._update_scope_project_team(action=ScopeMemberActions.REMOVE, role=ScopeRoles.LEADMEMBER, user=leadmember)

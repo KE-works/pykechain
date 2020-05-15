@@ -1,6 +1,6 @@
 import datetime
 
-from pykechain.enums import ScopeStatus, KEChainPages
+from pykechain.enums import ScopeStatus, KEChainPages, ScopeMemberActions, ScopeRoles
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from pykechain.models import Team, Scope2
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
@@ -68,15 +68,15 @@ class TestScopeMembers(TestBetamax):
     """
 
     DEFAULTS = {
-        'manager': [
+        ScopeRoles.MANAGER: [
             'superuser',
             'testmanager',
         ],
-        'leadmember': [
+        ScopeRoles.LEADMEMBER: [
             'superuser',
             'testlead',
         ],
-        'member': [
+        ScopeRoles.MEMBER: [
             'testuser',
         ]
     }
@@ -87,7 +87,7 @@ class TestScopeMembers(TestBetamax):
 
         for member_type, members in self.DEFAULTS.items():
             for member in members:
-                self.project._update_scope_project_team('add_' + member_type, member)
+                self.project._update_scope_project_team(ScopeMemberActions.ADD, member_type, member)
 
     def setUp(self):
         super().setUp()

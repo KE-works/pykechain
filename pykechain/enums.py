@@ -443,6 +443,32 @@ class TeamRoles(Enum):
     OWNER = "OWNER"
 
 
+class ScopeRoles(Enum):
+    """
+    Roles that exist for a member of a scope.
+
+    :cvar MANAGER: owner of the scope, has full rights
+    :cvar LEADMEMBER: elevated member, has assignment rights
+    :cvar MEMBER: normal member, only has viewing rights
+    """
+
+    MANAGER = "manager"
+    LEADMEMBER = "leadmember"
+    MEMBER = "member"
+
+
+class ScopeMemberActions(Enum):
+    """
+    Actions to be performed on the members of a scope.
+
+    :cvar ADD: add a member to the scope
+    :cvar REMOVE: delete a member from the scope
+    """
+
+    ADD = 'add'
+    REMOVE = 'remove'
+
+
 class KechainEnv(Enum):
     """Environment variables that can be set for pykechain.
 
