@@ -6,7 +6,7 @@ from pykechain.models import Base
 T = TypeVar('T')
 
 
-class TreeObject(Base, ABC, T):
+class TreeObject(Base, ABC):
     """Object class to include methods used to traverse a tree-structure."""
 
     def __init__(self, json, **kwargs):
