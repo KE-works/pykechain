@@ -1,14 +1,13 @@
 from abc import ABC
-from typing import Optional, Text, List, Generic, TypeVar
+from typing import Optional, Text, List, TypeVar
 
 from pykechain.models import Base
 
 T = TypeVar('T')
 
 
-class TreeObject(Base, ABC, Generic[T]):
+class TreeObject(Base, ABC, T):
     """Object class to include methods used to traverse a tree-structure."""
-    return_type = T
 
     def __init__(self, json, **kwargs):
         """
@@ -22,11 +21,11 @@ class TreeObject(Base, ABC, Generic[T]):
 
         self._cached_children = None  # type: Optional[List[T]]
 
-    def __call__(self, *args, **kwargs) -> T:
+    def __call__(self: T, *args, **kwargs) -> T:
         """Short-hand version of the `child` method."""
         return self.child(*args, **kwargs)
 
-    def child(self,
+    def child(self: T,
               name: Optional[Text] = None,
               pk: Optional[Text] = None,
               **kwargs) -> T:
@@ -43,7 +42,7 @@ class TreeObject(Base, ABC, Generic[T]):
         """
         raise NotImplementedError  # pragma: no cover
 
-    def parent(self) -> T:
+    def parent(self: T) -> T:
         """
         Retrieve the parent object.
 
@@ -52,7 +51,7 @@ class TreeObject(Base, ABC, Generic[T]):
         """
         raise NotImplementedError  # pragma: no cover
 
-    def siblings(self, **kwargs) -> List[T]:
+    def siblings(self: T, **kwargs) -> List[T]:
         """
         Retrieve all objects that have the same parent as the current object, thereby including itself.
 
@@ -61,7 +60,7 @@ class TreeObject(Base, ABC, Generic[T]):
         """
         raise NotImplementedError  # pragma: no cover
 
-    def children(self, **kwargs) -> List[T]:
+    def children(self: T, **kwargs) -> List[T]:
         """
         Retrieve all children objects.
 
@@ -71,7 +70,7 @@ class TreeObject(Base, ABC, Generic[T]):
         """
         raise NotImplementedError  # pragma: no cover
 
-    def all_children(self) -> List[T]:
+    def all_children(self: T) -> List[T]:
         """
         Retrieve a flat list of all descendants, sorted depth-first.
 

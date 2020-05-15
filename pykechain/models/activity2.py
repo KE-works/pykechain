@@ -59,6 +59,10 @@ class Activity2(TreeObject, TagsMixin):
 
         self._tags = json.get('tags', [])  # type: List[Text]
 
+    def __call__(self, *args, **kwargs) -> 'Activity2':
+        """Short-hand version of the `child` method."""
+        return self.child(*args, **kwargs)
+
     def refresh(self, *args, **kwargs):
         """Refresh the object in place."""
         super().refresh(url=self._client._build_url('activity', activity_id=self.id),
