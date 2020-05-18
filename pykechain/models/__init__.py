@@ -2,10 +2,18 @@
 from typing import Union
 
 from .base import Base
+from .scope import Scope
 from .scope2 import Scope2
+from .activity import Activity
 from .activity2 import Activity2
 from .association import Association
+from .part import Part
 from .part2 import Part2
+from .property import Property
+from .property_attachment import AttachmentProperty
+from .property_selectlist import SelectListProperty
+from .property_multi_reference import MultiReferenceProperty
+from .property_datetime import DatetimeProperty
 from .property2 import Property2
 from .property2_attachment import AttachmentProperty2
 from .property2_selectlist import SelectListProperty2
@@ -17,6 +25,11 @@ from .team import Team
 from .user import User
 
 AnyProperty = Union[
+    'Property',
+    'MultiReferenceProperty',
+    'AttachmentProperty',
+    'SelectListProperty',
+    'DatetimeProperty',
     'Property2',
     'MultiReferenceProperty2',
     'AttachmentProperty2',
@@ -26,15 +39,23 @@ AnyProperty = Union[
 
 __all__ = (
     'Base',
+    'Scope',
     'Scope2',
     'Association',
+    'Activity',
     'Activity2',
+    'Part',
     'Part2',
     'PartSet',
     'Service',
     'ServiceExecution',
     'User',
     'Team',
+    'Property',
+    'MultiReferenceProperty',
+    'AttachmentProperty',
+    'SelectListProperty',
+    'DatetimeProperty',
     'Property2',
     'MultiReferenceProperty2',
     'AttachmentProperty2',
