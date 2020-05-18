@@ -23,26 +23,25 @@ class SixTestCase(TestCase):
         if six.PY2:
             return self.assertRaisesRegexp(expected_exception, expected_regex, *args, **kwargs)
         else:
-            return super(__class__, self).assertRaisesRegex(expected_exception, expected_regex, *args, **kwargs)
+            return super().assertRaisesRegex(expected_exception, expected_regex, *args, **kwargs)
 
     def assertRegex(self, text, expected_regex, *args, **kwargs):
         if six.PY2:
             return self.assertRegexpMatches(text, expected_regex, *args, **kwargs)
         else:
-            return super(__class__, self).assertRegex(text, expected_regex, *args, **kwargs)
+            return super().assertRegex(text, expected_regex, *args, **kwargs)
 
 
 class TestBetamax(SixTestCase):
+
     @property
     def cassette_name(self):
-        cls = getattr(self, '__class__')
         test = self._testMethodName
-        return '{0}.{1}'.format(cls.__name__, test)
+        return '{0}.{1}'.format(self.__class__.__name__, test)
 
     def setUp(self):
-        # use self.env.set('var', 'value') and with self.env: ... to use custom envvars
+        # use self.env.set('var', 'value') and with self.env: ... to use custom environmental variables
         self.env = EnvironmentVarGuard()
-
         self.client = Client(url=TEST_URL)
 
         if TEST_TOKEN:
@@ -61,8 +60,8 @@ class TestBetamax(SixTestCase):
         elif TEST_SCOPE_ID:
             self.project = self.client.scope(id=TEST_SCOPE_ID)
         else:
-            raise Exception('Cloud not retrieve the test scope, you need to provide a '
-                            '`TEST_SCOPE_ID` or `TEST_SCOPE_NAME` in the `.env` file')
+            raise Exception('Could not retrieve the test scope, you need to provide a '
+                            '`TEST_SCOPE_ID` or `TEST_SCOPE_NAME` in your `.env` file')
 
     def tearDown(self):
         self.recorder.stop()

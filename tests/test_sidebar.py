@@ -11,7 +11,6 @@ class TestSideBar(TestBetamax):
         super(TestSideBar, self).setUp()
 
         self.scope = self.project.clone(asynchronous=False)  # type: Scope2
-        del self.project  # this makes sure the source is not accidentally modified
         self.manager = SideBarManager(scope=self.scope)
         self.scope_uri = '#/scopes/{}'.format(self.scope.id)
         self.scope_activity_uri = '{}/{}'.format(self.scope_uri, SubprocessDisplayMode.ACTIVITIES)
