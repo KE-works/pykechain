@@ -122,12 +122,14 @@ class Service(Base):
             'id': self.id,
             'name': check_text(name, 'name') or self.name,
             'description': check_text(description, 'description') or self.description,
-            'script_version': check_text(version, 'version'),
             'trusted': check_type(trusted, bool, 'trusted')
         }
         run_as = check_enum(run_as, ServiceScriptUser, 'run_as')
         if run_as:
             update_dict['run_as'] = run_as
+        version = check_text(version, 'version')
+        if version:
+            update_dict['script_version'] = version
 
         if kwargs:  # pragma: no cover
             update_dict.update(**kwargs)
