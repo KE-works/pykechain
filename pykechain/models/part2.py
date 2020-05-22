@@ -1,4 +1,3 @@
-import datetime
 from typing import Union, List, Dict, Optional, Text, Tuple  # noqa: F401
 
 import requests

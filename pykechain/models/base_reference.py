@@ -38,7 +38,7 @@ class _ReferenceProperty(Property2):
         if not self._value:
             return None
         elif not self._cached_values:
-            self._cached_values = self._retrieve_objects(object_ids=self._value)
+            self._cached_values = self._retrieve_objects()
         return self._cached_values
 
     @value.setter
@@ -55,7 +55,7 @@ class _ReferenceProperty(Property2):
             self._put_value(value)
 
     @abstractmethod
-    def _retrieve_objects(self, object_ids: Iterable[Any], **kwargs) -> Iterable[Base]:
+    def _retrieve_objects(self, **kwargs) -> Iterable[Base]:
         """
         Retrieve a list of Pykechain objects, type depending on the reference property type.
 

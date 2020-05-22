@@ -156,7 +156,7 @@ class Property2(BaseInScope):
 
     def serialize_value(self, value: [T]) -> T:
         """
-        Serializes the value to be set on the property.
+        Serialize the value to be set on the property.
 
         :param value: non-serialized value
         :type value: Any

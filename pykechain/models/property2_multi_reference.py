@@ -12,11 +12,10 @@ class MultiReferenceProperty2(_ReferencePropertyInScope):
     .. versionadded:: 1.14
     """
 
-    def _retrieve_objects(self, object_ids: Iterable[Text], **kwargs) -> Iterable[Part2]:
+    def _retrieve_objects(self, **kwargs) -> Iterable[Part2]:
         """
         Retrieve a list of Parts.
 
-        :param object_ids: list of Part UUIDs.
         :param kwargs: optional inputs
         :return: list of Part2 objects
         """
