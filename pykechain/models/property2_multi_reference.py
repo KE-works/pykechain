@@ -19,8 +19,11 @@ class MultiReferenceProperty2(_ReferencePropertyInScope):
         :param kwargs: optional inputs
         :return: list of Part2 objects
         """
-        assert all([isinstance(v, dict) and 'id' in v for v in self._value]), \
-            "Expect all elements in the _value to be a dict with 'name' and 'id', got '{}'.".format(self._value)
+        if self._value is None:
+            return []
+
+        if not all([isinstance(v, dict) and 'id' in v for v in self._value]):
+            raise ValueError("Expected _value to be dicts with field 'id', got '{}'.".format(self._value))
 
         ids = [v.get('id') for v in self._value]
         parts = []
