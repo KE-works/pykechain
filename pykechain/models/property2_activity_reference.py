@@ -20,4 +20,4 @@ class ActivityReferenceProperty(_ReferencePropertyInScope):
         :param kwargs: optional inputs
         :return: list of Activity2 objects
         """
-        return self._client.activities(id__in=','.join(object_ids))
+        return [Activity2(client=self._client, json=data) for data in self._value]
