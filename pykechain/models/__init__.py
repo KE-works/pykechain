@@ -12,8 +12,8 @@ from .part2 import Part2
 from .property import Property
 from .property_attachment import AttachmentProperty
 from .property_selectlist import SelectListProperty
-from .property_reference import ReferenceProperty
 from .property_multi_reference import MultiReferenceProperty
+from .property_datetime import DatetimeProperty
 from .property2 import Property2
 from .property2_attachment import AttachmentProperty2
 from .property2_selectlist import SelectListProperty2
@@ -27,6 +27,11 @@ from .user import User
 from ..enums import PropertyType
 
 AnyProperty = Union[
+    'Property',
+    'MultiReferenceProperty',
+    'AttachmentProperty',
+    'SelectListProperty',
+    'DatetimeProperty',
     'Property2',
     'MultiReferenceProperty2',
     'AttachmentProperty2',
@@ -54,21 +59,21 @@ __all__ = (
     'Part',
     'Part2',
     'PartSet',
-    'Property',
-    'AttachmentProperty',
-    'SelectListProperty',
-    'ReferenceProperty',
-    'MultiReferenceProperty',
-    'Property2',
-    'AttachmentProperty2',
-    'SelectListProperty2',
-    'DatetimeProperty2',
-    'MultiReferenceProperty2',
-    'ActivityReferenceProperty',
     'Service',
     'ServiceExecution',
     'User',
     'Team',
+    'Property',
+    'MultiReferenceProperty',
+    'AttachmentProperty',
+    'SelectListProperty',
+    'DatetimeProperty',
+    'Property2',
+    'MultiReferenceProperty2',
+    'AttachmentProperty2',
+    'SelectListProperty2',
+    'DatetimeProperty2',
+    'ActivityReferenceProperty',
     'AnyProperty',
     'property_type_to_class_map',
 )

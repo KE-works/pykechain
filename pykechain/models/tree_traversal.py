@@ -1,7 +1,9 @@
 from abc import ABC
-from typing import Optional, Text, List
+from typing import Optional, Text, List, TypeVar
 
 from pykechain.models import BaseInScope
+
+T = TypeVar('T')
 
 
 class TreeObject(BaseInScope, ABC):
@@ -17,16 +19,16 @@ class TreeObject(BaseInScope, ABC):
 
         self.parent_id = json.get('parent_id', None)  # type: Optional[Text]
 
-        self._cached_children = None  # type: Optional[List['TreeObject']]
+        self._cached_children = None  # type: Optional[List[T]]
 
-    def __call__(self, *args, **kwargs) -> 'TreeObject':
+    def __call__(self: T, *args, **kwargs) -> T:
         """Short-hand version of the `child` method."""
         return self.child(*args, **kwargs)
 
-    def child(self,
+    def child(self: T,
               name: Optional[Text] = None,
               pk: Optional[Text] = None,
-              **kwargs) -> 'TreeObject':
+              **kwargs) -> T:
         """
         Retrieve a child object.
 
@@ -38,27 +40,27 @@ class TreeObject(BaseInScope, ABC):
         :raises MultipleFoundError: whenever multiple children fit match inputs.
         :raises NotFoundError: whenever no child matching the inputs could be found.
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
-    def parent(self) -> 'TreeObject':
+    def parent(self: T) -> T:
         """
         Retrieve the parent object.
 
         :return: Parent object
         :raises APIError: whenever the parent could not be retrieved
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
-    def siblings(self, **kwargs) -> List['TreeObject']:
+    def siblings(self: T, **kwargs) -> List[T]:
         """
         Retrieve all objects that have the same parent as the current object, thereby including itself.
 
         :return: iterable of objects
         :raises NotFoundError: whenever the current object is a root object, thereby having no siblings.
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
-    def children(self, **kwargs) -> List['TreeObject']:
+    def children(self: T, **kwargs) -> List[T]:
         """
         Retrieve all children objects.
 
@@ -66,9 +68,9 @@ class TreeObject(BaseInScope, ABC):
         :rtype Iterable
         :raises APIError:
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
-    def all_children(self) -> List['TreeObject']:
+    def all_children(self: T) -> List[T]:
         """
         Retrieve a flat list of all descendants, sorted depth-first.
 

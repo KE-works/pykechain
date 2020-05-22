@@ -1,4 +1,5 @@
 from pykechain.enums import SubprocessDisplayMode, KEChainPages
+from pykechain.models import Scope2
 from pykechain.models.sidebar.sidebar_button import SideBarButton
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from tests.classes import TestBetamax
@@ -9,8 +10,7 @@ class TestSideBar(TestBetamax):
     def setUp(self):
         super(TestSideBar, self).setUp()
 
-        self.scope = self.project.clone(asynchronous=False)
-        del self.project  # this makes sure the source is not accidentally modified
+        self.scope = self.project.clone(asynchronous=False)  # type: Scope2
         self.manager = SideBarManager(scope=self.scope)
         self.scope_uri = '#/scopes/{}'.format(self.scope.id)
         self.scope_activity_uri = '{}/{}'.format(self.scope_uri, SubprocessDisplayMode.ACTIVITIES)

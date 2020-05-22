@@ -6,13 +6,13 @@ envparse==0.2.0
 jsonschema==3.2.0
 
 # for version comparison
-semver==2.9.1
+semver==2.10.1
 
 # to fix connection issues
 PyOpenSSL==19.1.0; python_version <= '2.7'
 
 # testing
-pytest==5.4.1
+pytest==5.4.2
 betamax==0.8.1
 coverage<=4.5.99
 pytest-cov==2.8.1
@@ -20,20 +20,20 @@ coveralls==2.0.0
 
 # documentation
 Sphinx==3.0.3
-nbsphinx==0.6.1
+nbsphinx==0.7.0
 
 # data science # not needed for local use
 # jupyter==1.0.0
 # matplotlib==3.1.1; python_version >= '3.6'
 
 # integration
-tox==3.14.6
+tox==3.15.0
 
 # code style
-flake8==3.7.9
+flake8==3.8.1
 pydocstyle==5.0.2
 mypy==0.770; python_version >= '3.4'
-pre-commit==2.3.0
+pre-commit==2.4.0
 
 # for package management (uploads)
 twine>=3.0.0; python_version >= '3.6'

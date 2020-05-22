@@ -2,7 +2,6 @@ import datetime
 from typing import Union, List, Dict, Optional, Text, Tuple  # noqa: F401
 
 import requests
-from six import text_type, string_types
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import Category, Multiplicity, Classification
@@ -10,6 +9,7 @@ from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, 
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
     get_edited_one_many
 from pykechain.models import Scope2
+from pykechain.models.input_checks import check_text, check_type, check_list_of_base, check_list_of_dicts
 from pykechain.models.property2 import Property2
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.utils import is_uuid, find
@@ -80,7 +80,7 @@ class Part2(TreeObject):
         :type json: dict
         """
         # we need to run the init of 'Base' instead of 'Part' as we do not need the instantiation of properties
-        super(Part2, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self.ref = json.get('ref')  # type: Text
         self.category = json.get('category')  # type: Category
@@ -94,14 +94,18 @@ class Part2(TreeObject):
         proxy_data = json.get('proxy_source_id_name', dict())  # type: Optional[Dict]
         self._proxy_model_id = proxy_data.get('id') if proxy_data else None  # type: Optional[Text]
 
+    def __call__(self, *args, **kwargs) -> 'Part2':
+        """Short-hand version of the `child` method."""
+        return self.child(*args, **kwargs)
+
     def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional[Dict] = None):
         """Refresh the object in place."""
         if extra_params is None:
             extra_params = {}
         extra_params.update(API_EXTRA_PARAMS['part2'])
-        super(Part2, self).refresh(json=json,
-                                   url=self._client._build_url('part2', part_id=self.id),
-                                   extra_params=extra_params)
+        super().refresh(json=json,
+                        url=self._client._build_url('part2', part_id=self.id),
+                        extra_params=extra_params)
 
     #
     # Family and structure methods
@@ -306,7 +310,8 @@ class Part2(TreeObject):
         :returns list of child objects
         :rtype List
         """
-        self.populate_descendants()
+        if self._cached_children is None:
+            self.populate_descendants()
         return super().all_children()
 
     def siblings(self, **kwargs) -> Union['PartSet', List['Part2']]:
@@ -351,7 +356,7 @@ class Part2(TreeObject):
             model_id = self._json_data.get('model_id')
             return self._client.model(pk=model_id)
         else:
-            raise NotFoundError("Part {} has no model".format(self.name))
+            raise NotFoundError('Part "{}" already is a model'.format(self))
 
     def instances(self, **kwargs) -> Union['PartSet', List['Part2']]:
         """
@@ -380,7 +385,7 @@ class Part2(TreeObject):
         if self.category == Category.MODEL:
             return self._client.parts(model=self, category=Category.INSTANCE, **kwargs)
         else:
-            raise NotFoundError("Part {} is not a model".format(self.name))
+            raise NotFoundError('Part "{}" is not a model, hence it has no instances.'.format(self))
 
     def instance(self) -> 'Part2':
         """
@@ -397,9 +402,9 @@ class Part2(TreeObject):
             return instances_list[0]
         elif len(instances_list) > 1:
             raise MultipleFoundError("Part {} has more than a single instance. "
-                                     "Use the `Part.instances()` method".format(self.name))
+                                     "Use the `Part.instances()` method".format(self))
         else:
-            raise NotFoundError("Part {} has no instance".format(self.name))
+            raise NotFoundError("Part {} has no instance".format(self))
 
     #
     # CRUD operations
@@ -438,17 +443,13 @@ class Part2(TreeObject):
         >>> front_fork.edit(name='Front Fork basemodel', description='Some description here')
 
         """
-        update_dict = {'id': self.id}
-        if name is not None:
-            if not isinstance(name, (string_types, text_type)):
-                raise IllegalArgumentError("name should be provided as a string")
-            update_dict.update({'name': name})
-        if description is not None:
-            if not isinstance(description, (string_types, text_type)):
-                raise IllegalArgumentError("description should be provided as a string")
-            update_dict.update({'description': description})
+        update_dict = {
+            'id': self.id,
+            'name': check_text(name, 'name') or self.name,
+            'description': check_text(description, 'description') or self.description,
+        }
 
-        if kwargs is not None:  # pragma: no cover
+        if kwargs:  # pragma: no cover
             update_dict.update(**kwargs)
 
         response = self._client._request('PUT',
@@ -457,10 +458,9 @@ class Part2(TreeObject):
                                          json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Part ({})".format(response))
+            raise APIError("Could not update Part {}".format(self), response=response)
 
-        if name:
-            self.name = name
+        self.refresh(json=response.json().get('results')[0])
 
     def proxy_model(self) -> 'Part2':
         """
@@ -579,7 +579,8 @@ class Part2(TreeObject):
 
         return new_model
 
-    def add_proxy_to(self, parent: 'Part2',
+    def add_proxy_to(self,
+                     parent: 'Part2',
                      name: Text,
                      multiplicity: Multiplicity = Multiplicity.ONE_MANY,
                      **kwargs) -> 'Part2':
@@ -642,25 +643,18 @@ class Part2(TreeObject):
         :return: Tuple with 2 lists of dicts
         :rtype tuple
         """
-        properties_fvalues = properties_fvalues or list()
+        properties_fvalues = check_list_of_dicts(properties_fvalues, 'properties_fvalues') or list()
+
         exception_fvalues = list()
         update_dict = update_dict or dict()
 
-        if part.category == Category.INSTANCE:
-            key = 'id'
-        else:
-            key = 'model_id'
+        key = 'id' if part.category == Category.INSTANCE else 'model_id'
 
-        from pykechain.models import Base
+        from pykechain.models import Base, AttachmentProperty2, DatetimeProperty2
 
         def make_serializable(value):
             # if the value is a reference property to another 'Base' Part, replace with its ID
-            if isinstance(value, Base):
-                return value.id
-            else:
-                return value
-
-        from pykechain.models import AttachmentProperty2, DatetimeProperty2
+            return value.id if isinstance(value, Base) else value
 
         for prop_name_or_id, property_value in update_dict.items():
             property_to_update = part.property(prop_name_or_id)
@@ -672,13 +666,10 @@ class Part2(TreeObject):
             if isinstance(property_to_update, DatetimeProperty2) and isinstance(property_value, datetime.datetime):
                 property_value = DatetimeProperty2.to_iso_format(property_value)
 
-            updated_p = dict(
-                value=property_value
-            )
-            if is_uuid(prop_name_or_id):
-                updated_p[key] = prop_name_or_id
-            else:
-                updated_p[key] = property_to_update.id
+            updated_p = {
+                'value': property_value,
+                key: property_to_update.id,
+            }
 
             if isinstance(property_to_update, AttachmentProperty2):
                 exception_fvalues.append(updated_p)
@@ -692,7 +683,6 @@ class Part2(TreeObject):
                             name: Optional[Text] = None,
                             update_dict: Optional[Dict] = None,
                             properties_fvalues: Optional[List[Dict]] = None,
-                            refresh: Optional[bool] = None,
                             **kwargs) -> 'Part2':
         """
         Add a new part instance of a model as a child of this part instance and update its properties in one go.
@@ -728,8 +718,6 @@ class Part2(TreeObject):
         :type update_dict: dict or None
         :param properties_fvalues: (optional) keyword argument with raw list of properties update dicts
         :type properties_fvalues: list of dict or None
-        :param refresh: (optional) refresh the children of this part after successful completion, default to False
-        :type refresh: Optional[bool]
         :param kwargs: (optional) additional keyword arguments that will be passed inside the update request
         :return: the newly created :class:`Part`
         :raises NotFoundError: when the property name is not a valid property of this part
@@ -746,19 +734,18 @@ class Part2(TreeObject):
         if self.category != Category.INSTANCE:
             raise APIError("Part should be of category INSTANCE")
 
-        if properties_fvalues and not isinstance(properties_fvalues, list):
-            raise IllegalArgumentError("optional `properties_fvalues` need to be provided as a list of dicts")
+        if not isinstance(model, Part2) or model.category != Category.MODEL:
+            raise IllegalArgumentError('`model` must be a Part2 object of category MODEL, "{}" is not.'.format(model))
 
-        name = name or model.name
-        url = self._client._build_url('parts2_new_instance')
-
+        instance_name = check_text(name, 'name') or model.name
         properties_fvalues, exception_fvalues = self._parse_update_dict(model, properties_fvalues, update_dict)
 
+        url = self._client._build_url('parts2_new_instance')
         response = self._client._request(
             'POST', url,
             params=API_EXTRA_PARAMS['parts2'],
             json=dict(
-                name=name,
+                name=instance_name,
                 model_id=model.id,
                 parent_id=self.id,
                 properties_fvalues=properties_fvalues,
@@ -767,27 +754,18 @@ class Part2(TreeObject):
         )
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError('{}: {}'.format(str(response), response.content))
+            raise APIError("Could not add to Part {}".format(self), response=response)
 
-        new_part_instance = Part2(response.json()['results'][0], client=self._client)
+        new_part_instance = Part2(response.json()['results'][0], client=self._client)  # type: Part2
 
         # ensure that cached children are updated
         if self._cached_children is not None:
             self._cached_children.append(new_part_instance)
-        if refresh is not None:
-            import warnings
-            warnings.warn("The refresh argument on the `add_with_properties()` method will be removed in "
-                          "pykechain version 3.4.0 onwards. As the concept of 'refresh' had an effect based "
-                          "on deprecated behaviour of the KE-chain API.", PendingDeprecationWarning)
-            if refresh:
-                # refreshed the children of this part (which is the parent of the children to be refreshed.
-                self.children()
 
         # If any values were not set via the json, set them individually
         for exception_fvalue in exception_fvalues:
             property_model_id = exception_fvalue['model_id']
-            property_instance = [p for p in new_part_instance.properties
-                                 if p._json_data['model_id'] == property_model_id][0]
+            property_instance = find(new_part_instance.properties, lambda p: p.model_id == property_model_id)
             property_instance.value = exception_fvalue['value']
 
         return new_part_instance
@@ -821,7 +799,7 @@ class Part2(TreeObject):
 
         """
         parent = self.parent()
-        return self._client._create_clone(parent, self, **kwargs)
+        return self._client._create_clone(parent=parent, part=self, **kwargs)
 
     def copy(self,
              target_parent: 'Part2',
@@ -862,8 +840,7 @@ class Part2(TreeObject):
         # that not all properties are retrieved we perform a refresh of the part itself first.
         self.refresh()
 
-        if not isinstance(target_parent, Part2):
-            raise IllegalArgumentError("`target_parent` needs to be a part, got '{}'".format(type(target_parent)))
+        check_type(target_parent, Part2, 'target_parent')
 
         if self.category == Category.MODEL and target_parent.category == Category.MODEL:
             # Cannot add a model under an instance or vice versa
@@ -886,7 +863,7 @@ class Part2(TreeObject):
             return copied_instance
         else:
             raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category'.
-                                       format(self.name, target_parent.name))
+                                       format(self, target_parent))
 
     def move(self,
              target_parent: 'Part2',
@@ -948,7 +925,8 @@ class Part2(TreeObject):
                 model_of_instance.delete()
             return moved_instance
         else:
-            raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category')
+            raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category'.format(
+                self, target_parent))
 
     def update(self,
                name: Optional[Text] = None,
@@ -1001,11 +979,7 @@ class Part2(TreeObject):
         """
         # dict(name=name, properties=json.dumps(update_dict))) with property ids:value
         # action = 'bulk_update_properties'  # not for KEC3
-        if name and not isinstance(name, (string_types, text_type)):
-            raise IllegalArgumentError("Name of the part should be provided as a string")
-
-        if properties_fvalues and not isinstance(properties_fvalues, list):
-            raise IllegalArgumentError("optional `properties_fvalues` need to be provided as a list of dicts")
+        check_text(name, 'name')
 
         properties_fvalues, exception_fvalues = self._parse_update_dict(self, properties_fvalues, update_dict)
 
@@ -1024,7 +998,7 @@ class Part2(TreeObject):
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update the part '{}', got: '{}'".format(self, response.content))
+            raise APIError("Could not update Part {}".format(self), response=response)
 
         # update local properties (without a call)
         self.refresh(json=response.json()['results'][0])
@@ -1042,9 +1016,9 @@ class Part2(TreeObject):
         response = self._client._request('DELETE', self._client._build_url('part2', part_id=self.id))
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete part: {} with id {}: ({})".format(self.name, self.id, response))
+            raise APIError("Could not delete Part {}".format(self), response=response)
 
-    def order_properties(self, property_list: Optional[List[Text]] = None) -> None:
+    def order_properties(self, property_list: Optional[List[Union['AnyProperty', Text]]] = None) -> None:
         """
         Order the properties of a part model using a list of property objects or property names or property id's.
 
@@ -1081,25 +1055,12 @@ class Part2(TreeObject):
         ...                                        {'id': color.id, 'order':  30, 'name': 'Colour'}])
 
         """
-        # in KEC3 backend we can (re)use the part update endpoint with a properties_fvalues list of dicts
-        # properties_fvalues = [ {'model_id':<uuid>, 'order': <int> ]
-
         if self.category != Category.MODEL:
-            raise APIError("Part should be of category MODEL")
-        if not isinstance(property_list, list):
-            raise IllegalArgumentError('Expected a list of strings or Property() objects, got a {} object'.
-                                       format(type(property_list)))
+            raise APIError("Ordering of properties must be done on a Part of category {}.".format(Category.MODEL))
 
-        properties_fvalues = list()
-        for order, prop_name_or_id in enumerate(property_list):
-            updated_p = {'order': order}
-            if is_uuid(prop_name_or_id):
-                updated_p['id'] = prop_name_or_id
-            elif isinstance(prop_name_or_id, Property2):
-                updated_p['id'] = prop_name_or_id.id
-            else:
-                updated_p['id'] = self.property(prop_name_or_id).id
-            properties_fvalues.append(updated_p)
+        property_ids = check_list_of_base(property_list, Property2, 'property_list', method=self.property)
+
+        properties_fvalues = [dict(order=order, id=pk) for order, pk in enumerate(property_ids)]
 
         return self.update(properties_fvalues=properties_fvalues)
 

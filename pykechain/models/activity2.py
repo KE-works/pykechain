@@ -1,22 +1,22 @@
 import datetime
 import os
 import time
-import warnings
 from typing import List, Text, Dict, Optional, Union
+from urllib.parse import urljoin
 
 import requests
-from requests.compat import urljoin  # type: ignore
-from six import text_type
 
 from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_EXTRA_PARAMS
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
-from pykechain.models.user import User
+from pykechain.models.input_checks import check_datetime, check_text, check_list_of_text, check_enum, check_user, \
+    check_type
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
+from pykechain.models.user import User
 from pykechain.models.widgets.widgets_manager import WidgetsManager
-from pykechain.utils import is_uuid, parse_datetime, is_valid_email
+from pykechain.utils import parse_datetime, is_valid_email
 
 
 class Activity2(TreeObject, TagsMixin):
@@ -44,45 +44,44 @@ class Activity2(TreeObject, TagsMixin):
 
     def __init__(self, json, **kwargs):
         """Construct an Activity from a json object."""
-        super(Activity2, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self._scope_id = json.get('scope_id')
 
-        self.ref = json.get('ref')
-        self.description = json.get('description', '')
-        self.status = json.get('status')
+        self.ref = json.get('ref')  # type: Text
+        self.description = json.get('description', '')  # type: Text
+        self.status = json.get('status')  # type: ActivityStatus
         self.classification = json.get('classification')  # type: ActivityClassification
         self.activity_type = json.get('activity_type')  # type: ActivityType
         self.start_date = parse_datetime(json.get('start_date'))
         self.due_date = parse_datetime(json.get('due_date'))
+        self.assignees_ids = json.get('assignees_ids', [])  # type: List[Text]
 
-        self._tags = json.get('tags')
+        self._tags = json.get('tags', [])  # type: List[Text]
+
+    def __call__(self, *args, **kwargs) -> 'Activity2':
+        """Short-hand version of the `child` method."""
+        return self.child(*args, **kwargs)
 
     def refresh(self, *args, **kwargs):
         """Refresh the object in place."""
-        super(Activity2, self).refresh(url=self._client._build_url('activity', activity_id=self.id),
-                                       extra_params=API_EXTRA_PARAMS['activity'])
+        super().refresh(url=self._client._build_url('activity', activity_id=self.id),
+                        extra_params=API_EXTRA_PARAMS['activity'])
 
     #
     # additional properties
     #
 
     @property
-    def assignees(self) -> Optional[List['User']]:
+    def assignees(self) -> List['User']:
         """List of assignees to the activity.
 
-        Provides a list of `User` objects or an empty list. If no `assignees_ids` are in the API call, then
-        returns None.
+        Provides a list of `User` objects or an empty list.
 
-        :return: a list of `User`'s or an empty list.
-        :rtype: list or None
+        :return: a list of `User` objects or an empty list.
+        :rtype: list
         """
-        if 'assignees_ids' in self._json_data and self._json_data.get('assignees_ids') == list():
-            return []
-        elif 'assignees_ids' in self._json_data and self._json_data.get('assignees_ids'):
-            assignees_ids_str = ','.join([str(id) for id in self._json_data.get('assignees_ids')])
-            return self._client.users(id__in=assignees_ids_str, is_hidden=False)
-        return None
+        return self._client.users(id__in=self.assignees_ids, is_hidden=False) if self.assignees_ids else []
 
     @property
     def scope_id(self):
@@ -101,8 +100,7 @@ class Activity2(TreeObject, TagsMixin):
         if self._scope_id is None:
             self.refresh()
             if self._scope_id is None:
-                raise NotFoundError("This activity '{}'({}) does not belong to a scope, something is weird!".
-                                    format(self.name, self.id))
+                raise NotFoundError("Activity '{}' has no related scope!".format(self))
         return self._scope_id
 
     @property
@@ -262,23 +260,6 @@ class Activity2(TreeObject, TagsMixin):
             raise IllegalArgumentError("One can only create a task under a subprocess.")
         return self._client.create_activity(self, *args, **kwargs)
 
-    def subprocess(self) -> 'Activity2':
-        """Retrieve the subprocess in which this activity is defined.
-
-        .. warning::
-            This method is deprecated for newer releases of KE-chain (version 2.9.0 and higher). Please
-            use the :func:`Activity2.parent()` method.
-
-        If this is a task on top level, it raises NotFounderror.
-
-        :return: a subprocess :class:`Activity2`
-        :raises NotFoundError: when it is a task in the top level of a project
-        :raises APIError: when other error occurs
-
-        """
-        raise ('Subprocess function is outdated in KE-chain 2.9.0, use `Activity2.parent()` method', DeprecationWarning)
-        # return self.parent()
-
     def parent(self) -> 'Activity2':
         """Retrieve the parent in which this activity is defined.
 
@@ -295,8 +276,7 @@ class Activity2(TreeObject, TagsMixin):
 
         """
         if self.parent_id is None:
-            raise NotFoundError("Cannot find subprocess for this task '{}', "
-                                "as this task exist on top level.".format(self.name))
+            raise NotFoundError("Cannot find parent for task '{}', as this task exist on top level.".format(self))
         return self._client.activity(pk=self.parent_id, scope=self.scope_id)
 
     def children(self, **kwargs) -> List['Activity2']:
@@ -382,8 +362,7 @@ class Activity2(TreeObject, TagsMixin):
 
         """
         if self.parent_id is None:
-            raise NotFoundError("Cannot find subprocess for this task '{}', "
-                                "as this task exist on top level.".format(self.name))
+            raise NotFoundError("Cannot find siblings for task '{}', as this task exist on top level.".format(self))
         return self._client.activities(parent_id=self.parent_id, scope=self.scope_id, **kwargs)
 
     def all_children(self) -> List['Activity2']:
@@ -400,13 +379,13 @@ class Activity2(TreeObject, TagsMixin):
         return super().all_children()
 
     def edit_cascade_down(
-        self,
-        start_date: Optional[datetime.datetime] = None,
-        due_date: Optional[datetime.datetime] = None,
-        assignees: Optional[List[Text]] = None,
-        assignees_ids: Optional[List[Text]] = None,
-        status: Optional[Union[ActivityStatus, Text]] = None,
-        overwrite: Optional[bool] = False,
+            self,
+            start_date: Optional[datetime.datetime] = None,
+            due_date: Optional[datetime.datetime] = None,
+            assignees: Optional[List[Text]] = None,
+            assignees_ids: Optional[List[Text]] = None,
+            status: Optional[Union[ActivityStatus, Text]] = None,
+            overwrite: Optional[bool] = False,
     ) -> None:
         """
         Edit the activity and all its descendants with a single operation.
@@ -443,6 +422,7 @@ class Activity2(TreeObject, TagsMixin):
         )
 
         all_tasks = [self] + self.all_children()
+        new_assignees = update_dict.get('assignees_ids', list())
 
         # Create update-json
         data = list()
@@ -452,25 +432,16 @@ class Activity2(TreeObject, TagsMixin):
             if not overwrite:
                 # Append the existing assignees of the task to the new assignees
                 existing_assignees = [u.id for u in task.assignees]
-                new_assignees = task_specific_update_dict.get('assignees_ids', list())
                 task_specific_update_dict['assignees_ids'] = list(set(existing_assignees + new_assignees))
 
             task_specific_update_dict.update({'id': task.id})
             data.append(task_specific_update_dict)
 
         # Perform bulk update
-        url = urljoin(self._client.api_root, 'api/activities/bulk_update')
+        url = self._client._build_url('activities_bulk_update')
         response = self._client._request('PUT', url, json=data)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Activity ({})".format(response))
-
-        # # Initialize all tasks with response
-        # for task, response_json in zip(all_tasks, response.json().get('results')):
-        #     task.__init__(client=self._client, json=response_json)
-        #     if task == self:
-        #         self.__init__(client=self._client, json=response_json)
-
-        # return all_tasks
+            raise APIError("Could not update Activity {}".format(self), response=response)
 
     def edit(
             self,
@@ -538,26 +509,13 @@ class Activity2(TreeObject, TagsMixin):
         >>> my_task.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
 
         """
-        update_dict = {'id': self.id}
-        if name is not None:
-            if isinstance(name, (str, text_type)):
-                update_dict.update({'name': name})
-                self.name = name
-            else:
-                raise IllegalArgumentError('Name should be a string')
-
-        if description is not None:
-            if isinstance(description, (str, text_type)):
-                update_dict.update({'description': description})
-                self.description = description
-            else:
-                raise IllegalArgumentError('Description should be a string')
-
+        update_dict = {
+            'id': self.id,
+            'name': check_text(text=name, key='name') or self.name,
+            'description': check_text(text=description, key='description') or self.description or '',
+        }
         if tags is not None:
-            if isinstance(tags, (list, tuple, set)):
-                update_dict.update({'tags': tags})
-            else:
-                raise IllegalArgumentError('tags should be a an array (list, tuple, set) of strings')
+            update_dict['tags'] = check_list_of_text(tags, 'tags', True)
 
         self._validate_edit_arguments(
             update_dict=update_dict,
@@ -573,54 +531,35 @@ class Activity2(TreeObject, TagsMixin):
         response = self._client._request('PUT', url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Activity ({})".format(response))
+            raise APIError("Could not update Activity {}".format(self), response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
     def _validate_edit_arguments(self, update_dict, start_date, due_date, assignees, assignees_ids, status):
         """Verify inputs provided in both the `edit` and `edit_cascade_down` methods."""
-        if start_date is not None:
-            if isinstance(start_date, datetime.datetime):
-                if not start_date.tzinfo:
-                    warnings.warn("The startdate '{}' is naive and not timezone aware, use pytz.timezone info. "
-                                  "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
-                update_dict.update({'start_date': start_date.isoformat(sep='T')})
-            else:
-                raise IllegalArgumentError('Start date should be a datetime.datetime() object')
+        if assignees and assignees_ids:
+            raise IllegalArgumentError('Provide either assignee names or their ids, but not both.')
 
-        if due_date is not None:
-            if isinstance(due_date, datetime.datetime):
-                if not due_date.tzinfo:
-                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
-                                  "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
-                update_dict.update({'due_date': due_date.isoformat(sep='T')})
-            else:
-                raise IllegalArgumentError('Due date should be a datetime.datetime() object')
+        assignees = assignees if assignees is not None else assignees_ids
 
-        if isinstance(assignees_ids, (list, tuple)) or isinstance(assignees, (list, tuple)):
-            members = self.scope.members()
+        if assignees:
+            if not isinstance(assignees, (list, tuple, set)) or not all(isinstance(a, (str, int)) for a in assignees):
+                raise IllegalArgumentError('All assignees must be provided as list, tuple or set of names or IDs.')
 
-            if isinstance(assignees_ids, (list, tuple)):
-                update_assignees_ids = [m.get('id') for m in members if m.get('id') in assignees_ids]
-                if len(update_assignees_ids) != len(assignees_ids):
-                    raise NotFoundError("All assignees should be a member of the project")
-            elif isinstance(assignees, (list, tuple)):
-                update_assignees_ids = [m.get('id') for m in members if m.get('username') in assignees]
-                if len(update_assignees_ids) != len(assignees):
-                    raise NotFoundError("All assignees should be a member of the project")
-            else:
-                raise IllegalArgumentError("Provide the usernames either as list of usernames of user id's")
+            update_assignees_ids = [m.get('id') for m in self.scope.members()
+                                    if m.get('id') in assignees or m.get('username') in set(assignees)]
 
-            update_dict.update({'assignees_ids': update_assignees_ids})
-        elif assignees_ids or assignees:
-            raise IllegalArgumentError("If assignees_ids or assignees are provided, they should be a list or tuple")
+            if len(update_assignees_ids) != len(assignees):
+                raise NotFoundError('All assignees should be a member of the project.')
+        else:
+            update_assignees_ids = []
 
-        if status is not None:
-            if isinstance(status, (str, text_type)) and status in ActivityStatus.values():
-                update_dict.update({'status': status})
-            else:
-                raise IllegalArgumentError('Status should be a string and in the list of acceptable '
-                                           'status strings: {}'.format(ActivityStatus.values()))
+        update_dict.update({
+            'assignees_ids': update_assignees_ids,
+            'start_date': check_datetime(dt=start_date, key='start_date'),
+            'due_date': check_datetime(dt=due_date, key='due_date'),
+            'status': check_enum(status, ActivityStatus, 'status') or self.status,
+        })
 
         return update_dict
 
@@ -633,7 +572,7 @@ class Activity2(TreeObject, TagsMixin):
         response = self._client._request('DELETE', self._client._build_url('activity', activity_id=self.id))
 
         if response.status_code != requests.codes.no_content:
-            raise APIError("Could not delete activity: {} with id {}".format(self.name, self.id))
+            raise APIError("Could not delete Activity {}.".format(self), response=response)
         return True
 
     #
@@ -659,14 +598,7 @@ class Activity2(TreeObject, TagsMixin):
         >>> parts = task.parts(category=Category.MODEL)
 
         """
-        if self._client.match_app_version(label='widget', version='>=3.0.0'):
-            widget_manager = self.widgets()
-            associated_parts = list()
-            for widget in widget_manager:
-                associated_parts.extend(widget.parts(*args, **kwargs))
-            return associated_parts
-        else:
-            return self._client.parts(*args, activity=self.id, **kwargs)
+        return [p for w in self.widgets() for p in w.parts(*args, **kwargs)]
 
     def associated_parts(self, *args, **kwargs):
         """Retrieve models and instances belonging to this activity.
@@ -690,22 +622,16 @@ class Activity2(TreeObject, TagsMixin):
         >>> all_models, all_instances = task.associated_parts()
 
         """
-        if self._client.match_app_version(label='widget', version='>=3.0.0'):
-            widget_manager = self.widgets()
-            associated_models = list()
-            associated_instances = list()
-            for widget in widget_manager:
-                associated_models.extend(widget.parts(category=Category.MODEL, *args, **kwargs))
-                associated_instances.extend(widget.parts(category=Category.INSTANCE, *args, **kwargs))
-            return (
-                associated_models,
-                associated_instances
-            )
-        else:
-            return (
-                self.parts(category=Category.MODEL, *args, **kwargs),
-                self.parts(category=Category.INSTANCE, *args, **kwargs)
-            )
+        associated_models = list()
+        associated_instances = list()
+        for widget in self.widgets():
+            associated_models.extend(widget.parts(category=Category.MODEL, *args, **kwargs))
+            associated_instances.extend(widget.parts(category=Category.INSTANCE, *args, **kwargs))
+
+        return (
+            associated_models,
+            associated_instances
+        )
 
     def associated_object_ids(self) -> List[Dict]:
         """Retrieve object ids associated to this activity.
@@ -742,7 +668,7 @@ class Activity2(TreeObject, TagsMixin):
         response = self._client._request('GET', url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve associations on activity: {}".format(response.content))
+            raise NotFoundError("Could not retrieve Associations on Activity {}".format(self), response=response)
 
         data = response.json()
         return data['results']
@@ -765,68 +691,6 @@ class Activity2(TreeObject, TagsMixin):
         """
         widgets = self._client.widgets(activity=self.id, **kwargs)
         return WidgetsManager(widgets=widgets, activity=self, client=self._client)
-
-    def customization(self):
-        """
-        Get a customization object representing the customization of the activity.
-
-        .. versionadded:: 1.11
-
-        :return: An instance of :class:`customization.ExtCustomization`
-
-        Example
-        -------
-        >>> activity = project.activity(name='Customizable activity')
-        >>> customization = activity.customization()
-        >>> part_to_show = project.part(name='Bike')
-        >>> customization.add_property_grid_widget(part_to_show,custom_title="My super bike")
-
-        """
-        from .customization import ExtCustomization
-        if self._client.match_app_version(label='widget', version='>=3.0.0'):
-            raise DeprecationWarning("Customizations are deprecated. We introduced the `Widget` concept in version 3.")
-
-        # For now, we only allow customization in an Ext JS context
-        return ExtCustomization(activity=self, client=self._client)
-
-    def configure(self, inputs, outputs):
-        """
-        Configure activity input and output.
-
-        You need to provide a list of input and output :class:`Property`. Does not work with lists of propery id's.
-
-        :param inputs: iterable of input property models
-        :type inputs: list(:class:`Property`)
-        :param outputs: iterable of output property models
-        :type outputs: list(:class:`Property`)
-        :raises APIError: when unable to configure the activity
-        """
-        def _get_propertyset(proplist):
-            """Make it into a unique list of properties to configure for either inputs or outputs."""
-            from pykechain.models import Property
-            propertyset = []
-            for property in proplist:
-                if isinstance(property, Property):
-                    propertyset.append(property.id)
-                elif is_uuid(property):
-                    propertyset.append(property)
-            return list(set(propertyset))
-
-        url = self._client._build_url('activity', activity_id='{}/update_associations'.format(self.id))
-
-        if not all([p._json_data.get('category') == Category.MODEL for p in inputs]) and \
-                not all([p._json_data.get('category') == Category.MODEL for p in outputs]):
-            raise IllegalArgumentError('All Properties need to be of category MODEL to configure a task')
-
-        response = self._client._request('PUT', url, json={
-            'inputs': _get_propertyset(inputs),
-            'outputs': _get_propertyset(outputs)
-        })
-
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not configure activity")
-
-        self.refresh(json=response.json().get('results')[0])
 
     def download_as_pdf(self, target_dir=None, pdf_filename=None, paper_size=PaperSize.A4,
                         paper_orientation=PaperOrientation.PORTRAIT, include_appendices=False):
@@ -871,11 +735,11 @@ class Activity2(TreeObject, TagsMixin):
         url = self._client._build_url('activity_export', activity_id=self.id)
         response = self._client._request('GET', url, params=request_params)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not download PDF of activity '{}': '{}'".format(self.name, response.content))
+            raise APIError("Could not download PDF of Activity {}".format(self), response=response)
 
         # If appendices are included, the request becomes asynchronous
 
-        if include_appendices:
+        if include_appendices:  # pragma: no cover
             data = response.json()
 
             # Download the pdf async
@@ -895,8 +759,8 @@ class Activity2(TreeObject, TagsMixin):
                 count += ASYNC_REFRESH_INTERVAL
                 time.sleep(ASYNC_REFRESH_INTERVAL)
 
-            raise APIError("Could not download PDF of activity {} within the time-out limit of {} "
-                           "seconds".format(self.name, ASYNC_TIMEOUT_LIMIT))
+            raise APIError("Could not download PDF of Activity {} within the time-out limit of {} "
+                           "seconds".format(self, ASYNC_TIMEOUT_LIMIT), response=response)
 
         with open(full_path, 'wb') as f:
             for chunk in response.iter_content(1024):
@@ -909,7 +773,7 @@ class Activity2(TreeObject, TagsMixin):
         See :func:`pykechain.Client.move_activity` for available parameters.
 
         If you want to move an Activity from one classification to another, you need to provide the target
-        classification. The classificaiton of the parent should match the one provided in the function. This is
+        classification. The classification of the parent should match the one provided in the function. This is
         to ensure that you really want this to happen.
 
         :param parent: parent object to move activity to
@@ -922,7 +786,7 @@ class Activity2(TreeObject, TagsMixin):
         """
         return self._client.move_activity(self, parent, classification=classification)
 
-    def share_link(self, subject, message, recipient_users):
+    def share_link(self, subject: Text, message: Text, recipient_users: List[Union[User, Text]]) -> None:
         """
         Share the link of the `Activity` through email.
 
@@ -932,29 +796,12 @@ class Activity2(TreeObject, TagsMixin):
         :type message: basestring
         :param recipient_users: users that will receive the email
         :type recipient_users: list(Union(User, Id))
-        :raises IllegalArgumentError: if no 'message' is specified
-        :raises IllegalArgumentError: if no 'subject' is specified
-        :raises IllegalArgumentError: if no 'recipient_users' is specified
-        :raises APIError: if an Error occurs.
+        :raises APIError: if an internal server error occurred.
         """
-        if not message:
-            raise IllegalArgumentError('Sharing an activity link requires a message')
-        if not subject:
-            raise IllegalArgumentError('Sharing an activity link requires a subject')
-        if not recipient_users:
-            raise IllegalArgumentError('Sharing an activity link requires recipient users')
-        else:
-            recipient_users_ids = list()
-            for user in recipient_users:
-                if isinstance(user, User):
-                    recipient_users_ids.append(user.id)
-                else:
-                    recipient_users_ids.append(user)
-
         params = dict(
-            message=message,
-            subject=subject,
-            recipient_users=recipient_users_ids,
+            message=check_text(message, 'message'),
+            subject=check_text(subject, 'subject'),
+            recipient_users=[check_user(recipient, User, 'recipient') for recipient in recipient_users],
             activity_id=self.id
         )
 
@@ -963,10 +810,17 @@ class Activity2(TreeObject, TagsMixin):
         response = self._client._request('POST', url, data=params)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not share the link to Activity, {}:\n\n{}'".format(str(response), response.json()))
+            raise APIError("Could not share the link to Activity {}".format(self), response=response)
 
-    def share_pdf(self, subject, message, recipient_users, paper_size=PaperSize.A3,
-                  paper_orientation=PaperOrientation.PORTRAIT, include_appendices=False):
+    def share_pdf(
+            self,
+            subject: Text,
+            message: Text,
+            recipient_users: List[Union[User, Text]],
+            paper_size: Optional[PaperSize] = PaperSize.A3,
+            paper_orientation: Optional[PaperOrientation] = PaperOrientation.PORTRAIT,
+            include_appendices: Optional[bool] = False
+    ) -> None:
         """
         Share the PDF of the `Activity` through email.
 
@@ -977,8 +831,8 @@ class Activity2(TreeObject, TagsMixin):
         :param recipient_users: users that will receive the email
         :type recipient_users: list(Union(User, Id))
         :param paper_size: The size of the paper to which the PDF is downloaded:
-                               - a4paper (default): A4 paper size
-                               - a3paper: A3 paper size
+                               - a4paper: A4 paper size
+                               - a3paper: A3 paper size (default)
                                - a2paper: A2 paper size
                                - a1paper: A1 paper size
                                - a0paper: A0 paper size
@@ -989,43 +843,29 @@ class Activity2(TreeObject, TagsMixin):
         :type paper_size: basestring (see :class:`enums.PaperOrientation`)
         :param include_appendices: True if the PDF should contain appendices, False (default) if otherwise.
         :type include_appendices: bool
-        :raises IllegalArgumentError: if no 'message' is specified
-        :raises IllegalArgumentError: if no 'subject' is specified
-        :raises IllegalArgumentError: if no 'recipient_users' is specified
-        :raises APIError: if an Error occurs.
+        :raises APIError: if an internal server error occurred.
         """
-        if not recipient_users:
-            raise IllegalArgumentError(
-                "Sharing an activity pdf requires a list of recipient users "
-                "(User objects, user id's or email addresses)"
-            )
-        else:
-            recipient_emails = list()
-            recipient_users_ids = list()
+        recipient_emails = list()
+        recipient_users_ids = list()
+        if isinstance(recipient_users, list) and all(isinstance(r, (str, int, User)) for r in recipient_users):
             for user in recipient_users:
-                if isinstance(user, User):
-                    recipient_users_ids.append(user.id)
-                elif isinstance(user, int):
-                    recipient_users_ids.append(user)
-                elif is_valid_email(user):
+                if is_valid_email(user):
                     recipient_emails.append(user)
                 else:
-                    raise IllegalArgumentError(
-                        "Sharing an activity pdf requires a list of recipient users "
-                        "(User objects, user id's or email addresses), got invalid email address: '{}".format(
-                            user
-                        )
-                    )
+                    recipient_users_ids.append(check_user(user, User, 'recipient'))
+        else:
+            raise IllegalArgumentError('`recipients` must be a list of User objects, IDs or email addresses, '
+                                       '"{}" ({}) is not.'.format(recipient_users, type(recipient_users)))
 
         params = dict(
-            message=message,
-            subject=subject,
+            message=check_text(message, 'message'),
+            subject=check_text(subject, 'subject'),
             recipient_users=recipient_users_ids,
-            recipient_emails=recipient_emails or [''],
+            recipient_emails=recipient_emails,
             activity_id=self.id,
-            papersize=paper_size,
-            orientation=paper_orientation,
-            appendices=include_appendices,
+            papersize=check_enum(paper_size, PaperSize, 'paper_size'),
+            orientation=check_enum(paper_orientation, PaperOrientation, 'paper_orientation'),
+            appendices=check_type(include_appendices, bool, 'bool'),
         )
 
         url = self._client._build_url('notification_share_activity_pdf')
@@ -1033,4 +873,4 @@ class Activity2(TreeObject, TagsMixin):
         response = self._client._request('POST', url, data=params)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not share the link to Activity, {}:\n\n{}'".format(str(response), response.json()))
+            raise APIError("Could not share the link to Activity {}".format(self), response=response)

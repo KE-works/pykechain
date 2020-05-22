@@ -1,5 +1,3 @@
-from unittest import skip
-
 import pytest
 from envparse import env
 
@@ -22,7 +20,6 @@ class TestGetProjectHelperNotForTravis(TestBetamax):
         # unset all environment variables in the self.env protected env world
         for kec_env in KechainEnv.values():
             self.env.unset(kec_env)
-        del self.project
 
     def test_get_project__not_for_travis(self):
         self.env.set(KechainEnv.KECHAIN_FORCE_ENV_USE, "false")
