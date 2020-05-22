@@ -1,6 +1,18 @@
 Change Log
 ==========
 
+v3.x.x
+------
+
+* :star: Implemented `ActivityReferenceProperty` class, generalizing the implementation of the part reference `MultiReferenceProperty2` class. Intermediate classes `_ReferenceProperty` and `_ReferencePropertyInScope` have been added for further reference properties.
+* :+1: Created mapping table `property_type_to_class_map` to convert between property types from the `PropertyType` enumeration and property classes derived from the `Property2` class.
+* :+1: Added `BaseInScope` base class for KE-chain objects limited to a single scope. It inherits from `Base` itself. The new class is used for Parts, Properties, Activities, Widgets, Associations and Services. Original class is still used for Scopes, Teams, Users, Banners, Notifications and ServiceExecutions.
+* :+1: Moved `scope` property method to the `BaseInScope` class, adding lazy retrieval to limit overhead.
+* :bug: Added `Activity2.scope_id` setter method (self-induced bug due to the introduction of `BaseInScope`).
+* :bug: Moved the serialization of property values from the `Part2._parse_update_dict()` method to the new `Property2.serialize_value()` method and used it in the `_put_value()` method of this class.
+* :bug: The `MultiReferenceProperty2.choices()` method now returns an empty list if no `Part` model is yet configured. Now the method no longer raises a TypeError (i.e. 'NoneType' object is not subscriptable).
+
+
 v3.7.0-rc2 (not released)
 
 : "star: Added `ScopeRoles` and `ScopeMemberActions` enum classes to list the roles of and operations on scope members.

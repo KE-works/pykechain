@@ -65,7 +65,7 @@ class BaseInScope(Base):
     """
     Base model for KE-chain objects coupled to a scope.
 
-    :ivar scope_id: UUID of the scope
+    :ivar scope_id: UUID of the Scope
     :type scope_id: str
     """
 
@@ -74,3 +74,19 @@ class BaseInScope(Base):
         super().__init__(json, *args, **kwargs)
 
         self.scope_id = json.get('scope_id', json.get('scope', None))
+        self._scope = None  # type: Optional['Scope2']
+
+    @property
+    def scope(self):
+        """
+        Scope this object belongs to.
+
+        This property will return a `Scope` object. It will make an additional call to the KE-chain API.
+
+        :return: the scope
+        :type: :class:`pykechain.models.Scope`
+        :raises NotFoundError: if the scope could not be found
+        """
+        if not self._scope:
+            self._scope = self._client.scope(pk=self.scope_id, status=None)
+        return self._scope

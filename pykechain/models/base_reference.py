@@ -23,12 +23,12 @@ class _ReferenceProperty(Property2):
         self._cached_values = None
 
     @property
-    def cls(self) -> Text:
+    def ref_name(self) -> Text:
         """Get the name of the referenced Pykechain class."""
         return self.REFERENCED_CLASS.__name__
 
     @property
-    def value(self) -> Optional[Iterable[Base]]:
+    def value(self) -> Optional[Iterable[REFERENCED_CLASS]]:
         """
         Retrieve the referenced objects of this reference property.
 
@@ -40,6 +40,19 @@ class _ReferenceProperty(Property2):
         elif not self._cached_values:
             self._cached_values = self._retrieve_objects(object_ids=self._value)
         return self._cached_values
+
+    @value.setter
+    def value(self, value: Any) -> None:
+        # TODO This is duplicate code from the Property2 class.
+        #  However, it is necessary to provide a setter method if we want to override the getter. What to do?
+        if self.use_bulk_update:
+            self.__class__._update_package.append(dict(
+                id=self.id,
+                value=value,
+            ))
+            self._value = value
+        else:
+            self._put_value(value)
 
     @abstractmethod
     def _retrieve_objects(self, object_ids: Iterable[Any], **kwargs) -> Iterable[Base]:
@@ -54,8 +67,7 @@ class _ReferenceProperty(Property2):
         """
         pass
 
-    @value.setter
-    def value(self, value: Union[List, Tuple]):
+    def _put_value(self, value: Union[List, Tuple]):
         # Sanitize the inputs
         value_to_set = []
         if isinstance(value, (list, tuple)):
@@ -65,17 +77,17 @@ class _ReferenceProperty(Property2):
                 elif isinstance(item, str) and is_uuid(item):
                     value_to_set.append(item)
                 else:
-                    raise ValueError("References must be of {cls}, {cls} id or None. type: {}".format(type(item),
-                                                                                                      cls=self.cls))
+                    raise ValueError("References must be of type {cls}, {cls} id or None. type: {}".format(
+                        type(item), cls=self.ref_name))
         elif value is None:
             value_to_set = None  # clear out the list
         else:
             raise ValueError(
-                "Reference must be a list (or tuple) of {cls}, {cls} id or None. type: {}".format(type(value),
-                                                                                                  cls=self.cls))
+                "Reference must be a list (or tuple) of type {cls}, {cls} id or None. type: {}".format(
+                    type(value), cls=self.ref_name))
 
-        # do the update
-        self._put_value(value_to_set)
+        # do the update in the superclass method
+        super()._put_value(value=value)
 
 
 class _ReferencePropertyInScope(_ReferenceProperty, ABC):
@@ -87,19 +99,9 @@ class _ReferencePropertyInScope(_ReferenceProperty, ABC):
 
     REFERENCED_CLASS = BaseInScope
 
-    @property
-    def value(self) -> Optional[Iterable[Base]]:
-        """
-        Retrieve the referenced objects of this reference property.
+    def _put_value(self, value: Union[List, Tuple]):
+        super()._put_value(value=value)
 
-        :return: list or generator of `Base` objects.
-        :rtype list
-        """
-        return super().value
-
-    @value.setter
-    def value(self, value: Union[List, Tuple]):
-        super().value = value
         if value is not None:
             self._check_x_scope_id(referenced_object=value)
 

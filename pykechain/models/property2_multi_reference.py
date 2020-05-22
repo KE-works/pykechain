@@ -1,4 +1,4 @@
-from typing import List, Optional, Text, Union, Any, Iterable
+from typing import List, Optional, Text, Union, Any, Iterable, Dict
 
 from pykechain.enums import Category, FilterType
 from pykechain.models.base_reference import _ReferencePropertyInScope
@@ -58,13 +58,18 @@ class MultiReferenceProperty2(_ReferencePropertyInScope):
         >>> referenced_part_choices = reference_property.choices()
 
         """
-        # from the reference property (instance) we need to get the value of the reference property in the model
-        # in the reference property of the model the value is set to the ID of the model from which we can choose parts
-        # the configuration of this ref prop is stored in the model() of this multi-ref-prop. Need to extract model_id
-        choices_model_id = self.model()._value[0].get('id')
-        possible_choices = self._client.parts(model_id=choices_model_id)  # makes multiple parts call
+        # Check whether the model of this reference property (possible itself) has a configured value
+        referenced_model = self.model()._value  # type: Optional[List[Dict]]
+        if referenced_model:
+            # If a model is configured, retrieve its ID
+            choices_model_id = referenced_model[0].get('id')
 
-        return possible_choices
+            # Retrieve all part instances with this model ID
+            possible_choices = self._client.parts(model_id=choices_model_id)  # makes multiple parts call
+
+            return possible_choices
+        else:
+            return list()
 
     def set_prefilters(
             self,

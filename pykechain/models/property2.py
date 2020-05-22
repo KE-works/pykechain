@@ -1,19 +1,21 @@
-from typing import Any, List, Dict, Optional, Text, Union, Tuple, Iterable
+from typing import Any, List, Dict, Optional, Text, Union, Tuple, Iterable, TypeVar
 
 import requests
 from jsonschema import validate
 
-from pykechain.enums import Category
+from pykechain.enums import Category, PropertyType
 from pykechain.exceptions import APIError, IllegalArgumentError
-from pykechain.models import Base
+from pykechain.models import Base, BaseInScope
 from pykechain.models.input_checks import check_text, check_type
 from pykechain.models.representations.representation_base import BaseRepresentation
 from pykechain.models.validators import PropertyValidator
 from pykechain.models.validators.validator_schemas import options_json_schema
 from pykechain.defaults import API_EXTRA_PARAMS
 
+T = TypeVar("T")
 
-class Property2(Base):
+
+class Property2(BaseInScope):
     """A virtual object representing a KE-chain property.
 
     .. versionadded: 3.0
@@ -33,8 +35,6 @@ class Property2(Base):
     :type model: str
     :ivar output: a boolean if the value is configured as an output (in an activity)
     :type output: bool
-    :ivar scope_id: the id of the Scope (not the `Scope` object)
-    :type scope_id: str
     :ivar part: The (parent) part in which this property is available
     :type part: :class:`Part2`
     :ivar value: the property value, can be set as well as property
@@ -142,6 +142,8 @@ class Property2(Base):
         cls.use_bulk_update = use_bulk_update
 
     def _put_value(self, value):
+        value = self.serialize_value(value)
+
         url = self._client._build_url('property2', property_id=self.id)
 
         response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['property2'], json={'value': value})
@@ -151,6 +153,31 @@ class Property2(Base):
 
         self.refresh(json=response.json()['results'][0])
         return self._value
+
+    def serialize_value(self, value: [T]) -> T:
+        """
+        Serializes the value to be set on the property.
+
+        :param value: non-serialized value
+        :type value: Any
+        :return: serialized value
+        """
+        def make_serializable(v):
+            # if the value is a reference property to another 'Base' Part, replace with its ID
+            return v.id if isinstance(v, Base) else v
+
+        if isinstance(value, (list, set, tuple)):
+            value = list(map(make_serializable, value))
+        else:
+            make_serializable(value)
+
+        if self.type == PropertyType.DATETIME_VALUE:
+            import datetime
+            if isinstance(value, datetime.datetime):
+                # noinspection PyUnresolvedReferences
+                value = self.to_iso_format(value)
+
+        return value
 
     @property
     def part(self) -> 'Part2':
@@ -363,25 +390,11 @@ class Property2(Base):
 
         from pykechain.models import property_type_to_class_map
 
+        # Get specific Property subclass, defaulting to Property2 itself
         property_class = property_type_to_class_map.get(property_type, Property2)
 
+        # Call constructor and return new object
         return property_class(json, **kwargs)
-        #
-        # # changed for PIM2
-        # if property_type == PropertyType.ATTACHMENT_VALUE:
-        #     from .property2_attachment import AttachmentProperty2
-        #     return AttachmentProperty2(json, **kwargs)
-        # elif property_type == PropertyType.SINGLE_SELECT_VALUE:
-        #     from .property2_selectlist import SelectListProperty2
-        #     return SelectListProperty2(json, **kwargs)
-        # elif property_type == PropertyType.REFERENCES_VALUE:
-        #     from .property2_multi_reference import MultiReferenceProperty2
-        #     return MultiReferenceProperty2(json, **kwargs)
-        # elif property_type == PropertyType.DATETIME_VALUE:
-        #     from .property2_datetime import DatetimeProperty2
-        #     return DatetimeProperty2(json, **kwargs)
-        # else:
-        #     return Property2(json, **kwargs)
 
     def edit(
             self,

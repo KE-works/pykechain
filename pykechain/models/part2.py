@@ -4,11 +4,10 @@ from typing import Union, List, Dict, Optional, Text, Tuple  # noqa: F401
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.enums import Category, Multiplicity, Classification
+from pykechain.enums import Category, Multiplicity, Classification, PropertyType
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
     get_edited_one_many
-from pykechain.models import Scope2
 from pykechain.models.input_checks import check_text, check_type, check_list_of_base, check_list_of_dicts
 from pykechain.models.property2 import Property2
 from pykechain.models.tree_traversal import TreeObject
@@ -153,7 +152,7 @@ class Part2(TreeObject):
         :rtype: :class:`pykechain.models.Scope`
         :raises NotFoundError: if the scope could not be found
         """
-        return self._client.scope(pk=self.scope_id, status=None)
+        return super().scope
 
     def parent(self) -> 'Part2':
         """Retrieve the parent of this `Part`.
@@ -650,28 +649,15 @@ class Part2(TreeObject):
 
         key = 'id' if part.category == Category.INSTANCE else 'model_id'
 
-        from pykechain.models import Base, AttachmentProperty2, DatetimeProperty2
-
-        def make_serializable(value):
-            # if the value is a reference property to another 'Base' Part, replace with its ID
-            return value.id if isinstance(value, Base) else value
-
         for prop_name_or_id, property_value in update_dict.items():
-            property_to_update = part.property(prop_name_or_id)
-            if isinstance(property_value, (list, set, tuple)):
-                property_value = list(map(make_serializable, property_value))
-            else:
-                make_serializable(property_value)
-
-            if isinstance(property_to_update, DatetimeProperty2) and isinstance(property_value, datetime.datetime):
-                property_value = DatetimeProperty2.to_iso_format(property_value)
+            property_to_update = part.property(prop_name_or_id)  # type: Property2
 
             updated_p = {
-                'value': property_value,
+                'value': property_to_update.serialize_value(property_value),
                 key: property_to_update.id,
             }
 
-            if isinstance(property_to_update, AttachmentProperty2):
+            if property_to_update.type == PropertyType.ATTACHMENT_VALUE:
                 exception_fvalues.append(updated_p)
             else:
                 properties_fvalues.append(updated_p)

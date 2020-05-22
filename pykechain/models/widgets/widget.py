@@ -6,11 +6,11 @@ from jsonschema import validate
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import WidgetTypes, Category
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
-from pykechain.models import Base
+from pykechain.models import BaseInScope
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 
 
-class Widget(Base):
+class Widget(BaseInScope):
     """A virtual object representing a KE-chain Widget.
 
     :cvar basestring id: UUID of the widget
@@ -48,7 +48,7 @@ class Widget(Base):
         self._activity_id = json.get('activity_id')
         self._parent_id = json.get('parent_id')
         self.has_subwidgets = json.get('has_subwidgets')
-        self._scope_id = json.get('scope_id')
+        self._scope_id = json.get('scope_id')  # TODO duplicate with `scope_id` attribute
         self.progress = json.get('progress')
 
     def __repr__(self):  # pragma: no cover

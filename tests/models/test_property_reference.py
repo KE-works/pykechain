@@ -62,7 +62,7 @@ class TestMultiReferenceProperty(TestBetamax):
         self.ref_prop_model.value = [wheel_model]
 
         # testing
-        self.assertEqual(len(self.ref_prop_model.value), 1)
+        self.assertEqual(len(list(self.ref_prop_model.value)), 1)
 
     def test_referencing_multiple_instances_using_parts(self):
         # setUp

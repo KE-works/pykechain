@@ -25,8 +25,6 @@ class Service(BaseInScope):
     :type description: str
     :ivar version: version number of the service, as provided by uploaded
     :type version: str
-    :ivar scope_id: uuid of the scope to which the service belongs
-    :type scope_id: uuid
     :ivar type: type of the service. One of the :class:`ServiceType`
     :type type: str
     :ivar filename: filename of the service

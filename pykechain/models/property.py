@@ -24,8 +24,6 @@ class Property(BaseInScope):  # pragma: no cover
     :type unit: str or None
     :ivar model: the id of the model (not the model object)
     :type model: str
-    :ivar scope_id: the id of the Scope (not the `Scope` object)
-    :type scope_id: str
     :ivar output: a boolean if the value is configured as an output (in an activity)
     :type output: bool
     :ivar part: The (parent) part in which this property is available

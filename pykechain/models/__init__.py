@@ -40,6 +40,7 @@ AnyProperty = Union[
     'ActivityReferenceProperty',
 ]
 
+# This map is used to identify the correct class for the (KE-chain provided) property type.
 property_type_to_class_map = {
     PropertyType.ATTACHMENT_VALUE: AttachmentProperty2,
     PropertyType.SINGLE_SELECT_VALUE: SelectListProperty2,
