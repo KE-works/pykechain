@@ -7,7 +7,7 @@ import six
 import warnings
 
 from pykechain.enums import ScopeStatus
-from pykechain.models import Team
+from pykechain.models import Team, Base
 from pykechain.models.scope2 import Scope2
 from pykechain.client import Client
 from pykechain.exceptions import ForbiddenError, ClientError, NotFoundError, IllegalArgumentError
@@ -87,6 +87,17 @@ class TestClient(TestCase):
         # TODO Produce a more precise Exception, even with the retry adapter.
         with self.assertRaises(Exception):
             client.current_user()
+
+    def test_reload(self):
+        client = Client()
+
+        not_a_kechain_object = 3
+        with self.assertRaises(IllegalArgumentError, msg='Reload must receive an object of type Base.'):
+            client.reload(not_a_kechain_object)
+
+        empty_kechain_object = Base(json=dict(name='empty', id='1234567890'), client=client)
+        with self.assertRaises(IllegalArgumentError, msg='Reload cant find API resource for type Base'):
+            client.reload(empty_kechain_object)
 
 
 class TestClientLive(TestBetamax):

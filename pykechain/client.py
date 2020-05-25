@@ -370,31 +370,46 @@ class Client(object):
         :return: a new object
         :raises NotFoundError: if original object is not found or deleted in the mean time
         """
-        if not url and not obj._json_data.get('url'):
-            # TODO Throw an error instead of building the URL?
-            #  This .__name__ method does not work for subclasses (e.g. MultiReferenceProperty).
+        check_type(value=obj, cls=Base, key='obj')
+        url = check_text(text=url, key='url')
+        extra_params = check_type(extra_params, dict, 'extra_params')
 
-            # build the url from the class name (in lower case) `obj.__class__.__name__.lower()`
-            # get the id from the `obj.id` which is normally a keyname `<class_name>_id` (without the '2' if so)
+        if url:
+            url = url
+        elif obj._json_data.get('url'):
+            url = obj._json_data.get('url')
+        else:
+            # No known URL to reload the object: Try to build the url from the class name (in lower case)
 
-            url = self._build_url(obj.__class__.__name__.lower(),
-                                  **{"{}_id".format(obj.__class__.__name__.lower().replace("2", "")): obj.id})
-            extra_api_params = API_EXTRA_PARAMS.get(obj.__class__.__name__.lower())
+            extra_api_params = dict()
+            superclasses = obj.__class__.mro()  # method resolution order, i.e. the obj's class and its superclasses
+            for cls in superclasses:
+                resource = cls.__name__.lower()
+
+                try:
+                    # set the id from the `obj.id` which is normally a keyname `<class_name>_id` (without the '2' if so)
+                    url = self._build_url(resource=resource, **{"{}_id".format(resource.replace("2", "")): obj.id})
+                    extra_api_params = API_EXTRA_PARAMS.get(resource)
+                    break
+                except KeyError:
+                    # If the resource was not recognized, try the next superclass
+                    continue
+
+            if url is None:
+                raise IllegalArgumentError(
+                    'Provide URL to reload the "{}" object (could not identify the API resource).'.format(obj))
+
             # add the additional API params to the already provided extra params if they are provided.
             extra_params = extra_params.update(**extra_api_params) if extra_params else extra_api_params
-        elif url:
-            url = url
-        else:
-            url = obj._json_data.get('url')
 
         response = self._request('GET', url, params=extra_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not reload {} {}".format(obj.__class__.__name__, obj), response=response)
 
-        data = response.json()
+        data = response.json()['results'][0]
 
-        return obj.__class__(data['results'][0], client=self)
+        return obj.__class__(data, client=self)
 
     @staticmethod
     def _retrieve_singular(method: Callable, *args, **kwargs):
@@ -407,8 +422,9 @@ class Client(object):
         :raises NotFoundError: When no result is found.
         :raises MultipleFoundError: When more than a single result is found.
         """
-        # TODO set limit=2 to reduce query (but allow MultipleFoundError)?
+        # TODO set limit=2 to reduce query (but allow MultipleFoundError)
         #  Will require updating of many cassettes.
+        # kwargs['limit'] = kwargs.get('limit', 2)
         results = method(*args, **kwargs)
 
         criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
@@ -1689,7 +1705,8 @@ class Client(object):
         if asynchronous:
             return None
 
-        cloned_scope = Scope2(response.json()['results'][0], client=source_scope._client)
+        data = response.json()['results'][0]
+        cloned_scope = Scope2(data, client=source_scope._client)
 
         # TODO work-around, some attributes are not (yet) in the KE-chain response.json()
         cloned_scope._tags = tags

@@ -623,3 +623,9 @@ class TestActivityReference(TestBetamax):
         self.assertIsInstance(self.prop, ActivityReferenceProperty)
         self.assertIsNotNone(self.prop.value)
         self.assertEqual(task, self.prop.value[0])
+
+    def test_reload(self):
+        reloaded_prop = self.client.reload(obj=self.prop)
+
+        self.assertFalse(self.prop is reloaded_prop, msg='Must be different Python objects, based on memory allocation')
+        self.assertEqual(self.prop, reloaded_prop, msg='Must be the same KE-chain prop, based on hashed UUID')
