@@ -3,21 +3,16 @@ import time
 from unittest import TestCase, skipIf
 
 import pytz
-import six
 import warnings
 
 from pykechain.enums import ScopeStatus
 from pykechain.models import Team, Base
 from pykechain.models.scope2 import Scope2
 from pykechain.client import Client
-from pykechain.exceptions import ForbiddenError, ClientError, NotFoundError, IllegalArgumentError
+from pykechain.exceptions import ForbiddenError, ClientError, NotFoundError, IllegalArgumentError, APIError
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_WIM2
-
-if six.PY2:
-    from test.test_support import EnvironmentVarGuard
-elif six.PY3:
-    from test.support import EnvironmentVarGuard
+from test.support import EnvironmentVarGuard
 
 
 class TestClient(TestCase):
@@ -84,10 +79,10 @@ class TestClient(TestCase):
     def test_get_current_user(self):
         client = Client()
 
-        # TODO Produce a more precise Exception, even with the retry adapter.
-        with self.assertRaises(Exception):
+        with self.assertRaises(APIError):
             client.current_user()
 
+    # noinspection PyTypeChecker
     def test_reload(self):
         client = Client()
 
