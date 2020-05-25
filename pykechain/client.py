@@ -912,12 +912,15 @@ class Client(object):
         """
         Retrieve the User object logged in to the Client.
 
-        # TODO Produce a more precise Exception, even with the retry adapter.
-        :raises Exception if not logged in yet.
+        :raises APIError if not logged in yet.
+        :raises NotFoundError if user could not be found.
         :returns User
         :rtype User
         """
-        response = self._request(method='GET', url=self._build_url(resource='user_current'))
+        try:
+            response = self._request(method='GET', url=self._build_url(resource='user_current'))
+        except Exception as e:
+            raise APIError("No authentication provided to retrieve the current user:\n{}".format(e.args[0]))
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve current User", response=response)
