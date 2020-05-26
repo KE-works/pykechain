@@ -22,7 +22,7 @@ class MultiReferenceProperty2(_ReferencePropertyInScope):
         if self._value is None:
             return []
 
-        if not all([isinstance(v, dict) and 'id' in v for v in self._value]):
+        if not all([isinstance(v, str) or (isinstance(v, dict) and 'id') in v for v in self._value]):
             raise ValueError("Expected _value to be dicts with field 'id', got '{}'.".format(self._value))
 
         ids = [v.get('id') for v in self._value]

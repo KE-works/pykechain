@@ -43,3 +43,8 @@ class DatetimeProperty2(Property2):
         # type: (datetime.datetime) -> Text
         """Convert a datetime object to isoformat."""
         return date_time.isoformat()
+
+    def serialize_value(self, value) -> str:
+        if isinstance(value, datetime.datetime):
+            value = self.to_iso_format(value)
+        return value

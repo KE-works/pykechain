@@ -43,14 +43,8 @@ class _ReferenceProperty(Property2):
 
     @value.setter
     def value(self, value: Any) -> None:
-        # TODO This is duplicate code from the Property2 class.
-        #  However, it is necessary to provide a setter method if we want to override the getter. What to do?
         if self.use_bulk_update:
-            self.__class__._update_package.append(dict(
-                id=self.id,
-                value=value,
-            ))
-            self._value = value
+            self._pend_value(value)
         else:
             self._put_value(value)
 
@@ -61,14 +55,12 @@ class _ReferenceProperty(Property2):
 
         This method is abstract because the exact method of the Client class changes per subclass.
 
-        :param object_ids: list of KE-chain UUIDs.
-        :param kwargs: optional inputs
-        :return: list of Pykechain objects
+        :param kwargs: optional arguments
+        :return: list of Pykechain objects inheriting from Base
         """
         pass
 
-    def _put_value(self, value: Union[List, Tuple]):
-        # Sanitize the inputs
+    def serialize_value(self, value: Union[List, Tuple]):
         value_to_set = []
         if isinstance(value, (list, tuple)):
             for item in value:
@@ -86,8 +78,7 @@ class _ReferenceProperty(Property2):
                 "Reference must be a list (or tuple) of type {cls}, {cls} id or None. type: {}".format(
                     type(value), cls=self.ref_name))
 
-        # do the update in the superclass method
-        super()._put_value(value=value_to_set)
+        return value_to_set
 
 
 class _ReferencePropertyInScope(_ReferenceProperty, ABC):

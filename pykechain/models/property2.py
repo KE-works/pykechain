@@ -3,7 +3,7 @@ from typing import Any, List, Dict, Optional, Text, Union, Tuple, Iterable, Type
 import requests
 from jsonschema import validate
 
-from pykechain.enums import Category, PropertyType
+from pykechain.enums import Category
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Base, BaseInScope
 from pykechain.models.input_checks import check_text, check_type
@@ -47,7 +47,7 @@ class Property2(BaseInScope):
     :type is_invalid: bool
     """
 
-    use_bulk_update = False
+    _use_bulk_update = False
     _update_package = list()
 
     def __init__(self, json, **kwargs):
@@ -105,6 +105,16 @@ class Property2(BaseInScope):
             return bool(self._value)
 
     @property
+    def use_bulk_update(self):
+        # set the class attribute to make this value a singleton
+        return self.__class__._use_bulk_update
+
+    @use_bulk_update.setter
+    def use_bulk_update(self, value):
+        assert isinstance(value, bool), "`use_bulk_update` must be set to a boolean, not {}".format(type(value))
+        self.__class__._use_bulk_update = value
+
+    @property
     def value(self) -> Any:
         """Retrieve the data value of a property.
 
@@ -117,11 +127,7 @@ class Property2(BaseInScope):
     @value.setter
     def value(self, value: Any) -> None:
         if self.use_bulk_update:
-            self.__class__._update_package.append(dict(
-                id=self.id,
-                value=value,
-            ))
-            self._value = value
+            self._pend_value(value)
         else:
             self._put_value(value)
 
@@ -141,7 +147,19 @@ class Property2(BaseInScope):
             cls._update_package = list()
         cls.use_bulk_update = use_bulk_update
 
+    def _pend_value(self, value):
+        """Store the value to be send at a later point in time using `update_values`."""
+        value = self.serialize_value(value)
+
+        self.__class__._update_package.append(dict(
+            id=self.id,
+            value=value,
+        ))
+        self._value = value
+        return self._value
+
     def _put_value(self, value):
+        """Send the value to KE-chain."""
         value = self.serialize_value(value)
 
         url = self._client._build_url('property2', property_id=self.id)
@@ -162,22 +180,7 @@ class Property2(BaseInScope):
         :type value: Any
         :return: serialized value
         """
-        def make_serializable(v):
-            # if the value is a reference property to another 'Base' Part, replace with its ID
-            return v.id if isinstance(v, Base) else v
-
-        if isinstance(value, (list, set, tuple)):
-            value = list(map(make_serializable, value))
-        else:
-            make_serializable(value)
-
-        if self.type == PropertyType.DATETIME_VALUE:
-            import datetime
-            if isinstance(value, datetime.datetime):
-                # noinspection PyUnresolvedReferences
-                value = self.to_iso_format(value)
-
-        return value
+        return value.id if isinstance(value, Base) else value
 
     @property
     def part(self) -> 'Part2':
