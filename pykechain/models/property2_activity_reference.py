@@ -1,4 +1,4 @@
-from typing import Iterable, Any
+from typing import Iterable
 
 from pykechain.models import Activity2
 from pykechain.models.base_reference import _ReferencePropertyInScope

@@ -61,6 +61,13 @@ class _ReferenceProperty(Property2):
         pass
 
     def serialize_value(self, value: Union[List, Tuple]):
+        """
+        Serialize the value to be set on the property by checking for a list of Base objects.
+
+        :param value: non-serialized value
+        :type value: Any
+        :return: serialized value
+        """
         value_to_set = []
         if isinstance(value, (list, tuple)):
             for item in value:

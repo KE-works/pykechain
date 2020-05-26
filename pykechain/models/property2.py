@@ -106,6 +106,7 @@ class Property2(BaseInScope):
 
     @property
     def use_bulk_update(self):
+        """Set or get the toggle to asynchronously update property values."""
         # set the class attribute to make this value a singleton
         return self.__class__._use_bulk_update
 

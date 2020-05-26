@@ -45,6 +45,13 @@ class DatetimeProperty2(Property2):
         return date_time.isoformat()
 
     def serialize_value(self, value) -> str:
+        """
+        Serialize the value to be set on the property by checking for datetime objects.
+
+        :param value: non-serialized value
+        :type value: Any
+        :return: serialized value
+        """
         if isinstance(value, datetime.datetime):
             value = self.to_iso_format(value)
         return value
