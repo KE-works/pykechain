@@ -87,7 +87,7 @@ class _ReferenceProperty(Property2):
                     type(value), cls=self.ref_name))
 
         # do the update in the superclass method
-        super()._put_value(value=value)
+        super()._put_value(value=value_to_set)
 
 
 class _ReferencePropertyInScope(_ReferenceProperty, ABC):
