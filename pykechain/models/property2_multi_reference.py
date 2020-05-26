@@ -102,9 +102,8 @@ class MultiReferenceProperty2(_ReferencePropertyInScope):
         """
         if not overwrite:
             initial_prefilters = self._options.get('prefilters', {})
-            list_of_prefilters = initial_prefilters.get('property_value', [])
-            if list_of_prefilters:
-                list_of_prefilters = list_of_prefilters.split(',')
+            prefilter_string = initial_prefilters.get('property_value', '')
+            list_of_prefilters = prefilter_string.split(',') if prefilter_string else []
         else:
             list_of_prefilters = list()
 
@@ -120,7 +119,7 @@ class MultiReferenceProperty2(_ReferencePropertyInScope):
         ))
 
         options_to_set = self._options
-        options_to_set['prefilters'] = {'property_value': ','.join(list_of_prefilters) if list_of_prefilters else {}}
+        options_to_set['prefilters'] = {'property_value': ','.join(list_of_prefilters)} if list_of_prefilters else {}
 
         self.edit(options=options_to_set)
 
