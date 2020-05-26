@@ -1,4 +1,4 @@
-from collections import Iterable
+from collections.abc import Iterable
 from typing import Any, Optional, Text, List, Dict
 
 from pykechain.enums import URITarget, SubprocessDisplayMode, KEChainPages, KEChainPageLabels
