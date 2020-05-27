@@ -212,6 +212,7 @@ class WidgetsManager(Iterable):
                              emphasize_delete: Optional[bool] = False,
                              sort_property: Optional[Union['AnyProperty', Text]] = None,
                              sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
+                             show_name_column: Optional[bool] = True,
                              show_images: Optional[bool] = False,
                              readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
                              writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
@@ -260,6 +261,8 @@ class WidgetsManager(Iterable):
             * ASC (default): Sort in ascending order
             * DESC: Sort in descending order
         :type sort_direction: basestring (see :class:`enums.SortTable`)
+        :param show_name_column: (O) show the column with part names
+        :type show_name_column: bool
         :param show_images: (O) show the attachments in the grid as images, not as hyperlinks (default False).
         :type show_images: bool
         :param readable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as readable
@@ -288,6 +291,7 @@ class WidgetsManager(Iterable):
             # columns
             "sortedColumn": sort_property_id if sort_property_id else None,
             "sortDirection": sort_direction,
+            "showNameColumn": show_name_column,
             "showImages": show_images,
             # buttons
             "addButtonVisible": new_instance if parent_instance else False,
@@ -339,6 +343,7 @@ class WidgetsManager(Iterable):
                                 sort_property: Optional[Union['AnyProperty', Text]] = None,
                                 sort_name: Optional[Union[bool, Text]] = False,
                                 sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
+                                show_name_column: Optional[bool] = True,
                                 show_images: Optional[bool] = False,
                                 collapse_filters: Optional[bool] = False,
                                 page_size: Optional[int] = 25,
@@ -393,6 +398,8 @@ class WidgetsManager(Iterable):
             * ASC (default): Sort in ascending order
             * DESC: Sort in descending order
         :type sort_direction: basestring (see :class:`enums.SortTable`)
+        :param show_name_column: (O) show the column with part names
+        :type show_name_column: bool
         :param show_images: (O) show the attachments in the grid as images, not as hyperlinks (default False).
         :type show_images: bool
         :param collapse_filters: Hide or show the filters pane (default False)
@@ -446,6 +453,7 @@ class WidgetsManager(Iterable):
             "showCollapseFiltersValue": "Collapsed" if collapse_filters else "Expanded",  # compatibility
             "collapseFilters": collapse_filters,
             "customPageSize": page_size,
+            "showNameColumn": show_name_column,
             "showImages": show_images,
             # buttons
             "addButtonVisible": new_instance if parent_instance_id else False,
