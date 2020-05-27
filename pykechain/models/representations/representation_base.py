@@ -1,8 +1,8 @@
+import warnings
 from abc import abstractmethod
 from typing import Dict, Any
 from jsonschema import validate
 
-from pykechain.enums import PropertyRepresentation
 from pykechain.models.validators.validator_schemas import representation_jsonschema_stub
 
 
@@ -10,7 +10,7 @@ class BaseRepresentation(object):
     """
     Base class for all Representations.
 
-    :cvar jsonschema: jsonschema to validate the json representation of the Validator
+    :cvar jsonschema: jsonschema to validate the json of the representation
     :type jsonschema: Dict
     :cvar rtype: type of representation
     :type rtype: Text
@@ -20,9 +20,12 @@ class BaseRepresentation(object):
     rtype = None
     _config_value_key = None
 
-    def __init__(self, prop, json=None, value=None):
+    def __init__(self, obj=None, json=None, value=None, prop=None):
         """Construct a base validator."""
-        self._property = prop
+        if prop is not None:
+            warnings.warn('Keyword `prop` is deprecated in favor of `obj`.', PendingDeprecationWarning)
+            obj = prop
+        self._obj = obj
 
         self._json = json or dict(rtype=self.rtype, config=dict())  # type: dict
 
@@ -35,43 +38,38 @@ class BaseRepresentation(object):
             self._config[self._config_value_key] = value
             self._value = value
 
-    def as_json(self):
-        # type: () -> dict
+    def as_json(self) -> Dict:
         """Parse the validator to a proper validator json."""
         return self._json
 
-    def validate_json(self):
-        # type: () -> Any
+    def validate_json(self) -> Any:
         """Validate the json representation of the validator against the validator jsonschema."""
         return validate(self._json, self.jsonschema)
 
     @classmethod
-    def parse(cls, prop, json):
-        # type: (AnyProperty, Dict) -> BaseRepresentation
+    def parse(cls, obj: Any, json: Dict) -> 'BaseRepresentation':
         """Parse a json dict and return the correct subclass of :class:`BaseRepresentation`.
 
-        It uses the 'effect' key to determine which :class:`BaseRepresentation` to instantiate.
-        Please refer to :class:`pykechain.enums.PropertyRepresentation` for the supported representations.
+        It uses the 'rtype' key to determine which :class:`BaseRepresentation` to instantiate.
 
-        :param prop: Property object to which the `BaseRepresentation` belongs.
-        :type: prop: AnyProperty
+        :param obj: object to which the `BaseRepresentation` belongs.
+        :type: prop: Base
         :param json: dictionary containing the specific keys to parse into a :class:`BaseRepresentation`
         :type json: dict
         :returns: the instantiated subclass of :class:`BaseRepresentation`
         :rtype: :class:`BaseRepresentation` or subclass thereof
         """
-        if 'rtype' in json:
-            rtype = json.get('rtype')
-            if rtype not in PropertyRepresentation.values():
-                raise Exception("Representation unknown, incorrect json: '{}'".format(json))
+        try:
+            rtype = json['rtype']
+        except KeyError:
+            raise Exception("Representation unknown, incorrect json: '{}'".format(json))
+        try:
+            from pykechain.models.representations import rtype_class_map
+            repr_class = rtype_class_map[rtype]  # type: type(BaseRepresentation)
+        except KeyError:
+            raise Exception('Unknown rtype "{}" in json'.format(rtype))
 
-            from pykechain.models.representations import representations
-            rtype_implementation_classname = "{}{}".format(rtype[0].upper(), rtype[1:])  # type: ignore
-            if hasattr(representations, rtype_implementation_classname):
-                return getattr(representations, rtype_implementation_classname)(prop=prop, json=json)
-            else:
-                raise Exception('unknown rtype in json')
-        raise Exception("Representation unknown, incorrect json: '{}'".format(json))
+        return repr_class(obj=obj, json=json)
 
     @property
     def value(self):
@@ -99,11 +97,10 @@ class BaseRepresentation(object):
         self._config[self._config_value_key] = value
 
         # Update the property in-place
-        self._property.representations = self._property.representations
+        self._obj.representations = self._obj.representations
 
     @abstractmethod
-    def validate_representation(self, value):
-        # type: (Any) -> None
+    def validate_representation(self, value: Any) -> None:
         """
         Validate whether the representation value can be set.
 
