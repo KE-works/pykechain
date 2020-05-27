@@ -197,7 +197,6 @@ class TestWidgetManagerInActivity(TestBetamax):
         super(TestWidgetManagerInActivity, self).setUp()
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
         self.wm = self.task.widgets()  # type: WidgetsManager
-        self.process = self.project.activities(activity_type=ActivityType.PROCESS)[0]
 
     def tearDown(self):
         self.task.delete()
@@ -260,6 +259,15 @@ class TestWidgetManagerInActivity(TestBetamax):
         )
 
         self.assertIsInstance(widget, PropertygridWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+
+    def test_add_attachment_widget(self):
+        picture_instance = self.project.part('Bike').property('Picture')
+        widget = self.wm.add_attachmentviewer_widget(
+            attachment_property=picture_instance,
+        )
+
+        self.assertIsInstance(widget, AttachmentviewerWidget)
         self.assertEqual(len(self.wm), 1 + 1)
 
     def test_attachment_widget_with_associations_using_widget_manager(self):
@@ -343,15 +351,6 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertIsInstance(widget, FilteredgridWidget)
         self.assertEqual(len(self.wm), 1 + 1)
 
-    def test_add_attachment_widget(self):
-        picture_instance = self.project.part('Bike').property('Picture')
-        widget = self.wm.add_attachmentviewer_widget(
-            attachment_property=picture_instance
-        )
-
-        self.assertIsInstance(widget, AttachmentviewerWidget)
-        self.assertEqual(len(self.wm), 1 + 1)
-
     def test_add_propertygrid_widget(self):
         bike_part = self.project.part(name='Bike')
         widget = self.wm.add_propertygrid_widget(
@@ -388,12 +387,13 @@ class TestWidgetManagerInActivity(TestBetamax):
         # setUp
         bike_part = self.project.part(name='Bike')
         picture = bike_part.property(name='Picture')
+        process = self.project.activities(activity_type=ActivityType.PROCESS)[0]
 
         widget1 = self.wm.add_card_widget(title="Some title", description='Some description')
         widget2 = self.wm.add_card_widget(image=picture, title=False, image_fit=ImageFitValue.COVER,
                                           link=self.task.id, link_target=LinkTargets.SAME_TAB)
         widget3 = self.wm.add_card_widget(title='Tree view', description='Process opens in tree view',
-                                          link=self.process)
+                                          link=process)
 
         # testing
         self.assertEqual(len(self.wm), 1 + 3)

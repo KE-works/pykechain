@@ -494,6 +494,8 @@ class WidgetsManager(Iterable):
                                     parent_widget: Optional[Union[Widget, Text]] = None,
                                     alignment: Optional[Alignment] = None,
                                     image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
+                                    show_download_button: Optional[bool] = True,
+                                    show_full_screen_button: Optional[bool] = True,
                                     **kwargs) -> Widget:
         """
         Add a KE-chain Attachment widget widget manager.
@@ -509,10 +511,14 @@ class WidgetsManager(Iterable):
             * String value: Custom title
             * None: No title
         :type title: bool or basestring or None
-        :param alignment: Alignment of the previewed attachment (Alignment enum class)
+        :param alignment: horizontal alignment of the previewed attachment (Alignment enum class)
         :type alignment: Alignment
-        :param image_fit: enumeration to address the image_fit (defaults to 'contain', otherwise 'cover')
+        :param image_fit: (O) enumeration to address the image_fit (defaults to 'contain', otherwise 'cover')
         :type image_fit: basestring or None
+        :param show_download_button: (O) whether a user can download the attached figure (defaults to True)
+        :type show_download_button: bool
+        :param show_full_screen_button: (O) whether the figure can be expanded to fit the full screen (defaults to True)
+        :type show_full_screen_button: bool
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
         :rtype: Widget
@@ -527,6 +533,8 @@ class WidgetsManager(Iterable):
             "propertyInstanceId": attachment_property.id,
             "alignment": check_enum(alignment, Alignment, 'alignment'),
             "imageFit": check_enum(image_fit, ImageFitValue, 'image_fit'),
+            "showDownloadButton": check_type(show_download_button, bool, 'show_download_button'),
+            "showFullscreenImageButton": check_type(show_full_screen_button, bool, 'show_full_screen_button'),
         })
 
         for deprecated_kw in ['widget_type', 'readable_models']:
