@@ -128,23 +128,3 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
         return client.scope(pk=scope_id, status=status)
     else:
         return client.scope(name=scope, status=status)
-
-
-def get_all_children(
-    obj: Union['Part', 'Activity'],
-    children: Optional[List] = None,
-) -> List:
-    """
-    Recursively create a flat list of all descendants.
-
-    ATTENTION: Dont manually insert a children list: this is only used for recursion.
-
-    :param obj: Part2 or Activity2 for which to build a list of descendants.
-    :param children: input to support recursion.
-    :returns list of child Parts or Activities
-    :rtype List
-    """
-    # TODO Deprecate v3.7.0
-    warnings.warn('This helper function has been replaced by the `all_children` method. '
-                  'This function will be deprecated in version 3.7.0.', PendingDeprecationWarning)
-    return obj.all_children()
