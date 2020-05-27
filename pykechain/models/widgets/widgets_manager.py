@@ -1293,6 +1293,7 @@ class WidgetsManager(Iterable):
         else:
             raise IllegalArgumentError("When using the add_card_widget, 'description' must be 'text_type' or None or "
                                        "False. Type is: {}".format(type(description)))
+
         meta.update({
             "showDescriptionValue": show_description_value,
             "customDescription": description
@@ -1348,7 +1349,7 @@ class WidgetsManager(Iterable):
 
         if link_value is not None:
             meta.update({
-                'showLinkValue': link_value,
+                'showLinkValue': check_enum(link_value, CardWidgetLinkValue, 'link_value'),
             })
 
         meta['linkTarget'] = check_enum(link_target, LinkTargets, 'link_target')

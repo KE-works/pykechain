@@ -1,7 +1,8 @@
 from unittest import TestCase
 
 from pykechain.enums import (WidgetTypes, ShowColumnTypes, FilterType, ProgressBarColors,
-                             Category, LinkTargets, KEChainPages, WidgetTitleValue, Alignment)
+                             Category, LinkTargets, KEChainPages, WidgetTitleValue, Alignment, ActivityType,
+                             CardWidgetLinkValue, CardWidgetLinkTarget, ImageFitValue)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Activity2
 from pykechain.models.widgets import (
@@ -196,6 +197,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         super(TestWidgetManagerInActivity, self).setUp()
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
         self.wm = self.task.widgets()  # type: WidgetsManager
+        self.process = self.project.activities(activity_type=ActivityType.PROCESS)[0]
 
     def tearDown(self):
         self.task.delete()
@@ -387,16 +389,24 @@ class TestWidgetManagerInActivity(TestBetamax):
         bike_part = self.project.part(name='Bike')
         picture = bike_part.property(name='Picture')
 
-        widget1 = self.wm.add_card_widget(title="Some title", description='Some description',
-                                          link='www.ke-chain.com', link_target=LinkTargets.NEW_TAB)
-        widget2 = self.wm.add_card_widget(image=picture, title=False,
+        widget1 = self.wm.add_card_widget(title="Some title", description='Some description')
+        widget2 = self.wm.add_card_widget(image=picture, title=False, image_fit=ImageFitValue.COVER,
                                           link=self.task.id, link_target=LinkTargets.SAME_TAB)
+        widget3 = self.wm.add_card_widget(title='Tree view', description='Process opens in tree view',
+                                          link=self.process)
 
         # testing
-        self.assertEqual(len(self.wm), 1 + 2)
+        self.assertEqual(len(self.wm), 1 + 3)
 
         self.assertIsInstance(widget1, CardWidget)
+        self.assertIsNone(widget1.meta.get('customLink'))
+
         self.assertIsInstance(widget2, CardWidget)
+        self.assertEqual(ImageFitValue.COVER, widget2.meta.get('imageFit'))
+        self.assertEqual(CardWidgetLinkTarget.SAME_TAB, widget2.meta.get('linkTarget'))
+
+        self.assertIsInstance(widget3, CardWidget)
+        self.assertEqual(CardWidgetLinkValue.TREE_VIEW, widget3.meta.get('showLinkValue'))
 
         with self.assertRaises(IllegalArgumentError):
             self.wm.add_card_widget(title=12)
