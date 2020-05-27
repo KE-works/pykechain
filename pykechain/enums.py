@@ -760,6 +760,7 @@ class CardWidgetLinkValue(Enum):
 
     EXTERNAL_LINK = "External link"
     TASK_LINK = "Task link"
+    TREE_VIEW = "Tree view"
     NO_LINK = "No link"
 
 

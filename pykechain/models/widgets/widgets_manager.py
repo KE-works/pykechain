@@ -3,7 +3,7 @@ from typing import Iterable, Union, AnyStr, Optional, Text, Dict, List, Any
 
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, ScopeWidgetColumnTypes, \
     ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
-    KEChainPages, CardWidgetKEChainPageLink, Alignment
+    KEChainPages, CardWidgetKEChainPageLink, Alignment, ActivityType
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from pykechain.models.input_checks import check_enum, check_text, check_base, check_type, check_list_of_text
 from pykechain.models.widgets import Widget
@@ -1250,6 +1250,7 @@ class WidgetsManager(Iterable):
                         parent_widget: Optional[Union[Widget, Text]] = None,
                         description: Optional[Union[Text, bool]] = None,
                         link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
+                        link_value: Optional[CardWidgetLinkValue] = None,
                         link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
                         image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
                         **kwargs) -> Widget:
@@ -1272,8 +1273,10 @@ class WidgetsManager(Iterable):
             * task: another KE-chain task, provided as an Activity2 object or its UUID
             * String value: URL to a webpage
             * KE-chain page: built-in KE-chain page of the current scope
+        :param link_value: Overwrite the default link value (obtained from the type of the link)
+        :type link_value: CardWidgetLinkValue
         :param link_target: how the link is opened, one of the values of CardWidgetLinkTarget enum.
-        :param link_target: CardWidgetLinkTarget
+        :type link_target: CardWidgetLinkTarget
         :param image_fit: how the image on the card widget is displayed
         :type image_fit: ImageFitValue
         :return: Card Widget
@@ -1313,19 +1316,24 @@ class WidgetsManager(Iterable):
 
         from pykechain.models import Activity2
         if isinstance(link, Activity2):
+            if link.activity_type == ActivityType.TASK:
+                default_link_value = CardWidgetLinkValue.TASK_LINK
+            else:
+                default_link_value = CardWidgetLinkValue.TREE_VIEW
+
             meta.update({
                 'customLink': link.id,
-                'showLinkValue': CardWidgetLinkValue.TASK_LINK
+                'showLinkValue': default_link_value,
             })
         elif isinstance(link, str) and is_uuid(link):
             meta.update({
                 'customLink': link,
-                'showLinkValue': CardWidgetLinkValue.TASK_LINK
+                'showLinkValue': CardWidgetLinkValue.TASK_LINK,
             })
         elif link is None or link is False:
             meta.update({
                 'customLink': None,
-                'showLinkValue': CardWidgetLinkValue.NO_LINK
+                'showLinkValue': CardWidgetLinkValue.NO_LINK,
             })
         elif link in KEChainPages.values():
             meta.update({
@@ -1335,7 +1343,12 @@ class WidgetsManager(Iterable):
         else:
             meta.update({
                 'customLink': link,
-                'showLinkValue': CardWidgetLinkValue.EXTERNAL_LINK
+                'showLinkValue': CardWidgetLinkValue.EXTERNAL_LINK,
+            })
+
+        if link_value is not None:
+            meta.update({
+                'showLinkValue': link_value,
             })
 
         meta['linkTarget'] = check_enum(link_target, LinkTargets, 'link_target')
