@@ -12,6 +12,7 @@ from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClas
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
 from pykechain.models.input_checks import check_datetime, check_text, check_list_of_text, check_enum, check_user, \
     check_type
+from pykechain.models.representations.mixin import RepresentationMixin
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.models.user import User
@@ -19,7 +20,7 @@ from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import parse_datetime, is_valid_email
 
 
-class Activity2(TreeObject, TagsMixin):
+class Activity2(TreeObject, RepresentationMixin, TagsMixin):
     """A virtual object representing a KE-chain activity.
 
     .. versionadded:: 2.0
@@ -56,8 +57,11 @@ class Activity2(TreeObject, TagsMixin):
         self.start_date = parse_datetime(json.get('start_date'))
         self.due_date = parse_datetime(json.get('due_date'))
         self.assignees_ids = json.get('assignees_ids', [])  # type: List[Text]
+        self._options = json.get('activity_options', {})
 
         self._tags = json.get('tags', [])  # type: List[Text]
+
+        RepresentationMixin.__init__(self, self._options.get('representations', {}))
 
     def __call__(self, *args, **kwargs) -> 'Activity2':
         """Short-hand version of the `child` method."""
@@ -67,6 +71,10 @@ class Activity2(TreeObject, TagsMixin):
         """Refresh the object in place."""
         super().refresh(url=self._client._build_url('activity', activity_id=self.id),
                         extra_params=API_EXTRA_PARAMS['activity'])
+
+    def _save_representations(self, representation_options):
+        self._options.update({'representations': representation_options})
+        self.edit(activity_options=self._options)
 
     #
     # additional properties
@@ -453,6 +461,7 @@ class Activity2(TreeObject, TagsMixin):
             assignees_ids: Optional[List[Text]] = None,
             status: Optional[Union[ActivityStatus, Text]] = None,
             tags: Optional[List[Text]] = None,
+            **kwargs
     ) -> None:
         """Edit the details of an activity.
 
@@ -524,6 +533,7 @@ class Activity2(TreeObject, TagsMixin):
             assignees=assignees,
             assignees_ids=assignees_ids,
             status=status,
+            **kwargs,
         )
 
         url = self._client._build_url('activity', activity_id=self.id)
@@ -535,7 +545,7 @@ class Activity2(TreeObject, TagsMixin):
 
         self.refresh(json=response.json().get('results')[0])
 
-    def _validate_edit_arguments(self, update_dict, start_date, due_date, assignees, assignees_ids, status):
+    def _validate_edit_arguments(self, update_dict, start_date, due_date, assignees, assignees_ids, status, **kwargs):
         """Verify inputs provided in both the `edit` and `edit_cascade_down` methods."""
         if assignees and assignees_ids:
             raise IllegalArgumentError('Provide either assignee names or their ids, but not both.')
@@ -560,6 +570,8 @@ class Activity2(TreeObject, TagsMixin):
             'due_date': check_datetime(dt=due_date, key='due_date'),
             'status': check_enum(status, ActivityStatus, 'status') or self.status,
         })
+        if kwargs:
+            update_dict.update(kwargs)
 
         return update_dict
 

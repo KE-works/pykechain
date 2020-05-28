@@ -10,13 +10,14 @@ from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
 from pykechain.models.input_checks import check_text, check_datetime, check_enum, check_list_of_text, \
     check_base, check_type
+from pykechain.models.representations.mixin import RepresentationMixin
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
 from pykechain.utils import parse_datetime, find
 
 
-class Scope2(Base, TagsMixin):
+class Scope2(Base, RepresentationMixin, TagsMixin):
     """A virtual object representing a KE-chain scope.
 
     :ivar id: id of the activity
@@ -56,6 +57,8 @@ class Scope2(Base, TagsMixin):
         self.start_date = parse_datetime(json.get('start_date'))
         self.due_date = parse_datetime(json.get('due_date'))
 
+        RepresentationMixin.__init__(self, self.options.get('representations', {}))
+
     @property
     def team(self):
         """Team to which the scope is assigned."""
@@ -83,6 +86,10 @@ class Scope2(Base, TagsMixin):
                         url=self._client._build_url('scope2', scope_id=self.id),
                         extra_params=API_EXTRA_PARAMS['scope2'])
 
+    def _save_representations(self, representation_options):
+        options = self.options
+        options.update({'representations': representation_options})
+        self.options = options
     #
     # CRUD methods
     #

@@ -77,7 +77,7 @@ class RepresentationMixin(object):
             else:
                 raise APIError("representation is not a BaseRepresentation: '{}'".format(representation))
 
-        validate(representations_json, options_json_schema)
+        [validate(r, options_json_schema) for r in representations_json]
         self._repr_options = representations_json
 
     @abstractmethod

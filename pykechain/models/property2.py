@@ -299,7 +299,8 @@ class Property2(Base, RepresentationMixin):
         super()._validate_representations(representations)
 
     def _save_representations(self, representation_options):
-        self.edit(options=self._options.update(representation_options))
+        self._options.update({'representations': representation_options})
+        self.edit(options=self._options)
 
     @classmethod
     def create(cls, json: dict, **kwargs) -> 'AnyProperty':
