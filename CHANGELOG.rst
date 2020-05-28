@@ -1,7 +1,23 @@
 Change Log
 ==========
 
+* :star: Extracted representations from `Property2` class into a separate `RepresentationMixin` class. This is now utilized by the `Scope2`, `Activity2` and `Property2` classes.
+* :+1: Added `CustomIconRepresentation` to change the font-awesome icons of KE-chain scopes and activities. Default icon display mode is set/gettable, defaulting to "regular".
+* :+1: Added `show_name_column` input to the `add_supergrid_widget` method of the `WidgetsManager`.
+* :+1: Added `show_download_button` and `show_full_screen_button` inputs to the `add_attachmentviewer_widget` method of the `WidgetsManager`.
+* :+1: Added `link_value` input to the `add_card_widget` method of the `WidgetsManager`. Linking to sub-process activities now opens the link in tree view by default.
+* :bug: Editing an `Activity2` now uses its `__init__` to refresh with the JSON from the response, removing an additional reload to get updated values.
+
+Backwards incompatible changes
+------------------------------
+
+We deprecated the following:
+
+* `get_all_children` helper function for parts and activities. Use the `all_children` method instead.
+
+
 v3.7.0-rc2 (not released)
+-------------------------
 
 : "star: Added `ScopeRoles` and `ScopeMemberActions` enum classes to list the roles of and operations on scope members.
 * :bug: Scope edit cleared some properties from the scope if they were not provided.
