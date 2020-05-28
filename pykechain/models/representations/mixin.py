@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List, Any, Dict
+from typing import List, Any
 
 from jsonschema import validate
 
@@ -23,7 +23,12 @@ class RepresentationMixin(object):
     _representations = list()  # type: List[BaseRepresentation]
     _repr_options = list()
 
-    def __init__(self, representation_options: Dict):
+    def __init__(self, representation_options):
+        """
+        Extract the json with the representation options.
+
+        :param representation_options: json with list of representations
+        """
         self._repr_options = representation_options
 
         # Construct representation objects
@@ -82,5 +87,6 @@ class RepresentationMixin(object):
 
     @abstractmethod
     def _save_representations(self, representation_options):
-        """Method to implement in the inheriting class. The representation options dict must be stored."""
+        """Store the representation in the object."""
+        # Implement this method via a subclass, e.g. "options()"
         pass

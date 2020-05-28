@@ -626,6 +626,20 @@ class PropertyRepresentation(Enum):
     THOUSANDS_SEPARATOR = "thousandsSeparator"
 
 
+class OtherRepresentations(Enum):
+    """
+    Other representations used in KE-chain.
+
+    :cvar CUSTOM_ICON: different font-awesome icons
+    """
+
+    CUSTOM_ICON = 'customIcon'
+
+
+class _AllRepresentations(PropertyRepresentation, OtherRepresentations):
+    pass
+
+
 class ShowColumnTypes(Enum):
     """The columns that can be shown in a Property grid.
 

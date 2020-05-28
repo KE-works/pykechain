@@ -89,6 +89,11 @@ class CustomIconRepresentation(BaseRepresentation):
 
     rtype = 'customIcon'
     _config_value_key = 'displayIcon'
+    _display_mode_key = 'displayIconMode'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._config[self._display_mode_key] = FontAwesomeMode.REGULAR
 
     def validate_representation(self, value: str):
         """
@@ -102,9 +107,15 @@ class CustomIconRepresentation(BaseRepresentation):
             raise IllegalArgumentError('{} value "{}" is not correct: not a string'.format(
                 self.__class__.__name__, value))
 
-    def set_display_mode(self, mode: FontAwesomeMode) -> None:
+    @property
+    def display_mode(self):
+        """Get the the display mode of the custom icon representation."""
+        return self._config[self._display_mode_key]
+
+    @display_mode.setter
+    def display_mode(self, mode: FontAwesomeMode) -> None:
         """
-        Change the display mode of the custom icon representation.
+        Set the the display mode of the custom icon representation.
 
         :param mode: FontAwesome display mode
         :type mode: FontAwesomeMode
@@ -113,6 +124,5 @@ class CustomIconRepresentation(BaseRepresentation):
             raise IllegalArgumentError('{} mode "{}" is not a FontAwesomeMode option.'.format(
                 self.__class__.__name__, mode))
 
-        current_value = self._value
-        current_value['displayIconMode'] = mode
-        self.value = current_value
+        self._config[self._display_mode_key] = mode
+        self.value = self.value  # trigger update

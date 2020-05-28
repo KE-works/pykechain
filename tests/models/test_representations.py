@@ -2,7 +2,7 @@ from abc import abstractmethod, ABC
 
 from jsonschema import validate
 
-from pykechain.enums import PropertyType, Multiplicity, LinkTargets, SelectListRepresentations
+from pykechain.enums import PropertyType, Multiplicity, LinkTargets, SelectListRepresentations, FontAwesomeMode
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import AnyProperty
 from pykechain.models.representations.representation_base import BaseRepresentation
@@ -39,14 +39,6 @@ class _TestRepresentationLive(TestBetamax):
     def setUp(self):
         super().setUp()
         self.obj = self._get_object()
-
-    @abstractmethod
-    def _get_object(self):
-        pass
-
-    def test_get_set(self):
-        """Test representation accessor property of the Mixin class"""
-        # setUp: set representations
         self.obj.representations = [
             self.representation_class(
                 prop=self.obj,
@@ -54,6 +46,16 @@ class _TestRepresentationLive(TestBetamax):
             ),
         ]
 
+    def tearDown(self):
+        self.obj.delete()
+        super().tearDown()
+
+    @abstractmethod
+    def _get_object(self):
+        pass
+
+    def test_get_set(self):
+        """Test representation accessor property of the Mixin class"""
         reloaded_obj = self.client.reload(self.obj)
         self.assertEqual(self.obj, reloaded_obj)
 
@@ -65,14 +67,6 @@ class _TestRepresentationLive(TestBetamax):
 
     def test_set_value(self):
         """Test value accessor property of the Representation class"""
-        # Make sure there is a representation object
-        self.obj.representations = [
-            self.representation_class(
-                prop=self.obj,
-                value=self.value,
-            ),
-        ]
-
         # Set new value via the representation object
         first_repr = self.obj.representations[0]
         first_repr.value = self.new_value
@@ -159,6 +153,24 @@ class _TestCustomIconRepresentation(_TestRepresentationLive, ABC):
     value = 'university'
     new_value = 'bat'
     incorrect_value = ['must be a string']
+
+    def test_set_mode(self):
+        representation = self.obj.representations[0]  # type: CustomIconRepresentation
+
+        # Set mode
+        representation.display_mode = FontAwesomeMode.SOLID
+
+        reloaded_obj = self.client.reload(obj=self.obj)
+        reloaded_repr = reloaded_obj.obj.representations[0]
+
+        # Test get of mode
+        self.assertEqual(representation.display_mode, reloaded_repr.display_mode)
+
+    def test_set_mode_incorrect(self):
+        representation = self.obj.representations[0]  # type: CustomIconRepresentation
+
+        with self.assertRaises(IllegalArgumentError):
+            representation.display_mode = 'fancy colors'
 
 
 class TestReprActivity(_TestCustomIconRepresentation):

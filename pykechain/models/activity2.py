@@ -70,7 +70,7 @@ class Activity2(TreeObject, RepresentationMixin, TagsMixin):
     def refresh(self, *args, **kwargs):
         """Refresh the object in place."""
         super().refresh(url=self._client._build_url('activity', activity_id=self.id),
-                        extra_params=API_EXTRA_PARAMS['activity'])
+                        extra_params=API_EXTRA_PARAMS['activity'], *args, **kwargs)
 
     def _save_representations(self, representation_options):
         self._options.update({'representations': representation_options})
@@ -538,7 +538,7 @@ class Activity2(TreeObject, RepresentationMixin, TagsMixin):
 
         url = self._client._build_url('activity', activity_id=self.id)
 
-        response = self._client._request('PUT', url, json=update_dict)
+        response = self._client._request('PUT', url, json=update_dict, params=API_EXTRA_PARAMS['activity'])
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Activity {}".format(self), response=response)
@@ -570,6 +570,7 @@ class Activity2(TreeObject, RepresentationMixin, TagsMixin):
             'due_date': check_datetime(dt=due_date, key='due_date'),
             'status': check_enum(status, ActivityStatus, 'status') or self.status,
         })
+
         if kwargs:
             update_dict.update(kwargs)
 

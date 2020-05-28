@@ -25,18 +25,16 @@ class BaseRepresentation(object):
         if prop is not None:
             warnings.warn('Keyword `prop` is deprecated in favor of `obj`.', PendingDeprecationWarning)
             obj = prop
+            del prop
         self._obj = obj
 
         self._json = json or dict(rtype=self.rtype, config=dict())  # type: dict
 
         self._config = self._json.get('config', dict())  # type: dict
 
-        if value is None and self._config_value_key in self._config:
-            self._value = self._config[self._config_value_key]
-        else:
+        if value is not None:
             self.validate_representation(value)
             self._config[self._config_value_key] = value
-            self._value = value
 
     def as_json(self) -> Dict:
         """Parse the validator to a proper validator json."""
@@ -79,7 +77,7 @@ class BaseRepresentation(object):
         :return: value
         :rtype Any
         """
-        return self._value
+        return self._config[self._config_value_key]
 
     @value.setter
     def value(self, value):
@@ -92,8 +90,6 @@ class BaseRepresentation(object):
         :rtype Any
         """
         self.validate_representation(value)
-
-        self._value = value
         self._config[self._config_value_key] = value
 
         # Update the property in-place
