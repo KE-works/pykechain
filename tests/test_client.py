@@ -126,6 +126,26 @@ class TestClientLive(TestBetamax):
         from pykechain.models import User
         self.assertIsInstance(user, User)
 
+    # 3.7.0
+    def test_reload_deleted_object(self):
+        bike_model = self.project.model(name='Bike')
+        bike = bike_model.instance()
+        wheel_model = bike_model.child(name='Wheel')
+
+        wheel_name = '__new wheel: test for reloading'
+        new_wheel_1 = bike.add(name=wheel_name, model=wheel_model)
+        new_wheel_2 = self.project.part(name=wheel_name)
+
+        self.assertFalse(new_wheel_1 is new_wheel_2, "Parts must be separate in Python memory")
+        self.assertEqual(new_wheel_1, new_wheel_2, "Parts must be identical in UUIDs")
+
+        new_wheel_2.delete()
+        with self.assertRaises(NotFoundError):
+            self.project.part(name=wheel_name)
+
+        with self.assertRaises(NotFoundError, msg="Wheel cant be reloaded after it was deleted"):
+            self.client.reload(new_wheel_1)
+
     # 2.6.0
     def test_create_scope(self):
         # setUp

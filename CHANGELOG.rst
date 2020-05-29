@@ -4,15 +4,15 @@ Change Log
 v3.7.0-rc3 (not released)
 ------
 
-* :star: Implemented `MultiSelectListProperty2` class, generalizing the implementation of the `SelectListProperty2 class. Intermediate class `_SelectListProperty` now hosts the generic implementation.
-* :star: Implemented `ActivityReferenceProperty` class, generalizing the implementation of the part reference `MultiReferenceProperty2` class. Intermediate classes `_ReferenceProperty` and `_ReferencePropertyInScope` have been added for further reference properties.
+* :star: Implemented `MultiSelectListProperty2` class, generalizing the implementation of the `SelectListProperty2 class. Intermediate class `_SelectListProperty` now hosts the generic implementation. #732
+* :star: Implemented `ActivityReferenceProperty` class, generalizing the implementation of the part reference `MultiReferenceProperty2` class. Intermediate classes `_ReferenceProperty` and `_ReferencePropertyInScope` have been added for further reference properties. #746
 * :+1: Created mapping table `property_type_to_class_map` to convert between property types from the `PropertyType` enumeration and property classes derived from the `Property2` class.
 * :+1: Added `BaseInScope` base class for KE-chain objects limited to a single scope. It inherits from `Base` itself. The new class is used for Parts, Properties, Activities, Widgets, Associations and Services. Original class is still used for Scopes, Teams, Users, Banners, Notifications and ServiceExecutions.
 * :+1: Moved `scope` property method to the `BaseInScope` class, adding lazy retrieval to limit overhead.
 * :bug: Added `Activity2.scope_id` setter method (self-induced bug due to the introduction of `BaseInScope`).
 * :bug: Moved the serialization of property values from the `Part2._parse_update_dict()` method to the new `Property2.serialize_value()` method. This new method is used in the `_put_value()` method of this class to have identical serialization in both `value` and `part.update()` mechanics.
 * :bug: The bulk update of property values via the `use_bulk_update` attribute and `update_values` method now uses the same serialization pipeline as synchronous updating. Also made the attribute a `Property2` class property, converting it to a singleton.
-* :bug: Refactored the `reload` method of the `Client` class to be able to reload any Pykechain class object.
+* :bug: Refactored the `reload` method of the `Client` class to be able to reload any Pykechain class object. #760
 
 backwards incompatible changes:
 -------------------------------

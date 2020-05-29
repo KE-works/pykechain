@@ -403,13 +403,12 @@ class Client(object):
             extra_params = extra_params.update(**extra_api_params) if extra_params else extra_api_params
 
         response = self._request('GET', url, params=extra_params)
+        data = response.json().get('results', [])
 
-        if response.status_code != requests.codes.ok:  # pragma: no cover
+        if response.status_code != requests.codes.ok or not len(data) > 0:
             raise NotFoundError("Could not reload {} {}".format(obj.__class__.__name__, obj), response=response)
 
-        data = response.json()['results'][0]
-
-        return obj.__class__(data, client=self)
+        return obj.__class__(data[0], client=self)
 
     @staticmethod
     def _retrieve_singular(method: Callable, *args, **kwargs):
@@ -1708,8 +1707,7 @@ class Client(object):
         if asynchronous:
             return None
 
-        data = response.json()['results'][0]
-        cloned_scope = Scope2(data, client=source_scope._client)
+        cloned_scope = Scope2(response.json()['results'][0], client=source_scope._client)
 
         # TODO work-around, some attributes are not (yet) in the KE-chain response.json()
         cloned_scope._tags = tags
