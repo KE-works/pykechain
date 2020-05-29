@@ -93,7 +93,8 @@ class CustomIconRepresentation(BaseRepresentation):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._config[self._display_mode_key] = FontAwesomeMode.REGULAR
+        if self._display_mode_key not in self._config:
+            self._config[self._display_mode_key] = FontAwesomeMode.REGULAR
 
     def validate_representation(self, value: str):
         """
@@ -103,7 +104,7 @@ class CustomIconRepresentation(BaseRepresentation):
         :type value: str
         :return: None
         """
-        if value is None:
+        if not isinstance(value, str):
             raise IllegalArgumentError('{} value "{}" is not correct: not a string'.format(
                 self.__class__.__name__, value))
 

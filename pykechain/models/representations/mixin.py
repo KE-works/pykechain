@@ -20,7 +20,7 @@ class RepresentationMixin(object):
         RepresentationMixin.__init__(self, self._options.get('representations', {}))
     """
 
-    _representations = list()  # type: List[BaseRepresentation]
+    _representations = list()  # type: List['AnyRepresentation']
     _repr_options = list()
 
     def __init__(self, representation_options):
@@ -40,7 +40,7 @@ class RepresentationMixin(object):
             )
 
     @property
-    def representations(self) -> List[BaseRepresentation]:
+    def representations(self) -> List['AnyRepresentation']:
         """
         Provide and set list of representation objects.
 
@@ -50,7 +50,7 @@ class RepresentationMixin(object):
         return self._representations
 
     @representations.setter
-    def representations(self, representations: List[BaseRepresentation]) -> None:
+    def representations(self, representations: List['AnyRepresentation']) -> None:
         self._validate_representations(representations)
 
         # set the internal representation list

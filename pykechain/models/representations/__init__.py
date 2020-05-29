@@ -2,6 +2,7 @@
 
 .. versionadded:: 3.0.x
 """
+from .mixin import RepresentationMixin
 from .representation_base import BaseRepresentation
 from .representations import (
     DecimalPlaces, SignificantDigits, ThousandsSeparator, LinkTarget, ButtonRepresentation, CustomIconRepresentation,
@@ -16,7 +17,7 @@ rtype_class_map = {
     CustomIconRepresentation.rtype: CustomIconRepresentation,
 }
 
-__all__ = [
+AnyRepresentation = [
     BaseRepresentation,
 
     # Numbers
@@ -32,4 +33,9 @@ __all__ = [
 
     # Scopes and activities
     CustomIconRepresentation,
+]
+
+__all__ = [
+    AnyRepresentation,
+    RepresentationMixin,
 ]

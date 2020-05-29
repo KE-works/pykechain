@@ -21,16 +21,28 @@ class BaseRepresentation(object):
     _config_value_key = None
 
     def __init__(self, obj=None, json=None, value=None, prop=None):
-        """Construct a base validator."""
+        """
+        Construct a base representation.
+
+        :param obj: the object to which the representation is applied, such as a property.
+        :type obj: Base
+        :param json: representation json (usually part of the original object json)
+        :type json: dict
+        :param value: value of the representation, its options vary per representation type
+        :type value: Any
+        :param prop: deprecated keyword for obj
+        :type prop: Property2
+        """
         if prop is not None:
             warnings.warn('Keyword `prop` is deprecated in favor of `obj`.', PendingDeprecationWarning)
             obj = prop
             del prop
-        self._obj = obj
 
+        self._obj = obj
         self._json = json or dict(rtype=self.rtype, config=dict())  # type: dict
 
         self._config = self._json.get('config', dict())  # type: dict
+        self._json['config'] = self._config
 
         if value is not None:
             self.validate_representation(value)
@@ -77,7 +89,7 @@ class BaseRepresentation(object):
         :return: value
         :rtype Any
         """
-        return self._config[self._config_value_key]
+        return self._config[self._config_value_key] if self._config_value_key else None
 
     @value.setter
     def value(self, value):
