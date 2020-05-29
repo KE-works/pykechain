@@ -92,6 +92,11 @@ class CustomIconRepresentation(BaseRepresentation):
     _display_mode_key = 'displayIconMode'
 
     def __init__(self, *args, **kwargs):
+        """
+        Create a custom icon representation.
+
+        Display mode of the icon will be `regular` by default.
+        """
         super().__init__(*args, **kwargs)
         if self._display_mode_key not in self._config:
             self._config[self._display_mode_key] = FontAwesomeMode.REGULAR
