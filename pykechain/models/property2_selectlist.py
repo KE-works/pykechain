@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from copy import copy
+from copy import deepcopy
 from typing import Any, Iterable
 
 from jsonschema import validate
@@ -28,7 +28,7 @@ class _SelectListProperty(Property2):
 
         :raises APIError: when unable to set the value or the value is not in the list of options
         """
-        return copy(self._value)
+        return deepcopy(self._value)
 
     @value.setter
     def value(self, value: Any):
@@ -79,7 +79,7 @@ class _SelectListProperty(Property2):
         List of options of this property to select from.
 
         """
-        return copy(self._value_choices)
+        return deepcopy(self._value_choices)
 
     @options.setter
     def options(self, options_list):

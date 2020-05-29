@@ -50,7 +50,7 @@ class MultiReferenceProperty2(_ReferencePropertyInScope):
                     ))
         return parts
 
-    def choices(self):
+    def choices(self) -> List[Part2]:
         """Retrieve the parts that you can reference for this `MultiReferenceProperty`.
 
         This method makes 2 API calls: 1) to retrieve the referenced model, and 2) to retrieve the instances of
@@ -118,10 +118,16 @@ class MultiReferenceProperty2(_ReferencePropertyInScope):
             prefilters=new_prefilters,
         ))
 
-        options_to_set = self._options
-        options_to_set['prefilters'] = {'property_value': ','.join(list_of_prefilters)} if list_of_prefilters else {}
+        # Only update the options if there are any prefilters to be set, or if the original filters have to overwritten
+        if list_of_prefilters or overwrite:
+            options_to_set = self._options
 
-        self.edit(options=options_to_set)
+            # Always create the entire prefilter json structure
+            options_to_set['prefilters'] = {
+                'property_value': ','.join(list_of_prefilters) if list_of_prefilters else ""
+            }
+
+            self.edit(options=options_to_set)
 
     def set_excluded_propmodels(
             self,
