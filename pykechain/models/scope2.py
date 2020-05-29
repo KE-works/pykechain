@@ -203,7 +203,7 @@ class Scope2(Base, RepresentationMixin, TagsMixin):
         if team:
             update_dict['team_id'] = team
         tags = check_list_of_text(tags, 'tags', True)
-        if tags:
+        if tags is not None:
             update_dict['tags'] = tags
         scope_options = check_type(options, dict, 'options')
         if scope_options:
@@ -219,6 +219,10 @@ class Scope2(Base, RepresentationMixin, TagsMixin):
             raise APIError("Could not update Scope {}".format(self), response=response)
 
         self.refresh(json=response.json().get('results')[0])
+
+        # TODO tags that are set are not in response
+        if tags is not None:
+            self._tags = tags
 
     def clone(self, **kwargs):
         """Clone a scope.

@@ -431,9 +431,7 @@ class Client(object):
         :raises NotFoundError: When no result is found.
         :raises MultipleFoundError: When more than a single result is found.
         """
-        # TODO set limit=2 to reduce query (but allow MultipleFoundError)
-        #  Will require updating of many cassettes.
-        # kwargs['limit'] = kwargs.get('limit', 2)
+        kwargs['limit'] = kwargs.get('limit', 2)
         results = method(*args, **kwargs)
 
         criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
