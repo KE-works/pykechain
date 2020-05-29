@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-v3.x.x
+v3.7.0-rc3 (not released)
 ------
 
 * :star: Implemented `MultiSelectListProperty2` class, generalizing the implementation of the `SelectListProperty2 class. Intermediate class `_SelectListProperty` now hosts the generic implementation.
