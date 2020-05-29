@@ -1,6 +1,6 @@
-from pykechain.enums import PropertyType, FilterType, Multiplicity
+from pykechain.enums import PropertyType, FilterType, Multiplicity, ActivityRootNames
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import MultiReferenceProperty2
+from pykechain.models import MultiReferenceProperty2, ActivityReferenceProperty
 from pykechain.models.validators import RequiredFieldValidator
 from pykechain.utils import find
 from tests.classes import TestBetamax
@@ -62,7 +62,7 @@ class TestMultiReferenceProperty(TestBetamax):
         self.ref_prop_model.value = [wheel_model]
 
         # testing
-        self.assertEqual(len(self.ref_prop_model.value), 1)
+        self.assertEqual(len(list(self.ref_prop_model.value)), 1)
 
     def test_referencing_multiple_instances_using_parts(self):
         # setUp
@@ -595,3 +595,37 @@ class TestMultiReferencePropertyXScope(TestBetamax):
 
         self.assertTrue(len(self.x_reference.value) == 1)
         self.assertEqual(self.x_target.id, self.x_reference.value[0].id)
+
+
+class TestActivityReference(TestBetamax):
+
+    def setUp(self):
+        super().setUp()
+        root = self.project.model(name='Product')
+        part = self.project.create_model(name='The part', parent=root, multiplicity=Multiplicity.ONE)
+        self.prop = part.add_property(name='activity ref', property_type=PropertyType.ACTIVITY_REFERENCES_VALUE)
+
+    def tearDown(self):
+        if self.prop:
+            self.prop.delete()
+        super().tearDown()
+
+    def test_create(self):
+        self.assertIsInstance(self.prop, ActivityReferenceProperty)
+
+    def test_value(self):
+        wbs_root = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
+        task = wbs_root.children()[0]
+
+        self.prop.value = [task]
+        self.prop.refresh()
+
+        self.assertIsInstance(self.prop, ActivityReferenceProperty)
+        self.assertIsNotNone(self.prop.value)
+        self.assertEqual(task, self.prop.value[0])
+
+    def test_reload(self):
+        reloaded_prop = self.client.reload(obj=self.prop)
+
+        self.assertFalse(self.prop is reloaded_prop, msg='Must be different Python objects, based on memory allocation')
+        self.assertEqual(self.prop, reloaded_prop, msg='Must be the same KE-chain prop, based on hashed UUID')

@@ -264,7 +264,6 @@ class TestWidgetManagerInActivity(TestBetamax):
         photo_property = self.project.property("Picture")
 
         widget = self.wm.add_attachmentviewer_widget(
-            widget_type=WidgetTypes.ATTACHMENTVIEWER,
             title="Attachment Viewer",
             attachment_property=photo_property,
         )
@@ -276,7 +275,6 @@ class TestWidgetManagerInActivity(TestBetamax):
         photo_property = self.project.property("Picture")
 
         widget = self.wm.add_attachmentviewer_widget(
-            widget_type=WidgetTypes.ATTACHMENTVIEWER,
             title="Attachment Viewer",
             attachment_property=photo_property,
             editable=True,

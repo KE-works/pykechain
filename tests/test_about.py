@@ -13,4 +13,4 @@ class TestAbout(TestCase):
         self.assertTrue(about.name)
         self.assertTrue(about.version)
         import semver
-        self.assertTrue(semver.parse(about.version))
+        self.assertTrue(semver.VersionInfo.parse(about.version))

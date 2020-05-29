@@ -85,9 +85,9 @@ class TestScopeMembers(TestBetamax):
         """Reset the scope members by removing all members and adding the defaults"""
         [self.project.remove_member(member=member['username']) for member in self.project.members()]
 
-        for member_type, members in self.DEFAULTS.items():
-            for member in members:
-                self.project._update_scope_project_team(ScopeMemberActions.ADD, member_type, member)
+        for role in [ScopeRoles.MANAGER, ScopeRoles.LEADMEMBER, ScopeRoles.MEMBER]:
+            for member in self.DEFAULTS[role]:
+                self.project._update_scope_project_team(ScopeMemberActions.ADD, role, member)
 
     def setUp(self):
         super().setUp()

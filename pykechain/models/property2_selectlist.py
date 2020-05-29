@@ -1,3 +1,7 @@
+from abc import abstractmethod
+from copy import deepcopy
+from typing import Any, Iterable
+
 from jsonschema import validate
 
 from pykechain.enums import Category
@@ -6,12 +10,13 @@ from pykechain.models.property2 import Property2
 from pykechain.models.validators.validator_schemas import options_json_schema
 
 
-class SelectListProperty2(Property2):
+class _SelectListProperty(Property2):
     """A select list property that needs to update its options."""
 
     def __init__(self, json, **kwargs):
         """Construct a Property from a json object."""
         super().__init__(json, **kwargs)
+
         self._value_choices = json.get('value_options').get('value_choices')
 
     @property
@@ -23,16 +28,27 @@ class SelectListProperty2(Property2):
 
         :raises APIError: when unable to set the value or the value is not in the list of options
         """
-        return self._value
+        return deepcopy(self._value)
 
     @value.setter
-    def value(self, value):
-        if value not in self.options and value is not None:
-            raise APIError('The new value `{}` of the single select list property should be in the list of '
-                           'options `{}`'.format(value, self.options))
+    def value(self, value: Any):
+        if value is not None:
+            self._check_new_value(value=value)
+
         if self._put_value(value):
             self._value = value
             self._json_data['value'] = value
+
+    @abstractmethod
+    def _check_new_value(self, value: Any):
+        """
+        Abstract method to validate the new value.
+
+        :param value: any new value
+        :return: sanitized value
+        :raises APIError: when unable to set the value or the value is not in the list of options
+        """
+        pass
 
     @property
     def options(self):
@@ -63,7 +79,7 @@ class SelectListProperty2(Property2):
         List of options of this property to select from.
 
         """
-        return self._value_choices
+        return deepcopy(self._value_choices)
 
     @options.setter
     def options(self, options_list):
@@ -100,3 +116,24 @@ class SelectListProperty2(Property2):
             raise APIError("Could not update options of Property {}".format(self), response=response)
         else:
             self._options = new_options  # save the new options as the options
+
+
+class SelectListProperty2(_SelectListProperty):
+    """A virtual object representing a KE-chain single-select list property."""
+
+    def _check_new_value(self, value: Any):
+        if value not in self.options:
+            raise APIError('The new value "{}" of the Property should be in the list of options:\n{}'.format(
+                value, self.options))
+
+
+class MultiSelectListProperty2(_SelectListProperty):
+    """A virtual object representing a KE-chain multi-select list property."""
+
+    def _check_new_value(self, value: Iterable[Any]):
+        if not isinstance(value, (list, tuple)):
+            raise IllegalArgumentError('The new values must be provided as a list or tuple, "{}" is not.'.format(value))
+
+        if not all(v in self.options for v in value):
+            raise APIError('The new values "{}" of the Property should be in the list of options:\n{}'.format(
+                value, self.options))

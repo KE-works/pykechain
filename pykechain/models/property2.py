@@ -1,19 +1,21 @@
-from typing import Any, List, Dict, Optional, Text, Union, Tuple, Iterable
+from typing import Any, List, Dict, Optional, Text, Union, Tuple, Iterable, TypeVar
 
 import requests
 from jsonschema import validate
 
-from pykechain.enums import PropertyType, Category
+from pykechain.enums import Category
 from pykechain.exceptions import APIError, IllegalArgumentError
-from pykechain.models import Base
+from pykechain.models import Base, BaseInScope
 from pykechain.models.input_checks import check_text, check_type
 from pykechain.models.representations.representation_base import BaseRepresentation
 from pykechain.models.validators import PropertyValidator
 from pykechain.models.validators.validator_schemas import options_json_schema
 from pykechain.defaults import API_EXTRA_PARAMS
 
+T = TypeVar("T")
 
-class Property2(Base):
+
+class Property2(BaseInScope):
     """A virtual object representing a KE-chain property.
 
     .. versionadded: 3.0
@@ -33,8 +35,6 @@ class Property2(Base):
     :type model: str
     :ivar output: a boolean if the value is configured as an output (in an activity)
     :type output: bool
-    :ivar scope_id: the id of the Scope (not the `Scope` object)
-    :type scope_id: str
     :ivar part: The (parent) part in which this property is available
     :type part: :class:`Part2`
     :ivar value: the property value, can be set as well as property
@@ -47,7 +47,7 @@ class Property2(Base):
     :type is_invalid: bool
     """
 
-    use_bulk_update = False
+    _use_bulk_update = False
     _update_package = list()
 
     def __init__(self, json, **kwargs):
@@ -57,7 +57,6 @@ class Property2(Base):
         self.output = json.get('output')  # type: bool
         self.model_id = json.get('model_id')  # type: Optional[Text]
         self.part_id = json.get('part_id')
-        self.scope_id = json.get('scope_id')
         self.ref = json.get('ref')
         self.type = json.get('property_type')
         self.category = json.get('category')
@@ -106,6 +105,17 @@ class Property2(Base):
             return bool(self._value)
 
     @property
+    def use_bulk_update(self):
+        """Set or get the toggle to asynchronously update property values."""
+        # set the class attribute to make this value a singleton
+        return self.__class__._use_bulk_update
+
+    @use_bulk_update.setter
+    def use_bulk_update(self, value):
+        assert isinstance(value, bool), "`use_bulk_update` must be set to a boolean, not {}".format(type(value))
+        self.__class__._use_bulk_update = value
+
+    @property
     def value(self) -> Any:
         """Retrieve the data value of a property.
 
@@ -118,11 +128,7 @@ class Property2(Base):
     @value.setter
     def value(self, value: Any) -> None:
         if self.use_bulk_update:
-            self.__class__._update_package.append(dict(
-                id=self.id,
-                value=value,
-            ))
-            self._value = value
+            self._pend_value(value)
         else:
             self._put_value(value)
 
@@ -142,7 +148,21 @@ class Property2(Base):
             cls._update_package = list()
         cls.use_bulk_update = use_bulk_update
 
+    def _pend_value(self, value):
+        """Store the value to be send at a later point in time using `update_values`."""
+        value = self.serialize_value(value)
+
+        self.__class__._update_package.append(dict(
+            id=self.id,
+            value=value,
+        ))
+        self._value = value
+        return self._value
+
     def _put_value(self, value):
+        """Send the value to KE-chain."""
+        value = self.serialize_value(value)
+
         url = self._client._build_url('property2', property_id=self.id)
 
         response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['property2'], json={'value': value})
@@ -152,6 +172,16 @@ class Property2(Base):
 
         self.refresh(json=response.json()['results'][0])
         return self._value
+
+    def serialize_value(self, value: [T]) -> T:
+        """
+        Serialize the value to be set on the property.
+
+        :param value: non-serialized value
+        :type value: Any
+        :return: serialized value
+        """
+        return value.id if isinstance(value, Base) else value
 
     @property
     def part(self) -> 'Part2':
@@ -362,21 +392,13 @@ class Property2(Base):
         """
         property_type = json.get('property_type')
 
-        # changed for PIM2
-        if property_type == PropertyType.ATTACHMENT_VALUE:
-            from .property2_attachment import AttachmentProperty2
-            return AttachmentProperty2(json, **kwargs)
-        elif property_type == PropertyType.SINGLE_SELECT_VALUE:
-            from .property2_selectlist import SelectListProperty2
-            return SelectListProperty2(json, **kwargs)
-        elif property_type == PropertyType.REFERENCES_VALUE:
-            from .property2_multi_reference import MultiReferenceProperty2
-            return MultiReferenceProperty2(json, **kwargs)
-        elif property_type == PropertyType.DATETIME_VALUE:
-            from .property2_datetime import DatetimeProperty2
-            return DatetimeProperty2(json, **kwargs)
-        else:
-            return Property2(json, **kwargs)
+        from pykechain.models import property_type_to_class_map
+
+        # Get specific Property subclass, defaulting to Property2 itself
+        property_class = property_type_to_class_map.get(property_type, Property2)
+
+        # Call constructor and return new object
+        return property_class(json, **kwargs)
 
     def edit(
             self,
