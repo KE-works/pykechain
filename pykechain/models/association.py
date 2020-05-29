@@ -1,7 +1,7 @@
-from pykechain.models import Base
+from pykechain.models import BaseInScope
 
 
-class Association(Base):
+class Association(BaseInScope):
     """
     A virtual object representing a KE-chain association.
 
@@ -11,7 +11,6 @@ class Association(Base):
     :ivar part_model_id
     :ivar widget_id
     :ivar activity_id
-    :ivar scope_id
     :ivar writable
     """
 
@@ -25,8 +24,6 @@ class Association(Base):
         self.part_model_id = json.get('model_part')
         self.widget_id = json.get('widget')
         self.activity_id = json.get('activity')
-        self.scope_id = json.get('scope')
-
         self.writable = json.get('writable')
         self.permissions = json.get('permissions')
 

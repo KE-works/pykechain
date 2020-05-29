@@ -23,6 +23,7 @@ class TestParts(TestBetamax):
 
         # Check if there are parts
         self.assertTrue(len(parts))
+        self.assertIsInstance(parts[0], Part2)
 
     def test_retrieve_single_part(self):
         part_to_retrieve = self.project.parts()[0]
