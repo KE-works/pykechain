@@ -3,21 +3,16 @@ import time
 from unittest import TestCase, skipIf
 
 import pytz
-import six
 import warnings
 
 from pykechain.enums import ScopeStatus
-from pykechain.models import Team
+from pykechain.models import Team, Base
 from pykechain.models.scope2 import Scope2
 from pykechain.client import Client
-from pykechain.exceptions import ForbiddenError, ClientError, NotFoundError, IllegalArgumentError
+from pykechain.exceptions import ForbiddenError, ClientError, NotFoundError, IllegalArgumentError, APIError
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_WIM2
-
-if six.PY2:
-    from test.test_support import EnvironmentVarGuard
-elif six.PY3:
-    from test.support import EnvironmentVarGuard
+from test.support import EnvironmentVarGuard
 
 
 class TestClient(TestCase):
@@ -84,9 +79,20 @@ class TestClient(TestCase):
     def test_get_current_user(self):
         client = Client()
 
-        # TODO Produce a more precise Exception, even with the retry adapter.
-        with self.assertRaises(Exception):
+        with self.assertRaises(APIError):
             client.current_user()
+
+    # noinspection PyTypeChecker
+    def test_reload(self):
+        client = Client()
+
+        not_a_kechain_object = 3
+        with self.assertRaises(IllegalArgumentError, msg='Reload must receive an object of type Base.'):
+            client.reload(not_a_kechain_object)
+
+        empty_kechain_object = Base(json=dict(name='empty', id='1234567890'), client=client)
+        with self.assertRaises(IllegalArgumentError, msg='Reload cant find API resource for type Base'):
+            client.reload(empty_kechain_object)
 
 
 class TestClientLive(TestBetamax):
@@ -119,6 +125,26 @@ class TestClientLive(TestBetamax):
 
         from pykechain.models import User
         self.assertIsInstance(user, User)
+
+    # 3.7.0
+    def test_reload_deleted_object(self):
+        bike_model = self.project.model(name='Bike')
+        bike = bike_model.instance()
+        wheel_model = bike_model.child(name='Wheel')
+
+        wheel_name = '__new wheel: test for reloading'
+        new_wheel_1 = bike.add(name=wheel_name, model=wheel_model)
+        new_wheel_2 = self.project.part(name=wheel_name)
+
+        self.assertFalse(new_wheel_1 is new_wheel_2, "Parts must be separate in Python memory")
+        self.assertEqual(new_wheel_1, new_wheel_2, "Parts must be identical in UUIDs")
+
+        new_wheel_2.delete()
+        with self.assertRaises(NotFoundError):
+            self.project.part(name=wheel_name)
+
+        with self.assertRaises(NotFoundError, msg="Wheel cant be reloaded after it was deleted"):
+            self.client.reload(new_wheel_1)
 
     # 2.6.0
     def test_create_scope(self):

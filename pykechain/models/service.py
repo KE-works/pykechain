@@ -6,12 +6,12 @@ from typing import Text, Dict, Optional
 
 from pykechain.enums import ServiceScriptUser, ServiceExecutionStatus
 from pykechain.exceptions import APIError
-from pykechain.models.base import Base
+from pykechain.models.base import Base, BaseInScope
 from pykechain.models.input_checks import check_text, check_enum, check_type
 from pykechain.utils import parse_datetime
 
 
-class Service(Base):
+class Service(BaseInScope):
     """
     A virtual object representing a KE-chain Service.
 
@@ -25,8 +25,6 @@ class Service(Base):
     :type description: str
     :ivar version: version number of the service, as provided by uploaded
     :type version: str
-    :ivar scope_id: uuid of the scope to which the service belongs
-    :type scope_id: uuid
     :ivar type: type of the service. One of the :class:`ServiceType`
     :type type: str
     :ivar filename: filename of the service
@@ -54,7 +52,6 @@ class Service(Base):
         self.filename = json.get('script_file_name')
         self.type = json.get('script_type')
         self.environment = json.get('env_version')
-        self.scope_id = json.get('scope')  # type: Text
 
         # for SIM3 version
         self.trusted = json.get('trusted')  # type: bool

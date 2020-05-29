@@ -111,18 +111,9 @@ class Activity2(TreeObject, RepresentationMixin, TagsMixin):
                 raise NotFoundError("Activity '{}' has no related scope!".format(self))
         return self._scope_id
 
-    @property
-    def scope(self):
-        """
-        Scope this Activity belongs to.
-
-        This property will return a `Scope` object. It will make an additional call to the KE-chain API.
-
-        :return: the scope
-        :type: :class:`pykechain.models.Scope`
-        :raises NotFoundError: if the scope could not be found
-        """
-        return self._client.scope(pk=self.scope_id, status=None)
+    @scope_id.setter
+    def scope_id(self, value):
+        self._scope_id = value
 
     #
     # predicates

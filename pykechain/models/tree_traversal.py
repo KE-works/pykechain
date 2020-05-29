@@ -1,12 +1,12 @@
 from abc import ABC
 from typing import Optional, Text, List, TypeVar
 
-from pykechain.models import Base
+from pykechain.models import BaseInScope
 
 T = TypeVar('T')
 
 
-class TreeObject(Base, ABC):
+class TreeObject(BaseInScope, ABC):
     """Object class to include methods used to traverse a tree-structure."""
 
     def __init__(self, json, **kwargs):
