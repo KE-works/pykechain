@@ -121,4 +121,4 @@ class BaseRepresentation(object):
         :raises IllegalArgumentError
         :return: None
         """
-        pass
+        pass  # pragma: no cover

@@ -70,11 +70,19 @@ class TestRepresentation(SixTestCase):
             BaseRepresentation.parse(obj=None, json=no_rtype_config)
 
     def test_component_invalid_object(self):
-        empty_activity = Activity2(json=dict(id='1234567890'), client=None)
+        empty_activity = Activity2(json={'id': '1234567890'}, client=None)
         representation = ThousandsSeparator(empty_activity)
 
         with self.assertRaises(IllegalArgumentError):
             empty_activity.representations = [representation]
+
+    def test_component_invalid_property_type(self):
+        empty_prop = Property2(json={'id': '1234567890', 'category': 'MODEL'}, client=None)
+        representation = ThousandsSeparator(empty_prop)
+        representation.rtype = 'Broken rtype'
+
+        with self.assertRaises(IllegalArgumentError):
+            empty_prop.representations = [representation]
 
     def test_component_not_a_list(self):
         empty_activity = Activity2(json={}, client=None)
