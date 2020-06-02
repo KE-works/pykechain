@@ -105,7 +105,8 @@ class BaseRepresentation(object):
         self._config[self._config_value_key] = value
 
         # Update the property in-place
-        self._obj.representations = self._obj.representations
+        if self._obj:
+            self._obj.representations = self._obj.representations
 
     @abstractmethod
     def validate_representation(self, value: Any) -> None:

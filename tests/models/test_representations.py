@@ -6,7 +6,6 @@ from jsonschema import validate
 from pykechain.enums import PropertyType, Multiplicity, LinkTargets, SelectListRepresentations, FontAwesomeMode
 from pykechain.exceptions import IllegalArgumentError, APIError
 from pykechain.models import AnyProperty, Property2, Scope2, Activity2
-from pykechain.models.representations.mixin import RepresentationMixin
 from pykechain.models.representations.representation_base import BaseRepresentation
 from pykechain.models.representations.representations import ButtonRepresentation, LinkTarget, SignificantDigits, \
     DecimalPlaces, ThousandsSeparator, CustomIconRepresentation
@@ -64,7 +63,7 @@ class Bases:
             super().tearDown()
 
         @abstractmethod
-        def _get_object(self) -> Union[Property2, Scope2, Activity2, RepresentationMixin]:
+        def _get_object(self) -> Union[Property2, Scope2, Activity2]:
             pass
 
         def test_get_set(self):

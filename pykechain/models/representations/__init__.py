@@ -2,7 +2,7 @@
 
 .. versionadded:: 3.0.x
 """
-from .mixin import RepresentationMixin
+from .component import RepresentationsComponent
 from .representation_base import BaseRepresentation
 from .representations import (
     DecimalPlaces, SignificantDigits, ThousandsSeparator, LinkTarget, ButtonRepresentation, CustomIconRepresentation,
@@ -37,5 +37,5 @@ AnyRepresentation = [
 
 __all__ = [
     AnyRepresentation,
-    RepresentationMixin,
+    RepresentationsComponent,
 ]

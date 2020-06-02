@@ -7,7 +7,7 @@ from pykechain.enums import Category
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Base, BaseInScope
 from pykechain.models.input_checks import check_text, check_type
-from pykechain.models.representations.mixin import RepresentationMixin
+from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.validators import PropertyValidator
 from pykechain.models.validators.validator_schemas import options_json_schema
 from pykechain.defaults import API_EXTRA_PARAMS
@@ -15,7 +15,7 @@ from pykechain.defaults import API_EXTRA_PARAMS
 T = TypeVar("T")
 
 
-class Property2(BaseInScope, RepresentationMixin):
+class Property2(BaseInScope):
     """A virtual object representing a KE-chain property.
 
     .. versionadded: 3.0
@@ -66,20 +66,23 @@ class Property2(BaseInScope, RepresentationMixin):
 
         # Create protected variables
         self._value = json.get('value')  # type: Any
-        self._options = json.get('value_options')  # type: Dict
+        self._options = json.get('value_options', {})  # type: Dict
         self._part = None  # type: Optional['Part2']
         self._model = None  # type: Optional['Property2']
         self._validators = []  # type: List[PropertyValidator]
         self._validation_results = []  # type: List
         self._validation_reasons = []  # type: List
 
-        if self._options:
-            validate(self._options, options_json_schema)
+        self._representations_container = RepresentationsComponent(
+            self,
+            self._options.get('representations', {}),
+            self._save_representations,
+        )
 
-            RepresentationMixin.__init__(self, self._options.get('representations', {}))
+        validate(self._options, options_json_schema)
 
-            if self._options.get('validators'):
-                self._parse_validators()
+        if self._options.get('validators'):
+            self._parse_validators()
 
     def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional = None) -> None:
         """Refresh the object in place."""
@@ -320,13 +323,17 @@ class Property2(BaseInScope, RepresentationMixin):
         else:
             return self._validation_results
 
-    def _validate_representations(self, representations: Any):
-        """Extend the default validation with Property2 specific validation."""
+    @property
+    def representations(self):
+        return self._representations_container.get_representations()
+
+    @representations.setter
+    def representations(self, value):
         if self.category != Category.MODEL:
             raise IllegalArgumentError("To update the list of representations, it can only work on a "
                                        "`Property` of category '{}'".format(Category.MODEL))
 
-        super()._validate_representations(representations)
+        self._representations_container.set_representations(value)
 
     def _save_representations(self, representation_options):
         self._options.update({'representations': representation_options})

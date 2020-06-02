@@ -12,7 +12,7 @@ from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClas
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
 from pykechain.models.input_checks import check_datetime, check_text, check_list_of_text, check_enum, check_user, \
     check_type
-from pykechain.models.representations.mixin import RepresentationMixin
+from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.models.user import User
@@ -20,7 +20,7 @@ from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import parse_datetime, is_valid_email
 
 
-class Activity2(TreeObject, RepresentationMixin, TagsMixin):
+class Activity2(TreeObject, TagsMixin):
     """A virtual object representing a KE-chain activity.
 
     .. versionadded:: 2.0
@@ -60,8 +60,11 @@ class Activity2(TreeObject, RepresentationMixin, TagsMixin):
         self._options = json.get('activity_options', {})
 
         self._tags = json.get('tags', [])  # type: List[Text]
-
-        RepresentationMixin.__init__(self, self._options.get('representations', {}))
+        self._representations_container = RepresentationsComponent(
+            self,
+            self._options.get('representations', {}),
+            self._save_representations,
+        )
 
     def __call__(self, *args, **kwargs) -> 'Activity2':
         """Short-hand version of the `child` method."""
@@ -71,10 +74,6 @@ class Activity2(TreeObject, RepresentationMixin, TagsMixin):
         """Refresh the object in place."""
         super().refresh(url=self._client._build_url('activity', activity_id=self.id),
                         extra_params=API_EXTRA_PARAMS['activity'], *args, **kwargs)
-
-    def _save_representations(self, representation_options):
-        self._options.update({'representations': representation_options})
-        self.edit(activity_options=self._options)
 
     #
     # additional properties
@@ -114,6 +113,18 @@ class Activity2(TreeObject, RepresentationMixin, TagsMixin):
     @scope_id.setter
     def scope_id(self, value):
         self._scope_id = value
+
+    @property
+    def representations(self):
+        return self._representations_container.get_representations()
+
+    @representations.setter
+    def representations(self, value):
+        self._representations_container.set_representations(value)
+
+    def _save_representations(self, representation_options):
+        self._options.update({'representations': representation_options})
+        self.edit(activity_options=self._options)
 
     #
     # predicates
