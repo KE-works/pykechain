@@ -48,6 +48,9 @@ class BaseRepresentation(object):
             self.validate_representation(value)
             self._config[self._config_value_key] = value
 
+    def __repr__(self):
+        return '{} ({})'.format(self.__class__.__name__, self.value)
+
     def as_json(self) -> Dict:
         """Parse the validator to a proper validator json."""
         return self._json
@@ -72,12 +75,12 @@ class BaseRepresentation(object):
         try:
             rtype = json['rtype']
         except KeyError:
-            raise Exception("Representation unknown, incorrect json: '{}'".format(json))
+            raise ValueError("Representation unknown, incorrect json: '{}'".format(json))
         try:
             from pykechain.models.representations import rtype_class_map
             repr_class = rtype_class_map[rtype]  # type: type(BaseRepresentation)
         except KeyError:
-            raise Exception('Unknown rtype "{}" in json'.format(rtype))
+            raise TypeError('Unknown rtype "{}" in json'.format(rtype))
 
         return repr_class(obj=obj, json=json)
 

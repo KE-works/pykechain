@@ -5,25 +5,88 @@ from jsonschema import validate
 
 from pykechain.enums import PropertyType, Multiplicity, LinkTargets, SelectListRepresentations, FontAwesomeMode
 from pykechain.exceptions import IllegalArgumentError, APIError
-from pykechain.models import AnyProperty, Property2, Scope2, Activity2
+from pykechain.models import AnyProperty, Property2, Scope2, Activity2, SelectListProperty2
 from pykechain.models.representations.representation_base import BaseRepresentation
 from pykechain.models.representations.representations import ButtonRepresentation, LinkTarget, SignificantDigits, \
     DecimalPlaces, ThousandsSeparator, CustomIconRepresentation
 from pykechain.models.validators.validator_schemas import options_json_schema
 from tests.classes import SixTestCase, TestBetamax
 
+representation_config = dict(
+    rtype='buttonRepresentation',
+    config=dict(
+        buttonRepresentation="dropdown",
+    )
+)
+options = dict(
+    representations=[representation_config],
+)
+
 
 class TestRepresentationJSON(SixTestCase):
+
     def test_valid_button_representation_json(self):
-        options = dict(
-            representations=[dict(
-                rtype='buttonRepresentation',
-                config=dict(
-                    buttonRepresentation="dropdown",
-                )
-            )]
-        )
         validate(options_json_schema, options)
+
+
+class TestRepresentation(SixTestCase):
+    def test_create(self):
+        representation = BaseRepresentation()
+
+        self.assertIsInstance(representation, BaseRepresentation)
+
+    def test_create_with_value(self):
+        representation = DecimalPlaces(value=3)
+
+        self.assertEqual(3, representation.value)
+
+    def test_create_with_object(self):
+        empty_prop = Property2(json={}, client=None)
+        representation = ButtonRepresentation(empty_prop)
+
+        self.assertIsInstance(representation, ButtonRepresentation)
+
+    def test_parse(self):
+        empty_slp = SelectListProperty2(json={'value_options': {}}, client=None)
+        BaseRepresentation.parse(obj=empty_slp, json=representation_config)
+
+    def test_parse_incorrect_rtype(self):
+        no_rtype_config = dict(
+            config=dict(
+                buttonRepresentation="dropdown",
+            )
+        )
+        with self.assertRaises(ValueError):
+            BaseRepresentation.parse(obj=None, json=no_rtype_config)
+
+    def test_parse_unknown_rtype(self):
+        no_rtype_config = dict(
+            rtype='Not a representation type',
+            config=dict(
+                buttonRepresentation="dropdown",
+            )
+        )
+        with self.assertRaises(TypeError):
+            BaseRepresentation.parse(obj=None, json=no_rtype_config)
+
+    def test_component_invalid_object(self):
+        empty_activity = Activity2(json=dict(id='1234567890'), client=None)
+        representation = ThousandsSeparator(empty_activity)
+
+        with self.assertRaises(IllegalArgumentError):
+            empty_activity.representations = [representation]
+
+    def test_component_not_a_list(self):
+        empty_activity = Activity2(json={}, client=None)
+
+        with self.assertRaises(IllegalArgumentError):
+            empty_activity.representations = 'Howdy!'
+
+    def test_component_not_a_representation(self):
+        empty_activity = Activity2(json={}, client=None)
+
+        with self.assertRaises(IllegalArgumentError):
+            empty_activity.representations = ['Howdy again!']
 
 
 class Bases:

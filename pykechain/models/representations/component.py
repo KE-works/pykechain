@@ -77,12 +77,9 @@ class RepresentationsComponent(object):
         """Dump the representations as json inside the _repr_options dictionary."""
         representations_json = []
         for r in self._representations:
-            if isinstance(r, BaseRepresentation):
-                json_format = r.as_json()
-                validate(json_format, representation_jsonschema_stub)
-                representations_json.append(json_format)
-            else:
-                raise APIError("representation is not a BaseRepresentation: '{}'".format(r))
+            json_format = r.as_json()
+            validate(json_format, representation_jsonschema_stub)
+            representations_json.append(json_format)
 
         self._repr_options = representations_json
 
