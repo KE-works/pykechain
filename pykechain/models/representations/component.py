@@ -3,7 +3,7 @@ from typing import List, Any, Dict, Callable
 from jsonschema import validate
 
 from pykechain.enums import _AllRepresentations, PropertyType
-from pykechain.exceptions import IllegalArgumentError, APIError
+from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.representations.representation_base import BaseRepresentation
 from pykechain.models.validators.validator_schemas import representation_jsonschema_stub
 
