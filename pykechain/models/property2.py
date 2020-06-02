@@ -325,6 +325,7 @@ class Property2(BaseInScope):
 
     @property
     def representations(self):
+        """Get and set the property representations."""
         return self._representations_container.get_representations()
 
     @representations.setter

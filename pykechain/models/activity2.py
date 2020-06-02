@@ -116,6 +116,7 @@ class Activity2(TreeObject, TagsMixin):
 
     @property
     def representations(self):
+        """Get and set the activity representations."""
         return self._representations_container.get_representations()
 
     @representations.setter

@@ -92,6 +92,7 @@ class Scope2(Base, TagsMixin):
 
     @property
     def representations(self):
+        """Get and set the scope representations."""
         return self._representations_container.get_representations()
 
     @representations.setter

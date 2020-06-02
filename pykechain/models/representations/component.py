@@ -39,7 +39,7 @@ class RepresentationsComponent(object):
 
     def get_representations(self) -> List['AnyRepresentation']:
         """
-        Provide and retrieve list of representation objects.
+        Get list of representation objects.
 
         :return: list of Representations
         :raises IllegalArgumentError if representations are set with incorrect options
@@ -47,6 +47,7 @@ class RepresentationsComponent(object):
         return self._representations
 
     def set_representations(self, representations: List['AnyRepresentation']) -> None:
+        """Set the representations."""
         self._validate_representations(representations)
 
         # set the internal representation list
