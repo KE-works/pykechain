@@ -10,6 +10,7 @@ from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
 from pykechain.models.input_checks import check_text, check_datetime, check_enum, check_list_of_text, \
     check_base, check_type
+from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
@@ -56,6 +57,12 @@ class Scope2(Base, TagsMixin):
         self.start_date = parse_datetime(json.get('start_date'))
         self.due_date = parse_datetime(json.get('due_date'))
 
+        self._representations_container = RepresentationsComponent(
+            self,
+            self.options.get('representations', {}),
+            self._save_representations,
+        )
+
     @property
     def team(self):
         """Team to which the scope is assigned."""
@@ -83,6 +90,19 @@ class Scope2(Base, TagsMixin):
                         url=self._client._build_url('scope2', scope_id=self.id),
                         extra_params=API_EXTRA_PARAMS['scope2'])
 
+    @property
+    def representations(self):
+        """Get and set the scope representations."""
+        return self._representations_container.get_representations()
+
+    @representations.setter
+    def representations(self, value):
+        self._representations_container.set_representations(value)
+
+    def _save_representations(self, representation_options):
+        options = self.options
+        options.update({'representations': representation_options})
+        self.options = options
     #
     # CRUD methods
     #
@@ -196,7 +216,7 @@ class Scope2(Base, TagsMixin):
         if team:
             update_dict['team_id'] = team
         tags = check_list_of_text(tags, 'tags', True)
-        if tags:
+        if tags is not None:
             update_dict['tags'] = tags
         scope_options = check_type(options, dict, 'options')
         if scope_options:
@@ -212,6 +232,10 @@ class Scope2(Base, TagsMixin):
             raise APIError("Could not update Scope {}".format(self), response=response)
 
         self.refresh(json=response.json().get('results')[0])
+
+        # TODO tags that are set are not in response
+        if tags is not None:
+            self._tags = tags
 
     def clone(self, **kwargs):
         """Clone a scope.

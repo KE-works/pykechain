@@ -94,19 +94,29 @@ class _SelectListProperty(Property2):
 
         # check if the options are not already set and indeed different
         if not self._value_choices or set(options_list) != set(self._value_choices):
-            self._put_options(options_list=options_list)
+            self._put_value_options(options_list=options_list)
             self._value_choices = options_list
 
-    def _put_options(self, options_list):
+    def _put_value_options(self, options_list):
+        new_options = self._options.copy()  # make a full copy of the dict not to only link it and update dict in place
+        new_options.update({"value_choices": options_list})
+
+        self._put_options(new_options)
+
+    def _save_representations(self, representation_options):
+        new_options = self._options.copy()  # make a full copy of the dict not to only link it and update dict in place
+        new_options.update({'representations': representation_options})
+
+        self._put_options(new_options)
+
+    def _put_options(self, new_options):
         """Save the options to KE-chain.
 
         Makes a single API call.
 
-        :param options_list: list of options to set.
+        :param new_options: list of options to set.
         :raises APIError: when unable to update the options
         """
-        new_options = self._options.copy()  # make a full copy of the dict not to only link it and update dict in place
-        new_options.update({"value_choices": options_list})
         validate(new_options, options_json_schema)
 
         url = self._client._build_url('property2', property_id=self.id)

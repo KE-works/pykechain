@@ -1,6 +1,6 @@
 import copy
 
-from pykechain.enums import PropertyVTypes, PropertyRepresentation
+from pykechain.enums import PropertyVTypes, _AllRepresentations
 
 #
 # Validators and Validator Effects
@@ -60,7 +60,7 @@ representation_jsonschema_stub = {
     "additionalProperties": False,
     "required": ["rtype", "config"],
     "properties": {
-        "rtype": {"type": "string", "enum": PropertyRepresentation.values()},
+        "rtype": {"type": "string", "enum": _AllRepresentations.values()},
         "config": {"type": "object"}
     }
 }

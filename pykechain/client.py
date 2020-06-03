@@ -385,15 +385,25 @@ class Client(object):
             superclasses = obj.__class__.mro()  # method resolution order, i.e. the obj's class and its superclasses
             for cls in superclasses:
                 resource = cls.__name__.lower()
+                stripped = resource.replace("2", "")
 
                 try:
                     # set the id from the `obj.id` which is normally a keyname `<class_name>_id` (without the '2' if so)
-                    url = self._build_url(resource=resource, **{"{}_id".format(resource.replace("2", "")): obj.id})
+                    url = self._build_url(resource=resource, **{"{}_id".format(stripped): obj.id})
                     extra_api_params = API_EXTRA_PARAMS.get(resource)
                     break
                 except KeyError:
-                    # If the resource was not recognized, try the next superclass
-                    continue
+                    if resource != stripped:
+                        # Try again with stripped resource name
+                        try:
+                            url = self._build_url(resource=stripped, **{"{}_id".format(stripped): obj.id})
+                            extra_api_params = API_EXTRA_PARAMS.get(stripped)
+                            break
+                        except KeyError:
+                            continue
+                    else:
+                        # If the resource was not recognized, try the next superclass
+                        continue
 
             if url is None:
                 raise IllegalArgumentError(
@@ -421,9 +431,7 @@ class Client(object):
         :raises NotFoundError: When no result is found.
         :raises MultipleFoundError: When more than a single result is found.
         """
-        # TODO set limit=2 to reduce query (but allow MultipleFoundError)
-        #  Will require updating of many cassettes.
-        # kwargs['limit'] = kwargs.get('limit', 2)
+        kwargs['limit'] = kwargs.get('limit', 2)
         results = method(*args, **kwargs)
 
         criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)

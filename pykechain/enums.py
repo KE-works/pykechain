@@ -105,7 +105,7 @@ class PropertyType(Enum):
     # JSON_VALUE = "JSON_VALUE"
     LINK_VALUE = "LINK_VALUE"
     SINGLE_SELECT_VALUE = "SINGLE_SELECT_VALUE"
-    # MULTI_SELECT_VALUE = "MULTI_SELECT_VALUE"
+    MULTI_SELECT_VALUE = "MULTI_SELECT_VALUE"
     REFERENCE_VALUE = "REFERENCE_VALUE"
     REFERENCES_VALUE = "REFERENCES_VALUE"
     ACTIVITY_REFERENCES_VALUE = "ACTIVITY_REFERENCES_VALUE"
@@ -635,6 +635,20 @@ class PropertyRepresentation(Enum):
     THOUSANDS_SEPARATOR = "thousandsSeparator"
 
 
+class OtherRepresentations(Enum):
+    """
+    Other representations used in KE-chain.
+
+    :cvar CUSTOM_ICON: different font-awesome icons
+    """
+
+    CUSTOM_ICON = 'customIcon'
+
+
+class _AllRepresentations(PropertyRepresentation, OtherRepresentations):
+    pass
+
+
 class ShowColumnTypes(Enum):
     """The columns that can be shown in a Property grid.
 
@@ -769,6 +783,7 @@ class CardWidgetLinkValue(Enum):
 
     EXTERNAL_LINK = "External link"
     TASK_LINK = "Task link"
+    TREE_VIEW = "Tree view"
     NO_LINK = "No link"
 
 

@@ -602,12 +602,12 @@ class TestActivityReference(TestBetamax):
     def setUp(self):
         super().setUp()
         root = self.project.model(name='Product')
-        part = self.project.create_model(name='The part', parent=root, multiplicity=Multiplicity.ONE)
-        self.prop = part.add_property(name='activity ref', property_type=PropertyType.ACTIVITY_REFERENCES_VALUE)
+        self.part = self.project.create_model(name='The part', parent=root, multiplicity=Multiplicity.ONE)
+        self.prop = self.part.add_property(name='activity ref', property_type=PropertyType.ACTIVITY_REFERENCES_VALUE)
 
     def tearDown(self):
-        if self.prop:
-            self.prop.delete()
+        if self.part:
+            self.part.delete()
         super().tearDown()
 
     def test_create(self):

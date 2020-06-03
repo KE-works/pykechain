@@ -3,7 +3,7 @@ from typing import Iterable, Union, AnyStr, Optional, Text, Dict, List, Any
 
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, ScopeWidgetColumnTypes, \
     ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
-    KEChainPages, CardWidgetKEChainPageLink, Alignment
+    KEChainPages, CardWidgetKEChainPageLink, Alignment, ActivityType
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from pykechain.models.input_checks import check_enum, check_text, check_base, check_type, check_list_of_text
 from pykechain.models.widgets import Widget
@@ -212,6 +212,7 @@ class WidgetsManager(Iterable):
                              emphasize_delete: Optional[bool] = False,
                              sort_property: Optional[Union['AnyProperty', Text]] = None,
                              sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
+                             show_name_column: Optional[bool] = True,
                              show_images: Optional[bool] = False,
                              readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
                              writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
@@ -260,6 +261,8 @@ class WidgetsManager(Iterable):
             * ASC (default): Sort in ascending order
             * DESC: Sort in descending order
         :type sort_direction: basestring (see :class:`enums.SortTable`)
+        :param show_name_column: (O) show the column with part names
+        :type show_name_column: bool
         :param show_images: (O) show the attachments in the grid as images, not as hyperlinks (default False).
         :type show_images: bool
         :param readable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as readable
@@ -288,6 +291,7 @@ class WidgetsManager(Iterable):
             # columns
             "sortedColumn": sort_property_id if sort_property_id else None,
             "sortDirection": sort_direction,
+            "showNameColumn": show_name_column,
             "showImages": show_images,
             # buttons
             "addButtonVisible": new_instance if parent_instance else False,
@@ -339,6 +343,7 @@ class WidgetsManager(Iterable):
                                 sort_property: Optional[Union['AnyProperty', Text]] = None,
                                 sort_name: Optional[Union[bool, Text]] = False,
                                 sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
+                                show_name_column: Optional[bool] = True,
                                 show_images: Optional[bool] = False,
                                 collapse_filters: Optional[bool] = False,
                                 page_size: Optional[int] = 25,
@@ -393,6 +398,8 @@ class WidgetsManager(Iterable):
             * ASC (default): Sort in ascending order
             * DESC: Sort in descending order
         :type sort_direction: basestring (see :class:`enums.SortTable`)
+        :param show_name_column: (O) show the column with part names
+        :type show_name_column: bool
         :param show_images: (O) show the attachments in the grid as images, not as hyperlinks (default False).
         :type show_images: bool
         :param collapse_filters: Hide or show the filters pane (default False)
@@ -446,6 +453,7 @@ class WidgetsManager(Iterable):
             "showCollapseFiltersValue": "Collapsed" if collapse_filters else "Expanded",  # compatibility
             "collapseFilters": collapse_filters,
             "customPageSize": page_size,
+            "showNameColumn": show_name_column,
             "showImages": show_images,
             # buttons
             "addButtonVisible": new_instance if parent_instance_id else False,
@@ -486,6 +494,8 @@ class WidgetsManager(Iterable):
                                     parent_widget: Optional[Union[Widget, Text]] = None,
                                     alignment: Optional[Alignment] = None,
                                     image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
+                                    show_download_button: Optional[bool] = True,
+                                    show_full_screen_button: Optional[bool] = True,
                                     **kwargs) -> Widget:
         """
         Add a KE-chain Attachment widget widget manager.
@@ -501,10 +511,14 @@ class WidgetsManager(Iterable):
             * String value: Custom title
             * None: No title
         :type title: bool or basestring or None
-        :param alignment: Alignment of the previewed attachment (Alignment enum class)
+        :param alignment: horizontal alignment of the previewed attachment (Alignment enum class)
         :type alignment: Alignment
-        :param image_fit: enumeration to address the image_fit (defaults to 'contain', otherwise 'cover')
+        :param image_fit: (O) enumeration to address the image_fit (defaults to 'contain', otherwise 'cover')
         :type image_fit: basestring or None
+        :param show_download_button: (O) whether a user can download the attached figure (defaults to True)
+        :type show_download_button: bool
+        :param show_full_screen_button: (O) whether the figure can be expanded to fit the full screen (defaults to True)
+        :type show_full_screen_button: bool
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
         :rtype: Widget
@@ -519,6 +533,8 @@ class WidgetsManager(Iterable):
             "propertyInstanceId": attachment_property.id,
             "alignment": check_enum(alignment, Alignment, 'alignment'),
             "imageFit": check_enum(image_fit, ImageFitValue, 'image_fit'),
+            "showDownloadButton": check_type(show_download_button, bool, 'show_download_button'),
+            "showFullscreenImageButton": check_type(show_full_screen_button, bool, 'show_full_screen_button'),
         })
 
         for deprecated_kw in ['widget_type', 'readable_models']:
@@ -1250,6 +1266,7 @@ class WidgetsManager(Iterable):
                         parent_widget: Optional[Union[Widget, Text]] = None,
                         description: Optional[Union[Text, bool]] = None,
                         link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
+                        link_value: Optional[CardWidgetLinkValue] = None,
                         link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
                         image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
                         **kwargs) -> Widget:
@@ -1272,8 +1289,10 @@ class WidgetsManager(Iterable):
             * task: another KE-chain task, provided as an Activity2 object or its UUID
             * String value: URL to a webpage
             * KE-chain page: built-in KE-chain page of the current scope
+        :param link_value: Overwrite the default link value (obtained from the type of the link)
+        :type link_value: CardWidgetLinkValue
         :param link_target: how the link is opened, one of the values of CardWidgetLinkTarget enum.
-        :param link_target: CardWidgetLinkTarget
+        :type link_target: CardWidgetLinkTarget
         :param image_fit: how the image on the card widget is displayed
         :type image_fit: ImageFitValue
         :return: Card Widget
@@ -1290,6 +1309,7 @@ class WidgetsManager(Iterable):
         else:
             raise IllegalArgumentError("When using the add_card_widget, 'description' must be 'text_type' or None or "
                                        "False. Type is: {}".format(type(description)))
+
         meta.update({
             "showDescriptionValue": show_description_value,
             "customDescription": description
@@ -1313,19 +1333,24 @@ class WidgetsManager(Iterable):
 
         from pykechain.models import Activity2
         if isinstance(link, Activity2):
+            if link.activity_type == ActivityType.TASK:
+                default_link_value = CardWidgetLinkValue.TASK_LINK
+            else:
+                default_link_value = CardWidgetLinkValue.TREE_VIEW
+
             meta.update({
                 'customLink': link.id,
-                'showLinkValue': CardWidgetLinkValue.TASK_LINK
+                'showLinkValue': default_link_value,
             })
         elif isinstance(link, str) and is_uuid(link):
             meta.update({
                 'customLink': link,
-                'showLinkValue': CardWidgetLinkValue.TASK_LINK
+                'showLinkValue': CardWidgetLinkValue.TASK_LINK,
             })
         elif link is None or link is False:
             meta.update({
                 'customLink': None,
-                'showLinkValue': CardWidgetLinkValue.NO_LINK
+                'showLinkValue': CardWidgetLinkValue.NO_LINK,
             })
         elif link in KEChainPages.values():
             meta.update({
@@ -1335,7 +1360,12 @@ class WidgetsManager(Iterable):
         else:
             meta.update({
                 'customLink': link,
-                'showLinkValue': CardWidgetLinkValue.EXTERNAL_LINK
+                'showLinkValue': CardWidgetLinkValue.EXTERNAL_LINK,
+            })
+
+        if link_value is not None:
+            meta.update({
+                'showLinkValue': check_enum(link_value, CardWidgetLinkValue, 'link_value'),
             })
 
         meta['linkTarget'] = check_enum(link_target, LinkTargets, 'link_target')
