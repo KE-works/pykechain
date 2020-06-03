@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v3.7.0-rc5 (not released)
+-------------------------
+
+* :+1: Added `PropertyTypes` enumeration values for the JSON property and multiple new reference properties.
+
 v3.7.0-rc4 (not released)
 -------------------------
 
