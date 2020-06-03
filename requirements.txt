@@ -12,7 +12,7 @@ semver==2.10.1
 PyOpenSSL==19.1.0; python_version <= '2.7'
 
 # testing
-pytest==5.4.2
+pytest==5.4.3
 betamax==0.8.1
 coverage<=4.5.99
 pytest-cov==2.9.0
