@@ -1,7 +1,8 @@
 from unittest import TestCase
 
 from pykechain.enums import (WidgetTypes, ShowColumnTypes, FilterType, ProgressBarColors,
-                             Category, LinkTargets, KEChainPages, WidgetTitleValue, Alignment)
+                             Category, LinkTargets, KEChainPages, WidgetTitleValue, Alignment, ActivityType,
+                             CardWidgetLinkValue, CardWidgetLinkTarget, ImageFitValue)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Activity2
 from pykechain.models.widgets import (
@@ -260,6 +261,15 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertIsInstance(widget, PropertygridWidget)
         self.assertEqual(len(self.wm), 1 + 1)
 
+    def test_add_attachment_widget(self):
+        picture_instance = self.project.part('Bike').property('Picture')
+        widget = self.wm.add_attachmentviewer_widget(
+            attachment_property=picture_instance,
+        )
+
+        self.assertIsInstance(widget, AttachmentviewerWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+
     def test_attachment_widget_with_associations_using_widget_manager(self):
         photo_property = self.project.property("Picture")
 
@@ -339,15 +349,6 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertIsInstance(widget, FilteredgridWidget)
         self.assertEqual(len(self.wm), 1 + 1)
 
-    def test_add_attachment_widget(self):
-        picture_instance = self.project.part('Bike').property('Picture')
-        widget = self.wm.add_attachmentviewer_widget(
-            attachment_property=picture_instance
-        )
-
-        self.assertIsInstance(widget, AttachmentviewerWidget)
-        self.assertEqual(len(self.wm), 1 + 1)
-
     def test_add_propertygrid_widget(self):
         bike_part = self.project.part(name='Bike')
         widget = self.wm.add_propertygrid_widget(
@@ -384,17 +385,26 @@ class TestWidgetManagerInActivity(TestBetamax):
         # setUp
         bike_part = self.project.part(name='Bike')
         picture = bike_part.property(name='Picture')
+        process = self.project.activities(activity_type=ActivityType.PROCESS)[0]
 
-        widget1 = self.wm.add_card_widget(title="Some title", description='Some description',
-                                          link='www.ke-chain.com', link_target=LinkTargets.NEW_TAB)
-        widget2 = self.wm.add_card_widget(image=picture, title=False,
+        widget1 = self.wm.add_card_widget(title="Some title", description='Some description')
+        widget2 = self.wm.add_card_widget(image=picture, title=False, image_fit=ImageFitValue.COVER,
                                           link=self.task.id, link_target=LinkTargets.SAME_TAB)
+        widget3 = self.wm.add_card_widget(title='Tree view', description='Process opens in tree view',
+                                          link=process)
 
         # testing
-        self.assertEqual(len(self.wm), 1 + 2)
+        self.assertEqual(len(self.wm), 1 + 3)
 
         self.assertIsInstance(widget1, CardWidget)
+        self.assertIsNone(widget1.meta.get('customLink'))
+
         self.assertIsInstance(widget2, CardWidget)
+        self.assertEqual(ImageFitValue.COVER, widget2.meta.get('imageFit'))
+        self.assertEqual(CardWidgetLinkTarget.SAME_TAB, widget2.meta.get('linkTarget'))
+
+        self.assertIsInstance(widget3, CardWidget)
+        self.assertEqual(CardWidgetLinkValue.TREE_VIEW, widget3.meta.get('showLinkValue'))
 
         with self.assertRaises(IllegalArgumentError):
             self.wm.add_card_widget(title=12)

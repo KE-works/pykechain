@@ -75,13 +75,6 @@ class TestClient(TestCase):
                 client = Client.from_env()
                 self.assertEqual(len(captured_warnings), 0)
 
-    # 3.6.3
-    def test_get_current_user(self):
-        client = Client()
-
-        with self.assertRaises(APIError):
-            client.current_user()
-
     # noinspection PyTypeChecker
     def test_reload(self):
         client = Client()
@@ -125,6 +118,11 @@ class TestClientLive(TestBetamax):
 
         from pykechain.models import User
         self.assertIsInstance(user, User)
+
+        del self.client.auth
+        del self.client.headers
+        with self.assertRaises(APIError):
+            self.client.current_user()
 
     # 3.7.0
     def test_reload_deleted_object(self):
