@@ -1,11 +1,15 @@
 import json
-
-import requests
-from six import text_type, string_types
 from typing import Any, AnyStr  # noqa: F401
 
+import requests
+
 from pykechain.enums import Multiplicity, Category
-from pykechain.exceptions import NotFoundError, APIError, MultipleFoundError, IllegalArgumentError
+from pykechain.exceptions import (
+    NotFoundError,
+    APIError,
+    MultipleFoundError,
+    IllegalArgumentError,
+)
 from pykechain.extra_utils import relocate_model, relocate_instance, move_part_instance
 from pykechain.models.base import Base
 from pykechain.models.property import Property
@@ -58,12 +62,18 @@ class Part(Base):  # pragma: no cover
         :param json: the json response to construct the :class:`Part` from
         :type json: dict
         """
-        super(Part, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
-        self.category = json.get('category')
-        self.parent_id = json['parent'].get('id') if 'parent' in json and json.get('parent') else None
-        self.properties = [Property.create(p, client=self._client) for p in json['properties']]
-        self.multiplicity = json.get('multiplicity', None)
+        self.category = json.get("category")
+        self.parent_id = (
+            json["parent"].get("id")
+            if "parent" in json and json.get("parent")
+            else None
+        )
+        self.properties = [
+            Property.create(p, client=self._client) for p in json["properties"]
+        ]
+        self.multiplicity = json.get("multiplicity", None)
         self._cached_children = None
 
     def property(self, name):
@@ -97,7 +107,9 @@ class Part(Base):  # pragma: no cover
             found = find(self.properties, lambda p: name == p.name)
 
         if not found:
-            raise NotFoundError("Could not find property with name or id {}".format(name))
+            raise NotFoundError(
+                "Could not find property with name or id {}".format(name)
+            )
 
         return found
 
@@ -153,7 +165,9 @@ class Part(Base):  # pragma: no cover
         if not kwargs:
             # no kwargs provided is the default, we aim to cache it.
             if not self._cached_children:
-                self._cached_children = list(self._client.parts(parent=self.id, category=self.category))
+                self._cached_children = list(
+                    self._client.parts(parent=self.id, category=self.category)
+                )
             return self._cached_children
         else:
             # if kwargs are provided, we assume no use of cache as specific filtering on the children is performed.
@@ -172,9 +186,12 @@ class Part(Base):  # pragma: no cover
         :raises APIError: When an error occurs.
         """
         if self.parent_id:
-            return self._client.parts(parent=self.parent_id, category=self.category, **kwargs)
+            return self._client.parts(
+                parent=self.parent_id, category=self.category, **kwargs
+            )
         else:
             from pykechain.models.partset import PartSet
+
             return PartSet(parts=[])
 
     def model(self):
@@ -196,7 +213,7 @@ class Part(Base):  # pragma: no cover
 
         """
         if self.category == Category.INSTANCE:
-            model_id = self._json_data['model'].get('id')
+            model_id = self._json_data["model"].get("id")
             return self._client.model(pk=model_id)
         else:
             raise NotFoundError("Part {} has no model".format(self.name))
@@ -244,8 +261,10 @@ class Part(Base):  # pragma: no cover
         if len(instances_list) == 1:
             return instances_list[0]
         elif len(instances_list) > 1:
-            raise MultipleFoundError("Part {} has more than a single instance. "
-                                     "Use the `Part.instances()` method".format(self.name))
+            raise MultipleFoundError(
+                "Part {} has more than a single instance. "
+                "Use the `Part.instances()` method".format(self.name)
+            )
         else:
             raise NotFoundError("Part {} has no instance".format(self.name))
 
@@ -269,9 +288,13 @@ class Part(Base):  # pragma: no cover
 
         """
         if self.category != Category.MODEL:
-            raise IllegalArgumentError("Part {} is not a model, therefore it cannot have a proxy model".format(self))
-        if 'proxy' in self._json_data and self._json_data.get('proxy'):
-            catalog_model_id = self._json_data['proxy'].get('id')
+            raise IllegalArgumentError(
+                "Part {} is not a model, therefore it cannot have a proxy model".format(
+                    self
+                )
+            )
+        if "proxy" in self._json_data and self._json_data.get("proxy"):
+            catalog_model_id = self._json_data["proxy"].get("id")
             return self._client.model(pk=catalog_model_id)
         else:
             raise NotFoundError("Part {} is not a proxy".format(self.name))
@@ -389,7 +412,9 @@ class Part(Base):  # pragma: no cover
         >>> new_wheel_model.add_proxy_to(bike_model, "Wheel", multiplicity=Multiplicity.ONE_MANY)
 
         """
-        return self._client.create_proxy_model(self, parent, name, multiplicity, **kwargs)
+        return self._client.create_proxy_model(
+            self, parent, name, multiplicity, **kwargs
+        )
 
     def add_property(self, *args, **kwargs):
         # type: (*Any, **Any) -> Property
@@ -412,10 +437,14 @@ class Part(Base):  # pragma: no cover
         :return: None
         :raises APIError: in case an Error occurs
         """
-        response = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
+        response = self._client._request(
+            "DELETE", self._client._build_url("part", part_id=self.id)
+        )
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete part: {} with id {}".format(self.name, self.id))
+            raise APIError(
+                "Could not delete part: {} with id {}".format(self.name, self.id)
+            )
 
     def edit(self, name=None, description=None, **kwargs):
         # type: (AnyStr, AnyStr, **Any) -> None
@@ -453,19 +482,21 @@ class Part(Base):  # pragma: no cover
         >>> front_fork.edit(name='Front Fork basemodel', description='Some description here')
 
         """
-        update_dict = {'id': self.id}
+        update_dict = {"id": self.id}
         if name is not None:
-            if not isinstance(name, (string_types, text_type)):
+            if not isinstance(name, ((str,), str)):
                 raise IllegalArgumentError("name should be provided as a string")
-            update_dict.update({'name': name})
+            update_dict.update({"name": name})
         if description is not None:
-            if not isinstance(description, (string_types, text_type)):
+            if not isinstance(description, ((str,), str)):
                 raise IllegalArgumentError("description should be provided as a string")
-            update_dict.update({'description': description})
+            update_dict.update({"description": description})
 
         if kwargs is not None:  # pragma: no cover
             update_dict.update(**kwargs)
-        response = self._client._request('PUT', self._client._build_url('part', part_id=self.id), json=update_dict)
+        response = self._client._request(
+            "PUT", self._client._build_url("part", part_id=self.id), json=update_dict
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Part ({})".format(response))
@@ -482,20 +513,20 @@ class Part(Base):  # pragma: no cover
             "<tr>",
             "<th>Property</th>",
             "<th>Value</th>",
-            "</tr>"
+            "</tr>",
         ]
 
         for prop in self.properties:
-            style = "color:blue;" if prop._json_data.get('output', False) else ""
+            style = "color:blue;" if prop._json_data.get("output", False) else ""
 
-            html.append("<tr style=\"{}\">".format(style))
+            html.append('<tr style="{}">'.format(style))
             html.append("<td>{}</td>".format(prop.name))
             html.append("<td>{}</td>".format(prop.value))
             html.append("</tr>")
 
         html.append("</table>")
 
-        return ''.join(html)
+        return "".join(html)
 
     def update(self, name=None, update_dict=None, bulk=True, **kwargs):
         """
@@ -527,7 +558,7 @@ class Part(Base):  # pragma: no cover
 
         """
         # dict(name=name, properties=json.dumps(update_dict))) with property ids:value
-        action = 'bulk_update_properties'
+        action = "bulk_update_properties"
 
         request_body = dict()
         for prop_name_or_id, property_value in update_dict.items():
@@ -541,24 +572,37 @@ class Part(Base):  # pragma: no cover
 
         if bulk and len(update_dict.keys()) > 1:
             if name:
-                if not isinstance(name, (string_types, text_type)):
-                    raise IllegalArgumentError("Name of the part should be provided as a string")
-            response = self._client._request('PUT',
-                                             self._client._build_url('part', part_id=self.id),
-                                             params=dict(select_action=action),
-                                             data=dict(name=name, properties=json.dumps(request_body), **kwargs))
+                if not isinstance(name, ((str,), str)):
+                    raise IllegalArgumentError(
+                        "Name of the part should be provided as a string"
+                    )
+            response = self._client._request(
+                "PUT",
+                self._client._build_url("part", part_id=self.id),
+                params=dict(select_action=action),
+                data=dict(name=name, properties=json.dumps(request_body), **kwargs),
+            )
 
             if response.status_code != requests.codes.ok:  # pragma: no cover
-                raise APIError("Could not update the part '{}', got: '{}'".format(self, response.content))
+                raise APIError(
+                    "Could not update the part '{}', got: '{}'".format(
+                        self, response.content
+                    )
+                )
 
             # update local properties (without a call)
-            self._json_data = response.json()['results'][0]
-            self.properties = [Property.create(p, client=self._client) for p in self._json_data['properties']]
+            self._json_data = response.json()["results"][0]
+            self.properties = [
+                Property.create(p, client=self._client)
+                for p in self._json_data["properties"]
+            ]
         else:
             for property_name, property_value in update_dict.items():
                 self.property(property_name).value = property_value
 
-    def add_with_properties(self, model, name=None, update_dict=None, bulk=True, **kwargs):
+    def add_with_properties(
+        self, model, name=None, update_dict=None, bulk=True, **kwargs
+    ):
         """
         Add a part and update its properties in one go.
 
@@ -592,7 +636,7 @@ class Part(Base):  # pragma: no cover
         if self.category != Category.INSTANCE:
             raise APIError("Part should be of category INSTANCE")
         name = name or model.name
-        action = 'new_instance_with_properties'
+        action = "new_instance_with_properties"
 
         properties_update_dict = dict()
         for prop_name_or_id, property_value in update_dict.items():
@@ -602,21 +646,27 @@ class Part(Base):  # pragma: no cover
             if is_uuid(prop_name_or_id):
                 properties_update_dict[prop_name_or_id] = property_value
             else:
-                properties_update_dict[model.property(prop_name_or_id).id] = property_value
+                properties_update_dict[
+                    model.property(prop_name_or_id).id
+                ] = property_value
 
         if bulk:
-            response = self._client._request('POST', self._client._build_url('parts'),
-                                             data=dict(
-                                                 name=name,
-                                                 model=model.id,
-                                                 parent=self.id,
-                                                 properties=json.dumps(properties_update_dict),
-                                                 **kwargs),
-                                             params=dict(select_action=action))
+            response = self._client._request(
+                "POST",
+                self._client._build_url("parts"),
+                data=dict(
+                    name=name,
+                    model=model.id,
+                    parent=self.id,
+                    properties=json.dumps(properties_update_dict),
+                    **kwargs,
+                ),
+                params=dict(select_action=action),
+            )
 
             if response.status_code != requests.codes.created:  # pragma: no cover
-                raise APIError('{}: {}'.format(str(response), response.content))
-            return Part(response.json()['results'][0], client=self._client)
+                raise APIError("{}: {}".format(str(response), response.content))
+            return Part(response.json()["results"][0], client=self._client)
         else:  # do the old way
             new_part = self.add(model, name=name)  # type: Part
             new_part.update(update_dict=update_dict, bulk=bulk)
@@ -671,19 +721,25 @@ class Part(Base):  # pragma: no cover
         if self.category != Category.MODEL:
             raise APIError("Part should be of category MODEL")
         if not isinstance(property_list, list):
-            raise IllegalArgumentError('Expected a list of strings or Property() objects, got a {} object'.
-                                       format(type(property_list)))
+            raise IllegalArgumentError(
+                "Expected a list of strings or Property() objects, got a {} object".format(
+                    type(property_list)
+                )
+            )
 
         order_dict = dict()
 
         for prop in property_list:
-            if isinstance(prop, (str, text_type)):
+            if isinstance(prop, (str, str)):
                 order_dict[self.property(name=prop).id] = property_list.index(prop)
             else:
                 order_dict[prop.id] = property_list.index(prop)
 
-        response = self._client._request('PUT', self._client._build_url('part', part_id=self.id),
-                                         data=dict(property_order=json.dumps(order_dict)))
+        response = self._client._request(
+            "PUT",
+            self._client._build_url("part", part_id=self.id),
+            data=dict(property_order=json.dumps(order_dict)),
+        )
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not reorder properties")
 
@@ -708,10 +764,8 @@ class Part(Base):  # pragma: no cover
         >>> bike.populate_descendants(batch=150)
 
         """
-        descendants_flat_list = list(self._client.parts(
-            parent_id=self.id,
-            category=self.category,
-            batch=batch)
+        descendants_flat_list = list(
+            self._client.parts(parent_id=self.id, category=self.category, batch=batch)
         )
 
         self._cached_children = descendants_flat_list
@@ -748,7 +802,9 @@ class Part(Base):  # pragma: no cover
         parent = self.parent()
         return self._client._create_clone(parent, self, **kwargs)
 
-    def copy(self, target_parent, name=None, include_children=True, include_instances=True):
+    def copy(
+        self, target_parent, name=None, include_children=True, include_instances=True
+    ):
         """
         Copy the `Part` to target parent, both of them having the same category.
 
@@ -776,31 +832,54 @@ class Part(Base):  # pragma: no cover
 
         """
         if not isinstance(target_parent, Part):
-            raise IllegalArgumentError("`target_parent` needs to be a part, got '{}'".format(type(target_parent)))
+            raise IllegalArgumentError(
+                "`target_parent` needs to be a part, got '{}'".format(
+                    type(target_parent)
+                )
+            )
 
         if self.category == Category.MODEL and target_parent.category == Category.MODEL:
             # Cannot add a model under an instance or vice versa
-            copied_model = relocate_model(part=self, target_parent=target_parent, name=name,
-                                          include_children=include_children)
+            copied_model = relocate_model(
+                part=self,
+                target_parent=target_parent,
+                name=name,
+                include_children=include_children,
+            )
             if include_instances:
                 instances_to_be_copied = list(self.instances())
                 parent_instances = list(target_parent.instances())
                 for parent_instance in parent_instances:
                     for instance in instances_to_be_copied:
                         instance.populate_descendants()
-                        move_part_instance(part_instance=instance, target_parent=parent_instance,
-                                           part_model=self, name=instance.name,
-                                           include_children=include_children)
+                        move_part_instance(
+                            part_instance=instance,
+                            target_parent=parent_instance,
+                            part_model=self,
+                            name=instance.name,
+                            include_children=include_children,
+                        )
             return copied_model
 
-        elif self.category == Category.INSTANCE and target_parent.category == Category.INSTANCE:
-            copied_instance = relocate_instance(part=self, target_parent=target_parent, name=name,
-                                                include_children=include_children)
+        elif (
+            self.category == Category.INSTANCE
+            and target_parent.category == Category.INSTANCE
+        ):
+            copied_instance = relocate_instance(
+                part=self,
+                target_parent=target_parent,
+                name=name,
+                include_children=include_children,
+            )
             return copied_instance
         else:
-            raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category')
+            raise IllegalArgumentError(
+                'part "{}" and target parent "{}" must have the same category'
+            )
 
-    def move(self, target_parent, name=None, include_children=True, include_instances=True):
+    def move(
+        self, target_parent, name=None, include_children=True, include_instances=True
+    ):
         """
         Move the `Part` to target parent, both of them the same category.
 
@@ -830,21 +909,37 @@ class Part(Base):  # pragma: no cover
         if not name:
             name = self.name
         if self.category == Category.MODEL and target_parent.category == Category.MODEL:
-            moved_model = relocate_model(part=self, target_parent=target_parent, name=name,
-                                         include_children=include_children)
+            moved_model = relocate_model(
+                part=self,
+                target_parent=target_parent,
+                name=name,
+                include_children=include_children,
+            )
             if include_instances:
                 retrieve_instances_to_copied = list(self.instances())
                 retrieve_parent_instances = list(target_parent.instances())
                 for parent_instance in retrieve_parent_instances:
                     for instance in retrieve_instances_to_copied:
                         instance.populate_descendants()
-                        move_part_instance(part_instance=instance, target_parent=parent_instance,
-                                           part_model=self, name=instance.name, include_children=include_children)
+                        move_part_instance(
+                            part_instance=instance,
+                            target_parent=parent_instance,
+                            part_model=self,
+                            name=instance.name,
+                            include_children=include_children,
+                        )
             self.delete()
             return moved_model
-        elif self.category == Category.INSTANCE and target_parent.category == Category.INSTANCE:
-            moved_instance = relocate_instance(part=self, target_parent=target_parent, name=name,
-                                               include_children=include_children)
+        elif (
+            self.category == Category.INSTANCE
+            and target_parent.category == Category.INSTANCE
+        ):
+            moved_instance = relocate_instance(
+                part=self,
+                target_parent=target_parent,
+                name=name,
+                include_children=include_children,
+            )
             try:
                 self.delete()
             except APIError:
@@ -852,4 +947,6 @@ class Part(Base):  # pragma: no cover
                 model_of_instance.delete()
             return moved_instance
         else:
-            raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category')
+            raise IllegalArgumentError(
+                'part "{}" and target parent "{}" must have the same category'
+            )

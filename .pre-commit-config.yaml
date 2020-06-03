@@ -4,44 +4,58 @@
 # If you want to run the checks on all files, run `pre-commit run -a` using the terminal
 #
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.5.0
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.1.0
     hooks:
-    -   id: check-ast
-    -   id: check-case-conflict
-    -   id: check-json
-    -   id: check-merge-conflict
-    -   id: check-vcs-permalinks
-    -   id: check-yaml
+      - id: check-ast
+      - id: check-case-conflict
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-vcs-permalinks
+      - id: check-yaml
         args: [--allow-multiple-documents]
-    -   id: debug-statements
-    -   id: detect-private-key
-    -   id: end-of-file-fixer
+      - id: debug-statements
+      - id: detect-private-key
+      - id: end-of-file-fixer
         exclude: tests/cassettes/*
-    -   id: mixed-line-ending
+      - id: mixed-line-ending
         args: [--fix=lf]
-    -   id: trailing-whitespace
+      - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
--   repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v1.5.2
-    hooks:
-    -   id: autopep8
-        files: pykechain/.*
--   repo: https://github.com/PyCQA/pydocstyle
+
+  - repo: https://github.com/PyCQA/pydocstyle
     rev: 5.0.2
     hooks:
-    -   id: pydocstyle
+      - id: pydocstyle
         args:
-        - --ignore=D100,D105,D203,D212,D213,D416
+          - --ignore=D100,D105,D203,D212,D213,D416
         files: pykechain/.*
--   repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.1
+
+  - repo: https://github.com/psf/black
+    rev: 19.10b0
     hooks:
-    -   id: flake8
-        args:
-        - --ignore=F821
+      - id: black
+        args: ["--target-version", "py35"]
         files: pykechain/.*
--   repo: https://github.com/mgedmin/check-manifest
+        exclude: pykechain/utils.py
+
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.8.2
+    hooks:
+      - id: flake8
+        additional_dependencies: [flake8-2020, flake8-implicit-str-concat]
+        args:
+          - --ignore=F821,W503
+        files: pykechain/.*
+        exclude: pykechain/utils.py
+
+  - repo: https://github.com/mgedmin/check-manifest
     rev: '0.42'
     hooks:
-    -   id: check-manifest
+      - id: check-manifest
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.4.4
+    hooks:
+      - id: pyupgrade
+        args: ["--py3-plus"]

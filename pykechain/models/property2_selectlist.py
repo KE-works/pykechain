@@ -17,7 +17,7 @@ class _SelectListProperty(Property2):
         """Construct a Property from a json object."""
         super().__init__(json, **kwargs)
 
-        self._value_choices = json.get('value_options').get('value_choices')
+        self._value_choices = json.get("value_options").get("value_choices")
 
     @property
     def value(self):
@@ -37,7 +37,7 @@ class _SelectListProperty(Property2):
 
         if self._put_value(value):
             self._value = value
-            self._json_data['value'] = value
+            self._json_data["value"] = value
 
     @abstractmethod
     def _check_new_value(self, value: Any):
@@ -85,9 +85,13 @@ class _SelectListProperty(Property2):
     def options(self, options_list):
         if not isinstance(options_list, list):
             raise IllegalArgumentError("The list of options should be a list")
-        if self._json_data.get('category') != Category.MODEL:
-            raise IllegalArgumentError("We can only update the options list of the model of this property. The "
-                                       "model of this property has id '{}'".format(self._json_data.get('model')))
+        if self._json_data.get("category") != Category.MODEL:
+            raise IllegalArgumentError(
+                "We can only update the options list of the model of this property. The "
+                "model of this property has id '{}'".format(
+                    self._json_data.get("model")
+                )
+            )
 
         # stringify the options list
         options_list = list(map(str, options_list))
@@ -98,14 +102,18 @@ class _SelectListProperty(Property2):
             self._value_choices = options_list
 
     def _put_value_options(self, options_list):
-        new_options = self._options.copy()  # make a full copy of the dict not to only link it and update dict in place
+        new_options = (
+            self._options.copy()
+        )  # make a full copy of the dict not to only link it and update dict in place
         new_options.update({"value_choices": options_list})
 
         self._put_options(new_options)
 
     def _save_representations(self, representation_options):
-        new_options = self._options.copy()  # make a full copy of the dict not to only link it and update dict in place
-        new_options.update({'representations': representation_options})
+        new_options = (
+            self._options.copy()
+        )  # make a full copy of the dict not to only link it and update dict in place
+        new_options.update({"representations": representation_options})
 
         self._put_options(new_options)
 
@@ -119,11 +127,16 @@ class _SelectListProperty(Property2):
         """
         validate(new_options, options_json_schema)
 
-        url = self._client._build_url('property2', property_id=self.id)
-        response = self._client._request('PUT', url, json={'value_options': new_options})
+        url = self._client._build_url("property2", property_id=self.id)
+        response = self._client._request(
+            "PUT", url, json={"value_options": new_options}
+        )
 
         if response.status_code != 200:  # pragma: no cover
-            raise APIError("Could not update options of Property {}".format(self), response=response)
+            raise APIError(
+                "Could not update options of Property {}".format(self),
+                response=response,
+            )
         else:
             self._options = new_options  # save the new options as the options
 
@@ -133,8 +146,11 @@ class SelectListProperty2(_SelectListProperty):
 
     def _check_new_value(self, value: Any):
         if value not in self.options:
-            raise APIError('The new value "{}" of the Property should be in the list of options:\n{}'.format(
-                value, self.options))
+            raise APIError(
+                'The new value "{}" of the Property should be in the list of options:\n{}'.format(
+                    value, self.options
+                )
+            )
 
 
 class MultiSelectListProperty2(_SelectListProperty):
@@ -142,8 +158,15 @@ class MultiSelectListProperty2(_SelectListProperty):
 
     def _check_new_value(self, value: Iterable[Any]):
         if not isinstance(value, (list, tuple)):
-            raise IllegalArgumentError('The new values must be provided as a list or tuple, "{}" is not.'.format(value))
+            raise IllegalArgumentError(
+                'The new values must be provided as a list or tuple, "{}" is not.'.format(
+                    value
+                )
+            )
 
         if not all(v in self.options for v in value):
-            raise APIError('The new values "{}" of the Property should be in the list of options:\n{}'.format(
-                value, self.options))
+            raise APIError(
+                'The new values "{}" of the Property should be in the list of options:\n{}'.format(
+                    value, self.options
+                )
+            )

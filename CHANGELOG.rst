@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v3.7.1 (unreleased)
+-------------------
+
+:+1: code reformatting using black and removal of all six compatibility code. Also ensuring future proofness using `pyupgrade` pre-commit hook.
+
 v3.7.0 (3JUN20)
 ---------------
 

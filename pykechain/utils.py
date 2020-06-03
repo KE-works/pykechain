@@ -6,7 +6,6 @@ from datetime import datetime, timedelta, timezone
 from typing import TypeVar, Iterable, Callable, Optional, Text, Dict  # noqa: F401
 
 import pytz
-import six
 
 T = TypeVar("T")
 
@@ -146,7 +145,7 @@ def is_url(value: Text) -> bool:
         # port number
         r"(?::\d{2,5})?"
         # resource path
-        u"(?:/[-a-z\u00a1-\uffff0-9._~%!$&'()*+,;=:@/]*)?"
+        "(?:/[-a-z\u00a1-\uffff0-9._~%!$&'()*+,;=:@/]*)?"
         # query string
         r"(?:\?\S*)?"
         # fragment
@@ -207,23 +206,12 @@ def temp_chdir(cwd: Optional[Text] = None):
     >>> pass
 
     """
-    if six.PY3:
-        from tempfile import TemporaryDirectory
+    from tempfile import TemporaryDirectory
 
-        with TemporaryDirectory() as tempwd:
-            origin = cwd or os.getcwd()
-            os.chdir(tempwd)
-
-            try:
-                yield tempwd if os.path.exists(tempwd) else ""
-            finally:
-                os.chdir(origin)
-    else:
-        from tempfile import mkdtemp
-
-        tempwd = mkdtemp()
+    with TemporaryDirectory() as tempwd:
         origin = cwd or os.getcwd()
         os.chdir(tempwd)
+
         try:
             yield tempwd if os.path.exists(tempwd) else ""
         finally:
@@ -286,7 +274,7 @@ def parse_datetime(value: Optional[Text]) -> Optional[datetime]:
             if tzinfo[0] == "-":
                 offset = -offset
             tzinfo = _get_fixed_timezone(offset)
-        kw = {k: int(v) for k, v in six.iteritems(kw) if v is not None}
+        kw = {k: int(v) for k, v in kw.items() if v is not None}
         kw["tzinfo"] = tzinfo
         return datetime(**kw)
 
@@ -455,7 +443,9 @@ def __dict_public__(cls: type(object)) -> Dict:
     return {k: v for (k, v) in cls.__dict__.items() if not k.startswith("__")}
 
 
-def __dict__inherited__(cls: type(object), stop: type(object) = type, public: Optional[bool] = True) -> Dict:
+def __dict__inherited__(
+    cls: type(object), stop: type(object) = type, public: Optional[bool] = True
+) -> Dict:
     """
     Get all __dict__ items of the class and its superclasses up to `type`, or the `stop` class given as input.
 

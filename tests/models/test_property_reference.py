@@ -9,7 +9,7 @@ from tests.classes import TestBetamax
 class TestMultiReferenceProperty(TestBetamax):
 
     def setUp(self):
-        super(TestMultiReferenceProperty, self).setUp()
+        super().setUp()
 
         # reference Part target (model and 1 instance)
         _wheel_model = self.project.model(ref='wheel')
@@ -54,7 +54,7 @@ class TestMultiReferenceProperty(TestBetamax):
     def tearDown(self):
         self.target_model.delete()
         self.ref_prop_model.delete()
-        super(TestMultiReferenceProperty, self).tearDown()
+        super().tearDown()
 
     def test_referencing_a_model(self):
         # setUp
@@ -546,7 +546,7 @@ class TestMultiReferenceProperty(TestBetamax):
 class TestMultiReferencePropertyXScope(TestBetamax):
 
     def setUp(self):
-        super(TestMultiReferencePropertyXScope, self).setUp()
+        super().setUp()
         self.x_scope = self.client.create_scope(name='Cross_reference scope', tags=['x-scope-target'])
 
         self.part_model = self.project.model('Bike')
@@ -567,7 +567,7 @@ class TestMultiReferencePropertyXScope(TestBetamax):
     def tearDown(self):
         self.x_reference_model.delete()
         self.x_scope.delete()
-        super(TestMultiReferencePropertyXScope, self).tearDown()
+        super().tearDown()
 
     def test_set_model_value(self):
         # setUp

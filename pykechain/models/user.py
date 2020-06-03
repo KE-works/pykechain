@@ -22,13 +22,15 @@ class User(Base):
 
     def __init__(self, json, **kwargs):
         """Construct a user from provided json data."""
-        super(User, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
-        self.username = self._json_data.get('username', '')
-        self.id = self._json_data.get('pk', '')
+        self.username = self._json_data.get("username", "")
+        self.id = self._json_data.get("pk", "")
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.username, self.id)
+        return "<pyke {} '{}' id {}>".format(
+            self.__class__.__name__, self.username, self.id
+        )
 
     @property
     def timezone(self):
@@ -41,7 +43,7 @@ class User(Base):
         :return: timezone object (compatible with datetime)
         :rtype: TzInfo
         """
-        return pytz.timezone(zone=self._json_data.get('timezone', 'UTC'))
+        return pytz.timezone(zone=self._json_data.get("timezone", "UTC"))
 
     @property
     def language(self):
@@ -53,7 +55,7 @@ class User(Base):
         :return: language code string
         :rtype: basestring
         """
-        return self._json_data.get('language_code', 'en')
+        return self._json_data.get("language_code", "en")
 
     @property
     def email(self):
@@ -63,4 +65,4 @@ class User(Base):
         :return: email address, default is empty string.
         :rtype: basestring
         """
-        return self._json_data.get('email', '')
+        return self._json_data.get("email", "")

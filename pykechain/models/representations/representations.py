@@ -1,4 +1,9 @@
-from pykechain.enums import PropertyRepresentation, SelectListRepresentations, LinkTargets, FontAwesomeMode
+from pykechain.enums import (
+    PropertyRepresentation,
+    SelectListRepresentations,
+    LinkTargets,
+    FontAwesomeMode,
+)
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.representations.representation_base import BaseRepresentation
 
@@ -7,7 +12,7 @@ class DecimalPlaces(BaseRepresentation):
     """Representation for floating-point value properties."""
 
     rtype = PropertyRepresentation.DECIMAL_PLACES
-    _config_value_key = 'amount'
+    _config_value_key = "amount"
 
     def validate_representation(self, value: int) -> None:
         """
@@ -18,8 +23,11 @@ class DecimalPlaces(BaseRepresentation):
         :return: None
         """
         if not isinstance(value, int):
-            raise IllegalArgumentError('{} value "{}" is not correct: not an integer'.format(
-                self.__class__.__name__, value))
+            raise IllegalArgumentError(
+                '{} value "{}" is not correct: not an integer'.format(
+                    self.__class__.__name__, value
+                )
+            )
 
 
 class SignificantDigits(DecimalPlaces):
@@ -42,15 +50,18 @@ class ThousandsSeparator(BaseRepresentation):
         :return: None
         """
         if not (isinstance(value, type(None))):
-            raise IllegalArgumentError('{} value "{}" is not correct: not NoneType'.format(
-                self.__class__.__name__, value))
+            raise IllegalArgumentError(
+                '{} value "{}" is not correct: not NoneType'.format(
+                    self.__class__.__name__, value
+                )
+            )
 
 
 class LinkTarget(BaseRepresentation):
     """Representation for HTML link reference properties."""
 
     rtype = PropertyRepresentation.LINK_TARGET
-    _config_value_key = 'target'
+    _config_value_key = "target"
 
     def validate_representation(self, value: LinkTargets) -> None:
         """
@@ -61,8 +72,11 @@ class LinkTarget(BaseRepresentation):
         :return: None
         """
         if value not in LinkTargets.values():
-            raise IllegalArgumentError('{} value "{}" is not correct: Not a CardWidgetLinkTarget option.'.format(
-                self.__class__.__name__, value))
+            raise IllegalArgumentError(
+                '{} value "{}" is not correct: Not a CardWidgetLinkTarget option.'.format(
+                    self.__class__.__name__, value
+                )
+            )
 
 
 class ButtonRepresentation(BaseRepresentation):
@@ -80,16 +94,19 @@ class ButtonRepresentation(BaseRepresentation):
         :return: None
         """
         if value not in SelectListRepresentations.values():
-            raise IllegalArgumentError('{} value "{}" is not correct: Not a SelectListRepresentations option.'.format(
-                self.__class__.__name__, value))
+            raise IllegalArgumentError(
+                '{} value "{}" is not correct: Not a SelectListRepresentations option.'.format(
+                    self.__class__.__name__, value
+                )
+            )
 
 
 class CustomIconRepresentation(BaseRepresentation):
     """Representation for scope and activities to display a custom Font Awesome icon."""
 
-    rtype = 'customIcon'
-    _config_value_key = 'displayIcon'
-    _display_mode_key = 'displayIconMode'
+    rtype = "customIcon"
+    _config_value_key = "displayIcon"
+    _display_mode_key = "displayIconMode"
 
     def __init__(self, *args, **kwargs):
         """
@@ -110,8 +127,11 @@ class CustomIconRepresentation(BaseRepresentation):
         :return: None
         """
         if not isinstance(value, str):
-            raise IllegalArgumentError('{} value "{}" is not correct: not a string'.format(
-                self.__class__.__name__, value))
+            raise IllegalArgumentError(
+                '{} value "{}" is not correct: not a string'.format(
+                    self.__class__.__name__, value
+                )
+            )
 
     @property
     def display_mode(self):
@@ -127,8 +147,11 @@ class CustomIconRepresentation(BaseRepresentation):
         :type mode: FontAwesomeMode
         """
         if mode not in set(FontAwesomeMode.values()):
-            raise IllegalArgumentError('{} mode "{}" is not a FontAwesomeMode option.'.format(
-                self.__class__.__name__, mode))
+            raise IllegalArgumentError(
+                '{} mode "{}" is not a FontAwesomeMode option.'.format(
+                    self.__class__.__name__, mode
+                )
+            )
 
         self._config[self._display_mode_key] = mode
         self.value = self.value  # trigger update

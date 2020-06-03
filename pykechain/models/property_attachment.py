@@ -2,7 +2,6 @@ import io
 import json
 
 import requests
-from six import string_types, text_type
 
 from pykechain.exceptions import APIError
 from pykechain.models.property import Property
@@ -46,15 +45,17 @@ class AttachmentProperty(Property):  # pragma: no cover
         ...     print('file attachment not set, its value is None')
 
         """
-        if 'value' in self._json_data and self._json_data['value']:
-            return "[Attachment: {}]".format(self._json_data['value'].split('/')[-1])
+        if "value" in self._json_data and self._json_data["value"]:
+            return "[Attachment: {}]".format(self._json_data["value"].split("/")[-1])
         else:
             return None
 
     @value.setter
     def value(self, value):
-        raise RuntimeError("Cannot set the value of an attachment property, use upload() to upload a new attachment or "
-                           "clear() to clear the attachment from the field")
+        raise RuntimeError(
+            "Cannot set the value of an attachment property, use upload() to upload a new attachment or "
+            "clear() to clear the attachment from the field"
+        )
 
     def clear(self):
         """Clear the attachment from the attachment field.
@@ -63,13 +64,13 @@ class AttachmentProperty(Property):  # pragma: no cover
         """
         if self._put_value(None) is None:
             self._value = None
-            self._json_data['value'] = None
+            self._json_data["value"] = None
 
     @property
     def filename(self):
         """Filename of the attachment, without the full 'attachment' path."""
-        if self.value and 'value' in self._json_data and self._json_data['value']:
-            return self._json_data['value'].split('/')[-1]
+        if self.value and "value" in self._json_data and self._json_data["value"]:
+            return self._json_data["value"].split("/")[-1]
         return None
 
     def json_load(self):
@@ -111,8 +112,8 @@ class AttachmentProperty(Property):  # pragma: no cover
         except ImportError:
             pass
 
-        if isinstance(data, (string_types, text_type)):
-            with open(data, 'rb') as fp:
+        if isinstance(data, ((str,), str)):
+            with open(data, "rb") as fp:
                 self._upload(fp)
         else:
             self._upload_json(data, **kwargs)
@@ -125,14 +126,14 @@ class AttachmentProperty(Property):  # pragma: no cover
         :raises APIError: When unable to download the data
         :raises OSError: When unable to save the data to disk
         """
-        with open(filename, 'w+b') as f:
+        with open(filename, "w+b") as f:
             for chunk in self._download():
                 f.write(chunk)
 
     def _download(self):
-        url = self._client._build_url('property_download', property_id=self.id)
+        url = self._client._build_url("property_download", property_id=self.id)
 
-        response = self._client._request('GET', url)
+        response = self._client._request("GET", url)
 
         if response.status_code != requests.codes.ok:
             raise APIError("Could not download property value")
@@ -140,25 +141,28 @@ class AttachmentProperty(Property):  # pragma: no cover
         return response
 
     def _upload(self, data):
-        url = self._client._build_url('property_upload', property_id=self.id)
+        url = self._client._build_url("property_upload", property_id=self.id)
 
-        response = self._client._request('POST', url,
-                                         data={"part": self._json_data['part']},
-                                         files={"attachment": data})
+        response = self._client._request(
+            "POST",
+            url,
+            data={"part": self._json_data["part"]},
+            files={"attachment": data},
+        )
 
         if response.status_code != requests.codes.ok:
             raise APIError("Could not upload attachment")
 
-    def _upload_json(self, content, name='data.json'):
-        data = (name, json.dumps(content), 'application/json')
+    def _upload_json(self, content, name="data.json"):
+        data = (name, json.dumps(content), "application/json")
 
         self._upload(data)
 
-    def _upload_plot(self, figure, name='plot.png'):
+    def _upload_plot(self, figure, name="plot.png"):
         buffer = io.BytesIO()
 
         figure.savefig(buffer, format="png")
 
-        data = (name, buffer.getvalue(), 'image/png')
+        data = (name, buffer.getvalue(), "image/png")
 
         self._upload(data)

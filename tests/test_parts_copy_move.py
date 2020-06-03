@@ -8,7 +8,7 @@ from tests.classes import TestBetamax
 class TestPartsCopyMove(TestBetamax):
 
     def setUp(self):
-        super(TestPartsCopyMove, self).setUp()
+        super().setUp()
         self.base = self.project.model(name__startswith='Catalog')
         self.cross_scope_project = self.client.scope(ref='cannondale-project')
         self.cross_scope_bike = self.cross_scope_project.model(ref='cannondale-bike')
@@ -58,7 +58,7 @@ class TestPartsCopyMove(TestBetamax):
         self.cross_scope_wheel.delete()
         if self.dump_part:
             self.dump_part.delete()
-        super(TestPartsCopyMove, self).tearDown()
+        super().tearDown()
 
     def test_copy_part_model_given_name_include_children(self):
         model_target_parent = self.project.model('Bike')

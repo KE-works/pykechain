@@ -194,13 +194,13 @@ class TestWidgetManager(TestBetamax):
 
 class TestWidgetManagerInActivity(TestBetamax):
     def setUp(self):
-        super(TestWidgetManagerInActivity, self).setUp()
+        super().setUp()
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
         self.wm = self.task.widgets()  # type: WidgetsManager
 
     def tearDown(self):
         self.task.delete()
-        super(TestWidgetManagerInActivity, self).tearDown()
+        super().tearDown()
 
     def test_new_widget_using_widget_manager(self):
         self.assertEqual(len(self.wm), 1)
@@ -667,7 +667,7 @@ class TestWidgetManagerInActivity(TestBetamax):
 class TestWidgetNavigationBarWidget(TestBetamax):
 
     def setUp(self):
-        super(TestWidgetNavigationBarWidget, self).setUp()
+        super().setUp()
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
         self.wm = self.task.widgets()  # type: WidgetsManager
 
@@ -686,7 +686,7 @@ class TestWidgetNavigationBarWidget(TestBetamax):
 
     def tearDown(self):
         self.task.delete()
-        super(TestWidgetNavigationBarWidget, self).tearDown()
+        super().tearDown()
 
     def test_add_navbar_widget(self):
         widget = self.wm.add_tasknavigationbar_widget(
@@ -752,14 +752,14 @@ class TestWidgetNavigationBarWidget(TestBetamax):
 
 class TestWidgetsCopyMove(TestBetamax):
     def setUp(self):
-        super(TestWidgetsCopyMove, self).setUp()
+        super().setUp()
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
         self.task_2 = self.project.create_activity(name="test_copy_widget")  # type: Activity2
 
     def tearDown(self):
         self.task.delete()
         self.task_2.delete()
-        super(TestWidgetsCopyMove, self).tearDown()
+        super().tearDown()
 
     def test_copy_widget(self):
         # setUp

@@ -1,12 +1,13 @@
 import warnings
 from abc import abstractmethod
 from typing import Dict, Any
+
 from jsonschema import validate
 
 from pykechain.models.validators.validator_schemas import representation_jsonschema_stub
 
 
-class BaseRepresentation(object):
+class BaseRepresentation:
     """
     Base class for all Representations.
 
@@ -34,22 +35,25 @@ class BaseRepresentation(object):
         :type prop: Property2
         """
         if prop is not None:
-            warnings.warn('Keyword `prop` is deprecated in favor of `obj`.', PendingDeprecationWarning)
+            warnings.warn(
+                "Keyword `prop` is deprecated in favor of `obj`.",
+                PendingDeprecationWarning,
+            )
             obj = prop
             del prop
 
         self._obj = obj
         self._json = json or dict(rtype=self.rtype, config=dict())  # type: dict
 
-        self._config = self._json.get('config', dict())  # type: dict
-        self._json['config'] = self._config
+        self._config = self._json.get("config", dict())  # type: dict
+        self._json["config"] = self._config
 
         if value is not None:
             self.validate_representation(value)
             self._config[self._config_value_key] = value
 
     def __repr__(self):
-        return '{} ({})'.format(self.__class__.__name__, self.value)
+        return "{} ({})".format(self.__class__.__name__, self.value)
 
     def as_json(self) -> Dict:
         """Parse the validator to a proper validator json."""
@@ -60,7 +64,7 @@ class BaseRepresentation(object):
         return validate(self._json, self.jsonschema)
 
     @classmethod
-    def parse(cls, obj: Any, json: Dict) -> 'BaseRepresentation':
+    def parse(cls, obj: Any, json: Dict) -> "BaseRepresentation":
         """Parse a json dict and return the correct subclass of :class:`BaseRepresentation`.
 
         It uses the 'rtype' key to determine which :class:`BaseRepresentation` to instantiate.
@@ -73,11 +77,14 @@ class BaseRepresentation(object):
         :rtype: :class:`BaseRepresentation` or subclass thereof
         """
         try:
-            rtype = json['rtype']
+            rtype = json["rtype"]
         except KeyError:
-            raise ValueError("Representation unknown, incorrect json: '{}'".format(json))
+            raise ValueError(
+                "Representation unknown, incorrect json: '{}'".format(json)
+            )
         try:
             from pykechain.models.representations import rtype_class_map
+
             repr_class = rtype_class_map[rtype]  # type: type(BaseRepresentation)
         except KeyError:
             raise TypeError('Unknown rtype "{}" in json'.format(rtype))

@@ -8,7 +8,7 @@ from tests.classes import TestBetamax
 class TestSideBar(TestBetamax):
 
     def setUp(self):
-        super(TestSideBar, self).setUp()
+        super().setUp()
 
         self.scope = self.project.clone(asynchronous=False)  # type: Scope2
         self.manager = SideBarManager(scope=self.scope)
@@ -23,7 +23,7 @@ class TestSideBar(TestBetamax):
 
     def tearDown(self):
         self.scope.delete()
-        super(TestSideBar, self).tearDown()
+        super().tearDown()
 
     def test_manager(self):
         side_bar_manager = SideBarManager(scope=self.scope)

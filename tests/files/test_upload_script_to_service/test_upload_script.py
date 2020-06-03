@@ -28,13 +28,13 @@ def main(*args, **kwargs):
         import pykechain
         print('--- importing pykechain version: {}'.format(pykechain.version))
     except ImportError:
-        print('/!\ pykechain is not installed, please install pykechain version 1.12 or later')
+        print(r'/!\ pykechain is not installed, please install pykechain version 1.12 or later')
 
     mark_2 = time.time()
 
     from envparse import env
     if not env('KECHAIN_URL', None) or not env('KECHAIN_TOKEN', None) or not env('KECHAIN_SCOPE_ID', None):
-        print('/!\ cannot interact using pykechain as environment variables KECHAIN_URL, KECHAIN_TOKEN and '
+        print(r'/!\ cannot interact using pykechain as environment variables KECHAIN_URL, KECHAIN_TOKEN and '
               'KECHAIN_SCOPE_ID are not set')
     else:
         project = pykechain.get_project()

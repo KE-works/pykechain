@@ -8,7 +8,7 @@ from tests.classes import TestBetamax
 class TestTeams(TestBetamax):
 
     def setUp(self):
-        super(TestTeams, self).setUp()
+        super().setUp()
 
         self.required_kwargs = dict(
             name='_test team',

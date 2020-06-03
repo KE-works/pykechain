@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from pykechain.enums import PropertyType
 from pykechain.exceptions import APIError, IllegalArgumentError
 from tests.classes import TestBetamax
@@ -7,7 +6,7 @@ from tests.classes import TestBetamax
 class TestSelectListProperty(TestBetamax):
     """Tests for the select list properties"""
     def setUp(self):
-        super(TestSelectListProperty, self).setUp()
+        super().setUp()
 
         self.select_model = self.project.model('Bike').add_property(
             name='Test single select list property',
@@ -18,7 +17,7 @@ class TestSelectListProperty(TestBetamax):
 
     def tearDown(self):
         self.select_model.delete()
-        super(TestSelectListProperty, self).tearDown()
+        super().tearDown()
 
     def test_get_options_list(self):
         self.assertTrue(hasattr(self.select_model, 'options'))

@@ -534,7 +534,7 @@ class TestActivity2SpecificTests(TestBetamax):
         list_of_assignees_in_data = self.task._json_data.get('assignees_ids')
         assignees_list = self.task.assignees
 
-        self.assertSetEqual(set(list_of_assignees_in_data), set([u.id for u in assignees_list]))
+        self.assertSetEqual(set(list_of_assignees_in_data), {u.id for u in assignees_list})
 
     def test_activity2_assignees_list_no_assignees_gives_empty_list(self):
         activity_name = 'Specify wheel diameter'

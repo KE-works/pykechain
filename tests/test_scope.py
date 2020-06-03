@@ -238,7 +238,7 @@ class TestScopeEdit(TestBetamax):
         )
 
         retrieved_project = self.client.scope(id=self.scope.id, status=ScopeStatus.CLOSED)
-        
+
         # testing
         self.assertEqual(new_scope_name, retrieved_project.name)
         self.assertEqual(new_scope_description, retrieved_project.description)

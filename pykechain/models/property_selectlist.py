@@ -11,8 +11,8 @@ class SelectListProperty(Property):  # pragma: no cover
 
     def __init__(self, json, **kwargs):
         """Construct a Property from a json object."""
-        super(SelectListProperty, self).__init__(json, **kwargs)
-        self._value_choices = self._json_data.get('options').get('value_choices')
+        super().__init__(json, **kwargs)
+        self._value_choices = self._json_data.get("options").get("value_choices")
 
     @property
     def value(self):
@@ -28,11 +28,13 @@ class SelectListProperty(Property):  # pragma: no cover
     @value.setter
     def value(self, value):
         if value not in self.options and value is not None:
-            raise APIError('The new value `{}` of the single select list property should be in the list of '
-                           'options `{}`'.format(value, self.options))
+            raise APIError(
+                "The new value `{}` of the single select list property should be in the list of "
+                "options `{}`".format(value, self.options)
+            )
         if self._put_value(value):
             self._value = value
-            self._json_data['value'] = value
+            self._json_data["value"] = value
 
     @property
     def options(self):
@@ -69,9 +71,13 @@ class SelectListProperty(Property):  # pragma: no cover
     def options(self, options_list):
         if not isinstance(options_list, list):
             raise IllegalArgumentError("The list of options should be a list")
-        if self._json_data.get('category') != Category.MODEL:
-            raise IllegalArgumentError("We can only update the options list of the model of this property. The "
-                                       "model of this property has id '{}'".format(self._json_data.get('model')))
+        if self._json_data.get("category") != Category.MODEL:
+            raise IllegalArgumentError(
+                "We can only update the options list of the model of this property. The "
+                "model of this property has id '{}'".format(
+                    self._json_data.get("model")
+                )
+            )
 
         # stringify the options list
         options_list = list(map(str, options_list))
@@ -89,14 +95,18 @@ class SelectListProperty(Property):  # pragma: no cover
         :param options_list: list of options to set.
         :raises APIError: when unable to update the options
         """
-        new_options = self._options.copy()  # make a full copy of the dict not to only link it and update dict in place
+        new_options = (
+            self._options.copy()
+        )  # make a full copy of the dict not to only link it and update dict in place
         new_options.update({"value_choices": options_list})
         validate(new_options, options_json_schema)
 
-        url = self._client._build_url('property', property_id=self.id)
-        response = self._client._request('PUT', url, json={'options': new_options})
+        url = self._client._build_url("property", property_id=self.id)
+        response = self._client._request("PUT", url, json={"options": new_options})
 
         if response.status_code != 200:  # pragma: no cover
-            raise APIError("Could not update property value. Response: {}".format(str(response)))
+            raise APIError(
+                "Could not update property value. Response: {}".format(str(response))
+            )
         else:
             self._options = new_options  # save the new options as the options

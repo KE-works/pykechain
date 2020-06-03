@@ -117,7 +117,7 @@ class TestPropertyCreation(TestBetamax):
 
 class TestProperties(TestBetamax):
     def setUp(self):
-        super(TestProperties, self).setUp()
+        super().setUp()
 
         self.wheel_model = self.project.model('Wheel')
         self.bike_model = self.project.model('Bike')
@@ -136,7 +136,7 @@ class TestProperties(TestBetamax):
     def tearDown(self):
         if self.prop_model:
             self.prop_model.delete()
-        super(TestProperties, self).tearDown()
+        super().tearDown()
 
     def test_retrieve_properties(self):
         properties = self.project.properties('Diameter')
@@ -423,7 +423,7 @@ class TestUpdateProperties(TestBetamax):
 
 class TestPropertiesWithReferenceProperty(TestBetamax):
     def setUp(self):
-        super(TestPropertiesWithReferenceProperty, self).setUp()
+        super().setUp()
 
         self.wheel_model = self.project.model('Wheel')
         self.bike = self.project.model('Bike')
@@ -437,7 +437,7 @@ class TestPropertiesWithReferenceProperty(TestBetamax):
 
     def tearDown(self):
         self.test_ref_property_model.delete()
-        super(TestPropertiesWithReferenceProperty, self).tearDown()
+        super().tearDown()
 
     def test_copy_reference_property_with_options(self):
         # setUp
