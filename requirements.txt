@@ -8,9 +8,6 @@ jsonschema==3.2.0
 # for version comparison
 semver==2.10.1
 
-# to fix connection issues
-PyOpenSSL==19.1.0; python_version <= '2.7'
-
 # testing
 pytest==5.4.3
 betamax==0.8.1
@@ -22,17 +19,13 @@ coveralls==2.0.0
 Sphinx==3.0.4
 nbsphinx==0.7.0
 
-# data science # not needed for local use
-# jupyter==1.0.0
-# matplotlib==3.1.1; python_version >= '3.6'
-
 # integration
 tox==3.15.1
 
 # code style
 flake8==3.8.2
 pydocstyle==5.0.2
-mypy==0.770; python_version >= '3.4'
+mypy==0.780; python_version >= '3.4'
 pre-commit==2.4.0
 
 # for package management (uploads)

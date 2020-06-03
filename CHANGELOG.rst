@@ -1,60 +1,31 @@
 Change Log
 ==========
 
-v3.7.0-rc5 (not released)
--------------------------
+v3.7.0 (3JUN20)
+---------------
 
-* :+1: Added `PropertyTypes` enumeration values for the JSON property and multiple new reference properties.
+This is a big release and perfectly qualifies for a minor version number upgrade. We took care of many things and improvements in alignment with fresh and refreshed capabilities of the KE-chain 3 platform.
 
-v3.7.0-rc4 (not released)
--------------------------
+In this release we also deprecated functionality that were announced to be deprecated some time ago. We deprecated all compatibility to 'KE-chain 2'. Please refer to the Backward Incompatible Changes down below.
+
+:star: is a new feature
+:+1: are improvements
+:bug: are fixed bugs
 
 * :star: Extracted representations from `Property2` class into a separate `RepresentationMixin` class. This is now utilized by the `Scope2`, `Activity2` and `Property2` classes.
+* :star: Implemented `MultiSelectListProperty2` class, generalizing the implementation of the `SelectListProperty2 class. Intermediate class `_SelectListProperty` now hosts the generic implementation. #732
+* :star: Implemented `ActivityReferenceProperty` class, generalizing the implementation of the part reference `MultiReferenceProperty2` class. Intermediate classes `_ReferenceProperty` and `_ReferencePropertyInScope` have been added for further reference properties. #746
+* :star: Added `ScopeRoles` and `ScopeMemberActions` enum classes to list the roles of and operations on scope members.
+
+* :+1: Added `PropertyTypes` enumeration values for the JSON property and multiple new reference properties.
 * :+1: Added `CustomIconRepresentation` to change the font-awesome icons of KE-chain scopes and activities. Default icon display mode is set/gettable, defaulting to "regular".
 * :+1: Added `show_name_column` input to the `add_supergrid_widget` method of the `WidgetsManager`.
 * :+1: Added `show_download_button` and `show_full_screen_button` inputs to the `add_attachmentviewer_widget` method of the `WidgetsManager`.
 * :+1: Added `link_value` input to the `add_card_widget` method of the `WidgetsManager`. Linking to sub-process activities now opens the link in tree view by default.
-* :bug: Editing an `Activity2` now uses its `__init__` to refresh with the JSON from the response, removing an additional reload to get updated values.
-
-Backwards incompatible changes
-------------------------------
-
-We deprecated the following:
-
-* `get_all_children` helper function for parts and activities. Use the `all_children` method instead.
-
-
-v3.7.0-rc3 (not released)
-------
-
-* :star: Implemented `MultiSelectListProperty2` class, generalizing the implementation of the `SelectListProperty2 class. Intermediate class `_SelectListProperty` now hosts the generic implementation. #732
-* :star: Implemented `ActivityReferenceProperty` class, generalizing the implementation of the part reference `MultiReferenceProperty2` class. Intermediate classes `_ReferenceProperty` and `_ReferencePropertyInScope` have been added for further reference properties. #746
 * :+1: Created mapping table `property_type_to_class_map` to convert between property types from the `PropertyType` enumeration and property classes derived from the `Property2` class.
 * :+1: Added `BaseInScope` base class for KE-chain objects limited to a single scope. It inherits from `Base` itself. The new class is used for Parts, Properties, Activities, Widgets, Associations and Services. Original class is still used for Scopes, Teams, Users, Banners, Notifications and ServiceExecutions.
 * :+1: Moved `scope` property method to the `BaseInScope` class, adding lazy retrieval to limit overhead.
-* :bug: Added `Activity2.scope_id` setter method (self-induced bug due to the introduction of `BaseInScope`).
-* :bug: Moved the serialization of property values from the `Part2._parse_update_dict()` method to the new `Property2.serialize_value()` method. This new method is used in the `_put_value()` method of this class to have identical serialization in both `value` and `part.update()` mechanics.
-* :bug: The bulk update of property values via the `use_bulk_update` attribute and `update_values` method now uses the same serialization pipeline as synchronous updating. Also made the attribute a `Property2` class property, converting it to a singleton.
-* :bug: Refactored the `reload` method of the `Client` class to be able to reload any Pykechain class object. #760
-
-Backwards incompatible changes:
--------------------------------
-
-* The `MultiReferenceProperty2.choices()` method now returns an empty list if no `Part` model is yet configured. Now the method no longer raises a TypeError (i.e. 'NoneType' object is not subscriptable).
-
-
-v3.7.0-rc2 (not released)
--------------------------
-
-: "star: Added `ScopeRoles` and `ScopeMemberActions` enum classes to list the roles of and operations on scope members.
-* :bug: Scope edit cleared some properties from the scope if they were not provided.
-: :+1: Improved robustness of teardown for tests for the `Scope2` class.
-
-v3.7.0-rc1 (not released)
--------------------------
-
-In this release we deprecated functionality that were announced to be deprecated some time ago. We deprecated all compatibility to 'KE-chain 2'.
-
+* :+1: Improved robustness of teardown for tests for the `Scope2` class.
 * :+1: Added `editable` argument to the `add_attachmentviewer_widget` method of the WidgetsManager, to enable both viewing and editing of the attachment.
 * :+1: Added `show_log` argument to the `add_service_widget` method of the WidgetsManager, to separate the log file and log message.
 * :+1: Added `Alignment` enum class, leaving `NavigationBarAlignment` as wrapper for backwards compatibility.
@@ -63,16 +34,25 @@ In this release we deprecated functionality that were announced to be deprecated
 * :+1: Large clean-up for user-input validation for most `Client` methods to provide consistent error messages.
 * :+1: Added intermediate `_retrieve_singular` method in `Client` class to simplify other methods intended to get 1 object. These other methods all had identical dependency on methods to retrieve more than 1 object, such as `part()` on `parts()`.
 * :+1: Improved traceback of any `APIError` by printing content from the `response` and/or `request` if provided by keyword arguments, e.g. `APIError("Incorrect value!", response=response)`. (#742)
+* :+1: dependent versions for development: semver (2.10.1), pytest (5.4.3), pytest-cov(2.9.0), Sphinx (3.0.4), nbsphinx (0.7.0), tox (3.15.1), flake8 (3.8.2), pre-commit (2.4.0), mypy (0.780), removed PyOpenSSL which was only for python 2.7.
 
+* :bug: Editing an `Activity2` now uses its `__init__` to refresh with the JSON from the response, removing an additional reload to get updated values.
+* :bug: Added `Activity2.scope_id` setter method (self-induced bug due to the introduction of `BaseInScope`).
+* :bug: Moved the serialization of property values from the `Part2._parse_update_dict()` method to the new `Property2.serialize_value()` method. This new method is used in the `_put_value()` method of this class to have identical serialization in both `value` and `part.update()` mechanics.
+* :bug: The bulk update of property values via the `use_bulk_update` attribute and `update_values` method now uses the same serialization pipeline as synchronous updating. Also made the attribute a `Property2` class property, converting it to a singleton.
+* :bug: Refactored the `reload` method of the `Client` class to be able to reload any Pykechain class object. #760
+* :bug: Scope edit cleared some properties from the scope if they were not provided.
 
-Backward incompatible changes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Backwards incompatible changes
+------------------------------
 
 We deprecated the following:
 
-* Options USERTASK, SERVICETASK and SUBPROCESS from `ActivityType` enum class.
-* Option START from `NavigationBarAlignment` enum class.
-* Mapping table `WIMCompatibleActivityTypes`.
+* `get_all_children` helper function for parts and activities. Use the `all_children` method instead.
+* The `MultiReferenceProperty2.choices()` method now returns an empty list if no `Part` model is yet configured. Now the method no longer raises a TypeError (i.e. 'NoneType' object is not subscriptable).
+* We deprecated the `ActivityTypes`: `USERTASK`, `SERVICETASK` and `SUBPROCESS` from `ActivityType` enum class.
+* We deprecated the option to use `START` from `NavigationBarAlignment` enum class.
+* We deprecated the mapping table `WIMCompatibleActivityTypes`.
 
 v3.6.4 (20APR20)
 ----------------
