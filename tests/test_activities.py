@@ -42,7 +42,6 @@ class TestActivityConstruction(TestBetamax):
         name = '__Testing task'
         description = 'My new task'
         status = ActivityStatus.OPEN
-        now = datetime.now()
         activity_type = ActivityType.TASK
         classification = ActivityClassification.WORKFLOW
 
@@ -52,8 +51,8 @@ class TestActivityConstruction(TestBetamax):
             parent=self.process,
             status=status,
             description=description,
-            start_date=now,
-            due_date=now,
+            start_date=self.time,
+            due_date=self.time,
             activity_type=activity_type,
             classification=classification,
         )
@@ -139,7 +138,7 @@ class TestActivityConstruction(TestBetamax):
             self.project.create_activity('__test_task', status='COMPLETE')
 
         with self.assertRaises(IllegalArgumentError):
-            self.project.create_activity('__test_task', start_date=datetime.now().isoformat())
+            self.project.create_activity('__test_task', start_date=self.time.isoformat())
 
         with self.assertRaises(IllegalArgumentError):
             self.project.create_activity('__test_task', description=1234)
@@ -166,22 +165,37 @@ class TestActivityConstruction(TestBetamax):
 
 
 class TestActivities(TestBetamax):
+
+    NAME = '__TEST ACTIVITY'
+
+    def setUp(self):
+        super().setUp()
+        self.workflow_root = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
+        self.task = self.project.create_activity(name=self.NAME, activity_type=ActivityType.TASK)
+
+    def tearDown(self):
+        if self.task:
+            try:
+                self.task.delete()
+            except APIError:
+                pass
+        super().tearDown()
+
     def test_retrieve_activities(self):
         self.assertTrue(self.project.activities())
 
     def test_retrieve_single_activity(self):
-        self.assertTrue(self.project.activity('Specify wheel diameter'))
+        self.assertTrue(self.project.activity(self.NAME))
 
     def test_activity_attributes(self):
         attributes = ['_client', '_json_data', 'id', 'name', 'created_at', 'updated_at', 'ref',
                       'description', 'status', 'activity_type', '_scope_id',
                       'start_date', 'due_date']
 
-        obj = self.project.activity('Specify wheel diameter')
         for attribute in attributes:
             with self.subTest(msg=attribute):
-                self.assertTrue(hasattr(obj, attribute),
-                                "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
+                self.assertTrue(hasattr(self.task, attribute),
+                                "Could not find '{}' in the object: '{}'".format(attribute, self.task.__dict__.keys()))
 
     def test_retrieve_unknown_activity(self):
         with self.assertRaises(NotFoundError):
@@ -193,113 +207,65 @@ class TestActivities(TestBetamax):
 
     # new in 1.7
     def test_edit_activity_name(self):
-        specify_wd = self.project.activity('Specify wheel diameter')
-        specify_wd.edit(name='Specify wheel diameter - updated')
+        self.task.edit(name='Specify wheel diameter - updated')
 
-        specify_wd_u = self.project.activity('Specify wheel diameter - updated')
-        self.assertEqual(specify_wd.id, specify_wd_u.id)
-        self.assertEqual(specify_wd.name, specify_wd_u.name)
-        self.assertEqual(specify_wd.name, 'Specify wheel diameter - updated')
+        self.task_u = self.project.activity('Specify wheel diameter - updated')
+        self.assertEqual(self.task.id, self.task_u.id)
+        self.assertEqual(self.task.name, self.task_u.name)
+        self.assertEqual(self.task.name, 'Specify wheel diameter - updated')
 
         # Added to improve coverage. Assert whether IllegalArgumentError is raised when 'name' is not a string object.
         with self.assertRaises(IllegalArgumentError):
-            specify_wd.edit(name=True)
-
-        specify_wd.edit(name='Specify wheel diameter')
+            self.task.edit(name=True)
 
     def test_edit_activity_description(self):
-        specify_wd = self.project.activity('Specify wheel diameter')
-        specify_wd.edit(description='This task has an even cooler description')
+        self.task.edit(description='This task has a cool description')
 
-        self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
+        self.assertEqual(self.task._client.last_response.status_code, requests.codes.ok)
 
         # Added to improve coverage. Assert whether IllegalArgumentError is raised when 'description' is
         # not a string object.
         with self.assertRaises(IllegalArgumentError):
-            specify_wd.edit(description=42)
-
-        specify_wd.edit(description='This task has a cool description')
+            self.task.edit(description=42)
 
     def test_edit_activity_naive_dates(self):
-        specify_wd = self.project.activity('Specify wheel diameter')
-
-        old_start, old_due = specify_wd.start_date, specify_wd.due_date
-
         start_time = datetime(2000, 1, 1, 0, 0, 0)
         due_time = datetime(2019, 12, 31, 0, 0, 0)
 
-        with warnings.catch_warnings(record=False) as w:
+        with warnings.catch_warnings(record=False):
             warnings.simplefilter("ignore")
-            specify_wd.edit(start_date=start_time, due_date=due_time)
+            self.task.edit(start_date=start_time, due_date=due_time)
 
-        self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
-
-        # Added to improve coverage. Assert whether IllegalArgumentError is raised when 'start_date' and
-        # 'due_date are not datetime objects
-        with self.assertRaises(IllegalArgumentError):
-            specify_wd.edit(start_date='All you need is love')
+        self.assertEqual(self.task._client.last_response.status_code, requests.codes.ok)
 
         with self.assertRaises(IllegalArgumentError):
-            specify_wd.edit(due_date='Love is all you need')
+            self.task.edit(start_date='All you need is love')
 
-        specify_wd_u = self.project.activity('Specify wheel diameter')
-
-        self.assertEqual(specify_wd.id, specify_wd_u.id)
-
-        specify_wd.edit(start_date=old_start, due_date=old_due)
+        with self.assertRaises(IllegalArgumentError):
+            self.task.edit(due_date='Love is all you need')
 
     def test_edit_due_date_timezone_aware(self):
-        specify_wd = self.project.activity('Specify wheel diameter')
+        self.task.edit(start_date=self.time, due_date=self.time)
 
-        # save old values
-        old_start, old_due = specify_wd.start_date, specify_wd.due_date
-
-        startdate = datetime.now(pytz.utc)
-        duedate = datetime(2019, 1, 1, 0, 0, 0, tzinfo=pytz.timezone('Europe/Amsterdam'))
-
-        specify_wd.edit(start_date=startdate, due_date=duedate)
-
-        self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
-
-        # teardown
-        specify_wd.edit(start_date=old_start, due_date=old_due)
+        self.assertEqual(self.task._client.last_response.status_code, requests.codes.ok)
 
     # 1.10.0
     def test_edit_activity_status(self):
-        specify_wd = self.project.activity('Specify wheel diameter')
-        original_status = specify_wd.status
+        self.task.edit(status=ActivityStatus.COMPLETED)
 
-        specify_wd.edit(status=ActivityStatus.COMPLETED)
-
-        # Added to improve coverage. Assert whether IllegalArgumentError is raised when 'status' is not a string
-        with self.assertRaises(IllegalArgumentError):
-            specify_wd.edit(status=True)
-
-        # If the status is not part of Enums.Status then it should raise an APIError
-        with self.assertRaises(IllegalArgumentError):
-            specify_wd.edit(status='NO STATUS')
-
-        # Return the status to how it used to be
-        specify_wd.edit(status=original_status)
+        for status in [True, 'NO STATUS', 3]:
+            with self.subTest(msg=status):
+                with self.assertRaises(IllegalArgumentError):
+                    self.task.edit(status=status)
 
     # 1.7.2
     def test_datetime_with_naive_duedate_only_fails(self):
         """reference to #121 - thanks to @joost.schut"""
-        # setup
-        specify_wd = self.project.activity('Specify wheel diameter')
-
-        # save old values
-        old_start, old_due = specify_wd.start_date, specify_wd.due_date
-
         naive_duedate = datetime(2017, 6, 5, 5, 0, 0)
-        with warnings.catch_warnings(record=False) as w:
-            warnings.simplefilter("ignore")
-            specify_wd.edit(due_date=naive_duedate)
 
-        # teardown
-        with warnings.catch_warnings(record=False) as w:
+        with warnings.catch_warnings(record=False):
             warnings.simplefilter("ignore")
-            specify_wd.edit(due_date=old_due)
+            self.task.edit(due_date=naive_duedate)
 
     def test_datetime_with_tzinfo_provides_correct_offset(self):
         """reference to #121 - thanks to @joost.schut
@@ -307,24 +273,15 @@ class TestActivities(TestBetamax):
         The tzinfo.timezone('Europe/Amsterdam') should provide a 2 hour offset, recording 20 minutes
         """
         # setup
-        specify_wd = self.project.activity('Specify wheel diameter')
-        # save old values
-        old_start, old_due = specify_wd.start_date, specify_wd.due_date
-
         tz = pytz.timezone('Europe/Amsterdam')
         tzaware_due = tz.localize(datetime(2017, 7, 1))
         tzaware_start = tz.localize(datetime(2017, 6, 30, 0, 0, 0))
 
-        specify_wd.edit(start_date=tzaware_start)
-        self.assertTrue(specify_wd._json_data['start_date'], tzaware_start.isoformat(sep='T'))
+        self.task.edit(start_date=tzaware_start)
+        self.assertTrue(self.task._json_data['start_date'], tzaware_start.isoformat(sep='T'))
 
-        specify_wd.edit(due_date=tzaware_due)
-        self.assertTrue(specify_wd._json_data['due_date'], tzaware_due.isoformat(sep='T'))
-
-        # teardown
-        with warnings.catch_warnings(record=False) as w:
-            warnings.simplefilter("ignore")
-            specify_wd.edit(start_date=old_start, due_date=old_due)
+        self.task.edit(due_date=tzaware_due)
+        self.assertTrue(self.task._json_data['due_date'], tzaware_due.isoformat(sep='T'))
 
     def test_edit_cascade_down(self):
         # setup
@@ -352,39 +309,32 @@ class TestActivities(TestBetamax):
         subtask.edit(assignees=[], status=ActivityStatus.OPEN)
 
     def test_retrieve_children_of_task_fails_for_task(self):
-        task = self.project.activity(name='Specify wheel diameter')
         with self.assertRaises(NotFoundError, msg='Tasks have no children!'):
-            task.children()
+            self.task.children()
 
     def test_child(self):
-        workflow_root = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
-
-        child_task = workflow_root.child(name='Specify wheel diameter')
+        child_task = self.workflow_root.child(name=self.NAME)
 
         self.assertIsInstance(child_task, Activity2)
-        self.assertEqual(child_task._json_data['parent_id'], workflow_root.id)
+        self.assertEqual(child_task._json_data['parent_id'], self.workflow_root.id)
 
     def test_child_invalid(self):
-        workflow_root = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
-
         with self.assertRaises(IllegalArgumentError):
-            workflow_root.child()
+            self.workflow_root.child()
 
-        second_process = workflow_root.create(name='Specify wheel diameter')
+        second_process = self.workflow_root.create(name=self.NAME)
         with self.assertRaises(MultipleFoundError):
-            workflow_root.child(name='Specify wheel diameter')
+            self.workflow_root.child(name=self.NAME)
         second_process.delete()
 
         with self.assertRaises(NotFoundError):
-            workflow_root.child(name='Just a scratch')
+            self.workflow_root.child(name='Just a scratch')
 
     def test_retrieve_all_children(self):
-        workflow_root = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
-
-        all_tasks = workflow_root.all_children()
+        all_tasks = self.workflow_root.all_children()
 
         self.assertIsInstance(all_tasks, list)
-        self.assertEqual(11, len(all_tasks), msg='Number of tasks has changed, expected 12.')
+        self.assertEqual(12, len(all_tasks), msg='Number of tasks has changed, expected 12.')
 
     def test_retrieve_activity_by_id(self):
         task = self.project.activity(name='Subprocess')  # type: Activity2
@@ -401,9 +351,8 @@ class TestActivities(TestBetamax):
         self.assertTrue(len(siblings) >= 1)
 
     def test_retrieve_siblings_of_root(self):
-        task = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
         with self.assertRaises(NotFoundError):
-            task.siblings()
+            self.workflow_root.siblings()
 
     # in 1.12
 
@@ -540,9 +489,6 @@ class TestActivity2SpecificTests(TestBetamax):
         activity_name = 'Specify wheel diameter'
         activity = self.project.activity(name=activity_name)  # type: Activity2
 
-        list_of_assignees_in_data = activity._json_data.get('assignees_ids')
-        assignees_list = activity.assignees
-
         self.assertListEqual(list(), activity.assignees, "Task has no assignees and should return Empty list")
 
     def test_activity2_move(self):
@@ -626,7 +572,7 @@ class TestActivity2SpecificTests(TestBetamax):
         # testing
         for model in associated_models:
             self.assertTrue(model.category == Category.MODEL)
-            if model.name == 'Bike':
+            if model == bike_model:
                 self.assertTrue(model.property(name='Gears').output)
                 self.assertFalse(model.property(name='Total height').output)
                 self.assertFalse(model.property(name='Picture').output)

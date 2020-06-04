@@ -119,8 +119,8 @@ class TestClientLive(TestBetamax):
         from pykechain.models import User
         self.assertIsInstance(user, User)
 
-        del self.client.auth
-        del self.client.headers
+        self.client.auth = None
+        self.client.headers = None
         with self.assertRaises(APIError):
             self.client.current_user()
 

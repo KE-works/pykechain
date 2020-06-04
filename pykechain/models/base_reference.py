@@ -1,9 +1,10 @@
 from abc import abstractmethod, ABC
-from typing import Optional, Any, Text, Iterable, Union, Tuple, List
+from typing import Optional, Any, Text, Union, Tuple, List
 
+from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Property2, Base
 from pykechain.models.base import BaseInScope
-from pykechain.utils import is_uuid
+from pykechain.models.input_checks import check_list_of_base, check_base
 
 
 class _ReferenceProperty(Property2):
@@ -23,12 +24,7 @@ class _ReferenceProperty(Property2):
         self._cached_values = None
 
     @property
-    def ref_name(self) -> Text:
-        """Get the name of the referenced Pykechain class."""
-        return self.REFERENCED_CLASS.__name__
-
-    @property
-    def value(self) -> Optional[Iterable[REFERENCED_CLASS]]:
+    def value(self) -> Optional[List[REFERENCED_CLASS]]:
         """
         Retrieve the referenced objects of this reference property.
 
@@ -43,13 +39,14 @@ class _ReferenceProperty(Property2):
 
     @value.setter
     def value(self, value: Any) -> None:
+        value = self.serialize_value(value)
         if self.use_bulk_update:
             self._pend_value(value)
         else:
             self._put_value(value)
 
     @abstractmethod
-    def _retrieve_objects(self, **kwargs) -> Iterable[Base]:
+    def _retrieve_objects(self, **kwargs) -> List[Base]:
         """
         Retrieve a list of Pykechain objects, type depending on the reference property type.
 
@@ -60,7 +57,7 @@ class _ReferenceProperty(Property2):
         """
         pass
 
-    def serialize_value(self, value: Union[List, Tuple]) -> Optional[List[Text]]:
+    def serialize_value(self, value: Union[Base, List, Tuple]) -> Optional[List[Text]]:
         """
         Serialize the value to be set on the property by checking for a list of Base objects.
 
@@ -68,24 +65,12 @@ class _ReferenceProperty(Property2):
         :type value: Any
         :return: serialized value
         """
-        value_to_set = []
-        if isinstance(value, (list, tuple)):
-            for item in value:
-                if isinstance(item, self.REFERENCED_CLASS):
-                    value_to_set.append(item.id)
-                elif isinstance(item, str) and is_uuid(item):
-                    value_to_set.append(item)
-                else:
-                    raise ValueError("References must be of type {cls}, {cls} id or None. type: {}".format(
-                        type(item), cls=self.ref_name))
-        elif value is None:
-            value_to_set = None  # clear out the list
-        else:
-            raise ValueError(
-                "Reference must be a list (or tuple) of type {cls}, {cls} id or None. type: {}".format(
-                    type(value), cls=self.ref_name))
-
-        return value_to_set
+        try:
+            value = check_base(value, cls=self.REFERENCED_CLASS, key='Reference')
+            return [value] if value is not None else value
+        except IllegalArgumentError:
+            # expected to fail, as value should be an iterable
+            return check_list_of_base(value, cls=self.REFERENCED_CLASS, key='references')
 
 
 class _ReferencePropertyInScope(_ReferenceProperty, ABC):

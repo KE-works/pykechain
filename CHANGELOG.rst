@@ -1,6 +1,13 @@
 Change Log
 ==========
 
+v3.7.1 ()
+---------------
+
+* :bug: Reference properties values can now be set with identifiers, such as `property.value = "1234..."` and a list of identifiers, such as `property.value = ["1234..."]`. The original behavior of the `MultiReferenceProperty2` was inconsistent: the `value` attribute did not allow strings while updating via the `Part2.update()` and `Part2.add_with_properties()` methods allowed it.
+* :+1: Enabled kwargs for bulk editing of activities.
+* :+1: Assigned `Part2` class as the referenced class for the `MultiReferenceProperty2` for more precise type-checking.
+
 v3.7.0 (3JUN20)
 ---------------
 
