@@ -1,14 +1,9 @@
 from pykechain.enums import PropertyType, FilterType, Multiplicity, ActivityRootNames
-from pykechain.exceptions import IllegalArgumentError, APIError
+from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import MultiReferenceProperty2, ActivityReferenceProperty
 from pykechain.models.validators import RequiredFieldValidator
 from pykechain.utils import find
 from tests.classes import TestBetamax
-
-import datetime
-import pytz
-
-new_year_2020 = datetime.datetime(year=2020, month=1, day=1, tzinfo=pytz.UTC)
 
 
 class TestMultiReferenceProperty(TestBetamax):
@@ -96,14 +91,6 @@ class TestMultiReferenceProperty(TestBetamax):
 
         # testing
         self.assertTrue(len(self.ref.value) >= 2)
-
-    def test_referencing_not_an_option(self):
-        # setUp
-        front_wheel = self.project.part('Front Wheel')
-
-        # testing
-        with self.assertRaises(APIError):
-            self.ref.value = front_wheel
 
     def test_referencing_a_list_with_no_parts(self):
         # setUp
@@ -233,7 +220,7 @@ class TestMultiReferenceProperty(TestBetamax):
             values=[30.5,
                     7,
                     'Al',
-                    new_year_2020,
+                    self.time,
                     'Michelin',
                     True],
             filters_type=[FilterType.GREATER_THAN_EQUAL,
@@ -254,7 +241,7 @@ class TestMultiReferenceProperty(TestBetamax):
         self.assertIn("{}:{}:{}".format(rim_material_property.id, 'Al', FilterType.CONTAINS), filters)
         self.assertIn("{}:{}:{}".format(self.bool_prop.id, 'true', FilterType.EXACT), filters)
         self.assertIn("{}:{}:{}".format(self.ssl_prop.id, 'Michelin', FilterType.CONTAINS), filters)
-        self.assertIn("{}:{}:{}".format(self.datetime_prop.id, new_year_2020, FilterType.GREATER_THAN_EQUAL),
+        self.assertIn("{}:{}:{}".format(self.datetime_prop.id, self.time, FilterType.GREATER_THAN_EQUAL),
                       filters)
 
     def test_set_prefilters_on_reference_property_with_excluded_propmodels_and_validators(self):
