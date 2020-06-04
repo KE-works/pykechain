@@ -11,7 +11,7 @@ class SelectListProperty(Property):  # pragma: no cover
 
     def __init__(self, json, **kwargs):
         """Construct a Property from a json object."""
-        super(SelectListProperty, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
         self._value_choices = self._json_data.get("options").get("value_choices")
 
     @property

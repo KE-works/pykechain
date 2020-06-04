@@ -3,7 +3,6 @@ import warnings
 from typing import Any, Text, List  # noqa: F401
 
 import requests
-from six import text_type, string_types
 
 from pykechain.enums import Multiplicity, ScopeStatus
 from pykechain.exceptions import (
@@ -44,7 +43,7 @@ class Scope(Base):  # pragma: no cover
     def __init__(self, json, **kwargs):
         # type: (dict, **Any) -> None
         """Construct a scope from provided json data."""
-        super(Scope, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self.bucket = json.get("bucket", {})
 
@@ -282,7 +281,7 @@ class Scope(Base):  # pragma: no cover
         :type user_type: basestring
         :raises APIError: When unable to update the scope project team.
         """
-        if isinstance(user, (string_types, text_type)):
+        if isinstance(user, ((str,), str)):
             users = self._client._retrieve_users()
             manager_object = next(
                 (item for item in users["results"] if item["username"] == user), None
@@ -386,14 +385,14 @@ class Scope(Base):  # pragma: no cover
         """
         update_dict = {"id": self.id}
         if name is not None:
-            if isinstance(name, (str, text_type)):
+            if isinstance(name, (str, str)):
                 update_dict.update({"name": name})
                 self.name = name
             else:
                 raise IllegalArgumentError("Name should be a string")
 
         if description is not None:  # isinstance(description, (str, text_type)):
-            if isinstance(description, (str, text_type)):
+            if isinstance(description, (str, str)):
                 update_dict.update({"text": description})
                 self.text = description
             else:
@@ -430,7 +429,7 @@ class Scope(Base):  # pragma: no cover
                 )
 
         if status is not None:
-            if isinstance(status, (str, text_type)) and status in ScopeStatus.values():
+            if isinstance(status, (str, str)) and status in ScopeStatus.values():
                 update_dict.update({"status": status})
             else:
                 raise IllegalArgumentError(
@@ -449,7 +448,7 @@ class Scope(Base):  # pragma: no cover
         if team is not None:
             from pykechain.models import Team
 
-            if isinstance(team, (str, text_type)) and is_uuid(team):
+            if isinstance(team, (str, str)) and is_uuid(team):
                 update_dict.update({"team_id": team})
             elif isinstance(team, Team):
                 update_dict.update({"team_id": team.id})

@@ -10,7 +10,7 @@ class DatetimeProperty(Property):  # pragma: no cover
     """A virtual object representing a KE-chain reference property."""
 
     def __index__(self, json, **kwargs):
-        super(DatetimeProperty, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
     @property
     def value(self):

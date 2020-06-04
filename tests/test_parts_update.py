@@ -9,9 +9,7 @@ class TestPartUpdate(TestBetamax):
     def test_part_update_with_dictionary_without_name(self):
         # setup
         front_fork = self.project.part("Front Fork")  # type: Part
-        saved_front_fork_properties = dict(
-            [(p.name, p.value) for p in front_fork.properties]
-        )
+        saved_front_fork_properties = {p.name: p.value for p in front_fork.properties}
 
         # do tests
         update_dict = {
@@ -43,9 +41,7 @@ class TestPartUpdate(TestBetamax):
     def test_part_update_with_dictionary_including_name(self):
         # setup
         front_fork = self.project.part("Front Fork")  # type: Part
-        saved_front_fork_properties = dict(
-            [(p.name, p.value) for p in front_fork.properties]
-        )
+        saved_front_fork_properties = {p.name: p.value for p in front_fork.properties}
 
         # do tests
         update_dict = {
@@ -80,9 +76,7 @@ class TestPartUpdate(TestBetamax):
     def test_part_update_with_missing_property(self):
         # setup
         front_fork = self.project.part("Front Fork")  # type: Part
-        saved_front_fork_properties = dict(
-            [(p.name, p.value) for p in front_fork.properties]
-        )
+        saved_front_fork_properties = {p.name: p.value for p in front_fork.properties}
 
         # do tests
         update_dict = {"Unknown Property": "Woot!"}
@@ -97,9 +91,7 @@ class TestPartUpdate(TestBetamax):
     def test_part_update_with_property_ids(self):
         # setup
         front_fork = self.project.part("Front Fork")  # type: Part
-        saved_front_fork_properties = dict(
-            [(p.name, p.value) for p in front_fork.properties]
-        )
+        saved_front_fork_properties = {p.name: p.value for p in front_fork.properties}
 
         update_dict = dict()
         for p in front_fork.properties:

@@ -2,7 +2,6 @@ import json
 from typing import Any, AnyStr  # noqa: F401
 
 import requests
-from six import text_type, string_types
 
 from pykechain.enums import Multiplicity, Category
 from pykechain.exceptions import (
@@ -63,7 +62,7 @@ class Part(Base):  # pragma: no cover
         :param json: the json response to construct the :class:`Part` from
         :type json: dict
         """
-        super(Part, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self.category = json.get("category")
         self.parent_id = (
@@ -485,11 +484,11 @@ class Part(Base):  # pragma: no cover
         """
         update_dict = {"id": self.id}
         if name is not None:
-            if not isinstance(name, (string_types, text_type)):
+            if not isinstance(name, ((str,), str)):
                 raise IllegalArgumentError("name should be provided as a string")
             update_dict.update({"name": name})
         if description is not None:
-            if not isinstance(description, (string_types, text_type)):
+            if not isinstance(description, ((str,), str)):
                 raise IllegalArgumentError("description should be provided as a string")
             update_dict.update({"description": description})
 
@@ -573,7 +572,7 @@ class Part(Base):  # pragma: no cover
 
         if bulk and len(update_dict.keys()) > 1:
             if name:
-                if not isinstance(name, (string_types, text_type)):
+                if not isinstance(name, ((str,), str)):
                     raise IllegalArgumentError(
                         "Name of the part should be provided as a string"
                     )
@@ -731,7 +730,7 @@ class Part(Base):  # pragma: no cover
         order_dict = dict()
 
         for prop in property_list:
-            if isinstance(prop, (str, text_type)):
+            if isinstance(prop, (str, str)):
                 order_dict[self.property(name=prop).id] = property_list.index(prop)
             else:
                 order_dict[prop.id] = property_list.index(prop)

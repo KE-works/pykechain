@@ -1,6 +1,5 @@
 import requests
 from jsonschema import validate
-from six import text_type, string_types
 
 from pykechain.enums import (
     ComponentXType,
@@ -75,7 +74,7 @@ widgetconfig_json_schema = {
 }
 
 
-class CustomizationBase(object):
+class CustomizationBase:
     """Base class for customization objects.
 
     :cvar activity: an instance of :class:`pykechain.models.Activity`
@@ -256,7 +255,7 @@ class ExtCustomization(CustomizationBase):
         # Check whether the part_model is uuid type or class `Part`
         if isinstance(part_model, (Part, Part2)):
             part_model_id = part_model.id
-        elif isinstance(part_model, (string_types, text_type)) and is_uuid(part_model):
+        elif isinstance(part_model, ((str,), str)) and is_uuid(part_model):
             part_model_id = part_model
             part_model = self._client.model(id=part_model_id)
         else:
@@ -268,7 +267,7 @@ class ExtCustomization(CustomizationBase):
         # Check whether the parent_part_instance is uuid type or class `Part`
         if isinstance(parent_part_instance, (Part, Part2)):
             parent_part_instance_id = parent_part_instance.id
-        elif isinstance(parent_part_instance, (string_types, text_type)) and is_uuid(
+        elif isinstance(parent_part_instance, ((str,), str)) and is_uuid(
             parent_part_instance
         ):
             parent_part_instance_id = parent_part_instance
@@ -284,9 +283,7 @@ class ExtCustomization(CustomizationBase):
         # Check whether the sort_property is uuid type or class `Property`
         if isinstance(sort_property, Property):
             sort_property_id = sort_property.id
-        elif isinstance(sort_property, (string_types, text_type)) and is_uuid(
-            sort_property
-        ):
+        elif isinstance(sort_property, ((str,), str)) and is_uuid(sort_property):
             sort_property_id = sort_property
             sort_property = self._client.property(
                 id=sort_property_id, category=Category.MODEL
@@ -388,7 +385,7 @@ class ExtCustomization(CustomizationBase):
             title = part_model.name
         elif custom_title is None:
             show_title_value = "No title"
-            title = str()
+            title = ""
         else:
             show_title_value = "Custom Title"
             title = str(custom_title)
@@ -455,9 +452,7 @@ class ExtCustomization(CustomizationBase):
         # Check whether the parent_part_instance is uuid type or class `Part`
         if isinstance(part_instance, (Part, Part2)):
             part_instance_id = part_instance.id
-        elif isinstance(part_instance, (string_types, text_type)) and is_uuid(
-            part_instance
-        ):
+        elif isinstance(part_instance, ((str,), str)) and is_uuid(part_instance):
             part_instance_id = part_instance
             part_instance = self._client.part(id=part_instance_id)
         else:
@@ -511,7 +506,7 @@ class ExtCustomization(CustomizationBase):
             title = part_instance.name
         elif custom_title is None:
             show_title_value = "No title"
-            title = str()
+            title = ""
         else:
             show_title_value = "Custom Title"
             title = str(custom_title)
@@ -663,7 +658,7 @@ class ExtCustomization(CustomizationBase):
         # Check whether the part_model is uuid type or class `Part`
         if isinstance(part_model, (Part, Part2)):
             part_model_id = part_model.id
-        elif isinstance(part_model, (string_types, text_type)) and is_uuid(part_model):
+        elif isinstance(part_model, ((str,), str)) and is_uuid(part_model):
             part_model_id = part_model
             part_model = self._client.model(id=part_model_id)
         else:
@@ -675,7 +670,7 @@ class ExtCustomization(CustomizationBase):
         # Check whether the parent_part_instance is uuid type or class `Part`
         if isinstance(parent_part_instance, (Part, Part2)):
             parent_part_instance_id = parent_part_instance.id
-        elif isinstance(parent_part_instance, (string_types, text_type)) and is_uuid(
+        elif isinstance(parent_part_instance, ((str,), str)) and is_uuid(
             parent_part_instance
         ):
             parent_part_instance_id = parent_part_instance
@@ -691,9 +686,7 @@ class ExtCustomization(CustomizationBase):
         # Check whether the sort_property is uuid type or class `Property`
         if isinstance(sort_property, Property):
             sort_property_id = sort_property.id
-        elif isinstance(sort_property, (string_types, text_type)) and is_uuid(
-            sort_property
-        ):
+        elif isinstance(sort_property, ((str,), str)) and is_uuid(sort_property):
             sort_property_id = sort_property
             sort_property = self._client.property(
                 id=sort_property_id, category=Category.MODEL
@@ -834,7 +827,7 @@ class ExtCustomization(CustomizationBase):
         # Check whether the script is uuid type or class `Service`
         if isinstance(script, Service):
             script_id = script.id
-        elif isinstance(script, (string_types, text_type)) and is_uuid(script):
+        elif isinstance(script, ((str,), str)) and is_uuid(script):
             script_id = script
             script = self._client.service(id=script_id)
         else:
@@ -912,7 +905,7 @@ class ExtCustomization(CustomizationBase):
         # Check whether the script is uuid type or class `Service`
         if isinstance(notebook, Service):
             notebook_id = notebook.id
-        elif isinstance(notebook, (string_types, text_type)) and is_uuid(notebook):
+        elif isinstance(notebook, ((str,), str)) and is_uuid(notebook):
             notebook_id = notebook
             notebook = self._client.service(id=notebook_id)
         else:
@@ -975,7 +968,7 @@ class ExtCustomization(CustomizationBase):
         # Check whether the attachment property is uuid type or class `Property`
         if isinstance(attachment_property, Property):
             attachment_property_id = attachment_property.id
-        elif isinstance(attachment_property, (string_types, text_type)) and is_uuid(
+        elif isinstance(attachment_property, ((str,), str)) and is_uuid(
             attachment_property
         ):
             attachment_property_id = attachment_property
@@ -1072,9 +1065,7 @@ class ExtCustomization(CustomizationBase):
                 activity = activity_dict["activityId"]
                 if isinstance(activity, (Activity, Activity2)):
                     activity_dict["activityId"] = activity.id
-                elif isinstance(activity, (string_types, text_type)) and is_uuid(
-                    activity
-                ):
+                elif isinstance(activity, ((str,), str)) and is_uuid(activity):
                     pass
                 else:
                     raise IllegalArgumentError(
@@ -1085,7 +1076,7 @@ class ExtCustomization(CustomizationBase):
                     "customText" not in activity_dict.keys()
                     or not activity_dict["customText"]
                 ):
-                    activity_dict["customText"] = str()
+                    activity_dict["customText"] = ""
                 if "emphasize" not in activity_dict.keys():
                     activity_dict["emphasize"] = False
 

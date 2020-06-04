@@ -11,7 +11,7 @@ allowed_attributes = [
 ]
 
 
-class SideBarButton(object):
+class SideBarButton:
     """
     Side-bar button class.
 

@@ -2,7 +2,6 @@ from typing import Any, Union, List  # noqa: F401
 
 import requests
 from jsonschema import validate
-from six import text_type, iteritems
 
 from pykechain.enums import PropertyType, Category
 from pykechain.exceptions import APIError, IllegalArgumentError
@@ -41,7 +40,7 @@ class Property(BaseInScope):  # pragma: no cover
     def __init__(self, json, **kwargs):
         # type: (dict, **Any) -> None
         """Construct a Property from a json object."""
-        super(Property, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self._output = json.get("output", None)
         self._value = json.get("value", None)
@@ -288,7 +287,7 @@ class Property(BaseInScope):  # pragma: no cover
         """
         update_dict = {"id": self.id}
         if name is not None:
-            if not isinstance(name, (str, text_type)):
+            if not isinstance(name, (str, str)):
                 raise IllegalArgumentError(
                     "name should be provided as a string, was provided as '{}'".format(
                         type(name)
@@ -297,7 +296,7 @@ class Property(BaseInScope):  # pragma: no cover
             update_dict.update({"name": name})
             self.name = name
         if description is not None:
-            if not isinstance(description, (str, text_type)):
+            if not isinstance(description, (str, str)):
                 raise IllegalArgumentError(
                     "description should be provided as a string, was provided as '{}'".format(
                         type(description)
@@ -305,7 +304,7 @@ class Property(BaseInScope):  # pragma: no cover
                 )
             update_dict.update({"description": description})
         if unit is not None:
-            if not isinstance(unit, (str, text_type)):
+            if not isinstance(unit, (str, str)):
                 raise IllegalArgumentError(
                     "unit should be provided as a string, was provided as '{}'".format(
                         type(unit)
@@ -322,7 +321,7 @@ class Property(BaseInScope):  # pragma: no cover
             update_dict.update({"options": options})
         if kwargs is not None:
             # process the other kwargs in py27 style.
-            for key, value in iteritems(kwargs):
+            for key, value in kwargs.items():
                 update_dict[key] = value
 
         response = self._client._request(

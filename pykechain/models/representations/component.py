@@ -8,7 +8,7 @@ from pykechain.models.representations.representation_base import BaseRepresentat
 from pykechain.models.validators.validator_schemas import representation_jsonschema_stub
 
 
-class RepresentationsComponent(object):
+class RepresentationsComponent:
     """
     Aggregate class to use representations on an object.
 

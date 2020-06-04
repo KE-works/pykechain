@@ -77,7 +77,7 @@ from .models.input_checks import (
 )
 
 
-class Client(object):
+class Client:
     """The KE-chain 2 python client to connect to a KE-chain (version 2) instance.
 
     :ivar last_request: last executed request. Which is of type `requests.Request`_
@@ -796,7 +796,7 @@ class Client(object):
                 data = response.json()
                 part_results.extend(data["results"])
 
-        return PartSet((Part2(p, client=self) for p in part_results))
+        return PartSet(Part2(p, client=self) for p in part_results)
 
     def part(self, *args, **kwargs) -> Part2:
         """Retrieve single KE-chain part.

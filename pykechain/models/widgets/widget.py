@@ -37,7 +37,7 @@ class Widget(BaseInScope):
         :type json: dict
         """
         # we need to run the init of 'Base' instead of 'Part' as we do not need the instantiation of properties
-        super(Widget, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
         del self.name
 
         self.manager = manager

@@ -18,7 +18,7 @@ class Team(Base):
 
     def __init__(self, json, **kwargs):
         """Construct a team from provided json data."""
-        super(Team, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self.ref = json.get("ref")
         self.description = json.get("description")

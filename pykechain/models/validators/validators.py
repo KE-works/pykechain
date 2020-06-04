@@ -1,5 +1,3 @@
-from __future__ import division
-
 import mimetypes
 import re
 from typing import (
@@ -76,7 +74,7 @@ class NumericRangeValidator(PropertyValidator):
         **kwargs
     ):
         """Construct the numeric range validator."""
-        super(NumericRangeValidator, self).__init__(json=json, **kwargs)
+        super().__init__(json=json, **kwargs)
 
         if minvalue is not None:
             self._config["minvalue"] = minvalue
@@ -352,7 +350,7 @@ class RegexStringValidator(PropertyValidator):
         :param kwargs: (optional) additional kwargs to pass down
         :type kwargs: dict
         """
-        super(RegexStringValidator, self).__init__(json=json, **kwargs)
+        super().__init__(json=json, **kwargs)
 
         if pattern is not None:
             self._config["pattern"] = pattern
@@ -396,7 +394,7 @@ class EmailValidator(RegexStringValidator):
         :param kwargs: (optional) additional kwargs to pass down
         :type kwargs: dict
         """
-        super(EmailValidator, self).__init__(json=json, pattern=self.pattern, **kwargs)
+        super().__init__(json=json, pattern=self.pattern, **kwargs)
 
 
 class AlwaysAllowValidator(PropertyValidator):
@@ -457,7 +455,7 @@ class FileSizeValidator(PropertyValidator):
         :type accept: Optional[Union[int,float]]
         :param kwargs: (optional) additional kwargs to pass down
         """
-        super(FileSizeValidator, self).__init__(json=json, **kwargs)
+        super().__init__(json=json, **kwargs)
         if max_size is not None:
             if isinstance(max_size, (int, float)):
                 self._config["maxSize"] = int(max_size)
@@ -531,7 +529,7 @@ class FileExtensionValidator(PropertyValidator):
         :type accept: Optional[List[Text]]
         :param kwargs: (optional) additional kwargs to pass down
         """
-        super(FileExtensionValidator, self).__init__(json=json, **kwargs)
+        super().__init__(json=json, **kwargs)
         if accept is not None:
             if isinstance(accept, Text):
                 self._config["accept"] = accept.split(",")

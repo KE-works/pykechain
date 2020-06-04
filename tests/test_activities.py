@@ -601,7 +601,7 @@ class TestActivity2SpecificTests(TestBetamax):
         assignees_list = self.task.assignees
 
         self.assertSetEqual(
-            set(list_of_assignees_in_data), set([u.id for u in assignees_list])
+            set(list_of_assignees_in_data), {u.id for u in assignees_list}
         )
 
     def test_activity2_assignees_list_no_assignees_gives_empty_list(self):

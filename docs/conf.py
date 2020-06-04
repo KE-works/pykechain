@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # KE-chain Python API documentation build configuration file, created by
 # sphinx-quickstart on Sun Dec 18 22:24:00 2016.

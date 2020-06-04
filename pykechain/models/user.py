@@ -22,7 +22,7 @@ class User(Base):
 
     def __init__(self, json, **kwargs):
         """Construct a user from provided json data."""
-        super(User, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self.username = self._json_data.get("username", "")
         self.id = self._json_data.get("pk", "")

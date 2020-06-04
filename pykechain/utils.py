@@ -6,7 +6,6 @@ from datetime import datetime, timedelta, timezone
 from typing import TypeVar, Iterable, Callable, Optional, Text, Dict  # noqa: F401
 
 import pytz
-import six
 
 T = TypeVar("T")
 
@@ -275,7 +274,7 @@ def parse_datetime(value: Optional[Text]) -> Optional[datetime]:
             if tzinfo[0] == "-":
                 offset = -offset
             tzinfo = _get_fixed_timezone(offset)
-        kw = {k: int(v) for k, v in six.iteritems(kw) if v is not None}
+        kw = {k: int(v) for k, v in kw.items() if v is not None}
         kw["tzinfo"] = tzinfo
         return datetime(**kw)
 

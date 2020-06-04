@@ -7,7 +7,7 @@ from jsonschema import validate
 from pykechain.models.validators.validator_schemas import representation_jsonschema_stub
 
 
-class BaseRepresentation(object):
+class BaseRepresentation:
     """
     Base class for all Representations.
 

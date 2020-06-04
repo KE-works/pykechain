@@ -3,7 +3,6 @@ import warnings
 from typing import Any  # noqa: F401
 
 import requests
-from six import text_type
 
 from pykechain.enums import Category, ActivityType, ActivityStatus
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
@@ -16,7 +15,7 @@ class Activity(Base):  # pragma: no cover
     def __init__(self, json, **kwargs):
         # type: (dict, **Any) -> None
         """Construct an Activity from a json object."""
-        super(Activity, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self.scope = json.get("scope", None)
         self.activity_type = json.get("activity_class", None)
@@ -355,14 +354,14 @@ class Activity(Base):  # pragma: no cover
         """
         update_dict = {"id": self.id}
         if name is not None:
-            if isinstance(name, (str, text_type)):
+            if isinstance(name, (str, str)):
                 update_dict.update({"name": name})
                 self.name = name
             else:
                 raise IllegalArgumentError("Name should be a string")
 
         if description is not None:
-            if isinstance(description, (str, text_type)):
+            if isinstance(description, (str, str)):
                 update_dict.update({"description": description})
                 self.description = description
             else:
@@ -416,10 +415,7 @@ class Activity(Base):  # pragma: no cover
                 raise IllegalArgumentError("Assignees should be a list")
 
         if status is not None:
-            if (
-                isinstance(status, (str, text_type))
-                and status in ActivityStatus.values()
-            ):
+            if isinstance(status, (str, str)) and status in ActivityStatus.values():
                 update_dict.update({"status": status})
             else:
                 raise IllegalArgumentError("Status should be a string")

@@ -1,7 +1,7 @@
 from pykechain.utils import __dict__inherited__
 
 
-class Enum(object):
+class Enum:
     """Custom enumeration class to support class attributes as options.
 
     Example

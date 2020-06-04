@@ -3,7 +3,7 @@ from typing import Dict, Optional, Text
 from pykechain.utils import parse_datetime
 
 
-class Base(object):
+class Base:
     """Base model connecting retrieved data to a KE-chain client.
 
     :ivar id: The UUID of the object (corresponds with the UUID in KE-chain).

@@ -44,7 +44,7 @@ class Service(BaseInScope):
 
     def __init__(self, json, **kwargs):
         """Construct a service from provided json data."""
-        super(Service, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
         del self.created_at
 
         self.description = json.get("description", "")
@@ -267,7 +267,7 @@ class ServiceExecution(Base):
 
     def __init__(self, json, **kwargs):
         """Construct a scope from provided json data."""
-        super(ServiceExecution, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
         del self.created_at
         del self.updated_at
 

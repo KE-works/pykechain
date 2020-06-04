@@ -1,5 +1,3 @@
-from six import text_type, string_types
-
 from pykechain.models.part import Part
 from pykechain.models.property import Property
 from pykechain.utils import is_uuid
@@ -13,7 +11,7 @@ class MultiReferenceProperty(Property):  # pragma: no cover
 
     def __init__(self, json, **kwargs):
         """Construct a MultiReferenceProperty from a json object."""
-        super(MultiReferenceProperty, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self._cached_values = None
 
@@ -77,7 +75,7 @@ class MultiReferenceProperty(Property):  # pragma: no cover
             for item in value:
                 if isinstance(item, Part):
                     value_to_set.append(item.id)
-                elif isinstance(item, (string_types, text_type)) and is_uuid(item):
+                elif isinstance(item, ((str,), str)) and is_uuid(item):
                     # tested against a six.text_type (found in the requests' urllib3 package) for unicode
                     # conversion in py27
                     value_to_set.append(item)

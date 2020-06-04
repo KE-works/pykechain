@@ -52,7 +52,7 @@ class TestServiceSetup(TestBetamax):
         return new_service
 
     def setUp(self):
-        super(TestServiceSetup, self).setUp()
+        super().setUp()
         self.test_assets_dir = os.path.dirname(
             os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
         )
@@ -60,7 +60,7 @@ class TestServiceSetup(TestBetamax):
 
     def tearDown(self):
         self.service.delete()
-        super(TestServiceSetup, self).tearDown()
+        super().tearDown()
 
 
 class TestServices(TestBetamax):
@@ -84,7 +84,7 @@ class TestServices(TestBetamax):
         return new_service
 
     def setUp(self):
-        super(TestServices, self).setUp()
+        super().setUp()
         self.test_assets_dir = os.path.dirname(
             os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
         )
@@ -263,7 +263,7 @@ class TestServicesWithCustomUploadedService(TestServiceSetup):
         self.service.upload(pkg_path=upload_path)
         # second upload modified filename
         self.assertRegex(
-            self.service._json_data["script_file_name"], "test_upload_\w+.py"
+            self.service._json_data["script_file_name"], r"test_upload_\w+.py"
         )
 
     def test_upload_script_to_service_with_wrong_path(self):

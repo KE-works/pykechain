@@ -17,7 +17,7 @@ from pykechain.models.validators.validator_schemas import (
 )
 
 
-class BaseValidator(object):
+class BaseValidator:
     """Base class for all Validators.
 
     This is the base implementation for both the :class:`PropertyValidator` as well as the :class:`ValidatorEffect`.
@@ -70,7 +70,7 @@ class PropertyValidator(BaseValidator):
 
     def __init__(self, json=None, *args, **kwargs):
         """Construct a Property Validator."""
-        super(PropertyValidator, self).__init__(json=json, *args, **kwargs)
+        super().__init__(json=json, *args, **kwargs)
         self._json = json or {"vtype": self.vtype, "config": {}}
         self._validation_result = None
         self._validation_reason = None
@@ -225,7 +225,7 @@ class ValidatorEffect(BaseValidator):
 
     def __init__(self, json=None, *args, **kwargs):
         """Construct a Validator Effect."""
-        super(ValidatorEffect, self).__init__(json=json, *args, **kwargs)
+        super().__init__(json=json, *args, **kwargs)
         self._json = json or {"effect": self.effect, "config": {}}
 
     def __call__(self, **kwargs):

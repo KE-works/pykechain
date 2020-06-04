@@ -157,9 +157,9 @@ class TestIsEmail(SixTestCase):
             "email@-example.com",
             "email@example..com",
             "Abc..123@example.com",
-            "”(),:;<>[\]@example.com",
+            r"”(),:;<>[\]@example.com",
             "just”not”right@example.com",
-            'this\ is"really"not\allowed@example.com',
+            'this\\ is"really"not\allowed@example.com',
         ]
         for email in invalid_addresses:
             with self.subTest(email):

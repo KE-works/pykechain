@@ -1,5 +1,3 @@
-from six import text_type
-
 from pykechain.models.part import Part
 from pykechain.models.property import Property
 
@@ -59,7 +57,7 @@ class ReferenceProperty(Property):  # pragma: no cover
     def value(self, value):
         if isinstance(value, Part):
             part_id = value.id
-        elif isinstance(value, (type(None), text_type)):
+        elif isinstance(value, (type(None), str)):
             # tested against a six.text_type (found in the requests' urllib3 package) for unicode conversion in py27
             part_id = value
         else:
