@@ -1,31 +1,32 @@
 import datetime
 import pytz
 
-from pykechain.exceptions import APIError, NotFoundError, MultipleFoundError, IllegalArgumentError
+from pykechain.exceptions import (
+    APIError,
+    NotFoundError,
+    MultipleFoundError,
+    IllegalArgumentError,
+)
 from pykechain.models.banner import Banner
 from tests.classes import TestBetamax
 
-NEW_YEAR_2020_naive = datetime.datetime.strptime('2020-01-01T00:01:00', '%Y-%m-%dT%H:%M:%S')
+NEW_YEAR_2020_naive = datetime.datetime.strptime(
+    "2020-01-01T00:01:00", "%Y-%m-%dT%H:%M:%S"
+)
 NEW_YEAR_2020 = NEW_YEAR_2020_naive.replace(tzinfo=pytz.UTC)
 
 
 class TestBanners(TestBetamax):
-    TEXT = '__This is a test banner__'
-    URL = 'https://www.ke-chain.nl/'
-    ICON = 'poo-storm'
+    TEXT = "__This is a test banner__"
+    URL = "https://www.ke-chain.nl/"
+    ICON = "poo-storm"
 
-    KWARGS = dict(
-        text=TEXT,
-        icon=ICON,
-        active_from=NEW_YEAR_2020,
-    )
+    KWARGS = dict(text=TEXT, icon=ICON, active_from=NEW_YEAR_2020,)
 
     def setUp(self):
         super().setUp()
         self.banner = self.client.create_banner(
-            url=self.URL,
-            is_active=True,
-            **self.KWARGS
+            url=self.URL, is_active=True, **self.KWARGS
         )  # type: Banner
 
     def tearDown(self):
@@ -50,25 +51,33 @@ class TestBanners(TestBetamax):
     def test_create_invalid_inputs(self):
         self.banner.delete()
         with self.assertRaises(IllegalArgumentError):
-            self.banner = self.client.create_banner(text=3, icon=self.ICON, active_from=NEW_YEAR_2020)
+            self.banner = self.client.create_banner(
+                text=3, icon=self.ICON, active_from=NEW_YEAR_2020
+            )
         with self.assertRaises(IllegalArgumentError):
-            self.banner = self.client.create_banner(text='some text', icon=True, active_from=NEW_YEAR_2020)
+            self.banner = self.client.create_banner(
+                text="some text", icon=True, active_from=NEW_YEAR_2020
+            )
         with self.assertRaises(IllegalArgumentError):
-            self.banner = self.client.create_banner(text='some text', icon=self.ICON, active_from='2020-01-01T00:01:00')
+            self.banner = self.client.create_banner(
+                text="some text", icon=self.ICON, active_from="2020-01-01T00:01:00"
+            )
         with self.assertRaises(IllegalArgumentError):
-            self.banner = self.client.create_banner(active_until='later', **self.KWARGS)
+            self.banner = self.client.create_banner(active_until="later", **self.KWARGS)
         with self.assertRaises(IllegalArgumentError):
             self.banner = self.client.create_banner(is_active=1, **self.KWARGS)
         with self.assertRaises(IllegalArgumentError):
-            self.banner = self.client.create_banner(url='www.ke-chain/scopes/', **self.KWARGS)
+            self.banner = self.client.create_banner(
+                url="www.ke-chain/scopes/", **self.KWARGS
+            )
 
     def test_delete(self):
         banner_id = self.banner.id
         self.banner.delete()
 
-        with self.assertRaises(APIError, msg='Cant delete the same banner twice.'):
+        with self.assertRaises(APIError, msg="Cant delete the same banner twice."):
             self.banner.delete()
-        with self.assertRaises(NotFoundError, msg='Banner is still found!'):
+        with self.assertRaises(NotFoundError, msg="Banner is still found!"):
             self.client.banner(pk=banner_id)
 
     def test_get_banners(self):
@@ -106,9 +115,9 @@ class TestBanners(TestBetamax):
         self.assertEqual(self.banner, active_banner)
 
     def test_edit(self):
-        text = '__RENAMED BANNER'
-        icon = 'site-map'
-        url = 'https://www.google.com/'
+        text = "__RENAMED BANNER"
+        icon = "site-map"
+        url = "https://www.google.com/"
         later = NEW_YEAR_2020 + datetime.timedelta(hours=1)
 
         self.banner.edit(
@@ -129,12 +138,12 @@ class TestBanners(TestBetamax):
 
     def test_edit_single_inputs(self):
         for kwarg in [
-            dict(text='New text'),
-            dict(icon='gifts'),
+            dict(text="New text"),
+            dict(icon="gifts"),
             dict(active_from=NEW_YEAR_2020 - datetime.timedelta(days=1)),
             dict(active_until=NEW_YEAR_2020 + datetime.timedelta(weeks=1)),
             dict(is_active=False),
-            dict(url='https://www.google.com'),
+            dict(url="https://www.google.com"),
         ]:
             with self.subTest(msg=kwarg):
                 self.banner.edit(**kwarg)
@@ -146,10 +155,10 @@ class TestBanners(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             self.banner.edit(icon=50)
         with self.assertRaises(IllegalArgumentError):
-            self.banner.edit(active_from='now')
+            self.banner.edit(active_from="now")
         with self.assertRaises(IllegalArgumentError):
-            self.banner.edit(active_until='later')
+            self.banner.edit(active_until="later")
         with self.assertRaises(IllegalArgumentError):
-            self.banner.edit(url='ke-chain,com')
+            self.banner.edit(url="ke-chain,com")
         with self.assertRaises(IllegalArgumentError):
-            self.banner.edit(is_active='Yes')
+            self.banner.edit(is_active="Yes")

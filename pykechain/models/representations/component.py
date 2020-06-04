@@ -17,7 +17,9 @@ class RepresentationsComponent(object):
     .. versionadded:: 3.7
     """
 
-    def __init__(self, parent_object, representation_options: Dict, update_method: Callable):
+    def __init__(
+        self, parent_object, representation_options: Dict, update_method: Callable
+    ):
         """
         Extract the json with the representation options.
 
@@ -34,10 +36,12 @@ class RepresentationsComponent(object):
         representations_json = self._repr_options
         for representation_json in representations_json:
             self._representations.append(
-                BaseRepresentation.parse(obj=self._parent_object, json=representation_json)
+                BaseRepresentation.parse(
+                    obj=self._parent_object, json=representation_json
+                )
             )
 
-    def get_representations(self) -> List['AnyRepresentation']:
+    def get_representations(self) -> List["AnyRepresentation"]:
         """
         Get list of representation objects.
 
@@ -46,7 +50,7 @@ class RepresentationsComponent(object):
         """
         return self._representations
 
-    def set_representations(self, representations: List['AnyRepresentation']) -> None:
+    def set_representations(self, representations: List["AnyRepresentation"]) -> None:
         """Set the representations."""
         self._validate_representations(representations)
 
@@ -62,15 +66,22 @@ class RepresentationsComponent(object):
     def _validate_representations(self, representations: Any):
         """Check provided representation inputs."""
         if not isinstance(representations, (tuple, list)):
-            raise IllegalArgumentError('Should be a list or tuple with Representation objects, '
-                                       'got {}'.format(type(representations)))
+            raise IllegalArgumentError(
+                "Should be a list or tuple with Representation objects, "
+                "got {}".format(type(representations))
+            )
 
         for r in representations:
             if not isinstance(r, BaseRepresentation):
-                raise IllegalArgumentError("Representation '{}' should be a Representation object".format(r))
+                raise IllegalArgumentError(
+                    "Representation '{}' should be a Representation object".format(r)
+                )
             if not _valid_object_type(r, self._parent_object):
                 raise IllegalArgumentError(
-                    "Representation '{}' can not be added to '{}'.".format(r, self._parent_object))
+                    "Representation '{}' can not be added to '{}'.".format(
+                        r, self._parent_object
+                    )
+                )
             r.validate_json()
 
     def _dump_representations(self):
@@ -84,7 +95,7 @@ class RepresentationsComponent(object):
         self._repr_options = representations_json
 
 
-def _valid_object_type(representation: BaseRepresentation, obj: 'Base') -> bool:
+def _valid_object_type(representation: BaseRepresentation, obj: "Base") -> bool:
     """
     Check whether the representation can be used on the provided object.
 
@@ -98,14 +109,19 @@ def _valid_object_type(representation: BaseRepresentation, obj: 'Base') -> bool:
     rtype = representation.rtype
     if rtype == _AllRepresentations.CUSTOM_ICON:
         from pykechain.models import Activity2, Scope2
+
         return isinstance(obj, (Activity2, Scope2))
     else:
         from pykechain.models import Property2
+
         if not isinstance(obj, Property2):
             return False
         else:
             if rtype == _AllRepresentations.BUTTON:
-                return obj.type in [PropertyType.SINGLE_SELECT_VALUE, PropertyType.MULTI_SELECT_VALUE]
+                return obj.type in [
+                    PropertyType.SINGLE_SELECT_VALUE,
+                    PropertyType.MULTI_SELECT_VALUE,
+                ]
             elif rtype == _AllRepresentations.DECIMAL_PLACES:
                 return obj.type == PropertyType.FLOAT_VALUE
             elif rtype == _AllRepresentations.SIGNIFICANT_DIGITS:

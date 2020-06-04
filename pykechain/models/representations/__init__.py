@@ -5,7 +5,12 @@
 from .component import RepresentationsComponent
 from .representation_base import BaseRepresentation
 from .representations import (
-    DecimalPlaces, SignificantDigits, ThousandsSeparator, LinkTarget, ButtonRepresentation, CustomIconRepresentation,
+    DecimalPlaces,
+    SignificantDigits,
+    ThousandsSeparator,
+    LinkTarget,
+    ButtonRepresentation,
+    CustomIconRepresentation,
 )
 
 rtype_class_map = {
@@ -19,18 +24,14 @@ rtype_class_map = {
 
 AnyRepresentation = [
     BaseRepresentation,
-
     # Numbers
     DecimalPlaces,
     SignificantDigits,
     ThousandsSeparator,
-
     # Link properties
     LinkTarget,
-
     # Select lists
     ButtonRepresentation,
-
     # Scopes and activities
     CustomIconRepresentation,
 ]

@@ -76,14 +76,19 @@ class _ReferenceProperty(Property2):
                 elif isinstance(item, str) and is_uuid(item):
                     value_to_set.append(item)
                 else:
-                    raise ValueError("References must be of type {cls}, {cls} id or None. type: {}".format(
-                        type(item), cls=self.ref_name))
+                    raise ValueError(
+                        "References must be of type {cls}, {cls} id or None. type: {}".format(
+                            type(item), cls=self.ref_name
+                        )
+                    )
         elif value is None:
             value_to_set = None  # clear out the list
         else:
             raise ValueError(
                 "Reference must be a list (or tuple) of type {cls}, {cls} id or None. type: {}".format(
-                    type(value), cls=self.ref_name))
+                    type(value), cls=self.ref_name
+                )
+            )
 
         return value_to_set
 
@@ -110,20 +115,22 @@ class _ReferencePropertyInScope(_ReferenceProperty, ABC):
         :param referenced_object: Either a pykechain object or a UUID string.
         :return: None
         """
-        if self._options and 'scope_id' not in self._options:
+        if self._options and "scope_id" not in self._options:
             # See whether the referenced model is an object with an ID
             if isinstance(referenced_object, self.REFERENCED_CLASS):
                 x_scope_id = referenced_object.scope_id
             else:
                 # retrieve the scope_id from the property model's value (which is an object in a scope (x_scope))
                 referenced_models = self.model().value
-                if not referenced_models or not isinstance(referenced_models[0], self.REFERENCED_CLASS):
+                if not referenced_models or not isinstance(
+                    referenced_models[0], self.REFERENCED_CLASS
+                ):
                     # if the referenced model is not set or the referenced value is not in current scope
                     x_scope_id = self.scope_id
                 else:
                     # get the scope_id from the referenced model
                     x_scope_id = referenced_models[0].scope_id
-            self._options['scope_id'] = x_scope_id
+            self._options["scope_id"] = x_scope_id
 
             # edit the model of the property, such that all instances are updated as well.
             self.model().edit(options=self._options)

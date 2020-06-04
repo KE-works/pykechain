@@ -1,13 +1,18 @@
 from pykechain.enums import NotificationEvent, NotificationChannels, NotificationStatus
-from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
+from pykechain.exceptions import (
+    NotFoundError,
+    MultipleFoundError,
+    APIError,
+    IllegalArgumentError,
+)
 from pykechain.models import User, Team
 from pykechain.models.notification import Notification
 from tests.classes import TestBetamax
 
 
 class _TestNotification(TestBetamax):
-    SUBJECT = '_TEST_SUBJECT'
-    MESSAGE = '_TEST_MESSAGE'
+    SUBJECT = "_TEST_SUBJECT"
+    MESSAGE = "_TEST_MESSAGE"
     USER_ID = 1
 
     def setUp(self) -> None:
@@ -20,7 +25,6 @@ class _TestNotification(TestBetamax):
 
 
 class TestNotificationCreation(_TestNotification):
-
     def setUp(self):
         super().setUp()
         self.bucket = list()
@@ -35,8 +39,9 @@ class TestNotificationCreation(_TestNotification):
 
     def test_create(self):
         # setUp
-        notification = self.client.create_notification(subject=self.SUBJECT,
-                                                       message=self.MESSAGE)
+        notification = self.client.create_notification(
+            subject=self.SUBJECT, message=self.MESSAGE
+        )
         self.bucket.append(notification)
 
         # testing
@@ -68,27 +73,49 @@ class TestNotificationCreation(_TestNotification):
     def test_create_invalid_inputs(self):
         kwargs = dict(subject=self.SUBJECT, message=self.MESSAGE)
         with self.assertRaises(IllegalArgumentError):
-            self.bucket.append(self.client.create_notification(subject=False, message=self.MESSAGE))
+            self.bucket.append(
+                self.client.create_notification(subject=False, message=self.MESSAGE)
+            )
         with self.assertRaises(IllegalArgumentError):
-            self.bucket.append(self.client.create_notification(subject=self.SUBJECT, message=[self.MESSAGE]))
+            self.bucket.append(
+                self.client.create_notification(
+                    subject=self.SUBJECT, message=[self.MESSAGE]
+                )
+            )
         with self.assertRaises(IllegalArgumentError):
-            self.bucket.append(self.client.create_notification(status='sending', **kwargs))
+            self.bucket.append(
+                self.client.create_notification(status="sending", **kwargs)
+            )
         with self.assertRaises(IllegalArgumentError):
-            self.bucket.append(self.client.create_notification(recipients='not a list', **kwargs))
+            self.bucket.append(
+                self.client.create_notification(recipients="not a list", **kwargs)
+            )
         with self.assertRaises(IllegalArgumentError):
-            self.bucket.append(self.client.create_notification(recipients=['not a user id'], **kwargs))
+            self.bucket.append(
+                self.client.create_notification(recipients=["not a user id"], **kwargs)
+            )
         with self.assertRaises(IllegalArgumentError):
             self.bucket.append(self.client.create_notification(team=0, **kwargs))
         with self.assertRaises(IllegalArgumentError):
-            self.bucket.append(self.client.create_notification(from_user='Myself', **kwargs))
+            self.bucket.append(
+                self.client.create_notification(from_user="Myself", **kwargs)
+            )
         with self.assertRaises(IllegalArgumentError):
-            self.bucket.append(self.client.create_notification(event='Update', **kwargs))
+            self.bucket.append(
+                self.client.create_notification(event="Update", **kwargs)
+            )
         with self.assertRaises(IllegalArgumentError):
-            self.bucket.append(self.client.create_notification(channel=[NotificationChannels.EMAIL], **kwargs))
+            self.bucket.append(
+                self.client.create_notification(
+                    channel=[NotificationChannels.EMAIL], **kwargs
+                )
+            )
 
     def test_delete_notification_from_client(self):
         # setUp
-        notification = self.client.create_notification(message=self.MESSAGE, subject=self.SUBJECT)
+        notification = self.client.create_notification(
+            message=self.MESSAGE, subject=self.SUBJECT
+        )
         self.client.delete_notification(notification=notification)
 
         # testing
@@ -97,7 +124,9 @@ class TestNotificationCreation(_TestNotification):
 
     def test_delete_notification(self):
         # setUp
-        notification = self.client.create_notification(message=self.MESSAGE, subject=self.SUBJECT)
+        notification = self.client.create_notification(
+            message=self.MESSAGE, subject=self.SUBJECT
+        )
         notification.delete()
 
         # testing
@@ -123,19 +152,25 @@ class TestNotifications(_TestNotification):
         # setUp
         notifications = self.client.notifications()
         number_of_notification = len(notifications)
-        dummy_notification = self.client.create_notification(subject="Dummy subject", message="Dummy message")
+        dummy_notification = self.client.create_notification(
+            subject="Dummy subject", message="Dummy message"
+        )
 
         notifications_retrieved_again = self.client.notifications()
 
         # testing
-        self.assertTrue(len(notifications_retrieved_again) == number_of_notification + 1)
+        self.assertTrue(
+            len(notifications_retrieved_again) == number_of_notification + 1
+        )
 
         # tearDown
         self.client.delete_notification(notification=dummy_notification)
 
     def test_retrieve_notification(self):
         # testing
-        retrieved_notification = self.client.notification(message=self.MESSAGE, subject=self.SUBJECT)
+        retrieved_notification = self.client.notification(
+            message=self.MESSAGE, subject=self.SUBJECT
+        )
 
         self.assertIsInstance(retrieved_notification, Notification)
         self.assertEqual(self.notification, retrieved_notification)
@@ -146,7 +181,9 @@ class TestNotifications(_TestNotification):
 
     def test_retrieve_notification_raise_multiple_found(self):
         # setUp
-        clone_testing_notification = self.client.create_notification(subject=self.SUBJECT, message=self.MESSAGE)
+        clone_testing_notification = self.client.create_notification(
+            subject=self.SUBJECT, message=self.MESSAGE
+        )
 
         # testing
         with self.assertRaises(MultipleFoundError):
@@ -165,14 +202,14 @@ class TestNotifications(_TestNotification):
         first_recipient = recipients[0]
 
         self.assertIsInstance(first_recipient, User)
-        self.assertEqual('superuser', first_recipient.username)
+        self.assertEqual("superuser", first_recipient.username)
 
     def test_get_from_user(self):
         from_user = self.notification.get_from_user()
 
         self.assertTrue(from_user)
         self.assertIsInstance(from_user, User)
-        self.assertEqual('pykechain_user', from_user.username)
+        self.assertEqual("pykechain_user", from_user.username)
 
     def test_get_team(self):
         team = self.notification.get_team()
@@ -181,8 +218,8 @@ class TestNotifications(_TestNotification):
         self.assertEqual(self.TEAM, team)
 
     def test_edit(self):
-        subject = 'NEW SUBJECT'
-        message = 'NEW MESSAGE'
+        subject = "NEW SUBJECT"
+        message = "NEW MESSAGE"
         status = NotificationStatus.ARCHIVED
         recipients = [4]
         from_user = 4
@@ -211,22 +248,22 @@ class TestNotifications(_TestNotification):
 
     def test_edit_incorrect_inputs(self):
         with self.assertRaises(IllegalArgumentError):
-            self.notification.edit(subject=['Not a string'])
+            self.notification.edit(subject=["Not a string"])
         with self.assertRaises(IllegalArgumentError):
             self.notification.edit(message=False)
         with self.assertRaises(IllegalArgumentError):
-            self.notification.edit(status='Deleting')
+            self.notification.edit(status="Deleting")
         with self.assertRaises(IllegalArgumentError):
             self.notification.edit(recipients=True)
         with self.assertRaises(IllegalArgumentError):
-            self.notification.edit(recipients=['Not a user ID'])
+            self.notification.edit(recipients=["Not a user ID"])
         with self.assertRaises(IllegalArgumentError):
             self.notification.edit(team=5)
         with self.assertRaises(IllegalArgumentError):
-            self.notification.edit(from_user='self')
+            self.notification.edit(from_user="self")
         with self.assertRaises(IllegalArgumentError):
             self.notification.edit(from_user=5.3)
         with self.assertRaises(IllegalArgumentError):
-            self.notification.edit(event='Update')
+            self.notification.edit(event="Update")
         with self.assertRaises(IllegalArgumentError):
             self.notification.edit(channel=[NotificationChannels.APP])

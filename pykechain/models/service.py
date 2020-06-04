@@ -1,8 +1,8 @@
 import os
 from datetime import datetime
+from typing import Text, Dict, Optional
 
 import requests
-from typing import Text, Dict, Optional
 
 from pykechain.enums import ServiceScriptUser, ServiceExecutionStatus
 from pykechain.exceptions import APIError
@@ -47,22 +47,24 @@ class Service(BaseInScope):
         super(Service, self).__init__(json, **kwargs)
         del self.created_at
 
-        self.description = json.get('description', '')
-        self.version = json.get('script_version', '')
-        self.filename = json.get('script_file_name')
-        self.type = json.get('script_type')
-        self.environment = json.get('env_version')
+        self.description = json.get("description", "")
+        self.version = json.get("script_version", "")
+        self.filename = json.get("script_file_name")
+        self.type = json.get("script_type")
+        self.environment = json.get("env_version")
 
         # for SIM3 version
-        self.trusted = json.get('trusted')  # type: bool
-        self.run_as = json.get('run_as')  # type: Text
-        self.verified_on = parse_datetime(json.get('verified_on'))  # type: Optional[datetime]
-        self.verification_results = json.get('verification_results')  # type: Dict
+        self.trusted = json.get("trusted")  # type: bool
+        self.run_as = json.get("run_as")  # type: Text
+        self.verified_on = parse_datetime(
+            json.get("verified_on")
+        )  # type: Optional[datetime]
+        self.verification_results = json.get("verification_results")  # type: Dict
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Service '{}' id {}>".format(self.name, self.id[-8:])
 
-    def execute(self, interactive: Optional[bool] = False) -> 'ServiceExecution':
+    def execute(self, interactive: Optional[bool] = False) -> "ServiceExecution":
         """
         Execute the service.
 
@@ -75,27 +77,34 @@ class Service(BaseInScope):
         :return: ServiceExecution when successful.
         :raises APIError: when unable to execute
         """
-        url = self._client._build_url('service_execute', service_id=self.id)
-        response = self._client._request('GET', url, params=dict(interactive=interactive, format='json'))
+        url = self._client._build_url("service_execute", service_id=self.id)
+        response = self._client._request(
+            "GET", url, params=dict(interactive=interactive, format="json")
+        )
 
         if response.status_code == requests.codes.conflict:  # pragma: no cover
             raise APIError(
-                "Conflict: Could not execute Service {} as it is already running.".format(self), response=response)
+                "Conflict: Could not execute Service {} as it is already running.".format(
+                    self
+                ),
+                response=response,
+            )
         elif response.status_code != requests.codes.accepted:  # pragma: no cover
             raise APIError(
-                "Could not execute Service {}".format(self), response=response)
+                "Could not execute Service {}".format(self), response=response
+            )
 
         data = response.json()
-        return ServiceExecution(json=data.get('results')[0], client=self._client)
+        return ServiceExecution(json=data.get("results")[0], client=self._client)
 
     def edit(
-            self,
-            name: Optional[Text] = None,
-            description: Optional[Text] = None,
-            version: Optional[Text] = None,
-            run_as: Optional[ServiceScriptUser] = None,
-            trusted: Optional[bool] = False,
-            **kwargs
+        self,
+        name: Optional[Text] = None,
+        description: Optional[Text] = None,
+        version: Optional[Text] = None,
+        run_as: Optional[ServiceScriptUser] = None,
+        trusted: Optional[bool] = False,
+        **kwargs
     ) -> None:
         """
         Edit Service details.
@@ -116,38 +125,47 @@ class Service(BaseInScope):
         :raises APIError: if the service could not be updated.
         """
         update_dict = {
-            'id': self.id,
-            'name': check_text(name, 'name') or self.name,
-            'description': check_text(description, 'description') or self.description,
-            'trusted': check_type(trusted, bool, 'trusted')
+            "id": self.id,
+            "name": check_text(name, "name") or self.name,
+            "description": check_text(description, "description") or self.description,
+            "trusted": check_type(trusted, bool, "trusted"),
         }
-        run_as = check_enum(run_as, ServiceScriptUser, 'run_as')
+        run_as = check_enum(run_as, ServiceScriptUser, "run_as")
         if run_as:
-            update_dict['run_as'] = run_as
-        version = check_text(version, 'version')
+            update_dict["run_as"] = run_as
+        version = check_text(version, "version")
         if version:
-            update_dict['script_version'] = version
+            update_dict["script_version"] = version
 
         if kwargs:  # pragma: no cover
             update_dict.update(**kwargs)
 
-        response = self._client._request('PUT', self._client._build_url('service', service_id=self.id),
-                                         json=update_dict)
+        response = self._client._request(
+            "PUT",
+            self._client._build_url("service", service_id=self.id),
+            json=update_dict,
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Service {}".format(self), response=response)
+            raise APIError(
+                "Could not update Service {}".format(self), response=response
+            )
 
-        self.refresh(json=response.json()['results'][0])
+        self.refresh(json=response.json()["results"][0])
 
     def delete(self) -> None:
         """Delete this service.
 
         :raises APIError: if delete was not successful.
         """
-        response = self._client._request('DELETE', self._client._build_url('service', service_id=self.id))
+        response = self._client._request(
+            "DELETE", self._client._build_url("service", service_id=self.id)
+        )
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Service {}".format(self), response=response)
+            raise APIError(
+                "Could not delete Service {}".format(self), response=response
+            )
 
     def upload(self, pkg_path):
         """
@@ -163,21 +181,25 @@ class Service(BaseInScope):
         if os.path.exists(pkg_path):
             self._upload(pkg_path=pkg_path)
         else:
-            raise OSError("Could not locate python package to upload in '{}'".format(pkg_path))
+            raise OSError(
+                "Could not locate python package to upload in '{}'".format(pkg_path)
+            )
 
     def _upload(self, pkg_path):
-        url = self._client._build_url('service_upload', service_id=self.id)
+        url = self._client._build_url("service_upload", service_id=self.id)
 
-        with open(pkg_path, 'rb') as pkg:
+        with open(pkg_path, "rb") as pkg:
             response = self._client._request(
-                'POST', url,
-                files={'attachment': (os.path.basename(pkg_path), pkg)}
+                "POST", url, files={"attachment": (os.path.basename(pkg_path), pkg)}
             )
 
         if response.status_code != requests.codes.accepted:  # pragma: no cover
-            raise APIError("Could not upload script file (or kecpkg) to Service {}".format(self), response=response)
+            raise APIError(
+                "Could not upload script file (or kecpkg) to Service {}".format(self),
+                response=response,
+            )
 
-        self.refresh(json=response.json()['results'][0])
+        self.refresh(json=response.json()["results"][0])
 
     def save_as(self, target_dir=None):
         """
@@ -194,12 +216,15 @@ class Service(BaseInScope):
         """
         full_path = os.path.join(target_dir or os.getcwd(), self.filename)
 
-        url = self._client._build_url('service_download', service_id=self.id)
-        response = self._client._request('GET', url)
+        url = self._client._build_url("service_download", service_id=self.id)
+        response = self._client._request("GET", url)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not download script file from Service {}".format(self), response=response)
+            raise APIError(
+                "Could not download script file from Service {}".format(self),
+                response=response,
+            )
 
-        with open(full_path, 'w+b') as f:
+        with open(full_path, "w+b") as f:
             for chunk in response:
                 f.write(chunk)
 
@@ -213,7 +238,9 @@ class Service(BaseInScope):
         :type kwargs: dict
         :return: list of ServiceExecutions associated to the current service.
         """
-        return self._client.service_executions(service=self.id, scope=self.scope_id, **kwargs)
+        return self._client.service_executions(
+            service=self.id, scope=self.scope_id, **kwargs
+        )
 
 
 class ServiceExecution(Base):
@@ -244,18 +271,22 @@ class ServiceExecution(Base):
         del self.created_at
         del self.updated_at
 
-        self.name = json.get('service_name')
-        self.service_id = json.get('service')
-        self.status = json.get('status', '')  # type: ServiceExecutionStatus
+        self.name = json.get("service_name")
+        self.service_id = json.get("service")
+        self.status = json.get("status", "")  # type: ServiceExecutionStatus
 
-        self.user = json.get('username')
-        if json.get('activity') is not None:
-            self.activity_id = json['activity'].get('id')  # type: Optional[Text]
+        self.user = json.get("username")
+        if json.get("activity") is not None:
+            self.activity_id = json["activity"].get("id")  # type: Optional[Text]
         else:
             self.activity_id = None
 
-        self.started_at = parse_datetime(json.get('started_at'))  # type: Optional[datetime]
-        self.finished_at = parse_datetime(json.get('finished_at'))  # type: Optional[datetime]
+        self.started_at = parse_datetime(
+            json.get("started_at")
+        )  # type: Optional[datetime]
+        self.finished_at = parse_datetime(
+            json.get("finished_at")
+        )  # type: Optional[datetime]
 
         self._service = None  # type: Optional[Service]
 
@@ -278,13 +309,17 @@ class ServiceExecution(Base):
         :return: None if the termination request was successful
         :raises APIError: When the service execution could not be terminated.
         """
-        url = self._client._build_url('service_execution_terminate', service_execution_id=self.id)
-        response = self._client._request('GET', url, params=dict(format='json'))
+        url = self._client._build_url(
+            "service_execution_terminate", service_execution_id=self.id
+        )
+        response = self._client._request("GET", url, params=dict(format="json"))
 
         if response.status_code != requests.codes.accepted:  # pragma: no cover
-            raise APIError("Could not terminate Service {}".format(self), response=response)
+            raise APIError(
+                "Could not terminate Service {}".format(self), response=response
+            )
 
-    def get_log(self, target_dir=None, log_filename='log.txt'):
+    def get_log(self, target_dir=None, log_filename="log.txt"):
         """
         Retrieve the log of the service execution.
 
@@ -299,12 +334,17 @@ class ServiceExecution(Base):
         """
         full_path = os.path.join(target_dir or os.getcwd(), log_filename)
 
-        url = self._client._build_url('service_execution_log', service_execution_id=self.id)
-        response = self._client._request('GET', url)
+        url = self._client._build_url(
+            "service_execution_log", service_execution_id=self.id
+        )
+        response = self._client._request("GET", url)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not download execution log of Service {}".format(self), response=response)
+            raise APIError(
+                "Could not download execution log of Service {}".format(self),
+                response=response,
+            )
 
-        with open(full_path, 'w+b') as f:
+        with open(full_path, "w+b") as f:
             for chunk in response:
                 f.write(chunk)
 
@@ -317,12 +357,17 @@ class ServiceExecution(Base):
         :return: full url to the interactive running notebook as `basestring`
         :raises APIError: when the url cannot be retrieved.
         """
-        url = self._client._build_url('service_execution_notebook_url', service_execution_id=self.id)
-        response = self._client._request('GET', url, params=dict(format='json'))
+        url = self._client._build_url(
+            "service_execution_notebook_url", service_execution_id=self.id
+        )
+        response = self._client._request("GET", url, params=dict(format="json"))
 
         if response.status_code != requests.codes.ok:
-            raise APIError("Could not retrieve notebook url of Service {}".format(self), response=response)
+            raise APIError(
+                "Could not retrieve notebook url of Service {}".format(self),
+                response=response,
+            )
 
         data = response.json()
-        url = data.get('results')[0].get('url')
+        url = data.get("results")[0].get("url")
         return url

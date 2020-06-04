@@ -3,6 +3,7 @@ from typing import Any, List, Dict, Optional, Text, Union, Tuple, Iterable, Type
 import requests
 from jsonschema import validate
 
+from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import Category
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Base, BaseInScope
@@ -10,7 +11,6 @@ from pykechain.models.input_checks import check_text, check_type
 from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.validators import PropertyValidator
 from pykechain.models.validators.validator_schemas import options_json_schema
-from pykechain.defaults import API_EXTRA_PARAMS
 
 T = TypeVar("T")
 
@@ -54,19 +54,19 @@ class Property2(BaseInScope):
         """Construct a Property from a json object."""
         super().__init__(json, **kwargs)
 
-        self.output = json.get('output')  # type: bool
-        self.model_id = json.get('model_id')  # type: Optional[Text]
-        self.part_id = json.get('part_id')
-        self.ref = json.get('ref')
-        self.type = json.get('property_type')
-        self.category = json.get('category')
-        self.description = json.get('description', None)
-        self.unit = json.get('unit', None)
-        self.order = json.get('order')
+        self.output = json.get("output")  # type: bool
+        self.model_id = json.get("model_id")  # type: Optional[Text]
+        self.part_id = json.get("part_id")
+        self.ref = json.get("ref")
+        self.type = json.get("property_type")
+        self.category = json.get("category")
+        self.description = json.get("description", None)
+        self.unit = json.get("unit", None)
+        self.order = json.get("order")
 
         # Create protected variables
-        self._value = json.get('value')  # type: Any
-        self._options = json.get('value_options', {})  # type: Dict
+        self._value = json.get("value")  # type: Any
+        self._options = json.get("value_options", {})  # type: Dict
         self._part = None  # type: Optional['Part2']
         self._model = None  # type: Optional['Property2']
         self._validators = []  # type: List[PropertyValidator]
@@ -74,21 +74,26 @@ class Property2(BaseInScope):
         self._validation_reasons = []  # type: List
 
         self._representations_container = RepresentationsComponent(
-            self,
-            self._options.get('representations', {}),
-            self._save_representations,
+            self, self._options.get("representations", {}), self._save_representations,
         )
 
         validate(self._options, options_json_schema)
 
-        if self._options.get('validators'):
+        if self._options.get("validators"):
             self._parse_validators()
 
-    def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional = None) -> None:
+    def refresh(
+        self,
+        json: Optional[Dict] = None,
+        url: Optional[Text] = None,
+        extra_params: Optional = None,
+    ) -> None:
         """Refresh the object in place."""
-        super().refresh(json=json,
-                        url=self._client._build_url('property2', property_id=self.id),
-                        extra_params=API_EXTRA_PARAMS['property2'])
+        super().refresh(
+            json=json,
+            url=self._client._build_url("property2", property_id=self.id),
+            extra_params=API_EXTRA_PARAMS["property2"],
+        )
 
     def has_value(self) -> bool:
         """Predicate to indicate if the property has a value set.
@@ -115,7 +120,9 @@ class Property2(BaseInScope):
 
     @use_bulk_update.setter
     def use_bulk_update(self, value):
-        assert isinstance(value, bool), "`use_bulk_update` must be set to a boolean, not {}".format(type(value))
+        assert isinstance(
+            value, bool
+        ), "`use_bulk_update` must be set to a boolean, not {}".format(type(value))
         self.__class__._use_bulk_update = value
 
     @property
@@ -136,7 +143,7 @@ class Property2(BaseInScope):
             self._put_value(value)
 
     @classmethod
-    def update_values(cls, client: 'Client', use_bulk_update: bool = False) -> None:
+    def update_values(cls, client: "Client", use_bulk_update: bool = False) -> None:
         """
         Perform the bulk update of property values using the stored values in the `Property` class.
 
@@ -155,10 +162,7 @@ class Property2(BaseInScope):
         """Store the value to be send at a later point in time using `update_values`."""
         value = self.serialize_value(value)
 
-        self.__class__._update_package.append(dict(
-            id=self.id,
-            value=value,
-        ))
+        self.__class__._update_package.append(dict(id=self.id, value=value,))
         self._value = value
         return self._value
 
@@ -166,14 +170,18 @@ class Property2(BaseInScope):
         """Send the value to KE-chain."""
         value = self.serialize_value(value)
 
-        url = self._client._build_url('property2', property_id=self.id)
+        url = self._client._build_url("property2", property_id=self.id)
 
-        response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['property2'], json={'value': value})
+        response = self._client._request(
+            "PUT", url, params=API_EXTRA_PARAMS["property2"], json={"value": value}
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Property {}".format(self), response=response)
+            raise APIError(
+                "Could not update Property {}".format(self), response=response
+            )
 
-        self.refresh(json=response.json()['results'][0])
+        self.refresh(json=response.json()["results"][0])
         return self._value
 
     def serialize_value(self, value: [T]) -> T:
@@ -187,7 +195,7 @@ class Property2(BaseInScope):
         return value.id if isinstance(value, Base) else value
 
     @property
-    def part(self) -> 'Part2':
+    def part(self) -> "Part2":
         """
         Retrieve the part that holds this Property.
 
@@ -198,7 +206,7 @@ class Property2(BaseInScope):
             self._part = self._client.part(pk=self.part_id, category=self.category)
         return self._part
 
-    def model(self) -> 'AnyProperty':
+    def model(self) -> "AnyProperty":
         """
         Model object of the property if the property is an instance otherwise itself.
 
@@ -211,7 +219,9 @@ class Property2(BaseInScope):
         if self.category == Category.MODEL:
             return self
         elif self._model is None:
-            self._model = self._client.property(pk=self.model_id, category=Category.MODEL)
+            self._model = self._client.property(
+                pk=self.model_id, category=Category.MODEL
+            )
         return self._model
 
     @property
@@ -226,12 +236,18 @@ class Property2(BaseInScope):
     @validators.setter
     def validators(self, validators: Iterable[PropertyValidator]) -> None:
         if self.category != Category.MODEL:
-            raise IllegalArgumentError("To update the list of validators, it can only work on "
-                                       "`Property` of category 'MODEL'")
+            raise IllegalArgumentError(
+                "To update the list of validators, it can only work on "
+                "`Property` of category 'MODEL'"
+            )
 
-        if not isinstance(validators, (tuple, list)) or not all(isinstance(v, PropertyValidator) for v in validators):
-            raise IllegalArgumentError('Should be a list or tuple with PropertyValidator objects, '
-                                       'got {}'.format(type(validators)))
+        if not isinstance(validators, (tuple, list)) or not all(
+            isinstance(v, PropertyValidator) for v in validators
+        ):
+            raise IllegalArgumentError(
+                "Should be a list or tuple with PropertyValidator objects, "
+                "got {}".format(type(validators))
+            )
         for validator in validators:
             validator.validate_json()
 
@@ -247,7 +263,7 @@ class Property2(BaseInScope):
     def _parse_validators(self):
         """Parse the validator in the options to validators."""
         self._validators = []
-        validators_json = self._options.get('validators')
+        validators_json = self._options.get("validators")
         for validator_json in validators_json:
             self._validators.append(PropertyValidator.parse(json=validator_json))
 
@@ -258,13 +274,15 @@ class Property2(BaseInScope):
             if isinstance(validator, PropertyValidator):
                 validators_json.append(validator.as_json())
             else:
-                raise APIError("validator is not a PropertyValidator: '{}'".format(validator))
-        if self._options.get('validators', list()) == validators_json:
+                raise APIError(
+                    "validator is not a PropertyValidator: '{}'".format(validator)
+                )
+        if self._options.get("validators", list()) == validators_json:
             # no change
             pass
         else:
             new_options = self._options.copy()  # make a copy
-            new_options.update({'validators': validators_json})
+            new_options.update({"validators": validators_json})
             validate(new_options, options_json_schema)
             self._options = new_options
 
@@ -315,8 +333,12 @@ class Property2(BaseInScope):
         :rtype: list(bool) or list((bool, str))
         :raises Exception: for incorrect validators or incompatible values
         """
-        self._validation_results = [validator.is_valid(self._value) for validator in self._validators]
-        self._validation_reasons = [validator.get_reason() for validator in self._validators]
+        self._validation_results = [
+            validator.is_valid(self._value) for validator in self._validators
+        ]
+        self._validation_reasons = [
+            validator.get_reason() for validator in self._validators
+        ]
 
         if reason:
             return list(zip(self._validation_results, self._validation_reasons))
@@ -331,17 +353,19 @@ class Property2(BaseInScope):
     @representations.setter
     def representations(self, value):
         if self.category != Category.MODEL:
-            raise IllegalArgumentError("To update the list of representations, it can only work on a "
-                                       "`Property` of category '{}'".format(Category.MODEL))
+            raise IllegalArgumentError(
+                "To update the list of representations, it can only work on a "
+                "`Property` of category '{}'".format(Category.MODEL)
+            )
 
         self._representations_container.set_representations(value)
 
     def _save_representations(self, representation_options):
-        self._options.update({'representations': representation_options})
+        self._options.update({"representations": representation_options})
         self.edit(options=self._options)
 
     @classmethod
-    def create(cls, json: dict, **kwargs) -> 'AnyProperty':
+    def create(cls, json: dict, **kwargs) -> "AnyProperty":
         """Create a property based on the json data.
 
         This method will attach the right class to a property, enabling the use of type-specific methods.
@@ -352,7 +376,7 @@ class Property2(BaseInScope):
         :type json: dict
         :return: a :class:`Property` object
         """
-        property_type = json.get('property_type')
+        property_type = json.get("property_type")
 
         from pykechain.models import property_type_to_class_map
 
@@ -363,12 +387,12 @@ class Property2(BaseInScope):
         return property_class(json, **kwargs)
 
     def edit(
-            self,
-            name: Optional[Text] = None,
-            description: Optional[Text] = None,
-            unit: Optional[Text] = None,
-            options: Optional[Dict] = None,
-            **kwargs
+        self,
+        name: Optional[Text] = None,
+        description: Optional[Text] = None,
+        unit: Optional[Text] = None,
+        options: Optional[Dict] = None,
+        **kwargs
     ) -> None:
         """Edit the details of a property (model).
 
@@ -406,31 +430,35 @@ class Property2(BaseInScope):
 
         """
         update_dict = {
-            'id': self.id,
-            'name': check_text(name, 'name') or self.name,
-            'description': check_text(description, 'description') or self.description,
+            "id": self.id,
+            "name": check_text(name, "name") or self.name,
+            "description": check_text(description, "description") or self.description,
         }
 
-        options = check_type(options, dict, 'options')
+        options = check_type(options, dict, "options")
         if options:
-            update_dict['value_options'] = options
+            update_dict["value_options"] = options
 
-        unit = check_text(unit, 'unit')
+        unit = check_text(unit, "unit")
         if unit:
-            update_dict['unit'] = unit
+            update_dict["unit"] = unit
 
         if kwargs:  # pragma: no cover
             update_dict.update(kwargs)
 
-        response = self._client._request('PUT',
-                                         self._client._build_url('property2', property_id=self.id),
-                                         params=API_EXTRA_PARAMS['property2'],
-                                         json=update_dict)
+        response = self._client._request(
+            "PUT",
+            self._client._build_url("property2", property_id=self.id),
+            params=API_EXTRA_PARAMS["property2"],
+            json=update_dict,
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Property {}".format(self), response=response)
+            raise APIError(
+                "Could not update Property {}".format(self), response=response
+            )
 
-        self.refresh(json=response.json()['results'][0])
+        self.refresh(json=response.json()["results"][0])
 
     def delete(self) -> None:
         """Delete this property.
@@ -438,12 +466,16 @@ class Property2(BaseInScope):
         :return: None
         :raises APIError: if delete was not successful
         """
-        response = self._client._request('DELETE', self._client._build_url('property2', property_id=self.id))
+        response = self._client._request(
+            "DELETE", self._client._build_url("property2", property_id=self.id)
+        )
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Property {}".format(self), response=response)
+            raise APIError(
+                "Could not delete Property {}".format(self), response=response
+            )
 
-    def copy(self, target_part: 'Part2', name: Optional[Text] = None) -> 'Property2':
+    def copy(self, target_part: "Part2", name: Optional[Text] = None) -> "Property2":
         """Copy a property model or instance.
 
         :param target_part: `Part` object under which the desired `Property` is copied
@@ -461,38 +493,47 @@ class Property2(BaseInScope):
 
         """
         from pykechain.models import Part2
-        check_type(target_part, Part2, 'target_part')
 
-        name = check_text(name, 'name') or self.name
+        check_type(target_part, Part2, "target_part")
+
+        name = check_text(name, "name") or self.name
         if self.category == Category.MODEL and target_part.category == Category.MODEL:
             # Cannot move a `Property` model under a `Part` instance or vice versa
-            copied_property_model = target_part.add_property(name=name,
-                                                             property_type=self.type,
-                                                             description=self.description,
-                                                             unit=self.unit,
-                                                             default_value=self.value,
-                                                             options=self._options
-                                                             )
+            copied_property_model = target_part.add_property(
+                name=name,
+                property_type=self.type,
+                description=self.description,
+                unit=self.unit,
+                default_value=self.value,
+                options=self._options,
+            )
             return copied_property_model
-        elif self.category == Category.INSTANCE and target_part.category == Category.INSTANCE:
+        elif (
+            self.category == Category.INSTANCE
+            and target_part.category == Category.INSTANCE
+        ):
             target_model = target_part.model()
             self_model = self.model()
-            target_model.add_property(name=name,
-                                      property_type=self_model.type,
-                                      description=self_model.description,
-                                      unit=self_model.unit,
-                                      default_value=self_model.value,
-                                      options=self_model._options
-                                      )
+            target_model.add_property(
+                name=name,
+                property_type=self_model.type,
+                description=self_model.description,
+                unit=self_model.unit,
+                default_value=self_model.value,
+                options=self_model._options,
+            )
             target_part.refresh()
             copied_property_instance = target_part.property(name=name)
             copied_property_instance.value = self.value
             return copied_property_instance
         else:
-            raise IllegalArgumentError('property "{}" and target part "{}" must have the same category'.
-                                       format(self.name, target_part.name))
+            raise IllegalArgumentError(
+                'property "{}" and target part "{}" must have the same category'.format(
+                    self.name, target_part.name
+                )
+            )
 
-    def move(self, target_part: 'Part2', name: Optional[Text] = None) -> 'Property2':
+    def move(self, target_part: "Part2", name: Optional[Text] = None) -> "Property2":
         """Move a property model or instance.
 
         :param target_part: `Part` object under which the desired `Property` is moved
