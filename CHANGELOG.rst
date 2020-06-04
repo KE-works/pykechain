@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+PR
+--
+
+* :star: Added the option to manage supervisor members on a scope for KE-chain 3 backends that support the supervisor member users. That is possble for releases of KE-chain 3 starting from June 2020. (version 3.7). #772
+
+
 v3.7.0 (3JUN20)
 ---------------
 
