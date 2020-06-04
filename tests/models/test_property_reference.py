@@ -5,6 +5,11 @@ from pykechain.models.validators import RequiredFieldValidator
 from pykechain.utils import find
 from tests.classes import TestBetamax
 
+import datetime
+import pytz
+
+new_year_2020 = datetime.datetime(year=2020, month=1, day=1, tzinfo=pytz.UTC)
+
 
 class TestMultiReferenceProperty(TestBetamax):
 
@@ -217,8 +222,6 @@ class TestMultiReferenceProperty(TestBetamax):
         diameter_property = self.float_prop  # decimal property
         spokes_property = self.integer_prop  # integer property
         rim_material_property = self.char_prop  # single line text
-        import datetime
-        new_year_2020 = datetime.datetime(year=2020, month=1, day=1)
 
         self.ref_prop_model.set_prefilters(
             property_models=[diameter_property,

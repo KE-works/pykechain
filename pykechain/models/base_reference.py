@@ -39,6 +39,7 @@ class _ReferenceProperty(Property2):
 
     @value.setter
     def value(self, value: Any) -> None:
+        value = self.serialize_value(value)
         if self.use_bulk_update:
             self._pend_value(value)
         else:
