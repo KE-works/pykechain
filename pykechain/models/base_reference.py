@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from typing import Optional, Any, Text, Iterable, Union, Tuple, List
+from typing import Optional, Any, Text, Union, Tuple, List
 
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Property2, Base
@@ -24,7 +24,7 @@ class _ReferenceProperty(Property2):
         self._cached_values = None
 
     @property
-    def value(self) -> Optional[Iterable[REFERENCED_CLASS]]:
+    def value(self) -> Optional[List[REFERENCED_CLASS]]:
         """
         Retrieve the referenced objects of this reference property.
 
@@ -45,7 +45,7 @@ class _ReferenceProperty(Property2):
             self._put_value(value)
 
     @abstractmethod
-    def _retrieve_objects(self, **kwargs) -> Iterable[Base]:
+    def _retrieve_objects(self, **kwargs) -> List[Base]:
         """
         Retrieve a list of Pykechain objects, type depending on the reference property type.
 

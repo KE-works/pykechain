@@ -49,7 +49,8 @@ class TestMultiReferenceProperty(TestBetamax):
 
         # reference property instance holding the value
         part_instance = self.part_model.instance()
-        self.ref = find(part_instance.properties, lambda p: p.model_id == self.ref_prop_model.id)
+        self.ref = find(part_instance.properties,
+                        lambda p: p.model_id == self.ref_prop_model.id)  # type: MultiReferenceProperty2
 
     def tearDown(self):
         self.target_model.delete()
@@ -91,7 +92,7 @@ class TestMultiReferenceProperty(TestBetamax):
         # testing
         self.assertTrue(len(self.ref.value) >= 2)
 
-    def test_referencing_a_part_not_an_option(self):
+    def test_referencing_not_an_option(self):
         # setUp
         front_wheel = self.project.part('Front Wheel')
 
