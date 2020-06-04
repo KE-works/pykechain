@@ -1,4 +1,4 @@
-from typing import List, Optional, Text, Union, Any, Iterable, Dict
+from typing import List, Optional, Text, Union, Any, Dict
 
 from pykechain.enums import Category, FilterType
 from pykechain.models.base_reference import _ReferencePropertyInScope
@@ -12,7 +12,9 @@ class MultiReferenceProperty2(_ReferencePropertyInScope):
     .. versionadded:: 1.14
     """
 
-    def _retrieve_objects(self, **kwargs) -> Iterable[Part2]:
+    REFERENCED_CLASS = Part2
+
+    def _retrieve_objects(self, **kwargs) -> List[Part2]:
         """
         Retrieve a list of Parts.
 

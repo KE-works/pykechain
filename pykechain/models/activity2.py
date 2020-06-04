@@ -397,6 +397,7 @@ class Activity2(TreeObject, TagsMixin):
             assignees_ids: Optional[List[Text]] = None,
             status: Optional[Union[ActivityStatus, Text]] = None,
             overwrite: Optional[bool] = False,
+            **kwargs
     ) -> None:
         """
         Edit the activity and all its descendants with a single operation.
@@ -430,6 +431,7 @@ class Activity2(TreeObject, TagsMixin):
             assignees=assignees,
             assignees_ids=assignees_ids,
             status=status,
+            **kwargs
         )
 
         all_tasks = [self] + self.all_children()

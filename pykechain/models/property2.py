@@ -130,6 +130,7 @@ class Property2(BaseInScope):
 
     @value.setter
     def value(self, value: Any) -> None:
+        value = self.serialize_value(value)
         if self.use_bulk_update:
             self._pend_value(value)
         else:
@@ -153,8 +154,6 @@ class Property2(BaseInScope):
 
     def _pend_value(self, value):
         """Store the value to be send at a later point in time using `update_values`."""
-        value = self.serialize_value(value)
-
         self.__class__._update_package.append(dict(
             id=self.id,
             value=value,
@@ -164,8 +163,6 @@ class Property2(BaseInScope):
 
     def _put_value(self, value):
         """Send the value to KE-chain."""
-        value = self.serialize_value(value)
-
         url = self._client._build_url('property2', property_id=self.id)
 
         response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['property2'], json={'value': value})

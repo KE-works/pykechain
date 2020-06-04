@@ -1,7 +1,9 @@
+import datetime
 import os
-from unittest import TestCase
-
+import pytz
 import six
+
+from unittest import TestCase
 from betamax import Betamax
 
 if six.PY2:
@@ -33,6 +35,8 @@ class SixTestCase(TestCase):
 
 
 class TestBetamax(SixTestCase):
+
+    time = datetime.datetime(year=2020, month=1, day=1, tzinfo=pytz.UTC)
 
     @property
     def cassette_name(self):
