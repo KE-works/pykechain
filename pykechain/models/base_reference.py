@@ -65,7 +65,8 @@ class _ReferenceProperty(Property2):
         :return: serialized value
         """
         try:
-            return [check_base(value, cls=self.REFERENCED_CLASS, key='Reference')]
+            value = check_base(value, cls=self.REFERENCED_CLASS, key='Reference')
+            return [value] if value is not None else value
         except IllegalArgumentError:
             # expected to fail, as value should be an iterable
             return check_list_of_base(value, cls=self.REFERENCED_CLASS, key='references')
