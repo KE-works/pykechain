@@ -12,6 +12,8 @@ class MultiReferenceProperty2(_ReferencePropertyInScope):
     .. versionadded:: 1.14
     """
 
+    REFERENCED_CLASS = Part2
+
     def _retrieve_objects(self, **kwargs) -> Iterable[Part2]:
         """
         Retrieve a list of Parts.

@@ -1,5 +1,5 @@
 from pykechain.enums import PropertyType, FilterType, Multiplicity, ActivityRootNames
-from pykechain.exceptions import IllegalArgumentError
+from pykechain.exceptions import IllegalArgumentError, APIError
 from pykechain.models import MultiReferenceProperty2, ActivityReferenceProperty
 from pykechain.models.validators import RequiredFieldValidator
 from pykechain.utils import find
@@ -91,12 +91,12 @@ class TestMultiReferenceProperty(TestBetamax):
         # testing
         self.assertTrue(len(self.ref.value) >= 2)
 
-    def test_referencing_a_part_not_in_a_list(self):
+    def test_referencing_a_part_not_an_option(self):
         # setUp
         front_wheel = self.project.part('Front Wheel')
 
         # testing
-        with self.assertRaises(ValueError):
+        with self.assertRaises(APIError):
             self.ref.value = front_wheel
 
     def test_referencing_a_list_with_no_parts(self):

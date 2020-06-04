@@ -120,7 +120,7 @@ class Bases:
             self.obj = self._get_object()
             self.obj.representations = [
                 self.representation_class(
-                    prop=self.obj,
+                    obj=self.obj,
                     value=self.value,
                 ),
             ]
@@ -167,7 +167,7 @@ class Bases:
 
             with self.assertRaises(IllegalArgumentError):
                 self.representation_class(
-                    prop=self.obj,
+                    obj=self.obj,
                     value=self.incorrect_value,
                 )
 
