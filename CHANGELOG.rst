@@ -3,7 +3,8 @@ Change Log
 
 v3.7.2 (8JUN20)
 ---------------
-* :bug: fixed an issue where an old version of the dependent 'semantic versioning' package (`semver`) could cause problems. We now put a proper versioning requirements in the setup.py such that pip or pipenv will install the correct version. Thanks for @bastiaan.beijer for finding this one.
+* :bug: fixed an issue where an old version of the dependent 'semantic versioning' package (`semver`) could cause problems. We now put a proper versioning requirement in the setup.py such that the correct version will be installed. Thanks for @bastiaan.beijer for finding this one.
+* :+1: dependent versions for development: tox (3.15.2)
 
 v3.7.1 (4JUN20)
 ---------------
