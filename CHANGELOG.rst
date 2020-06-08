@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v3.7.2 (8JUN20)
+---------------
+* :bug: fixed an issue where an old version of the dependent 'semantic versioning' package (`semver`) could cause problems. We now put a proper versioning requirements in the setup.py such that pip or pipenv will install the correct version. Thanks for @bastiaan.beijer for finding this one.
+
 v3.7.1 (4JUN20)
 ---------------
 
@@ -17,7 +21,7 @@ In this release we also deprecated functionality that were announced to be depre
 
 :star: is a new feature
 :+1: are improvements
-:bug: are fixed bugs
+:bug: are fixed bugs./
 
 * :star: Extracted representations from `Property2` class into a separate `RepresentationMixin` class. This is now utilized by the `Scope2`, `Activity2` and `Property2` classes.
 * :star: Implemented `MultiSelectListProperty2` class, generalizing the implementation of the `SelectListProperty2 class. Intermediate class `_SelectListProperty` now hosts the generic implementation. #732
