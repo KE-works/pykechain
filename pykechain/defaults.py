@@ -41,6 +41,7 @@ API_PATH = {
     'activity': 'api/activities/{activity_id}.json',
     'activity_export': 'api/activities/{activity_id}/export',
     'activity_move': 'api/activities/{activity_id}/move_activity',
+    'activities_bulk_clone': 'api/activities/bulk_clone',
     'activities_bulk_update': 'api/activities/bulk_update',
     'parts': 'api/parts.json',
     'part': 'api/parts/{part_id}.json',

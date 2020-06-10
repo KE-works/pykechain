@@ -11,7 +11,7 @@ from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClas
     PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
 from pykechain.models.input_checks import check_datetime, check_text, check_list_of_text, check_enum, check_user, \
-    check_type
+    check_type, check_base
 from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
@@ -389,6 +389,36 @@ class Activity2(TreeObject, TagsMixin):
             return []
         return super().all_children()
 
+    def clone(
+            self,
+            parent: Optional[Union['Activity2', Text]] = None,
+            update_dict: Optional[Dict] = None,
+            **kwargs
+      ) -> 'Activity2':
+        """
+
+        :param parent: (O) parent Activity2 object or UUID
+        :type parent: Activity2
+        :param update_dict: (O) dictionary of new values to set on the cloned activities, e.g. `{"name": "New name"}`
+        :type update_dict: dict
+        :param kwargs: additional arguments, see the `Client.clone_activities()` method
+        :return: clone of this activity
+        :rtype Activity2
+        """
+        update_dict = check_type(update_dict, dict, 'update_dict')
+        if update_dict:
+            validated_dict = self._validate_edit_arguments({}, **update_dict)
+        else:
+            validated_dict = None
+
+        cloned_activities = self._client.clone_activities(
+            parent=check_base(parent, Activity2, 'parent') or self.parent_id,
+            activities=[self],
+            activity_update_dicts={self.id: validated_dict} if validated_dict else None,
+            **kwargs
+        )
+        return cloned_activities[0]
+
     def edit_cascade_down(
             self,
             start_date: Optional[datetime.datetime] = None,
@@ -550,8 +580,17 @@ class Activity2(TreeObject, TagsMixin):
 
         self.refresh(json=response.json().get('results')[0])
 
-    def _validate_edit_arguments(self, update_dict, start_date, due_date, assignees, assignees_ids, status, **kwargs):
-        """Verify inputs provided in both the `edit` and `edit_cascade_down` methods."""
+    def _validate_edit_arguments(
+            self,
+            update_dict,
+            start_date=None,
+            due_date=None,
+            assignees=None,
+            assignees_ids=None,
+            status=None,
+            **kwargs
+    ) -> Dict:
+        """Verify inputs provided in both the `clone`, `edit` and `edit_cascade_down` methods."""
         if assignees and assignees_ids:
             raise IllegalArgumentError('Provide either assignee names or their ids, but not both.')
 
@@ -569,12 +608,14 @@ class Activity2(TreeObject, TagsMixin):
         else:
             update_assignees_ids = []
 
-        update_dict.update({
-            'assignees_ids': update_assignees_ids,
-            'start_date': check_datetime(dt=start_date, key='start_date'),
-            'due_date': check_datetime(dt=due_date, key='due_date'),
-            'status': check_enum(status, ActivityStatus, 'status') or self.status,
-        })
+        if update_assignees_ids:
+            update_dict['assignees_ids'] = update_assignees_ids
+        if start_date:
+            update_dict['start_date'] = check_datetime(dt=start_date, key='start_date')
+        if due_date:
+            update_dict['due_date'] = check_datetime(dt=due_date, key='due_date')
+        if status:
+            update_dict['status'] = check_enum(status, ActivityStatus, 'status') or self.status
 
         if kwargs:
             update_dict.update(kwargs)

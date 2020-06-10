@@ -84,3 +84,32 @@ class TreeObject(BaseInScope, ABC):
             all_children.extend(child.all_children())
 
         return all_children
+
+    def _populate_cached_children(self, all_descendants: List[T]) -> None:
+        """
+        Helper function to fill the `_cached_children` attribute with a list of descendants
+
+        :param all_descendants: list of TreeObject objects of possible descendants of this TreeObject.
+        :type all_descendants: list
+        :return: None
+        """
+        # Create mapping table from a parent part ID to its children
+        children_by_parent_id = dict()
+        for descendant in all_descendants:
+            if descendant.parent_id in children_by_parent_id:
+                children_by_parent_id[descendant.parent_id].append(descendant)
+            else:
+                children_by_parent_id[descendant.parent_id] = [descendant]
+
+        # Populate every descendant with its children
+        for descendant in all_descendants:
+            if descendant.id in children_by_parent_id:
+                descendant._cached_children = children_by_parent_id[descendant.id]
+            else:
+                descendant._cached_children = []
+
+        this_children = children_by_parent_id.get(self.id, list())
+        if self._cached_children:
+            self._cached_children.extend(this_children)
+        else:
+            self._cached_children = this_children

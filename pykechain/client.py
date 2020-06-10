@@ -1105,6 +1105,89 @@ class Client(object):
             parent._cached_children.append(new_activity)
         return new_activity
 
+    def clone_activities(
+        self,
+        activities: List[Union[Activity2, Text]],
+        parent: Union[Activity2, Text],
+        activity_update_dicts: Optional[Dict] = None,
+        clone_parts: Optional[bool] = False,
+        clone_part_instances: Optional[bool] = True,
+        clone_children: Optional[bool] = True,
+        excluded_models: Optional[List[Text]] = None,
+        part_parent_model: Optional[Union[Part2, Text]] = None,
+        part_parent_instance: Optional[Union[Part2, Text]] = None,
+        **kwargs
+    ) -> List[Activity2]:
+        """
+        Clone multiple activities.
+
+        :param activities: list of Activity2 object or UUIDs
+        :type activities: list
+        :param parent: parent Activity2 sub-process object or UUID
+        :type parent: Activity2
+        :param activity_update_dicts: (O) dict of dictionaries, each key-value combination relating to an activity
+        to clone and a dict of new values to assign, e.g. `{activity.id: {"name": "Cloned activity"}}`
+        :type activity_update_dicts: dict
+        :param clone_parts: (O) whether to clone the data models configured in the activities, defaults to False
+        :type clone_parts: bool
+        :param clone_part_instances: (O) whether to clone the part instances of the data model configured in the
+            activities, defaults to True
+        :type clone_part_instances: bool
+        :param clone_children: (O) whether to clone child activities
+        :type clone_children: bool
+        :param excluded_models: (O) list of Part2 objects or UUIDs to exclude from being cloned
+        :type excluded_models: list
+        :param part_parent_model: (O) parent Part2 object or UUID for the copied data model(s)
+        :type part_parent_model: Part2
+        :param part_parent_instance: (O) parent Part2 object or UUID for the copied part instance(s)
+        :type part_parent_instance: Part2
+        :return: list of cloned activities
+        :rtype: list
+        :raises APIError if cloned
+        """
+        update_name = 'activity_update_dicts'
+        activity_ids = check_list_of_base(activities, cls=Activity2, key='activities')
+        update_dicts = check_type(activity_update_dicts, dict, key=update_name) or dict()
+
+        if not all(key in activity_ids for key in update_dicts.keys()):
+            incorrect_ids = [key for key in update_dicts.keys() if key not in activity_ids]
+            raise IllegalArgumentError(
+                "The `{}` must contain updates to activities that are to be cloned. "
+                "Did not recognize the following UUIDs:\n{}".format(update_name, '\n'.join(incorrect_ids)))
+
+        elif not all(isinstance(value, dict) for value in update_dicts.values()):
+            raise IllegalArgumentError("The `{}` must be a dict of dicts.".format(update_name))
+
+        activities = [dict(id=uuid, **update_dicts.get(uuid, {})) for uuid in activity_ids]
+
+        data = dict(
+            parent_id=check_base(parent, cls=Activity2, key='parent'),
+            clone_parts=check_type(clone_parts, bool, 'clone_parts'),
+            clone_part_instances=check_type(clone_part_instances, bool, 'clone_part_instances'),
+            clone_children=check_type(clone_children, bool, 'clone_children'),
+            exclude_model_ids=check_list_of_base(excluded_models, cls=Part2, key='excluded_models'),
+            part_parent_model_id=check_base(part_parent_model, Part2, 'part_parent_model'),
+            part_parent_instance_id=check_base(part_parent_instance, Part2, 'part_parent_instance'),
+            activities=activities,
+        )
+
+        if kwargs:
+            data.update(kwargs)
+
+        response = self._request('POST', self._build_url('activities_bulk_clone'),
+                                 data=data,
+                                 params=API_EXTRA_PARAMS['activities'])
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not clone Activity.", response=response)
+
+        cloned_activities = [Activity2(d, client=self) for d in response.json()['results']]
+
+        if isinstance(parent, Activity2):
+            parent._populate_cached_children(cloned_activities)
+
+        return cloned_activities
+
     def _create_part(self, action: Text, data: Dict, **kwargs) -> Optional[Part2]:
         """Create a part for PIM 2 internal core function."""
         # suppress_kevents should be in the data (not the query_params)

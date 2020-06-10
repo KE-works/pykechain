@@ -282,22 +282,7 @@ class Part2(TreeObject):
             descendants=self.id,
         ))[1:]  # remove the part itself, which is returned on index 0
 
-        # Create mapping table from a parent part ID to its children
-        children_by_parent_id = dict()
-        for descendant in all_descendants:
-            if descendant.parent_id in children_by_parent_id:
-                children_by_parent_id[descendant.parent_id].append(descendant)
-            else:
-                children_by_parent_id[descendant.parent_id] = [descendant]
-
-        # Populate every descendant with its children
-        for descendant in all_descendants:
-            if descendant.id in children_by_parent_id:
-                descendant._cached_children = children_by_parent_id[descendant.id]
-            else:
-                descendant._cached_children = []
-
-        self._cached_children = children_by_parent_id.get(self.id, list())
+        self._populate_cached_children(all_descendants=all_descendants)
 
         return None
 
