@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import List
 
 from pykechain.models import Activity2
 from pykechain.models.base_reference import _ReferencePropertyInScope
@@ -12,7 +12,7 @@ class ActivityReferenceProperty(_ReferencePropertyInScope):
 
     REFERENCED_CLASS = Activity2
 
-    def _retrieve_objects(self, **kwargs) -> Iterable[Activity2]:
+    def _retrieve_objects(self, **kwargs) -> List[Activity2]:
         """
         Retrieve a list of Activities.
 

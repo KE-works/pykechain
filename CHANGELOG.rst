@@ -3,9 +3,19 @@ Change Log
 
 PR
 --
-
 * :star: Added the option to manage supervisor members on a scope for KE-chain 3 backends that support the supervisor member users. That is possble for releases of KE-chain 3 starting from June 2020. (version 3.7). #772
 
+v3.7.2 (8JUN20)
+---------------
+* :bug: fixed an issue where an old version of the dependent 'semantic versioning' package (`semver`) could cause problems. We now put a proper versioning requirement in the setup.py such that the correct version will be installed. Thanks for @bastiaan.beijer for finding this one.
+* :+1: dependent versions for development: tox (3.15.2)
+
+v3.7.1 (4JUN20)
+---------------
+
+* :bug: Reference properties values can now be set with identifiers, such as `property.value = "1234..."` and a list of identifiers, such as `property.value = ["1234..."]`. The original behavior of the `MultiReferenceProperty2` was inconsistent: the `value` attribute did not allow strings while updating via the `Part2.update()` and `Part2.add_with_properties()` methods allowed it. (#770)
+* :+1: Enabled kwargs for bulk editing of activities. (#770)
+* :+1: Assigned `Part2` class as the referenced class for the `MultiReferenceProperty2` for more precise type-checking. (#770)
 
 v3.7.0 (3JUN20)
 ---------------
@@ -16,7 +26,7 @@ In this release we also deprecated functionality that were announced to be depre
 
 :star: is a new feature
 :+1: are improvements
-:bug: are fixed bugs
+:bug: are fixed bugs./
 
 * :star: Extracted representations from `Property2` class into a separate `RepresentationMixin` class. This is now utilized by the `Scope2`, `Activity2` and `Property2` classes.
 * :star: Implemented `MultiSelectListProperty2` class, generalizing the implementation of the `SelectListProperty2 class. Intermediate class `_SelectListProperty` now hosts the generic implementation. #732
