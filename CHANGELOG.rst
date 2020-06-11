@@ -5,6 +5,13 @@ PR
 --
 * :star: Added the option to manage supervisor members on a scope for KE-chain 3 backends that support the supervisor member users. That is possble for releases of KE-chain 3 starting from June 2020. (version 3.7). #772
 
+v3.7.3 (11JUN20)
+----------------
+
+* :+1: Added `autofill` representation for date, time and datetime properties (#733)
+* :+1: Added `breadcrumb_root` option for meta-panel widgets.
+* :+1: dependent versions for development: sphinx (3.1.0), flake8 (3.8.3), pre-commit (2.5.1)
+
 v3.7.2 (8JUN20)
 ---------------
 * :bug: fixed an issue where an old version of the dependent 'semantic versioning' package (`semver`) could cause problems. We now put a proper versioning requirement in the setup.py such that the correct version will be installed. Thanks for @bastiaan.beijer for finding this one.

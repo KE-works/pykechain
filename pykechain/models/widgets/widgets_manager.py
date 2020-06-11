@@ -913,6 +913,7 @@ class WidgetsManager(Iterable):
                              show_download_pdf: Optional[bool] = False,
                              show_progressbar: Optional[bool] = False,
                              progress_bar: Optional[Dict] = None,
+                             breadcrumb_root: Optional['Activity2'] = None,
                              **kwargs) -> Widget:
         """
         Add a KE-chain Metapanel to the WidgetManager.
@@ -944,6 +945,8 @@ class WidgetsManager(Iterable):
         :param progress_bar: Progress bar custom settings. Allowed dictionary items `colorNoProgress, showProgressText,
         showProgressText, customHeight, colorInProgress, colorCompleted, colorInProgressBackground`
         :type progress_bar: dict or None
+        :param breadcrumb_root: Activity2 object or UUID to specify the breadcrumb root
+        :type breadcrumb_root: Activity2
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
         :rtype: Widget
@@ -955,6 +958,7 @@ class WidgetsManager(Iterable):
         if show_all:
             meta['showAll'] = True
         else:
+            from pykechain.models import Activity2
             meta.update(dict(
                 showAll=False,
                 showDueDate=show_due_date,
@@ -970,7 +974,8 @@ class WidgetsManager(Iterable):
                 # if progress=False and Bar=True, the bar is True
                 # if progress=False and Bar=False, both are False
                 showProgress=show_progress and not show_progressbar or show_progress,
-                showProgressBar=show_progressbar and not show_progress
+                showProgressBar=show_progressbar and not show_progress,
+                breadcrumbAncestor=check_base(breadcrumb_root, Activity2, 'breadcrumb_root') or None,
             ))
         if progress_bar:
             meta.update(dict(
@@ -981,7 +986,7 @@ class WidgetsManager(Iterable):
                     colorInProgress=progress_bar.get('colorInProgress', ProgressBarColors.DEFAULT_IN_PROGRESS),
                     colorCompleted=progress_bar.get('colorCompleted', ProgressBarColors.DEFAULT_COMPLETED),
                     colorInProgressBackground=progress_bar.get('colorInProgressBackground',
-                                                               ProgressBarColors.DEFAULT_IN_PROGRESS_BACKGROUND)
+                                                               ProgressBarColors.DEFAULT_IN_PROGRESS_BACKGROUND),
                 )
             ))
         widget = self.create_widget(
