@@ -1,5 +1,6 @@
 from pykechain.enums import PropertyRepresentation, SelectListRepresentations, LinkTargets, FontAwesomeMode
 from pykechain.exceptions import IllegalArgumentError
+from pykechain.models.input_checks import check_type
 from pykechain.models.representations.representation_base import BaseRepresentation
 
 
@@ -82,6 +83,23 @@ class ButtonRepresentation(BaseRepresentation):
         if value not in SelectListRepresentations.values():
             raise IllegalArgumentError('{} value "{}" is not correct: Not a SelectListRepresentations option.'.format(
                 self.__class__.__name__, value))
+
+
+class Autofill(BaseRepresentation):
+    """Representation for date(time) properties."""
+
+    rtype = PropertyRepresentation.AUTOFILL
+    _config_value_key = PropertyRepresentation.AUTOFILL
+
+    def validate_representation(self, value: bool) -> None:
+        """
+        Validate whether the representation value can be set.
+
+        :param value: representation value to set.
+        :type value: bool
+        :return: None
+        """
+        check_type(value, bool, 'autofill')
 
 
 class CustomIconRepresentation(BaseRepresentation):

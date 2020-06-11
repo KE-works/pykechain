@@ -633,6 +633,7 @@ class PropertyRepresentation(Enum):
     LINK_TARGET = "linkTarget"
     BUTTON = 'buttonRepresentation'
     THOUSANDS_SEPARATOR = "thousandsSeparator"
+    AUTOFILL = 'autofill'
 
 
 class OtherRepresentations(Enum):

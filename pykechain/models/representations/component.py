@@ -114,5 +114,7 @@ def _valid_object_type(representation: BaseRepresentation, obj: 'Base') -> bool:
                 return obj.type in [PropertyType.INT_VALUE, PropertyType.FLOAT_VALUE]
             elif rtype == _AllRepresentations.LINK_TARGET:
                 return obj.type == PropertyType.LINK_VALUE
+            elif rtype == _AllRepresentations.AUTOFILL:
+                return obj.type in [PropertyType.DATETIME_VALUE, PropertyType.DATE_VALUE, PropertyType.TIME_VALUE]
             else:
                 return False

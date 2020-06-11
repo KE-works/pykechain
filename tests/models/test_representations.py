@@ -8,7 +8,7 @@ from pykechain.exceptions import IllegalArgumentError, APIError
 from pykechain.models import AnyProperty, Property2, Scope2, Activity2, SelectListProperty2
 from pykechain.models.representations.representation_base import BaseRepresentation
 from pykechain.models.representations.representations import ButtonRepresentation, LinkTarget, SignificantDigits, \
-    DecimalPlaces, ThousandsSeparator, CustomIconRepresentation
+    DecimalPlaces, ThousandsSeparator, CustomIconRepresentation, Autofill
 from pykechain.models.validators.validator_schemas import options_json_schema
 from tests.classes import SixTestCase, TestBetamax
 
@@ -256,6 +256,13 @@ class TestReprButton(Bases._TestPropertyRepresentation):
     def setUp(self):
         super().setUp()
         self.obj.options = ['alpha', 'beta', 'gamma', 'omega']
+
+
+class TestReprAutofill(Bases._TestPropertyRepresentation):
+    property_type = PropertyType.DATETIME_VALUE
+    representation_class = Autofill
+    value = False
+    new_value = True
 
 
 class TestReprActivity(Bases._TestCustomIconRepresentation):
