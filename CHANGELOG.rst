@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+v3.7.4 (unreleased)
+----------------
+
+* :bug: Reloading `Activity2` when retrieved in an `ActivityReferenceProperty` in order to populate it with all required data.
+
+
 v3.7.3 (11JUN20)
 ----------------
 
