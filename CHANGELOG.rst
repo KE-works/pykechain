@@ -1,11 +1,11 @@
 Change Log
 ==========
 
-v3.7.4 (unreleased)
+v3.7.4 (15JUN20)
 ----------------
 
 * :bug: Reloading `Activity2` when retrieved in an `ActivityReferenceProperty` in order to populate it with all required data.
-
+* :+1: dependent versions for development: sphinx (3.1.1), pytest-cov (2.10.0)
 
 v3.7.3 (11JUN20)
 ----------------
