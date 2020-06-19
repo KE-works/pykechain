@@ -95,6 +95,8 @@ class TreeObject(BaseInScope, ABC):
 
         :param all_descendants: list of TreeObject objects of possible descendants of this TreeObject.
         :type all_descendants: list
+        :param overwrite: whether to remove existing cached children, defaults to False
+        :type overwrite: bool
         :return: None
         """
         # Create mapping table from a parent part ID to its children
