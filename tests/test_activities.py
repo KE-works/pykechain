@@ -168,10 +168,10 @@ class TestActivityClone(TestBetamax):
 
     def setUp(self):
         super().setUp()
-        self.process = self.project.activities(name='Subprocess', activity_type=ActivityType.PROCESS)[0]
-        self.task = self.process.child('SubTask')
+        self.process = self.project.create_activity(name='__TEST CLONE SUBPROCESS', activity_type=ActivityType.PROCESS)
+        self.task = self.process.create('__TEST CLONE TASK')
         self.clone = None
-        self.bucket = [self.clone]
+        self.bucket = [self.process]
 
     def tearDown(self):
         for activity in self.bucket:
@@ -183,11 +183,11 @@ class TestActivityClone(TestBetamax):
         super().tearDown()
 
     def test(self):
-        self.clone = self.task.clone()
+        clone = self.task.clone()
 
-        self.assertIsInstance(self.clone, Activity2)
-        self.assertNotEqual(self.task, self.clone)
-        self.assertEqual(self.task.parent_id, self.clone.parent_id)
+        self.assertIsInstance(clone, Activity2)
+        self.assertNotEqual(self.task, clone)
+        self.assertEqual(self.task.parent_id, clone.parent_id)
 
     def test_parent_id(self):
         second_process = self.project.create_activity(
@@ -196,23 +196,23 @@ class TestActivityClone(TestBetamax):
         )
         self.bucket.append(second_process)
 
-        self.clone = self.task.clone(
+        clone = self.task.clone(
             parent=second_process,
         )
 
-        self.assertNotEqual(self.task.parent_id, self.clone.parent_id)
+        self.assertNotEqual(self.task.parent_id, clone.parent_id)
 
     def test_update(self):
         new_name = '__TEST TASK RENAMED'
-        self.clone = self.task.clone(
+        clone = self.task.clone(
             update_dict=dict(name=new_name),
         )
 
-        self.assertEqual(new_name, self.clone.name)
+        self.assertEqual(new_name, clone.name)
 
     def test_update_incorrect(self):
-        with self.assertRaises(APIError):
-            self.clone = self.task.clone(name='new_name')
+        with self.assertRaises(IllegalArgumentError):
+            self.task.clone(part_parent_instance=True)
 
 
 class TestActivities(TestBetamax):

@@ -1116,6 +1116,7 @@ class Client(object):
         excluded_models: Optional[List[Text]] = None,
         part_parent_model: Optional[Union[Part2, Text]] = None,
         part_parent_instance: Optional[Union[Part2, Text]] = None,
+        asynchronous: Optional[bool] = False,
         **kwargs
     ) -> List[Activity2]:
         """
@@ -1133,7 +1134,7 @@ class Client(object):
         :param clone_part_instances: (O) whether to clone the part instances of the data model configured in the
             activities, defaults to True
         :type clone_part_instances: bool
-        :param clone_children: (O) whether to clone child activities
+        :param clone_children: (O) whether to clone child parts
         :type clone_children: bool
         :param excluded_models: (O) list of Part2 objects or UUIDs to exclude from being cloned
         :type excluded_models: list
@@ -1141,6 +1142,8 @@ class Client(object):
         :type part_parent_model: Part2
         :param part_parent_instance: (O) parent Part2 object or UUID for the copied part instance(s)
         :type part_parent_instance: Part2
+        :param asynchronous: If true, immediately returns without activities (default = False)
+        :type asynchronous: bool
         :return: list of cloned activities
         :rtype: list
         :raises APIError if cloned
@@ -1165,7 +1168,7 @@ class Client(object):
             clone_parts=check_type(clone_parts, bool, 'clone_parts'),
             clone_part_instances=check_type(clone_part_instances, bool, 'clone_part_instances'),
             clone_children=check_type(clone_children, bool, 'clone_children'),
-            exclude_model_ids=check_list_of_base(excluded_models, cls=Part2, key='excluded_models'),
+            exclude_model_ids=check_list_of_base(excluded_models, cls=Part2, key='excluded_models') or [],
             part_parent_model_id=check_base(part_parent_model, Part2, 'part_parent_model'),
             part_parent_instance_id=check_base(part_parent_instance, Part2, 'part_parent_instance'),
             activities=activities,
@@ -1174,12 +1177,15 @@ class Client(object):
         if kwargs:
             data.update(kwargs)
 
-        response = self._request('POST', self._build_url('activities_bulk_clone'),
-                                 data=data,
-                                 params=API_EXTRA_PARAMS['activities'])
+        params = API_EXTRA_PARAMS['activities']
+        params['async_mode'] = asynchronous
 
-        if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not clone Activity.", response=response)
+        response = self._request('POST', self._build_url('activities_bulk_clone'),
+                                 json=data, params=params)
+
+        if (asynchronous and response.status_code != requests.codes.accepted) or \
+                (not asynchronous and response.status_code != requests.codes.created):  # pragma: no cover
+            raise APIError("Could not clone Activities.", response=response)
 
         cloned_activities = [Activity2(d, client=self) for d in response.json()['results']]
 
