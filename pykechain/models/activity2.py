@@ -390,12 +390,13 @@ class Activity2(TreeObject, TagsMixin):
         return super().all_children()
 
     def clone(
-            self,
-            parent: Optional[Union['Activity2', Text]] = None,
-            update_dict: Optional[Dict] = None,
-            **kwargs
-      ) -> 'Activity2':
+        self,
+        parent: Optional[Union['Activity2', Text]] = None,
+        update_dict: Optional[Dict] = None,
+        **kwargs
+    ) -> 'Activity2':
         """
+        Create a copy of this activity.
 
         :param parent: (O) parent Activity2 object or UUID
         :type parent: Activity2

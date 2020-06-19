@@ -87,7 +87,7 @@ class TreeObject(BaseInScope, ABC):
 
     def _populate_cached_children(self, all_descendants: List[T]) -> None:
         """
-        Helper function to fill the `_cached_children` attribute with a list of descendants
+        Fill the `_cached_children` attribute with a list of descendants.
 
         :param all_descendants: list of TreeObject objects of possible descendants of this TreeObject.
         :type all_descendants: list
