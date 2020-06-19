@@ -1177,7 +1177,7 @@ class Client(object):
         if kwargs:
             data.update(kwargs)
 
-        params = API_EXTRA_PARAMS['activities']
+        params = dict(API_EXTRA_PARAMS['activities'])
         params['async_mode'] = asynchronous
 
         response = self._request('POST', self._build_url('activities_bulk_clone'),

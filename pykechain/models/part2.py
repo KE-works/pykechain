@@ -282,7 +282,7 @@ class Part2(TreeObject):
             descendants=self.id,
         ))[1:]  # remove the part itself, which is returned on index 0
 
-        self._populate_cached_children(all_descendants=all_descendants)
+        self._populate_cached_children(all_descendants=all_descendants, overwrite=True)
 
         return None
 
