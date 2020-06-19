@@ -5,32 +5,27 @@
 from .component import RepresentationsComponent
 from .representation_base import BaseRepresentation
 from .representations import (
-    DecimalPlaces, SignificantDigits, ThousandsSeparator, LinkTarget, ButtonRepresentation, CustomIconRepresentation,
+    DecimalPlaces,
+    SignificantDigits,
+    ThousandsSeparator,
+    LinkTarget,
+    ButtonRepresentation,
+    CustomIconRepresentation,
+    Autofill,
 )
-
-rtype_class_map = {
-    DecimalPlaces.rtype: DecimalPlaces,
-    SignificantDigits.rtype: SignificantDigits,
-    ThousandsSeparator.rtype: ThousandsSeparator,
-    LinkTarget.rtype: LinkTarget,
-    ButtonRepresentation.rtype: ButtonRepresentation,
-    CustomIconRepresentation.rtype: CustomIconRepresentation,
-}
 
 AnyRepresentation = [
     BaseRepresentation,
-
     # Numbers
     DecimalPlaces,
     SignificantDigits,
     ThousandsSeparator,
-
     # Link properties
     LinkTarget,
-
     # Select lists
     ButtonRepresentation,
-
+    # Date, Time, Datetime properties
+    Autofill,
     # Scopes and activities
     CustomIconRepresentation,
 ]
@@ -39,3 +34,5 @@ __all__ = [
     AnyRepresentation,
     RepresentationsComponent,
 ]
+
+rtype_class_map = {r.rtype: r for r in AnyRepresentation}

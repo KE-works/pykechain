@@ -1,6 +1,19 @@
 Change Log
 ==========
 
+v3.7.4 (15JUN20)
+----------------
+
+* :bug: Reloading `Activity2` when retrieved in an `ActivityReferenceProperty` in order to populate it with all required data.
+* :+1: dependent versions for development: sphinx (3.1.1), pytest-cov (2.10.0)
+
+v3.7.3 (11JUN20)
+----------------
+
+* :+1: Added `autofill` representation for date, time and datetime properties (#733)
+* :+1: Added `breadcrumb_root` option for meta-panel widgets.
+* :+1: dependent versions for development: sphinx (3.1.0), flake8 (3.8.3), pre-commit (2.5.1)
+
 v3.7.2 (8JUN20)
 ---------------
 * :bug: fixed an issue where an old version of the dependent 'semantic versioning' package (`semver`) could cause problems. We now put a proper versioning requirement in the setup.py such that the correct version will be installed. Thanks for @bastiaan.beijer for finding this one.
