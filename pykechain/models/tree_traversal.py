@@ -85,12 +85,18 @@ class TreeObject(BaseInScope, ABC):
 
         return all_children
 
-    def _populate_cached_children(self, all_descendants: List[T]) -> None:
+    def _populate_cached_children(
+            self,
+            all_descendants: List[T],
+            overwrite: Optional[bool] = False
+    ) -> None:
         """
         Fill the `_cached_children` attribute with a list of descendants.
 
         :param all_descendants: list of TreeObject objects of possible descendants of this TreeObject.
         :type all_descendants: list
+        :param overwrite: whether to remove existing cached children, defaults to False
+        :type overwrite: bool
         :return: None
         """
         # Create mapping table from a parent part ID to its children
@@ -109,7 +115,7 @@ class TreeObject(BaseInScope, ABC):
                 descendant._cached_children = []
 
         this_children = children_by_parent_id.get(self.id, list())
-        if self._cached_children:
+        if self._cached_children and not overwrite:
             self._cached_children.extend(this_children)
         else:
             self._cached_children = this_children
