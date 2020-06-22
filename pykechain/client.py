@@ -1113,7 +1113,7 @@ class Client(object):
         clone_parts: Optional[bool] = False,
         clone_part_instances: Optional[bool] = True,
         clone_children: Optional[bool] = True,
-        excluded_models: Optional[List[Text]] = None,
+        excluded_parts: Optional[List[Text]] = None,
         part_parent_model: Optional[Union[Part2, Text]] = None,
         part_parent_instance: Optional[Union[Part2, Text]] = None,
         asynchronous: Optional[bool] = False,
@@ -1136,8 +1136,9 @@ class Client(object):
         :type clone_part_instances: bool
         :param clone_children: (O) whether to clone child parts
         :type clone_children: bool
-        :param excluded_models: (O) list of Part2 objects or UUIDs to exclude from being cloned
-        :type excluded_models: list
+        :param excluded_parts: (O) list of Part2 objects or UUIDs to exclude from being cloned,
+            maintaining the original configuration of the widgets.
+        :type excluded_parts: list
         :param part_parent_model: (O) parent Part2 object or UUID for the copied data model(s)
         :type part_parent_model: Part2
         :param part_parent_instance: (O) parent Part2 object or UUID for the copied part instance(s)
@@ -1168,7 +1169,7 @@ class Client(object):
             clone_parts=check_type(clone_parts, bool, 'clone_parts'),
             clone_part_instances=check_type(clone_part_instances, bool, 'clone_part_instances'),
             clone_children=check_type(clone_children, bool, 'clone_children'),
-            exclude_model_ids=check_list_of_base(excluded_models, cls=Part2, key='excluded_models') or [],
+            exclude_model_ids=check_list_of_base(excluded_parts, cls=Part2, key='excluded_models') or [],
             part_parent_model_id=check_base(part_parent_model, Part2, 'part_parent_model'),
             part_parent_instance_id=check_base(part_parent_instance, Part2, 'part_parent_instance'),
             activities=activities,

@@ -394,7 +394,7 @@ class Activity2(TreeObject, TagsMixin):
         parent: Optional[Union['Activity2', Text]] = None,
         update_dict: Optional[Dict] = None,
         **kwargs
-    ) -> 'Activity2':
+    ) -> Optional['Activity2']:
         """
         Create a copy of this activity.
 
@@ -418,7 +418,7 @@ class Activity2(TreeObject, TagsMixin):
             activity_update_dicts={self.id: validated_dict} if validated_dict else None,
             **kwargs
         )
-        return cloned_activities[0]
+        return cloned_activities[0] if cloned_activities else None
 
     def edit_cascade_down(
             self,
