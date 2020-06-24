@@ -1,6 +1,8 @@
 Change Log
 ==========
 
+* :star: Added the Weather and GeoJSON property types to pykechain in correspondance with the backend version (core.pim 3.6.0). #787
+
 v3.7.4 (15JUN20)
 ----------------
 
