@@ -1116,6 +1116,8 @@ class Client(object):
         excluded_parts: Optional[List[Text]] = None,
         part_parent_model: Optional[Union[Part2, Text]] = None,
         part_parent_instance: Optional[Union[Part2, Text]] = None,
+        part_model_rename_template: Optional[Text] = None,
+        part_instance_rename_template: Optional[Text] = None,
         asynchronous: Optional[bool] = False,
         **kwargs
     ) -> List[Activity2]:
@@ -1143,6 +1145,10 @@ class Client(object):
         :type part_parent_model: Part2
         :param part_parent_instance: (O) parent Part2 object or UUID for the copied part instance(s)
         :type part_parent_instance: Part2
+        :param part_model_rename_template: (O) renaming template for part models. Must contain "{name}"
+        :type part_model_rename_template: str
+        :param part_instance_rename_template: (O) renaming template for part instances. Must contain "{name}"
+        :type part_instance_rename_template: str
         :param asynchronous: If true, immediately returns without activities (default = False)
         :type asynchronous: bool
         :return: list of cloned activities
@@ -1172,6 +1178,10 @@ class Client(object):
             exclude_model_ids=check_list_of_base(excluded_parts, cls=Part2, key='excluded_models') or [],
             part_parent_model_id=check_base(part_parent_model, Part2, 'part_parent_model'),
             part_parent_instance_id=check_base(part_parent_instance, Part2, 'part_parent_instance'),
+            cloned_part_models_rename_template=check_type(
+                part_model_rename_template, str, 'part_model_rename_template'),
+            cloned_part_instances_rename_template=check_type(
+                part_instance_rename_template, str, 'part_instnace_rename_template'),
             activities=activities,
         )
 

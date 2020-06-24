@@ -124,6 +124,7 @@ class TestWidgets(TestBetamax):
         for w in widget_set:
             with self.subTest(msg=w):
                 self.assertIsInstance(w, Widget)
+                self.assertEqual(self.activity.id, w._activity_id)
 
     def test_create_widget_in_activity(self):
         self.new_widget = self.client.create_widget(
