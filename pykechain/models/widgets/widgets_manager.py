@@ -1385,6 +1385,50 @@ class WidgetsManager(Iterable):
         )
         return widget
 
+    def add_weather_widget(self,
+                           weather_property: 'Property2',
+                           autofill: Optional[bool] = None,
+                           title: Optional[Union[bool, Text]] = False,
+                           parent_widget: Optional[Union[Widget, Text]] = None,
+
+                           **kwargs) -> Widget:
+        """
+        Add a KE-chain Weather widget to the Widgetmanager and the activity.
+
+        The widget will be saved in KE-chain.
+
+        :param weather_property: KE-chain Weather property to display
+        :type weather_property: Property2
+        :param title: A custom title for the script widget
+            * False (default): Script name
+            * String value: Custom title
+            * None: No title
+        :type title: bool or basestring or None
+        :param kwargs: additional keyword arguments to pass
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
+        """
+        weather_property = _retrieve_object(weather_property,
+                                            method=self._client.property)  # type: 'Property2'  # noqa
+        meta = _initiate_meta(kwargs, activity=self._activity_id)
+        meta, title = _set_title(meta, title=title, default_title=weather_property.name, **kwargs)
+
+        meta.update({
+            "propertyInstanceId": weather_property.id,
+        })
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.WEATHER,
+            meta=meta,
+            title=title,
+            parent=parent_widget,
+            writable_models=[weather_property.model_id],
+            **kwargs,
+        )
+        return widget
+
     #
     # Widget manager methods
     #

@@ -2,7 +2,8 @@ from unittest import TestCase
 
 from pykechain.enums import (WidgetTypes, ShowColumnTypes, FilterType, ProgressBarColors,
                              Category, LinkTargets, KEChainPages, WidgetTitleValue, Alignment, ActivityType,
-                             CardWidgetLinkValue, CardWidgetLinkTarget, ImageFitValue)
+                             CardWidgetLinkValue, CardWidgetLinkTarget, ImageFitValue, PropertyType, Classification,
+                             Multiplicity)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Activity2
 from pykechain.models.widgets import (
@@ -603,6 +604,25 @@ class TestWidgetManagerInActivity(TestBetamax):
                 with self.assertRaises(IllegalArgumentError):
                     self.wm.add_scope_widget(**inputs)
 
+    def test_weather_widget(self):
+        """Testing the weather widget."""
+        catalog_root_model = self.project.part(name='Catalog', classification=Classification.CATALOG,
+                                               category=Category.MODEL)
+        new_model = self.project.create_model_with_properties(parent=catalog_root_model,
+                                                              name='___TEST PART', multiplicity=Multiplicity.ONE,
+                                                              properties_fvalues=[
+                                                                  dict(name='weather',
+                                                                       property_type=PropertyType.WEATHER_VALUE)])
+        weather_prop_instance = new_model.instances()[0].property('weather')
+
+        self.new_widget = self.wm.add_weather_widget(
+            weather_property=weather_prop_instance,
+        )
+
+        # teardown
+        self.new_widget.delete()
+        new_model.delete()
+
     def test_insert_widget(self):
         bike_part = self.project.part('Bike')
         w0 = self.wm[0]  # meta panel
@@ -610,7 +630,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         w1, w2, w3 = [self.wm.add_propertygrid_widget(
             part_instance=bike_part,
             writable_models=bike_part.model().properties,
-            title='Original widget {i} (w{i})'.format(i=i+1),
+            title='Original widget {i} (w{i})'.format(i=i + 1),
         ) for i in range(3)]
 
         # if widget order is `[w0,w1,w2]` and inserting `w3` at index 1 (before Widget1);
