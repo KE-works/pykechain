@@ -1,7 +1,11 @@
 Change Log
 ==========
 
+v3.7.5 (29JUN20)
+----------------
+
 * :star: Added the Weather and GeoJSON property types to pykechain in correspondance with the backend version (core.pim 3.6.0). #787
+* :+1: dependent versions for development: mypy (0.782), requests (2.24.0), nbsphinx (0.7.1), semver (2.10.2)
 
 v3.7.4 (15JUN20)
 ----------------
