@@ -1,7 +1,11 @@
 Change Log
 ==========
 
+v.3.7.6 (30JUN20)
+-----------------
+
 * :star: Added the Weather Widget creating possibilities. #788
+* :+1: dependent versions for development: tox (3.16.0)
 
 v3.7.5 (29JUN20)
 ----------------
