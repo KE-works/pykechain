@@ -284,6 +284,7 @@ class WidgetTypes(Enum):
     :cvar SIGNATURE: Signature widget
     :cvar CARD: Card widget
     :cvar TASKS: Tasks widget
+    :cvar WEATHER: Weather widget
     """
 
     UNDEFINED = 'UNDEFINED'
@@ -304,6 +305,7 @@ class WidgetTypes(Enum):
     SIGNATURE = 'SIGNATURE'
     CARD = 'CARD'
     TASKS = 'TASKS'
+    WEATHER = 'WEATHER'
 
 
 WidgetCompatibleTypes = {

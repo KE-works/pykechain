@@ -1,6 +1,8 @@
 Change Log
 ==========
 
+* :star: Added the Weather Widget creating possibilities. #788
+
 v3.7.5 (29JUN20)
 ----------------
 
