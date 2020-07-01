@@ -1378,6 +1378,66 @@ class Client(object):
         )
         return self._create_part(action='create_proxy_model', data=data, **kwargs)
 
+    def _create_parts_bulk(
+            self,
+            parts: List[Dict],
+            **kwargs
+    ) -> List[Part2]:
+        """
+        Create multiple part instances simultaneously.
+
+        :param parts: list of dicts, each specifying a part instance. Available fields per dict:
+            * name: str
+            * description: str
+            * parent_id: str of parent instance
+            * model_id: str of part model
+            * properties: list of dicts, each specifying a property to update. Available fields per dict:
+                * name: str
+                * value: Any
+                * value_options: dict
+                * model_id: str of property model
+        :param kwargs:
+        :return: list of Part instances
+        :rtype list
+        """
+        check_list_of_dicts(
+            parts,
+            'parts',
+            [
+                'name',
+                'description',
+                'parent_id',
+                'model_id',
+                'properties',
+            ],
+        )
+
+        for part in parts:
+            check_list_of_dicts(
+                part.get('properties'),
+                'properties',
+                [
+                    'name',
+                    'value',
+                    'value_options',
+                    'model_id',
+                ],
+            )
+
+        # prepare url query parameters
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['parts2'])
+
+        response = self._request('POST', self._build_url('parts2_bulk_create'),
+                                 params=query_params, json=parts)
+
+        if response.status_code != requests.codes.created:
+            raise APIError("Could not create Parts", response=response)
+
+        part_jsons = response.json()['results']
+
+        return [Part2(client=self.client, j=j) for j in part_jsons]
+
     def create_property(
             self,
             model: Part2,
