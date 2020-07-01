@@ -1436,7 +1436,7 @@ class Client(object):
 
         part_jsons = response.json()['results']
 
-        return [Part2(client=self.client, j=j) for j in part_jsons]
+        return [Part2(client=self, json=j) for j in part_jsons]
 
     def create_property(
             self,
