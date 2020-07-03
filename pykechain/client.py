@@ -1158,7 +1158,7 @@ class Client(object):
         :rtype: list
         :raises APIError if cloned
         """
-        if self.match_app_version(label='wim', version=">=3.6.0"):
+        if self.match_app_version(label='kechain2.core.pim', version=">=3.6.0"):  # pragma: no cover
             raise APIError("Cloning of activities requires KE-chain version >= 3.6.0.")
 
         update_name = 'activity_update_dicts'
