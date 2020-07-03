@@ -1124,7 +1124,7 @@ class Client(object):
         """
         Clone multiple activities.
 
-    .. versionadded:: 3.7
+        .. versionadded:: 3.7
         The bulk clone activities with parts API is included in KE-chain backend since version 3.6.
 
         :param activities: list of Activity2 object or UUIDs
@@ -1158,6 +1158,9 @@ class Client(object):
         :rtype: list
         :raises APIError if cloned
         """
+        if self.match_app_version(label='wim', version=">=3.6.0"):
+            raise APIError("Cloning of activities requires KE-chain version >= 3.6.0.")
+
         update_name = 'activity_update_dicts'
         activity_ids = check_list_of_base(activities, cls=Activity2, key='activities')
         update_dicts = check_type(activity_update_dicts, dict, key=update_name) or dict()
