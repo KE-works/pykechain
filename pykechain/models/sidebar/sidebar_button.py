@@ -89,7 +89,7 @@ class SideBarButton(object):
     def __repr__(self) -> Text:
         return '{} {}: {}'.format(self.__class__.__name__, self.order, self.display_name)
 
-    def refresh(self, json: Dict) -> None:
+    def refresh(self, json: Optional[Dict] = None) -> None:
         """
         Refresh the object in-place using the provided json.
 
@@ -97,7 +97,7 @@ class SideBarButton(object):
         :type json: dict
         :return: None
         """
-        self.__init__(side_bar_manager=self._manager, json=json)
+        self.__init__(side_bar_manager=self._manager, json=json or self.as_dict())
 
     def edit(self, **kwargs) -> None:
         """
