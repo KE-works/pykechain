@@ -1175,7 +1175,7 @@ class Client(object):
             clone_parts=check_type(clone_parts, bool, 'clone_parts'),
             clone_part_instances=check_type(clone_part_instances, bool, 'clone_part_instances'),
             clone_children=check_type(clone_children, bool, 'clone_children'),
-            exclude_model_ids=check_list_of_base(excluded_parts, cls=Part2, key='excluded_models') or [],
+            exclude_model_ids=check_list_of_base(excluded_parts, Part2, 'excluded_models') or [],
             part_parent_model_id=check_base(part_parent_model, Part2, 'part_parent_model'),
             part_parent_instance_id=check_base(part_parent_instance, Part2, 'part_parent_instance'),
             cloned_part_models_rename_template=check_type(
