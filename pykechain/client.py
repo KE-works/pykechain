@@ -1124,6 +1124,9 @@ class Client(object):
         """
         Clone multiple activities.
 
+    .. versionadded:: 3.7
+        The bulk clone activities with parts API is included in KE-chain backend since version 3.6.
+
         :param activities: list of Activity2 object or UUIDs
         :type activities: list
         :param parent: parent Activity2 sub-process object or UUID
