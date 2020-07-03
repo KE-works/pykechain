@@ -103,6 +103,35 @@ class Scope2(Base, TagsMixin):
         options = self.options
         options.update({'representations': representation_options})
         self.options = options
+
+    @property
+    def workflow_root_process(self) -> 'Activity2':
+        return self.activity(id=self._json_data['workflow_root_id'])
+
+    @property
+    def app_root_process(self) -> 'Activity2':
+        return self.activity(id=self._json_data['app_root_id'])
+
+    @property
+    def catalog_root_process(self) -> 'Activity2':
+        return self.activity(id=self._json_data['catalog_root_id'])
+
+    @property
+    def product_root_model(self) -> 'Part2':
+        return self.model(id=self._json_data['product_model_id'])
+
+    @property
+    def product_root_instance(self) -> 'Part2':
+        return self.part(id=self._json_data['product_instance_id'])
+
+    @property
+    def catalog_root_model(self) -> 'Part2':
+        return self.model(id=self._json_data['catalog_model_id'])
+
+    @property
+    def catalog_root_instance(self) -> 'Part2':
+        return self.part(id=self._json_data['catalog_instance_id'])
+
     #
     # CRUD methods
     #
