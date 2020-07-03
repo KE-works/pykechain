@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+v3.7.7 ()
+---------
+
+* :+1: Implemented robust method to update Scope side-bar buttons with minimum number of requests using a context manager (e.g. `with scope.sidebar as manager` mechanism) (#654)
+* :+1: Included mapping dict from KE-chain native pages to their Font Awesome icons.
+
 v3.7.6 (30JUN20)
 -----------------
 
