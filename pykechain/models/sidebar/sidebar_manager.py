@@ -33,7 +33,7 @@ class SideBarManager(Iterable):
 
         return instance
 
-    def __init__(self, scope: 'Scope2',  **kwargs):
+    def __init__(self, scope: 'Scope2', **kwargs):
         """
         Create a side-bar manager object for the Scope2 object.
 
@@ -91,7 +91,7 @@ class SideBarManager(Iterable):
 
     def __enter__(self):
         """
-        Using the `with` keyword, you can postpone updates to KE-chain by creating a context manager.
+        Open context manager using the `with` keyword to postpone updates to KE-chain.
 
         >>> with scope.side_bar() as manager:
         >>>     button = manager.add_ke_chain_page(page_name=KEChainPages.EXPLORER)
@@ -142,7 +142,7 @@ class SideBarManager(Iterable):
         else:
             index = check_type(order, int, 'order')
 
-        button = SideBarButton(side_bar_manager=self, order=index,  *args, **kwargs)
+        button = SideBarButton(side_bar_manager=self, order=index, *args, **kwargs)
 
         self._buttons.insert(index, button)
 
