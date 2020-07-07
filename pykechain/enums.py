@@ -866,12 +866,9 @@ CardWidgetKEChainPageLink = {
     KEChainPages.DATA_MODEL: 'Model',
     KEChainPages.EXPLORER: 'Explorer',
     KEChainPages.SERVICES: 'Script',
-
-    # TODO task trees are not yet supported in the front-end
-    # https://git.ke-works.net/kew/KE-chain-3-FE/-/blob/develop-pim3/src/widgets/cardWidget/cardWidget.js#L85
-    KEChainPages.WORK_BREAKDOWN: 'Activities',
-    KEChainPages.CATALOG_WBS: 'Catalogus',
-    KEChainPages.APP_WBS: 'App',
+    KEChainPages.WORK_BREAKDOWN: 'Work Breakdown',
+    KEChainPages.CATALOG_WBS: 'Catalog Tasks',
+    KEChainPages.APP_WBS: 'App Tasks',
 }
 
 KEChainPageIcons = {
