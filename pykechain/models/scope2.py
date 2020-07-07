@@ -47,6 +47,14 @@ class Scope2(Base, TagsMixin):
         # for 'kechain2.core.wim >=2.0.0'
         self.workflow_root = json.get('workflow_root_id')
 
+        self._workflow_root_process = None
+        self._catalog_root_process = None
+        self._app_root_process = None
+        self._product_root_model = None
+        self._product_root_instance = None
+        self._catalog_root_model = None
+        self._catalog_root_instance = None
+
         self.ref = json.get('ref')
         self.description = json.get('text')
         self.status = json.get('status')
@@ -103,6 +111,56 @@ class Scope2(Base, TagsMixin):
         options = self.options
         options.update({'representations': representation_options})
         self.options = options
+
+    @property
+    def workflow_root_process(self) -> 'Activity2':
+        """Retrieve the Activity2 root object with classification WORKFLOW."""
+        if self._workflow_root_process is None:
+            self._workflow_root_process = self.activity(id=self._json_data['workflow_root_id'])
+        return self._workflow_root_process
+
+    @property
+    def app_root_process(self) -> 'Activity2':
+        """Retrieve the Activity2 root object with classification APP."""
+        if self._app_root_process is None:
+            self._app_root_process = self.activity(id=self._json_data['app_root_id'])
+        return self._app_root_process
+
+    @property
+    def catalog_root_process(self) -> 'Activity2':
+        """Retrieve the Activity2 root object with classification CATALOG."""
+        if self._catalog_root_process is None:
+            self._catalog_root_process = self.activity(id=self._json_data['catalog_root_id'])
+        return self._catalog_root_process
+
+    @property
+    def product_root_model(self) -> 'Part2':
+        """Retrieve the Part2 root object with classification PRODUCT and category MODEL."""
+        if self._product_root_model is None:
+            self._product_root_model = self.model(id=self._json_data['product_model_id'])
+        return self._product_root_model
+
+    @property
+    def product_root_instance(self) -> 'Part2':
+        """Retrieve the Part2 root object with classification PRODUCT and category INSTANCE."""
+        if self._product_root_instance is None:
+            self._product_root_instance = self.part(id=self._json_data['product_instance_id'])
+        return self._product_root_instance
+
+    @property
+    def catalog_root_model(self) -> 'Part2':
+        """Retrieve the Part2 root object with classification CATALOG and category MODEL."""
+        if self._catalog_root_model is None:
+            self._catalog_root_model = self.model(id=self._json_data['catalog_model_id'])
+        return self._catalog_root_model
+
+    @property
+    def catalog_root_instance(self) -> 'Part2':
+        """Retrieve the Part2 root object with classification CATALOG and category INSTANCE."""
+        if self._catalog_root_instance is None:
+            self._catalog_root_instance = self.part(id=self._json_data['catalog_instance_id'])
+        return self._catalog_root_instance
+
     #
     # CRUD methods
     #

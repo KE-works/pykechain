@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+v3.7.7 ()
+---------
+
+* :+1: Added properties to retrieve the root Activity and Part objects of a Scope. (#799)
+* :+1: Added bulk-clone of activities, including associated data models. (#737)
+
 v3.7.6 (30JUN20)
 -----------------
 
