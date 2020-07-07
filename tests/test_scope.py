@@ -61,6 +61,19 @@ class TestScopes(TestBetamax):
 
         self.assertIsInstance(side_bar_manager, SideBarManager)
 
+    def test_root_properties(self):
+        for value in [
+            self.project.workflow_root_process,
+            self.project.catalog_root_process,
+            self.project.app_root_process,
+            self.project.product_root_model,
+            self.project.product_root_instance,
+            self.project.catalog_root_model,
+            self.project.catalog_root_instance,
+        ]:
+            with self.subTest(''):
+                self.assertIsNotNone(value)
+
 
 class TestScopeMembers(TestBetamax):
     """
