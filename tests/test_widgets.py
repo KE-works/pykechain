@@ -430,7 +430,8 @@ class TestWidgetManagerInActivity(TestBetamax):
                 card_widget = self.wm.add_card_widget(title=native_page_name, link=native_page_name)
                 self.assertIsInstance(card_widget, CardWidget)
 
-        self.assertEqual(len(self.wm), 8, msg='New KE-chain page has been added to the Enum.')
+        self.assertEqual(len(self.wm), 9, msg='New KE-chain page has been added to the Enum, '
+                                              'check if the mapping dicts in enums.py need updating too!')
 
     def test_service_widget(self):
         service_gears_successful = self.project.service("Service Gears - Successful")
