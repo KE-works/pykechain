@@ -1108,11 +1108,11 @@ class Client(object):
     def clone_activities(
         self,
         activities: List[Union[Activity2, Text]],
-        parent: Union[Activity2, Text],
+        activity_parent: Union[Activity2, Text],
         activity_update_dicts: Optional[Dict] = None,
-        clone_parts: Optional[bool] = False,
-        clone_part_instances: Optional[bool] = True,
-        clone_children: Optional[bool] = True,
+        include_part_models: Optional[bool] = False,
+        include_part_instances: Optional[bool] = True,
+        include_children: Optional[bool] = True,
         excluded_parts: Optional[List[Text]] = None,
         part_parent_model: Optional[Union[Part2, Text]] = None,
         part_parent_instance: Optional[Union[Part2, Text]] = None,
@@ -1129,18 +1129,18 @@ class Client(object):
 
         :param activities: list of Activity2 object or UUIDs
         :type activities: list
-        :param parent: parent Activity2 sub-process object or UUID
-        :type parent: Activity2
+        :param activity_parent: parent Activity2 sub-process object or UUID
+        :type activity_parent: Activity2
         :param activity_update_dicts: (O) dict of dictionaries, each key-value combination relating to an activity
         to clone and a dict of new values to assign, e.g. `{activity.id: {"name": "Cloned activity"}}`
         :type activity_update_dicts: dict
-        :param clone_parts: (O) whether to clone the data models configured in the activities, defaults to False
-        :type clone_parts: bool
-        :param clone_part_instances: (O) whether to clone the part instances of the data model configured in the
+        :param include_part_models: (O) whether to clone the data models configured in the activities, defaults to False
+        :type include_part_models: bool
+        :param include_part_instances: (O) whether to clone the part instances of the data model configured in the
             activities, defaults to True
-        :type clone_part_instances: bool
-        :param clone_children: (O) whether to clone child parts
-        :type clone_children: bool
+        :type include_part_instances: bool
+        :param include_children: (O) whether to clone child parts
+        :type include_children: bool
         :param excluded_parts: (O) list of Part2 objects or UUIDs to exclude from being cloned,
             maintaining the original configuration of the widgets.
         :type excluded_parts: list
@@ -1177,16 +1177,16 @@ class Client(object):
         activities = [dict(id=uuid, **update_dicts.get(uuid, {})) for uuid in activity_ids]
 
         data = dict(
-            parent_id=check_base(parent, cls=Activity2, key='parent'),
-            clone_parts=check_type(clone_parts, bool, 'clone_parts'),
-            clone_part_instances=check_type(clone_part_instances, bool, 'clone_part_instances'),
-            clone_children=check_type(clone_children, bool, 'clone_children'),
-            exclude_model_ids=check_list_of_base(excluded_parts, Part2, 'excluded_models') or [],
+            activity_parent_id=check_base(activity_parent, cls=Activity2, key='parent'),
+            include_part_models=check_type(include_part_models, bool, 'clone_parts'),
+            include_part_instances=check_type(include_part_instances, bool, 'clone_part_instances'),
+            include_part_children=check_type(include_children, bool, 'clone_children'),
+            excluded_part_ids=check_list_of_base(excluded_parts, Part2, 'excluded_models') or [],
             part_parent_model_id=check_base(part_parent_model, Part2, 'part_parent_model'),
             part_parent_instance_id=check_base(part_parent_instance, Part2, 'part_parent_instance'),
-            cloned_part_models_rename_template=check_type(
+            part_models_rename_template=check_type(
                 part_model_rename_template, str, 'part_model_rename_template'),
-            cloned_part_instances_rename_template=check_type(
+            part_instances_rename_template=check_type(
                 part_instance_rename_template, str, 'part_instnace_rename_template'),
             activities=activities,
         )
@@ -1206,8 +1206,8 @@ class Client(object):
 
         cloned_activities = [Activity2(d, client=self) for d in response.json()['results']]
 
-        if isinstance(parent, Activity2):
-            parent._populate_cached_children(cloned_activities)
+        if isinstance(activity_parent, Activity2):
+            activity_parent._populate_cached_children(cloned_activities)
 
         return cloned_activities
 

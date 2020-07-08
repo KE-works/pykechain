@@ -221,7 +221,7 @@ class TestActivityClone(TestBetamax):
         self.assertIsNone(response)
 
     def test_async_via_client(self):
-        response = self.client.clone_activities(activities=[self.task], parent=self.process, asynchronous=True)
+        response = self.client.clone_activities(activities=[self.task], activity_parent=self.process, asynchronous=True)
 
         self.assertIsInstance(response, list)
         self.assertFalse(response)
@@ -240,8 +240,7 @@ class TestActivityCloneParts(TestBetamax):
             name='__TEST CLONE TASK')
 
         # Create part model to copy along
-        catalog_root = self.project.model(name='Catalog')
-        intermediate = catalog_root.add_model(
+        intermediate = self.project.catalog_root_model.add_model(
             name='__TEST CLONE INTERMEDIATE MODEL',
             multiplicity=Multiplicity.ONE)
         source_parent_model = intermediate.add_model(
@@ -274,8 +273,7 @@ class TestActivityCloneParts(TestBetamax):
         )
 
         # Create target parents to move to
-        product_root = self.project.model(name='Product')
-        self.target_parent_model = product_root.add_model(
+        self.target_parent_model = self.project.product_root_model.add_model(
             name='__TEST CLONE TARGET PARENT',
             multiplicity=Multiplicity.ONE)
         self.parent_instance = self.target_parent_model.instance()
@@ -296,11 +294,11 @@ class TestActivityCloneParts(TestBetamax):
         """Copy a data model from the catalog to the product data model tree"""
         clones = self.client.clone_activities(
             activities=[self.task],
-            parent=self.process,
+            activity_parent=self.process,
             activity_update_dicts={self.task.id: {'name': '__TEST CLONE ACTIVITY WITH PARTS'}},
-            clone_parts=True,
-            clone_instances=True,
-            clone_children=True,
+            include_part_models=True,
+            include_part_instances=True,
+            include_children=True,
             part_parent_model=self.target_parent_model,
             part_parent_instance=self.parent_instance,
             asynchronous=False,
@@ -315,11 +313,11 @@ class TestActivityCloneParts(TestBetamax):
         """Exclude the bike model from the copy"""
         clones = self.client.clone_activities(
             activities=[self.task],
-            parent=self.process,
+            activity_parent=self.process,
             activity_update_dicts={self.task.id: {'name': '__TEST CLONE ACTIVITY WITH PARTS'}},
-            clone_parts=True,
-            clone_instances=True,
-            clone_children=True,
+            include_part_models=True,
+            include_part_instances=True,
+            include_children=True,
             excluded_parts=[self.bike_instance],
             part_parent_model=self.target_parent_model,
             part_parent_instance=self.parent_instance,
