@@ -477,3 +477,37 @@ class TestPIM2SpecificPartTests(TestBetamax):
         siblings_of_root_node = product_root_node.parent().siblings()
         self.assertIsInstance(siblings_of_root_node, PartSet)
         self.assertEqual(len(siblings_of_root_node), 0)
+
+    def test_bulk_create_parts(self):
+        bike_part = self.project.part(name="Bike")
+        wheel_model = self.project.model(name="Wheel")
+        parts = 1000 * [{
+            "name": "Mid Wheel",
+            "parent_id": bike_part.id,
+            "description": "",
+            "model_id": wheel_model.id,
+            "properties": [{
+                    "name": "Diameter",
+                    "value": 15.4,
+                    "model_id": wheel_model.property(name="Diameter").id
+                },
+                {
+                    "name": "Spokes",
+                    "value": 21,
+                    "model_id": wheel_model.property(name="Spokes").id
+                },
+                {
+                    "name": "Rim Material",
+                    "value": "Titanium",
+                    "model_id": wheel_model.property(name="Rim Material").id
+                },
+                {
+                    "name": "Tire Thickness",
+                    "value": 6.69,
+                    "model_id": wheel_model.property(name="Tire Thickness").id
+                }
+            ]
+        }]
+        self.client._create_parts_bulk(
+            parts=parts
+        )

@@ -78,10 +78,10 @@ def check_list_of_dicts(list_of_dicts: Optional[Iterable[Dict]],
                 for field in fields:
                     if field not in dictionary:
                         missing_fields.add(field)
-            if missing_fields:
-                raise IllegalArgumentError('Not every dict contains the required fields: "{}"\n'
-                                           'Missing fields: "{}"'.format('", "'.join(fields),
-                                                                         '", "'.join(list(missing_fields))))
+            # if missing_fields:
+                # raise IllegalArgumentError('Not every dict contains the required fields: "{}"\n'
+                #                            'Missing fields: "{}"'.format('", "'.join(fields),
+                #                                                          '", "'.join(list(missing_fields))))
     return list_of_dicts
 
 
