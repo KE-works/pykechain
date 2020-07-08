@@ -110,7 +110,7 @@ class SideBarButton(object):
             if hasattr(self, key):
                 setattr(self, key, value)
 
-        self._manager._update(buttons=self._manager._buttons)
+        self._manager._update()
 
     def delete(self) -> None:
         """

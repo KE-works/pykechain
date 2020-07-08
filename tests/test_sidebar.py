@@ -167,6 +167,8 @@ class TestSideBar(TestBetamax):
     def test_context_manager(self):
         with SideBarManager(scope=self.scope) as bulk_creation_manager:
 
+            bulk_creation_manager.override_sidebar = True
+
             bulk_creation_manager.add_task_button(
                 activity=self.scope.activities()[0],
                 icon='bookmark',
@@ -190,3 +192,5 @@ class TestSideBar(TestBetamax):
         updated_side_bar_buttons = self.scope.options.get('customNavigation')
         self.assertTrue(len(updated_side_bar_buttons) == 3,
                         msg='At the end of bulk creation, the buttons must have been created.')
+
+        self.assertTrue(self.scope.options.get('overrideSidebar'))
