@@ -835,6 +835,7 @@ class KEChainPages(Enum):
     EXPLORER = 'product'
     SERVICES = 'scripts'
     CATALOG_WBS = 'catalogtree'
+    APP_WBS = 'apptree'
 
 
 KEChainPageLabels = {
@@ -842,6 +843,7 @@ KEChainPageLabels = {
     KEChainPages.TASKS: 'Tasks',
     KEChainPages.WORK_BREAKDOWN: 'Work Breakdown',
     KEChainPages.CATALOG_WBS: 'Catalog',
+    KEChainPages.APP_WBS: 'App Screens',
     KEChainPages.DATA_MODEL: 'Data model',
     KEChainPages.EXPLORER: 'Explorer',
     KEChainPages.SERVICES: 'Scripts',
@@ -852,6 +854,7 @@ KEChainPageLabels_nl = {
     KEChainPages.TASKS: 'Taken',
     KEChainPages.WORK_BREAKDOWN: 'Taakverdeling',
     KEChainPages.CATALOG_WBS: 'Catalogus',
+    KEChainPages.APP_WBS: 'App schermen',
     KEChainPages.DATA_MODEL: 'Data model',
     KEChainPages.EXPLORER: 'Explorer',
     KEChainPages.SERVICES: 'Scripts',
@@ -860,11 +863,23 @@ KEChainPageLabels_nl = {
 CardWidgetKEChainPageLink = {
     KEChainPages.DETAIL: 'Project',
     KEChainPages.TASKS: 'Tasks',
-    KEChainPages.WORK_BREAKDOWN: 'Activities',
-    KEChainPages.CATALOG_WBS: 'Catalogus',
     KEChainPages.DATA_MODEL: 'Model',
     KEChainPages.EXPLORER: 'Explorer',
     KEChainPages.SERVICES: 'Script',
+    KEChainPages.WORK_BREAKDOWN: 'Work Breakdown',
+    KEChainPages.CATALOG_WBS: 'Catalog Tasks',
+    KEChainPages.APP_WBS: 'App Tasks',
+}
+
+KEChainPageIcons = {
+    KEChainPages.DETAIL: 'bookmark',
+    KEChainPages.TASKS: 'edit',
+    KEChainPages.WORK_BREAKDOWN: 'sitemap',
+    KEChainPages.CATALOG_WBS: 'books',
+    KEChainPages.APP_WBS: 'tablet-alt',
+    KEChainPages.DATA_MODEL: 'cube',
+    KEChainPages.EXPLORER: 'folder',
+    KEChainPages.SERVICES: 'file-code',
 }
 
 

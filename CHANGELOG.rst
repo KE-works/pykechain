@@ -4,6 +4,8 @@ Change Log
 v3.7.7 ()
 ---------
 
+* :+1: Implemented robust method to update Scope side-bar buttons with minimum number of requests using a context manager (e.g. `with scope.sidebar as manager` mechanism) (#654)
+* :+1: Included mapping dict from KE-chain native pages to their Font Awesome icons.
 * :+1: Added properties to retrieve the root Activity and Part objects of a Scope. (#799)
 * :+1: Added bulk-clone of activities, including associated data models. (#737)
 

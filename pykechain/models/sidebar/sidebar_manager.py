@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 from typing import Any, Optional, Text, List, Dict
 
-from pykechain.enums import URITarget, SubprocessDisplayMode, KEChainPages, KEChainPageLabels
+from pykechain.enums import URITarget, SubprocessDisplayMode, KEChainPages, KEChainPageLabels, KEChainPageIcons
 from pykechain.exceptions import NotFoundError
 from pykechain.models.input_checks import check_url, check_text, check_enum, check_list_of_dicts, check_type
 from pykechain.models.sidebar.sidebar_button import SideBarButton
@@ -20,7 +20,6 @@ class SideBarManager(Iterable):
     """
 
     __existing_managers = dict()  # storage of manager objects to enforce 1 manager object per Scope
-    _perform_bulk_creation = None  # ensure every instance has this attribute, regardless of the __init__ function.
 
     def __new__(cls, scope: 'Scope2', *args, **kwargs):
         """Overwrite superclass method to enforce singleton manager per Scope2 object."""
@@ -34,7 +33,7 @@ class SideBarManager(Iterable):
 
         return instance
 
-    def __init__(self, scope: 'Scope2', bulk_creation: Optional[bool] = False, **kwargs):
+    def __init__(self, scope: 'Scope2', **kwargs):
         """
         Create a side-bar manager object for the Scope2 object.
 
@@ -47,18 +46,19 @@ class SideBarManager(Iterable):
 
         from pykechain.models import Scope2
         check_type(scope, Scope2, 'scope')
-        check_type(bulk_creation, bool, 'bulk_creation')
 
         self.scope = scope  # type: Scope2
         self._override = scope.options.get('overrideSidebar', False)  # type: bool
-        self._scope_uri = "#/scopes/{}".format(self.scope.id)
 
-        self._perform_bulk_creation = bulk_creation  # type: bool
+        self._scope_uri = "#/scopes/{}".format(self.scope.id)
+        self._perform_bulk_creation = False
+
+        self._buttons = []  # type: List[SideBarButton]
 
         # Load existing buttons from the scope
-        self._buttons = []  # type: List[SideBarButton]
         for button_dict in scope.options.get('customNavigation', []):
             self._buttons.append(SideBarButton(side_bar_manager=self, json=button_dict))
+
         self._iter = iter(self._buttons)
 
     def __repr__(self) -> Text:  # pragma: no cover
@@ -79,21 +79,30 @@ class SideBarManager(Iterable):
         found = None
         if isinstance(key, SideBarButton):
             found = find(self._buttons, lambda b: b == key)
+
         if isinstance(key, int):
             found = self._buttons[key]
         elif isinstance(key, str):
-            found = find(self._buttons, lambda p: key == p.title or key == p.ref)
+            found = find(self._buttons, lambda p: key == p.display_name)
 
         if found is not None:
             return found
         raise NotFoundError("Could not find button with index or name '{}'".format(key))
 
-    def __del__(self) -> None:
-        """Prior to deletion of the manager, an update to KE-chain is performed using the latest configuration."""
-        if self._perform_bulk_creation:
-            # Set bulk creation to False in order for update to proceed correctly
-            self._perform_bulk_creation = False
-            self._update(buttons=self._buttons, override_sidebar=self._override)
+    def __enter__(self):
+        """
+        Open context manager using the `with` keyword to postpone updates to KE-chain.
+
+        >>> with scope.side_bar() as manager:
+        >>>     button = manager.add_ke_chain_page(page_name=KEChainPages.EXPLORER)
+        >>>     manager.insert(index=0, button=button)
+        """
+        self._perform_bulk_creation = True
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._perform_bulk_creation = False
+        self._update(buttons=self._buttons, override_sidebar=self._override)
 
     def remove(self, key: Any) -> None:
         """
@@ -114,6 +123,9 @@ class SideBarManager(Iterable):
         :param button: a side-bar button object
         :type button: SideBarButton
         """
+        if button in self._buttons:
+            self._buttons.remove(button)
+
         self._buttons.insert(check_type(index, int, 'index'), button)
 
     def create_button(self, order: Optional[int] = None, *args, **kwargs) -> SideBarButton:
@@ -162,10 +174,7 @@ class SideBarManager(Iterable):
 
         uri = '{}/{}/{}'.format(self._scope_uri, task_display_mode, activity.id)
 
-        if activity.scope_id == self.scope.id:
-            uri_target = URITarget.INTERNAL
-        else:
-            uri_target = URITarget.EXTERNAL
+        uri_target = URITarget.INTERNAL if activity.scope_id == self.scope.id else URITarget.EXTERNAL
 
         return self.create_button(uri=uri, uri_target=uri_target, title=title, *args, **kwargs)
 
@@ -185,10 +194,13 @@ class SideBarManager(Iterable):
         """
         page_name = check_enum(page_name, KEChainPages, 'page_name')
         title = check_text(title, 'title') or KEChainPageLabels[page_name]
+        icon = KEChainPageIcons[page_name]
+        if 'icon' in kwargs:
+            icon = kwargs.pop('icon')
 
         uri = '{}/{}'.format(self._scope_uri, page_name)
 
-        return self.create_button(uri=uri, uri_target=URITarget.INTERNAL, title=title, *args, **kwargs)
+        return self.create_button(uri=uri, uri_target=URITarget.INTERNAL, title=title, icon=icon, *args, **kwargs)
 
     def add_external_button(self, url: Text, title: Text, *args, **kwargs) -> SideBarButton:
         """
