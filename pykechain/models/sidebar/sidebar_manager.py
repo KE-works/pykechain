@@ -102,7 +102,7 @@ class SideBarManager(Iterable):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._perform_bulk_creation = False
-        self._update(buttons=self._buttons, override_sidebar=self._override)
+        self._update()
 
     def remove(self, key: Any) -> None:
         """
@@ -146,7 +146,7 @@ class SideBarManager(Iterable):
 
         self._buttons.insert(index, button)
 
-        self._update(buttons=self._buttons)
+        self._update()
 
         return button
 
@@ -240,7 +240,8 @@ class SideBarManager(Iterable):
 
             self._buttons.append(button)
 
-        self._update(buttons=self._buttons, override_sidebar=override_sidebar)
+        self.override_sidebar = override_sidebar
+        self._update()
 
         return self._buttons
 
@@ -253,7 +254,7 @@ class SideBarManager(Iterable):
         """
         button = self[key]
         self._buttons.remove(button)
-        self._update(buttons=self._buttons)
+        self._update()
 
     @property
     def override_sidebar(self) -> bool:
@@ -276,13 +277,12 @@ class SideBarManager(Iterable):
         """
         check_type(value, bool, 'override_sidebar')
         self._override = value
-        self._update(override_sidebar=value)
+        self._update()
 
-    def _update(self, **kwargs) -> None:
+    def _update(self) -> None:
         """
         Update the side-bar using the scope.options attribute.
 
-        :param kwargs: all keywords valid for scope.options
         :return: None
         :rtype None
         """
@@ -292,17 +292,13 @@ class SideBarManager(Iterable):
 
         options = dict(self.scope.options)
 
-        buttons = kwargs.pop('buttons', list())
-        override = kwargs.pop('override_sidebar', self.scope.options.get('overrideSidebar'))
-
         custom_navigation = list()
-        for button in buttons:
+        for button in self._buttons:
             custom_navigation.append(button.as_dict())
 
         options.update(
             customNavigation=custom_navigation,
-            overrideSidebar=override,
-            **kwargs
+            overrideSidebar=self._override,
         )
 
         self.scope.options = options
