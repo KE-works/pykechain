@@ -1382,7 +1382,7 @@ class Client(object):
             self,
             parts: List[Dict],
             **kwargs
-    ) -> List[Part2]:
+    ) -> PartSet:
         """
         Create multiple part instances simultaneously.
 
@@ -1400,43 +1400,45 @@ class Client(object):
         :return: list of Part instances
         :rtype list
         """
-        check_list_of_dicts(
-            parts,
-            'parts',
-            [
-                'name',
-                'description',
-                'parent_id',
-                'model_id',
-                'properties',
-            ],
-        )
-
-        for part in parts:
-            check_list_of_dicts(
-                part.get('properties'),
-                'properties',
-                [
-                    'name',
-                    'value',
-                    'value_options',
-                    'model_id',
-                ],
-            )
-
+        # check_list_of_dicts(
+        #     parts,
+        #     'parts',
+        #     [
+        #         'name',
+        #         'description',
+        #         'parent_id',
+        #         'model_id',
+        #         'properties',
+        #     ],
+        # )
+        #
+        # for part in parts:
+        #     check_list_of_dicts(
+        #         part.get('properties'),
+        #         'properties',
+        #         [
+        #             'name',
+        #             'value',
+        #             'value_options',
+        #             'model_id',
+        #         ],
+        #     )
+        parts = {"parts": parts}
         # prepare url query parameters
         query_params = kwargs
         query_params.update(API_EXTRA_PARAMS['parts2'])
-
+        import time
+        start = time.time()
         response = self._request('POST', self._build_url('parts2_bulk_create'),
                                  params=query_params, json=parts)
-
+        end = time.time()
+        print(end-start)
         if response.status_code != requests.codes.created:
             raise APIError("Could not create Parts", response=response)
 
         part_jsons = response.json()['results']
 
-        return [Part2(client=self, json=j) for j in part_jsons]
+        return PartSet(parts=part_jsons)
 
     def create_property(
             self,
