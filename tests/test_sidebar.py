@@ -65,10 +65,10 @@ class TestSideBar(TestBetamax):
     def test_create_button_incorrect_arguments(self):
         with self.assertRaises(IllegalArgumentError):
             SideBarButton(self.manager, order='3')
-            
+
         with self.assertRaises(IllegalArgumentError):
             SideBarButton(self.manager, order=1, title=False)
-            
+
         with self.assertRaises(IllegalArgumentError):
             SideBarButton(self.manager, order=1, title='Button', icon=32)
 
@@ -82,11 +82,11 @@ class TestSideBar(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             SideBarButton(self.manager, order=1, title='Button', icon='pennant', uri='http://www.google.com',
                           icon_mode='best')
-            
+
         with self.assertRaises(IllegalArgumentError):
             SideBarButton(self.manager, order=1, title='Button', icon='pennant', uri='http://www.google.com',
                           random='unsupported keyword')
-            
+
     def test_edit_button(self):
         new_button = self.manager.create_button(**self.default_button_config)
 
@@ -98,7 +98,7 @@ class TestSideBar(TestBetamax):
         new_button.delete()
 
         self.assertNotIn(new_button, self.manager)
-        
+
     def test_get_button(self):
         new_button = self.manager.create_button(**self.default_button_config)
 
@@ -183,14 +183,34 @@ class TestSideBar(TestBetamax):
                 icon='sitemap',
             )
 
-            self.assertNotIn('customNavigation', self.scope.options,
+            self.assertEqual(0, len(self.scope.options['customNavigation']),
                              msg='During bulk creation of buttons, KE-chain should not be updated yet.')
 
-        self.assertIn('customNavigation', self.scope.options,
-                      msg='After closing the context `with`, update should be performed.')
+        self.assertEqual(3, len(self.scope.options['customNavigation']),
+                         msg='After closing the context `with`, update should be performed.')
 
         updated_side_bar_buttons = self.scope.options.get('customNavigation')
         self.assertTrue(len(updated_side_bar_buttons) == 3,
                         msg='At the end of bulk creation, the buttons must have been created.')
 
-        self.assertTrue(self.scope.options.get('overrideSidebar'))
+        self.assertTrue(self.scope.options.get('overrideSideBar'))
+
+    def test_load_buttons(self):
+        # setup: create a custom button
+        with self.scope.side_bar() as sbm:
+            sbm.override_sidebar = True
+            sbm.add_ke_chain_page(KEChainPages.WORK_BREAKDOWN)
+
+        # setup: delete scope object (and the sidebar manager) and reload it
+        scope_id = self.scope.id
+        del self.scope
+        self.scope = self.client.scope(id=scope_id)
+
+        # testing: delete original button (this tests the "load") and add another one
+        with self.scope.side_bar() as sbm:
+            for button in sbm:
+                sbm.delete_button(button)
+            sbm.override_sidebar = True
+            sbm.add_ke_chain_page(KEChainPages.TASKS)
+
+        self.assertEqual(1, len(self.scope.options.get('customNavigation')))

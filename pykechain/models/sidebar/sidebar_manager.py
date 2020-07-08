@@ -298,7 +298,7 @@ class SideBarManager(Iterable):
 
         options.update(
             customNavigation=custom_navigation,
-            overrideSidebar=self._override,
+            overrideSideBar=self._override,
         )
 
         self.scope.options = options
