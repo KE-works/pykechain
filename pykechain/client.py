@@ -1111,7 +1111,7 @@ class Client(object):
         activity_parent: Union[Activity2, Text],
         activity_update_dicts: Optional[Dict] = None,
         include_part_models: Optional[bool] = False,
-        include_part_instances: Optional[bool] = True,
+        include_part_instances: Optional[bool] = False,
         include_children: Optional[bool] = True,
         excluded_parts: Optional[List[Text]] = None,
         part_parent_model: Optional[Union[Part2, Text]] = None,
@@ -1187,7 +1187,7 @@ class Client(object):
             part_models_rename_template=check_type(
                 part_model_rename_template, str, 'part_model_rename_template'),
             part_instances_rename_template=check_type(
-                part_instance_rename_template, str, 'part_instnace_rename_template'),
+                part_instance_rename_template, str, 'part_instance_rename_template'),
             activities=activities,
         )
 

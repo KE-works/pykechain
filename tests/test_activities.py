@@ -266,7 +266,8 @@ class TestActivityCloneParts(TestBetamax):
             all_readable=True,
         )
 
-        self.bike_instance = self.project.model('Bike').instance()
+        self.bike_model = self.project.model('Bike')
+        self.bike_instance = self.bike_model.instance()
         wm.add_propertygrid_widget(
             part_instance=self.bike_instance,
             all_readable=True,
@@ -318,7 +319,7 @@ class TestActivityCloneParts(TestBetamax):
             include_part_models=True,
             include_part_instances=True,
             include_children=True,
-            excluded_parts=[self.bike_instance],
+            excluded_parts=[self.bike_model, self.bike_instance],
             part_parent_model=self.target_parent_model,
             part_parent_instance=self.parent_instance,
             asynchronous=False,
