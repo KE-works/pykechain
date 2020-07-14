@@ -1,6 +1,7 @@
+import datetime
 from unittest import skipIf
 
-from pykechain.enums import Multiplicity, Category, Classification
+from pykechain.enums import Multiplicity, Category, Classification, PropertyType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import PartSet, Part2
 from tests.classes import TestBetamax
@@ -478,19 +479,19 @@ class TestPIM2SpecificPartTests(TestBetamax):
         self.assertIsInstance(siblings_of_root_node, PartSet)
         self.assertEqual(len(siblings_of_root_node), 0)
 
-    def test_bulk_create_parts(self):
+    def test_bulk_create_parts_2(self):
         bike_part = self.project.part(name="Bike")
         wheel_model = self.project.model(name="Wheel")
-        parts = 1000 * [{
+        parts = 3 * [{
             "name": "Mid Wheel",
             "parent_id": bike_part.id,
             "description": "",
             "model_id": wheel_model.id,
             "properties": [{
-                    "name": "Diameter",
-                    "value": 15.4,
-                    "model_id": wheel_model.property(name="Diameter").id
-                },
+                "name": "Diameter",
+                "value": 15.4,
+                "model_id": wheel_model.property(name="Diameter").id
+            },
                 {
                     "name": "Spokes",
                     "value": 21,
@@ -511,3 +512,117 @@ class TestPIM2SpecificPartTests(TestBetamax):
         self.client._create_parts_bulk(
             parts=parts
         )
+
+
+# @skipIf(not TEST_FLAG_IS_PIM3, reason="This tests is designed for PIM version 3, expected to fail on older PIM3")
+class TestBulkPartsCreation(TestBetamax):
+    def setUp(self):
+        super().setUp()
+        self.product_model = self.project.model(name="Product")
+        self.part_model = self.project.create_model(name="Part", parent=self.product_model)
+        self.text_prop = self.part_model.add_property(name="Text Property", property_type=PropertyType.TEXT_VALUE)
+        self.char_prop = self.part_model.add_property(name="Char Property", property_type=PropertyType.CHAR_VALUE)
+        self.int_prop = self.part_model.add_property(name="Int Property", property_type=PropertyType.INT_VALUE)
+        self.float_prop = self.part_model.add_property(name="Float Property", property_type=PropertyType.FLOAT_VALUE)
+        self.bool_prop = self.part_model.add_property(
+            name="Boolean Property", property_type=PropertyType.BOOLEAN_VALUE)
+        self.date_prop = self.part_model.add_property(name="Date Property", property_type=PropertyType.DATE_VALUE)
+        self.datetime_prop = self.part_model.add_property(
+            name="Datetime Property", property_type=PropertyType.DATETIME_VALUE)
+        self.attachment_prop = self.part_model.add_property(
+            name="Attach Property", property_type=PropertyType.ATTACHMENT_VALUE)
+        self.link_prop = self.part_model.add_property(name="Link Property", property_type=PropertyType.LINK_VALUE)
+        self.ss_prop = self.part_model.add_property(
+            name="SS Property", property_type=PropertyType.SINGLE_SELECT_VALUE)
+        self.ss_prop.options = ["1", "2", "3", "4", "5"]
+        self.ms_prop = self.part_model.add_property(
+            name="MS Property", property_type=PropertyType.MULTI_SELECT_VALUE,
+            options={"value_choices": ["1", "2", "3", "4", "5"]})
+        self.part_ref_prop = self.part_model.add_property(
+            name="Part ref Property", property_type=PropertyType.REFERENCES_VALUE,
+            default_value=self.project.model(name="Wheel").id)
+        self.geo_info_prop = self.part_model.add_property(
+            name="Geo Property", property_type=PropertyType.GEOJSON_VALUE)
+        self.weather_prop = self.part_model.add_property(
+            name="Weather Property", property_type=PropertyType.WEATHER_VALUE)
+        self.act_ref_prop = self.part_model.add_property(
+            name="Act Property", property_type=PropertyType.ACTIVITY_REFERENCES_VALUE)
+
+    def tearDown(self):
+        self.part_model.delete()
+
+    """Bulk parts creation"""
+    def test_bulk_create_parts(self):
+        product_part = self.project.part(name="Product")
+        new_parts = list()
+        for i in range(1, 6):
+            part_dict = {
+                "name": "Part {}".format(i),
+                "parent_id": product_part.id,
+                "description": "Description part {}".format(i),
+                "model_id": self.part_model.id,
+                "properties": [
+                    {
+                        "name": self.text_prop.name,
+                        "value": "Text {}".format(i),
+                        "model_id": self.text_prop.id
+                    },
+                    {
+                        "name": self.char_prop.name,
+                        "value": "Multi text {}".format(i),
+                        "model_id": self.char_prop.id
+                    },
+                    {
+                        "name": self.int_prop.name,
+                        "value": i,
+                        "model_id": self.int_prop.id
+                    },
+                    {
+                        "name": self.float_prop.name,
+                        "value": float("{}.{}".format(i, i)),
+                        "model_id": self.float_prop.id
+                    },
+                    {
+                        "name": self.bool_prop.name,
+                        "value": True if i % 2 == 0 else False,
+                        "model_id": self.bool_prop.id
+                    },
+                    {
+                        "name": self.date_prop.name,
+                        "value": datetime.date(2020, i, i).isoformat(),
+                        "model_id": self.char_prop.id
+                    },
+                    {
+                        "name": self.datetime_prop.name,
+                        "value": datetime.datetime(2020, i, i, 15, 00, 00).isoformat("T"),
+                        "model_id": self.datetime_prop.id
+                    },
+                    {
+                        "name": self.link_prop.name,
+                        "value": "http://{}.com".format(i),
+                        "model_id": self.link_prop.id
+                    },
+                    {
+                        "name": self.ss_prop.name,
+                        "value": "{}".format(i),
+                        "model_id": self.ss_prop.id
+                    },
+                    {
+                        "name": self.ms_prop.name,
+                        "value": ["{}".format(i)],
+                        "model_id": self.ms_prop.id
+                    },
+                    {
+                        "name": self.part_ref_prop.name,
+                        "value": [self.project.part(name="Front wheel").id],
+                        "model_id": self.part_ref_prop.id
+                    },
+                ]
+            }
+            new_parts.append(part_dict)
+        self.client._create_parts_bulk(
+            parts=new_parts
+        )
+        print()
+
+
