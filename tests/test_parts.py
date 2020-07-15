@@ -514,13 +514,13 @@ class TestPIM2SpecificPartTests(TestBetamax):
         )
 
 
-# @skipIf(not TEST_FLAG_IS_PIM3, reason="This tests is designed for PIM version 3, expected to fail on older PIM3")
+@skipIf(not TEST_FLAG_IS_PIM3, reason="This tests is designed for PIM version 3, expected to fail on older PIM3")
 class TestBulkPartsCreation(TestBetamax):
     def setUp(self):
         super().setUp()
         self.product_model = self.project.model(name="Product")
         self.part_model = self.project.create_model(name="Part", parent=self.product_model)
-        self.text_prop = self.part_model.add_property(name="Text Property", property_type=PropertyType.TEXT_VALUE)
+        self.text_prop = self.part_model.add_property(name="Text Property", property_type=PropertyType.TEXT_VALUE, unit="mm")
         self.char_prop = self.part_model.add_property(name="Char Property", property_type=PropertyType.CHAR_VALUE)
         self.int_prop = self.part_model.add_property(name="Int Property", property_type=PropertyType.INT_VALUE)
         self.float_prop = self.part_model.add_property(name="Float Property", property_type=PropertyType.FLOAT_VALUE)
@@ -555,74 +555,107 @@ class TestBulkPartsCreation(TestBetamax):
     def test_bulk_create_parts(self):
         product_part = self.project.part(name="Product")
         new_parts = list()
-        for i in range(1, 6):
+        for idx in range(1, 5):
             part_dict = {
-                "name": "Part {}".format(i),
+                "name": "Part {}".format(idx),
                 "parent_id": product_part.id,
-                "description": "Description part {}".format(i),
+                "description": "Description part {}".format(idx),
                 "model_id": self.part_model.id,
                 "properties": [
                     {
                         "name": self.text_prop.name,
-                        "value": "Text {}".format(i),
-                        "model_id": self.text_prop.id
+                        "value": "{}".format(idx),
+                        "model_id": self.text_prop.id,
                     },
                     {
                         "name": self.char_prop.name,
-                        "value": "Multi text {}".format(i),
+                        "value": "{}".format(idx),
                         "model_id": self.char_prop.id
                     },
                     {
                         "name": self.int_prop.name,
-                        "value": i,
+                        "value": idx,
                         "model_id": self.int_prop.id
                     },
                     {
                         "name": self.float_prop.name,
-                        "value": float("{}.{}".format(i, i)),
+                        "value": float("{}.{}".format(idx, idx)),
                         "model_id": self.float_prop.id
                     },
                     {
                         "name": self.bool_prop.name,
-                        "value": True if i % 2 == 0 else False,
+                        "value": True if idx % 2 == 0 else False,
                         "model_id": self.bool_prop.id
                     },
                     {
                         "name": self.date_prop.name,
-                        "value": datetime.date(2020, i, i).isoformat(),
-                        "model_id": self.char_prop.id
+                        "value": datetime.date(2020, idx, idx).isoformat(),
+                        "model_id": self.date_prop.id
                     },
                     {
                         "name": self.datetime_prop.name,
-                        "value": datetime.datetime(2020, i, i, 15, 00, 00).isoformat("T"),
+                        "value": datetime.datetime(2020, idx, idx, 15, 00, 00).isoformat("T"),
                         "model_id": self.datetime_prop.id
                     },
                     {
                         "name": self.link_prop.name,
-                        "value": "http://{}.com".format(i),
+                        "value": "http://{}.com".format(idx),
                         "model_id": self.link_prop.id
                     },
                     {
                         "name": self.ss_prop.name,
-                        "value": "{}".format(i),
+                        "value": "{}".format(idx),
                         "model_id": self.ss_prop.id
                     },
                     {
                         "name": self.ms_prop.name,
-                        "value": ["{}".format(i)],
+                        "value": ["{}".format(idx)],
                         "model_id": self.ms_prop.id
                     },
                     {
                         "name": self.part_ref_prop.name,
-                        "value": [self.project.part(name="Front wheel").id],
+                        "value": [self.project.part(name="Front Wheel").id],
                         "model_id": self.part_ref_prop.id
+                    },
+                    {
+                        "name": self.act_ref_prop.name,
+                        "value": [self.project.activity(name="test task").id],
+                        "model_id": self.act_ref_prop.id
                     },
                 ]
             }
             new_parts.append(part_dict)
-        self.client._create_parts_bulk(
+        parts_created = self.client._create_parts_bulk(
             parts=new_parts
         )
-        print()
+
+        # testing
+        idx = 1
+        for part_created in parts_created:
+            self.assertEqual(part_created.name, "Part {}".format(idx))
+            self.assertEqual(part_created.description, "Description part {}".format(idx))
+            self.assertEqual(part_created.category, Category.INSTANCE)
+
+            self.assertEqual(part_created.property(name=self.text_prop.name).value, str(idx))
+            self.assertEqual(part_created.property(name=self.char_prop.name).value, str(idx))
+            self.assertEqual(part_created.property(name=self.int_prop.name).value, idx)
+            self.assertEqual(part_created.property(name=self.float_prop.name).value, float("{}.{}".format(idx, idx)))
+            self.assertEqual(part_created.property(name=self.bool_prop.name).value, True if idx % 2 == 0 else False)
+            self.assertEqual(part_created.property(name=self.date_prop.name).value,
+                             datetime.date(2020, idx, idx).isoformat())
+            self.assertEqual(part_created.property(name=self.datetime_prop.name).value,
+                             datetime.datetime(2020, idx, idx, 15, 00, 00).isoformat("T"))
+            self.assertEqual(part_created.property(name=self.link_prop.name).value, "http://{}.com".format(idx))
+            self.assertEqual(part_created.property(name=self.ss_prop.name).value, "{}".format(idx))
+            self.assertEqual(part_created.property(name=self.ms_prop.name).value, ["{}".format(idx)])
+            self.assertEqual(part_created.property(name=self.part_ref_prop.name).value[0].name, "Front Wheel")
+            self.assertEqual(part_created.property(name=self.act_ref_prop.name).value[0].name, "test task")
+            self.assertEqual(part_created.property(name=self.weather_prop.name).value, str())
+            self.assertEqual(part_created.property(name=self.geo_info_prop.name).value, str())
+            idx += 1
+
+
+
+
 
 
