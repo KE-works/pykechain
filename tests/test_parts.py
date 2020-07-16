@@ -1,6 +1,9 @@
+import datetime
 from unittest import skipIf
 
-from pykechain.enums import Multiplicity, Category, Classification
+import pytest
+
+from pykechain.enums import Multiplicity, Category, Classification, PropertyType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import PartSet, Part2
 from tests.classes import TestBetamax
@@ -477,3 +480,209 @@ class TestPIM2SpecificPartTests(TestBetamax):
         siblings_of_root_node = product_root_node.parent().siblings()
         self.assertIsInstance(siblings_of_root_node, PartSet)
         self.assertEqual(len(siblings_of_root_node), 0)
+
+
+@skipIf(not TEST_FLAG_IS_PIM3, reason="This tests is designed for PIM version 3, expected to fail on older PIM3")
+@pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+                    reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
+class TestBulkPartsCreation(TestBetamax):
+    def setUp(self):
+        super().setUp()
+
+        self.product_model = self.project.model(name="Product")
+        self.part_model = self.project.create_model(name="Part", parent=self.product_model)
+        self.text_prop = self.part_model.add_property(name="Text Property", property_type=PropertyType.TEXT_VALUE, unit="mm")
+        self.char_prop = self.part_model.add_property(name="Char Property", property_type=PropertyType.CHAR_VALUE)
+        self.int_prop = self.part_model.add_property(name="Int Property", property_type=PropertyType.INT_VALUE)
+        self.float_prop = self.part_model.add_property(name="Float Property", property_type=PropertyType.FLOAT_VALUE)
+        self.bool_prop = self.part_model.add_property(
+            name="Boolean Property", property_type=PropertyType.BOOLEAN_VALUE)
+        self.date_prop = self.part_model.add_property(name="Date Property", property_type=PropertyType.DATE_VALUE)
+        self.datetime_prop = self.part_model.add_property(
+            name="Datetime Property", property_type=PropertyType.DATETIME_VALUE)
+        self.attachment_prop = self.part_model.add_property(
+            name="Attach Property", property_type=PropertyType.ATTACHMENT_VALUE)
+        self.link_prop = self.part_model.add_property(name="Link Property", property_type=PropertyType.LINK_VALUE)
+        self.ss_prop = self.part_model.add_property(
+            name="SS Property", property_type=PropertyType.SINGLE_SELECT_VALUE)
+        self.ss_prop.options = ["1", "2", "3", "4", "5"]
+        self.ms_prop = self.part_model.add_property(
+            name="MS Property", property_type=PropertyType.MULTI_SELECT_VALUE,
+            options={"value_choices": ["1", "2", "3", "4", "5"]})
+        self.part_ref_prop = self.part_model.add_property(
+            name="Part ref Property", property_type=PropertyType.REFERENCES_VALUE,
+            default_value=self.project.model(name="Wheel").id)
+        self.geo_info_prop = self.part_model.add_property(
+            name="Geo Property", property_type=PropertyType.GEOJSON_VALUE)
+        self.weather_prop = self.part_model.add_property(
+            name="Weather Property", property_type=PropertyType.WEATHER_VALUE)
+        self.act_ref_prop = self.part_model.add_property(
+            name="Act Property", property_type=PropertyType.ACTIVITY_REFERENCES_VALUE)
+
+        self.product_part = self.project.part(name="Product")
+        self.part_dict = {
+            "name": "Dummy name",
+            "parent_id": self.product_part.id,
+            "description": "",
+            "model_id": self.part_model.id,
+            "properties": [
+                {
+                    "name": self.text_prop.name,
+                    "value": "Dummy value",
+                    "model_id": self.text_prop.id,
+                }]
+        }
+
+    def tearDown(self):
+        self.part_model.delete()
+
+    """Bulk parts creation"""
+    def test_bulk_create_parts(self):
+        new_parts = list()
+        for idx in range(1, 5):
+            part_dict = {
+                "name": idx,
+                "parent_id": self.product_part.id,
+                "description": "Description part {}".format(idx),
+                "model_id": self.part_model.id,
+                "properties": [
+                    {
+                        "name": self.text_prop.name,
+                        "value": "{}".format(idx),
+                        "model_id": self.text_prop.id,
+                    },
+                    {
+                        "name": self.char_prop.name,
+                        "value": "{}".format(idx),
+                        "model_id": self.char_prop.id
+                    },
+                    {
+                        "name": self.int_prop.name,
+                        "value": idx,
+                        "model_id": self.int_prop.id
+                    },
+                    {
+                        "name": self.float_prop.name,
+                        "value": float("{}.{}".format(idx, idx)),
+                        "model_id": self.float_prop.id
+                    },
+                    {
+                        "name": self.bool_prop.name,
+                        "value": True if idx % 2 == 0 else False,
+                        "model_id": self.bool_prop.id
+                    },
+                    {
+                        "name": self.date_prop.name,
+                        "value": datetime.date(2020, idx, idx).isoformat(),
+                        "model_id": self.date_prop.id
+                    },
+                    {
+                        "name": self.datetime_prop.name,
+                        "value": datetime.datetime(2020, idx, idx, 15, 00, 00).isoformat("T"),
+                        "model_id": self.datetime_prop.id
+                    },
+                    {
+                        "name": self.link_prop.name,
+                        "value": "http://{}.com".format(idx),
+                        "model_id": self.link_prop.id
+                    },
+                    {
+                        "name": self.ss_prop.name,
+                        "value": "{}".format(idx),
+                        "model_id": self.ss_prop.id
+                    },
+                    {
+                        "name": self.ms_prop.name,
+                        "value": ["{}".format(idx)],
+                        "model_id": self.ms_prop.id
+                    },
+                    {
+                        "name": self.part_ref_prop.name,
+                        "value": [self.project.part(name="Front Wheel").id],
+                        "model_id": self.part_ref_prop.id
+                    },
+                    {
+                        "name": self.act_ref_prop.name,
+                        "value": [self.project.activity(name="test task").id],
+                        "model_id": self.act_ref_prop.id
+                    },
+                ]
+            }
+            new_parts.append(part_dict)
+        parts_created = self.client._create_parts_bulk(
+            parts=new_parts
+        )
+
+        # testing
+        self.assertEqual(len(parts_created), 4)
+        for part_created in parts_created:
+            idx = int(part_created.name)
+            self.assertEqual(part_created.description, "Description part {}".format(idx))
+            self.assertEqual(part_created.category, Category.INSTANCE)
+            self.assertEqual(len(part_created.properties), 15)
+
+            self.assertEqual(part_created.property(name=self.text_prop.name).value, str(idx))
+            self.assertEqual(part_created.property(name=self.char_prop.name).value, str(idx))
+            self.assertEqual(part_created.property(name=self.int_prop.name).value, idx)
+            self.assertEqual(part_created.property(name=self.float_prop.name).value, float("{}.{}".format(idx, idx)))
+            self.assertEqual(part_created.property(name=self.bool_prop.name).value, True if idx % 2 == 0 else False)
+            self.assertEqual(part_created.property(name=self.date_prop.name).value,
+                             datetime.date(2020, idx, idx).isoformat())
+            self.assertEqual(part_created.property(name=self.datetime_prop.name).value.split("+")[0],
+                             datetime.datetime(2020, idx, idx, 15, 00, 00).isoformat("T"))
+            self.assertEqual(part_created.property(name=self.link_prop.name).value, "http://{}.com".format(idx))
+            self.assertEqual(part_created.property(name=self.ss_prop.name).value, "{}".format(idx))
+            self.assertEqual(part_created.property(name=self.ms_prop.name).value, ["{}".format(idx)])
+            self.assertEqual(part_created.property(name=self.part_ref_prop.name).value[0].name, "Front Wheel")
+            self.assertEqual(part_created.property(name=self.act_ref_prop.name).value[0].name, "test task")
+            self.assertEqual(part_created.property(name=self.weather_prop.name).value, dict())
+            self.assertEqual(part_created.property(name=self.geo_info_prop.name).value, dict())
+
+    def test_bulk_create_parts_without_name(self):
+        self.part_dict.pop("name")
+        with self.assertRaises(IllegalArgumentError):
+            self.client._create_parts_bulk(
+                parts=[self.part_dict]
+            )
+
+    def test_bulk_create_parts_without_parent_id(self):
+        self.part_dict.pop("parent_id")
+        with self.assertRaises(IllegalArgumentError):
+            self.client._create_parts_bulk(
+                parts=[self.part_dict]
+            )
+
+    def test_bulk_create_parts_without_model_id(self):
+        self.part_dict.pop("model_id")
+        with self.assertRaises(IllegalArgumentError):
+            self.client._create_parts_bulk(
+                parts=[self.part_dict]
+            )
+
+    def test_bulk_create_parts_without_properties(self):
+        self.part_dict.pop("properties")
+        with self.assertRaises(IllegalArgumentError):
+            self.client._create_parts_bulk(
+                parts=[self.part_dict]
+            )
+
+    def test_bulk_create_parts_without_property_name(self):
+        self.part_dict["properties"][0].pop("name")
+        with self.assertRaises(IllegalArgumentError):
+            self.client._create_parts_bulk(
+                parts=[self.part_dict]
+            )
+
+    def test_bulk_create_parts_without_property_model_id(self):
+        self.part_dict["properties"][0].pop("model_id")
+        with self.assertRaises(IllegalArgumentError):
+            self.client._create_parts_bulk(
+                parts=[self.part_dict]
+            )
+
+    def test_bulk_create_parts_without_property_value(self):
+        self.part_dict["properties"][0].pop("value")
+        with self.assertRaises(IllegalArgumentError):
+            self.client._create_parts_bulk(
+                parts=[self.part_dict]
+            )
