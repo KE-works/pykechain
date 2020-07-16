@@ -1484,6 +1484,78 @@ class Client(object):
         )
         return self._create_part(action='create_proxy_model', data=data, **kwargs)
 
+    def _create_parts_bulk(
+            self,
+            parts: List[Dict],
+            asynchronous: Optional[bool] = False,
+            **kwargs
+    ) -> PartSet:
+        """
+        Create multiple part instances simultaneously.
+
+        :param update_dict: dictionary with keys being property names (str) or property_id (from the property models)
+                            and values being property values
+        :type update_dict: dict or None
+        :param parts: list of dicts, each specifying a part instance. Available fields per dict:
+            :param name: (optional) name provided for the new instance as string otherwise use the name of the model
+            :type name: basestring or None
+            :param model_id: model of the part which to add new instances, should follow the model tree in KE-chain
+            :type model_id: UUID
+            :param parent_id: parent where to add new instances, should follow the model tree in KE-chain
+            :type parent_id: UUID
+            :param properties: list of dicts, each specifying a property to update. Available fields per dict:
+                :param name: Name of the property model
+                :type name: basestring
+                :param value: The value of the Property instance after it is created
+                :type value: basestring or int or bool or list (depending on the PropertyType)
+                :param model_id: model of the property should follow the model tree in KE-chain
+                :type model_id: UUID
+            :type properties: list
+        :type parts: list
+        :param asynchronous: If true, immediately returns without activities (default = False)
+        :type asynchronous: bool
+        :param kwargs:
+        :return: list of Part instances
+        :rtype list
+        """
+        check_list_of_dicts(
+            parts,
+            'parts',
+            [
+                'name',
+                'parent_id',
+                'model_id',
+                'properties',
+            ],
+        )
+        for part in parts:
+            check_list_of_dicts(
+                part.get('properties'),
+                'properties',
+                [
+                    'name',
+                    'value',
+                    'model_id',
+                ],
+            )
+
+        parts = {"parts": parts}
+        # prepare url query parameters
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['parts2'])
+        query_params['async_mode'] = asynchronous
+
+        response = self._request('POST', self._build_url('parts2_bulk_create'),
+                                 params=query_params, json=parts)
+
+        if (asynchronous and response.status_code != requests.codes.accepted) or \
+                (not asynchronous and response.status_code != requests.codes.created):  # pragma: no cover
+            raise APIError("Could not clone Activities.", response=response)
+
+        part_ids = response.json()['results'][0]['parts_created']
+        parts = [part for part in self.parts(category=None) if part.id in part_ids]
+        return PartSet(parts=parts)
+
     def create_property(
             self,
             model: Part2,
