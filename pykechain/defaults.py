@@ -41,6 +41,7 @@ API_PATH = {
     'activity': 'api/activities/{activity_id}.json',
     'activity_export': 'api/activities/{activity_id}/export',
     'activity_move': 'api/activities/{activity_id}/move_activity',
+    'activities_bulk_clone': 'api/activities/bulk_clone',
     'activities_bulk_update': 'api/activities/bulk_update',
     'parts': 'api/parts.json',
     'part': 'api/parts/{part_id}.json',
@@ -130,10 +131,16 @@ API_EXTRA_PARAMS = {
         ['id', 'text', 'icon', 'is_active', 'active_from', 'active_until', 'url', 'created_at', 'updated_at'])},
     'scope2': {'fields': ",".join(
         ['id', 'name', 'ref', 'text', 'created_at', 'updated_at', 'start_date', 'due_date', 'status', 'category',
-         'progress', 'members', 'team', 'tags', 'scope_options', 'team_id_name', 'workflow_root_id'])},
+         'progress', 'members', 'team', 'tags', 'scope_options', 'team_id_name',
+         'workflow_root_id', 'catalog_root_id', 'app_root_id',
+         'product_model_id', 'product_instance_id', 'catalog_model_id', 'catalog_instance_id',
+         ])},
     'scopes2': {'fields': ",".join(
         ['id', 'name', 'ref', 'text', 'created_at', 'updated_at', 'start_date', 'due_date', 'status', 'category',
-         'progress', 'members', 'team', 'tags', 'scope_options', 'team_id_name', 'workflow_root_id'])},
+         'progress', 'members', 'team', 'tags', 'scope_options', 'team_id_name',
+         'workflow_root_id', 'catalog_root_id', 'app_root_id',
+         'product_model_id', 'product_instance_id', 'catalog_model_id', 'catalog_instance_id',
+         ])},
     'part2': {'fields': ",".join(
         ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'properties', 'category', 'classification',
          'parent_id', 'multiplicity', 'value_options', 'property_type', 'value', 'output', 'order',
