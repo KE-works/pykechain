@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v3.8 (UNRELEASED)
+-----------------
+
+* :star: Added the bulk_create_parts API endpoint, which allows the adding of multiple `Part` instances with `Properties` in one call. #797
+
 v3.7.6 (30JUN20)
 -----------------
 
