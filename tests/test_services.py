@@ -308,6 +308,7 @@ class TestServiceExecutions(TestServiceSetup):
     def test_log_of_service_execution(self):
         # setUp
         service_execution = self.service.execute()
+        time.sleep(5)
 
         with temp_chdir() as target_dir:
             service_execution.get_log(target_dir=target_dir)
