@@ -479,45 +479,12 @@ class TestPIM2SpecificPartTests(TestBetamax):
         self.assertIsInstance(siblings_of_root_node, PartSet)
         self.assertEqual(len(siblings_of_root_node), 0)
 
-    def test_bulk_create_parts_2(self):
-        bike_part = self.project.part(name="Bike")
-        wheel_model = self.project.model(name="Wheel")
-        parts = 3 * [{
-            "name": "Mid Wheel",
-            "parent_id": bike_part.id,
-            "description": "",
-            "model_id": wheel_model.id,
-            "properties": [{
-                "name": "Diameter",
-                "value": 15.4,
-                "model_id": wheel_model.property(name="Diameter").id
-            },
-                {
-                    "name": "Spokes",
-                    "value": 21,
-                    "model_id": wheel_model.property(name="Spokes").id
-                },
-                {
-                    "name": "Rim Material",
-                    "value": "Titanium",
-                    "model_id": wheel_model.property(name="Rim Material").id
-                },
-                {
-                    "name": "Tire Thickness",
-                    "value": 6.69,
-                    "model_id": wheel_model.property(name="Tire Thickness").id
-                }
-            ]
-        }]
-        self.client._create_parts_bulk(
-            parts=parts
-        )
-
 
 @skipIf(not TEST_FLAG_IS_PIM3, reason="This tests is designed for PIM version 3, expected to fail on older PIM3")
 class TestBulkPartsCreation(TestBetamax):
     def setUp(self):
         super().setUp()
+
         self.product_model = self.project.model(name="Product")
         self.part_model = self.project.create_model(name="Part", parent=self.product_model)
         self.text_prop = self.part_model.add_property(name="Text Property", property_type=PropertyType.TEXT_VALUE, unit="mm")
@@ -548,17 +515,30 @@ class TestBulkPartsCreation(TestBetamax):
         self.act_ref_prop = self.part_model.add_property(
             name="Act Property", property_type=PropertyType.ACTIVITY_REFERENCES_VALUE)
 
+        self.product_part = self.project.part(name="Product")
+        self.part_dict = {
+            "name": "Dummy name",
+            "parent_id": self.product_part.id,
+            "description": "",
+            "model_id": self.part_model.id,
+            "properties": [
+                {
+                    "name": self.text_prop.name,
+                    "value": "Dummy value",
+                    "model_id": self.text_prop.id,
+                }]
+        }
+
     def tearDown(self):
         self.part_model.delete()
 
     """Bulk parts creation"""
     def test_bulk_create_parts(self):
-        product_part = self.project.part(name="Product")
         new_parts = list()
         for idx in range(1, 5):
             part_dict = {
-                "name": "Part {}".format(idx),
-                "parent_id": product_part.id,
+                "name": idx,
+                "parent_id": self.product_part.id,
                 "description": "Description part {}".format(idx),
                 "model_id": self.part_model.id,
                 "properties": [
@@ -630,11 +610,12 @@ class TestBulkPartsCreation(TestBetamax):
         )
 
         # testing
-        idx = 1
+        self.assertEqual(len(parts_created), 4)
         for part_created in parts_created:
-            self.assertEqual(part_created.name, "Part {}".format(idx))
+            idx = int(part_created.name)
             self.assertEqual(part_created.description, "Description part {}".format(idx))
             self.assertEqual(part_created.category, Category.INSTANCE)
+            self.assertEqual(len(part_created.properties), 15)
 
             self.assertEqual(part_created.property(name=self.text_prop.name).value, str(idx))
             self.assertEqual(part_created.property(name=self.char_prop.name).value, str(idx))
@@ -643,19 +624,61 @@ class TestBulkPartsCreation(TestBetamax):
             self.assertEqual(part_created.property(name=self.bool_prop.name).value, True if idx % 2 == 0 else False)
             self.assertEqual(part_created.property(name=self.date_prop.name).value,
                              datetime.date(2020, idx, idx).isoformat())
-            self.assertEqual(part_created.property(name=self.datetime_prop.name).value,
+            self.assertEqual(part_created.property(name=self.datetime_prop.name).value.split("+")[0],
                              datetime.datetime(2020, idx, idx, 15, 00, 00).isoformat("T"))
             self.assertEqual(part_created.property(name=self.link_prop.name).value, "http://{}.com".format(idx))
             self.assertEqual(part_created.property(name=self.ss_prop.name).value, "{}".format(idx))
             self.assertEqual(part_created.property(name=self.ms_prop.name).value, ["{}".format(idx)])
             self.assertEqual(part_created.property(name=self.part_ref_prop.name).value[0].name, "Front Wheel")
             self.assertEqual(part_created.property(name=self.act_ref_prop.name).value[0].name, "test task")
-            self.assertEqual(part_created.property(name=self.weather_prop.name).value, str())
-            self.assertEqual(part_created.property(name=self.geo_info_prop.name).value, str())
-            idx += 1
+            self.assertEqual(part_created.property(name=self.weather_prop.name).value, dict())
+            self.assertEqual(part_created.property(name=self.geo_info_prop.name).value, dict())
 
+    def test_bulk_create_parts_without_name(self):
+        self.part_dict.pop("name")
+        with self.assertRaises(IllegalArgumentError):
+            self.client._create_parts_bulk(
+                parts=[self.part_dict]
+            )
 
+    def test_bulk_create_parts_without_parent_id(self):
+        self.part_dict.pop("parent_id")
+        with self.assertRaises(IllegalArgumentError):
+            self.client._create_parts_bulk(
+                parts=[self.part_dict]
+            )
 
+    def test_bulk_create_parts_without_model_id(self):
+        self.part_dict.pop("model_id")
+        with self.assertRaises(IllegalArgumentError):
+            self.client._create_parts_bulk(
+                parts=[self.part_dict]
+            )
 
+    def test_bulk_create_parts_without_properties(self):
+        self.part_dict.pop("properties")
+        with self.assertRaises(IllegalArgumentError):
+            self.client._create_parts_bulk(
+                parts=[self.part_dict]
+            )
 
+    def test_bulk_create_parts_without_property_name(self):
+        self.part_dict["properties"][0].pop("name")
+        with self.assertRaises(IllegalArgumentError):
+            self.client._create_parts_bulk(
+                parts=[self.part_dict]
+            )
 
+    def test_bulk_create_parts_without_property_model_id(self):
+        self.part_dict["properties"][0].pop("model_id")
+        with self.assertRaises(IllegalArgumentError):
+            self.client._create_parts_bulk(
+                parts=[self.part_dict]
+            )
+
+    def test_bulk_create_parts_without_property_value(self):
+        self.part_dict["properties"][0].pop("value")
+        with self.assertRaises(IllegalArgumentError):
+            self.client._create_parts_bulk(
+                parts=[self.part_dict]
+            )

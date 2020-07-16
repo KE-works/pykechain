@@ -1388,13 +1388,11 @@ class Client(object):
 
         :param parts: list of dicts, each specifying a part instance. Available fields per dict:
             * name: str
-            * description: str
             * parent_id: str of parent instance
             * model_id: str of part model
             * properties: list of dicts, each specifying a property to update. Available fields per dict:
                 * name: str
                 * value: Any
-                * value_options: dict
                 * model_id: str of property model
         :param kwargs:
         :return: list of Part instances
