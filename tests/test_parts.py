@@ -1,6 +1,8 @@
 import datetime
 from unittest import skipIf
 
+import pytest
+
 from pykechain.enums import Multiplicity, Category, Classification, PropertyType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
 from pykechain.models import PartSet, Part2
@@ -481,6 +483,8 @@ class TestPIM2SpecificPartTests(TestBetamax):
 
 
 @skipIf(not TEST_FLAG_IS_PIM3, reason="This tests is designed for PIM version 3, expected to fail on older PIM3")
+@pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+                    reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
 class TestBulkPartsCreation(TestBetamax):
     def setUp(self):
         super().setUp()
