@@ -1444,7 +1444,7 @@ class Client(object):
 
         if (asynchronous and response.status_code != requests.codes.accepted) or \
                 (not asynchronous and response.status_code != requests.codes.created):  # pragma: no cover
-            raise APIError("Could not clone Activities.", response=response)
+            raise APIError("Could not create Parts.", response=response)
 
         part_ids = response.json()['results'][0]['parts_created']
         parts = [part for part in self.parts(category=None) if part.id in part_ids]
