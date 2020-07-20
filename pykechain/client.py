@@ -1553,7 +1553,7 @@ class Client(object):
             raise APIError("Could not create Parts. ({})".format(response.status_code), response=response)
 
         part_ids = response.json()['results'][0]['parts_created']
-        parts = self.parts(id__in=part_ids)
+        parts = self.parts(id__in=",".join(part_ids))
         return PartSet(parts=parts)
 
     def create_property(
