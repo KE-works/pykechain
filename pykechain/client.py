@@ -1556,6 +1556,28 @@ class Client(object):
         parts = self.parts(id__in=",".join(part_ids))
         return PartSet(parts=parts)
 
+    def _delete_parts_bulk(
+            self,
+            parts: List[Dict],
+            asynchronous: Optional[bool] = False,
+            **kwargs
+    ) -> bool:
+        """
+
+        """
+        parts = {"parts": parts}
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['parts2'])
+        query_params['async_mode'] = asynchronous
+        response = self._request('DELETE', self._build_url('parts2_bulk_delete'),
+                                 params=query_params, json=parts)
+
+        if (asynchronous and response.status_code != requests.codes.accepted) or \
+                (not asynchronous and response.status_code != requests.codes.created):  # pragma: no cover
+            raise APIError("Could not delete Parts. ({})".format(response.status_code), response=response)
+
+        return True
+
     def create_property(
             self,
             model: Part2,
