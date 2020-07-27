@@ -333,6 +333,7 @@ class WidgetsManager(Iterable):
                                 new_instance: Optional[bool] = True,
                                 edit: Optional[bool] = True,
                                 clone: Optional[bool] = True,
+                                upload: Optional[bool] = False,
                                 export: Optional[bool] = True,
                                 delete: Optional[bool] = False,
                                 incomplete_rows: Optional[bool] = True,
@@ -376,6 +377,8 @@ class WidgetsManager(Iterable):
         :type edit: bool
         :param clone: Show or hide the Clone button (default True)
         :type clone: bool
+        :param upload: Show or hide the Upload Grid button (default False)
+        :type upload: bool
         :param export: Show or hide the Export Grid button (default True)
         :type export: bool
         :param delete: Show or hide the Delete button (default False)
@@ -460,6 +463,7 @@ class WidgetsManager(Iterable):
             "editButtonVisible": edit,
             "deleteButtonVisible": delete,
             "cloneButtonVisible": clone,
+            "uploadButtonVisible": upload,
             "downloadButtonVisible": export,
             "incompleteRowsVisible": incomplete_rows,
             "primaryAddUiValue": emphasize_new_instance,
