@@ -1488,6 +1488,7 @@ class Client(object):
             self,
             parts: List[Dict],
             asynchronous: Optional[bool] = False,
+            retrieve_instances: Optional[bool] = True,
             **kwargs
     ) -> PartSet:
         """
@@ -1514,8 +1515,10 @@ class Client(object):
         :type parts: list
         :param asynchronous: If true, immediately returns without activities (default = False)
         :type asynchronous: bool
+        :param retrieve_instances: If true, will retrieve the created Part Instances in a PartSet
+        :type retrieve_instances: bool
         :param kwargs:
-        :return: list of Part instances
+        :return: list of Part instances or list of part UUIDs
         :rtype list
         """
         check_list_of_dicts(
@@ -1553,8 +1556,10 @@ class Client(object):
             raise APIError("Could not create Parts. ({})".format(response.status_code), response=response)
 
         part_ids = response.json()['results'][0]['parts_created']
-        parts = self.parts(id__in=",".join(part_ids))
-        return PartSet(parts=parts)
+        if retrieve_instances:
+            parts = self.parts(id__in=",".join(part_ids), batch=50)
+            return PartSet(parts=parts)
+        return part_ids
 
     def create_property(
             self,
