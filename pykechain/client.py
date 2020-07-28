@@ -23,7 +23,7 @@ from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.notification import Notification
 from pykechain.models.widgets.widget import Widget
-from pykechain.utils import is_uuid, find, is_valid_email
+from pykechain.utils import is_uuid, find, is_valid_email, get_in_chunks
 from .__about__ import version as pykechain_version
 from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
     check_list_of_base, check_base, check_uuid, check_list_of_dicts, check_url, check_user
@@ -1556,9 +1556,11 @@ class Client(object):
             raise APIError("Could not create Parts. ({})".format(response.status_code), response=response)
 
         part_ids = response.json()['results'][0]['parts_created']
+        part_instances = list()
         if retrieve_instances:
-            parts = self.parts(id__in=",".join(part_ids), batch=50)
-            return PartSet(parts=parts)
+            for parts_list in get_in_chunks(lst=part_ids, chunk_size=50):
+                part_instances.extend(self.parts(id__in=",".join(parts_list)))
+            return PartSet(parts=part_instances)
         return part_ids
 
     def create_property(
