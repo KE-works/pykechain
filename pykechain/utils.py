@@ -490,3 +490,11 @@ def __dict__inherited__(cls: type(object), stop: type(object) = type, public: Op
         _dict.update(super_class_dict)
 
     return _dict
+
+
+def get_in_chunks(lst, chunk_size):
+    """
+    Yields successive chunks from a list based on the chunk_size.
+    """
+    for i in range(0, len(lst), chunk_size):
+        yield lst[i:i+chunk_size]
