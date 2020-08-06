@@ -23,7 +23,7 @@ from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.notification import Notification
 from pykechain.models.widgets.widget import Widget
-from pykechain.utils import is_uuid, find, is_valid_email
+from pykechain.utils import is_uuid, find, is_valid_email, get_in_chunks
 from .__about__ import version as pykechain_version
 from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
     check_list_of_base, check_base, check_uuid, check_list_of_dicts, check_url, check_user
@@ -1483,6 +1483,85 @@ class Client(object):
             multiplicity=check_enum(multiplicity, Multiplicity, 'multiplicity'),
         )
         return self._create_part(action='create_proxy_model', data=data, **kwargs)
+
+    def _create_parts_bulk(
+            self,
+            parts: List[Dict],
+            asynchronous: Optional[bool] = False,
+            retrieve_instances: Optional[bool] = True,
+            **kwargs
+    ) -> PartSet:
+        """
+        Create multiple part instances simultaneously.
+
+        :param update_dict: dictionary with keys being property names (str) or property_id (from the property models)
+                            and values being property values
+        :type update_dict: dict or None
+        :param parts: list of dicts, each specifying a part instance. Available fields per dict:
+            :param name: (optional) name provided for the new instance as string otherwise use the name of the model
+            :type name: basestring or None
+            :param model_id: model of the part which to add new instances, should follow the model tree in KE-chain
+            :type model_id: UUID
+            :param parent_id: parent where to add new instances, should follow the model tree in KE-chain
+            :type parent_id: UUID
+            :param properties: list of dicts, each specifying a property to update. Available fields per dict:
+                :param name: Name of the property model
+                :type name: basestring
+                :param value: The value of the Property instance after it is created
+                :type value: basestring or int or bool or list (depending on the PropertyType)
+                :param model_id: model of the property should follow the model tree in KE-chain
+                :type model_id: UUID
+            :type properties: list
+        :type parts: list
+        :param asynchronous: If true, immediately returns without activities (default = False)
+        :type asynchronous: bool
+        :param retrieve_instances: If true, will retrieve the created Part Instances in a PartSet
+        :type retrieve_instances: bool
+        :param kwargs:
+        :return: list of Part instances or list of part UUIDs
+        :rtype list
+        """
+        check_list_of_dicts(
+            parts,
+            'parts',
+            [
+                'name',
+                'parent_id',
+                'model_id',
+                'properties',
+            ],
+        )
+        for part in parts:
+            check_list_of_dicts(
+                part.get('properties'),
+                'properties',
+                [
+                    'name',
+                    'value',
+                    'model_id',
+                ],
+            )
+
+        parts = {"parts": parts}
+        # prepare url query parameters
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['parts2'])
+        query_params['async_mode'] = asynchronous
+
+        response = self._request('POST', self._build_url('parts2_bulk_create'),
+                                 params=query_params, json=parts)
+
+        if (asynchronous and response.status_code != requests.codes.accepted) or \
+                (not asynchronous and response.status_code != requests.codes.created):  # pragma: no cover
+            raise APIError("Could not create Parts. ({})".format(response.status_code), response=response)
+
+        part_ids = response.json()['results'][0]['parts_created']
+        part_instances = list()
+        if retrieve_instances:
+            for parts_list in get_in_chunks(lst=part_ids, chunk_size=50):
+                part_instances.extend(self.parts(id__in=",".join(parts_list)))
+            return PartSet(parts=part_instances)
+        return part_ids
 
     def create_property(
             self,
