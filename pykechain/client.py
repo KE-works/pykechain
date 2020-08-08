@@ -23,7 +23,7 @@ from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.notification import Notification
 from pykechain.models.widgets.widget import Widget
-from pykechain.utils import is_uuid, find, is_valid_email
+from pykechain.utils import is_uuid, find, is_valid_email, get_in_chunks
 from .__about__ import version as pykechain_version
 from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
     check_list_of_base, check_base, check_uuid, check_list_of_dicts, check_url, check_user
@@ -1105,6 +1105,112 @@ class Client(object):
             parent._cached_children.append(new_activity)
         return new_activity
 
+    def clone_activities(
+        self,
+        activities: List[Union[Activity2, Text]],
+        parent: Union[Activity2, Text],
+        activity_update_dicts: Optional[Dict] = None,
+        clone_parts: Optional[bool] = False,
+        clone_part_instances: Optional[bool] = True,
+        clone_children: Optional[bool] = True,
+        excluded_parts: Optional[List[Text]] = None,
+        part_parent_model: Optional[Union[Part2, Text]] = None,
+        part_parent_instance: Optional[Union[Part2, Text]] = None,
+        part_model_rename_template: Optional[Text] = None,
+        part_instance_rename_template: Optional[Text] = None,
+        asynchronous: Optional[bool] = False,
+        **kwargs
+    ) -> List[Activity2]:
+        """
+        Clone multiple activities.
+
+        .. versionadded:: 3.7
+        The bulk clone activities with parts API is included in KE-chain backend since version 3.6.
+
+        :param activities: list of Activity2 object or UUIDs
+        :type activities: list
+        :param parent: parent Activity2 sub-process object or UUID
+        :type parent: Activity2
+        :param activity_update_dicts: (O) dict of dictionaries, each key-value combination relating to an activity
+        to clone and a dict of new values to assign, e.g. `{activity.id: {"name": "Cloned activity"}}`
+        :type activity_update_dicts: dict
+        :param clone_parts: (O) whether to clone the data models configured in the activities, defaults to False
+        :type clone_parts: bool
+        :param clone_part_instances: (O) whether to clone the part instances of the data model configured in the
+            activities, defaults to True
+        :type clone_part_instances: bool
+        :param clone_children: (O) whether to clone child parts
+        :type clone_children: bool
+        :param excluded_parts: (O) list of Part2 objects or UUIDs to exclude from being cloned,
+            maintaining the original configuration of the widgets.
+        :type excluded_parts: list
+        :param part_parent_model: (O) parent Part2 object or UUID for the copied data model(s)
+        :type part_parent_model: Part2
+        :param part_parent_instance: (O) parent Part2 object or UUID for the copied part instance(s)
+        :type part_parent_instance: Part2
+        :param part_model_rename_template: (O) renaming template for part models. Must contain "{name}"
+        :type part_model_rename_template: str
+        :param part_instance_rename_template: (O) renaming template for part instances. Must contain "{name}"
+        :type part_instance_rename_template: str
+        :param asynchronous: If true, immediately returns without activities (default = False)
+        :type asynchronous: bool
+        :return: list of cloned activities
+        :rtype: list
+        :raises APIError if cloned
+        """
+        if self.match_app_version(label='kechain2.core.pim', version=">=3.6.0"):  # pragma: no cover
+            raise APIError("Cloning of activities requires KE-chain version >= 3.6.0.")
+
+        update_name = 'activity_update_dicts'
+        activity_ids = check_list_of_base(activities, cls=Activity2, key='activities')
+        update_dicts = check_type(activity_update_dicts, dict, key=update_name) or dict()
+
+        if not all(key in activity_ids for key in update_dicts.keys()):
+            incorrect_ids = [key for key in update_dicts.keys() if key not in activity_ids]
+            raise IllegalArgumentError(
+                "The `{}` must contain updates to activities that are to be cloned. "
+                "Did not recognize the following UUIDs:\n{}".format(update_name, '\n'.join(incorrect_ids)))
+
+        elif not all(isinstance(value, dict) for value in update_dicts.values()):
+            raise IllegalArgumentError("The `{}` must be a dict of dicts.".format(update_name))
+
+        activities = [dict(id=uuid, **update_dicts.get(uuid, {})) for uuid in activity_ids]
+
+        data = dict(
+            parent_id=check_base(parent, cls=Activity2, key='parent'),
+            clone_parts=check_type(clone_parts, bool, 'clone_parts'),
+            clone_part_instances=check_type(clone_part_instances, bool, 'clone_part_instances'),
+            clone_children=check_type(clone_children, bool, 'clone_children'),
+            exclude_model_ids=check_list_of_base(excluded_parts, Part2, 'excluded_models') or [],
+            part_parent_model_id=check_base(part_parent_model, Part2, 'part_parent_model'),
+            part_parent_instance_id=check_base(part_parent_instance, Part2, 'part_parent_instance'),
+            cloned_part_models_rename_template=check_type(
+                part_model_rename_template, str, 'part_model_rename_template'),
+            cloned_part_instances_rename_template=check_type(
+                part_instance_rename_template, str, 'part_instnace_rename_template'),
+            activities=activities,
+        )
+
+        if kwargs:
+            data.update(kwargs)
+
+        params = dict(API_EXTRA_PARAMS['activities'])
+        params['async_mode'] = asynchronous
+
+        response = self._request('POST', self._build_url('activities_bulk_clone'),
+                                 json=data, params=params)
+
+        if (asynchronous and response.status_code != requests.codes.accepted) or \
+                (not asynchronous and response.status_code != requests.codes.created):  # pragma: no cover
+            raise APIError("Could not clone Activities.", response=response)
+
+        cloned_activities = [Activity2(d, client=self) for d in response.json()['results']]
+
+        if isinstance(parent, Activity2):
+            parent._populate_cached_children(cloned_activities)
+
+        return cloned_activities
+
     def _create_part(self, action: Text, data: Dict, **kwargs) -> Optional[Part2]:
         """Create a part for PIM 2 internal core function."""
         # suppress_kevents should be in the data (not the query_params)
@@ -1377,6 +1483,85 @@ class Client(object):
             multiplicity=check_enum(multiplicity, Multiplicity, 'multiplicity'),
         )
         return self._create_part(action='create_proxy_model', data=data, **kwargs)
+
+    def _create_parts_bulk(
+            self,
+            parts: List[Dict],
+            asynchronous: Optional[bool] = False,
+            retrieve_instances: Optional[bool] = True,
+            **kwargs
+    ) -> PartSet:
+        """
+        Create multiple part instances simultaneously.
+
+        :param update_dict: dictionary with keys being property names (str) or property_id (from the property models)
+                            and values being property values
+        :type update_dict: dict or None
+        :param parts: list of dicts, each specifying a part instance. Available fields per dict:
+            :param name: (optional) name provided for the new instance as string otherwise use the name of the model
+            :type name: basestring or None
+            :param model_id: model of the part which to add new instances, should follow the model tree in KE-chain
+            :type model_id: UUID
+            :param parent_id: parent where to add new instances, should follow the model tree in KE-chain
+            :type parent_id: UUID
+            :param properties: list of dicts, each specifying a property to update. Available fields per dict:
+                :param name: Name of the property model
+                :type name: basestring
+                :param value: The value of the Property instance after it is created
+                :type value: basestring or int or bool or list (depending on the PropertyType)
+                :param model_id: model of the property should follow the model tree in KE-chain
+                :type model_id: UUID
+            :type properties: list
+        :type parts: list
+        :param asynchronous: If true, immediately returns without activities (default = False)
+        :type asynchronous: bool
+        :param retrieve_instances: If true, will retrieve the created Part Instances in a PartSet
+        :type retrieve_instances: bool
+        :param kwargs:
+        :return: list of Part instances or list of part UUIDs
+        :rtype list
+        """
+        check_list_of_dicts(
+            parts,
+            'parts',
+            [
+                'name',
+                'parent_id',
+                'model_id',
+                'properties',
+            ],
+        )
+        for part in parts:
+            check_list_of_dicts(
+                part.get('properties'),
+                'properties',
+                [
+                    'name',
+                    'value',
+                    'model_id',
+                ],
+            )
+
+        parts = {"parts": parts}
+        # prepare url query parameters
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['parts2'])
+        query_params['async_mode'] = asynchronous
+
+        response = self._request('POST', self._build_url('parts2_bulk_create'),
+                                 params=query_params, json=parts)
+
+        if (asynchronous and response.status_code != requests.codes.accepted) or \
+                (not asynchronous and response.status_code != requests.codes.created):  # pragma: no cover
+            raise APIError("Could not create Parts. ({})".format(response.status_code), response=response)
+
+        part_ids = response.json()['results'][0]['parts_created']
+        part_instances = list()
+        if retrieve_instances:
+            for parts_list in get_in_chunks(lst=part_ids, chunk_size=50):
+                part_instances.extend(self.parts(id__in=",".join(parts_list)))
+            return PartSet(parts=part_instances)
+        return part_ids
 
     def create_property(
             self,

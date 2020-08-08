@@ -38,7 +38,10 @@ class APIError(Exception):
         import json
 
         if self.response is not None and isinstance(self.response, Response):
-            response_json = self.response.json()
+            try:
+                response_json = self.response.json()
+            except json.decoder.JSONDecodeError:
+                response_json = None
 
             if response_json:
                 self.msg = response_json.get('msg')

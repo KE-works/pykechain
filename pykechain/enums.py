@@ -90,6 +90,16 @@ class PropertyType(Enum):
     :cvar SINGLE_SELECT_VALUE: single select list property (choose from a list)
     :cvar REFERENCES_VALUE: a multi reference property, a list of UUID values referring to other part models
 
+    .. versionadded:: 3.6
+    :cvar ACTIVITY_REFERENCES_VALUE: Activity References Property
+    :cvar SCOPE_REFERENCES_VALUE: Scope References Property
+    :cvar SERVICE_REFERENCES_VALUE: Service Referenes Property
+    :cvar TEAM_REFERENCES_VALUE: Team References Property
+    :cvar USER_REFERENCES_VALUE: User References Property
+    :cvar JSON_VALUE: Generic JSON storage Property
+    :cvar GEOJSON_VALUE: GEOJSON property to store map data
+    :cvar WEATHER_VALUE: Weather JSON property compatible with the response of weatherapi.com
+
     .. _Property documentation: https://support.ke-chain.com/confluence/dosearchsite.action?queryString=concept+property
     """
 
@@ -102,7 +112,6 @@ class PropertyType(Enum):
     DATE_VALUE = "DATE_VALUE"
     TIME_VALUE = "TIME_VALUE"
     ATTACHMENT_VALUE = "ATTACHMENT_VALUE"
-    JSON_VALUE = "JSON_VALUE"
     LINK_VALUE = "LINK_VALUE"
     SINGLE_SELECT_VALUE = "SINGLE_SELECT_VALUE"
     MULTI_SELECT_VALUE = "MULTI_SELECT_VALUE"
@@ -113,6 +122,9 @@ class PropertyType(Enum):
     SERVICE_REFERENCES_VALUE = "SERVICE_REFERENCES_VALUE"
     TEAM_REFERENCES_VALUE = "TEAM_REFERENCES_VALUE"
     USER_REFERENCES_VALUE = "USER_REFERENCES_VALUE"
+    JSON_VALUE = "JSON_VALUE"
+    GEOJSON_VALUE = "GEOJSON_VALUE"
+    WEATHER_VALUE = "WEATHER_VALUE"
 
 
 class ActivityType(Enum):
@@ -272,6 +284,7 @@ class WidgetTypes(Enum):
     :cvar SIGNATURE: Signature widget
     :cvar CARD: Card widget
     :cvar TASKS: Tasks widget
+    :cvar WEATHER: Weather widget
     """
 
     UNDEFINED = 'UNDEFINED'
@@ -292,6 +305,7 @@ class WidgetTypes(Enum):
     SIGNATURE = 'SIGNATURE'
     CARD = 'CARD'
     TASKS = 'TASKS'
+    WEATHER = 'WEATHER'
 
 
 WidgetCompatibleTypes = {
@@ -823,6 +837,7 @@ class KEChainPages(Enum):
     EXPLORER = 'product'
     SERVICES = 'scripts'
     CATALOG_WBS = 'catalogtree'
+    APP_WBS = 'apptree'
 
 
 KEChainPageLabels = {
@@ -830,6 +845,7 @@ KEChainPageLabels = {
     KEChainPages.TASKS: 'Tasks',
     KEChainPages.WORK_BREAKDOWN: 'Work Breakdown',
     KEChainPages.CATALOG_WBS: 'Catalog',
+    KEChainPages.APP_WBS: 'App Screens',
     KEChainPages.DATA_MODEL: 'Data model',
     KEChainPages.EXPLORER: 'Explorer',
     KEChainPages.SERVICES: 'Scripts',
@@ -840,6 +856,7 @@ KEChainPageLabels_nl = {
     KEChainPages.TASKS: 'Taken',
     KEChainPages.WORK_BREAKDOWN: 'Taakverdeling',
     KEChainPages.CATALOG_WBS: 'Catalogus',
+    KEChainPages.APP_WBS: 'App schermen',
     KEChainPages.DATA_MODEL: 'Data model',
     KEChainPages.EXPLORER: 'Explorer',
     KEChainPages.SERVICES: 'Scripts',
@@ -848,11 +865,23 @@ KEChainPageLabels_nl = {
 CardWidgetKEChainPageLink = {
     KEChainPages.DETAIL: 'Project',
     KEChainPages.TASKS: 'Tasks',
-    KEChainPages.WORK_BREAKDOWN: 'Activities',
-    KEChainPages.CATALOG_WBS: 'Catalogus',
     KEChainPages.DATA_MODEL: 'Model',
     KEChainPages.EXPLORER: 'Explorer',
     KEChainPages.SERVICES: 'Script',
+    KEChainPages.WORK_BREAKDOWN: 'Work Breakdown',
+    KEChainPages.CATALOG_WBS: 'Catalog Tasks',
+    KEChainPages.APP_WBS: 'App Tasks',
+}
+
+KEChainPageIcons = {
+    KEChainPages.DETAIL: 'bookmark',
+    KEChainPages.TASKS: 'edit',
+    KEChainPages.WORK_BREAKDOWN: 'sitemap',
+    KEChainPages.CATALOG_WBS: 'books',
+    KEChainPages.APP_WBS: 'tablet-alt',
+    KEChainPages.DATA_MODEL: 'cube',
+    KEChainPages.EXPLORER: 'folder',
+    KEChainPages.SERVICES: 'file-code',
 }
 
 

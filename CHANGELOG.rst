@@ -5,6 +5,37 @@ PR
 --
 * :star: Added the option to manage supervisor members on a scope for KE-chain 3 backends that support the supervisor member users. That is possble for releases of KE-chain 3 starting from June 2020. (version 3.7). #772
 
+v3.8 (UNRELEASED)
+-----------------
+
+* :star: Added the bulk_create_parts API endpoint, which allows the adding of multiple `Part` instances with `Properties` in one call. #797
+
+v3.7.7 ()
+---------
+
+* :+1: Implemented robust method to update Scope side-bar buttons with minimum number of requests using a context manager (e.g. `with scope.sidebar as manager` mechanism) (#654)
+* :+1: Included mapping dict from KE-chain native pages to their Font Awesome icons.
+* :+1: Added properties to retrieve the root Activity and Part objects of a Scope. (#799)
+* :+1: Added bulk-clone of activities, including associated data models. (#737)
+
+v3.7.6 (30JUN20)
+-----------------
+
+* :star: Added the Weather Widget creating possibilities. #788
+* :+1: dependent versions for development: tox (3.16.0)
+
+v3.7.5 (29JUN20)
+----------------
+
+* :star: Added the Weather and GeoJSON property types to pykechain in correspondance with the backend version (core.pim 3.6.0). #787
+* :+1: dependent versions for development: mypy (0.782), requests (2.24.0), nbsphinx (0.7.1), semver (2.10.2)
+
+v3.7.4 (15JUN20)
+----------------
+
+* :bug: Reloading `Activity2` when retrieved in an `ActivityReferenceProperty` in order to populate it with all required data.
+* :+1: dependent versions for development: sphinx (3.1.1), pytest-cov (2.10.0)
+
 v3.7.3 (11JUN20)
 ----------------
 

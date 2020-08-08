@@ -2,7 +2,8 @@ from unittest import TestCase
 
 from pykechain.enums import (WidgetTypes, ShowColumnTypes, FilterType, ProgressBarColors,
                              Category, LinkTargets, KEChainPages, WidgetTitleValue, Alignment, ActivityType,
-                             CardWidgetLinkValue, CardWidgetLinkTarget, ImageFitValue)
+                             CardWidgetLinkValue, CardWidgetLinkTarget, ImageFitValue, PropertyType, Classification,
+                             Multiplicity)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Activity2
 from pykechain.models.widgets import (
@@ -124,6 +125,7 @@ class TestWidgets(TestBetamax):
         for w in widget_set:
             with self.subTest(msg=w):
                 self.assertIsInstance(w, Widget)
+                self.assertEqual(self.activity.id, w._activity_id)
 
     def test_create_widget_in_activity(self):
         self.new_widget = self.client.create_widget(
@@ -428,7 +430,8 @@ class TestWidgetManagerInActivity(TestBetamax):
                 card_widget = self.wm.add_card_widget(title=native_page_name, link=native_page_name)
                 self.assertIsInstance(card_widget, CardWidget)
 
-        self.assertEqual(len(self.wm), 8, msg='New KE-chain page has been added to the Enum.')
+        self.assertEqual(len(self.wm), 9, msg='New KE-chain page has been added to the Enum, '
+                                              'check if the mapping dicts in enums.py need updating too!')
 
     def test_service_widget(self):
         service_gears_successful = self.project.service("Service Gears - Successful")
@@ -603,6 +606,10 @@ class TestWidgetManagerInActivity(TestBetamax):
                 with self.assertRaises(IllegalArgumentError):
                     self.wm.add_scope_widget(**inputs)
 
+
+
+
+
     def test_insert_widget(self):
         bike_part = self.project.part('Bike')
         w0 = self.wm[0]  # meta panel
@@ -610,7 +617,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         w1, w2, w3 = [self.wm.add_propertygrid_widget(
             part_instance=bike_part,
             writable_models=bike_part.model().properties,
-            title='Original widget {i} (w{i})'.format(i=i+1),
+            title='Original widget {i} (w{i})'.format(i=i + 1),
         ) for i in range(3)]
 
         # if widget order is `[w0,w1,w2]` and inserting `w3` at index 1 (before Widget1);
@@ -663,6 +670,35 @@ class TestWidgetManagerInActivity(TestBetamax):
         # tearDown
         [w.delete() for w in new_widgets]
 
+
+class TestWidgetManagerWeatherWidget(TestBetamax):
+    def setUp(self):
+        super(TestWidgetManagerWeatherWidget, self).setUp()
+        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
+        self.wm = self.task.widgets()  # type: WidgetsManager
+
+
+        catalog_root_model = self.project.part(name='Catalog', classification=Classification.CATALOG,
+                                               category=Category.MODEL)
+        self.part_model_with_weather_prop = self.project.create_model_with_properties(parent=catalog_root_model,
+                                                              name='___TEST PART', multiplicity=Multiplicity.ONE,
+                                                              properties_fvalues=[
+                                                                  dict(name='weather',
+                                                                       property_type=PropertyType.WEATHER_VALUE)])
+        self.weather_prop_instance = self.part_model_with_weather_prop.instances()[0].property('weather')
+
+    def tearDown(self):
+        self.weather_widget.delete()
+        self.part_model_with_weather_prop.delete()
+        self.task.delete()
+        super(TestWidgetManagerWeatherWidget, self).tearDown()
+
+
+    def test_weather_widget(self):
+        """Testing the weather widget."""
+        self.weather_widget = self.wm.add_weather_widget(
+            weather_property=self.weather_prop_instance,
+        )
 
 class TestWidgetNavigationBarWidget(TestBetamax):
 

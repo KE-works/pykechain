@@ -8,7 +8,8 @@ import pytz
 import requests
 
 from pykechain.enums import ActivityType, ActivityStatus, ActivityClassification, Category, \
-    activity_root_name_by_classification, ActivityRootNames, PaperSize, PaperOrientation, NotificationEvent
+    activity_root_name_by_classification, ActivityRootNames, PaperSize, PaperOrientation, NotificationEvent, \
+    Multiplicity, PropertyType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError, APIError
 from pykechain.models import Activity2
 from pykechain.utils import temp_chdir, slugify_ref
@@ -162,6 +163,174 @@ class TestActivityConstruction(TestBetamax):
             self.project.activity(name=sub_process_name)
         with self.assertRaises(NotFoundError, msg='Children of deleted Activities cant be found!'):
             self.project.activity(name=sub_task_name)
+
+
+class TestActivityClone(TestBetamax):
+
+    def setUp(self):
+        super().setUp()
+        self.process = self.project.create_activity(name='__TEST CLONE SUBPROCESS', activity_type=ActivityType.PROCESS)
+        self.task = self.process.create('__TEST CLONE TASK')
+        self.clone = None
+        self.bucket = [self.process]
+
+    def tearDown(self):
+        for activity in self.bucket:
+            if activity:
+                try:
+                    activity.delete()
+                except APIError:
+                    pass
+        super().tearDown()
+
+    def test(self):
+        clone = self.task.clone()
+
+        self.assertIsInstance(clone, Activity2)
+        self.assertNotEqual(self.task, clone)
+        self.assertEqual(self.task.parent_id, clone.parent_id)
+
+    def test_parent_id(self):
+        second_process = self.project.create_activity(
+            name='__Test process 2',
+            activity_type=ActivityType.PROCESS,
+        )
+        self.bucket.append(second_process)
+
+        clone = self.task.clone(
+            parent=second_process,
+        )
+
+        self.assertNotEqual(self.task.parent_id, clone.parent_id)
+
+    def test_update(self):
+        new_name = '__TEST TASK RENAMED'
+        clone = self.task.clone(
+            update_dict=dict(name=new_name),
+        )
+
+        self.assertEqual(new_name, clone.name)
+
+    def test_update_incorrect(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.task.clone(part_parent_instance=True)
+
+    def test_async_via_task(self):
+        response = self.task.clone(asynchronous=True)
+
+        self.assertIsNone(response)
+
+    def test_async_via_client(self):
+        response = self.client.clone_activities(activities=[self.task], parent=self.process, asynchronous=True)
+
+        self.assertIsInstance(response, list)
+        self.assertFalse(response)
+
+
+class TestActivityCloneParts(TestBetamax):
+
+    def setUp(self):
+        super().setUp()
+
+        # Create task to clone
+        self.process = self.project.create_activity(
+            name='__TEST CLONE SUBPROCESS',
+            activity_type=ActivityType.PROCESS)
+        self.task = self.process.create(
+            name='__TEST CLONE TASK')
+
+        # Create part model to copy along
+        catalog_root = self.project.model(name='Catalog')
+        intermediate = catalog_root.add_model(
+            name='__TEST CLONE INTERMEDIATE MODEL',
+            multiplicity=Multiplicity.ONE)
+        source_parent_model = intermediate.add_model(
+            name='__TEST CLONE CONFIGURED MODEL - PARENT',
+            multiplicity=Multiplicity.ONE_MANY)
+        child_model = source_parent_model.add_model(
+            name='__TEST CLONE CONFIGURED MODEL - CHILD',
+            multiplicity=Multiplicity.ONE_MANY)
+
+        for prop_type in [
+            PropertyType.CHAR_VALUE,
+            PropertyType.DATE_VALUE,
+        ]:
+            child_model.add_property(
+                name='__TEST ' + prop_type,
+                property_type=prop_type)
+
+        # Add widget to add configured part models
+        wm = self.task.widgets()
+        wm.add_filteredgrid_widget(
+            parent_instance=source_parent_model.instance(),
+            part_model=child_model,
+            all_readable=True,
+        )
+
+        self.bike_instance = self.project.model('Bike').instance()
+        wm.add_propertygrid_widget(
+            part_instance=self.bike_instance,
+            all_readable=True,
+        )
+
+        # Create target parents to move to
+        product_root = self.project.model(name='Product')
+        self.target_parent_model = product_root.add_model(
+            name='__TEST CLONE TARGET PARENT',
+            multiplicity=Multiplicity.ONE)
+        self.parent_instance = self.target_parent_model.instance()
+
+        # In tearDown, delete tasks first, then configured data modelsW
+        self.bucket = [self.task, self.process, intermediate, self.target_parent_model]
+
+    def tearDown(self):
+        for obj in self.bucket:
+            if obj:
+                try:
+                    obj.delete()
+                except APIError:
+                    pass
+        super().tearDown()
+
+    def test(self):
+        """Copy a data model from the catalog to the product data model tree"""
+        clones = self.client.clone_activities(
+            activities=[self.task],
+            parent=self.process,
+            activity_update_dicts={self.task.id: {'name': '__TEST CLONE ACTIVITY WITH PARTS'}},
+            clone_parts=True,
+            clone_instances=True,
+            clone_children=True,
+            part_parent_model=self.target_parent_model,
+            part_parent_instance=self.parent_instance,
+            asynchronous=False,
+        )
+
+        self.assertTrue(clones)
+
+        new_children = list(self.parent_instance.children())
+        self.assertTrue(new_children, msg='No parts were copied')
+
+    def test_excluded_models(self):
+        """Exclude the bike model from the copy"""
+        clones = self.client.clone_activities(
+            activities=[self.task],
+            parent=self.process,
+            activity_update_dicts={self.task.id: {'name': '__TEST CLONE ACTIVITY WITH PARTS'}},
+            clone_parts=True,
+            clone_instances=True,
+            clone_children=True,
+            excluded_parts=[self.bike_instance],
+            part_parent_model=self.target_parent_model,
+            part_parent_instance=self.parent_instance,
+            asynchronous=False,
+        )
+
+        self.assertTrue(clones)
+
+        new_children = list(self.parent_instance.children())
+        self.assertTrue(new_children, msg='No parts were copied')
+        self.assertNotIn('Bike', {c.name for c in new_children}, msg='Bike should not have been copied over.')
 
 
 class TestActivities(TestBetamax):

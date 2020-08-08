@@ -19,6 +19,7 @@ from pykechain.models.widgets.widget_schemas import undefined_meta_schema
 # PROGRESS = 'PROGRESS'
 # SIGNATURE = 'SIGNATURE'
 # CARD = 'CARD'
+# WEATHER = 'WEATHER'
 
 
 class MetapanelWidget(Widget):
@@ -93,3 +94,7 @@ class ThirdpartyWidget(Widget):
 
 class TasksWidget(Widget):
     """Tasks Widget."""
+
+
+class WeatherWidget(Widget):
+    """Weather Widget."""
