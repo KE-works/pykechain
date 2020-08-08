@@ -3,7 +3,7 @@ import re
 import unicodedata
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
-from typing import TypeVar, Iterable, Callable, Optional, Text, Dict  # noqa: F401
+from typing import TypeVar, Iterable, Callable, Optional, Text, Dict, Union, List  # noqa: F401
 
 import pytz
 import six
@@ -492,9 +492,16 @@ def __dict__inherited__(cls: type(object), stop: type(object) = type, public: Op
     return _dict
 
 
-def get_in_chunks(lst, chunk_size):
+def get_in_chunks(lst: Union[List, Iterable], chunk_size: int) -> Iterable:
     """
-    Yields successive chunks from a list based on the chunk_size.
+    Yield successive chunks from a list based on the chunk_size.
+
+    :param lst: list or Iterable
+    :type lst: List or Iterable
+    :param chunk_size: size of the chunks
+    :type chunk_size: int
+    :returns: Iterator that returns list of length chunk_size until original lst is depleted.
+    :rtype: Iterable
     """
     for i in range(0, len(lst), chunk_size):
-        yield lst[i : i + chunk_size]
+        yield lst[i: i + chunk_size]
