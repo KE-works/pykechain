@@ -66,11 +66,13 @@ class _ReferenceProperty(Property2):
         :return: serialized value
         """
         try:
-            value = check_base(value, cls=self.REFERENCED_CLASS, key='Reference')
+            value = check_base(value, cls=self.REFERENCED_CLASS, key="Reference")
             return [value] if value is not None else value
         except IllegalArgumentError:
             # expected to fail, as value should be an iterable
-            return check_list_of_base(value, cls=self.REFERENCED_CLASS, key='references')
+            return check_list_of_base(
+                value, cls=self.REFERENCED_CLASS, key="references"
+            )
 
 
 class _ReferencePropertyInScope(_ReferenceProperty, ABC):
@@ -95,20 +97,22 @@ class _ReferencePropertyInScope(_ReferenceProperty, ABC):
         :param referenced_object: Either a pykechain object or a UUID string.
         :return: None
         """
-        if self._options and 'scope_id' not in self._options:
+        if self._options and "scope_id" not in self._options:
             # See whether the referenced model is an object with an ID
             if isinstance(referenced_object, self.REFERENCED_CLASS):
                 x_scope_id = referenced_object.scope_id
             else:
                 # retrieve the scope_id from the property model's value (which is an object in a scope (x_scope))
                 referenced_models = self.model().value
-                if not referenced_models or not isinstance(referenced_models[0], self.REFERENCED_CLASS):
+                if not referenced_models or not isinstance(
+                    referenced_models[0], self.REFERENCED_CLASS
+                ):
                     # if the referenced model is not set or the referenced value is not in current scope
                     x_scope_id = self.scope_id
                 else:
                     # get the scope_id from the referenced model
                     x_scope_id = referenced_models[0].scope_id
-            self._options['scope_id'] = x_scope_id
+            self._options["scope_id"] = x_scope_id
 
             # edit the model of the property, such that all instances are updated as well.
             self.model().edit(options=self._options)

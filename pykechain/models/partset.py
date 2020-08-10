@@ -19,7 +19,9 @@ class PartSet(Sized):
         self._iter = iter(self._parts)
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke {} object {} parts>".format(self.__class__.__name__, self.__len__())
+        return "<pyke {} object {} parts>".format(
+            self.__class__.__name__, self.__len__()
+        )
 
     def __iter__(self):
         return self
@@ -40,13 +42,9 @@ class PartSet(Sized):
         raise NotImplementedError
 
     def _repr_html_(self) -> Text:
-        all_instances = all(p.category == 'INSTANCE' for p in self._parts)
+        all_instances = all(p.category == "INSTANCE" for p in self._parts)
 
-        html = [
-            "<table width=100%>",
-            "<tr>",
-            "<th>Part</th>"
-        ]
+        html = ["<table width=100%>", "<tr>", "<th>Part</th>"]
 
         if not all_instances:
             html.append("<th>Category</th>")
@@ -66,4 +64,4 @@ class PartSet(Sized):
 
         html.append("</table>")
 
-        return ''.join(html)
+        return "".join(html)

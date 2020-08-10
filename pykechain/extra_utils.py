@@ -57,8 +57,10 @@ def relocate_model(part, target_parent, name=None, include_children=True):
     :raises IllegalArgumentError: if target_parent is descendant of part
     """
     if target_parent.id in get_illegal_targets(part, include={part.id}):
-        raise IllegalArgumentError('cannot relocate part "{}" under target parent "{}", because the target is part of '
-                                   'its descendants'.format(part.name, target_parent.name))
+        raise IllegalArgumentError(
+            'cannot relocate part "{}" under target parent "{}", because the target is part of '
+            "its descendants".format(part.name, target_parent.name)
+        )
 
     # First, if the user doesn't provide the name, then just use the default "Clone - ..." name
     if not name:
@@ -66,7 +68,9 @@ def relocate_model(part, target_parent, name=None, include_children=True):
 
     # The description cannot be added when creating a model, so edit the model after creation.
     part_desc = part.description
-    moved_part_model = target_parent.add_model(name=name, multiplicity=part.multiplicity)
+    moved_part_model = target_parent.add_model(
+        name=name, multiplicity=part.multiplicity
+    )
     if part_desc:
         moved_part_model.edit(description=str(part_desc))
 
@@ -75,17 +79,17 @@ def relocate_model(part, target_parent, name=None, include_children=True):
 
     # Loop through properties and retrieve their type, description and unit
     list_of_properties_sorted_by_order = part.properties
-    list_of_properties_sorted_by_order.sort(key=lambda x: x._json_data['order'])
+    list_of_properties_sorted_by_order.sort(key=lambda x: x._json_data["order"])
     for prop in list_of_properties_sorted_by_order:
         prop_type = prop.type
         description = prop.description
         unit = prop.unit
 
         # For KE-chain 3 (PIM2) we have value_options instead of options.
-        if prop._client.match_app_version(label='pim', version='>=3.0.0'):
-            options = prop._json_data.get('value_options')
+        if prop._client.match_app_version(label="pim", version=">=3.0.0"):
+            options = prop._json_data.get("value_options")
         else:
-            options = prop._json_data.get('options')
+            options = prop._json_data.get("options")
 
         # On "Part references" properties, the models referenced also need to be added
         if prop_type == PropertyType.REFERENCES_VALUE:
@@ -95,7 +99,7 @@ def relocate_model(part, target_parent, name=None, include_children=True):
                 description=description,
                 property_type=prop_type,
                 default_value=referenced_part_ids,
-                options=options
+                options=options,
             )
 
         # On "Attachment" properties, attachments needs to be downloaded and re-uploaded to the new property.
@@ -104,10 +108,10 @@ def relocate_model(part, target_parent, name=None, include_children=True):
                 name=prop.name,
                 description=description,
                 property_type=prop_type,
-                options=options
+                options=options,
             )
             if prop.value:
-                attachment_name = prop._json_data['value'].split('/')[-1]
+                attachment_name = prop._json_data["value"].split("/")[-1]
                 with temp_chdir() as target_dir:
                     full_path = os.path.join(target_dir or os.getcwd(), attachment_name)
                     prop.save_as(filename=full_path)
@@ -121,7 +125,7 @@ def relocate_model(part, target_parent, name=None, include_children=True):
                 property_type=prop_type,
                 default_value=prop.value,
                 unit=unit,
-                options=options
+                options=options,
             )
 
         # Map the current property model id with newly created property model Object
@@ -137,7 +141,7 @@ def relocate_model(part, target_parent, name=None, include_children=True):
                 part=sub_part,
                 target_parent=moved_part_model,
                 name=sub_part.name,
-                include_children=include_children
+                include_children=include_children,
             )
     return moved_part_model
 
@@ -182,8 +186,12 @@ def relocate_instance(part, target_parent, name=None, include_children=True):
     target_parent_model = target_parent.model()
 
     # Call the move_part() function for those models.
-    relocate_model(part=part_model, target_parent=target_parent_model, name=part_model.name,
-                   include_children=include_children)
+    relocate_model(
+        part=part_model,
+        target_parent=target_parent_model,
+        name=part_model.name,
+        include_children=include_children,
+    )
 
     # Populate the descendants of the Part (category=Instance), in order to avoid to retrieve children for every
     # level and save time. Only need it the children should be included.
@@ -191,12 +199,19 @@ def relocate_instance(part, target_parent, name=None, include_children=True):
         part.populate_descendants()
 
     # This function will move the part instance under the target_parent instance, and its children if required.
-    moved_instance = move_part_instance(part_instance=part, target_parent=target_parent, part_model=part_model,
-                                        name=name, include_children=include_children)
+    moved_instance = move_part_instance(
+        part_instance=part,
+        target_parent=target_parent,
+        part_model=part_model,
+        name=name,
+        include_children=include_children,
+    )
     return moved_instance
 
 
-def move_part_instance(part_instance, target_parent, part_model, name=None, include_children=True):
+def move_part_instance(
+    part_instance, target_parent, part_model, name=None, include_children=True
+):
     """
     Move the `Part` instance to target parent and updates the properties based on the original part instance.
 
@@ -232,15 +247,21 @@ def move_part_instance(part_instance, target_parent, part_model, name=None, incl
             moved_instance = moved_model.instances(parent_id=target_parent.id)[0]
             get_edited_one_many().append(moved_model.id)
         else:
-            moved_instance = target_parent.add(name=name, model=moved_model, suppress_kevents=True)
+            moved_instance = target_parent.add(
+                name=name, model=moved_model, suppress_kevents=True
+            )
     else:
         # If multiplicity is '0 or more' or '0 or 1', it means no instance has been created automatically with the
         # model, so then everything must be created and then updated.
-        moved_instance = target_parent.add(name=name, model=moved_model, suppress_kevents=True)
+        moved_instance = target_parent.add(
+            name=name, model=moved_model, suppress_kevents=True
+        )
 
     # Update properties of the instance
     map_property_instances(part_instance, moved_instance)
-    moved_instance = update_part_with_properties(part_instance, moved_instance, name=str(name))
+    moved_instance = update_part_with_properties(
+        part_instance, moved_instance, name=str(name)
+    )
 
     # If include_children is True, then recursively call this function for every descendant. Keep the name of the
     # original sub-instance.
@@ -250,9 +271,13 @@ def move_part_instance(part_instance, target_parent, part_model, name=None, incl
             part_instance.populate_descendants()
 
         for sub_instance in part_instance._cached_children:
-            move_part_instance(part_instance=sub_instance, target_parent=moved_instance,
-                               part_model=sub_instance.model(),
-                               name=sub_instance.name, include_children=True)
+            move_part_instance(
+                part_instance=sub_instance,
+                target_parent=moved_instance,
+                part_model=sub_instance.model(),
+                name=sub_instance.name,
+                include_children=True,
+            )
 
     return moved_instance
 
@@ -277,7 +302,7 @@ def update_part_with_properties(part_instance, moved_instance, name=None):
         if prop_instance.type == PropertyType.ATTACHMENT_VALUE:
             moved_prop = get_mapping_dictionary()[prop_instance.id]
             if prop_instance.value:
-                attachment_name = prop_instance._json_data['value'].split('/')[-1]
+                attachment_name = prop_instance._json_data["value"].split("/")[-1]
                 with temp_chdir() as target_dir:
                     full_path = os.path.join(target_dir or os.getcwd(), attachment_name)
                     prop_instance.save_as(filename=full_path)
@@ -289,12 +314,16 @@ def update_part_with_properties(part_instance, moved_instance, name=None):
         elif prop_instance.type == PropertyType.REFERENCES_VALUE:
             if prop_instance.value:
                 moved_prop_instance = get_mapping_dictionary()[prop_instance.id]
-                properties_id_dict[moved_prop_instance.id] = [ref_part.id for ref_part in prop_instance.value]
+                properties_id_dict[moved_prop_instance.id] = [
+                    ref_part.id for ref_part in prop_instance.value
+                ]
         else:
             moved_prop_instance = get_mapping_dictionary()[prop_instance.id]
             properties_id_dict[moved_prop_instance.id] = prop_instance.value
     # Update the name and property values in one go.
-    moved_instance.update(name=str(name), update_dict=properties_id_dict, bulk=True, suppress_kevents=True)
+    moved_instance.update(
+        name=str(name), update_dict=properties_id_dict, bulk=True, suppress_kevents=True
+    )
     moved_instance.populate_descendants()
     return moved_instance
 
@@ -317,5 +346,7 @@ def map_property_instances(original_part, new_part):
     # Do the same for each Property of original part instance, using the 'model' id and the get_mapping_dictionary
     for prop_original in original_part.properties:
         get_mapping_dictionary()[prop_original.id] = [
-            prop_new for prop_new in new_part.properties if
-            get_mapping_dictionary()[prop_original.model_id].id == prop_new.model_id][0]
+            prop_new
+            for prop_new in new_part.properties
+            if get_mapping_dictionary()[prop_original.model_id].id == prop_new.model_id
+        ][0]

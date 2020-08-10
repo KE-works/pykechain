@@ -43,22 +43,22 @@ class Property(BaseInScope):  # pragma: no cover
         """Construct a Property from a json object."""
         super(Property, self).__init__(json, **kwargs)
 
-        self._output = json.get('output', None)
-        self._value = json.get('value', None)
-        self._options = json.get('options', None)
+        self._output = json.get("output", None)
+        self._value = json.get("value", None)
+        self._options = json.get("options", None)
         self._model = None  # Model object storage
-        self.type = json.get('property_type', None)
-        self.category = json.get('category')
-        self.description = json.get('description', None)
-        self.unit = json.get('unit', None)
-        self.order = json.get('order', None)
+        self.type = json.get("property_type", None)
+        self.category = json.get("category")
+        self.description = json.get("description", None)
+        self.unit = json.get("unit", None)
+        self.order = json.get("order", None)
 
         # set an empty internal validators variable
         self._validators = []  # type: List[Any]
 
         if self._options:
             validate(self._options, options_json_schema)
-            if self._options.get('validators'):
+            if self._options.get("validators"):
                 self._parse_validators()
 
     @property
@@ -68,7 +68,7 @@ class Property(BaseInScope):  # pragma: no cover
         :return: True if the property output is configured as output, otherwise false
         :rtype: bool
         """
-        return self._json_data.get('output', False)
+        return self._json_data.get("output", False)
 
     @property
     def value(self):
@@ -99,15 +99,23 @@ class Property(BaseInScope):  # pragma: no cover
     def validators(self, validators):
         # type: (Union[list, tuple]) -> None
         if self.category != Category.MODEL:
-            raise IllegalArgumentError("To update the list of validators, it can only work on "
-                                       "`Property` of category 'MODEL'")
+            raise IllegalArgumentError(
+                "To update the list of validators, it can only work on "
+                "`Property` of category 'MODEL'"
+            )
 
         if not isinstance(validators, (tuple, list)):
-            raise IllegalArgumentError('Should be a list or tuple with PropertyValidator objects, '
-                                       'got {}'.format(type(validators)))
+            raise IllegalArgumentError(
+                "Should be a list or tuple with PropertyValidator objects, "
+                "got {}".format(type(validators))
+            )
         for validator in validators:
             if not isinstance(validator, PropertyValidator):
-                raise IllegalArgumentError("Validator '{}' should be a PropertyValidator object".format(validator))
+                raise IllegalArgumentError(
+                    "Validator '{}' should be a PropertyValidator object".format(
+                        validator
+                    )
+                )
             validator.validate_json()
 
         # set the internal validators list
@@ -126,9 +134,9 @@ class Property(BaseInScope):  # pragma: no cover
         :returns: The :class:`Part` associated to this property
         :raises APIError: if the `Part` is not found
         """
-        part_id = self._json_data['part']
+        part_id = self._json_data["part"]
 
-        return self._client.part(pk=part_id, category=self._json_data['category'])
+        return self._client.part(pk=part_id, category=self._json_data["category"])
 
     @property
     def model_id(self):
@@ -139,7 +147,7 @@ class Property(BaseInScope):  # pragma: no cover
         if self.category == Category.MODEL:
             return None
         else:
-            return self._json_data.get('model')
+            return self._json_data.get("model")
 
     def model(self):
         """
@@ -154,7 +162,9 @@ class Property(BaseInScope):  # pragma: no cover
         if self.category == Category.MODEL:
             return self
         elif self._model is None:
-            self._model = self._client.property(pk=self.model_id, category=Category.MODEL)
+            self._model = self._client.property(
+                pk=self.model_id, category=Category.MODEL
+            )
         return self._model
 
     def delete(self):
@@ -164,20 +174,26 @@ class Property(BaseInScope):  # pragma: no cover
         :return: None
         :raises APIError: if delete was not successful
         """
-        response = self._client._request('DELETE', self._client._build_url('property', property_id=self.id))
+        response = self._client._request(
+            "DELETE", self._client._build_url("property", property_id=self.id)
+        )
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete property: {} with id {}".format(self.name, self.id))
+            raise APIError(
+                "Could not delete property: {} with id {}".format(self.name, self.id)
+            )
 
     def _put_value(self, value):
-        url = self._client._build_url('property', property_id=self.id)
+        url = self._client._build_url("property", property_id=self.id)
 
-        response = self._client._request('PUT', url, json={'value': value})
+        response = self._client._request("PUT", url, json={"value": value})
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update property value")
 
-        self.refresh(url=url)  # update itself by requerying the url to retrieve all the information.
+        self.refresh(
+            url=url
+        )  # update itself by requerying the url to retrieve all the information.
         return self.value
 
     def has_value(self):
@@ -208,22 +224,27 @@ class Property(BaseInScope):  # pragma: no cover
         :type json: dict
         :return: a :class:`Property` object
         """
-        property_type = json.get('property_type')
+        property_type = json.get("property_type")
 
         if property_type == PropertyType.ATTACHMENT_VALUE:
             from .property_attachment import AttachmentProperty
+
             return AttachmentProperty(json, **kwargs)
         elif property_type == PropertyType.SINGLE_SELECT_VALUE:
             from .property_selectlist import SelectListProperty
+
             return SelectListProperty(json, **kwargs)
         elif property_type == PropertyType.REFERENCE_VALUE:
             from .property_reference import ReferenceProperty
+
             return ReferenceProperty(json, **kwargs)
         elif property_type == PropertyType.REFERENCES_VALUE:
             from .property_multi_reference import MultiReferenceProperty
+
             return MultiReferenceProperty(json, **kwargs)
         elif property_type == PropertyType.DATETIME_VALUE:
             from .property_datetime import DatetimeProperty
+
             return DatetimeProperty(json, **kwargs)
         else:
             return Property(json, **kwargs)
@@ -265,63 +286,80 @@ class Property(BaseInScope):  # pragma: no cover
         >>> wheel_property_reference.edit(options=options)
 
         """
-        update_dict = {'id': self.id}
+        update_dict = {"id": self.id}
         if name is not None:
             if not isinstance(name, (str, text_type)):
                 raise IllegalArgumentError(
-                    "name should be provided as a string, was provided as '{}'".format(type(name)))
-            update_dict.update({'name': name})
+                    "name should be provided as a string, was provided as '{}'".format(
+                        type(name)
+                    )
+                )
+            update_dict.update({"name": name})
             self.name = name
         if description is not None:
             if not isinstance(description, (str, text_type)):
-                raise IllegalArgumentError("description should be provided as a string, was provided as '{}'".
-                                           format(type(description)))
-            update_dict.update({'description': description})
+                raise IllegalArgumentError(
+                    "description should be provided as a string, was provided as '{}'".format(
+                        type(description)
+                    )
+                )
+            update_dict.update({"description": description})
         if unit is not None:
             if not isinstance(unit, (str, text_type)):
-                raise IllegalArgumentError("unit should be provided as a string, was provided as '{}'".
-                                           format(type(unit)))
-            update_dict.update({'unit': unit})
+                raise IllegalArgumentError(
+                    "unit should be provided as a string, was provided as '{}'".format(
+                        type(unit)
+                    )
+                )
+            update_dict.update({"unit": unit})
         if options is not None:
             if not isinstance(options, dict):
-                raise IllegalArgumentError("options should be provided as a dict, was provided as '{}'".
-                                           format(type(options)))
-            update_dict.update({'options': options})
+                raise IllegalArgumentError(
+                    "options should be provided as a dict, was provided as '{}'".format(
+                        type(options)
+                    )
+                )
+            update_dict.update({"options": options})
         if kwargs is not None:
             # process the other kwargs in py27 style.
             for key, value in iteritems(kwargs):
                 update_dict[key] = value
 
-        response = self._client._request('PUT', self._client._build_url('property', property_id=self.id),
-                                         json=update_dict)
+        response = self._client._request(
+            "PUT",
+            self._client._build_url("property", property_id=self.id),
+            json=update_dict,
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Property ({})".format(response))
 
-        self.refresh(url=self._client._build_url('property', property_id=self.id))
+        self.refresh(url=self._client._build_url("property", property_id=self.id))
 
     def _parse_validators(self):
         """Parse the validator in the options to validators."""
         self._validators = []
-        validators_json = self._options.get('validators')
+        validators_json = self._options.get("validators")
         for validator_json in validators_json:
             self._validators.append(PropertyValidator.parse(json=validator_json))
 
     def _dump_validators(self):
         """Dump the validators as json inside the _options dictionary with the key `validators`."""
-        if hasattr(self, '_validators'):
+        if hasattr(self, "_validators"):
             validators_json = []
             for validator in self._validators:
                 if isinstance(validator, PropertyValidator):
                     validators_json.append(validator.as_json())
                 else:
-                    raise APIError("validator is not a PropertyValidator: '{}'".format(validator))
-            if self._options.get('validators', list()) == validators_json:
+                    raise APIError(
+                        "validator is not a PropertyValidator: '{}'".format(validator)
+                    )
+            if self._options.get("validators", list()) == validators_json:
                 # no change
                 pass
             else:
                 new_options = self._options.copy()  # make a copy
-                new_options.update({'validators': validators_json})
+                new_options.update({"validators": validators_json})
                 validate(new_options, options_json_schema)
                 self._options = new_options
 
@@ -337,7 +375,7 @@ class Property(BaseInScope):  # pragma: no cover
         :returns: True when the `value` is valid
         :rtype: bool or None
         """
-        if not hasattr(self, '_validators'):
+        if not hasattr(self, "_validators"):
             return None
         else:
             self.validate(reason=False)
@@ -378,8 +416,13 @@ class Property(BaseInScope):  # pragma: no cover
         :rtype: list(bool) or list((bool, str))
         :raises Exception: for incorrect validators or incompatible values
         """
-        self._validation_results = [validator.is_valid(self._value) for validator in getattr(self, '_validators')]
-        self._validation_reasons = [validator.get_reason() for validator in getattr(self, '_validators')]
+        self._validation_results = [
+            validator.is_valid(self._value)
+            for validator in getattr(self, "_validators")
+        ]
+        self._validation_reasons = [
+            validator.get_reason() for validator in getattr(self, "_validators")
+        ]
 
         if reason:
             return list(zip(self._validation_results, self._validation_reasons))
