@@ -1558,7 +1558,7 @@ class Client(object):
 
     def _delete_parts_bulk(
             self,
-            parts: List[Union[Part2]],
+            parts: List[Union[Part2, Text]],
             asynchronous: Optional[bool] = False,
             **kwargs
     ) -> bool:
