@@ -53,7 +53,7 @@ class ReferenceProperty(Property):  # pragma: no cover
         if not self._value:
             return None
 
-        return self._client.part(pk=self._value["id"])
+        return self._client.part(pk=self._value['id'])
 
     @value.setter
     def value(self, value):
@@ -63,11 +63,7 @@ class ReferenceProperty(Property):  # pragma: no cover
             # tested against a six.text_type (found in the requests' urllib3 package) for unicode conversion in py27
             part_id = value
         else:
-            raise ValueError(
-                "Reference must be a Part, Part id or None. type: {}".format(
-                    type(value)
-                )
-            )
+            raise ValueError("Reference must be a Part, Part id or None. type: {}".format(type(value)))
 
         self._value = self._put_value(part_id)
 
@@ -90,11 +86,7 @@ class ReferenceProperty(Property):  # pragma: no cover
         # in the reference property of the model the value is set to the ID of the model from which we can choose parts
         model_parent_part = self.part.model()  # makes single part call
         property_model = model_parent_part.property(self.name)
-        referenced_model = self._client.model(
-            pk=property_model._value["id"]
-        )  # makes single part call
-        possible_choices = self._client.parts(
-            model=referenced_model
-        )  # makes multiple parts call
+        referenced_model = self._client.model(pk=property_model._value['id'])  # makes single part call
+        possible_choices = self._client.parts(model=referenced_model)  # makes multiple parts call
 
         return possible_choices

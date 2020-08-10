@@ -2,22 +2,11 @@ from __future__ import division
 
 import mimetypes
 import re
-from typing import (
-    Any,
-    Union,
-    Tuple,
-    Optional,
-    Text,
-    Dict,
-    List,
-)  # noqa: F401 # pylint: disable=unused-import
+from typing import Any, Union, Tuple, Optional, Text, Dict, List  # noqa: F401 # pylint: disable=unused-import
 
 from pykechain.enums import PropertyVTypes
 from pykechain.models.validators.mime_types_defaults import predefined_mimes
-from pykechain.models.validators.validator_schemas import (
-    filesizevalidator_schema,
-    fileextensionvalidator_schema,
-)
+from pykechain.models.validators.validator_schemas import filesizevalidator_schema, fileextensionvalidator_schema
 from pykechain.models.validators.validators_base import PropertyValidator
 from pykechain.utils import EMAIL_REGEX_PATTERN
 
@@ -66,52 +55,40 @@ class NumericRangeValidator(PropertyValidator):
 
     vtype = PropertyVTypes.NUMERICRANGE
 
-    def __init__(
-        self,
-        json=None,
-        minvalue=None,
-        maxvalue=None,
-        stepsize=None,
-        enforce_stepsize=None,
-        **kwargs
-    ):
+    def __init__(self, json=None, minvalue=None, maxvalue=None, stepsize=None, enforce_stepsize=None, **kwargs):
         """Construct the numeric range validator."""
         super(NumericRangeValidator, self).__init__(json=json, **kwargs)
 
         if minvalue is not None:
-            self._config["minvalue"] = minvalue
+            self._config['minvalue'] = minvalue
         if maxvalue is not None:
-            self._config["maxvalue"] = maxvalue
+            self._config['maxvalue'] = maxvalue
         if stepsize is not None:
-            self._config["stepsize"] = stepsize
+            self._config['stepsize'] = stepsize
         if enforce_stepsize is not None:
-            self._config["enforce_stepsize"] = enforce_stepsize
+            self._config['enforce_stepsize'] = enforce_stepsize
 
-        if self._config.get("minvalue") is None:
-            self.minvalue = float("-inf")
+        if self._config.get('minvalue') is None:
+            self.minvalue = float('-inf')
         else:
-            self.minvalue = self._config.get("minvalue")
-        if self._config.get("maxvalue") is None:
-            self.maxvalue = float("inf")
+            self.minvalue = self._config.get('minvalue')
+        if self._config.get('maxvalue') is None:
+            self.maxvalue = float('inf')
         else:
-            self.maxvalue = self._config.get("maxvalue")
+            self.maxvalue = self._config.get('maxvalue')
 
-        self.stepsize = self._config.get("stepsize", None)
-        self.enforce_stepsize = self._config.get("enforce_stepsize", None)
+        self.stepsize = self._config.get('stepsize', None)
+        self.enforce_stepsize = self._config.get('enforce_stepsize', None)
 
         if self.minvalue > self.maxvalue:
-            raise Exception(
-                "The minvalue ({}) should be smaller than the maxvalue ({}) of the numeric "
-                "range validation".format(self.minvalue, self.maxvalue)
-            )
+            raise Exception('The minvalue ({}) should be smaller than the maxvalue ({}) of the numeric '
+                            'range validation'.format(self.minvalue, self.maxvalue))
         if self.enforce_stepsize and self.stepsize is None:
-            raise Exception("The stepsize should be provided when enforcing stepsize")
+            raise Exception('The stepsize should be provided when enforcing stepsize')
 
     def _logic(self, value=None):
         # type: (Any) -> Tuple[Union[bool, None], str]
-        basereason = "Value '{}' should be between {} and {}".format(
-            value, self.minvalue, self.maxvalue
-        )
+        basereason = "Value '{}' should be between {} and {}".format(value, self.minvalue, self.maxvalue)
         self._validation_result, self._validation_reason = None, "No reason"
 
         if value is not None:
@@ -119,28 +96,19 @@ class NumericRangeValidator(PropertyValidator):
             if not self._validation_result:
                 self._validation_reason = basereason
             else:
-                self._validation_reason = basereason.replace("should be", "is")
+                self._validation_reason = basereason.replace('should be', 'is')
 
         if self.stepsize != 1 and self.enforce_stepsize:
             # to account also for floating point stepsize checks: https://stackoverflow.com/a/30445184/246235
-            if self.minvalue == float("-inf"):
-                self._validation_result = (
-                    abs(value / self.stepsize - round(value / self.stepsize))
-                    < self.accuracy
-                )
+            if self.minvalue == float('-inf'):
+                self._validation_result = abs(value / self.stepsize - round(value / self.stepsize)) < self.accuracy
             else:
-                self._validation_result = (
-                    abs(
-                        (value - self.minvalue) / self.stepsize
-                        - round((value - self.minvalue) / self.stepsize)
-                    )
-                    < self.accuracy
-                )
+                self._validation_result = abs((value - self.minvalue) / self.stepsize - round(
+                    (value - self.minvalue) / self.stepsize)) < self.accuracy
 
             if not self._validation_result:
-                self._validation_reason = "Value '{}' is not in alignment with a stepsize of {}".format(
-                    value, self.stepsize
-                )
+                self._validation_reason = "Value '{}' is not in alignment with a stepsize of {}". \
+                    format(value, self.stepsize)
 
         return self._validation_result, self._validation_reason
 
@@ -174,13 +142,7 @@ class RequiredFieldValidator(PropertyValidator):
         basereason = "Value is required"
         self._validation_result, self._validation_reason = None, "No reason"
 
-        if (
-            value is not None
-            and value != ""
-            and value != list()
-            and value != tuple()
-            and value != set()
-        ):
+        if value is not None and value != '' and value != list() and value != tuple() and value != set():
             self._validation_result = True
             self._validation_reason = "Value is provided"
         else:
@@ -225,10 +187,7 @@ class EvenNumberValidator(PropertyValidator):
             self._validation_result, self.validation_reason = None, "No reason"
             return self._validation_result, self._validation_reason
         if not isinstance(value, (int, float)):
-            self._validation_result, self.validation_reason = (
-                False,
-                "Value should be an integer, or float (floored)",
-            )
+            self._validation_result, self.validation_reason = False, "Value should be an integer, or float (floored)"
             return self._validation_result, self._validation_reason
 
         basereason = "Value '{}' should be an even number".format(value)
@@ -263,10 +222,7 @@ class OddNumberValidator(PropertyValidator):
             self._validation_result, self.validation_reason = None, "No reason"
             return self._validation_result, self._validation_reason
         if not isinstance(value, (int, float)):
-            self._validation_result, self.validation_reason = (
-                False,
-                "Value should be an integer, or float (floored)",
-            )
+            self._validation_result, self.validation_reason = False, "Value should be an integer, or float (floored)"
             return self._validation_result, self._validation_reason
 
         basereason = "Value '{}' should be a odd number".format(value)
@@ -294,10 +250,7 @@ class SingleReferenceValidator(PropertyValidator):
             self._validation_result, self.validation_reason = None, "No reason"
             return self._validation_result, self._validation_reason
         if not isinstance(value, (list, tuple, set)):
-            self._validation_result, self.validation_reason = (
-                False,
-                "Value should be a list, tuple or set",
-            )
+            self._validation_result, self.validation_reason = False, "Value should be a list, tuple or set"
             return self._validation_result, self._validation_reason
 
         self._validation_result = len(value) == 1 or len(value) == 0
@@ -355,9 +308,9 @@ class RegexStringValidator(PropertyValidator):
         super(RegexStringValidator, self).__init__(json=json, **kwargs)
 
         if pattern is not None:
-            self._config["pattern"] = pattern
+            self._config['pattern'] = pattern
 
-        self.pattern = self._config.get("pattern", r".+")
+        self.pattern = self._config.get('pattern', r'.+')
         self._re = re.compile(self.pattern)
 
     def _logic(self, value=None):
@@ -366,15 +319,13 @@ class RegexStringValidator(PropertyValidator):
             self._validation_result, self.validation_reason = None, "No reason"
             return self._validation_result, self._validation_reason
 
-        basereason = "Value '{}' should match the regex pattern '{}'".format(
-            value, self.pattern
-        )
+        basereason = "Value '{}' should match the regex pattern '{}'".format(value, self.pattern)
 
         self._validation_result = re.match(self._re, value) is not None
         if not self._validation_result:
             self._validation_reason = basereason
         else:
-            self._validation_reason = basereason.replace("should match", "matches")
+            self._validation_reason = basereason.replace('should match', 'matches')
 
         return self._validation_result, self._validation_reason
 
@@ -414,7 +365,7 @@ class AlwaysAllowValidator(PropertyValidator):
 
         The validation results are returned as tuple (boolean (true/false), reasontext)
         """
-        return True, "Always True"
+        return True, 'Always True'
 
 
 class FileSizeValidator(PropertyValidator):
@@ -443,12 +394,7 @@ class FileSizeValidator(PropertyValidator):
     vtype = PropertyVTypes.FILESIZE
     jsonschema = filesizevalidator_schema
 
-    def __init__(
-        self,
-        json: Optional[Dict] = None,
-        max_size: Optional[Union[int, float]] = None,
-        **kwargs
-    ):
+    def __init__(self, json: Optional[Dict] = None, max_size: Optional[Union[int, float]] = None, **kwargs):
         """Construct a file size validator.
 
         :param json: (optional) dict (json) object to construct the object from
@@ -460,21 +406,17 @@ class FileSizeValidator(PropertyValidator):
         super(FileSizeValidator, self).__init__(json=json, **kwargs)
         if max_size is not None:
             if isinstance(max_size, (int, float)):
-                self._config["maxSize"] = int(max_size)
+                self._config['maxSize'] = int(max_size)
             else:
                 raise ValueError("`max_size` should be a number.")
-        self.max_size = self._config.get("maxSize", float("inf"))
+        self.max_size = self._config.get('maxSize', float('inf'))
 
-    def _logic(
-        self, value: Optional[Union[int, float]] = None
-    ) -> Tuple[Optional[bool], Optional[Text]]:
+    def _logic(self, value: Optional[Union[int, float]] = None) -> Tuple[Optional[bool], Optional[Text]]:
         """Based on a filesize (numeric) or  filepath of the property (value), the filesize is checked."""
         if value is None:
             return None, "No reason"
 
-        basereason = "Value '{}' should be of a size less then '{}'".format(
-            value, self.max_size
-        )
+        basereason = "Value '{}' should be of a size less then '{}'".format(value, self.max_size)
 
         if isinstance(value, (int, float)):
             if int(value) <= self.max_size and int(value) >= 0:
@@ -482,12 +424,7 @@ class FileSizeValidator(PropertyValidator):
             else:
                 return False, basereason
 
-        return (
-            True,
-            "We determine the filesize of '{}' to be valid. We cannot check it at this end.".format(
-                value
-            ),
-        )
+        return True, "We determine the filesize of '{}' to be valid. We cannot check it at this end.".format(value)
 
 
 class FileExtensionValidator(PropertyValidator):
@@ -518,11 +455,9 @@ class FileExtensionValidator(PropertyValidator):
 
     vtype = PropertyVTypes.FILEEXTENSION
     jsonschema = fileextensionvalidator_schema
-    mimetype_regex = r"^[-\w.]+/[-\w.\*]+$"
+    mimetype_regex = r'^[-\w.]+/[-\w.\*]+$'
 
-    def __init__(
-        self, json: Optional[Dict] = None, accept: Optional[List[Text]] = None, **kwargs
-    ):
+    def __init__(self, json: Optional[Dict] = None, accept: Optional[List[Text]] = None, **kwargs):
         """Construct a file extension validator.
 
         :param json: (optional) dict (json) object to construct the object from
@@ -534,15 +469,13 @@ class FileExtensionValidator(PropertyValidator):
         super(FileExtensionValidator, self).__init__(json=json, **kwargs)
         if accept is not None:
             if isinstance(accept, Text):
-                self._config["accept"] = accept.split(",")
+                self._config['accept'] = accept.split(',')
             elif isinstance(accept, List):
-                self._config["accept"] = accept
+                self._config['accept'] = accept
             else:
-                raise ValueError(
-                    "`accept` should be a commaseparated list or a list of strings."
-                )
+                raise ValueError("`accept` should be a commaseparated list or a list of strings.")
 
-        self.accept = self._config.get("accept", None)
+        self.accept = self._config.get('accept', None)
         self._accepted_mimetypes = self._convert_to_mimetypes(self.accept)
 
     def _convert_to_mimetypes(self, accept: List[Text]) -> Optional[List[Text]]:
@@ -571,7 +504,7 @@ class FileExtensionValidator(PropertyValidator):
             else:
                 # we assume this is an extension.
                 # we can only guess a url, we make a url like: "file.ext" to check.
-                if item.startswith("."):
+                if item.startswith('.'):
                     fake_filename = "file{}".format(item)
                 else:
                     fake_filename = "file.{}".format(item)
@@ -585,9 +518,7 @@ class FileExtensionValidator(PropertyValidator):
 
         return marray
 
-    def _logic(
-        self, value: Optional[Text] = None
-    ) -> Tuple[Optional[bool], Optional[Text]]:
+    def _logic(self, value: Optional[Text] = None) -> Tuple[Optional[bool], Optional[Text]]:
         """Based on the filename of the property (value), the type is checked.
 
         1. convert filename to mimetype
@@ -596,14 +527,12 @@ class FileExtensionValidator(PropertyValidator):
         if value is None:
             return None, "No reason"
 
-        basereason = "Value '{}' should match the mime types '{}'".format(
-            value, self.accept
-        )
+        basereason = "Value '{}' should match the mime types '{}'".format(value, self.accept)
 
         guessed_type, _ = mimetypes.guess_type(value)
         if guessed_type is None:
             return False, "Could not determine the mimetype of '{}'".format(value)
         elif guessed_type in self._accepted_mimetypes:
-            return True, basereason.replace("match", "matches")
+            return True, basereason.replace('match', 'matches')
 
         return False, basereason

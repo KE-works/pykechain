@@ -3,10 +3,7 @@ from typing import List, Optional, Text, Union, Any, Dict
 from pykechain.enums import Category, FilterType
 from pykechain.models.base_reference import _ReferencePropertyInScope
 from pykechain.models.part2 import Part2
-from pykechain.models.widgets.helpers import (
-    _check_prefilters,
-    _check_excluded_propmodels,
-)
+from pykechain.models.widgets.helpers import _check_prefilters, _check_excluded_propmodels
 
 
 class MultiReferenceProperty2(_ReferencePropertyInScope):
@@ -30,13 +27,11 @@ class MultiReferenceProperty2(_ReferencePropertyInScope):
         ids = []
         for value in self._value:
             if isinstance(value, dict):
-                ids.append(value.get("id"))
+                ids.append(value.get('id'))
             elif isinstance(value, str):
                 ids.append(value)
             else:
-                raise ValueError(
-                    'Value "{}" must be a dict with field `id` or a UUID.'.format(value)
-                )
+                raise ValueError('Value "{}" must be a dict with field `id` or a UUID.'.format(value))
 
         parts = []
 
@@ -45,18 +40,16 @@ class MultiReferenceProperty2(_ReferencePropertyInScope):
                 parts = [self._client.part(pk=ids[0], category=None)]
             elif self.category == Category.INSTANCE:
                 # Retrieve the referenced model for low-permissions scripts to enable use of the `id__in` key
-                if (
-                    False
-                ):  # TODO Check for script permissions in order to skip the model() retrieval
+                if False:  # TODO Check for script permissions in order to skip the model() retrieval
                     models = [None]
                 else:
                     models = self.model().value
                 if models:
-                    parts = list(
-                        self._client.parts(
-                            id__in=",".join(ids), model=models[0], category=None,
-                        )
-                    )
+                    parts = list(self._client.parts(
+                        id__in=','.join(ids),
+                        model=models[0],
+                        category=None,
+                    ))
         return parts
 
     def choices(self) -> List[Part2]:
@@ -78,23 +71,21 @@ class MultiReferenceProperty2(_ReferencePropertyInScope):
         referenced_model = self.model()._value  # type: Optional[List[Dict]]
         if referenced_model:
             # If a model is configured, retrieve its ID
-            choices_model_id = referenced_model[0].get("id")
+            choices_model_id = referenced_model[0].get('id')
 
             # Retrieve all part instances with this model ID
-            possible_choices = self._client.parts(
-                model_id=choices_model_id
-            )  # makes multiple parts call
+            possible_choices = self._client.parts(model_id=choices_model_id)  # makes multiple parts call
 
             return possible_choices
         else:
             return list()
 
     def set_prefilters(
-        self,
-        property_models: List[Union[Text, "AnyProperty"]],
-        values: List[Any],
-        filters_type: List[FilterType],
-        overwrite: Optional[bool] = False,
+            self,
+            property_models: List[Union[Text, 'AnyProperty']],
+            values: List[Any],
+            filters_type: List[FilterType],
+            overwrite: Optional[bool] = False
     ) -> None:
         """
         Set the pre-filters on a `MultiReferenceProperty`.
@@ -112,39 +103,38 @@ class MultiReferenceProperty2(_ReferencePropertyInScope):
         :raises IllegalArgumentError: when the type of the input is provided incorrect.
         """
         if not overwrite:
-            initial_prefilters = self._options.get("prefilters", {})
-            prefilter_string = initial_prefilters.get("property_value", "")
-            list_of_prefilters = prefilter_string.split(",") if prefilter_string else []
+            initial_prefilters = self._options.get('prefilters', {})
+            prefilter_string = initial_prefilters.get('property_value', '')
+            list_of_prefilters = prefilter_string.split(',') if prefilter_string else []
         else:
             list_of_prefilters = list()
 
         new_prefilters = {
-            "property_models": property_models,
-            "values": values,
-            "filters_type": filters_type,
+            'property_models': property_models,
+            'values': values,
+            'filters_type': filters_type,
         }
 
-        list_of_prefilters.extend(
-            _check_prefilters(part_model=self.value[0], prefilters=new_prefilters,)
-        )
+        list_of_prefilters.extend(_check_prefilters(
+            part_model=self.value[0],
+            prefilters=new_prefilters,
+        ))
 
         # Only update the options if there are any prefilters to be set, or if the original filters have to overwritten
         if list_of_prefilters or overwrite:
             options_to_set = self._options
 
             # Always create the entire prefilter json structure
-            options_to_set["prefilters"] = {
-                "property_value": ",".join(list_of_prefilters)
-                if list_of_prefilters
-                else ""
+            options_to_set['prefilters'] = {
+                'property_value': ','.join(list_of_prefilters) if list_of_prefilters else ""
             }
 
             self.edit(options=options_to_set)
 
     def set_excluded_propmodels(
-        self,
-        property_models: List[Union[Text, "AnyProperty"]],
-        overwrite: Optional[bool] = False,
+            self,
+            property_models: List[Union[Text, 'AnyProperty']],
+            overwrite: Optional[bool] = False,
     ) -> None:
         """
         Exclude a list of properties from being visible in the part-shop and modal (pop-up) of the reference property.
@@ -157,17 +147,16 @@ class MultiReferenceProperty2(_ReferencePropertyInScope):
         :raises IllegalArgumentError
         """
         if not overwrite:
-            list_of_propmodels_excl = self._options.get("propmodels_excl", [])
+            list_of_propmodels_excl = self._options.get('propmodels_excl', [])
         else:
             list_of_propmodels_excl = list()
 
-        list_of_propmodels_excl.extend(
-            _check_excluded_propmodels(
-                part_model=self.value[0], property_models=property_models,
-            )
-        )
+        list_of_propmodels_excl.extend(_check_excluded_propmodels(
+            part_model=self.value[0],
+            property_models=property_models,
+        ))
 
         options_to_set = self._options
-        options_to_set["propmodels_excl"] = list_of_propmodels_excl
+        options_to_set['propmodels_excl'] = list_of_propmodels_excl
 
         self.edit(options=options_to_set)
