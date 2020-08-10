@@ -1512,7 +1512,7 @@ class Client(object):
                 :type model_id: UUID
             :type properties: list
         :type parts: list
-        :param asynchronous: If true, immediately returns without activities (default = False)
+        :param asynchronous: If true, immediately returns without parts (default = False)
         :type asynchronous: bool
         :param kwargs:
         :return: list of Part instances
@@ -1558,24 +1558,39 @@ class Client(object):
 
     def _delete_parts_bulk(
             self,
-            parts: List[Dict],
+            parts: List[Union[Part2]],
             asynchronous: Optional[bool] = False,
             **kwargs
     ) -> bool:
-        """
+        """Delete multiple Parts simultaneously.
 
+        :param parts: list of Part objects or UUIDs
+        :type parts: List[Property] or List[UUID]
+        :param asynchronous: If true, immediately returns (default = False)
+        :type asynchronous: bool
+        :param kwargs:
+        :return: True if parts are delete successfully
+        :raises APIError: if the parts could not be deleted
+        :raises IllegalArgumentError: if there were neither Parts nor UUIDs in the list of parts
         """
-        parts = {"parts": parts}
+        list_parts = list()
+        for part in parts:
+            if isinstance(part, Part2):
+                list_parts.append(part.id)
+            elif is_uuid(part):
+                list_parts.append(part)
+            else:
+                raise IllegalArgumentError("{} is not a Part nor an UUID".format(part))
+        json = {"parts": list_parts}
         query_params = kwargs
         query_params.update(API_EXTRA_PARAMS['parts2'])
         query_params['async_mode'] = asynchronous
         response = self._request('DELETE', self._build_url('parts2_bulk_delete'),
-                                 params=query_params, json=parts)
+                                 params=query_params, json=json)
 
-        if (asynchronous and response.status_code != requests.codes.accepted) or \
-                (not asynchronous and response.status_code != requests.codes.created):  # pragma: no cover
+        if (asynchronous and response.status_code != requests.codes.ok) or \
+                (not asynchronous and response.status_code != requests.codes.ok):  # pragma: no cover
             raise APIError("Could not delete Parts. ({})".format(response.status_code), response=response)
-
         return True
 
     def create_property(
