@@ -4,12 +4,24 @@ from typing import Union, Text, Dict, Optional, List  # noqa: F401
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.enums import Multiplicity, ScopeStatus, SubprocessDisplayMode, KEChainPages, ScopeRoles, \
-    ScopeMemberActions
+from pykechain.enums import (
+    Multiplicity,
+    ScopeStatus,
+    SubprocessDisplayMode,
+    KEChainPages,
+    ScopeRoles,
+    ScopeMemberActions,
+)
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.base import Base
-from pykechain.models.input_checks import check_text, check_datetime, check_enum, check_list_of_text, \
-    check_base, check_type
+from pykechain.models.input_checks import (
+    check_text,
+    check_datetime,
+    check_enum,
+    check_list_of_text,
+    check_base,
+    check_type,
+)
 from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
@@ -43,9 +55,9 @@ class Scope2(Base, TagsMixin):
         super().__init__(json, **kwargs)
 
         # for 'kechain2.core.wim <2.0.0'
-        self.process = json.get('process')
+        self.process = json.get("process")
         # for 'kechain2.core.wim >=2.0.0'
-        self.workflow_root = json.get('workflow_root_id')
+        self.workflow_root = json.get("workflow_root_id")
 
         self._workflow_root_process = None
         self._catalog_root_process = None
@@ -55,28 +67,26 @@ class Scope2(Base, TagsMixin):
         self._catalog_root_model = None
         self._catalog_root_instance = None
 
-        self.ref = json.get('ref')
-        self.description = json.get('text')
-        self.status = json.get('status')
-        self.category = json.get('category')
+        self.ref = json.get("ref")
+        self.description = json.get("text")
+        self.status = json.get("status")
+        self.category = json.get("category")
 
-        self._tags = json.get('tags')
+        self._tags = json.get("tags")
 
-        self.start_date = parse_datetime(json.get('start_date'))
-        self.due_date = parse_datetime(json.get('due_date'))
+        self.start_date = parse_datetime(json.get("start_date"))
+        self.due_date = parse_datetime(json.get("due_date"))
 
         self._representations_container = RepresentationsComponent(
-            self,
-            self.options.get('representations', {}),
-            self._save_representations,
+            self, self.options.get("representations", {}), self._save_representations,
         )
 
     @property
     def team(self):
         """Team to which the scope is assigned."""
-        team_dict = self._json_data.get('team_id_name')
-        if team_dict and team_dict.get('id'):
-            return self._client.team(pk=team_dict.get('id'))
+        team_dict = self._json_data.get("team_id_name")
+        if team_dict and team_dict.get("id"):
+            return self._client.team(pk=team_dict.get("id"))
         else:
             return None
 
@@ -86,7 +96,7 @@ class Scope2(Base, TagsMixin):
 
         .. versionadded: 3.0
         """
-        return self._json_data.get('scope_options')
+        return self._json_data.get("scope_options")
 
     @options.setter
     def options(self, option_value):
@@ -94,9 +104,11 @@ class Scope2(Base, TagsMixin):
 
     def refresh(self, json=None, url=None, extra_params=None):
         """Refresh the object in place."""
-        super().refresh(json=json,
-                        url=self._client._build_url('scope2', scope_id=self.id),
-                        extra_params=API_EXTRA_PARAMS['scope2'])
+        super().refresh(
+            json=json,
+            url=self._client._build_url("scope2", scope_id=self.id),
+            extra_params=API_EXTRA_PARAMS["scope2"],
+        )
 
     @property
     def representations(self):
@@ -109,56 +121,68 @@ class Scope2(Base, TagsMixin):
 
     def _save_representations(self, representation_options):
         options = self.options
-        options.update({'representations': representation_options})
+        options.update({"representations": representation_options})
         self.options = options
 
     @property
-    def workflow_root_process(self) -> 'Activity2':
+    def workflow_root_process(self) -> "Activity2":
         """Retrieve the Activity2 root object with classification WORKFLOW."""
         if self._workflow_root_process is None:
-            self._workflow_root_process = self.activity(id=self._json_data['workflow_root_id'])
+            self._workflow_root_process = self.activity(
+                id=self._json_data["workflow_root_id"]
+            )
         return self._workflow_root_process
 
     @property
-    def app_root_process(self) -> 'Activity2':
+    def app_root_process(self) -> "Activity2":
         """Retrieve the Activity2 root object with classification APP."""
         if self._app_root_process is None:
-            self._app_root_process = self.activity(id=self._json_data['app_root_id'])
+            self._app_root_process = self.activity(id=self._json_data["app_root_id"])
         return self._app_root_process
 
     @property
-    def catalog_root_process(self) -> 'Activity2':
+    def catalog_root_process(self) -> "Activity2":
         """Retrieve the Activity2 root object with classification CATALOG."""
         if self._catalog_root_process is None:
-            self._catalog_root_process = self.activity(id=self._json_data['catalog_root_id'])
+            self._catalog_root_process = self.activity(
+                id=self._json_data["catalog_root_id"]
+            )
         return self._catalog_root_process
 
     @property
-    def product_root_model(self) -> 'Part2':
+    def product_root_model(self) -> "Part2":
         """Retrieve the Part2 root object with classification PRODUCT and category MODEL."""
         if self._product_root_model is None:
-            self._product_root_model = self.model(id=self._json_data['product_model_id'])
+            self._product_root_model = self.model(
+                id=self._json_data["product_model_id"]
+            )
         return self._product_root_model
 
     @property
-    def product_root_instance(self) -> 'Part2':
+    def product_root_instance(self) -> "Part2":
         """Retrieve the Part2 root object with classification PRODUCT and category INSTANCE."""
         if self._product_root_instance is None:
-            self._product_root_instance = self.part(id=self._json_data['product_instance_id'])
+            self._product_root_instance = self.part(
+                id=self._json_data["product_instance_id"]
+            )
         return self._product_root_instance
 
     @property
-    def catalog_root_model(self) -> 'Part2':
+    def catalog_root_model(self) -> "Part2":
         """Retrieve the Part2 root object with classification CATALOG and category MODEL."""
         if self._catalog_root_model is None:
-            self._catalog_root_model = self.model(id=self._json_data['catalog_model_id'])
+            self._catalog_root_model = self.model(
+                id=self._json_data["catalog_model_id"]
+            )
         return self._catalog_root_model
 
     @property
-    def catalog_root_instance(self) -> 'Part2':
+    def catalog_root_instance(self) -> "Part2":
         """Retrieve the Part2 root object with classification CATALOG and category INSTANCE."""
         if self._catalog_root_instance is None:
-            self._catalog_root_instance = self.part(id=self._json_data['catalog_instance_id'])
+            self._catalog_root_instance = self.part(
+                id=self._json_data["catalog_instance_id"]
+            )
         return self._catalog_root_instance
 
     #
@@ -177,36 +201,43 @@ class Scope2(Base, TagsMixin):
         :type user: basestring
         :raises APIError: When unable to update the scope project team.
         """
-        action = check_enum(action, ScopeMemberActions, 'action')
-        role = check_enum(role, ScopeRoles, 'role')
-        user = check_text(user, 'user')
+        action = check_enum(action, ScopeMemberActions, "action")
+        role = check_enum(role, ScopeRoles, "role")
+        user = check_text(user, "user")
 
-        users = self._client._retrieve_users()['results']  # type: List[Dict]
-        user_object = find(users, lambda u: u['username'] == user)  # type: Dict
+        users = self._client._retrieve_users()["results"]  # type: List[Dict]
+        user_object = find(users, lambda u: u["username"] == user)  # type: Dict
         if user_object is None:
             raise NotFoundError('User "{}" does not exist'.format(user))
 
-        url = self._client._build_url('scope2_{}_{}'.format(action, role), scope_id=self.id)
+        url = self._client._build_url(
+            "scope2_{}_{}".format(action, role), scope_id=self.id
+        )
 
-        response = self._client._request('PUT', url,
-                                         params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
-                                         data={'user_id': user_object['pk']})
+        response = self._client._request(
+            "PUT",
+            url,
+            params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
+            data={"user_id": user_object["pk"]},
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not {} {} in Scope".format(action, role), response=response)
+            raise APIError(
+                "Could not {} {} in Scope".format(action, role), response=response
+            )
 
-        self.refresh(json=response.json().get('results')[0])
+        self.refresh(json=response.json().get("results")[0])
 
     def edit(
-            self,
-            name: Optional[Text] = None,
-            description: Optional[Text] = None,
-            start_date: Optional[datetime] = None,
-            due_date: Optional[datetime] = None,
-            status: Optional[Union[Text, ScopeStatus]] = None,
-            tags: Optional[List[Text]] = None,
-            team: Optional[Union[Team, Text]] = None,
-            options: Optional[Dict] = None,
+        self,
+        name: Optional[Text] = None,
+        description: Optional[Text] = None,
+        start_date: Optional[datetime] = None,
+        due_date: Optional[datetime] = None,
+        status: Optional[Union[Text, ScopeStatus]] = None,
+        tags: Optional[List[Text]] = None,
+        team: Optional[Union[Team, Text]] = None,
+        options: Optional[Dict] = None,
     ) -> None:
         """Edit the details of a scope.
 
@@ -263,33 +294,36 @@ class Scope2(Base, TagsMixin):
 
         """
         update_dict = {
-            'id': self.id,
-            'name': check_text(name, 'name') or self.name,
-            'text': check_text(description, 'description') or self.description,
-            'start_date': check_datetime(start_date, 'start_date'),
-            'due_date': check_datetime(due_date, 'due_date'),
-            'status': check_enum(status, ScopeStatus, 'status') or self.status,
+            "id": self.id,
+            "name": check_text(name, "name") or self.name,
+            "text": check_text(description, "description") or self.description,
+            "start_date": check_datetime(start_date, "start_date"),
+            "due_date": check_datetime(due_date, "due_date"),
+            "status": check_enum(status, ScopeStatus, "status") or self.status,
         }
-        team = check_base(team, Team, 'team', method=self._client.team)
+        team = check_base(team, Team, "team", method=self._client.team)
         if team:
-            update_dict['team_id'] = team
-        tags = check_list_of_text(tags, 'tags', True)
+            update_dict["team_id"] = team
+        tags = check_list_of_text(tags, "tags", True)
         if tags is not None:
-            update_dict['tags'] = tags
-        scope_options = check_type(options, dict, 'options')
+            update_dict["tags"] = tags
+        scope_options = check_type(options, dict, "options")
         if scope_options:
-            update_dict['scope_options'] = scope_options
+            update_dict["scope_options"] = scope_options
 
-        url = self._client._build_url('scope2', scope_id=self.id)
+        url = self._client._build_url("scope2", scope_id=self.id)
 
-        response = self._client._request('PUT', url,
-                                         params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
-                                         json=update_dict)
+        response = self._client._request(
+            "PUT",
+            url,
+            params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
+            json=update_dict,
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Scope {}".format(self), response=response)
 
-        self.refresh(json=response.json().get('results')[0])
+        self.refresh(json=response.json().get("results")[0])
 
         # TODO tags that are set are not in response
         if tags is not None:
@@ -366,14 +400,25 @@ class Scope2(Base, TagsMixin):
         """
         return self._client.create_model(parent, name, multiplicity=multiplicity)
 
-    def create_model_with_properties(self, parent, name, multiplicity=Multiplicity.ZERO_MANY,
-                                     properties_fvalues=None, **kwargs):
+    def create_model_with_properties(
+        self,
+        parent,
+        name,
+        multiplicity=Multiplicity.ZERO_MANY,
+        properties_fvalues=None,
+        **kwargs
+    ):
         """Create a model with its properties in a single API request.
 
         See :func:`pykechain.Client.create_model_with_properties()` for available parameters.
         """
-        return self._client.create_model_with_properties(parent, name, multiplicity=multiplicity,
-                                                         properties_fvalues=properties_fvalues, **kwargs)
+        return self._client.create_model_with_properties(
+            parent,
+            name,
+            multiplicity=multiplicity,
+            properties_fvalues=properties_fvalues,
+            **kwargs
+        )
 
     #
     # Activity methods
@@ -404,10 +449,13 @@ class Scope2(Base, TagsMixin):
         """Retrieve the side-bar manager."""
         return SideBarManager(scope=self, *args, **kwargs)
 
-    def set_landing_page(self,
-                         activity: Union['Activity2', KEChainPages],
-                         task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
-                         ) -> None:
+    def set_landing_page(
+        self,
+        activity: Union["Activity2", KEChainPages],
+        task_display_mode: Optional[
+            SubprocessDisplayMode
+        ] = SubprocessDisplayMode.ACTIVITIES,
+    ) -> None:
         """
         Update the landing page of the scope.
 
@@ -422,17 +470,20 @@ class Scope2(Base, TagsMixin):
 
         if not (isinstance(activity, Activity2) or activity in KEChainPages.values()):
             raise IllegalArgumentError(
-                'activity must be of class Activity2 or a KEChainPages option, "{}" is not.'.format(activity))
+                'activity must be of class Activity2 or a KEChainPages option, "{}" is not.'.format(
+                    activity
+                )
+            )
 
-        check_enum(task_display_mode, SubprocessDisplayMode, 'task_display_mode')
+        check_enum(task_display_mode, SubprocessDisplayMode, "task_display_mode")
 
         if isinstance(activity, Activity2):
-            url = '#/scopes/{}/{}/{}'.format(self.id, task_display_mode, activity.id)
+            url = "#/scopes/{}/{}/{}".format(self.id, task_display_mode, activity.id)
         else:
-            url = '#/scopes/{}/{}'.format(self.id, activity)
+            url = "#/scopes/{}/{}".format(self.id, activity)
 
         options = dict(self.options)
-        options.update({'landingPage': url})
+        options.update({"landingPage": url})
         self.options = options
 
     #
@@ -488,7 +539,9 @@ class Scope2(Base, TagsMixin):
     # User and Members of the Scope
     #
 
-    def members(self, is_manager: Optional[bool] = None, is_leadmember: Optional[bool] = None) -> List[Dict]:
+    def members(
+        self, is_manager: Optional[bool] = None, is_leadmember: Optional[bool] = None
+    ) -> List[Dict]:
         """
         Retrieve members of the scope.
 
@@ -505,12 +558,20 @@ class Scope2(Base, TagsMixin):
         >>> leadmembers = project.members(is_leadmember=True)
 
         """
-        members = [member for member in self._json_data['members'] if member['is_active']]
+        members = [
+            member for member in self._json_data["members"] if member["is_active"]
+        ]
 
         if is_manager is not None:
-            members = [member for member in members if member.get('is_manager') == is_manager]
+            members = [
+                member for member in members if member.get("is_manager") == is_manager
+            ]
         if is_leadmember is not None:
-            members = [member for member in members if member.get('is_leadmember') == is_leadmember]
+            members = [
+                member
+                for member in members
+                if member.get("is_leadmember") == is_leadmember
+            ]
 
         return members
 
@@ -524,7 +585,9 @@ class Scope2(Base, TagsMixin):
         :type member: basestring
         :raises APIError: when unable to update the scope member
         """
-        self._update_scope_project_team(action=ScopeMemberActions.ADD, role=ScopeRoles.MEMBER, user=member)
+        self._update_scope_project_team(
+            action=ScopeMemberActions.ADD, role=ScopeRoles.MEMBER, user=member
+        )
 
     def remove_member(self, member: Text) -> None:
         """
@@ -534,7 +597,9 @@ class Scope2(Base, TagsMixin):
         :type member: basestring
         :raises APIError: when unable to update the scope member
         """
-        self._update_scope_project_team(action=ScopeMemberActions.REMOVE, role=ScopeRoles.MEMBER, user=member)
+        self._update_scope_project_team(
+            action=ScopeMemberActions.REMOVE, role=ScopeRoles.MEMBER, user=member
+        )
 
     def add_manager(self, manager: Text) -> None:
         """
@@ -544,7 +609,9 @@ class Scope2(Base, TagsMixin):
         :type manager: basestring
         :raises APIError: when unable to update the scope manager
         """
-        self._update_scope_project_team(action=ScopeMemberActions.ADD, role=ScopeRoles.MANAGER, user=manager)
+        self._update_scope_project_team(
+            action=ScopeMemberActions.ADD, role=ScopeRoles.MANAGER, user=manager
+        )
 
     def remove_manager(self, manager: Text) -> None:
         """
@@ -554,7 +621,9 @@ class Scope2(Base, TagsMixin):
         :type manager: basestring
         :raises APIError: when unable to update the scope manager
         """
-        self._update_scope_project_team(action=ScopeMemberActions.REMOVE, role=ScopeRoles.MANAGER, user=manager)
+        self._update_scope_project_team(
+            action=ScopeMemberActions.REMOVE, role=ScopeRoles.MANAGER, user=manager
+        )
 
     def add_leadmember(self, leadmember: Text) -> None:
         """
@@ -564,7 +633,9 @@ class Scope2(Base, TagsMixin):
         :type leadmember: basestring
         :raises APIError: when unable to update the scope leadmember
         """
-        self._update_scope_project_team(action=ScopeMemberActions.ADD, role=ScopeRoles.LEADMEMBER, user=leadmember)
+        self._update_scope_project_team(
+            action=ScopeMemberActions.ADD, role=ScopeRoles.LEADMEMBER, user=leadmember
+        )
 
     def remove_leadmember(self, leadmember: Text) -> None:
         """
@@ -574,4 +645,8 @@ class Scope2(Base, TagsMixin):
         :type leadmember: basestring
         :raises APIError: when unable to update the scope leadmember
         """
-        self._update_scope_project_team(action=ScopeMemberActions.REMOVE, role=ScopeRoles.LEADMEMBER, user=leadmember)
+        self._update_scope_project_team(
+            action=ScopeMemberActions.REMOVE,
+            role=ScopeRoles.LEADMEMBER,
+            user=leadmember,
+        )

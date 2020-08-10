@@ -6,6 +6,7 @@ v3.8 (UNRELEASED)
 
 * :star: Added the bulk_create_parts API endpoint, which allows the adding of multiple `Part` instances with `Properties` in one call. #797
 * :star: Added the bulk_delete_parts API endpoint, which allows the deleon of multiple `Part` objects in one call.
+
 v3.7.7 ()
 ---------
 
