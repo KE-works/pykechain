@@ -695,8 +695,8 @@ class TestBulkPartsDeletion(TestBetamax):
     def setUp(self):
         super().setUp()
         self.parts = list()
-        self.wheel_model = self.client.model(name="Wheel")
-        self.bike_instance = self.client.part(name="Bike")
+        self.wheel_model = self.project.model(name="Wheel")
+        self.bike_instance = self.project.part(name="Bike")
 
         self.diameter_prop = self.wheel_model.property(name="Diameter")
         self.spokes_prop = self.wheel_model.property(name="Spokes")
@@ -742,5 +742,14 @@ class TestBulkPartsDeletion(TestBetamax):
             part.delete()
 
     def test_bulk_delete_parts(self):
+        self.client._delete_parts_bulk(parts=self.parts_created)
+        for idx in range(1, 5):
+            with self.assertRaises(NotFoundError):
+                self.project.part(name="Wheel {}".format(idx))
+
+    def test_bulk_delete_parts_with_part_ids(self):
         self.client._delete_parts_bulk(parts=[part.id for part in self.parts_created])
-        print()
+        for idx in range(1, 5):
+            with self.assertRaises(NotFoundError):
+                self.project.part(name="Wheel {}".format(idx))
+
