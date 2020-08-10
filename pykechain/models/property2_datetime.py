@@ -24,9 +24,9 @@ class DatetimeProperty2(Property2):
         if value is None:
             self._put_value(None)
         elif isinstance(value, datetime.datetime):
-            self._put_value(check_datetime(dt=value, key="value"))
+            self._put_value(check_datetime(dt=value, key='value'))
         else:
-            raise IllegalArgumentError("value should be a datetime.datetime() object")
+            raise IllegalArgumentError('value should be a datetime.datetime() object')
 
     def to_datetime(self):
         # type: () -> Union[type(None), datetime.datetime]

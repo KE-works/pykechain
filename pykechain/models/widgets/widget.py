@@ -5,12 +5,7 @@ from jsonschema import validate
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import WidgetTypes, Category
-from pykechain.exceptions import (
-    APIError,
-    IllegalArgumentError,
-    NotFoundError,
-    MultipleFoundError,
-)
+from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
 from pykechain.models import BaseInScope
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 
@@ -30,7 +25,7 @@ class Widget(BaseInScope):
 
     schema = widget_meta_schema
 
-    def __init__(self, json: Dict, manager: "WidgetsManager" = None, **kwargs) -> None:
+    def __init__(self, json: Dict, manager: 'WidgetsManager' = None, **kwargs) -> None:
         """Construct a Widget from a KE-chain 2 json response.
 
         :param json: the json response to construct the :class:`Part` from
@@ -41,27 +36,23 @@ class Widget(BaseInScope):
         del self.name
 
         self.manager = manager
-        self.title = json.get("title")
-        self.ref = json.get("ref")
-        self.widget_type = json.get("widget_type")
+        self.title = json.get('title')
+        self.ref = json.get('ref')
+        self.widget_type = json.get('widget_type')
         # set schema
         if self._client:
             self.schema = self._client.widget_schema(self.widget_type)
 
-        self.meta = self.validate_meta(json.get("meta"))
-        self.order = json.get("order")
-        self._activity_id = json.get("activity_id")
-        self._parent_id = json.get("parent_id")
-        self.has_subwidgets = json.get("has_subwidgets")
-        self._scope_id = json.get(
-            "scope_id"
-        )  # TODO duplicate with `scope_id` attribute
-        self.progress = json.get("progress")
+        self.meta = self.validate_meta(json.get('meta'))
+        self.order = json.get('order')
+        self._activity_id = json.get('activity_id')
+        self._parent_id = json.get('parent_id')
+        self.has_subwidgets = json.get('has_subwidgets')
+        self._scope_id = json.get('scope_id')  # TODO duplicate with `scope_id` attribute
+        self.progress = json.get('progress')
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke {} '{}' id {}>".format(
-            self.__class__.__name__, self.widget_type, self.id[-8:]
-        )
+        return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.widget_type, self.id[-8:])
 
     def activity(self):
         # type: () -> Activity2  # noqa: F821 to prevent circular imports
@@ -80,17 +71,13 @@ class Widget(BaseInScope):
         :rtype: :class:`Widget`
         """
         if not self._parent_id:
-            raise NotFoundError("Widget has no parent widget (parent_id is null).")
+            raise NotFoundError('Widget has no parent widget (parent_id is null).')
 
         parent_widgets = self._client.widgets(pk=self._parent_id)
         if not parent_widgets:
-            raise NotFoundError(
-                'No parent widget with uuid "{}" was found.'.format(self._parent_id)
-            )
+            raise NotFoundError('No parent widget with uuid "{}" was found.'.format(self._parent_id))
         elif len(parent_widgets) > 1:
-            raise MultipleFoundError(
-                'There are multiple widgets with uuid "{}".'.format(self._parent_id)
-            )
+            raise MultipleFoundError('There are multiple widgets with uuid "{}".'.format(self._parent_id))
         else:
             return parent_widgets[0]
 
@@ -106,7 +93,7 @@ class Widget(BaseInScope):
         return validate(meta, self.schema) is None and meta
 
     @classmethod
-    def create(cls, json: Dict, **kwargs) -> "Widget":
+    def create(cls, json: Dict, **kwargs) -> 'Widget':
         """Create a widget based on the json data.
 
         This method will attach the right class to a widget, enabling the use of type-specific methods.
@@ -118,7 +105,6 @@ class Widget(BaseInScope):
         :return: a :class:`Widget` object
         :rtype: :class:`Widget`
         """
-
         def _type_to_classname(widget_type):
             """
             Generate corresponding inner classname based on the widget type.
@@ -132,21 +118,17 @@ class Widget(BaseInScope):
                 widget_type = WidgetTypes.UNDEFINED
             return "{}Widget".format(widget_type.title())
 
-        widget_type = json.get("widget_type")
+        widget_type = json.get('widget_type')
 
         # dispatcher to instantiate the right widget class based on the widget type
         # load all difference widget types from the pykechain.model.widgets module.
         import importlib
-
         all_widgets = importlib.import_module("pykechain.models.widgets")
         if hasattr(all_widgets, _type_to_classname(widget_type)):
-            return getattr(all_widgets, _type_to_classname(widget_type))(
-                json, client=kwargs.pop("client"), **kwargs
-            )
+            return getattr(all_widgets, _type_to_classname(widget_type))(json, client=kwargs.pop('client'), **kwargs)
         else:
-            return getattr(all_widgets, _type_to_classname(WidgetTypes.UNDEFINED))(
-                json, client=kwargs.pop("client"), **kwargs
-            )
+            return getattr(all_widgets, _type_to_classname(WidgetTypes.UNDEFINED))(json, client=kwargs.pop('client'),
+                                                                                   **kwargs)
 
         #
         # Searchers and retrievers
@@ -186,7 +168,7 @@ class Widget(BaseInScope):
         """
         return (
             self.parts(category=Category.MODEL, *args, **kwargs),
-            self.parts(category=Category.INSTANCE, *args, **kwargs),
+            self.parts(category=Category.INSTANCE, *args, **kwargs)
         )
 
     #
@@ -213,12 +195,8 @@ class Widget(BaseInScope):
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
         """
-        self._client.update_widget_associations(
-            widget=self,
-            readable_models=readable_models,
-            writable_models=writable_models,
-            **kwargs
-        )
+        self._client.update_widget_associations(widget=self, readable_models=readable_models,
+                                                writable_models=writable_models, **kwargs)
 
     def edit(self, title=None, meta=None, **kwargs):
         # type: (Optional[AnyStr], Optional[Dict], **Any) -> None
@@ -235,20 +213,18 @@ class Widget(BaseInScope):
         if meta is not None:
             update_dict.update(dict(meta=meta))
         if title is not None:
-            self.meta.update({"customTitle": title})
+            self.meta.update({'customTitle': title})
             update_dict.update(dict(meta=self.meta))
         if kwargs:
             update_dict.update(**kwargs)
 
-        url = self._client._build_url("widget", widget_id=self.id)
-        response = self._client._request(
-            "PUT", url, params=API_EXTRA_PARAMS["widgets"], json=update_dict
-        )
+        url = self._client._build_url('widget', widget_id=self.id)
+        response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['widgets'], json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Widget {}".format(self), response=response)
 
-        self.refresh(json=response.json().get("results")[0])
+        self.refresh(json=response.json().get('results')[0])
 
     def delete(self) -> bool:
         """Delete the widget.
@@ -281,13 +257,9 @@ class Widget(BaseInScope):
 
         """
         from pykechain.models import Activity2
-
         if not isinstance(target_activity, Activity2):
-            raise IllegalArgumentError(
-                "`target_activity` needs to be an activity, got '{}'".format(
-                    type(target_activity)
-                )
-            )
+            raise IllegalArgumentError("`target_activity` needs to be an activity, got '{}'".format(
+                type(target_activity)))
 
         # Retrieve the widget manager of the target activity
         widget_manager = target_activity.widgets()
@@ -303,14 +275,9 @@ class Widget(BaseInScope):
                 readable_models.append(associated_property)
 
         # Create a perfect copy of the widget
-        copied_widget = widget_manager.create_widget(
-            meta=self.meta,
-            widget_type=self.widget_type,
-            title=self.title,
-            writable_models=writable_models,
-            readable_models=readable_models,
-            order=order,
-        )
+        copied_widget = widget_manager.create_widget(meta=self.meta, widget_type=self.widget_type, title=self.title,
+                                                     writable_models=writable_models, readable_models=readable_models,
+                                                     order=order)
 
         return copied_widget
 

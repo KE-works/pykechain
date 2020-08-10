@@ -6,17 +6,10 @@ from pykechain.models.input_checks import check_enum
 from pykechain.utils import is_uuid, snakecase, camelcase
 
 # these are the common keys to all kecards.
-KECARD_COMMON_KEYS = [
-    "collapsed",
-    "collapsible",
-    "noBackground",
-    "noPadding",
-    "isDisabled",
-    "isMerged",
-]
+KECARD_COMMON_KEYS = ["collapsed", "collapsible", "noBackground", "noPadding", "isDisabled", "isMerged"]
 
 
-def _retrieve_object(obj: Union["Base", Text], method: Callable) -> Union["Base"]:
+def _retrieve_object(obj: Union['Base', Text], method: Callable) -> Union['Base']:
     """
     Object if object or uuid of object is provided as argument.
 
@@ -31,7 +24,6 @@ def _retrieve_object(obj: Union["Base", Text], method: Callable) -> Union["Base"
     """
     # Check whether the part_model is uuid type or class `Part`
     from pykechain.models import Part2, Property2, Service, Team
-
     if isinstance(obj, (Part2, Property2, Service, Team)):
         return obj
     elif isinstance(obj, str) and is_uuid(obj):
@@ -39,15 +31,11 @@ def _retrieve_object(obj: Union["Base", Text], method: Callable) -> Union["Base"
         obj = method(id=obj_id)
         return obj
     else:
-        raise IllegalArgumentError(
-            "When adding the widget, obj must be a Part, Property, Service, Team, "
-            " Part id, Property id, Service id or Team id. Type is: {}".format(
-                type(obj)
-            )
-        )
+        raise IllegalArgumentError("When adding the widget, obj must be a Part, Property, Service, Team, "
+                                   " Part id, Property id, Service id or Team id. Type is: {}".format(type(obj)))
 
 
-def _retrieve_object_id(obj: Optional[Union["Base", Text]]) -> Optional[Text]:
+def _retrieve_object_id(obj: Optional[Union['Base', Text]]) -> Optional[Text]:
     """
     Object id if object or uuid of object is provided as argument.
 
@@ -60,7 +48,6 @@ def _retrieve_object_id(obj: Optional[Union["Base", Text]]) -> Optional[Text]:
     """
     # Check whether the obj is an object of any subclass of Base, or uuid type
     from pykechain.models import Base
-
     if issubclass(type(obj), Base):
         return obj.id
     elif isinstance(obj, str) and is_uuid(obj):
@@ -68,19 +55,15 @@ def _retrieve_object_id(obj: Optional[Union["Base", Text]]) -> Optional[Text]:
     elif isinstance(obj, type(None)):
         return None
     else:
-        raise IllegalArgumentError(
-            "When adding the widget, obj must be an instance of `Base` or an object id. "
-            "Type is: {}".format(type(obj))
-        )
+        raise IllegalArgumentError("When adding the widget, obj must be an instance of `Base` or an object id. "
+                                   "Type is: {}".format(type(obj)))
 
 
-def _set_title(
-    meta: Dict,
-    title: Optional[Union[Text, bool]] = None,
-    default_title: Optional[Text] = None,
-    show_title_value: Optional[WidgetTitleValue] = None,
-    **kwargs
-) -> Tuple[Dict, Text]:
+def _set_title(meta: Dict,
+               title: Optional[Union[Text, bool]] = None,
+               default_title: Optional[Text] = None,
+               show_title_value: Optional[WidgetTitleValue] = None,
+               **kwargs) -> Tuple[Dict, Text]:
     """
     Set the customTitle in the meta based on provided optional custom title or default.
 
@@ -103,12 +86,12 @@ def _set_title(
     :rtype: Tuple[Dict,Text]
     :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
-    check_enum(show_title_value, WidgetTitleValue, "show_title_value")
+    check_enum(show_title_value, WidgetTitleValue, 'show_title_value')
 
     if show_title_value is None:
         if title is False:
             show_title_value = WidgetTitleValue.DEFAULT
-        elif title is None or title == "":
+        elif title is None or title == '':
             show_title_value = WidgetTitleValue.NO_TITLE
         else:
             show_title_value = WidgetTitleValue.CUSTOM_TITLE
@@ -116,18 +99,17 @@ def _set_title(
     if show_title_value == WidgetTitleValue.DEFAULT:
         title_meta = None
         if default_title is None:
-            raise IllegalArgumentError(
-                "If `title` is set to False the `default_title` is used and cannot be None. "
-                "Provide a `default_title` argument and ensure it is not None."
-            )
+            raise IllegalArgumentError("If `title` is set to False the `default_title` is used and cannot be None. "
+                                       "Provide a `default_title` argument and ensure it is not None.")
         title_ref = default_title
     else:
         title_meta = title
         title_ref = title
 
-    meta.update(
-        {"showTitleValue": show_title_value, "customTitle": title_meta,}
-    )
+    meta.update({
+        "showTitleValue": show_title_value,
+        "customTitle": title_meta,
+    })
     return meta, title_ref
 
 
@@ -162,8 +144,8 @@ def _initiate_meta(kwargs, activity, ignores=()):
             meta[camelcase(key)] = kwargs.pop(key)
 
     # we check for custom_height specifically and deal with it.
-    if snakecase("customHeight") in kwargs:
-        meta["customHeight"] = kwargs.pop(snakecase("customHeight"))
+    if snakecase('customHeight') in kwargs:
+        meta['customHeight'] = kwargs.pop(snakecase("customHeight"))
 
     # remove the 'ignores' from the meta
     for key in ignores:
@@ -173,9 +155,7 @@ def _initiate_meta(kwargs, activity, ignores=()):
     return meta
 
 
-def _check_prefilters(
-    part_model: "Part2", prefilters: Dict
-) -> List[Text]:  # noqa: F821
+def _check_prefilters(part_model: 'Part2', prefilters: Dict) -> List[Text]:  # noqa: F821
     """
     Check the pre-filters on a `FilteredGridWidget` or `MultiReferenceProperty2.
 
@@ -198,17 +178,13 @@ def _check_prefilters(
     """
     from pykechain.models import Property2
 
-    property_models = prefilters.get(
-        "property_models", []
-    )  # type: List[Property2, Text]  # noqa
-    values = prefilters.get("values", [])
-    filters_type = prefilters.get("filters_type", [])
+    property_models = prefilters.get('property_models', [])  # type: List[Property2, Text]  # noqa
+    values = prefilters.get('values', [])
+    filters_type = prefilters.get('filters_type', [])
 
     if any(len(lst) != len(property_models) for lst in [values, filters_type]):
-        raise IllegalArgumentError(
-            'The lists of "property_models", "values" and "filters_type" should be the '
-            "same length."
-        )
+        raise IllegalArgumentError('The lists of "property_models", "values" and "filters_type" should be the '
+                                   'same length.')
 
     list_of_prefilters = []
     for prop, value, filter_type in zip(property_models, values, filters_type):
@@ -217,29 +193,22 @@ def _check_prefilters(
 
         if not isinstance(prop, Property2) or prop.category != Category.MODEL:
             raise IllegalArgumentError(
-                'Pre-filters can only be set on Property models, received "{}".'.format(
-                    prop
-                )
-            )
+                'Pre-filters can only be set on Property models, received "{}".'.format(prop))
 
         elif part_model.id != prop.part_id:
             raise IllegalArgumentError(
-                "Pre-filters can only be set on properties belonging to the selected Part model, found "
-                'selected Part model "{}" and Properties belonging to "{}"'.format(
-                    part_model.name, prop.part.name
-                )
-            )
+                'Pre-filters can only be set on properties belonging to the selected Part model, found '
+                'selected Part model "{}" and Properties belonging to "{}"'.format(part_model.name,
+                                                                                   prop.part.name))
         else:
             if prop.type == PropertyType.BOOLEAN_VALUE:
                 value = str(value).lower()
-            new_pre_filter = ":".join([prop.id, str(value), filter_type])
+            new_pre_filter = ':'.join([prop.id, str(value), filter_type])
             list_of_prefilters.append(new_pre_filter)
     return list_of_prefilters
 
 
-def _check_excluded_propmodels(
-    part_model: "Part2", property_models: List["AnyProperty"]
-) -> List["AnyProperty"]:
+def _check_excluded_propmodels(part_model: 'Part2', property_models: List['AnyProperty']) -> List['AnyProperty']:
     """
     Validate the excluded property models of the referenced part.
 
@@ -253,34 +222,25 @@ def _check_excluded_propmodels(
     from pykechain.models import Part2
 
     if not isinstance(part_model, Part2):
-        raise IllegalArgumentError(
-            '`part_model` must be a Part2 object, "{}" is not.'.format(part_model)
-        )
+        raise IllegalArgumentError('`part_model` must be a Part2 object, "{}" is not.'.format(part_model))
 
     list_of_propmodels_excl = list()  # type: List['AnyProperty']
     for property_model in property_models:
         if is_uuid(property_model):
             property_model = part_model.property(property_model)
         elif not isinstance(property_model, Property2):
-            raise IllegalArgumentError(
-                "A part reference property can only exclude `Property` models or their UUIDs, "
-                'found type "{}"'.format(type(property_model))
-            )
+            raise IllegalArgumentError('A part reference property can only exclude `Property` models or their UUIDs, '
+                                       'found type "{}"'.format(type(property_model)))
 
         if property_model.category != Category.MODEL:
-            raise IllegalArgumentError(
-                "A part reference property can only exclude `Property` models, found "
-                'category "{}" on property "{}"'.format(
-                    property_model.category, property_model.name
-                )
-            )
+            raise IllegalArgumentError('A part reference property can only exclude `Property` models, found '
+                                       'category "{}" on property "{}"'.format(property_model.category,
+                                                                               property_model.name))
         elif part_model.id != property_model.part_id:
             raise IllegalArgumentError(
-                "A part reference property can only exclude properties belonging to the referenced Part model, "
+                'A part reference property can only exclude properties belonging to the referenced Part model, '
                 'found referenced Part model "{}" and Properties belonging to "{}"'.format(
-                    part_model.name, property_model.part.name
-                )
-            )
+                    part_model.name, property_model.part.name))
         else:
             list_of_propmodels_excl.append(property_model.id)
     return list_of_propmodels_excl

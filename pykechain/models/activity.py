@@ -18,9 +18,9 @@ class Activity(Base):  # pragma: no cover
         """Construct an Activity from a json object."""
         super(Activity, self).__init__(json, **kwargs)
 
-        self.scope = json.get("scope", None)
-        self.activity_type = json.get("activity_class", None)
-        self.status = json.get("status", None)
+        self.scope = json.get('scope', None)
+        self.activity_type = json.get('activity_class', None)
+        self.status = json.get('status', None)
 
     @property
     def scope_id(self):
@@ -36,18 +36,15 @@ class Activity(Base):  # pragma: no cover
         :raises NotFoundError: if the scope could not be found
         """
         if self.scope:
-            scope_id = self.scope and self.scope.get("id")
+            scope_id = self.scope and self.scope.get('id')
         else:
             pseudo_self = self._client.activity(pk=self.id, fields="id,scope")
-            if pseudo_self.scope and pseudo_self.scope.get("id"):
+            if pseudo_self.scope and pseudo_self.scope.get('id'):
                 self.scope = pseudo_self.scope
-                scope_id = self.scope.get("id")
+                scope_id = self.scope.get('id')
             else:
-                raise NotFoundError(
-                    "This activity '{}'({}) does not belong to a scope, something is weird!".format(
-                        self.name, self.id
-                    )
-                )
+                raise NotFoundError("This activity '{}'({}) does not belong to a scope, something is weird!".
+                                    format(self.name, self.id))
         return scope_id
 
     #
@@ -61,9 +58,9 @@ class Activity(Base):  # pragma: no cover
         :return: Return True if it is a root level activity, otherwise return False
         :rtype: bool
         """
-        container_id = self._json_data.get("container")
+        container_id = self._json_data.get('container')
         if container_id:
-            return container_id == self._json_data.get("root_container")
+            return container_id == self._json_data.get('root_container')
         else:
             return False
 
@@ -111,7 +108,7 @@ class Activity(Base):  # pragma: no cover
         :return: Return True if it is customized, otherwise return False
         :rtype: bool
         """
-        if self._json_data.get("customization", False):
+        if self._json_data.get('customization', False):
             return True
         else:
             return False
@@ -165,7 +162,7 @@ class Activity(Base):  # pragma: no cover
         """
         return (
             self.parts(category=Category.MODEL, *args, **kwargs),
-            self.parts(category=Category.INSTANCE, *args, **kwargs),
+            self.parts(category=Category.INSTANCE, *args, **kwargs)
         )
 
     def configure(self, inputs, outputs):
@@ -179,14 +176,12 @@ class Activity(Base):  # pragma: no cover
         :type outputs: list(:class:`Property`)
         :raises APIError: when unable to configure the activity
         """
-        url = self._client._build_url("activity", activity_id=self.id)
+        url = self._client._build_url('activity', activity_id=self.id)
 
-        response = self._client._request(
-            "PUT",
-            url,
-            params={"select_action": "update_associations"},
-            json={"inputs": [p.id for p in inputs], "outputs": [p.id for p in outputs]},
-        )
+        response = self._client._request('PUT', url, params={'select_action': 'update_associations'}, json={
+            'inputs': [p.id for p in inputs],
+            'outputs': [p.id for p in outputs]
+        })
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not configure activity")
@@ -196,14 +191,10 @@ class Activity(Base):  # pragma: no cover
 
         :raises APIError: when unable to delete the activity
         """
-        response = self._client._request(
-            "DELETE", self._client._build_url("activity", activity_id=self.id)
-        )
+        response = self._client._request('DELETE', self._client._build_url('activity', activity_id=self.id))
 
         if response.status_code != requests.codes.no_content:
-            raise APIError(
-                "Could not delete activity: {} with id {}".format(self.name, self.id)
-            )
+            raise APIError("Could not delete activity: {} with id {}".format(self.name, self.id))
 
     def subprocess(self):
         """Retrieve the subprocess in which this activity is defined.
@@ -220,12 +211,10 @@ class Activity(Base):  # pragma: no cover
         >>> subprocess = task.subprocess()
 
         """
-        subprocess_id = self._json_data.get("container")
-        if subprocess_id == self._json_data.get("root_container"):
-            raise NotFoundError(
-                "Cannot find subprocess for this task '{}', "
-                "as this task exist on top level.".format(self.name)
-            )
+        subprocess_id = self._json_data.get('container')
+        if subprocess_id == self._json_data.get('root_container'):
+            raise NotFoundError("Cannot find subprocess for this task '{}', "
+                                "as this task exist on top level.".format(self.name))
         return self._client.activity(pk=subprocess_id, scope=self.scope_id)
 
     def children(self, **kwargs):
@@ -251,10 +240,8 @@ class Activity(Base):  # pragma: no cover
 
         """
         if self.activity_type != ActivityType.SUBPROCESS:
-            raise NotFoundError(
-                "Only subprocesses can have children, please choose a subprocess instead of a '{}' "
-                "(activity '{}')".format(self.activity_type, self.name)
-            )
+            raise NotFoundError("Only subprocesses can have children, please choose a subprocess instead of a '{}' "
+                                "(activity '{}')".format(self.activity_type, self.name))
 
         return self._client.activities(container=self.id, scope=self.scope_id, **kwargs)
 
@@ -278,10 +265,8 @@ class Activity(Base):  # pragma: no cover
         >>> siblings = task.siblings(name__contains='Another Task')
 
         """
-        container_id = self._json_data.get("container")
-        return self._client.activities(
-            container=container_id, scope=self.scope_id, **kwargs
-        )
+        container_id = self._json_data.get('container')
+        return self._client.activities(container=container_id, scope=self.scope_id, **kwargs)
 
     def create(self, *args, **kwargs):
         """Create a new activity belonging to this subprocess.
@@ -295,15 +280,7 @@ class Activity(Base):  # pragma: no cover
             raise IllegalArgumentError("One can only create a task under a subprocess.")
         return self._client.create_activity(self.id, *args, **kwargs)
 
-    def edit(
-        self,
-        name=None,
-        description=None,
-        start_date=None,
-        due_date=None,
-        assignees=None,
-        status=None,
-    ):
+    def edit(self, name=None, description=None, start_date=None, due_date=None, assignees=None, status=None):
         """Edit the details of an activity.
 
         :param name: (optionally) edit the name of the activity
@@ -353,91 +330,70 @@ class Activity(Base):  # pragma: no cover
         >>> my_task.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
 
         """
-        update_dict = {"id": self.id}
+        update_dict = {'id': self.id}
         if name is not None:
             if isinstance(name, (str, text_type)):
-                update_dict.update({"name": name})
+                update_dict.update({'name': name})
                 self.name = name
             else:
-                raise IllegalArgumentError("Name should be a string")
+                raise IllegalArgumentError('Name should be a string')
 
         if description is not None:
             if isinstance(description, (str, text_type)):
-                update_dict.update({"description": description})
+                update_dict.update({'description': description})
                 self.description = description
             else:
-                raise IllegalArgumentError("Description should be a string")
+                raise IllegalArgumentError('Description should be a string')
 
         if start_date is not None:
             if isinstance(start_date, datetime.datetime):
                 if not start_date.tzinfo:
-                    warnings.warn(
-                        "The startdate '{}' is naive and not timezone aware, use pytz.timezone info. "
-                        "This date is interpreted as UTC time.".format(
-                            start_date.isoformat(sep=" ")
-                        )
-                    )
-                update_dict.update({"start_date": start_date.isoformat(sep="T")})
+                    warnings.warn("The startdate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(start_date.isoformat(sep=' ')))
+                update_dict.update({'start_date': start_date.isoformat(sep='T')})
             else:
-                raise IllegalArgumentError(
-                    "Start date should be a datetime.datetime() object"
-                )
+                raise IllegalArgumentError('Start date should be a datetime.datetime() object')
 
         if due_date is not None:
             if isinstance(due_date, datetime.datetime):
                 if not due_date.tzinfo:
-                    warnings.warn(
-                        "The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
-                        "This date is interpreted as UTC time.".format(
-                            due_date.isoformat(sep=" ")
-                        )
-                    )
-                update_dict.update({"due_date": due_date.isoformat(sep="T")})
+                    warnings.warn("The duedate '{}' is naive and not timezone aware, use pytz.timezone info. "
+                                  "This date is interpreted as UTC time.".format(due_date.isoformat(sep=' ')))
+                update_dict.update({'due_date': due_date.isoformat(sep='T')})
             else:
-                raise IllegalArgumentError(
-                    "Due date should be a datetime.datetime() object"
-                )
+                raise IllegalArgumentError('Due date should be a datetime.datetime() object')
 
         if assignees is not None:
             if isinstance(assignees, list):
                 project = self._client.scope(pk=self.scope_id, status=None)
-                members_list = [
-                    member["username"] for member in project._json_data["members"]
-                ]
+                members_list = [member['username'] for member in project._json_data['members']]
                 for assignee in assignees:
                     if assignee not in members_list:
-                        raise NotFoundError(
-                            "Assignee '{}' should be a member of the scope".format(
-                                assignee
-                            )
-                        )
-                update_dict.update({"assignees": assignees})
+                        raise NotFoundError("Assignee '{}' should be a member of the scope".format(assignee))
+                update_dict.update({'assignees': assignees})
             else:
-                raise IllegalArgumentError("Assignees should be a list")
+                raise IllegalArgumentError('Assignees should be a list')
 
         if status is not None:
-            if (
-                isinstance(status, (str, text_type))
-                and status in ActivityStatus.values()
-            ):
-                update_dict.update({"status": status})
+            if isinstance(status, (str, text_type)) and status in ActivityStatus.values():
+                update_dict.update({'status': status})
             else:
-                raise IllegalArgumentError("Status should be a string")
+                raise IllegalArgumentError('Status should be a string')
 
-        url = self._client._build_url("activity", activity_id=self.id)
-        response = self._client._request("PUT", url, json=update_dict)
+        url = self._client._build_url('activity', activity_id=self.id)
+        response = self._client._request('PUT', url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Activity ({})".format(response))
 
         if status:
-            self._json_data["status"] = str(status)
+            self._json_data['status'] = str(status)
         if assignees:
-            self._json_data["assignees"] = assignees
+            self._json_data['assignees'] = assignees
         if due_date:
-            self._json_data["due_date"] = str(due_date)
+            self._json_data['due_date'] = str(due_date)
         if start_date:
-            self._json_data["start_date"] = str(start_date)
+            self._json_data['start_date'] = str(start_date)
 
     def customization(self):
         """

@@ -64,10 +64,8 @@ class MultiReferenceProperty(Property):  # pragma: no cover
         if not self._value:
             return None
         if not self._cached_values and isinstance(self._value, (list, tuple)):
-            ids = [v.get("id") for v in self._value]
-            self._cached_values = list(
-                self._client.parts(id__in=",".join(ids), category=None)
-            )
+            ids = [v.get('id') for v in self._value]
+            self._cached_values = list(self._client.parts(id__in=','.join(ids), category=None))
         return self._cached_values
 
     @value.setter
@@ -82,20 +80,13 @@ class MultiReferenceProperty(Property):  # pragma: no cover
                     # conversion in py27
                     value_to_set.append(item)
                 else:
-                    raise ValueError(
-                        "Reference must be a Part, Part id or None. type: {}".format(
-                            type(item)
-                        )
-                    )
+                    raise ValueError("Reference must be a Part, Part id or None. type: {}".format(type(item)))
         elif isinstance(value, type(None)):
             # clear out the list
             value_to_set = None
         else:
             raise ValueError(
-                "Reference must be a list (or tuple) of Part, Part id or None. type: {}".format(
-                    type(value)
-                )
-            )
+                "Reference must be a list (or tuple) of Part, Part id or None. type: {}".format(type(value)))
 
         # we replace the current choices!
         self._value = self._put_value(value_to_set)
@@ -119,11 +110,7 @@ class MultiReferenceProperty(Property):  # pragma: no cover
         # in the reference property of the model the value is set to the ID of the model from which we can choose parts
         model_parent_part = self.part.model()  # makes single part call
         property_model = model_parent_part.property(self.name)
-        referenced_model = (
-            property_model.value and property_model.value[0]
-        )  # list of seleceted models is always 1
-        possible_choices = self._client.parts(
-            model=referenced_model
-        )  # makes multiple parts call
+        referenced_model = property_model.value and property_model.value[0]  # list of seleceted models is always 1
+        possible_choices = self._client.parts(model=referenced_model)  # makes multiple parts call
 
         return possible_choices

@@ -455,9 +455,7 @@ def __dict_public__(cls: type(object)) -> Dict:
     return {k: v for (k, v) in cls.__dict__.items() if not k.startswith("__")}
 
 
-def __dict__inherited__(
-    cls: type(object), stop: type(object) = type, public: Optional[bool] = True
-) -> Dict:
+def __dict__inherited__(cls: type(object), stop: type(object) = type, public: Optional[bool] = True) -> Dict:
     """
     Get all __dict__ items of the class and its superclasses up to `type`, or the `stop` class given as input.
 

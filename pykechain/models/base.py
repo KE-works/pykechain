@@ -16,23 +16,21 @@ class Base(object):
     :type updated_at: datetime or None
     """
 
-    def __init__(self, json: Dict, client: "Client"):
+    def __init__(self, json: Dict, client: 'Client'):
         """Construct a model from provided json data."""
         self._json_data = json
         self._client = client  # type: 'Client'
 
-        self.id = json.get("id", None)
-        self.name = json.get("name", None)
-        self.created_at = parse_datetime(json.get("created_at"))
-        self.updated_at = parse_datetime(json.get("updated_at"))
+        self.id = json.get('id', None)
+        self.name = json.get('name', None)
+        self.created_at = parse_datetime(json.get('created_at'))
+        self.updated_at = parse_datetime(json.get('updated_at'))
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke {} '{}' id {}>".format(
-            self.__class__.__name__, self.name, self.id[-8:]
-        )
+        return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.name, self.id[-8:])
 
     def __eq__(self, other):  # pragma: no cover
-        if hasattr(self, "id") and hasattr(other, "id"):
+        if hasattr(self, 'id') and hasattr(other, 'id'):
             return self.id == other.id
         else:
             return super().__eq__(other)
@@ -40,12 +38,7 @@ class Base(object):
     def __hash__(self):
         return hash(self.id)
 
-    def refresh(
-        self,
-        json: Optional[Dict] = None,
-        url: Optional[Text] = None,
-        extra_params: Optional[Dict] = None,
-    ):
+    def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional[Dict] = None):
         """Refresh the object in place.
 
         Can be called on the object without any arguments and should refresh the object inplace. If you want to
@@ -80,7 +73,7 @@ class BaseInScope(Base):
         """Append the scope ID to the attributes of the base object."""
         super().__init__(json, *args, **kwargs)
 
-        self.scope_id = json.get("scope_id", json.get("scope", None))
+        self.scope_id = json.get('scope_id', json.get('scope', None))
         self._scope = None  # type: Optional['Scope2']
 
     @property

@@ -2,15 +2,8 @@ import requests
 from jsonschema import validate
 from six import text_type, string_types
 
-from pykechain.enums import (
-    ComponentXType,
-    Category,
-    SortTable,
-    PropertyType,
-    NavigationBarAlignment,
-    WidgetNames,
-    ShowColumnTypes,
-)
+from pykechain.enums import ComponentXType, Category, SortTable, PropertyType, NavigationBarAlignment, WidgetNames, \
+    ShowColumnTypes
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Part2, Activity2
 from pykechain.models.activity import Activity
@@ -19,9 +12,7 @@ from pykechain.models.property import Property
 from pykechain.models.service import Service
 from pykechain.utils import is_uuid
 
-uuid_pattern = (
-    r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
-)
+uuid_pattern = r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 uuid_string = {"type": "string", "pattern": uuid_pattern}
 
 # deprecated as we are moving towards a 'meta' definition for the widgets in KE-chain 3
@@ -31,7 +22,10 @@ component_jsonwidget_schema = {
     "title": "Component JSON Schema",
     "type": "object",
     "properties": {
-        "xtype": {"type": "string", "enum": ComponentXType.values()},
+        "xtype": {
+            "type": "string",
+            "enum": ComponentXType.values()
+        },
         "filter": {
             "type": "object",
             "properties": {
@@ -40,15 +34,15 @@ component_jsonwidget_schema = {
                 "parent": uuid_string,
                 "part_id": uuid_string,
                 "model_id": uuid_string,
-                "parent_id": uuid_string,
-            },
+                "parent_id": uuid_string
+            }
         },
         "title": {"type": ["string", "null"]},
         "viewModel": {"type": "object"},
         "model": uuid_string,
-        "parent": uuid_string,
+        "parent": uuid_string
     },
-    "required": ["xtype"],
+    "required": ["xtype"]
 }
 
 widget_json_stub = {
@@ -58,8 +52,8 @@ widget_json_stub = {
     "properties": {
         "name": {"type": "string", "enum": WidgetNames.values()},
         "meta": {"type": "object"},
-        "config": {"type": "object"},
-    },
+        "config": {"type": "object"}
+    }
 }
 
 widgetconfig_json_schema = {
@@ -69,9 +63,12 @@ widgetconfig_json_schema = {
     "properties": {
         "ext": {
             "type": "object",
-            "widgets": {"type": "array", "items": widget_json_stub},
+            "widgets": {
+                "type": "array",
+                "items": widget_json_stub
+            }
         }
-    },
+    }
 }
 
 
@@ -92,8 +89,7 @@ class ExtCustomization(CustomizationBase):
 
     def __str__(self):  # pragma: no cover
         return "<pyke ExtCustomization '{}' id {} ({} widgets)>".format(
-            self.activity.name, str(self.activity.id)[-8:], len(self.widgets())
-        )
+            self.activity.name, str(self.activity.id)[-8:], len(self.widgets()))
 
     def __repr__(self):  # pragma: no cover
         return self.__str__()
@@ -106,9 +102,9 @@ class ExtCustomization(CustomizationBase):
         """
         if len(widgets) > 0:
             # Get the current customization and only replace the 'ext' part of it
-            customization = self.activity._json_data.get("customization", dict())
+            customization = self.activity._json_data.get('customization', dict())
             if customization:
-                customization["ext"] = dict(widgets=widgets)
+                customization['ext'] = dict(widgets=widgets)
             else:
                 customization = dict(ext=dict(widgets=widgets))
 
@@ -121,11 +117,9 @@ class ExtCustomization(CustomizationBase):
             validate(customization, widgetconfig_json_schema)
 
         # Save to the activity and store the saved activity to self
-        response = self._client._request(
-            "PUT",
-            self._client._build_url("activity", activity_id=str(self.activity.id)),
-            json=dict(customization=customization),
-        )
+        response = self._client._request("PUT",
+                                         self._client._build_url("activity", activity_id=str(self.activity.id)),
+                                         json=dict(customization=customization))
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not save customization ({})".format(response))
         else:
@@ -151,10 +145,10 @@ class ExtCustomization(CustomizationBase):
 
         :return: The Ext JS specific customization in `list(dict)` form
         """
-        customization = self.activity._json_data.get("customization")
+        customization = self.activity._json_data.get('customization')
 
         if customization and "ext" in customization.keys():
-            return customization["ext"]["widgets"]
+            return customization['ext']['widgets']
         else:
             return []
 
@@ -196,22 +190,10 @@ class ExtCustomization(CustomizationBase):
         validate(config, component_jsonwidget_schema)
         self._add_widget(dict(config=config, name=WidgetNames.JSONWIDGET))
 
-    def add_super_grid_widget(
-        self,
-        part_model,
-        delete=False,
-        edit=True,
-        export=True,
-        incomplete_rows=True,
-        new_instance=False,
-        parent_part_instance=None,
-        max_height=None,
-        custom_title=False,
-        emphasize_edit=False,
-        emphasize_new_instance=True,
-        sort_property=None,
-        sort_direction=SortTable.ASCENDING,
-    ):
+    def add_super_grid_widget(self, part_model, delete=False, edit=True, export=True, incomplete_rows=True,
+                              new_instance=False, parent_part_instance=None, max_height=None, custom_title=False,
+                              emphasize_edit=False, emphasize_new_instance=True, sort_property=None,
+                              sort_direction=SortTable.ASCENDING):
         """
         Add a KE-chain superGrid (e.g. basic table widget) to the customization.
 
@@ -260,63 +242,47 @@ class ExtCustomization(CustomizationBase):
             part_model_id = part_model
             part_model = self._client.model(id=part_model_id)
         else:
-            raise IllegalArgumentError(
-                "When using the add_supergrid_widget, part_model must be a Part or Part id. "
-                "Type is: {}".format(type(part_model))
-            )
+            raise IllegalArgumentError("When using the add_supergrid_widget, part_model must be a Part or Part id. "
+                                       "Type is: {}".format(type(part_model)))
 
         # Check whether the parent_part_instance is uuid type or class `Part`
         if isinstance(parent_part_instance, (Part, Part2)):
             parent_part_instance_id = parent_part_instance.id
-        elif isinstance(parent_part_instance, (string_types, text_type)) and is_uuid(
-            parent_part_instance
-        ):
+        elif isinstance(parent_part_instance, (string_types, text_type)) and is_uuid(parent_part_instance):
             parent_part_instance_id = parent_part_instance
             parent_part_instance = self._client.part(id=parent_part_instance_id)
         elif isinstance(parent_part_instance, type(None)):
             parent_part_instance_id = None
         else:
-            raise IllegalArgumentError(
-                "When using the add_supergrid_widget, parent_part_instance must be a "
-                "Part, Part id or None. Type is: {}".format(type(parent_part_instance))
-            )
+            raise IllegalArgumentError("When using the add_supergrid_widget, parent_part_instance must be a "
+                                       "Part, Part id or None. Type is: {}".format(type(parent_part_instance)))
 
         # Check whether the sort_property is uuid type or class `Property`
         if isinstance(sort_property, Property):
             sort_property_id = sort_property.id
-        elif isinstance(sort_property, (string_types, text_type)) and is_uuid(
-            sort_property
-        ):
+        elif isinstance(sort_property, (string_types, text_type)) and is_uuid(sort_property):
             sort_property_id = sort_property
-            sort_property = self._client.property(
-                id=sort_property_id, category=Category.MODEL
-            )
+            sort_property = self._client.property(id=sort_property_id, category=Category.MODEL)
         elif isinstance(sort_property, type(None)):
             sort_property_id = None
         else:
-            raise IllegalArgumentError(
-                "When using the add_supergrid_widget, sort_property must be a "
-                "Property, Property id or None. Type is: {}".format(type(sort_property))
-            )
+            raise IllegalArgumentError("When using the add_supergrid_widget, sort_property must be a "
+                                       "Property, Property id or None. Type is: {}".format(type(sort_property)))
 
         # Assertions
         if not parent_part_instance and new_instance:
-            raise IllegalArgumentError(
-                "If you want to allow the creation of new part instances, you must specify a "
-                "parent_part_instance"
-            )
+            raise IllegalArgumentError("If you want to allow the creation of new part instances, you must specify a "
+                                       "parent_part_instance")
         if sort_property and sort_property.part.id != part_model.id:
-            raise IllegalArgumentError(
-                "If you want to sort on a property, then sort_property must be located under "
-                "part_model"
-            )
+            raise IllegalArgumentError("If you want to sort on a property, then sort_property must be located under "
+                                       "part_model")
         # Declare superGrid config
-        if self._client.match_app_version(label="pim", version=">=3.0.0"):
+        if self._client.match_app_version(label='pim', version='>=3.0.0'):
             config = {
                 "xtype": ComponentXType.SUPERGRID,
                 "filter": {
                     "activity_id": str(self.activity.id),
-                    "model_id": part_model_id,
+                    "model_id": part_model_id
                 },
                 "viewModel": {
                     "data": {
@@ -325,32 +291,27 @@ class ExtCustomization(CustomizationBase):
                             "edit": edit,
                             "export": export,
                             "incompleteRows": incomplete_rows,
-                            "newInstance": new_instance,
+                            "newInstance": new_instance
                         },
-                        "sorters": [
-                            {"direction": sort_direction, "property": sort_property_id}
-                        ]
-                        if sort_property_id
-                        else [],
+                        "sorters": [{
+                            "direction": sort_direction,
+                            "property": sort_property_id
+                        }] if sort_property_id else [],
                         "ui": {
-                            "newInstance": "primary-action"
-                            if emphasize_new_instance
-                            else "default-toolbar",
-                            "edit": "primary-action"
-                            if emphasize_edit
-                            else "default-toolbar",
-                        },
+                            "newInstance": "primary-action" if emphasize_new_instance else "default-toolbar",
+                            "edit": "primary-action" if emphasize_edit else "default-toolbar"
+                        }
                     }
-                },
+                }
             }
             # Add parent to filter if added.
-            config["filter"]["parent_id"] = parent_part_instance_id
+            config['filter']["parent_id"] = parent_part_instance_id
         else:
             config = {
                 "xtype": ComponentXType.SUPERGRID,
                 "filter": {
                     "activity_id": str(self.activity.id),
-                    "model": part_model_id,
+                    "model": part_model_id
                 },
                 "viewModel": {
                     "data": {
@@ -359,29 +320,24 @@ class ExtCustomization(CustomizationBase):
                             "edit": edit,
                             "export": export,
                             "incompleteRows": incomplete_rows,
-                            "newInstance": new_instance,
+                            "newInstance": new_instance
                         },
-                        "sorters": [
-                            {"direction": sort_direction, "property": sort_property_id}
-                        ]
-                        if sort_property_id
-                        else [],
+                        "sorters": [{
+                            "direction": sort_direction,
+                            "property": sort_property_id
+                        }] if sort_property_id else [],
                         "ui": {
-                            "newInstance": "primary-action"
-                            if emphasize_new_instance
-                            else "default-toolbar",
-                            "edit": "primary-action"
-                            if emphasize_edit
-                            else "default-toolbar",
-                        },
+                            "newInstance": "primary-action" if emphasize_new_instance else "default-toolbar",
+                            "edit": "primary-action" if emphasize_edit else "default-toolbar"
+                        }
                     }
-                },
+                }
             }
-            config["filter"]["parent"] = parent_part_instance_id
+            config['filter']["parent"] = parent_part_instance_id
 
         # Add max height and custom title
         if max_height:
-            config["maxHeight"] = max_height
+            config['maxHeight'] = max_height
 
         if custom_title is False:
             show_title_value = "Default"
@@ -406,9 +362,7 @@ class ExtCustomization(CustomizationBase):
             "customTitle": title,
             "primaryEditUiValue": emphasize_edit,
             "downloadButtonVisible": export,
-            "addButtonUi": "primary-action"
-            if emphasize_new_instance
-            else "default-toolbar",
+            "addButtonUi": "primary-action" if emphasize_new_instance else "default-toolbar",
             "deleteButtonVisible": delete,
             "incompleteRowsButtonVisible": incomplete_rows,
             "addButtonVisible": new_instance,
@@ -417,21 +371,13 @@ class ExtCustomization(CustomizationBase):
             "editButtonVisible": edit,
             "showHeightValue": "Custom max height" if max_height else "Auto",
             "sortDirection": sort_direction,
-            "sortedColumn": sort_property_id if sort_property_id else None,
+            "sortedColumn": sort_property_id if sort_property_id else None
         }
 
-        self._add_widget(
-            dict(config=config, meta=meta, name=WidgetNames.SUPERGRIDWIDGET)
-        )
+        self._add_widget(dict(config=config, meta=meta, name=WidgetNames.SUPERGRIDWIDGET))
 
-    def add_property_grid_widget(
-        self,
-        part_instance,
-        max_height=None,
-        custom_title=False,
-        show_headers=True,
-        show_columns=None,
-    ):
+    def add_property_grid_widget(self, part_instance, max_height=None, custom_title=False, show_headers=True,
+                                 show_columns=None):
         """
         Add a KE-chain Property Grid widget to the customization.
 
@@ -455,16 +401,12 @@ class ExtCustomization(CustomizationBase):
         # Check whether the parent_part_instance is uuid type or class `Part`
         if isinstance(part_instance, (Part, Part2)):
             part_instance_id = part_instance.id
-        elif isinstance(part_instance, (string_types, text_type)) and is_uuid(
-            part_instance
-        ):
+        elif isinstance(part_instance, (string_types, text_type)) and is_uuid(part_instance):
             part_instance_id = part_instance
             part_instance = self._client.part(id=part_instance_id)
         else:
-            raise IllegalArgumentError(
-                "When using the add_property_grid_widget, part_instance must be a "
-                "Part or Part id. Type is: {}".format(type(part_instance))
-            )
+            raise IllegalArgumentError("When using the add_property_grid_widget, part_instance must be a "
+                                       "Part or Part id. Type is: {}".format(type(part_instance)))
         if not show_columns:
             show_columns = list()
 
@@ -479,16 +421,20 @@ class ExtCustomization(CustomizationBase):
                 display_columns[possible_column] = False
 
         # Declare property grid config
-        if self._client.match_app_version(label="pim", version=">=3.0.0"):
+        if self._client.match_app_version(label='pim', version='>=3.0.0'):
             config = {
                 "xtype": ComponentXType.PROPERTYGRID,
                 "category": Category.INSTANCE,
                 "filter": {
                     "activity_id": str(self.activity.id),
-                    "part_id": part_instance_id,  # gpim
+                    "part_id": part_instance_id  # gpim
                 },
                 "hideHeaders": not show_headers,
-                "viewModel": {"data": {"displayColumns": display_columns}},
+                "viewModel": {
+                    "data": {
+                        "displayColumns": display_columns
+                    }
+                }
             }
         else:
             config = {
@@ -496,15 +442,19 @@ class ExtCustomization(CustomizationBase):
                 "category": Category.INSTANCE,
                 "filter": {
                     "activity_id": str(self.activity.id),
-                    "part": part_instance_id,
+                    "part": part_instance_id
                 },
                 "hideHeaders": not show_headers,
-                "viewModel": {"data": {"displayColumns": display_columns}},
+                "viewModel": {
+                    "data": {
+                        "displayColumns": display_columns
+                    }
+                }
             }
 
         # Add max height and custom title
         if max_height:
-            config["maxHeight"] = max_height
+            config['maxHeight'] = max_height
 
         if custom_title is False:
             show_title_value = "Default"
@@ -527,16 +477,12 @@ class ExtCustomization(CustomizationBase):
             "showColumns": show_columns,
             "showHeaders": show_headers,
             "showHeightValue": "Custom max height" if max_height else "Auto",
-            "showTitleValue": show_title_value,
+            "showTitleValue": show_title_value
         }
 
-        self._add_widget(
-            dict(config=config, meta=meta, name=WidgetNames.PROPERTYGRIDWIDGET)
-        )
+        self._add_widget(dict(config=config, meta=meta, name=WidgetNames.PROPERTYGRIDWIDGET))
 
-    def add_text_widget(
-        self, text=None, custom_title=None, collapsible=True, collapsed=False
-    ):
+    def add_text_widget(self, text=None, custom_title=None, collapsible=True, collapsed=False):
         """
         Add a KE-chain Text widget to the customization.
 
@@ -557,25 +503,27 @@ class ExtCustomization(CustomizationBase):
         # Declare text widget config
         config = {
             "xtype": ComponentXType.HTMLPANEL,
-            "filter": {"activity_id": str(self.activity.id),},
+            "filter": {
+                "activity_id": str(self.activity.id),
+            }
         }
 
         # Add text and custom title
         if text:
-            config["html"] = text
+            config['html'] = text
         if custom_title:
             show_title_value = "Custom Title"
             title = custom_title
         else:
             show_title_value = "No Title"
             title = None
-        config["collapsible"] = collapsible
+        config['collapsible'] = collapsible
         # A widget can only be collapsed if it is collapsible in the first place
         if collapsible:
-            config["collapsed"] = collapsed
+            config['collapsed'] = collapsed
         else:
-            config["collapsed"] = False
-        config["title"] = title
+            config['collapsed'] = False
+        config['title'] = title
         # Declare the meta info for the property grid
         meta = {
             "activityId": str(self.activity.id),
@@ -583,30 +531,16 @@ class ExtCustomization(CustomizationBase):
             "collapsible": collapsible,
             "collapsed": collapsed,
             "html": text,
-            "showTitleValue": show_title_value,
+            "showTitleValue": show_title_value
         }
 
         self._add_widget(dict(config=config, meta=meta, name=WidgetNames.HTMLWIDGET))
 
-    def add_paginated_grid_widget(
-        self,
-        part_model,
-        delete=False,
-        edit=True,
-        export=True,
-        new_instance=False,
-        clone_instance=False,
-        parent_part_instance=None,
-        max_height=None,
-        custom_title=False,
-        emphasize_edit=False,
-        emphasize_new_instance=True,
-        emphasize_clone_instance=False,
-        sort_property=None,
-        sort_direction=SortTable.ASCENDING,
-        page_size=25,
-        collapse_filters=False,
-    ):
+    def add_paginated_grid_widget(self, part_model, delete=False, edit=True, export=True,
+                                  new_instance=False, clone_instance=False, parent_part_instance=None, max_height=None,
+                                  custom_title=False, emphasize_edit=False, emphasize_new_instance=True,
+                                  emphasize_clone_instance=False, sort_property=None,
+                                  sort_direction=SortTable.ASCENDING, page_size=25, collapse_filters=False):
         """
         Add a KE-chain paginatedGrid (e.g. paginated table widget) to the customization.
 
@@ -667,56 +601,40 @@ class ExtCustomization(CustomizationBase):
             part_model_id = part_model
             part_model = self._client.model(id=part_model_id)
         else:
-            raise IllegalArgumentError(
-                "When using the add_paginated_grid_widget, part_model must be a Part or Part id."
-                " Type is: {}".format(type(part_model))
-            )
+            raise IllegalArgumentError("When using the add_paginated_grid_widget, part_model must be a Part or Part id."
+                                       " Type is: {}".format(type(part_model)))
 
         # Check whether the parent_part_instance is uuid type or class `Part`
         if isinstance(parent_part_instance, (Part, Part2)):
             parent_part_instance_id = parent_part_instance.id
-        elif isinstance(parent_part_instance, (string_types, text_type)) and is_uuid(
-            parent_part_instance
-        ):
+        elif isinstance(parent_part_instance, (string_types, text_type)) and is_uuid(parent_part_instance):
             parent_part_instance_id = parent_part_instance
             parent_part_instance = self._client.part(id=parent_part_instance_id)
         elif isinstance(parent_part_instance, type(None)):
             parent_part_instance_id = None
         else:
-            raise IllegalArgumentError(
-                "When using the add_paginated_grid_widget, parent_part_instance must be a "
-                "Part, Part id or None. Type is: {}".format(type(parent_part_instance))
-            )
+            raise IllegalArgumentError("When using the add_paginated_grid_widget, parent_part_instance must be a "
+                                       "Part, Part id or None. Type is: {}".format(type(parent_part_instance)))
 
         # Check whether the sort_property is uuid type or class `Property`
         if isinstance(sort_property, Property):
             sort_property_id = sort_property.id
-        elif isinstance(sort_property, (string_types, text_type)) and is_uuid(
-            sort_property
-        ):
+        elif isinstance(sort_property, (string_types, text_type)) and is_uuid(sort_property):
             sort_property_id = sort_property
-            sort_property = self._client.property(
-                id=sort_property_id, category=Category.MODEL
-            )
+            sort_property = self._client.property(id=sort_property_id, category=Category.MODEL)
         elif isinstance(sort_property, type(None)):
             sort_property_id = None
         else:
-            raise IllegalArgumentError(
-                "When using the add_paginated_grid_widget, sort_property must be a "
-                "Property, Property id or None. Type is: {}".format(type(sort_property))
-            )
+            raise IllegalArgumentError("When using the add_paginated_grid_widget, sort_property must be a "
+                                       "Property, Property id or None. Type is: {}".format(type(sort_property)))
 
         # Assertions
         if not parent_part_instance and (new_instance or clone_instance):
-            raise IllegalArgumentError(
-                "If you want to allow the creation (or cloning) of new part instances, "
-                "you must specify a `parent_part_instance`"
-            )
+            raise IllegalArgumentError("If you want to allow the creation (or cloning) of new part instances, "
+                                       "you must specify a `parent_part_instance`")
         if sort_property and sort_property.part.id != part_model.id:
-            raise IllegalArgumentError(
-                "If you want to sort on a property, then sort_property must be located under "
-                "`part_model`"
-            )
+            raise IllegalArgumentError("If you want to sort on a property, then sort_property must be located under "
+                                       "`part_model`")
 
         # Add custom title
         if custom_title is False:
@@ -724,7 +642,7 @@ class ExtCustomization(CustomizationBase):
             title = part_model.name
         elif custom_title is None:
             show_title_value = "No title"
-            title = " "
+            title = ' '
         else:
             show_title_value = "Custom Title"
             title = str(custom_title)
@@ -737,7 +655,9 @@ class ExtCustomization(CustomizationBase):
 
         config = {
             "xtype": ComponentXType.FILTEREDGRID,
-            "filter": {"activity_id": str(self.activity.id),},
+            "filter": {
+                "activity_id": str(self.activity.id),
+            },
             "grid": {
                 "viewModel": {
                     "data": {
@@ -746,25 +666,18 @@ class ExtCustomization(CustomizationBase):
                             "edit": edit,
                             "export": export,
                             "newInstance": new_instance,
-                            "cloneInstance": clone_instance,
+                            "cloneInstance": clone_instance
                         },
-                        "sorters": [
-                            {"direction": sort_direction, "property": sort_property_id}
-                        ]
-                        if sort_property_id
-                        else [],
+                        "sorters": [{
+                            "direction": sort_direction,
+                            "property": sort_property_id
+                        }] if sort_property_id else [],
                         "ui": {
-                            "newInstance": "primary-action"
-                            if emphasize_new_instance
-                            else "default-toolbar",
-                            "edit": "primary-action"
-                            if emphasize_edit
-                            else "default-toolbar",
-                            "cloneInstance": "primary-action"
-                            if emphasize_clone_instance
-                            else "default-toolbar",
+                            "newInstance": "primary-action" if emphasize_new_instance else "default-toolbar",
+                            "edit": "primary-action" if emphasize_edit else "default-toolbar",
+                            "cloneInstance": "primary-action" if emphasize_clone_instance else "default-toolbar"
                         },
-                        "pageSize": page_size,
+                        "pageSize": page_size
                     }
                 },
                 "xtype": ComponentXType.PAGINATEDSUPERGRID,
@@ -774,7 +687,7 @@ class ExtCustomization(CustomizationBase):
             "maxHeight": max_height if max_height else None,
             "parentInstanceId": parent_part_instance_id,
             "partModelId": part_model_id,
-            "collapseFilters": collapse_filters,
+            "collapseFilters": collapse_filters
         }
 
         # Declare the meta info for the paginatedGrid
@@ -788,9 +701,7 @@ class ExtCustomization(CustomizationBase):
             "customTitle": title,
             "primaryEditUiValue": emphasize_edit,
             "downloadButtonVisible": export,
-            "addButtonUi": "primary-action"
-            if emphasize_new_instance
-            else "default-toolbar",
+            "addButtonUi": "primary-action" if emphasize_new_instance else "default-toolbar",
             "deleteButtonVisible": delete,
             "addButtonVisible": new_instance,
             "showTitleValue": show_title_value,
@@ -800,16 +711,12 @@ class ExtCustomization(CustomizationBase):
             "sortedColumn": sort_property_id if sort_property_id else None,
             "collapseFilters": collapse_filters,
             "showCollapseFiltersValue": collapse_filters_value,
-            "customPageSize": page_size,
+            "customPageSize": page_size
         }
 
-        self._add_widget(
-            dict(config=config, meta=meta, name=WidgetNames.FILTEREDGRIDWIDGET)
-        )
+        self._add_widget(dict(config=config, meta=meta, name=WidgetNames.FILTEREDGRIDWIDGET))
 
-    def add_script_widget(
-        self, script, custom_title=False, custom_button_text=False, emphasize_run=True
-    ):
+    def add_script_widget(self, script, custom_title=False, custom_button_text=False, emphasize_run=True):
         """
         Add a KE-chain Script (e.g. script widget) to the customization.
 
@@ -838,17 +745,15 @@ class ExtCustomization(CustomizationBase):
             script_id = script
             script = self._client.service(id=script_id)
         else:
-            raise IllegalArgumentError(
-                "When using the add_script_widget, script must be a Service or Service id. "
-                "Type is: {}".format(type(script))
-            )
+            raise IllegalArgumentError("When using the add_script_widget, script must be a Service or Service id. "
+                                       "Type is: {}".format(type(script)))
         # Add custom title
         if custom_title is False:
             show_title_value = "Default"
             title = script.name
         elif custom_title is None:
             show_title_value = "No title"
-            title = ""
+            title = ''
         else:
             show_title_value = "Custom Title"
             title = str(custom_title)
@@ -859,35 +764,33 @@ class ExtCustomization(CustomizationBase):
             button_text = script.name
         elif custom_button_text is None:
             show_button_value = "No title"
-            button_text = ""
+            button_text = ''
         else:
             show_button_value = "Custom Title"
             button_text = str(custom_button_text)
 
         # Declare script widget config
         config = {
-            "showTitleValue": show_title_value,
-            "serviceId": script_id,
-            "viewModel": {
-                "data": {
-                    "buttonUI": "primary-action"
-                    if emphasize_run
-                    else "default-toolbar",
+            'showTitleValue': show_title_value,
+            'serviceId': script_id,
+            'viewModel': {
+                'data': {
+                    'buttonUI': 'primary-action' if emphasize_run else "default-toolbar",
                 }
             },
-            "title": title,
-            "xtype": ComponentXType.EXECUTESERVICE,
-            "customButtonText": button_text,
+            'title': title,
+            'xtype': ComponentXType.EXECUTESERVICE,
+            'customButtonText': button_text
         }
 
         # Declare script widget meta
         meta = {
-            "showButtonValue": show_button_value,
-            "customText": button_text,
-            "customTitle": title,
-            "serviceId": script_id,
-            "emphasizeButton": emphasize_run,
-            "showTitleValue": show_title_value,
+            'showButtonValue': show_button_value,
+            'customText': button_text,
+            'customTitle': title,
+            'serviceId': script_id,
+            'emphasizeButton': emphasize_run,
+            'showTitleValue': show_title_value
         }
 
         self._add_widget(dict(config=config, meta=meta, name=WidgetNames.SERVICEWIDGET))
@@ -916,10 +819,8 @@ class ExtCustomization(CustomizationBase):
             notebook_id = notebook
             notebook = self._client.service(id=notebook_id)
         else:
-            raise IllegalArgumentError(
-                "When using the add_notebook_widget, notebook must be a Service or Service id. "
-                "Type is: {}".format(type(notebook))
-            )
+            raise IllegalArgumentError("When using the add_notebook_widget, notebook must be a Service or Service id. "
+                                       "Type is: {}".format(type(notebook)))
 
         # Add custom title
         if custom_title is False:
@@ -927,35 +828,31 @@ class ExtCustomization(CustomizationBase):
             title = notebook.name
         elif custom_title is None:
             show_title_value = "No title"
-            title = ""
+            title = ''
         else:
             show_title_value = "Custom Title"
             title = str(custom_title)
 
         # Declare notebook widget config
         config = {
-            "title": title,
-            "showTitleValue": show_title_value,
-            "height": height if height else 800,
-            "xtype": ComponentXType.NOTEBOOKPANEL,
-            "serviceId": notebook_id,
+            'title': title,
+            'showTitleValue': show_title_value,
+            'height': height if height else 800,
+            'xtype': ComponentXType.NOTEBOOKPANEL,
+            'serviceId': notebook_id
         }
 
         # Declare notebook widget meta
         meta = {
-            "showTitleValue": show_title_value,
-            "customHeight": height if height else 800,
-            "customTitle": title,
-            "serviceId": notebook_id,
+            'showTitleValue': show_title_value,
+            'customHeight': height if height else 800,
+            'customTitle': title,
+            'serviceId': notebook_id
         }
 
-        self._add_widget(
-            dict(config=config, meta=meta, name=WidgetNames.NOTEBOOKWIDGET)
-        )
+        self._add_widget(dict(config=config, meta=meta, name=WidgetNames.NOTEBOOKWIDGET))
 
-    def add_attachment_viewer_widget(
-        self, attachment_property, custom_title=False, height=None
-    ):
+    def add_attachment_viewer_widget(self, attachment_property, custom_title=False, height=None):
         """
         Add a KE-chain Attachment Viewer (e.g. attachment viewer widget) to the customization.
 
@@ -975,36 +872,24 @@ class ExtCustomization(CustomizationBase):
         # Check whether the attachment property is uuid type or class `Property`
         if isinstance(attachment_property, Property):
             attachment_property_id = attachment_property.id
-        elif isinstance(attachment_property, (string_types, text_type)) and is_uuid(
-            attachment_property
-        ):
+        elif isinstance(attachment_property, (string_types, text_type)) and is_uuid(attachment_property):
             attachment_property_id = attachment_property
             attachment_property = self._client.property(id=attachment_property_id)
         else:
-            raise IllegalArgumentError(
-                "When using the add_attachment_viewer_widget, attachment_property must be a "
-                "Property or Property id. Type is: {}".format(type(attachment_property))
-            )
+            raise IllegalArgumentError("When using the add_attachment_viewer_widget, attachment_property must be a "
+                                       "Property or Property id. Type is: {}".format(type(attachment_property)))
 
         # Check whether the `Property` has type `Attachment`
         property_type = attachment_property.type
         if property_type != PropertyType.ATTACHMENT_VALUE:
-            raise IllegalArgumentError(
-                "When using the add_attachment_viewer_widget, attachment_property must have "
-                "type {}. Type found: {}".format(
-                    PropertyType.ATTACHMENT_VALUE, property_type
-                )
-            )
+            raise IllegalArgumentError("When using the add_attachment_viewer_widget, attachment_property must have "
+                                       "type {}. Type found: {}".format(PropertyType.ATTACHMENT_VALUE, property_type))
 
         # Check also whether `Property` has category `Instance`
-        property_category = attachment_property._json_data["category"]
+        property_category = attachment_property._json_data['category']
         if property_category != Category.INSTANCE:
-            raise IllegalArgumentError(
-                "When using the add_attachment_viewer_widget, attachment_property must have "
-                "category {}. Category found: {}".format(
-                    Category.INSTANCE, property_category
-                )
-            )
+            raise IllegalArgumentError("When using the add_attachment_viewer_widget, attachment_property must have "
+                                       "category {}. Category found: {}".format(Category.INSTANCE, property_category))
 
         # Add custom title
         if custom_title is False:
@@ -1012,37 +897,35 @@ class ExtCustomization(CustomizationBase):
             title = attachment_property.name
         elif custom_title is None:
             show_title_value = "No title"
-            title = ""
+            title = ''
         else:
             show_title_value = "Custom Title"
             title = str(custom_title)
 
         # Declare attachment viewer widget config
         config = {
-            "propertyId": attachment_property_id,
-            "showTitleValue": show_title_value,
-            "xtype": ComponentXType.PROPERTYATTACHMENTPREVIEWER,
-            "title": title,
-            "filter": {"activity_id": str(self.activity.id)},
-            "height": height if height else 500,
+            'propertyId': attachment_property_id,
+            'showTitleValue': show_title_value,
+            'xtype': ComponentXType.PROPERTYATTACHMENTPREVIEWER,
+            'title': title,
+            'filter': {
+                'activity_id': str(self.activity.id)
+            },
+            'height': height if height else 500
         }
 
         # Declare attachment viewer widget meta
         meta = {
-            "propertyInstanceId": attachment_property_id,
-            "activityId": str(self.activity.id),
-            "customHeight": height if height else 500,
-            "showTitleValue": show_title_value,
-            "customTitle": title,
+            'propertyInstanceId': attachment_property_id,
+            'activityId': str(self.activity.id),
+            'customHeight': height if height else 500,
+            'showTitleValue': show_title_value,
+            'customTitle': title
         }
 
-        self._add_widget(
-            dict(config=config, meta=meta, name=WidgetNames.ATTACHMENTVIEWERWIDGET)
-        )
+        self._add_widget(dict(config=config, meta=meta, name=WidgetNames.ATTACHMENTVIEWERWIDGET))
 
-    def add_navigation_bar_widget(
-        self, activities, alignment=NavigationBarAlignment.CENTER
-    ):
+    def add_navigation_bar_widget(self, activities, alignment=NavigationBarAlignment.CENTER):
         """
         Add a KE-chain Navigation Bar (e.g. navigation bar widget) to the customization.
 
@@ -1062,59 +945,46 @@ class ExtCustomization(CustomizationBase):
         :raises IllegalArgumentError: When unknown or illegal arguments are passed.
         """
         # Loop through the list of activities
-        set_of_expected_keys = {"activityId", "customText", "emphasize"}
+        set_of_expected_keys = {'activityId', 'customText', 'emphasize'}
         for activity_dict in activities:
-            if (
-                set(activity_dict.keys()).issubset(set_of_expected_keys)
-                and "activityId" in set_of_expected_keys
-            ):
+            if set(activity_dict.keys()).issubset(set_of_expected_keys) and 'activityId' in set_of_expected_keys:
                 # Check whether the activityId is class `Activity` or UUID
-                activity = activity_dict["activityId"]
+                activity = activity_dict['activityId']
                 if isinstance(activity, (Activity, Activity2)):
-                    activity_dict["activityId"] = activity.id
-                elif isinstance(activity, (string_types, text_type)) and is_uuid(
-                    activity
-                ):
+                    activity_dict['activityId'] = activity.id
+                elif isinstance(activity, (string_types, text_type)) and is_uuid(activity):
                     pass
                 else:
-                    raise IllegalArgumentError(
-                        "When using the add_navigation_bar_widget, activityId must be an "
-                        "Activity or Activity id. Type is: {}".format(type(activity))
-                    )
-                if (
-                    "customText" not in activity_dict.keys()
-                    or not activity_dict["customText"]
-                ):
-                    activity_dict["customText"] = str()
-                if "emphasize" not in activity_dict.keys():
-                    activity_dict["emphasize"] = False
+                    raise IllegalArgumentError("When using the add_navigation_bar_widget, activityId must be an "
+                                               "Activity or Activity id. Type is: {}".format(type(activity)))
+                if 'customText' not in activity_dict.keys() or not activity_dict['customText']:
+                    activity_dict['customText'] = str()
+                if 'emphasize' not in activity_dict.keys():
+                    activity_dict['emphasize'] = False
 
             else:
-                raise IllegalArgumentError(
-                    "Found unexpected key in activities. Only keys allowed are: {}".format(
-                        set_of_expected_keys
-                    )
-                )
+                raise IllegalArgumentError("Found unexpected key in activities. Only keys allowed are: {}".
+                                           format(set_of_expected_keys))
 
         # Declare navigation bar widget config
         config = {
-            "alignment": alignment,
-            "xtype": ComponentXType.ACTIVITYNAVIGATIONBAR,
-            "filter": {"activity_id": str(self.activity.id)},
-            "taskButtons": activities,
+            'alignment': alignment,
+            'xtype': ComponentXType.ACTIVITYNAVIGATIONBAR,
+            'filter': {
+                'activity_id': str(self.activity.id)
+            },
+            'taskButtons': activities
         }
 
         for activity_dict in activities:
-            activity_id = activity_dict["activityId"]
-            activity_dict["name"] = self._client.activity(id=activity_id).name
+            activity_id = activity_dict['activityId']
+            activity_dict['name'] = self._client.activity(id=activity_id).name
 
         # Declare navigation bar widget meta
         meta = {
-            "alignment": alignment,
-            "activityId": str(self.activity.id),
-            "taskButtons": activities,
+            'alignment': alignment,
+            'activityId': str(self.activity.id),
+            'taskButtons': activities
         }
 
-        self._add_widget(
-            dict(config=config, meta=meta, name=WidgetNames.TASKNAVIGATIONBARWIDGET)
-        )
+        self._add_widget(dict(config=config, meta=meta, name=WidgetNames.TASKNAVIGATIONBARWIDGET))

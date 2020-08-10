@@ -3,7 +3,7 @@ from typing import Optional, Text, List, TypeVar
 
 from pykechain.models import BaseInScope
 
-T = TypeVar("T")
+T = TypeVar('T')
 
 
 class TreeObject(BaseInScope, ABC):
@@ -17,7 +17,7 @@ class TreeObject(BaseInScope, ABC):
         """
         super().__init__(json=json, **kwargs)
 
-        self.parent_id = json.get("parent_id", None)  # type: Optional[Text]
+        self.parent_id = json.get('parent_id', None)  # type: Optional[Text]
 
         self._cached_children = None  # type: Optional[List[T]]
 
@@ -25,9 +25,10 @@ class TreeObject(BaseInScope, ABC):
         """Short-hand version of the `child` method."""
         return self.child(*args, **kwargs)
 
-    def child(
-        self: T, name: Optional[Text] = None, pk: Optional[Text] = None, **kwargs
-    ) -> T:
+    def child(self: T,
+              name: Optional[Text] = None,
+              pk: Optional[Text] = None,
+              **kwargs) -> T:
         """
         Retrieve a child object.
 
@@ -85,7 +86,9 @@ class TreeObject(BaseInScope, ABC):
         return all_children
 
     def _populate_cached_children(
-        self, all_descendants: List[T], overwrite: Optional[bool] = False,
+            self,
+            all_descendants: List[T],
+            overwrite: Optional[bool] = False,
     ) -> None:
         """
         Fill the `_cached_children` attribute with a list of descendants.
