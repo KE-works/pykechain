@@ -13,6 +13,7 @@ v3.7.7 ()
 * :+1: Included mapping dict from KE-chain native pages to their Font Awesome icons.
 * :+1: Added properties to retrieve the root Activity and Part objects of a Scope. (#799)
 * :+1: Added bulk-clone of activities, including associated data models. (#737)
+* :+1: Added `upload` input value for when creating basic- and filtered-grid widgets. (#814)
 
 v3.7.6 (30JUN20)
 -----------------
