@@ -733,23 +733,29 @@ class TestBulkPartsDeletion(TestBetamax):
                 ]
             }
             self.parts.append(part_dict)
-        self.parts_created = self.client._create_parts_bulk(
+        self.parts_created = list(self.client._create_parts_bulk(
             parts=self.parts
-        )
+        ))
 
     def tearDown(self):
         for part in self.parts_created:
-            part.delete()
+            # In case the parts have not been deleted and a clean up is required
+            try:
+                part.delete()
+            except APIError:
+                pass
 
     def test_bulk_delete_parts(self):
         self.client._delete_parts_bulk(parts=self.parts_created)
         for idx in range(1, 5):
-            with self.assertRaises(NotFoundError):
-                self.project.part(name="Wheel {}".format(idx))
+            with self.subTest(idx=idx):
+                with self.assertRaises(NotFoundError):
+                    self.project.part(name="Wheel {}".format(idx))
 
     def test_bulk_delete_parts_with_part_ids(self):
         self.client._delete_parts_bulk(parts=[part.id for part in self.parts_created])
         for idx in range(1, 5):
-            with self.assertRaises(NotFoundError):
-                self.project.part(name="Wheel {}".format(idx))
+            with self.subTest(idx=idx):
+                with self.assertRaises(NotFoundError):
+                    self.project.part(name="Wheel {}".format(idx))
 
