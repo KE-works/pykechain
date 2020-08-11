@@ -756,4 +756,7 @@ class TestBulkPartsDeletion(TestBetamax):
                 with self.assertRaises(NotFoundError):
                     self.project.part(name="Wheel {}".format(idx))
 
-
+    def test_bulk_delete_parts_with_wrong_input(self):
+        wrong_input = [self.project.activity(name="Specify wheel diameter")]
+        with self.assertRaises(IllegalArgumentError):
+            self.client._delete_parts_bulk(parts=wrong_input)
