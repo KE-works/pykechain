@@ -746,16 +746,14 @@ class TestBulkPartsDeletion(TestBetamax):
                 pass
 
     def test_bulk_delete_parts(self):
-        self.client._delete_parts_bulk(parts=self.parts_created)
+        input_parts_and_uuids = [self.parts_created[0],
+                                 self.parts_created[1],
+                                 self.parts_created[2].id,
+                                 self.parts_created[3].id]
+        self.client._delete_parts_bulk(parts=input_parts_and_uuids)
         for idx in range(1, 5):
             with self.subTest(idx=idx):
                 with self.assertRaises(NotFoundError):
                     self.project.part(name="Wheel {}".format(idx))
 
-    def test_bulk_delete_parts_with_part_ids(self):
-        self.client._delete_parts_bulk(parts=[part.id for part in self.parts_created])
-        for idx in range(1, 5):
-            with self.subTest(idx=idx):
-                with self.assertRaises(NotFoundError):
-                    self.project.part(name="Wheel {}".format(idx))
 
