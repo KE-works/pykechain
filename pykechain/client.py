@@ -1106,20 +1106,20 @@ class Client(object):
         return new_activity
 
     def clone_activities(
-        self,
-        activities: List[Union[Activity2, Text]],
-        parent: Union[Activity2, Text],
-        activity_update_dicts: Optional[Dict] = None,
-        clone_parts: Optional[bool] = False,
-        clone_part_instances: Optional[bool] = True,
-        clone_children: Optional[bool] = True,
-        excluded_parts: Optional[List[Text]] = None,
-        part_parent_model: Optional[Union[Part2, Text]] = None,
-        part_parent_instance: Optional[Union[Part2, Text]] = None,
-        part_model_rename_template: Optional[Text] = None,
-        part_instance_rename_template: Optional[Text] = None,
-        asynchronous: Optional[bool] = False,
-        **kwargs
+            self,
+            activities: List[Union[Activity2, Text]],
+            parent: Union[Activity2, Text],
+            activity_update_dicts: Optional[Dict] = None,
+            clone_parts: Optional[bool] = False,
+            clone_part_instances: Optional[bool] = True,
+            clone_children: Optional[bool] = True,
+            excluded_parts: Optional[List[Text]] = None,
+            part_parent_model: Optional[Union[Part2, Text]] = None,
+            part_parent_instance: Optional[Union[Part2, Text]] = None,
+            part_model_rename_template: Optional[Text] = None,
+            part_instance_rename_template: Optional[Text] = None,
+            asynchronous: Optional[bool] = False,
+            **kwargs
     ) -> List[Activity2]:
         """
         Clone multiple activities.
@@ -1513,7 +1513,7 @@ class Client(object):
                 :type model_id: UUID
             :type properties: list
         :type parts: list
-        :param asynchronous: If true, immediately returns without activities (default = False)
+        :param asynchronous: If true, immediately returns without parts (default = False)
         :type asynchronous: bool
         :param retrieve_instances: If true, will retrieve the created Part Instances in a PartSet
         :type retrieve_instances: bool
@@ -1562,6 +1562,45 @@ class Client(object):
                 part_instances.extend(self.parts(id__in=",".join(parts_list)))
             return PartSet(parts=part_instances)
         return part_ids
+
+    def _delete_parts_bulk(
+            self,
+            parts: List[Union[Part2, Text]],
+            asynchronous: Optional[bool] = False,
+            **kwargs
+    ) -> bool:
+        """Delete multiple Parts simultaneously.
+
+        :param parts: list of Part objects or UUIDs
+        :type parts: List[Property] or List[UUID]
+        :param asynchronous: If true, immediately returns (default = False)
+        :type asynchronous: bool
+        :param kwargs:
+        :return: True if parts are delete successfully
+        :raises APIError: if the parts could not be deleted
+        :raises IllegalArgumentError: if there were neither Parts nor UUIDs in the list of parts
+        """
+        check_type(asynchronous, bool, 'asynchronous')
+
+        list_parts = list()
+        for part in parts:
+            if isinstance(part, Part2):
+                list_parts.append(part.id)
+            elif is_uuid(part):
+                list_parts.append(part)
+            else:
+                raise IllegalArgumentError("{} is not a Part nor an UUID".format(part))
+        payload = {"parts": list_parts}
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['parts2'])
+        query_params['async_mode'] = asynchronous
+        response = self._request('DELETE', self._build_url('parts2_bulk_delete'), params=query_params, json=payload)
+        # TODO - remove requests.codes.ok when async is implemented in the backend
+        if (asynchronous and response.status_code not in (requests.codes.ok, requests.codes.accepted) or (
+                not asynchronous and response.status_code not in (
+                requests.codes.ok, requests.codes.accepted))):  # pragma: no cover
+            raise APIError("Could not delete Parts. ({})".format(response.status_code), response=response)
+        return True
 
     def create_property(
             self,
