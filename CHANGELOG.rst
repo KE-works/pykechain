@@ -1,15 +1,11 @@
 Change Log
 ==========
 
-v3.8 (UNRELEASED)
------------------
+v3.8.0 (11AUG20)
+----------------
 
 * :star: Added the bulk_create_parts API endpoint, which allows the adding of multiple `Part` instances with `Properties` in one call. #797
 * :star: Added the bulk_delete_parts API endpoint, which allows the deletion of multiple `Part` objects in one call. #812
-
-v3.7.7 ()
----------
-
 * :+1: Implemented robust method to update Scope side-bar buttons with minimum number of requests using a context manager (e.g. `with scope.sidebar as manager` mechanism) (#654)
 * :+1: Included mapping dict from KE-chain native pages to their Font Awesome icons.
 * :+1: Added properties to retrieve the root Activity and Part objects of a Scope. (#799)
@@ -17,7 +13,7 @@ v3.7.7 ()
 * :+1: Added `upload` input value for when creating basic- and filtered-grid widgets. (#814)
 
 v3.7.6 (30JUN20)
------------------
+----------------
 
 * :star: Added the Weather Widget creating possibilities. #788
 * :+1: dependent versions for development: tox (3.16.0)
