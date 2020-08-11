@@ -204,6 +204,7 @@ class WidgetsManager(Iterable):
                              edit: Optional[bool] = True,
                              clone: Optional[bool] = True,
                              export: Optional[bool] = True,
+                             upload: Optional[bool] = True,
                              delete: Optional[bool] = False,
                              incomplete_rows: Optional[bool] = True,
                              emphasize_new_instance: Optional[bool] = True,
@@ -243,6 +244,8 @@ class WidgetsManager(Iterable):
         :type clone: bool
         :param export: Show or hide the Export Grid button (default True)
         :type export: bool
+        :param upload: Show or hide the Import Grid button (default True)
+        :type upload: bool
         :param delete: Show or hide the Delete button (default False)
         :type delete: bool
         :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
@@ -299,6 +302,7 @@ class WidgetsManager(Iterable):
             "deleteButtonVisible": delete,
             "cloneButtonVisible": clone,
             "downloadButtonVisible": export,
+            "uploadButtonVisible": upload,
             "incompleteRowsVisible": incomplete_rows,
             "primaryAddUiValue": emphasize_new_instance,
             "primaryEditUiValue": emphasize_edit,
@@ -334,6 +338,7 @@ class WidgetsManager(Iterable):
                                 edit: Optional[bool] = True,
                                 clone: Optional[bool] = True,
                                 export: Optional[bool] = True,
+                                upload: Optional[bool] = True,
                                 delete: Optional[bool] = False,
                                 incomplete_rows: Optional[bool] = True,
                                 emphasize_new_instance: Optional[bool] = True,
@@ -378,6 +383,8 @@ class WidgetsManager(Iterable):
         :type clone: bool
         :param export: Show or hide the Export Grid button (default True)
         :type export: bool
+        :param upload: Show or hide the Import Grid button (default True)
+        :type upload: bool
         :param delete: Show or hide the Delete button (default False)
         :type delete: bool
         :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
@@ -461,6 +468,7 @@ class WidgetsManager(Iterable):
             "deleteButtonVisible": delete,
             "cloneButtonVisible": clone,
             "downloadButtonVisible": export,
+            "uploadButtonVisible": upload,
             "incompleteRowsVisible": incomplete_rows,
             "primaryAddUiValue": emphasize_new_instance,
             "primaryEditUiValue": emphasize_edit,
