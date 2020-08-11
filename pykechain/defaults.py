@@ -87,6 +87,7 @@ API_PATH = {
     'parts2_clone_model': 'api/v3/parts/clone_model',
     'parts2_clone_instance': 'api/v3/parts/clone_instance',
     'parts2_bulk_create': '/api/v3/parts/bulk_create_part_instances',
+    'parts2_bulk_delete': '/api/v3/parts/bulk_delete_part_instances',
     'parts2_export': 'api/v3/parts/export',
     'part2': 'api/v3/parts/{part_id}.json',
     'properties2': 'api/v3/properties.json',
