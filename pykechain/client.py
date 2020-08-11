@@ -1573,6 +1573,8 @@ class Client(object):
         :raises APIError: if the parts could not be deleted
         :raises IllegalArgumentError: if there were neither Parts nor UUIDs in the list of parts
         """
+        check_type(asynchronous, bool, 'asynchronous')
+
         list_parts = list()
         for part in parts:
             if isinstance(part, Part2):
@@ -1581,12 +1583,12 @@ class Client(object):
                 list_parts.append(part)
             else:
                 raise IllegalArgumentError("{} is not a Part nor an UUID".format(part))
-        json = {"parts": list_parts}
+        payload = {"parts": list_parts}
         query_params = kwargs
         query_params.update(API_EXTRA_PARAMS['parts2'])
         query_params['async_mode'] = asynchronous
         response = self._request('DELETE', self._build_url('parts2_bulk_delete'),
-                                 params=query_params, json=json)
+                                 params=query_params, json=payload)
 
         if (asynchronous and response.status_code != requests.codes.ok) or \
                 (not asynchronous and response.status_code != requests.codes.ok):  # pragma: no cover
