@@ -1589,9 +1589,9 @@ class Client(object):
         query_params['async_mode'] = asynchronous
         response = self._request('DELETE', self._build_url('parts2_bulk_delete'),
                                  params=query_params, json=payload)
-
-        if (asynchronous and response.status_code != requests.codes.ok) or \
-                (not asynchronous and response.status_code != requests.codes.ok):  # pragma: no cover
+        # TODO - remove requests.codes.ok when async is implemented in the backend
+        if (asynchronous and response.status_code not in (requests.codes.ok, requests.codes.accepted) or
+                (not asynchronous and response.status_code not in (requests.codes.ok, requests.codes.accepted))): # pragma: no cover
             raise APIError("Could not delete Parts. ({})".format(response.status_code), response=response)
         return True
 
