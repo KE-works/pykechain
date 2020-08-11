@@ -1106,20 +1106,20 @@ class Client(object):
         return new_activity
 
     def clone_activities(
-        self,
-        activities: List[Union[Activity2, Text]],
-        parent: Union[Activity2, Text],
-        activity_update_dicts: Optional[Dict] = None,
-        clone_parts: Optional[bool] = False,
-        clone_part_instances: Optional[bool] = True,
-        clone_children: Optional[bool] = True,
-        excluded_parts: Optional[List[Text]] = None,
-        part_parent_model: Optional[Union[Part2, Text]] = None,
-        part_parent_instance: Optional[Union[Part2, Text]] = None,
-        part_model_rename_template: Optional[Text] = None,
-        part_instance_rename_template: Optional[Text] = None,
-        asynchronous: Optional[bool] = False,
-        **kwargs
+            self,
+            activities: List[Union[Activity2, Text]],
+            parent: Union[Activity2, Text],
+            activity_update_dicts: Optional[Dict] = None,
+            clone_parts: Optional[bool] = False,
+            clone_part_instances: Optional[bool] = True,
+            clone_children: Optional[bool] = True,
+            excluded_parts: Optional[List[Text]] = None,
+            part_parent_model: Optional[Union[Part2, Text]] = None,
+            part_parent_instance: Optional[Union[Part2, Text]] = None,
+            part_model_rename_template: Optional[Text] = None,
+            part_instance_rename_template: Optional[Text] = None,
+            asynchronous: Optional[bool] = False,
+            **kwargs
     ) -> List[Activity2]:
         """
         Clone multiple activities.
@@ -1589,9 +1589,11 @@ class Client(object):
         query_params['async_mode'] = asynchronous
         response = self._request('DELETE', self._build_url('parts2_bulk_delete'),
                                  params=query_params, json=payload)
+        
         # TODO - remove requests.codes.ok when async is implemented in the backend
         if (asynchronous and response.status_code not in (requests.codes.ok, requests.codes.accepted) or
-                (not asynchronous and response.status_code not in (requests.codes.ok, requests.codes.accepted))): # pragma: no cover
+                (not asynchronous and response.status_code not in (
+                requests.codes.ok, requests.codes.accepted))):  # pragma: no cover
             raise APIError("Could not delete Parts. ({})".format(response.status_code), response=response)
         return True
 
