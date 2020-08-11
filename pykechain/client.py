@@ -1587,12 +1587,11 @@ class Client(object):
         query_params = kwargs
         query_params.update(API_EXTRA_PARAMS['parts2'])
         query_params['async_mode'] = asynchronous
-        response = self._request('DELETE', self._build_url('parts2_bulk_delete'),
-                                 params=query_params, json=payload)
+        response = self._request('DELETE', self._build_url('parts2_bulk_delete'), params=query_params, json=payload)
         # TODO - remove requests.codes.ok when async is implemented in the backend
-        if (asynchronous and response.status_code not in (requests.codes.ok, requests.codes.accepted)
-                or (not asynchronous and response.status_code
-                    not in (requests.codes.ok, requests.codes.accepted))):  # pragma: no cover
+        if (asynchronous and response.status_code not in (requests.codes.ok, requests.codes.accepted) or (
+                not asynchronous and response.status_code not in (
+                requests.codes.ok, requests.codes.accepted))):  # pragma: no cover
             raise APIError("Could not delete Parts. ({})".format(response.status_code), response=response)
         return True
 
