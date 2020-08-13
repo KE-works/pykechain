@@ -151,7 +151,7 @@ class SideBarManager(Iterable):
         return button
 
     def add_task_button(self,
-                        activity: 'Activity2',
+                        activity: 'Activity',
                         title: Optional[Text] = None,
                         task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
                         *args, **kwargs) -> SideBarButton:
@@ -159,7 +159,7 @@ class SideBarManager(Iterable):
         Add a side-bar button to a KE-chain activity.
 
         :param activity: Activity object
-        :type activity: Activity2
+        :type activity: Activity
         :param title: Title of the side-bar button, defaults to the activity name
         :type title: str
         :param task_display_mode: for sub-processes, vary the display mode in KE-chain
@@ -167,8 +167,8 @@ class SideBarManager(Iterable):
         :return: new side-bar button
         :rtype SideBarButton
         """
-        from pykechain.models import Activity2
-        check_type(activity, Activity2, 'activity')
+        from pykechain.models import Activity
+        check_type(activity, Activity, 'activity')
         check_enum(task_display_mode, SubprocessDisplayMode, 'task_display_mode')
         title = check_text(title, 'title') or activity.name
 
