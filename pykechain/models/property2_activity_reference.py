@@ -1,6 +1,6 @@
 from typing import List
 
-from pykechain.models import Activity2
+from pykechain.models import Activity
 from pykechain.models.base_reference import _ReferencePropertyInScope
 
 
@@ -10,9 +10,9 @@ class ActivityReferenceProperty(_ReferencePropertyInScope):
     .. versionadded:: 3.7
     """
 
-    REFERENCED_CLASS = Activity2
+    REFERENCED_CLASS = Activity
 
-    def _retrieve_objects(self, **kwargs) -> List[Activity2]:
+    def _retrieve_objects(self, **kwargs) -> List[Activity]:
         """
         Retrieve a list of Activities.
 
@@ -21,7 +21,7 @@ class ActivityReferenceProperty(_ReferencePropertyInScope):
         """
         activities = []
         for activity_json in self._value:
-            activity = Activity2(client=self._client, json=activity_json)
+            activity = Activity(client=self._client, json=activity_json)
             activity.refresh()  # To populate the object with all expected data
             activities.append(activity)
         return activities
