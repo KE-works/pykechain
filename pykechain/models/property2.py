@@ -33,4 +33,5 @@ class Property2(Property, _DeprecationMixin):
     :ivar is_invalid: if the property does not conform to the validator
     :type is_invalid: bool
     """
+
     pass

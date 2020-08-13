@@ -24,4 +24,5 @@ class Activity2(Activity, _DeprecationMixin):
     :ivar activity_type: Type of the activity. One of :class:`pykechain.enums.ActivityType` for WIM version 2
     :type activity_type: basestring
     """
+
     pass

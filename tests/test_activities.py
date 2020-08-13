@@ -547,7 +547,7 @@ class TestActivities(TestBetamax):
 
 
 @skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
-class TestActivitySpecificTests(TestBetamax):
+class TestActivity2SpecificTests(TestBetamax):
 
     def setUp(self):
         super().setUp()

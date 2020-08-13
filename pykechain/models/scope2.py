@@ -22,4 +22,5 @@ class Scope2(Scope, _DeprecationMixin):
     :ivar type: Type of the Scope. One of :class:`pykechain.enums.ScopeType` for WIM version 2
     :type type: basestring
     """
+
     pass

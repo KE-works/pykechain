@@ -7,4 +7,5 @@ class MultiReferenceProperty2(MultiReferenceProperty, _DeprecationMixin):
 
     .. versionadded:: 1.14
     """
+
     pass

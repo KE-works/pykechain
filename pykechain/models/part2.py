@@ -59,4 +59,5 @@ class Part2(Part, _DeprecationMixin):
     True
 
     """
+
     pass
