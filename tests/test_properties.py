@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pykechain.enums import PropertyType, Category, Multiplicity
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
-from pykechain.models import Property2
+from pykechain.models import Property
 from pykechain.models.validators import SingleReferenceValidator
 from tests.classes import TestBetamax
 
@@ -37,7 +37,7 @@ class TestPropertyCreation(TestBetamax):
         new_prop = self.part_model.property(name='New property')
 
         self.assertEqual(new_property, new_prop)
-        self.assertIsInstance(new_prop, Property2)
+        self.assertIsInstance(new_prop, Property)
         self.assertEqual(new_prop.value, 'EUREKA!')
         self.assertEqual(new_prop._json_data['property_type'], PropertyType.CHAR_VALUE)
 
@@ -147,7 +147,7 @@ class TestProperties(TestBetamax):
     def test_retrieve_property(self):
         prop = self.project.property(name='Cheap?', category=Category.MODEL)
 
-        self.assertIsInstance(prop, Property2)
+        self.assertIsInstance(prop, Property)
         self.assertTrue(prop)
 
     def test_retrieve_property_model(self):
@@ -337,15 +337,15 @@ class TestProperties(TestBetamax):
         dual_pad_prop_retrieved_from_seat = seat_part.property(name=dual_pad_ref)
 
         # testing
-        self.assertIsInstance(dual_pad_property, Property2)
+        self.assertIsInstance(dual_pad_property, Property)
         self.assertEqual(dual_pad_name, dual_pad_property.name)
         self.assertEqual(Category.INSTANCE, dual_pad_property.category)
 
-        self.assertIsInstance(dual_pad_property_model, Property2)
+        self.assertIsInstance(dual_pad_property_model, Property)
         self.assertEqual(dual_pad_name, dual_pad_property_model.name)
         self.assertEqual(Category.MODEL, dual_pad_property_model.category)
 
-        self.assertIsInstance(dual_pad_prop_retrieved_from_seat, Property2)
+        self.assertIsInstance(dual_pad_prop_retrieved_from_seat, Property)
         self.assertEqual(dual_pad_name, dual_pad_prop_retrieved_from_seat.name)
         self.assertEqual(Category.INSTANCE, dual_pad_prop_retrieved_from_seat.category)
 
@@ -379,13 +379,13 @@ class TestUpdateProperties(TestBetamax):
         # testing
         self.assertIsInstance(updated_properties, list)
         self.assertTrue(all(p1 == p2 for p1, p2 in zip(self.props, updated_properties)))
-        self.assertTrue(all(isinstance(p, Property2) for p in updated_properties))
+        self.assertTrue(all(isinstance(p, Property) for p in updated_properties))
         self.assertTrue(all(p.value == 'new value' for p in updated_properties))
 
     def test_bulk_update_manual(self):
         """Test storing of value updates in the Property class."""
         # setUp
-        Property2.use_bulk_update = True
+        Property.use_bulk_update = True
         self.prop_1.value = 'new value'
         self.prop_2.value = 'another value'
 
@@ -393,7 +393,7 @@ class TestUpdateProperties(TestBetamax):
         self.assertIsNone(self._refresh_prop(self.prop_1).value)
         self.assertIsNone(self._refresh_prop(self.prop_2).value)
 
-        Property2.update_values(client=self.client)
+        Property.update_values(client=self.client)
 
         self.assertEqual(self._refresh_prop(self.prop_1).value, 'new value')
         self.assertEqual(self._refresh_prop(self.prop_2).value, 'another value')
@@ -401,24 +401,24 @@ class TestUpdateProperties(TestBetamax):
     def test_bulk_update_reset(self):
         """Test whether bulk update is reset to `False` after update is performed."""
         # setUp
-        Property2.use_bulk_update = True
+        Property.use_bulk_update = True
         self.prop_1.value = 'new value'
 
         # testing
         self.assertIsNone(self._refresh_prop(self.prop_1).value)
-        Property2.update_values(client=self.client)
+        Property.update_values(client=self.client)
         self.assertEqual(self._refresh_prop(self.prop_1).value, 'new value')
-        self.assertFalse(Property2.use_bulk_update)
+        self.assertFalse(Property.use_bulk_update)
 
         # setUp 2
-        Property2.use_bulk_update = True
+        Property.use_bulk_update = True
         self.prop_2.value = 'another value'
 
         # testing 2
         self.assertIsNone(self._refresh_prop(self.prop_2).value)
-        Property2.update_values(client=self.client, use_bulk_update=True)
+        Property.update_values(client=self.client, use_bulk_update=True)
         self.assertEqual(self._refresh_prop(self.prop_2).value, 'another value')
-        self.assertTrue(Property2.use_bulk_update)
+        self.assertTrue(Property.use_bulk_update)
 
 
 class TestPropertiesWithReferenceProperty(TestBetamax):

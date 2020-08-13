@@ -1,6 +1,6 @@
 from pykechain.enums import Category, Multiplicity
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
-from pykechain.models import PartSet, Part2
+from pykechain.models import PartSet, Part
 from pykechain.utils import find
 from tests.classes import TestBetamax
 
@@ -84,11 +84,11 @@ class TestPartRetrieve(TestBetamax):
         front_fork_model = self.project.model(ref=front_fork_ref)
 
         # testing
-        self.assertIsInstance(front_fork_part, Part2)
+        self.assertIsInstance(front_fork_part, Part)
         self.assertEqual(front_fork_name, front_fork_part.name)
         self.assertEqual(Category.INSTANCE, front_fork_part.category)
 
-        self.assertIsInstance(front_fork_model, Part2)
+        self.assertIsInstance(front_fork_model, Part)
         self.assertEqual(front_fork_name, front_fork_model.name)
         self.assertEqual(Category.MODEL, front_fork_model.category)
 
@@ -97,7 +97,7 @@ class TestPartRetrieve(TestBetamax):
 
         bike = root.child(name='Bike')
 
-        self.assertIsInstance(bike, Part2)
+        self.assertIsInstance(bike, Part)
         self.assertEqual(bike.parent_id, root.id)
 
         bike_via__call__ = root('Bike')
@@ -147,7 +147,7 @@ class TestPartRetrieve(TestBetamax):
         self.assertEqual(6, len(all_children), msg='Number of models has changed, expected 6')
 
     def test_child_after_construction(self):
-        """Test retrieval of child after creating the model via another Part2 object of the same KE-chain Part."""
+        """Test retrieval of child after creating the model via another Part object of the same KE-chain Part."""
         bike_for_adding = self.project.model(name='Bike')
         bike_for_getting = self.project.model(name='Bike')
 

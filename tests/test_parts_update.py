@@ -1,6 +1,7 @@
 import os
 
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
+from pykechain.models import Part
 from tests.classes import TestBetamax
 
 

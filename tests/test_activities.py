@@ -11,7 +11,7 @@ from pykechain.enums import ActivityType, ActivityStatus, ActivityClassification
     activity_root_name_by_classification, ActivityRootNames, PaperSize, PaperOrientation, NotificationEvent, \
     Multiplicity, PropertyType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError, APIError
-from pykechain.models import Activity2
+from pykechain.models import Activity
 from pykechain.utils import temp_chdir, slugify_ref
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_WIM2
@@ -59,7 +59,7 @@ class TestActivityConstruction(TestBetamax):
         )
 
         # testing
-        self.assertIsInstance(self.task, Activity2)
+        self.assertIsInstance(self.task, Activity)
         self.assertEqual(name, self.task.name)
         self.assertEqual(status, self.task.status)
         self.assertTrue(description, self.task.description)
@@ -71,7 +71,7 @@ class TestActivityConstruction(TestBetamax):
     def test_create_on_scope(self):
         self.task = self.project.create_activity('__Test task')
 
-        self.assertIsInstance(self.task, Activity2)
+        self.assertIsInstance(self.task, Activity)
         self.assertEqual(ActivityType.TASK, self.task.activity_type)
         self.assertEqual(ActivityClassification.WORKFLOW, self.task.classification)
 
@@ -186,7 +186,7 @@ class TestActivityClone(TestBetamax):
     def test(self):
         clone = self.task.clone()
 
-        self.assertIsInstance(clone, Activity2)
+        self.assertIsInstance(clone, Activity)
         self.assertNotEqual(self.task, clone)
         self.assertEqual(self.task.parent_id, clone.parent_id)
 
@@ -454,8 +454,8 @@ class TestActivities(TestBetamax):
 
     def test_edit_cascade_down(self):
         # setup
-        subprocess = self.project.activity('Subprocess')  # type: Activity2
-        subtask = self.project.activity('SubTask')  # type: Activity2
+        subprocess = self.project.activity('Subprocess')  # type: Activity
+        subtask = self.project.activity('SubTask')  # type: Activity
         testuser = self.client.user(username='testuser')
 
         subprocess.edit_cascade_down(
@@ -484,7 +484,7 @@ class TestActivities(TestBetamax):
     def test_child(self):
         child_task = self.workflow_root.child(name=self.NAME)
 
-        self.assertIsInstance(child_task, Activity2)
+        self.assertIsInstance(child_task, Activity)
         self.assertEqual(child_task._json_data['parent_id'], self.workflow_root.id)
 
     def test_child_invalid(self):
@@ -506,14 +506,14 @@ class TestActivities(TestBetamax):
         self.assertEqual(12, len(all_tasks), msg='Number of tasks has changed, expected 12.')
 
     def test_retrieve_activity_by_id(self):
-        task = self.project.activity(name='Subprocess')  # type: Activity2
+        task = self.project.activity(name='Subprocess')  # type: Activity
 
         task_by_id = self.client.activity(pk=task.id)
 
         self.assertEqual(task.id, task_by_id.id)
 
     def test_retrieve_siblings_of_a_task_in_a_subprocess(self):
-        task = self.project.activity(name='Subprocess')  # type: Activity2
+        task = self.project.activity(name='Subprocess')  # type: Activity
         siblings = task.siblings()
 
         self.assertIn(task.id, [sibling.id for sibling in siblings])
@@ -526,14 +526,14 @@ class TestActivities(TestBetamax):
     # in 1.12
 
     def test_retrieve_siblings_of_a_task_in_a_subprocess_with_arguments(self):
-        task = self.project.activity(name='SubTask')  # type: Activity2
+        task = self.project.activity(name='SubTask')  # type: Activity
         siblings = task.siblings(name__icontains='sub')
 
         self.assertIn(task.id, [sibling.id for sibling in siblings])
         self.assertEqual(1, len(siblings))
 
     @skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on old WIM")
-    def test_activity2_without_scope_id_will_fix_itself(self):
+    def test_activity_without_scope_id_will_fix_itself(self):
         specify_wheel_diam_cripled = self.project.activity(name='Specify wheel diameter', fields='id,name,status')
         self.assertFalse(specify_wheel_diam_cripled._json_data.get('scope_id'))
 
@@ -547,7 +547,7 @@ class TestActivities(TestBetamax):
 
 
 @skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
-class TestActivity2SpecificTests(TestBetamax):
+class TestActivitySpecificTests(TestBetamax):
 
     def setUp(self):
         super().setUp()
@@ -561,8 +561,8 @@ class TestActivity2SpecificTests(TestBetamax):
 
     # 2.0 new activity
     # noinspection PyTypeChecker
-    def test_edit_activity2_assignee(self):
-        specify_wd = self.project.activity('Specify wheel diameter')  # type: Activity2
+    def test_edit_activity_assignee(self):
+        specify_wd = self.project.activity('Specify wheel diameter')  # type: Activity
         original_assignee_ids = specify_wd._json_data.get('assignee_ids') or []
 
         # pykechain_user = self.client.user(username='pykechain')
@@ -587,42 +587,42 @@ class TestActivity2SpecificTests(TestBetamax):
 
         specify_wd.edit(assignees_ids=original_assignee_ids)
 
-    def test_activity2_retrieve_parent_of_task(self):
+    def test_activity_retrieve_parent_of_task(self):
         task = self.project.activity(name='SubTask')
         subprocess = task.parent()  # type Activity
         self.assertEqual(subprocess.activity_type, ActivityType.PROCESS)
 
-    def test_activity2_retrieve_parent_of_root(self):
+    def test_activity_retrieve_parent_of_root(self):
         task = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
         with self.assertRaises(NotFoundError):
             task.parent()
 
-    def test_activity2_retrieve_parent_of_a_toplevel_task_returns_workflow_root_id(self):
+    def test_activity_retrieve_parent_of_a_toplevel_task_returns_workflow_root_id(self):
         task = self.project.activity('Specify wheel diameter')
         parent = task.parent()
         self.assertEqual(self.project._json_data.get('workflow_root_id'), parent.id)
 
-    def test_activity2_test_workflow_root_object(self):
+    def test_activity_test_workflow_root_object(self):
         workflow_root = self.project.activity(id=self.project._json_data.get('workflow_root_id'))
 
         self.assertTrue(workflow_root.is_root())
         self.assertTrue(workflow_root.is_workflow_root())
 
-    def test_activity2_retrieve_children_of_parent(self):
-        subprocess = self.project.activity(name='Subprocess')  # type: Activity2
+    def test_activity_retrieve_children_of_parent(self):
+        subprocess = self.project.activity(name='Subprocess')  # type: Activity
         children = subprocess.children()
         self.assertTrue(len(children) >= 1)
         for child in children:
             self.assertEqual(child._json_data.get('parent_id'), subprocess.id)
 
-    def test_activity2_retrieve_children_of_subprocess_with_arguments(self):
-        subprocess = self.project.activity(name='Subprocess')  # type: Activity2
+    def test_activity_retrieve_children_of_subprocess_with_arguments(self):
+        subprocess = self.project.activity(name='Subprocess')  # type: Activity
         children = subprocess.children(name__icontains='task')
         self.assertTrue(len(children) >= 1)
         for child in children:
             self.assertEqual(child._json_data.get('parent_id'), subprocess.id)
 
-    def test_rootlevel_activity2_is_rootlevel(self):
+    def test_rootlevel_activity_is_rootlevel(self):
         specify_wd = self.project.activity('Specify wheel diameter')
 
         self.assertTrue(specify_wd.is_rootlevel())
@@ -631,36 +631,36 @@ class TestActivity2SpecificTests(TestBetamax):
 
         self.assertFalse(root_itself.is_rootlevel())
 
-    def test_subtask_activity2_is_not_rootlevel(self):
+    def test_subtask_activity_is_not_rootlevel(self):
         subprocess_subtask = self.project.activity('SubTask')
 
         self.assertFalse(subprocess_subtask.is_rootlevel())
 
-    def test_activity2_is_task(self):
+    def test_activity_is_task(self):
         specify_wd = self.project.activity('Specify wheel diameter')
 
         self.assertTrue(specify_wd.is_task())
         self.assertFalse(specify_wd.is_subprocess())
 
-    def test_activity2_is_subprocess(self):
+    def test_activity_is_subprocess(self):
         subprocess = self.project.activity('Subprocess')
 
         self.assertTrue(subprocess.is_subprocess())
         self.assertFalse(subprocess.is_task())
 
-    def test_activity2_assignees_list(self):
+    def test_activity_assignees_list(self):
         list_of_assignees_in_data = self.task._json_data.get('assignees_ids')
         assignees_list = self.task.assignees
 
         self.assertSetEqual(set(list_of_assignees_in_data), set([u.id for u in assignees_list]))
 
-    def test_activity2_assignees_list_no_assignees_gives_empty_list(self):
+    def test_activity_assignees_list_no_assignees_gives_empty_list(self):
         activity_name = 'Specify wheel diameter'
-        activity = self.project.activity(name=activity_name)  # type: Activity2
+        activity = self.project.activity(name=activity_name)  # type: Activity
 
         self.assertListEqual(list(), activity.assignees, "Task has no assignees and should return Empty list")
 
-    def test_activity2_move(self):
+    def test_activity_move(self):
         # setUp
         activity_to_be_moved = self.task
 
@@ -672,7 +672,7 @@ class TestActivity2SpecificTests(TestBetamax):
         # testing
         self.assertEqual(new_parent, activity_to_be_moved.parent())
 
-    def test_activity2_move_under_task_parent(self):
+    def test_activity_move_under_task_parent(self):
         # setUp
         new_parent_name = 'Specify wheel diameter'
         new_parent = self.project.activity(name=new_parent_name)
@@ -681,7 +681,7 @@ class TestActivity2SpecificTests(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             self.task.move(parent=new_parent)
 
-    def test_activity2_move_under_part_object(self):
+    def test_activity_move_under_part_object(self):
         # setUp
         new_parent_name = 'Bike'
         new_parent = self.project.part(name=new_parent_name)
@@ -691,16 +691,16 @@ class TestActivity2SpecificTests(TestBetamax):
             self.task.move(parent=new_parent)
 
     # tests added in 3.0
-    def test_activity2_retrieve_with_refs(self):
+    def test_activity_retrieve_with_refs(self):
         # setup
         test_task_ref = slugify_ref(self.task.name)
         test_task_activity = self.project.activity(ref=test_task_ref)
 
         # testing
-        self.assertIsInstance(test_task_activity, Activity2)
+        self.assertIsInstance(test_task_activity, Activity)
         self.assertEqual(self.task, test_task_activity)
 
-    def test_activity2_associated_parts(self):
+    def test_activity_associated_parts(self):
         # setUp
         activity_name = 'Task - Form + Tables + Service'
         activity = self.project.activity(name=activity_name)
@@ -722,7 +722,7 @@ class TestActivity2SpecificTests(TestBetamax):
         self.assertTrue(len(associated_models) == 3)
         self.assertTrue(len(associated_instances) == 4)
 
-    def test_activity2_associated_objects_ids(self):
+    def test_activity_associated_objects_ids(self):
         # setUp
         activity_name = 'Task - Form + Tables + Service'
         activity = self.project.activity(name=activity_name)
@@ -731,7 +731,7 @@ class TestActivity2SpecificTests(TestBetamax):
         # testing
         self.assertTrue(len(associated_object_ids) == 17)
 
-    def test_activity2_parts_of_specific_type(self):
+    def test_activity_parts_of_specific_type(self):
         # setUp
         activity_name = 'Task - Form + Tables + Service'
         bike_model = self.project.model(name="Bike")
@@ -752,7 +752,7 @@ class TestActivity2SpecificTests(TestBetamax):
 
 
 class TestActivityDownloadAsPDF(TestBetamax):
-    def test_activity2_download_as_pdf(self):
+    def test_activity_download_as_pdf(self):
         # setUp
         activity_name = 'Task - Form'
         activity = self.project.activity(name=activity_name)
@@ -768,7 +768,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
 
     @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
                         reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
-    def test_activity2_download_as_pdf_async(self):
+    def test_activity_download_as_pdf_async(self):
         activity_name = 'Task - Form'
         activity = self.project.activity(name=activity_name)
 
@@ -780,7 +780,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
             self.assertTrue(pdf_file)
             self.assertTrue(pdf_file_called_after_activity)
 
-    def test_activity2_share_link(self):
+    def test_activity_share_link(self):
         # setUp
         test_user = self.client.user(username='testuser')
 
@@ -804,7 +804,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
         # tearDown
         notifications[0].delete()
 
-    def test_activity2_share_pdf(self):
+    def test_activity_share_pdf(self):
         # setUp
         test_user = self.client.user(username='testuser')
 
