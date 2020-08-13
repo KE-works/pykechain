@@ -13,7 +13,7 @@ class SideBarManager(Iterable):
     Sidebar manager class.
 
     :ivar scope: Scope object for which the side-bar is managed.
-    :type scope: Scope2
+    :type scope: Scope
     :ivar bulk_creation: boolean to create buttons in bulk, postponing updating of KE-chain until the manager is
                          deleted from memory (end of your function)
     :type bulk_creation: bool
@@ -21,8 +21,8 @@ class SideBarManager(Iterable):
 
     __existing_managers = dict()  # storage of manager objects to enforce 1 manager object per Scope
 
-    def __new__(cls, scope: 'Scope2', *args, **kwargs):
-        """Overwrite superclass method to enforce singleton manager per Scope2 object."""
+    def __new__(cls, scope: 'Scope', *args, **kwargs):
+        """Overwrite superclass method to enforce singleton manager per Scope object."""
         instance = super().__new__(cls)
 
         # Singleton manager per scope: this is required to support bulk_creation
@@ -33,21 +33,21 @@ class SideBarManager(Iterable):
 
         return instance
 
-    def __init__(self, scope: 'Scope2', **kwargs):
+    def __init__(self, scope: 'Scope', **kwargs):
         """
-        Create a side-bar manager object for the Scope2 object.
+        Create a side-bar manager object for the Scope object.
 
         :param scope: Scope for which to create the side-bar manager.
-        :type scope: Scope2
+        :type scope: Scope
         :param bulk_creation: flag whether to update once (True) or continuously (False, default)
         :type bulk_creation: bool
         """
         super().__init__(**kwargs)
 
-        from pykechain.models import Scope2
-        check_type(scope, Scope2, 'scope')
+        from pykechain.models import Scope
+        check_type(scope, Scope, 'scope')
 
-        self.scope = scope  # type: Scope2
+        self.scope = scope  # type: Scope
         self._override = scope.options.get('overrideSidebar', False)  # type: bool
 
         self._scope_uri = "#/scopes/{}".format(self.scope.id)

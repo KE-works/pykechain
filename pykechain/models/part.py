@@ -8,7 +8,7 @@ from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, 
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
     get_edited_one_many
 from pykechain.models.input_checks import check_text, check_type, check_list_of_base, check_list_of_dicts
-from pykechain.models.property2 import Property2
+from pykechain.models.property import Property
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.utils import is_uuid, find
 
@@ -32,7 +32,7 @@ class Part(TreeObject):
     :type category: basestring
     :ivar parent_id: The UUID of the parent of this part
     :type parent_id: basestring or None
-    :ivar properties: The list of :class:`Property2` objects belonging to this part.
+    :ivar properties: The list of :class:`Property` objects belonging to this part.
     :type properties: List[Property]
     :ivar multiplicity: The multiplicity of the part being one of the following options: ZERO_ONE, ONE, ZERO_MANY,
                         ONE_MANY, (reserved) M_N (of :class:`pykechain.enums.Multiplicity`)
@@ -86,7 +86,7 @@ class Part(TreeObject):
         self.multiplicity = json.get('multiplicity')  # type: Text
         self.classification = json.get('classification')  # type: Classification
 
-        self.properties = [Property2.create(p, client=self._client)
+        self.properties = [Property.create(p, client=self._client)
                            for p in sorted(json['properties'], key=lambda p: p.get('order', 0))]  # type: list
 
         proxy_data = json.get('proxy_source_id_name', dict())  # type: Optional[Dict]
@@ -142,7 +142,7 @@ class Part(TreeObject):
 
         return found
 
-    def scope(self) -> 'Scope2':
+    def scope(self) -> 'Scope':
         """Scope this Part belongs to.
 
         This property will return a `Scope` object. It will make an additional call to the KE-chain API.
@@ -634,7 +634,7 @@ class Part(TreeObject):
         key = 'id' if part.category == Category.INSTANCE else 'model_id'
 
         for prop_name_or_id, property_value in update_dict.items():
-            property_to_update = part.property(prop_name_or_id)  # type: Property2
+            property_to_update = part.property(prop_name_or_id)  # type: Property
 
             updated_p = {
                 'value': property_to_update.serialize_value(property_value),
@@ -710,10 +710,10 @@ class Part(TreeObject):
         instance_name = check_text(name, 'name') or model.name
         properties_fvalues, exception_fvalues = self._parse_update_dict(model, properties_fvalues, update_dict)
 
-        url = self._client._build_url('parts2_new_instance')
+        url = self._client._build_url('parts_new_instance')
         response = self._client._request(
             'POST', url,
-            params=API_EXTRA_PARAMS['parts2'],
+            params=API_EXTRA_PARAMS['parts'],
             json=dict(
                 name=instance_name,
                 model_id=model.id,
@@ -1028,7 +1028,7 @@ class Part(TreeObject):
         if self.category != Category.MODEL:
             raise APIError("Ordering of properties must be done on a Part of category {}.".format(Category.MODEL))
 
-        property_ids = check_list_of_base(property_list, Property2, 'property_list', method=self.property)
+        property_ids = check_list_of_base(property_list, Property, 'property_list', method=self.property)
 
         properties_fvalues = [dict(order=order, id=pk) for order, pk in enumerate(property_ids)]
 

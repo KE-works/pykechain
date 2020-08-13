@@ -18,13 +18,13 @@ def _retrieve_object(obj: Union['Base', Text], method: Callable) -> Union['Base'
     :param method: client object to retrieve the object if only uuid is provided.
     :type method: `Client`
     :return: object based on the object or uuid of the objet
-    :rtype: `Part2` or `Team` or `Property2`
+    :rtype: `Part` or `Team` or `Property`
     :raises APIError: If the object could not be retrieved based on the UUID
-    :raises IllegalArgumentError: if the object provided is not a Part, Property2 or UUID.
+    :raises IllegalArgumentError: if the object provided is not a Part, Property or UUID.
     """
     # Check whether the part_model is uuid type or class `Part`
-    from pykechain.models import Part2, Property2, Service, Team
-    if isinstance(obj, (Part2, Property2, Service, Team)):
+    from pykechain.models import Part, Property, Service, Team
+    if isinstance(obj, (Part, Property, Service, Team)):
         return obj
     elif isinstance(obj, str) and is_uuid(obj):
         obj_id = obj
@@ -127,8 +127,8 @@ def _initiate_meta(kwargs, activity, ignores=()):
 
     :param kwargs: the keyword arguments provided to the widget function which are checked for the kecard definition
     :type kwargs: dict
-    :param activity: uuid or `activity2` object
-    :type activity: Activity2 or basestring
+    :param activity: uuid or `activity` object
+    :type activity: Activity or basestring
     :param ignores: list or tuple of keys to ensure they are not present in the initated meta on return
     :type ignores: list or tuple
     :return: kecard dictionary
@@ -155,9 +155,9 @@ def _initiate_meta(kwargs, activity, ignores=()):
     return meta
 
 
-def _check_prefilters(part_model: 'Part2', prefilters: Dict) -> List[Text]:  # noqa: F821
+def _check_prefilters(part_model: 'Part', prefilters: Dict) -> List[Text]:  # noqa: F821
     """
-    Check the pre-filters on a `FilteredGridWidget` or `MultiReferenceProperty2.
+    Check the pre-filters on a `FilteredGridWidget` or `MultiReferenceProperty.
 
     The prefilters should comply to the prefilters schema as present in the backend.
 
@@ -176,9 +176,9 @@ def _check_prefilters(part_model: 'Part2', prefilters: Dict) -> List[Text]:  # n
     :param prefilters: Dictionary with prefilters.
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
-    from pykechain.models import Property2
+    from pykechain.models import Property
 
-    property_models = prefilters.get('property_models', [])  # type: List[Property2, Text]  # noqa
+    property_models = prefilters.get('property_models', [])  # type: List[Property, Text]  # noqa
     values = prefilters.get('values', [])
     filters_type = prefilters.get('filters_type', [])
 
@@ -191,7 +191,7 @@ def _check_prefilters(part_model: 'Part2', prefilters: Dict) -> List[Text]:  # n
         if is_uuid(prop):
             prop = part_model.property(prop)  # the finder can handle uuid, name or ref
 
-        if not isinstance(prop, Property2) or prop.category != Category.MODEL:
+        if not isinstance(prop, Property) or prop.category != Category.MODEL:
             raise IllegalArgumentError(
                 'Pre-filters can only be set on Property models, received "{}".'.format(prop))
 
@@ -208,7 +208,7 @@ def _check_prefilters(part_model: 'Part2', prefilters: Dict) -> List[Text]:  # n
     return list_of_prefilters
 
 
-def _check_excluded_propmodels(part_model: 'Part2', property_models: List['AnyProperty']) -> List['AnyProperty']:
+def _check_excluded_propmodels(part_model: 'Part', property_models: List['AnyProperty']) -> List['AnyProperty']:
     """
     Validate the excluded property models of the referenced part.
 
@@ -218,17 +218,17 @@ def _check_excluded_propmodels(part_model: 'Part2', property_models: List['AnyPr
     :rtype list
     :raises IllegalArgumentError: whenever the properties are not of category MODEL or do not belong to the part model.
     """
-    from pykechain.models import Property2
-    from pykechain.models import Part2
+    from pykechain.models import Property
+    from pykechain.models import Part
 
-    if not isinstance(part_model, Part2):
-        raise IllegalArgumentError('`part_model` must be a Part2 object, "{}" is not.'.format(part_model))
+    if not isinstance(part_model, Part):
+        raise IllegalArgumentError('`part_model` must be a Part object, "{}" is not.'.format(part_model))
 
     list_of_propmodels_excl = list()  # type: List['AnyProperty']
     for property_model in property_models:
         if is_uuid(property_model):
             property_model = part_model.property(property_model)
-        elif not isinstance(property_model, Property2):
+        elif not isinstance(property_model, Property):
             raise IllegalArgumentError('A part reference property can only exclude `Property` models or their UUIDs, '
                                        'found type "{}"'.format(type(property_model)))
 

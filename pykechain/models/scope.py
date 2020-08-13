@@ -113,50 +113,50 @@ class Scope(Base, TagsMixin):
         self.options = options
 
     @property
-    def workflow_root_process(self) -> 'Activity2':
-        """Retrieve the Activity2 root object with classification WORKFLOW."""
+    def workflow_root_process(self) -> 'Activity':
+        """Retrieve the Activity root object with classification WORKFLOW."""
         if self._workflow_root_process is None:
             self._workflow_root_process = self.activity(id=self._json_data['workflow_root_id'])
         return self._workflow_root_process
 
     @property
-    def app_root_process(self) -> 'Activity2':
-        """Retrieve the Activity2 root object with classification APP."""
+    def app_root_process(self) -> 'Activity':
+        """Retrieve the Activity root object with classification APP."""
         if self._app_root_process is None:
             self._app_root_process = self.activity(id=self._json_data['app_root_id'])
         return self._app_root_process
 
     @property
-    def catalog_root_process(self) -> 'Activity2':
-        """Retrieve the Activity2 root object with classification CATALOG."""
+    def catalog_root_process(self) -> 'Activity':
+        """Retrieve the Activity root object with classification CATALOG."""
         if self._catalog_root_process is None:
             self._catalog_root_process = self.activity(id=self._json_data['catalog_root_id'])
         return self._catalog_root_process
 
     @property
-    def product_root_model(self) -> 'Part2':
-        """Retrieve the Part2 root object with classification PRODUCT and category MODEL."""
+    def product_root_model(self) -> 'Part':
+        """Retrieve the Part root object with classification PRODUCT and category MODEL."""
         if self._product_root_model is None:
             self._product_root_model = self.model(id=self._json_data['product_model_id'])
         return self._product_root_model
 
     @property
-    def product_root_instance(self) -> 'Part2':
-        """Retrieve the Part2 root object with classification PRODUCT and category INSTANCE."""
+    def product_root_instance(self) -> 'Part':
+        """Retrieve the Part root object with classification PRODUCT and category INSTANCE."""
         if self._product_root_instance is None:
             self._product_root_instance = self.part(id=self._json_data['product_instance_id'])
         return self._product_root_instance
 
     @property
-    def catalog_root_model(self) -> 'Part2':
-        """Retrieve the Part2 root object with classification CATALOG and category MODEL."""
+    def catalog_root_model(self) -> 'Part':
+        """Retrieve the Part root object with classification CATALOG and category MODEL."""
         if self._catalog_root_model is None:
             self._catalog_root_model = self.model(id=self._json_data['catalog_model_id'])
         return self._catalog_root_model
 
     @property
-    def catalog_root_instance(self) -> 'Part2':
-        """Retrieve the Part2 root object with classification CATALOG and category INSTANCE."""
+    def catalog_root_instance(self) -> 'Part':
+        """Retrieve the Part root object with classification CATALOG and category INSTANCE."""
         if self._catalog_root_instance is None:
             self._catalog_root_instance = self.part(id=self._json_data['catalog_instance_id'])
         return self._catalog_root_instance
@@ -405,28 +405,28 @@ class Scope(Base, TagsMixin):
         return SideBarManager(scope=self, *args, **kwargs)
 
     def set_landing_page(self,
-                         activity: Union['Activity2', KEChainPages],
+                         activity: Union['Activity', KEChainPages],
                          task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
                          ) -> None:
         """
         Update the landing page of the scope.
 
-        :param activity: Activity2 object or KEChainPages option
-        :type activity: (Activity2, KEChainPages)
+        :param activity: Activity object or KEChainPages option
+        :type activity: (Activity, KEChainPages)
         :param task_display_mode: display mode of the activity in KE-chain
         :type task_display_mode: SubprocessDisplayMode
         :return: None
         :rtype None
         """
-        from pykechain.models import Activity2
+        from pykechain.models import Activity
 
-        if not (isinstance(activity, Activity2) or activity in KEChainPages.values()):
+        if not (isinstance(activity, Activity) or activity in KEChainPages.values()):
             raise IllegalArgumentError(
-                'activity must be of class Activity2 or a KEChainPages option, "{}" is not.'.format(activity))
+                'activity must be of class Activity or a KEChainPages option, "{}" is not.'.format(activity))
 
         check_enum(task_display_mode, SubprocessDisplayMode, 'task_display_mode')
 
-        if isinstance(activity, Activity2):
+        if isinstance(activity, Activity):
             url = '#/scopes/{}/{}/{}'.format(self.id, task_display_mode, activity.id)
         else:
             url = '#/scopes/{}/{}'.format(self.id, activity)

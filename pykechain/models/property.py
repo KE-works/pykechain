@@ -36,7 +36,7 @@ class Property(BaseInScope):
     :ivar output: a boolean if the value is configured as an output (in an activity)
     :type output: bool
     :ivar part: The (parent) part in which this property is available
-    :type part: :class:`Part2`
+    :type part: :class:`Part`
     :ivar value: the property value, can be set as well as property
     :type value: Any
     :ivar validators: the list of validators that are available in the property
@@ -67,7 +67,7 @@ class Property(BaseInScope):
         # Create protected variables
         self._value = json.get('value')  # type: Any
         self._options = json.get('value_options', {})  # type: Dict
-        self._part = None  # type: Optional['Part2']
+        self._part = None  # type: Optional['Part']
         self._model = None  # type: Optional['Property']
         self._validators = []  # type: List[PropertyValidator]
         self._validation_results = []  # type: List
@@ -184,7 +184,7 @@ class Property(BaseInScope):
         return value.id if isinstance(value, Base) else value
 
     @property
-    def part(self) -> 'Part2':
+    def part(self) -> 'Part':
         """
         Retrieve the part that holds this Property.
 
@@ -440,7 +440,7 @@ class Property(BaseInScope):
         if response.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete Property {}".format(self), response=response)
 
-    def copy(self, target_part: 'Part2', name: Optional[Text] = None) -> 'Property':
+    def copy(self, target_part: 'Part', name: Optional[Text] = None) -> 'Property':
         """Copy a property model or instance.
 
         :param target_part: `Part` object under which the desired `Property` is copied
@@ -457,8 +457,8 @@ class Property(BaseInScope):
         >>> property_to_copy.copy(target_part=bike, name='Bike diameter?')
 
         """
-        from pykechain.models import Part2
-        check_type(target_part, Part2, 'target_part')
+        from pykechain.models import Part
+        check_type(target_part, Part, 'target_part')
 
         name = check_text(name, 'name') or self.name
         if self.category == Category.MODEL and target_part.category == Category.MODEL:
@@ -489,7 +489,7 @@ class Property(BaseInScope):
             raise IllegalArgumentError('property "{}" and target part "{}" must have the same category'.
                                        format(self.name, target_part.name))
 
-    def move(self, target_part: 'Part2', name: Optional[Text] = None) -> 'Property':
+    def move(self, target_part: 'Part', name: Optional[Text] = None) -> 'Property':
         """Move a property model or instance.
 
         :param target_part: `Part` object under which the desired `Property` is moved

@@ -1,10 +1,11 @@
 from six import text_type
 
+from pykechain.exceptions import _DeprecationMixin
 from pykechain.models.part import Part
 from pykechain.models.property import Property
 
 
-class ReferenceProperty(Property):  # pragma: no cover
+class ReferenceProperty(Property, _DeprecationMixin):  # pragma: no cover
     """A virtual object representing a KE-chain reference property."""
 
     @property
