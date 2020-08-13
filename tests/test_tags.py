@@ -1,8 +1,7 @@
 from unittest import TestCase
 
-from pykechain.models import Activity
-
 from pykechain.exceptions import IllegalArgumentError
+from pykechain.models import Activity
 from pykechain.models.tags import TagsMixin
 from tests.classes import TestBetamax
 

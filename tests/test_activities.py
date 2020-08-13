@@ -545,19 +545,19 @@ class TestActivities(TestBetamax):
         with self.assertRaisesRegex(IllegalArgumentError, 'must be an option from enum'):
             self.project.create_activity(name='New', activity_type='DEFUNCTActivity')
 
-
-@skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
-class TestActivity2SpecificTests(TestBetamax):
-
-    def setUp(self):
-        super().setUp()
-        self.root = self.project.activity(ActivityRootNames.WORKFLOW_ROOT)
-        self.task = self.root.create(name='test task', activity_type=ActivityType.TASK)
-
-    def tearDown(self):
-        if self.task:
-            self.task.delete()
-        super().tearDown()
+#
+# @skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
+# class TestActivitiesWIM2(TestBetamax):
+#
+#     def setUp(self):
+#         super().setUp()
+#         self.root = self.project.activity(ActivityRootNames.WORKFLOW_ROOT)
+#         self.task = self.root.create(name='test task', activity_type=ActivityType.TASK)
+#
+#     def tearDown(self):
+#         if self.task:
+#             self.task.delete()
+#         super().tearDown()
 
     # 2.0 new activity
     # noinspection PyTypeChecker

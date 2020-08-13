@@ -1,18 +1,18 @@
 import datetime
 import time
+import warnings
+from test.support import EnvironmentVarGuard
 from unittest import TestCase, skipIf
 
 import pytz
-import warnings
 
+from pykechain.client import Client
 from pykechain.enums import ScopeStatus
+from pykechain.exceptions import ForbiddenError, ClientError, NotFoundError, IllegalArgumentError, APIError
 from pykechain.models import Team, Base
 from pykechain.models.scope import Scope
-from pykechain.client import Client
-from pykechain.exceptions import ForbiddenError, ClientError, NotFoundError, IllegalArgumentError, APIError
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_WIM2
-from test.support import EnvironmentVarGuard
 
 
 class TestClient(TestCase):
