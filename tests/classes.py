@@ -1,9 +1,9 @@
 import datetime
 import os
+from unittest import TestCase
+
 import pytz
 import six
-
-from unittest import TestCase
 from betamax import Betamax
 
 if six.PY2:

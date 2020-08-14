@@ -16,7 +16,7 @@ from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, Ser
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
 
-from pykechain.models import Part2, Property2, Activity2, Scope2, PartSet, Base, AnyProperty, Service, \
+from pykechain.models import Part, Property, Activity, Scope, PartSet, Base, AnyProperty, Service, \
     ServiceExecution
 from pykechain.models.association import Association
 from pykechain.models.team import Team
@@ -31,7 +31,7 @@ from .models.banner import Banner
 
 
 class Client(object):
-    """The KE-chain 2 python client to connect to a KE-chain (version 2) instance.
+    """The KE-chain python client to connect to a KE-chain instance.
 
     :ivar last_request: last executed request. Which is of type `requests.Request`_
     :ivar last_response: last executed response. Which is of type `requests.Response`_
@@ -449,7 +449,7 @@ class Client(object):
             pk: Optional[Text] = None,
             status: Optional[Union[ScopeStatus, Text]] = ScopeStatus.ACTIVE,
             **kwargs
-    ) -> List[Scope2]:
+    ) -> List[Scope]:
         """Return all scopes visible / accessible for the logged in user.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -486,8 +486,8 @@ class Client(object):
             'status': check_enum(status, ScopeStatus, 'status'),
         }
 
-        request_params.update(API_EXTRA_PARAMS['scope2'])
-        url = self._build_url('scopes2')
+        request_params.update(API_EXTRA_PARAMS['scope'])
+        url = self._build_url('scopes')
 
         if kwargs:
             request_params.update(**kwargs)
@@ -499,9 +499,9 @@ class Client(object):
 
         data = response.json()
 
-        return [Scope2(s, client=self) for s in data['results']]
+        return [Scope(s, client=self) for s in data['results']]
 
-    def scope(self, *args, **kwargs) -> Scope2:
+    def scope(self, *args, **kwargs) -> Scope:
         """Return a single scope based on the provided name.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -519,7 +519,7 @@ class Client(object):
             pk: Optional[Text] = None,
             scope: Optional[Text] = None,
             **kwargs
-    ) -> List[Activity2]:
+    ) -> List[Activity]:
         """Search for activities with optional name, pk and scope filter.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -551,9 +551,9 @@ class Client(object):
             raise NotFoundError("Could not retrieve Activities", response=response)
 
         data = response.json()
-        return [Activity2(a, client=self) for a in data['results']]
+        return [Activity(a, client=self) for a in data['results']]
 
-    def activity(self, *args, **kwargs) -> Activity2:
+    def activity(self, *args, **kwargs) -> Activity:
         """Search for a single activity.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -575,7 +575,7 @@ class Client(object):
             self,
             name: Optional[Text] = None,
             pk: Optional[Text] = None,
-            model: Optional[Part2] = None,
+            model: Optional[Part] = None,
             category: Optional[Union[Category, Text]] = Category.INSTANCE,
             scope_id: Optional[Text] = None,
             parent: Optional[Text] = None,
@@ -651,8 +651,8 @@ class Client(object):
             parent_id=parent,
             model_id=model.id if model else None,
         )
-        url = self._build_url('parts2')
-        request_params.update(API_EXTRA_PARAMS['parts2'])
+        url = self._build_url('parts')
+        request_params.update(API_EXTRA_PARAMS['parts'])
 
         if kwargs:
             request_params.update(**kwargs)
@@ -675,9 +675,9 @@ class Client(object):
                 data = response.json()
                 part_results.extend(data['results'])
 
-        return PartSet((Part2(p, client=self) for p in part_results))
+        return PartSet((Part(p, client=self) for p in part_results))
 
-    def part(self, *args, **kwargs) -> Part2:
+    def part(self, *args, **kwargs) -> Part:
         """Retrieve single KE-chain part.
 
         Uses the same interface as the :func:`parts` method but returns only a single pykechain :class:`models.Part`
@@ -692,7 +692,7 @@ class Client(object):
         """
         return self._retrieve_singular(self.parts, *args, **kwargs)
 
-    def model(self, *args, **kwargs) -> Part2:
+    def model(self, *args, **kwargs) -> Part:
         """Retrieve single KE-chain part model.
 
         Uses the same interface as the :func:`part` method but returns only a single pykechain
@@ -738,13 +738,13 @@ class Client(object):
         if kwargs:  # pragma: no cover
             request_params.update(**kwargs)
 
-        request_params.update(API_EXTRA_PARAMS['properties2'])
-        response = self._request('GET', self._build_url('properties2'), params=request_params)
+        request_params.update(API_EXTRA_PARAMS['properties'])
+        response = self._request('GET', self._build_url('properties'), params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve Properties", response=response)
 
-        return [Property2.create(p, client=self) for p in response.json()['results']]
+        return [Property.create(p, client=self) for p in response.json()['results']]
 
     def property(self, *args, **kwargs) -> 'AnyProperty':  # noqa: F
         """Retrieve single KE-chain Property.
@@ -987,7 +987,7 @@ class Client(object):
     def widgets(
             self,
             pk: Optional[Text] = None,
-            activity: Optional[Union[Activity2, Text]] = None,
+            activity: Optional[Union[Activity, Text]] = None,
             **kwargs
     ) -> List[Widget]:
         """
@@ -1009,7 +1009,7 @@ class Client(object):
         request_params = dict(API_EXTRA_PARAMS['widgets'])
         request_params['id'] = check_uuid(pk)
 
-        if isinstance(activity, Activity2):
+        if isinstance(activity, Activity):
             request_params.update(dict(activity_id=activity.id))
         elif is_uuid(activity):
             request_params.update(dict(activity_id=activity))
@@ -1030,7 +1030,7 @@ class Client(object):
 
     def create_activity(
             self,
-            parent: Union[Activity2, Text],
+            parent: Union[Activity, Text],
             name: Text,
             activity_type: ActivityType = ActivityType.TASK,
             status: ActivityStatus = ActivityStatus.OPEN,
@@ -1039,12 +1039,12 @@ class Client(object):
             due_date: Optional[datetime.datetime] = None,
             classification: ActivityClassification = None,
             tags: Optional[List[Text]] = None,
-    ) -> Activity2:
+    ) -> Activity:
         """
         Create a new activity.
 
         :param parent: parent under which to create the activity
-        :type parent: basestring or :class:`models.Activity2`
+        :type parent: basestring or :class:`models.Activity`
         :param name: new activity name
         :type name: basestring
         :param activity_type: type of activity: TASK (default) or PROCESS
@@ -1061,11 +1061,11 @@ class Client(object):
         :type classification: ActivityClassification
         :param tags: list of activity tags
         :type tags: list
-        :return: the created :class:`models.Activity2`
+        :return: the created :class:`models.Activity`
         :raises APIError: When the object could not be created
         :raises IllegalArgumentError: When an incorrect arguments are provided
         """
-        if isinstance(parent, Activity2):
+        if isinstance(parent, Activity):
             parent_classification = parent.classification
             parent_id = parent.id
         elif is_uuid(parent):
@@ -1100,37 +1100,37 @@ class Client(object):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create Activity.", response=response)
 
-        new_activity = Activity2(response.json()['results'][0], client=self)
-        if isinstance(parent, Activity2) and parent._cached_children is not None:
+        new_activity = Activity(response.json()['results'][0], client=self)
+        if isinstance(parent, Activity) and parent._cached_children is not None:
             parent._cached_children.append(new_activity)
         return new_activity
 
     def clone_activities(
             self,
-            activities: List[Union[Activity2, Text]],
-            parent: Union[Activity2, Text],
+            activities: List[Union[Activity, Text]],
+            parent: Union[Activity, Text],
             activity_update_dicts: Optional[Dict] = None,
             clone_parts: Optional[bool] = False,
             clone_part_instances: Optional[bool] = True,
             clone_children: Optional[bool] = True,
             excluded_parts: Optional[List[Text]] = None,
-            part_parent_model: Optional[Union[Part2, Text]] = None,
-            part_parent_instance: Optional[Union[Part2, Text]] = None,
+            part_parent_model: Optional[Union[Part, Text]] = None,
+            part_parent_instance: Optional[Union[Part, Text]] = None,
             part_model_rename_template: Optional[Text] = None,
             part_instance_rename_template: Optional[Text] = None,
             asynchronous: Optional[bool] = False,
             **kwargs
-    ) -> List[Activity2]:
+    ) -> List[Activity]:
         """
         Clone multiple activities.
 
         .. versionadded:: 3.7
         The bulk clone activities with parts API is included in KE-chain backend since version 3.6.
 
-        :param activities: list of Activity2 object or UUIDs
+        :param activities: list of Activity object or UUIDs
         :type activities: list
-        :param parent: parent Activity2 sub-process object or UUID
-        :type parent: Activity2
+        :param parent: parent Activity sub-process object or UUID
+        :type parent: Activity
         :param activity_update_dicts: (O) dict of dictionaries, each key-value combination relating to an activity
         to clone and a dict of new values to assign, e.g. `{activity.id: {"name": "Cloned activity"}}`
         :type activity_update_dicts: dict
@@ -1141,13 +1141,13 @@ class Client(object):
         :type clone_part_instances: bool
         :param clone_children: (O) whether to clone child parts
         :type clone_children: bool
-        :param excluded_parts: (O) list of Part2 objects or UUIDs to exclude from being cloned,
+        :param excluded_parts: (O) list of Part objects or UUIDs to exclude from being cloned,
             maintaining the original configuration of the widgets.
         :type excluded_parts: list
-        :param part_parent_model: (O) parent Part2 object or UUID for the copied data model(s)
-        :type part_parent_model: Part2
-        :param part_parent_instance: (O) parent Part2 object or UUID for the copied part instance(s)
-        :type part_parent_instance: Part2
+        :param part_parent_model: (O) parent Part object or UUID for the copied data model(s)
+        :type part_parent_model: Part
+        :param part_parent_instance: (O) parent Part object or UUID for the copied part instance(s)
+        :type part_parent_instance: Part
         :param part_model_rename_template: (O) renaming template for part models. Must contain "{name}"
         :type part_model_rename_template: str
         :param part_instance_rename_template: (O) renaming template for part instances. Must contain "{name}"
@@ -1162,7 +1162,7 @@ class Client(object):
             raise APIError("Cloning of activities requires KE-chain version >= 3.6.0.")
 
         update_name = 'activity_update_dicts'
-        activity_ids = check_list_of_base(activities, cls=Activity2, key='activities')
+        activity_ids = check_list_of_base(activities, cls=Activity, key='activities')
         update_dicts = check_type(activity_update_dicts, dict, key=update_name) or dict()
 
         if not all(key in activity_ids for key in update_dicts.keys()):
@@ -1177,13 +1177,13 @@ class Client(object):
         activities = [dict(id=uuid, **update_dicts.get(uuid, {})) for uuid in activity_ids]
 
         data = dict(
-            parent_id=check_base(parent, cls=Activity2, key='parent'),
+            parent_id=check_base(parent, cls=Activity, key='parent'),
             clone_parts=check_type(clone_parts, bool, 'clone_parts'),
             clone_part_instances=check_type(clone_part_instances, bool, 'clone_part_instances'),
             clone_children=check_type(clone_children, bool, 'clone_children'),
-            exclude_model_ids=check_list_of_base(excluded_parts, Part2, 'excluded_models') or [],
-            part_parent_model_id=check_base(part_parent_model, Part2, 'part_parent_model'),
-            part_parent_instance_id=check_base(part_parent_instance, Part2, 'part_parent_instance'),
+            exclude_model_ids=check_list_of_base(excluded_parts, Part, 'excluded_models') or [],
+            part_parent_model_id=check_base(part_parent_model, Part, 'part_parent_model'),
+            part_parent_instance_id=check_base(part_parent_instance, Part, 'part_parent_instance'),
             cloned_part_models_rename_template=check_type(
                 part_model_rename_template, str, 'part_model_rename_template'),
             cloned_part_instances_rename_template=check_type(
@@ -1204,14 +1204,14 @@ class Client(object):
                 (not asynchronous and response.status_code != requests.codes.created):  # pragma: no cover
             raise APIError("Could not clone Activities.", response=response)
 
-        cloned_activities = [Activity2(d, client=self) for d in response.json()['results']]
+        cloned_activities = [Activity(d, client=self) for d in response.json()['results']]
 
-        if isinstance(parent, Activity2):
+        if isinstance(parent, Activity):
             parent._populate_cached_children(cloned_activities)
 
         return cloned_activities
 
-    def _create_part(self, action: Text, data: Dict, **kwargs) -> Optional[Part2]:
+    def _create_part(self, action: Text, data: Dict, **kwargs) -> Optional[Part]:
         """Create a part for PIM 2 internal core function."""
         # suppress_kevents should be in the data (not the query_params)
         if 'suppress_kevents' in kwargs:
@@ -1219,18 +1219,18 @@ class Client(object):
 
         # prepare url query parameters
         query_params = kwargs
-        query_params.update(API_EXTRA_PARAMS['parts2'])
+        query_params.update(API_EXTRA_PARAMS['parts'])
 
-        response = self._request('POST', self._build_url('parts2_{}'.format(action)),
+        response = self._request('POST', self._build_url('parts_{}'.format(action)),
                                  params=query_params,
                                  json=data)
 
         if response.status_code != requests.codes.created:
             raise APIError("Could not create Part", response=response)
 
-        return Part2(response.json()['results'][0], client=self)
+        return Part(response.json()['results'][0], client=self)
 
-    def create_part(self, parent: Part2, model: Part2, name: Optional[Text] = None, **kwargs) -> Part2:
+    def create_part(self, parent: Part, model: Part, name: Optional[Text] = None, **kwargs) -> Part:
         """Create a new part instance from a given model under a given parent.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
@@ -1250,7 +1250,7 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
-        if not isinstance(parent, Part2) or not isinstance(model, Part2):
+        if not isinstance(parent, Part) or not isinstance(model, Part):
             raise IllegalArgumentError("The `parent` and `model` should be 'Part' objects")
         if parent.category != Category.INSTANCE:
             raise IllegalArgumentError("The `parent` should be of category 'INSTANCE'")
@@ -1263,10 +1263,10 @@ class Client(object):
         return self._create_part(action="new_instance", data=data, **kwargs)
 
     def create_model(self,
-                     parent: Union[Part2, Text],
+                     parent: Union[Part, Text],
                      name: Text,
                      multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
-                     **kwargs) -> Part2:
+                     **kwargs) -> Part:
         """Create a new child model under a given parent.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
@@ -1285,7 +1285,7 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
-        if isinstance(parent, Part2):
+        if isinstance(parent, Part):
             pass
         elif is_uuid(parent):
             parent = self.model(id=parent)
@@ -1304,11 +1304,11 @@ class Client(object):
 
     def create_model_with_properties(
             self,
-            parent: Union[Part2, Text],
+            parent: Union[Part, Text],
             name: Text,
             multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
             properties_fvalues: Optional[List[Dict]] = None,
-            **kwargs) -> Part2:
+            **kwargs) -> Part:
         """Create a model with its properties in a single API request.
 
         With KE-chain 3 backends you may now provide a whole set of properties to create using a `properties_fvalues`
@@ -1328,7 +1328,7 @@ class Client(object):
            This version makes a model including properties in a single API call
 
         :param parent: parent part instance or a part uuid
-        :type parent: :class:`models.Part2`
+        :type parent: :class:`models.Part`
         :param name: new part name
         :type name: basestring
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N of :class:`enums.Multiplicity`
@@ -1356,7 +1356,7 @@ class Client(object):
         ...                                                 properties_fvalues=properties_fvalues)
 
         """
-        if isinstance(parent, Part2):
+        if isinstance(parent, Part):
             pass
         elif is_uuid(parent):
             parent = self.model(id=parent)
@@ -1377,12 +1377,12 @@ class Client(object):
         return self._create_part(action="create_child_model", data=data, **kwargs)
 
     def _create_clone(self,
-                      parent: Part2,
-                      part: Part2,
+                      parent: Part,
+                      part: Part,
                       name: Optional[Text] = None,
                       multiplicity: Optional[Multiplicity] = None,
                       **kwargs
-                      ) -> Part2:
+                      ) -> Part:
         """Create a new `Part` clone under the `Parent`.
 
         An optional name of the cloned part may be provided. If not provided the name will be set
@@ -1404,8 +1404,8 @@ class Client(object):
         :return: cloned :class:`models.Part`
         :raises APIError: if the `Part` could not be cloned
         """
-        check_type(part, Part2, 'part')
-        check_type(parent, Part2, 'parent')
+        check_type(part, Part, 'part')
+        check_type(parent, Part, 'parent')
 
         data = dict(
             name=check_text(name, 'name') or "CLONE - {}".format(part.name),
@@ -1427,24 +1427,24 @@ class Client(object):
             select_action = 'clone_instance'
 
         query_params = kwargs
-        query_params.update(API_EXTRA_PARAMS['parts2'])
-        url = self._build_url('parts2_{}'.format(select_action))
+        query_params.update(API_EXTRA_PARAMS['parts'])
+        url = self._build_url('parts_{}'.format(select_action))
 
         response = self._request('POST', url, params=query_params, data=data)
 
         if response.status_code != requests.codes.created:
             raise APIError("Could not clone Part", response=response)
 
-        return Part2(response.json()['results'][0], client=self)
+        return Part(response.json()['results'][0], client=self)
 
     def create_proxy_model(
             self,
-            model: Part2,
-            parent: Part2,
+            model: Part,
+            parent: Part,
             name: Text,
             multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
             **kwargs
-    ) -> Part2:
+    ) -> Part:
         """Add this model as a proxy to another parent model.
 
         This will add a model as a proxy model to another parent model. It ensure that it will copy the
@@ -1468,8 +1468,8 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Part` could not be created
         """
-        check_type(model, Part2, 'model')
-        check_type(parent, Part2, 'parent')
+        check_type(model, Part, 'model')
+        check_type(parent, Part, 'parent')
 
         if model.category != Category.MODEL:
             raise IllegalArgumentError("The model should be of category MODEL")
@@ -1545,10 +1545,10 @@ class Client(object):
         parts = {"parts": parts}
         # prepare url query parameters
         query_params = kwargs
-        query_params.update(API_EXTRA_PARAMS['parts2'])
+        query_params.update(API_EXTRA_PARAMS['parts'])
         query_params['async_mode'] = asynchronous
 
-        response = self._request('POST', self._build_url('parts2_bulk_create'),
+        response = self._request('POST', self._build_url('parts_bulk_create'),
                                  params=query_params, json=parts)
 
         if (asynchronous and response.status_code != requests.codes.accepted) or \
@@ -1565,7 +1565,7 @@ class Client(object):
 
     def _delete_parts_bulk(
             self,
-            parts: List[Union[Part2, Text]],
+            parts: List[Union[Part, Text]],
             asynchronous: Optional[bool] = False,
             **kwargs
     ) -> bool:
@@ -1584,7 +1584,7 @@ class Client(object):
 
         list_parts = list()
         for part in parts:
-            if isinstance(part, Part2):
+            if isinstance(part, Part):
                 list_parts.append(part.id)
             elif is_uuid(part):
                 list_parts.append(part)
@@ -1592,9 +1592,9 @@ class Client(object):
                 raise IllegalArgumentError("{} is not a Part nor an UUID".format(part))
         payload = {"parts": list_parts}
         query_params = kwargs
-        query_params.update(API_EXTRA_PARAMS['parts2'])
+        query_params.update(API_EXTRA_PARAMS['parts'])
         query_params['async_mode'] = asynchronous
-        response = self._request('DELETE', self._build_url('parts2_bulk_delete'), params=query_params, json=payload)
+        response = self._request('DELETE', self._build_url('parts_bulk_delete'), params=query_params, json=payload)
         # TODO - remove requests.codes.ok when async is implemented in the backend
         if (asynchronous and response.status_code not in (requests.codes.ok, requests.codes.accepted) or (
                 not asynchronous and response.status_code not in (
@@ -1604,7 +1604,7 @@ class Client(object):
 
     def create_property(
             self,
-            model: Part2,
+            model: Part,
             name: Text,
             description: Optional[Text] = None,
             property_type: Optional[Union[PropertyType, Text]] = PropertyType.CHAR_VALUE,
@@ -1642,7 +1642,7 @@ class Client(object):
         :raises APIError: if the `Property` model could not be created
         """
         check_enum(property_type, PropertyType, 'property_type')
-        check_type(model, Part2, 'model')
+        check_type(model, Part, 'model')
         if model.category != Category.MODEL:
             raise IllegalArgumentError("`model` should be of category MODEL")
 
@@ -1655,7 +1655,7 @@ class Client(object):
                 default_value = default_value[0]
 
             # Retrieve the referenced Scope from the default value
-            if isinstance(default_value, Part2):
+            if isinstance(default_value, Part):
                 scope_options = dict(
                     scope_id=default_value._json_data["scope_id"]
                 )
@@ -1679,16 +1679,16 @@ class Client(object):
             unit=unit or '',
             value_options=options,
         )
-        url = self._build_url('properties2_create_model')
+        url = self._build_url('properties_create_model')
         query_params = kwargs
-        query_params.update(API_EXTRA_PARAMS['properties2'])
+        query_params.update(API_EXTRA_PARAMS['properties'])
 
         response = self._request('POST', url, params=query_params, json=data)
 
         if response.status_code != requests.codes.created:
             raise APIError("Could not create Property", response=response)
 
-        prop = Property2.create(response.json()['results'][0], client=self)
+        prop = Property.create(response.json()['results'][0], client=self)
 
         model.properties.append(prop)
 
@@ -1697,7 +1697,7 @@ class Client(object):
     def create_service(
             self,
             name: Text,
-            scope: Scope2,
+            scope: Scope,
             description: Optional[Text] = None,
             version: Optional[Text] = None,
             service_type: Optional[ServiceType] = ServiceType.PYTHON_SCRIPT,
@@ -1741,7 +1741,7 @@ class Client(object):
         """
         data = dict(
             name=check_text(name, 'name'),
-            scope=check_base(scope, Scope2, 'scope'),  # not scope_id!
+            scope=check_base(scope, Scope, 'scope'),  # not scope_id!
             description=check_text(text=description, key='description') or '',
             script_type=check_enum(service_type, ServiceType, 'service_type'),
             script_version=check_text(text=version, key='version') or '1.0',
@@ -1772,7 +1772,7 @@ class Client(object):
             due_date: Optional[datetime.datetime] = None,
             team: Optional[Union[Team, Text]] = None,
             **kwargs
-    ) -> Scope2:
+    ) -> Scope:
         """
         Create a Scope.
 
@@ -1814,16 +1814,16 @@ class Client(object):
         # injecting additional kwargs for those cases that you need to add extra options.
         data_dict.update(kwargs)
 
-        url = self._build_url('scopes2')
-        query_params = API_EXTRA_PARAMS['scopes2']
+        url = self._build_url('scopes')
+        query_params = API_EXTRA_PARAMS['scopes']
         response = self._request('POST', url, params=query_params, data=data_dict)
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create Scope", response=response)
 
-        return Scope2(response.json()['results'][0], client=self)
+        return Scope(response.json()['results'][0], client=self)
 
-    def delete_scope(self, scope: Scope2, asynchronous: Optional[bool] = True) -> bool:
+    def delete_scope(self, scope: Scope, asynchronous: Optional[bool] = True) -> bool:
         """
         Delete a scope.
 
@@ -1838,14 +1838,14 @@ class Client(object):
         :return: True when the delete is a success.
         :raises APIError: in case of failure in the deletion of the scope
         """
-        check_type(scope, Scope2, 'scope')
+        check_type(scope, Scope, 'scope')
 
         query_options = {
             "async_mode": check_type(asynchronous, bool, 'asynchronous'),
         }
 
         response = self._request('DELETE',
-                                 url=self._build_url('scope2', scope_id=str(scope.id)),
+                                 url=self._build_url('scope', scope_id=str(scope.id)),
                                  params=query_options)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
@@ -1855,7 +1855,7 @@ class Client(object):
 
     def clone_scope(
             self,
-            source_scope: Scope2,
+            source_scope: Scope,
             name: Optional[Text] = None,
             status: Optional[ScopeStatus] = None,
             start_date: Optional[datetime.datetime] = None,
@@ -1865,7 +1865,7 @@ class Client(object):
             team: Optional[Union[Team, Text]] = None,
             scope_options: Optional[Dict] = None,
             asynchronous: Optional[bool] = False,
-    ) -> Optional[Scope2]:
+    ) -> Optional[Scope]:
         """
         Clone a Scope.
 
@@ -1902,7 +1902,7 @@ class Client(object):
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: When the server is unable to clone the scope (eg. permissions)
         """
-        check_type(source_scope, Scope2, 'scope')
+        check_type(source_scope, Scope, 'scope')
         check_type(scope_options, dict, 'scope_options')
 
         start_date = start_date or source_scope.start_date
@@ -1924,8 +1924,8 @@ class Client(object):
         if team:
             data_dict['team_id'] = team
 
-        url = self._build_url('scopes2_clone')
-        query_params = API_EXTRA_PARAMS['scopes2']
+        url = self._build_url('scopes_clone')
+        query_params = API_EXTRA_PARAMS['scopes']
         response = self._request('POST', url,
                                  params=query_params,
                                  json=data_dict)
@@ -1939,7 +1939,7 @@ class Client(object):
         if asynchronous:
             return None
 
-        cloned_scope = Scope2(response.json()['results'][0], client=source_scope._client)
+        cloned_scope = Scope(response.json()['results'][0], client=source_scope._client)
 
         # TODO work-around, some attributes are not (yet) in the KE-chain response.json()
         cloned_scope._tags = tags
@@ -2017,7 +2017,7 @@ class Client(object):
 
     @staticmethod
     def _validate_widget(
-            activity: Union[Activity2, Text],
+            activity: Union[Activity, Text],
             widget_type: Union[WidgetTypes, Text],
             title: Optional[Text],
             meta: Dict,
@@ -2027,7 +2027,7 @@ class Client(object):
     ) -> Dict:
         """Validate the format and content of the configuration of a widget."""
         data = dict(
-            activity_id=check_base(activity, Activity2, 'activity'),
+            activity_id=check_base(activity, Activity, 'activity'),
             widget_type=check_enum(widget_type, WidgetTypes, 'widget_type'),
             meta=meta,
             parent_id=check_base(parent, Widget, 'parent')
@@ -2064,14 +2064,14 @@ class Client(object):
         if kwargs.get('outputs'):
             writable_models = kwargs.pop('outputs')
 
-        readable_model_ids = check_list_of_base(readable_models, Property2, 'readable_models') or []
-        writable_model_ids = check_list_of_base(writable_models, Property2, 'writable_models') or []
+        readable_model_ids = check_list_of_base(readable_models, Property, 'readable_models') or []
+        writable_model_ids = check_list_of_base(writable_models, Property, 'writable_models') or []
 
         return readable_model_ids, writable_model_ids
 
     def create_widget(
             self,
-            activity: Union[Activity2, Text],
+            activity: Union[Activity, Text],
             widget_type: Union[WidgetTypes, Text],
             meta: Dict,
             title: Optional[Text] = None,
@@ -2271,10 +2271,10 @@ class Client(object):
     def associations(
             self,
             widget: Optional[Widget] = None,
-            activity: Optional[Activity2] = None,
-            part: Optional[Part2] = None,
+            activity: Optional[Activity] = None,
+            part: Optional[Part] = None,
             property: Optional[AnyProperty] = None,
-            scope: Optional[Scope2] = None,
+            scope: Optional[Scope] = None,
             limit: Optional[int] = None,
     ) -> List[Association]:
         """
@@ -2283,19 +2283,19 @@ class Client(object):
         :param widget: widget for which to retrieve associations
         :type widget: Widget
         :param activity: activity for which to retrieve associations
-        :type activity: Activity2
+        :type activity: Activity
         :param part: part for which to retrieve associations
-        :type part: Part2
+        :type part: Part
         :param property: property for which to retrieve associations
         :type property: AnyProperty
         :param scope: scope for which to retrieve associations
-        :type scope: Scope2
+        :type scope: Scope
         :param limit: maximum number of associations to retrieve
         :type limit: int
         :return: list of association objects
         :rtype List[Association]
         """
-        part = check_type(part, Part2, 'part')
+        part = check_type(part, Part, 'part')
         if part is not None:
             if part.category == Category.MODEL:
                 part_instance = ''
@@ -2307,7 +2307,7 @@ class Client(object):
             part_instance = ''
             part_model = ''
 
-        prop = check_type(property, Property2, 'property')
+        prop = check_type(property, Property, 'property')
         if prop is not None:
             if prop.category == Category.MODEL:
                 property_model = prop.id
@@ -2326,8 +2326,8 @@ class Client(object):
         request_params = {
             'limit': limit,
             'widget': check_base(widget, Widget, 'widget') or '',
-            'activity': check_base(activity, Activity2, 'activity') or '',
-            'scope': check_base(scope, Scope2, 'scope') or '',
+            'activity': check_base(activity, Activity, 'activity') or '',
+            'scope': check_base(scope, Scope, 'scope') or '',
             'instance_part': part_instance,
             'instance_property': property_instance,
             'model_part': part_model,
@@ -2360,10 +2360,10 @@ class Client(object):
         :type widget: :class:`Widget` or UUID
         :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    read rights
-        :type readable_models: List[Property2] or List[UUID] or None
+        :type readable_models: List[Property] or List[UUID] or None
         :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    write rights
-        :type writable_models: List[Property2] or List[UUID] or None
+        :type writable_models: List[Property] or List[UUID] or None
         :return: None
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
@@ -2445,10 +2445,10 @@ class Client(object):
         :type widget: :class:`Widget` or UUID
         :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    read rights
-        :type readable_models: List[Property2] or List[UUID] or None
+        :type readable_models: List[Property] or List[UUID] or None
         :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    write rights
-        :type writable_models: List[Property2] or List[UUID] or None
+        :type writable_models: List[Property] or List[UUID] or None
         :return: None
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
@@ -2554,7 +2554,7 @@ class Client(object):
         """
         check_type(widget, Widget, 'widget')
 
-        model_ids = check_list_of_base(models, Property2, 'models')
+        model_ids = check_list_of_base(models, Property, 'models')
 
         if not model_ids:
             return
@@ -2593,12 +2593,12 @@ class Client(object):
         :param classification: The target classification if it is desirable to change ActivityClassification
         :type classification: Text
         :raises IllegalArgumentError: if the 'parent' activity_type is not :class:`enums.ActivityType.SUBPROCESS`
-        :raises IllegalArgumentError: if the 'parent' type is not :class:`Activity2` or UUID
+        :raises IllegalArgumentError: if the 'parent' type is not :class:`Activity` or UUID
         :raises APIError: if an Error occurs.
         """
-        activity = check_type(activity, Activity2, 'activity')
+        activity = check_type(activity, Activity, 'activity')
 
-        if isinstance(parent, Activity2):
+        if isinstance(parent, Activity):
             parent_object = parent
             parent_id = parent.id
         elif isinstance(parent, str) and is_uuid(parent):
@@ -2646,15 +2646,15 @@ class Client(object):
 
         response = self._request(
             'POST',
-            self._build_url('properties2_bulk_update'),
-            params=API_EXTRA_PARAMS['property2'],
+            self._build_url('properties_bulk_update'),
+            params=API_EXTRA_PARAMS['property'],
             json=properties,
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Properties", response=response)
 
-        properties = [Property2.create(client=self, json=js) for js in response.json()['results']]
+        properties = [Property.create(client=self, json=js) for js in response.json()['results']]
 
         return properties
 

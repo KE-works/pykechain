@@ -1,18 +1,18 @@
 import datetime
 import time
+import warnings
+from test.support import EnvironmentVarGuard
 from unittest import TestCase, skipIf
 
 import pytz
-import warnings
 
-from pykechain.enums import ScopeStatus
-from pykechain.models import Team, Base
-from pykechain.models.scope2 import Scope2
 from pykechain.client import Client
+from pykechain.enums import ScopeStatus
 from pykechain.exceptions import ForbiddenError, ClientError, NotFoundError, IllegalArgumentError, APIError
+from pykechain.models import Team, Base
+from pykechain.models.scope import Scope
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_WIM2
-from test.support import EnvironmentVarGuard
 
 
 class TestClient(TestCase):
@@ -232,7 +232,7 @@ class TestClientLive(TestBetamax):
         self.temp_scope = self.client.clone_scope(source_scope=self.project)
 
         # testing
-        self.assertIsInstance(self.temp_scope, Scope2)
+        self.assertIsInstance(self.temp_scope, Scope)
         self.assertEqual(self.temp_scope.name, 'CLONE - {}'.format(self.project.name))
         self.assertEqual(self.temp_scope.status, self.project.status)
         self.assertEqual(self.temp_scope.start_date, self.project.start_date)
@@ -260,7 +260,7 @@ class TestClientLive(TestBetamax):
             team=team,
         )
 
-        self.assertIsInstance(self.temp_scope, Scope2)
+        self.assertIsInstance(self.temp_scope, Scope)
         self.assertEqual(self.temp_scope.name, name)
         self.assertEqual(self.temp_scope.status, status)
         self.assertEqual(self.temp_scope.start_date, now)
@@ -316,7 +316,7 @@ class TestCloneScopeAsync(TestBetamax):
                 break
 
         # testing
-        self.assertIsInstance(self.temp_scope, Scope2)
+        self.assertIsInstance(self.temp_scope, Scope)
 
 
 @skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")

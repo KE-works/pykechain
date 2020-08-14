@@ -1,8 +1,7 @@
 from unittest import TestCase
 
-from pykechain.models import Activity2
-
 from pykechain.exceptions import IllegalArgumentError
+from pykechain.models import Activity
 from pykechain.models.tags import TagsMixin
 from tests.classes import TestBetamax
 
@@ -105,7 +104,7 @@ class TestTagsActivity(TestBetamax):
 
     def setUp(self):
         super(TestTagsActivity, self).setUp()
-        self.task = self.project.activity(name='SubTask')  # type: Activity2
+        self.task = self.project.activity(name='SubTask')  # type: Activity
 
     def tearDown(self):
         self.task.tags = None

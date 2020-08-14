@@ -108,13 +108,13 @@ def _valid_object_type(representation: BaseRepresentation, obj: "Base") -> bool:
     """
     rtype = representation.rtype
     if rtype == _AllRepresentations.CUSTOM_ICON:
-        from pykechain.models import Activity2, Scope2
+        from pykechain.models import Activity, Scope
 
-        return isinstance(obj, (Activity2, Scope2))
+        return isinstance(obj, (Activity, Scope))
     else:
-        from pykechain.models import Property2
+        from pykechain.models import Property
 
-        if not isinstance(obj, Property2):
+        if not isinstance(obj, Property):
             return False
         else:
             if rtype == _AllRepresentations.BUTTON:

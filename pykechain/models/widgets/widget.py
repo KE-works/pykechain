@@ -55,11 +55,11 @@ class Widget(BaseInScope):
         return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.widget_type, self.id[-8:])
 
     def activity(self):
-        # type: () -> Activity2  # noqa: F821 to prevent circular imports
+        # type: () -> Activity  # noqa: F821 to prevent circular imports
         """Activity associated to the widget.
 
         :return: The Activity
-        :rtype: :class:`Activity2`
+        :rtype: :class:`Activity`
         """
         return self._client.activity(id=self._activity_id)
 
@@ -239,7 +239,7 @@ class Widget(BaseInScope):
             self._client.delete_widget(widget=self)
 
     def copy(self, target_activity, order=None):
-        # type: (Activity2, Optional[int]) -> Widget
+        # type: (Activity, Optional[int]) -> Widget
         """Copy the widget.
 
         :param target_activity: `Activity` object under which the desired `Widget` is copied
@@ -256,8 +256,8 @@ class Widget(BaseInScope):
         >>> widget_to_copy.copy(target_activity=target_activity, order=3)
 
         """
-        from pykechain.models import Activity2
-        if not isinstance(target_activity, Activity2):
+        from pykechain.models import Activity
+        if not isinstance(target_activity, Activity):
             raise IllegalArgumentError("`target_activity` needs to be an activity, got '{}'".format(
                 type(target_activity)))
 
@@ -282,7 +282,7 @@ class Widget(BaseInScope):
         return copied_widget
 
     def move(self, target_activity, order=None):
-        # type: (Activity2, Optional[int]) -> Widget # noqa: F821
+        # type: (Activity, Optional[int]) -> Widget # noqa: F821
         """Move the widget.
 
         :param target_activity: `Activity` object under which the desired `Widget` is moved
