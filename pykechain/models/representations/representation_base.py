@@ -32,7 +32,7 @@ class BaseRepresentation(object):
         :param value: value of the representation, its options vary per representation type
         :type value: Any
         :param prop: deprecated keyword for obj
-        :type prop: Property2
+        :type prop: Property
         """
         if prop is not None:
             warnings.warn(

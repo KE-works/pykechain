@@ -2,7 +2,7 @@ import datetime
 
 from pykechain.enums import ScopeStatus, KEChainPages, ScopeMemberActions, ScopeRoles
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
-from pykechain.models import Team, Scope2
+from pykechain.models import Team, Scope
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from tests.classes import TestBetamax
 
@@ -33,7 +33,7 @@ class TestScopes(TestBetamax):
         scope = self.client.scope(ref=scope_ref)
 
         # testing
-        self.assertIsInstance(scope, Scope2)
+        self.assertIsInstance(scope, Scope)
         self.assertTrue(scope.name, scope_name)
 
     def test_retrieve_scope_with_kwargs(self):

@@ -1,6 +1,6 @@
 from typing import Sized, Iterable, Text  # noqa: F401
 
-from pykechain.models.part2 import Part2  # noqa: F401
+from pykechain.models.part import Part  # noqa: F401
 
 
 class PartSet(Sized):
@@ -13,7 +13,7 @@ class PartSet(Sized):
      * iPython notebook support for HTML table
     """
 
-    def __init__(self, parts: Iterable[Part2]):
+    def __init__(self, parts: Iterable[Part]):
         """Construct a PartSet from a part iterable."""
         self._parts = list(parts)
         self._iter = iter(self._parts)
@@ -33,7 +33,7 @@ class PartSet(Sized):
 
     next = __next__  # py2.7 alias
 
-    def __getitem__(self, k: int) -> Part2:
+    def __getitem__(self, k: int) -> Part:
         if isinstance(k, int):
             return self._parts[k]
 

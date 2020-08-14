@@ -5,7 +5,7 @@ from pykechain.enums import (WidgetTypes, ShowColumnTypes, FilterType, ProgressB
                              CardWidgetLinkValue, CardWidgetLinkTarget, ImageFitValue, PropertyType, Classification,
                              Multiplicity)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
-from pykechain.models import Activity2
+from pykechain.models import Activity
 from pykechain.models.widgets import (
     UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, SupergridWidget, FilteredgridWidget,
     TasknavigationbarWidget, SignatureWidget, ServiceWidget, NotebookWidget, MulticolumnWidget, CardWidget,
@@ -197,7 +197,7 @@ class TestWidgetManager(TestBetamax):
 class TestWidgetManagerInActivity(TestBetamax):
     def setUp(self):
         super(TestWidgetManagerInActivity, self).setUp()
-        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
+        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
         self.wm = self.task.widgets()  # type: WidgetsManager
 
     def tearDown(self):
@@ -674,7 +674,7 @@ class TestWidgetManagerInActivity(TestBetamax):
 class TestWidgetManagerWeatherWidget(TestBetamax):
     def setUp(self):
         super(TestWidgetManagerWeatherWidget, self).setUp()
-        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
+        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
         self.wm = self.task.widgets()  # type: WidgetsManager
 
 
@@ -704,7 +704,7 @@ class TestWidgetNavigationBarWidget(TestBetamax):
 
     def setUp(self):
         super(TestWidgetNavigationBarWidget, self).setUp()
-        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
+        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
         self.wm = self.task.widgets()  # type: WidgetsManager
 
         self.frame = self.project.part(name='Frame')
@@ -789,8 +789,8 @@ class TestWidgetNavigationBarWidget(TestBetamax):
 class TestWidgetsCopyMove(TestBetamax):
     def setUp(self):
         super(TestWidgetsCopyMove, self).setUp()
-        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
-        self.task_2 = self.project.create_activity(name="test_copy_widget")  # type: Activity2
+        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
+        self.task_2 = self.project.create_activity(name="test_copy_widget")  # type: Activity
 
     def tearDown(self):
         self.task.delete()
