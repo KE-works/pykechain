@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-v3.x.x (UNRELEASED)
+v3.8.1-rc1 (14AUG20)
 -------------------
 
 * :+1: Included pending deprecation of version-2 classes such as `Part2`, `Property2`. It is advised to use the original `Part` and `Property` classes instead. (#713)
