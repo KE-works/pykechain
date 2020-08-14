@@ -125,7 +125,7 @@ class _DeprecationMixin:
 
     def __new__(cls, *args, **kwargs):
         if not cls.__notified:
-            warnings.warn('`{n}` is a wrapping class for `{nn}`. `{n}` will be deprecated in version vX.X.X.'
+            warnings.warn('`{n}` is a wrapping class for `{nn}`. `{n}` will be deprecated in November 2020.'
                           .format(n=cls.__name__, nn=str(cls.__name__)[:-1]), PendingDeprecationWarning)
             cls.__notified = True
 
