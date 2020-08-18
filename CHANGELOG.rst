@@ -5,8 +5,9 @@ v3.8.1-rc2 (UNRELEASED)
 -----------------------
 
 * :+1: Added `set_associations` and `remove_associations` method to the `Widget` class (#827)
-* :+1: Implemented create, edit and delete functionality for `Associations` (#827)
 * :+1: Added `association()` method to the `Client` class, to retrieve a single association.
+* :+1: Implemented create, edit and delete functionality for `Associations` (#827)
+* :+1: Implemented `is_model` property for `Association` objects, specifying whether they are associating `Part` models or instances.
 
 v3.8.1-rc1 (14AUG20)
 --------------------

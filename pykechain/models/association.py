@@ -38,6 +38,16 @@ class Association(BaseInScope):
     def __repr__(self):  # pragma: no cover
         return "<pyke {} id {}>".format(self.__class__.__name__, self.id)
 
+    @property
+    def is_model(self) -> bool:
+        """
+        Specify whether the association relates a Part model (true) or Part instance (false).
+
+        :return: boolean
+        :rtype bool
+        """
+        return self.part_instance_id is None
+
     def edit(
             self,
             widget: Optional[Widget] = None,
