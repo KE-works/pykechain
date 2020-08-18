@@ -2344,6 +2344,27 @@ class Client(object):
 
         return associations
 
+    def association(self, *args, **kwargs) -> Association:
+        """
+        Retrieve a single association.
+
+        :param widget: widget for which to retrieve associations
+        :type widget: Widget
+        :param activity: activity for which to retrieve associations
+        :type activity: Activity
+        :param part: part for which to retrieve associations
+        :type part: Part
+        :param property: property for which to retrieve associations
+        :type property: AnyProperty
+        :param scope: scope for which to retrieve associations
+        :type scope: Scope
+        :param limit: maximum number of associations to retrieve
+        :type limit: int
+        :return: Association objects
+        :rtype Association
+        """
+        return self._retrieve_singular(self.associations, *args, **kwargs)
+
     def create_association(
             self,
             widget: Union[Widget, Text],
