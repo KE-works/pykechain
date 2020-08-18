@@ -2344,6 +2344,82 @@ class Client(object):
 
         return associations
 
+    def create_association(
+            self,
+            widget: Union[Widget, Text],
+            property: Union[AnyProperty, Text],
+            writable: Optional[bool] = True,
+            **kwargs
+    ) -> Association:
+        """
+        Create an association between a widget and a property.
+
+        :param widget: A Widget object or its uuid
+        :param property: A Property object or its uuid
+        :param writable: (optional) boolean to specify whether the property can be edited (True) or is read-only (False)
+        :return: New association
+        :rtype Association
+        """
+        check_base(widget, Widget, 'widget')
+        check_base(property, Property, 'property')
+        check_type(writable, bool, 'editable')
+
+        if widget.scope_id != property.scope_id:
+            raise IllegalArgumentError("`widget` and `property` must belong to the same scope.")
+
+        data = {
+            "activity": widget._activity_id,
+            "widget": widget.id,
+            "writable": writable,
+            "scope": widget.scope_id,
+        }
+        if property.category == Category.INSTANCE:
+            data.update({
+                "instance_property": property.id,
+                "instance_part": property.part_id,
+            })
+            property_model = property.model()
+        else:
+            property_model = property
+
+        data.update({
+            "model_property": property_model.id,
+            "model_part": property_model.part_id,
+        })
+
+        data.update(kwargs)
+        data.update(API_EXTRA_PARAMS['association'])
+
+        url = self._build_url('associations')
+
+        response = self._request('POST', url, data=data)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create Association", response=response)
+
+        result = response.json()['results'][0]
+
+        return Association(json=result, client=self)
+
+    def delete_association(self, association: Union[Association, Text]):
+        """
+        Delete an association.
+
+        :param association: Association object or its uuid
+        :raises APIError if deletion failed
+        :return: None
+        """
+
+        association_id = check_base(association, Association, 'association')
+
+        url = self._build_url('association', association_id=association_id)
+        response = self._request('DELETE', url)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not delete association", response=response)
+
+        return
+
     def update_widget_associations(
             self,
             widget: Union[Widget, Text],
