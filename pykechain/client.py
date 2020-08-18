@@ -2380,6 +2380,10 @@ class Client(object):
             })
             property_model = property.model()
         else:
+            data.update({
+                "instance_property": "",
+                "instance_part": "",
+            })
             property_model = property
 
         data.update({
@@ -2388,7 +2392,6 @@ class Client(object):
         })
 
         data.update(kwargs)
-        data.update(API_EXTRA_PARAMS['association'])
 
         url = self._build_url('associations')
 
@@ -2409,7 +2412,6 @@ class Client(object):
         :raises APIError if deletion failed
         :return: None
         """
-
         association_id = check_base(association, Association, 'association')
 
         url = self._build_url('association', association_id=association_id)

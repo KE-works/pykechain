@@ -4,7 +4,7 @@ import requests
 
 from pykechain.enums import Category
 from pykechain.exceptions import APIError, IllegalArgumentError
-from pykechain.models import BaseInScope, Property
+from pykechain.models import BaseInScope
 from pykechain.models.input_checks import check_base, check_type
 from pykechain.models.widgets import Widget
 
@@ -41,10 +41,10 @@ class Association(BaseInScope):
     def edit(
             self,
             widget: Optional[Widget] = None,
-            property: Optional[Property] = None,
+            property: Optional['Property'] = None,
             writable: Optional[bool] = None,
             **kwargs
-        ) -> None:
+    ) -> None:
         """
         Update the attributes of this association.
 
@@ -54,6 +54,7 @@ class Association(BaseInScope):
         :return: None
         """
         check_base(widget, Widget, 'widget')
+        from pykechain.models import Property
         check_base(property, Property, 'property')
         check_type(writable, bool, 'writable')
 
@@ -95,7 +96,7 @@ class Association(BaseInScope):
 
     def delete(self) -> None:
         """
-        Deletes the association.
+        Delete the association.
 
         :return: None
         """

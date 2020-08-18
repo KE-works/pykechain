@@ -90,6 +90,38 @@ class TestAssociations(TestBetamax):
                 with self.assertRaises(IllegalArgumentError):
                     self.client.associations(limit=limit)
 
+    def test_create_association(self):
+        unassigned_property = self.frame_model.properties[2]
+
+        new_association = self.client.create_association(
+            widget=self.form_widget,
+            property=unassigned_property,
+            editable=True,
+        )
+
+        self.assertIsInstance(new_association, Association)
+
+    def test_delete_association(self):
+        associations_form_widget = self.client.associations(widget=self.form_widget)
+        self.assertTrue(associations_form_widget)
+
+        last_association = associations_form_widget.pop()
+        last_association.delete()
+
+        reloaded = self.client.associations(widget=self.form_widget)
+
+        self.assertEqual(len(associations_form_widget), len(reloaded))
+
+    def test_edit_association(self):
+        associations_form_widget = self.client.associations(widget=self.form_widget)
+        self.assertTrue(associations_form_widget)
+
+        last_association = associations_form_widget.pop()
+        self.assertFalse(last_association.writable)
+
+        last_association.edit(writable=True)
+        self.assertTrue(last_association.writable)
+
     def test_update_widget_associations(self):
         original_associations = self.client.associations(widget=self.form_widget)
 
