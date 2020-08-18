@@ -1,4 +1,4 @@
-from typing import Any, Optional, List, AnyStr, Dict
+from typing import Any, Optional, List, AnyStr, Dict, Union, Text
 
 import requests
 from jsonschema import validate
@@ -230,6 +230,23 @@ class Widget(BaseInScope):
             widget=self,
             readable_models=readable_models,
             writable_models=writable_models,
+            **kwargs
+        )
+
+    def remove_associations(
+            self,
+            models: List[Union['Property', Text]],
+            **kwargs
+    ) -> None:
+        """
+        Remove associated properties from the widget.
+
+        :param models: list of Properties or their uuids
+        :return: None
+        """
+        self._client.remove_widget_associations(
+            widget=self,
+            models=models,
             **kwargs
         )
 

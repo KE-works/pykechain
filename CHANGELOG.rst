@@ -4,7 +4,7 @@ Change Log
 v3.8.1-rc2 (UNRELEASED)
 -----------------------
 
-* :+1: Added `set_associations` method to the `Widget` class (#827)
+* :+1: Added `set_associations` and `remove_associations` method to the `Widget` class (#827)
 * :+1: Implemented create, edit and delete functionality for `Associations` (#827)
 
 v3.8.1-rc1 (14AUG20)
