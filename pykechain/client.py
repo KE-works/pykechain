@@ -1000,8 +1000,8 @@ class Client(object):
         :param activity: (optional) the :class:`Activity` or UUID of the activity to filter the widgets for.
         :type activity: basestring or None
         :param kwargs: additional keyword arguments
-        :return: A :class:`WidgetManager` list, containing the widgets
-        :rtype: WidgetManager
+        :return: A list of Widget objects
+        :rtype: List
         :raises NotFoundError: when the widgets could not be found
         :raises APIError: when the API does not support the widgets, or when the API gives an error.
         """
@@ -1023,6 +1023,18 @@ class Client(object):
             raise NotFoundError("Could not retrieve Widgets", response=response)
 
         return [Widget.create(json=json, client=self) for json in response.json()['results']]
+
+    def widget(self, *args, **kwargs) -> Widget:
+        """
+        Widget of an activity.
+
+        :param pk: (optional) the uuid of the widget.
+        :type pk: basestring or None
+        :param activity: (optional) the :class:`Activity` or UUID of the activity to filter the widgets for.
+        :type activity: basestring or None
+        :return: Widget
+        """
+        return self._retrieve_singular(self.widgets, *args, **kwargs)
 
     #
     # Creators
