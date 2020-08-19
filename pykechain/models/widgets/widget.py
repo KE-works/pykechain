@@ -5,7 +5,7 @@ from jsonschema import validate
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import WidgetTypes, Category
-from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
+from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import BaseInScope
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 
@@ -165,6 +165,7 @@ class Widget(BaseInScope):
     #
     # Write methods
     #
+
     def update_associations(
             self,
             readable_models: Optional[List] = None,
