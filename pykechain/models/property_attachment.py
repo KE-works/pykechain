@@ -1,34 +1,16 @@
 import io
 import json
+import os
 
 import requests
-from six import string_types, text_type
+from typing import Text, Any, Optional
 
 from pykechain.exceptions import APIError
 from pykechain.models.property import Property
 
 
-class AttachmentProperty(Property):  # pragma: no cover
-    """
-    A virtual object representing a KE-chain attachment property.
-
-    :ivar type: The property type of the property. One of the types described in :class:`pykechain.enums.PropertyType`
-    :type type: str
-    :ivar output: a boolean if the value is configured as an output (in an activity)
-    :type output: bool
-    :ivar part: The (parent) part in which this property is available
-    :type part: :class:`Part`
-    :ivar value: the property value, can be set as well as property
-    :type value: Any
-    :ivar filename: the filename and extension of the attachment
-    :type filename: str or None
-    :ivar validators: the list of validators that are available in the property
-    :type validators: list(PropertyValidator)
-    :ivar is_valid: if the property conforms to the validators
-    :type is_valid: bool
-    :ivar is_invalid: if the property does not conform to the validator
-    :type is_invalid: bool
-    """
+class AttachmentProperty(Property):
+    """A virtual object representing a KE-chain attachment property."""
 
     @property
     def value(self):
@@ -46,17 +28,19 @@ class AttachmentProperty(Property):  # pragma: no cover
         ...     print('file attachment not set, its value is None')
 
         """
-        if 'value' in self._json_data and self._json_data['value']:
-            return "[Attachment: {}]".format(self._json_data['value'].split('/')[-1])
+        if self.has_value():
+            return "[Attachment: {}]".format(self.filename)
         else:
             return None
 
     @value.setter
     def value(self, value):
-        raise RuntimeError("Cannot set the value of an attachment property, use upload() to upload a new attachment or "
-                           "clear() to clear the attachment from the field")
+        if value is None:
+            self.clear()
+        else:
+            self.upload(data=value)
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear the attachment from the attachment field.
 
         :raises APIError: if unable to remove the attachment
@@ -66,11 +50,9 @@ class AttachmentProperty(Property):  # pragma: no cover
             self._json_data['value'] = None
 
     @property
-    def filename(self):
+    def filename(self) -> Optional[Text]:
         """Filename of the attachment, without the full 'attachment' path."""
-        if self.value and 'value' in self._json_data and self._json_data['value']:
-            return self._json_data['value'].split('/')[-1]
-        return None
+        return self._value.split('/')[-1] if self.has_value() else None
 
     def json_load(self):
         """Download the data from the attachment and deserialise the contained json.
@@ -89,14 +71,14 @@ class AttachmentProperty(Property):  # pragma: no cover
         """
         return self._download().json()
 
-    def upload(self, data, **kwargs):
+    def upload(self, data: Text, **kwargs: Any) -> None:
         """Upload a file to the attachment property.
 
         When providing a :class:`matplotlib.figure.Figure` object as data, the figure is uploaded as PNG.
         For this, `matplotlib`_ should be installed.
 
-        :param filename: File path
-        :type filename: basestring
+        :param data: File path
+        :type data: basestring
         :raises APIError: When unable to upload the file to KE-chain
         :raises OSError: When the path to the file is incorrect or file could not be found
 
@@ -111,43 +93,27 @@ class AttachmentProperty(Property):  # pragma: no cover
         except ImportError:
             pass
 
-        if isinstance(data, (string_types, text_type)):
+        if isinstance(data, str):
             with open(data, 'rb') as fp:
                 self._upload(fp)
         else:
             self._upload_json(data, **kwargs)
+        self._value = data
 
-    def save_as(self, filename):
+    def save_as(self, filename: Optional[Text] = None) -> None:
         """Download the attachment to a file.
 
-        :param filename: File path
-        :type filename: basestring
+        :param filename: (optional) File path. If not provided, will be saved to current working dir
+                         with `self.filename`.
+        :type filename: basestring or None
         :raises APIError: When unable to download the data
         :raises OSError: When unable to save the data to disk
         """
+        filename = filename or os.path.join(os.getcwd(), self.filename)
+
         with open(filename, 'w+b') as f:
             for chunk in self._download():
                 f.write(chunk)
-
-    def _download(self):
-        url = self._client._build_url('property_download', property_id=self.id)
-
-        response = self._client._request('GET', url)
-
-        if response.status_code != requests.codes.ok:
-            raise APIError("Could not download property value")
-
-        return response
-
-    def _upload(self, data):
-        url = self._client._build_url('property_upload', property_id=self.id)
-
-        response = self._client._request('POST', url,
-                                         data={"part": self._json_data['part']},
-                                         files={"attachment": data})
-
-        if response.status_code != requests.codes.ok:
-            raise APIError("Could not upload attachment")
 
     def _upload_json(self, content, name='data.json'):
         data = (name, json.dumps(content), 'application/json')
@@ -162,3 +128,26 @@ class AttachmentProperty(Property):  # pragma: no cover
         data = (name, buffer.getvalue(), 'image/png')
 
         self._upload(data)
+        self._value = name
+
+    # custom for PIM2
+    def _download(self):
+        url = self._client._build_url('property_download', property_id=self.id)
+
+        response = self._client._request('GET', url)
+
+        if response.status_code != requests.codes.ok:
+            raise APIError("Could not download property value.", response=response)
+
+        return response
+
+    # custom for PIM2
+    def _upload(self, data):
+        url = self._client._build_url('property_upload', property_id=self.id)
+
+        response = self._client._request('POST', url,
+                                         data={"part": self._json_data['part_id']},
+                                         files={"attachment": data})
+
+        if response.status_code != requests.codes.ok:
+            raise APIError("Could not upload attachment", response=response)

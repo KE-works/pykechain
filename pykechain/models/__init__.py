@@ -19,7 +19,7 @@ from .property2_attachment import AttachmentProperty2
 from .property2_selectlist import SelectListProperty2
 from .property2_multi_reference import MultiReferenceProperty2
 from .property2_datetime import DatetimeProperty2
-from .property2_activity_reference import ActivityReferenceProperty
+from .property_reference import ActivityReferenceProperty
 from .partset import PartSet
 from .service import Service, ServiceExecution
 from .team import Team

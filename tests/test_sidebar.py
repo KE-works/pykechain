@@ -1,6 +1,6 @@
 from pykechain.enums import SubprocessDisplayMode, KEChainPages, ScopeStatus
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
-from pykechain.models import Scope2
+from pykechain.models import Scope
 from pykechain.models.sidebar.sidebar_button import SideBarButton
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from tests.classes import TestBetamax
@@ -11,7 +11,7 @@ class TestSideBar(TestBetamax):
     def setUp(self):
         super(TestSideBar, self).setUp()
 
-        self.scope = self.project.clone(asynchronous=False)  # type: Scope2
+        self.scope = self.project.clone(asynchronous=False)  # type: Scope
         del self.project
 
         self.manager = SideBarManager(scope=self.scope)

@@ -5,7 +5,7 @@ import pytest
 
 from pykechain.enums import Multiplicity, Category, Classification, PropertyType
 from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
-from pykechain.models import PartSet, Part2
+from pykechain.models import PartSet, Part
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_PIM3
 
@@ -26,7 +26,7 @@ class TestParts(TestBetamax):
 
         # Check if there are parts
         self.assertTrue(len(parts))
-        self.assertIsInstance(parts[0], Part2)
+        self.assertIsInstance(parts[0], Part)
 
     def test_retrieve_single_part(self):
         part_to_retrieve = self.project.parts()[0]
@@ -222,21 +222,21 @@ class TestParts(TestBetamax):
 
     # version 1.1.3 and later
     def test_retrieve_parent_of_part(self):
-        frame = self.project.part('Frame')  # type: Part2
+        frame = self.project.part('Frame')  # type: Part
         self.assertTrue(hasattr(frame, 'parent_id'))
         parent_of_frame = frame.parent()
         self.assertIsInstance(parent_of_frame, type(frame))
 
     def test_retrieve_children_of_part(self):
-        bike = self.project.part('Bike')  # type: Part2
-        self.assertIsInstance(bike, Part2)
+        bike = self.project.part('Bike')  # type: Part
+        self.assertIsInstance(bike, Part)
         children_of_bike = bike.children()
         self.assertIsInstance(children_of_bike, (PartSet, list))
         self.assertTrue(len(children_of_bike) >= 1)  # eg. Wheels ...
 
     def test_retrieve_siblings_of_part(self):
         """Test if the siblings of a part is the same as the children of the parent of the part"""
-        frame = self.project.part('Frame')  # type: Part2
+        frame = self.project.part('Frame')  # type: Part
         siblings_of_frame = frame.siblings()
         self.assertIsInstance(siblings_of_frame, PartSet)
         self.assertTrue(len(siblings_of_frame) >= 1)  # eg. Wheels ...
@@ -408,15 +408,15 @@ class TestParts(TestBetamax):
 
     # new in 1.12
     def test_retrieve_children_of_part_with_additional_arguments(self):
-        bike = self.project.part('Bike')  # type: Part2
-        self.assertIsInstance(bike, Part2)
+        bike = self.project.part('Bike')  # type: Part
+        self.assertIsInstance(bike, Part)
         children_of_bike = bike.children(name__icontains='Wheel')
         self.assertIsInstance(children_of_bike, PartSet)
         self.assertTrue(len(children_of_bike) >= 1)  # eg. Wheels ...
 
     def test_retrieve_siblings_of_part_with_additional_arguments(self):
         """Test if the siblings of a part is the same as the children of the parent of the part"""
-        frame = self.project.part('Frame')  # type: Part2
+        frame = self.project.part('Frame')  # type: Part
         siblings_of_frame = frame.siblings(name__icontains='Wheel')
         self.assertIsInstance(siblings_of_frame, PartSet)
         self.assertTrue(len(siblings_of_frame) >= 1)  # eg. Wheels ...
@@ -686,3 +686,77 @@ class TestBulkPartsCreation(TestBetamax):
             self.client._create_parts_bulk(
                 parts=[self.part_dict]
             )
+
+
+@skipIf(not TEST_FLAG_IS_PIM3, reason="This tests is designed for PIM version 3, expected to fail on older PIM3")
+@pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+                    reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
+class TestBulkPartsDeletion(TestBetamax):
+    def setUp(self):
+        super().setUp()
+        self.parts = list()
+        self.wheel_model = self.project.model(name="Wheel")
+        self.bike_instance = self.project.part(name="Bike")
+
+        self.diameter_prop = self.wheel_model.property(name="Diameter")
+        self.spokes_prop = self.wheel_model.property(name="Spokes")
+        self.rim_material_prop = self.wheel_model.property(name="Rim Material")
+        self.tire_thickness_prop = self.wheel_model.property(name="Tire Thickness")
+
+        for idx in range(1, 5):
+            part_dict = {
+                "name": "Wheel {}".format(idx),
+                "parent_id": self.bike_instance.id,
+                "description": "",
+                "model_id": self.wheel_model.id,
+                "properties": [
+                    {
+                        "name": self.diameter_prop.name,
+                        "value": float("{}.{}".format(idx, idx)),
+                        "model_id": self.diameter_prop.id,
+                    },
+                    {
+                        "name": self.spokes_prop.name,
+                        "value": "{}".format(idx),
+                        "model_id": self.spokes_prop.id
+                    },
+                    {
+                        "name": self.rim_material_prop.name,
+                        "value": "Material {}".format(idx),
+                        "model_id": self.rim_material_prop.id
+                    },
+                    {
+                        "name": self.tire_thickness_prop.name,
+                        "value": float("{}.{}".format(idx, idx)),
+                        "model_id": self.tire_thickness_prop.id
+                    }
+                ]
+            }
+            self.parts.append(part_dict)
+        self.parts_created = list(self.client._create_parts_bulk(
+            parts=self.parts
+        ))
+
+    def tearDown(self):
+        for part in self.parts_created:
+            # In case the parts have not been deleted and a clean up is required
+            try:
+                part.delete()
+            except APIError:
+                pass
+
+    def test_bulk_delete_parts(self):
+        input_parts_and_uuids = [self.parts_created[0],
+                                 self.parts_created[1],
+                                 self.parts_created[2].id,
+                                 self.parts_created[3].id]
+        self.client._delete_parts_bulk(parts=input_parts_and_uuids)
+        for idx in range(1, 5):
+            with self.subTest(idx=idx):
+                with self.assertRaises(NotFoundError):
+                    self.project.part(name="Wheel {}".format(idx))
+
+    def test_bulk_delete_parts_with_wrong_input(self):
+        wrong_input = [self.project.activity(name="Specify wheel diameter")]
+        with self.assertRaises(IllegalArgumentError):
+            self.client._delete_parts_bulk(parts=wrong_input)
