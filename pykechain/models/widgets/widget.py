@@ -71,13 +71,7 @@ class Widget(BaseInScope):
         if not self._parent_id:
             raise NotFoundError('Widget has no parent widget (parent_id is null).')
 
-        parent_widgets = self._client.widgets(pk=self._parent_id)
-        if not parent_widgets:
-            raise NotFoundError('No parent widget with uuid "{}" was found.'.format(self._parent_id))
-        elif len(parent_widgets) > 1:
-            raise MultipleFoundError('There are multiple widgets with uuid "{}".'.format(self._parent_id))
-        else:
-            return parent_widgets[0]
+        return self._client.widget(pk=self._parent_id)
 
     def validate_meta(self, meta: Dict) -> Dict:
         """Validate the meta and return the meta if validation is successfull.
