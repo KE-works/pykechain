@@ -621,7 +621,7 @@ class TestActivities(TestBetamax):
     # 2.0 new activity
     # noinspection PyTypeChecker
     def test_edit_activity_assignee(self):
-        specify_wd = self.project.activity("Specify wheel diameter")  # type: Activity2
+        specify_wd = self.project.activity("Specify wheel diameter")  # type: Activity
         original_assignee_ids = specify_wd._json_data.get("assignee_ids") or []
 
         # pykechain_user = self.client.user(username='pykechain')
