@@ -161,10 +161,12 @@ class Widget(BaseInScope):
         :returns: a tuple(models of :class:`PartSet`, instances of :class:`PartSet`)
 
         """
-        return (
-            self.parts(category=Category.MODEL, *args, **kwargs),
-            self.parts(category=Category.INSTANCE, *args, **kwargs)
-        )
+        models_and_instances = self._client.parts(*args, widget=self.id, category=None, **kwargs)
+
+        models = [p for p in models_and_instances if p.category == Category.MODEL]
+        instances = [p for p in models_and_instances if p.category == Category.INSTANCE]
+
+        return models, instances
 
     #
     # Write methods
