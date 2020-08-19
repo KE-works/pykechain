@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v3.8.1-rc2 (19AUG20)
+--------------------
+
+* :+1: Renamed activity clone API endpoint is now supported. (#805)
+
 v3.8.1-rc1 (14AUG20)
 -------------------
 
