@@ -1118,20 +1118,20 @@ class Client(object):
         return new_activity
 
     def clone_activities(
-            self,
-            activities: List[Union[Activity, Text]],
-            parent: Union[Activity, Text],
-            activity_update_dicts: Optional[Dict] = None,
-            clone_parts: Optional[bool] = False,
-            clone_part_instances: Optional[bool] = True,
-            clone_children: Optional[bool] = True,
-            excluded_parts: Optional[List[Text]] = None,
-            part_parent_model: Optional[Union[Part, Text]] = None,
-            part_parent_instance: Optional[Union[Part, Text]] = None,
-            part_model_rename_template: Optional[Text] = None,
-            part_instance_rename_template: Optional[Text] = None,
-            asynchronous: Optional[bool] = False,
-            **kwargs
+        self,
+        activities: List[Union[Activity, Text]],
+        activity_parent: Union[Activity, Text],
+        activity_update_dicts: Optional[Dict] = None,
+        include_part_models: Optional[bool] = False,
+        include_part_instances: Optional[bool] = False,
+        include_children: Optional[bool] = True,
+        excluded_parts: Optional[List[Text]] = None,
+        part_parent_model: Optional[Union[Part, Text]] = None,
+        part_parent_instance: Optional[Union[Part, Text]] = None,
+        part_model_rename_template: Optional[Text] = None,
+        part_instance_rename_template: Optional[Text] = None,
+        asynchronous: Optional[bool] = False,
+        **kwargs
     ) -> List[Activity]:
         """
         Clone multiple activities.
@@ -1141,19 +1141,19 @@ class Client(object):
 
         :param activities: list of Activity object or UUIDs
         :type activities: list
-        :param parent: parent Activity sub-process object or UUID
-        :type parent: Activity
+        :param activity_parent: parent Activity sub-process object or UUID
+        :type activity_parent: Activity
         :param activity_update_dicts: (O) dict of dictionaries, each key-value combination relating to an activity
         to clone and a dict of new values to assign, e.g. `{activity.id: {"name": "Cloned activity"}}`
         :type activity_update_dicts: dict
-        :param clone_parts: (O) whether to clone the data models configured in the activities, defaults to False
-        :type clone_parts: bool
-        :param clone_part_instances: (O) whether to clone the part instances of the data model configured in the
+        :param include_part_models: (O) whether to clone the data models configured in the activities, defaults to False
+        :type include_part_models: bool
+        :param include_part_instances: (O) whether to clone the part instances of the data model configured in the
             activities, defaults to True
-        :type clone_part_instances: bool
-        :param clone_children: (O) whether to clone child parts
-        :type clone_children: bool
-        :param excluded_parts: (O) list of Part objects or UUIDs to exclude from being cloned,
+        :type include_part_instances: bool
+        :param include_children: (O) whether to clone child parts
+        :type include_children: bool
+        :param excluded_parts: (O) list of Part2 objects or UUIDs to exclude from being cloned,
             maintaining the original configuration of the widgets.
         :type excluded_parts: list
         :param part_parent_model: (O) parent Part object or UUID for the copied data model(s)
@@ -1170,8 +1170,8 @@ class Client(object):
         :rtype: list
         :raises APIError if cloned
         """
-        if self.match_app_version(label='kechain2.core.pim', version=">=3.6.0"):  # pragma: no cover
-            raise APIError("Cloning of activities requires KE-chain version >= 3.6.0.")
+        if self.match_app_version(label='kechain2.core.pim', version=">=3.7.0"):  # pragma: no cover
+            raise APIError("Cloning of activities with parts requires KE-chain version >= 3.7.0.")
 
         update_name = 'activity_update_dicts'
         activity_ids = check_list_of_base(activities, cls=Activity, key='activities')
@@ -1189,17 +1189,17 @@ class Client(object):
         activities = [dict(id=uuid, **update_dicts.get(uuid, {})) for uuid in activity_ids]
 
         data = dict(
-            parent_id=check_base(parent, cls=Activity, key='parent'),
-            clone_parts=check_type(clone_parts, bool, 'clone_parts'),
-            clone_part_instances=check_type(clone_part_instances, bool, 'clone_part_instances'),
-            clone_children=check_type(clone_children, bool, 'clone_children'),
-            exclude_model_ids=check_list_of_base(excluded_parts, Part, 'excluded_models') or [],
+            activity_parent_id=check_base(activity_parent, cls=Activity, key='parent'),
+            include_part_models=check_type(include_part_models, bool, 'clone_parts'),
+            include_part_instances=check_type(include_part_instances, bool, 'clone_part_instances'),
+            include_part_children=check_type(include_children, bool, 'clone_children'),
+            excluded_part_ids=check_list_of_base(excluded_parts, Part, 'excluded_models') or [],
             part_parent_model_id=check_base(part_parent_model, Part, 'part_parent_model'),
             part_parent_instance_id=check_base(part_parent_instance, Part, 'part_parent_instance'),
-            cloned_part_models_rename_template=check_type(
+            part_models_rename_template=check_type(
                 part_model_rename_template, str, 'part_model_rename_template'),
-            cloned_part_instances_rename_template=check_type(
-                part_instance_rename_template, str, 'part_instnace_rename_template'),
+            part_instances_rename_template=check_type(
+                part_instance_rename_template, str, 'part_instance_rename_template'),
             activities=activities,
         )
 
@@ -1218,8 +1218,8 @@ class Client(object):
 
         cloned_activities = [Activity(d, client=self) for d in response.json()['results']]
 
-        if isinstance(parent, Activity):
-            parent._populate_cached_children(cloned_activities)
+        if isinstance(activity_parent, Activity):
+            activity_parent._populate_cached_children(cloned_activities)
 
         return cloned_activities
 

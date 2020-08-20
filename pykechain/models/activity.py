@@ -413,7 +413,7 @@ class Activity(TreeObject, TagsMixin):
             validated_dict = None
 
         cloned_activities = self._client.clone_activities(
-            parent=check_base(parent, Activity, 'parent') or self.parent_id,
+            activity_parent=check_base(parent, Activity, 'parent') or self.parent_id,
             activities=[self],
             activity_update_dicts={self.id: validated_dict} if validated_dict else None,
             **kwargs
