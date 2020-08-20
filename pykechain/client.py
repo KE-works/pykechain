@@ -2061,7 +2061,13 @@ class Client(object):
         return data
 
     @staticmethod
-    def _validate_related_models(readable_models: List, writable_models: List, **kwargs) -> Tuple[List, List]:
+    def _validate_related_models(
+            readable_models: List,
+            writable_models: List,
+            part_instance: Union[Part, Text],
+            parent_part_instance: Union[Part, Text],
+            **kwargs
+    ) -> Tuple[List, List, Text, Text]:
         """
         Verify the format and content of the readable and writable models.
 
@@ -2078,8 +2084,10 @@ class Client(object):
 
         readable_model_ids = check_list_of_base(readable_models, Property, 'readable_models') or []
         writable_model_ids = check_list_of_base(writable_models, Property, 'writable_models') or []
+        part_instance_id = check_base(part_instance, Part, "part_instance")
+        parent_part_instance_id = check_base(parent_part_instance, Part, "parent_part_instance")
 
-        return readable_model_ids, writable_model_ids
+        return readable_model_ids, writable_model_ids, part_instance_id, parent_part_instance_id
 
     def create_widget(
             self,
@@ -2091,6 +2099,8 @@ class Client(object):
             parent: Optional[Union[Widget, Text]] = None,
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
+            part_instance: Optional[Union[Part, Text]] = None,
+            parent_part_instance: Optional[Union[Part, Text]] = None,
             **kwargs
     ) -> Widget:
         """
@@ -2118,6 +2128,10 @@ class Client(object):
         :type readable_models: list of properties or list of property id's
         :param writable_models: (optional) list of property model ids to be configured as writable (alias = ouputs)
         :type writable_models: list of properties or list of property id's
+        :param part_instance: Part object or UUID to be used as instance of the widget
+        :type part_instance: Part or UUID
+        :param parent_part_instance: Part object or UUID to be used as parent of the widget
+        :type parent_part_instance: Part or UUID
         :param kwargs: (optional) additional keyword=value arguments to create widget
         :return: the created subclass of :class:`Widget`
         :rtype: :class:`Widget`
@@ -2134,9 +2148,11 @@ class Client(object):
             **kwargs
         )
 
-        readable_model_ids, writable_model_ids = self._validate_related_models(
+        readable_model_ids, writable_model_ids, part_instance_id, parent_part_instance_id = self._validate_related_models(
             readable_models=readable_models,
             writable_models=writable_models,
+            part_instance=part_instance,
+            parent_part_instance=parent_part_instance,
             **kwargs,
         )
 
@@ -2152,7 +2168,12 @@ class Client(object):
 
         # update the associations if needed
         if readable_model_ids is not None or writable_model_ids is not None:
-            widget.update_associations(readable_models=readable_model_ids, writable_models=writable_model_ids)
+            widget.update_associations(
+                readable_models=readable_model_ids,
+                writable_models=writable_model_ids,
+                part_instance=part_instance_id,
+                parent_part_instance=parent_part_instance_id,
+            )
 
         return widget
 
@@ -2265,14 +2286,15 @@ class Client(object):
     @staticmethod
     def _validate_associations(
             widgets: List[Union[Widget, Text]],
-            associations: List[Tuple[List, List]],
+            associations: List[Tuple[List, List, Part, Part]],
     ) -> List[Text]:
         """Perform the validation of the internal widgets and associations."""
         widget_ids = check_list_of_base(widgets, Widget, 'widgets')
 
-        if not isinstance(associations, List) and all(isinstance(a, tuple) and len(a) == 2 for a in associations):
+        if not isinstance(associations, List) and all(isinstance(a, tuple) and len(a) in [2, 4] for a in associations):
             raise IllegalArgumentError(
-                '`associations` must be a list of tuples, defining the readable and writable models per widget.')
+                '`associations` must be a list of tuples, defining the readable and writable models per widget, '
+                'and optionally the part and parent part instances')
 
         if not len(widgets) == len(associations):
             raise IllegalArgumentError('The `widgets` and `associations` lists must be of equal length, '
@@ -2361,6 +2383,8 @@ class Client(object):
             widget: Union[Widget, Text],
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
+            part_instance: Optional[Union[Part, Text]] = None,
+            parent_part_instance: Optional[Union[Part, Text]] = None,
             **kwargs
     ) -> None:
         """
@@ -2376,6 +2400,10 @@ class Client(object):
         :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    write rights
         :type writable_models: List[Property] or List[UUID] or None
+        :param part_instance: Part object or UUID to be used as instance of the widget
+        :type part_instance: Part or UUID
+        :param parent_part_instance: Part object or UUID to be used as parent of the widget
+        :type parent_part_instance: Part or UUID
         :return: None
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
@@ -2385,6 +2413,8 @@ class Client(object):
             associations=[(
                 readable_models if readable_models else [],
                 writable_models if writable_models else [],
+                part_instance,
+                parent_part_instance,
             )],
             **kwargs
         )
@@ -2392,7 +2422,7 @@ class Client(object):
     def update_widgets_associations(
             self,
             widgets: List[Union[Widget, Text]],
-            associations: List[Tuple[List, List]],
+            associations: List[Tuple[List, List, Part, Part]],
             **kwargs
     ) -> None:
         """
@@ -2413,17 +2443,25 @@ class Client(object):
 
         bulk_data = list()
         for widget_id, association in zip(widget_ids, associations):
-            readable_models, writable_models = association
+            if len(association) == 2:
+                readable_models, writable_models = association
+                part_instance, parent_part_instance = None, None
+            else:
+                readable_models, writable_models, part_instance, parent_part_instance = association
 
-            readable_model_ids, writable_model_ids = self._validate_related_models(
+            readable_model_ids, writable_model_ids, part_instance_id, parent_part_instance_id = self._validate_related_models(
                 readable_models=readable_models,
                 writable_models=writable_models,
+                part_instance=part_instance,
+                parent_part_instance=parent_part_instance,
             )
 
             data = dict(
                 id=widget_id,
                 readable_model_properties_ids=readable_model_ids,
                 writable_model_properties_ids=writable_model_ids,
+                part_instance_id=part_instance_id,
+                parent_part_instance_id=parent_part_instance_id,
             )
 
             if kwargs:
@@ -2445,6 +2483,8 @@ class Client(object):
             widget: Union[Widget, Text],
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
+            part_instance: Optional[Union[Part, Text]] = None,
+            parent_part_instance: Optional[Union[Part, Text]] = None,
             **kwargs
     ) -> None:
         """
@@ -2461,20 +2501,29 @@ class Client(object):
         :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    write rights
         :type writable_models: List[Property] or List[UUID] or None
+        :param part_instance: Part object or UUID to be used as instance of the widget
+        :type part_instance: Part or UUID
+        :param parent_part_instance: Part object or UUID to be used as parent of the widget
+        :type parent_part_instance: Part or UUID
         :return: None
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
         """
         self.set_widgets_associations(
             widgets=[widget],
-            associations=[(readable_models, writable_models)],
+            associations=[(
+                readable_models,
+                writable_models,
+                part_instance,
+                parent_part_instance,
+            )],
             **kwargs
         )
 
     def set_widgets_associations(
             self,
             widgets: List[Union[Widget, Text]],
-            associations: List[Tuple[List, List]],
+            associations: List[Tuple[List, List, Part, Part]],
             **kwargs
     ) -> None:
         """
@@ -2496,17 +2545,25 @@ class Client(object):
 
         bulk_data = list()
         for widget_id, association in zip(widget_ids, associations):
-            readable_models, writable_models = association
+            if len(association) == 2:
+                readable_models, writable_models = association
+                part_instance, parent_part_instance = None, None
+            else:
+                readable_models, writable_models, part_instance, parent_part_instance = association
 
-            readable_model_ids, writable_model_ids = self._validate_related_models(
+            readable_model_ids, writable_model_ids, part_instance_id, parent_part_instance_id = self._validate_related_models(
                 readable_models=readable_models,
                 writable_models=writable_models,
+                part_instance=part_instance,
+                parent_part_instance=parent_part_instance,
             )
 
             data = dict(
                 id=widget_id,
                 readable_model_properties_ids=readable_model_ids,
                 writable_model_properties_ids=writable_model_ids,
+                part_instance_id=part_instance_id,
+                parent_part_instance_id=parent_part_instance_id,
             )
 
             if kwargs:  # pragma: no cover

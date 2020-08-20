@@ -170,6 +170,8 @@ class Widget(BaseInScope):
             self,
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
+            part_instance: Optional[Union['Part', Text]] = None,
+            parent_part_instance: Optional[Union['Part', Text]] = None,
             **kwargs
     ) -> None:
         """
@@ -186,6 +188,10 @@ class Widget(BaseInScope):
         :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                 write rights (alias = outputs)
         :type writable_models: List[Property] or List[UUID] or None
+        :param part_instance: Part object or UUID to be used as instance of the widget
+        :type part_instance: Part or UUID
+        :param parent_part_instance: Part object or UUID to be used as parent of the widget
+        :type parent_part_instance: Part or UUID
         :param kwargs: additional keyword arguments to be passed into the API call as param.
         :return: None
         :raises APIError: when the associations could not be changed
@@ -195,6 +201,8 @@ class Widget(BaseInScope):
             widget=self,
             readable_models=readable_models,
             writable_models=writable_models,
+            part_instance=part_instance,
+            parent_part_instance=parent_part_instance,
             **kwargs
         )
 
@@ -202,6 +210,8 @@ class Widget(BaseInScope):
             self,
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
+            part_instance: Optional[Union['Part', Text]] = None,
+            parent_part_instance: Optional[Union['Part', Text]] = None,
             **kwargs
     ) -> None:
         """
@@ -218,6 +228,10 @@ class Widget(BaseInScope):
         :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                 write rights (alias = outputs)
         :type writable_models: List[Property] or List[UUID] or None
+        :param part_instance: Part object or UUID to be used as instance of the widget
+        :type part_instance: Part or UUID
+        :param parent_part_instance: Part object or UUID to be used as parent of the widget
+        :type parent_part_instance: Part or UUID
         :param kwargs: additional keyword arguments to be passed into the API call as param.
         :return: None
         :raises APIError: when the associations could not be set
@@ -227,6 +241,8 @@ class Widget(BaseInScope):
             widget=self,
             readable_models=readable_models,
             writable_models=writable_models,
+            part_instance=part_instance,
+            parent_part_instance=parent_part_instance,
             **kwargs
         )
 
