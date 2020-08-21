@@ -1026,12 +1026,8 @@ class Client(object):
 
     def widget(self, *args, **kwargs) -> Widget:
         """
-        Widget of an activity.
+        Retrieve a single widget.
 
-        :param pk: (optional) the uuid of the widget.
-        :type pk: basestring or None
-        :param activity: (optional) the :class:`Activity` or UUID of the activity to filter the widgets for.
-        :type activity: basestring or None
         :return: Widget
         """
         return self._retrieve_singular(self.widgets, *args, **kwargs)
@@ -2148,13 +2144,14 @@ class Client(object):
             **kwargs
         )
 
-        readable_model_ids, writable_model_ids, part_instance_id, parent_part_instance_id = self._validate_related_models(
-            readable_models=readable_models,
-            writable_models=writable_models,
-            part_instance=part_instance,
-            parent_part_instance=parent_part_instance,
-            **kwargs,
-        )
+        readable_model_ids, writable_model_ids, part_instance_id, parent_part_instance_id = \
+            self._validate_related_models(
+                readable_models=readable_models,
+                writable_models=writable_models,
+                part_instance=part_instance,
+                parent_part_instance=parent_part_instance,
+                **kwargs,
+            )
 
         # perform the call
         url = self._build_url('widgets')
@@ -2203,6 +2200,8 @@ class Client(object):
             bulk_associations.append(self._validate_related_models(
                 readable_models=widget.get('readable_models'),
                 writable_models=widget.get('writable_models'),
+                part_instance=widget.get('part_instance'),
+                parent_part_instance=widget.get('parent_part_instance'),
                 **widget.pop('kwargs', dict()),
             ))
 
@@ -2422,7 +2421,7 @@ class Client(object):
     def update_widgets_associations(
             self,
             widgets: List[Union[Widget, Text]],
-            associations: List[Tuple[List, List, Part, Part]],
+            associations: List[Tuple],
             **kwargs
     ) -> None:
         """
@@ -2449,12 +2448,13 @@ class Client(object):
             else:
                 readable_models, writable_models, part_instance, parent_part_instance = association
 
-            readable_model_ids, writable_model_ids, part_instance_id, parent_part_instance_id = self._validate_related_models(
-                readable_models=readable_models,
-                writable_models=writable_models,
-                part_instance=part_instance,
-                parent_part_instance=parent_part_instance,
-            )
+            readable_model_ids, writable_model_ids, part_instance_id, parent_part_instance_id = \
+                self._validate_related_models(
+                    readable_models=readable_models,
+                    writable_models=writable_models,
+                    part_instance=part_instance,
+                    parent_part_instance=parent_part_instance,
+                )
 
             data = dict(
                 id=widget_id,
@@ -2523,7 +2523,7 @@ class Client(object):
     def set_widgets_associations(
             self,
             widgets: List[Union[Widget, Text]],
-            associations: List[Tuple[List, List, Part, Part]],
+            associations: List[Tuple],
             **kwargs
     ) -> None:
         """
@@ -2551,12 +2551,13 @@ class Client(object):
             else:
                 readable_models, writable_models, part_instance, parent_part_instance = association
 
-            readable_model_ids, writable_model_ids, part_instance_id, parent_part_instance_id = self._validate_related_models(
-                readable_models=readable_models,
-                writable_models=writable_models,
-                part_instance=part_instance,
-                parent_part_instance=parent_part_instance,
-            )
+            readable_model_ids, writable_model_ids, part_instance_id, parent_part_instance_id = \
+                self._validate_related_models(
+                    readable_models=readable_models,
+                    writable_models=writable_models,
+                    part_instance=part_instance,
+                    parent_part_instance=parent_part_instance,
+                )
 
             data = dict(
                 id=widget_id,
