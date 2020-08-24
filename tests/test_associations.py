@@ -95,8 +95,7 @@ class TestAssociations(TestBetamax):
 
         self.assertEqual(4, len(original_associations))
 
-        self.client.update_widget_associations(
-            widget=self.form_widget,
+        self.form_widget.update_associations(
             readable_models=[],
             writable_models=self.frame_model.properties[2:3],
         )
@@ -111,8 +110,7 @@ class TestAssociations(TestBetamax):
         )
 
     def test_set_associations(self):
-        self.client.set_widget_associations(
-            widget=self.form_widget,
+        self.form_widget.set_associations(
             readable_models=[],
             writable_models=self.frame_model.properties,
         )
