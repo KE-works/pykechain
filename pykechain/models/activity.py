@@ -483,10 +483,7 @@ class Activity(TreeObject, TagsMixin):
             data.append(task_specific_update_dict)
 
         # Perform bulk update
-        url = self._client._build_url('activities_bulk_update')
-        response = self._client._request('PUT', url, json=data)
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Activity {}".format(self), response=response)
+        self._client.update_activities(activities=data)
 
     def edit(
             self,

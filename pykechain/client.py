@@ -1219,6 +1219,25 @@ class Client(object):
 
         return cloned_activities
 
+    def update_activities(
+            self,
+            activities: List[Dict],
+    ) -> None:
+        """
+        Update multiple activities in bulk.
+
+        :param activities: list of dicts, each specifying the updated data per activity.
+        :raises APIError
+        :return: None
+        """
+        check_list_of_dicts(activities, 'activities', fields=['id'])
+
+        url = self._build_url('activities_bulk_update')
+        response = self._request('PUT', url, json=activities)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Activities", response=response)
+
     def _create_part(self, action: Text, data: Dict, **kwargs) -> Optional[Part]:
         """Create a part for PIM 2 internal core function."""
         # suppress_kevents should be in the data (not the query_params)

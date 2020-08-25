@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+v3.8.1-rc3 (UNRELEASED)
+-----------------------
+
+* :+1: Added `update_activities` method to `Client` to update activities in bulk.
+* :+1: `WidgetsManager` is now stored in its `Activity` object for lazy retrieval.
+
 v3.8.1-rc2 (UNRELEASED)
 -----------------------
 
