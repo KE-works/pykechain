@@ -30,8 +30,8 @@ class WidgetsManager(Iterable):
 
         :param widgets: list of widgets.
         :type widgets: List[Widget]
-        :param activity: an :class:`Activity` object or an activity UUID
-        :type activity: basestring or None
+        :param activity: an :class:`Activity` object
+        :type activity: Activity
         :param kwargs: additional keyword arguments
         :type kwargs: dict or None
         :returns: None
