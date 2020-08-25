@@ -2479,9 +2479,12 @@ class Client(object):
                 id=widget_id,
                 readable_model_properties_ids=readable_model_ids,
                 writable_model_properties_ids=writable_model_ids,
-                part_instance_id=part_instance_id,
-                parent_part_instance_id=parent_part_instance_id,
             )
+
+            if part_instance_id:
+                data.update(dict(part_instance_id=part_instance_id))
+            if parent_part_instance_id:
+                data.update(dict(parent_part_instance_id=parent_part_instance_id))
 
             if kwargs:
                 data.update(**kwargs)
@@ -2582,9 +2585,12 @@ class Client(object):
                 id=widget_id,
                 readable_model_properties_ids=readable_model_ids,
                 writable_model_properties_ids=writable_model_ids,
-                part_instance_id=part_instance_id,
-                parent_part_instance_id=parent_part_instance_id,
             )
+
+            if part_instance_id:
+                data.update(dict(part_instance_id=part_instance_id))
+            if parent_part_instance_id:
+                data.update(dict(parent_part_instance_id=parent_part_instance_id))
 
             if kwargs:  # pragma: no cover
                 data.update(**kwargs)

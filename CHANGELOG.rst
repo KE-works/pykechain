@@ -6,6 +6,7 @@ v3.8.1-rc3 (UNRELEASED)
 
 * :+1: Added `update_activities` method to `Client` to update activities in bulk.
 * :+1: `WidgetsManager` is now stored in its `Activity` object for lazy retrieval.
+* :bug: Set and Update of widget associations now optionally updates the `part_instance_id` and/or `parent_part_instance_id`.
 
 v3.8.1-rc2 (UNRELEASED)
 -----------------------
