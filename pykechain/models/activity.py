@@ -65,6 +65,7 @@ class Activity(TreeObject, TagsMixin):
             self._options.get('representations', {}),
             self._save_representations,
         )
+        self._widgets_manager = None  # type: Optional[WidgetsManager]
 
     def __call__(self, *args, **kwargs) -> 'Activity':
         """Short-hand version of the `child` method."""
@@ -749,8 +750,10 @@ class Activity(TreeObject, TagsMixin):
         :raises NotFoundError: when the widgets could not be found
         :raises APIError: when the API does not support the widgets, or when the API gives an error.
         """
-        widgets = self._client.widgets(activity=self.id, **kwargs)
-        return WidgetsManager(widgets=widgets, activity=self, client=self._client)
+        if self._widgets_manager is None:
+            widgets = self._client.widgets(activity=self.id, **kwargs)
+            self._widgets_manager = WidgetsManager(widgets=widgets, activity=self, client=self._client)
+        return self._widgets_manager
 
     def download_as_pdf(self, target_dir=None, pdf_filename=None, paper_size=PaperSize.A4,
                         paper_orientation=PaperOrientation.PORTRAIT, include_appendices=False):
