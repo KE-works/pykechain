@@ -1,5 +1,5 @@
 import warnings
-from typing import Iterable, Union, AnyStr, Optional, Text, Dict, List, Any
+from typing import Iterable, Union, Optional, Text, Dict, List, Any
 
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, ScopeWidgetColumnTypes, \
     ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
@@ -43,6 +43,10 @@ class WidgetsManager(Iterable):
 
         from pykechain.models import Activity
         from pykechain import Client
+
+        if not isinstance(activity, Activity):
+            raise IllegalArgumentError(
+                "The `WidgetsManager` should be provided a :class:`Activity` to function properly.")
 
         self.activity = activity  # type: Activity
         self._activity_id = activity.id
