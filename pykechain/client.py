@@ -2180,7 +2180,9 @@ class Client(object):
             raise APIError("Could not create Widget", response=response)
 
         # create the widget and do postprocessing
-        widget = Widget.create(json=response.json().get('results')[0], client=self)
+        manager = activity._widgets_manager if isinstance(activity, Activity) else None
+
+        widget = Widget.create(json=response.json().get('results')[0], client=self, manager=manager)
 
         # update the associations if needed
         if readable_model_ids is not None or writable_model_ids is not None:

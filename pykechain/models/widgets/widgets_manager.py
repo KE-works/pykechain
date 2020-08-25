@@ -21,8 +21,7 @@ class WidgetsManager(Iterable):
 
     def __init__(self,
                  widgets: Iterable[Widget],
-                 activity: Union['Activity', AnyStr],
-                 client: Optional['Client'] = None,
+                 activity: 'Activity',
                  **kwargs) -> None:
         """Construct a Widget Manager from a list of widgets.
 
@@ -33,8 +32,6 @@ class WidgetsManager(Iterable):
         :type widgets: List[Widget]
         :param activity: an :class:`Activity` object or an activity UUID
         :type activity: basestring or None
-        :param client: (O) if the activity was provided as a UUID, also provide a :class:`Client` object.
-        :type client: `Client` or None
         :param kwargs: additional keyword arguments
         :type kwargs: dict or None
         :returns: None
@@ -43,17 +40,13 @@ class WidgetsManager(Iterable):
         self._widgets = list(widgets)  # type: List[Widget]
         for widget in self._widgets:
             widget.manager = self
+
         from pykechain.models import Activity
         from pykechain import Client
-        if isinstance(activity, Activity):
-            self._activity_id = activity.id
-            self._client = activity._client  # type: Client
-        elif isinstance(activity, str) and client is not None:
-            self._activity_id = activity
-            self._client = client  # type: Client
-        else:
-            raise IllegalArgumentError("The `WidgetsManager` should be provided either an :class:`Activity` or "
-                                       "an activity uuid and a `Client` to function properly.")
+
+        self.activity = activity  # type: Activity
+        self._activity_id = activity.id
+        self._client = activity._client  # type: Client
 
         self._iter = iter(self._widgets)
 
@@ -109,7 +102,7 @@ class WidgetsManager(Iterable):
         """
         # Insert the current widget
         for widget in widgets:
-            widget['activity'] = self._activity_id
+            widget['activity'] = self.activity
 
         return self._client.create_widgets(widgets=widgets)
 
@@ -147,7 +140,7 @@ class WidgetsManager(Iterable):
         if 'parent_widget' in kwargs:
             kwargs['parent'] = kwargs.pop('parent_widget')
 
-        widget = self._client.create_widget(*args, activity=self._activity_id, **kwargs)
+        widget = self._client.create_widget(*args, activity=self.activity, **kwargs)
 
         if kwargs.get('order') is None:
             self._widgets.append(widget)
@@ -287,7 +280,7 @@ class WidgetsManager(Iterable):
         parent_instance = _retrieve_object_id(obj=parent_instance)  # type: 'Part'  # noqa
         sort_property_id = _retrieve_object_id(obj=sort_property)
 
-        meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
+        meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         meta.update({
             # grid
             "partModelId": part_model.id,
@@ -441,7 +434,7 @@ class WidgetsManager(Iterable):
         sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
         if not sort_property_id and sort_name:
             sort_property_id = "name"
-        meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
+        meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         if prefilters:
             list_of_prefilters = _check_prefilters(part_model=part_model, prefilters=prefilters)
             prefilters = {'property_value': ','.join(list_of_prefilters) if list_of_prefilters else {}}
@@ -535,7 +528,7 @@ class WidgetsManager(Iterable):
         """
         attachment_property = _retrieve_object(attachment_property,
                                                method=self._client.property)  # type: 'Property'
-        meta = _initiate_meta(kwargs, activity=self._activity_id)
+        meta = _initiate_meta(kwargs, activity=self.activity)
 
         meta.update({
             "propertyInstanceId": attachment_property.id,
@@ -635,7 +628,7 @@ class WidgetsManager(Iterable):
 
             button_dict['isDisabled'] = input_dict.get('isDisabled', False)
 
-        meta = _initiate_meta(kwargs, activity=self._activity_id, ignores=('showHeightValue',))
+        meta = _initiate_meta(kwargs, activity=self.activity, ignores=('showHeightValue',))
         meta['taskButtons'] = task_buttons
         meta['alignment'] = check_enum(alignment, Alignment, 'alignment')
 
@@ -711,7 +704,7 @@ class WidgetsManager(Iterable):
             else:
                 display_columns[possible_column] = False
 
-        meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
+        meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         meta.update({
             "customHeight": max_height if max_height else None,
             "partInstanceId": part_instance.id,
@@ -778,7 +771,7 @@ class WidgetsManager(Iterable):
         # Check whether the script is uuid type or class `Service`
         service = _retrieve_object(obj=service, method=self._client.service)  # type: 'Service'  # noqa
 
-        meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
+        meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
 
         # Add custom button text
         if custom_button_text is False:
@@ -841,7 +834,7 @@ class WidgetsManager(Iterable):
         """
         check_text(html, 'html')
 
-        meta = _initiate_meta(kwargs, activity=self._activity_id)
+        meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, default_title=WidgetTypes.HTML, **kwargs)
 
         meta["htmlContent"] = html
@@ -891,7 +884,7 @@ class WidgetsManager(Iterable):
             raise IllegalArgumentError("When using the add_notebook_widget, notebook must be a Service or Service id. "
                                        "Type is: {}".format(type(notebook)))
 
-        meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
+        meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, default_title=notebook.name, **kwargs)
 
         meta.update({
@@ -961,7 +954,7 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        meta = _initiate_meta(kwargs, activity=self._activity_id)
+        meta = _initiate_meta(kwargs, activity=self.activity)
 
         if show_all:
             meta['showAll'] = True
@@ -1032,7 +1025,7 @@ class WidgetsManager(Iterable):
         :return: newly created widget
         :rtype Widget
         """
-        meta = _initiate_meta(kwargs, activity=self._activity_id)
+        meta = _initiate_meta(kwargs, activity=self.activity)
 
         meta.update(dict(
             colorNoProgress=color_no_progress,
@@ -1068,7 +1061,7 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
+        meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, default_title=WidgetTypes.MULTICOLUMN, **kwargs)
 
         widget = self.create_widget(
@@ -1155,7 +1148,7 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        meta = _initiate_meta(kwargs, activity=self._activity_id)
+        meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, default_title=WidgetTypes.SCOPE, **kwargs)
 
         check_type(show_all_columns, bool, 'show_all_columns')
@@ -1236,7 +1229,7 @@ class WidgetsManager(Iterable):
         """
         attachment_property = _retrieve_object(attachment_property,
                                                method=self._client.property)  # type: 'AttachmentProperty'  # noqa
-        meta = _initiate_meta(kwargs, activity=self._activity_id)
+        meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, default_title=attachment_property.name, **kwargs)
 
         # Add custom button text
@@ -1310,7 +1303,7 @@ class WidgetsManager(Iterable):
         :type image_fit: ImageFitValue
         :return: Card Widget
         """
-        meta = _initiate_meta(kwargs, activity=self._activity_id)
+        meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, default_title=WidgetTypes.CARD, **kwargs)
 
         # Process the description
@@ -1418,7 +1411,7 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         weather_property = _retrieve_object(weather_property, method=self._client.property)  # type: 'Property'  # noqa
-        meta = _initiate_meta(kwargs, activity=self._activity_id)
+        meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, default_title=weather_property.name, **kwargs)
 
         meta.update({

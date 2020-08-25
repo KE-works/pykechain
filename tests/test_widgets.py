@@ -13,7 +13,7 @@ from pykechain.models.widgets import (
 from pykechain.models.widgets.helpers import _set_title
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
-from pykechain.utils import is_uuid, slugify_ref
+from pykechain.utils import slugify_ref
 from tests.classes import TestBetamax
 
 
@@ -205,9 +205,8 @@ class TestWidgetManager(TestBetamax):
 
     def test_widgetmanager_has_activity_and_client(self):
         self.assertIsNotNone(self.wm._client)
-        self.assertIsNotNone(self.wm._activity_id)
+        self.assertIsInstance(self.wm.activity, Activity)
         self.assertIsInstance(self.wm._client, self.client.__class__)
-        self.assertTrue(is_uuid(self.wm._activity_id))
 
 
 class TestWidgetManagerInActivity(TestBetamax):
@@ -852,4 +851,4 @@ class TestWidgetsCopyMove(TestBetamax):
         self.assertEqual(widget_manager_2[0].widget_type, WidgetTypes.PROPERTYGRID)
         self.assertEqual(widget_manager_2[0].title, title)
         self.assertTrue(all(prop.output for prop in associated_model.properties))
-        self.assertEqual(len(self.task.widgets()), 1)
+        self.assertEqual(1, len(self.task.widgets()))

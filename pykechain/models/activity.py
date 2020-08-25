@@ -749,7 +749,7 @@ class Activity(TreeObject, TagsMixin):
         """
         if self._widgets_manager is None:
             widgets = self._client.widgets(activity=self.id, **kwargs)
-            self._widgets_manager = WidgetsManager(widgets=widgets, activity=self, client=self._client)
+            self._widgets_manager = WidgetsManager(widgets=widgets, activity=self)
         return self._widgets_manager
 
     def download_as_pdf(self, target_dir=None, pdf_filename=None, paper_size=PaperSize.A4,
