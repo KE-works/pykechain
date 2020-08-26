@@ -1,4 +1,4 @@
-from typing import List, Optional, Text, Union, Any, Dict
+from typing import List, Optional, Text, Union, Any
 
 from pykechain.enums import Category, FilterType
 from pykechain.models.base_reference import _ReferencePropertyInScope
@@ -68,13 +68,18 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
 
         """
         # Check whether the model of this reference property (possible itself) has a configured value
-        referenced_model = self.model()._value  # type: Optional[List[Dict]]
-        if referenced_model:
+        if self.model().has_value():
             # If a model is configured, retrieve its ID
-            choices_model_id = referenced_model[0].get('id')
+            choices_model_id = self.model().value[0].get('id')
+
+            # Determine which parts are filtered out
+            prefilter = self._options.get('prefilters', {}).get('property_value')  # type: Optional[Text]
 
             # Retrieve all part instances with this model ID
-            possible_choices = self._client.parts(model_id=choices_model_id)  # makes multiple parts call
+            possible_choices = self._client.parts(
+                model_id=choices_model_id,
+                property_value=prefilter,
+            )
 
             return possible_choices
         else:
