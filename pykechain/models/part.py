@@ -81,6 +81,7 @@ class Part(TreeObject):
         super().__init__(json, **kwargs)
 
         self.ref = json.get('ref')  # type: Text
+        self.model_id = json.get("model_id")  # type: Text
         self.category = json.get('category')  # type: Category
         self.description = json.get('description')  # type: Text
         self.multiplicity = json.get('multiplicity')  # type: Text
@@ -336,8 +337,7 @@ class Part(TreeObject):
 
         """
         if self.category == Category.INSTANCE:
-            model_id = self._json_data.get('model_id')
-            return self._client.model(pk=model_id)
+            return self._client.model(pk=self.model_id)
         else:
             raise NotFoundError('Part "{}" already is a model'.format(self))
 
