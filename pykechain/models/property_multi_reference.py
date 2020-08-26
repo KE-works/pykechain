@@ -70,7 +70,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
         # Check whether the model of this reference property (possible itself) has a configured value
         if self.model().has_value():
             # If a model is configured, retrieve its ID
-            choices_model_id = self.model().value[0].get('id')
+            choices_model_id = self.model()._value[0].get('id')
 
             # Determine which parts are filtered out
             prefilter = self._options.get('prefilters', {}).get('property_value')  # type: Optional[Text]
