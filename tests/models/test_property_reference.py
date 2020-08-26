@@ -126,12 +126,28 @@ class TestMultiReferenceProperty(TestBetamax):
 
     def test_multi_ref_choices(self):
         # setUp
-        self.project.part(ref='bike').add(model=self.target_model, name='__Wheel 2')
+        self.project.part(ref='bike').add_with_properties(
+            name='__Wheel 2',
+            model=self.target_model,
+            update_dict={
+                PropertyType.BOOLEAN_VALUE: True,
+            }
+        )
         self.ref_prop_model.value = [self.target_model]
         possible_options = self.ref.choices()
 
         # testing
         self.assertEqual(2, len(possible_options))
+
+        self.ref_prop_model.set_prefilters(
+            property_models=[self.target_model.property(PropertyType.BOOLEAN_VALUE)],
+            values=[True],
+            filters_type=[FilterType.EXACT],
+        )
+        self.ref.refresh()
+
+        possible_options = self.ref.choices()
+        self.assertEqual(1, len(possible_options))
 
     def test_create_ref_property_referencing_part_in_list(self):
         # setUp
