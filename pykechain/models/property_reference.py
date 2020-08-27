@@ -81,8 +81,10 @@ class UserReferenceProperty(_ReferencePropertyInScope):
             return []
         users_ids = []
         for value in self._value:
-            if isinstance(value, dict):
+            if isinstance(value, dict) and "pk" in value:
                 users_ids.append(str(value.get("pk")))
+            elif isinstance(value, dict) and "id" in value:
+                users_ids.append(str(value.get("id")))
             elif isinstance(value, str):
                 users_ids.append(value)
             else:
