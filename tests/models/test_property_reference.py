@@ -755,6 +755,10 @@ class TestScopeReference(TestBetamax):
         self.assertIsNotNone(self.scope_ref_prop.value)
         self.assertEqual(bike_project, self.scope_ref_prop.value[0])
 
+    def test_no_value(self):
+        self.assertIsInstance(self.scope_ref_prop, ScopeReferenceProperty)
+        self.assertIsNone(self.scope_ref_prop.value)
+
     def test_reload(self):
         reloaded_prop = self.client.reload(obj=self.scope_ref_prop)
 
@@ -797,6 +801,10 @@ class TestUserReference(TestBetamax):
         self.assertIsInstance(self.user_ref_prop, UserReferenceProperty)
         self.assertIsNotNone(self.user_ref_prop.value)
         self.assertEqual(user, self.user_ref_prop.value[0])
+
+    def test_no_value(self):
+        self.assertIsInstance(self.user_ref_prop, UserReferenceProperty)
+        self.assertIsNone(self.user_ref_prop.value)
 
     def test_reload(self):
         reloaded_prop = self.client.reload(obj=self.user_ref_prop)

@@ -50,7 +50,7 @@ class ScopeReferenceProperty(_ReferencePropertyInScope):
                 scope_ids.append(value.get("id"))
             elif isinstance(value, str):
                 scope_ids.append(value)
-            else:
+            else:  # pragma: no cover
                 raise ValueError(
                     'Value "{}" must be a dict with field `id` or a UUID.'.format(value)
                 )
@@ -83,13 +83,9 @@ class UserReferenceProperty(_ReferencePropertyInScope):
         for value in self._value:
             if isinstance(value, dict) and "pk" in value:
                 users_ids.append(str(value.get("pk")))
-            elif isinstance(value, dict) and "id" in value:
-                users_ids.append(str(value.get("id")))
-            elif isinstance(value, str):
-                users_ids.append(value)
-            elif isinstance(value, int):
+            elif isinstance(value, (int, str)):
                 users_ids.append(str(value))
-            else:
+            else:  # pragma: no cover
                 raise ValueError(
                     'Value "{}" must be a dict with field `pk` or a UUID.'.format(value)
                 )
