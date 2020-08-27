@@ -404,7 +404,6 @@ class Property(BaseInScope):
 
         """
         update_dict = {
-            'id': self.id,
             'name': check_text(name, 'name') or self.name,
             'description': check_text(description, 'description') or self.description,
         }
@@ -423,6 +422,8 @@ class Property(BaseInScope):
         if self.use_bulk_update:
             self._pend_update(data=update_dict)
         else:
+            update_dict["id"] = self.id
+
             response = self._client._request(
                 'PUT',
                 self._client._build_url('property', property_id=self.id),
