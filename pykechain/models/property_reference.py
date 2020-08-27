@@ -87,6 +87,8 @@ class UserReferenceProperty(_ReferencePropertyInScope):
                 users_ids.append(str(value.get("id")))
             elif isinstance(value, str):
                 users_ids.append(value)
+            elif isinstance(value, int):
+                users_ids.append(str(value))
             else:
                 raise ValueError(
                     'Value "{}" must be a dict with field `pk` or a UUID.'.format(value)
