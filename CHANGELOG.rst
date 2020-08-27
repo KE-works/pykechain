@@ -1,25 +1,31 @@
 Change Log
 ==========
 
-PR
---
+v3.8.1-rc2 (UNRELEASED)
+-----------------------
+
+* :+1: Added `set_associations` and `remove_associations` method to the `Widget` class (#827)
+* :+1: Renamed activity clone API endpoint is now supported. We now support the cloning and renaming of Parts as well as cloning the activities. (#805)
 * :star: Added the option to manage supervisor members on a scope for KE-chain 3 backends that support the supervisor member users. That is possble for releases of KE-chain 3 starting from June 2020. (version 3.7). #772
 
-v3.8 (UNRELEASED)
------------------
+v3.8.1-rc1 (14AUG20)
+--------------------
+
+* :+1: Included pending deprecation of version-2 classes such as `Part2`, `Property2`. It is advised to use the original `Part` and `Property` classes instead. (#713)
+
+v3.8.0 (11AUG20)
+----------------
 
 * :star: Added the bulk_create_parts API endpoint, which allows the adding of multiple `Part` instances with `Properties` in one call. #797
-
-v3.7.7 ()
----------
-
+* :star: Added the bulk_delete_parts API endpoint, which allows the deletion of multiple `Part` objects in one call. #812
 * :+1: Implemented robust method to update Scope side-bar buttons with minimum number of requests using a context manager (e.g. `with scope.sidebar as manager` mechanism) (#654)
 * :+1: Included mapping dict from KE-chain native pages to their Font Awesome icons.
 * :+1: Added properties to retrieve the root Activity and Part objects of a Scope. (#799)
 * :+1: Added bulk-clone of activities, including associated data models. (#737)
+* :+1: Added `upload` input value for when creating basic- and filtered-grid widgets. (#814)
 
 v3.7.6 (30JUN20)
------------------
+----------------
 
 * :star: Added the Weather Widget creating possibilities. #788
 * :+1: dependent versions for development: tox (3.16.0)

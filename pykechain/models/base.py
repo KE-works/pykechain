@@ -74,7 +74,7 @@ class BaseInScope(Base):
         super().__init__(json, *args, **kwargs)
 
         self.scope_id = json.get('scope_id', json.get('scope', None))
-        self._scope = None  # type: Optional['Scope2']
+        self._scope = None  # type: Optional['Scope']
 
     @property
     def scope(self):

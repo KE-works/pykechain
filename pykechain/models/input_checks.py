@@ -10,7 +10,12 @@ iter_types = (list, tuple, set)
 
 
 def check_type(value: Optional[Any], cls: Any, key: Text) -> Optional[Any]:
-    """Validate any input to be an instance a specific class."""
+    """Validate any input to be an instance a specific class.
+
+    :param value: value to check against
+    :param cls: check to see if the value is of type class
+    :param key: key
+    """
     if value is not None:
         if not isinstance(value, cls):
             if isinstance(cls, iter_types):
@@ -161,12 +166,19 @@ def check_user(obj: Optional[Any],
 
 
 def check_list_of_base(
-        objects: Optional[List[Any]],
-        cls: Optional[type(object)] = None,
-        key: Optional[Text] = 'objects',
-        method: Optional[Callable] = None,
+    objects: Optional[List[Any]],
+    cls: Optional[type(object)] = None,
+    key: Optional[Text] = 'objects',
+    method: Optional[Callable] = None,
 ) -> Optional[List[Text]]:
-    """Validate the iterable of objects provided as input are Base (or subclass) instances and return a list of IDs."""
+    """Validate the iterable of objects provided as input are Base (or subclass) instances and return a list of IDs.
+
+    :param objects: list of objects to check
+    :param cls: (optional) class to check objects against
+    :param key: (optional) key to check
+    :param method: (optional) method used to check with
+    :return: list of UUID's in Text.
+    """
     ids = None
     if objects is not None:
         check_type(objects, iter_types, key=key)

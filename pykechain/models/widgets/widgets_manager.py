@@ -21,7 +21,7 @@ class WidgetsManager(Iterable):
 
     def __init__(self,
                  widgets: Iterable[Widget],
-                 activity: Union['Activity2', AnyStr],
+                 activity: Union['Activity', AnyStr],
                  client: Optional['Client'] = None,
                  **kwargs) -> None:
         """Construct a Widget Manager from a list of widgets.
@@ -43,9 +43,9 @@ class WidgetsManager(Iterable):
         self._widgets = list(widgets)  # type: List[Widget]
         for widget in self._widgets:
             widget.manager = self
-        from pykechain.models import Activity2
+        from pykechain.models import Activity
         from pykechain import Client
-        if isinstance(activity, Activity2):
+        if isinstance(activity, Activity):
             self._activity_id = activity.id
             self._client = activity._client  # type: Client
         elif isinstance(activity, str) and client is not None:
@@ -157,7 +157,7 @@ class WidgetsManager(Iterable):
 
     def create_configured_widget(
             self,
-            part: 'Part2',
+            part: 'Part',
             all_readable: Optional[bool] = None,
             all_writable: Optional[bool] = None,
             readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
@@ -168,7 +168,7 @@ class WidgetsManager(Iterable):
         Create a widget with configured properties.
 
         :param part: Part to retrieve the properties from if all_readable or all_writable is True.
-        :type part: Part2
+        :type part: Part
         :param all_readable: Selects all the `Properties` of part_model and configures them as readable in the widget
         :type all_readable: bool
         :param all_writable: Selects all the `Properties` of part_model and configures them as writable in the widget
@@ -196,14 +196,15 @@ class WidgetsManager(Iterable):
             **kwargs)
 
     def add_supergrid_widget(self,
-                             part_model: Union['Part2', Text],
-                             parent_instance: Optional[Union['Part2', Text]] = None,
+                             part_model: Union['Part', Text],
+                             parent_instance: Optional[Union['Part', Text]] = None,
                              title: Optional[Union[type(None), Text, bool]] = False,
                              parent_widget: Optional[Union[Widget, Text]] = None,
                              new_instance: Optional[bool] = True,
                              edit: Optional[bool] = True,
                              clone: Optional[bool] = True,
                              export: Optional[bool] = True,
+                             upload: Optional[bool] = True,
                              delete: Optional[bool] = False,
                              incomplete_rows: Optional[bool] = True,
                              emphasize_new_instance: Optional[bool] = True,
@@ -243,6 +244,8 @@ class WidgetsManager(Iterable):
         :type clone: bool
         :param export: Show or hide the Export Grid button (default True)
         :type export: bool
+        :param upload: Show or hide the Import Grid button (default True)
+        :type upload: bool
         :param delete: Show or hide the Delete button (default False)
         :type delete: bool
         :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
@@ -280,8 +283,8 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: 'Part2'  # noqa
-        parent_instance = _retrieve_object_id(obj=parent_instance)  # type: 'Part2'  # noqa
+        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: 'Part'  # noqa
+        parent_instance = _retrieve_object_id(obj=parent_instance)  # type: 'Part'  # noqa
         sort_property_id = _retrieve_object_id(obj=sort_property)
 
         meta = _initiate_meta(kwargs=kwargs, activity=self._activity_id)
@@ -299,6 +302,7 @@ class WidgetsManager(Iterable):
             "deleteButtonVisible": delete,
             "cloneButtonVisible": clone,
             "downloadButtonVisible": export,
+            "uploadButtonVisible": upload,
             "incompleteRowsVisible": incomplete_rows,
             "primaryAddUiValue": emphasize_new_instance,
             "primaryEditUiValue": emphasize_edit,
@@ -326,14 +330,15 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_filteredgrid_widget(self,
-                                part_model: Union['Part2', Text],
-                                parent_instance: Optional[Union['Part2', Text]] = None,
+                                part_model: Union['Part', Text],
+                                parent_instance: Optional[Union['Part', Text]] = None,
                                 title: Optional[Union[type(None), Text, bool]] = False,
                                 parent_widget: Optional[Union[Widget, Text]] = None,
                                 new_instance: Optional[bool] = True,
                                 edit: Optional[bool] = True,
                                 clone: Optional[bool] = True,
                                 export: Optional[bool] = True,
+                                upload: Optional[bool] = True,
                                 delete: Optional[bool] = False,
                                 incomplete_rows: Optional[bool] = True,
                                 emphasize_new_instance: Optional[bool] = True,
@@ -378,6 +383,8 @@ class WidgetsManager(Iterable):
         :type clone: bool
         :param export: Show or hide the Export Grid button (default True)
         :type export: bool
+        :param upload: Show or hide the Import Grid button (default True)
+        :type upload: bool
         :param delete: Show or hide the Delete button (default False)
         :type delete: bool
         :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
@@ -417,7 +424,7 @@ class WidgetsManager(Iterable):
         :param excluded_propmodels: (O) list of properties not shown in the filter pane
         :type excluded_propmodels: list
         :param prefilters: (O) default filters active in the grid, defined as a dict with the following fields:
-            * property_models: list of Properties, defined as Property2 objects or UUIDs
+            * property_models: list of Properties, defined as Property objects or UUIDs
             * values: the pre-filter value for each property to filter on
             * filters_type: the types of filters, either `le`, `ge`, `icontains` or `exact`
         :type prefilters: dict
@@ -429,7 +436,7 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: 'Part2'  # noqa
+        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: 'Part'  # noqa
         parent_instance_id = _retrieve_object_id(obj=parent_instance)  # type: text_type
         sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
         if not sort_property_id and sort_name:
@@ -461,6 +468,7 @@ class WidgetsManager(Iterable):
             "deleteButtonVisible": delete,
             "cloneButtonVisible": clone,
             "downloadButtonVisible": export,
+            "uploadButtonVisible": upload,
             "incompleteRowsVisible": incomplete_rows,
             "primaryAddUiValue": emphasize_new_instance,
             "primaryEditUiValue": emphasize_edit,
@@ -488,7 +496,7 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_attachmentviewer_widget(self,
-                                    attachment_property: Union[Text, 'AttachmentProperty2'],
+                                    attachment_property: Union[Text, 'AttachmentProperty'],
                                     editable: Optional[bool] = False,
                                     title: Optional[Union[Text, bool]] = False,
                                     parent_widget: Optional[Union[Widget, Text]] = None,
@@ -526,7 +534,7 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         attachment_property = _retrieve_object(attachment_property,
-                                               method=self._client.property)  # type: 'Property2'
+                                               method=self._client.property)  # type: 'Property'
         meta = _initiate_meta(kwargs, activity=self._activity_id)
 
         meta.update({
@@ -589,7 +597,7 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        from pykechain.models import Activity2
+        from pykechain.models import Activity
 
         set_of_expected_keys = {'activityId', 'customText', 'emphasized', 'emphasize', 'isDisabled', 'link'}
         task_buttons = list()
@@ -603,7 +611,7 @@ class WidgetsManager(Iterable):
             if 'activityId' in input_dict:
                 # Check whether the activityId is class `Activity` or UUID
                 activity = input_dict['activityId']
-                if isinstance(activity, Activity2):
+                if isinstance(activity, Activity):
                     button_dict['activityId'] = activity.id
                 elif isinstance(activity, str) and is_uuid(activity):
                     button_dict['activityId'] = activity
@@ -641,7 +649,7 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_propertygrid_widget(self,
-                                part_instance: Union['Part2', Text],
+                                part_instance: Union['Part', Text],
                                 title: Optional[Union[Text, bool]] = False,
                                 max_height: Optional[int] = None,
                                 show_headers: Optional[bool] = True,
@@ -688,7 +696,7 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_instance = _retrieve_object(part_instance, method=self._client.part)  # type: 'Part2'  # noqa: F821
+        part_instance = _retrieve_object(part_instance, method=self._client.part)  # type: 'Part'  # noqa: F821
 
         if not show_columns:
             show_columns = list()
@@ -913,7 +921,7 @@ class WidgetsManager(Iterable):
                              show_download_pdf: Optional[bool] = False,
                              show_progressbar: Optional[bool] = False,
                              progress_bar: Optional[Dict] = None,
-                             breadcrumb_root: Optional['Activity2'] = None,
+                             breadcrumb_root: Optional['Activity'] = None,
                              **kwargs) -> Widget:
         """
         Add a KE-chain Metapanel to the WidgetManager.
@@ -945,8 +953,8 @@ class WidgetsManager(Iterable):
         :param progress_bar: Progress bar custom settings. Allowed dictionary items `colorNoProgress, showProgressText,
         showProgressText, customHeight, colorInProgress, colorCompleted, colorInProgressBackground`
         :type progress_bar: dict or None
-        :param breadcrumb_root: Activity2 object or UUID to specify the breadcrumb root
-        :type breadcrumb_root: Activity2
+        :param breadcrumb_root: Activity object or UUID to specify the breadcrumb root
+        :type breadcrumb_root: Activity
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
         :rtype: Widget
@@ -958,7 +966,7 @@ class WidgetsManager(Iterable):
         if show_all:
             meta['showAll'] = True
         else:
-            from pykechain.models import Activity2
+            from pykechain.models import Activity
             meta.update(dict(
                 showAll=False,
                 showDueDate=show_due_date,
@@ -975,7 +983,7 @@ class WidgetsManager(Iterable):
                 # if progress=False and Bar=False, both are False
                 showProgress=show_progress and not show_progressbar or show_progress,
                 showProgressBar=show_progressbar and not show_progress,
-                breadcrumbAncestor=check_base(breadcrumb_root, Activity2, 'breadcrumb_root') or None,
+                breadcrumbAncestor=check_base(breadcrumb_root, Activity, 'breadcrumb_root') or None,
             ))
         if progress_bar:
             meta.update(dict(
@@ -1198,7 +1206,7 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_signature_widget(self,
-                             attachment_property: 'AttachmentProperty2',
+                             attachment_property: 'AttachmentProperty',
                              title: Optional[Union[bool, Text]] = False,
                              parent_widget: Optional[Union[Widget, Text]] = None,
                              custom_button_text: Optional[Union[bool, Text]] = False,
@@ -1227,7 +1235,7 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         attachment_property = _retrieve_object(attachment_property,
-                                               method=self._client.property)  # type: 'AttachmentProperty2'  # noqa
+                                               method=self._client.property)  # type: 'AttachmentProperty'  # noqa
         meta = _initiate_meta(kwargs, activity=self._activity_id)
         meta, title = _set_title(meta, title=title, default_title=attachment_property.name, **kwargs)
 
@@ -1266,7 +1274,7 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_card_widget(self,
-                        image: Optional['AttachmentProperty2'] = None,
+                        image: Optional['AttachmentProperty'] = None,
                         title: Optional[Union[type(None), Text, bool]] = None,
                         parent_widget: Optional[Union[Widget, Text]] = None,
                         description: Optional[Union[Text, bool]] = None,
@@ -1280,7 +1288,7 @@ class WidgetsManager(Iterable):
 
         The widget will be saved in KE-chain.
 
-        :param image: AttachmentProperty2 providing the source of the image shown in the card widget.
+        :param image: AttachmentProperty providing the source of the image shown in the card widget.
         :param title: A custom title for the card widget
             * False (default): Card name
             * String value: Custom title
@@ -1291,7 +1299,7 @@ class WidgetsManager(Iterable):
             * None: No title
         :param link: Where the card widget refers to. This can be one of the following:
             * None (default): no link
-            * task: another KE-chain task, provided as an Activity2 object or its UUID
+            * task: another KE-chain task, provided as an Activity object or its UUID
             * String value: URL to a webpage
             * KE-chain page: built-in KE-chain page of the current scope
         :param link_value: Overwrite the default link value (obtained from the type of the link)
@@ -1321,8 +1329,8 @@ class WidgetsManager(Iterable):
         })
 
         # Process the image it is linked to
-        from pykechain.models import Property2
-        if isinstance(image, Property2) and image.type == PropertyType.ATTACHMENT_VALUE:
+        from pykechain.models import Property
+        if isinstance(image, Property) and image.type == PropertyType.ATTACHMENT_VALUE:
             meta.update({
                 'customImage': "/api/v3/properties/{}/preview".format(image.id),
                 'showImageValue': CardWidgetImageValue.CUSTOM_IMAGE
@@ -1336,8 +1344,8 @@ class WidgetsManager(Iterable):
             raise IllegalArgumentError("When using the add_card_widget, 'image' must be a Property or None. Type "
                                        "is: {}".format(type(image)))
 
-        from pykechain.models import Activity2
-        if isinstance(link, Activity2):
+        from pykechain.models import Activity
+        if isinstance(link, Activity):
             if link.activity_type == ActivityType.TASK:
                 default_link_value = CardWidgetLinkValue.TASK_LINK
             else:
@@ -1386,11 +1394,10 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_weather_widget(self,
-                           weather_property: 'Property2',
+                           weather_property: 'Property',
                            autofill: Optional[bool] = None,
                            title: Optional[Union[bool, Text]] = False,
                            parent_widget: Optional[Union[Widget, Text]] = None,
-
                            **kwargs) -> Widget:
         """
         Add a KE-chain Weather widget to the Widgetmanager and the activity.
@@ -1398,7 +1405,7 @@ class WidgetsManager(Iterable):
         The widget will be saved in KE-chain.
 
         :param weather_property: KE-chain Weather property to display
-        :type weather_property: Property2
+        :type weather_property: Property
         :param title: A custom title for the script widget
             * False (default): Script name
             * String value: Custom title
@@ -1410,8 +1417,7 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        weather_property = _retrieve_object(weather_property,
-                                            method=self._client.property)  # type: 'Property2'  # noqa
+        weather_property = _retrieve_object(weather_property, method=self._client.property)  # type: 'Property'  # noqa
         meta = _initiate_meta(kwargs, activity=self._activity_id)
         meta, title = _set_title(meta, title=title, default_title=weather_property.name, **kwargs)
 

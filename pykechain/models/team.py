@@ -158,6 +158,6 @@ class Team(Base):
                      update_dict=update_dict,
                      team_id=self.id)
 
-    def scopes(self, status: Optional[ScopeStatus] = None, **kwargs) -> List['Scope2']:
+    def scopes(self, status: Optional[ScopeStatus] = None, **kwargs) -> List['Scope']:
         """Scopes associated to the team."""
         return self._client.scopes(team=self.id, status=status, **kwargs)

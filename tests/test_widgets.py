@@ -5,7 +5,7 @@ from pykechain.enums import (WidgetTypes, ShowColumnTypes, FilterType, ProgressB
                              CardWidgetLinkValue, CardWidgetLinkTarget, ImageFitValue, PropertyType, Classification,
                              Multiplicity)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
-from pykechain.models import Activity2
+from pykechain.models import Activity, Part
 from pykechain.models.widgets import (
     UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, SupergridWidget, FilteredgridWidget,
     TasknavigationbarWidget, SignatureWidget, ServiceWidget, NotebookWidget, MulticolumnWidget, CardWidget,
@@ -154,6 +154,22 @@ class TestWidgets(TestBetamax):
         self.assertIsInstance(first_widget, Widget)
         self.assertIsNotNone(first_widget.meta)
 
+    def test_associated_parts(self):
+        task = self.project.activity(name="Task - Basic Table")
+        grid_widget = list(task.widgets())[0]
+
+        associated_parts = grid_widget.associated_parts()
+        self.assertTrue(associated_parts)
+        self.assertIsInstance(associated_parts, tuple)
+        self.assertTrue(len(associated_parts) == 2)
+
+        models, instances = associated_parts
+
+        self.assertIsInstance(models, list)
+        self.assertTrue(all(isinstance(p, Part) for p in models))
+        self.assertTrue(all(p.category == Category.MODEL for p in models))
+        self.assertTrue(all(p.category == Category.INSTANCE for p in models))
+
 
 class TestWidgetManager(TestBetamax):
 
@@ -197,7 +213,7 @@ class TestWidgetManager(TestBetamax):
 class TestWidgetManagerInActivity(TestBetamax):
     def setUp(self):
         super(TestWidgetManagerInActivity, self).setUp()
-        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
+        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
         self.wm = self.task.widgets()  # type: WidgetsManager
 
     def tearDown(self):
@@ -606,10 +622,6 @@ class TestWidgetManagerInActivity(TestBetamax):
                 with self.assertRaises(IllegalArgumentError):
                     self.wm.add_scope_widget(**inputs)
 
-
-
-
-
     def test_insert_widget(self):
         bike_part = self.project.part('Bike')
         w0 = self.wm[0]  # meta panel
@@ -674,9 +686,8 @@ class TestWidgetManagerInActivity(TestBetamax):
 class TestWidgetManagerWeatherWidget(TestBetamax):
     def setUp(self):
         super(TestWidgetManagerWeatherWidget, self).setUp()
-        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
+        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
         self.wm = self.task.widgets()  # type: WidgetsManager
-
 
         catalog_root_model = self.project.part(name='Catalog', classification=Classification.CATALOG,
                                                category=Category.MODEL)
@@ -693,18 +704,18 @@ class TestWidgetManagerWeatherWidget(TestBetamax):
         self.task.delete()
         super(TestWidgetManagerWeatherWidget, self).tearDown()
 
-
     def test_weather_widget(self):
         """Testing the weather widget."""
         self.weather_widget = self.wm.add_weather_widget(
             weather_property=self.weather_prop_instance,
         )
 
+
 class TestWidgetNavigationBarWidget(TestBetamax):
 
     def setUp(self):
         super(TestWidgetNavigationBarWidget, self).setUp()
-        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
+        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
         self.wm = self.task.widgets()  # type: WidgetsManager
 
         self.frame = self.project.part(name='Frame')
@@ -789,8 +800,8 @@ class TestWidgetNavigationBarWidget(TestBetamax):
 class TestWidgetsCopyMove(TestBetamax):
     def setUp(self):
         super(TestWidgetsCopyMove, self).setUp()
-        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
-        self.task_2 = self.project.create_activity(name="test_copy_widget")  # type: Activity2
+        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
+        self.task_2 = self.project.create_activity(name="test_copy_widget")  # type: Activity
 
     def tearDown(self):
         self.task.delete()

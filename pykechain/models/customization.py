@@ -4,7 +4,7 @@ from six import text_type, string_types
 
 from pykechain.enums import ComponentXType, Category, SortTable, PropertyType, NavigationBarAlignment, WidgetNames, \
     ShowColumnTypes
-from pykechain.exceptions import APIError, IllegalArgumentError
+from pykechain.exceptions import APIError, IllegalArgumentError, _DeprecationMixin
 from pykechain.models import Part2, Activity2
 from pykechain.models.activity import Activity
 from pykechain.models.part import Part
@@ -84,7 +84,7 @@ class CustomizationBase(object):
         self.activity = activity
 
 
-class ExtCustomization(CustomizationBase):
+class ExtCustomization(CustomizationBase, _DeprecationMixin):
     """A class to represent the activity customization for Ext Js."""
 
     def __str__(self):  # pragma: no cover

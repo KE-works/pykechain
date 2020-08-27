@@ -1,5 +1,5 @@
 from pykechain.exceptions import IllegalArgumentError, APIError
-from pykechain.models import Activity2, Part2, Property2
+from pykechain.models import Activity, Part, Property
 from pykechain.models.association import Association
 from pykechain.models.input_checks import check_list_of_base
 from pykechain.utils import is_uuid
@@ -10,14 +10,14 @@ class TestAssociations(TestBetamax):
 
     def setUp(self):
         super().setUp()
-        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity2
+        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
 
         # Exactly 1 model
-        self.frame = self.project.part(name='Frame')  # type: Part2
+        self.frame = self.project.part(name='Frame')  # type: Part
         self.frame_model = self.project.model(name='Frame')
 
         # Zero or more model
-        self.wheel_parent = self.project.model(name='Bike')  # type: Property2
+        self.wheel_parent = self.project.model(name='Bike')  # type: Property
         self.wheel_model = self.project.model(name='Wheel')
 
         widgets_manager = self.task.widgets()
@@ -95,8 +95,7 @@ class TestAssociations(TestBetamax):
 
         self.assertEqual(4, len(original_associations))
 
-        self.client.update_widget_associations(
-            widget=self.form_widget,
+        self.form_widget.update_associations(
             readable_models=[],
             writable_models=self.frame_model.properties[2:3],
         )
@@ -111,8 +110,7 @@ class TestAssociations(TestBetamax):
         )
 
     def test_set_associations(self):
-        self.client.set_widget_associations(
-            widget=self.form_widget,
+        self.form_widget.set_associations(
             readable_models=[],
             writable_models=self.frame_model.properties,
         )
@@ -170,7 +168,7 @@ class TestAssociations(TestBetamax):
 
     # noinspection PyTypeChecker
     def test_validate_model_input(self):
-        model_ids = check_list_of_base(self.frame_model.properties, Property2)
+        model_ids = check_list_of_base(self.frame_model.properties, Property)
 
         self.assertIsInstance(model_ids, list)
         self.assertTrue(all(is_uuid(model_id) for model_id in model_ids))
@@ -180,7 +178,7 @@ class TestAssociations(TestBetamax):
             check_list_of_base(objects='not a list')
 
         with self.assertRaises(IllegalArgumentError):
-            check_list_of_base(objects=[self.frame_model.properties[0], 'Not a property'], cls=Property2)
+            check_list_of_base(objects=[self.frame_model.properties[0], 'Not a property'], cls=Property)
 
     def test_validate_widget_input(self):
         for method in [

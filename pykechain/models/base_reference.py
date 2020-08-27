@@ -2,12 +2,12 @@ from abc import abstractmethod, ABC
 from typing import Optional, Any, Text, Union, Tuple, List
 
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Property2, Base
+from pykechain.models import Property, Base
 from pykechain.models.base import BaseInScope
 from pykechain.models.input_checks import check_list_of_base, check_base
 
 
-class _ReferenceProperty(Property2):
+class _ReferenceProperty(Property):
     """
     Private base class for the KE-chain reference properties.
 

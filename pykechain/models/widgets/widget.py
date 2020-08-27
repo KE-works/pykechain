@@ -1,11 +1,11 @@
-from typing import Any, Optional, List, AnyStr, Dict
+from typing import Any, Optional, List, AnyStr, Dict, Union, Text
 
 import requests
 from jsonschema import validate
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import WidgetTypes, Category
-from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
+from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import BaseInScope
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 
@@ -54,17 +54,15 @@ class Widget(BaseInScope):
     def __repr__(self):  # pragma: no cover
         return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.widget_type, self.id[-8:])
 
-    def activity(self):
-        # type: () -> Activity2  # noqa: F821 to prevent circular imports
+    def activity(self) -> 'Activity':
         """Activity associated to the widget.
 
         :return: The Activity
-        :rtype: :class:`Activity2`
+        :rtype: :class:`Activity`
         """
         return self._client.activity(id=self._activity_id)
 
-    def parent(self):
-        # type: () -> Widget
+    def parent(self) -> 'Widget':
         """Parent widget.
 
         :return: The parent of this widget.
@@ -73,16 +71,9 @@ class Widget(BaseInScope):
         if not self._parent_id:
             raise NotFoundError('Widget has no parent widget (parent_id is null).')
 
-        parent_widgets = self._client.widgets(pk=self._parent_id)
-        if not parent_widgets:
-            raise NotFoundError('No parent widget with uuid "{}" was found.'.format(self._parent_id))
-        elif len(parent_widgets) > 1:
-            raise MultipleFoundError('There are multiple widgets with uuid "{}".'.format(self._parent_id))
-        else:
-            return parent_widgets[0]
+        return self._client.widget(pk=self._parent_id)
 
-    def validate_meta(self, meta):
-        # type: (dict) -> dict
+    def validate_meta(self, meta: Dict) -> Dict:
         """Validate the meta and return the meta if validation is successfull.
 
         :param meta: meta of the widget to be validated.
@@ -134,8 +125,7 @@ class Widget(BaseInScope):
         # Searchers and retrievers
         #
 
-    def parts(self, *args, **kwargs):
-        # type: (*Any, **Any) -> Any
+    def parts(self, *args, **kwargs) -> Any:
         """Retrieve parts belonging to this widget.
 
         Without any arguments it retrieves the Instances related to this widget only.
@@ -148,8 +138,7 @@ class Widget(BaseInScope):
         """
         return self._client.parts(*args, widget=self.id, **kwargs)
 
-    def associated_parts(self, *args, **kwargs):
-        # type: (*Any, **Any) -> (Any, Any)
+    def associated_parts(self, *args, **kwargs) -> (Any, Any):
         """Retrieve models and instances belonging to this widget.
 
         This is a convenience method for the :func:`Widget.parts()` method, which is used to retrieve both the
@@ -166,18 +155,67 @@ class Widget(BaseInScope):
         :returns: a tuple(models of :class:`PartSet`, instances of :class:`PartSet`)
 
         """
-        return (
-            self.parts(category=Category.MODEL, *args, **kwargs),
-            self.parts(category=Category.INSTANCE, *args, **kwargs)
-        )
+        models_and_instances = self._client.parts(*args, widget=self.id, category=None, **kwargs)
+
+        models = [p for p in models_and_instances if p.category == Category.MODEL]
+        instances = [p for p in models_and_instances if p.category == Category.INSTANCE]
+
+        return models, instances
 
     #
     # Write methods
     #
-    def update_associations(self, readable_models=None, writable_models=None, **kwargs):
-        # type: (Optional[List], Optional[List], **Any) -> None
+
+    def update_associations(
+            self,
+            readable_models: Optional[List] = None,
+            writable_models: Optional[List] = None,
+            part_instance: Optional[Union['Part', Text]] = None,
+            parent_part_instance: Optional[Union['Part', Text]] = None,
+            **kwargs
+    ) -> None:
         """
         Update associations on this widget.
+
+        This is a patch to the list of associations: Existing associations are modified but not removed.
+
+        Alternatively you may use `inputs` or `outputs` as a alias to `readable_models` and `writable_models`
+        respectively.
+
+        :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
+                                read rights (alias = inputs)
+        :type readable_models: List[Property] or List[UUID] or None
+        :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
+                                write rights (alias = outputs)
+        :type writable_models: List[Property] or List[UUID] or None
+        :param part_instance: Part object or UUID to be used as instance of the widget
+        :type part_instance: Part or UUID
+        :param parent_part_instance: Part object or UUID to be used as parent of the widget
+        :type parent_part_instance: Part or UUID
+        :param kwargs: additional keyword arguments to be passed into the API call as param.
+        :return: None
+        :raises APIError: when the associations could not be changed
+        :raise IllegalArgumentError: when the list is not of the right type
+        """
+        self._client.update_widget_associations(
+            widget=self,
+            readable_models=readable_models,
+            writable_models=writable_models,
+            part_instance=part_instance,
+            parent_part_instance=parent_part_instance,
+            **kwargs
+        )
+
+    def set_associations(
+            self,
+            readable_models: Optional[List] = None,
+            writable_models: Optional[List] = None,
+            part_instance: Optional[Union['Part', Text]] = None,
+            parent_part_instance: Optional[Union['Part', Text]] = None,
+            **kwargs
+    ) -> None:
+        """
+        Set associations on this widget.
 
         This is an absolute list of associations. If you provide No models, than the associations are cleared.
 
@@ -190,16 +228,47 @@ class Widget(BaseInScope):
         :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                 write rights (alias = outputs)
         :type writable_models: List[Property] or List[UUID] or None
+        :param part_instance: Part object or UUID to be used as instance of the widget
+        :type part_instance: Part or UUID
+        :param parent_part_instance: Part object or UUID to be used as parent of the widget
+        :type parent_part_instance: Part or UUID
         :param kwargs: additional keyword arguments to be passed into the API call as param.
         :return: None
-        :raises APIError: when the associations could not be changed
+        :raises APIError: when the associations could not be set
         :raise IllegalArgumentError: when the list is not of the right type
         """
-        self._client.update_widget_associations(widget=self, readable_models=readable_models,
-                                                writable_models=writable_models, **kwargs)
+        self._client.set_widget_associations(
+            widget=self,
+            readable_models=readable_models,
+            writable_models=writable_models,
+            part_instance=part_instance,
+            parent_part_instance=parent_part_instance,
+            **kwargs
+        )
 
-    def edit(self, title=None, meta=None, **kwargs):
-        # type: (Optional[AnyStr], Optional[Dict], **Any) -> None
+    def remove_associations(
+            self,
+            models: List[Union['Property', Text]],
+            **kwargs
+    ) -> None:
+        """
+        Remove associated properties from the widget.
+
+        :param models: list of Properties or their uuids
+        :return: None
+        """
+        self._client.remove_widget_associations(
+            widget=self,
+            models=models,
+            **kwargs
+        )
+
+    def edit(
+            self,
+            title: Optional[AnyStr] = None,
+            meta: Optional[Dict] = None,
+            **kwargs
+    ) -> None:
         """Edit the details of a widget.
 
         :param title: (optional) title of the widget
@@ -238,8 +307,7 @@ class Widget(BaseInScope):
         else:
             self._client.delete_widget(widget=self)
 
-    def copy(self, target_activity, order=None):
-        # type: (Activity2, Optional[int]) -> Widget
+    def copy(self, target_activity: 'Activity', order: Optional[int] = None) -> 'Widget':
         """Copy the widget.
 
         :param target_activity: `Activity` object under which the desired `Widget` is copied
@@ -256,8 +324,8 @@ class Widget(BaseInScope):
         >>> widget_to_copy.copy(target_activity=target_activity, order=3)
 
         """
-        from pykechain.models import Activity2
-        if not isinstance(target_activity, Activity2):
+        from pykechain.models import Activity
+        if not isinstance(target_activity, Activity):
             raise IllegalArgumentError("`target_activity` needs to be an activity, got '{}'".format(
                 type(target_activity)))
 
@@ -281,8 +349,7 @@ class Widget(BaseInScope):
 
         return copied_widget
 
-    def move(self, target_activity, order=None):
-        # type: (Activity2, Optional[int]) -> Widget # noqa: F821
+    def move(self, target_activity: 'Activity', order: Optional[int] = None) -> 'Widget':
         """Move the widget.
 
         :param target_activity: `Activity` object under which the desired `Widget` is moved
