@@ -1,6 +1,5 @@
 import datetime
 from typing import Union, Text
-from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Property
 from pykechain.models.input_checks import check_datetime
 from pykechain.utils import parse_datetime
@@ -21,15 +20,16 @@ class DatetimeProperty(Property):
 
     @value.setter
     def value(self, value):
-        if value is None:
-            self._put_value(None)
-        elif isinstance(value, datetime.datetime):
-            self._put_value(check_datetime(dt=value, key='value'))
-        else:
-            raise IllegalArgumentError('value should be a datetime.datetime() object')
+        value = check_datetime(dt=value, key='value')
 
-    def to_datetime(self):
-        # type: () -> Union[type(None), datetime.datetime]
+        value = self.serialize_value(value)
+        if self.use_bulk_update:
+            self._pend_update(dict(value=value))
+            self._value = value
+        else:
+            self._put_value(value)
+
+    def to_datetime(self) -> Union[type(None), datetime.datetime]:
         """Retrieve the data value of a property.
 
         Setting this value will immediately update the property in KE-chain.
@@ -39,12 +39,11 @@ class DatetimeProperty(Property):
         return parse_datetime(self._value)
 
     @staticmethod
-    def to_iso_format(date_time):
-        # type: (datetime.datetime) -> Text
+    def to_iso_format(date_time: datetime.datetime) -> Text:
         """Convert a datetime object to isoformat."""
         return date_time.isoformat()
 
-    def serialize_value(self, value) -> str:
+    def serialize_value(self, value) -> Text:
         """
         Serialize the value to be set on the property by checking for datetime objects.
 

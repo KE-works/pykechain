@@ -988,19 +988,23 @@ class Part(TreeObject):
         if name:
             payload_json.update(name=name)
 
-        response = self._client._request(
-            'PUT', self._client._build_url('part', part_id=self.id),
-            params=API_EXTRA_PARAMS['part'],
-            json=payload_json
-        )
+        if Property.use_bulk_update and not (name or kwargs):
+            # Use the bulk-update for properties, but only if only properties are being updated, nothing more
+            Property._update_package.extend(properties_fvalues)
+        else:
+            response = self._client._request(
+                'PUT', self._client._build_url('part', part_id=self.id),
+                params=API_EXTRA_PARAMS['part'],
+                json=payload_json
+            )
 
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Part {}".format(self), response=response)
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise APIError("Could not update Part {}".format(self), response=response)
 
-        # update local properties (without a call)
-        self.refresh(json=response.json()['results'][0])
+            # update local properties (without a call)
+            self.refresh(json=response.json()['results'][0])
 
-        # If any values were not set via the json, set them individually
+        # If any values can not be set via the json, set them individually
         for exception_fvalue in exception_fvalues:
             self.property(exception_fvalue['id']).value = exception_fvalue['value']
 

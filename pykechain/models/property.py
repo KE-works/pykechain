@@ -172,7 +172,6 @@ class Property(BaseInScope):
             raise APIError("Could not update Property {}".format(self), response=response)
 
         self.refresh(json=response.json()['results'][0])
-        return self._value
 
     def serialize_value(self, value: [T]) -> T:
         """

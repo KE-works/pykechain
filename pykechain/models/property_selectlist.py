@@ -35,9 +35,11 @@ class _SelectListProperty(Property):
         if value is not None:
             self._check_new_value(value=value)
 
-        if self._put_value(value):
+        if self.use_bulk_update:
+            self._pend_update(dict(value=value))
             self._value = value
-            self._json_data['value'] = value
+        else:
+            self._put_value(value)
 
     @abstractmethod
     def _check_new_value(self, value: Any):
