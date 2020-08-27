@@ -19,7 +19,7 @@ from .property2_attachment import AttachmentProperty2
 from .property2_selectlist import SelectListProperty2
 from .property2_multi_reference import MultiReferenceProperty2
 from .property2_datetime import DatetimeProperty2
-from .property_reference import ActivityReferenceProperty
+from .property_reference import ActivityReferenceProperty, ScopeReferenceProperty, UserReferenceProperty
 from .partset import PartSet
 from .service import Service, ServiceExecution
 from .team import Team
@@ -38,6 +38,8 @@ AnyProperty = Union[
     'SelectListProperty2',
     'DatetimeProperty2'
     'ActivityReferenceProperty',
+    'ScopeReferenceProperty',
+    'UserReferenceProperty',
 ]
 
 # This map is used to identify the correct class for the (KE-chain provided) property type.
@@ -47,6 +49,8 @@ property_type_to_class_map = {
     PropertyType.REFERENCES_VALUE: MultiReferenceProperty2,
     PropertyType.DATETIME_VALUE: DatetimeProperty2,
     PropertyType.ACTIVITY_REFERENCES_VALUE: ActivityReferenceProperty,
+    PropertyType.SCOPE_REFERENCES_VALUE: ScopeReferenceProperty,
+    PropertyType.USER_REFERENCES_VALUE: UserReferenceProperty,
 }
 
 __all__ = (
@@ -75,6 +79,8 @@ __all__ = (
     'SelectListProperty2',
     'DatetimeProperty2',
     'ActivityReferenceProperty',
+    'ScopeReferenceProperty',
+    'UserReferenceProperty',
     'AnyProperty',
     'property_type_to_class_map',
 )
