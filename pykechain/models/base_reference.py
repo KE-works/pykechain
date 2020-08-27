@@ -41,7 +41,8 @@ class _ReferenceProperty(Property):
     def value(self, value: Any) -> None:
         value = self.serialize_value(value)
         if self.use_bulk_update:
-            self._pend_value(value)
+            self._pend_update(dict(value=value))
+            self._value = value
         else:
             self._put_value(value)
 

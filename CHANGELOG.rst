@@ -4,10 +4,11 @@ Change Log
 v3.8.1-rc3 (UNRELEASED)
 -----------------------
 
-* :bug: Set and Update of widget associations now optionally updates the `part_instance_id` and/or `parent_part_instance_id`.
+* :bug: Set and Update of widget associations now handles optional `part_instance_id` and/or `parent_part_instance_id` inputs.
 * :+1: Added `update_activities` method to `Client` to update activities in bulk.
 * :+1: `WidgetsManager` is now stored in its `Activity` object for lazy retrieval, while the `WidgetsManager` no explicitly stores a reference to its `Activity`.
 * :+1: Available `Part` options of a pre-filtered multi-reference properties are now filtered when using the `choices()` method on the `MultiReferenceProperty`.
+* :+1: Added `model_id` attribute to `Part` class.
 
 v3.8.1-rc2 (UNRELEASED)
 -----------------------

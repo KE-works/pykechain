@@ -11,6 +11,7 @@ from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.validators import PropertyValidator
 from pykechain.models.validators.validator_schemas import options_json_schema
 from pykechain.defaults import API_EXTRA_PARAMS
+from pykechain.utils import find
 
 T = TypeVar("T")
 
@@ -132,7 +133,8 @@ class Property(BaseInScope):
     def value(self, value: Any) -> None:
         value = self.serialize_value(value)
         if self.use_bulk_update:
-            self._pend_value(value)
+            self._pend_update(dict(value=value))
+            self._value = value
         else:
             self._put_value(value)
 
@@ -152,14 +154,13 @@ class Property(BaseInScope):
             cls._update_package = list()
         cls.use_bulk_update = use_bulk_update
 
-    def _pend_value(self, value):
+    def _pend_update(self, data):
         """Store the value to be send at a later point in time using `update_values`."""
-        self.__class__._update_package.append(dict(
-            id=self.id,
-            value=value,
-        ))
-        self._value = value
-        return self._value
+        update_dict = find(self.__class__._update_package, lambda d: d["id"] == self.id)
+        if update_dict:
+            update_dict.update(data)
+        else:
+            self.__class__._update_package.append(dict(id=self.id, **data))
 
     def _put_value(self, value):
         """Send the value to KE-chain."""
@@ -419,15 +420,20 @@ class Property(BaseInScope):
         if kwargs:  # pragma: no cover
             update_dict.update(kwargs)
 
-        response = self._client._request('PUT',
-                                         self._client._build_url('property', property_id=self.id),
-                                         params=API_EXTRA_PARAMS['property'],
-                                         json=update_dict)
+        if self.use_bulk_update:
+            self._pend_update(data=update_dict)
+        else:
+            response = self._client._request(
+                'PUT',
+                self._client._build_url('property', property_id=self.id),
+                params=API_EXTRA_PARAMS['property'],
+                json=update_dict
+            )
 
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Property {}".format(self), response=response)
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise APIError("Could not update Property {}".format(self), response=response)
 
-        self.refresh(json=response.json()['results'][0])
+            self.refresh(json=response.json()['results'][0])
 
     def delete(self) -> None:
         """Delete this property.
