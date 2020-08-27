@@ -9,6 +9,7 @@ v3.8.1-rc3 (UNRELEASED)
 * :+1: `WidgetsManager` is now stored in its `Activity` object for lazy retrieval, while the `WidgetsManager` no explicitly stores a reference to its `Activity`.
 * :+1: Available `Part` options of a pre-filtered multi-reference properties are now filtered when using the `choices()` method on the `MultiReferenceProperty`.
 * :+1: Added `model_id` attribute to `Part` class.
+* :+1: Added `count_instances()` method to the `Part` class, to retrieve the number of Part instances of a Part model.
 
 v3.8.1-rc2 (UNRELEASED)
 -----------------------

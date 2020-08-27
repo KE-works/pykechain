@@ -389,6 +389,33 @@ class Part(TreeObject):
         else:
             raise NotFoundError("Part {} has no instance".format(self))
 
+    def count_instances(self) -> int:
+        """
+        Retrieve the number of instances of this Part model without the parts themselves.
+
+        :return: number of Part instances
+        :rtype
+        """
+        if not self.category == Category.MODEL:
+            raise IllegalArgumentError("You can only count the number of instances of a Part with category MODEL")
+
+        response = self._client._request(
+            "GET",
+            self._client._build_url("parts"),
+            params={
+                "scope_id": self.scope_id,
+                "model_id": self.id,
+                "limit": 1,
+            },
+        )
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve Parts instances")
+
+        data = response.json()["count"]
+
+        return data
+
     #
     # CRUD operations
     #
