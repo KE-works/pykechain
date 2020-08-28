@@ -385,7 +385,7 @@ class TestUpdateProperties(TestBetamax):
     def test_bulk_update_manual(self):
         """Test storing of value updates in the Property class."""
         # setUp
-        Property.use_bulk_update = True
+        Property.set_bulk_update(True)
         self.prop_1.value = 'new value'
         self.prop_2.value = 'another value'
 
@@ -401,7 +401,7 @@ class TestUpdateProperties(TestBetamax):
     def test_bulk_update_reset(self):
         """Test whether bulk update is reset to `False` after update is performed."""
         # setUp
-        Property.use_bulk_update = True
+        Property.set_bulk_update(True)
         self.prop_1.value = 'new value'
 
         # testing
@@ -411,7 +411,7 @@ class TestUpdateProperties(TestBetamax):
         self.assertFalse(Property.use_bulk_update)
 
         # setUp 2
-        Property.use_bulk_update = True
+        Property.set_bulk_update(True)
         self.prop_2.value = 'another value'
 
         # testing 2

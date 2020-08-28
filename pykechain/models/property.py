@@ -116,8 +116,12 @@ class Property(BaseInScope):
 
     @use_bulk_update.setter
     def use_bulk_update(self, value):
-        assert isinstance(value, bool), "`use_bulk_update` must be set to a boolean, not {}".format(type(value))
-        self.__class__._use_bulk_update = value
+        self.__class__.set_bulk_update(value)
+
+    @classmethod
+    def set_bulk_update(cls, value):
+        assert isinstance(value, bool), "`bulk_update` must be set to a boolean, not {}".format(type(value))
+        cls._use_bulk_update = value
 
     @property
     def value(self) -> Any:
@@ -152,7 +156,7 @@ class Property(BaseInScope):
         if cls.use_bulk_update:
             client.update_properties(properties=cls._update_package)
             cls._update_package = list()
-        cls.use_bulk_update = use_bulk_update
+        cls.set_bulk_update(use_bulk_update)
 
     def _pend_update(self, data):
         """Store the value to be send at a later point in time using `update_values`."""

@@ -90,7 +90,7 @@ class TestPartUpdate(TestBetamax):
 
     def test_bulk_update(self):
         from pykechain.models import Property
-        Property.use_bulk_update = True
+        Property.set_bulk_update(True)
 
         self.wheel.update(update_dict={
             'Diameter': 0.7,
