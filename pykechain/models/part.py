@@ -654,6 +654,7 @@ class Part(TreeObject):
         :rtype tuple
         """
         properties_fvalues = check_list_of_dicts(properties_fvalues, 'properties_fvalues') or list()
+        check_type(update_dict, dict, "update_dict")
 
         exception_fvalues = list()
         update_dict = update_dict or dict()
@@ -991,6 +992,15 @@ class Part(TreeObject):
         if Property.use_bulk_update and not (name or kwargs):
             # Use the bulk-update for properties, but only if only properties are being updated, nothing more
             Property._update_package.extend(properties_fvalues)
+
+            value_dict = dict()
+            for update in properties_fvalues:
+                key = "id" if self.category == Category.INSTANCE else "model_id"
+                value_dict[update[key]] = update["value"]
+
+            for prop in self.properties:
+                if prop.id in value_dict:
+                    prop._value = value_dict[prop.id]
         else:
             response = self._client._request(
                 'PUT', self._client._build_url('part', part_id=self.id),

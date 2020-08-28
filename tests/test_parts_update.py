@@ -6,99 +6,69 @@ from tests.classes import TestBetamax
 
 
 class TestPartUpdate(TestBetamax):
-    # updated in 1.9
-    def test_part_update_with_dictionary_without_name(self):
-        # setup
-        front_fork = self.project.part('Front Fork')  # type: Part
-        saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
 
-        # do tests
+    def setUp(self):
+        super().setUp()
+        model = self.project.model("Wheel")
+        bike = self.project.part("Bike")
+        self.wheel = bike.add(model=model, name='_WHEEL')  # type: Part
+
+    def tearDown(self):
+        self.wheel.delete()
+        super().tearDown()
+
+    def test(self):
         update_dict = {
-            'Material': 'Adamantium',
-            'Height': 432.1,
-            'Color': 'Earth Blue (new)'
+            'Diameter': 432.1,
+            'Spokes': 0,
+            'Rim Material': 'Adamantium'
         }
-        front_fork.update(update_dict=update_dict)
-        refreshed_front_fork = self.project.part(pk=front_fork.id)
+        self.wheel.update(
+            name='Better wheel',
+            update_dict=update_dict,
+        )
+        live_wheel = self.project.part(pk=self.wheel.id)
+        self.assertEqual(live_wheel.name, 'Better wheel')
 
-        for prop in refreshed_front_fork.properties:
-            self.assertIn(prop.name, update_dict, "property with {} should be in the update dict".format(prop.name))
-            self.assertEqual(update_dict[prop.name], prop.value, "property {} with value {} did not match contents "
-                                                                 "with KEC".format(prop.name, prop.value))
+        for name, value in update_dict.items():
+            self.assertEqual(value, live_wheel.property(name=name).value,
+                             "property {} with value {} did not match contents with KEC".format(name, value))
 
-        # tearDown
-        for prop_name, prop_value in saved_front_fork_properties.items():
-            front_fork.property(prop_name).value = prop_value
-
-    # new in 1.9
-    def test_part_update_with_dictionary_including_name(self):
-        # setup
-        front_fork = self.project.part('Front Fork')  # type: Part
-        saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
-
-        # do tests
-        update_dict = {
-            'Material': 'Adamantium',
-            'Height': 432.1,
-            'Color': 'Earth Blue (new)'
-        }
-        front_fork.update(name='Better front fork', update_dict=update_dict)
-        refreshed_front_fork = self.project.part(pk=front_fork.id)
-        self.assertEqual(refreshed_front_fork.name, 'Better front fork')
-        for prop in refreshed_front_fork.properties:
-            self.assertIn(prop.name, update_dict, "property with {} should be in the update dict".format(prop.name))
-            self.assertEqual(update_dict[prop.name], prop.value, "property {} with value {} did not match contents "
-                                                                 "with KEC".format(prop.name, prop.value))
-
-        with self.assertRaises(IllegalArgumentError):
-            front_fork.update(name=12, update_dict=update_dict)
-
-        # tearDown
-        for prop_name, prop_value in saved_front_fork_properties.items():
-            front_fork.property(prop_name).value = prop_value
-        refreshed_front_fork.edit(name='Front Fork')
-
-    def test_part_update_with_missing_property(self):
-        # setup
-        front_fork = self.project.part('Front Fork')  # type: Part
-        saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
-
-        # do tests
+    def test_with_missing_property(self):
         update_dict = {
             'Unknown Property': 'Woot!'
         }
         with self.assertRaises(NotFoundError):
-            front_fork.update(update_dict=update_dict)
+            self.wheel.update(update_dict=update_dict)
 
-        # tearDown
-        for prop_name, prop_value in saved_front_fork_properties.items():
-            front_fork.property(prop_name).value = prop_value
+    # noinspection PyTypeChecker
+    def test_invalid_inputs(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.wheel.update(name=12)
+
+        with self.assertRaises(IllegalArgumentError):
+            self.wheel.update(update_dict=("Diameter", 41.2))
+
+        with self.assertRaises(IllegalArgumentError):
+            self.wheel.update(properties_fvalues=("Diameter", 41.2))
 
     # new in 1.14.1
-    def test_part_update_with_property_ids(self):
-        # setup
-        front_fork = self.project.part('Front Fork')  # type: Part
-        saved_front_fork_properties = dict([(p.name, p.value) for p in front_fork.properties])
-
+    def test_with_property_ids(self):
         update_dict = dict()
-        for p in front_fork.properties:
-            if p.name == 'Color':
-                update_dict[p.id] = 'Green'
-            elif p.name == 'Material':
-                update_dict[p.id] = 'Titanium'
-            elif p.name == 'Height (mm)':
-                update_dict[p.id] = '42'
+        for p in self.wheel.properties:
+            if p.name == 'Diameter':
+                update_dict[p.id] = 1.5
+            elif p.name == 'Spokes':
+                update_dict[p.id] = 20
+            elif p.name == 'Rim Material':
+                update_dict[p.id] = "Adamantium"
 
         # do tests
-        front_fork.update(update_dict=update_dict)
+        self.wheel.update(update_dict=update_dict)
 
-        # tearDown
-        for prop_name, prop_value in saved_front_fork_properties.items():
-            front_fork.property(prop_name).value = prop_value
-
-    def test_part_update_with_attachment(self):
+    def test_with_attachment(self):
         # setup
-        bike_part = self.project.part('Bike')  # type: Part2
+        bike_part = self.project.part('Bike')  # type: Part
         bike_part.property(name='Picture').value = None
 
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/'))
@@ -117,3 +87,26 @@ class TestPartUpdate(TestBetamax):
 
         # tearDown
         attachment_prop.value = None
+
+    def test_bulk_update(self):
+        from pykechain.models import Property
+        Property.use_bulk_update = True
+
+        self.wheel.update(update_dict={
+            'Diameter': 0.7,
+            'Spokes': 25,
+        })
+
+        self.assertEqual(0.7, self.wheel.property("Diameter").value)
+        self.assertEqual(25, self.wheel.property("Spokes").value)
+
+        live_wheel = self.project.part(name="_WHEEL")
+
+        self.assertIsNone(live_wheel.property("Diameter").value)
+        self.assertIsNone(live_wheel.property("Spokes").value)
+
+        Property.update_values(client=self.client)
+        live_wheel.refresh()
+
+        self.assertEqual(0.7, live_wheel.property("Diameter").value)
+        self.assertEqual(25, live_wheel.property("Spokes").value)
