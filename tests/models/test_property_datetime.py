@@ -2,7 +2,7 @@ import datetime
 
 from pykechain.enums import PropertyType
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models.property2_datetime import DatetimeProperty2
+from pykechain.models.property2_datetime import DatetimeProperty
 from tests.classes import TestBetamax
 
 
@@ -13,8 +13,8 @@ class TestDateTime(TestBetamax):
         super(TestDateTime, self).setUp()
 
         self.property_model = self.project.model('Bike').add_property(
-            name='Testing date', property_type=PropertyType.DATETIME_VALUE)  # type: DatetimeProperty2
-        self.property = self.project.part('Bike').property(name='Testing date')  # type: DatetimeProperty2
+            name='Testing date', property_type=PropertyType.DATETIME_VALUE)  # type: DatetimeProperty
+        self.property = self.project.part('Bike').property(name='Testing date')  # type: DatetimeProperty
 
         self.property.value = self.example_time
 
