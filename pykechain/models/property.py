@@ -120,6 +120,7 @@ class Property(BaseInScope):
 
     @classmethod
     def set_bulk_update(cls, value):
+        """Set global class attribute to toggle the use of bulk-updates of properties."""
         assert isinstance(value, bool), "`bulk_update` must be set to a boolean, not {}".format(type(value))
         cls._use_bulk_update = value
 
