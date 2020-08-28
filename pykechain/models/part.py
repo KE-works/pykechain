@@ -1,4 +1,4 @@
-from typing import Union, List, Dict, Optional, Text, Tuple  # noqa: F401
+from typing import Union, List, Dict, Optional, Text, Tuple, Any  # noqa: F401
 
 import requests
 
@@ -88,7 +88,7 @@ class Part(TreeObject):
         self.classification = json.get('classification')  # type: Classification
 
         self.properties = [Property.create(p, client=self._client)
-                           for p in sorted(json['properties'], key=lambda p: p.get('order', 0))]  # type: list
+                           for p in sorted(json['properties'], key=lambda p: p.get('order', 0))]  # type: List[Property]
 
         proxy_data = json.get('proxy_source_id_name', dict())  # type: Optional[Dict]
         self._proxy_model_id = proxy_data.get('id') if proxy_data else None  # type: Optional[Text]
@@ -641,9 +641,11 @@ class Part(TreeObject):
         return self._client.create_property(self, *args, **kwargs)
 
     @staticmethod
-    def _parse_update_dict(part: 'Part',
-                           properties_fvalues: List,
-                           update_dict: Dict) -> Tuple[List[Dict], List[Dict]]:
+    def _parse_update_dict(
+            part: 'Part',
+            properties_fvalues: List[Dict[Text, Any]],
+            update_dict: Dict,
+    ) -> Tuple[List[Dict], List[Dict]]:
         """
         Check the content of the update dict and insert them into the properties_fvalues list.
 
@@ -989,14 +991,14 @@ class Part(TreeObject):
         if name:
             payload_json.update(name=name)
 
-        if Property.use_bulk_update and not (name or kwargs):
+        if Property._use_bulk_update and not (name or kwargs):
             # Use the bulk-update for properties, but only if only properties are being updated, nothing more
             Property._update_package.extend(properties_fvalues)
 
             value_dict = dict()
             for update in properties_fvalues:
                 key = "id" if self.category == Category.INSTANCE else "model_id"
-                value_dict[update[key]] = update["value"]
+                value_dict[update[key]] = update.get("value")
 
             for prop in self.properties:
                 if prop.id in value_dict:
