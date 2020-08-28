@@ -4,8 +4,8 @@ from pykechain.models import Activity, Scope, user
 from pykechain.models.base_reference import _ReferencePropertyInScope
 
 
-class ActivityReferenceProperty(_ReferencePropertyInScope):
-    """A virtual object representing a KE-chain Activity Reference property.
+class ActivityReferencesProperty(_ReferencePropertyInScope):
+    """A virtual object representing a KE-chain Activity References property.
 
     .. versionadded:: 3.7
     """
@@ -27,8 +27,8 @@ class ActivityReferenceProperty(_ReferencePropertyInScope):
         return activities
 
 
-class ScopeReferenceProperty(_ReferencePropertyInScope):
-    """A virtual object representing a KE-chain Scope Reference property.
+class ScopeReferencesProperty(_ReferencePropertyInScope):
+    """A virtual object representing a KE-chain Scope References property.
 
     .. versionadded: 3.9
     """
@@ -61,8 +61,8 @@ class ScopeReferenceProperty(_ReferencePropertyInScope):
         return scopes
 
 
-class UserReferenceProperty(_ReferencePropertyInScope):
-    """A virtual object representing a KE-chain User Reference property.
+class UserReferencesProperty(_ReferencePropertyInScope):
+    """A virtual object representing a KE-chain User References property.
 
     .. versionadded: 3.9
     """

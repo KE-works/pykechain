@@ -2,9 +2,9 @@ from pykechain.enums import PropertyType, FilterType, Multiplicity, ActivityRoot
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import MultiReferenceProperty2
 from pykechain.models.property_reference import (
-    ActivityReferenceProperty,
-    ScopeReferenceProperty,
-    UserReferenceProperty,
+    ActivityReferencesProperty,
+    ScopeReferencesProperty,
+    UserReferencesProperty,
 )
 from pykechain.models.validators import RequiredFieldValidator
 from pykechain.utils import find
@@ -699,7 +699,7 @@ class TestActivityReference(TestBetamax):
         super().tearDown()
 
     def test_create(self):
-        self.assertIsInstance(self.prop, ActivityReferenceProperty)
+        self.assertIsInstance(self.prop, ActivityReferencesProperty)
 
     def test_value(self):
         wbs_root = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
@@ -708,7 +708,7 @@ class TestActivityReference(TestBetamax):
         self.prop.value = [task]
         self.prop.refresh()
 
-        self.assertIsInstance(self.prop, ActivityReferenceProperty)
+        self.assertIsInstance(self.prop, ActivityReferencesProperty)
         self.assertIsNotNone(self.prop.value)
         self.assertEqual(task, self.prop.value[0])
 
@@ -744,19 +744,19 @@ class TestScopeReference(TestBetamax):
         super().tearDown()
 
     def test_create(self):
-        self.assertIsInstance(self.scope_ref_prop, ScopeReferenceProperty)
+        self.assertIsInstance(self.scope_ref_prop, ScopeReferencesProperty)
 
     def test_value(self):
         bike_project = self.client.scope(name="Bike Project")
 
         self.scope_ref_prop.value = [bike_project]
 
-        self.assertIsInstance(self.scope_ref_prop, ScopeReferenceProperty)
+        self.assertIsInstance(self.scope_ref_prop, ScopeReferencesProperty)
         self.assertIsNotNone(self.scope_ref_prop.value)
         self.assertEqual(bike_project, self.scope_ref_prop.value[0])
 
     def test_no_value(self):
-        self.assertIsInstance(self.scope_ref_prop, ScopeReferenceProperty)
+        self.assertIsInstance(self.scope_ref_prop, ScopeReferencesProperty)
         self.assertIsNone(self.scope_ref_prop.value)
 
     def test_reload(self):
@@ -791,19 +791,19 @@ class TestUserReference(TestBetamax):
         super().tearDown()
 
     def test_create(self):
-        self.assertIsInstance(self.user_ref_prop, UserReferenceProperty)
+        self.assertIsInstance(self.user_ref_prop, UserReferencesProperty)
 
     def test_value(self):
         user = self.client.user(name="User Test")
 
         self.user_ref_prop.value = [user]
 
-        self.assertIsInstance(self.user_ref_prop, UserReferenceProperty)
+        self.assertIsInstance(self.user_ref_prop, UserReferencesProperty)
         self.assertIsNotNone(self.user_ref_prop.value)
         self.assertEqual(user, self.user_ref_prop.value[0])
 
     def test_no_value(self):
-        self.assertIsInstance(self.user_ref_prop, UserReferenceProperty)
+        self.assertIsInstance(self.user_ref_prop, UserReferencesProperty)
         self.assertIsNone(self.user_ref_prop.value)
 
     def test_reload(self):
