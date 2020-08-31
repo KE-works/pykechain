@@ -16,6 +16,7 @@ v3.8.1-rc2 (UNRELEASED)
 
 * :+1: Added `set_associations` and `remove_associations` method to the `Widget` class (#827)
 * :+1: Renamed activity clone API endpoint is now supported. We now support the cloning and renaming of Parts as well as cloning the activities. (#805)
+* :+1: Added support of user references and scope references properties in pykechain by implementing the `UserReferencesProperty` and `ScopeReferencesProperty` classes. (#832)
 
 v3.8.1-rc1 (14AUG20)
 --------------------
@@ -48,7 +49,7 @@ v3.7.5 (29JUN20)
 v3.7.4 (15JUN20)
 ----------------
 
-* :bug: Reloading `Activity2` when retrieved in an `ActivityReferenceProperty` in order to populate it with all required data.
+* :bug: Reloading `Activity2` when retrieved in an `ActivityReferencesProperty` in order to populate it with all required data.
 * :+1: dependent versions for development: sphinx (3.1.1), pytest-cov (2.10.0)
 
 v3.7.3 (11JUN20)
@@ -83,7 +84,7 @@ In this release we also deprecated functionality that were announced to be depre
 
 * :star: Extracted representations from `Property2` class into a separate `RepresentationMixin` class. This is now utilized by the `Scope2`, `Activity2` and `Property2` classes.
 * :star: Implemented `MultiSelectListProperty2` class, generalizing the implementation of the `SelectListProperty2 class. Intermediate class `_SelectListProperty` now hosts the generic implementation. #732
-* :star: Implemented `ActivityReferenceProperty` class, generalizing the implementation of the part reference `MultiReferenceProperty2` class. Intermediate classes `_ReferenceProperty` and `_ReferencePropertyInScope` have been added for further reference properties. #746
+* :star: Implemented `ActivityReferencesProperty` class, generalizing the implementation of the part reference `MultiReferenceProperty2` class. Intermediate classes `_ReferenceProperty` and `_ReferencePropertyInScope` have been added for further reference properties. #746
 * :star: Added `ScopeRoles` and `ScopeMemberActions` enum classes to list the roles of and operations on scope members.
 
 * :+1: Added `PropertyTypes` enumeration values for the JSON property and multiple new reference properties.
