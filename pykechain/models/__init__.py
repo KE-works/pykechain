@@ -48,7 +48,7 @@ property_type_to_class_map = {
     PropertyType.SINGLE_SELECT_VALUE: SelectListProperty,
     PropertyType.REFERENCES_VALUE: MultiReferenceProperty,
     PropertyType.DATETIME_VALUE: DatetimeProperty,
-    PropertyType.ACTIVITY_REFERENCES_VALUE: ActivityReferenceProperty,
+    PropertyType.ACTIVITY_REFERENCES_VALUE: ActivityReferencesProperty,
     PropertyType.SCOPE_REFERENCES_VALUE: ScopeReferencesProperty,
     PropertyType.USER_REFERENCES_VALUE: UserReferencesProperty,
 }
