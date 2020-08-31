@@ -1,7 +1,7 @@
 from typing import List
 
 from pykechain.models import Activity, Scope, user
-from pykechain.models.base_reference import _ReferencePropertyInScope
+from pykechain.models.base_reference import _ReferencePropertyInScope, _ReferenceProperty
 
 
 class ActivityReferencesProperty(_ReferencePropertyInScope):
@@ -27,7 +27,7 @@ class ActivityReferencesProperty(_ReferencePropertyInScope):
         return activities
 
 
-class ScopeReferencesProperty(_ReferencePropertyInScope):
+class ScopeReferencesProperty(_ReferenceProperty):
     """A virtual object representing a KE-chain Scope References property.
 
     .. versionadded: 3.9
@@ -61,7 +61,7 @@ class ScopeReferencesProperty(_ReferencePropertyInScope):
         return scopes
 
 
-class UserReferencesProperty(_ReferencePropertyInScope):
+class UserReferencesProperty(_ReferenceProperty):
     """A virtual object representing a KE-chain User References property.
 
     .. versionadded: 3.9

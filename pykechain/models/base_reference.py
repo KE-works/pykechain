@@ -56,7 +56,7 @@ class _ReferenceProperty(Property):
         :param kwargs: optional arguments
         :return: list of Pykechain objects inheriting from Base
         """
-        pass
+        pass  # pragma: no cover
 
     def serialize_value(self, value: Union[Base, List, Tuple]) -> Optional[List[Text]]:
         """

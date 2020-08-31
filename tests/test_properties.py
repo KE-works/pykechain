@@ -420,6 +420,9 @@ class TestUpdateProperties(TestBetamax):
         self.assertEqual(self._refresh_prop(self.prop_2).value, 'another value')
         self.assertTrue(Property._use_bulk_update)
 
+        # tearDown
+        Property.set_bulk_update(False)
+
 
 class TestPropertiesWithReferenceProperty(TestBetamax):
     def setUp(self):
