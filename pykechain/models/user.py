@@ -1,3 +1,5 @@
+from typing import Text
+
 import pytz
 
 from .base import Base
@@ -31,7 +33,16 @@ class User(Base):
         return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.username, self.id)
 
     @property
-    def timezone(self):
+    def default_name(self) -> Text:
+        """
+        Default name, prioritizing the user name over the KE-chain name.
+        :return: Name
+        :rtype str
+        """
+        return self.username if self.username else self.name
+
+    @property
+    def timezone(self) -> pytz.BaseTzInfo:
         """
         Timezone of the user.
 
@@ -44,7 +55,7 @@ class User(Base):
         return pytz.timezone(zone=self._json_data.get('timezone', 'UTC'))
 
     @property
-    def language(self):
+    def language(self) -> Text:
         """
         Language code of the user.
 
@@ -56,7 +67,7 @@ class User(Base):
         return self._json_data.get('language_code', 'en')
 
     @property
-    def email(self):
+    def email(self) -> Text:
         """
         Email of the user.
 

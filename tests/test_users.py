@@ -41,6 +41,12 @@ class TestUsers(TestBetamax):
         name_retrieved = user_retrieved.name
         self.assertIn(name_retrieved, ['User Test', ''])
 
+    def test_retrieve_default_name(self):
+        user_retrieved = self.client.user(username='testuser')
+        default_name = user_retrieved.default_name
+        self.assertIsInstance(default_name, str)
+        self.assertIn(default_name, user_retrieved.username)
+
     def test_retrieve_user_email(self):
         user_retrieved = self.client.user(username='testuser')
         email_retrieved = user_retrieved.email
