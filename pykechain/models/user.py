@@ -35,7 +35,8 @@ class User(Base):
     @property
     def default_name(self) -> Text:
         """
-        Default name, prioritizing the user name over the KE-chain name.
+        Get default name, prioritizing the user name over the KE-chain name.
+
         :return: Name
         :rtype str
         """
