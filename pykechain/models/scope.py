@@ -421,10 +421,11 @@ class Scope(Base, TagsMixin):
         """Retrieve the side-bar manager."""
         return SideBarManager(scope=self, *args, **kwargs)
 
-    def set_landing_page(self,
-                         activity: Union['Activity', KEChainPages],
-                         task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
-                         ) -> None:
+    def set_landing_page(
+            self,
+            activity: Union['Activity', KEChainPages],
+            task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
+    ) -> None:
         """
         Update the landing page of the scope.
 
@@ -451,6 +452,14 @@ class Scope(Base, TagsMixin):
         options = dict(self.options)
         options.update({'landingPage': url})
         self.options = options
+
+    def get_landing_page_url(self) -> Optional[Text]:
+        """
+        Retrieve the landing page URL, if it is set in the options.
+
+        :return: Landing page url
+        """
+        return self.options.get("landingPage")
 
     #
     # Service Methods
