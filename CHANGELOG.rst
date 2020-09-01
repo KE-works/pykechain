@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+* :+1: Added the Service Widget in alignment with the KE-chain backend. (KE-220)
+
+
 v3.8.1-rc2 (UNRELEASED)
 -----------------------
 
