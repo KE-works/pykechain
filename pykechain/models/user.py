@@ -3,6 +3,7 @@ from typing import Text
 import pytz
 
 from .base import Base
+from ..enums import LanguageCodes
 
 
 class User(Base):
@@ -65,7 +66,7 @@ class User(Base):
         :return: language code string
         :rtype: basestring
         """
-        return self._json_data.get('language_code', 'en')
+        return self._json_data.get('language_code', LanguageCodes.ENGLISH)
 
     @property
     def email(self) -> Text:

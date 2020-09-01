@@ -11,6 +11,7 @@ v3.8.1-rc3 (UNRELEASED)
 * :+1: Added `model_id` attribute to `Part` class.
 * :+1: Added `count_instances()` method to the `Part` class, to retrieve the number of Part instances of a Part model.
 * :+1: Added `get_landing_page_url()` method to the `Scope` class, to retrieve the (relative) URL of landing page for that scope. Append it to the client's API root for a full URL.
+* :+1: Added `LanguageCodes` enum class to enumerate the available Language options for user profiles.
 
 v3.8.1-rc2 (UNRELEASED)
 -----------------------

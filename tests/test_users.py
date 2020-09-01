@@ -1,3 +1,4 @@
+from pykechain.enums import LanguageCodes
 from pykechain.exceptions import NotFoundError, MultipleFoundError
 from tests.classes import TestBetamax
 
@@ -55,4 +56,4 @@ class TestUsers(TestBetamax):
     def test_retrieve_user_language(self):
         user_retrieved = self.client.user(username='testuser')
         language_retrieved = user_retrieved.language
-        self.assertIn(language_retrieved, ['fr', 'en', 'nl', 'de', ''])
+        self.assertIn(language_retrieved, LanguageCodes.values())
