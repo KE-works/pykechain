@@ -1038,7 +1038,7 @@ class LanguageCodes(Enum):
     :cvar DUTCH: Dutch
     :cvar ITALIAN: Italian
     """
-    
+
     ENGLISH = "en"
     FRENCH = "fr"
     GERMAN = "de"

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional, Text
 
 from pykechain.models import Activity, Scope, user
 from pykechain.models.base_reference import _ReferencePropertyInScope, _ReferenceProperty
@@ -94,3 +94,15 @@ class UserReferencesProperty(_ReferenceProperty):
         if users_ids:
             users = list(self._client.users(id__in=",".join(users_ids)))
         return users
+
+    def value_ids(self) -> Optional[List[Text]]:
+        """
+        Retrieve the referenced object UUIDs only.
+
+        :return: list of UUIDs
+        :rtype list
+        """
+        if self.has_value():
+            return [value.get("pk") for value in self._value]
+        else:
+            return None

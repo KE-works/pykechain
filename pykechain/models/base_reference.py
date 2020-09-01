@@ -46,6 +46,18 @@ class _ReferenceProperty(Property):
         else:
             self._put_value(value)
 
+    def value_ids(self) -> Optional[List[Text]]:
+        """
+        Retrieve the referenced object UUIDs only.
+
+        :return: list of UUIDs
+        :rtype list
+        """
+        if self.has_value():
+            return [value.get("id") for value in self._value]
+        else:
+            return None
+
     @abstractmethod
     def _retrieve_objects(self, **kwargs) -> List[Base]:
         """
