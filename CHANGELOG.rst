@@ -5,7 +5,7 @@ v3.8.1-rc3 (UNRELEASED)
 -----------------------
 
 * :bug: Set and Update of widget associations now handles optional `part_instance_id` and/or `parent_part_instance_id` inputs.
-* :bug: `WidgetsManager` no longer implements `Iterable` as an "iterator", making it possible to loop over its widgets multiple times.
+* :bug: `WidgetsManager` and `PartSet` no longer implement `Iterable` as an "iterator", making it possible to loop over the Widgets/Parts multiple times.
 * :+1: Added `update_activities` method to `Client` to update activities in bulk.
 * :+1: `WidgetsManager` is now stored in its `Activity` object for lazy retrieval, while the `WidgetsManager` no explicitly stores a reference to its `Activity`.
 * :+1: Available `Part` options of a pre-filtered multi-reference properties are now filtered when using the `choices()` method on the `MultiReferenceProperty`.

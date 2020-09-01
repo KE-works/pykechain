@@ -56,10 +56,7 @@ class WidgetsManager(Iterable):
         return "<pyke {} object {} widgets>".format(self.__class__.__name__, self.__len__())
 
     def __iter__(self):
-        n = 0
-        while n < len(self):
-            yield self._widgets[n]
-            n += 1
+        return iter(self._widgets)
 
     def __len__(self) -> int:
         return len(self._widgets)

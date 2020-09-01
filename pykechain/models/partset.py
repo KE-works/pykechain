@@ -1,9 +1,9 @@
-from typing import Sized, Iterable, Text  # noqa: F401
+from typing import Iterable, Text  # noqa: F401
 
 from pykechain.models.part import Part  # noqa: F401
 
 
-class PartSet(Sized):
+class PartSet(Iterable):
     """A set of KE-chain parts.
 
     Adding set-like methods on a list of parts:
@@ -16,22 +16,15 @@ class PartSet(Sized):
     def __init__(self, parts: Iterable[Part]):
         """Construct a PartSet from a part iterable."""
         self._parts = list(parts)
-        self._iter = iter(self._parts)
 
     def __repr__(self):  # pragma: no cover
         return "<pyke {} object {} parts>".format(self.__class__.__name__, self.__len__())
 
     def __iter__(self):
-        return self
+        return iter(self._parts)
 
     def __len__(self):
         return len(self._parts)
-
-    def __next__(self):
-        # py3.4 and up style next
-        return next(self._iter)
-
-    next = __next__  # py2.7 alias
 
     def __getitem__(self, k: int) -> Part:
         if isinstance(k, int):
