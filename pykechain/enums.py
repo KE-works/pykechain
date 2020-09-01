@@ -1031,7 +1031,7 @@ class NotificationChannels(Enum):
 class LanguageCodes(Enum):
     """
     Options for the language setting of a user.
-    
+
     :cvar ENGLISH: English
     :cvar FRENCH: French
     :cvar GERMAN: German

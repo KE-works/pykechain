@@ -52,22 +52,17 @@ class WidgetsManager(Iterable):
         self._activity_id = activity.id
         self._client = activity._client  # type: Client
 
-        self._iter = iter(self._widgets)
-
     def __repr__(self) -> Text:  # pragma: no cover
         return "<pyke {} object {} widgets>".format(self.__class__.__name__, self.__len__())
 
     def __iter__(self):
-        return self
+        n = 0
+        while n < len(self):
+            yield self._widgets[n]
+            n += 1
 
     def __len__(self) -> int:
         return len(self._widgets)
-
-    def __next__(self) -> Widget:
-        # py3.4 and up style next
-        return next(self._iter)
-
-    next = __next__  # py2.7 alias
 
     def __getitem__(self, key: Union[int, str, Widget]) -> Widget:
         """Widget from the list of widgets based on index, uuid, title or ref.
