@@ -862,7 +862,7 @@ class TestUserReference(TestBetamax):
         ids = self.user_ref_prop.value_ids()
 
         self.assertIsInstance(ids, list)
-        self.assertTrue(all(isinstance(v, str) for v in ids))
+        self.assertTrue(all(isinstance(v, int) for v in ids))
 
     def test_no_value(self):
         self.assertIsInstance(self.user_ref_prop, UserReferencesProperty)
