@@ -383,7 +383,6 @@ class Property(BaseInScope):
         :param options: (options) new options of the property
         :type options: dict
         :param kwargs: (optional) additional kwargs to be edited
-        :type kwargs: dict or None
         :return: None
         :raises APIError: When unable to edit the property
         :raises IllegalArgumentError: when the type of the input is provided incorrect.

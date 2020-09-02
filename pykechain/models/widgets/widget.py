@@ -4,10 +4,11 @@ import requests
 from jsonschema import validate
 
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.enums import WidgetTypes, Category
+from pykechain.enums import WidgetTypes, Category, WidgetTitleValue
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import BaseInScope
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
+from pykechain.utils import slugify_ref
 
 
 class Widget(BaseInScope):
@@ -36,8 +37,7 @@ class Widget(BaseInScope):
         del self.name
 
         self.manager = manager
-        self.title = json.get('title')
-        self.ref = json.get('ref')
+
         self.widget_type = json.get('widget_type')
         # set schema
         if self._client:
@@ -53,6 +53,52 @@ class Widget(BaseInScope):
 
     def __repr__(self):  # pragma: no cover
         return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.widget_type, self.id[-8:])
+
+    @property
+    def title(self) -> Optional[Text]:
+        """
+        Return the title of the widget.
+
+        :return: title string
+        :rtype str
+        """
+        show_title_value = self._json_data.get("showTitleValue")
+        if show_title_value == WidgetTitleValue.NO_TITLE:
+            return None
+        elif show_title_value == WidgetTitleValue.CUSTOM_TITLE:
+            return self._json_data.get("customTitle")
+
+        elif show_title_value == WidgetTitleValue.DEFAULT:
+            try:
+                if self.widget_type == WidgetTypes.PROPERTYGRID:
+                    return self._client.part(self.meta.get("partInstanceId")).name
+                elif self.widget_type in [WidgetTypes.FILTEREDGRID, WidgetTypes.SUPERGRID]:
+                    return self._client.part(self.meta.get("partModelId"), category=None).name
+                elif self.widget_type in [WidgetTypes.SERVICE, WidgetTypes.NOTEBOOK]:
+                    return self._client.service(self.meta.get("serviceId")).name
+                elif self.widget_type in [WidgetTypes.ATTACHMENTVIEWER, WidgetTypes.SIGNATURE]:
+                    return self._client.property(self.meta.get("propertyInstanceId")).name
+                elif self.widget_type == WidgetTypes.CARD:
+                    return self.scope.name
+                else:
+                    # TODO Weather, Scope and Task widgets display type in user's language: retrieve from locize API?
+                    #  https://api.locize.app/b3df49f9-caf4-4282-9785-43113bff1ff7/latest/nl/common
+                    return None
+
+            except NotFoundError:  # pragma: no cover
+                return None
+        else:  # pragma: no cover
+            return None
+
+    @property
+    def ref(self) -> Optional[Text]:
+        """
+        Return the slugified title of the widget.
+
+        :return: title string converted to a slug
+        :rtype str
+        """
+        return slugify_ref(self.title) if self.title else None
 
     def activity(self) -> 'Activity':
         """Activity associated to the widget.

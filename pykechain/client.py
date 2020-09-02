@@ -221,6 +221,8 @@ class Client(object):
         self.last_request = self.last_response.request
         self.last_url = self.last_response.url
 
+        # print("{} {} {}".format(method, url, kwargs.get("params")))  # uncomment to track all requests
+
         if self.last_response.status_code == requests.codes.forbidden:
             raise ForbiddenError(self.last_response.json()['results'][0]['detail'])
 
