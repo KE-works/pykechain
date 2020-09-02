@@ -6,7 +6,6 @@ v3.8.1-rc3 (UNRELEASED)
 
 * :bug: Set and Update of widget associations now handles optional `part_instance_id` and/or `parent_part_instance_id` inputs.
 * :bug: `WidgetsManager` and `PartSet` no longer implement `Iterable` as an "iterator", making it possible to loop over the Widgets/Parts multiple times.
-* :bug: The `title` and `ref` attributes of `Widget` objects are converted into properties to dynamically retrieve their values.
 
 * :+1: Added `update_activities` method to `Client` to update activities in bulk.
 * :+1: `WidgetsManager` is now stored in its `Activity` object for lazy retrieval, while the `WidgetsManager` no explicitly stores a reference to its `Activity`.
@@ -16,6 +15,7 @@ v3.8.1-rc3 (UNRELEASED)
 * :+1: Added `get_landing_page_url()` method to the `Scope` class, to retrieve the (relative) URL of landing page for that scope. Append it to the client's API root for a full URL.
 * :+1: Added `LanguageCodes` enum class to enumerate the available Language options for user profiles.
 * :+1: Added `value_ids()` method to `_ReferenceProperty` class, returning a list of UUIDs instead of Pykechain objects.
+* :+1: Added `title_visible` property to `Widget` class for the widget's title shown in KE-chain.
 
 v3.8.1-rc2 (UNRELEASED)
 -----------------------

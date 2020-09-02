@@ -8,7 +8,6 @@ from pykechain.enums import WidgetTypes, Category, WidgetTitleValue
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import BaseInScope
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
-from pykechain.utils import slugify_ref
 
 
 class Widget(BaseInScope):
@@ -36,6 +35,8 @@ class Widget(BaseInScope):
         super(Widget, self).__init__(json, **kwargs)
         del self.name
 
+        self.title = json.get("title")
+        self.ref = json.get("ref")
         self.manager = manager
 
         self.widget_type = json.get('widget_type')
@@ -55,7 +56,7 @@ class Widget(BaseInScope):
         return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.widget_type, self.id[-8:])
 
     @property
-    def title(self) -> Optional[Text]:
+    def title_visible(self) -> Optional[Text]:
         """
         Return the title of the widget.
 
@@ -66,7 +67,7 @@ class Widget(BaseInScope):
         if show_title_value == WidgetTitleValue.NO_TITLE:
             return None
         elif show_title_value == WidgetTitleValue.CUSTOM_TITLE:
-            return self._json_data.get("customTitle")
+            return self.title
 
         elif show_title_value == WidgetTitleValue.DEFAULT:
             try:
@@ -89,16 +90,6 @@ class Widget(BaseInScope):
                 return None
         else:  # pragma: no cover
             return None
-
-    @property
-    def ref(self) -> Optional[Text]:
-        """
-        Return the slugified title of the widget.
-
-        :return: title string converted to a slug
-        :rtype str
-        """
-        return slugify_ref(self.title) if self.title else None
 
     def activity(self) -> 'Activity':
         """Activity associated to the widget.
