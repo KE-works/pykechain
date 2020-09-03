@@ -5,7 +5,7 @@ from jsonschema import validate
 
 from pykechain.enums import PropertyType, Multiplicity, LinkTargets, SelectListRepresentations, FontAwesomeMode
 from pykechain.exceptions import IllegalArgumentError, APIError
-from pykechain.models import AnyProperty, Property2, Scope2, Activity2, SelectListProperty2
+from pykechain.models import AnyProperty, Property, Scope, Activity, SelectListProperty
 from pykechain.models.representations.representation_base import BaseRepresentation
 from pykechain.models.representations.representations import ButtonRepresentation, LinkTarget, SignificantDigits, \
     DecimalPlaces, ThousandsSeparator, CustomIconRepresentation, Autofill
@@ -41,13 +41,13 @@ class TestRepresentation(SixTestCase):
         self.assertEqual(3, representation.value)
 
     def test_create_with_object(self):
-        empty_prop = Property2(json={}, client=None)
+        empty_prop = Property(json={}, client=None)
         representation = ButtonRepresentation(empty_prop)
 
         self.assertIsInstance(representation, ButtonRepresentation)
 
     def test_parse(self):
-        empty_slp = SelectListProperty2(json={'value_options': {}}, client=None)
+        empty_slp = SelectListProperty(json={'value_options': {}}, client=None)
         BaseRepresentation.parse(obj=empty_slp, json=representation_config)
 
     def test_parse_incorrect_rtype(self):
@@ -70,14 +70,14 @@ class TestRepresentation(SixTestCase):
             BaseRepresentation.parse(obj=None, json=no_rtype_config)
 
     def test_component_invalid_object(self):
-        empty_activity = Activity2(json={'id': '1234567890'}, client=None)
+        empty_activity = Activity(json={'id': '1234567890'}, client=None)
         representation = ThousandsSeparator(empty_activity)
 
         with self.assertRaises(IllegalArgumentError):
             empty_activity.representations = [representation]
 
     def test_component_invalid_property_type(self):
-        empty_prop = Property2(json={'id': '1234567890', 'category': 'MODEL'}, client=None)
+        empty_prop = Property(json={'id': '1234567890', 'category': 'MODEL'}, client=None)
         representation = ThousandsSeparator(empty_prop)
         representation.rtype = 'Broken rtype'
 
@@ -85,13 +85,13 @@ class TestRepresentation(SixTestCase):
             empty_prop.representations = [representation]
 
     def test_component_not_a_list(self):
-        empty_activity = Activity2(json={}, client=None)
+        empty_activity = Activity(json={}, client=None)
 
         with self.assertRaises(IllegalArgumentError):
             empty_activity.representations = 'Howdy!'
 
     def test_component_not_a_representation(self):
-        empty_activity = Activity2(json={}, client=None)
+        empty_activity = Activity(json={}, client=None)
 
         with self.assertRaises(IllegalArgumentError):
             empty_activity.representations = ['Howdy again!']
@@ -134,7 +134,7 @@ class Bases:
             super().tearDown()
 
         @abstractmethod
-        def _get_object(self) -> Union[Property2, Scope2, Activity2]:
+        def _get_object(self) -> Union[Property, Scope, Activity]:
             pass
 
         def test_get_set(self):

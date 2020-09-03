@@ -2,7 +2,7 @@ from jsonschema import validate, ValidationError
 
 from pykechain.enums import PropertyVTypes, PropertyType
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Property2, AttachmentProperty2
+from pykechain.models import Property, AttachmentProperty
 from pykechain.models.validators import PropertyValidator, ValidatorEffect, VisualEffect, ValidVisualEffect, \
     InvalidVisualEffect, NumericRangeValidator, BooleanFieldValidator
 from pykechain.models.validators.validator_schemas import options_json_schema, validator_jsonschema_stub, \
@@ -602,7 +602,7 @@ class TestFileExtensionValidator(SixTestCase):
 class TestPropertyWithValidator(SixTestCase):
 
     def test_property_without_validator(self):
-        prop = Property2(json={}, client=None)
+        prop = Property(json={}, client=None)
         self.assertIsNone(prop.is_valid)
         self.assertIsNone(prop.is_invalid)
         self.assertEqual(prop._validators, list())
@@ -614,7 +614,7 @@ class TestPropertyWithValidator(SixTestCase):
             value_options=dict(
                 validators=[NumericRangeValidator(minvalue=0, maxvalue=10).as_json()]
             ))
-        prop = Property2(json=prop_json, client=None)
+        prop = Property(json=prop_json, client=None)
         self.assertTrue(prop.is_valid)
         self.assertFalse(prop.is_invalid)
         self.assertTrue(prop.validate())
@@ -625,7 +625,7 @@ class TestPropertyWithValidator(SixTestCase):
             value_options=dict(
                 validators=[NumericRangeValidator(minvalue=0, maxvalue=10).as_json()]
             ))
-        prop = Property2(json=prop_json, client=None)
+        prop = Property(json=prop_json, client=None)
         self.assertIsNone(prop.is_valid)
         self.assertIsNone(prop.is_invalid)
         self.assertListEqual([(None, "No reason")], prop.validate())
@@ -636,7 +636,7 @@ class TestPropertyWithValidator(SixTestCase):
             value_options=dict(
                 validators=[FileSizeValidator(max_size=100).as_json()]
             ))
-        prop = AttachmentProperty2(json=prop_json, client=None)
+        prop = AttachmentProperty(json=prop_json, client=None)
         self.assertTrue(prop.is_valid)
         self.assertFalse(prop.is_invalid)
         self.assertTrue(prop.validate())
@@ -647,7 +647,7 @@ class TestPropertyWithValidator(SixTestCase):
             value_options=dict(
                 validators=[FileSizeValidator(max_size=100).as_json()]
             ))
-        prop = AttachmentProperty2(json=prop_json, client=None)
+        prop = AttachmentProperty(json=prop_json, client=None)
         self.assertIsNone(prop.is_valid)
         self.assertIsNone(prop.is_invalid)
         self.assertListEqual([(None, "No reason")], prop.validate())
@@ -658,7 +658,7 @@ class TestPropertyWithValidator(SixTestCase):
             value_options=dict(
                 validators=[FileExtensionValidator(accept=['.txt', 'application/pdf']).as_json()]
             ))
-        prop = AttachmentProperty2(json=prop_json, client=None)
+        prop = AttachmentProperty(json=prop_json, client=None)
         self.assertTrue(prop.is_valid)
         self.assertFalse(prop.is_invalid)
         self.assertTrue(prop.validate())
@@ -669,7 +669,7 @@ class TestPropertyWithValidator(SixTestCase):
             value_options=dict(
                 validators=[FileExtensionValidator(accept=['.txt', 'application/pdf']).as_json()]
             ))
-        prop = AttachmentProperty2(json=prop_json, client=None)
+        prop = AttachmentProperty(json=prop_json, client=None)
         self.assertIsNone(prop.is_valid)
         self.assertIsNone(prop.is_invalid)
         self.assertListEqual([(None, "No reason")], prop.validate())

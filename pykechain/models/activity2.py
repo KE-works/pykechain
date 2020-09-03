@@ -1,8 +1,7 @@
 from pykechain.exceptions import _DeprecationMixin
-from pykechain.models import Activity
 
 
-class Activity2(Activity, _DeprecationMixin):
+class Activity2(_DeprecationMixin):
     """A virtual object representing a KE-chain activity.
 
     .. versionadded:: 2.0
