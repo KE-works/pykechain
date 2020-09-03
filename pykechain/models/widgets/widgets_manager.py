@@ -302,7 +302,7 @@ class WidgetsManager(Iterable):
         if parent_instance:
             meta['parentInstanceId'] = parent_instance
 
-        meta, title = _set_title(meta, title=title, default_title=part_model.name, **kwargs)
+        meta, title = _set_title(meta, title=title, **kwargs)
 
         widget = self.create_configured_widget(
             widget_type=WidgetTypes.SUPERGRID,
@@ -468,7 +468,7 @@ class WidgetsManager(Iterable):
         if parent_instance_id:
             meta['parentInstanceId'] = parent_instance_id
 
-        meta, title = _set_title(meta, title=title, default_title=part_model.name, **kwargs)
+        meta, title = _set_title(meta, title=title, **kwargs)
 
         widget = self.create_configured_widget(
             widget_type=WidgetTypes.FILTEREDGRID,
@@ -504,7 +504,7 @@ class WidgetsManager(Iterable):
         :param editable: Whether the attachment can be added, edited or deleted (default: False)
         :type editable: bool
         :param title: A custom title for the script widget
-            * False (default): Script name
+            * False (default): Property name
             * String value: Custom title
             * None: No title
         :type title: bool or basestring or None
@@ -540,7 +540,7 @@ class WidgetsManager(Iterable):
                 warnings.warn('Argument "{}" is no longer supported as input to `add_attachment_viewer`.'.format(
                     deprecated_kw), Warning)
 
-        meta, title = _set_title(meta, title=title, default_title=attachment_property.name, **kwargs)
+        meta, title = _set_title(meta, title=title, **kwargs)
 
         if check_type(editable, bool, 'editable'):
             kwargs.update({'writable_models': [attachment_property.model_id]})
@@ -708,7 +708,7 @@ class WidgetsManager(Iterable):
             "showHeaders": show_headers,
         })
 
-        meta, title = _set_title(meta, title=title, default_title=part_instance.name, **kwargs)
+        meta, title = _set_title(meta, title=title, **kwargs)
 
         widget = self.create_configured_widget(
             widget_type=WidgetTypes.PROPERTYGRID,
@@ -792,7 +792,7 @@ class WidgetsManager(Iterable):
             'showLog': True if download_log else check_type(show_log, bool, 'show_log'),
         })
 
-        meta, title = _set_title(meta, title=title, default_title=service.name, **kwargs)
+        meta, title = _set_title(meta, title=title, **kwargs)
 
         widget = self.create_widget(
             widget_type=WidgetTypes.SERVICE,
@@ -831,7 +831,7 @@ class WidgetsManager(Iterable):
         check_text(html, 'html')
 
         meta = _initiate_meta(kwargs, activity=self.activity)
-        meta, title = _set_title(meta, title=title, default_title=WidgetTypes.HTML, **kwargs)
+        meta, title = _set_title(meta, title=title, **kwargs)
 
         meta["htmlContent"] = html
 
@@ -881,7 +881,7 @@ class WidgetsManager(Iterable):
                                        "Type is: {}".format(type(notebook)))
 
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
-        meta, title = _set_title(meta, title=title, default_title=notebook.name, **kwargs)
+        meta, title = _set_title(meta, title=title, **kwargs)
 
         meta.update({
             'serviceId': notebook_id
@@ -1058,7 +1058,7 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
-        meta, title = _set_title(meta, title=title, default_title=WidgetTypes.MULTICOLUMN, **kwargs)
+        meta, title = _set_title(meta, title=title, **kwargs)
 
         widget = self.create_widget(
             widget_type=WidgetTypes.MULTICOLUMN,
@@ -1145,7 +1145,7 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         meta = _initiate_meta(kwargs, activity=self.activity)
-        meta, title = _set_title(meta, title=title, default_title=WidgetTypes.SCOPE, **kwargs)
+        meta, title = _set_title(meta, title=title, **kwargs)
 
         check_type(show_all_columns, bool, 'show_all_columns')
 
@@ -1226,7 +1226,7 @@ class WidgetsManager(Iterable):
         attachment_property = _retrieve_object(attachment_property,
                                                method=self._client.property)  # type: 'AttachmentProperty'  # noqa
         meta = _initiate_meta(kwargs, activity=self.activity)
-        meta, title = _set_title(meta, title=title, default_title=attachment_property.name, **kwargs)
+        meta, title = _set_title(meta, title=title, **kwargs)
 
         # Add custom button text
         if not custom_button_text:
@@ -1300,7 +1300,7 @@ class WidgetsManager(Iterable):
         :return: Card Widget
         """
         meta = _initiate_meta(kwargs, activity=self.activity)
-        meta, title = _set_title(meta, title=title, default_title=WidgetTypes.CARD, **kwargs)
+        meta, title = _set_title(meta, title=title, **kwargs)
 
         # Process the description
         if description is False or description is None:
@@ -1408,7 +1408,7 @@ class WidgetsManager(Iterable):
         """
         weather_property = _retrieve_object(weather_property, method=self._client.property)  # type: 'Property'  # noqa
         meta = _initiate_meta(kwargs, activity=self.activity)
-        meta, title = _set_title(meta, title=title, default_title=weather_property.name, **kwargs)
+        meta, title = _set_title(meta, title=title, **kwargs)
 
         meta.update({
             "propertyInstanceId": weather_property.id,

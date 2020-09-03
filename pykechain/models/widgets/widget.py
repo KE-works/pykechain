@@ -58,12 +58,12 @@ class Widget(BaseInScope):
     @property
     def title_visible(self) -> Optional[Text]:
         """
-        Return the title of the widget.
+        Return the title of the widget displayed in KE-chain.
 
         :return: title string
         :rtype str
         """
-        show_title_value = self._json_data.get("showTitleValue")
+        show_title_value = self.meta.get("showTitleValue")
         if show_title_value == WidgetTitleValue.NO_TITLE:
             return None
         elif show_title_value == WidgetTitleValue.CUSTOM_TITLE:
@@ -72,13 +72,13 @@ class Widget(BaseInScope):
         elif show_title_value == WidgetTitleValue.DEFAULT:
             try:
                 if self.widget_type == WidgetTypes.PROPERTYGRID:
-                    return self._client.part(self.meta.get("partInstanceId")).name
+                    return self._client.part(pk=self.meta.get("partInstanceId")).name
                 elif self.widget_type in [WidgetTypes.FILTEREDGRID, WidgetTypes.SUPERGRID]:
-                    return self._client.part(self.meta.get("partModelId"), category=None).name
+                    return self._client.part(pk=self.meta.get("partModelId"), category=None).name
                 elif self.widget_type in [WidgetTypes.SERVICE, WidgetTypes.NOTEBOOK]:
-                    return self._client.service(self.meta.get("serviceId")).name
+                    return self._client.service(pk=self.meta.get("serviceId")).name
                 elif self.widget_type in [WidgetTypes.ATTACHMENTVIEWER, WidgetTypes.SIGNATURE]:
-                    return self._client.property(self.meta.get("propertyInstanceId")).name
+                    return self._client.property(pk=self.meta.get("propertyInstanceId"), category=None).name
                 elif self.widget_type == WidgetTypes.CARD:
                     return self.scope.name
                 else:

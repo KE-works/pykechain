@@ -4,6 +4,7 @@ Change Log
 v3.8.1-rc3 (UNRELEASED)
 -----------------------
 
+* :bug Added `title_visible` property to `Widget` class for the widget's title shown in KE-chain, deprecating the `default_title` mechanism when creating widgets. The default title of a widget is not dependent on front-end and is not stored in the widget.
 * :bug: Set and Update of widget associations now handles optional `part_instance_id` and/or `parent_part_instance_id` inputs.
 * :bug: `WidgetsManager` and `PartSet` no longer implement `Iterable` as an "iterator", making it possible to loop over the Widgets/Parts multiple times.
 
@@ -15,7 +16,7 @@ v3.8.1-rc3 (UNRELEASED)
 * :+1: Added `get_landing_page_url()` method to the `Scope` class, to retrieve the (relative) URL of landing page for that scope. Append it to the client's API root for a full URL.
 * :+1: Added `LanguageCodes` enum class to enumerate the available Language options for user profiles.
 * :+1: Added `value_ids()` method to `_ReferenceProperty` class, returning a list of UUIDs instead of Pykechain objects.
-* :+1: Added `title_visible` property to `Widget` class for the widget's title shown in KE-chain.
+
 
 v3.8.1-rc2 (UNRELEASED)
 -----------------------

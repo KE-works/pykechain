@@ -22,7 +22,7 @@ class TestSetTitle(TestCase):
     def test_interface(self):
         title_in = 'title'
         meta_in = dict()
-        output = _set_title(meta_in, title_in, useless_input=3)
+        output = _set_title(meta_in, title_in)
 
         self.assertIsInstance(output, tuple)
         self.assertTrue(len(output) == 2)
@@ -44,58 +44,39 @@ class TestSetTitle(TestCase):
         self.assertEqual(WidgetTitleValue.CUSTOM_TITLE, meta['showTitleValue'])
 
         title_in = False
-        default = 'default'
-        meta, title = _set_title(dict(), title=title_in, default_title=default)
-        self.assertEqual(default, title)
+        meta, title = _set_title(dict(), title=title_in)
+        self.assertIsNone(title)
         self.assertIsNone(meta['customTitle'])
         self.assertEqual(WidgetTitleValue.DEFAULT, meta['showTitleValue'])
 
         title_in = None
-        default = 'default'
-        meta, title = _set_title(dict(), title=title_in, default_title=default)
-        self.assertEqual(title_in, title)
-        self.assertEqual(title_in, meta['customTitle'])
+        meta, title = _set_title(dict(), title=title_in)
+        self.assertIsNone(title)
+        self.assertIsNone(meta['customTitle'])
         self.assertEqual(WidgetTitleValue.NO_TITLE, meta['showTitleValue'])
-
-    def test_default_title(self):
-        default = 'default title'
-
-        title_in = False
-        meta, title = _set_title(dict(), title=title_in, default_title=default)
-
-        self.assertEqual(default, title)
-
-        title_in = 'title'
-        meta, title = _set_title(dict(), title=title_in, default_title=default)
-
-        self.assertNotEqual(default, title)
-
-        with self.assertRaises(IllegalArgumentError, msg='`default_title` must provided if title is `False`!'):
-            _set_title(dict(), title=False)
 
     def test_show_title_value(self):
         """Test parser when changing the `show_title_value` input."""
         title_in = 'title'
-        default = 'default'
 
         meta, title = _set_title(
-            dict(), title=title_in, show_title_value=WidgetTitleValue.NO_TITLE, default_title=default)
+            dict(), title=title_in, show_title_value=WidgetTitleValue.NO_TITLE)
 
         self.assertEqual(title_in, title)
         self.assertEqual(title_in, meta['customTitle'])
         self.assertEqual(WidgetTitleValue.NO_TITLE, meta['showTitleValue'])
 
         meta, title = _set_title(
-            dict(), title=title_in, show_title_value=WidgetTitleValue.CUSTOM_TITLE, default_title=default)
+            dict(), title=title_in, show_title_value=WidgetTitleValue.CUSTOM_TITLE)
 
         self.assertEqual(title_in, title)
         self.assertEqual(title_in, meta['customTitle'])
         self.assertEqual(WidgetTitleValue.CUSTOM_TITLE, meta['showTitleValue'])
 
         meta, title = _set_title(
-            dict(), title=title_in, show_title_value=WidgetTitleValue.DEFAULT, default_title=default)
+            dict(), title=title_in, show_title_value=WidgetTitleValue.DEFAULT)
 
-        self.assertEqual(default, title)
+        self.assertIsNone(title)
         self.assertIsNone(meta['customTitle'])
         self.assertEqual(WidgetTitleValue.DEFAULT, meta['showTitleValue'])
 
@@ -256,6 +237,8 @@ class TestWidgetManagerInActivity(TestBetamax):
         )
 
         self.assertEqual(title, widget.title)
+        self.assertNotEqual(widget.title_visible, widget.title)
+        self.assertIsNone(widget.title_visible)
         self.assertEqual(slugify_ref(title), widget.ref)
         self.assertEqual(WidgetTitleValue.NO_TITLE, widget.meta.get('showTitleValue'))
 
@@ -286,6 +269,7 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertIsInstance(widget, AttachmentviewerWidget)
         self.assertEqual(len(self.wm), 1 + 1)
+        self.assertEqual("Picture", widget.title_visible)
 
     def test_attachment_widget_with_associations_using_widget_manager(self):
         photo_property = self.project.property("Picture")
@@ -325,6 +309,7 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertIsInstance(widget, SupergridWidget)
         self.assertEqual(len(self.wm), 1 + 1)
+        self.assertEqual(part_model.name, widget.title_visible)
 
     def test_add_filtered_grid_widget(self):
         part_model = self.project.model(name='Wheel')
@@ -341,6 +326,7 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertIsInstance(widget, FilteredgridWidget)
         self.assertEqual(len(self.wm), 1 + 1)
+        self.assertEqual(part_model.name, widget.title_visible)
 
     def test_add_filtered_grid_widget_with_prefilters_and_excluded_propmodels(self):
         part_model = self.project.model(name='Wheel')
@@ -370,7 +356,6 @@ class TestWidgetManagerInActivity(TestBetamax):
         bike_part = self.project.part(name='Bike')
         widget = self.wm.add_propertygrid_widget(
             part_instance=bike_part,
-            title="Testing the custom title of a property grid widget",
             show_headers=False, show_columns=[ShowColumnTypes.UNIT],
             readable_models=bike_part.model().properties[:2],
             writable_models=bike_part.model().properties[3:],
@@ -378,6 +363,7 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertIsInstance(widget, PropertygridWidget)
         self.assertEqual(len(self.wm), 1 + 1)
+        self.assertEqual(bike_part.name, widget.title_visible)
 
     def test_add_signature_widget(self):
         bike_part = self.project.part(name='Bike')
@@ -471,6 +457,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertIsInstance(widget2, ServiceWidget)
         self.assertIsInstance(widget3, ServiceWidget)
         self.assertEqual(len(self.wm), 1 + 3)
+        self.assertEqual(service_gears_successful.name, widget1.title_visible)
 
     def test_add_html_widget(self):
         widget_1 = self.wm.add_html_widget(html='Or is this just fantasy?', title='Is this the real life?')
@@ -487,12 +474,14 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(widget_2.ref, slugify_ref('Caught in a landslide'))
 
     def test_metapanel_widget(self):
-        self.wm.add_metapanel_widget(
+        widget = self.wm.add_metapanel_widget(
             show_all=True,
             show_progress=True,
             show_progressbar=True
         )
+
         self.assertEqual(len(self.wm), 1 + 1)
+        self.assertIsNone(widget.title_visible)
 
     def test_add_metapanel_with_progress_settings(self):
         progress_bar = dict(
