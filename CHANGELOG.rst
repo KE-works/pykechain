@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v3.8.3-rc3 (UNRELEASED)
+-----------------------
+
+* :+1: Inverted the inheritance hierarchy of Class2 classes, allowing for type-checking via `isinstance()`. However, creating objects from these classes is no longer supported.
+
 v3.8.1-rc2 (UNRELEASED)
 -----------------------
 
