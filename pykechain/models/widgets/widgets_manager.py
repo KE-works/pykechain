@@ -1194,13 +1194,16 @@ class WidgetsManager(Iterable):
         )
         return widget
 
-    def add_signature_widget(self,
-                             attachment_property: 'AttachmentProperty',
-                             title: Optional[Union[bool, Text]] = False,
-                             parent_widget: Optional[Union[Widget, Text]] = None,
-                             custom_button_text: Optional[Union[bool, Text]] = False,
-                             custom_undo_button_text: Optional[Union[bool, Text]] = False,
-                             **kwargs) -> Widget:
+    def add_signature_widget(
+            self,
+            attachment_property: 'AttachmentProperty',
+            title: Optional[Union[bool, Text]] = False,
+            parent_widget: Optional[Union[Widget, Text]] = None,
+            custom_button_text: Optional[Union[bool, Text]] = False,
+            custom_undo_button_text: Optional[Union[bool, Text]] = False,
+            editable: Optional[bool] = True,
+            **kwargs
+    ) -> Widget:
         """
         Add a KE-chain Signature widget to the Widgetmanager and the activity.
 
@@ -1217,6 +1220,8 @@ class WidgetsManager(Iterable):
         :type custom_button_text: bool or basestring
         :param custom_undo_button_text: Custom text for 'Remove signature' button
         :type custom_undo_button_text: bool or basestring
+        :param editable: (optional) if False, creates a viewable, not editable, signature widget (default = True)
+        :type editable: bool
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
         :rtype: Widget
@@ -1227,6 +1232,7 @@ class WidgetsManager(Iterable):
                                                method=self._client.property)  # type: 'AttachmentProperty'  # noqa
         meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
+        check_type(editable, bool, "editable")
 
         # Add custom button text
         if not custom_button_text:
@@ -1257,7 +1263,8 @@ class WidgetsManager(Iterable):
             meta=meta,
             title=title,
             parent=parent_widget,
-            readable_models=[attachment_property.model_id],
+            readable_models=[attachment_property.model_id] if not editable else None,
+            writable_models=[attachment_property.model_id] if editable else None,
             **kwargs,
         )
         return widget

@@ -63,7 +63,7 @@ def _set_title(
         meta: Dict,
         title: Optional[Union[Text, bool]] = None,
         show_title_value: Optional[WidgetTitleValue] = None,
-        **kwargs,
+        **kwargs
 ) -> Tuple[Dict, Text]:
     """
     Set the customTitle in the meta based on provided optional custom title or default.

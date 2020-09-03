@@ -7,6 +7,7 @@ v3.8.1-rc3 (UNRELEASED)
 * :bug Added `title_visible` property to `Widget` class for the widget's title shown in KE-chain, deprecating the `default_title` mechanism when creating widgets. The default title of a widget is not dependent on front-end and is not stored in the widget.
 * :bug: Set and Update of widget associations now handles optional `part_instance_id` and/or `parent_part_instance_id` inputs.
 * :bug: `WidgetsManager` and `PartSet` no longer implement `Iterable` as an "iterator", making it possible to loop over the Widgets/Parts multiple times.
+* :bug: `add_signature_widget()` method of the `WidgetManager` class now creates an editable signature widget by default. The new input argument `editable` can be set to False to create a viewable widget.
 
 * :+1: Added `update_activities` method to `Client` to update activities in bulk.
 * :+1: `WidgetsManager` is now stored in its `Activity` object for lazy retrieval, while the `WidgetsManager` no explicitly stores a reference to its `Activity`.
