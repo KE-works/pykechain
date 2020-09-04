@@ -6,6 +6,7 @@ from jsonschema import validate
 
 from pykechain.enums import Category
 from pykechain.exceptions import APIError, IllegalArgumentError
+from pykechain.models.property2_selectlist import SelectListProperty2, MultiSelectListProperty2
 from pykechain.models.property import Property
 from pykechain.models.validators.validator_schemas import options_json_schema
 
@@ -128,7 +129,7 @@ class _SelectListProperty(Property):
             self._options = new_options  # save the new options as the options
 
 
-class SelectListProperty(_SelectListProperty):
+class SelectListProperty(_SelectListProperty, SelectListProperty2):
     """A virtual object representing a KE-chain single-select list property."""
 
     def _check_new_value(self, value: Any):
@@ -137,7 +138,7 @@ class SelectListProperty(_SelectListProperty):
                 value, self.options))
 
 
-class MultiSelectListProperty(_SelectListProperty):
+class MultiSelectListProperty(_SelectListProperty, MultiSelectListProperty2):
     """A virtual object representing a KE-chain multi-select list property."""
 
     def _check_new_value(self, value: Iterable[Any]):

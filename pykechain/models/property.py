@@ -6,6 +6,7 @@ from jsonschema import validate
 from pykechain.enums import Category
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Base, BaseInScope
+from pykechain.models.property2 import Property2
 from pykechain.models.input_checks import check_text, check_type
 from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.validators import PropertyValidator
@@ -15,7 +16,7 @@ from pykechain.defaults import API_EXTRA_PARAMS
 T = TypeVar("T")
 
 
-class Property(BaseInScope):
+class Property(BaseInScope, Property2):
     """A virtual object representing a KE-chain property.
 
     .. versionadded: 3.0

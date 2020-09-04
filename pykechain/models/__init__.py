@@ -44,10 +44,10 @@ AnyProperty = Union[
 
 # This map is used to identify the correct class for the (KE-chain provided) property type.
 property_type_to_class_map = {
-    PropertyType.ATTACHMENT_VALUE: AttachmentProperty2,
-    PropertyType.SINGLE_SELECT_VALUE: SelectListProperty2,
-    PropertyType.REFERENCES_VALUE: MultiReferenceProperty2,
-    PropertyType.DATETIME_VALUE: DatetimeProperty2,
+    PropertyType.ATTACHMENT_VALUE: AttachmentProperty,
+    PropertyType.SINGLE_SELECT_VALUE: SelectListProperty,
+    PropertyType.REFERENCES_VALUE: MultiReferenceProperty,
+    PropertyType.DATETIME_VALUE: DatetimeProperty,
     PropertyType.ACTIVITY_REFERENCES_VALUE: ActivityReferencesProperty,
     PropertyType.SCOPE_REFERENCES_VALUE: ScopeReferencesProperty,
     PropertyType.USER_REFERENCES_VALUE: UserReferencesProperty,
