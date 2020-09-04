@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from pykechain.models import Activity, Scope, user
-from pykechain.models.base_reference import _ReferencePropertyInScope
+from pykechain.models.base_reference import _ReferencePropertyInScope, _ReferenceProperty
 from pykechain.models.property2_activity_reference import ActivityReferencesProperty as ActivityReferencesProperty2
 
 
