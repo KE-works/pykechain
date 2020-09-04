@@ -31,9 +31,7 @@ class DatetimeProperty(Property, DatetimeProperty2):
             self._put_value(value)
 
     def to_datetime(self) -> Union[type(None), datetime.datetime]:
-        """Retrieve the data value of a property.
-
-        Setting this value will immediately update the property in KE-chain.
+        """Retrieve the datetime as a datetime.datetime value.
 
         :returns: the value
         """

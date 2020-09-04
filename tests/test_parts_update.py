@@ -9,9 +9,9 @@ class TestPartUpdate(TestBetamax):
 
     def setUp(self):
         super().setUp()
-        model = self.project.model("Wheel")
+        self.model = self.project.model("Wheel")
         bike = self.project.part("Bike")
-        self.wheel = bike.add(model=model, name='_WHEEL')  # type: Part
+        self.wheel = bike.add(model=self.model, name='_WHEEL')  # type: Part
 
     def tearDown(self):
         self.wheel.delete()
@@ -33,6 +33,14 @@ class TestPartUpdate(TestBetamax):
         for name, value in update_dict.items():
             self.assertEqual(value, live_wheel.property(name=name).value,
                              "property {} with value {} did not match contents with KEC".format(name, value))
+
+    def test_model(self):
+        update_dict = {
+            'Diameter': 432.1,
+            'Spokes': 0,
+            'Rim Material': 'Adamantium'
+        }
+        self.model.update(update_dict=update_dict)
 
     def test_with_missing_property(self):
         update_dict = {

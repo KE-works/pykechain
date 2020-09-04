@@ -666,14 +666,12 @@ class Part(TreeObject, Part2):
         exception_fvalues = list()
         update_dict = update_dict or dict()
 
-        key = 'id' if part.category == Category.INSTANCE else 'model_id'
-
         for prop_name_or_id, property_value in update_dict.items():
             property_to_update = part.property(prop_name_or_id)  # type: Property
 
             updated_p = {
-                'value': property_to_update.serialize_value(property_value),
-                key: property_to_update.id,
+                "value": property_to_update.serialize_value(property_value),
+                "id": property_to_update.id,
             }
 
             if property_to_update.type == PropertyType.ATTACHMENT_VALUE:
@@ -769,7 +767,7 @@ class Part(TreeObject, Part2):
 
         # If any values were not set via the json, set them individually
         for exception_fvalue in exception_fvalues:
-            property_model_id = exception_fvalue['model_id']
+            property_model_id = exception_fvalue['id']
             property_instance = find(new_part_instance.properties, lambda p: p.model_id == property_model_id)
             property_instance.value = exception_fvalue['value']
 
@@ -1002,8 +1000,7 @@ class Part(TreeObject, Part2):
 
             value_dict = dict()
             for update in properties_fvalues:
-                key = "id" if self.category == Category.INSTANCE else "model_id"
-                value_dict[update[key]] = update.get("value")
+                value_dict[update["id"]] = update.get("value")
 
             for prop in self.properties:
                 if prop.id in value_dict:

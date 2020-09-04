@@ -53,17 +53,36 @@ class _ReferenceProperty(Property):
         :return: list of UUIDs
         :rtype list
         """
-        if self.has_value():
-            return [value.get("id") for value in self._value]
-        else:
-            return None
+        return [value.get("id") for value in self._value] if self.has_value() else None
+
+    def _validate_values(self) -> List[Text]:
+        """
+        Check if the `_value` attribute has valid content.
+
+        :return list of UUIDs:
+        :rtype list
+        """
+        if not self._value:
+            return []
+
+        object_ids = []
+        for value in self._value:
+            if isinstance(value, dict) and "id" in value:
+                object_ids.append(str(value.get("id")))
+            elif isinstance(value, (int, str)):
+                object_ids.append(str(value))
+            else:  # pragma: no cover
+                raise ValueError(
+                    'Value "{}" must be a dict with field `id` or a UUID.'.format(value)
+                )
+        return object_ids
 
     @abstractmethod
     def _retrieve_objects(self, **kwargs) -> List[Base]:
         """
         Retrieve a list of Pykechain objects, type depending on the reference property type.
 
-        This method is abstract because the exact method of the Client class changes per subclass.
+        This method is abstract because the exact retrieval method of the Client class changes per subclass.
 
         :param kwargs: optional arguments
         :return: list of Pykechain objects inheriting from Base

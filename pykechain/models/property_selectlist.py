@@ -51,7 +51,7 @@ class _SelectListProperty(Property):
         :return: sanitized value
         :raises APIError: when unable to set the value or the value is not in the list of options
         """
-        pass
+        pass  # pragma: no cover
 
     @property
     def options(self):
@@ -136,8 +136,8 @@ class SelectListProperty(_SelectListProperty, SelectListProperty2):
 
     def _check_new_value(self, value: Any):
         if value not in self.options:
-            raise APIError('The new value "{}" of the Property should be in the list of options:\n{}'.format(
-                value, self.options))
+            raise IllegalArgumentError('The new value "{}" of the Property should be in the list of options:'
+                                       '\n{}'.format(value, self.options))
 
 
 class MultiSelectListProperty(_SelectListProperty, MultiSelectListProperty2):
@@ -148,5 +148,5 @@ class MultiSelectListProperty(_SelectListProperty, MultiSelectListProperty2):
             raise IllegalArgumentError('The new values must be provided as a list or tuple, "{}" is not.'.format(value))
 
         if not all(v in self.options for v in value):
-            raise APIError('The new values "{}" of the Property should be in the list of options:\n{}'.format(
-                value, self.options))
+            raise IllegalArgumentError('The new values "{}" of the Property should be in the list of options:'
+                                       '\n{}'.format(value, self.options))

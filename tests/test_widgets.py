@@ -106,7 +106,7 @@ class TestWidgets(TestBetamax):
         for w in widget_set:
             with self.subTest(msg=w):
                 self.assertIsInstance(w, Widget)
-                self.assertEqual(self.activity.id, w._activity_id)
+                self.assertEqual(self.activity.id, w.activity())
 
     def test_create_widget_in_activity(self):
         self.new_widget = self.client.create_widget(
@@ -214,7 +214,21 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertIsInstance(htmlwidget, HtmlWidget)
         self.assertEqual(len(self.wm), 1 + 1)
 
-    def test_edit_widget(self):
+    def test_edit_widget_meta(self):
+        bike_part = self.project.part('Bike')
+        widget = self.wm.add_propertygrid_widget(
+            part_instance=bike_part,
+            writable_models=bike_part.model().properties,
+        )
+
+        widget.meta.update({"showColumns": [ShowColumnTypes.UNIT, ShowColumnTypes.DESCRIPTION]})
+        widget.edit(meta=widget.meta)
+
+        live_widget = self.client.widget(pk=widget.id)
+
+        self.assertEqual(widget.meta, live_widget.meta)
+
+    def test_edit_widget_title(self):
         bike_part = self.project.part('Bike')
         widget = self.wm.add_propertygrid_widget(
             part_instance=bike_part,
@@ -224,7 +238,10 @@ class TestWidgetManagerInActivity(TestBetamax):
         new_title = "My customly edited title"
         widget.edit(title=new_title)
 
-        self.assertEqual(widget.meta.get('customTitle'), new_title)
+        live_widget = self.client.widget(pk=widget.id)
+
+        self.assertEqual(new_title, live_widget.title)
+        self.assertEqual(new_title, live_widget.title_visible)
 
     def test_widget_title(self):
         title = 'Hidden title'
@@ -279,6 +296,7 @@ class TestWidgetManagerInActivity(TestBetamax):
             attachment_property=photo_property,
         )
 
+        self.assertEqual("Attachment Viewer", widget.title_visible)
         self.assertIsInstance(widget, AttachmentviewerWidget)
         self.assertEqual(len(self.wm), 1 + 1)
 
@@ -399,6 +417,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         # testing
         self.assertEqual(len(self.wm), 1 + 3)
 
+        self.assertEqual(self.project.name, widget1.title_visible)
         self.assertIsInstance(widget1, CardWidget)
         self.assertIsNone(widget1.meta.get('customLink'))
 

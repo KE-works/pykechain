@@ -1,4 +1,5 @@
 from pykechain.enums import PropertyType, Multiplicity
+from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Part
 from pykechain.models.validators import RequiredFieldValidator
 from pykechain.utils import is_uuid
@@ -65,24 +66,47 @@ class TestPartCreateWithProperties(TestBetamax):
 
 
 class TestCreateModelWithProperties(TestBetamax):
-    def test_create_model_with_properties(self):
-        properties_fvalues = [
-            {"name": "char prop", "property_type": PropertyType.CHAR_VALUE},
-            {"name": "number prop", "property_type": PropertyType.FLOAT_VALUE, "value": 3.14},
-            {"name": "boolean_prop", "property_type": PropertyType.BOOLEAN_VALUE, "value": False,
-             "value_options": {"validators": [RequiredFieldValidator().as_json()]}}
-        ]
+    properties_fvalues = [
+        {"name": "char prop", "property_type": PropertyType.CHAR_VALUE},
+        {"name": "number prop", "property_type": PropertyType.FLOAT_VALUE, "value": 3.14},
+        {"name": "boolean_prop", "property_type": PropertyType.BOOLEAN_VALUE, "value": False,
+         "value_options": {"validators": [RequiredFieldValidator().as_json()]}}
+    ]
 
+    def setUp(self):
+        super().setUp()
+        self.new_part = None
+
+    def tearDown(self):
+        if self.new_part is not None:
+            self.new_part.delete()
+        super().tearDown()
+
+    def test_create_model_with_properties(self):
         parent = self.project.model(name__startswith='Catalog')
 
-        new_model = self.project.create_model_with_properties(name='A new model', parent=parent.id,
-                                                              multiplicity=Multiplicity.ZERO_MANY,
-                                                              properties_fvalues=properties_fvalues)
+        new_model = self.project.create_model_with_properties(
+            name='A new model',
+            parent=parent.id,
+            multiplicity=Multiplicity.ZERO_MANY,
+            properties_fvalues=self.properties_fvalues,
+        )
+        self.new_part = new_model
 
         self.assertEqual(3, len(new_model.properties))
         self.assertEqual(new_model.property('number prop').value, 3.14)
         self.assertEqual(new_model.property('boolean_prop').value, False)
         self.assertTrue(new_model.property('boolean_prop')._options)
 
-        # tearDown
-        new_model.delete()
+    def test_create_with_invalid_properties(self):
+        parent = self.project.model(name__startswith='Catalog')
+
+        with self.assertRaises(IllegalArgumentError):
+            self.new_part = self.project.create_model_with_properties(
+                name='A new model',
+                parent=parent.id,
+                multiplicity=Multiplicity.ZERO_MANY,
+                properties_fvalues=[
+                    {"property_type": PropertyType.CHAR_VALUE}
+                ],
+            )

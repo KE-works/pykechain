@@ -133,18 +133,16 @@ class Widget(BaseInScope):
         :return: a :class:`Widget` object
         :rtype: :class:`Widget`
         """
-        def _type_to_classname(widget_type):
+        def _type_to_classname(type_widget: str):
             """
             Generate corresponding inner classname based on the widget type.
 
-            :param widget_type: type of the widget (one of :class:`WidgetTypes`)
-            :type widget_type: str
+            :param type_widget: type of the widget (one of :class:`WidgetTypes`)
+            :type type_widget: str
             :return: classname corresponding to the widget type
             :rtype: str
             """
-            if widget_type is None:
-                widget_type = WidgetTypes.UNDEFINED
-            return "{}Widget".format(widget_type.title())
+            return "{}Widget".format(type_widget.title()) if type_widget else WidgetTypes.UNDEFINED
 
         widget_type = json.get('widget_type')
 
@@ -318,10 +316,12 @@ class Widget(BaseInScope):
 
         if meta is not None:
             update_dict.update(dict(meta=meta))
+
         if title is not None:
-            self.meta.update({'customTitle': title})
-            update_dict.update(dict(meta=self.meta))
-        if kwargs:
+            self.meta.update({"customTitle": title, "showTitleValue": WidgetTitleValue.CUSTOM_TITLE})
+            update_dict.update(dict(title=title, meta=self.meta))
+
+        if kwargs:  # pragma: no cover
             update_dict.update(**kwargs)
 
         url = self._client._build_url('widget', widget_id=self.id)

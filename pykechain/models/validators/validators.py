@@ -457,7 +457,7 @@ class FileExtensionValidator(PropertyValidator):
     jsonschema = fileextensionvalidator_schema
     mimetype_regex = r'^[-\w.]+/[-\w.\*]+$'
 
-    def __init__(self, json: Optional[Dict] = None, accept: Optional[List[Text]] = None, **kwargs):
+    def __init__(self, json: Optional[Dict] = None, accept: Optional[Union[Text, List[Text]]] = None, **kwargs):
         """Construct a file extension validator.
 
         :param json: (optional) dict (json) object to construct the object from
@@ -504,17 +504,11 @@ class FileExtensionValidator(PropertyValidator):
             else:
                 # we assume this is an extension.
                 # we can only guess a url, we make a url like: "file.ext" to check.
-                if item.startswith('.'):
-                    fake_filename = "file{}".format(item)
-                else:
-                    fake_filename = "file.{}".format(item)
+                fake_filename = "file{}".format(item) if item.startswith(".") else "file.{}".format(item)
 
                 # do guess
                 guess, _ = mimetypes.guess_type(fake_filename)
-                if guess is not None:
-                    marray.append(guess)
-                else:
-                    print(guess)
+                marray.append(guess) if guess is not None else print(guess)
 
         return marray
 

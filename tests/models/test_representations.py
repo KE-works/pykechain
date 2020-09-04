@@ -137,6 +137,11 @@ class Bases:
         def _get_object(self) -> Union[Property, Scope, Activity]:
             pass
 
+        def test_create_with_prop(self):
+            representation = self.representation_class(prop=self.obj, value=self.value)
+
+            self.assertIsInstance(representation, self.representation_class)
+
         def test_get_set(self):
             """Test representation accessor property of the Mixin class"""
             reloaded_obj = self.client.reload(self.obj)

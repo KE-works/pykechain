@@ -567,6 +567,16 @@ class TestFileExtensionValidator(SixTestCase):
         self.assertTrue(validator.is_valid('file.pdf'))
         self.assertFalse(validator.is_valid('file.docx'))
 
+        with self.assertRaises(ValueError):
+            # noinspection PyTypeChecker
+            FileExtensionValidator(accept=True)
+
+    def test_fileextensionvalidator_on_extensions_csv(self):
+        validator = FileExtensionValidator(accept=".csv,.pdf")
+        self.assertTrue(validator.is_valid('file.csv'))
+        self.assertTrue(validator.is_valid('file.pdf'))
+        self.assertFalse(validator.is_valid('file.docx'))
+
     def test_fileextensionvalidator_on_mimetype(self):
         validator = FileExtensionValidator(accept=["application/pdf"])
         self.assertTrue(validator.is_valid('file.pdf'))
