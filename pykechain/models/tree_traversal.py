@@ -18,7 +18,7 @@ class TreeObject(BaseInScope, ABC):
         super().__init__(json=json, **kwargs)
 
         self.parent_id = json.get('parent_id', None)  # type: Optional[Text]
-
+        self._parent = None  # type: Optional[T]
         self._cached_children = None  # type: Optional[List[T]]
 
     def __call__(self: T, *args, **kwargs) -> T:
@@ -99,7 +99,7 @@ class TreeObject(BaseInScope, ABC):
         :type overwrite: bool
         :return: None
         """
-        # Create mapping table from a parent part ID to its children
+        # Create mapping table from a parent ID to its children
         children_by_parent_id = dict()
         for descendant in all_descendants:
             if descendant.parent_id in children_by_parent_id:
@@ -113,6 +113,11 @@ class TreeObject(BaseInScope, ABC):
                 descendant._cached_children = children_by_parent_id[descendant.id]
             else:
                 descendant._cached_children = []
+
+        # Populate every descendant with its parent
+        object_by_id = {c.id: c for c in all_descendants + [self]}
+        for descendant in all_descendants:
+            descendant._parent = object_by_id[descendant.parent_id]
 
         this_children = children_by_parent_id.get(self.id, list())
         if self._cached_children and not overwrite:

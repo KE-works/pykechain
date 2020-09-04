@@ -290,7 +290,9 @@ class Activity(TreeObject, TagsMixin, Activity2):
         """
         if self.parent_id is None:
             raise NotFoundError("Cannot find parent for task '{}', as this task exist on top level.".format(self))
-        return self._client.activity(pk=self.parent_id, scope=self.scope_id)
+        elif self._parent is None:
+            self._parent = self._client.activity(pk=self.parent_id, scope=self.scope_id)
+        return self._parent
 
     def children(self, **kwargs) -> List['Activity']:
         """Retrieve the direct activities of this subprocess.
@@ -319,6 +321,8 @@ class Activity(TreeObject, TagsMixin, Activity2):
         if not kwargs:
             if self._cached_children is None:
                 self._cached_children = self._client.activities(parent_id=self.id, scope=self.scope_id, **kwargs)
+                for child in self._cached_children:
+                    child._parent = self
             return self._cached_children
         else:
             return self._client.activities(parent_id=self.id, scope=self.scope_id, **kwargs)

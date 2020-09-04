@@ -167,7 +167,9 @@ class Part(TreeObject, Part2):
         >>> bike = part.parent()
 
         """
-        return self._client.part(pk=self.parent_id, category=self.category) if self.parent_id else None
+        if self._parent is None and self.parent_id:
+            self._parent = self._client.part(pk=self.parent_id, category=self.category)
+        return self._parent
 
     def children(self, **kwargs) -> Union['PartSet', List['Part']]:
         """Retrieve the children of this `Part` as `PartSet`.
@@ -203,6 +205,8 @@ class Part(TreeObject, Part2):
             # no kwargs provided is the default, we aim to cache it.
             if self._cached_children is None:
                 self._cached_children = list(self._client.parts(parent=self.id, category=self.category))
+                for child in self._cached_children:
+                    child._parent = self
             return self._cached_children
         else:
             # if kwargs are provided, we assume no use of cache as specific filtering on the children is performed.
