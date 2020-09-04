@@ -1,10 +1,11 @@
 from typing import List, Optional
 
 from pykechain.models import Activity, Scope, user
-from pykechain.models.base_reference import _ReferencePropertyInScope, _ReferenceProperty
+from pykechain.models.base_reference import _ReferencePropertyInScope
+from pykechain.models.property2_activity_reference import ActivityReferencesProperty as ActivityReferencesProperty2
 
 
-class ActivityReferencesProperty(_ReferencePropertyInScope):
+class ActivityReferencesProperty(_ReferencePropertyInScope, ActivityReferencesProperty2):
     """A virtual object representing a KE-chain Activity References property.
 
     .. versionadded:: 3.7

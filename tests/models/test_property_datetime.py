@@ -2,7 +2,7 @@ import datetime
 
 from pykechain.enums import PropertyType
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models.property2_datetime import DatetimeProperty
+from pykechain.models import DatetimeProperty
 from tests.classes import TestBetamax
 
 

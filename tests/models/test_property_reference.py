@@ -1,6 +1,6 @@
 from pykechain.enums import PropertyType, FilterType, Multiplicity, ActivityRootNames
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import MultiReferenceProperty2
+from pykechain.models import MultiReferenceProperty
 from pykechain.models.property_reference import (
     ActivityReferencesProperty,
     ScopeReferencesProperty,
@@ -49,13 +49,13 @@ class TestMultiReferenceProperty(TestBetamax):
             name=self.ref_prop_name,
             property_type=PropertyType.REFERENCES_VALUE,
             default_value=self.target_model.id,
-        )  # type: MultiReferenceProperty2
+        )  # type: MultiReferenceProperty
 
         # reference property instance holding the value
         part_instance = self.part_model.instance()
         self.ref = find(
             part_instance.properties, lambda p: p.model_id == self.ref_prop_model.id
-        )  # type: MultiReferenceProperty2
+        )  # type: MultiReferenceProperty
 
     def tearDown(self):
         self.target_model.delete()

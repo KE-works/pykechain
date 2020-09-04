@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-v3.8.1-rc3 (UNRELEASED)
+v3.8.1-rc4 (UNRELEASED)
 -----------------------
 
 * :bug Added `title_visible` property to `Widget` class for the widget's title shown in KE-chain, deprecating the `default_title` mechanism when creating widgets. The default title of a widget is not dependent on front-end and is not stored in the widget.
@@ -18,6 +18,10 @@ v3.8.1-rc3 (UNRELEASED)
 * :+1: Added `LanguageCodes` enum class to enumerate the available Language options for user profiles.
 * :+1: Added `value_ids()` method to `_ReferenceProperty` class, returning a list of UUIDs instead of Pykechain objects.
 
+v3.8.3-rc3 (UNRELEASED)
+-----------------------
+
+* :+1: Inverted the inheritance hierarchy of Class2 classes, allowing for type-checking via `isinstance()`. However, creating objects from these classes is no longer supported.
 
 v3.8.1-rc2 (UNRELEASED)
 -----------------------

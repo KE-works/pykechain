@@ -10,6 +10,7 @@ from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
+from pykechain.models.activity2 import Activity2
 from pykechain.models.input_checks import check_datetime, check_text, check_list_of_text, check_enum, check_user, \
     check_type, check_base
 from pykechain.models.representations.component import RepresentationsComponent
@@ -20,7 +21,7 @@ from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import parse_datetime, is_valid_email
 
 
-class Activity(TreeObject, TagsMixin):
+class Activity(TreeObject, TagsMixin, Activity2):
     """A virtual object representing a KE-chain activity.
 
     .. versionadded:: 2.0
