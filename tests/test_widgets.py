@@ -106,7 +106,7 @@ class TestWidgets(TestBetamax):
         for w in widget_set:
             with self.subTest(msg=w):
                 self.assertIsInstance(w, Widget)
-                self.assertEqual(self.activity.id, w.activity())
+                self.assertEqual(self.activity, w.activity())
 
     def test_create_widget_in_activity(self):
         self.new_widget = self.client.create_widget(
@@ -408,7 +408,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         picture = bike_part.property(name='Picture')
         process = self.project.activities(activity_type=ActivityType.PROCESS)[0]
 
-        widget1 = self.wm.add_card_widget(title="Some title", description='Some description')
+        widget1 = self.wm.add_card_widget(description='Some description')
         widget2 = self.wm.add_card_widget(image=picture, title=False, image_fit=ImageFitValue.COVER,
                                           link=self.task.id, link_target=LinkTargets.SAME_TAB)
         widget3 = self.wm.add_card_widget(title='Tree view', description='Process opens in tree view',

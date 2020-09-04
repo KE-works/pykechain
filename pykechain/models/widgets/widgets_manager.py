@@ -1271,7 +1271,7 @@ class WidgetsManager(Iterable):
 
     def add_card_widget(self,
                         image: Optional['AttachmentProperty'] = None,
-                        title: Optional[Union[type(None), Text, bool]] = None,
+                        title: Optional[Union[type(None), Text, bool]] = False,
                         parent_widget: Optional[Union[Widget, Text]] = None,
                         description: Optional[Union[Text, bool]] = None,
                         link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
