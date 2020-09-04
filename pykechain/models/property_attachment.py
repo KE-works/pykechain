@@ -6,10 +6,11 @@ import requests
 from typing import Text, Any, Optional
 
 from pykechain.exceptions import APIError
+from pykechain.models.property2_attachment import AttachmentProperty2
 from pykechain.models.property import Property
 
 
-class AttachmentProperty(Property):
+class AttachmentProperty(Property, AttachmentProperty2):
     """A virtual object representing a KE-chain attachment property."""
 
     @property

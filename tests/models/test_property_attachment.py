@@ -2,7 +2,7 @@ import json
 import os
 
 from pykechain.enums import PropertyType, Multiplicity
-from pykechain.models import AttachmentProperty2
+from pykechain.models import AttachmentProperty
 from tests.classes import TestBetamax
 
 
@@ -19,9 +19,9 @@ class TestAttachment(TestBetamax):
         self.property_model = self.part_model.add_property(
             name=self.property_name,
             property_type=PropertyType.ATTACHMENT_VALUE
-        )  # type: AttachmentProperty2
+        )  # type: AttachmentProperty
 
-        self.property = self.part_model.instance().property(name=self.property_name)  # type: AttachmentProperty2
+        self.property = self.part_model.instance().property(name=self.property_name)  # type: AttachmentProperty
 
     def tearDown(self):
         self.part_model.delete()

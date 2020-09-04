@@ -7,6 +7,7 @@ from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import Multiplicity, ScopeStatus, SubprocessDisplayMode, KEChainPages, ScopeRoles, \
     ScopeMemberActions
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
+from pykechain.models.scope2 import Scope2
 from pykechain.models.base import Base
 from pykechain.models.input_checks import check_text, check_datetime, check_enum, check_list_of_text, \
     check_base, check_type
@@ -17,7 +18,7 @@ from pykechain.models.team import Team
 from pykechain.utils import parse_datetime, find
 
 
-class Scope(Base, TagsMixin):
+class Scope(Base, TagsMixin, Scope2):
     """A virtual object representing a KE-chain scope.
 
     :ivar id: id of the activity
