@@ -650,6 +650,7 @@ class Part(TreeObject, Part2):
             part: 'Part',
             properties_fvalues: List[Dict[Text, Any]],
             update_dict: Dict,
+            creating: bool = False,
     ) -> Tuple[List[Dict], List[Dict]]:
         """
         Check the content of the update dict and insert them into the properties_fvalues list.
@@ -657,6 +658,7 @@ class Part(TreeObject, Part2):
         :param part: Depending on whether you add to or update a part, this is the model or the part itself, resp.
         :param properties_fvalues: list of property values
         :param update_dict: dictionary with property values, keyed by property names
+        :param creating: flag to indicate creation of new properties, hence using the `model_id` instead of `id`
         :return: Tuple with 2 lists of dicts
         :rtype tuple
         """
@@ -666,12 +668,14 @@ class Part(TreeObject, Part2):
         exception_fvalues = list()
         update_dict = update_dict or dict()
 
+        key = "model_id" if creating else "id"
+
         for prop_name_or_id, property_value in update_dict.items():
             property_to_update = part.property(prop_name_or_id)  # type: Property
 
             updated_p = {
                 "value": property_to_update.serialize_value(property_value),
-                "id": property_to_update.id,
+                key: property_to_update.id,
             }
 
             if property_to_update.type == PropertyType.ATTACHMENT_VALUE:
@@ -741,7 +745,12 @@ class Part(TreeObject, Part2):
             raise IllegalArgumentError('`model` must be a Part object of category MODEL, "{}" is not.'.format(model))
 
         instance_name = check_text(name, 'name') or model.name
-        properties_fvalues, exception_fvalues = self._parse_update_dict(model, properties_fvalues, update_dict)
+        properties_fvalues, exception_fvalues = self._parse_update_dict(
+            model,
+            properties_fvalues,
+            update_dict,
+            creating=True,
+        )
 
         url = self._client._build_url('parts_new_instance')
         response = self._client._request(
