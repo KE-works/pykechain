@@ -67,7 +67,7 @@ class Widget(BaseInScope):
         if show_title_value == WidgetTitleValue.NO_TITLE:
             return None
         elif show_title_value == WidgetTitleValue.CUSTOM_TITLE:
-            return self.title
+            return self._json_data.get("customTitle")
 
         elif show_title_value == WidgetTitleValue.DEFAULT:
             try:
