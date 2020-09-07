@@ -7,62 +7,74 @@ from tests.classes import TestBetamax
 
 
 class TestPartCreateWithProperties(TestBetamax):
+
+    def setUp(self):
+        super().setUp()
+        self.parent = self.project.part('Bike')  # type: Part
+        self.wheel_model = self.project.model('Wheel')  # type: Part
+        self.new_wheel = None
+
+    def tearDown(self):
+        if self.new_wheel:
+            self.new_wheel.delete()
+        super().tearDown()
+
     def test_create_part_with_properties_no_bulk(self):
         """Test create a part with the properties when bulk = False for old API compatibility"""
-        parent = self.project.part('Bike')  # type: Part
-        wheel_model = self.project.model('Wheel')  # type: Part
-
         update_dict = {
             'Diameter': 42.42,
             'Spokes': 42,
             'Rim Material': 'Unobtanium'
         }
 
-        new_wheel = parent.add_with_properties(wheel_model, "Fresh Wheel", update_dict=update_dict, bulk=False)
+        self.new_wheel = self.parent.add_with_properties(
+            self.wheel_model,
+            "Fresh Wheel",
+            update_dict=update_dict,
+            bulk=False,
+        )
 
-        self.assertIsInstance(new_wheel, Part)
-        self.assertTrue(new_wheel.property('Diameter'), 42.42)
-
-        new_wheel.delete()
+        self.assertIsInstance(self.new_wheel, Part)
+        self.assertTrue(self.new_wheel.property('Diameter'), 42.42)
 
     def test_create_part_with_properties_names_with_bulk(self):
         """Test create a part with the properties when bulk = False for old API compatibility"""
-        parent = self.project.part('Bike')  # type: Part
-        wheel_model = self.project.model('Wheel')  # type: Part
-
         update_dict = {
             'Diameter': 42.43,
             'Spokes': 42,
             'Rim Material': 'Unobtanium'
         }
 
-        new_wheel = parent.add_with_properties(wheel_model, "Fresh Wheel", update_dict=update_dict, bulk=True)
+        self.new_wheel = self.parent.add_with_properties(
+            self.wheel_model,
+            "Fresh Wheel",
+            update_dict=update_dict,
+            bulk=True,
+        )
 
-        self.assertIsInstance(new_wheel, Part)
-        self.assertTrue(new_wheel.property('Diameter'), 42.43)
-
-        new_wheel.delete()
+        self.assertIsInstance(self.new_wheel, Part)
+        self.assertTrue(self.new_wheel.property('Diameter'), 42.43)
 
     def test_create_part_with_properties_ids_with_bulk(self):
         """Test create a part with the properties when bulk = False for old API compatibility"""
-        parent = self.project.part('Bike')  # type: Part
-        wheel_model = self.project.model('Wheel')  # type: Part
-
         update_dict = {
-            wheel_model.property('Diameter').id: 42.43,
-            wheel_model.property('Spokes').id: 42,
-            wheel_model.property('Rim Material').id: 'Unobtanium'
+            self.wheel_model.property('Diameter').id: 42.43,
+            self.wheel_model.property('Spokes').id: 42,
+            self.wheel_model.property('Rim Material').id: 'Unobtanium'
         }
 
         # check if the keys are really a UUID
         self.assertTrue(any([is_uuid(key) for key in update_dict.keys()]))
 
-        new_wheel = parent.add_with_properties(wheel_model, "Fresh Wheel", update_dict=update_dict, bulk=True)
+        self.new_wheel = self.parent.add_with_properties(
+            self.wheel_model,
+            "Fresh Wheel",
+            update_dict=update_dict,
+            bulk=True,
+        )
 
-        self.assertIsInstance(new_wheel, Part)
-        self.assertTrue(new_wheel.property('Diameter'), 42.43)
-
-        new_wheel.delete()
+        self.assertIsInstance(self.new_wheel, Part)
+        self.assertTrue(self.new_wheel.property('Diameter'), 42.43)
 
 
 class TestCreateModelWithProperties(TestBetamax):
