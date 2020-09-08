@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-v3.8.1 (04SEP20)
+v3.8.1 (08SEP20)
 ----------------
 
 * :bug: Added `title_visible` property to `Widget` class for the widget's title shown in KE-chain, deprecating the `default_title` mechanism when creating widgets. The default title of a widget is not dependent on front-end and is not stored in the widget.
@@ -18,23 +18,12 @@ v3.8.1 (04SEP20)
 * :+1: Added `LanguageCodes` enum class to enumerate the available Language options for user profiles.
 * :+1: Added `value_ids()` method to `_ReferenceProperty` class, returning a list of UUIDs instead of Pykechain objects.
 * :+1: Added lazy retrieval in `parent()` method of `TreeObject`, `Part` and `Activity` classes. Retrieving children or populating descendants also sets all known parent objects.
-
-v3.8.1-rc3 (03SEP20)
---------------------
-
 * :+1: Inverted the inheritance hierarchy of Class2 classes, allowing for type-checking via `isinstance()`. However, creating objects from these classes is no longer supported.
-
-v3.8.1-rc2 (19AUG20)
---------------------
-
 * :+1: Added `set_associations` and `remove_associations` method to the `Widget` class (#827)
 * :+1: Renamed activity clone API endpoint is now supported. We now support the cloning and renaming of Parts as well as cloning the activities. (#805)
 * :+1: Added support of user references and scope references properties in pykechain by implementing the `UserReferencesProperty` and `ScopeReferencesProperty` classes. (#832)
-
-v3.8.1-rc1 (14AUG20)
---------------------
-
 * :+1: Included pending deprecation of version-2 classes such as `Part2`, `Property2`. It is advised to use the original `Part` and `Property` classes instead. (#713)
+* :+1: dependent versions for development: sphinx (3.2.1), pytest-cov (2.10.1), tox (3.20.0), pydocstyle (5.1.1), pre-commit (2.7.1), coveralls (2.1.2)
 
 v3.8.0 (11AUG20)
 ----------------
