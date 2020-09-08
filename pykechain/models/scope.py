@@ -4,13 +4,30 @@ from typing import Union, Text, Dict, Optional, List  # noqa: F401
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.enums import Multiplicity, ScopeStatus, SubprocessDisplayMode, KEChainPages, ScopeRoles, \
-    ScopeMemberActions
+from pykechain.enums import (
+    Multiplicity,
+    ScopeStatus,
+    SubprocessDisplayMode,
+    KEChainPages,
+    ScopeRoles,
+    ScopeMemberActions,
+)
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.scope2 import Scope2
+from pykechain.models.service import Service, ServiceExecution
+from pykechain.models.activity import Activity
+from pykechain.models.part import Part
 from pykechain.models.base import Base
-from pykechain.models.input_checks import check_text, check_datetime, check_enum, check_list_of_text, \
-    check_base, check_type
+from pykechain.models.property import Property
+from pykechain.models.input_checks import (
+    check_text,
+    check_datetime,
+    check_enum,
+    check_list_of_text,
+    check_base,
+    check_type,
+)
+from pykechain.models.representations import BaseRepresentation
 from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
@@ -73,7 +90,7 @@ class Scope(Base, TagsMixin, Scope2):
         )
 
     @property
-    def team(self):
+    def team(self) -> Optional[Team]:
         """Team to which the scope is assigned."""
         team_dict = self._json_data.get('team_id_name')
         if team_dict and team_dict.get('id'):
@@ -82,7 +99,7 @@ class Scope(Base, TagsMixin, Scope2):
             return None
 
     @property
-    def options(self):
+    def options(self) -> Dict:
         """Options of the Scope.
 
         .. versionadded: 3.0
@@ -100,7 +117,7 @@ class Scope(Base, TagsMixin, Scope2):
                         extra_params=API_EXTRA_PARAMS['scope'])
 
     @property
-    def representations(self):
+    def representations(self) -> List['BaseRepresentation']:
         """Get and set the scope representations."""
         return self._representations_container.get_representations()
 
@@ -296,7 +313,7 @@ class Scope(Base, TagsMixin, Scope2):
         if tags is not None:
             self._tags = tags
 
-    def clone(self, **kwargs):
+    def clone(self, **kwargs) -> 'Scope':
         """Clone a scope.
 
         See :method:`pykechain.Client.clone_scope()` for available parameters.
@@ -319,7 +336,7 @@ class Scope(Base, TagsMixin, Scope2):
     # Part methods
     #
 
-    def parts(self, *args, **kwargs):
+    def parts(self, *args, **kwargs) -> List['Part']:
         """Retrieve parts belonging to this scope.
 
         This uses
@@ -328,14 +345,14 @@ class Scope(Base, TagsMixin, Scope2):
         """
         return self._client.parts(*args, scope_id=self.id, **kwargs)
 
-    def part(self, *args, **kwargs):
+    def part(self, *args, **kwargs) -> 'Part':
         """Retrieve a single part belonging to this scope.
 
         See :class:`pykechain.Client.part` for available parameters.
         """
         return self._client.part(*args, scope_id=self.id, **kwargs)
 
-    def properties(self, *args, **kwargs):
+    def properties(self, *args, **kwargs) -> List['Property']:
         """Retrieve properties belonging to this scope.
 
         .. versionadded: 3.0
@@ -344,7 +361,7 @@ class Scope(Base, TagsMixin, Scope2):
         """
         return self._client.properties(*args, scope_id=self.id, **kwargs)
 
-    def property(self, *args, **kwargs):
+    def property(self, *args, **kwargs) -> 'Property':
         """Retrieve a single property belonging to this scope.
 
         .. versionadded: 3.0
@@ -353,14 +370,14 @@ class Scope(Base, TagsMixin, Scope2):
         """
         return self._client.property(*args, scope_id=self.id, **kwargs)
 
-    def model(self, *args, **kwargs):
+    def model(self, *args, **kwargs) -> 'Part':
         """Retrieve a single model belonging to this scope.
 
         See :class:`pykechain.Client.model` for available parameters.
         """
         return self._client.model(*args, scope_id=self.id, **kwargs)
 
-    def create_model(self, parent, name, multiplicity=Multiplicity.ZERO_MANY):
+    def create_model(self, parent, name, multiplicity=Multiplicity.ZERO_MANY) -> 'Part':
         """Create a single part model in this scope.
 
         See :class:`pykechain.Client.create_model` for available parameters.
@@ -368,7 +385,7 @@ class Scope(Base, TagsMixin, Scope2):
         return self._client.create_model(parent, name, multiplicity=multiplicity)
 
     def create_model_with_properties(self, parent, name, multiplicity=Multiplicity.ZERO_MANY,
-                                     properties_fvalues=None, **kwargs):
+                                     properties_fvalues=None, **kwargs) -> 'Part':
         """Create a model with its properties in a single API request.
 
         See :func:`pykechain.Client.create_model_with_properties()` for available parameters.
@@ -380,21 +397,21 @@ class Scope(Base, TagsMixin, Scope2):
     # Activity methods
     #
 
-    def activities(self, *args, **kwargs):
+    def activities(self, *args, **kwargs) -> List['Activity']:
         """Retrieve activities belonging to this scope.
 
         See :class:`pykechain.Client.activities` for available parameters.
         """
         return self._client.activities(*args, scope_id=self.id, **kwargs)
 
-    def activity(self, *args, **kwargs):
+    def activity(self, *args, **kwargs) -> 'Activity':
         """Retrieve a single activity belonging to this scope.
 
         See :class:`pykechain.Client.activity` for available parameters.
         """
         return self._client.activity(*args, scope_id=self.id, **kwargs)
 
-    def create_activity(self, *args, **kwargs):
+    def create_activity(self, *args, **kwargs) -> 'Activity':
         """Create a new activity belonging to this scope.
 
         See :class:`pykechain.Client.create_activity` for available parameters.
@@ -405,10 +422,11 @@ class Scope(Base, TagsMixin, Scope2):
         """Retrieve the side-bar manager."""
         return SideBarManager(scope=self, *args, **kwargs)
 
-    def set_landing_page(self,
-                         activity: Union['Activity', KEChainPages],
-                         task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
-                         ) -> None:
+    def set_landing_page(
+            self,
+            activity: Union['Activity', KEChainPages],
+            task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
+    ) -> None:
         """
         Update the landing page of the scope.
 
@@ -436,11 +454,19 @@ class Scope(Base, TagsMixin, Scope2):
         options.update({'landingPage': url})
         self.options = options
 
+    def get_landing_page_url(self) -> Optional[Text]:
+        """
+        Retrieve the landing page URL, if it is set in the options.
+
+        :return: Landing page url
+        """
+        return self.options.get("landingPage")
+
     #
     # Service Methods
     #
 
-    def services(self, *args, **kwargs):
+    def services(self, *args, **kwargs) -> List['Service']:
         """Retrieve services belonging to this scope.
 
         See :class:`pykechain.Client.services` for available parameters.
@@ -449,7 +475,7 @@ class Scope(Base, TagsMixin, Scope2):
         """
         return self._client.services(*args, scope=self.id, **kwargs)
 
-    def create_service(self, *args, **kwargs):
+    def create_service(self, *args, **kwargs) -> 'Service':
         """Create a service to current scope.
 
         See :class:`pykechain.Client.create_service` for available parameters.
@@ -458,7 +484,7 @@ class Scope(Base, TagsMixin, Scope2):
         """
         return self._client.create_service(*args, scope=self.id, **kwargs)
 
-    def service(self, *args, **kwargs):
+    def service(self, *args, **kwargs) -> 'Service':
         """Retrieve a single service belonging to this scope.
 
         See :class:`pykechain.Client.service` for available parameters.
@@ -467,7 +493,7 @@ class Scope(Base, TagsMixin, Scope2):
         """
         return self._client.service(*args, scope=self.id, **kwargs)
 
-    def service_executions(self, *args, **kwargs):
+    def service_executions(self, *args, **kwargs) -> List['ServiceExecution']:
         """Retrieve services belonging to this scope.
 
         See :class:`pykechain.Client.service_executions` for available parameters.
@@ -476,7 +502,7 @@ class Scope(Base, TagsMixin, Scope2):
         """
         return self._client.service_executions(*args, scope=self.id, **kwargs)
 
-    def service_execution(self, *args, **kwargs):
+    def service_execution(self, *args, **kwargs) -> 'ServiceExecution':
         """Retrieve a single service execution belonging to this scope.
 
         See :class:`pykechain.Client.service_execution` for available parameters.

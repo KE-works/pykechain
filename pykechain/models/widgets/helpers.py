@@ -59,11 +59,12 @@ def _retrieve_object_id(obj: Optional[Union['Base', Text]]) -> Optional[Text]:
                                    "Type is: {}".format(type(obj)))
 
 
-def _set_title(meta: Dict,
-               title: Optional[Union[Text, bool]] = None,
-               default_title: Optional[Text] = None,
-               show_title_value: Optional[WidgetTitleValue] = None,
-               **kwargs) -> Tuple[Dict, Text]:
+def _set_title(
+        meta: Dict,
+        title: Optional[Union[Text, bool]] = None,
+        show_title_value: Optional[WidgetTitleValue] = None,
+        **kwargs
+) -> Tuple[Dict, Text]:
     """
     Set the customTitle in the meta based on provided optional custom title or default.
 
@@ -78,8 +79,6 @@ def _set_title(meta: Dict,
             * String value: use the title
             * None: No title at all.
     :type title: basestring or bool or None
-    :param default_title: (optional) If title is False, the default title is injected as title
-    :type default_title: basestring or None
     :param show_title_value: (optional) Specify how the title is displayed, regardless of other inputs.
     :type show_title_value: WidgetTitleValue
     :return: tuple of meta and the title
@@ -91,26 +90,21 @@ def _set_title(meta: Dict,
     if show_title_value is None:
         if title is False:
             show_title_value = WidgetTitleValue.DEFAULT
+            title = None
         elif title is None or title == '':
             show_title_value = WidgetTitleValue.NO_TITLE
+            title = None
         else:
             show_title_value = WidgetTitleValue.CUSTOM_TITLE
 
-    if show_title_value == WidgetTitleValue.DEFAULT:
-        title_meta = None
-        if default_title is None:
-            raise IllegalArgumentError("If `title` is set to False the `default_title` is used and cannot be None. "
-                                       "Provide a `default_title` argument and ensure it is not None.")
-        title_ref = default_title
-    else:
-        title_meta = title
-        title_ref = title
+    if show_title_value == WidgetTitleValue.DEFAULT or title is False:
+        title = None
 
     meta.update({
         "showTitleValue": show_title_value,
-        "customTitle": title_meta,
+        "customTitle": title,
     })
-    return meta, title_ref
+    return meta, title
 
 
 def _initiate_meta(kwargs, activity, ignores=()):

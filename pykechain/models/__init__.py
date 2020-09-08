@@ -11,7 +11,7 @@ from .part import Part
 from .part2 import Part2
 from .property import Property
 from .property_attachment import AttachmentProperty
-from .property_selectlist import SelectListProperty
+from .property_selectlist import SelectListProperty, MultiSelectListProperty
 from .property_multi_reference import MultiReferenceProperty
 from .property_datetime import DatetimeProperty
 from .property2 import Property2
@@ -46,6 +46,7 @@ AnyProperty = Union[
 property_type_to_class_map = {
     PropertyType.ATTACHMENT_VALUE: AttachmentProperty,
     PropertyType.SINGLE_SELECT_VALUE: SelectListProperty,
+    PropertyType.MULTI_SELECT_VALUE: MultiSelectListProperty,
     PropertyType.REFERENCES_VALUE: MultiReferenceProperty,
     PropertyType.DATETIME_VALUE: DatetimeProperty,
     PropertyType.ACTIVITY_REFERENCES_VALUE: ActivityReferencesProperty,

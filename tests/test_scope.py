@@ -4,6 +4,7 @@ from pykechain.enums import ScopeStatus, KEChainPages, ScopeMemberActions, Scope
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from pykechain.models import Team, Scope
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
+from pykechain.utils import is_url
 from tests.classes import TestBetamax
 
 
@@ -299,3 +300,14 @@ class TestScopeEdit(TestBetamax):
         for task in tasks:
             with self.subTest(msg=task):
                 self.scope.set_landing_page(activity=task)
+
+    def test_get_landing_page(self):
+        landing_page = self.scope.get_landing_page_url()
+
+        self.assertIsNone(landing_page)
+
+        self.scope.set_landing_page(activity=self.scope.activities()[0])
+        landing_page = self.scope.get_landing_page_url()
+
+        self.assertIsInstance(landing_page, str)
+        self.assertTrue(is_url(self.client.api_root + landing_page))

@@ -41,21 +41,53 @@ class _ReferenceProperty(Property):
     def value(self, value: Any) -> None:
         value = self.serialize_value(value)
         if self.use_bulk_update:
-            self._pend_value(value)
+            self._pend_update(dict(value=value))
+            self._value = value
         else:
             self._put_value(value)
+
+    def value_ids(self) -> Optional[List[Text]]:
+        """
+        Retrieve the referenced object UUIDs only.
+
+        :return: list of UUIDs
+        :rtype list
+        """
+        return [value.get("id") for value in self._value] if self.has_value() else None
+
+    def _validate_values(self) -> List[Text]:
+        """
+        Check if the `_value` attribute has valid content.
+
+        :return list of UUIDs:
+        :rtype list
+        """
+        if not self._value:
+            return []
+
+        object_ids = []
+        for value in self._value:
+            if isinstance(value, dict) and "id" in value:
+                object_ids.append(str(value.get("id")))
+            elif isinstance(value, (int, str)):
+                object_ids.append(str(value))
+            else:  # pragma: no cover
+                raise ValueError(
+                    'Value "{}" must be a dict with field `id` or a UUID.'.format(value)
+                )
+        return object_ids
 
     @abstractmethod
     def _retrieve_objects(self, **kwargs) -> List[Base]:
         """
         Retrieve a list of Pykechain objects, type depending on the reference property type.
 
-        This method is abstract because the exact method of the Client class changes per subclass.
+        This method is abstract because the exact retrieval method of the Client class changes per subclass.
 
         :param kwargs: optional arguments
         :return: list of Pykechain objects inheriting from Base
         """
-        pass
+        pass  # pragma: no cover
 
     def serialize_value(self, value: Union[Base, List, Tuple]) -> Optional[List[Text]]:
         """

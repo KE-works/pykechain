@@ -136,8 +136,7 @@ class TestAssociations(TestBetamax):
 
         self.assertEqual(4, len(original_associations))
 
-        self.client.remove_widget_associations(
-            widget=self.form_widget,
+        self.form_widget.remove_associations(
             models=self.frame_model.properties[0:1],
         )
         associations = self.client.associations(widget=self.form_widget)

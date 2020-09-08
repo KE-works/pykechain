@@ -38,7 +38,7 @@ class BaseValidator(object):
     @classmethod
     def parse(cls, json: Dict) -> Any:
         """Parse a json dict and return the correct subclass."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
 
 class PropertyValidator(BaseValidator):

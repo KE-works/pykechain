@@ -1,4 +1,4 @@
-from typing import List, Optional, Text, Union, Any, Dict
+from typing import List, Optional, Text, Union, Any
 
 from pykechain.enums import Category, FilterType
 from pykechain.models.property2_multi_reference import MultiReferenceProperty2
@@ -22,23 +22,13 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         :param kwargs: optional inputs
         :return: list of Part objects
         """
-        if self._value is None:
-            return []
-
-        ids = []
-        for value in self._value:
-            if isinstance(value, dict):
-                ids.append(value.get('id'))
-            elif isinstance(value, str):
-                ids.append(value)
-            else:
-                raise ValueError('Value "{}" must be a dict with field `id` or a UUID.'.format(value))
+        part_ids = self._validate_values()
 
         parts = []
 
-        if ids:
+        if part_ids:
             if self.category == Category.MODEL:
-                parts = [self._client.part(pk=ids[0], category=None)]
+                parts = [self._client.part(pk=part_ids[0], category=None)]
             elif self.category == Category.INSTANCE:
                 # Retrieve the referenced model for low-permissions scripts to enable use of the `id__in` key
                 if False:  # TODO Check for script permissions in order to skip the model() retrieval
@@ -47,7 +37,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
                     models = self.model().value
                 if models:
                     parts = list(self._client.parts(
-                        id__in=','.join(ids),
+                        id__in=','.join(part_ids),
                         model=models[0],
                         category=None,
                     ))
@@ -68,18 +58,22 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         >>> referenced_part_choices = reference_property.choices()
 
         """
+        possible_choices = list()
         # Check whether the model of this reference property (possible itself) has a configured value
-        referenced_model = self.model()._value  # type: Optional[List[Dict]]
-        if referenced_model:
+        if self.model().has_value():
             # If a model is configured, retrieve its ID
-            choices_model_id = referenced_model[0].get('id')
+            choices_model_id = self.model()._value[0].get('id')
+
+            # Determine which parts are filtered out
+            prefilter = self._options.get('prefilters', {}).get('property_value')  # type: Optional[Text]
 
             # Retrieve all part instances with this model ID
-            possible_choices = self._client.parts(model_id=choices_model_id)  # makes multiple parts call
+            possible_choices = self._client.parts(
+                model_id=choices_model_id,
+                property_value=prefilter,
+            )
 
-            return possible_choices
-        else:
-            return list()
+        return possible_choices
 
     def set_prefilters(
             self,

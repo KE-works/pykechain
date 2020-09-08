@@ -221,6 +221,8 @@ class Client(object):
         self.last_request = self.last_response.request
         self.last_url = self.last_response.url
 
+        # print("{} {} {}".format(method, url, kwargs.get("params")))  # uncomment to track all requests
+
         if self.last_response.status_code == requests.codes.forbidden:
             raise ForbiddenError(self.last_response.json()['results'][0]['detail'])
 
@@ -1219,6 +1221,25 @@ class Client(object):
 
         return cloned_activities
 
+    def update_activities(
+            self,
+            activities: List[Dict],
+    ) -> None:
+        """
+        Update multiple activities in bulk.
+
+        :param activities: list of dicts, each specifying the updated data per activity.
+        :raises APIError
+        :return: None
+        """
+        check_list_of_dicts(activities, 'activities', fields=['id'])
+
+        url = self._build_url('activities_bulk_update')
+        response = self._request('PUT', url, json=activities)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Activities", response=response)
+
     def _create_part(self, action: Text, data: Dict, **kwargs) -> Optional[Part]:
         """Create a part for PIM 2 internal core function."""
         # suppress_kevents should be in the data (not the query_params)
@@ -2161,7 +2182,9 @@ class Client(object):
             raise APIError("Could not create Widget", response=response)
 
         # create the widget and do postprocessing
-        widget = Widget.create(json=response.json().get('results')[0], client=self)
+        manager = activity._widgets_manager if isinstance(activity, Activity) else None
+
+        widget = Widget.create(json=response.json().get('results')[0], client=self, manager=manager)
 
         # update the associations if needed
         if readable_model_ids is not None or writable_model_ids is not None:
@@ -2460,9 +2483,12 @@ class Client(object):
                 id=widget_id,
                 readable_model_properties_ids=readable_model_ids,
                 writable_model_properties_ids=writable_model_ids,
-                part_instance_id=part_instance_id,
-                parent_part_instance_id=parent_part_instance_id,
             )
+
+            if part_instance_id:
+                data.update(dict(part_instance_id=part_instance_id))
+            if parent_part_instance_id:
+                data.update(dict(parent_part_instance_id=parent_part_instance_id))
 
             if kwargs:
                 data.update(**kwargs)
@@ -2563,9 +2589,12 @@ class Client(object):
                 id=widget_id,
                 readable_model_properties_ids=readable_model_ids,
                 writable_model_properties_ids=writable_model_ids,
-                part_instance_id=part_instance_id,
-                parent_part_instance_id=parent_part_instance_id,
             )
+
+            if part_instance_id:
+                data.update(dict(part_instance_id=part_instance_id))
+            if parent_part_instance_id:
+                data.update(dict(parent_part_instance_id=parent_part_instance_id))
 
             if kwargs:  # pragma: no cover
                 data.update(**kwargs)
