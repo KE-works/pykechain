@@ -129,14 +129,41 @@ class TestMultiReferenceProperty(TestBetamax):
         self.assertFalse(self.ref.has_value())
         self.assertIsNone(value_of_multi_ref)
 
+    def test_value_ids(self):
+        wheel_instances = self.target_model.instances()
+        wheel_instances_list = [instance.id for instance in wheel_instances]
+        self.ref.value = wheel_instances_list
+        self.ref.refresh()
+
+        ids = self.ref.value_ids()
+
+        self.assertIsInstance(ids, list)
+        self.assertTrue(all(isinstance(v, str) for v in ids))
+
     def test_multi_ref_choices(self):
         # setUp
-        self.project.part(ref="bike").add(model=self.target_model, name="__Wheel 2")
+        self.project.part(ref="bike").add_with_properties(
+            name='__Wheel 2',
+            model=self.target_model,
+            update_dict={
+                PropertyType.BOOLEAN_VALUE: True,
+            }
+        )
         self.ref_prop_model.value = [self.target_model]
         possible_options = self.ref.choices()
 
         # testing
         self.assertEqual(2, len(possible_options))
+
+        self.ref_prop_model.set_prefilters(
+            property_models=[self.target_model.property(PropertyType.BOOLEAN_VALUE)],
+            values=[True],
+            filters_type=[FilterType.EXACT],
+        )
+        self.ref.refresh()
+
+        possible_options = self.ref.choices()
+        self.assertEqual(1, len(possible_options))
 
     def test_create_ref_property_referencing_part_in_list(self):
         # setUp
@@ -712,6 +739,18 @@ class TestActivityReference(TestBetamax):
         self.assertIsNotNone(self.prop.value)
         self.assertEqual(task, self.prop.value[0])
 
+    def test_value_ids(self):
+        wbs_root = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
+        task = wbs_root.children()[0]
+
+        self.prop.value = [task]
+        self.prop.refresh()
+
+        ids = self.prop.value_ids()
+
+        self.assertIsInstance(ids, list)
+        self.assertTrue(all(isinstance(v, str) for v in ids))
+
     def test_reload(self):
         reloaded_prop = self.client.reload(obj=self.prop)
 
@@ -754,6 +793,17 @@ class TestScopeReference(TestBetamax):
         self.assertIsInstance(self.scope_ref_prop, ScopeReferencesProperty)
         self.assertIsNotNone(self.scope_ref_prop.value)
         self.assertEqual(bike_project, self.scope_ref_prop.value[0])
+
+    def test_value_ids(self):
+        bike_project = self.client.scope(name="Bike Project")
+
+        self.scope_ref_prop.value = [bike_project]
+        self.scope_ref_prop.refresh()
+
+        ids = self.scope_ref_prop.value_ids()
+
+        self.assertIsInstance(ids, list)
+        self.assertTrue(all(isinstance(v, str) for v in ids))
 
     def test_no_value(self):
         self.assertIsInstance(self.scope_ref_prop, ScopeReferencesProperty)
@@ -801,6 +851,18 @@ class TestUserReference(TestBetamax):
         self.assertIsInstance(self.user_ref_prop, UserReferencesProperty)
         self.assertIsNotNone(self.user_ref_prop.value)
         self.assertEqual(user, self.user_ref_prop.value[0])
+
+    def test_value_ids(self):
+        user = self.client.user(name="User Test")
+
+        self.user_ref_prop.value = [user]
+
+        self.user_ref_prop.refresh()
+
+        ids = self.user_ref_prop.value_ids()
+
+        self.assertIsInstance(ids, list)
+        self.assertTrue(all(isinstance(v, int) for v in ids))
 
     def test_no_value(self):
         self.assertIsInstance(self.user_ref_prop, UserReferencesProperty)
