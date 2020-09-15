@@ -1431,6 +1431,11 @@ class WidgetsManager(Iterable):
         )
         return widget
 
+
+    def add_service_card_widget(self):
+        """
+
+        """
     #
     # Widget manager methods
     #
