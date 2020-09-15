@@ -483,10 +483,15 @@ class Client(object):
 
         """
         request_params = {
-            'name': check_text(text=name, key='name'),
-            'id': check_uuid(pk),
             'status': check_enum(status, ScopeStatus, 'status'),
         }
+        name = check_text(text=name, key='name')
+        pk = check_uuid(pk)
+
+        if name:
+            request_params["name"] = name
+        if pk:
+            request_params["id"] = pk
 
         request_params.update(API_EXTRA_PARAMS['scope'])
         url = self._build_url('scopes')
