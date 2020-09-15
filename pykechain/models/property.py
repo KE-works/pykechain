@@ -158,7 +158,7 @@ class Property(BaseInScope, Property2):
         if cls.use_bulk_update:
             properties = [dict(id=key, **values) for key, values in cls._update_package.items()]
             client.update_properties(properties=properties)
-            cls._update_package = list()
+            cls._update_package = dict()
         cls.set_bulk_update(use_bulk_update)
 
     def _pend_update(self, data):
