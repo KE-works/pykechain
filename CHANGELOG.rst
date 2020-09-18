@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v3.8.2-rc2
+----------
+
+* :bug: The `descendants` of a `Part` with classification `CATALOG` returns both the Catalog and Product descendants. This broke the guaranteed parent-child relationship when populating the descendants in the `populate_descendants()` method of the `Part` class.
+
 v3.8.1 (08SEP20)
 ----------------
 
