@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+v3.8.2 (18SEP20)
+----------------
+
+* :bug: The `descendants` of a `Part` with classification `CATALOG` returns both the Catalog and Product descendants. This broke the guaranteed parent-child relationship when populating the descendants in the `populate_descendants()` method of the `Part` class.
+* :bug: KeyError in `add_with_properties()` method of the `Part` class.
+
+* :+1: dependent versions for development: pytest (6.0.2)
+
 v3.8.1 (08SEP20)
 ----------------
 
