@@ -505,3 +505,17 @@ def get_in_chunks(lst: Union[List, Iterable], chunk_size: int) -> Iterable:
     """
     for i in range(0, len(lst), chunk_size):
         yield lst[i: i + chunk_size]
+
+
+def clean_update_dictionary(update_dict: Dict) -> Dict:
+    """
+    Clean a dictionary by removing all the keys that have an empty value.
+
+    :param update_dict: dictionary with keys=request parameters
+    :type update_dict: dict
+
+    :return: same dictionary but cleaned up if there are values None
+    :rtype: dict
+    """
+    cleaned_up_dict = {k: v for k, v in update_dict.items() if v not in (None, str(), list(), dict())}
+    return cleaned_up_dict

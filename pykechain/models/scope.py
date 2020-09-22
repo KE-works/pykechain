@@ -32,7 +32,7 @@ from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
-from pykechain.utils import parse_datetime, find
+from pykechain.utils import parse_datetime, find, clean_update_dictionary
 
 
 class Scope(Base, TagsMixin, Scope2):
@@ -225,6 +225,7 @@ class Scope(Base, TagsMixin, Scope2):
             tags: Optional[List[Text]] = None,
             team: Optional[Union[Team, Text]] = None,
             options: Optional[Dict] = None,
+            clear_values: Optional[Dict] = False
     ) -> None:
         """Edit the details of a scope.
 
@@ -246,6 +247,9 @@ class Scope(Base, TagsMixin, Scope2):
         :type team: UUIDstring or None
         :param options: (optionally) custom options dictionary stored on the scope object
         :type options: dict or None
+        :param clear_values: (optionally) if set to True this will automatically clear out the values of parameters
+                             not mentioned in the call or mentioned but with value None
+        :type clear_values: bool
         :raises IllegalArgumentError: if the type of the inputs is not correct
         :raises APIError: if another Error occurs
         :warns: UserWarning - When a naive datetime is provided. Defaults to UTC.
@@ -283,22 +287,19 @@ class Scope(Base, TagsMixin, Scope2):
         update_dict = {
             'id': self.id,
             'name': check_text(name, 'name') or self.name,
-            'text': check_text(description, 'description') or self.description,
+            'text': check_text(description, 'description') or str(),
             'start_date': check_datetime(start_date, 'start_date'),
             'due_date': check_datetime(due_date, 'due_date'),
             'status': check_enum(status, ScopeStatus, 'status') or self.status,
+            'tags': check_list_of_text(tags, 'tags', True) or list(),
+            'team_id': check_base(team, Team, 'team') or str(),
+            'scope_options': check_type(options, dict, 'options') or dict()
         }
-        team = check_base(team, Team, 'team', method=self._client.team)
-        if team:
-            update_dict['team_id'] = team
-        tags = check_list_of_text(tags, 'tags', True)
-        if tags is not None:
-            update_dict['tags'] = tags
-        scope_options = check_type(options, dict, 'options')
-        if scope_options:
-            update_dict['scope_options'] = scope_options
 
         url = self._client._build_url('scope', scope_id=self.id)
+
+        if not clear_values:
+            update_dict = clean_update_dictionary(update_dict=update_dict)
 
         response = self._client._request('PUT', url,
                                          params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
