@@ -12,7 +12,7 @@ from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.validators import PropertyValidator
 from pykechain.models.validators.validator_schemas import options_json_schema
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.utils import find
+from pykechain.utils import find, Empty, clean_empty_values
 
 T = TypeVar("T")
 
@@ -367,10 +367,10 @@ class Property(BaseInScope, Property2):
 
     def edit(
             self,
-            name: Optional[Text] = None,
-            description: Optional[Text] = None,
-            unit: Optional[Text] = None,
-            options: Optional[Dict] = None,
+            name: Optional[Text] = Empty(),
+            description: Optional[Text] = Empty(),
+            unit: Optional[Text] = Empty(),
+            options: Optional[Dict] = Empty(),
             **kwargs
     ) -> None:
         """Edit the details of a property (model).
@@ -406,22 +406,23 @@ class Property(BaseInScope, Property2):
         >>> options['propmodels_excl'] = propmodels_excl
         >>> wheel_property_reference.edit(options=options)
 
+        Not mentioning an input parameter in the function will leave it unchanged. Setting a parameter as None will
+        clear its value (where that is possible). The example below will clear the description, but leave everything
+        else unchanged.
+
+        >>> wheel_property.edit(description=None)
         """
         update_dict = {
             'name': check_text(name, 'name') or self.name,
-            'description': check_text(description, 'description') or self.description,
+            'description': check_text(description, 'description') or str(),
+            'unit': check_text(unit, 'unit') or str(),
+            'value_options': check_type(options, dict, 'options') or dict()
         }
-
-        options = check_type(options, dict, 'options')
-        if options:
-            update_dict['value_options'] = options
-
-        unit = check_text(unit, 'unit')
-        if unit:
-            update_dict['unit'] = unit
 
         if kwargs:  # pragma: no cover
             update_dict.update(kwargs)
+
+        update_dict = clean_empty_values(update_dict=update_dict)
 
         if self.use_bulk_update:
             self._pend_update(data=update_dict)

@@ -256,6 +256,40 @@ class TestProperties(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             self.prop_model.edit(unit=4)
 
+    def test_edit_property_clear_values(self):
+        # setup
+        initial_name = 'Property first name'
+        initial_description = 'Property created to test clearing values.'
+        initial_unit = 'mm'
+
+        self.prop_model.edit(
+            name=initial_name,
+            description=initial_description,
+            unit=initial_unit
+        )
+
+        # Edit without mentioning values, everything should stay the same
+        new_name = 'Property second name'
+        self.prop_model.edit(
+            name=new_name
+        )
+
+        # testing
+        self.assertEqual(self.prop_model.name, new_name)
+        self.assertEqual(self.prop_model.description, initial_description)
+        self.assertEqual(self.prop_model.unit, initial_unit),
+
+        # Edit with clearing the values, name and status cannot be cleared
+        self.prop_model.edit(
+            name=None,
+            description=None,
+            unit=None
+        )
+
+        self.assertEqual(self.prop_model.name, new_name)
+        self.assertEqual(self.prop_model.description, str())
+        self.assertEqual(self.prop_model.unit, str())
+
     # 2.5.4
     def test_property_type(self):
         self.assertEqual(PropertyType.INT_VALUE, str(self.prop_model.type))
