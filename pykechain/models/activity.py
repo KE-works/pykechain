@@ -18,7 +18,7 @@ from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.models.user import User
 from pykechain.models.widgets.widgets_manager import WidgetsManager
-from pykechain.utils import parse_datetime, is_valid_email
+from pykechain.utils import parse_datetime, is_valid_email, Empty, clean_empty_values
 
 
 class Activity(TreeObject, TagsMixin, Activity2):
@@ -492,39 +492,40 @@ class Activity(TreeObject, TagsMixin, Activity2):
 
     def edit(
             self,
-            name: Optional[Text] = None,
-            description: Optional[Text] = None,
-            start_date: Optional[datetime.datetime] = None,
-            due_date: Optional[datetime.datetime] = None,
-            assignees: Optional[List[Text]] = None,
-            assignees_ids: Optional[List[Text]] = None,
-            status: Optional[Union[ActivityStatus, Text]] = None,
-            tags: Optional[List[Text]] = None,
+            name: Optional[Text] = Empty(),
+            description: Optional[Text] = Empty(),
+            start_date: Optional[datetime.datetime] = Empty(),
+            due_date: Optional[datetime.datetime] = Empty(),
+            assignees: Optional[List[Text]] = Empty(),
+            assignees_ids: Optional[List[Text]] = Empty(),
+            status: Optional[Union[ActivityStatus, Text]] = Empty(),
+            tags: Optional[List[Text]] = Empty(),
             **kwargs
     ) -> None:
         """Edit the details of an activity.
 
-        :param name: (optionally) edit the name of the activity
-        :type name: basestring or None
-        :param description: (optionally) edit the description of the activity
-        :type description: basestring or None
+        :param name: (optionally) edit the name of the activity. Name cannot be cleared.
+        :type name: basestring or None or Empty()
+        :param description: (optionally) edit the description of the activity or clear it
+        :type description: basestring or None or Empty()
         :param start_date: (optionally) edit the start date of the activity as a datetime object (UTC time/timezone
-                            aware preferred)
-        :type start_date: datetime or None
+                            aware preferred) or clear it
+        :type start_date: datetime or None or Empty()
         :param due_date: (optionally) edit the due_date of the activity as a datetime object (UTC time/timzeone
-                            aware preferred)
-        :type due_date: datetime or None
+                            aware preferred) or clear it
+        :type due_date: datetime or None or Empty()
         :param assignees: (optionally) edit the assignees (usernames) of the activity as a list, will overwrite all
-                          assignees
-        :type assignees: list(basestring) or None
+                          assignees or clear them
+        :type assignees: list(basestring) or None or Empty()
         :param assignees_ids: (optionally) edit the assignees (user id's) of the activity as a list, will overwrite all
-                             assignees
-        :type assignees_ids: list(basestring) or None
-        :param status: (optionally) edit the status of the activity as a string based
+                             assignees or clear them
+        :type assignees_ids: list(basestring) or None or Empty()
+        :param status: (optionally) edit the status of the activity as a string based. Status cannot be cleared.
                        on :class:`~pykechain.enums.ActivityStatus`
-        :type status: ActivityStatus or None
+        :type status: ActivityStatus or None or Empty()
         :param tags: (optionally) replace the tags on an activity, which is a list of strings ["one","two","three"]
-        :type tags: list of basestring or None
+                    or clear them
+        :type tags: list of basestring or None or Empty()
 
         :raises NotFoundError: if a `username` in the list of assignees is not in the list of scope members
         :raises IllegalArgumentError: if the type of the inputs is not correct
@@ -556,14 +557,19 @@ class Activity(TreeObject, TagsMixin, Activity2):
         >>> due_date_tzaware = mytimezone.localize(datetime(2019, 10, 27, 23, 59, 0))
         >>> my_task.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
 
+        Not mentioning an input parameter in the function will leave it unchanged. Setting a parameter as None will
+        clear its value (where that is possible). The example below will clear the due_date, but leave everything else
+        unchanged.
+
+        >>> my_task.edit(due_date=None)
+
         """
         update_dict = {
             'id': self.id,
             'name': check_text(text=name, key='name') or self.name,
-            'description': check_text(text=description, key='description') or self.description or '',
+            'description': check_text(text=description, key='description') or str(),
+            'tags': check_list_of_text(tags, 'tags', True) or list(),
         }
-        if tags is not None:
-            update_dict['tags'] = check_list_of_text(tags, 'tags', True)
 
         self._validate_edit_arguments(
             update_dict=update_dict,
@@ -574,6 +580,8 @@ class Activity(TreeObject, TagsMixin, Activity2):
             status=status,
             **kwargs,
         )
+
+        update_dict = clean_empty_values(update_dict=update_dict)
 
         url = self._client._build_url('activity', activity_id=self.id)
 
@@ -595,10 +603,26 @@ class Activity(TreeObject, TagsMixin, Activity2):
             **kwargs
     ) -> Dict:
         """Verify inputs provided in both the `clone`, `edit` and `edit_cascade_down` methods."""
-        if assignees and assignees_ids:
-            raise IllegalArgumentError('Provide either assignee names or their ids, but not both.')
+        update_dict.update({
+            'start_date': check_datetime(dt=start_date, key='start_date'),
+            'due_date': check_datetime(dt=due_date, key='due_date'),
+            'status': check_enum(status, ActivityStatus, 'status') or self.status
+        })
 
-        assignees = assignees if assignees is not None else assignees_ids
+        # If both are empty that means the user is not interested in changing them
+        if isinstance(assignees_ids, Empty) and isinstance(assignees, Empty):
+            update_dict['assignees_ids'] = Empty()
+            return update_dict
+        # If one of them is None, then the assignees will be cleared from the Activity
+        elif assignees is None or assignees_ids is None:
+            update_dict['assignees_ids'] = list()
+            return update_dict
+        # In case both of them have values specified, then an Error is raised
+        elif assignees and assignees_ids and not isinstance(assignees, Empty) and not isinstance(assignees_ids, Empty):
+            raise IllegalArgumentError('Provide either assignee names or their ids, but not both.')
+        # Otherwise, pick the one that has a value specified which is not Empty
+        else:
+            assignees = assignees if assignees is not None and not isinstance(assignees, Empty) else assignees_ids
 
         if assignees:
             if not isinstance(assignees, (list, tuple, set)) or not all(isinstance(a, (str, int)) for a in assignees):
@@ -610,16 +634,9 @@ class Activity(TreeObject, TagsMixin, Activity2):
             if len(update_assignees_ids) != len(assignees):
                 raise NotFoundError('All assignees should be a member of the project.')
         else:
-            update_assignees_ids = []
+            update_assignees_ids = list()
 
-        if update_assignees_ids:
-            update_dict['assignees_ids'] = update_assignees_ids
-        if start_date:
-            update_dict['start_date'] = check_datetime(dt=start_date, key='start_date')
-        if due_date:
-            update_dict['due_date'] = check_datetime(dt=due_date, key='due_date')
-        if status:
-            update_dict['status'] = check_enum(status, ActivityStatus, 'status') or self.status
+        update_dict['assignees_ids'] = update_assignees_ids
 
         if kwargs:
             update_dict.update(kwargs)

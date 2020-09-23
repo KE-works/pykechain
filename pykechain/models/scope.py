@@ -217,7 +217,7 @@ class Scope(Base, TagsMixin, Scope2):
 
     def edit(
             self,
-            name: Optional[Text] = None,
+            name: Optional[Text] = Empty(),
             description: Optional[Text] = Empty(),
             start_date: Optional[datetime] = Empty(),
             due_date: Optional[datetime] = Empty(),
@@ -229,24 +229,25 @@ class Scope(Base, TagsMixin, Scope2):
         """
         Edit the details of a scope. Setting an input to None will clear out the value (exception being name and status)
 
-        :param name: (optionally) edit the name of the scope
-        :type name: basestring or None
-        :param description: (optionally) edit the description of the scope
-        :type description: basestring or None
+        :param name: (optionally) edit the name of the scope. Name cannot be cleared.
+        :type name: basestring or None or Empty()
+        :param description: (optionally) edit the description of the scope or clear it
+        :type description: basestring or None or Empty()
         :param start_date: (optionally) edit the start date of the scope as a datetime object (UTC time/timezone
-                            aware preferred)
-        :type start_date: datetime or None
+                            aware preferred) or clear it
+        :type start_date: datetime or None or Empty()
         :param due_date: (optionally) edit the due_date of the scope as a datetime object (UTC time/timzeone
-                            aware preferred)
-        :type due_date: datetime or None
-        :param status: (optionally) edit the status of the scope as a string based
-        :type status: basestring or None
-        :param tags: (optionally) replace the tags on a scope, which is a list of strings ["one","two","three"]
-        :type tags: list of basestring or None
-        :param team: (optionally) add the scope to a team
-        :type team: UUIDstring or None
+                            aware preferred) or clear it
+        :type due_date: datetime or None or Empty()
+        :param status: (optionally) edit the status of the scope as a string based. Status cannot be cleared.
+        :type status: basestring or None or Empty()
+        :param tags: (optionally) replace the tags on a scope, which is a list of strings ["one","two","three"] or
+                    clear them
+        :type tags: list of basestring or None or Empty()
+        :param team: (optionally) add the scope to a team. Team cannot be cleared.
+        :type team: UUIDstring or None or Empty()
         :param options: (optionally) custom options dictionary stored on the scope object
-        :type options: dict or None
+        :type options: dict or None or Empty()
 
         :raises IllegalArgumentError: if the type of the inputs is not correct
         :raises APIError: if another Error occurs
@@ -280,6 +281,12 @@ class Scope(Base, TagsMixin, Scope2):
 
         >>> my_team = client.team(name='My own team')
         >>> project.edit(team=my_team)
+
+        Not mentioning an input parameter in the function will leave it unchanged. Setting a parameter as None will
+        clear its value (where that is possible). The example below will clear the due_date, but leave everything else
+        unchanged.
+
+        >>> project.edit(due_date=None)
 
         """
         update_dict = {

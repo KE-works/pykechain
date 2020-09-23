@@ -281,7 +281,7 @@ class TestScopeEdit(TestBetamax):
 
     # test added due to #847 - providing no inputs overwrites values
     def test_edit_scope_no_inputs_provided(self):
-        # setup
+        # setUp
         initial_name = 'Pykechain testing (bike project)'
         initial_description = 'Project used to build a Bike. Part-time job is to also test Pykechain.'
         initial_start_date = datetime.datetime(2018, 12, 5, tzinfo=None)
