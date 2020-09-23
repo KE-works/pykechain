@@ -4,7 +4,7 @@ from typing import Text, Optional, List, Iterable, Any, Callable, Dict
 
 from pykechain.enums import Enum
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.utils import is_uuid, is_url
+from pykechain.utils import is_uuid, is_url, Empty
 
 iter_types = (list, tuple, set)
 
@@ -16,7 +16,7 @@ def check_type(value: Optional[Any], cls: Any, key: Text) -> Optional[Any]:
     :param cls: check to see if the value is of type class
     :param key: key
     """
-    if value is not None:
+    if value is not None and not isinstance(value, Empty):
         if not isinstance(value, cls):
             if isinstance(cls, iter_types):
                 types = ', '.join(c.__name__ for c in cls)
@@ -29,7 +29,7 @@ def check_type(value: Optional[Any], cls: Any, key: Text) -> Optional[Any]:
 
 def check_uuid(uuid: Optional[Text], key: Optional[Text] = 'pk') -> Optional[Text]:
     """Validate the UUID input to be a correct UUID."""
-    if uuid is not None:
+    if uuid is not None and not isinstance(uuid, Empty):
         if not is_uuid(uuid):
             raise IllegalArgumentError('`{}` must be a valid UUID, "{}" ({}) is not.'.format(key, uuid, type(uuid)))
     return uuid
@@ -37,7 +37,7 @@ def check_uuid(uuid: Optional[Text], key: Optional[Text] = 'pk') -> Optional[Tex
 
 def check_text(text: Optional[Text], key: Text) -> Optional[Text]:
     """Validate text input to be a string."""
-    if text is not None:
+    if text is not None and not isinstance(text, Empty):
         if not isinstance(text, str):
             raise IllegalArgumentError('`{}` should be a string, "{}" ({}) is not.'.format(key, text, type(text)))
     return text
@@ -46,7 +46,7 @@ def check_text(text: Optional[Text], key: Text) -> Optional[Text]:
 def check_url(url: Optional[Text], key: Text = 'url') -> Optional[Text]:
     """Validate text input to be a valid format URL."""
     url = check_text(text=url, key=key)
-    if url is not None:
+    if url is not None and not isinstance(url, Empty):
         if not is_url(url):
             raise IllegalArgumentError('`{}` should be a valid URL, "{}" ({}) is not.'.format(key, url, type(url)))
     return url
@@ -54,7 +54,7 @@ def check_url(url: Optional[Text], key: Text = 'url') -> Optional[Text]:
 
 def check_list_of_text(list_of_text: Optional[Iterable[Text]], key: Text, unique: bool = False) -> Optional[List[Text]]:
     """Validate iterable input to be a list/tuple/set of strings."""
-    if list_of_text is not None:
+    if list_of_text is not None and not isinstance(list_of_text, Empty):
         if not isinstance(list_of_text, iter_types) or not all(isinstance(t, Text) for t in list_of_text):
             raise IllegalArgumentError(
                 '`{}` should be a list, tuple or set of strings, "{}" ({}) is not.'.format(key, list_of_text,
@@ -69,7 +69,7 @@ def check_list_of_dicts(list_of_dicts: Optional[Iterable[Dict]],
                         fields: Optional[List[Text]] = None,
                         ) -> Optional[List[Dict]]:
     """Validate iterable input to be a list/tuple/set of dicts, optionally checking for required field names."""
-    if list_of_dicts is not None:
+    if list_of_dicts is not None and not isinstance(list_of_dicts, Empty):
         if not isinstance(list_of_dicts, iter_types) or not all(isinstance(d, dict) for d in list_of_dicts):
             raise IllegalArgumentError(
                 '`{}` should be a list, tuple or set of dicts, "{}" ({}) is not.'.format(key, list_of_dicts,
@@ -92,7 +92,7 @@ def check_list_of_dicts(list_of_dicts: Optional[Iterable[Dict]],
 
 def check_enum(value: Optional[Any], enum: type(Enum), key: Text) -> Optional[Any]:
     """Validate input to be an option from an enum class."""
-    if value is not None:
+    if value is not None and not isinstance(value, Empty):
         if value not in enum.values():
             raise IllegalArgumentError('`{}` must be an option from enum {}, "{}" ({}) is not.\nChoose from: {}'.format(
                 key, enum.__class__.__name__, value, type(value), enum.values()))
@@ -101,7 +101,7 @@ def check_enum(value: Optional[Any], enum: type(Enum), key: Text) -> Optional[An
 
 def check_datetime(dt: Optional[datetime], key: Text) -> Optional[Text]:
     """Validate a datetime value to be a datetime and be timezone aware."""
-    if dt is not None:
+    if dt is not None and not isinstance(dt, Empty):
         if isinstance(dt, datetime):
             if not dt.tzinfo:
                 warnings.warn("`{}` '{}' is naive and not timezone aware, use pytz.timezone info. "
@@ -119,7 +119,7 @@ def check_base(obj: Optional[Any],
                method: Optional[Callable] = None,
                ) -> Optional[Text]:
     """Validate whether the object provided as input is a Base (or subclass) instance and return its ID."""
-    if obj is not None:
+    if obj is not None and not isinstance(obj, Empty):
 
         if cls is None:
             from pykechain.models import Base
@@ -143,7 +143,7 @@ def check_user(obj: Optional[Any],
                method: Optional[Callable] = None,
                ) -> Optional[int]:
     """Provide same functionality as check_base(), although users dont use UUID but integers."""
-    if obj is not None:
+    if obj is not None and not isinstance(obj, Empty):
 
         if cls is None:
             from pykechain.models import User
@@ -180,7 +180,7 @@ def check_list_of_base(
     :return: list of UUID's in Text.
     """
     ids = None
-    if objects is not None:
+    if objects is not None and not isinstance(objects, Empty):
         check_type(objects, iter_types, key=key)
 
         if cls is None:
@@ -201,3 +201,9 @@ def check_list_of_base(
                     key, cls.__name__, '", "'.join([str(n) for n in not_recognized]))
             )
     return ids
+
+
+def check_empty(value: Optional[Any]):
+    if isinstance(value, Empty):
+        return True
+    return False

@@ -298,17 +298,14 @@ class TestScopeEdit(TestBetamax):
             team=team_two
         )
 
-        # Edit without clearing values, everything should stay the same
+        # Edit without mentioning values, everything should stay the same
+        new_name = 'Just Pykechain testing (bike project)'
         self.scope.edit(
-            name=None,
-            description=None,
-            start_date=None,
-            due_date=None,
-            tags=None
+            name=new_name
         )
 
         # testing
-        self.assertEqual(self.scope.name, initial_name)
+        self.assertEqual(self.scope.name, new_name)
         self.assertEqual(self.scope.description, initial_description)
         self.assertEqual(self.scope.start_date.strftime("%Y/%m/%d, %H:%M:%S"),
                          initial_start_date.strftime("%Y/%m/%d, %H:%M:%S"))
@@ -323,11 +320,10 @@ class TestScopeEdit(TestBetamax):
             start_date=None,
             due_date=None,
             status=None,
-            tags=None,
-            clear_values=True
+            tags=None
         )
         self.scope.refresh()
-        self.assertEqual(self.scope.name, initial_name)
+        self.assertEqual(self.scope.name, new_name)
         self.assertEqual(self.scope.description, str())
         self.assertEqual(self.scope.start_date, None)
         self.assertEqual(self.scope.due_date, None)

@@ -32,7 +32,7 @@ from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
-from pykechain.utils import parse_datetime, find, clean_update_dictionary
+from pykechain.utils import parse_datetime, find, Empty, clean_empty_values
 
 
 class Scope(Base, TagsMixin, Scope2):
@@ -218,16 +218,16 @@ class Scope(Base, TagsMixin, Scope2):
     def edit(
             self,
             name: Optional[Text] = None,
-            description: Optional[Text] = None,
-            start_date: Optional[datetime] = None,
-            due_date: Optional[datetime] = None,
-            status: Optional[Union[Text, ScopeStatus]] = None,
-            tags: Optional[List[Text]] = None,
-            team: Optional[Union[Team, Text]] = None,
-            options: Optional[Dict] = None,
-            clear_values: Optional[Dict] = False
+            description: Optional[Text] = Empty(),
+            start_date: Optional[datetime] = Empty(),
+            due_date: Optional[datetime] = Empty(),
+            status: Optional[Union[Text, ScopeStatus]] = Empty(),
+            tags: Optional[List[Text]] = Empty(),
+            team: Optional[Union[Team, Text]] = Empty(),
+            options: Optional[Dict] = Empty(),
     ) -> None:
-        """Edit the details of a scope.
+        """
+        Edit the details of a scope. Setting an input to None will clear out the value (exception being name and status)
 
         :param name: (optionally) edit the name of the scope
         :type name: basestring or None
@@ -247,9 +247,7 @@ class Scope(Base, TagsMixin, Scope2):
         :type team: UUIDstring or None
         :param options: (optionally) custom options dictionary stored on the scope object
         :type options: dict or None
-        :param clear_values: (optionally) if set to True this will automatically clear out the values of parameters
-                             not mentioned in the call or mentioned but with value None
-        :type clear_values: bool
+
         :raises IllegalArgumentError: if the type of the inputs is not correct
         :raises APIError: if another Error occurs
         :warns: UserWarning - When a naive datetime is provided. Defaults to UTC.
@@ -296,10 +294,9 @@ class Scope(Base, TagsMixin, Scope2):
             'scope_options': check_type(options, dict, 'options') or dict()
         }
 
-        url = self._client._build_url('scope', scope_id=self.id)
+        update_dict = clean_empty_values(update_dict=update_dict)
 
-        if not clear_values:
-            update_dict = clean_update_dictionary(update_dict=update_dict)
+        url = self._client._build_url('scope', scope_id=self.id)
 
         response = self._client._request('PUT', url,
                                          params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
@@ -311,7 +308,7 @@ class Scope(Base, TagsMixin, Scope2):
         self.refresh(json=response.json().get('results')[0])
 
         # TODO tags that are set are not in response
-        if tags is not None:
+        if tags is not None and not isinstance(tags, Empty):
             self._tags = tags
 
     def clone(self, **kwargs) -> 'Scope':
