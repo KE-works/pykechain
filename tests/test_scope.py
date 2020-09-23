@@ -280,7 +280,7 @@ class TestScopeEdit(TestBetamax):
             self.scope.edit(tags='tags must be a list of strings')
 
     # test added due to #847 - providing no inputs overwrites values
-    def test_edit_scope_no_inputs_provided(self):
+    def test_edit_scope_clearing_values(self):
         # setUp
         initial_name = 'Pykechain testing (bike project)'
         initial_description = 'Project used to build a Bike. Part-time job is to also test Pykechain.'

@@ -528,7 +528,7 @@ class TestActivities(TestBetamax):
         subtask.edit(assignees=[], status=ActivityStatus.OPEN)
 
     # test added due to #847 - providing no inputs overwrites values
-    def test_edit_scope_clearing_values(self):
+    def test_edit_activity_clearing_values(self):
         # setup
         initial_name = 'Pykechain testing task'
         initial_description = 'Task created to test editing.'
