@@ -375,14 +375,16 @@ class Property(BaseInScope, Property2):
     ) -> None:
         """Edit the details of a property (model).
 
-        :param name: (optional) new name of the property to edit
-        :type name: basestring or None
-        :param description: (optional) new description of the property
-        :type description: basestring or None
-        :param unit: (optional) new unit of the property
-        :type unit: basestring or None
-        :param options: (options) new options of the property
-        :type options: dict
+        Setting an input to None will clear out the value (exception being name).
+
+        :param name: (optional) new name of the property to edit. Cannot be cleared.
+        :type name: basestring or None or Empty
+        :param description: (optional) new description of the property. Can be cleared.
+        :type description: basestring or None or Empty
+        :param unit: (optional) new unit of the property. Can be cleared.
+        :type unit: basestring or None or Empty
+        :param options: (options) new options of the property. Can be cleared.
+        :type options: dict or None or Empty
         :param kwargs: (optional) additional kwargs to be edited
         :return: None
         :raises APIError: When unable to edit the property
@@ -411,6 +413,7 @@ class Property(BaseInScope, Property2):
         else unchanged.
 
         >>> wheel_property.edit(description=None)
+
         """
         update_dict = {
             'name': check_text(name, 'name') or self.name,

@@ -509,7 +509,7 @@ def get_in_chunks(lst: Union[List, Iterable], chunk_size: int) -> Iterable:
 
 class Empty(object):
     """
-    This class represents an empty value.
+    Represents an empty value.
 
     In edit functions we want to be able to edit values of model properties, e.g. the due_date of a process.
     Consider the following example:

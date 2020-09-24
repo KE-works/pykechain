@@ -204,6 +204,7 @@ def check_list_of_base(
 
 
 def check_empty(value: Optional[Any]):
+    """Validate whether the value provided is of class `Empty`."""
     if isinstance(value, Empty):
         return True
     return False

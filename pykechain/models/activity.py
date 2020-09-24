@@ -428,11 +428,11 @@ class Activity(TreeObject, TagsMixin, Activity2):
 
     def edit_cascade_down(
             self,
-            start_date: Optional[datetime.datetime] = None,
-            due_date: Optional[datetime.datetime] = None,
-            assignees: Optional[List[Text]] = None,
-            assignees_ids: Optional[List[Text]] = None,
-            status: Optional[Union[ActivityStatus, Text]] = None,
+            start_date: Optional[datetime.datetime] = Empty(),
+            due_date: Optional[datetime.datetime] = Empty(),
+            assignees: Optional[List[Text]] = Empty(),
+            assignees_ids: Optional[List[Text]] = Empty(),
+            status: Optional[Union[ActivityStatus, Text]] = Empty(),
             overwrite: Optional[bool] = False,
             **kwargs
     ) -> None:
@@ -476,6 +476,9 @@ class Activity(TreeObject, TagsMixin, Activity2):
 
         # Create update-json
         data = list()
+
+        update_dict = clean_empty_values(update_dict=update_dict)
+
         for task in all_tasks:
             task_specific_update_dict = dict(update_dict)
 
@@ -504,28 +507,30 @@ class Activity(TreeObject, TagsMixin, Activity2):
     ) -> None:
         """Edit the details of an activity.
 
+        Setting an input to None will clear out the value (exception being name and status).
+
         :param name: (optionally) edit the name of the activity. Name cannot be cleared.
-        :type name: basestring or None or Empty()
+        :type name: basestring or None or Empty
         :param description: (optionally) edit the description of the activity or clear it
-        :type description: basestring or None or Empty()
+        :type description: basestring or None or Empty
         :param start_date: (optionally) edit the start date of the activity as a datetime object (UTC time/timezone
                             aware preferred) or clear it
-        :type start_date: datetime or None or Empty()
+        :type start_date: datetime or None or Empty
         :param due_date: (optionally) edit the due_date of the activity as a datetime object (UTC time/timzeone
                             aware preferred) or clear it
-        :type due_date: datetime or None or Empty()
+        :type due_date: datetime or None or Empty
         :param assignees: (optionally) edit the assignees (usernames) of the activity as a list, will overwrite all
                           assignees or clear them
-        :type assignees: list(basestring) or None or Empty()
+        :type assignees: list(basestring) or None or Empty
         :param assignees_ids: (optionally) edit the assignees (user id's) of the activity as a list, will overwrite all
                              assignees or clear them
-        :type assignees_ids: list(basestring) or None or Empty()
+        :type assignees_ids: list(basestring) or None or Empty
         :param status: (optionally) edit the status of the activity as a string based. Status cannot be cleared.
                        on :class:`~pykechain.enums.ActivityStatus`
-        :type status: ActivityStatus or None or Empty()
+        :type status: ActivityStatus or None or Empty
         :param tags: (optionally) replace the tags on an activity, which is a list of strings ["one","two","three"]
                     or clear them
-        :type tags: list of basestring or None or Empty()
+        :type tags: list of basestring or None or Empty
 
         :raises NotFoundError: if a `username` in the list of assignees is not in the list of scope members
         :raises IllegalArgumentError: if the type of the inputs is not correct
@@ -578,7 +583,7 @@ class Activity(TreeObject, TagsMixin, Activity2):
             assignees=assignees,
             assignees_ids=assignees_ids,
             status=status,
-            **kwargs,
+            **kwargs
         )
 
         update_dict = clean_empty_values(update_dict=update_dict)

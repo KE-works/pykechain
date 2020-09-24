@@ -6,7 +6,7 @@ from pykechain.models import Base
 from typing import Text, List, Optional, Dict, Union
 
 from pykechain.models.input_checks import check_text, check_enum, check_base, check_user
-from pykechain.utils import is_valid_email
+from pykechain.utils import is_valid_email, Empty, clean_empty_values
 
 
 class Notification(Base):
@@ -76,14 +76,14 @@ class Notification(Base):
 
     def edit(
             self,
-            subject: Optional[Text] = None,
-            message: Optional[Text] = None,
-            status: Optional[NotificationStatus] = None,
-            recipients: Optional[List[Union['User', Text, int]]] = None,
-            team: Optional[Union['Team', Text]] = None,
-            from_user: Optional[Union['User', Text]] = None,
-            event: Optional[NotificationEvent] = None,
-            channel: Optional[NotificationChannels] = None,
+            subject: Optional[Text] = Empty(),
+            message: Optional[Text] = Empty(),
+            status: Optional[NotificationStatus] = Empty(),
+            recipients: Optional[List[Union['User', Text, int]]] = Empty(),
+            team: Optional[Union['Team', Text]] = Empty(),
+            from_user: Optional[Union['User', Text]] = Empty(),
+            event: Optional[NotificationEvent] = Empty(),
+            channel: Optional[NotificationChannels] = Empty(),
             **kwargs
     ) -> None:
         """
@@ -121,24 +121,36 @@ class Notification(Base):
                         recipient_emails.append(recipient)
                     else:
                         recipient_users.append(check_user(recipient, User, 'recipient'))
+            elif isinstance(recipients, Empty):
+                recipient_emails = Empty()
+                recipient_users = Empty()
             else:
                 raise IllegalArgumentError('`recipients` must be a list of User objects, IDs or email addresses, '
                                            '"{}" ({}) is not.'.format(recipients, type(recipients)))
 
+        if isinstance(channel, Empty):
+            channels = Empty()
+        elif check_enum(channel, NotificationChannels, 'channel'):
+            channels = [channel]
+        else:
+            channels = list()
+
         update_dict = {
-            'status': check_enum(status, NotificationStatus, 'status'),
-            'event': check_enum(event, NotificationEvent, 'event'),
-            'subject': check_text(subject, 'subject'),
-            'message': check_text(message, 'message'),
+            'status': check_enum(status, NotificationStatus, 'status') or self.status,
+            'event': check_enum(event, NotificationEvent, 'event') or self.event,
+            'subject': check_text(subject, 'subject') or self.subject,
+            'message': check_text(message, 'message') or self.message,
             'recipient_users': recipient_users,
             'recipient_emails': recipient_emails,
             'team': check_base(team, Team, 'team'),
             'from_user': check_user(from_user, User, 'from_user'),
-            'channels': [channel] if check_enum(channel, NotificationChannels, 'channel') else [],
+            'channels': channels or self.channels
         }
 
         if kwargs:
             update_dict.update(kwargs)
+
+        update_dict = clean_empty_values(update_dict=update_dict)
 
         url = self._client._build_url('notification', notification_id=self.id)
 
