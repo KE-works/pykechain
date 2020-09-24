@@ -11,7 +11,7 @@ from pykechain.models.part2 import Part2
 from pykechain.models.input_checks import check_text, check_type, check_list_of_base, check_list_of_dicts
 from pykechain.models.property import Property
 from pykechain.models.tree_traversal import TreeObject
-from pykechain.utils import is_uuid, find
+from pykechain.utils import is_uuid, find, Empty, clean_empty_values
 
 
 class Part(TreeObject, Part2):
@@ -425,8 +425,15 @@ class Part(TreeObject, Part2):
     # CRUD operations
     #
 
-    def edit(self, name: Optional[Text] = None, description: Optional[Text] = None, **kwargs) -> None:
+    def edit(
+            self,
+            name: Optional[Text] = Empty(),
+            description: Optional[Text] = Empty(),
+            **kwargs
+    ) -> None:
         """Edit the details of a part (model or instance).
+
+        Setting an input to None will clear out the value (exception being name).
 
         For an instance you can edit the Part instance name and the part instance description. To alter the values
         of properties use :func:`Part.update()`.
@@ -436,9 +443,10 @@ class Part(TreeObject, Part2):
         against a trade-off that someone looking at the frontend won't notice any changes unless the page
         is refreshed.
 
-        :param name: optional name of the part to edit
-        :param description: (optional) description of the part
-        :type description: basestring or None
+        :param name: optional name of the part to edit. Cannot be cleared.
+        :type name: basestring or None or Empty
+        :param description: (optional) description of the part. Can be cleared.
+        :type description: basestring or None or Empty
         :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
         :return: None
         :raises IllegalArgumentError: when the type or value of an argument provided is incorrect
@@ -457,15 +465,22 @@ class Part(TreeObject, Part2):
         >>> front_fork = project.model('Front Fork')
         >>> front_fork.edit(name='Front Fork basemodel', description='Some description here')
 
+        Not mentioning an input parameter in the function will leave it unchanged. Setting a parameter as None will
+        clear its value (where that is possible). The example below will clear the description and edit the name.
+
+        >>> front_fork.edit(name="Front spoon", description=None)
+
         """
         update_dict = {
             'id': self.id,
             'name': check_text(name, 'name') or self.name,
-            'description': check_text(description, 'description') or self.description,
+            'description': check_text(description, 'description') or str(),
         }
 
         if kwargs:  # pragma: no cover
             update_dict.update(**kwargs)
+
+        update_dict = clean_empty_values(update_dict=update_dict)
 
         response = self._client._request('PUT',
                                          self._client._build_url('part', part_id=self.id),

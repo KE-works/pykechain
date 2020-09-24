@@ -89,25 +89,34 @@ class Notification(Base):
         """
         Update the current `Notification` attributes.
 
-        :param subject: (O) Header text of the notification
-        :type subject: str
-        :param message: (O) Content message of the notification
-        :type message: str
-        :param status: (O) life-cycle status of the notification, defaults to "DRAFT".
+        Setting an input to None will clear out the value (only applicable to recipients and from_user).
+
+        :param subject: (O) Header text of the notification. Cannot be cleared.
+        :type subject: basestring or None or Empty
+        :param message: (O) Content message of the notification. Cannot be cleared.
+        :type message: basestring or None or Empty
+        :param status: (O) life-cycle status of the notification, defaults to "DRAFT". Cannot be cleared.
         :type status: NotificationStatus
         :param recipients: (O) list of recipients, each being a User object, user ID or an email address.
-        :type recipients: list
+        :type recipients: list or None or Empty
         :param team: (O) team object to which the notification is constrained
         :type team: Team object or Team UUID
         :param from_user: (O) Sender of the notification, either a User object or user ID. Defaults to script user.
-        :type from_user: User or user ID
-        :param event: (O) originating event of the notification.
+        :type from_user: User or user ID or None or Empty
+        :param event: (O) originating event of the notification. Cannot be cleared.
         :type event: NotificationEvent
-        :param channel: (O) method used to send the notification, defaults to "EMAIL".
+        :param channel: (O) method used to send the notification, defaults to "EMAIL". Cannot be cleared.
         :type channel: NotificationChannels
         :param kwargs: (optional) keyword=value arguments
         :return: None
         :raises: APIError: when the `Notification` could not be updated
+
+        Not mentioning an input parameter in the function will leave it unchanged. Setting a parameter as None will
+        clear its value (where that is possible). The example below will clear the from_user, but leave everything
+        else unchanged.
+
+        >>> notification.edit(from_user=None)
+
         """
         from pykechain.models import Team, User
 
