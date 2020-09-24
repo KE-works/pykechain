@@ -154,3 +154,56 @@ class TestBanners(TestBetamax):
             self.banner.edit(url='ke-chain,com')
         with self.assertRaises(IllegalArgumentError):
             self.banner.edit(is_active='Yes')
+
+    # test added due to #847 - providing no inputs overwrites values
+    def test_edit_banner_clear_values(self):
+        # setup
+        initial_text = 'Happy new Year'
+        initial_icon = 'gifts'
+        initial_active_from = NEW_YEAR_2020 - datetime.timedelta(days=1)
+        initial_active_until = NEW_YEAR_2020 + datetime.timedelta(days=1)
+        initial_is_active = False
+        initial_url = 'https://www.google.com'
+
+        self.banner.edit(
+            text=initial_text,
+            icon=initial_icon,
+            active_from=NEW_YEAR_2020 - datetime.timedelta(days=1),
+            active_until=NEW_YEAR_2020 + datetime.timedelta(days=1),
+            is_active=initial_is_active,
+            url=initial_url
+        )
+
+        # Edit without mentioning values, everything should stay the same
+        new_text = '2021!!!'
+        new_is_active = True
+
+        self.banner.edit(
+            text=new_text,
+            is_active=new_is_active,
+        )
+
+        # testing
+        self.assertEqual(self.banner.text, new_text)
+        self.assertEqual(self.banner.icon, initial_icon)
+        self.assertEqual(self.banner.active_from, initial_active_from)
+        self.assertEqual(self.banner.active_until, initial_active_until)
+        self.assertEqual(self.banner.is_active, new_is_active)
+        self.assertEqual(self.banner.url, initial_url)
+
+        # Edit with clearing the values, name and status cannot be cleared
+        self.banner.edit(
+            text=None,
+            icon=None,
+            active_from=None,
+            active_until=None,
+            is_active=None,
+            url=None
+        )
+
+        self.assertEqual(self.banner.text, new_text)
+        self.assertEqual(self.banner.icon, str())
+        self.assertEqual(self.banner.active_from, initial_active_from)
+        self.assertEqual(self.banner.active_until, initial_active_until)
+        self.assertEqual(self.banner.is_active, new_is_active)
+        self.assertEqual(self.banner.url, str())

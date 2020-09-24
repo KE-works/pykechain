@@ -256,6 +256,7 @@ class TestProperties(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             self.prop_model.edit(unit=4)
 
+    # test added due to #847 - providing no inputs overwrites values
     def test_edit_property_clear_values(self):
         # setup
         initial_name = 'Property first name'
