@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+UNRELEASED (DDMMMYY)
+--------------------
+* :+1: Changed the way edit functions work for `Part`, `Properties`, `Activity`, `Scope`, `Notification`, `Service` and `Banner` classes. Passing inputs with value None in those functions will clear those attributes if possible. Not mentioning them will not overwrite their values.
+
 v3.8.2 (18SEP20)
 ----------------
 
