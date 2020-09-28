@@ -104,7 +104,8 @@ class SideBarManager(Iterable):
         self._perform_bulk_creation = False
         self._update()
 
-    def refresh(self):
+    def refresh(self) -> None:
+        """Reload the scope options from KE-chain to refresh the side-bar data."""
         self.scope.refresh()
         self.__init__(scope=self.scope)
 
