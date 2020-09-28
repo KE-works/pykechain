@@ -112,6 +112,8 @@ class SideBarButton(object):
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+            elif key in allowed_attributes:
+                self._other_attributes[key] = value
 
         self._manager._update()
 
