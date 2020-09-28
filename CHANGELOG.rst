@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+* :bug: `SidebarButton` class did not preserve all data from the scope options, losing display names in other languages.
+* :+1: Added `refresh()` method on `SideBarManager` to reload the side-bar from KE-chain.
+
 v3.8.2 (18SEP20)
 ----------------
 

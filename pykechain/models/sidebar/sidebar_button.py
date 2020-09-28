@@ -85,6 +85,9 @@ class SideBarButton(object):
         self.display_icon_mode = icon_mode  # type: FontAwesomeMode
 
         self._other_attributes = kwargs
+        for key in allowed_attributes:
+            if key in json:
+                self._other_attributes[key] = json[key]
 
     def __repr__(self) -> Text:
         return '{} {}: {}'.format(self.__class__.__name__, self.order, self.display_name)

@@ -201,10 +201,8 @@ class TestSideBar(TestBetamax):
             sbm.override_sidebar = True
             sbm.add_ke_chain_page(KEChainPages.WORK_BREAKDOWN)
 
-        # setup: delete scope object (and the sidebar manager) and reload it
-        scope_id = self.scope.id
-        del self.scope
-        self.scope = self.client.scope(id=scope_id)
+        # Reload side-bar from KE-chain
+        self.scope.side_bar().refresh()
 
         # testing: delete original button (this tests the "load") and add another one
         with self.scope.side_bar() as sbm:
@@ -214,3 +212,26 @@ class TestSideBar(TestBetamax):
             sbm.add_ke_chain_page(KEChainPages.TASKS)
 
         self.assertEqual(1, len(self.scope.options.get('customNavigation')))
+
+    def test_attributes_button(self):
+        display_name_nl = "Het data model"
+        button_title = "New button"
+
+        # Check whether all attributes are retrieved and set
+        with self.scope.side_bar() as sbm:
+            sbm.add_ke_chain_page(
+                page_name=KEChainPages.DATA_MODEL,
+                title=button_title,
+                displayName_nl=display_name_nl,
+            )
+
+        # Reload side-bar from KE-chain
+        self.scope.side_bar().refresh()
+
+        sbm = self.scope.side_bar()
+        found = False
+        for button in sbm:  # type: SideBarButton
+            if button._other_attributes.get("displayName_nl") == display_name_nl:
+                found = True
+
+        self.assertTrue(found)
