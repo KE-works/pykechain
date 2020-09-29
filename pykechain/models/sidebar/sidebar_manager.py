@@ -48,7 +48,7 @@ class SideBarManager(Iterable):
         check_type(scope, Scope, 'scope')
 
         self.scope = scope  # type: Scope
-        self._override = scope.options.get('overrideSidebar', False)  # type: bool
+        self._override = scope.options.get('overrideSideBar', False)  # type: bool
 
         self._scope_uri = "#/scopes/{}".format(self.scope.id)
         self._perform_bulk_creation = False
