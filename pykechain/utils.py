@@ -507,21 +507,7 @@ def get_in_chunks(lst: Union[List, Iterable], chunk_size: int) -> Iterable:
         yield lst[i: i + chunk_size]
 
 
-class Singleton(type):
-    """
-    Meta-class to create a singleton from a class.
-
-    source: https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
-    """
-    _instances = {}  # dict of class instances, keyed by the class object
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-
-class Empty(object, metaclass=Singleton):
+class Empty(object):
     """
     Represents an empty value.
 
@@ -569,8 +555,13 @@ class Empty(object, metaclass=Singleton):
 
     Happy coding!
     """
+    __instance = None
 
-    pass
+    def __new__(cls, *args, **kwargs):
+        """Only create a single instance of this class, i.e. simple singleton pattern."""
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
+        return cls.__instance
 
 
 def clean_empty_values(update_dict: Dict) -> Dict:
