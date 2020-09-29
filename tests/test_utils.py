@@ -1,4 +1,6 @@
-from pykechain.utils import is_url, is_valid_email
+from unittest import TestCase
+
+from pykechain.utils import is_url, is_valid_email, Empty
 from tests.classes import SixTestCase
 
 
@@ -157,3 +159,13 @@ class TestIsEmail(SixTestCase):
         for email in invalid_addresses:
             with self.subTest(email):
                 self.assertFalse(is_valid_email(email), "should be an invalid address: '{}'".format(email))
+
+
+class TestEmpty(TestCase):
+
+    def test_singleton(self):
+        empty_1 = Empty()
+        empty_2 = Empty()
+
+        self.assertEqual(empty_1, empty_2)
+        self.assertIs(empty_1, empty_2)
