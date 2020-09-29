@@ -88,10 +88,17 @@ class TestSideBar(TestBetamax):
                           random='unsupported keyword')
 
     def test_edit_button(self):
+        custom_name = "Custom Dutch name"
         new_button = self.manager.create_button(**self.default_button_config)
 
-        new_button.edit(display_icon='pennant')
+        new_button.edit(
+            display_icon="pennant",
+            displayName_nl=custom_name,
+        )
         new_button.refresh()
+
+        self.assertEqual("pennant", new_button.display_icon)
+        self.assertEqual(custom_name, new_button._other_attributes.get("displayName_nl"))
 
     def test_delete_button(self):
         new_button = self.manager.create_button(**self.default_button_config)
@@ -201,10 +208,8 @@ class TestSideBar(TestBetamax):
             sbm.override_sidebar = True
             sbm.add_ke_chain_page(KEChainPages.WORK_BREAKDOWN)
 
-        # setup: delete scope object (and the sidebar manager) and reload it
-        scope_id = self.scope.id
-        del self.scope
-        self.scope = self.client.scope(id=scope_id)
+        # Reload side-bar from KE-chain
+        self.scope.side_bar().refresh()
 
         # testing: delete original button (this tests the "load") and add another one
         with self.scope.side_bar() as sbm:
@@ -214,3 +219,41 @@ class TestSideBar(TestBetamax):
             sbm.add_ke_chain_page(KEChainPages.TASKS)
 
         self.assertEqual(1, len(self.scope.options.get('customNavigation')))
+
+    def test_attributes_button(self):
+        display_name_nl = "Het data model"
+        button_title = "New button"
+
+        # Check whether all attributes are retrieved and set
+        with self.scope.side_bar() as sbm:
+            sbm.add_ke_chain_page(
+                page_name=KEChainPages.DATA_MODEL,
+                title=button_title,
+                displayName_nl=display_name_nl,
+            )
+
+        # Reload side-bar from KE-chain
+        self.scope.side_bar().refresh()
+
+        sbm = self.scope.side_bar()
+        found = False
+        for button in sbm:  # type: SideBarButton
+            if button._other_attributes.get("displayName_nl") == display_name_nl:
+                found = True
+
+        self.assertTrue(found)
+
+    def test_attributes_sidebar(self):
+        sbm = self.scope.side_bar()
+
+        # Check starting condition
+        self.assertFalse(sbm.override_sidebar)
+
+        # Set value
+        sbm.override_sidebar = True
+
+        # Reload side-bar from KE-chain
+        sbm.refresh()
+
+        # Test attributes
+        self.assertTrue(sbm.override_sidebar)

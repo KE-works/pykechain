@@ -48,7 +48,7 @@ class SideBarManager(Iterable):
         check_type(scope, Scope, 'scope')
 
         self.scope = scope  # type: Scope
-        self._override = scope.options.get('overrideSidebar', False)  # type: bool
+        self._override = scope.options.get('overrideSideBar', False)  # type: bool
 
         self._scope_uri = "#/scopes/{}".format(self.scope.id)
         self._perform_bulk_creation = False
@@ -103,6 +103,11 @@ class SideBarManager(Iterable):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._perform_bulk_creation = False
         self._update()
+
+    def refresh(self) -> None:
+        """Reload the scope options from KE-chain to refresh the side-bar data."""
+        self.scope.refresh()
+        self.__init__(scope=self.scope)
 
     def remove(self, key: Any) -> None:
         """
