@@ -88,10 +88,17 @@ class TestSideBar(TestBetamax):
                           random='unsupported keyword')
 
     def test_edit_button(self):
+        custom_name = "Custom Dutch name"
         new_button = self.manager.create_button(**self.default_button_config)
 
-        new_button.edit(display_icon='pennant')
+        new_button.edit(
+            display_icon="pennant",
+            displayName_nl=custom_name,
+        )
         new_button.refresh()
+
+        self.assertEqual("pennant", new_button.display_icon)
+        self.assertEqual(custom_name, new_button._other_attributes.get("displayName_nl"))
 
     def test_delete_button(self):
         new_button = self.manager.create_button(**self.default_button_config)
@@ -235,3 +242,18 @@ class TestSideBar(TestBetamax):
                 found = True
 
         self.assertTrue(found)
+
+    def test_attributes_sidebar(self):
+        sbm = self.scope.side_bar()
+
+        # Check starting condition
+        self.assertFalse(sbm.override_sidebar)
+
+        # Set value
+        sbm.override_sidebar = True
+
+        # Reload side-bar from KE-chain
+        sbm.refresh()
+
+        # Test attributes
+        self.assertTrue(sbm.override_sidebar)
