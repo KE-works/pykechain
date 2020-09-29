@@ -169,3 +169,4 @@ class TestEmpty(TestCase):
 
         self.assertEqual(empty_1, empty_2)
         self.assertIs(empty_1, empty_2)
+        self.assertIsNot(empty_1, Empty)
