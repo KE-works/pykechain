@@ -2,13 +2,14 @@ import warnings
 from typing import Iterable, Union, Optional, Text, Dict, List, Any
 
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, ScopeWidgetColumnTypes, \
-    ProgressBarColors, PropertyType, CardWidgetImageValue, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
-    KEChainPages, CardWidgetKEChainPageLink, Alignment, ActivityType
+    ProgressBarColors, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
+    KEChainPages, Alignment
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
+from pykechain.models import Service
 from pykechain.models.input_checks import check_enum, check_text, check_base, check_type, check_list_of_text
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
-    _check_prefilters, _check_excluded_propmodels
+    _check_prefilters, _check_excluded_propmodels, _set_description, _set_link, _set_image, _set_button_text
 from pykechain.utils import is_uuid, find, snakecase, is_url
 
 
@@ -768,31 +769,17 @@ class WidgetsManager(Iterable):
         service = _retrieve_object(obj=service, method=self._client.service)  # type: 'Service'  # noqa
 
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
+        meta, title = _set_title(meta, title=title, **kwargs)
+        meta = _set_button_text(meta, custom_button_text=custom_button_text, service=service, **kwargs)
 
-        # Add custom button text
-        if custom_button_text is False:
-            show_button_value = "Default"
-            button_text = service.name
-        elif custom_button_text is None:
-            show_button_value = "No text"
-            button_text = ''
-        else:
-            show_button_value = "Custom text"
-            button_text = str(custom_button_text)
-
-        from pykechain.models import Service
         service_id = check_base(service, Service, 'service', method=self._client.service)
 
         meta.update({
-            'showButtonValue': show_button_value,
-            'customText': button_text,
             'serviceId': service_id,
             'emphasizeButton': emphasize_run,
             'showDownloadLog': check_type(download_log, bool, 'download_log'),
             'showLog': True if download_log else check_type(show_log, bool, 'show_log'),
         })
-
-        meta, title = _set_title(meta, title=title, **kwargs)
 
         widget = self.create_widget(
             widget_type=WidgetTypes.SERVICE,
@@ -1216,6 +1203,8 @@ class WidgetsManager(Iterable):
             * String value: Custom title
             * None: No title
         :type title: bool or basestring or None
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or basestring or None
         :param custom_button_text: Custom text for 'Add signature' button
         :type custom_button_text: bool or basestring
         :param custom_undo_button_text: Custom text for 'Remove signature' button
@@ -1277,7 +1266,7 @@ class WidgetsManager(Iterable):
                         link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
                         link_value: Optional[CardWidgetLinkValue] = None,
                         link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
-                        image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
+                        image_fit: Optional[Union[Text, ImageFitValue]] = ImageFitValue.CONTAIN,
                         **kwargs) -> Widget:
         """
         Add a KE-chain Card widget to the WidgetManager and the activity.
@@ -1298,6 +1287,8 @@ class WidgetsManager(Iterable):
             * task: another KE-chain task, provided as an Activity object or its UUID
             * String value: URL to a webpage
             * KE-chain page: built-in KE-chain page of the current scope
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or basestring or None
         :param link_value: Overwrite the default link value (obtained from the type of the link)
         :type link_value: CardWidgetLinkValue
         :param link_target: how the link is opened, one of the values of CardWidgetLinkTarget enum.
@@ -1308,84 +1299,16 @@ class WidgetsManager(Iterable):
         """
         meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
-
-        # Process the description
-        if description is False or description is None:
-            show_description_value = "No description"
-            description = ""
-        elif isinstance(description, str):
-            show_description_value = "Custom description"
-        else:
-            raise IllegalArgumentError("When using the add_card_widget, 'description' must be 'text_type' or None or "
-                                       "False. Type is: {}".format(type(description)))
-
-        meta.update({
-            "showDescriptionValue": show_description_value,
-            "customDescription": description
-        })
-
-        # Process the image it is linked to
-        from pykechain.models import Property
-        if isinstance(image, Property) and image.type == PropertyType.ATTACHMENT_VALUE:
-            meta.update({
-                'customImage': "/api/v3/properties/{}/preview".format(image.id),
-                'showImageValue': CardWidgetImageValue.CUSTOM_IMAGE
-            })
-        elif image is None:
-            meta.update({
-                'customImage': None,
-                'showImageValue': CardWidgetImageValue.NO_IMAGE
-            })
-        else:
-            raise IllegalArgumentError("When using the add_card_widget, 'image' must be a Property or None. Type "
-                                       "is: {}".format(type(image)))
-
-        from pykechain.models import Activity
-        if isinstance(link, Activity):
-            if link.activity_type == ActivityType.TASK:
-                default_link_value = CardWidgetLinkValue.TASK_LINK
-            else:
-                default_link_value = CardWidgetLinkValue.TREE_VIEW
-
-            meta.update({
-                'customLink': link.id,
-                'showLinkValue': default_link_value,
-            })
-        elif isinstance(link, str) and is_uuid(link):
-            meta.update({
-                'customLink': link,
-                'showLinkValue': CardWidgetLinkValue.TASK_LINK,
-            })
-        elif link is None or link is False:
-            meta.update({
-                'customLink': None,
-                'showLinkValue': CardWidgetLinkValue.NO_LINK,
-            })
-        elif link in KEChainPages.values():
-            meta.update({
-                'customLink': "",
-                'showLinkValue': CardWidgetKEChainPageLink[link],
-            })
-        else:
-            meta.update({
-                'customLink': link,
-                'showLinkValue': CardWidgetLinkValue.EXTERNAL_LINK,
-            })
-
-        if link_value is not None:
-            meta.update({
-                'showLinkValue': check_enum(link_value, CardWidgetLinkValue, 'link_value'),
-            })
-
-        meta['linkTarget'] = check_enum(link_target, LinkTargets, 'link_target')
-        meta['imageFit'] = check_enum(image_fit, ImageFitValue, 'image_fit')
+        meta = _set_description(meta, description=description, **kwargs)
+        meta = _set_link(meta, link=link, link_value=link_value, link_target=link_target, **kwargs)
+        meta = _set_image(meta, image=image, image_fit=image_fit, **kwargs)
 
         widget = self.create_widget(
             widget_type=WidgetTypes.CARD,
             meta=meta,
             title=title,
             parent=parent_widget,
-            **kwargs,
+            **kwargs
         )
         return widget
 
@@ -1407,6 +1330,8 @@ class WidgetsManager(Iterable):
             * String value: Custom title
             * None: No title
         :type title: bool or basestring or None
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or basestring or None
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
         :rtype: Widget
@@ -1431,11 +1356,82 @@ class WidgetsManager(Iterable):
         )
         return widget
 
-
-    def add_service_card_widget(self):
+    def add_service_card_widget(self,
+                                service: 'Service',
+                                image: Optional['AttachmentProperty'] = None,
+                                title: Optional[Union[type(None), bool, Text]] = False,
+                                description: Optional[Union[Text]] = None,
+                                parent_widget: Optional[Union[Widget, Text]] = None,
+                                custom_button_text: Optional[Text] = False,
+                                emphasize_run: Optional[bool] = True,
+                                link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
+                                link_value: Optional[CardWidgetLinkValue] = None,
+                                link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
+                                image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
+                                **kwargs):
         """
+        Add a KE-chain Service Card widget to the WidgetManager and the activity.
 
+        The widget will be saved in KE-chain.
+
+        :param service: The Service to which the button will be coupled and will be ran when the button is pressed.
+        :type service: :class:`Service` or UUID
+        :param image: AttachmentProperty providing the source of the image shown in the card widget.
+        :param title: A custom title for the card widget
+            * False (default): Card name
+            * String value: Custom title
+            * None: No title
+        :param description: Custom text shown below the image in the card widget
+            * False (default): Card name
+            * String value: Custom title
+            * None: No title
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or basestring or None
+        :param custom_button_text: A custom text for the button linked to the script
+            * False (default): Script name
+            * String value: Custom title
+            * None: No title
+        :type custom_button_text: bool or basestring or None
+        :param emphasize_run: Emphasize the run button (default True)
+        :type emphasize_run: bool
+        :param link: Where the card widget refers to. This can be one of the following:
+            * None (default): no link
+            * task: another KE-chain task, provided as an Activity object or its UUID
+            * String value: URL to a webpage
+            * KE-chain page: built-in KE-chain page of the current scope
+        :param link_value: Overwrite the default link value (obtained from the type of the link)
+        :type link_value: CardWidgetLinkValue
+        :param link_target: how the link is opened, one of the values of CardWidgetLinkTarget enum.
+        :type link_target: CardWidgetLinkTarget
+        :param image_fit: how the image on the card widget is displayed
+        :type image_fit: ImageFitValue
+        :return: Service Card Widget
         """
+        # Check whether the script is uuid type or class `Service`
+        service = _retrieve_object(obj=service, method=self._client.service)  # type: 'Service'  # noqa
+
+        meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
+        meta, title = _set_title(meta, title=title, **kwargs)
+        meta = _set_description(meta, description=description, **kwargs)
+        meta = _set_link(meta, link=link, link_value=link_value, link_target=link_target, **kwargs)
+        meta = _set_image(meta, image=image, image_fit=image_fit, **kwargs)
+        meta = _set_button_text(meta, custom_button_text=custom_button_text, service=service, **kwargs)
+
+        service_id = check_base(service, Service, 'service', method=self._client.service)
+
+        meta.update({
+            'serviceId': service_id,
+            'emphasizeButton': emphasize_run,
+        })
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.SERVICE,
+            meta=meta,
+            title=title,
+            parent=parent_widget,
+            **kwargs
+        )
+        return widget
     #
     # Widget manager methods
     #

@@ -689,6 +689,12 @@ class TestWidgetManagerInActivity(TestBetamax):
         # tearDown
         [w.delete() for w in new_widgets]
 
+    def test_add_service_card_widget(self):
+        # setUp
+        print()
+        widget1 = self.wm.add_service_card_widget(
+
+        )
 
 class TestWidgetManagerWeatherWidget(TestBetamax):
     def setUp(self):
