@@ -3,7 +3,6 @@ from typing import Dict, Optional, Union, Text, Tuple, List, Callable
 from pykechain.enums import Category, PropertyType, WidgetTitleValue, ActivityType, \
     CardWidgetLinkValue, KEChainPages, CardWidgetKEChainPageLink, LinkTargets, ImageFitValue, CardWidgetImageValue
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Activity, Property
 from pykechain.models.input_checks import check_enum
 from pykechain.utils import is_uuid, snakecase, camelcase
 
@@ -177,6 +176,8 @@ def _set_link(
     :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
     meta['linkTarget'] = check_enum(link_target, LinkTargets, 'link_target')
+
+    from pykechain.models import Activity
     if isinstance(link, Activity):
         if link.activity_type == ActivityType.TASK:
             default_link_value = CardWidgetLinkValue.TASK_LINK
@@ -241,6 +242,7 @@ def _set_image(
     """
     meta['imageFit'] = check_enum(image_fit, ImageFitValue, 'image_fit')
 
+    from pykechain.models import Property
     if isinstance(image, Property) and image.type == PropertyType.ATTACHMENT_VALUE:
         meta.update({
             'customImage': "/api/v3/properties/{}/preview".format(image.id),

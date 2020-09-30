@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+vUNRELEASED
+___________
+* :+1: Added the possibility to create a `ServiceCardWidget` through the `add_service_card_widget()` function.
+
 v3.8.1 (08SEP20)
 ----------------
 

@@ -12,6 +12,7 @@ from pykechain.models.widgets import (
     MetapanelWidget, ScopeWidget)
 from pykechain.models.widgets.helpers import _set_title
 from pykechain.models.widgets.widget import Widget
+from pykechain.models.widgets.widget_models import ServicecardWidget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import slugify_ref
 from tests.classes import TestBetamax
@@ -288,7 +289,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(len(self.wm), 1 + 1)
         self.assertEqual("Picture", widget.title_visible)
 
-    def test_attachment_widget_with_associations_using_widget_manager(self):
+    def test_add_attachment_widget_with_associations_using_widget_manager(self):
         photo_property = self.project.property("Picture")
 
         widget = self.wm.add_attachmentviewer_widget(
@@ -300,7 +301,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertIsInstance(widget, AttachmentviewerWidget)
         self.assertEqual(len(self.wm), 1 + 1)
 
-    def test_attachment_widget_with_editable_association(self):
+    def test_add_attachment_widget_with_editable_association(self):
         photo_property = self.project.property("Picture")
 
         widget = self.wm.add_attachmentviewer_widget(
@@ -453,7 +454,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(len(self.wm), 9, msg='New KE-chain page has been added to the Enum, '
                                               'check if the mapping dicts in enums.py need updating too!')
 
-    def test_service_widget(self):
+    def test_add_service_widget(self):
         service_gears_successful = self.project.service("Service Gears - Successful")
 
         widget1 = self.wm.add_service_widget(service=service_gears_successful)
@@ -492,7 +493,7 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertEqual(widget_2.ref, slugify_ref('Caught in a landslide'))
 
-    def test_metapanel_widget(self):
+    def test_add_metapanel_widget(self):
         widget = self.wm.add_metapanel_widget(
             show_all=True,
             show_progress=True,
@@ -516,7 +517,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         )
         self.assertEqual(len(self.wm), 1 + 1)
 
-    def test_progress_widget(self):
+    def test_add_progress_widget(self):
         self.wm.add_progress_widget(custom_height=35,
                                     show_progress_text=False)
         self.assertEqual(len(self.wm), 1 + 1)
@@ -546,7 +547,7 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertNotIn(widget_one, self.wm)
 
-    def test_notebook_widget(self):
+    def test_add_notebook_widget(self):
         notebook = self.project.service(name="Service Gears - Successful")
         widget1 = self.wm.add_notebook_widget(
             notebook=notebook,
@@ -570,7 +571,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             self.wm.add_notebook_widget(notebook="This will raise an error")
 
-    def test_multicolumn_widget(self):
+    def test_add_multicolumn_widget(self):
         bike_part = self.project.part('Bike')
         picture_instance = bike_part.property('Picture')
         picture_model = picture_instance.model()
@@ -602,7 +603,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         with self.assertRaises(NotFoundError):
             parent_widget.parent()
 
-    def test_scope_widget(self):
+    def test_add_scope_widget(self):
         scope_widget = self.wm.add_scope_widget()
 
         self.assertIsInstance(scope_widget, ScopeWidget)
@@ -691,10 +692,33 @@ class TestWidgetManagerInActivity(TestBetamax):
 
     def test_add_service_card_widget(self):
         # setUp
-        print()
-        widget1 = self.wm.add_service_card_widget(
+        service_gears_successful = self.project.service("Service Gears - Successful")
+        bike_part = self.project.part(name='Bike')
+        picture = bike_part.property(name='Picture')
+        title = 'Service card title'
+        description = 'The description'
 
+        widget = self.wm.add_service_card_widget(
+            service=service_gears_successful,
+            image=picture,
+            title=title,
+            description=description,
+            custom_button_text=False,
+            link=KEChainPages.EXPLORER,
+            link_target=LinkTargets.SAME_TAB,
+            image_fit=ImageFitValue.COVER
         )
+
+        self.assertEqual(len(self.wm), 1 + 1)
+
+        self.assertIsInstance(widget, ServicecardWidget)
+        self.assertEqual(widget.title, title)
+        self.assertEqual(widget.meta.get('customText'), service_gears_successful.name)
+        self.assertEqual(widget.meta.get('customDescription'), description)
+        self.assertIn(picture.id, widget.meta.get('customImage'))
+        self.assertEqual(ImageFitValue.COVER, widget.meta.get('imageFit'))
+        self.assertEqual(CardWidgetLinkTarget.SAME_TAB, widget.meta.get('linkTarget'))
+
 
 class TestWidgetManagerWeatherWidget(TestBetamax):
     def setUp(self):

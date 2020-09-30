@@ -100,5 +100,5 @@ class WeatherWidget(Widget):
     """Weather Widget."""
 
 
-class ServiceCardWidget(Widget):
+class ServicecardWidget(Widget):
     """ServiceCard Widget."""

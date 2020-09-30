@@ -5,7 +5,6 @@ from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, ScopeWidget
     ProgressBarColors, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
     KEChainPages, Alignment
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
-from pykechain.models import Service
 from pykechain.models.input_checks import check_enum, check_text, check_base, check_type, check_list_of_text
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
@@ -772,6 +771,7 @@ class WidgetsManager(Iterable):
         meta, title = _set_title(meta, title=title, **kwargs)
         meta = _set_button_text(meta, custom_button_text=custom_button_text, service=service, **kwargs)
 
+        from pykechain.models import Service
         service_id = check_base(service, Service, 'service', method=self._client.service)
 
         meta.update({
@@ -1417,6 +1417,7 @@ class WidgetsManager(Iterable):
         meta = _set_image(meta, image=image, image_fit=image_fit, **kwargs)
         meta = _set_button_text(meta, custom_button_text=custom_button_text, service=service, **kwargs)
 
+        from pykechain.models import Service
         service_id = check_base(service, Service, 'service', method=self._client.service)
 
         meta.update({
@@ -1425,7 +1426,7 @@ class WidgetsManager(Iterable):
         })
 
         widget = self.create_widget(
-            widget_type=WidgetTypes.SERVICE,
+            widget_type=WidgetTypes.SERVICECARD,
             meta=meta,
             title=title,
             parent=parent_widget,
