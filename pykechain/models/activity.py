@@ -10,6 +10,7 @@ from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
+from pykechain.models.activity2 import Activity2
 from pykechain.models.input_checks import check_datetime, check_text, check_list_of_text, check_enum, check_user, \
     check_type, check_base
 from pykechain.models.representations.component import RepresentationsComponent
@@ -20,7 +21,7 @@ from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import parse_datetime, is_valid_email
 
 
-class Activity(TreeObject, TagsMixin):
+class Activity(TreeObject, TagsMixin, Activity2):
     """A virtual object representing a KE-chain activity.
 
     .. versionadded:: 2.0
@@ -65,6 +66,7 @@ class Activity(TreeObject, TagsMixin):
             self._options.get('representations', {}),
             self._save_representations,
         )
+        self._widgets_manager = None  # type: Optional[WidgetsManager]
 
     def __call__(self, *args, **kwargs) -> 'Activity':
         """Short-hand version of the `child` method."""
@@ -288,7 +290,9 @@ class Activity(TreeObject, TagsMixin):
         """
         if self.parent_id is None:
             raise NotFoundError("Cannot find parent for task '{}', as this task exist on top level.".format(self))
-        return self._client.activity(pk=self.parent_id, scope=self.scope_id)
+        elif self._parent is None:
+            self._parent = self._client.activity(pk=self.parent_id, scope=self.scope_id)
+        return self._parent
 
     def children(self, **kwargs) -> List['Activity']:
         """Retrieve the direct activities of this subprocess.
@@ -317,6 +321,8 @@ class Activity(TreeObject, TagsMixin):
         if not kwargs:
             if self._cached_children is None:
                 self._cached_children = self._client.activities(parent_id=self.id, scope=self.scope_id, **kwargs)
+                for child in self._cached_children:
+                    child._parent = self
             return self._cached_children
         else:
             return self._client.activities(parent_id=self.id, scope=self.scope_id, **kwargs)
@@ -482,10 +488,7 @@ class Activity(TreeObject, TagsMixin):
             data.append(task_specific_update_dict)
 
         # Perform bulk update
-        url = self._client._build_url('activities_bulk_update')
-        response = self._client._request('PUT', url, json=data)
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Activity {}".format(self), response=response)
+        self._client.update_activities(activities=data)
 
     def edit(
             self,
@@ -749,8 +752,10 @@ class Activity(TreeObject, TagsMixin):
         :raises NotFoundError: when the widgets could not be found
         :raises APIError: when the API does not support the widgets, or when the API gives an error.
         """
-        widgets = self._client.widgets(activity=self.id, **kwargs)
-        return WidgetsManager(widgets=widgets, activity=self, client=self._client)
+        if self._widgets_manager is None:
+            widgets = self._client.widgets(activity=self.id, **kwargs)
+            self._widgets_manager = WidgetsManager(widgets=widgets, activity=self)
+        return self._widgets_manager
 
     def download_as_pdf(self, target_dir=None, pdf_filename=None, paper_size=PaperSize.A4,
                         paper_orientation=PaperOrientation.PORTRAIT, include_appendices=False):

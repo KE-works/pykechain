@@ -1028,3 +1028,21 @@ class NotificationChannels(Enum):
 
     EMAIL = 'EMAIL'
     APP = 'APP'
+
+
+class LanguageCodes(Enum):
+    """
+    Options for the language setting of a user.
+
+    :cvar ENGLISH: English
+    :cvar FRENCH: French
+    :cvar GERMAN: German
+    :cvar DUTCH: Dutch
+    :cvar ITALIAN: Italian
+    """
+
+    ENGLISH = "en"
+    FRENCH = "fr"
+    GERMAN = "de"
+    DUTCH = "nl"
+    ITALIAN = "it"

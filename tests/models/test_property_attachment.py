@@ -2,7 +2,7 @@ import json
 import os
 
 from pykechain.enums import PropertyType, Multiplicity
-from pykechain.models import AttachmentProperty2
+from pykechain.models import AttachmentProperty
 from tests.classes import TestBetamax
 
 
@@ -14,14 +14,14 @@ class TestAttachment(TestBetamax):
         super().setUp()
         self.property_name = 'Plot Attachment'
 
-        root = self.project.model(name='Product')
-        self.part_model = root.add_model(name='__Testing attachments', multiplicity=Multiplicity.ONE)
+        self.root_model = self.project.model(name='Product')
+        self.part_model = self.root_model.add_model(name='__Testing attachments', multiplicity=Multiplicity.ONE_MANY)
         self.property_model = self.part_model.add_property(
             name=self.property_name,
             property_type=PropertyType.ATTACHMENT_VALUE
-        )  # type: AttachmentProperty2
+        )  # type: AttachmentProperty
 
-        self.property = self.part_model.instance().property(name=self.property_name)  # type: AttachmentProperty2
+        self.property = self.part_model.instance().property(name=self.property_name)  # type: AttachmentProperty
 
     def tearDown(self):
         self.part_model.delete()
@@ -85,3 +85,13 @@ class TestAttachment(TestBetamax):
 
     def test_has_value_false(self):
         self.assertFalse(self.property.has_value())
+
+    def test_add_with_properties(self):
+        # setUp
+        self.new_wheel = self.root_model.instance().add_with_properties(
+            self.part_model,
+            "new part",
+            update_dict={
+                self.property_name: self.project_root + '/requirements.txt'
+            },
+        )

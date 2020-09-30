@@ -6,16 +6,18 @@ from jsonschema import validate
 from pykechain.enums import Category
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Base, BaseInScope
+from pykechain.models.property2 import Property2
 from pykechain.models.input_checks import check_text, check_type
 from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.validators import PropertyValidator
 from pykechain.models.validators.validator_schemas import options_json_schema
 from pykechain.defaults import API_EXTRA_PARAMS
+from pykechain.utils import find
 
 T = TypeVar("T")
 
 
-class Property(BaseInScope):
+class Property(BaseInScope, Property2):
     """A virtual object representing a KE-chain property.
 
     .. versionadded: 3.0
@@ -115,8 +117,13 @@ class Property(BaseInScope):
 
     @use_bulk_update.setter
     def use_bulk_update(self, value):
-        assert isinstance(value, bool), "`use_bulk_update` must be set to a boolean, not {}".format(type(value))
-        self.__class__._use_bulk_update = value
+        self.__class__.set_bulk_update(value)
+
+    @classmethod
+    def set_bulk_update(cls, value):
+        """Set global class attribute to toggle the use of bulk-updates of properties."""
+        assert isinstance(value, bool), "`bulk_update` must be set to a boolean, not {}".format(type(value))
+        cls._use_bulk_update = value
 
     @property
     def value(self) -> Any:
@@ -132,7 +139,8 @@ class Property(BaseInScope):
     def value(self, value: Any) -> None:
         value = self.serialize_value(value)
         if self.use_bulk_update:
-            self._pend_value(value)
+            self._pend_update(dict(value=value))
+            self._value = value
         else:
             self._put_value(value)
 
@@ -150,16 +158,15 @@ class Property(BaseInScope):
         if cls.use_bulk_update:
             client.update_properties(properties=cls._update_package)
             cls._update_package = list()
-        cls.use_bulk_update = use_bulk_update
+        cls.set_bulk_update(use_bulk_update)
 
-    def _pend_value(self, value):
+    def _pend_update(self, data):
         """Store the value to be send at a later point in time using `update_values`."""
-        self.__class__._update_package.append(dict(
-            id=self.id,
-            value=value,
-        ))
-        self._value = value
-        return self._value
+        update_dict = find(self.__class__._update_package, lambda d: d["id"] == self.id)
+        if update_dict:
+            update_dict.update(data)
+        else:
+            self.__class__._update_package.append(dict(id=self.id, **data))
 
     def _put_value(self, value):
         """Send the value to KE-chain."""
@@ -171,7 +178,6 @@ class Property(BaseInScope):
             raise APIError("Could not update Property {}".format(self), response=response)
 
         self.refresh(json=response.json()['results'][0])
-        return self._value
 
     def serialize_value(self, value: [T]) -> T:
         """
@@ -378,7 +384,6 @@ class Property(BaseInScope):
         :param options: (options) new options of the property
         :type options: dict
         :param kwargs: (optional) additional kwargs to be edited
-        :type kwargs: dict or None
         :return: None
         :raises APIError: When unable to edit the property
         :raises IllegalArgumentError: when the type of the input is provided incorrect.
@@ -403,7 +408,6 @@ class Property(BaseInScope):
 
         """
         update_dict = {
-            'id': self.id,
             'name': check_text(name, 'name') or self.name,
             'description': check_text(description, 'description') or self.description,
         }
@@ -419,15 +423,22 @@ class Property(BaseInScope):
         if kwargs:  # pragma: no cover
             update_dict.update(kwargs)
 
-        response = self._client._request('PUT',
-                                         self._client._build_url('property', property_id=self.id),
-                                         params=API_EXTRA_PARAMS['property'],
-                                         json=update_dict)
+        if self.use_bulk_update:
+            self._pend_update(data=update_dict)
+        else:
+            update_dict["id"] = self.id
 
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Property {}".format(self), response=response)
+            response = self._client._request(
+                'PUT',
+                self._client._build_url('property', property_id=self.id),
+                params=API_EXTRA_PARAMS['property'],
+                json=update_dict
+            )
 
-        self.refresh(json=response.json()['results'][0])
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise APIError("Could not update Property {}".format(self), response=response)
+
+            self.refresh(json=response.json()['results'][0])
 
     def delete(self) -> None:
         """Delete this property.

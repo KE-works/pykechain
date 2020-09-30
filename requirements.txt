@@ -9,7 +9,7 @@ jsonschema==3.2.0
 semver==2.10.2
 
 # testing
-pytest==6.0.1
+pytest==6.1.0
 betamax==0.8.1
 coverage<=4.5.99
 pytest-cov==2.10.1
@@ -20,13 +20,13 @@ Sphinx==3.2.1
 nbsphinx==0.7.1
 
 # integration
-tox==3.19.0
+tox==3.20.0
 
 # code style
 flake8==3.8.3
-pydocstyle==5.0.2
+pydocstyle==5.1.1
 mypy==0.782; python_version >= '3.4'
-pre-commit==2.6.0
+pre-commit==2.7.1
 
 # for package management (uploads)
 twine>=3.0.0; python_version >= '3.6'

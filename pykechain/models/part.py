@@ -1,4 +1,4 @@
-from typing import Union, List, Dict, Optional, Text, Tuple  # noqa: F401
+from typing import Union, List, Dict, Optional, Text, Tuple, Any  # noqa: F401
 
 import requests
 
@@ -7,13 +7,14 @@ from pykechain.enums import Category, Multiplicity, Classification, PropertyType
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
     get_edited_one_many
+from pykechain.models.part2 import Part2
 from pykechain.models.input_checks import check_text, check_type, check_list_of_base, check_list_of_dicts
 from pykechain.models.property import Property
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.utils import is_uuid, find
 
 
-class Part(TreeObject):
+class Part(TreeObject, Part2):
     """A virtual object representing a KE-chain part.
 
     :ivar id: UUID of the part
@@ -81,13 +82,14 @@ class Part(TreeObject):
         super().__init__(json, **kwargs)
 
         self.ref = json.get('ref')  # type: Text
+        self.model_id = json.get("model_id")  # type: Text
         self.category = json.get('category')  # type: Category
         self.description = json.get('description')  # type: Text
         self.multiplicity = json.get('multiplicity')  # type: Text
         self.classification = json.get('classification')  # type: Classification
 
         self.properties = [Property.create(p, client=self._client)
-                           for p in sorted(json['properties'], key=lambda p: p.get('order', 0))]  # type: list
+                           for p in sorted(json['properties'], key=lambda p: p.get('order', 0))]  # type: List[Property]
 
         proxy_data = json.get('proxy_source_id_name', dict())  # type: Optional[Dict]
         self._proxy_model_id = proxy_data.get('id') if proxy_data else None  # type: Optional[Text]
@@ -165,7 +167,9 @@ class Part(TreeObject):
         >>> bike = part.parent()
 
         """
-        return self._client.part(pk=self.parent_id, category=self.category) if self.parent_id else None
+        if self._parent is None and self.parent_id:
+            self._parent = self._client.part(pk=self.parent_id, category=self.category)
+        return self._parent
 
     def children(self, **kwargs) -> Union['PartSet', List['Part']]:
         """Retrieve the children of this `Part` as `PartSet`.
@@ -201,6 +205,8 @@ class Part(TreeObject):
             # no kwargs provided is the default, we aim to cache it.
             if self._cached_children is None:
                 self._cached_children = list(self._client.parts(parent=self.id, category=self.category))
+                for child in self._cached_children:
+                    child._parent = self
             return self._cached_children
         else:
             # if kwargs are provided, we assume no use of cache as specific filtering on the children is performed.
@@ -336,8 +342,7 @@ class Part(TreeObject):
 
         """
         if self.category == Category.INSTANCE:
-            model_id = self._json_data.get('model_id')
-            return self._client.model(pk=model_id)
+            return self._client.model(pk=self.model_id)
         else:
             raise NotFoundError('Part "{}" already is a model'.format(self))
 
@@ -388,6 +393,33 @@ class Part(TreeObject):
                                      "Use the `Part.instances()` method".format(self))
         else:
             raise NotFoundError("Part {} has no instance".format(self))
+
+    def count_instances(self) -> int:
+        """
+        Retrieve the number of instances of this Part model without the parts themselves.
+
+        :return: number of Part instances
+        :rtype
+        """
+        if not self.category == Category.MODEL:
+            raise IllegalArgumentError("You can only count the number of instances of a Part with category MODEL")
+
+        response = self._client._request(
+            "GET",
+            self._client._build_url("parts"),
+            params={
+                "scope_id": self.scope_id,
+                "model_id": self.id,
+                "limit": 1,
+            },
+        )
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve Parts instances")
+
+        data = response.json()["count"]
+
+        return data
 
     #
     # CRUD operations
@@ -614,30 +646,35 @@ class Part(TreeObject):
         return self._client.create_property(self, *args, **kwargs)
 
     @staticmethod
-    def _parse_update_dict(part: 'Part',
-                           properties_fvalues: List,
-                           update_dict: Dict) -> Tuple[List[Dict], List[Dict]]:
+    def _parse_update_dict(
+            part: 'Part',
+            properties_fvalues: List[Dict[Text, Any]],
+            update_dict: Dict,
+            creating: bool = False,
+    ) -> Tuple[List[Dict], List[Dict]]:
         """
         Check the content of the update dict and insert them into the properties_fvalues list.
 
         :param part: Depending on whether you add to or update a part, this is the model or the part itself, resp.
         :param properties_fvalues: list of property values
         :param update_dict: dictionary with property values, keyed by property names
+        :param creating: flag to indicate creation of new properties, hence using the `model_id` instead of `id`
         :return: Tuple with 2 lists of dicts
         :rtype tuple
         """
         properties_fvalues = check_list_of_dicts(properties_fvalues, 'properties_fvalues') or list()
+        check_type(update_dict, dict, "update_dict")
 
         exception_fvalues = list()
         update_dict = update_dict or dict()
 
-        key = 'id' if part.category == Category.INSTANCE else 'model_id'
+        key = "model_id" if creating else "id"
 
         for prop_name_or_id, property_value in update_dict.items():
             property_to_update = part.property(prop_name_or_id)  # type: Property
 
             updated_p = {
-                'value': property_to_update.serialize_value(property_value),
+                "value": property_to_update.serialize_value(property_value),
                 key: property_to_update.id,
             }
 
@@ -708,7 +745,12 @@ class Part(TreeObject):
             raise IllegalArgumentError('`model` must be a Part object of category MODEL, "{}" is not.'.format(model))
 
         instance_name = check_text(name, 'name') or model.name
-        properties_fvalues, exception_fvalues = self._parse_update_dict(model, properties_fvalues, update_dict)
+        properties_fvalues, exception_fvalues = self._parse_update_dict(
+            model,
+            properties_fvalues,
+            update_dict,
+            creating=True,
+        )
 
         url = self._client._build_url('parts_new_instance')
         response = self._client._request(
@@ -961,19 +1003,31 @@ class Part(TreeObject):
         if name:
             payload_json.update(name=name)
 
-        response = self._client._request(
-            'PUT', self._client._build_url('part', part_id=self.id),
-            params=API_EXTRA_PARAMS['part'],
-            json=payload_json
-        )
+        if Property._use_bulk_update and not (name or kwargs):
+            # Use the bulk-update for properties, but only if only properties are being updated, nothing more
+            Property._update_package.extend(properties_fvalues)
 
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Part {}".format(self), response=response)
+            value_dict = dict()
+            for update in properties_fvalues:
+                value_dict[update["id"]] = update.get("value")
 
-        # update local properties (without a call)
-        self.refresh(json=response.json()['results'][0])
+            for prop in self.properties:
+                if prop.id in value_dict:
+                    prop._value = value_dict[prop.id]
+        else:
+            response = self._client._request(
+                'PUT', self._client._build_url('part', part_id=self.id),
+                params=API_EXTRA_PARAMS['part'],
+                json=payload_json
+            )
 
-        # If any values were not set via the json, set them individually
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise APIError("Could not update Part {}".format(self), response=response)
+
+            # update local properties (without a call)
+            self.refresh(json=response.json()['results'][0])
+
+        # If any values can not be set via the json, set them individually
         for exception_fvalue in exception_fvalues:
             self.property(exception_fvalue['id']).value = exception_fvalue['value']
 

@@ -6,10 +6,11 @@ import requests
 from typing import Text, Any, Optional
 
 from pykechain.exceptions import APIError
+from pykechain.models.property2_attachment import AttachmentProperty2
 from pykechain.models.property import Property
 
 
-class AttachmentProperty(Property):
+class AttachmentProperty(Property, AttachmentProperty2):
     """A virtual object representing a KE-chain attachment property."""
 
     @property
@@ -71,7 +72,7 @@ class AttachmentProperty(Property):
         """
         return self._download().json()
 
-    def upload(self, data: Text, **kwargs: Any) -> None:
+    def upload(self, data: Any, **kwargs: Any) -> None:
         """Upload a file to the attachment property.
 
         When providing a :class:`matplotlib.figure.Figure` object as data, the figure is uploaded as PNG.
@@ -136,7 +137,7 @@ class AttachmentProperty(Property):
 
         response = self._client._request('GET', url)
 
-        if response.status_code != requests.codes.ok:
+        if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not download property value.", response=response)
 
         return response
@@ -149,5 +150,5 @@ class AttachmentProperty(Property):
                                          data={"part": self._json_data['part_id']},
                                          files={"attachment": data})
 
-        if response.status_code != requests.codes.ok:
+        if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not upload attachment", response=response)

@@ -1,17 +1,42 @@
 Change Log
 ==========
 
-v3.8.1-rc2 (UNRELEASED)
------------------------
-
-* :+1: Added `set_associations` and `remove_associations` method to the `Widget` class (#827)
-* :+1: Renamed activity clone API endpoint is now supported. We now support the cloning and renaming of Parts as well as cloning the activities. (#805)
+* :bug: Missing upper-case letter in `SideBarManager` caused a loss of the `override_sidebar` property.
+* :bug: `SidebarButton` class did not preserve all data from the scope options, losing display names in other languages. Editing of this values is now possible as well.
+* :+1: Added `refresh()` method on `SideBarManager` to reload the side-bar from KE-chain.
 * :star: Added the option to manage supervisor members on a scope for KE-chain 3 backends that support the supervisor member users. That is possble for releases of KE-chain 3 starting from June 2020. (version 3.7). #772
 
-v3.8.1-rc1 (14AUG20)
---------------------
+v3.8.2 (18SEP20)
+----------------
 
+* :bug: The `descendants` of a `Part` with classification `CATALOG` returns both the Catalog and Product descendants. This broke the guaranteed parent-child relationship when populating the descendants in the `populate_descendants()` method of the `Part` class.
+* :bug: KeyError in `add_with_properties()` method of the `Part` class.
+
+* :+1: dependent versions for development: pytest (6.0.2)
+
+v3.8.1 (08SEP20)
+----------------
+
+* :bug: Added `title_visible` property to `Widget` class for the widget's title shown in KE-chain, deprecating the `default_title` mechanism when creating widgets. The default title of a widget is not dependent on front-end and is not stored in the widget.
+* :bug: Set and Update of widget associations now handles optional `part_instance_id` and/or `parent_part_instance_id` inputs.
+* :bug: `WidgetsManager` and `PartSet` no longer implement `Iterable` as an "iterator", making it possible to loop over the Widgets/Parts multiple times.
+* :bug: `add_signature_widget()` method of the `WidgetManager` class now creates an editable signature widget by default. The new input argument `editable` can be set to False to create a viewable widget.
+
+* :+1: Added `update_activities` method to `Client` to update activities in bulk.
+* :+1: `WidgetsManager` is now stored in its `Activity` object for lazy retrieval, while the `WidgetsManager` no explicitly stores a reference to its `Activity`.
+* :+1: Available `Part` options of a pre-filtered multi-reference properties are now filtered when using the `choices()` method on the `MultiReferenceProperty`.
+* :+1: Added `model_id` attribute to `Part` class.
+* :+1: Added `count_instances()` method to the `Part` class, to retrieve the number of Part instances of a Part model.
+* :+1: Added `get_landing_page_url()` method to the `Scope` class, to retrieve the (relative) URL of landing page for that scope. Append it to the client's API root for a full URL.
+* :+1: Added `LanguageCodes` enum class to enumerate the available Language options for user profiles.
+* :+1: Added `value_ids()` method to `_ReferenceProperty` class, returning a list of UUIDs instead of Pykechain objects.
+* :+1: Added lazy retrieval in `parent()` method of `TreeObject`, `Part` and `Activity` classes. Retrieving children or populating descendants also sets all known parent objects.
+* :+1: Inverted the inheritance hierarchy of Class2 classes, allowing for type-checking via `isinstance()`. However, creating objects from these classes is no longer supported.
+* :+1: Added `set_associations` and `remove_associations` method to the `Widget` class (#827)
+* :+1: Renamed activity clone API endpoint is now supported. We now support the cloning and renaming of Parts as well as cloning the activities. (#805)
+* :+1: Added support of user references and scope references properties in pykechain by implementing the `UserReferencesProperty` and `ScopeReferencesProperty` classes. (#832)
 * :+1: Included pending deprecation of version-2 classes such as `Part2`, `Property2`. It is advised to use the original `Part` and `Property` classes instead. (#713)
+* :+1: dependent versions for development: sphinx (3.2.1), pytest-cov (2.10.1), tox (3.20.0), pydocstyle (5.1.1), pre-commit (2.7.1), coveralls (2.1.2)
 
 v3.8.0 (11AUG20)
 ----------------
@@ -39,7 +64,7 @@ v3.7.5 (29JUN20)
 v3.7.4 (15JUN20)
 ----------------
 
-* :bug: Reloading `Activity2` when retrieved in an `ActivityReferenceProperty` in order to populate it with all required data.
+* :bug: Reloading `Activity2` when retrieved in an `ActivityReferencesProperty` in order to populate it with all required data.
 * :+1: dependent versions for development: sphinx (3.1.1), pytest-cov (2.10.0)
 
 v3.7.3 (11JUN20)
@@ -74,7 +99,7 @@ In this release we also deprecated functionality that were announced to be depre
 
 * :star: Extracted representations from `Property2` class into a separate `RepresentationMixin` class. This is now utilized by the `Scope2`, `Activity2` and `Property2` classes.
 * :star: Implemented `MultiSelectListProperty2` class, generalizing the implementation of the `SelectListProperty2 class. Intermediate class `_SelectListProperty` now hosts the generic implementation. #732
-* :star: Implemented `ActivityReferenceProperty` class, generalizing the implementation of the part reference `MultiReferenceProperty2` class. Intermediate classes `_ReferenceProperty` and `_ReferencePropertyInScope` have been added for further reference properties. #746
+* :star: Implemented `ActivityReferencesProperty` class, generalizing the implementation of the part reference `MultiReferenceProperty2` class. Intermediate classes `_ReferenceProperty` and `_ReferencePropertyInScope` have been added for further reference properties. #746
 * :star: Added `ScopeRoles` and `ScopeMemberActions` enum classes to list the roles of and operations on scope members.
 
 * :+1: Added `PropertyTypes` enumeration values for the JSON property and multiple new reference properties.

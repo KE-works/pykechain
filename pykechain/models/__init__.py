@@ -11,7 +11,7 @@ from .part import Part
 from .part2 import Part2
 from .property import Property
 from .property_attachment import AttachmentProperty
-from .property_selectlist import SelectListProperty
+from .property_selectlist import SelectListProperty, MultiSelectListProperty
 from .property_multi_reference import MultiReferenceProperty
 from .property_datetime import DatetimeProperty
 from .property2 import Property2
@@ -19,7 +19,7 @@ from .property2_attachment import AttachmentProperty2
 from .property2_selectlist import SelectListProperty2
 from .property2_multi_reference import MultiReferenceProperty2
 from .property2_datetime import DatetimeProperty2
-from .property_reference import ActivityReferenceProperty
+from .property_reference import ActivityReferencesProperty, ScopeReferencesProperty, UserReferencesProperty
 from .partset import PartSet
 from .service import Service, ServiceExecution
 from .team import Team
@@ -37,16 +37,21 @@ AnyProperty = Union[
     'AttachmentProperty2',
     'SelectListProperty2',
     'DatetimeProperty2'
-    'ActivityReferenceProperty',
+    'ActivityReferencesProperty',
+    'ScopeReferencesProperty',
+    'UserReferencesProperty',
 ]
 
 # This map is used to identify the correct class for the (KE-chain provided) property type.
 property_type_to_class_map = {
-    PropertyType.ATTACHMENT_VALUE: AttachmentProperty2,
-    PropertyType.SINGLE_SELECT_VALUE: SelectListProperty2,
-    PropertyType.REFERENCES_VALUE: MultiReferenceProperty2,
-    PropertyType.DATETIME_VALUE: DatetimeProperty2,
-    PropertyType.ACTIVITY_REFERENCES_VALUE: ActivityReferenceProperty,
+    PropertyType.ATTACHMENT_VALUE: AttachmentProperty,
+    PropertyType.SINGLE_SELECT_VALUE: SelectListProperty,
+    PropertyType.MULTI_SELECT_VALUE: MultiSelectListProperty,
+    PropertyType.REFERENCES_VALUE: MultiReferenceProperty,
+    PropertyType.DATETIME_VALUE: DatetimeProperty,
+    PropertyType.ACTIVITY_REFERENCES_VALUE: ActivityReferencesProperty,
+    PropertyType.SCOPE_REFERENCES_VALUE: ScopeReferencesProperty,
+    PropertyType.USER_REFERENCES_VALUE: UserReferencesProperty,
 }
 
 __all__ = (
@@ -74,7 +79,9 @@ __all__ = (
     'AttachmentProperty2',
     'SelectListProperty2',
     'DatetimeProperty2',
-    'ActivityReferenceProperty',
+    'ActivityReferencesProperty',
+    'ScopeReferencesProperty',
+    'UserReferencesProperty',
     'AnyProperty',
     'property_type_to_class_map',
 )

@@ -347,6 +347,17 @@ class TestParts(TestBetamax):
 
         self.assertEqual(front_fork_model.id, front_fork_retrieved_model.id)
 
+    def test_count_instances(self):
+        front_fork_model = self.project.model("Wheel")
+        nr = front_fork_model.count_instances()
+
+        self.assertIsInstance(nr, int)
+        self.assertEqual(2, nr)
+
+        bike_part = self.project.part("Bike")
+        with self.assertRaises(IllegalArgumentError):
+            bike_part.count_instances()
+
     def test_retrieve_catalog_model_of_proxy(self):
         catalog_container = self.project.model(name__startswith='Catalog')
         bearing_catalog_model = catalog_container.add_model('Bearing', multiplicity=Multiplicity.ZERO_MANY)

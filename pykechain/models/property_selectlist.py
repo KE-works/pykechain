@@ -6,6 +6,7 @@ from jsonschema import validate
 
 from pykechain.enums import Category
 from pykechain.exceptions import APIError, IllegalArgumentError
+from pykechain.models.property2_selectlist import SelectListProperty2, MultiSelectListProperty2
 from pykechain.models.property import Property
 from pykechain.models.validators.validator_schemas import options_json_schema
 
@@ -35,9 +36,11 @@ class _SelectListProperty(Property):
         if value is not None:
             self._check_new_value(value=value)
 
-        if self._put_value(value):
+        if self.use_bulk_update:
+            self._pend_update(dict(value=value))
             self._value = value
-            self._json_data['value'] = value
+        else:
+            self._put_value(value)
 
     @abstractmethod
     def _check_new_value(self, value: Any):
@@ -48,7 +51,7 @@ class _SelectListProperty(Property):
         :return: sanitized value
         :raises APIError: when unable to set the value or the value is not in the list of options
         """
-        pass
+        pass  # pragma: no cover
 
     @property
     def options(self):
@@ -128,16 +131,16 @@ class _SelectListProperty(Property):
             self._options = new_options  # save the new options as the options
 
 
-class SelectListProperty(_SelectListProperty):
+class SelectListProperty(_SelectListProperty, SelectListProperty2):
     """A virtual object representing a KE-chain single-select list property."""
 
     def _check_new_value(self, value: Any):
         if value not in self.options:
-            raise APIError('The new value "{}" of the Property should be in the list of options:\n{}'.format(
-                value, self.options))
+            raise IllegalArgumentError('The new value "{}" of the Property should be in the list of options:'
+                                       '\n{}'.format(value, self.options))
 
 
-class MultiSelectListProperty(_SelectListProperty):
+class MultiSelectListProperty(_SelectListProperty, MultiSelectListProperty2):
     """A virtual object representing a KE-chain multi-select list property."""
 
     def _check_new_value(self, value: Iterable[Any]):
@@ -145,5 +148,5 @@ class MultiSelectListProperty(_SelectListProperty):
             raise IllegalArgumentError('The new values must be provided as a list or tuple, "{}" is not.'.format(value))
 
         if not all(v in self.options for v in value):
-            raise APIError('The new values "{}" of the Property should be in the list of options:\n{}'.format(
-                value, self.options))
+            raise IllegalArgumentError('The new values "{}" of the Property should be in the list of options:'
+                                       '\n{}'.format(value, self.options))
