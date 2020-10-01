@@ -973,6 +973,18 @@ class WidgetTitleValue(Enum):
     CUSTOM_TITLE = 'Custom title'
 
 
+class WidgetDescriptionValue(Enum):
+    """
+    Options to configure the description of a widget.
+
+    :cvar NO_DESCRIPTION: Show no description.
+    :cvar CUSTOM_DESCRIPTION: Show a custom description text.
+    """
+
+    NO_DESCRIPTION = 'No description'
+    CUSTOM_DESCRIPTION = 'Custom description'
+
+
 class NotificationStatus(Enum):
     """
     Options to retrieve a Notification based on its status.

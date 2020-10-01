@@ -1,7 +1,8 @@
 from typing import Dict, Optional, Union, Text, Tuple, List, Callable
 
-from pykechain.enums import Category, PropertyType, WidgetTitleValue, ActivityType, \
-    CardWidgetLinkValue, KEChainPages, CardWidgetKEChainPageLink, LinkTargets, ImageFitValue, CardWidgetImageValue
+from pykechain.enums import (Category, PropertyType, WidgetTitleValue, ActivityType, CardWidgetLinkValue, KEChainPages,
+                             CardWidgetKEChainPageLink, LinkTargets, ImageFitValue, CardWidgetImageValue,
+                             WidgetDescriptionValue)
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_enum
 from pykechain.utils import is_uuid, snakecase, camelcase
@@ -112,7 +113,7 @@ def _set_description(
         meta: Dict,
         description: Optional[Union[Text, bool]] = None,
         **kwargs
-) -> Tuple[Dict]:
+) -> Dict:
     """
     Set the customDescription in the meta based on provided optional custom description or no description.
 
@@ -126,15 +127,15 @@ def _set_description(
             * None or False: No description at all.
     :type description: basestring or None or bool
 
-    :return: tuple of meta
-    :rtype: Tuple[Dict,Text]
+    :return: meta dictionary
+    :rtype: dict
     :raises IllegalArgumentError: When description is neither str, bool or None.
     """
     if description is False or description is None:
-        show_description_value = "No description"
+        show_description_value = WidgetDescriptionValue.NO_DESCRIPTION
         description = ""
     elif isinstance(description, str):
-        show_description_value = "Custom description"
+        show_description_value = WidgetDescriptionValue.CUSTOM_DESCRIPTION
     else:
         raise IllegalArgumentError("When using the add_card_widget or add_service_card_widget, 'description' must be "
                                    "'text_type' or None or False. Type is: {}".format(type(description)))
@@ -151,7 +152,7 @@ def _set_link(
         link_value: Optional[CardWidgetLinkValue] = None,
         link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
         **kwargs
-) -> Tuple[Dict]:
+) -> Dict:
     """
     Set the link in the meta based on provided optional custom link.
 
@@ -171,8 +172,8 @@ def _set_link(
     :param link_target: how the link is opened, one of the values of CardWidgetLinkTarget enum.
     :type link_target: CardWidgetLinkTarget
 
-    :return: tuple of meta
-    :rtype: Tuple[Dict,Text]
+    :return: meta dictionary
+    :rtype: dict
     :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
     meta['linkTarget'] = check_enum(link_target, LinkTargets, 'link_target')
@@ -222,7 +223,7 @@ def _set_image(
         image: Optional['AttachmentProperty'] = None,
         image_fit: Optional[Union[Text, ImageFitValue]] = ImageFitValue.CONTAIN,
         **kwargs
-) -> Tuple[Dict]:
+) -> Dict:
     """
     Set the image in the meta based on provided optional custom link.
 
@@ -236,8 +237,8 @@ def _set_image(
     :param image_fit: how the image on the card widget is displayed
     :type image_fit: ImageFitValue
 
-    :return: tuple of meta
-    :rtype: Tuple[Dict,Text]
+    :return: meta dictionary
+    :rtype: dict
     :raises IllegalArgumentError: When illegal `image` type is used.
     """
     meta['imageFit'] = check_enum(image_fit, ImageFitValue, 'image_fit')
@@ -264,7 +265,7 @@ def _set_button_text(
         service: 'Service',
         custom_button_text: Optional[Text] = False,
         **kwargs
-) -> Tuple[Dict]:
+) -> Dict:
     """
     Set the button text in the meta based on provided optional custom_button_text.
 
@@ -282,8 +283,8 @@ def _set_button_text(
         * None: No title
     :type custom_button_text: bool or basestring or None
 
-    :return: tuple of meta
-    :rtype: Tuple[Dict,Text]
+    :return: meta dictionary
+    :rtype: dict
     :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
     if custom_button_text is False:
