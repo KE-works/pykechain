@@ -2,13 +2,12 @@ import os
 from datetime import datetime
 
 import requests
-from typing import Text, Dict, Optional
+from typing import Text, Dict, Optional, Union
 
 from pykechain.enums import ServiceScriptUser, ServiceExecutionStatus, ServiceType, ServiceEnvironmentVersion
 from pykechain.exceptions import APIError
 from pykechain.models.base import Base, BaseInScope
 from pykechain.models.input_checks import check_text, check_enum, check_type
-from pykechain.typing import OptionalEmpty
 from pykechain.utils import parse_datetime, Empty, clean_empty_values
 
 
@@ -91,13 +90,13 @@ class Service(BaseInScope):
 
     def edit(
             self,
-            name: OptionalEmpty[Text] = Empty(),
-            description: OptionalEmpty[Text] = Empty(),
-            version: OptionalEmpty[Text] = Empty(),
-            type: OptionalEmpty[ServiceType] = Empty(),
-            environment_version: OptionalEmpty[ServiceEnvironmentVersion] = Empty(),
-            run_as: OptionalEmpty[ServiceScriptUser] = Empty(),
-            trusted: OptionalEmpty[bool] = Empty(),
+            name: Optional[Union[Text, Empty]] = Empty(),
+            description: Optional[Union[Text, Empty]] = Empty(),
+            version: Optional[Union[Text, Empty]] = Empty(),
+            type: Optional[Union[ServiceType, Empty]] = Empty(),
+            environment_version: Optional[Union[ServiceEnvironmentVersion, Empty]] = Empty(),
+            run_as: Optional[Union[ServiceScriptUser, Empty]] = Empty(),
+            trusted: Optional[Union[bool, Empty]] = Empty(),
             **kwargs
     ) -> None:
         """

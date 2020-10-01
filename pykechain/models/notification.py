@@ -6,7 +6,6 @@ from pykechain.models import Base
 from typing import Text, List, Optional, Dict, Union
 
 from pykechain.models.input_checks import check_text, check_enum, check_base, check_user
-from pykechain.typing import OptionalEmpty
 from pykechain.utils import is_valid_email, Empty, clean_empty_values
 
 
@@ -77,14 +76,14 @@ class Notification(Base):
 
     def edit(
             self,
-            subject: OptionalEmpty[Text] = Empty(),
-            message: OptionalEmpty[Text] = Empty(),
-            status: OptionalEmpty[NotificationStatus] = Empty(),
-            recipients: OptionalEmpty[List[Union['User', Text, int]]] = Empty(),
-            team: OptionalEmpty[Union['Team', Text]] = Empty(),
-            from_user: OptionalEmpty[Union['User', Text]] = Empty(),
-            event: OptionalEmpty[NotificationEvent] = Empty(),
-            channel: OptionalEmpty[NotificationChannels] = Empty(),
+            subject: Optional[Union[Text, Empty]] = Empty(),
+            message: Optional[Union[Text, Empty]] = Empty(),
+            status: Optional[Union[NotificationStatus, Empty]] = Empty(),
+            recipients: Optional[Union[List[Union['User', Text, int]], Empty]] = Empty(),
+            team: Optional[Union['Team', Text, Empty]] = Empty(),
+            from_user: Optional[Union['User', Text, Empty]] = Empty(),
+            event: Optional[Union[NotificationEvent, Empty]] = Empty(),
+            channel: Optional[Union[NotificationChannels, Empty]] = Empty(),
             **kwargs
     ) -> None:
         """

@@ -32,7 +32,6 @@ from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
-from pykechain.typing import OptionalEmpty
 from pykechain.utils import parse_datetime, find, Empty, clean_empty_values
 
 
@@ -218,14 +217,14 @@ class Scope(Base, TagsMixin, Scope2):
 
     def edit(
             self,
-            name: OptionalEmpty[Text] = Empty(),
-            description: OptionalEmpty[Text] = Empty(),
-            start_date: OptionalEmpty[datetime] = Empty(),
-            due_date: OptionalEmpty[datetime] = Empty(),
-            status: OptionalEmpty[Union[Text, ScopeStatus]] = Empty(),
-            tags: OptionalEmpty[List[Text]] = Empty(),
-            team: OptionalEmpty[Union[Team, Text]] = Empty(),
-            options: OptionalEmpty[Dict] = Empty(),
+            name: Optional[Union[Text, Empty]] = Empty(),
+            description: Optional[Union[Text, Empty]] = Empty(),
+            start_date: Optional[Union[datetime, Empty]] = Empty(),
+            due_date: Optional[Union[datetime, Empty]] = Empty(),
+            status: Optional[Union[Text, ScopeStatus, Empty]] = Empty(),
+            tags: Optional[Union[List[Text], Empty]] = Empty(),
+            team: Optional[Union[Team, Text, Empty]] = Empty(),
+            options: Optional[Union[Dict, Empty]] = Empty(),
     ) -> None:
         """
         Edit the details of a scope.

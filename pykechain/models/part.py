@@ -11,7 +11,6 @@ from pykechain.models.part2 import Part2
 from pykechain.models.input_checks import check_text, check_type, check_list_of_base, check_list_of_dicts
 from pykechain.models.property import Property
 from pykechain.models.tree_traversal import TreeObject
-from pykechain.typing import OptionalEmpty
 from pykechain.utils import is_uuid, find, Empty, clean_empty_values
 
 
@@ -428,8 +427,8 @@ class Part(TreeObject, Part2):
 
     def edit(
             self,
-            name: OptionalEmpty[Text] = Empty(),
-            description: OptionalEmpty[Text] = Empty(),
+            name: Optional[Union[Text, Empty]] = Empty(),
+            description: Optional[Union[Text, Empty]] = Empty(),
             **kwargs
     ) -> None:
         """Edit the details of a part (model or instance).
