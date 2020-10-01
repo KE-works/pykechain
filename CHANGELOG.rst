@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+* :bug: Missing upper-case letter in `SideBarManager` caused a loss of the `override_sidebar` property.
+* :bug: `SidebarButton` class did not preserve all data from the scope options, losing display names in other languages. Editing of this values is now possible as well.
+* :+1: Added `refresh()` method on `SideBarManager` to reload the side-bar from KE-chain.
+
 v3.8.2 (18SEP20)
 ----------------
 
