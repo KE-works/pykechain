@@ -776,7 +776,7 @@ class Part(TreeObject, Part2):
 
         # If any values were not set via the json, set them individually
         for exception_fvalue in exception_fvalues:
-            property_model_id = exception_fvalue['id']
+            property_model_id = exception_fvalue['model_id']
             property_instance = find(new_part_instance.properties, lambda p: p.model_id == property_model_id)
             property_instance.value = exception_fvalue['value']
 

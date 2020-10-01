@@ -117,7 +117,7 @@ class TreeObject(BaseInScope, ABC):
         # Populate every descendant with its parent
         object_by_id = {c.id: c for c in all_descendants + [self]}
         for descendant in all_descendants:
-            descendant._parent = object_by_id[descendant.parent_id]
+            descendant._parent = object_by_id.get(descendant.parent_id)
 
         this_children = children_by_parent_id.get(self.id, list())
         if self._cached_children and not overwrite:
