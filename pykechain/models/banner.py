@@ -1,11 +1,12 @@
 import datetime
-from typing import Text, Optional
+from typing import Text
 
 import requests
 
 from pykechain.exceptions import APIError
 from pykechain.models import Base
 from pykechain.models.input_checks import check_text, check_datetime, check_type, check_url
+from pykechain.typing import OptionalEmpty
 from pykechain.utils import parse_datetime, Empty, clean_empty_values
 
 
@@ -31,12 +32,12 @@ class Banner(Base):
         return "<pyke Banner '{}' id {}>".format(self.name, self.id[-8:])
 
     def edit(self,
-             text: Optional[Text] = Empty(),
-             icon: Optional[Text] = Empty(),
-             active_from: Optional[datetime.datetime] = Empty(),
-             active_until: Optional[datetime.datetime] = Empty(),
-             is_active: Optional[bool] = Empty(),
-             url: Optional[Text] = Empty(),
+             text: OptionalEmpty[Text] = Empty(),
+             icon: OptionalEmpty[Text] = Empty(),
+             active_from: OptionalEmpty[datetime.datetime] = Empty(),
+             active_until: OptionalEmpty[datetime.datetime] = Empty(),
+             is_active: OptionalEmpty[bool] = Empty(),
+             url: OptionalEmpty[Text] = Empty(),
              ) -> None:
         """
         Update the banner properties.

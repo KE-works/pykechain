@@ -18,6 +18,7 @@ from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.models.user import User
 from pykechain.models.widgets.widgets_manager import WidgetsManager
+from pykechain.typing import OptionalEmpty
 from pykechain.utils import parse_datetime, is_valid_email, Empty, clean_empty_values
 
 
@@ -428,11 +429,11 @@ class Activity(TreeObject, TagsMixin, Activity2):
 
     def edit_cascade_down(
             self,
-            start_date: Optional[datetime.datetime] = Empty(),
-            due_date: Optional[datetime.datetime] = Empty(),
-            assignees: Optional[List[Text]] = Empty(),
-            assignees_ids: Optional[List[Text]] = Empty(),
-            status: Optional[Union[ActivityStatus, Text]] = Empty(),
+            start_date: OptionalEmpty[datetime.datetime] = Empty(),
+            due_date: OptionalEmpty[datetime.datetime] = Empty(),
+            assignees: OptionalEmpty[List[Text]] = Empty(),
+            assignees_ids: OptionalEmpty[List[Text]] = Empty(),
+            status: OptionalEmpty[Union[ActivityStatus, Text]] = Empty(),
             overwrite: Optional[bool] = False,
             **kwargs
     ) -> None:
@@ -495,14 +496,14 @@ class Activity(TreeObject, TagsMixin, Activity2):
 
     def edit(
             self,
-            name: Optional[Text] = Empty(),
-            description: Optional[Text] = Empty(),
-            start_date: Optional[datetime.datetime] = Empty(),
-            due_date: Optional[datetime.datetime] = Empty(),
-            assignees: Optional[List[Text]] = Empty(),
-            assignees_ids: Optional[List[Text]] = Empty(),
-            status: Optional[Union[ActivityStatus, Text]] = Empty(),
-            tags: Optional[List[Text]] = Empty(),
+            name: OptionalEmpty[Text] = Empty(),
+            description: OptionalEmpty[Text] = Empty(),
+            start_date: OptionalEmpty[datetime.datetime] = Empty(),
+            due_date: OptionalEmpty[datetime.datetime] = Empty(),
+            assignees: OptionalEmpty[List[Text]] = Empty(),
+            assignees_ids: OptionalEmpty[List[Text]] = Empty(),
+            status: OptionalEmpty[Union[ActivityStatus, Text]] = Empty(),
+            tags: OptionalEmpty[List[Text]] = Empty(),
             **kwargs
     ) -> None:
         """Edit the details of an activity.
