@@ -565,6 +565,9 @@ class Empty(object):
         return cls.__instance
 
 
+empty = Empty()
+
+
 def clean_empty_values(update_dict: Dict) -> Dict:
     """
     Clean a dictionary by removing all the keys that have an empty value.

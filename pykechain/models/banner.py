@@ -6,7 +6,7 @@ import requests
 from pykechain.exceptions import APIError
 from pykechain.models import Base
 from pykechain.models.input_checks import check_text, check_datetime, check_type, check_url
-from pykechain.utils import parse_datetime, Empty, clean_empty_values
+from pykechain.utils import parse_datetime, Empty, clean_empty_values, empty
 
 
 class Banner(Base):
@@ -31,13 +31,13 @@ class Banner(Base):
         return "<pyke Banner '{}' id {}>".format(self.name, self.id[-8:])
 
     def edit(self,
-             text: Optional[Union[Text, Empty]] = Empty(),
-             icon: Optional[Union[Text, Empty]] = Empty(),
-             active_from: Optional[Union[datetime.datetime, Empty]] = Empty(),
-             active_until: Optional[Union[datetime.datetime, Empty]] = Empty(),
-             is_active: Optional[Union[bool, Empty]] = Empty(),
-             url: Optional[Union[Text, Empty]] = Empty(),
-             ) -> None:
+             text: Optional[Union[Text, Empty]] = empty,
+             icon: Optional[Union[Text, Empty]] = empty,
+             active_from: Optional[Union[datetime.datetime, Empty]] = empty,
+             active_until: Optional[Union[datetime.datetime, Empty]] = empty,
+             is_active: Optional[Union[bool, Empty]] = empty,
+             url: Optional[Union[Text, Empty]] = empty,
+        ) -> None:
         """
         Update the banner properties.
 

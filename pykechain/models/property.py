@@ -12,7 +12,7 @@ from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.validators import PropertyValidator
 from pykechain.models.validators.validator_schemas import options_json_schema
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.utils import find, Empty, clean_empty_values
+from pykechain.utils import find, Empty, clean_empty_values, empty
 
 T = TypeVar("T")
 
@@ -367,10 +367,10 @@ class Property(BaseInScope, Property2):
 
     def edit(
             self,
-            name: Optional[Text] = Empty(),
-            description: Optional[Text] = Empty(),
-            unit: Optional[Text] = Empty(),
-            options: Optional[Dict] = Empty(),
+            name: Optional[Text] = empty,
+            description: Optional[Text] = empty,
+            unit: Optional[Text] = empty,
+            options: Optional[Dict] = empty,
             **kwargs
     ) -> None:
         """Edit the details of a property (model).

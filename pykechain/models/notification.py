@@ -6,7 +6,7 @@ from pykechain.models import Base
 from typing import Text, List, Optional, Dict, Union
 
 from pykechain.models.input_checks import check_text, check_enum, check_base, check_user
-from pykechain.utils import is_valid_email, Empty, clean_empty_values
+from pykechain.utils import is_valid_email, Empty, clean_empty_values, empty
 
 
 class Notification(Base):
@@ -76,14 +76,14 @@ class Notification(Base):
 
     def edit(
             self,
-            subject: Optional[Union[Text, Empty]] = Empty(),
-            message: Optional[Union[Text, Empty]] = Empty(),
-            status: Optional[Union[NotificationStatus, Empty]] = Empty(),
-            recipients: Optional[Union[List[Union['User', Text, int]], Empty]] = Empty(),
-            team: Optional[Union['Team', Text, Empty]] = Empty(),
-            from_user: Optional[Union['User', Text, Empty]] = Empty(),
-            event: Optional[Union[NotificationEvent, Empty]] = Empty(),
-            channel: Optional[Union[NotificationChannels, Empty]] = Empty(),
+            subject: Optional[Union[Text, Empty]] = empty,
+            message: Optional[Union[Text, Empty]] = empty,
+            status: Optional[Union[NotificationStatus, Empty]] = empty,
+            recipients: Optional[Union[List[Union['User', Text, int]], Empty]] = empty,
+            team: Optional[Union['Team', Text, Empty]] = empty,
+            from_user: Optional[Union['User', Text, Empty]] = empty,
+            event: Optional[Union[NotificationEvent, Empty]] = empty,
+            channel: Optional[Union[NotificationChannels, Empty]] = empty,
             **kwargs
     ) -> None:
         """
@@ -131,14 +131,14 @@ class Notification(Base):
                     else:
                         recipient_users.append(check_user(recipient, User, 'recipient'))
             elif isinstance(recipients, Empty):
-                recipient_emails = Empty()
-                recipient_users = Empty()
+                recipient_emails = empty
+                recipient_users = empty
             else:
                 raise IllegalArgumentError('`recipients` must be a list of User objects, IDs or email addresses, '
                                            '"{}" ({}) is not.'.format(recipients, type(recipients)))
 
         if isinstance(channel, Empty):
-            channels = Empty()
+            channels = empty
         elif check_enum(channel, NotificationChannels, 'channel'):
             channels = [channel]
         else:

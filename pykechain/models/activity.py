@@ -18,7 +18,7 @@ from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.models.user import User
 from pykechain.models.widgets.widgets_manager import WidgetsManager
-from pykechain.utils import parse_datetime, is_valid_email, Empty, clean_empty_values
+from pykechain.utils import parse_datetime, is_valid_email, empty, Empty, clean_empty_values
 
 
 class Activity(TreeObject, TagsMixin, Activity2):
@@ -428,11 +428,11 @@ class Activity(TreeObject, TagsMixin, Activity2):
 
     def edit_cascade_down(
             self,
-            start_date: Optional[Union[datetime.datetime, Empty]] = Empty(),
-            due_date: Optional[Union[datetime.datetime, Empty]] = Empty(),
-            assignees: Optional[Union[List[Text], Empty]] = Empty(),
-            assignees_ids: Optional[Union[List[Text], Empty]] = Empty(),
-            status: Optional[Union[ActivityStatus, Text, Empty]] = Empty(),
+            start_date: Optional[Union[datetime.datetime, Empty]] = empty,
+            due_date: Optional[Union[datetime.datetime, Empty]] = empty,
+            assignees: Optional[Union[List[Text], Empty]] = empty,
+            assignees_ids: Optional[Union[List[Text], Empty]] = empty,
+            status: Optional[Union[ActivityStatus, Text, Empty]] = empty,
             overwrite: Optional[bool] = False,
             **kwargs
     ) -> None:
@@ -495,14 +495,14 @@ class Activity(TreeObject, TagsMixin, Activity2):
 
     def edit(
             self,
-            name: Optional[Union[Text, Empty]] = Empty(),
-            description: Optional[Union[Text, Empty]] = Empty(),
-            start_date: Optional[Union[datetime.datetime, Empty]] = Empty(),
-            due_date: Optional[Union[datetime.datetime, Empty]] = Empty(),
-            assignees: Optional[Union[List[Text], Empty]] = Empty(),
-            assignees_ids: Optional[Union[List[Text], Empty]] = Empty(),
-            status: Optional[Union[ActivityStatus, Text, Empty]] = Empty(),
-            tags: Optional[Union[List[Text], Empty]] = Empty(),
+            name: Optional[Union[Text, Empty]] = empty,
+            description: Optional[Union[Text, Empty]] = empty,
+            start_date: Optional[Union[datetime.datetime, Empty]] = empty,
+            due_date: Optional[Union[datetime.datetime, Empty]] = empty,
+            assignees: Optional[Union[List[Text], Empty]] = empty,
+            assignees_ids: Optional[Union[List[Text], Empty]] = empty,
+            status: Optional[Union[ActivityStatus, Text, Empty]] = empty,
+            tags: Optional[Union[List[Text], Empty]] = empty,
             **kwargs
     ) -> None:
         """Edit the details of an activity.
@@ -616,7 +616,7 @@ class Activity(TreeObject, TagsMixin, Activity2):
 
         # If both are empty that means the user is not interested in changing them
         if isinstance(assignees_ids, Empty) and isinstance(assignees, Empty):
-            update_dict['assignees_ids'] = Empty()
+            update_dict['assignees_ids'] = empty
             return update_dict
         # If one of them is None, then the assignees will be cleared from the Activity
         elif assignees is None or assignees_ids is None:

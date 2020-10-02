@@ -8,7 +8,7 @@ from pykechain.enums import ServiceScriptUser, ServiceExecutionStatus, ServiceTy
 from pykechain.exceptions import APIError
 from pykechain.models.base import Base, BaseInScope
 from pykechain.models.input_checks import check_text, check_enum, check_type
-from pykechain.utils import parse_datetime, Empty, clean_empty_values
+from pykechain.utils import parse_datetime, Empty, clean_empty_values, empty
 
 
 class Service(BaseInScope):
@@ -90,13 +90,13 @@ class Service(BaseInScope):
 
     def edit(
             self,
-            name: Optional[Union[Text, Empty]] = Empty(),
-            description: Optional[Union[Text, Empty]] = Empty(),
-            version: Optional[Union[Text, Empty]] = Empty(),
-            type: Optional[Union[ServiceType, Empty]] = Empty(),
-            environment_version: Optional[Union[ServiceEnvironmentVersion, Empty]] = Empty(),
-            run_as: Optional[Union[ServiceScriptUser, Empty]] = Empty(),
-            trusted: Optional[Union[bool, Empty]] = Empty(),
+            name: Optional[Union[Text, Empty]] = empty,
+            description: Optional[Union[Text, Empty]] = empty,
+            version: Optional[Union[Text, Empty]] = empty,
+            type: Optional[Union[ServiceType, Empty]] = empty,
+            environment_version: Optional[Union[ServiceEnvironmentVersion, Empty]] = empty,
+            run_as: Optional[Union[ServiceScriptUser, Empty]] = empty,
+            trusted: Optional[Union[bool, Empty]] = empty,
             **kwargs
     ) -> None:
         """
