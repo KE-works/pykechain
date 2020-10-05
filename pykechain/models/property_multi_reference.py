@@ -78,9 +78,10 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
 
     def set_prefilters(
             self,
-            property_models: List[Union[Text, 'AnyProperty']],
-            values: List[Any],
-            filters_type: List[FilterType],
+            property_models: List[Union[Text, 'AnyProperty']] = None,
+            values: List[Any] = None,
+            filters_type: List[FilterType] = None,
+            prefilters: List[Tuple] = None,
             overwrite: Optional[bool] = False
     ) -> None:
         """
@@ -93,6 +94,8 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         :param filters_type: `list` of filter types per pre-filter, one of :class:`enums.FilterType`,
                 defaults to `FilterType.CONTAINS`
         :type filters_type: list
+        :param prefilters: `list` of tuples, each tuple representing a pre-filter.
+        :type prefilters: list
         :param overwrite: determines whether the pre-filters should be over-written or not, defaults to False
         :type overwrite: bool
 
@@ -105,11 +108,14 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         else:
             list_of_prefilters = list()
 
-        new_prefilters = {
-            'property_models': property_models,
-            'values': values,
-            'filters_type': filters_type,
-        }
+        if prefilters is None:
+            new_prefilters = {
+                'property_models': property_models,
+                'values': values,
+                'filters_type': filters_type,
+            }
+        else:
+            new_prefilters = prefilters
 
         list_of_prefilters.extend(_check_prefilters(
             part_model=self.value[0],

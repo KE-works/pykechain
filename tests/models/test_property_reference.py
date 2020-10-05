@@ -295,6 +295,22 @@ class TestMultiReferenceProperty(TestBetamax):
             filters,
         )
 
+    def test_set_prefilters_with_tuples(self):
+        prefilters_set = [
+            (self.float_prop, 15.3, FilterType.GREATER_THAN_EQUAL),
+            (self.char_prop, "Al", FilterType.CONTAINS),
+        ]
+
+        self.ref_prop_model.set_prefilters(prefilters=prefilters_set)
+
+        prefilters_get = self.ref_prop_model.get_prefilters(in_tuples=True)
+
+        prop_id, value, filter_type = prefilters_get[0]
+
+        self.assertEqual(self.float_prop.id, prop_id)
+        self.assertEqual("15.3", value)
+        self.assertEqual(FilterType.GREATER_THAN_EQUAL, filter_type)
+
     def test_set_prefilters_on_reference_property_with_excluded_propmodels_and_validators(
         self,
     ):
