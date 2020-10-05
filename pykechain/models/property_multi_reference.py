@@ -137,7 +137,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
             self,
             in_tuples: Optional[bool] = True,
     ) -> Union[
-        List[Tuple[Text, Text, Text]],
+        List[Tuple[Text, Text, FilterType]],
         Tuple[List[Text]]
     ]:
         """
