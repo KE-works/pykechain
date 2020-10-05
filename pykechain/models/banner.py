@@ -30,14 +30,15 @@ class Banner(Base):
     def __repr__(self):  # pragma: no cover
         return "<pyke Banner '{}' id {}>".format(self.name, self.id[-8:])
 
-    def edit(self,
-             text: Optional[Union[Text, Empty]] = empty,
-             icon: Optional[Union[Text, Empty]] = empty,
-             active_from: Optional[Union[datetime.datetime, Empty]] = empty,
-             active_until: Optional[Union[datetime.datetime, Empty]] = empty,
-             is_active: Optional[Union[bool, Empty]] = empty,
-             url: Optional[Union[Text, Empty]] = empty,
-        ) -> None:
+    def edit(
+        self,
+        text: Optional[Union[Text, Empty]] = empty,
+        icon: Optional[Union[Text, Empty]] = empty,
+        active_from: Optional[Union[datetime.datetime, Empty]] = empty,
+        active_until: Optional[Union[datetime.datetime, Empty]] = empty,
+        is_active: Optional[Union[bool, Empty]] = empty,
+        url: Optional[Union[Text, Empty]] = empty,
+    ) -> None:
         """
         Update the banner properties.
 

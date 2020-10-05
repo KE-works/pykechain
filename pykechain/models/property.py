@@ -12,7 +12,7 @@ from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.validators import PropertyValidator
 from pykechain.models.validators.validator_schemas import options_json_schema
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.utils import find, Empty, clean_empty_values, empty
+from pykechain.utils import find, clean_empty_values, empty
 
 T = TypeVar("T")
 
