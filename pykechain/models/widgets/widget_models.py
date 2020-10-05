@@ -98,3 +98,7 @@ class TasksWidget(Widget):
 
 class WeatherWidget(Widget):
     """Weather Widget."""
+
+
+class ServicecardWidget(Widget):
+    """ServiceCard Widget."""
