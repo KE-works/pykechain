@@ -505,3 +505,78 @@ def get_in_chunks(lst: Union[List, Iterable], chunk_size: int) -> Iterable:
     """
     for i in range(0, len(lst), chunk_size):
         yield lst[i: i + chunk_size]
+
+
+class Empty(object):
+    """
+    Represents an empty value.
+
+    In edit functions we want to be able to edit values of model properties, e.g. the due_date of a process.
+    Consider the following example:
+
+        def edit(self, start_date, due_date)
+            self.start_date = start_date
+            self.due_date = due_date
+            self.save()
+
+    This OK, we can edit both the start and due date. But what if we want to be able to edit one of the two dates
+    without providing or touching the other.
+
+    We would have to change it as follows:
+
+        def edit(self, start_date=None, due_date=None)
+            if start_date:
+                self.start_date = start_date
+            if due_date:
+                self.due_date = due_date
+            self.save()
+
+    Now, if we provide a start_date but not a due_date, the due_date would automatically get a None value. This way
+    only the non-None values are edited and saved. Looks OK.
+
+    But what if we want to empty a date and set it to null(None) in the database? If we we send None as a due_date value
+    it would not get saved due to the None value checker we implemented in order to have optional parameters.
+
+    Here comes the Empty class into play!
+
+    The Empty class is just a Python class which does absolutely nothing and only serves the purpose of being unique.
+    If we give the parameters in our edit function a default value which is an instance of the Empty class, we can check
+    on that in order to know if we want to save the value. Like this:
+
+        def edit(self, start_date=Empty(), due_date=Empty())
+            if not isinstance(start_date, Empty):
+                self.start_date = start_date
+            if not isinstance(due_date, Empty):
+                self.due_date = due_date
+            self.save()
+
+    Now both start_date and due_date are optional but they can also hold a None value which will lead to an actual
+    edit.
+
+    Happy coding!
+    """
+
+    __instance = None
+
+    def __new__(cls, *args, **kwargs):
+        """Only create a single instance of this class, i.e. simple singleton pattern."""
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
+        return cls.__instance
+
+
+empty = Empty()
+
+
+def clean_empty_values(update_dict: Dict) -> Dict:
+    """
+    Clean a dictionary by removing all the keys that have an empty value.
+
+    :param update_dict: dictionary with keys=request parameters
+    :type update_dict: dict
+
+    :return: same dictionary but cleaned up if there are values None
+    :rtype: dict
+    """
+    cleaned_up_dict = {k: v for k, v in update_dict.items() if not isinstance(v, Empty)}
+    return cleaned_up_dict

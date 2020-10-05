@@ -300,6 +300,25 @@ class TestParts(TestBetamax):
         # teardown
         front_fork.edit(name=front_fork_oldname)
 
+    # test added due to #847 - providing no inputs overwrites values
+    def test_edit_part_clear_values(self):
+        # setup
+        front_fork = self.project.part('Front Fork')
+        front_fork_name = str(front_fork.name)
+        front_fork_description = str(front_fork.description)
+
+        front_fork.edit(
+            name=None,
+            description=None
+        )
+
+        # testing
+        self.assertEqual(front_fork.name, front_fork_name)
+        self.assertEqual(front_fork.description, str())
+
+        # tearDown
+        front_fork.edit(description=front_fork_description)
+
     def test_create_model(self):
         bike = self.project.model('Bike')
         pedal = self.project.create_model(bike, 'Pedal', multiplicity=Multiplicity.ONE)

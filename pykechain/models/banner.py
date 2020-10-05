@@ -1,12 +1,12 @@
 import datetime
-from typing import Text, Optional
+from typing import Text, Optional, Union
 
 import requests
 
 from pykechain.exceptions import APIError
 from pykechain.models import Base
 from pykechain.models.input_checks import check_text, check_datetime, check_type, check_url
-from pykechain.utils import parse_datetime
+from pykechain.utils import parse_datetime, Empty, clean_empty_values, empty
 
 
 class Banner(Base):
@@ -30,43 +30,54 @@ class Banner(Base):
     def __repr__(self):  # pragma: no cover
         return "<pyke Banner '{}' id {}>".format(self.name, self.id[-8:])
 
-    def edit(self,
-             text: Optional[Text] = None,
-             icon: Optional[Text] = None,
-             active_from: Optional[datetime.datetime] = None,
-             active_until: Optional[datetime.datetime] = None,
-             is_active: Optional[bool] = None,
-             url: Optional[Text] = None,
-             ) -> None:
+    def edit(
+        self,
+        text: Optional[Union[Text, Empty]] = empty,
+        icon: Optional[Union[Text, Empty]] = empty,
+        active_from: Optional[Union[datetime.datetime, Empty]] = empty,
+        active_until: Optional[Union[datetime.datetime, Empty]] = empty,
+        is_active: Optional[Union[bool, Empty]] = empty,
+        url: Optional[Union[Text, Empty]] = empty,
+    ) -> None:
         """
         Update the banner properties.
 
-        :param text: Text to display in the banner. May use HTML.
-        :type text: str
-        :param icon: Font-awesome icon to stylize the banner
-        :type icon: str
-        :param active_from: Datetime from when the banner will become active.
-        :type active_from: datetime.datetime
-        :param active_until: Datetime from when the banner will no longer be active.
-        :type active_until: datetime.datetime
-        :param is_active: Boolean whether to set the banner as active, defaults to False.
-        :type is_active: bool
-        :param url: target for the "more info" button within the banner.
-        :param url: str
+        Setting an input to None will clear out the value (exception being text, active_from, active_until and
+        is_active).
+
+        :param text: Text to display in the banner. May use HTML. Text cannot be cleared.
+        :type text: basestring or None or Empty
+        :param icon: Font-awesome icon to stylize the banner. Can be cleared.
+        :type icon: basestring or None or Empty
+        :param active_from: Datetime from when the banner will become active. Cannot be cleared.
+        :type active_from: datetime.datetime or None or Empty
+        :param active_until: Datetime from when the banner will no longer be active. Cannot be cleared.
+        :type active_until: datetime.datetime or None or Empty
+        :param is_active: Boolean whether to set the banner as active, defaults to False. Cannot be cleared.
+        :type is_active: bool or None or Empty
+        :param url: target for the "more info" button within the banner. Can be cleared.
+        :param url: basestring or None or Empty
         :return: None
+
+        Not mentioning an input parameter in the function will leave it unchanged. Setting a parameter as None will
+        clear its value (when that is possible). The example below will clear the url and edit the text, but leave
+        everything else unchanged.
+
+        >>> banner.edit(text='New text here', url=None)
+
         """
         update_dict = {
             'text': check_text(text, 'text') or self.text,
-            'icon': check_text(icon, 'icon'),
-            'active_from': check_datetime(active_from, 'active_from'),
-            'active_until': check_datetime(active_until, 'active_until'),
-            'is_active': check_type(is_active, bool, 'is_active'),
-            'url': check_url(url),
+            'icon': check_text(icon, 'icon') or str(),
+            'active_from': check_datetime(active_from, 'active_from') or check_datetime(
+                self.active_from, 'active_from'),
+            'active_until': check_datetime(active_until, 'active_until') or check_datetime(
+                self.active_until, 'active_until'),
+            'is_active': check_type(is_active, bool, 'is_active') or self.is_active,
+            'url': check_url(url) or str(),
         }
 
-        # Remove None values
-        items = [(key, value) for key, value in update_dict.items()]
-        [update_dict.pop(key) for key, value in items if value is None]
+        update_dict = clean_empty_values(update_dict=update_dict)
 
         url = self._client._build_url('banner', banner_id=self.id)
 
