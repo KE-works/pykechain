@@ -166,6 +166,12 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
             filter_types = [pf.type for pf in prefilters]
             prefilters = tuple([property_model_ids, values, filter_types])
 
+            warnings.warn(
+                "Prefilters will be provided as list of `PropertyValueFilter` objects. "
+                "Separate lists will be deprecated in January 2021.",  # TODO Deprecate January 2021
+                PendingDeprecationWarning,
+            )
+
         return prefilters
 
     def set_excluded_propmodels(
