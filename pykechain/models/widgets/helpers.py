@@ -1,8 +1,17 @@
 from typing import Dict, Optional, Union, Text, Tuple, List, Callable
 
-from pykechain.enums import (Category, PropertyType, WidgetTitleValue, ActivityType, CardWidgetLinkValue, KEChainPages,
-                             CardWidgetKEChainPageLink, LinkTargets, ImageFitValue, CardWidgetImageValue,
-                             WidgetDescriptionValue)
+from pykechain.enums import (
+    Category,
+    PropertyType,
+    WidgetTitleValue,
+    ActivityType,
+    CardWidgetLinkValue,
+    KEChainPages,
+    CardWidgetKEChainPageLink,
+    LinkTargets,
+    ImageFitValue,
+    CardWidgetImageValue,
+)
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_enum
 from pykechain.utils import is_uuid, snakecase, camelcase
@@ -132,10 +141,10 @@ def _set_description(
     :raises IllegalArgumentError: When description is neither str, bool or None.
     """
     if description is False or description is None:
-        show_description_value = WidgetDescriptionValue.NO_DESCRIPTION
+        show_description_value = "No description"
         description = ""
     elif isinstance(description, str):
-        show_description_value = WidgetDescriptionValue.CUSTOM_DESCRIPTION
+        show_description_value = "Custom description"
     else:
         raise IllegalArgumentError("When using the add_card_widget or add_service_card_widget, 'description' must be "
                                    "'text_type' or None or False. Type is: {}".format(type(description)))

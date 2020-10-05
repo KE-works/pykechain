@@ -1356,19 +1356,21 @@ class WidgetsManager(Iterable):
         )
         return widget
 
-    def add_service_card_widget(self,
-                                service: 'Service',
-                                image: Optional['AttachmentProperty'] = None,
-                                title: Optional[Union[type(None), bool, Text]] = False,
-                                description: Optional[Union[Text]] = None,
-                                parent_widget: Optional[Union[Widget, Text]] = None,
-                                custom_button_text: Optional[Text] = False,
-                                emphasize_run: Optional[bool] = True,
-                                link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
-                                link_value: Optional[CardWidgetLinkValue] = None,
-                                link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
-                                image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
-                                **kwargs):
+    def add_service_card_widget(
+        self,
+        service: 'Service',
+        image: Optional['AttachmentProperty'] = None,
+        title: Optional[Union[type(None), bool, Text]] = False,
+        description: Optional[Union[Text]] = None,
+        parent_widget: Optional[Union[Widget, Text]] = None,
+        custom_button_text: Optional[Text] = False,
+        emphasize_run: Optional[bool] = True,
+        link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
+        link_value: Optional[CardWidgetLinkValue] = None,
+        link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
+        image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
+        **kwargs
+    ) -> Widget:
         """
         Add a KE-chain Service Card widget to the WidgetManager and the activity.
 
