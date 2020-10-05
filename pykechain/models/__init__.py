@@ -24,6 +24,7 @@ from .partset import PartSet
 from .service import Service, ServiceExecution
 from .team import Team
 from .user import User
+from .value_filter import PropertyValueFilter
 from ..enums import PropertyType
 
 AnyProperty = Union[
@@ -83,5 +84,6 @@ __all__ = (
     'ScopeReferencesProperty',
     'UserReferencesProperty',
     'AnyProperty',
+    'PropertyValueFilter',
     'property_type_to_class_map',
 )
