@@ -1,6 +1,7 @@
-from typing import List, Optional, Text, Union, Any
+from typing import List, Optional, Text, Union, Any, Tuple
 
 from pykechain.enums import Category, FilterType
+from pykechain.models.input_checks import check_type
 from pykechain.models.property2_multi_reference import MultiReferenceProperty2
 from pykechain.models.base_reference import _ReferencePropertyInScope
 from pykechain.models.part import Part
@@ -89,7 +90,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         :type property_models: list
         :param values: `list` of values to pre-filter on, value has to match the property type.
         :type values: list
-        :param filters_type: `list` of filter types per pre-fitler, one of :class:`enums.FilterType`,
+        :param filters_type: `list` of filter types per pre-filter, one of :class:`enums.FilterType`,
                 defaults to `FilterType.CONTAINS`
         :type filters_type: list
         :param overwrite: determines whether the pre-filters should be over-written or not, defaults to False
@@ -126,6 +127,34 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
 
             self.edit(options=options_to_set)
 
+    def get_prefilters(
+            self,
+            in_tuples: Optional[bool] = True,
+    ) -> Union[
+        List[Tuple[Text, Text, Text]],
+        Tuple[List[Text]]
+    ]:
+        """
+        Retrieve the pre-filters applied to the reference property.
+
+        :param in_tuples: (O) return a list of tuples, each tuple representing a pre-filter, if True (default).
+            If False, the pre-filters are returned as three lists of property model UUIDs, values and filter types.
+        :return: prefilters
+        """
+        check_type(in_tuples, bool, "in_tuples")
+
+        prefilter_string = self._options.get("prefilters", {}).get("property_value", "")
+        list_of_prefilters = prefilter_string.split(",") if prefilter_string else []
+        prefilters = [tuple(pf.split(":")) for pf in list_of_prefilters]
+
+        if not in_tuples:
+            property_model_ids = [pf[0] for pf in prefilters]
+            values = [pf[1] for pf in prefilters]
+            filter_types = [pf[2] for pf in prefilters]
+            prefilters = tuple([property_model_ids, values, filter_types])
+
+        return prefilters
+
     def set_excluded_propmodels(
             self,
             property_models: List[Union[Text, 'AnyProperty']],
@@ -152,6 +181,15 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         ))
 
         options_to_set = self._options
-        options_to_set['propmodels_excl'] = list_of_propmodels_excl
+        options_to_set['propmodels_excl'] = list(set(list_of_propmodels_excl))
 
         self.edit(options=options_to_set)
+
+    def get_excluded_propmodel_ids(self) -> List[Text]:
+        """
+        Retrieve a list of property model UUIDs which are not visible.
+
+        :return: list of UUIDs
+        :rtype list
+        """
+        return self._options.get("propmodels_excl", [])

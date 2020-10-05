@@ -7,7 +7,7 @@ from pykechain.models.property_reference import (
     UserReferencesProperty,
 )
 from pykechain.models.validators import RequiredFieldValidator
-from pykechain.utils import find
+from pykechain.utils import find, is_uuid
 from tests.classes import TestBetamax
 
 
@@ -530,6 +530,30 @@ class TestMultiReferenceProperty(TestBetamax):
             isinstance(self.ref_prop_model._validators[0], RequiredFieldValidator)
         )
 
+    def test_get_prefilters(self):
+        # setUp
+        self.ref_prop_model.set_prefilters(
+            property_models=[self.float_prop],
+            values=[15.13],
+            filters_type=[FilterType.GREATER_THAN_EQUAL],
+        )
+
+        prefilters = self.ref_prop_model.get_prefilters()
+
+        self.assertTrue(prefilters, msg="A prefilter should be set")
+
+        self.assertIsInstance(prefilters, list, msg="By default, prefilters should be a list of tuples")
+        self.assertTrue(all(isinstance(pf, tuple) for pf in prefilters), msg="Not every prefilter is a tuple")
+
+        prefilters = self.ref_prop_model.get_prefilters(in_tuples=False)
+
+        self.assertIsInstance(prefilters, tuple, msg="Prefilters should be a tuple of 3 lists")
+        self.assertEqual(3, len(prefilters), msg="Expected 3 lists")
+
+        property_model_ids, values, filters = prefilters
+
+        self.assertEqual(len(property_model_ids), len(values), len(filters))
+
     def test_set_excluded_propmodels_on_reference_property_the_wrong_way(self):
         # setUp
         bike_gears_property = self.part_model.property(name="Gears")
@@ -594,6 +618,16 @@ class TestMultiReferenceProperty(TestBetamax):
         self.assertTrue(
             spokes_property.id in self.ref_prop_model._options["propmodels_excl"]
         )
+
+    def test_get_excluded_propmodel_ids(self):
+        # setUp
+        self.ref_prop_model.set_excluded_propmodels(property_models=[self.float_prop])
+
+        excluded_propmodel_ids = self.ref_prop_model.get_excluded_propmodel_ids()
+
+        self.assertTrue(excluded_propmodel_ids, msg="Excluded propmodels should be set")
+        self.assertIsInstance(excluded_propmodel_ids, list)
+        self.assertTrue(all(is_uuid(pk) for pk in excluded_propmodel_ids))
 
     def test_retrieve_scope_id(self):
         frame = self.project.part(name="Frame")
