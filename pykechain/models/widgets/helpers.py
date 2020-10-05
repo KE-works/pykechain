@@ -1,6 +1,17 @@
 from typing import Dict, Optional, Union, Text, Tuple, List, Callable
 
-from pykechain.enums import Category, WidgetTitleValue
+from pykechain.enums import (
+    Category,
+    PropertyType,
+    WidgetTitleValue,
+    ActivityType,
+    CardWidgetLinkValue,
+    KEChainPages,
+    CardWidgetKEChainPageLink,
+    LinkTargets,
+    ImageFitValue,
+    CardWidgetImageValue,
+)
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_enum
 from pykechain.models.value_filter import PropertyValueFilter
@@ -106,6 +117,200 @@ def _set_title(
         "customTitle": title,
     })
     return meta, title
+
+
+def _set_description(
+        meta: Dict,
+        description: Optional[Union[Text, bool]] = None,
+        **kwargs
+) -> Dict:
+    """
+    Set the customDescription in the meta based on provided optional custom description or no description.
+
+    This will inject into the meta the `customDescription` and `showDescriptionValue` if the `description` is provided
+    as argument, otherwise it will inject 'no description'. It returns the meta definition of the widget.
+
+    :param meta: meta dictionary to augment
+    :type meta: dict
+    :param description: A description for the widget
+            * String value: use the description
+            * None or False: No description at all.
+    :type description: basestring or None or bool
+
+    :return: meta dictionary
+    :rtype: dict
+    :raises IllegalArgumentError: When description is neither str, bool or None.
+    """
+    if description is False or description is None:
+        show_description_value = "No description"
+        description = ""
+    elif isinstance(description, str):
+        show_description_value = "Custom description"
+    else:
+        raise IllegalArgumentError("When using the add_card_widget or add_service_card_widget, 'description' must be "
+                                   "'text_type' or None or False. Type is: {}".format(type(description)))
+    meta.update({
+        "showDescriptionValue": show_description_value,
+        "customDescription": description
+    })
+    return meta
+
+
+def _set_link(
+        meta: Dict,
+        link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
+        link_value: Optional[CardWidgetLinkValue] = None,
+        link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
+        **kwargs
+) -> Dict:
+    """
+    Set the link in the meta based on provided optional custom link.
+
+    This will inject into the meta the `customLink` and `showLinkValue` if the `link` is provided
+    as argument, otherwise it will inject 'no link'. It returns the meta definition of the widget.
+
+    :param meta: meta dictionary to augment
+    :type meta: dict
+    :param link: Where the card widget refers to. This can be one of the following:
+        * None (default): no link
+        * task: another KE-chain task, provided as an Activity object or its UUID
+        * String value: URL to a webpage
+        * KE-chain page: built-in KE-chain page of the current scope
+    :type link: basestring or None or bool or KEChainPages
+    :param link_value: Overwrite the default link value (obtained from the type of the link)
+    :type link_value: CardWidgetLinkValue
+    :param link_target: how the link is opened, one of the values of CardWidgetLinkTarget enum.
+    :type link_target: CardWidgetLinkTarget
+
+    :return: meta dictionary
+    :rtype: dict
+    :raises IllegalArgumentError: When illegal (combination) of arguments are set.
+    """
+    meta['linkTarget'] = check_enum(link_target, LinkTargets, 'link_target')
+
+    from pykechain.models import Activity
+    if isinstance(link, Activity):
+        if link.activity_type == ActivityType.TASK:
+            default_link_value = CardWidgetLinkValue.TASK_LINK
+        else:
+            default_link_value = CardWidgetLinkValue.TREE_VIEW
+
+        meta.update({
+            'customLink': link.id,
+            'showLinkValue': default_link_value,
+        })
+    elif isinstance(link, str) and is_uuid(link):
+        meta.update({
+            'customLink': link,
+            'showLinkValue': CardWidgetLinkValue.TASK_LINK,
+        })
+    elif link is None or link is False:
+        meta.update({
+            'customLink': None,
+            'showLinkValue': CardWidgetLinkValue.NO_LINK,
+        })
+    elif link in KEChainPages.values():
+        meta.update({
+            'customLink': "",
+            'showLinkValue': CardWidgetKEChainPageLink[link],
+        })
+    else:
+        meta.update({
+            'customLink': link,
+            'showLinkValue': CardWidgetLinkValue.EXTERNAL_LINK,
+        })
+
+    if link_value is not None:
+        meta.update({
+            'showLinkValue': check_enum(link_value, CardWidgetLinkValue, 'link_value'),
+        })
+
+    return meta
+
+
+def _set_image(
+        meta: Dict,
+        image: Optional['AttachmentProperty'] = None,
+        image_fit: Optional[Union[Text, ImageFitValue]] = ImageFitValue.CONTAIN,
+        **kwargs
+) -> Dict:
+    """
+    Set the image in the meta based on provided optional custom link.
+
+    This will inject into the meta the `customImage` and `showImageValue` if the `image` is provided
+    as argument, otherwise it will inject 'no link'. It returns the meta definition of the widget.
+
+    :param meta: meta dictionary to augment
+    :type meta: dict
+    :param image: AttachmentProperty providing the source of the image shown in the card widget.
+    :type image: AttachmentProperty or None
+    :param image_fit: how the image on the card widget is displayed
+    :type image_fit: ImageFitValue
+
+    :return: meta dictionary
+    :rtype: dict
+    :raises IllegalArgumentError: When illegal `image` type is used.
+    """
+    meta['imageFit'] = check_enum(image_fit, ImageFitValue, 'image_fit')
+
+    from pykechain.models import Property
+    if isinstance(image, Property) and image.type == PropertyType.ATTACHMENT_VALUE:
+        meta.update({
+            'customImage': "/api/v3/properties/{}/preview".format(image.id),
+            'showImageValue': CardWidgetImageValue.CUSTOM_IMAGE
+        })
+    elif image is None:
+        meta.update({
+            'customImage': None,
+            'showImageValue': CardWidgetImageValue.NO_IMAGE
+        })
+    else:
+        raise IllegalArgumentError("When using the add_card_widget or add_service_card_widget, 'description' must be "
+                                   "'text_type' or None or False. Type is: {}".format(type(image)))
+    return meta
+
+
+def _set_button_text(
+        meta: Dict,
+        service: 'Service',
+        custom_button_text: Optional[Text] = False,
+        **kwargs
+) -> Dict:
+    """
+    Set the button text in the meta based on provided optional custom_button_text.
+
+    This will inject into the meta the `customText` and `showButtonValue` if the `custom_button_text` is provided
+    as argument, otherwise it will inject the Service name if False and no text if None. It returns the meta definition
+    of the widget.
+
+    :param meta: meta dictionary to augment
+    :type meta: dict
+    :param service: The Service to which the button will be coupled and will be ran when the button is pressed.
+    :type service: :class:`Service` or UUID
+    :param custom_button_text: A custom text for the button linked to the script
+        * False (default): Script name
+        * String value: Custom title
+        * None: No title
+    :type custom_button_text: bool or basestring or None
+
+    :return: meta dictionary
+    :rtype: dict
+    :raises IllegalArgumentError: When illegal (combination) of arguments are set.
+    """
+    if custom_button_text is False:
+        show_button_value = "Default"
+        button_text = service.name
+    elif custom_button_text is None:
+        show_button_value = "No text"
+        button_text = ''
+    else:
+        show_button_value = "Custom text"
+        button_text = str(custom_button_text)
+    meta.update({
+        'showButtonValue': show_button_value,
+        'customText': button_text,
+    })
+    return meta
 
 
 def _initiate_meta(kwargs, activity, ignores=()):

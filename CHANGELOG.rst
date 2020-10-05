@@ -1,9 +1,15 @@
 Change Log
 ==========
 
+UNRELEASED (DDMMMYY)
+--------------------
+
+___________
+* :+1: Added the possibility to create a `ServiceCardWidget` through the `add_service_card_widget()` function.
 * :bug: Missing upper-case letter in `SideBarManager` caused a loss of the `override_sidebar` property.
 * :bug: `SidebarButton` class did not preserve all data from the scope options, losing display names in other languages. Editing of this values is now possible as well.
 * :+1: Added `refresh()` method on `SideBarManager` to reload the side-bar from KE-chain.
+* :+1: Changed the way edit functions work for `Part`, `Properties`, `Activity`, `Scope`, `Notification`, `Service`, `Team` and `Banner` classes. Passing inputs with value None in those functions will clear those attributes if possible. Not mentioning them will not overwrite their values.
 * :+1: Created `PropertyValueFilter` class to manage (pre)filters of `MultiReferenceProperty` and `FilteredGridWidget` objects.
 * :+1: Added `get_prefilters()` and `get_excluded_propmodel_ids()` methods to the `MultiReferenceProperty` class.
 
@@ -12,7 +18,6 @@ v3.8.2 (18SEP20)
 
 * :bug: The `descendants` of a `Part` with classification `CATALOG` returns both the Catalog and Product descendants. This broke the guaranteed parent-child relationship when populating the descendants in the `populate_descendants()` method of the `Part` class.
 * :bug: KeyError in `add_with_properties()` method of the `Part` class.
-
 * :+1: dependent versions for development: pytest (6.0.2)
 
 v3.8.1 (08SEP20)

@@ -862,7 +862,7 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve Service Executions", response=response)
 
-        return [ServiceExecution(service_exeuction, client=self) for service_exeuction in response.json()['results']]
+        return [ServiceExecution(service_execution, client=self) for service_execution in response.json()['results']]
 
     def service_execution(self, *args, **kwargs):
         """

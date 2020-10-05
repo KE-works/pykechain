@@ -12,6 +12,7 @@ from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.validators import PropertyValidator
 from pykechain.models.validators.validator_schemas import options_json_schema
 from pykechain.defaults import API_EXTRA_PARAMS
+from pykechain.utils import find, clean_empty_values, empty
 
 T = TypeVar("T")
 
@@ -367,22 +368,24 @@ class Property(BaseInScope, Property2):
 
     def edit(
             self,
-            name: Optional[Text] = None,
-            description: Optional[Text] = None,
-            unit: Optional[Text] = None,
-            options: Optional[Dict] = None,
+            name: Optional[Text] = empty,
+            description: Optional[Text] = empty,
+            unit: Optional[Text] = empty,
+            options: Optional[Dict] = empty,
             **kwargs
     ) -> None:
         """Edit the details of a property (model).
 
-        :param name: (optional) new name of the property to edit
-        :type name: basestring or None
-        :param description: (optional) new description of the property
-        :type description: basestring or None
-        :param unit: (optional) new unit of the property
-        :type unit: basestring or None
-        :param options: (options) new options of the property
-        :type options: dict
+        Setting an input to None will clear out the value (exception being name).
+
+        :param name: (optional) new name of the property to edit. Cannot be cleared.
+        :type name: basestring or None or Empty
+        :param description: (optional) new description of the property. Can be cleared.
+        :type description: basestring or None or Empty
+        :param unit: (optional) new unit of the property. Can be cleared.
+        :type unit: basestring or None or Empty
+        :param options: (options) new options of the property. Can be cleared.
+        :type options: dict or None or Empty
         :param kwargs: (optional) additional kwargs to be edited
         :return: None
         :raises APIError: When unable to edit the property
@@ -406,22 +409,24 @@ class Property(BaseInScope, Property2):
         >>> options['propmodels_excl'] = propmodels_excl
         >>> wheel_property_reference.edit(options=options)
 
+        Not mentioning an input parameter in the function will leave it unchanged. Setting a parameter as None will
+        clear its value (where that is possible). The example below will clear the description, but leave everything
+        else unchanged.
+
+        >>> wheel_property.edit(description=None)
+
         """
         update_dict = {
             'name': check_text(name, 'name') or self.name,
-            'description': check_text(description, 'description') or self.description,
+            'description': check_text(description, 'description') or str(),
+            'unit': check_text(unit, 'unit') or str(),
+            'value_options': check_type(options, dict, 'options') or dict()
         }
-
-        options = check_type(options, dict, 'options')
-        if options:
-            update_dict['value_options'] = options
-
-        unit = check_text(unit, 'unit')
-        if unit:
-            update_dict['unit'] = unit
 
         if kwargs:  # pragma: no cover
             update_dict.update(kwargs)
+
+        update_dict = clean_empty_values(update_dict=update_dict)
 
         if self.use_bulk_update:
             self._pend_update(data=update_dict)

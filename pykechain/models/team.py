@@ -7,6 +7,7 @@ from pykechain.exceptions import APIError
 from pykechain.models.user import User
 from .base import Base
 from .input_checks import check_text, check_type, check_enum, check_user
+from ..utils import Empty, empty, clean_empty_values
 
 
 class Team(Base):
@@ -37,10 +38,10 @@ class Team(Base):
 
     def edit(
             self,
-            name: Optional[Text] = None,
-            description: Optional[Text] = None,
-            options: Optional[Dict] = None,
-            is_hidden: Optional[bool] = None
+            name: Optional[Union[Text, Empty]] = empty,
+            description: Optional[Union[Text, Empty]] = empty,
+            options: Optional[Union[Dict, Empty]] = empty,
+            is_hidden: Optional[Union[bool, Empty]] = empty,
     ) -> None:
         """
         Edit the attributes of the Team.
@@ -59,10 +60,12 @@ class Team(Base):
         update_dict = {
             'id': self.id,
             'name': check_text(name, 'name') or self.name,
-            'description': check_text(description, 'description') or self.description,
-            'options': check_type(options, dict, 'options') or self.options,
-            'is_hidden': check_type(is_hidden, bool, 'is_hidden') or self.is_hidden,
+            'description': check_text(description, 'description'),
+            'options': check_type(options, dict, 'options'),
+            'is_hidden': check_type(is_hidden, bool, 'is_hidden'),
         }
+
+        update_dict = clean_empty_values(update_dict=update_dict)
 
         self._update(resource='team', team_id=self.id, update_dict=update_dict)
 

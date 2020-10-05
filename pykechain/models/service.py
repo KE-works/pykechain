@@ -2,13 +2,13 @@ import os
 from datetime import datetime
 
 import requests
-from typing import Text, Dict, Optional
+from typing import Text, Dict, Optional, Union
 
-from pykechain.enums import ServiceScriptUser, ServiceExecutionStatus
+from pykechain.enums import ServiceScriptUser, ServiceExecutionStatus, ServiceType, ServiceEnvironmentVersion
 from pykechain.exceptions import APIError
 from pykechain.models.base import Base, BaseInScope
 from pykechain.models.input_checks import check_text, check_enum, check_type
-from pykechain.utils import parse_datetime
+from pykechain.utils import parse_datetime, Empty, clean_empty_values, empty
 
 
 class Service(BaseInScope):
@@ -90,46 +90,66 @@ class Service(BaseInScope):
 
     def edit(
             self,
-            name: Optional[Text] = None,
-            description: Optional[Text] = None,
-            version: Optional[Text] = None,
-            run_as: Optional[ServiceScriptUser] = None,
-            trusted: Optional[bool] = False,
+            name: Optional[Union[Text, Empty]] = empty,
+            description: Optional[Union[Text, Empty]] = empty,
+            version: Optional[Union[Text, Empty]] = empty,
+            type: Optional[Union[ServiceType, Empty]] = empty,
+            environment_version: Optional[Union[ServiceEnvironmentVersion, Empty]] = empty,
+            run_as: Optional[Union[ServiceScriptUser, Empty]] = empty,
+            trusted: Optional[Union[bool, Empty]] = empty,
             **kwargs
     ) -> None:
         """
         Edit Service details.
 
+        Setting an input to None will clear out the value (exception being name).
+
         .. versionadded:: 1.13
 
-        :param name: (optional) name of the service to change.
-        :type name: basestring or None
-        :param description: (optional) description of the service.
-        :type description: basestring or None
-        :param version: (optional) version number of the service.
-        :type version: basestring or None
-        :param run_as: (optional) user to run the service as. Defaults to kenode user (bound to scope)
-        :type run_as: basestring or None
-        :param trusted: (optional) flag whether the service is trusted, default if False
-        :type trusted: bool
+        :param name: (optional) name of the service to change. Cannot be cleared.
+        :type name: basestring or None or Empty
+        :param description: (optional) description of the service. Can be cleared.
+        :type description: basestring or None or Empty
+        :param version: (optional) version number of the service. Can be cleared.
+        :type version: basestring or None or Empty
+        :param type: (optional) script type (Python or Notebook). Cannot be cleared.
+        :type type: ServiceType or None or Empty
+        :param environment_version: (optional) environment version of the service. Cannot be cleared.
+        :type environment_version: ServiceEnvironmentVersion or None or Empty
+        :param run_as: (optional) user to run the service as. Defaults to kenode user (bound to scope).
+                    Cannot be cleared.
+        :type run_as: ServiceScriptUser or None or Empty
+        :param trusted: (optional) flag whether the service is trusted, default if False. Cannot be cleared.
+        :type trusted: bool or None or Empty
         :raises IllegalArgumentError: when you provide an illegal argument.
         :raises APIError: if the service could not be updated.
+
+        Example
+        -------
+        >>> service.edit(name='Car service', version='203')
+
+        Not mentioning an input parameter in the function will leave it unchanged. Setting a parameter as None will
+        clear its value (where that is possible). The example below will clear the description and edit the name.
+
+        >>> service.edit(name="Plane service", description=None)
+
         """
         update_dict = {
             'id': self.id,
             'name': check_text(name, 'name') or self.name,
-            'description': check_text(description, 'description') or self.description,
-            'trusted': check_type(trusted, bool, 'trusted')
+            'description': check_text(description, 'description') or str(),
+            'trusted': check_type(trusted, bool, 'trusted') or self.trusted,
+            'script_type': check_enum(type, ServiceType, 'type') or self.type,
+            'env_version': check_enum(environment_version, ServiceEnvironmentVersion,
+                                      'environment version') or self.environment,
+            'run_as': check_enum(run_as, ServiceScriptUser, 'run_as') or self.run_as,
+            'script_version': check_text(version, 'version') or str()
         }
-        run_as = check_enum(run_as, ServiceScriptUser, 'run_as')
-        if run_as:
-            update_dict['run_as'] = run_as
-        version = check_text(version, 'version')
-        if version:
-            update_dict['script_version'] = version
 
         if kwargs:  # pragma: no cover
             update_dict.update(**kwargs)
+
+        update_dict = clean_empty_values(update_dict=update_dict)
 
         response = self._client._request('PUT', self._client._build_url('service', service_id=self.id),
                                          json=update_dict)
