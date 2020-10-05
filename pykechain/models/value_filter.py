@@ -35,7 +35,7 @@ class PropertyValueFilter(object):
             self.validate(part_model)
 
     def __repr__(self):
-        return "PropertyValueFilter {}: {}".format(self.type, self.value)
+        return "PropertyValueFilter {}: {} ({})".format(self.type, self.value, self.id)
 
     def format(self) -> Text:
         """Format PropertyValueFilter as a string."""
