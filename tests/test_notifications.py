@@ -230,3 +230,61 @@ class TestNotifications(_TestNotification):
             self.notification.edit(event='Update')
         with self.assertRaises(IllegalArgumentError):
             self.notification.edit(channel=[NotificationChannels.APP])
+
+    # test added due to #847 - providing no inputs overwrites values
+    def test_edit_notification_clear_values(self):
+        # setup
+        initial_subject = 'NEW SUBJECT'
+        initial_message = 'NEW MESSAGE'
+        initial_status = NotificationStatus.ARCHIVED
+        initial_recipients = [4]
+        initial_from_user = 4
+        initial_event = NotificationEvent.EXPORT_ACTIVITY_ASYNC
+        initial_channel = NotificationChannels.APP
+
+        self.notification.edit(
+            subject=initial_subject,
+            message=initial_message,
+            status=initial_status,
+            recipients=initial_recipients,
+            team=self.TEAM,
+            from_user=initial_from_user,
+            event=initial_event,
+            channel=initial_channel,
+        )
+
+        # Edit without mentioning values, everything should stay the same
+        new_subject = "AWESOME SUBJECT NEW"
+
+        self.notification.edit(
+            subject=new_subject
+        )
+
+        # testing
+        self.assertEqual(self.notification.subject, new_subject)
+        self.assertEqual(self.notification.message, initial_message)
+        self.assertEqual(self.notification.status, initial_status)
+        self.assertEqual(self.notification.recipient_user_ids, initial_recipients)
+        self.assertEqual(self.notification.from_user_id, initial_from_user)
+        self.assertEqual(self.notification.event, initial_event)
+        self.assertEqual(self.notification.channels, [initial_channel])
+
+        # Edit with clearing the values, name and status cannot be cleared
+        self.notification.edit(
+            subject=None,
+            message=None,
+            status=None,
+            recipients=None,
+            team=None,
+            from_user=None,
+            event=None,
+            channel=None,
+        )
+
+        self.assertEqual(self.notification.subject, new_subject)
+        self.assertEqual(self.notification.message, initial_message)
+        self.assertEqual(self.notification.status, initial_status)
+        self.assertEqual(self.notification.recipient_user_ids, list())
+        self.assertEqual(self.notification.from_user_id, None)
+        self.assertEqual(self.notification.event, initial_event)
+        self.assertEqual(self.notification.channels, [initial_channel])

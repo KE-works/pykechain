@@ -301,7 +301,7 @@ class TestActivityCloneParts(TestBetamax):
         )
         self.parent_instance = self.target_parent_model.instance()
 
-        # In tearDown, delete tasks first, then configured data modelsW
+        # In tearDown, delete tasks first, then configured data models
         self.bucket = [self.task, self.process, intermediate, self.target_parent_model]
 
     def tearDown(self):
@@ -527,6 +527,58 @@ class TestActivities(TestBetamax):
         subprocess.edit(assignees=[], status=ActivityStatus.OPEN)
         subtask.edit(assignees=[], status=ActivityStatus.OPEN)
 
+    # test added due to #847 - providing no inputs overwrites values
+    def test_edit_activity_clearing_values(self):
+        # setup
+        initial_name = 'Pykechain testing task'
+        initial_description = 'Task created to test editing.'
+        initial_start_date = datetime(2018, 12, 5, tzinfo=None)
+        initial_due_date = datetime(2018, 12, 8, tzinfo=None)
+        initial_tags = ['tag_one', 'tag_two']
+        initial_assignee = self.client.user(username="testuser")
+
+        self.task.edit(
+            name=initial_name,
+            description=initial_description,
+            start_date=initial_start_date,
+            assignees=[initial_assignee.username],
+            due_date=initial_due_date,
+            tags=initial_tags,
+        )
+
+        # Edit without mentioning values, everything should stay the same
+        new_name = 'New name for task'
+        self.task.edit(
+            name=new_name
+        )
+
+        # testing
+        self.assertEqual(self.task.name, new_name)
+        self.assertEqual(self.task.description, initial_description)
+        self.assertEqual(self.task.start_date.strftime("%Y/%m/%d, %H:%M:%S"),
+                         initial_start_date.strftime("%Y/%m/%d, %H:%M:%S"))
+        self.assertEqual(self.task.due_date.strftime("%Y/%m/%d, %H:%M:%S"),
+                         initial_due_date.strftime("%Y/%m/%d, %H:%M:%S"))
+        self.assertEqual(self.task.tags, initial_tags)
+
+        # Edit with clearing the values, name and status cannot be cleared
+        self.task.edit(
+            name=None,
+            description=None,
+            start_date=None,
+            due_date=None,
+            status=None,
+            assignees=None,
+            tags=None
+        )
+        self.task.refresh()
+        self.assertEqual(self.task.name, new_name)
+        self.assertEqual(self.task.description, str())
+        self.assertEqual(self.task.start_date, None)
+        self.assertEqual(self.task.due_date, None)
+        self.assertEqual(self.task.assignees, list())
+        self.assertEqual(self.task.tags, list())
+
     def test_retrieve_children_of_task_fails_for_task(self):
         with self.assertRaises(NotFoundError, msg="Tasks have no children!"):
             self.task.children()
@@ -718,6 +770,7 @@ class TestActivities(TestBetamax):
         assignees_list = self.task.assignees
 
         self.assertSetEqual(
+
             set(list_of_assignees_in_data), set([u.id for u in assignees_list])
         )
 
