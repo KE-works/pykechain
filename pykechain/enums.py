@@ -244,6 +244,7 @@ class WidgetNames(Enum):
     :cvar MULTICOLUMNWIDGET: multiColumnWidget
     :cvar PROGRESSWIDGET: progressWidget
     :cvar TASKSWIDGET: tasksWidget
+    :cvar SERVICECARDWIDGET: serviceCardWidget
     """
 
     SUPERGRIDWIDGET = 'superGridWidget'
@@ -261,6 +262,7 @@ class WidgetNames(Enum):
     CARDWIDGET = 'cardWidget'
     PROGRESSWIDGET = 'progressWidget'
     TASKSWIDGET = 'taskWidget'
+    SERVICECARDWIDGET = 'serviceCardWidget'
 
 
 class WidgetTypes(Enum):
@@ -285,6 +287,7 @@ class WidgetTypes(Enum):
     :cvar CARD: Card widget
     :cvar TASKS: Tasks widget
     :cvar WEATHER: Weather widget
+    :cvar SERVICECARD: Servicecard widget
     """
 
     UNDEFINED = 'UNDEFINED'
@@ -306,6 +309,7 @@ class WidgetTypes(Enum):
     CARD = 'CARD'
     TASKS = 'TASKS'
     WEATHER = 'WEATHER'
+    SERVICECARD = 'SERVICECARD'
 
 
 WidgetCompatibleTypes = {
@@ -323,7 +327,8 @@ WidgetCompatibleTypes = {
     WidgetNames.PROGRESSWIDGET: WidgetTypes.PROGRESS,
     WidgetNames.SIGNATUREWIDGET: WidgetTypes.SIGNATURE,
     WidgetNames.CARDWIDGET: WidgetTypes.CARD,
-    WidgetNames.TASKSWIDGET: WidgetTypes.TASKS
+    WidgetNames.TASKSWIDGET: WidgetTypes.TASKS,
+    WidgetNames.SERVICECARDWIDGET: WidgetTypes.SERVICECARD
 }
 
 default_metapanel_widget = dict(
