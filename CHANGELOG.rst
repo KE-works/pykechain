@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+vUNRELEASED
+___________
+* :+1: Added the possibility to create a `ServiceCardWidget` through the `add_service_card_widget()` function.
 * :bug: Missing upper-case letter in `SideBarManager` caused a loss of the `override_sidebar` property.
 * :bug: `SidebarButton` class did not preserve all data from the scope options, losing display names in other languages. Editing of this values is now possible as well.
 * :+1: Added `refresh()` method on `SideBarManager` to reload the side-bar from KE-chain.
@@ -10,7 +13,6 @@ v3.8.2 (18SEP20)
 
 * :bug: The `descendants` of a `Part` with classification `CATALOG` returns both the Catalog and Product descendants. This broke the guaranteed parent-child relationship when populating the descendants in the `populate_descendants()` method of the `Part` class.
 * :bug: KeyError in `add_with_properties()` method of the `Part` class.
-
 * :+1: dependent versions for development: pytest (6.0.2)
 
 v3.8.1 (08SEP20)
