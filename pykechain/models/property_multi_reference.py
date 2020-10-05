@@ -158,7 +158,13 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
 
         prefilter_string = self._options.get("prefilters", {}).get("property_value", "")
         list_of_prefilters = prefilter_string.split(",") if prefilter_string else []
-        prefilters = [PropertyValueFilter(*pf.split(":")) for pf in list_of_prefilters]
+
+        prefilters = list()
+        for prefilter in list_of_prefilters:
+            prefilter_raw = prefilter.split(":")
+            if len(prefilter_raw) == 1:
+                prefilter_raw = prefilter.split("%3A")
+            prefilters.append(PropertyValueFilter(*prefilter_raw))
 
         if as_lists:
             property_model_ids = [pf.id for pf in prefilters]
