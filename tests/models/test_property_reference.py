@@ -7,6 +7,7 @@ from pykechain.models.property_reference import (
     UserReferencesProperty,
 )
 from pykechain.models.validators import RequiredFieldValidator
+from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.utils import find, is_uuid
 from tests.classes import TestBetamax
 
@@ -297,19 +298,19 @@ class TestMultiReferenceProperty(TestBetamax):
 
     def test_set_prefilters_with_tuples(self):
         prefilters_set = [
-            (self.float_prop, 15.3, FilterType.GREATER_THAN_EQUAL),
-            (self.char_prop, "Al", FilterType.CONTAINS),
+            PropertyValueFilter(self.float_prop, 15.3, FilterType.GREATER_THAN_EQUAL),
+            PropertyValueFilter(self.char_prop, "Al", FilterType.CONTAINS),
         ]
 
         self.ref_prop_model.set_prefilters(prefilters=prefilters_set)
 
-        prefilters_get = self.ref_prop_model.get_prefilters(in_tuples=True)
+        prefilters_get = self.ref_prop_model.get_prefilters()
 
-        prop_id, value, filter_type = prefilters_get[0]
+        first_filter = prefilters_get[0]
 
-        self.assertEqual(self.float_prop.id, prop_id)
-        self.assertEqual("15.3", value)
-        self.assertEqual(FilterType.GREATER_THAN_EQUAL, filter_type)
+        self.assertEqual(self.float_prop.id, first_filter.id)
+        self.assertEqual("15.3", first_filter.value)
+        self.assertEqual(FilterType.GREATER_THAN_EQUAL, first_filter.type)
 
     def test_set_prefilters_on_reference_property_with_excluded_propmodels_and_validators(
         self,
@@ -558,13 +559,14 @@ class TestMultiReferenceProperty(TestBetamax):
 
         self.assertTrue(prefilters, msg="A prefilter should be set")
 
-        self.assertIsInstance(prefilters, list, msg="By default, prefilters should be a list of tuples")
-        self.assertTrue(all(isinstance(pf, tuple) for pf in prefilters), msg="Not every prefilter is a tuple")
+        self.assertIsInstance(prefilters, list, msg="By default, prefilters should be a list of tuples!")
+        self.assertTrue(all(isinstance(pf, PropertyValueFilter) for pf in prefilters),
+                        msg="Not every prefilter is a PropertyValueFilter object!")
 
-        prefilters = self.ref_prop_model.get_prefilters(in_tuples=False)
+        prefilters = self.ref_prop_model.get_prefilters(as_lists=True)
 
-        self.assertIsInstance(prefilters, tuple, msg="Prefilters should be a tuple of 3 lists")
-        self.assertEqual(3, len(prefilters), msg="Expected 3 lists")
+        self.assertIsInstance(prefilters, tuple, msg="Prefilters should be a tuple of 3 lists!")
+        self.assertEqual(3, len(prefilters), msg="Expected 3 lists!")
 
         property_model_ids, values, filters = prefilters
 

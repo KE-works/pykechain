@@ -1,8 +1,9 @@
 from typing import Dict, Optional, Union, Text, Tuple, List, Callable
 
-from pykechain.enums import Category, PropertyType, WidgetTitleValue
+from pykechain.enums import Category, WidgetTitleValue
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_enum
+from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.utils import is_uuid, snakecase, camelcase
 
 # these are the common keys to all kecards.
@@ -154,7 +155,7 @@ def _check_prefilters(part_model: 'Part', prefilters: Union[Dict, List]) -> List
     Check the format of the pre-filters.
 
     :param part_model: The part model of which the properties are filtered.
-    :param prefilters: Dictionary or list with prefilters.
+    :param prefilters: Dictionary or list with PropertyValueFilter objects.
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
     if isinstance(prefilters, dict):
@@ -165,43 +166,19 @@ def _check_prefilters(part_model: 'Part', prefilters: Union[Dict, List]) -> List
         if any(len(lst) != len(property_models) for lst in [values, filters_type]):
             raise IllegalArgumentError('The lists of "property_models", "values" and "filters_type" should be the '
                                        'same length.')
-        prefilters = list(zip(property_models, values, filters_type))
+        prefilters = [PropertyValueFilter(
+            property_model=pf[0],
+            value=pf[1],
+            filter_type=pf[2],
+            part_model=part_model,
+        ) for pf in zip(property_models, values, filters_type)]
 
-    list_of_prefilters = [_check_prefilter_tuple(part_model, pf) for pf in prefilters]
+    elif not all(isinstance(pf, PropertyValueFilter) for pf in prefilters):
+        raise IllegalArgumentError("`prefilters` must be a list of PropertyValueFilter objects.")
+
+    list_of_prefilters = [pf.format() for pf in prefilters]
 
     return list_of_prefilters
-
-
-def _check_prefilter_tuple(part_model: 'Part', prefilter: Tuple) -> Text:
-    """
-    Check a pre-filter tuple.
-
-    :param part_model: The part model of which the properties are filtered.
-    :param prefilter: one prefilter, consisting of a property model ID, value and filter type
-    :return:
-    """
-    from pykechain.models import Property
-
-    prop, value, filter_type = prefilter
-
-    if is_uuid(prop):
-        prop = part_model.property(prop)  # the finder can handle uuid, name or ref
-
-    if not isinstance(prop, Property) or prop.category != Category.MODEL:
-        raise IllegalArgumentError(
-            'Pre-filters can only be set on Property models, received "{}".'.format(prop))
-
-    elif part_model.id != prop.part_id:
-        raise IllegalArgumentError(
-            'Pre-filters can only be set on properties belonging to the selected Part model, found '
-            'selected Part model "{}" and Properties belonging to "{}"'.format(part_model.name,
-                                                                               prop.part.name))
-    else:
-        if prop.type == PropertyType.BOOLEAN_VALUE:
-            value = str(value).lower()
-        new_pre_filter = ':'.join([prop.id, str(value), filter_type])
-
-    return new_pre_filter
 
 
 def _check_excluded_propmodels(part_model: 'Part', property_models: List['AnyProperty']) -> List['AnyProperty']:

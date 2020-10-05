@@ -6,6 +6,7 @@ from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, ScopeWidget
     KEChainPages, CardWidgetKEChainPageLink, Alignment, ActivityType
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from pykechain.models.input_checks import check_enum, check_text, check_base, check_type, check_list_of_text
+from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
     _check_prefilters, _check_excluded_propmodels
@@ -318,36 +319,38 @@ class WidgetsManager(Iterable):
         )
         return widget
 
-    def add_filteredgrid_widget(self,
-                                part_model: Union['Part', Text],
-                                parent_instance: Optional[Union['Part', Text]] = None,
-                                title: Optional[Union[type(None), Text, bool]] = False,
-                                parent_widget: Optional[Union[Widget, Text]] = None,
-                                new_instance: Optional[bool] = True,
-                                edit: Optional[bool] = True,
-                                clone: Optional[bool] = True,
-                                export: Optional[bool] = True,
-                                upload: Optional[bool] = True,
-                                delete: Optional[bool] = False,
-                                incomplete_rows: Optional[bool] = True,
-                                emphasize_new_instance: Optional[bool] = True,
-                                emphasize_edit: Optional[bool] = False,
-                                emphasize_clone: Optional[bool] = False,
-                                emphasize_delete: Optional[bool] = False,
-                                sort_property: Optional[Union['AnyProperty', Text]] = None,
-                                sort_name: Optional[Union[bool, Text]] = False,
-                                sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
-                                show_name_column: Optional[bool] = True,
-                                show_images: Optional[bool] = False,
-                                collapse_filters: Optional[bool] = False,
-                                page_size: Optional[int] = 25,
-                                readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
-                                writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
-                                all_readable: Optional[bool] = False,
-                                all_writable: Optional[bool] = False,
-                                excluded_propmodels: Optional[List[Union['AnyProperty', Text]]] = None,
-                                prefilters: Optional[Dict] = None,
-                                **kwargs) -> Widget:
+    def add_filteredgrid_widget(
+        self,
+        part_model: Union['Part', Text],
+        parent_instance: Optional[Union['Part', Text]] = None,
+        title: Optional[Union[type(None), Text, bool]] = False,
+        parent_widget: Optional[Union[Widget, Text]] = None,
+        new_instance: Optional[bool] = True,
+        edit: Optional[bool] = True,
+        clone: Optional[bool] = True,
+        export: Optional[bool] = True,
+        upload: Optional[bool] = True,
+        delete: Optional[bool] = False,
+        incomplete_rows: Optional[bool] = True,
+        emphasize_new_instance: Optional[bool] = True,
+        emphasize_edit: Optional[bool] = False,
+        emphasize_clone: Optional[bool] = False,
+        emphasize_delete: Optional[bool] = False,
+        sort_property: Optional[Union['AnyProperty', Text]] = None,
+        sort_name: Optional[Union[bool, Text]] = False,
+        sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
+        show_name_column: Optional[bool] = True,
+        show_images: Optional[bool] = False,
+        collapse_filters: Optional[bool] = False,
+        page_size: Optional[int] = 25,
+        readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+        writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+        all_readable: Optional[bool] = False,
+        all_writable: Optional[bool] = False,
+        excluded_propmodels: Optional[List[Union['AnyProperty', Text]]] = None,
+        prefilters: Optional[Union[List[PropertyValueFilter], Dict]] = None,
+        **kwargs
+    ) -> Widget:
         """
         Add a KE-chain superGrid (e.g. basic table widget) to the customization.
 
@@ -412,7 +415,8 @@ class WidgetsManager(Iterable):
         :type all_writable: bool
         :param excluded_propmodels: (O) list of properties not shown in the filter pane
         :type excluded_propmodels: list
-        :param prefilters: (O) default filters active in the grid, defined as a dict with the following fields:
+        :param prefilters: (O) default filters active in the grid.
+            Defined as either a list of PropertyValueFilter objects or a dict with the following fields:
             * property_models: list of Properties, defined as Property objects or UUIDs
             * values: the pre-filter value for each property to filter on
             * filters_type: the types of filters, either `le`, `ge`, `icontains` or `exact`

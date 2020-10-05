@@ -1,3 +1,4 @@
+import warnings
 from typing import List, Optional, Text, Union, Any, Tuple
 
 from pykechain.enums import Category, FilterType
@@ -5,6 +6,7 @@ from pykechain.models.input_checks import check_type
 from pykechain.models.property2_multi_reference import MultiReferenceProperty2
 from pykechain.models.base_reference import _ReferencePropertyInScope
 from pykechain.models.part import Part
+from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets.helpers import _check_prefilters, _check_excluded_propmodels
 
 
@@ -81,7 +83,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
             property_models: List[Union[Text, 'AnyProperty']] = None,
             values: List[Any] = None,
             filters_type: List[FilterType] = None,
-            prefilters: List[Tuple] = None,
+            prefilters: List[PropertyValueFilter] = None,
             overwrite: Optional[bool] = False
     ) -> None:
         """
@@ -94,7 +96,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         :param filters_type: `list` of filter types per pre-filter, one of :class:`enums.FilterType`,
                 defaults to `FilterType.CONTAINS`
         :type filters_type: list
-        :param prefilters: `list` of tuples, each tuple representing a pre-filter.
+        :param prefilters: `list` of PropertyValueFilter objects
         :type prefilters: list
         :param overwrite: determines whether the pre-filters should be over-written or not, defaults to False
         :type overwrite: bool
@@ -114,6 +116,11 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
                 'values': values,
                 'filters_type': filters_type,
             }
+            warnings.warn(
+                "Prefilters must be provided as list of `PropertyValueFilter` objects. "
+                "Separate input lists will be deprecated in January 2021.",  # TODO Deprecate January 2021
+                PendingDeprecationWarning,
+            )
         else:
             new_prefilters = prefilters
 
@@ -135,28 +142,28 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
 
     def get_prefilters(
             self,
-            in_tuples: Optional[bool] = True,
+            as_lists: Optional[bool] = False,
     ) -> Union[
-        List[Tuple[Text, Text, FilterType]],
+        List[PropertyValueFilter],
         Tuple[List[Text]]
     ]:
         """
         Retrieve the pre-filters applied to the reference property.
 
-        :param in_tuples: (O) return a list of tuples, each tuple representing a pre-filter, if True (default).
-            If False, the pre-filters are returned as three lists of property model UUIDs, values and filter types.
+        :param as_lists: (O) (default = False)
+            If True, the pre-filters are returned as three lists of property model UUIDs, values and filter types.
         :return: prefilters
         """
-        check_type(in_tuples, bool, "in_tuples")
+        check_type(as_lists, bool, "as_lists")
 
         prefilter_string = self._options.get("prefilters", {}).get("property_value", "")
         list_of_prefilters = prefilter_string.split(",") if prefilter_string else []
-        prefilters = [tuple(pf.split(":")) for pf in list_of_prefilters]
+        prefilters = [PropertyValueFilter(*pf.split(":")) for pf in list_of_prefilters]
 
-        if not in_tuples:
-            property_model_ids = [pf[0] for pf in prefilters]
-            values = [pf[1] for pf in prefilters]
-            filter_types = [pf[2] for pf in prefilters]
+        if as_lists:
+            property_model_ids = [pf.id for pf in prefilters]
+            values = [pf.value for pf in prefilters]
+            filter_types = [pf.type for pf in prefilters]
             prefilters = tuple([property_model_ids, values, filter_types])
 
         return prefilters
