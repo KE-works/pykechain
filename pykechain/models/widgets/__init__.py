@@ -2,7 +2,7 @@
 from .widget import Widget  # noqa: F403,F401,D104
 from .widget_models import MetapanelWidget, PropertygridWidget, UndefinedWidget, FilteredgridWidget, SupergridWidget, \
     AttachmentviewerWidget, TasknavigationbarWidget, HtmlWidget, ServiceWidget, NotebookWidget, JsonWidget, \
-    MulticolumnWidget, ProgressWidget, ScopeWidget, ThirdpartyWidget, SignatureWidget, CardWidget
+    MulticolumnWidget, ProgressWidget, ScopeWidget, ThirdpartyWidget, SignatureWidget, CardWidget, ServicecardWidget
 from .widgets_manager import WidgetsManager
 
 __all__ = (
@@ -23,6 +23,7 @@ __all__ = (
     'SignatureWidget',
     'ScopeWidget',
     'CardWidget',
+    'ServicecardWidget',
     'ThirdpartyWidget',
     'WidgetsManager'
 )

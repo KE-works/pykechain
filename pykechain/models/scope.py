@@ -32,7 +32,7 @@ from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
-from pykechain.utils import parse_datetime, find
+from pykechain.utils import parse_datetime, find, Empty, clean_empty_values, empty
 
 
 class Scope(Base, TagsMixin, Scope2):
@@ -235,36 +235,41 @@ class Scope(Base, TagsMixin, Scope2):
         self.refresh(json=response.json().get("results")[0])
 
     def edit(
-        self,
-        name: Optional[Text] = None,
-        description: Optional[Text] = None,
-        start_date: Optional[datetime] = None,
-        due_date: Optional[datetime] = None,
-        status: Optional[Union[Text, ScopeStatus]] = None,
-        tags: Optional[List[Text]] = None,
-        team: Optional[Union[Team, Text]] = None,
-        options: Optional[Dict] = None,
+            self,
+            name: Optional[Union[Text, Empty]] = empty,
+            description: Optional[Union[Text, Empty]] = empty,
+            start_date: Optional[Union[datetime, Empty]] = empty,
+            due_date: Optional[Union[datetime, Empty]] = empty,
+            status: Optional[Union[Text, ScopeStatus, Empty]] = empty,
+            tags: Optional[Union[List[Text], Empty]] = empty,
+            team: Optional[Union[Team, Text, Empty]] = empty,
+            options: Optional[Union[Dict, Empty]] = empty,
     ) -> None:
-        """Edit the details of a scope.
+        """
+        Edit the details of a scope.
 
-        :param name: (optionally) edit the name of the scope
-        :type name: basestring or None
-        :param description: (optionally) edit the description of the scope
-        :type description: basestring or None
+        Setting an input to None will clear out the value (exception being name and status).
+
+        :param name: (optionally) edit the name of the scope. Name cannot be cleared.
+        :type name: basestring or None or Empty
+        :param description: (optionally) edit the description of the scope or clear it
+        :type description: basestring or None or Empty
         :param start_date: (optionally) edit the start date of the scope as a datetime object (UTC time/timezone
-                            aware preferred)
-        :type start_date: datetime or None
+                            aware preferred) or clear it
+        :type start_date: datetime or None or Empty
         :param due_date: (optionally) edit the due_date of the scope as a datetime object (UTC time/timzeone
-                            aware preferred)
-        :type due_date: datetime or None
-        :param status: (optionally) edit the status of the scope as a string based
-        :type status: basestring or None
-        :param tags: (optionally) replace the tags on a scope, which is a list of strings ["one","two","three"]
-        :type tags: list of basestring or None
-        :param team: (optionally) add the scope to a team
-        :type team: UUIDstring or None
+                            aware preferred) or clear it
+        :type due_date: datetime or None or Empty
+        :param status: (optionally) edit the status of the scope as a string based. Status cannot be cleared.
+        :type status: basestring or None or Empty
+        :param tags: (optionally) replace the tags on a scope, which is a list of strings ["one","two","three"] or
+                    clear them
+        :type tags: list of basestring or None or Empty
+        :param team: (optionally) add the scope to a team. Team cannot be cleared.
+        :type team: UUIDstring or None or Empty
         :param options: (optionally) custom options dictionary stored on the scope object
-        :type options: dict or None
+        :type options: dict or None or Empty
+
         :raises IllegalArgumentError: if the type of the inputs is not correct
         :raises APIError: if another Error occurs
         :warns: UserWarning - When a naive datetime is provided. Defaults to UTC.
@@ -298,24 +303,26 @@ class Scope(Base, TagsMixin, Scope2):
         >>> my_team = client.team(name='My own team')
         >>> project.edit(team=my_team)
 
+        Not mentioning an input parameter in the function will leave it unchanged. Setting a parameter as None will
+        clear its value (where that is possible). The example below will clear the due_date, but leave everything else
+        unchanged.
+
+        >>> project.edit(due_date=None)
+
         """
         update_dict = {
-            "id": self.id,
-            "name": check_text(name, "name") or self.name,
-            "text": check_text(description, "description") or self.description,
-            "start_date": check_datetime(start_date, "start_date"),
-            "due_date": check_datetime(due_date, "due_date"),
-            "status": check_enum(status, ScopeStatus, "status") or self.status,
+            'id': self.id,
+            'name': check_text(name, 'name') or self.name,
+            'text': check_text(description, 'description') or str(),
+            'start_date': check_datetime(start_date, 'start_date'),
+            'due_date': check_datetime(due_date, 'due_date'),
+            'status': check_enum(status, ScopeStatus, 'status') or self.status,
+            'tags': check_list_of_text(tags, 'tags', True) or list(),
+            'team_id': check_base(team, Team, 'team') or str(),
+            'scope_options': check_type(options, dict, 'options') or dict()
         }
-        team = check_base(team, Team, "team", method=self._client.team)
-        if team:
-            update_dict["team_id"] = team
-        tags = check_list_of_text(tags, "tags", True)
-        if tags is not None:
-            update_dict["tags"] = tags
-        scope_options = check_type(options, dict, "options")
-        if scope_options:
-            update_dict["scope_options"] = scope_options
+
+        update_dict = clean_empty_values(update_dict=update_dict)
 
         url = self._client._build_url("scope", scope_id=self.id)
 
@@ -332,7 +339,7 @@ class Scope(Base, TagsMixin, Scope2):
         self.refresh(json=response.json().get("results")[0])
 
         # TODO tags that are set are not in response
-        if tags is not None:
+        if tags is not None and not isinstance(tags, Empty):
             self._tags = tags
 
     def clone(self, **kwargs) -> 'Scope':

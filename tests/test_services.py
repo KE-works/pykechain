@@ -143,6 +143,67 @@ class TestServices(TestBetamax):
         # tearDown
         service.edit(name=name_before, description=description_before, version=version_before)
 
+    # test added due to #847 - providing no inputs overwrites values
+    def test_edit_service_clear_values(self):
+        # setup
+        initial_name = 'Service testing editing'
+        initial_description = 'Description test'
+        initial_version = '1.0'
+        initial_run_as = 'kenode'
+        initial_trusted = False
+        initial_type = ServiceType.NOTEBOOK
+        initial_env = ServiceEnvironmentVersion.PYTHON_3_7_NOTEBOOKS
+
+        self.service = self.project.create_service(name=initial_name)
+
+        self.service.edit(
+            name=initial_name,
+            description=initial_description,
+            version=initial_version,
+            type=initial_type,
+            environment_version=initial_env,
+            run_as=initial_run_as,
+            trusted=initial_trusted
+        )
+
+        # Edit without mentioning values, everything should stay the same
+        new_name = 'Changed service name'
+
+        self.service.edit(
+            name=new_name
+        )
+
+        # testing
+        self.assertEqual(self.service.name, new_name)
+        self.assertEqual(self.service.description, initial_description)
+        self.assertEqual(self.service.version, initial_version)
+        self.assertEqual(self.service.run_as, initial_run_as)
+        self.assertEqual(self.service.type, initial_type)
+        self.assertEqual(self.service.environment, initial_env)
+        self.assertEqual(self.service.trusted, initial_trusted)
+
+        # Edit with clearing the values, name and status cannot be cleared
+        self.service.edit(
+            name=None,
+            description=None,
+            version=None,
+            type=None,
+            environment_version=None,
+            run_as=None,
+            trusted=None
+        )
+
+        self.assertEqual(self.service.name, new_name)
+        self.assertEqual(self.service.description, str())
+        self.assertEqual(self.service.version, str())
+        self.assertEqual(self.service.type, initial_type)
+        self.assertEqual(self.service.environment, initial_env)
+        self.assertEqual(self.service.run_as, initial_run_as)
+        self.assertEqual(self.service.trusted, initial_trusted)
+
+        # teardown
+        self.service.delete()
+
     # test added in 3.1
     def test_retrieve_services_with_refs(self):
         # setup
@@ -271,6 +332,7 @@ class TestServiceExecutions(TestServiceSetup):
     def test_properties_of_service_execution(self):
         service_name = 'Service Gears - Successful'
         service = self.project.service(name=service_name)
+
         service_executions = self.project.service_executions(service=service.id, limit=1)
         self.assertTrue(service_executions)
 

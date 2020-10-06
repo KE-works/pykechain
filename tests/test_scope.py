@@ -297,6 +297,56 @@ class TestScopeEdit(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             self.scope.edit(tags='tags must be a list of strings')
 
+    # test added due to #847 - providing no inputs overwrites values
+    def test_edit_scope_clearing_values(self):
+        # setUp
+        initial_name = 'Pykechain testing (bike project)'
+        initial_description = 'Project used to build a Bike. Part-time job is to also test Pykechain.'
+        initial_start_date = datetime.datetime(2018, 12, 5, tzinfo=None)
+        initial_due_date = datetime.datetime(2018, 12, 8, tzinfo=None)
+        initial_tags = ['tag_one', 'tag_two']
+        team_one, team_two = self.client.teams()[:2]
+
+        self.scope.edit(
+            name=initial_name,
+            description=initial_description,
+            start_date=initial_start_date,
+            due_date=initial_due_date,
+            tags=initial_tags,
+            team=team_two
+        )
+
+        # Edit without mentioning values, everything should stay the same
+        new_name = 'Just Pykechain testing (bike project)'
+        self.scope.edit(
+            name=new_name
+        )
+
+        # testing
+        self.assertEqual(self.scope.name, new_name)
+        self.assertEqual(self.scope.description, initial_description)
+        self.assertEqual(self.scope.start_date.strftime("%Y/%m/%d, %H:%M:%S"),
+                         initial_start_date.strftime("%Y/%m/%d, %H:%M:%S"))
+        self.assertEqual(self.scope.due_date.strftime("%Y/%m/%d, %H:%M:%S"),
+                         initial_due_date.strftime("%Y/%m/%d, %H:%M:%S"))
+        self.assertEqual(self.scope.tags, initial_tags)
+
+        # Edit with clearing the values, name and status cannot be cleared
+        self.scope.edit(
+            name=None,
+            description=None,
+            start_date=None,
+            due_date=None,
+            status=None,
+            tags=None
+        )
+        self.scope.refresh()
+        self.assertEqual(self.scope.name, new_name)
+        self.assertEqual(self.scope.description, str())
+        self.assertEqual(self.scope.start_date, None)
+        self.assertEqual(self.scope.due_date, None)
+        self.assertEqual(self.scope.tags, list())
+
     # v2.3.3
     def test_edit_scope_team(self):
         """Test capabilities of changing team scope"""
