@@ -728,15 +728,18 @@ class WidgetsManager(Iterable):
         )
         return widget
 
-    def add_service_widget(self,
-                           service: 'Service',
-                           title: Optional[Union[type(None), bool, Text]] = False,
-                           custom_button_text: Optional[Text] = False,
-                           emphasize_run: Optional[bool] = True,
-                           download_log: Optional[bool] = False,
-                           show_log: Optional[bool] = True,
-                           parent_widget: Optional[Union[Widget, Text]] = None,
-                           **kwargs) -> Widget:
+    def add_service_widget(
+        self,
+        service: 'Service',
+        title: Optional[Union[type(None), bool, Text]] = False,
+        custom_button_text: Optional[Text] = False,
+        emphasize_run: Optional[bool] = True,
+        alignment: Optional[Alignment] = Alignment.LEFT,
+        download_log: Optional[bool] = False,
+        show_log: Optional[bool] = True,
+        parent_widget: Optional[Union[Widget, Text]] = None,
+        **kwargs
+    ) -> Widget:
         """
         Add a KE-chain Service (e.g. script widget) to the widget manager.
 
@@ -756,6 +759,8 @@ class WidgetsManager(Iterable):
         :type custom_button_text: bool or basestring or None
         :param emphasize_run: Emphasize the run button (default True)
         :type emphasize_run: bool
+        :param alignment: Horizontal alignment of the button
+        :type alignment: Alignment
         :param download_log: Include the possibility of downloading the log inside the activity (default False)
         :type download_log: bool
         :param show_log: Include the log message inside the activity (default True)
@@ -776,13 +781,14 @@ class WidgetsManager(Iterable):
         meta = _set_button_text(meta, custom_button_text=custom_button_text, service=service, **kwargs)
 
         from pykechain.models import Service
-        service_id = check_base(service, Service, 'service', method=self._client.service)
+        service_id = check_base(service, Service, "service", method=self._client.service)
 
         meta.update({
-            'serviceId': service_id,
-            'emphasizeButton': emphasize_run,
-            'showDownloadLog': check_type(download_log, bool, 'download_log'),
-            'showLog': True if download_log else check_type(show_log, bool, 'show_log'),
+            "serviceId": service_id,
+            "emphasizeButton": emphasize_run,
+            "showDownloadLog": check_type(download_log, bool, "download_log"),
+            "showLog": True if download_log else check_type(show_log, bool, "show_log"),
+            "alignment": check_enum(alignment, Alignment, "alignment"),
         })
 
         widget = self.create_widget(
@@ -1369,6 +1375,7 @@ class WidgetsManager(Iterable):
         parent_widget: Optional[Union[Widget, Text]] = None,
         custom_button_text: Optional[Text] = False,
         emphasize_run: Optional[bool] = True,
+        alignment: Optional[Alignment] = Alignment.LEFT,
         link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
         link_value: Optional[CardWidgetLinkValue] = None,
         link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
@@ -1400,6 +1407,8 @@ class WidgetsManager(Iterable):
         :type custom_button_text: bool or basestring or None
         :param emphasize_run: Emphasize the run button (default True)
         :type emphasize_run: bool
+        :param alignment: Horizontal alignment of the button
+        :type alignment: Alignment
         :param link: Where the card widget refers to. This can be one of the following:
             * None (default): no link
             * task: another KE-chain task, provided as an Activity object or its UUID
@@ -1429,6 +1438,7 @@ class WidgetsManager(Iterable):
         meta.update({
             'serviceId': service_id,
             'emphasizeButton': emphasize_run,
+            "alignment": check_enum(alignment, Alignment, "alignment"),
         })
 
         widget = self.create_widget(
