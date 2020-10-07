@@ -43,7 +43,7 @@ class PropertyValueFilter(object):
 
     def format(self) -> Text:
         """Format PropertyValueFilter as a string."""
-        return "{}:{}:{}".format(self.id, json.dumps(self.value), self.type)
+        return "{}:{}:{}".format(self.id, json.dumps(self.value)[1:-1], self.type)
 
     def validate(self, part_model: 'Part') -> None:
         """
