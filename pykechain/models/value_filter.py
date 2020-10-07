@@ -42,7 +42,7 @@ class PropertyValueFilter(object):
 
     def format(self) -> Text:
         """Format PropertyValueFilter as a string."""
-        return "{}:{}:{}".format(self.id, self.value, self.type)
+        return "{}:{}:{}".format(self.id, str(self.value).lower(), self.type)
 
     def validate(self, part_model: 'Part') -> None:
         """
@@ -65,11 +65,9 @@ class PropertyValueFilter(object):
             raise IllegalArgumentError(
                 'Property value filters can only be set on Property models, received "{}".'.format(prop))
         else:
-            if prop.type == PropertyType.BOOLEAN_VALUE:
-                self.value = str(self.value).lower()
-                if self.type != FilterType.EXACT:
-                    warnings.warn("A PropertyValueFilter on a boolean property should use filter type `{}`".format(
-                        FilterType.EXACT), Warning)
+            if prop.type == PropertyType.BOOLEAN_VALUE and self.type != FilterType.EXACT:
+                warnings.warn("A PropertyValueFilter on a boolean property should use filter type `{}`".format(
+                    FilterType.EXACT), Warning)
 
     @classmethod
     def parse_options(cls, options: Dict) -> List['PropertyValueFilter']:

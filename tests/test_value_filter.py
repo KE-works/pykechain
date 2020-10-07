@@ -66,7 +66,7 @@ class TestPropertyValueFilter(TestBetamax):
         with self.assertWarns(Warning, msg="Using any filter but EXACT should be warned against"):
             boolean_filter.validate(part_model=self.bike)
 
-        self.assertIsInstance(boolean_filter.value, str, msg="Boolean value should have been parsed to a string")
+        self.assertIn("false", boolean_filter.format(), msg="Boolean value should have been parsed to a string")
 
     def test_parse_options(self):
         for options in [
