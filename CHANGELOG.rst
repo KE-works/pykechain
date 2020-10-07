@@ -9,8 +9,11 @@ UNRELEASED (DDMMMYY)
 * :bug: `SidebarButton` class did not preserve all data from the scope options, losing display names in other languages. Editing of this values is now possible as well.
 * :+1: Added `refresh()` method on `SideBarManager` to reload the side-bar from KE-chain.
 * :+1: Changed the way edit functions work for `Part`, `Properties`, `Activity`, `Scope`, `Notification`, `Service`, `Team` and `Banner` classes. Passing inputs with value None in those functions will clear those attributes if possible. Not mentioning them will not overwrite their values.
+
+* :bug: Updating or setting of widget associations with only readable and/or writable properties is now supported.
 * :+1: Created `PropertyValueFilter` class to manage (pre)filters of `MultiReferenceProperty` and `FilteredGridWidget` objects.
 * :+1: Added `get_prefilters()` and `get_excluded_propmodel_ids()` methods to the `MultiReferenceProperty` class.
+* :+1: Added `alignment` keyword arguments for the creation of `ServiceCardWidget` and `ServiceWidget` classes.
 
 Backwards incompatible changes
 ------------------------------
