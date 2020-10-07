@@ -306,6 +306,7 @@ class TestMultiReferenceProperty(TestBetamax):
 
         prefilters_get = self.ref_prop_model.get_prefilters()
 
+        self.assertTrue(prefilters_get, msg="No prefilters returned")
         first_filter = prefilters_get[0]
 
         self.assertEqual(self.float_prop.id, first_filter.id)

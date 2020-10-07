@@ -70,7 +70,8 @@ class PropertyValueFilter(object):
         :return: list of PropertyValueFilter objects
         :rtype list
         """
-        prefilter_string_list = options.get("prefilters", {}).get("property_value", "").split(',')
+        prefilter_string = options.get("prefilters", {}).get("property_value")
+        prefilter_string_list = prefilter_string.split(",") if prefilter_string else []
 
         prefilters = list()
         for pf_string in prefilter_string_list:
@@ -79,6 +80,6 @@ class PropertyValueFilter(object):
             if len(prefilter_raw) == 1:   # FIXME encoding problem KE-chain
                 prefilter_raw = pf_string.split("%3A")
 
-            PropertyValueFilter(*prefilter_raw)
+            prefilters.append(PropertyValueFilter(*prefilter_raw))
 
         return prefilters
