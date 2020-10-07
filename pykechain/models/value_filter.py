@@ -42,7 +42,7 @@ class PropertyValueFilter(object):
 
     def format(self) -> Text:
         """Format PropertyValueFilter as a string."""
-        value = str(self.value).lower() if isinstance(self.value, str) else self.value
+        value = str(self.value).lower() if isinstance(self.value, bool) else self.value
         return "{}:{}:{}".format(self.id, value, self.type)
 
     def validate(self, part_model: 'Part') -> None:
