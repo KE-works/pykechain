@@ -129,7 +129,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         if overwrite:  # Remove pre-filters from the existing prefilters if they match the property model UUID
             provided_filter_ids = {pf.id for pf in verified_prefilters}
             list_of_prefilters = [pf for pf in list_of_prefilters if pf.id not in provided_filter_ids]
-            
+
         list_of_prefilters += verified_prefilters
 
         # Only update the options if there are any prefilters to be set, or if the original filters have to overwritten
@@ -158,7 +158,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         :return: prefilters
         """
         check_type(as_lists, bool, "as_lists")
-        
+
         prefilters = PropertyValueFilter.parse_options(options=self._options)
 
         if as_lists:

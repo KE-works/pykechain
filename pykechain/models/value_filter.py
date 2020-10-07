@@ -1,8 +1,9 @@
-from typing import Text, Union, Any, Optional, Dict, List
+import warnings
+from typing import Text, Union, Any, Dict, List
 
 from pykechain.enums import FilterType, Category, PropertyType
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
-from pykechain.models.input_checks import check_base, check_enum
+from pykechain.models.input_checks import check_base, check_enum, check_type
 
 
 class PropertyValueFilter(object):
@@ -33,6 +34,12 @@ class PropertyValueFilter(object):
     def __repr__(self):
         return "PropertyValueFilter {}: {} ({})".format(self.type, self.value, self.id)
 
+    def __eq__(self, other):
+        if isinstance(other, PropertyValueFilter):
+            return self.format() == other.format()
+        else:
+            return False
+
     def format(self) -> Text:
         """Format PropertyValueFilter as a string."""
         return "{}:{}:{}".format(self.id, self.value, self.type)
@@ -60,16 +67,21 @@ class PropertyValueFilter(object):
         else:
             if prop.type == PropertyType.BOOLEAN_VALUE:
                 self.value = str(self.value).lower()
+                if self.type != FilterType.EXACT:
+                    warnings.warn("A PropertyValueFilter on a boolean property should use filter type `{}`".format(
+                        FilterType.EXACT), Warning)
 
     @classmethod
     def parse_options(cls, options: Dict) -> List['PropertyValueFilter']:
         """
-        Convert the string-based definition of a property value filter to a PropertyValueFilter object
+        Convert the dict & string-based definition of a property value filter to a list of PropertyValueFilter objects.
 
         :param options: options dict from a multi-reference property or meta dict from a filtered grid widget.
         :return: list of PropertyValueFilter objects
         :rtype list
         """
+        check_type(options, dict, "options")
+
         prefilter_string = options.get("prefilters", {}).get("property_value")
         prefilter_string_list = prefilter_string.split(",") if prefilter_string else []
 

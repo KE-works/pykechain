@@ -356,57 +356,65 @@ class TestMultiReferenceProperty(TestBetamax):
             self.ref_prop_model._validators[0], RequiredFieldValidator
         )
 
-    def test_add_prefilters_to_reference_property(self):
-        # Set the initial prefilters
-        self.ref_prop_model.set_prefilters(
-            property_models=[self.float_prop],
-            values=[15.13],
-            filters_type=[FilterType.GREATER_THAN_EQUAL],
-        )
-        # Add others, checks whether the initial ones are remembered (overwrite = False)
-        self.ref_prop_model.set_prefilters(
-            property_models=[self.integer_prop],
-            values=[2],
-            filters_type=[FilterType.LOWER_THAN_EQUAL],
-            overwrite=False,
-        )
-
-        # testing
-        self.assertTrue("property_value" in self.ref_prop_model._options["prefilters"])
-        self.assertTrue(
-            "{}:{}:{}".format(self.float_prop.id, 15.13, FilterType.GREATER_THAN_EQUAL)
-            in self.ref_prop_model._options["prefilters"]["property_value"]
-        )
-        self.assertTrue(
-            "{}:{}:{}".format(self.integer_prop.id, 2, FilterType.LOWER_THAN_EQUAL)
-            in self.ref_prop_model._options["prefilters"]["property_value"]
-        )
-
-    def test_overwrite_prefilters_on_reference_property(self):
+    def test_clear_prefilters(self):
         # setUp
-        diameter_property = self.float_prop
-        spokes_property = self.integer_prop
+        prefilter_1 = PropertyValueFilter(
+            property_model=self.float_prop,
+            value=15.13,
+            filter_type=FilterType.GREATER_THAN_EQUAL,
+        )
+        self.ref_prop_model.set_prefilters(prefilters=[prefilter_1])
 
-        # Set the initial prefilters
-        self.ref_prop_model.set_prefilters(
-            property_models=[diameter_property],
-            values=[15.13],
-            filters_type=[FilterType.GREATER_THAN_EQUAL],
+        # Add filter for different property, see if the first one is removed (clear = True)
+        prefilter_2 = PropertyValueFilter(
+            property_model=self.integer_prop,
+            value=13,
+            filter_type=FilterType.EXACT,
         )
-        # Add others, see if the first ones are remembered (overwrite = False)
         self.ref_prop_model.set_prefilters(
-            property_models=[spokes_property],
-            values=[2],
-            filters_type=[FilterType.LOWER_THAN_EQUAL],
-            overwrite=True,
+            prefilters=[prefilter_2],
+            clear=True,
         )
+
+        self.ref_prop_model.refresh()
+        live_prefilters = self.ref_prop_model.get_prefilters()
 
         # testing
-        self.assertTrue("property_value" in self.ref_prop_model._options["prefilters"])
-        self.assertTrue(
-            "{}:{}:{}".format(spokes_property.id, 2, FilterType.LOWER_THAN_EQUAL)
-            == self.ref_prop_model._options["prefilters"]["property_value"]
+        self.assertTrue(live_prefilters, msg="Expected at least 1 prefilter")
+        self.assertEqual(1, len(live_prefilters), msg="Expected 1 prefilter")
+        self.assertEqual(prefilter_2, live_prefilters[0])
+
+    def test_overwrite_prefilters(self):
+        # setUp
+        prefilter_1 = PropertyValueFilter(
+            property_model=self.float_prop,
+            value=15.13,
+            filter_type=FilterType.GREATER_THAN_EQUAL,
         )
+        prefilter_2 = PropertyValueFilter(
+            property_model=self.integer_prop,
+            value=13,
+            filter_type=FilterType.EXACT,
+        )
+        prefilter_3 = PropertyValueFilter(
+            property_model=self.float_prop,
+            value=15.13,
+            filter_type=FilterType.EXACT,
+        )
+        # Set the initial filters
+        self.ref_prop_model.set_prefilters(prefilters=[prefilter_1, prefilter_2])
+
+        # Add another filter for the same property to see if the first one is removed (overwrite = True)
+        self.ref_prop_model.set_prefilters(prefilters=[prefilter_3], overwrite=True)
+
+        self.ref_prop_model.refresh()
+        live_prefilters = self.ref_prop_model.get_prefilters()
+
+        # testing
+        self.assertTrue(live_prefilters, msg="Expected at least 1 prefilter")
+        self.assertEqual(2, len(live_prefilters), msg="Expected 2 prefilters")
+        self.assertIn(prefilter_2, live_prefilters)
+        self.assertIn(prefilter_3, live_prefilters)
 
     def test_set_prefilters_on_reference_property_using_uuid(self):
         # setUp
