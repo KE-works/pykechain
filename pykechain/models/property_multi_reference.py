@@ -84,7 +84,8 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
             values: List[Any] = None,
             filters_type: List[FilterType] = None,
             prefilters: List[PropertyValueFilter] = None,
-            overwrite: Optional[bool] = False
+            overwrite: Optional[bool] = False,
+            clear: Optional[bool] = False,
     ) -> None:
         """
         Set the pre-filters on a `MultiReferenceProperty`.
@@ -98,44 +99,46 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         :type filters_type: list
         :param prefilters: `list` of PropertyValueFilter objects
         :type prefilters: list
-        :param overwrite: determines whether the pre-filters should be over-written or not, defaults to False
+        :param overwrite: whether existing pre-filters should be overwritten, if new filters to the same property
+            are provided as input. Does not remove non-conflicting prefilters. (default = False)
         :type overwrite: bool
+        :param clear: whether all existing pre-filters should be cleared. (default = False)
+        :type clear: bool
 
         :raises IllegalArgumentError: when the type of the input is provided incorrect.
         """
-        if not overwrite:
-            initial_prefilters = self._options.get('prefilters', {})
-            prefilter_string = initial_prefilters.get('property_value', '')
-            list_of_prefilters = prefilter_string.split(',') if prefilter_string else []
+        if not clear:
+            list_of_prefilters = PropertyValueFilter.parse_options(options=self._options)
         else:
             list_of_prefilters = list()
 
         if prefilters is None:
             new_prefilters = {
-                'property_models': property_models,
-                'values': values,
-                'filters_type': filters_type,
+                "property_models": property_models,
+                "values": values,
+                "filters_type": filters_type,
             }
-            warnings.warn(
-                "Prefilters must be provided as list of `PropertyValueFilter` objects. "
-                "Separate input lists will be deprecated in January 2021.",  # TODO Deprecate January 2021
-                PendingDeprecationWarning,
-            )
         else:
             new_prefilters = prefilters
 
-        list_of_prefilters.extend(_check_prefilters(
+        verified_prefilters = _check_prefilters(
             part_model=self.value[0],
             prefilters=new_prefilters,
-        ))
+        )
+
+        if overwrite:  # Remove pre-filters from the existing prefilters if they match the property model UUID
+            provided_filter_ids = {pf.id for pf in verified_prefilters}
+            list_of_prefilters = [pf for pf in list_of_prefilters if pf.id not in provided_filter_ids]
+            
+        list_of_prefilters += verified_prefilters
 
         # Only update the options if there are any prefilters to be set, or if the original filters have to overwritten
-        if list_of_prefilters or overwrite:
+        if list_of_prefilters or clear:
             options_to_set = self._options
 
             # Always create the entire prefilter json structure
-            options_to_set['prefilters'] = {
-                'property_value': ','.join(list_of_prefilters) if list_of_prefilters else ""
+            options_to_set["prefilters"] = {
+                "property_value": ",".join([pf.format() for pf in list_of_prefilters])
             }
 
             self.edit(options=options_to_set)
@@ -155,16 +158,8 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         :return: prefilters
         """
         check_type(as_lists, bool, "as_lists")
-
-        prefilter_string = self._options.get("prefilters", {}).get("property_value", "")
-        list_of_prefilters = prefilter_string.split(",") if prefilter_string else []
-
-        prefilters = list()
-        for prefilter in list_of_prefilters:
-            prefilter_raw = prefilter.split(":")
-            if len(prefilter_raw) == 1:
-                prefilter_raw = prefilter.split("%3A")
-            prefilters.append(PropertyValueFilter(*prefilter_raw))
+        
+        prefilters = PropertyValueFilter.parse_options(options=self._options)
 
         if as_lists:
             property_model_ids = [pf.id for pf in prefilters]

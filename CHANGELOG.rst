@@ -4,7 +4,6 @@ Change Log
 UNRELEASED (DDMMMYY)
 --------------------
 
-___________
 * :+1: Added the possibility to create a `ServiceCardWidget` through the `add_service_card_widget()` function.
 * :bug: Missing upper-case letter in `SideBarManager` caused a loss of the `override_sidebar` property.
 * :bug: `SidebarButton` class did not preserve all data from the scope options, losing display names in other languages. Editing of this values is now possible as well.
@@ -12,6 +11,14 @@ ___________
 * :+1: Changed the way edit functions work for `Part`, `Properties`, `Activity`, `Scope`, `Notification`, `Service`, `Team` and `Banner` classes. Passing inputs with value None in those functions will clear those attributes if possible. Not mentioning them will not overwrite their values.
 * :+1: Created `PropertyValueFilter` class to manage (pre)filters of `MultiReferenceProperty` and `FilteredGridWidget` objects.
 * :+1: Added `get_prefilters()` and `get_excluded_propmodel_ids()` methods to the `MultiReferenceProperty` class.
+
+Backwards incompatible changes
+------------------------------
+
+The following changes are not compatible with previous functionality:
+
+* The `overwrite` keyword argument in the `set_prefilters()` method of the `MultiReferenceProperty` now only overwrites prefilters if explicitly provided with new ones. Removing all prefilters is now supported with the keyword argument `clear`, also a boolean.
+* Specifying prefilters via separate lists of properties, values and filter types is planned to be deprecated in January 2021 in favor of using `PropertyValueFilter` objects as input.
 
 v3.8.2 (18SEP20)
 ----------------

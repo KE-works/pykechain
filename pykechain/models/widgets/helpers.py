@@ -1,3 +1,4 @@
+import warnings
 from typing import Dict, Optional, Union, Text, Tuple, List, Callable
 
 from pykechain.enums import (
@@ -355,12 +356,14 @@ def _initiate_meta(kwargs, activity, ignores=()):
     return meta
 
 
-def _check_prefilters(part_model: 'Part', prefilters: Union[Dict, List]) -> List[Text]:  # noqa: F821
+def _check_prefilters(part_model: 'Part', prefilters: Union[Dict, List]) -> List[PropertyValueFilter]:  # noqa: F821
     """
     Check the format of the pre-filters.
 
     :param part_model: The part model of which the properties are filtered.
     :param prefilters: Dictionary or list with PropertyValueFilter objects.
+    :returns: list of PropertyValueFilter objects
+    :rtype list
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
     if isinstance(prefilters, dict):
@@ -375,15 +378,20 @@ def _check_prefilters(part_model: 'Part', prefilters: Union[Dict, List]) -> List
             property_model=pf[0],
             value=pf[1],
             filter_type=pf[2],
-            part_model=part_model,
         ) for pf in zip(property_models, values, filters_type)]
+
+        warnings.warn(
+            "Prefilters must be provided as list of `PropertyValueFilter` objects. "
+            "Separate input lists will be deprecated in January 2021.",  # TODO Deprecate January 2021
+            PendingDeprecationWarning,
+        )
 
     elif not all(isinstance(pf, PropertyValueFilter) for pf in prefilters):
         raise IllegalArgumentError("`prefilters` must be a list of PropertyValueFilter objects.")
 
-    list_of_prefilters = [pf.format() for pf in prefilters]
+    [pf.validate(part_model=part_model) for pf in prefilters]
 
-    return list_of_prefilters
+    return prefilters
 
 
 def _check_excluded_propmodels(part_model: 'Part', property_models: List['AnyProperty']) -> List['AnyProperty']:

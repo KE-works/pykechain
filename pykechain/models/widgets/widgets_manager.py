@@ -437,8 +437,8 @@ class WidgetsManager(Iterable):
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         if prefilters:
             list_of_prefilters = _check_prefilters(part_model=part_model, prefilters=prefilters)
-            prefilters = {'property_value': ','.join(list_of_prefilters) if list_of_prefilters else {}}
-            meta['prefilters'] = prefilters
+            prefilters = {"property_value": ",".join([pf.format() for pf in list_of_prefilters])}
+            meta["prefilters"] = prefilters
         if excluded_propmodels:
             excluded_propmodels = _check_excluded_propmodels(part_model=part_model,
                                                              property_models=excluded_propmodels)

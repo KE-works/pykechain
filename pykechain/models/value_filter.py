@@ -1,4 +1,4 @@
-from typing import Text, Union, Any, Optional
+from typing import Text, Union, Any, Optional, Dict, List
 
 from pykechain.enums import FilterType, Category, PropertyType
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
@@ -19,7 +19,6 @@ class PropertyValueFilter(object):
         property_model: Union[Text, 'Property'],
         value: Any,
         filter_type: FilterType,
-        part_model: Optional['Part'] = None,
     ):
         """Create PropertyValueFilter instance."""
         from pykechain.models import Property
@@ -30,9 +29,6 @@ class PropertyValueFilter(object):
         self.id = property_model_id
         self.value = value
         self.type = filter_type
-
-        if part_model is not None:
-            self.validate(part_model)
 
     def __repr__(self):
         return "PropertyValueFilter {}: {} ({})".format(self.type, self.value, self.id)
@@ -64,3 +60,25 @@ class PropertyValueFilter(object):
         else:
             if prop.type == PropertyType.BOOLEAN_VALUE:
                 self.value = str(self.value).lower()
+
+    @classmethod
+    def parse_options(cls, options: Dict) -> List['PropertyValueFilter']:
+        """
+        Convert the string-based definition of a property value filter to a PropertyValueFilter object
+
+        :param options: options dict from a multi-reference property or meta dict from a filtered grid widget.
+        :return: list of PropertyValueFilter objects
+        :rtype list
+        """
+        prefilter_string_list = options.get("prefilters", {}).get("property_value", "").split(',')
+
+        prefilters = list()
+        for pf_string in prefilter_string_list:
+            prefilter_raw = pf_string.split(":")
+
+            if len(prefilter_raw) == 1:   # FIXME encoding problem KE-chain
+                prefilter_raw = pf_string.split("%3A")
+
+            PropertyValueFilter(*prefilter_raw)
+
+        return prefilters
