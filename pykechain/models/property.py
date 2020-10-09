@@ -12,7 +12,7 @@ from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.validators import PropertyValidator
 from pykechain.models.validators.validator_schemas import options_json_schema
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.utils import find, clean_empty_values, empty
+from pykechain.utils import clean_empty_values, empty
 
 T = TypeVar("T")
 
@@ -50,7 +50,7 @@ class Property(BaseInScope, Property2):
     """
 
     _use_bulk_update = False
-    _update_package = list()
+    _update_package = dict()
 
     def __init__(self, json, **kwargs):
         """Construct a Property from a json object."""
@@ -156,17 +156,18 @@ class Property(BaseInScope, Property2):
         :return: None
         """
         if cls.use_bulk_update:
-            client.update_properties(properties=cls._update_package)
-            cls._update_package = list()
+            properties = [dict(id=key, **values) for key, values in cls._update_package.items()]
+            client.update_properties(properties=properties)
+            cls._update_package = dict()
         cls.set_bulk_update(use_bulk_update)
 
     def _pend_update(self, data):
         """Store the value to be send at a later point in time using `update_values`."""
-        update_dict = find(self.__class__._update_package, lambda d: d["id"] == self.id)
-        if update_dict:
-            update_dict.update(data)
+        existing_data = self.__class__._update_package.get(self.id, None)
+        if existing_data:
+            existing_data.update(data)
         else:
-            self.__class__._update_package.append(dict(id=self.id, **data))
+            self.__class__._update_package[self.id] = data
 
     def _put_value(self, value):
         """Send the value to KE-chain."""
