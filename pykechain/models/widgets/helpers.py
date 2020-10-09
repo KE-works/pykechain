@@ -1,3 +1,4 @@
+import warnings
 from typing import Dict, Optional, Union, Text, Tuple, List, Callable
 
 from pykechain.enums import (
@@ -14,6 +15,7 @@ from pykechain.enums import (
 )
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_enum
+from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.utils import is_uuid, snakecase, camelcase
 
 # these are the common keys to all kecards.
@@ -354,57 +356,42 @@ def _initiate_meta(kwargs, activity, ignores=()):
     return meta
 
 
-def _check_prefilters(part_model: 'Part', prefilters: Dict) -> List[Text]:  # noqa: F821
+def _check_prefilters(part_model: 'Part', prefilters: Union[Dict, List]) -> List[PropertyValueFilter]:  # noqa: F821
     """
-    Check the pre-filters on a `FilteredGridWidget` or `MultiReferenceProperty.
-
-    The prefilters should comply to the prefilters schema as present in the backend.
-
-    ```
-    "prefilters": {
-        "type": ["object", "null"],
-        "additionalProperties": True,
-        "properties": {
-            "property_value": def_nullstring,
-            "name__icontains": def_nullstring
-        }
-    }
-    ```
+    Check the format of the pre-filters.
 
     :param part_model: The part model of which the properties are filtered.
-    :param prefilters: Dictionary with prefilters.
+    :param prefilters: Dictionary or list with PropertyValueFilter objects.
+    :returns: list of PropertyValueFilter objects
+    :rtype list
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
-    from pykechain.models import Property
+    if isinstance(prefilters, dict):
+        property_models = prefilters.get('property_models', [])  # type: List[Property, Text]  # noqa
+        values = prefilters.get('values', [])
+        filters_type = prefilters.get('filters_type', [])
 
-    property_models = prefilters.get('property_models', [])  # type: List[Property, Text]  # noqa
-    values = prefilters.get('values', [])
-    filters_type = prefilters.get('filters_type', [])
+        if any(len(lst) != len(property_models) for lst in [values, filters_type]):
+            raise IllegalArgumentError('The lists of "property_models", "values" and "filters_type" should be the '
+                                       'same length.')
+        prefilters = [PropertyValueFilter(
+            property_model=pf[0],
+            value=pf[1],
+            filter_type=pf[2],
+        ) for pf in zip(property_models, values, filters_type)]
 
-    if any(len(lst) != len(property_models) for lst in [values, filters_type]):
-        raise IllegalArgumentError('The lists of "property_models", "values" and "filters_type" should be the '
-                                   'same length.')
+        warnings.warn(
+            "Prefilters must be provided as list of `PropertyValueFilter` objects. "
+            "Separate input lists will be deprecated in January 2021.",  # TODO Deprecate January 2021
+            PendingDeprecationWarning,
+        )
 
-    list_of_prefilters = []
-    for prop, value, filter_type in zip(property_models, values, filters_type):
-        if is_uuid(prop):
-            prop = part_model.property(prop)  # the finder can handle uuid, name or ref
+    elif not all(isinstance(pf, PropertyValueFilter) for pf in prefilters):
+        raise IllegalArgumentError("`prefilters` must be a list of PropertyValueFilter objects.")
 
-        if not isinstance(prop, Property) or prop.category != Category.MODEL:
-            raise IllegalArgumentError(
-                'Pre-filters can only be set on Property models, received "{}".'.format(prop))
+    [pf.validate(part_model=part_model) for pf in prefilters]
 
-        elif part_model.id != prop.part_id:
-            raise IllegalArgumentError(
-                'Pre-filters can only be set on properties belonging to the selected Part model, found '
-                'selected Part model "{}" and Properties belonging to "{}"'.format(part_model.name,
-                                                                                   prop.part.name))
-        else:
-            if prop.type == PropertyType.BOOLEAN_VALUE:
-                value = str(value).lower()
-            new_pre_filter = ':'.join([prop.id, str(value), filter_type])
-            list_of_prefilters.append(new_pre_filter)
-    return list_of_prefilters
+    return prefilters
 
 
 def _check_excluded_propmodels(part_model: 'Part', property_models: List['AnyProperty']) -> List['AnyProperty']:

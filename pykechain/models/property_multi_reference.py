@@ -1,9 +1,12 @@
-from typing import List, Optional, Text, Union, Any
+import warnings
+from typing import List, Optional, Text, Union, Any, Tuple
 
 from pykechain.enums import Category, FilterType
+from pykechain.models.input_checks import check_type
 from pykechain.models.property2_multi_reference import MultiReferenceProperty2
 from pykechain.models.base_reference import _ReferencePropertyInScope
 from pykechain.models.part import Part
+from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets.helpers import _check_prefilters, _check_excluded_propmodels
 
 
@@ -77,10 +80,12 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
 
     def set_prefilters(
             self,
-            property_models: List[Union[Text, 'AnyProperty']],
-            values: List[Any],
-            filters_type: List[FilterType],
-            overwrite: Optional[bool] = False
+            property_models: List[Union[Text, 'AnyProperty']] = None,
+            values: List[Any] = None,
+            filters_type: List[FilterType] = None,
+            prefilters: List[PropertyValueFilter] = None,
+            overwrite: Optional[bool] = False,
+            clear: Optional[bool] = False,
     ) -> None:
         """
         Set the pre-filters on a `MultiReferenceProperty`.
@@ -89,42 +94,86 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         :type property_models: list
         :param values: `list` of values to pre-filter on, value has to match the property type.
         :type values: list
-        :param filters_type: `list` of filter types per pre-fitler, one of :class:`enums.FilterType`,
+        :param filters_type: `list` of filter types per pre-filter, one of :class:`enums.FilterType`,
                 defaults to `FilterType.CONTAINS`
         :type filters_type: list
-        :param overwrite: determines whether the pre-filters should be over-written or not, defaults to False
+        :param prefilters: `list` of PropertyValueFilter objects
+        :type prefilters: list
+        :param overwrite: whether existing pre-filters should be overwritten, if new filters to the same property
+            are provided as input. Does not remove non-conflicting prefilters. (default = False)
         :type overwrite: bool
+        :param clear: whether all existing pre-filters should be cleared. (default = False)
+        :type clear: bool
 
         :raises IllegalArgumentError: when the type of the input is provided incorrect.
         """
-        if not overwrite:
-            initial_prefilters = self._options.get('prefilters', {})
-            prefilter_string = initial_prefilters.get('property_value', '')
-            list_of_prefilters = prefilter_string.split(',') if prefilter_string else []
+        if not clear:
+            list_of_prefilters = PropertyValueFilter.parse_options(options=self._options)
         else:
             list_of_prefilters = list()
 
-        new_prefilters = {
-            'property_models': property_models,
-            'values': values,
-            'filters_type': filters_type,
-        }
+        if prefilters is None:
+            new_prefilters = {
+                "property_models": property_models,
+                "values": values,
+                "filters_type": filters_type,
+            }
+        else:
+            new_prefilters = prefilters
 
-        list_of_prefilters.extend(_check_prefilters(
+        verified_prefilters = _check_prefilters(
             part_model=self.value[0],
             prefilters=new_prefilters,
-        ))
+        )
+
+        if overwrite:  # Remove pre-filters from the existing prefilters if they match the property model UUID
+            provided_filter_ids = {pf.id for pf in verified_prefilters}
+            list_of_prefilters = [pf for pf in list_of_prefilters if pf.id not in provided_filter_ids]
+
+        list_of_prefilters += verified_prefilters
 
         # Only update the options if there are any prefilters to be set, or if the original filters have to overwritten
-        if list_of_prefilters or overwrite:
+        if list_of_prefilters or clear:
             options_to_set = self._options
 
             # Always create the entire prefilter json structure
-            options_to_set['prefilters'] = {
-                'property_value': ','.join(list_of_prefilters) if list_of_prefilters else ""
+            options_to_set["prefilters"] = {
+                "property_value": ",".join([pf.format() for pf in list_of_prefilters])
             }
 
             self.edit(options=options_to_set)
+
+    def get_prefilters(
+            self,
+            as_lists: Optional[bool] = False,
+    ) -> Union[
+        List[PropertyValueFilter],
+        Tuple[List[Text]]
+    ]:
+        """
+        Retrieve the pre-filters applied to the reference property.
+
+        :param as_lists: (O) (default = False)
+            If True, the pre-filters are returned as three lists of property model UUIDs, values and filter types.
+        :return: prefilters
+        """
+        check_type(as_lists, bool, "as_lists")
+
+        prefilters = PropertyValueFilter.parse_options(options=self._options)
+
+        if as_lists:
+            property_model_ids = [pf.id for pf in prefilters]
+            values = [pf.value for pf in prefilters]
+            filter_types = [pf.type for pf in prefilters]
+            prefilters = tuple([property_model_ids, values, filter_types])
+
+            warnings.warn(
+                "Prefilters will be provided as list of `PropertyValueFilter` objects. "
+                "Separate lists will be deprecated in January 2021.",  # TODO Deprecate January 2021
+                PendingDeprecationWarning,
+            )
+
+        return prefilters
 
     def set_excluded_propmodels(
             self,
@@ -152,6 +201,15 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         ))
 
         options_to_set = self._options
-        options_to_set['propmodels_excl'] = list_of_propmodels_excl
+        options_to_set['propmodels_excl'] = list(set(list_of_propmodels_excl))
 
         self.edit(options=options_to_set)
+
+    def get_excluded_propmodel_ids(self) -> List[Text]:
+        """
+        Retrieve a list of property model UUIDs which are not visible.
+
+        :return: list of UUIDs
+        :rtype list
+        """
+        return self._options.get("propmodels_excl", [])
