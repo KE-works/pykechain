@@ -483,10 +483,15 @@ class Client(object):
 
         """
         request_params = {
-            'name': check_text(text=name, key='name'),
-            'id': check_uuid(pk),
             'status': check_enum(status, ScopeStatus, 'status'),
         }
+        name = check_text(text=name, key='name')
+        pk = check_uuid(pk)
+
+        if name:
+            request_params["name"] = name
+        if pk:
+            request_params["id"] = pk
 
         request_params.update(API_EXTRA_PARAMS['scope'])
         url = self._build_url('scopes')
@@ -646,12 +651,12 @@ class Client(object):
             id=check_uuid(pk),
             name=check_text(text=name, key='name'),
             category=check_enum(category, Category, 'category'),
-            activity_id=activity,
-            widget_id=widget,
+            activity_id=check_base(activity, Activity, "activity"),
+            widget_id=check_base(widget, Widget, "widget"),
             limit=batch,
-            scope_id=scope_id,
-            parent_id=parent,
-            model_id=model.id if model else None,
+            scope_id=check_uuid(scope_id),
+            parent_id=check_base(parent, Part, "parent"),
+            model_id=check_base(model, Part, "model"),
         )
         url = self._build_url('parts')
         request_params.update(API_EXTRA_PARAMS['parts'])
@@ -2481,10 +2486,12 @@ class Client(object):
 
             data = dict(
                 id=widget_id,
-                readable_model_properties_ids=readable_model_ids,
-                writable_model_properties_ids=writable_model_ids,
             )
 
+            if readable_model_ids:
+                data.update(dict(readable_model_properties_ids=readable_model_ids))
+            if writable_model_ids:
+                data.update(dict(writable_model_properties_ids=writable_model_ids))
             if part_instance_id:
                 data.update(dict(part_instance_id=part_instance_id))
             if parent_part_instance_id:
@@ -2587,10 +2594,12 @@ class Client(object):
 
             data = dict(
                 id=widget_id,
-                readable_model_properties_ids=readable_model_ids,
-                writable_model_properties_ids=writable_model_ids,
             )
 
+            if readable_model_ids:
+                data.update(dict(readable_model_properties_ids=readable_model_ids))
+            if writable_model_ids:
+                data.update(dict(writable_model_properties_ids=writable_model_ids))
             if part_instance_id:
                 data.update(dict(part_instance_id=part_instance_id))
             if parent_part_instance_id:

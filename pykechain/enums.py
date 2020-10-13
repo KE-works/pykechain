@@ -536,7 +536,7 @@ class SortTable(Enum):
 
 
 class Alignment(Enum):
-    """The acceptable alignment options for attachment viewer and navigation bar widgets.
+    """The acceptable alignment options for attachment viewer, navigation bar widgets and service widgets.
 
     :cvar LEFT: Aligned to the left
     :cvar CENTER: Aligned to the center

@@ -1020,11 +1020,12 @@ class Part(TreeObject, Part2):
 
         if Property._use_bulk_update and not (name or kwargs):
             # Use the bulk-update for properties, but only if only properties are being updated, nothing more
-            Property._update_package.extend(properties_fvalues)
 
             value_dict = dict()
             for update in properties_fvalues:
-                value_dict[update["id"]] = update.get("value")
+                pk = update.pop("id")
+                value_dict[pk] = update.get("value")
+                Property._update_package[pk] = update
 
             for prop in self.properties:
                 if prop.id in value_dict:

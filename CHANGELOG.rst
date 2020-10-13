@@ -4,13 +4,25 @@ Change Log
 UNRELEASED (DDMMMYY)
 --------------------
 
-___________
 * :+1: Added the possibility to create a `ServiceCardWidget` through the `add_service_card_widget()` function.
 * :bug: Missing upper-case letter in `SideBarManager` caused a loss of the `override_sidebar` property.
 * :bug: `SidebarButton` class did not preserve all data from the scope options, losing display names in other languages. Editing of this values is now possible as well.
 * :+1: Added `refresh()` method on `SideBarManager` to reload the side-bar from KE-chain.
 * :star: Added the option to manage supervisor members on a scope for KE-chain 3 backends that support the supervisor member users. That is possble for releases of KE-chain 3 starting from June 2020. (version 3.7). #772
 * :+1: Changed the way edit functions work for `Part`, `Properties`, `Activity`, `Scope`, `Notification`, `Service`, `Team` and `Banner` classes. Passing inputs with value None in those functions will clear those attributes if possible. Not mentioning them will not overwrite their values.
+
+* :bug: Updating or setting of widget associations with only readable and/or writable properties is now supported.
+* :+1: Created `PropertyValueFilter` class to manage (pre)filters of `MultiReferenceProperty` and `FilteredGridWidget` objects.
+* :+1: Added `get_prefilters()` and `get_excluded_propmodel_ids()` methods to the `MultiReferenceProperty` class.
+* :+1: Added `alignment` keyword arguments for the creation of `ServiceCardWidget` and `ServiceWidget` classes.
+
+Backwards incompatible changes
+------------------------------
+
+The following changes are not compatible with previous functionality:
+
+* The `overwrite` keyword argument in the `set_prefilters()` method of the `MultiReferenceProperty` now only overwrites prefilters if explicitly provided with new ones. Removing all prefilters is now supported with the keyword argument `clear`, also a boolean.
+* Specifying prefilters via separate lists of properties, values and filter types is planned to be deprecated in January 2021 in favor of using `PropertyValueFilter` objects as input.
 
 v3.8.2 (18SEP20)
 ----------------
@@ -22,13 +34,13 @@ v3.8.2 (18SEP20)
 v3.8.1 (08SEP20)
 ----------------
 
-* :bug: Added `title_visible` property to `Widget` class for the widget's title shown in KE-chain, deprecating the `default_title` mechanism when creating widgets. The default title of a widget is not dependent on front-end and is not stored in the widget.
+* :bug: Added `title_visible` property to `Widget` class for the widget's title shown in KE-chain, deprecating the `default_title` mechanism when creating widgets. The default title of a widget is dependent on front-end and is not stored in the widget.
 * :bug: Set and Update of widget associations now handles optional `part_instance_id` and/or `parent_part_instance_id` inputs.
 * :bug: `WidgetsManager` and `PartSet` no longer implement `Iterable` as an "iterator", making it possible to loop over the Widgets/Parts multiple times.
 * :bug: `add_signature_widget()` method of the `WidgetManager` class now creates an editable signature widget by default. The new input argument `editable` can be set to False to create a viewable widget.
 
 * :+1: Added `update_activities` method to `Client` to update activities in bulk.
-* :+1: `WidgetsManager` is now stored in its `Activity` object for lazy retrieval, while the `WidgetsManager` no explicitly stores a reference to its `Activity`.
+* :+1: `WidgetsManager` is now stored in its `Activity` object for lazy retrieval, while the `WidgetsManager` now explicitly stores a reference to its `Activity`.
 * :+1: Available `Part` options of a pre-filtered multi-reference properties are now filtered when using the `choices()` method on the `MultiReferenceProperty`.
 * :+1: Added `model_id` attribute to `Part` class.
 * :+1: Added `count_instances()` method to the `Part` class, to retrieve the number of Part instances of a Part model.

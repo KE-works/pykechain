@@ -6,6 +6,7 @@ from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, ScopeWidget
     KEChainPages, Alignment
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from pykechain.models.input_checks import check_enum, check_text, check_base, check_type, check_list_of_text
+from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
     _check_prefilters, _check_excluded_propmodels, _set_description, _set_link, _set_image, _set_button_text
@@ -318,36 +319,38 @@ class WidgetsManager(Iterable):
         )
         return widget
 
-    def add_filteredgrid_widget(self,
-                                part_model: Union['Part', Text],
-                                parent_instance: Optional[Union['Part', Text]] = None,
-                                title: Optional[Union[type(None), Text, bool]] = False,
-                                parent_widget: Optional[Union[Widget, Text]] = None,
-                                new_instance: Optional[bool] = True,
-                                edit: Optional[bool] = True,
-                                clone: Optional[bool] = True,
-                                export: Optional[bool] = True,
-                                upload: Optional[bool] = True,
-                                delete: Optional[bool] = False,
-                                incomplete_rows: Optional[bool] = True,
-                                emphasize_new_instance: Optional[bool] = True,
-                                emphasize_edit: Optional[bool] = False,
-                                emphasize_clone: Optional[bool] = False,
-                                emphasize_delete: Optional[bool] = False,
-                                sort_property: Optional[Union['AnyProperty', Text]] = None,
-                                sort_name: Optional[Union[bool, Text]] = False,
-                                sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
-                                show_name_column: Optional[bool] = True,
-                                show_images: Optional[bool] = False,
-                                collapse_filters: Optional[bool] = False,
-                                page_size: Optional[int] = 25,
-                                readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
-                                writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
-                                all_readable: Optional[bool] = False,
-                                all_writable: Optional[bool] = False,
-                                excluded_propmodels: Optional[List[Union['AnyProperty', Text]]] = None,
-                                prefilters: Optional[Dict] = None,
-                                **kwargs) -> Widget:
+    def add_filteredgrid_widget(
+        self,
+        part_model: Union['Part', Text],
+        parent_instance: Optional[Union['Part', Text]] = None,
+        title: Optional[Union[type(None), Text, bool]] = False,
+        parent_widget: Optional[Union[Widget, Text]] = None,
+        new_instance: Optional[bool] = True,
+        edit: Optional[bool] = True,
+        clone: Optional[bool] = True,
+        export: Optional[bool] = True,
+        upload: Optional[bool] = True,
+        delete: Optional[bool] = False,
+        incomplete_rows: Optional[bool] = True,
+        emphasize_new_instance: Optional[bool] = True,
+        emphasize_edit: Optional[bool] = False,
+        emphasize_clone: Optional[bool] = False,
+        emphasize_delete: Optional[bool] = False,
+        sort_property: Optional[Union['AnyProperty', Text]] = None,
+        sort_name: Optional[Union[bool, Text]] = False,
+        sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
+        show_name_column: Optional[bool] = True,
+        show_images: Optional[bool] = False,
+        collapse_filters: Optional[bool] = False,
+        page_size: Optional[int] = 25,
+        readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+        writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+        all_readable: Optional[bool] = False,
+        all_writable: Optional[bool] = False,
+        excluded_propmodels: Optional[List[Union['AnyProperty', Text]]] = None,
+        prefilters: Optional[Union[List[PropertyValueFilter], Dict]] = None,
+        **kwargs
+    ) -> Widget:
         """
         Add a KE-chain superGrid (e.g. basic table widget) to the customization.
 
@@ -412,7 +415,8 @@ class WidgetsManager(Iterable):
         :type all_writable: bool
         :param excluded_propmodels: (O) list of properties not shown in the filter pane
         :type excluded_propmodels: list
-        :param prefilters: (O) default filters active in the grid, defined as a dict with the following fields:
+        :param prefilters: (O) default filters active in the grid.
+            Defined as either a list of PropertyValueFilter objects or a dict with the following fields:
             * property_models: list of Properties, defined as Property objects or UUIDs
             * values: the pre-filter value for each property to filter on
             * filters_type: the types of filters, either `le`, `ge`, `icontains` or `exact`
@@ -433,8 +437,8 @@ class WidgetsManager(Iterable):
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         if prefilters:
             list_of_prefilters = _check_prefilters(part_model=part_model, prefilters=prefilters)
-            prefilters = {'property_value': ','.join(list_of_prefilters) if list_of_prefilters else {}}
-            meta['prefilters'] = prefilters
+            prefilters = {"property_value": ",".join([pf.format() for pf in list_of_prefilters])}
+            meta["prefilters"] = prefilters
         if excluded_propmodels:
             excluded_propmodels = _check_excluded_propmodels(part_model=part_model,
                                                              property_models=excluded_propmodels)
@@ -724,15 +728,18 @@ class WidgetsManager(Iterable):
         )
         return widget
 
-    def add_service_widget(self,
-                           service: 'Service',
-                           title: Optional[Union[type(None), bool, Text]] = False,
-                           custom_button_text: Optional[Text] = False,
-                           emphasize_run: Optional[bool] = True,
-                           download_log: Optional[bool] = False,
-                           show_log: Optional[bool] = True,
-                           parent_widget: Optional[Union[Widget, Text]] = None,
-                           **kwargs) -> Widget:
+    def add_service_widget(
+        self,
+        service: 'Service',
+        title: Optional[Union[type(None), bool, Text]] = False,
+        custom_button_text: Optional[Text] = False,
+        emphasize_run: Optional[bool] = True,
+        alignment: Optional[Alignment] = Alignment.LEFT,
+        download_log: Optional[bool] = False,
+        show_log: Optional[bool] = True,
+        parent_widget: Optional[Union[Widget, Text]] = None,
+        **kwargs
+    ) -> Widget:
         """
         Add a KE-chain Service (e.g. script widget) to the widget manager.
 
@@ -752,6 +759,8 @@ class WidgetsManager(Iterable):
         :type custom_button_text: bool or basestring or None
         :param emphasize_run: Emphasize the run button (default True)
         :type emphasize_run: bool
+        :param alignment: Horizontal alignment of the button
+        :type alignment: Alignment
         :param download_log: Include the possibility of downloading the log inside the activity (default False)
         :type download_log: bool
         :param show_log: Include the log message inside the activity (default True)
@@ -772,13 +781,14 @@ class WidgetsManager(Iterable):
         meta = _set_button_text(meta, custom_button_text=custom_button_text, service=service, **kwargs)
 
         from pykechain.models import Service
-        service_id = check_base(service, Service, 'service', method=self._client.service)
+        service_id = check_base(service, Service, "service", method=self._client.service)
 
         meta.update({
-            'serviceId': service_id,
-            'emphasizeButton': emphasize_run,
-            'showDownloadLog': check_type(download_log, bool, 'download_log'),
-            'showLog': True if download_log else check_type(show_log, bool, 'show_log'),
+            "serviceId": service_id,
+            "emphasizeButton": emphasize_run,
+            "showDownloadLog": check_type(download_log, bool, "download_log"),
+            "showLog": True if download_log else check_type(show_log, bool, "show_log"),
+            "alignment": check_enum(alignment, Alignment, "alignment"),
         })
 
         widget = self.create_widget(
@@ -1365,6 +1375,7 @@ class WidgetsManager(Iterable):
         parent_widget: Optional[Union[Widget, Text]] = None,
         custom_button_text: Optional[Text] = False,
         emphasize_run: Optional[bool] = True,
+        alignment: Optional[Alignment] = Alignment.LEFT,
         link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
         link_value: Optional[CardWidgetLinkValue] = None,
         link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
@@ -1396,6 +1407,8 @@ class WidgetsManager(Iterable):
         :type custom_button_text: bool or basestring or None
         :param emphasize_run: Emphasize the run button (default True)
         :type emphasize_run: bool
+        :param alignment: Horizontal alignment of the button
+        :type alignment: Alignment
         :param link: Where the card widget refers to. This can be one of the following:
             * None (default): no link
             * task: another KE-chain task, provided as an Activity object or its UUID
@@ -1425,6 +1438,7 @@ class WidgetsManager(Iterable):
         meta.update({
             'serviceId': service_id,
             'emphasizeButton': emphasize_run,
+            "alignment": check_enum(alignment, Alignment, "alignment"),
         })
 
         widget = self.create_widget(
