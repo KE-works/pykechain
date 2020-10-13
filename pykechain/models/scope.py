@@ -61,9 +61,9 @@ class Scope(Base, TagsMixin, Scope2):
         super().__init__(json, **kwargs)
 
         # for 'kechain2.core.wim <2.0.0'
-        self.process = json.get('process')
+        self.process = json.get("process")
         # for 'kechain2.core.wim >=2.0.0'
-        self.workflow_root = json.get('workflow_root_id')
+        self.workflow_root = json.get("workflow_root_id")
 
         self._workflow_root_process = None
         self._catalog_root_process = None
@@ -73,28 +73,26 @@ class Scope(Base, TagsMixin, Scope2):
         self._catalog_root_model = None
         self._catalog_root_instance = None
 
-        self.ref = json.get('ref')
-        self.description = json.get('text')
-        self.status = json.get('status')
-        self.category = json.get('category')
+        self.ref = json.get("ref")
+        self.description = json.get("text")
+        self.status = json.get("status")
+        self.category = json.get("category")
 
-        self._tags = json.get('tags')
+        self._tags = json.get("tags")
 
-        self.start_date = parse_datetime(json.get('start_date'))
-        self.due_date = parse_datetime(json.get('due_date'))
+        self.start_date = parse_datetime(json.get("start_date"))
+        self.due_date = parse_datetime(json.get("due_date"))
 
         self._representations_container = RepresentationsComponent(
-            self,
-            self.options.get('representations', {}),
-            self._save_representations,
+            self, self.options.get("representations", {}), self._save_representations,
         )
 
     @property
     def team(self) -> Optional[Team]:
         """Team to which the scope is assigned."""
-        team_dict = self._json_data.get('team_id_name')
-        if team_dict and team_dict.get('id'):
-            return self._client.team(pk=team_dict.get('id'))
+        team_dict = self._json_data.get("team_id_name")
+        if team_dict and team_dict.get("id"):
+            return self._client.team(pk=team_dict.get("id"))
         else:
             return None
 
@@ -104,7 +102,7 @@ class Scope(Base, TagsMixin, Scope2):
 
         .. versionadded: 3.0
         """
-        return self._json_data.get('scope_options')
+        return self._json_data.get("scope_options")
 
     @options.setter
     def options(self, option_value):
@@ -112,9 +110,11 @@ class Scope(Base, TagsMixin, Scope2):
 
     def refresh(self, json=None, url=None, extra_params=None):
         """Refresh the object in place."""
-        super().refresh(json=json,
-                        url=self._client._build_url('scope', scope_id=self.id),
-                        extra_params=API_EXTRA_PARAMS['scope'])
+        super().refresh(
+            json=json,
+            url=self._client._build_url("scope", scope_id=self.id),
+            extra_params=API_EXTRA_PARAMS["scope"],
+        )
 
     @property
     def representations(self) -> List['BaseRepresentation']:
@@ -127,56 +127,68 @@ class Scope(Base, TagsMixin, Scope2):
 
     def _save_representations(self, representation_options):
         options = self.options
-        options.update({'representations': representation_options})
+        options.update({"representations": representation_options})
         self.options = options
 
     @property
-    def workflow_root_process(self) -> 'Activity':
+    def workflow_root_process(self) -> "Activity":
         """Retrieve the Activity root object with classification WORKFLOW."""
         if self._workflow_root_process is None:
-            self._workflow_root_process = self.activity(id=self._json_data['workflow_root_id'])
+            self._workflow_root_process = self.activity(
+                id=self._json_data["workflow_root_id"]
+            )
         return self._workflow_root_process
 
     @property
-    def app_root_process(self) -> 'Activity':
+    def app_root_process(self) -> "Activity":
         """Retrieve the Activity root object with classification APP."""
         if self._app_root_process is None:
-            self._app_root_process = self.activity(id=self._json_data['app_root_id'])
+            self._app_root_process = self.activity(id=self._json_data["app_root_id"])
         return self._app_root_process
 
     @property
-    def catalog_root_process(self) -> 'Activity':
+    def catalog_root_process(self) -> "Activity":
         """Retrieve the Activity root object with classification CATALOG."""
         if self._catalog_root_process is None:
-            self._catalog_root_process = self.activity(id=self._json_data['catalog_root_id'])
+            self._catalog_root_process = self.activity(
+                id=self._json_data["catalog_root_id"]
+            )
         return self._catalog_root_process
 
     @property
-    def product_root_model(self) -> 'Part':
+    def product_root_model(self) -> "Part":
         """Retrieve the Part root object with classification PRODUCT and category MODEL."""
         if self._product_root_model is None:
-            self._product_root_model = self.model(id=self._json_data['product_model_id'])
+            self._product_root_model = self.model(
+                id=self._json_data["product_model_id"]
+            )
         return self._product_root_model
 
     @property
-    def product_root_instance(self) -> 'Part':
+    def product_root_instance(self) -> "Part":
         """Retrieve the Part root object with classification PRODUCT and category INSTANCE."""
         if self._product_root_instance is None:
-            self._product_root_instance = self.part(id=self._json_data['product_instance_id'])
+            self._product_root_instance = self.part(
+                id=self._json_data["product_instance_id"]
+            )
         return self._product_root_instance
 
     @property
-    def catalog_root_model(self) -> 'Part':
+    def catalog_root_model(self) -> "Part":
         """Retrieve the Part root object with classification CATALOG and category MODEL."""
         if self._catalog_root_model is None:
-            self._catalog_root_model = self.model(id=self._json_data['catalog_model_id'])
+            self._catalog_root_model = self.model(
+                id=self._json_data["catalog_model_id"]
+            )
         return self._catalog_root_model
 
     @property
-    def catalog_root_instance(self) -> 'Part':
+    def catalog_root_instance(self) -> "Part":
         """Retrieve the Part root object with classification CATALOG and category INSTANCE."""
         if self._catalog_root_instance is None:
-            self._catalog_root_instance = self.part(id=self._json_data['catalog_instance_id'])
+            self._catalog_root_instance = self.part(
+                id=self._json_data["catalog_instance_id"]
+            )
         return self._catalog_root_instance
 
     #
@@ -195,25 +207,32 @@ class Scope(Base, TagsMixin, Scope2):
         :type user: basestring
         :raises APIError: When unable to update the scope project team.
         """
-        action = check_enum(action, ScopeMemberActions, 'action')
-        role = check_enum(role, ScopeRoles, 'role')
-        user = check_text(user, 'user')
+        action = check_enum(action, ScopeMemberActions, "action")
+        role = check_enum(role, ScopeRoles, "role")
+        user = check_text(user, "user")
 
-        users = self._client._retrieve_users()['results']  # type: List[Dict]
-        user_object = find(users, lambda u: u['username'] == user)  # type: Dict
+        users = self._client._retrieve_users()["results"]  # type: List[Dict]
+        user_object = find(users, lambda u: u["username"] == user)  # type: Dict
         if user_object is None:
             raise NotFoundError('User "{}" does not exist'.format(user))
 
-        url = self._client._build_url('scope_{}_{}'.format(action, role), scope_id=self.id)
+        url = self._client._build_url(
+            "scope_{}_{}".format(action, role), scope_id=self.id
+        )
 
-        response = self._client._request('PUT', url,
-                                         params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
-                                         data={'user_id': user_object['pk']})
+        response = self._client._request(
+            "PUT",
+            url,
+            params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
+            data={"user_id": user_object["pk"]},
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not {} {} in Scope".format(action, role), response=response)
+            raise APIError(
+                "Could not {} {} in Scope".format(action, role), response=response
+            )
 
-        self.refresh(json=response.json().get('results')[0])
+        self.refresh(json=response.json().get("results")[0])
 
     def edit(
             self,
@@ -305,16 +324,19 @@ class Scope(Base, TagsMixin, Scope2):
 
         update_dict = clean_empty_values(update_dict=update_dict)
 
-        url = self._client._build_url('scope', scope_id=self.id)
+        url = self._client._build_url("scope", scope_id=self.id)
 
-        response = self._client._request('PUT', url,
-                                         params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
-                                         json=update_dict)
+        response = self._client._request(
+            "PUT",
+            url,
+            params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
+            json=update_dict,
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Scope {}".format(self), response=response)
 
-        self.refresh(json=response.json().get('results')[0])
+        self.refresh(json=response.json().get("results")[0])
 
         # TODO tags that are set are not in response
         if tags is not None and not isinstance(tags, Empty):
@@ -391,14 +413,25 @@ class Scope(Base, TagsMixin, Scope2):
         """
         return self._client.create_model(parent, name, multiplicity=multiplicity)
 
-    def create_model_with_properties(self, parent, name, multiplicity=Multiplicity.ZERO_MANY,
-                                     properties_fvalues=None, **kwargs) -> 'Part':
+    def create_model_with_properties(
+        self,
+        parent,
+        name,
+        multiplicity=Multiplicity.ZERO_MANY,
+        properties_fvalues=None,
+        **kwargs
+    ) -> 'Part':
         """Create a model with its properties in a single API request.
 
         See :func:`pykechain.Client.create_model_with_properties()` for available parameters.
         """
-        return self._client.create_model_with_properties(parent, name, multiplicity=multiplicity,
-                                                         properties_fvalues=properties_fvalues, **kwargs)
+        return self._client.create_model_with_properties(
+            parent,
+            name,
+            multiplicity=multiplicity,
+            properties_fvalues=properties_fvalues,
+            **kwargs
+        )
 
     #
     # Activity methods
@@ -430,9 +463,11 @@ class Scope(Base, TagsMixin, Scope2):
         return SideBarManager(scope=self, *args, **kwargs)
 
     def set_landing_page(
-            self,
-            activity: Union['Activity', KEChainPages],
-            task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
+        self,
+        activity: Union["Activity", KEChainPages],
+        task_display_mode: Optional[
+            SubprocessDisplayMode
+        ] = SubprocessDisplayMode.ACTIVITIES,
     ) -> None:
         """
         Update the landing page of the scope.
@@ -448,17 +483,20 @@ class Scope(Base, TagsMixin, Scope2):
 
         if not (isinstance(activity, Activity) or activity in KEChainPages.values()):
             raise IllegalArgumentError(
-                'activity must be of class Activity or a KEChainPages option, "{}" is not.'.format(activity))
+                'activity must be of class Activity or a KEChainPages option, "{}" is not.'.format(
+                    activity
+                )
+            )
 
-        check_enum(task_display_mode, SubprocessDisplayMode, 'task_display_mode')
+        check_enum(task_display_mode, SubprocessDisplayMode, "task_display_mode")
 
         if isinstance(activity, Activity):
-            url = '#/scopes/{}/{}/{}'.format(self.id, task_display_mode, activity.id)
+            url = "#/scopes/{}/{}/{}".format(self.id, task_display_mode, activity.id)
         else:
-            url = '#/scopes/{}/{}'.format(self.id, activity)
+            url = "#/scopes/{}/{}".format(self.id, activity)
 
         options = dict(self.options)
-        options.update({'landingPage': url})
+        options.update({"landingPage": url})
         self.options = options
 
     def get_landing_page_url(self) -> Optional[Text]:
@@ -522,12 +560,22 @@ class Scope(Base, TagsMixin, Scope2):
     # User and Members of the Scope
     #
 
-    def members(self, is_manager: Optional[bool] = None, is_leadmember: Optional[bool] = None) -> List[Dict]:
+    def members(
+        self,
+        is_manager: Optional[bool] = None,
+        is_supervisor: Optional[bool] = None,
+        is_leadmember: Optional[bool] = None,
+    ) -> List[Dict]:
         """
         Retrieve members of the scope.
 
+        .. versionchanged:: 3.7
+           we added the supervisor members for backend that support this.
+
         :param is_manager: (otional) set to True/False to filter members that are/aren't managers, resp.
         :type is_manager: bool
+        :param is_supervisor: (optional) set to True/False to filter members that are/aren't supervisors, resp.
+        :type is_supervisor: bool
         :param is_leadmember: (optional) set to True/False to filter members that are/aren't leadmembers, resp.
         :type is_leadmember: bool
         :return: List of members, each defined as a dict
@@ -536,16 +584,30 @@ class Scope(Base, TagsMixin, Scope2):
         --------
         >>> members = project.members()
         >>> managers = project.members(is_manager=True)
+        >>> supervisors = project.members(is_supervisor=True)
         >>> leadmembers = project.members(is_leadmember=True)
 
         """
-        members = [member for member in self._json_data['members'] if member['is_active']]
+        members = [
+            member for member in self._json_data["members"] if member["is_active"]
+        ]
 
         if is_manager is not None:
-            members = [member for member in members if member.get('is_manager') == is_manager]
+            members = [
+                member for member in members if member.get("is_manager") == is_manager
+            ]
+        if is_supervisor is not None:
+            members = [
+                member
+                for member in members
+                if member.get("is_supervisor") == is_supervisor
+            ]
         if is_leadmember is not None:
-            members = [member for member in members if member.get('is_leadmember') == is_leadmember]
-
+            members = [
+                member
+                for member in members
+                if member.get("is_leadmember") == is_leadmember
+            ]
         return members
 
     def add_member(self, member: Text) -> None:
@@ -558,7 +620,9 @@ class Scope(Base, TagsMixin, Scope2):
         :type member: basestring
         :raises APIError: when unable to update the scope member
         """
-        self._update_scope_project_team(action=ScopeMemberActions.ADD, role=ScopeRoles.MEMBER, user=member)
+        self._update_scope_project_team(
+            action=ScopeMemberActions.ADD, role=ScopeRoles.MEMBER, user=member
+        )
 
     def remove_member(self, member: Text) -> None:
         """
@@ -568,7 +632,9 @@ class Scope(Base, TagsMixin, Scope2):
         :type member: basestring
         :raises APIError: when unable to update the scope member
         """
-        self._update_scope_project_team(action=ScopeMemberActions.REMOVE, role=ScopeRoles.MEMBER, user=member)
+        self._update_scope_project_team(
+            action=ScopeMemberActions.REMOVE, role=ScopeRoles.MEMBER, user=member
+        )
 
     def add_manager(self, manager: Text) -> None:
         """
@@ -578,7 +644,9 @@ class Scope(Base, TagsMixin, Scope2):
         :type manager: basestring
         :raises APIError: when unable to update the scope manager
         """
-        self._update_scope_project_team(action=ScopeMemberActions.ADD, role=ScopeRoles.MANAGER, user=manager)
+        self._update_scope_project_team(
+            action=ScopeMemberActions.ADD, role=ScopeRoles.MANAGER, user=manager
+        )
 
     def remove_manager(self, manager: Text) -> None:
         """
@@ -588,7 +656,9 @@ class Scope(Base, TagsMixin, Scope2):
         :type manager: basestring
         :raises APIError: when unable to update the scope manager
         """
-        self._update_scope_project_team(action=ScopeMemberActions.REMOVE, role=ScopeRoles.MANAGER, user=manager)
+        self._update_scope_project_team(
+            action=ScopeMemberActions.REMOVE, role=ScopeRoles.MANAGER, user=manager
+        )
 
     def add_leadmember(self, leadmember: Text) -> None:
         """
@@ -598,7 +668,9 @@ class Scope(Base, TagsMixin, Scope2):
         :type leadmember: basestring
         :raises APIError: when unable to update the scope leadmember
         """
-        self._update_scope_project_team(action=ScopeMemberActions.ADD, role=ScopeRoles.LEADMEMBER, user=leadmember)
+        self._update_scope_project_team(
+            action=ScopeMemberActions.ADD, role=ScopeRoles.LEADMEMBER, user=leadmember
+        )
 
     def remove_leadmember(self, leadmember: Text) -> None:
         """
@@ -608,4 +680,50 @@ class Scope(Base, TagsMixin, Scope2):
         :type leadmember: basestring
         :raises APIError: when unable to update the scope leadmember
         """
-        self._update_scope_project_team(action=ScopeMemberActions.REMOVE, role=ScopeRoles.LEADMEMBER, user=leadmember)
+        self._update_scope_project_team(
+            action=ScopeMemberActions.REMOVE,
+            role=ScopeRoles.LEADMEMBER,
+            user=leadmember,
+        )
+
+    def add_supervisor(self, supervisor: Text) -> None:
+        """
+        Add a single supervisor to the scope.
+
+        .. versionadded:: 3.7
+           requires backend version 3.7 as well.
+
+        :param supervisor: single username to be added to the scope list of supervisors
+        :type supervisor: basestring
+        :raises APIError: when unable to update the scope supervisor
+        """
+        if self._client.match_app_version(label="scope", version="<3.6.0"):
+            raise NotImplementedError(
+                "Adding and removal of supervisor members to a scope not "
+                "possible with this backend version"
+            )
+        self._update_scope_project_team(
+            action=ScopeMemberActions.ADD, role=ScopeRoles.SUPERVISOR, user=supervisor
+        )
+
+    def remove_supervisor(self, supervisor: Text) -> None:
+        """
+        Remove a single supervisor to the scope.
+
+        .. versionadded:: 3.7
+           requires backend version 3.7 as well.
+
+        :param supervisor: single username to be added to the scope list of supervisors
+        :type supervisor: basestring
+        :raises APIError: when unable to update the scope supervisor
+        """
+        if self._client.match_app_version(label="scope", version="<3.6.0"):
+            raise NotImplementedError(
+                "Adding and removal of supervisor members to a scope not "
+                "possible with this backend version"
+            )
+        self._update_scope_project_team(
+            action=ScopeMemberActions.REMOVE,
+            role=ScopeRoles.SUPERVISOR,
+            user=supervisor,
+        )
