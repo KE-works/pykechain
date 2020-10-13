@@ -476,11 +476,13 @@ class ScopeRoles(Enum):
     Roles that exist for a member of a scope.
 
     :cvar MANAGER: owner of the scope, has full rights
-    :cvar LEADMEMBER: elevated member, has assignment rights
+    :cvar SUPERVISOR: supervisor member of a scope, has the rights as leadmember and rights to manage catalog tasks.
+    :cvar LEADMEMBER: elevated member, has assignment rights, no rights on App tasks or Catalog tasks.
     :cvar MEMBER: normal member, only has viewing rights
     """
 
     MANAGER = "manager"
+    SUPERVISOR = "supervisor"
     LEADMEMBER = "leadmember"
     MEMBER = "member"
 
