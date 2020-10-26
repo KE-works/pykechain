@@ -15,6 +15,7 @@ UNRELEASED (DDMMMYY)
 * :+1: Created `PropertyValueFilter` class to manage (pre)filters of `MultiReferenceProperty` and `FilteredGridWidget` objects.
 * :+1: Added `get_prefilters()` and `get_excluded_propmodel_ids()` methods to the `MultiReferenceProperty` class.
 * :+1: Added `alignment` keyword arguments for the creation of `ServiceCardWidget` and `ServiceWidget` classes.
+* :+1: Added `order` keyword argument to the `create_property()` method of the `Client` class.
 
 Backwards incompatible changes
 ------------------------------

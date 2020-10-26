@@ -114,6 +114,27 @@ class TestPropertyCreation(TestBetamax):
                 # tearDown
                 prop.delete()
 
+    def test_order(self):
+        index_0 = self.part_model.add_property(name="dummy at index 0")
+        index_1 = self.part_model.add_property(name="dummy at index 1")
+        index_2 = self.part_model.add_property(name="dummy at index 2")
+
+        new_index_1 = self.part_model.add_property(name="inserted with order 1", order=1)
+
+        self.part_model.refresh()
+
+        self.assertEqual(4, len(self.part_model.properties))
+        self.assertEqual(index_0, self.part_model.properties[0])
+        self.assertEqual(new_index_1, self.part_model.properties[1])
+        self.assertEqual(index_1, self.part_model.properties[2])
+        self.assertEqual(index_2, self.part_model.properties[3])
+
+        with self.assertRaises(IllegalArgumentError):
+            self.part_model.add_property(name="Negative order", order=-5)
+
+        with self.assertRaises(IllegalArgumentError):
+            self.part_model.add_property(name="Too high order", order=500)
+
 
 class TestProperties(TestBetamax):
     def setUp(self):

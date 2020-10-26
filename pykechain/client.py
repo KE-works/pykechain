@@ -1645,6 +1645,7 @@ class Client(object):
             default_value: Optional[Any] = None,
             unit: Optional[Text] = None,
             options: Optional[Dict] = None,
+            order: Optional[int] = None,
             **kwargs
     ) -> AnyProperty:
         """Create a new property model under a given model.
@@ -1671,6 +1672,8 @@ class Client(object):
         :type unit: basestring or None
         :param options: (optional) property options (eg. validators or 'single selectlist choices')
         :type options: basestring or None
+        :param order: (optional) index of the property among the existing properties of the Part model
+        :type order: int
         :return: a :class:`models.Property` with category `MODEL`
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Property` model could not be created
@@ -1704,6 +1707,11 @@ class Client(object):
                                            "or a model uuid, got: '{}'".format(default_value))
             options.update(scope_options)
 
+        order = check_type(order, int, "order")
+        if order is not None and not (0 < order < len(model.properties)):
+            raise IllegalArgumentError("The `order` must be larger than zero and smaller than the existing number of "
+                                       "properties ({}): `{}` is not valid.".format(len(model.properties), order))
+
         data = dict(
             name=check_text(name, 'name'),
             part_id=model.id,
@@ -1713,10 +1721,16 @@ class Client(object):
             unit=unit or '',
             value_options=options,
         )
-        url = self._build_url('properties_create_model')
-        query_params = kwargs
-        query_params.update(API_EXTRA_PARAMS['properties'])
 
+        if order is not None:
+            data["order"] = order - 1
+
+        if kwargs:
+            data.update(kwargs)
+
+        query_params = dict(API_EXTRA_PARAMS['properties'])
+
+        url = self._build_url('properties_create_model')
         response = self._request('POST', url, params=query_params, json=data)
 
         if response.status_code != requests.codes.created:
