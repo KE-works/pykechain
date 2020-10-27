@@ -1738,7 +1738,10 @@ class Client(object):
 
         prop = Property.create(response.json()['results'][0], client=self)
 
-        model.properties.append(prop)
+        if order is None:
+            model.properties.append(prop)
+        else:
+            model.properties.insert(order, prop)
 
         return prop
 
