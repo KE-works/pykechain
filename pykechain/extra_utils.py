@@ -291,8 +291,9 @@ def update_part_with_properties(part_instance, moved_instance, name=None):
             if prop_instance.value:
                 properties_id_dict[moved_prop_instance.id] = [ref_part.id for ref_part in prop_instance.value]
         elif prop_instance.type in (PropertyType.SINGLE_SELECT_VALUE, PropertyType.MULTI_SELECT_VALUE):
-            if prop_instance.value in prop_instance.model().options:
-                properties_id_dict[moved_prop_instance.id] = prop_instance.value
+            if prop_instance.model().options:
+                if prop_instance.value in prop_instance.model().options:
+                    properties_id_dict[moved_prop_instance.id] = prop_instance.value
         else:
             properties_id_dict[moved_prop_instance.id] = prop_instance.value
     # Update the name and property values in one go.
