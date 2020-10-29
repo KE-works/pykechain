@@ -33,6 +33,12 @@ class TestPartsCopyMove(TestBetamax):
             options=dict(value_choices=['a', 'b', 'c']),
             property_type=PropertyType.SINGLE_SELECT_VALUE
         )
+        p_multi_select = self.model_to_be_copied.add_property(
+            name='__Property multi select list',
+            default_value=['a', 'c'],
+            options=dict(value_choices=['a', 'b', 'c', 'd']),
+            property_type=PropertyType.MULTI_SELECT_VALUE
+        )
         p_multi_reference_property = self.model_to_be_copied.add_property(
             name='__Property multi reference',
             default_value=self.cross_scope_wheel,
@@ -95,7 +101,7 @@ class TestPartsCopyMove(TestBetamax):
 
         # testing
         self.assertTrue(copied_instance)
-        self.assertEqual(len(copied_instance.properties), 4)
+        self.assertEqual(len(copied_instance.properties), 5)
         self.assertTrue(copied_instance.property('__property-single-text'))
         self.assertEqual(copied_instance.property('__property-decimal-number').value, 33)
         self.assertEqual(copied_instance.property('__property-single-select-list').value, None)
@@ -119,7 +125,7 @@ class TestPartsCopyMove(TestBetamax):
         # testing
         self.assertTrue(copied_model)
         self.assertEqual(copied_model.name, name_of_part)
-        self.assertEqual(len(copied_model.properties), 4)
+        self.assertEqual(len(copied_model.properties), 5)
         self.assertEqual(len(copied_model._cached_children), 0)
 
     def test_move_part_model(self):
