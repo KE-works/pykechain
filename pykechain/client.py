@@ -1047,8 +1047,8 @@ class Client(object):
             self,
             parent: Union[Activity, Text],
             name: Text,
-            ref: Text = None,
             activity_type: ActivityType = ActivityType.TASK,
+            ref: Optional[Text] = None,
             status: ActivityStatus = ActivityStatus.OPEN,
             description: Optional[Text] = None,
             start_date: Optional[datetime.datetime] = None,
@@ -1064,10 +1064,10 @@ class Client(object):
         :type parent: basestring or :class:`models.Activity`
         :param name: new activity name
         :type name: basestring
-        :param ref: activity ref, slug
-        :type ref: basestring
         :param activity_type: type of activity: TASK (default) or PROCESS
         :type activity_type: basestring
+        :param ref: activity ref, slug
+        :type ref: basestring
         :param status: status of the activity: OPEN (default) or COMPLETED
         :type status: ActivityStatus
         :param description: description of the activity
