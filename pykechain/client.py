@@ -23,7 +23,7 @@ from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.notification import Notification
 from pykechain.models.widgets.widget import Widget
-from pykechain.utils import is_uuid, find, is_valid_email, get_in_chunks
+from pykechain.utils import is_uuid, find, is_valid_email, get_in_chunks, slugify_ref
 from .__about__ import version as pykechain_version
 from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
     check_list_of_base, check_base, check_uuid, check_list_of_dicts, check_url, check_user
@@ -1047,6 +1047,7 @@ class Client(object):
             self,
             parent: Union[Activity, Text],
             name: Text,
+            ref: Text = None,
             activity_type: ActivityType = ActivityType.TASK,
             status: ActivityStatus = ActivityStatus.OPEN,
             description: Optional[Text] = None,
@@ -1054,6 +1055,7 @@ class Client(object):
             due_date: Optional[datetime.datetime] = None,
             classification: ActivityClassification = None,
             tags: Optional[List[Text]] = None,
+            **kwargs
     ) -> Activity:
         """
         Create a new activity.
@@ -1062,6 +1064,8 @@ class Client(object):
         :type parent: basestring or :class:`models.Activity`
         :param name: new activity name
         :type name: basestring
+        :param ref: activity ref, slug
+        :type ref: basestring
         :param activity_type: type of activity: TASK (default) or PROCESS
         :type activity_type: basestring
         :param status: status of the activity: OPEN (default) or COMPLETED
@@ -1097,6 +1101,14 @@ class Client(object):
         else:
             classification = check_enum(classification, ActivityClassification, 'classification')
 
+        ref = check_text(ref, "ref")
+        if ref:
+            slug_ref = slugify_ref(ref)
+            if slug_ref != ref:
+                raise IllegalArgumentError(
+                    "`ref` must be a slug, `{}` is not. "
+                    "Use `slugify_ref` util function to convert to `{}`.".format(ref, slug_ref))
+
         data = {
             "name": check_text(text=name, key='name'),
             "parent_id": parent_id,
@@ -1108,6 +1120,12 @@ class Client(object):
             "due_date": check_datetime(dt=due_date, key='due_date'),
             "tags": check_list_of_text(tags, key='tags', unique=True),
         }
+
+        if ref:
+            data["ref"] = slugify_ref(ref)
+
+        if kwargs:
+            data.update(kwargs)
 
         response = self._request('POST', self._build_url('activities'), data=data,
                                  params=API_EXTRA_PARAMS['activities'])
