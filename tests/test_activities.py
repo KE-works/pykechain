@@ -55,6 +55,7 @@ class TestActivityConstruction(TestBetamax):
 
     def test_create_with_inputs(self):
         name = "__Testing task"
+        ref = slugify_ref(name)
         description = "My new task"
         status = ActivityStatus.OPEN
         activity_type = ActivityType.TASK
@@ -63,6 +64,7 @@ class TestActivityConstruction(TestBetamax):
         # setUp
         self.task = self.client.create_activity(
             name=name,
+            ref=ref,
             parent=self.process,
             status=status,
             description=description,
@@ -75,6 +77,7 @@ class TestActivityConstruction(TestBetamax):
         # testing
         self.assertIsInstance(self.task, Activity)
         self.assertEqual(name, self.task.name)
+        self.assertEqual(ref, self.task.ref)
         self.assertEqual(status, self.task.status)
         self.assertTrue(description, self.task.description)
         self.assertIsInstance(self.task.start_date, datetime)
