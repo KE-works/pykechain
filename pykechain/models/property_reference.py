@@ -49,7 +49,7 @@ class ScopeReferencesProperty(_ReferenceProperty):
 
         scopes = []
         if scope_ids:
-            scopes = list(self._client.scopes(id__in=",".join(scope_ids)))
+            scopes = list(self._client.scopes(id__in=",".join(scope_ids), status=None))
         return scopes
 
     def set_prefilters(
