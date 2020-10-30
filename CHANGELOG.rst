@@ -14,7 +14,8 @@ UNRELEASED (DDMMMYY)
 * :+1: Added `refresh()` method on `SideBarManager` to reload the side-bar from KE-chain.
 * :+1: Changed the way edit functions work for `Part`, `Properties`, `Activity`, `Scope`, `Notification`, `Service`, `Team` and `Banner` classes. Passing inputs with value None in those functions will clear those attributes if possible. Not mentioning them will not overwrite their values.
 * :+1: Created `PropertyValueFilter` class to manage (pre)filters of `MultiReferenceProperty` and `FilteredGridWidget` objects.
-* :+1: Added `get_prefilters()` and `get_excluded_propmodel_ids()` methods to the `MultiReferenceProperty` class.
+* :+1: Added `get_prefilters()` and `set_prefilters()` method to all reference property classes by default, albeit raising a `NotImplementedError`. Implementations exist for `ScopeReferencesProperty` and `MultiReferenceProperty`.
+* :+1: Added `get_excluded_propmodel_ids()` method to the `MultiReferenceProperty` class.
 * :+1: Added `alignment` keyword arguments for the creation of `ServiceCardWidget` and `ServiceWidget` classes.
 * :+1: Added `ref` keyword to `create_activity()` method of `Client` class.
 

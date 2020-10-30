@@ -1,8 +1,10 @@
 from typing import List, Optional, Text
 
+from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Scope, user
 from pykechain.models.base_reference import _ReferencePropertyInScope, _ReferenceProperty
 from pykechain.models.property2_activity_reference import ActivityReferencesProperty as ActivityReferencesProperty2
+from pykechain.models.value_filter import ScopeFilter
 
 
 class ActivityReferencesProperty(_ReferencePropertyInScope, ActivityReferencesProperty2):
@@ -49,6 +51,55 @@ class ScopeReferencesProperty(_ReferenceProperty):
         if scope_ids:
             scopes = list(self._client.scopes(id__in=",".join(scope_ids)))
         return scopes
+
+    def set_prefilters(
+            self,
+            prefilters: List[ScopeFilter] = None,
+            clear: Optional[bool] = False,
+    ) -> None:
+        """
+        Set pre-filters on the scope reference property.
+
+        :param prefilters: list of Scope Filter objects
+        :type prefilters: list
+        :param clear: whether all existing pre-filters should be cleared. (default = False)
+        :type clear: bool
+
+        :return: None
+        """
+        if prefilters is not None:
+            if not isinstance(prefilters, list) or not all(isinstance(pf, ScopeFilter) for pf in prefilters):
+                raise IllegalArgumentError(
+                    "`prefilters` must be a list of ScopeFilter objects, `{}` is not.".format(prefilters))
+        else:
+            prefilters = []
+
+        if not clear:
+            list_of_prefilters = ScopeFilter.parse_options(options=self._options)
+        else:
+            list_of_prefilters = list()
+
+        list_of_prefilters += prefilters
+
+        # Only update the options if there are any prefilters to be set, or if the original filters have to overwritten
+        if list_of_prefilters or clear:
+            options_to_set = self._options
+
+            # Always create the entire prefilter json structure
+            options_to_set["prefilters"] = {
+                "tags__contains": ",".join([pf.format() for pf in list_of_prefilters if pf.format()])
+            }
+
+            self.edit(options=options_to_set)
+
+    def get_prefilters(self) -> List[ScopeFilter]:
+        """
+        Return a list of ScopeFilter objects currently configured on the property.
+
+        :return: list of ScopeFilter objects
+        :rtype list
+        """
+        return ScopeFilter.parse_options(self._options)
 
 
 class UserReferencesProperty(_ReferenceProperty):

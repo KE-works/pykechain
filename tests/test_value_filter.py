@@ -1,6 +1,9 @@
+from unittest import TestCase
+
 from pykechain.enums import FilterType
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import PropertyValueFilter
+from pykechain.models.value_filter import ScopeFilter
 from tests.classes import TestBetamax
 
 
@@ -98,3 +101,26 @@ class TestPropertyValueFilter(TestBetamax):
         self.assertNotEqual(self.filter, third_filter)
         self.assertNotEqual(self.filter, fourth_filter)
         self.assertNotEqual(self.filter, fifth_filter)
+
+
+class TestScopeFilter(TestCase):
+
+    def setUp(self) -> None:
+        self.filter = ScopeFilter(tag="Calculation")
+
+    def test__repr__(self):
+        representation = self.filter.__repr__()
+
+        self.assertIsInstance(representation, str)
+
+    def test__eq__(self):
+        second_filter = ScopeFilter("Calculation")
+        third_filter = ScopeFilter("Not a calculation")
+
+        self.assertEqual(self.filter, second_filter)
+        self.assertNotEqual(self.filter, third_filter)
+
+    def test_format(self):
+        string = self.filter.format()
+
+        self.assertIsInstance(string, str)
