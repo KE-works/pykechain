@@ -7,7 +7,7 @@ from pykechain.models.property_reference import (
     UserReferencesProperty,
 )
 from pykechain.models.validators import RequiredFieldValidator
-from pykechain.models.value_filter import PropertyValueFilter
+from pykechain.models.value_filter import PropertyValueFilter, ScopeFilter
 from pykechain.utils import find, is_uuid
 from tests.classes import TestBetamax
 
@@ -836,7 +836,7 @@ class TestScopeReference(TestBetamax):
         )
         self.scope_ref_prop = self.part.add_property(
             name="scope ref", property_type=PropertyType.SCOPE_REFERENCES_VALUE
-        )
+        )  # type: ScopeReferencesProperty
 
     def tearDown(self):
         if self.part:
@@ -882,6 +882,32 @@ class TestScopeReference(TestBetamax):
             reloaded_prop,
             msg="Must be the same KE-chain prop, based on hashed UUID",
         )
+
+    def test_prefilters(self):
+        live_filters = self.scope_ref_prop.get_prefilters()
+        self.assertFalse(live_filters)
+
+        tags = ["project", "catalog"]
+        filters = [ScopeFilter(tag=tag) for tag in tags]
+
+        self.scope_ref_prop.set_prefilters(
+            prefilters=filters,
+        )
+        self.scope_ref_prop.refresh()
+        live_filters = self.scope_ref_prop.get_prefilters()
+
+        self.assertTrue(live_filters)
+        self.assertIsInstance(live_filters, list)
+        self.assertTrue(all(isinstance(pf, ScopeFilter) for pf in live_filters))
+
+        self.scope_ref_prop.set_prefilters(clear=True)
+        self.scope_ref_prop.refresh()
+        live_filters = self.scope_ref_prop.get_prefilters()
+        self.assertFalse(live_filters)
+
+        with self.assertRaises(IllegalArgumentError):
+            # noinspection PyTypeChecker
+            self.scope_ref_prop.set_prefilters(prefilters=filters[0])
 
 
 class TestUserReference(TestBetamax):

@@ -5,6 +5,7 @@ from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Property, Base
 from pykechain.models.base import BaseInScope
 from pykechain.models.input_checks import check_list_of_base, check_base
+from pykechain.models.value_filter import BaseFilter
 
 
 class _ReferenceProperty(Property):
@@ -103,6 +104,26 @@ class _ReferenceProperty(Property):
         except IllegalArgumentError:
             # expected to fail, as value should be an iterable
             return check_list_of_base(value, cls=self.REFERENCED_CLASS, key='references')
+
+    def set_prefilters(
+            self,
+            prefilters: Optional[List[BaseFilter]] = None,
+            clear: Optional[bool] = False,
+    ):
+        """
+        Set the prefilters on the reference property.
+
+        :return: None
+        """
+        NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
+
+    def get_prefilters(self):
+        """
+        Get the prefilters currently on the reference property.
+
+        :return: list of filter values.
+        """
+        NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
 
 
 class _ReferencePropertyInScope(_ReferenceProperty, ABC):
