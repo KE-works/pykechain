@@ -16,6 +16,7 @@ UNRELEASED (DDMMMYY)
 * :+1: Created `PropertyValueFilter` class to manage (pre)filters of `MultiReferenceProperty` and `FilteredGridWidget` objects.
 * :+1: Added `get_prefilters()` and `get_excluded_propmodel_ids()` methods to the `MultiReferenceProperty` class.
 * :+1: Added `alignment` keyword arguments for the creation of `ServiceCardWidget` and `ServiceWidget` classes.
+* :+1: Added a check whether the  a single or multi select list `Property` value is in the options when copying or moving a `Part`.
 * :+1: Added `ref` keyword to `create_activity()` method of `Client` class.
 
 Backwards incompatible changes

@@ -273,25 +273,32 @@ def update_part_with_properties(part_instance, moved_instance, name=None):
     # in one go
     properties_id_dict = dict()
     for prop_instance in part_instance.properties:
+        moved_prop_instance = get_mapping_dictionary()[prop_instance.id]
+
         # Do different magic if there is an attachment property and it has a value
         if prop_instance.type == PropertyType.ATTACHMENT_VALUE:
-            moved_prop = get_mapping_dictionary()[prop_instance.id]
             if prop_instance.value:
                 attachment_name = prop_instance._json_data['value'].split('/')[-1]
                 with temp_chdir() as target_dir:
                     full_path = os.path.join(target_dir or os.getcwd(), attachment_name)
                     prop_instance.save_as(filename=full_path)
-                    moved_prop.upload(full_path)
+                    moved_prop_instance.upload(full_path)
             else:
-                moved_prop.clear()
+                moved_prop_instance.clear()
         # For a reference value property, add the id's of the part referenced {property.id: [part1.id, part2.id, ...]},
         # if there is part referenced at all.
         elif prop_instance.type == PropertyType.REFERENCES_VALUE:
             if prop_instance.value:
-                moved_prop_instance = get_mapping_dictionary()[prop_instance.id]
                 properties_id_dict[moved_prop_instance.id] = [ref_part.id for ref_part in prop_instance.value]
+        elif prop_instance.type == PropertyType.SINGLE_SELECT_VALUE:
+            if prop_instance.model().options:
+                if prop_instance.value in prop_instance.model().options:
+                    properties_id_dict[moved_prop_instance.id] = prop_instance.value
+        elif prop_instance.type == PropertyType.MULTI_SELECT_VALUE:
+            if prop_instance.value:
+                if all(value in prop_instance.model().options for value in prop_instance.value):
+                    properties_id_dict[moved_prop_instance.id] = prop_instance.value
         else:
-            moved_prop_instance = get_mapping_dictionary()[prop_instance.id]
             properties_id_dict[moved_prop_instance.id] = prop_instance.value
     # Update the name and property values in one go.
     moved_instance.update(name=str(name), update_dict=properties_id_dict, bulk=True, suppress_kevents=True)
