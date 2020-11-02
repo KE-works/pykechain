@@ -4,18 +4,20 @@ Change Log
 UNRELEASED (DDMMMYY)
 --------------------
 
-* :+1: Added the possibility to create a `ServiceCardWidget` through the `add_service_card_widget()` function.
-* :bug: Missing upper-case letter in `SideBarManager` caused a loss of the `override_sidebar` property.
-* :bug: `SidebarButton` class did not preserve all data from the scope options, losing display names in other languages. Editing of this values is now possible as well.
-* :+1: Added `refresh()` method on `SideBarManager` to reload the side-bar from KE-chain.
 * :star: Added the option to manage supervisor members on a scope for KE-chain 3 backends that support the supervisor member users. That is possble for releases of KE-chain 3 starting from June 2020. (version 3.7). #772
-* :+1: Changed the way edit functions work for `Part`, `Properties`, `Activity`, `Scope`, `Notification`, `Service`, `Team` and `Banner` classes. Passing inputs with value None in those functions will clear those attributes if possible. Not mentioning them will not overwrite their values.
 
 * :bug: Updating or setting of widget associations with only readable and/or writable properties is now supported.
+* :bug: Missing upper-case letter in `SideBarManager` caused a loss of the `override_sidebar` property.
+* :bug: `SidebarButton` class did not preserve all data from the scope options, losing display names in other languages. Editing of this values is now possible as well.
+
+* :+1: Added the possibility to create a `ServiceCardWidget` through the `add_service_card_widget()` function.
+* :+1: Added `refresh()` method on `SideBarManager` to reload the side-bar from KE-chain.
+* :+1: Changed the way edit functions work for `Part`, `Properties`, `Activity`, `Scope`, `Notification`, `Service`, `Team` and `Banner` classes. Passing inputs with value None in those functions will clear those attributes if possible. Not mentioning them will not overwrite their values.
 * :+1: Created `PropertyValueFilter` class to manage (pre)filters of `MultiReferenceProperty` and `FilteredGridWidget` objects.
 * :+1: Added `get_prefilters()` and `get_excluded_propmodel_ids()` methods to the `MultiReferenceProperty` class.
 * :+1: Added `alignment` keyword arguments for the creation of `ServiceCardWidget` and `ServiceWidget` classes.
 * :+1: Added a check whether the  a single or multi select list `Property` value is in the options when copying or moving a `Part`.
+* :+1: Added `ref` keyword to `create_activity()` method of `Client` class.
 
 Backwards incompatible changes
 ------------------------------
