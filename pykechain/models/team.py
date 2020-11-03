@@ -42,6 +42,7 @@ class Team(Base):
             description: Optional[Union[Text, Empty]] = empty,
             options: Optional[Union[Dict, Empty]] = empty,
             is_hidden: Optional[Union[bool, Empty]] = empty,
+            **kwargs
     ) -> None:
         """
         Edit the attributes of the Team.
@@ -64,6 +65,9 @@ class Team(Base):
             'options': check_type(options, dict, 'options'),
             'is_hidden': check_type(is_hidden, bool, 'is_hidden'),
         }
+
+        if kwargs:  # pragma: no cover
+            update_dict.update(kwargs)
 
         update_dict = clean_empty_values(update_dict=update_dict)
 

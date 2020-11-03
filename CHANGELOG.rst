@@ -20,6 +20,7 @@ UNRELEASED (DDMMMYY)
 * :+1: Added `get_excluded_propmodel_ids()` method to the `MultiReferenceProperty` class.
 * :+1: Added `alignment` keyword arguments for the creation of `ServiceCardWidget` and `ServiceWidget` classes.
 * :+1: Added `ref` keyword to `create_activity()` method of `Client` class.
+* :+1: Added `category` keywords to `edit()` method of `Scope` class and enabled providing of keyword argument to all edit methods.
 
 Backwards incompatible changes
 ------------------------------

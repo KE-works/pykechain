@@ -11,6 +11,7 @@ from pykechain.enums import (
     KEChainPages,
     ScopeRoles,
     ScopeMemberActions,
+    ScopeCategory,
 )
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.scope2 import Scope2
@@ -241,9 +242,11 @@ class Scope(Base, TagsMixin, Scope2):
             start_date: Optional[Union[datetime, Empty]] = empty,
             due_date: Optional[Union[datetime, Empty]] = empty,
             status: Optional[Union[Text, ScopeStatus, Empty]] = empty,
+            category: Optional[Union[Text, ScopeCategory, Empty]] = empty,
             tags: Optional[Union[List[Text], Empty]] = empty,
             team: Optional[Union[Team, Text, Empty]] = empty,
             options: Optional[Union[Dict, Empty]] = empty,
+            **kwargs
     ) -> None:
         """
         Edit the details of a scope.
@@ -261,7 +264,9 @@ class Scope(Base, TagsMixin, Scope2):
                             aware preferred) or clear it
         :type due_date: datetime or None or Empty
         :param status: (optionally) edit the status of the scope as a string based. Status cannot be cleared.
-        :type status: basestring or None or Empty
+        :type status: ScopeStatus or Empty
+        :param category (optionally) edit the category of the scope
+        :type category: ScopeCategory or Empty
         :param tags: (optionally) replace the tags on a scope, which is a list of strings ["one","two","three"] or
                     clear them
         :type tags: list of basestring or None or Empty
@@ -311,16 +316,20 @@ class Scope(Base, TagsMixin, Scope2):
 
         """
         update_dict = {
-            'id': self.id,
-            'name': check_text(name, 'name') or self.name,
-            'text': check_text(description, 'description') or str(),
-            'start_date': check_datetime(start_date, 'start_date'),
-            'due_date': check_datetime(due_date, 'due_date'),
-            'status': check_enum(status, ScopeStatus, 'status') or self.status,
-            'tags': check_list_of_text(tags, 'tags', True) or list(),
-            'team_id': check_base(team, Team, 'team') or str(),
-            'scope_options': check_type(options, dict, 'options') or dict()
+            "id": self.id,
+            "name": check_text(name, "name") or self.name,
+            "text": check_text(description, "description") or str(),
+            "start_date": check_datetime(start_date, "start_date"),
+            "due_date": check_datetime(due_date, "due_date"),
+            "status": check_enum(status, ScopeStatus, "status") or self.status,
+            "category": check_enum(category, ScopeCategory, "category"),
+            "tags": check_list_of_text(tags, "tags", True) or list(),
+            "team_id": check_base(team, Team, "team") or str(),
+            "scope_options": check_type(options, dict, "options") or dict(),
         }
+        
+        if kwargs:  # pragma: no cover
+            update_dict.update(kwargs)
 
         update_dict = clean_empty_values(update_dict=update_dict)
 
