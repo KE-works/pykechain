@@ -1487,9 +1487,9 @@ class WidgetsManager(Iterable):
         :param source_projects_tags: Tags on which the source projects can be filtered on. Source is selected
             automatically as TAGGED_SCOPES
         :type source_projects_tags: list of tags
-        :param source_subprocess: Subprocess that the `Widget` uses as source. Source is selected
-            automatically as SUBPROCESS
-        :type source_subprocess: str (UUID of an `Activity`)
+        :param source_subprocess: Subprocess that the `Widget` uses as source. Source is selected automatically
+            SUBPROCESS
+        :type source_subprocess: list of str (UUID of an `Activity`)
         :param source_selected_scopes: List of `Scope` to be used by the `Widget` as source. Source is selected
             automatically as SELECTED_SCOPES
         :type source_selected_scopes: list of str (UUIDs of `Scopes`)
