@@ -6,30 +6,30 @@ envparse==0.2.0
 jsonschema==3.2.0
 
 # for version comparison
-semver==2.10.2
+semver==2.13.0
 
 # testing
-pytest==6.1.0
+pytest==6.1.2
 betamax==0.8.1
 coverage<=4.5.99
 pytest-cov==2.10.1
 coveralls==2.1.2
 
 # documentation
-Sphinx==3.2.1
+Sphinx==3.3.0
 nbsphinx==0.8.0
 
 # integration
-tox==3.20.0
+tox==3.20.1
 
 # code style
-flake8==3.8.3
+flake8==3.8.4
 pydocstyle==5.1.1
 mypy==0.782; python_version >= '3.4'
-pre-commit==2.7.1
+pre-commit==2.8.2
 
 # for package management (uploads)
 twine>=3.0.0; python_version >= '3.6'
 twine==3.2.0; python_version <= '3.5.99'
 
-pytz==2020.1
+pytz==2020.4

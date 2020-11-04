@@ -4,25 +4,31 @@ Change Log
 UNRELEASED (DDMMMYY)
 --------------------
 
-* :+1: Added the possibility to create a `ServiceCardWidget` through the `add_service_card_widget()` function.
-* :bug: Missing upper-case letter in `SideBarManager` caused a loss of the `override_sidebar` property.
-* :bug: `SidebarButton` class did not preserve all data from the scope options, losing display names in other languages. Editing of this values is now possible as well.
-* :+1: Added `refresh()` method on `SideBarManager` to reload the side-bar from KE-chain.
-* :star: Added the option to manage supervisor members on a scope for KE-chain 3 backends that support the supervisor member users. That is possble for releases of KE-chain 3 starting from June 2020. (version 3.7). #772
-* :+1: Changed the way edit functions work for `Part`, `Properties`, `Activity`, `Scope`, `Notification`, `Service`, `Team` and `Banner` classes. Passing inputs with value None in those functions will clear those attributes if possible. Not mentioning them will not overwrite their values.
+* :star: Added the option to manage supervisor members on a scope for KE-chain 3 backends that support the supervisor member users. That is possible for releases of KE-chain 3 starting from June 2020. (version 3.7). #772
+* :star: Added the possibility to create a `ServiceCardWidget` through the `add_service_card_widget()` function.
 
 * :bug: Updating or setting of widget associations with only readable and/or writable properties is now supported.
+* :bug: Missing upper-case letter in `SideBarManager` caused a loss of the `override_sidebar` property.
+* :bug: `SidebarButton` class did not preserve all data from the scope options, losing display names in other languages. Editing of this values is now possible as well.
+* :bug: Added a check whether the value of a single or multi select list `Property` is in the options when copying or moving a `Part`.
+
 * :+1: Created `PropertyValueFilter` class to manage (pre)filters of `MultiReferenceProperty` and `FilteredGridWidget` objects.
-* :+1: Added `get_prefilters()` and `get_excluded_propmodel_ids()` methods to the `MultiReferenceProperty` class.
+* :+1: Created `ScopeFilter` class to manage (pre)filters of `ScopeReferencesProperty`.
+
+* :+1: Added `refresh()` method on `SideBarManager` to reload the side-bar from KE-chain.
+* :+1: Added `get_prefilters()` and `set_prefilters()` method to all reference property classes by default, albeit raising a `NotImplementedError`. Implementations exist for `ScopeReferencesProperty` and `MultiReferenceProperty`.
+* :+1: Added `get_excluded_propmodel_ids()` method to the `MultiReferenceProperty` class.
 * :+1: Added `alignment` keyword arguments for the creation of `ServiceCardWidget` and `ServiceWidget` classes.
+* :+1: Added `ref` keyword to `create_activity()` method of `Client` class.
 
 Backwards incompatible changes
 ------------------------------
 
 The following changes are not compatible with previous functionality:
 
+* Changed the way edit functions work for `Part`, `Properties`, `Activity`, `Scope`, `Notification`, `Service`, `Team` and `Banner` classes. Passing inputs with value None in those functions will clear those attributes if possible. Not mentioning them will not overwrite their values.
 * The `overwrite` keyword argument in the `set_prefilters()` method of the `MultiReferenceProperty` now only overwrites prefilters if explicitly provided with new ones. Removing all prefilters is now supported with the keyword argument `clear`, also a boolean.
-* Specifying prefilters via separate lists of properties, values and filter types is planned to be deprecated in January 2021 in favor of using `PropertyValueFilter` objects as input.
+* Specifying prefilters via separate lists of properties, values and filter types is planned to be deprecated in January 2021 in favor of using `Filter` objects as input.
 
 v3.8.2 (18SEP20)
 ----------------
