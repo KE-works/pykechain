@@ -1456,12 +1456,12 @@ class WidgetsManager(Iterable):
         self,
         title: Optional[Union[bool, Text]] = False,
         parent_widget: Optional[Union[Widget, Text]] = None,
-        source_projects: [DashboardWidgetSourceScopes] = DashboardWidgetSourceScopes.CURRENT_PROJECT,
-        source_projects_tags: Optional[List] = None,
+        source_scopes: [DashboardWidgetSourceScopes] = DashboardWidgetSourceScopes.CURRENT_SCOPE,
+        source_scopes_tags: Optional[List] = None,
         source_subprocess: Optional[List] = None,
         source_selected_scopes: Optional[List] = None,
         show_tasks: Optional[List[DashboardWidgetShowTasks]] = None,
-        show_projects: Optional[List[DashboardWidgetShowScopes]] = None,
+        show_scopes: Optional[List[DashboardWidgetShowScopes]] = None,
         no_background: Optional[bool] = False,
         show_assignees: Optional[bool] = True,
         show_assignees_table: Optional[bool] = True,
@@ -1481,12 +1481,12 @@ class WidgetsManager(Iterable):
             * None: No title
         :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
         :type parent_widget: Widget or basestring or None
-        :param source_projects: The `Project(s)` to be used as source when displaying the Widget.
-            Defaults on CURRENT_PROJECT.
-        :type source_projects: basestring (see :class:`models.widgets.enums.DashboardWidgetSourceScopes`)
-        :param source_projects_tags: Tags on which the source projects can be filtered on. Source is selected
+        :param source_scopes: The `Project(s)` to be used as source when displaying the Widget.
+            Defaults on CURRENT_SCOPE.
+        :type source_scopes: basestring (see :class:`models.widgets.enums.DashboardWidgetSourceScopes`)
+        :param source_scopes_tags: Tags on which the source projects can be filtered on. Source is selected
             automatically as TAGGED_SCOPES
-        :type source_projects_tags: list of tags
+        :type source_scopes_tags: list of tags
         :param source_subprocess: Subprocess that the `Widget` uses as source. Source is selected automatically
             SUBPROCESS
         :type source_subprocess: list of str (UUID of an `Activity`)
@@ -1495,8 +1495,8 @@ class WidgetsManager(Iterable):
         :type source_selected_scopes: list of str (UUIDs of `Scopes`)
         :param show_tasks: Type of tasks to be displayed in the `Widget`. If left None, all of them will be selected
         :type show_tasks: list of basestring (see :class:`models.widgets.enums.DashboardWidgetShowTasks`)
-        :param show_projects: Type of scopes to be displayed in the `Widget`. If left None, all of them will be selected
-        :type show_projects: list of basestring (see :class:`models.widgets.enums.DashboardWidgetShowScopes`)
+        :param show_scopes: Type of scopes to be displayed in the `Widget`. If left None, all of them will be selected
+        :type show_scopes: list of basestring (see :class:`models.widgets.enums.DashboardWidgetShowScopes`)
         :param no_background: Reverse the shadows (default False)
         :type no_background: bool
         :param show_assignees: Show the assignees pie chart
@@ -1515,10 +1515,10 @@ class WidgetsManager(Iterable):
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
 
-        if source_projects_tags:
+        if source_scopes_tags:
             meta.update({
                 'source': DashboardWidgetSourceScopes.TAGGED_SCOPES,
-                'scopeTag': check_type(source_projects_tags, list, 'source_projects_tags')
+                'scopeTag': check_type(source_scopes_tags, list, 'source_scopes_tags')
             })
         elif source_subprocess:
             meta.update({
@@ -1532,7 +1532,7 @@ class WidgetsManager(Iterable):
             })
         else:
             meta.update({
-                'source': check_enum(source_projects, DashboardWidgetSourceScopes, 'source_projects')
+                'source': check_enum(source_scopes, DashboardWidgetSourceScopes, 'source_scopes')
             })
 
         show_tasks_list = list()
@@ -1560,7 +1560,7 @@ class WidgetsManager(Iterable):
                     })
 
         show_projects_list = list()
-        if show_projects is None:
+        if show_scopes is None:
             for value in DashboardWidgetShowScopes.values():
                 show_projects_list.append({
                     'name': value,
@@ -1570,7 +1570,7 @@ class WidgetsManager(Iterable):
         else:
             check_type(show_tasks, list, 'show_tasks')
             for value in DashboardWidgetShowScopes.values():
-                if value in show_projects:
+                if value in show_scopes:
                     show_projects_list.append({
                         'name': value,
                         'order': DashboardWidgetShowScopes.values().index(value),

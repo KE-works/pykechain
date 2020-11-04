@@ -6,14 +6,14 @@ class DashboardWidgetSourceScopes(Enum):
     Options to link the Dashboard Widget to a source.
 
     :cvar TAGGED_SCOPES: source is a list of tags
-    :cvar CURRENT_PROJECT: source is the current project
+    :cvar CURRENT_SCOPE: source is the current project
     :cvar SELECTED_SCOPES: source is a list of scopes
     :cvar SUBPROCESS: source is an activity
     :cvar OWN_SCOPES: source is list of scopes based on user
     """
 
     TAGGED_SCOPES = 'taggedScopes'
-    CURRENT_PROJECT = 'project'
+    CURRENT_SCOPE = 'project'
     SELECTED_SCOPES = 'selectedScopes'
     SUBPROCESS = 'subProcess'
     OWN_SCOPES = 'scopes'
@@ -39,11 +39,11 @@ class DashboardWidgetShowScopes(Enum):
     """
     Options to display information about scopes in a Dashboard widget.
 
-    :cvar TOTAL_PROJECTS: all the projects
-    :cvar CLOSED_PROJECTS: closed projects
-    :cvar OVERDUE_PROJECTS: projects that had their due date in the past
+    :cvar TOTAL_SCOPES: all the projects
+    :cvar CLOSED_SCOPES: closed projects
+    :cvar OVERDUE_SCOPES: projects that had their due date in the past
     """
 
-    TOTAL_PROJECTS = "TOTAL_PROJECTS"
-    CLOSED_PROJECTS = "CLOSED_PROJECTS"
-    OVERDUE_PROJECTS = "OVERDUE_PROJECTS"
+    TOTAL_SCOPES = "TOTAL_SCOPES"
+    CLOSED_SCOPES = "CLOSED_SCOPES"
+    OVERDUE_SCOPES = "OVERDUE_SCOPES"

@@ -732,9 +732,9 @@ class TestWidgetManagerInActivity(TestBetamax):
         )
         widget_tagged_projects = self.wm.add_dashboard_widget(
             title=title_widget_2,
-            source_projects_tags=['catalog-scope'],
+            source_scopes_tags=['catalog-scope'],
             show_tasks=[DashboardWidgetShowTasks.UNASSIGNED_TASKS, DashboardWidgetShowTasks.CLOSED_TASKS],
-            show_projects=[DashboardWidgetShowScopes.CLOSED_PROJECTS],
+            show_scopes=[DashboardWidgetShowScopes.CLOSED_SCOPES],
             show_assignees=False
         )
 
