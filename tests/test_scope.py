@@ -90,6 +90,9 @@ class TestScopeMembers(TestBetamax):
             'superuser',
             'testlead',
         ],
+        ScopeRoles.SUPERVISOR: [
+            'supervisor'
+        ],
         ScopeRoles.MEMBER: [
             'testuser',
         ]
@@ -99,7 +102,7 @@ class TestScopeMembers(TestBetamax):
         """Reset the scope members by removing all members and adding the defaults"""
         [self.project.remove_member(member=member['username']) for member in self.project.members()]
 
-        for role in [ScopeRoles.MANAGER, ScopeRoles.LEADMEMBER, ScopeRoles.MEMBER]:
+        for role in [ScopeRoles.MANAGER, ScopeRoles.LEADMEMBER, ScopeRoles.MEMBER, ScopeRoles.SUPERVISOR]:
             for member in self.DEFAULTS[role]:
                 self.project._update_scope_project_team(ScopeMemberActions.ADD, role, member)
 
@@ -124,26 +127,23 @@ class TestScopeMembers(TestBetamax):
 
         all_members = set(get_member_names())
         managers = set(get_member_names(is_manager=True))
+        supervisors = set(get_member_names(is_supervisor=True))
         non_managers = set(get_member_names(is_manager=False))
         leads = set(get_member_names(is_leadmember=True))
         non_leads = set(get_member_names(is_leadmember=False))
         basic_members = set(get_member_names(is_manager=False, is_leadmember=False))
-        lead_and_manager = set(get_member_names(is_manager=True, is_leadmember=True))
 
-        self.assertEqual(4, len(all_members), msg=','.join(all_members))
-        self.assertTrue(basic_members and leads and managers and lead_and_manager,
+        self.assertEqual(5, len(all_members), msg=','.join(all_members))
+        self.assertTrue(basic_members and leads and managers and supervisors,
                         msg='Test scope must have a member of every type!')
 
-        all_roles = basic_members | leads | managers | lead_and_manager
+        all_roles = basic_members | leads | managers | supervisors
         remaining_non_leads = all_roles - leads
         remaining_non_managers = all_roles - managers
 
         self.assertSetEqual(all_roles, all_members, msg='The sum of all roles should equal all members.')
         self.assertSetEqual(remaining_non_leads, non_leads)
         self.assertSetEqual(remaining_non_managers, non_managers)
-
-        self.assertTrue(lead_and_manager <= managers)
-        self.assertTrue(lead_and_manager <= leads)
 
     def test_add_member(self):
         member_to_be_added = 'anotheruser'
@@ -214,6 +214,24 @@ class TestScopeMembers(TestBetamax):
         self.assertTrue(leadmember_to_be_removed not in [leadmember['username'] for leadmember in project_leadmembers])
         project_leadmembers = self.project.members(is_leadmember=False)
         self.assertTrue(leadmember_to_be_removed in [leadmember['username'] for leadmember in project_leadmembers])
+
+    def test_add_supervisor(self):
+        supervisor_to_be_added = 'anotheruser'
+        # testing
+        self.project.add_supervisor(supervisor_to_be_added)
+        self.project = self.client.scope(pk=self.project.id)
+        project_supervisors = self.project.members(is_supervisor=True)
+        self.assertTrue(supervisor_to_be_added in [supervisor['username'] for supervisor in project_supervisors])
+
+    def test_remove_supervisor(self):
+        supervisor_to_be_removed = 'anotheruser'
+        # setUp
+        self.project.add_supervisor(supervisor_to_be_removed)
+        # testing
+        self.project.remove_supervisor(supervisor_to_be_removed)
+        self.project = self.client.scope(pk=self.project.id)
+        project_supervisors = self.project.members(is_supervisor=True)
+        self.assertTrue(supervisor_to_be_removed not in [supervisor['username'] for supervisor in project_supervisors])
 
 
 class TestScopeEdit(TestBetamax):
