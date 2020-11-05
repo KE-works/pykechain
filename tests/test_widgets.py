@@ -246,6 +246,26 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(new_title, live_widget.title)
         self.assertEqual(new_title, live_widget.title_visible)
 
+    def test_edit_widget_title_and_meta(self):
+        bike_part = self.project.part('Bike')
+        widget = self.wm.add_propertygrid_widget(
+            part_instance=bike_part,
+            writable_models=bike_part.model().properties,
+        )
+        new_title = "New title"
+        new_meta = dict(widget.meta)
+        new_meta.update({"showColumns": [ShowColumnTypes.UNIT, ShowColumnTypes.DESCRIPTION]})
+        widget.edit(
+            title=new_title,
+            meta=new_meta,
+        )
+
+        live_widget = self.client.widget(pk=widget.id)
+
+        self.assertEqual(new_title, live_widget.title)
+        self.assertEqual(new_title, live_widget.title_visible)
+        self.assertEqual([ShowColumnTypes.UNIT, ShowColumnTypes.DESCRIPTION], live_widget.meta["showColumns"])
+
     def test_widget_title(self):
         title = 'Hidden title'
         bike_part = self.project.part('Bike')

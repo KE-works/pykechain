@@ -315,7 +315,8 @@ class Widget(BaseInScope):
         update_dict = dict()
 
         if meta is not None:
-            update_dict.update(dict(meta=meta))
+            self.meta.update(meta)
+            update_dict.update(dict(meta=self.meta))
 
         if title is not None:
             self.meta.update({"customTitle": title, "showTitleValue": WidgetTitleValue.CUSTOM_TITLE})
