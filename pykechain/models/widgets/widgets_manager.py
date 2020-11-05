@@ -4,6 +4,8 @@ from typing import Iterable, Union, Optional, Text, Dict, List, Any
 from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, ScopeWidgetColumnTypes, \
     ProgressBarColors, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
     KEChainPages, Alignment
+from pykechain.models.widgets.enums import DashboardWidgetSourceScopes, DashboardWidgetShowTasks, \
+    DashboardWidgetShowScopes
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from pykechain.models.input_checks import check_enum, check_text, check_base, check_type, check_list_of_text
 from pykechain.models.value_filter import PropertyValueFilter
@@ -1088,7 +1090,7 @@ class WidgetsManager(Iterable):
                          search_filter: Optional[bool] = True,
                          **kwargs) -> Widget:
         """
-        Add a KE-chain Scope widget to the Widgetmanager and the activity.
+        Add a KE-chain Scope widget to the WidgetManager and the activity.
 
         The widget will be saved in KE-chain.
 
@@ -1443,6 +1445,157 @@ class WidgetsManager(Iterable):
 
         widget = self.create_widget(
             widget_type=WidgetTypes.SERVICECARD,
+            meta=meta,
+            title=title,
+            parent=parent_widget,
+            **kwargs
+        )
+        return widget
+
+    def add_dashboard_widget(
+        self,
+        title: Optional[Union[bool, Text]] = False,
+        parent_widget: Optional[Union[Widget, Text]] = None,
+        source_scopes: [DashboardWidgetSourceScopes] = DashboardWidgetSourceScopes.CURRENT_SCOPE,
+        source_scopes_tags: Optional[List] = None,
+        source_subprocess: Optional[List] = None,
+        source_selected_scopes: Optional[List] = None,
+        show_tasks: Optional[List[DashboardWidgetShowTasks]] = None,
+        show_scopes: Optional[List[DashboardWidgetShowScopes]] = None,
+        no_background: Optional[bool] = False,
+        show_assignees: Optional[bool] = True,
+        show_assignees_table: Optional[bool] = True,
+        show_open_task_assignees: Optional[bool] = True,
+        show_open_vs_closed_tasks: Optional[bool] = True,
+        show_open_closed_tasks_assignees: Optional[bool] = True,
+        **kwargs
+    ) -> Widget:
+        """
+        Add a KE-chain Dashboard Widget to the WidgetManager and the activity.
+
+        The widget will be saved in KE-chain
+
+        :param title: A custom title for the card widget
+            * False (default): Card name
+            * String value: Custom title
+            * None: No title
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or basestring or None
+        :param source_scopes: The `Project(s)` to be used as source when displaying the Widget.
+            Defaults on CURRENT_SCOPE.
+        :type source_scopes: basestring (see :class:`models.widgets.enums.DashboardWidgetSourceScopes`)
+        :param source_scopes_tags: Tags on which the source projects can be filtered on. Source is selected
+            automatically as TAGGED_SCOPES
+        :type source_scopes_tags: list of tags
+        :param source_subprocess: Subprocess that the `Widget` uses as source. Source is selected automatically
+            SUBPROCESS
+        :type source_subprocess: list of str (UUID of an `Activity`)
+        :param source_selected_scopes: List of `Scope` to be used by the `Widget` as source. Source is selected
+            automatically as SELECTED_SCOPES
+        :type source_selected_scopes: list of str (UUIDs of `Scopes`)
+        :param show_tasks: Type of tasks to be displayed in the `Widget`. If left None, all of them will be selected
+        :type show_tasks: list of basestring (see :class:`models.widgets.enums.DashboardWidgetShowTasks`)
+        :param show_scopes: Type of scopes to be displayed in the `Widget`. If left None, all of them will be selected
+        :type show_scopes: list of basestring (see :class:`models.widgets.enums.DashboardWidgetShowScopes`)
+        :param no_background: Reverse the shadows (default False)
+        :type no_background: bool
+        :param show_assignees: Show the assignees pie chart
+        :type show_assignees: bool
+        :param show_assignees_table: Show the assignees table
+        :type show_assignees_table: bool
+        :param show_open_task_assignees: Show the `Open tasks per assignees` pie chart
+        :type show_open_task_assignees: bool
+        :param show_open_vs_closed_tasks: Show the `Open vs closed tasks` pie chart
+        :type show_open_vs_closed_tasks: bool
+        :param show_open_closed_tasks_assignees: Show the `Open open and closed tasks per assignees` pie chart
+        :type show_open_closed_tasks_assignees: bool
+        :param kwargs:
+        :return:
+        """
+        meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
+        meta, title = _set_title(meta, title=title, **kwargs)
+
+        if source_scopes_tags:
+            meta.update({
+                'source': DashboardWidgetSourceScopes.TAGGED_SCOPES,
+                'scopeTag': check_type(source_scopes_tags, list, 'source_scopes_tags')
+            })
+        elif source_subprocess:
+            meta.update({
+                'source': DashboardWidgetSourceScopes.SUBPROCESS,
+                'scopeTag': check_type(source_subprocess, list, 'source_subprocess')
+            })
+        elif source_selected_scopes:
+            meta.update({
+                'source': DashboardWidgetSourceScopes.SELECTED_SCOPES,
+                'scopeList': check_type(source_selected_scopes, list, 'source_selected_scopes')
+            })
+        else:
+            meta.update({
+                'source': check_enum(source_scopes, DashboardWidgetSourceScopes, 'source_scopes')
+            })
+
+        show_tasks_list = list()
+        if show_tasks is None:
+            for value in DashboardWidgetShowTasks.values():
+                show_tasks_list.append({
+                    'name': value,
+                    'order': DashboardWidgetShowTasks.values().index(value),
+                    'selected': True
+                })
+        else:
+            check_type(show_tasks, list, 'show_tasks')
+            for value in DashboardWidgetShowTasks.values():
+                if value in show_tasks:
+                    show_tasks_list.append({
+                        'name': value,
+                        'order': DashboardWidgetShowTasks.values().index(value),
+                        'selected': True
+                    })
+                else:
+                    show_tasks_list.append({
+                        'name': value,
+                        'order': DashboardWidgetShowTasks.values().index(value),
+                        'selected': False
+                    })
+
+        show_projects_list = list()
+        if show_scopes is None:
+            for value in DashboardWidgetShowScopes.values():
+                show_projects_list.append({
+                    'name': value,
+                    'order': DashboardWidgetShowScopes.values().index(value),
+                    'selected': True
+                })
+        else:
+            check_type(show_tasks, list, 'show_tasks')
+            for value in DashboardWidgetShowScopes.values():
+                if value in show_scopes:
+                    show_projects_list.append({
+                        'name': value,
+                        'order': DashboardWidgetShowScopes.values().index(value),
+                        'selected': True
+                    })
+                else:
+                    show_projects_list.append({
+                        'name': value,
+                        'order': DashboardWidgetShowScopes.values().index(value),
+                        'selected': False
+                    })
+        meta.update({
+            'showNumbers': show_tasks_list,
+            'showNumbersProjects': show_projects_list,
+            'noBackground': check_type(no_background, bool, 'no_background'),
+            'showAssignees': check_type(show_assignees, bool, 'show_assignees'),
+            'showAssigneesTable': check_type(show_assignees_table, bool, 'show_assignees_table'),
+            'showOpenTaskAssignees': check_type(show_open_task_assignees, bool, 'show_open_task_assignees'),
+            'showOpenVsClosedTasks': check_type(show_open_vs_closed_tasks, bool, 'show_open_vs_closed_tasks'),
+            'showOpenClosedTasksAssignees': check_type(
+                show_open_closed_tasks_assignees, bool, 'show_open_closed_tasks_assignees')
+        })
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.DASHBOARD,
             meta=meta,
             title=title,
             parent=parent_widget,
