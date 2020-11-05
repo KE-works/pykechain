@@ -1,12 +1,13 @@
 Change Log
 ==========
 
-UNRELEASED (DDMMMYY)
---------------------
+v3.9.0 (05NOV20)
+----------------
 
 * :star: Added the option to manage supervisor members on a scope for KE-chain 3 backends that support the supervisor member users. That is possible for releases of KE-chain 3 starting from June 2020. (version 3.7). #772
 * :star: Added the possibility to create a `ServiceCardWidget` through the `add_service_card_widget()` function.
 * :star: Added the possibility to create a `DashboardWidget` through the `add_dashboard_widget()` function.
+
 * :bug: Updating or setting of widget associations with only readable and/or writable properties is now supported.
 * :bug: Missing upper-case letter in `SideBarManager` caused a loss of the `override_sidebar` property.
 * :bug: `SidebarButton` class did not preserve all data from the scope options, losing display names in other languages. Editing of this values is now possible as well.
