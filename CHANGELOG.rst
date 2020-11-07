@@ -1,6 +1,8 @@
 Change Log
 ==========
 
+* :+1: Editing the `title` and `meta` of a `Widget` can now be performed simultaneously.
+
 v3.9.0 (05NOV20)
 ----------------
 
