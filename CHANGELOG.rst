@@ -3,6 +3,12 @@ Change Log
 
 * :+1: Editing the `title` and `meta` of a `Widget` can now be performed simultaneously.
 
+Backwards incompatible changes
+------------------------------
+
+* Deleted `pykechain/models/customization.py`
+* Deleted enumeration class `ComponentXType`
+
 v3.9.0 (05NOV20)
 ----------------
 
