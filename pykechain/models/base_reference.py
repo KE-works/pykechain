@@ -91,7 +91,7 @@ class _ReferenceProperty(Property):
         pass  # pragma: no cover
 
     @staticmethod
-    def chunks(lst: List[Any], n: int = 100):
+    def chunks(lst: List[Any], n: Optional[int] = 100) -> List:
         """
         Yield successive n-sized chunks from lst.
 
