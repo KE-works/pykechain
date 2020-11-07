@@ -95,6 +95,8 @@ class _ReferenceProperty(Property):
         """
         Yield successive n-sized chunks from lst.
 
+        source: https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
+
         :param lst: list of any type
         :param n: chunk size, defaults to 100
         :returns slice from original list
