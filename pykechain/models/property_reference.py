@@ -49,7 +49,9 @@ class ScopeReferencesProperty(_ReferenceProperty):
 
         scopes = []
         if scope_ids:
-            scopes = list(self._client.scopes(id__in=",".join(scope_ids), status=None))
+            scopes = list()
+            for chunk in self.chunks(scope_ids):
+                scopes += list(self._client.scopes(id__in=",".join(chunk), status=None))
         return scopes
 
     def set_prefilters(
@@ -144,7 +146,9 @@ class UserReferencesProperty(_ReferenceProperty):
 
         users = []
         if user_ids:
-            users = list(self._client.users(id__in=",".join(user_ids)))
+            users = list()
+            for chunk in self.chunks(user_ids):
+                users = list(self._client.users(id__in=",".join(chunk)))
         return users
 
     def value_ids(self) -> Optional[List[int]]:

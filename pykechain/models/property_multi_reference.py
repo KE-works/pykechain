@@ -39,11 +39,13 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
                 else:
                     models = self.model().value
                 if models:
-                    parts = list(self._client.parts(
-                        id__in=','.join(part_ids),
-                        model=models[0],
-                        category=None,
-                    ))
+                    parts = list()
+                    for chunk in self.chunks(part_ids):
+                        parts += list(self._client.parts(
+                            id__in=','.join(chunk),
+                            model=models[0],
+                            category=None,
+                        ))
         return parts
 
     def choices(self) -> List[Part]:

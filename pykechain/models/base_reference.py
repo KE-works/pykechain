@@ -90,6 +90,19 @@ class _ReferenceProperty(Property):
         """
         pass  # pragma: no cover
 
+    @staticmethod
+    def chunks(lst: List[Any], n: int = 100):
+        """
+        Yield successive n-sized chunks from lst.
+
+        :param lst: list of any type
+        :param n: chunk size, defaults to 100
+        :returns slice from original list
+        :rtype list
+        """
+        for i in range(0, len(lst), n):
+            yield lst[i:i + n]
+
     def serialize_value(self, value: Union[Base, List, Tuple]) -> Optional[List[Text]]:
         """
         Serialize the value to be set on the property by checking for a list of Base objects.
