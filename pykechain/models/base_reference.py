@@ -1,6 +1,7 @@
 from abc import abstractmethod, ABC
 from typing import Optional, Any, Text, Union, Tuple, List
 
+from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Property, Base
 from pykechain.models.base import BaseInScope
@@ -91,7 +92,7 @@ class _ReferenceProperty(Property):
         pass  # pragma: no cover
 
     @staticmethod
-    def chunks(lst: List[Any], n: Optional[int] = 100) -> List:
+    def chunks(lst: List[Any], n: Optional[int] = PARTS_BATCH_LIMIT) -> List:
         """
         Yield successive n-sized chunks from lst.
 
