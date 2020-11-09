@@ -6,7 +6,7 @@ Change Log
 Backwards incompatible changes
 ------------------------------
 
-* Deleted `pykechain/models/customization.py`
+* As planned and marked with a PendingDeprecationWarning we deprecate the customizations of Activities. This can only be done with old KE-chain versions which are no longer available in production. 
 * Deleted enumeration class `ComponentXType`
 
 v3.9.0 (05NOV20)
