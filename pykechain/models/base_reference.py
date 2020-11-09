@@ -131,7 +131,7 @@ class _ReferenceProperty(Property):
 
         :return: None
         """
-        NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
+        raise NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
 
     def get_prefilters(self):
         """
@@ -139,7 +139,7 @@ class _ReferenceProperty(Property):
 
         :return: list of filter values.
         """
-        NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
+        raise NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
 
 
 class _ReferencePropertyInScope(_ReferenceProperty, ABC):
