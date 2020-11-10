@@ -41,7 +41,8 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
                 if models:
                     parts = list()
                     for chunk in self.chunks(part_ids):
-                        parts += list(self._client.parts(
+                        parts.extend(
+                            list(self._client.parts(
                             id__in=','.join(chunk),
                             model=models[0],
                             category=None,
