@@ -94,7 +94,7 @@ class _ReferenceProperty(Property):
     @staticmethod
     def chunks(lst: List[Any], n: Optional[int] = PARTS_BATCH_LIMIT) -> List:
         """
-        Yield successive n-sized chunks from lst.
+        Yield successive n-sized chunks from a list.
 
         source: https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
