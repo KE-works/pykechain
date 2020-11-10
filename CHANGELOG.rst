@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-* :bug: Retrieving the `value` of any reference property is now performed in batches to limit request size, using the new `chunks()` method.
+* :+1: Retrieving the `value` of any reference property is now performed in batches to limit request size, using the new `chunks()` method.
 
 * :+1: Editing the `title` and `meta` of a `Widget` can now be performed simultaneously.
 
