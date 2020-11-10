@@ -43,10 +43,11 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
                     for chunk in self.chunks(part_ids):
                         parts.extend(
                             list(self._client.parts(
-                            id__in=','.join(chunk),
-                            model=models[0],
-                            category=None,
-                        ))
+                                id__in=','.join(chunk),
+                                model=models[0],
+                                category=None,
+                            ))
+                        )
         return parts
 
     def choices(self) -> List[Part]:
