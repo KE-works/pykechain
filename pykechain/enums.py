@@ -182,48 +182,6 @@ activity_root_name_by_classification = {
 }
 
 
-class ComponentXType(Enum):
-    """The various inspectortypes supported in the customized task in KE-chain.
-
-    :cvar PANEL: panel
-    :cvar TOOLBAR: toolbar
-    :cvar PROPERTYGRID: propertyGrid
-    :cvar SUPERGRID: superGrid
-    :cvar PAGINATEDSUPERGRID: paginatedSuperGrid
-    :cvar FILTEREDGRID: filteredGrid
-    :cvar DISPLAYFIELD: displayfield
-    :cvar PROPERTYATTACHMENTPREVIEWER: propertyAttachmentViewer
-    :cvar HTMLPANEL: htmlPanel
-    :cvar EXECUTESERVICE: executeService
-    :cvar NOTEBOOKPANEL: notebookPanel
-    :cvar BUTTON: button
-    :cvar MODELVIEWER: modelViewer
-    :cvar CSVGRID: csvGrid
-    :cvar JSONTREE: jsonTree
-    """
-
-    PANEL = "panel"
-    TOOLBAR = "toolbar"
-    PROPERTYGRID = "propertyGrid"
-    SUPERGRID = "superGrid"
-    PAGINATEDSUPERGRID = "paginatedSuperGrid"
-    FILTEREDGRID = "filteredGrid"
-    DISPLAYFIELD = "displayfield"
-    # in 1.13.1
-    PROPERTYATTACHMENTPREVIEWER = "propertyAttachmentViewer"
-    HTMLPANEL = "htmlPanel"
-    EXECUTESERVICE = "executeService"
-    NOTEBOOKPANEL = "notebookPanel"
-    # Issue #279:
-    ACTIVITYNAVIGATIONBAR = "activityNavigationBar"
-
-    # for RND
-    BUTTON = "button"
-    MODELVIEWER = "modelViewer"
-    CSVGRID = "csvGrid"
-    JSONTREE = "jsonTree"
-
-
 class WidgetNames(Enum):
     """The various Names of the Widget that can be configured.
 
@@ -342,12 +300,6 @@ default_metapanel_widget = dict(
     meta=dict(
         showAll=True,
     ),
-)
-
-default_activity_customization = dict(
-    ext=dict(
-        widgets=[default_metapanel_widget]
-    )
 )
 
 
