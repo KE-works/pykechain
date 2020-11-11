@@ -31,6 +31,10 @@ RETRY_TOTAL = 10
 # If the backoff_factor is 0.1, then sleep() will sleep for [0.0s, 0.2s, 0.4s, …] between retries.
 RETRY_BACKOFF_FACTOR = 0.8
 
+
+# Batching of parts when a large number of parts are requested at once
+PARTS_BATCH_LIMIT = 100  # number of parts
+
 #
 # API Paths and API Extra Parameters
 #
