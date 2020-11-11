@@ -1,6 +1,7 @@
 from abc import abstractmethod, ABC
 from typing import Optional, Any, Text, Union, Tuple, List
 
+from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Property, Base
 from pykechain.models.base import BaseInScope
@@ -90,6 +91,21 @@ class _ReferenceProperty(Property):
         """
         pass  # pragma: no cover
 
+    @staticmethod
+    def chunks(lst: List[Any], n: Optional[int] = PARTS_BATCH_LIMIT) -> List:
+        """
+        Yield successive n-sized chunks from a list.
+
+        source: https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
+
+        :param lst: list of any type
+        :param n: chunk size, defaults to 100
+        :returns slice from original list
+        :rtype list
+        """
+        for i in range(0, len(lst), n):
+            yield lst[i:i + n]
+
     def serialize_value(self, value: Union[Base, List, Tuple]) -> Optional[List[Text]]:
         """
         Serialize the value to be set on the property by checking for a list of Base objects.
@@ -115,7 +131,7 @@ class _ReferenceProperty(Property):
 
         :return: None
         """
-        NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
+        raise NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
 
     def get_prefilters(self):
         """
@@ -123,7 +139,7 @@ class _ReferenceProperty(Property):
 
         :return: list of filter values.
         """
-        NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
+        raise NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
 
 
 class _ReferencePropertyInScope(_ReferenceProperty, ABC):

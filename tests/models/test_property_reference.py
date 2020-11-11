@@ -1,6 +1,9 @@
+from unittest import TestCase
+
 from pykechain.enums import PropertyType, FilterType, Multiplicity, ActivityRootNames
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import MultiReferenceProperty
+from pykechain.models.base_reference import _ReferenceProperty
 from pykechain.models.property_reference import (
     ActivityReferencesProperty,
     ScopeReferencesProperty,
@@ -10,6 +13,32 @@ from pykechain.models.validators import RequiredFieldValidator
 from pykechain.models.value_filter import PropertyValueFilter, ScopeFilter
 from pykechain.utils import find, is_uuid
 from tests.classes import TestBetamax
+
+
+class TestBaseReference(TestCase):
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.base_ref = _ReferenceProperty(json=dict(), client=None)
+
+    def test_chunks(self):
+        chunks = self.base_ref.chunks(
+            lst=list(range(77)),
+            n=9,
+        )
+
+        import types
+        self.assertIsInstance(chunks, types.GeneratorType)
+
+        chunks_list = list(chunks)
+        self.assertEqual(9, len(chunks_list))
+
+    def test_prefilters(self):
+        with self.assertRaises(NotImplementedError):
+            self.base_ref.set_prefilters()
+
+        with self.assertRaises(NotImplementedError):
+            self.base_ref.get_prefilters()
 
 
 class TestMultiReferenceProperty(TestBetamax):
