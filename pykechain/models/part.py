@@ -2,7 +2,7 @@ from typing import Union, List, Dict, Optional, Text, Tuple, Any  # noqa: F401
 
 import requests
 
-from pykechain.defaults import API_EXTRA_PARAMS
+from pykechain.defaults import API_EXTRA_PARAMS, PARTS_BATCH_LIMIT
 from pykechain.enums import Category, Multiplicity, Classification, PropertyType
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
 from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
@@ -259,7 +259,7 @@ class Part(TreeObject, Part2):
             raise NotFoundError('{} has no matching child.{}'.format(self, criteria))
         return part
 
-    def populate_descendants(self, batch: int = 200) -> None:
+    def populate_descendants(self, batch: int = PARTS_BATCH_LIMIT) -> None:
         """
         Retrieve the descendants of a specific part in a list of dicts and populate the :func:`Part.children()` method.
 
@@ -272,7 +272,7 @@ class Part(TreeObject, Part2):
         .. versionchanged:: 3.3.2 now populates child parts instead of this part
 
         :param batch: Number of Parts to be retrieved in a batch
-        :type batch: int (defaults to 200)
+        :type batch: int (defaults to 100)
         :returns: None
         :raises APIError: if you cannot create the children tree.
 
