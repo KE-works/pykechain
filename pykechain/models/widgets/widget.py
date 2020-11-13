@@ -8,6 +8,7 @@ from pykechain.enums import WidgetTypes, Category, WidgetTitleValue
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import BaseInScope
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
+from pykechain.utils import Empty, empty
 
 
 class Widget(BaseInScope):
@@ -300,7 +301,7 @@ class Widget(BaseInScope):
 
     def edit(
             self,
-            title: Optional[AnyStr] = None,
+            title: Optional[Union[AnyStr, Empty]] = empty,
             meta: Optional[Dict] = None,
             **kwargs
     ) -> None:
@@ -318,9 +319,13 @@ class Widget(BaseInScope):
             self.meta.update(meta)
             update_dict.update(dict(meta=self.meta))
 
-        if title is not None:
-            self.meta.update({"customTitle": title, "showTitleValue": WidgetTitleValue.CUSTOM_TITLE})
-            update_dict.update(dict(title=title, meta=self.meta))
+        if title is not empty:
+            if title is None:
+                self.meta.update({"customTitle": "", "showTitleValue": WidgetTitleValue.NO_TITLE})
+                update_dict.update(dict(meta=self.meta))
+            else:
+                self.meta.update({"customTitle": title, "showTitleValue": WidgetTitleValue.CUSTOM_TITLE})
+                update_dict.update(dict(title=title, meta=self.meta))
 
         if kwargs:  # pragma: no cover
             update_dict.update(**kwargs)
