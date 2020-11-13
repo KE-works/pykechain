@@ -261,6 +261,14 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertIsNone(live_widget.title_visible)
         self.assertEqual(WidgetTitleValue.NO_TITLE, live_widget.meta.get("showTitleValue"))
 
+        widget.edit(title=False)
+
+        live_widget = self.client.widget(pk=widget.id)
+
+        self.assertFalse(live_widget.title)
+        self.assertEqual("Bike", live_widget.title_visible)
+        self.assertEqual(WidgetTitleValue.DEFAULT, live_widget.meta.get("showTitleValue"))
+
     def test_edit_widget_title_and_meta(self):
         bike_part = self.project.part('Bike')
         widget = self.wm.add_propertygrid_widget(
