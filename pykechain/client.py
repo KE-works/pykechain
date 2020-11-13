@@ -544,7 +544,7 @@ class Client(object):
         request_params = {
             'id': check_uuid(pk),
             'name': check_text(text=name, key='name'),
-            'scope': scope
+            'scope_id': check_base(scope, Scope, "scope"),
         }
 
         request_params.update(API_EXTRA_PARAMS['activity'])
