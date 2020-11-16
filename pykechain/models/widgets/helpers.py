@@ -16,10 +16,16 @@ from pykechain.enums import (
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_enum
 from pykechain.models.value_filter import PropertyValueFilter
+from pykechain.models.widgets.enums import MetaWidget
 from pykechain.utils import is_uuid, snakecase, camelcase
 
 # these are the common keys to all kecards.
-KECARD_COMMON_KEYS = ["collapsed", "collapsible", "noBackground", "noPadding", "isDisabled", "isMerged"]
+KECARD_COMMON_KEYS = [MetaWidget.COLLAPSED,
+                      MetaWidget.COLLAPSIBLE,
+                      MetaWidget.NO_BACKGROUND,
+                      MetaWidget.NO_PADDING,
+                      MetaWidget.IS_DISABLED,
+                      MetaWidget.IS_MERGED]
 
 
 def _retrieve_object(obj: Union['Base', Text], method: Callable) -> Union['Base']:
@@ -114,8 +120,8 @@ def _set_title(
         title = None
 
     meta.update({
-        "showTitleValue": show_title_value,
-        "customTitle": title,
+        MetaWidget.SHOW_TITLE_VALUE: show_title_value,
+        MetaWidget.CUSTOM_TITLE: title,
     })
     return meta, title
 
@@ -151,8 +157,8 @@ def _set_description(
         raise IllegalArgumentError("When using the add_card_widget or add_service_card_widget, 'description' must be "
                                    "'text_type' or None or False. Type is: {}".format(type(description)))
     meta.update({
-        "showDescriptionValue": show_description_value,
-        "customDescription": description
+        MetaWidget.SHOW_DESCRIPTION_VALUE: show_description_value,
+        MetaWidget.CUSTOM_DESCRIPTION: description
     })
     return meta
 
@@ -197,33 +203,33 @@ def _set_link(
             default_link_value = CardWidgetLinkValue.TREE_VIEW
 
         meta.update({
-            'customLink': link.id,
-            'showLinkValue': default_link_value,
+            MetaWidget.CUSTOM_LINK: link.id,
+            MetaWidget.SHOW_LINK_VALUE: default_link_value,
         })
     elif isinstance(link, str) and is_uuid(link):
         meta.update({
-            'customLink': link,
-            'showLinkValue': CardWidgetLinkValue.TASK_LINK,
+            MetaWidget.CUSTOM_LINK: link,
+            MetaWidget.SHOW_LINK_VALUE: CardWidgetLinkValue.TASK_LINK,
         })
     elif link is None or link is False:
         meta.update({
-            'customLink': None,
-            'showLinkValue': CardWidgetLinkValue.NO_LINK,
+            MetaWidget.CUSTOM_LINK: None,
+            MetaWidget.SHOW_LINK_VALUE: CardWidgetLinkValue.NO_LINK,
         })
     elif link in KEChainPages.values():
         meta.update({
-            'customLink': "",
-            'showLinkValue': CardWidgetKEChainPageLink[link],
+            MetaWidget.CUSTOM_LINK: "",
+            MetaWidget.SHOW_LINK_VALUE: CardWidgetKEChainPageLink[link],
         })
     else:
         meta.update({
-            'customLink': link,
-            'showLinkValue': CardWidgetLinkValue.EXTERNAL_LINK,
+            MetaWidget.CUSTOM_LINK: link,
+            MetaWidget.SHOW_LINK_VALUE: CardWidgetLinkValue.EXTERNAL_LINK,
         })
 
     if link_value is not None:
         meta.update({
-            'showLinkValue': check_enum(link_value, CardWidgetLinkValue, 'link_value'),
+            MetaWidget.SHOW_LINK_VALUE: check_enum(link_value, CardWidgetLinkValue, 'link_value'),
         })
 
     return meta
@@ -252,18 +258,18 @@ def _set_image(
     :rtype: dict
     :raises IllegalArgumentError: When illegal `image` type is used.
     """
-    meta['imageFit'] = check_enum(image_fit, ImageFitValue, 'image_fit')
+    meta[MetaWidget.IMAGE_FIT] = check_enum(image_fit, ImageFitValue, 'image_fit')
 
     from pykechain.models import Property
     if isinstance(image, Property) and image.type == PropertyType.ATTACHMENT_VALUE:
         meta.update({
-            'customImage': "/api/v3/properties/{}/preview".format(image.id),
-            'showImageValue': CardWidgetImageValue.CUSTOM_IMAGE
+            MetaWidget.CUSTOM_IMAGE: "/api/v3/properties/{}/preview".format(image.id),
+            MetaWidget.SHOW_IMAGE_VALUE: CardWidgetImageValue.CUSTOM_IMAGE
         })
     elif image is None:
         meta.update({
-            'customImage': None,
-            'showImageValue': CardWidgetImageValue.NO_IMAGE
+            MetaWidget.CUSTOM_IMAGE: None,
+            MetaWidget.SHOW_IMAGE_VALUE: CardWidgetImageValue.NO_IMAGE
         })
     else:
         raise IllegalArgumentError("When using the add_card_widget or add_service_card_widget, 'description' must be "
@@ -308,8 +314,8 @@ def _set_button_text(
         show_button_value = "Custom text"
         button_text = str(custom_button_text)
     meta.update({
-        'showButtonValue': show_button_value,
-        'customText': button_text,
+        MetaWidget.SHOW_BUTTON_VALUE: show_button_value,
+        MetaWidget.CUSTOM_TEXT: button_text,
     })
     return meta
 
@@ -345,8 +351,8 @@ def _initiate_meta(kwargs, activity, ignores=()):
             meta[camelcase(key)] = kwargs.pop(key)
 
     # we check for custom_height specifically and deal with it.
-    if snakecase('customHeight') in kwargs:
-        meta['customHeight'] = kwargs.pop(snakecase("customHeight"))
+    if snakecase(MetaWidget.CUSTOM_HEIGHT) in kwargs:
+        meta[MetaWidget.CUSTOM_HEIGHT] = kwargs.pop(snakecase(MetaWidget.CUSTOM_HEIGHT))
 
     # remove the 'ignores' from the meta
     for key in ignores:
@@ -367,9 +373,9 @@ def _check_prefilters(part_model: 'Part', prefilters: Union[Dict, List]) -> List
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
     if isinstance(prefilters, dict):
-        property_models = prefilters.get('property_models', [])  # type: List[Property, Text]  # noqa
-        values = prefilters.get('values', [])
-        filters_type = prefilters.get('filters_type', [])
+        property_models = prefilters.get(MetaWidget.PROPERTY_MODELS, [])  # type: List[Property, Text]  # noqa
+        values = prefilters.get(MetaWidget.VALUES, [])
+        filters_type = prefilters.get(MetaWidget.FILTERS_TYPE, [])
 
         if any(len(lst) != len(property_models) for lst in [values, filters_type]):
             raise IllegalArgumentError('The lists of "property_models", "values" and "filters_type" should be the '
