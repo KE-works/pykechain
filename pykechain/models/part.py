@@ -111,12 +111,14 @@ class Part(TreeObject, Part2):
     # Family and structure methods
     #
 
-    def property(self, name: Text = None) -> 'AnyProperty':
+    def property(self, name: Text = None, ref: Text = None) -> 'AnyProperty':
         """Retrieve the property belonging to this part based on its name or uuid.
 
-        :param name: property name, ref or property UUID to search for
+        :param name: property name or property UUID to search for
+        :param ref: slugified name of the property
         :return: a single :class:`Property`
         :raises NotFoundError: if the `Property` is not part of the `Part`
+        :raises MultipleFoundError
 
         Example
         -------
@@ -134,15 +136,24 @@ class Part(TreeObject, Part2):
         6
 
         """
-        if is_uuid(name):
-            found = find(self.properties, lambda p: name == p.id)
+        if name:
+            if is_uuid(name):
+                matches = [p for p in self.properties if p.id == name]
+            else:
+                matches = [p for p in self.properties if p.name == name]
+        elif ref:
+            matches = [p for p in self.properties if p.ref == ref]
         else:
-            found = find(self.properties, lambda p: name == p.name or name == p.ref)
+            raise IllegalArgumentError("Must specify valid name (or UUID) or ref to identify the property")
 
-        if not found:
-            raise NotFoundError("Could not find property with name, ref or id '{}'".format(name))
+        criteria = " with arguments {}: {}".format("name" if name else "ref", name if name else ref)
 
-        return found
+        if not matches:
+            raise NotFoundError("Could not find a property" + criteria)
+        elif len(matches) > 1:
+            raise MultipleFoundError("Found multiple properties" + criteria)
+        else:
+            return matches[0]
 
     def scope(self) -> 'Scope':
         """Scope this Part belongs to.

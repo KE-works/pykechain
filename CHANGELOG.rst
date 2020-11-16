@@ -10,6 +10,7 @@ Backwards incompatible changes
 
 * As planned and marked with a PendingDeprecationWarning we deprecate the customizations of Activities. This can only be done with old KE-chain versions which are no longer available in production. 
 * Deleted enumeration class `ComponentXType`
+* Retrieving a single `Property` from a `Part` using the `property()` method now has separate keyword arguments for `name` (which also allows for a UUID) and `ref`.
 
 v3.9.0 (05NOV20)
 ----------------
