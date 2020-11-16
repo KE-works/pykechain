@@ -102,9 +102,9 @@ class TestPartsCopyMove(TestBetamax):
         # testing
         self.assertTrue(copied_instance)
         self.assertEqual(len(copied_instance.properties), 5)
-        self.assertTrue(copied_instance.property('__property-single-text'))
-        self.assertEqual(copied_instance.property('__property-decimal-number').value, 33)
-        self.assertEqual(copied_instance.property('__property-single-select-list').value, None)
+        self.assertTrue(copied_instance.property(ref='__property-single-text'))
+        self.assertEqual(copied_instance.property(ref='__property-decimal-number').value, 33)
+        self.assertEqual(copied_instance.property(ref='__property-single-select-list').value, None)
 
         self.assertEqual(len(copied_instance._cached_children), 2)
 
@@ -158,9 +158,9 @@ class TestPartsCopyMove(TestBetamax):
         self.assertTrue(copied_instance)
         self.assertEqual(copied_instance.name, '__Copied instance')
         self.assertEqual(len(copied_instance.properties), len(self.model_to_be_copied.properties))
-        self.assertEqual(copied_instance.property('__property-single-text').value, None)
-        self.assertEqual(copied_instance.property('__property-decimal-number').value, 33)
-        self.assertEqual(copied_instance.property('__property-single-select-list').value, None)
+        self.assertEqual(copied_instance.property(ref='__property-single-text').value, None)
+        self.assertEqual(copied_instance.property(ref='__property-decimal-number').value, 33)
+        self.assertEqual(copied_instance.property(ref='__property-single-select-list').value, None)
 
         self.assertEqual(len(copied_instance._cached_children), 2)
 
