@@ -112,11 +112,12 @@ class Part(TreeObject, Part2):
     #
 
     def property(self, name: Text = None) -> 'AnyProperty':
-        """Retrieve the property belonging to this part based on its name or uuid.
+        """Retrieve the property belonging to this part based on its name, ref or uuid.
 
-        :param name: property name, ref or property UUID to search for
+        :param name: property name, ref or UUID to search for
         :return: a single :class:`Property`
         :raises NotFoundError: if the `Property` is not part of the `Part`
+        :raises MultipleFoundError
 
         Example
         -------
@@ -135,14 +136,18 @@ class Part(TreeObject, Part2):
 
         """
         if is_uuid(name):
-            found = find(self.properties, lambda p: name == p.id)
+            matches = [p for p in self.properties if p.id == name]
         else:
-            found = find(self.properties, lambda p: name == p.name or name == p.ref)
+            matches = [p for p in self.properties if p.name == name]
+            if not matches:
+                matches = [p for p in self.properties if p.ref == name]
 
-        if not found:
-            raise NotFoundError("Could not find property with name, ref or id '{}'".format(name))
-
-        return found
+        if not matches:
+            raise NotFoundError("Could not find a property with name, id or ref: {}".format(name))
+        elif len(matches) > 1:
+            raise MultipleFoundError("Found multiple properties with name, id or ref: {}".format(name))
+        else:
+            return matches[0]
 
     def scope(self) -> 'Scope':
         """Scope this Part belongs to.
