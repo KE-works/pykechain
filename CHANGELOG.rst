@@ -1,6 +1,8 @@
 Change Log
 ==========
 
+* :bug: In the `Part.property()` method, the property is retrieved by matching a `name` prior to matching a `ref`.
+
 * :+1: Retrieving the `value` of any reference property is now performed in batches to limit request size, using the new `chunks()` method.
 * :+1: Editing the `title` and `meta` of a `Widget` can now be performed simultaneously and `title` can be cleared by providing `None`.
 
@@ -9,7 +11,6 @@ Backwards incompatible changes
 
 * As planned and marked with a PendingDeprecationWarning we deprecate the customizations of Activities. This can only be done with old KE-chain versions which are no longer available in production. 
 * Deleted enumeration class `ComponentXType`
-* Retrieving a single `Property` from a `Part` using the `property()` method now has separate keyword arguments for `name` (which also allows for a UUID) and `ref`.
 
 v3.9.0 (05NOV20)
 ----------------

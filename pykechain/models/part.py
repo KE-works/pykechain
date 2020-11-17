@@ -111,11 +111,10 @@ class Part(TreeObject, Part2):
     # Family and structure methods
     #
 
-    def property(self, name: Text = None, ref: Text = None) -> 'AnyProperty':
-        """Retrieve the property belonging to this part based on its name or uuid.
+    def property(self, name: Text = None) -> 'AnyProperty':
+        """Retrieve the property belonging to this part based on its name, ref or uuid.
 
-        :param name: property name or property UUID to search for
-        :param ref: slugified name of the property
+        :param name: property name, ref or UUID to search for
         :return: a single :class:`Property`
         :raises NotFoundError: if the `Property` is not part of the `Part`
         :raises MultipleFoundError
@@ -136,22 +135,17 @@ class Part(TreeObject, Part2):
         6
 
         """
-        if name:
-            if is_uuid(name):
-                matches = [p for p in self.properties if p.id == name]
-            else:
-                matches = [p for p in self.properties if p.name == name]
-        elif ref:
-            matches = [p for p in self.properties if p.ref == ref]
+        if is_uuid(name):
+            matches = [p for p in self.properties if p.id == name]
         else:
-            raise IllegalArgumentError("Must specify valid name (or UUID) or ref to identify the property")
-
-        criteria = " with arguments {}: {}".format("name" if name else "ref", name if name else ref)
+            matches = [p for p in self.properties if p.name == name]
+            if not matches:
+                matches = [p for p in self.properties if p.ref == name]
 
         if not matches:
-            raise NotFoundError("Could not find a property" + criteria)
+            raise NotFoundError("Could not find a property with name, id or ref: {}".format(name))
         elif len(matches) > 1:
-            raise MultipleFoundError("Found multiple properties" + criteria)
+            raise MultipleFoundError("Found multiple properties with name, id or ref: {}".format(name))
         else:
             return matches[0]
 
