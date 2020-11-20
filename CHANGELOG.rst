@@ -1,11 +1,11 @@
 Change Log
 ==========
 
+* :bug: In the `Part.property()` method, the property is retrieved by matching a `name` prior to matching a `ref`.
+
 * :+1: Retrieving the `value` of any reference property is now performed in batches to limit request size, using the new `chunks()` method.
-
-* :+1: Editing the `title` and `meta` of a `Widget` can now be performed simultaneously.
+* :+1: Editing the `title` and `meta` of a `Widget` can now be performed simultaneously and `title` can be cleared by providing `None`.
 * :+1: Refactored a lot of the strings used in the `Widget` meta into enums, to help with consistency.
-
 
 Backwards incompatible changes
 ------------------------------

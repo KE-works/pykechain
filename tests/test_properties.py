@@ -369,7 +369,7 @@ class TestProperties(TestBetamax):
         dual_pad_property = self.project.property(ref=dual_pad_ref)
         dual_pad_property_model = self.project.property(ref=dual_pad_ref, category=Category.MODEL)
         seat_part = self.project.part(name='Seat')
-        dual_pad_prop_retrieved_from_seat = seat_part.property(name=dual_pad_ref)
+        dual_pad_prop_retrieved_from_seat = seat_part.property(dual_pad_ref)
 
         # testing
         self.assertIsInstance(dual_pad_property, Property)

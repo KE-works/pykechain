@@ -8,7 +8,9 @@ from pykechain.enums import WidgetTypes, Category, WidgetTitleValue
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import BaseInScope
 from pykechain.models.widgets.enums import MetaWidget, AssociatedObjectId
+from pykechain.models.widgets.helpers import _set_title
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
+from pykechain.utils import Empty, empty
 
 
 class Widget(BaseInScope):
@@ -302,14 +304,17 @@ class Widget(BaseInScope):
 
     def edit(
             self,
-            title: Optional[AnyStr] = None,
+            title: Optional[Union[AnyStr, bool, None, Empty]] = empty,
             meta: Optional[Dict] = None,
             **kwargs
     ) -> None:
         """Edit the details of a widget.
 
-        :param title: (optional) title of the widget
-        :type title: basestring or None
+        :param title: New title for the widget
+            * False: use the default title, depending on the widget type
+            * String value: use this title
+            * None: No title at all
+        :type title: basestring, None or False
         :param meta: (optional) new Meta definition
         :type meta: dict or None
         :raises APIError: if the widget could not be updated.
@@ -320,11 +325,9 @@ class Widget(BaseInScope):
             self.meta.update(meta)
             update_dict.update(dict(meta=self.meta))
 
-        if title is not None:
-            self.meta.update({
-                MetaWidget.CUSTOM_TITLE: title,
-                MetaWidget.SHOW_TITLE_VALUE: WidgetTitleValue.CUSTOM_TITLE})
-            update_dict.update(dict(title=title, meta=self.meta))
+        if title is not empty:
+            _set_title(meta=self.meta, title=title)
+            update_dict.update(meta=self.meta)
 
         if kwargs:  # pragma: no cover
             update_dict.update(**kwargs)
