@@ -535,7 +535,7 @@ class WidgetsManager(Iterable):
 
         meta.update({
             AssociatedObjectId.PROPERTY_INSTANCE_ID: attachment_property.id,
-            MetaWidget.ALIGNMENT: check_enum(alignment, Alignment, MetaWidget.ALIGNMENT),
+            MetaWidget.ALIGNMENT: check_enum(alignment, Alignment, "alignment"),
             MetaWidget.IMAGE_FIT: check_enum(image_fit, ImageFitValue, 'image_fit'),
             MetaWidget.SHOW_DOWNLOAD_BUTTON: check_type(show_download_button, bool, 'show_download_button'),
             MetaWidget.SHOW_FULL_SCREEN_IMAGE_BUTTON: check_type(show_full_screen_button, bool,
@@ -639,7 +639,7 @@ class WidgetsManager(Iterable):
 
         meta = _initiate_meta(kwargs, activity=self.activity, ignores=(MetaWidget.SHOW_HEIGHT_VALUE,))
         meta[MetaWidget.TASK_BUTTONS] = task_buttons
-        meta[MetaWidget.ALIGNMENT] = check_enum(alignment, Alignment, MetaWidget.ALIGNMENT)
+        meta[MetaWidget.ALIGNMENT] = check_enum(alignment, Alignment, "alignment")
 
         widget = self.create_widget(
             widget_type=WidgetTypes.TASKNAVIGATIONBAR,
@@ -797,7 +797,7 @@ class WidgetsManager(Iterable):
             MetaWidget.EMPHASIZE_BUTTON: emphasize_run,
             MetaWidget.SHOW_DOWNLOAD_LOG: check_type(download_log, bool, "download_log"),
             MetaWidget.SHOW_LOG: True if download_log else check_type(show_log, bool, "show_log"),
-            MetaWidget.ALIGNMENT: check_enum(alignment, Alignment, MetaWidget.ALIGNMENT),
+            MetaWidget.ALIGNMENT: check_enum(alignment, Alignment, "alignment"),
         })
 
         widget = self.create_widget(
@@ -1450,7 +1450,7 @@ class WidgetsManager(Iterable):
         meta.update({
             AssociatedObjectId.SERVICE_ID: service_id,
             MetaWidget.EMPHASIZE_BUTTON: emphasize_run,
-            MetaWidget.ALIGNMENT: check_enum(alignment, Alignment, MetaWidget.ALIGNMENT),
+            MetaWidget.ALIGNMENT: check_enum(alignment, Alignment, "alignment"),
         })
 
         widget = self.create_widget(
