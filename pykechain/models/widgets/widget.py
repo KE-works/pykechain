@@ -7,6 +7,7 @@ from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import WidgetTypes, Category, WidgetTitleValue
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import BaseInScope
+from pykechain.models.widgets.enums import MetaWidget, AssociatedObjectId
 from pykechain.models.widgets.helpers import _set_title
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 from pykechain.utils import Empty, empty
@@ -65,22 +66,23 @@ class Widget(BaseInScope):
         :return: title string
         :rtype str
         """
-        show_title_value = self.meta.get("showTitleValue")
+        show_title_value = self.meta.get(MetaWidget.SHOW_TITLE_VALUE)
         if show_title_value == WidgetTitleValue.NO_TITLE:
             return None
         elif show_title_value == WidgetTitleValue.CUSTOM_TITLE:
-            return self.meta.get("customTitle")
+            return self.meta.get(MetaWidget.CUSTOM_TITLE)
 
         elif show_title_value == WidgetTitleValue.DEFAULT:
             try:
                 if self.widget_type == WidgetTypes.PROPERTYGRID:
-                    return self._client.part(pk=self.meta.get("partInstanceId")).name
+                    return self._client.part(pk=self.meta.get(AssociatedObjectId.PART_INSTANCE_ID)).name
                 elif self.widget_type in [WidgetTypes.FILTEREDGRID, WidgetTypes.SUPERGRID]:
-                    return self._client.part(pk=self.meta.get("partModelId"), category=None).name
+                    return self._client.part(pk=self.meta.get(AssociatedObjectId.PART_MODEL_ID), category=None).name
                 elif self.widget_type in [WidgetTypes.SERVICE, WidgetTypes.NOTEBOOK]:
-                    return self._client.service(pk=self.meta.get("serviceId")).name
+                    return self._client.service(pk=self.meta.get(AssociatedObjectId.SERVICE_ID)).name
                 elif self.widget_type in [WidgetTypes.ATTACHMENTVIEWER, WidgetTypes.SIGNATURE]:
-                    return self._client.property(pk=self.meta.get("propertyInstanceId"), category=None).name
+                    return self._client.property(pk=self.meta.get(AssociatedObjectId.PROPERTY_INSTANCE_ID),
+                                                 category=None).name
                 elif self.widget_type == WidgetTypes.CARD:
                     return self.scope.name
                 else:
