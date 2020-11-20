@@ -149,10 +149,10 @@ def _set_description(
     :raises IllegalArgumentError: When description is neither str, bool or None.
     """
     if description is False or description is None:
-        show_description_value = "No description"
+        show_description_value = MetaWidget.DESCRIPTION_OPTION_NOTHING
         description = ""
     elif isinstance(description, str):
-        show_description_value = "Custom description"
+        show_description_value = MetaWidget.DESCRIPTION_OPTION_CUSTOM
     else:
         raise IllegalArgumentError("When using the add_card_widget or add_service_card_widget, 'description' must be "
                                    "'text_type' or None or False. Type is: {}".format(type(description)))
@@ -272,8 +272,8 @@ def _set_image(
             MetaWidget.SHOW_IMAGE_VALUE: CardWidgetImageValue.NO_IMAGE
         })
     else:
-        raise IllegalArgumentError("When using the add_card_widget or add_service_card_widget, 'description' must be "
-                                   "'text_type' or None or False. Type is: {}".format(type(image)))
+        raise IllegalArgumentError("When using the add_card_widget or add_service_card_widget, 'image' must be an "
+                                   "'AttachmentProperty' or None. Type is: {}".format(type(image)))
     return meta
 
 
@@ -305,13 +305,13 @@ def _set_button_text(
     :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
     if custom_button_text is False:
-        show_button_value = "Default"
+        show_button_value = MetaWidget.BUTTON_TEXT_DEFAULT
         button_text = service.name
     elif custom_button_text is None:
-        show_button_value = "No text"
-        button_text = ''
+        show_button_value = MetaWidget.BUTTON_NO_TEXT
+        button_text = str()
     else:
-        show_button_value = "Custom text"
+        show_button_value = MetaWidget.BUTTON_TEXT_CUSTOM
         button_text = str(custom_button_text)
     meta.update({
         MetaWidget.SHOW_BUTTON_VALUE: show_button_value,

@@ -1,17 +1,55 @@
 import warnings
-from typing import Iterable, Union, Optional, Text, Dict, List, Any
+from typing import (
+    Iterable,
+    Union,
+    Optional,
+    Text,
+    Dict,
+    List,
+    Any,
+)
 
-from pykechain.enums import SortTable, WidgetTypes, ShowColumnTypes, ScopeWidgetColumnTypes, \
-    ProgressBarColors, CardWidgetLinkValue, LinkTargets, ImageFitValue, \
-    KEChainPages, Alignment
-from pykechain.models.widgets.enums import DashboardWidgetSourceScopes, DashboardWidgetShowTasks, \
-    DashboardWidgetShowScopes, MetaWidget, AssociatedObjectId
+from pykechain.enums import (
+    SortTable,
+    WidgetTypes,
+    ShowColumnTypes,
+    ScopeWidgetColumnTypes,
+    ProgressBarColors,
+    CardWidgetLinkValue,
+    LinkTargets,
+    ImageFitValue,
+    KEChainPages,
+    Alignment,
+)
+from pykechain.models.widgets.enums import (
+    DashboardWidgetSourceScopes,
+    DashboardWidgetShowTasks,
+    DashboardWidgetShowScopes,
+    MetaWidget,
+    AssociatedObjectId,
+)
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
-from pykechain.models.input_checks import check_enum, check_text, check_base, check_type, check_list_of_text
+from pykechain.models.input_checks import (
+    check_enum,
+    check_text,
+    check_base,
+    check_type,
+    check_list_of_text,
+)
 from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets import Widget
-from pykechain.models.widgets.helpers import _set_title, _initiate_meta, _retrieve_object, _retrieve_object_id, \
-    _check_prefilters, _check_excluded_propmodels, _set_description, _set_link, _set_image, _set_button_text
+from pykechain.models.widgets.helpers import (
+    _set_title,
+    _initiate_meta,
+    _retrieve_object,
+    _retrieve_object_id,
+    _check_prefilters,
+    _check_excluded_propmodels,
+    _set_description,
+    _set_link,
+    _set_image,
+    _set_button_text,
+)
 from pykechain.utils import is_uuid, find, snakecase, is_url
 
 
@@ -101,7 +139,7 @@ class WidgetsManager(Iterable):
         """
         # Insert the current widget
         for widget in widgets:
-            widget['activity'] = self.activity
+            widget["activity"] = self.activity
 
         return self._client.create_widgets(widgets=widgets)
 
@@ -136,8 +174,8 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        if 'parent_widget' in kwargs:
-            kwargs['parent'] = kwargs.pop('parent_widget')
+        if "parent_widget" in kwargs:
+            kwargs["parent"] = kwargs.pop("parent_widget")
 
         widget = self._client.create_widget(*args, activity=self.activity, **kwargs)
 
@@ -173,7 +211,7 @@ class WidgetsManager(Iterable):
         :return: Widget
         """
         if all_readable and all_writable:
-            raise IllegalArgumentError('Properties can be either writable or readable, but not both.')
+            raise IllegalArgumentError("Properties can be either writable or readable, but not both.")
 
         all_property_models = [p.model_id if p.model_id else p for p in part.properties]
 
@@ -536,24 +574,24 @@ class WidgetsManager(Iterable):
         meta.update({
             AssociatedObjectId.PROPERTY_INSTANCE_ID: attachment_property.id,
             MetaWidget.ALIGNMENT: check_enum(alignment, Alignment, "alignment"),
-            MetaWidget.IMAGE_FIT: check_enum(image_fit, ImageFitValue, 'image_fit'),
-            MetaWidget.SHOW_DOWNLOAD_BUTTON: check_type(show_download_button, bool, 'show_download_button'),
+            MetaWidget.IMAGE_FIT: check_enum(image_fit, ImageFitValue, "image_fit"),
+            MetaWidget.SHOW_DOWNLOAD_BUTTON: check_type(show_download_button, bool, "show_download_button"),
             MetaWidget.SHOW_FULL_SCREEN_IMAGE_BUTTON: check_type(show_full_screen_button, bool,
-                                                                 'show_full_screen_button'),
+                                                                 "show_full_screen_button"),
         })
 
-        for deprecated_kw in ['widget_type', 'readable_models']:
+        for deprecated_kw in ["widget_type", "readable_models"]:
             if deprecated_kw in kwargs:
                 kwargs.pop(deprecated_kw)
-                warnings.warn('Argument "{}" is no longer supported as input to `add_attachment_viewer`.'.format(
+                warnings.warn("Argument `{}` is no longer supported as input to `add_attachment_viewer`.".format(
                     deprecated_kw), Warning)
 
         meta, title = _set_title(meta, title=title, **kwargs)
 
-        if check_type(editable, bool, 'editable'):
-            kwargs.update({'writable_models': [attachment_property.model_id]})
+        if check_type(editable, bool, "editable"):
+            kwargs.update({"writable_models": [attachment_property.model_id]})
         else:
-            kwargs.update({'readable_models': [attachment_property.model_id]})
+            kwargs.update({"readable_models": [attachment_property.model_id]})
 
         widget = self.create_widget(
             widget_type=WidgetTypes.ATTACHMENTVIEWER,
@@ -622,14 +660,14 @@ class WidgetsManager(Iterable):
                                                "Activity or Activity id. Type is: {}".format(type(activity)))
             elif MetaWidget.LINK in input_dict:
                 if not is_url(input_dict[MetaWidget.LINK]):
-                    raise IllegalArgumentError("The link should be an URL, got '{}'".format(input_dict['link']))
+                    raise IllegalArgumentError("The link should be an URL, got '{}'".format(input_dict["link"]))
                 button_dict[MetaWidget.LINK] = input_dict[MetaWidget.LINK]
             else:
                 raise IllegalArgumentError("Each button must have key 'activityId' or 'link'. "
                                            "Button {} has neither.".format(nr + 1))
 
             if MetaWidget.CUSTOM_TEXT not in input_dict or not input_dict[MetaWidget.CUSTOM_TEXT]:
-                button_dict[MetaWidget.CUSTOM_TEXT] = ''
+                button_dict[MetaWidget.CUSTOM_TEXT] = str()
             else:
                 button_dict[MetaWidget.CUSTOM_TEXT] = str(input_dict[MetaWidget.CUSTOM_TEXT])
 
@@ -834,7 +872,7 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        check_text(html, 'html')
+        check_text(html, "html")
 
         meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
@@ -959,7 +997,7 @@ class WidgetsManager(Iterable):
         meta = _initiate_meta(kwargs, activity=self.activity)
 
         if show_all:
-            meta['showAll'] = True
+            meta[MetaWidget.SHOW_ALL] = True
         else:
             from pykechain.models import Activity
             meta.update(dict(
@@ -978,7 +1016,7 @@ class WidgetsManager(Iterable):
                 # if progress=False and Bar=False, both are False
                 showProgress=show_progress and not show_progressbar or show_progress,
                 showProgressBar=show_progressbar and not show_progress,
-                breadcrumbAncestor=check_base(breadcrumb_root, Activity, 'breadcrumb_root') or None,
+                breadcrumbAncestor=check_base(breadcrumb_root, Activity, "breadcrumb_root") or None,
             ))
         if progress_bar:
             meta.update(dict(
@@ -1156,18 +1194,18 @@ class WidgetsManager(Iterable):
         meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
 
-        check_type(show_all_columns, bool, 'show_all_columns')
+        check_type(show_all_columns, bool, "show_all_columns")
 
         if not show_all_columns and show_columns:
             if not isinstance(show_columns, (list, tuple)):
-                raise IllegalArgumentError('`show_columns` must be a list or tuple, "{}" is not.'.format(show_columns))
+                raise IllegalArgumentError("`show_columns` must be a list or tuple, `{}` is not.".format(show_columns))
             options = set(ScopeWidgetColumnTypes.values())
             if not all(sc in options for sc in show_columns):
                 raise IllegalArgumentError("`show_columns` must consist out of ScopeWidgetColumnTypes options.")
             meta[MetaWidget.SHOW_COLUMNS] = [snakecase(c) for c in show_columns]
 
         if not isinstance(page_size, int) or page_size < 1:
-            raise IllegalArgumentError('`page_size` must be a positive integer, "{}" is not.'.format(page_size))
+            raise IllegalArgumentError("`page_size` must be a positive integer, `{}` is not.".format(page_size))
 
         if team:
             meta[AssociatedObjectId.TEAM_ID] = _retrieve_object_id(team)
@@ -1175,13 +1213,13 @@ class WidgetsManager(Iterable):
         for button_setting in [
             add, edit, delete, clone, emphasize_add, emphasize_clone, emphasize_edit, emphasize_delete,
         ]:
-            check_type(button_setting, bool, 'buttons')
+            check_type(button_setting, bool, "buttons")
 
         meta.update({
-            MetaWidget.SORTED_COLUMN: snakecase(check_enum(sorted_column, ScopeWidgetColumnTypes, 'sorted_column')),
-            MetaWidget.SORTED_DIRECTION: check_enum(sorted_direction, SortTable, 'sorted_direction'),
-            MetaWidget.VISIBLE_ACTIVE_FILTER: check_type(active_filter, bool, 'active_filter'),
-            MetaWidget.VISIBLE_SEARCH_FILTER: check_type(search_filter, bool, 'search_filter'),
+            MetaWidget.SORTED_COLUMN: snakecase(check_enum(sorted_column, ScopeWidgetColumnTypes, "sorted_column")),
+            MetaWidget.SORTED_DIRECTION: check_enum(sorted_direction, SortTable, "sorted_direction"),
+            MetaWidget.VISIBLE_ACTIVE_FILTER: check_type(active_filter, bool, "active_filter"),
+            MetaWidget.VISIBLE_SEARCH_FILTER: check_type(search_filter, bool, "search_filter"),
             MetaWidget.VISIBLE_ADD_BUTTON: add,
             MetaWidget.VISIBLE_EDIT_BUTTON: edit,
             MetaWidget.VISIBLE_DELETE_BUTTON: delete,
@@ -1191,7 +1229,7 @@ class WidgetsManager(Iterable):
             MetaWidget.EMPHASIZE_CLONE_BUTTON: emphasize_clone,
             MetaWidget.EMPHASIZE_DELETE_BUTTON: emphasize_delete,
             MetaWidget.CUSTOM_PAGE_SIZE: page_size,
-            MetaWidget.TAGS: check_list_of_text(tags, 'tags', True) or [],
+            MetaWidget.TAGS: check_list_of_text(tags, "tags", True) or [],
         })
 
         widget = self.create_widget(
@@ -1247,18 +1285,18 @@ class WidgetsManager(Iterable):
 
         # Add custom button text
         if not custom_button_text:
-            show_button_value = "Default"
-            button_text = ''
+            show_button_value = MetaWidget.BUTTON_TEXT_DEFAULT
+            button_text = str()
         else:
-            show_button_value = "Custom text"
+            show_button_value = MetaWidget.BUTTON_TEXT_CUSTOM
             button_text = str(custom_button_text)
 
         # Add custom undo button text
         if not custom_undo_button_text:
-            show_undo_button_value = "Default"
-            undo_button_text = ''
+            show_undo_button_value = MetaWidget.BUTTON_TEXT_DEFAULT
+            undo_button_text = str()
         else:
-            show_undo_button_value = "Custom text"
+            show_undo_button_value = MetaWidget.BUTTON_TEXT_CUSTOM
             undo_button_text = str(custom_undo_button_text)
 
         meta.update({
@@ -1445,7 +1483,7 @@ class WidgetsManager(Iterable):
         meta = _set_button_text(meta, custom_button_text=custom_button_text, service=service, **kwargs)
 
         from pykechain.models import Service
-        service_id = check_base(service, Service, 'service', method=self._client.service)
+        service_id = check_base(service, Service, "service", method=self._client.service)
 
         meta.update({
             AssociatedObjectId.SERVICE_ID: service_id,
@@ -1528,21 +1566,21 @@ class WidgetsManager(Iterable):
         if source_scopes_tags:
             meta.update({
                 MetaWidget.SOURCE: DashboardWidgetSourceScopes.TAGGED_SCOPES,
-                MetaWidget.SCOPE_TAG: check_type(source_scopes_tags, list, 'source_scopes_tags')
+                MetaWidget.SCOPE_TAG: check_type(source_scopes_tags, list, "source_scopes_tags")
             })
         elif source_subprocess:
             meta.update({
                 MetaWidget.SOURCE: DashboardWidgetSourceScopes.SUBPROCESS,
-                MetaWidget.SCOPE_TAG: check_type(source_subprocess, list, 'source_subprocess')
+                MetaWidget.SCOPE_TAG: check_type(source_subprocess, list, "source_subprocess")
             })
         elif source_selected_scopes:
             meta.update({
                 MetaWidget.SOURCE: DashboardWidgetSourceScopes.SELECTED_SCOPES,
-                MetaWidget.SCOPE_LIST: check_type(source_selected_scopes, list, 'source_selected_scopes')
+                MetaWidget.SCOPE_LIST: check_type(source_selected_scopes, list, "source_selected_scopes")
             })
         else:
             meta.update({
-                MetaWidget.SOURCE: check_enum(source_scopes, DashboardWidgetSourceScopes, 'source_scopes')
+                MetaWidget.SOURCE: check_enum(source_scopes, DashboardWidgetSourceScopes, "source_scopes")
             })
 
         show_tasks_list = list()
@@ -1554,7 +1592,7 @@ class WidgetsManager(Iterable):
                     MetaWidget.SELECTED: True
                 })
         else:
-            check_type(show_tasks, list, 'show_tasks')
+            check_type(show_tasks, list, "show_tasks")
             for value in DashboardWidgetShowTasks.values():
                 if value in show_tasks:
                     show_tasks_list.append({
@@ -1578,7 +1616,7 @@ class WidgetsManager(Iterable):
                     MetaWidget.SELECTED: True
                 })
         else:
-            check_type(show_tasks, list, 'show_tasks')
+            check_type(show_tasks, list, "show_tasks")
             for value in DashboardWidgetShowScopes.values():
                 if value in show_scopes:
                     show_projects_list.append({
@@ -1595,14 +1633,14 @@ class WidgetsManager(Iterable):
         meta.update({
             MetaWidget.SHOW_NUMBERS: show_tasks_list,
             MetaWidget.SHOW_NUMBERS_PROJECTS: show_projects_list,
-            MetaWidget.NO_BACKGROUND: check_type(no_background, bool, 'no_background'),
-            MetaWidget.SHOW_ASSIGNEES: check_type(show_assignees, bool, 'show_assignees'),
-            MetaWidget.SHOW_ASSIGNEES_TABLE: check_type(show_assignees_table, bool, 'show_assignees_table'),
-            MetaWidget.SHOW_OPEN_TASK_ASSIGNEES: check_type(show_open_task_assignees, bool, 'show_open_task_assignees'),
+            MetaWidget.NO_BACKGROUND: check_type(no_background, bool, "no_background"),
+            MetaWidget.SHOW_ASSIGNEES: check_type(show_assignees, bool, "show_assignees"),
+            MetaWidget.SHOW_ASSIGNEES_TABLE: check_type(show_assignees_table, bool, "show_assignees_table"),
+            MetaWidget.SHOW_OPEN_TASK_ASSIGNEES: check_type(show_open_task_assignees, bool, "show_open_task_assignees"),
             MetaWidget.SHOW_OPEN_VS_CLOSED_TASKS: check_type(show_open_vs_closed_tasks, bool,
-                                                             'show_open_vs_closed_tasks'),
+                                                             "show_open_vs_closed_tasks"),
             MetaWidget.SHOW_OPEN_VS_CLOSED_TASKS_ASSIGNEES: check_type(
-                show_open_closed_tasks_assignees, bool, 'show_open_closed_tasks_assignees')
+                show_open_closed_tasks_assignees, bool, "show_open_closed_tasks_assignees")
         })
 
         widget = self.create_widget(

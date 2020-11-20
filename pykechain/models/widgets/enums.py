@@ -79,6 +79,8 @@ class MetaWidget(Enum):
     SHOW_TITLE_VALUE = "showTitleValue"
     CUSTOM_TITLE = "customTitle"
     SHOW_DESCRIPTION_VALUE = "showDescriptionValue"
+    DESCRIPTION_OPTION_NOTHING = "No description"
+    DESCRIPTION_OPTION_CUSTOM = "Custom description"
     CUSTOM_DESCRIPTION = "customDescription"
     COLLAPSED = "collapsed"
     COLLAPSIBLE = "collapsible"
@@ -138,6 +140,9 @@ class MetaWidget(Enum):
     EMPHASIZE_BUTTON = "emphasizeButton"
     SHOW_DOWNLOAD_LOG = "showDownloadLog"
     SHOW_LOG = "showLog"
+    BUTTON_TEXT_DEFAULT = "Default"
+    BUTTON_NO_TEXT = "No text"
+    BUTTON_TEXT_CUSTOM = "Custom text"
 
     # Progress Bar widget
     COLOR_NO_PROGRESS = "colorNoProgress"
@@ -149,7 +154,7 @@ class MetaWidget(Enum):
     # Signature widget
     SHOW_UNDO_BUTTON = "showUndoButtonValue"
     CUSTOM_UNDO_BUTTON_TEXT = "customUndoText"
-    CUSTOM_TEXT = "customText"
+    CUSTOM_TEXT = "customText"  # Used for task-navigation bar and signature widgets
     SHOW_BUTTON_VALUE = "showButtonValue"
 
     # Dashboard Widget
@@ -178,3 +183,6 @@ class MetaWidget(Enum):
     LINK = "link"
     SHOW_HEIGHT_VALUE = "showHeightValue"
     TASK_BUTTONS = "taskButtons"
+
+    # Meta Panel Widget
+    SHOW_ALL = "showAll"
