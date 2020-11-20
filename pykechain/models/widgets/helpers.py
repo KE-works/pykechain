@@ -16,7 +16,7 @@ from pykechain.enums import (
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_enum
 from pykechain.models.value_filter import PropertyValueFilter
-from pykechain.models.widgets.enums import MetaWidget
+from pykechain.models.widgets.enums import MetaWidget, AssociatedObjectId
 from pykechain.utils import is_uuid, snakecase, camelcase
 
 # these are the common keys to all kecards.
@@ -341,7 +341,7 @@ def _initiate_meta(kwargs, activity, ignores=()):
     :return: kecard dictionary
     :rtype: dict
     """
-    meta = dict(activityId=str(_retrieve_object_id(activity)))
+    meta = {AssociatedObjectId.ACTIVITY_ID: str(_retrieve_object_id(activity))}
     # also add the keys' in their snake case appearance so noPadding and no_padding, customHeight and custom_height
     keys_in_kwargs = KECARD_COMMON_KEYS + [snakecase(k) for k in KECARD_COMMON_KEYS]
 
