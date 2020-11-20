@@ -5,6 +5,7 @@ from pykechain.models import Activity, Scope, user
 from pykechain.models.base_reference import _ReferencePropertyInScope, _ReferenceProperty
 from pykechain.models.property2_activity_reference import ActivityReferencesProperty as ActivityReferencesProperty2
 from pykechain.models.value_filter import ScopeFilter
+from pykechain.models.widgets.enums import MetaWidget
 
 
 class ActivityReferencesProperty(_ReferencePropertyInScope, ActivityReferencesProperty2):
@@ -88,7 +89,7 @@ class ScopeReferencesProperty(_ReferenceProperty):
             options_to_set = self._options
 
             # Always create the entire prefilter json structure
-            options_to_set["prefilters"] = {
+            options_to_set[MetaWidget.PREFILTERS] = {
                 "tags__contains": ",".join([pf.format() for pf in list_of_prefilters if pf.format()])
             }
 

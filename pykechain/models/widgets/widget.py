@@ -7,6 +7,7 @@ from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import WidgetTypes, Category, WidgetTitleValue
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import BaseInScope
+from pykechain.models.widgets.enums import MetaWidget
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 
 
@@ -63,11 +64,11 @@ class Widget(BaseInScope):
         :return: title string
         :rtype str
         """
-        show_title_value = self.meta.get("showTitleValue")
+        show_title_value = self.meta.get(MetaWidget.SHOW_TITLE_VALUE)
         if show_title_value == WidgetTitleValue.NO_TITLE:
             return None
         elif show_title_value == WidgetTitleValue.CUSTOM_TITLE:
-            return self.meta.get("customTitle")
+            return self.meta.get(MetaWidget.CUSTOM_TITLE)
 
         elif show_title_value == WidgetTitleValue.DEFAULT:
             try:
@@ -319,7 +320,9 @@ class Widget(BaseInScope):
             update_dict.update(dict(meta=self.meta))
 
         if title is not None:
-            self.meta.update({"customTitle": title, "showTitleValue": WidgetTitleValue.CUSTOM_TITLE})
+            self.meta.update({
+                MetaWidget.CUSTOM_TITLE: title,
+                MetaWidget.SHOW_TITLE_VALUE: WidgetTitleValue.CUSTOM_TITLE})
             update_dict.update(dict(title=title, meta=self.meta))
 
         if kwargs:  # pragma: no cover

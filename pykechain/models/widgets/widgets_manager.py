@@ -1032,14 +1032,14 @@ class WidgetsManager(Iterable):
         """
         meta = _initiate_meta(kwargs, activity=self.activity)
 
-        meta.update(dict(
-            colorNoProgress=color_no_progress,
-            showProgressText=show_progress_text,
-            customHeight=height,
-            colorInProgress=color_in_progress,
-            colorCompleted=color_completed,
-            colorInProgressBackground=color_in_progress_background
-        ))
+        meta.update({
+            MetaWidget.COLOR_NO_PROGRESS: color_no_progress,
+            MetaWidget.SHOW_PROGRESS_TEXT: show_progress_text,
+            MetaWidget.CUSTOM_HEIGHT: height,
+            MetaWidget.COLOR_IN_PROGRESS: color_in_progress,
+            MetaWidget.COLOR_COMPLETED_PROGRESS: color_completed,
+            MetaWidget.COLOR_IN_PROGRESS_BACKGROUND: color_in_progress_background
+        })
         widget = self.create_widget(
             widget_type=WidgetTypes.PROGRESS,
             meta=meta,

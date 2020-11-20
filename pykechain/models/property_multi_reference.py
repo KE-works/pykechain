@@ -7,6 +7,7 @@ from pykechain.models.property2_multi_reference import MultiReferenceProperty2
 from pykechain.models.base_reference import _ReferencePropertyInScope
 from pykechain.models.part import Part
 from pykechain.models.value_filter import PropertyValueFilter
+from pykechain.models.widgets.enums import MetaWidget
 from pykechain.models.widgets.helpers import _check_prefilters, _check_excluded_propmodels
 
 
@@ -72,7 +73,8 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
             choices_model_id = self.model()._value[0].get('id')
 
             # Determine which parts are filtered out
-            prefilter = self._options.get('prefilters', {}).get('property_value')  # type: Optional[Text]
+            prefilter = self._options.get(MetaWidget.PREFILTERS, {}).\
+                get(MetaWidget.PROPERTY_VALUE_PREFILTER)  # type: Optional[Text]
 
             # Retrieve all part instances with this model ID
             possible_choices = self._client.parts(
