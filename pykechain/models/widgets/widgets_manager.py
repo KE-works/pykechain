@@ -780,7 +780,7 @@ class WidgetsManager(Iterable):
         self,
         service: 'Service',
         title: TITLE_TYPING = False,
-        custom_button_text:TITLE_TYPING = False,
+        custom_button_text: TITLE_TYPING = False,
         emphasize_run: Optional[bool] = True,
         alignment: Optional[Alignment] = Alignment.LEFT,
         download_log: Optional[bool] = False,
