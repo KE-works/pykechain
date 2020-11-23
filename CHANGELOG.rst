@@ -2,6 +2,7 @@ Change Log
 ==========
 
 * :bug: In the `Part.property()` method, the property is retrieved by matching a `name` prior to matching a `ref`.
+* :bug: The `text` input for editing of a `Banner` is not possible to be cleared, only optional as input.
 
 * :+1: Retrieving the `value` of any reference property is now performed in batches to limit request size, using the new `chunks()` method.
 * :+1: Editing the `title` and `meta` of a `Widget` can now be performed simultaneously and `title` can be cleared by providing `None`.
