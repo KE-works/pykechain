@@ -6,6 +6,7 @@ Change Log
 * :+1: Retrieving the `value` of any reference property is now performed in batches to limit request size, using the new `chunks()` method.
 * :+1: Editing the `title` and `meta` of a `Widget` can now be performed simultaneously and `title` can be cleared by providing `None`.
 * :+1: Refactored a lot of the strings used in the `Widget` meta into enums, to help with consistency.
+* :+1: In the `set_prefilters()` method of the `MultiReferenceProperty` class, users can now provide the referenced model to validate against, or bypass validation altogether, using the `validate` input argument.
 
 Backwards incompatible changes
 ------------------------------
