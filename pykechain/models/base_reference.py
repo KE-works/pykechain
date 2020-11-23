@@ -1,7 +1,6 @@
 from abc import abstractmethod, ABC
 from typing import Optional, Any, Text, Union, Tuple, List
 
-from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Property, Base
 from pykechain.models.base import BaseInScope
