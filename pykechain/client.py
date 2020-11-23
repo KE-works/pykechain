@@ -2276,7 +2276,9 @@ class Client(object):
         :return: list of Widget objects
         :rtype List[Widget]
         """
-        check_list_of_dicts(widgets, 'widgets')
+        check_list_of_dicts(widgets, 'widgets', fields=["id"])
+        if len(widgets) != len({w.get("id") for w in widgets}):
+            raise IllegalArgumentError("Bulk update of widgets must receive a list of unique widget IDs.")
 
         response = self._request(
             "PUT",
