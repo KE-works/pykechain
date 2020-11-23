@@ -32,7 +32,7 @@ class Banner(Base):
 
     def edit(
         self,
-        text: Optional[Union[Text, Empty]] = empty,
+        text: Optional[Union[Text]] = None,
         icon: Optional[Union[Text, Empty]] = empty,
         active_from: Optional[Union[datetime.datetime, Empty]] = empty,
         active_until: Optional[Union[datetime.datetime, Empty]] = empty,
