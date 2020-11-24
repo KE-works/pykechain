@@ -1,6 +1,7 @@
 import warnings
 from typing import List, Optional, Text, Union, Any, Tuple
 
+from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.enums import Category, FilterType
 from pykechain.models.input_checks import check_type
 from pykechain.models.property2_multi_reference import MultiReferenceProperty2
@@ -9,6 +10,7 @@ from pykechain.models.part import Part
 from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets.enums import MetaWidget
 from pykechain.models.widgets.helpers import _check_prefilters, _check_excluded_propmodels
+from pykechain.utils import get_in_chunks
 
 
 class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2):
@@ -41,7 +43,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
                     models = self.model().value
                 if models:
                     parts = list()
-                    for chunk in self.chunks(part_ids):
+                    for chunk in get_in_chunks(part_ids, PARTS_BATCH_LIMIT):
                         parts.extend(
                             list(self._client.parts(
                                 id__in=','.join(chunk),
