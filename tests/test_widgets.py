@@ -4,8 +4,10 @@ from pykechain.enums import (WidgetTypes, ShowColumnTypes, FilterType, ProgressB
                              Category, LinkTargets, KEChainPages, WidgetTitleValue, Alignment, ActivityType,
                              CardWidgetLinkValue, CardWidgetLinkTarget, ImageFitValue, PropertyType, Classification,
                              Multiplicity)
-from pykechain.models.widgets.enums import DashboardWidgetSourceScopes, DashboardWidgetShowTasks, \
-    DashboardWidgetShowScopes
+from pykechain.models.widgets.enums import (
+    DashboardWidgetShowTasks,
+    DashboardWidgetShowScopes,
+)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Activity, Part
 from pykechain.models.widgets import (
@@ -153,6 +155,26 @@ class TestWidgets(TestBetamax):
         self.assertTrue(all(isinstance(p, Part) for p in models))
         self.assertTrue(all(p.category == Category.MODEL for p in models))
         self.assertTrue(all(p.category == Category.INSTANCE for p in models))
+
+    def test_bulk_update(self):
+        parent = self.project.activity(name="Tasks with Widgets")
+        task = self.project.activity(name="Task - Form + Tables + Service")
+        test_task = task.clone(
+            parent=parent,
+            name="BULK WIDGET TEST TASK",
+        )
+        self.new_widget = test_task  # for teardown
+
+        widgets = list(test_task.widgets())[1:]  # remove meta-panel
+        self.client.update_widgets(
+            widgets=[dict(id=w.id, title="widget {}".format(i + 1)) for i, w in enumerate(widgets)]
+        )
+
+        with self.assertRaises(IllegalArgumentError):
+            double_update = [widgets[0], widgets[0], widgets[1]]
+            self.client.update_widgets(
+                widgets=[dict(id=w.id, title="widget {}".format(i + 1)) for i, w in enumerate(double_update)]
+            )
 
 
 class TestWidgetManager(TestBetamax):

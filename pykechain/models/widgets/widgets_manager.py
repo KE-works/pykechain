@@ -49,6 +49,7 @@ from pykechain.models.widgets.helpers import (
     _set_link,
     _set_image,
     _set_button_text,
+    TITLE_TYPING,
 )
 from pykechain.utils import is_uuid, find, snakecase, is_url
 
@@ -228,7 +229,7 @@ class WidgetsManager(Iterable):
     def add_supergrid_widget(self,
                              part_model: Union['Part', Text],
                              parent_instance: Optional[Union['Part', Text]] = None,
-                             title: Optional[Union[type(None), Text, bool]] = False,
+                             title: TITLE_TYPING = False,
                              parent_widget: Optional[Union[Widget, Text]] = None,
                              new_instance: Optional[bool] = True,
                              edit: Optional[bool] = True,
@@ -363,7 +364,7 @@ class WidgetsManager(Iterable):
         self,
         part_model: Union['Part', Text],
         parent_instance: Optional[Union['Part', Text]] = None,
-        title: Optional[Union[type(None), Text, bool]] = False,
+        title: TITLE_TYPING = False,
         parent_widget: Optional[Union[Widget, Text]] = None,
         new_instance: Optional[bool] = True,
         edit: Optional[bool] = True,
@@ -532,7 +533,7 @@ class WidgetsManager(Iterable):
     def add_attachmentviewer_widget(self,
                                     attachment_property: Union[Text, 'AttachmentProperty'],
                                     editable: Optional[bool] = False,
-                                    title: Optional[Union[Text, bool]] = False,
+                                    title: TITLE_TYPING = False,
                                     parent_widget: Optional[Union[Widget, Text]] = None,
                                     alignment: Optional[Alignment] = None,
                                     image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
@@ -690,7 +691,7 @@ class WidgetsManager(Iterable):
 
     def add_propertygrid_widget(self,
                                 part_instance: Union['Part', Text],
-                                title: Optional[Union[Text, bool]] = False,
+                                title: TITLE_TYPING = False,
                                 max_height: Optional[int] = None,
                                 show_headers: Optional[bool] = True,
                                 show_columns: Optional[Iterable] = None,
@@ -778,8 +779,8 @@ class WidgetsManager(Iterable):
     def add_service_widget(
         self,
         service: 'Service',
-        title: Optional[Union[type(None), bool, Text]] = False,
-        custom_button_text: Optional[Text] = False,
+        title: TITLE_TYPING = False,
+        custom_button_text: TITLE_TYPING = False,
         emphasize_run: Optional[bool] = True,
         alignment: Optional[Alignment] = Alignment.LEFT,
         download_log: Optional[bool] = False,
@@ -850,7 +851,7 @@ class WidgetsManager(Iterable):
 
     def add_html_widget(self,
                         html: Optional[Text],
-                        title: Optional[Union[type(None), bool, Text]] = None,
+                        title: TITLE_TYPING = None,
                         parent_widget: Optional[Union[Widget, Text]] = None,
                         **kwargs) -> Widget:
         """
@@ -890,7 +891,7 @@ class WidgetsManager(Iterable):
 
     def add_notebook_widget(self,
                             notebook: 'Service',
-                            title: Optional[Union[type(None), bool, Text]] = False,
+                            title: TITLE_TYPING = False,
                             parent_widget: Optional[Union[Widget, Text]] = None,
                             **kwargs) -> Widget:
         """
@@ -1086,7 +1087,7 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_multicolumn_widget(self,
-                               title: Optional[Text] = None,
+                               title: TITLE_TYPING = None,
                                **kwargs) -> Widget:
         """
         Add a KE-chain Multi Column widget to the WidgetManager.
@@ -1118,7 +1119,7 @@ class WidgetsManager(Iterable):
 
     def add_scope_widget(self,
                          team: Union['Team', Text] = None,
-                         title: Optional[Text] = None,
+                         title: TITLE_TYPING = None,
                          add: Optional[bool] = True,
                          edit: Optional[bool] = True,
                          clone: Optional[bool] = True,
@@ -1244,7 +1245,7 @@ class WidgetsManager(Iterable):
     def add_signature_widget(
             self,
             attachment_property: 'AttachmentProperty',
-            title: Optional[Union[bool, Text]] = False,
+            title: TITLE_TYPING = False,
             parent_widget: Optional[Union[Widget, Text]] = None,
             custom_button_text: Optional[Union[bool, Text]] = False,
             custom_undo_button_text: Optional[Union[bool, Text]] = False,
@@ -1320,7 +1321,7 @@ class WidgetsManager(Iterable):
 
     def add_card_widget(self,
                         image: Optional['AttachmentProperty'] = None,
-                        title: Optional[Union[type(None), Text, bool]] = False,
+                        title: TITLE_TYPING = False,
                         parent_widget: Optional[Union[Widget, Text]] = None,
                         description: Optional[Union[Text, bool]] = None,
                         link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
@@ -1375,7 +1376,7 @@ class WidgetsManager(Iterable):
     def add_weather_widget(self,
                            weather_property: 'Property',
                            autofill: Optional[bool] = None,
-                           title: Optional[Union[bool, Text]] = False,
+                           title: TITLE_TYPING = False,
                            parent_widget: Optional[Union[Widget, Text]] = None,
                            **kwargs) -> Widget:
         """
@@ -1420,10 +1421,10 @@ class WidgetsManager(Iterable):
         self,
         service: 'Service',
         image: Optional['AttachmentProperty'] = None,
-        title: Optional[Union[type(None), bool, Text]] = False,
+        title: TITLE_TYPING = False,
         description: Optional[Union[Text]] = None,
         parent_widget: Optional[Union[Widget, Text]] = None,
-        custom_button_text: Optional[Text] = False,
+        custom_button_text: TITLE_TYPING = False,
         emphasize_run: Optional[bool] = True,
         alignment: Optional[Alignment] = Alignment.LEFT,
         link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
@@ -1502,9 +1503,9 @@ class WidgetsManager(Iterable):
 
     def add_dashboard_widget(
         self,
-        title: Optional[Union[bool, Text]] = False,
+        title: TITLE_TYPING = False,
         parent_widget: Optional[Union[Widget, Text]] = None,
-        source_scopes: [DashboardWidgetSourceScopes] = DashboardWidgetSourceScopes.CURRENT_SCOPE,
+        source_scopes: Optional[DashboardWidgetSourceScopes] = DashboardWidgetSourceScopes.CURRENT_SCOPE,
         source_scopes_tags: Optional[List] = None,
         source_subprocess: Optional[List] = None,
         source_selected_scopes: Optional[List] = None,

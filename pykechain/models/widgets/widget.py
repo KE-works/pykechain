@@ -1,4 +1,4 @@
-from typing import Any, Optional, List, AnyStr, Dict, Union, Text
+from typing import Any, Optional, List, Dict, Union, Text
 
 import requests
 from jsonschema import validate
@@ -8,7 +8,7 @@ from pykechain.enums import WidgetTypes, Category, WidgetTitleValue
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import BaseInScope
 from pykechain.models.widgets.enums import MetaWidget, AssociatedObjectId
-from pykechain.models.widgets.helpers import _set_title
+from pykechain.models.widgets.helpers import _set_title, TITLE_TYPING
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 from pykechain.utils import Empty, empty
 
@@ -304,7 +304,7 @@ class Widget(BaseInScope):
 
     def edit(
             self,
-            title: Optional[Union[AnyStr, bool, None, Empty]] = empty,
+            title: Union[TITLE_TYPING, Empty] = empty,
             meta: Optional[Dict] = None,
             **kwargs
     ) -> None:
