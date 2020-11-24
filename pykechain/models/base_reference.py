@@ -44,6 +44,7 @@ class _ReferenceProperty(Property):
         if self.use_bulk_update:
             self._pend_update(dict(value=value))
             self._value = [dict(id=pk) for pk in value] if isinstance(value, list) else None
+            self._cached_values = None
         else:
             self._put_value(value)
 

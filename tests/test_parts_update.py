@@ -100,20 +100,23 @@ class TestPartUpdate(TestBetamax):
         from pykechain.models import Property
         Property.set_bulk_update(True)
 
+        # setUp
         frame = self.project.part("Frame")
         front_wheel = self.project.part("Front Wheel")
-
+        old_data = frame.as_dict()
         update_dict = {
             "Material": "Kevlar",
             "Color": "Black",
             "Ref to wheel": self.wheel,
         }
+
+        # testing
         frame.update(update_dict=update_dict)
 
         self.assertEqual("Kevlar", frame.property("Material").value)
         self.assertEqual("Black", frame.property("Color").value)
-        self.assertEqual(self.wheel, frame.property("Ref to wheel").value[0])
         self.assertEqual(self.wheel.id, frame.property("Ref to wheel").value_ids()[0])
+        self.assertEqual(self.wheel, frame.property("Ref to wheel").value[0])
 
         live_frame = self.project.part("Frame")
 
@@ -129,3 +132,6 @@ class TestPartUpdate(TestBetamax):
         self.assertEqual("Kevlar", live_frame.property("Material").value)
         self.assertEqual("Black", live_frame.property("Color").value)
         self.assertEqual(self.wheel, live_frame.property("Ref to wheel").value[0])
+
+        # tearDown
+        frame.update(update_dict=old_data)
