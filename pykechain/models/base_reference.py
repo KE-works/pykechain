@@ -1,7 +1,6 @@
 from abc import abstractmethod, ABC
 from typing import Optional, Any, Text, Union, Tuple, List
 
-from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Property, Base
 from pykechain.models.base import BaseInScope
@@ -44,7 +43,7 @@ class _ReferenceProperty(Property):
         value = self.serialize_value(value)
         if self.use_bulk_update:
             self._pend_update(dict(value=value))
-            self._value = value
+            self._value = [dict(id=pk, name=str()) for pk in value] if isinstance(value, list) else None
         else:
             self._put_value(value)
 
@@ -90,21 +89,6 @@ class _ReferenceProperty(Property):
         :return: list of Pykechain objects inheriting from Base
         """
         pass  # pragma: no cover
-
-    @staticmethod
-    def chunks(lst: List[Any], n: Optional[int] = PARTS_BATCH_LIMIT) -> List:
-        """
-        Yield successive n-sized chunks from a list.
-
-        source: https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
-
-        :param lst: list of any type
-        :param n: chunk size, defaults to 100
-        :returns slice from original list
-        :rtype list
-        """
-        for i in range(0, len(lst), n):
-            yield lst[i:i + n]
 
     def serialize_value(self, value: Union[Base, List, Tuple]) -> Optional[List[Text]]:
         """
