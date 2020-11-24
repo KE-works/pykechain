@@ -1023,18 +1023,17 @@ class Part(TreeObject, Part2):
         if name:
             payload_json.update(name=name)
 
-        if Property._use_bulk_update and not (name or kwargs):
+        if Property.use_bulk_update and not (name or kwargs):
             # Use the bulk-update for properties, but only if only properties are being updated, nothing more
 
             value_dict = dict()
             for update in properties_fvalues:
                 pk = update.pop("id")
                 value_dict[pk] = update.get("value")
-                Property._update_package[pk] = update
 
             for prop in self.properties:
                 if prop.id in value_dict:
-                    prop._value = value_dict[prop.id]
+                    prop.value = value_dict[prop.id]
         else:
             response = self._client._request(
                 'PUT', self._client._build_url('part', part_id=self.id),
