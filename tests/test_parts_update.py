@@ -100,21 +100,32 @@ class TestPartUpdate(TestBetamax):
         from pykechain.models import Property
         Property.set_bulk_update(True)
 
-        self.wheel.update(update_dict={
-            'Diameter': 0.7,
-            'Spokes': 25,
-        })
+        frame = self.project.part("Frame")
+        front_wheel = self.project.part("Front Wheel")
 
-        self.assertEqual(0.7, self.wheel.property("Diameter").value)
-        self.assertEqual(25, self.wheel.property("Spokes").value)
+        update_dict = {
+            "Material": "Kevlar",
+            "Color": "Black",
+            "Ref to wheel": self.wheel,
+        }
+        frame.update(update_dict=update_dict)
 
-        live_wheel = self.project.part(name="_WHEEL")
+        self.assertEqual("Kevlar", frame.property("Material").value)
+        self.assertEqual("Black", frame.property("Color").value)
+        self.assertEqual(self.wheel, frame.property("Ref to wheel").value[0])
+        self.assertEqual(self.wheel.id, frame.property("Ref to wheel").value_ids()[0])
 
-        self.assertIsNone(live_wheel.property("Diameter").value)
-        self.assertIsNone(live_wheel.property("Spokes").value)
+        live_frame = self.project.part("Frame")
+
+        self.assertIsNot(frame, live_frame, msg="Frames must be 2 different Python objects, by memory allocation")
+        self.assertEqual(frame, live_frame, msg="Frames must be identical KE-chain objects, by UUID")
+        self.assertEqual("Aluminum", live_frame.property("Material").value)
+        self.assertEqual("KE-works orange", live_frame.property("Color").value)
+        self.assertEqual(front_wheel, live_frame.property("Ref to wheel").value[0])
 
         Property.update_values(client=self.client)
-        live_wheel.refresh()
+        live_frame.refresh()
 
-        self.assertEqual(0.7, live_wheel.property("Diameter").value)
-        self.assertEqual(25, live_wheel.property("Spokes").value)
+        self.assertEqual("Kevlar", live_frame.property("Material").value)
+        self.assertEqual("Black", live_frame.property("Color").value)
+        self.assertEqual(self.wheel, live_frame.property("Ref to wheel").value[0])
