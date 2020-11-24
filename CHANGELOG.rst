@@ -10,6 +10,7 @@ Change Log
 * :+1: Refactored a lot of the strings used in the `Widget` meta into enums, to help with consistency.
 * :+1: Added input validation and additional tests for `update_widgets()` method of `Client` class.
 * :+1: Set identical type hints for `title` keywords in all methods of the `WidgetsManager` and `Widget` classes.
+* :+1: In the `set_prefilters()` method of the `MultiReferenceProperty` class, users can now provide the referenced model to validate against, or bypass validation altogether, using the `validate` input argument.
 
 Backwards incompatible changes
 ------------------------------

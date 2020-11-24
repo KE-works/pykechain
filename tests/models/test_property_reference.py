@@ -330,6 +330,24 @@ class TestMultiReferenceProperty(TestBetamax):
         self.assertEqual("15.3", first_filter.value)
         self.assertEqual(FilterType.GREATER_THAN_EQUAL, first_filter.type)
 
+    def test_set_prefilters_with_validation(self):
+        prefilter_good = PropertyValueFilter(self.float_prop, 15.3, FilterType.GREATER_THAN_EQUAL)
+        prefilter_bad = PropertyValueFilter(self.part_model.property("Gears"), 15.3, FilterType.GREATER_THAN_EQUAL)
+
+        # Validate automatically
+        self.ref_prop_model.set_prefilters(prefilters=[prefilter_good])
+        with self.assertRaises(IllegalArgumentError):
+            self.ref_prop_model.set_prefilters(prefilters=[prefilter_bad])
+
+        # Validate by providing the referenced model
+        self.ref_prop_model.set_prefilters(prefilters=[prefilter_good], validate=self.target_model)
+        with self.assertRaises(IllegalArgumentError):
+            self.ref_prop_model.set_prefilters(prefilters=[prefilter_bad], validate=self.target_model)
+
+        # Dont validate
+        self.ref_prop_model.set_prefilters(prefilters=[prefilter_good], validate=False)
+        self.ref_prop_model.set_prefilters(prefilters=[prefilter_bad], validate=None)
+
     def test_set_prefilters_on_reference_property_with_excluded_propmodels_and_validators(
         self,
     ):

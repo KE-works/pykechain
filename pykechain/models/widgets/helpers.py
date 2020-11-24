@@ -397,7 +397,8 @@ def _check_prefilters(part_model: 'Part', prefilters: Union[Dict, List]) -> List
     elif not all(isinstance(pf, PropertyValueFilter) for pf in prefilters):
         raise IllegalArgumentError("`prefilters` must be a list of PropertyValueFilter objects.")
 
-    [pf.validate(part_model=part_model) for pf in prefilters]
+    if part_model:
+        [pf.validate(part_model=part_model) for pf in prefilters]
 
     return prefilters
 
