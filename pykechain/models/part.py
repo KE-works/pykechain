@@ -671,7 +671,7 @@ class Part(TreeObject, Part2):
             properties_fvalues: List[Dict[Text, Any]],
             update_dict: Dict,
             creating: bool = False,
-    ) -> Tuple[List[Dict], List[Dict]]:
+    ) -> Tuple[List[Dict], List[Dict], Dict]:
         """
         Check the content of the update dict and insert them into the properties_fvalues list.
 
@@ -690,6 +690,8 @@ class Part(TreeObject, Part2):
 
         key = "model_id" if creating else "id"
 
+        parsed_dict = dict()
+
         for prop_name_or_id, property_value in update_dict.items():
             property_to_update = part.property(prop_name_or_id)  # type: Property
 
@@ -697,13 +699,14 @@ class Part(TreeObject, Part2):
                 "value": property_to_update.serialize_value(property_value),
                 key: property_to_update.id,
             }
+            parsed_dict[property_to_update.id] = property_value
 
             if property_to_update.type == PropertyType.ATTACHMENT_VALUE:
                 exception_fvalues.append(updated_p)
             else:
                 properties_fvalues.append(updated_p)
 
-        return properties_fvalues, exception_fvalues
+        return properties_fvalues, exception_fvalues, parsed_dict
 
     def add_with_properties(self,
                             model: 'Part',
@@ -765,7 +768,7 @@ class Part(TreeObject, Part2):
             raise IllegalArgumentError('`model` must be a Part object of category MODEL, "{}" is not.'.format(model))
 
         instance_name = check_text(name, 'name') or model.name
-        properties_fvalues, exception_fvalues = self._parse_update_dict(
+        properties_fvalues, exception_fvalues, _ = self._parse_update_dict(
             model,
             properties_fvalues,
             update_dict,
@@ -1013,7 +1016,8 @@ class Part(TreeObject, Part2):
         # action = 'bulk_update_properties'  # not for KEC3
         check_text(name, 'name')
 
-        properties_fvalues, exception_fvalues = self._parse_update_dict(self, properties_fvalues, update_dict)
+        properties_fvalues, exception_fvalues, update_dict = \
+            self._parse_update_dict(self, properties_fvalues, update_dict)
 
         payload_json = dict(
             properties_fvalues=properties_fvalues,
@@ -1023,18 +1027,11 @@ class Part(TreeObject, Part2):
         if name:
             payload_json.update(name=name)
 
-        if Property._use_bulk_update and not (name or kwargs):
-            # Use the bulk-update for properties, but only if only properties are being updated, nothing more
-
-            value_dict = dict()
-            for update in properties_fvalues:
-                pk = update.pop("id")
-                value_dict[pk] = update.get("value")
-                Property._update_package[pk] = update
-
+        if Property.use_bulk_update and not (name or kwargs):
+            # Send updates to the property value in case of bulk updates while no part update is required
             for prop in self.properties:
-                if prop.id in value_dict:
-                    prop._value = value_dict[prop.id]
+                if prop.id in update_dict:
+                    prop.value = update_dict[prop.id]
         else:
             response = self._client._request(
                 'PUT', self._client._build_url('part', part_id=self.id),

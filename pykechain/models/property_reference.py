@@ -127,8 +127,9 @@ class UserReferencesProperty(_ReferenceProperty):
 
         object_ids = []
         for value in self._value:
-            if isinstance(value, dict) and "pk" in value:
-                object_ids.append(str(value.get("pk")))
+            if isinstance(value, dict) and "pk" in value or "id" in value:
+                pk = str(value.get("pk", value.get("id")))
+                object_ids.append(pk)
             elif isinstance(value, (int, str)):
                 object_ids.append(str(value))
             else:  # pragma: no cover
