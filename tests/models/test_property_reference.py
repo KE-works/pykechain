@@ -13,6 +13,7 @@ from pykechain.models.validators import RequiredFieldValidator
 from pykechain.models.value_filter import PropertyValueFilter, ScopeFilter
 from pykechain.utils import find, is_uuid
 from tests.classes import TestBetamax
+from tests.utils import TEST_TOKEN_LOW_PERMISSIONS, TEST_TOKEN
 
 
 class TestBaseReference(TestCase):
@@ -776,6 +777,31 @@ class TestMultiReferencePropertyXScope(TestBetamax):
         self.x_reference_model.delete()
         self.x_scope.delete()
         super(TestMultiReferencePropertyXScope, self).tearDown()
+
+    def test_get_value_low_permissions(self):
+        # setUp
+
+        # set a value using full permissions
+        self.x_reference_model.value = [self.x_target_model]
+        self.x_reference.value = [self.x_target]
+
+        try:
+            # testing
+            referenced_value = self.x_reference.value
+
+            self.assertTrue(referenced_value)
+
+            self.client.login(token=TEST_TOKEN_LOW_PERMISSIONS)  # login as low-permission user
+            self.x_reference.refresh()
+            referenced_value = self.x_reference.value
+
+            self.assertFalse(referenced_value)
+
+        except Exception as e:
+            self.client.login(token=TEST_TOKEN)
+            raise Exception(e)
+
+        self.client.login(token=TEST_TOKEN)
 
     def test_set_model_value(self):
         # setUp

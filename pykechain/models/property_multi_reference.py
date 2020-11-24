@@ -34,13 +34,13 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
 
         if part_ids:
             if self.category == Category.MODEL:
-                parts = [self._client.part(pk=part_ids[0], category=None)]
+                parts = [self._client.model(pk=part_ids[0])]
             elif self.category == Category.INSTANCE:
-                # Retrieve the referenced model for low-permissions scripts to enable use of the `id__in` key
-                if False:  # TODO Check for script permissions in order to skip the model() retrieval
-                    models = [None]
-                else:
-                    models = self.model().value
+                # Retrieve the referenced model to limit the size of the client-wide request
+                # TODO Remove addition model() request to provide the model to prevent a "suspicious API request"
+                #  This requires more information in a reference property instance, such as the target scope UUID or the
+                #  referenced part model UUID.
+                models = self.model().value_ids()
                 if models:
                     parts = list()
                     for chunk in get_in_chunks(part_ids, PARTS_BATCH_LIMIT):

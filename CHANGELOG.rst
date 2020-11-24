@@ -12,6 +12,7 @@ Change Log
 * :+1: Set identical type hints for `title` keywords in all methods of the `WidgetsManager` and `Widget` classes.
 * :+1: In the `set_prefilters()` method of the `MultiReferenceProperty` class, users can now provide the referenced model to validate against, or bypass validation altogether, using the `validate` input argument.
 * :+1: The `child()` method of the `Activity` class now tries to find a cached child prior to requesting the child from KE-chain.
+* :+1: Added tests for low-level permissions while retrieving cross-scope part references.
 
 Backwards incompatible changes
 ------------------------------

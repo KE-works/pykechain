@@ -8,6 +8,7 @@ env.read_envfile()
 TEST_URL = env('TEST_URL', default='https://pim3-test.ke-chain.com')
 TEST_USERNAME = env('TEST_USERNAME', default='pykechain')  # LVL1
 TEST_TOKEN = env('TEST_TOKEN', default='')
+TEST_TOKEN_LOW_PERMISSIONS = env('TEST_TOKEN_LOW', default='')
 TEST_SCOPE_ID = env('TEST_SCOPE_ID', default='bd5dceaa-a35e-47b0-9fc5-875410f4a56f')
 TEST_SCOPE_NAME = env('TEST_SCOPE_NAME', default='Bike Project')
 TEST_RECORD_CASSETTES = env.bool('TEST_RECORD_CASSETTES', default=True)
