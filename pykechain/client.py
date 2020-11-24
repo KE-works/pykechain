@@ -2278,7 +2278,8 @@ class Client(object):
         """
         check_list_of_dicts(widgets, 'widgets', fields=["id"])
         if len(widgets) != len({w.get("id") for w in widgets}):
-            raise IllegalArgumentError("Bulk update of widgets must receive a list of unique widget IDs.")
+            raise IllegalArgumentError("`widgets` must be a list of dicts with one dict per widget, "
+                                       "but found multiple dicts updating the same widget")
 
         response = self._request(
             "PUT",
