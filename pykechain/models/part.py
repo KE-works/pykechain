@@ -1027,7 +1027,7 @@ class Part(TreeObject, Part2):
         if name:
             payload_json.update(name=name)
 
-        if Property.use_bulk_update and not (name or kwargs):
+        if Property._use_bulk_update and not (name or kwargs):
             # Send updates to the property value in case of bulk updates while no part update is required
             for prop in self.properties:
                 if prop.id in update_dict:
