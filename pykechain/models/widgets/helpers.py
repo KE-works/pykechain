@@ -27,6 +27,8 @@ KECARD_COMMON_KEYS = [MetaWidget.COLLAPSED,
                       MetaWidget.IS_DISABLED,
                       MetaWidget.IS_MERGED]
 
+TITLE_TYPING = Optional[Union[type(None), Text, bool]]
+
 
 def _retrieve_object(obj: Union['Base', Text], method: Callable) -> Union['Base']:
     """
@@ -80,7 +82,7 @@ def _retrieve_object_id(obj: Optional[Union['Base', Text]]) -> Optional[Text]:
 
 def _set_title(
         meta: Dict,
-        title: Optional[Union[Text, bool]] = None,
+        title: TITLE_TYPING = None,
         show_title_value: Optional[WidgetTitleValue] = None,
         **kwargs
 ) -> Tuple[Dict, Text]:
@@ -280,7 +282,7 @@ def _set_image(
 def _set_button_text(
         meta: Dict,
         service: 'Service',
-        custom_button_text: Optional[Text] = False,
+        custom_button_text: TITLE_TYPING = False,
         **kwargs
 ) -> Dict:
     """
