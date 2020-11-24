@@ -94,6 +94,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
             prefilters: List[PropertyValueFilter] = None,
             overwrite: Optional[bool] = False,
             clear: Optional[bool] = False,
+            validate: Optional[Union[bool, Part]] = True,
     ) -> None:
         """
         Set the pre-filters on a `MultiReferenceProperty`.
@@ -112,6 +113,8 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         :type overwrite: bool
         :param clear: whether all existing pre-filters should be cleared. (default = False)
         :type clear: bool
+        :param validate: whether the pre-filters are validated to the referenced model, which can be provided as well
+        :type validate: bool
 
         :raises IllegalArgumentError: when the type of the input is provided incorrect.
         """
@@ -129,8 +132,15 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         else:
             new_prefilters = prefilters
 
+        if not validate:
+            part_model = None
+        elif isinstance(validate, Part):
+            part_model = validate
+        else:
+            part_model = self.value[0]
+
         verified_prefilters = _check_prefilters(
-            part_model=self.value[0],
+            part_model=part_model,
             prefilters=new_prefilters,
         )
 
