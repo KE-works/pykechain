@@ -443,7 +443,7 @@ class TestUpdateProperties(TestBetamax):
         self.assertIsNone(self._refresh_prop(self.prop_1).value)
         Property.update_values(client=self.client)
         self.assertEqual(self._refresh_prop(self.prop_1).value, 'new value')
-        self.assertFalse(Property._use_bulk_update)
+        self.assertFalse(Property._USE_BULK_UPDATE)
 
         # setUp 2
         Property.set_bulk_update(True)
@@ -453,7 +453,7 @@ class TestUpdateProperties(TestBetamax):
         self.assertIsNone(self._refresh_prop(self.prop_2).value)
         Property.update_values(client=self.client, use_bulk_update=True)
         self.assertEqual(self._refresh_prop(self.prop_2).value, 'another value')
-        self.assertTrue(Property._use_bulk_update)
+        self.assertTrue(Property._USE_BULK_UPDATE)
 
         # tearDown
         Property.set_bulk_update(False)
