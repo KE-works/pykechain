@@ -2,6 +2,7 @@ Change Log
 ==========
 
 * :bug: In the `Part.property()` method, the property is retrieved by matching a `name` prior to matching a `ref`.
+* :bug: The `text` and `is_active` inputs for editing of a `Banner` were not properly managed, leading to API errors or unchanged values.
 * :bug: Batched property values of `BaseReference` and inherited classes are now stored as lists of dicts instead of list of UUIDs, to simulate values retrieved directly KE-chain.
 
 * :+1: Retrieving the `value` of any reference property is now performed in batches to limit request size, using the existing `get_in_chunks` utility function.

@@ -46,7 +46,7 @@ class Banner(Base):
         is_active).
 
         :param text: Text to display in the banner. May use HTML. Text cannot be cleared.
-        :type text: basestring or None or Empty
+        :type text: basestring or Empty
         :param icon: Font-awesome icon to stylize the banner. Can be cleared.
         :type icon: basestring or None or Empty
         :param active_from: Datetime from when the banner will become active. Cannot be cleared.
@@ -54,7 +54,7 @@ class Banner(Base):
         :param active_until: Datetime from when the banner will no longer be active. Cannot be cleared.
         :type active_until: datetime.datetime or None or Empty
         :param is_active: Boolean whether to set the banner as active, defaults to False. Cannot be cleared.
-        :type is_active: bool or None or Empty
+        :type is_active: bool or Empty
         :param url: target for the "more info" button within the banner. Can be cleared.
         :param url: basestring or None or Empty
         :return: None
@@ -66,18 +66,22 @@ class Banner(Base):
         >>> banner.edit(text='New text here', url=None)
 
         """
+        active = check_type(is_active, bool, 'is_active')
         update_dict = {
-            'text': check_text(text, 'text') or self.text,
+            'text': check_text(text, 'text'),
             'icon': check_text(icon, 'icon') or str(),
             'active_from': check_datetime(active_from, 'active_from') or check_datetime(
                 self.active_from, 'active_from'),
             'active_until': check_datetime(active_until, 'active_until') or check_datetime(
                 self.active_until, 'active_until'),
-            'is_active': check_type(is_active, bool, 'is_active') or self.is_active,
+            'is_active': empty if active is None else active,
             'url': check_url(url) or str(),
         }
 
         update_dict = clean_empty_values(update_dict=update_dict)
+
+        if "text" not in update_dict or update_dict["text"] is None:
+            update_dict["text"] = self.text
 
         url = self._client._build_url('banner', banner_id=self.id)
 
