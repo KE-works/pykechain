@@ -49,7 +49,7 @@ class Property(BaseInScope, Property2):
     :type is_invalid: bool
     """
 
-    _use_bulk_update = False
+    _USE_BULK_UPDATE = False
     _update_package = dict()
 
     def __init__(self, json, **kwargs):
@@ -113,7 +113,7 @@ class Property(BaseInScope, Property2):
     def use_bulk_update(self):
         """Set or get the toggle to asynchronously update property values."""
         # set the class attribute to make this value a singleton
-        return self.__class__._use_bulk_update
+        return self.__class__._USE_BULK_UPDATE
 
     @use_bulk_update.setter
     def use_bulk_update(self, value):
@@ -123,7 +123,7 @@ class Property(BaseInScope, Property2):
     def set_bulk_update(cls, value):
         """Set global class attribute to toggle the use of bulk-updates of properties."""
         assert isinstance(value, bool), "`bulk_update` must be set to a boolean, not {}".format(type(value))
-        cls._use_bulk_update = value
+        cls._USE_BULK_UPDATE = value
 
     @property
     def value(self) -> Any:
@@ -155,7 +155,7 @@ class Property(BaseInScope, Property2):
         :type use_bulk_update: bool
         :return: None
         """
-        if cls.use_bulk_update:
+        if cls._USE_BULK_UPDATE:
             properties = [dict(id=key, **values) for key, values in cls._update_package.items()]
             client.update_properties(properties=properties)
             cls._update_package = dict()
