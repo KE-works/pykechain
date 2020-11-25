@@ -26,7 +26,7 @@ tox==3.20.1
 flake8==3.8.4
 pydocstyle==5.1.1
 mypy==0.790; python_version >= '3.4'
-pre-commit==2.9.0
+pre-commit==2.9.1
 
 # for package management (uploads)
 twine>=3.0.0; python_version >= '3.6'
