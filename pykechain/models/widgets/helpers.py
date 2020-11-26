@@ -14,7 +14,7 @@ from pykechain.enums import (
     CardWidgetImageValue,
 )
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models.input_checks import check_enum
+from pykechain.models.input_checks import check_enum, check_base
 from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets.enums import MetaWidget, AssociatedObjectId
 from pykechain.utils import is_uuid, snakecase, camelcase
@@ -415,6 +415,10 @@ def _check_excluded_propmodels(part_model: 'Part', property_models: List['AnyPro
     """
     from pykechain.models import Property
     from pykechain.models import Part
+
+    if not part_model:
+        # part model is unknown, only check for property_models
+        return [check_base(pm, Property, "property_model") for pm in property_models]
 
     if not isinstance(part_model, Part):
         raise IllegalArgumentError('`part_model` must be a Part object, "{}" is not.'.format(part_model))

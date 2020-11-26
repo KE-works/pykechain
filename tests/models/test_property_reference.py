@@ -533,6 +533,25 @@ class TestMultiReferenceProperty(TestBetamax):
             spokes_property.id in self.ref_prop_model._options["propmodels_excl"]
         )
 
+    def test_set_excluded_propmodels_with_validation(self):
+        excluded_model_good = self.float_prop
+        excluded_model_bad = self.part_model.property("Gears")
+
+        # Validate automatically
+        self.ref_prop_model.set_excluded_propmodels(property_models=[excluded_model_good])
+        with self.assertRaises(IllegalArgumentError):
+            self.ref_prop_model.set_excluded_propmodels(property_models=[excluded_model_bad])
+
+        # Validate by providing the referenced model
+        self.ref_prop_model.set_excluded_propmodels(property_models=[excluded_model_good], validate=self.target_model)
+        with self.assertRaises(IllegalArgumentError):
+            self.ref_prop_model.set_excluded_propmodels(
+                property_models=[excluded_model_bad], validate=self.target_model)
+
+        # Dont validate
+        self.ref_prop_model.set_excluded_propmodels(property_models=[excluded_model_good], validate=False)
+        self.ref_prop_model.set_excluded_propmodels(property_models=[excluded_model_bad], validate=None)
+
     def test_set_excluded_propmodels_on_reference_property_using_uuid(self):
         # setUp
         diameter_property = self.float_prop
