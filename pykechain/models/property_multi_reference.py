@@ -197,6 +197,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
             self,
             property_models: List[Union[Text, 'AnyProperty']],
             overwrite: Optional[bool] = False,
+            validate: Optional[Union[bool, Part]] = True,
     ) -> None:
         """
         Exclude a list of properties from being visible in the part-shop and modal (pop-up) of the reference property.
@@ -205,6 +206,8 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         :type property_models: list
         :param overwrite: flag whether to overwrite existing (True) or append (False, default) to existing filter(s).
         :type overwrite bool
+        :param validate: whether the pre-filters are validated to the referenced model, which can be provided as well
+        :type validate: bool
 
         :raises IllegalArgumentError
         """
@@ -213,8 +216,15 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         else:
             list_of_propmodels_excl = list()
 
+        if not validate:
+            part_model = None
+        elif isinstance(validate, Part):
+            part_model = validate
+        else:
+            part_model = self.value[0]
+
         list_of_propmodels_excl.extend(_check_excluded_propmodels(
-            part_model=self.value[0],
+            part_model=part_model,
             property_models=property_models,
         ))
 
