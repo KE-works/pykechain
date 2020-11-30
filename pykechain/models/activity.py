@@ -629,7 +629,6 @@ class Activity(TreeObject, TagsMixin, Activity2):
 
         # If both are empty that means the user is not interested in changing them
         if isinstance(assignees_ids, Empty) and isinstance(assignees, Empty):
-            update_dict['assignees_ids'] = empty
             return update_dict
         # If one of them is None, then the assignees will be cleared from the Activity
         elif assignees is None or assignees_ids is None:

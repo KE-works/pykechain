@@ -7,6 +7,7 @@ v3.9.1 (27NOV20)
 * :bug: In the `Part.property()` method, the property is retrieved by matching a `name` prior to matching a `ref`, to prevent conflicts when these might identical between different properties.
 * :bug: The `text` and `is_active` inputs for editing of a `Banner` were not properly managed, leading to API errors or unchanged values.
 * :bug: Batched property values of `BaseReference` and inherited classes are now stored as lists of dicts instead of list of UUIDs, to simulate values retrieved directly from KE-chain.
+* :bug: Resolved small issue where `empty` values were being combined with normal objects in the `edit_cascade_down()` method of the `Activity` class.
 
 * :+1: Refactored a lot of the strings used in the `Widget` meta into enums, to help with consistency.
 * :+1: Retrieving the `value` of any reference property is now performed in batches to limit request size, using the existing `get_in_chunks` utility function.
