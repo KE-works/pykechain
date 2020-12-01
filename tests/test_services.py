@@ -24,7 +24,7 @@ class TestServiceSetup(TestBetamax):
         new_service = self.project.create_service(
             name=name or 'Test upload script to service',
             description="Only used for testing - you can safely remove this",
-            environment_version=ServiceEnvironmentVersion.PYTHON_3_6,
+            environment_version=ServiceEnvironmentVersion.PYTHON_3_8,
         )
         upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_script_to_service',
                                    'test_upload_script.py')
@@ -152,7 +152,7 @@ class TestServices(TestBetamax):
         initial_run_as = 'kenode'
         initial_trusted = False
         initial_type = ServiceType.NOTEBOOK
-        initial_env = ServiceEnvironmentVersion.PYTHON_3_7_NOTEBOOKS
+        initial_env = ServiceEnvironmentVersion.PYTHON_3_8_NOTEBOOKS
 
         self.service = self.project.create_service(name=initial_name)
 
