@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v3.9.2 (UNRELEASED)
+* :+1: Pykechain now supports Python version 3.8 on its `Scripts` and `Notebook` classes. Removed the support of Python 2.7 and 3.6.
+
+
 v3.9.1 (27NOV20)
 ----------------
 

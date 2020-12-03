@@ -361,25 +361,17 @@ class ServiceType(Enum):
 class ServiceEnvironmentVersion(Enum):
     """The acceptable versions of python where services run on.
 
-    :cvar PYTHON_2_7: Service execution environment is a python 2.7 container
-    :cvar PYTHON_3_5: Service execution environment is a python 3.5 container
     :cvar PYTHON_3_6: Service execution environment is a python 3.6 container
     :cvar PYTHON_3_7: Service execution environment is a python 3.7 container
     :cvar PYTHON_3_8: Service execution environment is a python 3.8 container
-    :cvar PYTHON_3_5_NOTEBOOKS: execution environment is a python 3.5 container with jupyter notebook preinstalled
     :cvar PYTHON_3_6_NOTEBOOKS: execution environment is a python 3.6 container with jupyter notebook preinstalled
-    :cvar PYTHON_3_7_NOTEBOOKS: execution environment is a python 3.7 container with jupyter notebook preinstalled
     :cvar PYTHON_3_8_NOTEBOOKS: execution environment is a python 3.8 container with jupyter notebook preinstalled
     """
 
-    PYTHON_2_7 = '2.7'
-    PYTHON_3_5 = '3.5'
     PYTHON_3_6 = '3.6'
     PYTHON_3_7 = '3.7'
     PYTHON_3_8 = '3.8'
-    PYTHON_3_5_NOTEBOOKS = '3.5_notebook'
     PYTHON_3_6_NOTEBOOKS = '3.6_notebook'
-    PYTHON_3_7_NOTEBOOKS = '3.7_notebook'
     PYTHON_3_8_NOTEBOOKS = '3.8_notebook'
 
 

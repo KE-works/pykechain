@@ -1753,7 +1753,7 @@ class Client(object):
             description: Optional[Text] = None,
             version: Optional[Text] = None,
             service_type: Optional[ServiceType] = ServiceType.PYTHON_SCRIPT,
-            environment_version: Optional[ServiceEnvironmentVersion] = ServiceEnvironmentVersion.PYTHON_3_6,
+            environment_version: Optional[ServiceEnvironmentVersion] = ServiceEnvironmentVersion.PYTHON_3_8,
             run_as: Optional[ServiceScriptUser] = ServiceScriptUser.KENODE_USER,
             pkg_path: Optional[Text] = None
     ) -> Service:
@@ -1780,7 +1780,7 @@ class Client(object):
                              defaults to `PYTHON_SCRIPT`
         :type service_type: basestring or None
         :param environment_version: (optional) execution environment of the service (refer to
-         :class:`pykechain.enums.ServiceEnvironmentVersion`), defaults to `PYTHON_3_6`
+         :class:`pykechain.enums.ServiceEnvironmentVersion`), defaults to `PYTHON_3_8`
         :type environment_version: basestring or None
         :param run_as: (optional) user to run the service as. Defaults to kenode user (bound to scope)
         :type run_as: basestring or None
