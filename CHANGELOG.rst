@@ -44,7 +44,7 @@ v3.9.0 (05NOV20)
 * :+1: Added `get_prefilters()` and `set_prefilters()` method to all reference property classes by default, albeit raising a `NotImplementedError`. Implementations exist for `ScopeReferencesProperty` and `MultiReferenceProperty`.
 * :+1: Added `get_excluded_propmodel_ids()` method to the `MultiReferenceProperty` class.
 * :+1: Added `alignment` keyword arguments for the creation of `ServiceCardWidget` and `ServiceWidget` classes.
-* :+1: Added `ref` keyword to `create_activity()` method of `Client` class.
+* :+1: Added `ref` keyword to `create_activity()` method of `Client`
 
 Backwards incompatible changes
 ------------------------------
