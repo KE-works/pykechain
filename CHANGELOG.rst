@@ -1,11 +1,36 @@
 Change Log
 ==========
 
-UNRELEASED (DDMMMYY)
---------------------
+* :+1: Added `category` keywords to `edit()` method of `Scope` class and enabled providing of keyword argument to all edit methods.
+
+v3.9.1 (27NOV20)
+----------------
+
+* :bug: In the `Part.property()` method, the property is retrieved by matching a `name` prior to matching a `ref`, to prevent conflicts when these might identical between different properties.
+* :bug: The `text` and `is_active` inputs for editing of a `Banner` were not properly managed, leading to API errors or unchanged values.
+* :bug: Batched property values of `BaseReference` and inherited classes are now stored as lists of dicts instead of list of UUIDs, to simulate values retrieved directly from KE-chain.
+* :bug: Resolved small issue where `empty` values were being combined with normal objects in the `edit_cascade_down()` method of the `Activity` class.
+
+* :+1: Refactored a lot of the strings used in the `Widget` meta into enums, to help with consistency.
+* :+1: Retrieving the `value` of any reference property is now performed in batches to limit request size, using the existing `get_in_chunks` utility function.
+* :+1: Editing the `title` and `meta` of a `Widget` can now be performed simultaneously and `title` can be cleared by providing `None`.
+* :+1: Added input validation and additional tests for `update_widgets()` method of `Client` class.
+* :+1: Set identical type hinting for `title` keywords in all methods of the `WidgetsManager` and `Widget` classes.
+* :+1: In the `set_prefilters()` and `set_excluded_propmodels()` methods of the `MultiReferenceProperty` class, users can now provide the referenced model to validate against, or bypass validation altogether, using the `validate` input argument.
+* :+1: The `child()` method of the `Activity` class now tries to find a cached child prior to requesting the child from KE-chain, similar to the `Part` class.
+
+Backwards incompatible changes
+------------------------------
+
+* As planned and marked with a PendingDeprecationWarning we deprecate the customizations of Activities. This can only be done with old KE-chain versions which are no longer available in production.
+* Deleted enumeration class `ComponentXType`
+
+v3.9.0 (05NOV20)
+----------------
 
 * :star: Added the option to manage supervisor members on a scope for KE-chain 3 backends that support the supervisor member users. That is possible for releases of KE-chain 3 starting from June 2020. (version 3.7). #772
 * :star: Added the possibility to create a `ServiceCardWidget` through the `add_service_card_widget()` function.
+* :star: Added the possibility to create a `DashboardWidget` through the `add_dashboard_widget()` function.
 
 * :bug: Updating or setting of widget associations with only readable and/or writable properties is now supported.
 * :bug: Missing upper-case letter in `SideBarManager` caused a loss of the `override_sidebar` property.
@@ -20,7 +45,6 @@ UNRELEASED (DDMMMYY)
 * :+1: Added `get_excluded_propmodel_ids()` method to the `MultiReferenceProperty` class.
 * :+1: Added `alignment` keyword arguments for the creation of `ServiceCardWidget` and `ServiceWidget` classes.
 * :+1: Added `ref` keyword to `create_activity()` method of `Client` class.
-* :+1: Added `category` keywords to `edit()` method of `Scope` class and enabled providing of keyword argument to all edit methods.
 
 Backwards incompatible changes
 ------------------------------

@@ -1,13 +1,16 @@
 import warnings
 from typing import List, Optional, Text, Union, Any, Tuple
 
+from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.enums import Category, FilterType
 from pykechain.models.input_checks import check_type
 from pykechain.models.property2_multi_reference import MultiReferenceProperty2
 from pykechain.models.base_reference import _ReferencePropertyInScope
 from pykechain.models.part import Part
 from pykechain.models.value_filter import PropertyValueFilter
+from pykechain.models.widgets.enums import MetaWidget
 from pykechain.models.widgets.helpers import _check_prefilters, _check_excluded_propmodels
+from pykechain.utils import get_in_chunks
 
 
 class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2):
@@ -39,11 +42,15 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
                 else:
                     models = self.model().value
                 if models:
-                    parts = list(self._client.parts(
-                        id__in=','.join(part_ids),
-                        model=models[0],
-                        category=None,
-                    ))
+                    parts = list()
+                    for chunk in get_in_chunks(part_ids, PARTS_BATCH_LIMIT):
+                        parts.extend(
+                            list(self._client.parts(
+                                id__in=','.join(chunk),
+                                model=models[0],
+                                category=None,
+                            ))
+                        )
         return parts
 
     def choices(self) -> List[Part]:
@@ -68,7 +75,8 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
             choices_model_id = self.model()._value[0].get('id')
 
             # Determine which parts are filtered out
-            prefilter = self._options.get('prefilters', {}).get('property_value')  # type: Optional[Text]
+            prefilter = self._options.get(MetaWidget.PREFILTERS, {}).\
+                get(MetaWidget.PROPERTY_VALUE_PREFILTER)  # type: Optional[Text]
 
             # Retrieve all part instances with this model ID
             possible_choices = self._client.parts(
@@ -86,6 +94,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
             prefilters: List[PropertyValueFilter] = None,
             overwrite: Optional[bool] = False,
             clear: Optional[bool] = False,
+            validate: Optional[Union[bool, Part]] = True,
     ) -> None:
         """
         Set the pre-filters on a `MultiReferenceProperty`.
@@ -104,6 +113,8 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         :type overwrite: bool
         :param clear: whether all existing pre-filters should be cleared. (default = False)
         :type clear: bool
+        :param validate: whether the pre-filters are validated to the referenced model, which can be provided as well
+        :type validate: bool
 
         :raises IllegalArgumentError: when the type of the input is provided incorrect.
         """
@@ -121,8 +132,15 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         else:
             new_prefilters = prefilters
 
+        if not validate:
+            part_model = None
+        elif isinstance(validate, Part):
+            part_model = validate
+        else:
+            part_model = self.value[0]
+
         verified_prefilters = _check_prefilters(
-            part_model=self.value[0],
+            part_model=part_model,
             prefilters=new_prefilters,
         )
 
@@ -179,6 +197,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
             self,
             property_models: List[Union[Text, 'AnyProperty']],
             overwrite: Optional[bool] = False,
+            validate: Optional[Union[bool, Part]] = True,
     ) -> None:
         """
         Exclude a list of properties from being visible in the part-shop and modal (pop-up) of the reference property.
@@ -187,6 +206,8 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         :type property_models: list
         :param overwrite: flag whether to overwrite existing (True) or append (False, default) to existing filter(s).
         :type overwrite bool
+        :param validate: whether the pre-filters are validated to the referenced model, which can be provided as well
+        :type validate: bool
 
         :raises IllegalArgumentError
         """
@@ -195,8 +216,15 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
         else:
             list_of_propmodels_excl = list()
 
+        if not validate:
+            part_model = None
+        elif isinstance(validate, Part):
+            part_model = validate
+        else:
+            part_model = self.value[0]
+
         list_of_propmodels_excl.extend(_check_excluded_propmodels(
-            part_model=self.value[0],
+            part_model=part_model,
             property_models=property_models,
         ))
 

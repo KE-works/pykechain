@@ -43,7 +43,8 @@ class _ReferenceProperty(Property):
         value = self.serialize_value(value)
         if self.use_bulk_update:
             self._pend_update(dict(value=value))
-            self._value = value
+            self._value = [dict(id=pk) for pk in value] if isinstance(value, list) else None
+            self._cached_values = None
         else:
             self._put_value(value)
 
@@ -115,7 +116,7 @@ class _ReferenceProperty(Property):
 
         :return: None
         """
-        NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
+        raise NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
 
     def get_prefilters(self):
         """
@@ -123,7 +124,7 @@ class _ReferenceProperty(Property):
 
         :return: list of filter values.
         """
-        NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
+        raise NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
 
 
 class _ReferencePropertyInScope(_ReferenceProperty, ABC):

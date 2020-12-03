@@ -1,4 +1,4 @@
-from typing import Any, Optional, List, AnyStr, Dict, Union, Text
+from typing import Any, Optional, List, Dict, Union, Text
 
 import requests
 from jsonschema import validate
@@ -7,7 +7,10 @@ from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import WidgetTypes, Category, WidgetTitleValue
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import BaseInScope
+from pykechain.models.widgets.enums import MetaWidget, AssociatedObjectId
+from pykechain.models.widgets.helpers import _set_title, TITLE_TYPING
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
+from pykechain.utils import Empty, empty
 
 
 class Widget(BaseInScope):
@@ -63,22 +66,23 @@ class Widget(BaseInScope):
         :return: title string
         :rtype str
         """
-        show_title_value = self.meta.get("showTitleValue")
+        show_title_value = self.meta.get(MetaWidget.SHOW_TITLE_VALUE)
         if show_title_value == WidgetTitleValue.NO_TITLE:
             return None
         elif show_title_value == WidgetTitleValue.CUSTOM_TITLE:
-            return self.meta.get("customTitle")
+            return self.meta.get(MetaWidget.CUSTOM_TITLE)
 
         elif show_title_value == WidgetTitleValue.DEFAULT:
             try:
                 if self.widget_type == WidgetTypes.PROPERTYGRID:
-                    return self._client.part(pk=self.meta.get("partInstanceId")).name
+                    return self._client.part(pk=self.meta.get(AssociatedObjectId.PART_INSTANCE_ID)).name
                 elif self.widget_type in [WidgetTypes.FILTEREDGRID, WidgetTypes.SUPERGRID]:
-                    return self._client.part(pk=self.meta.get("partModelId"), category=None).name
+                    return self._client.part(pk=self.meta.get(AssociatedObjectId.PART_MODEL_ID), category=None).name
                 elif self.widget_type in [WidgetTypes.SERVICE, WidgetTypes.NOTEBOOK]:
-                    return self._client.service(pk=self.meta.get("serviceId")).name
+                    return self._client.service(pk=self.meta.get(AssociatedObjectId.SERVICE_ID)).name
                 elif self.widget_type in [WidgetTypes.ATTACHMENTVIEWER, WidgetTypes.SIGNATURE]:
-                    return self._client.property(pk=self.meta.get("propertyInstanceId"), category=None).name
+                    return self._client.property(pk=self.meta.get(AssociatedObjectId.PROPERTY_INSTANCE_ID),
+                                                 category=None).name
                 elif self.widget_type == WidgetTypes.CARD:
                     return self.scope.name
                 else:
@@ -300,14 +304,17 @@ class Widget(BaseInScope):
 
     def edit(
             self,
-            title: Optional[AnyStr] = None,
+            title: Union[TITLE_TYPING, Empty] = empty,
             meta: Optional[Dict] = None,
             **kwargs
     ) -> None:
         """Edit the details of a widget.
 
-        :param title: (optional) title of the widget
-        :type title: basestring or None
+        :param title: New title for the widget
+            * False: use the default title, depending on the widget type
+            * String value: use this title
+            * None: No title at all
+        :type title: basestring, None or False
         :param meta: (optional) new Meta definition
         :type meta: dict or None
         :raises APIError: if the widget could not be updated.
@@ -315,11 +322,12 @@ class Widget(BaseInScope):
         update_dict = dict()
 
         if meta is not None:
-            update_dict.update(dict(meta=meta))
+            self.meta.update(meta)
+            update_dict.update(dict(meta=self.meta))
 
-        if title is not None:
-            self.meta.update({"customTitle": title, "showTitleValue": WidgetTitleValue.CUSTOM_TITLE})
-            update_dict.update(dict(title=title, meta=self.meta))
+        if title is not empty:
+            _set_title(meta=self.meta, title=title)
+            update_dict.update(meta=self.meta)
 
         if kwargs:  # pragma: no cover
             update_dict.update(**kwargs)

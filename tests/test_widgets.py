@@ -4,6 +4,10 @@ from pykechain.enums import (WidgetTypes, ShowColumnTypes, FilterType, ProgressB
                              Category, LinkTargets, KEChainPages, WidgetTitleValue, Alignment, ActivityType,
                              CardWidgetLinkValue, CardWidgetLinkTarget, ImageFitValue, PropertyType, Classification,
                              Multiplicity)
+from pykechain.models.widgets.enums import (
+    DashboardWidgetShowTasks,
+    DashboardWidgetShowScopes,
+)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Activity, Part
 from pykechain.models.widgets import (
@@ -12,7 +16,7 @@ from pykechain.models.widgets import (
     MetapanelWidget, ScopeWidget)
 from pykechain.models.widgets.helpers import _set_title
 from pykechain.models.widgets.widget import Widget
-from pykechain.models.widgets.widget_models import ServicecardWidget
+from pykechain.models.widgets.widget_models import ServicecardWidget, DashboardWidget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import slugify_ref
 from tests.classes import TestBetamax
@@ -152,6 +156,26 @@ class TestWidgets(TestBetamax):
         self.assertTrue(all(p.category == Category.MODEL for p in models))
         self.assertTrue(all(p.category == Category.INSTANCE for p in models))
 
+    def test_bulk_update(self):
+        parent = self.project.activity(name="Tasks with Widgets")
+        task = self.project.activity(name="Task - Form + Tables + Service")
+        test_task = task.clone(
+            parent=parent,
+            name="BULK WIDGET TEST TASK",
+        )
+        self.new_widget = test_task  # for teardown
+
+        widgets = list(test_task.widgets())[1:]  # remove meta-panel
+        self.client.update_widgets(
+            widgets=[dict(id=w.id, title="widget {}".format(i + 1)) for i, w in enumerate(widgets)]
+        )
+
+        with self.assertRaises(IllegalArgumentError):
+            double_update = [widgets[0], widgets[0], widgets[1]]
+            self.client.update_widgets(
+                widgets=[dict(id=w.id, title="widget {}".format(i + 1)) for i, w in enumerate(double_update)]
+            )
+
 
 class TestWidgetManager(TestBetamax):
 
@@ -243,6 +267,49 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertEqual(new_title, live_widget.title)
         self.assertEqual(new_title, live_widget.title_visible)
+
+    def test_edit_widget_title_is_none(self):
+        bike_part = self.project.part('Bike')
+        widget = self.wm.add_propertygrid_widget(
+            part_instance=bike_part,
+            writable_models=bike_part.model().properties,
+        )
+
+        widget.edit(title=None)
+
+        live_widget = self.client.widget(pk=widget.id)
+
+        self.assertFalse(live_widget.title)
+        self.assertIsNone(live_widget.title_visible)
+        self.assertEqual(WidgetTitleValue.NO_TITLE, live_widget.meta.get("showTitleValue"))
+
+        widget.edit(title=False)
+
+        live_widget = self.client.widget(pk=widget.id)
+
+        self.assertFalse(live_widget.title)
+        self.assertEqual("Bike", live_widget.title_visible)
+        self.assertEqual(WidgetTitleValue.DEFAULT, live_widget.meta.get("showTitleValue"))
+
+    def test_edit_widget_title_and_meta(self):
+        bike_part = self.project.part('Bike')
+        widget = self.wm.add_propertygrid_widget(
+            part_instance=bike_part,
+            writable_models=bike_part.model().properties,
+        )
+        new_title = "New title"
+        new_meta = dict(widget.meta)
+        new_meta.update({"showColumns": [ShowColumnTypes.UNIT, ShowColumnTypes.DESCRIPTION]})
+        widget.edit(
+            title=new_title,
+            meta=new_meta,
+        )
+
+        live_widget = self.client.widget(pk=widget.id)
+
+        self.assertEqual(new_title, live_widget.title)
+        self.assertEqual(new_title, live_widget.title_visible)
+        self.assertEqual([ShowColumnTypes.UNIT, ShowColumnTypes.DESCRIPTION], live_widget.meta["showColumns"])
 
     def test_widget_title(self):
         title = 'Hidden title'
@@ -719,6 +786,40 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(ImageFitValue.COVER, widget.meta.get('imageFit'))
         self.assertEqual(CardWidgetLinkTarget.SAME_TAB, widget.meta.get('linkTarget'))
 
+    def test_add_dashboard_widget(self):
+        # setUp
+        title_widget_1 = 'Dashboard widget'
+        title_widget_2 = 'Tagged projects widget'
+
+        widget_current_project = self.wm.add_dashboard_widget(
+            title=title_widget_1,
+            show_assignees=True
+        )
+        widget_tagged_projects = self.wm.add_dashboard_widget(
+            title=title_widget_2,
+            source_scopes_tags=['catalog-scope'],
+            show_tasks=[DashboardWidgetShowTasks.UNASSIGNED_TASKS, DashboardWidgetShowTasks.CLOSED_TASKS],
+            show_scopes=[DashboardWidgetShowScopes.CLOSED_SCOPES],
+            show_assignees=False
+        )
+
+        # testing
+        self.assertIsInstance(widget_current_project, DashboardWidget)
+        self.assertIsInstance(widget_tagged_projects, DashboardWidget)
+
+        self.assertEqual(widget_current_project.title, title_widget_1)
+        self.assertEqual(widget_tagged_projects.title, title_widget_2)
+
+        self.assertTrue(all(elem['selected'] for elem in widget_current_project.meta['showNumbers']))
+        self.assertTrue(all(elem['selected'] for elem in widget_current_project.meta['showNumbersProjects']))
+
+        self.assertTrue(any(elem['selected'] is False for elem in widget_tagged_projects.meta['showNumbers']))
+        self.assertTrue(any(elem['selected'] is False for elem in widget_tagged_projects.meta['showNumbersProjects']))
+
+        self.assertTrue(widget_current_project.meta['showAssignees'])
+        self.assertFalse(widget_tagged_projects.meta['showAssignees'])
+        return
+
 
 class TestWidgetManagerWeatherWidget(TestBetamax):
     def setUp(self):
@@ -728,11 +829,12 @@ class TestWidgetManagerWeatherWidget(TestBetamax):
 
         catalog_root_model = self.project.part(name='Catalog', classification=Classification.CATALOG,
                                                category=Category.MODEL)
-        self.part_model_with_weather_prop = self.project.create_model_with_properties(parent=catalog_root_model,
-                                                              name='___TEST PART', multiplicity=Multiplicity.ONE,
-                                                              properties_fvalues=[
-                                                                  dict(name='weather',
-                                                                       property_type=PropertyType.WEATHER_VALUE)])
+        self.part_model_with_weather_prop = self.project.create_model_with_properties(
+            parent=catalog_root_model,
+            name='___TEST PART', multiplicity=Multiplicity.ONE,
+            properties_fvalues=[
+                dict(name='weather',
+                     property_type=PropertyType.WEATHER_VALUE)])
         self.weather_prop_instance = self.part_model_with_weather_prop.instances()[0].property('weather')
 
     def tearDown(self):

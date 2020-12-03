@@ -2,7 +2,7 @@
 name = 'pykechain'
 description = 'KE-chain Python SDK'
 
-version = '3.8.2'
+version = '3.9.1'
 
 author = 'KE-works BV'
 email = 'support+pykechain@ke-works.com'

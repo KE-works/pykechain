@@ -1,10 +1,13 @@
 from typing import List, Optional, Text
 
+from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Scope, user
 from pykechain.models.base_reference import _ReferencePropertyInScope, _ReferenceProperty
 from pykechain.models.property2_activity_reference import ActivityReferencesProperty as ActivityReferencesProperty2
 from pykechain.models.value_filter import ScopeFilter
+from pykechain.models.widgets.enums import MetaWidget
+from pykechain.utils import get_in_chunks
 
 
 class ActivityReferencesProperty(_ReferencePropertyInScope, ActivityReferencesProperty2):
@@ -49,7 +52,9 @@ class ScopeReferencesProperty(_ReferenceProperty):
 
         scopes = []
         if scope_ids:
-            scopes = list(self._client.scopes(id__in=",".join(scope_ids), status=None))
+            scopes = list()
+            for chunk in get_in_chunks(scope_ids, PARTS_BATCH_LIMIT):
+                scopes.extend(list(self._client.scopes(id__in=",".join(chunk), status=None)))
         return scopes
 
     def set_prefilters(
@@ -86,7 +91,7 @@ class ScopeReferencesProperty(_ReferenceProperty):
             options_to_set = self._options
 
             # Always create the entire prefilter json structure
-            options_to_set["prefilters"] = {
+            options_to_set[MetaWidget.PREFILTERS] = {
                 "tags__contains": ",".join([pf.format() for pf in list_of_prefilters if pf.format()])
             }
 
@@ -122,8 +127,9 @@ class UserReferencesProperty(_ReferenceProperty):
 
         object_ids = []
         for value in self._value:
-            if isinstance(value, dict) and "pk" in value:
-                object_ids.append(str(value.get("pk")))
+            if isinstance(value, dict) and "pk" in value or "id" in value:
+                pk = str(value.get("pk", value.get("id")))
+                object_ids.append(pk)
             elif isinstance(value, (int, str)):
                 object_ids.append(str(value))
             else:  # pragma: no cover
@@ -144,7 +150,9 @@ class UserReferencesProperty(_ReferenceProperty):
 
         users = []
         if user_ids:
-            users = list(self._client.users(id__in=",".join(user_ids)))
+            users = list()
+            for chunk in get_in_chunks(user_ids, PARTS_BATCH_LIMIT):
+                users.extend(list(self._client.users(id__in=",".join(chunk))))
         return users
 
     def value_ids(self) -> Optional[List[int]]:

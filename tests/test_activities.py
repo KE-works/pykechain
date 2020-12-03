@@ -514,7 +514,9 @@ class TestActivities(TestBetamax):
         testuser = self.client.user(username="testuser")
 
         subprocess.edit_cascade_down(
-            assignees=["testuser"], status=ActivityStatus.COMPLETED, overwrite=False,
+            assignees=["testuser"],
+            status=ActivityStatus.COMPLETED,
+            overwrite=False,
         )
 
         subprocess.refresh()

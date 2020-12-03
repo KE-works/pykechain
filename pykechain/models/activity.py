@@ -345,7 +345,20 @@ class Activity(TreeObject, TagsMixin, Activity2):
         if not (name or pk):
             raise IllegalArgumentError('You need to provide either "name" or "pk".')
 
-        activity_list = list(self.children(name=name, pk=pk, **kwargs))
+        if self._cached_children:
+            # First try to find the child without calling KE-chain.
+            if name:
+                activity_list = [c for c in self.children() if c.name == name]
+            else:
+                activity_list = [c for c in self.children() if c.id == pk]
+        else:
+            activity_list = []
+
+        if not activity_list:
+            if name:
+                activity_list = self.children(name=name)
+            else:
+                activity_list = self.children(pk=pk)
 
         criteria = '\nname: {}\npk: {}\nkwargs: {}'.format(name, pk, kwargs)
 
@@ -616,7 +629,6 @@ class Activity(TreeObject, TagsMixin, Activity2):
 
         # If both are empty that means the user is not interested in changing them
         if isinstance(assignees_ids, Empty) and isinstance(assignees, Empty):
-            update_dict['assignees_ids'] = empty
             return update_dict
         # If one of them is None, then the assignees will be cleared from the Activity
         elif assignees is None or assignees_ids is None:

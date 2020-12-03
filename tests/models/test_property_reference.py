@@ -1,6 +1,9 @@
+from unittest import TestCase
+
 from pykechain.enums import PropertyType, FilterType, Multiplicity, ActivityRootNames
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import MultiReferenceProperty
+from pykechain.models.base_reference import _ReferenceProperty
 from pykechain.models.property_reference import (
     ActivityReferencesProperty,
     ScopeReferencesProperty,
@@ -10,6 +13,20 @@ from pykechain.models.validators import RequiredFieldValidator
 from pykechain.models.value_filter import PropertyValueFilter, ScopeFilter
 from pykechain.utils import find, is_uuid
 from tests.classes import TestBetamax
+
+
+class TestBaseReference(TestCase):
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.base_ref = _ReferenceProperty(json=dict(), client=None)
+
+    def test_prefilters(self):
+        with self.assertRaises(NotImplementedError):
+            self.base_ref.set_prefilters()
+
+        with self.assertRaises(NotImplementedError):
+            self.base_ref.get_prefilters()
 
 
 class TestMultiReferenceProperty(TestBetamax):
@@ -313,6 +330,24 @@ class TestMultiReferenceProperty(TestBetamax):
         self.assertEqual("15.3", first_filter.value)
         self.assertEqual(FilterType.GREATER_THAN_EQUAL, first_filter.type)
 
+    def test_set_prefilters_with_validation(self):
+        prefilter_good = PropertyValueFilter(self.float_prop, 15.3, FilterType.GREATER_THAN_EQUAL)
+        prefilter_bad = PropertyValueFilter(self.part_model.property("Gears"), 15.3, FilterType.GREATER_THAN_EQUAL)
+
+        # Validate automatically
+        self.ref_prop_model.set_prefilters(prefilters=[prefilter_good])
+        with self.assertRaises(IllegalArgumentError):
+            self.ref_prop_model.set_prefilters(prefilters=[prefilter_bad])
+
+        # Validate by providing the referenced model
+        self.ref_prop_model.set_prefilters(prefilters=[prefilter_good], validate=self.target_model)
+        with self.assertRaises(IllegalArgumentError):
+            self.ref_prop_model.set_prefilters(prefilters=[prefilter_bad], validate=self.target_model)
+
+        # Dont validate
+        self.ref_prop_model.set_prefilters(prefilters=[prefilter_good], validate=False)
+        self.ref_prop_model.set_prefilters(prefilters=[prefilter_bad], validate=None)
+
     def test_set_prefilters_on_reference_property_with_excluded_propmodels_and_validators(
         self,
     ):
@@ -497,6 +532,25 @@ class TestMultiReferenceProperty(TestBetamax):
         self.assertTrue(
             spokes_property.id in self.ref_prop_model._options["propmodels_excl"]
         )
+
+    def test_set_excluded_propmodels_with_validation(self):
+        excluded_model_good = self.float_prop
+        excluded_model_bad = self.part_model.property("Gears")
+
+        # Validate automatically
+        self.ref_prop_model.set_excluded_propmodels(property_models=[excluded_model_good])
+        with self.assertRaises(IllegalArgumentError):
+            self.ref_prop_model.set_excluded_propmodels(property_models=[excluded_model_bad])
+
+        # Validate by providing the referenced model
+        self.ref_prop_model.set_excluded_propmodels(property_models=[excluded_model_good], validate=self.target_model)
+        with self.assertRaises(IllegalArgumentError):
+            self.ref_prop_model.set_excluded_propmodels(
+                property_models=[excluded_model_bad], validate=self.target_model)
+
+        # Dont validate
+        self.ref_prop_model.set_excluded_propmodels(property_models=[excluded_model_good], validate=False)
+        self.ref_prop_model.set_excluded_propmodels(property_models=[excluded_model_bad], validate=None)
 
     def test_set_excluded_propmodels_on_reference_property_using_uuid(self):
         # setUp

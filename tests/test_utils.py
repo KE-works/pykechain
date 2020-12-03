@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from pykechain.utils import is_url, is_valid_email, Empty
+from pykechain.utils import is_url, is_valid_email, Empty, get_in_chunks
 from tests.classes import SixTestCase
 
 
@@ -170,3 +170,18 @@ class TestEmpty(TestCase):
         self.assertEqual(empty_1, empty_2)
         self.assertIs(empty_1, empty_2)
         self.assertIsNot(empty_1, Empty)
+
+
+class TestChunks(TestCase):
+
+    def test_get_in_chunks(self):
+        chunks = get_in_chunks(
+            lst=list(range(77)),
+            chunk_size=9,
+        )
+
+        import types
+        self.assertIsInstance(chunks, types.GeneratorType)
+
+        chunks_list = list(chunks)
+        self.assertEqual(9, len(chunks_list))

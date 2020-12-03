@@ -9,7 +9,7 @@ from requests.adapters import HTTPAdapter  # type: ignore
 from urllib3 import Retry
 
 from pykechain.defaults import API_PATH, API_EXTRA_PARAMS, RETRY_ON_CONNECTION_ERRORS, RETRY_BACKOFF_FACTOR, \
-    RETRY_TOTAL, RETRY_ON_READ_ERRORS, RETRY_ON_REDIRECT_ERRORS
+    RETRY_TOTAL, RETRY_ON_READ_ERRORS, RETRY_ON_REDIRECT_ERRORS, PARTS_BATCH_LIMIT
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
     ActivityClassification, ActivityStatus, NotificationStatus, NotificationEvent, NotificationChannels
@@ -544,7 +544,7 @@ class Client(object):
         request_params = {
             'id': check_uuid(pk),
             'name': check_text(text=name, key='name'),
-            'scope': scope
+            'scope_id': check_base(scope, Scope, "scope"),
         }
 
         request_params.update(API_EXTRA_PARAMS['activity'])
@@ -589,7 +589,7 @@ class Client(object):
             activity: Optional[Text] = None,
             widget: Optional[Text] = None,
             limit: Optional[int] = None,
-            batch: Optional[int] = 100,
+            batch: Optional[int] = PARTS_BATCH_LIMIT,
             **kwargs
     ) -> PartSet:
         """Retrieve multiple KE-chain parts.
@@ -2276,7 +2276,10 @@ class Client(object):
         :return: list of Widget objects
         :rtype List[Widget]
         """
-        check_list_of_dicts(widgets, 'widgets')
+        check_list_of_dicts(widgets, 'widgets', fields=["id"])
+        if len(widgets) != len({w.get("id") for w in widgets}):
+            raise IllegalArgumentError("`widgets` must be a list of dicts with one dict per widget, "
+                                       "but found multiple dicts updating the same widget")
 
         response = self._request(
             "PUT",

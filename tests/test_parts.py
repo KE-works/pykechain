@@ -633,7 +633,7 @@ class TestBulkPartsCreation(TestBetamax):
                     },
                     {
                         "name": self.act_ref_prop.name,
-                        "value": [self.project.activity(name="test task").id],
+                        "value": [self.project.activity(name="Specify wheel diameter").id],
                         "model_id": self.act_ref_prop.id
                     },
                 ]
@@ -664,7 +664,7 @@ class TestBulkPartsCreation(TestBetamax):
             self.assertEqual(part_created.property(name=self.ss_prop.name).value, "{}".format(idx))
             self.assertEqual(part_created.property(name=self.ms_prop.name).value, ["{}".format(idx)])
             self.assertEqual(part_created.property(name=self.part_ref_prop.name).value[0].name, "Front Wheel")
-            self.assertEqual(part_created.property(name=self.act_ref_prop.name).value[0].name, "test task")
+            self.assertEqual(part_created.property(name=self.act_ref_prop.name).value[0].name, "Specify wheel diameter")
             self.assertEqual(part_created.property(name=self.weather_prop.name).value, dict())
             self.assertEqual(part_created.property(name=self.geo_info_prop.name).value, dict())
 
