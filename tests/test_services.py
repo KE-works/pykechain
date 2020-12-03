@@ -199,7 +199,7 @@ class TestServices(TestBetamax):
         self.assertEqual(self.service.description, str())
         self.assertEqual(self.service.version, str())
         self.assertEqual(self.service.type, initial_type)
-        self.assertEqual(self.service.environment, initial_env)
+        self.assertIn(self.service.environment, (initial_env, compatibility_env))
         self.assertEqual(self.service.run_as, initial_run_as)
         self.assertEqual(self.service.trusted, initial_trusted)
 
