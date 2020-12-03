@@ -327,7 +327,7 @@ class Scope(Base, TagsMixin, Scope2):
             "team_id": check_base(team, Team, "team") or str(),
             "scope_options": check_type(options, dict, "options") or dict(),
         }
-        
+
         if kwargs:  # pragma: no cover
             update_dict.update(kwargs)
 
