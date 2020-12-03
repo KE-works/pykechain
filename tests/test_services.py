@@ -153,6 +153,8 @@ class TestServices(TestBetamax):
         initial_trusted = False
         initial_type = ServiceType.NOTEBOOK
         initial_env = ServiceEnvironmentVersion.PYTHON_3_8_NOTEBOOKS
+        # TODO: to be removed in later versions of pykechain, only for temporal compatibility
+        compatibility_env = "3.7_notebook"
 
         self.service = self.project.create_service(name=initial_name)
 
@@ -179,7 +181,7 @@ class TestServices(TestBetamax):
         self.assertEqual(self.service.version, initial_version)
         self.assertEqual(self.service.run_as, initial_run_as)
         self.assertEqual(self.service.type, initial_type)
-        self.assertEqual(self.service.environment, initial_env)
+        self.assertIn(self.service.environment, (initial_env, compatibility_env))
         self.assertEqual(self.service.trusted, initial_trusted)
 
         # Edit with clearing the values, name and status cannot be cleared
