@@ -38,6 +38,7 @@ class Banner(Base):
         active_until: Optional[Union[datetime.datetime, Empty]] = empty,
         is_active: Optional[Union[bool, Empty]] = empty,
         url: Optional[Union[Text, Empty]] = empty,
+        **kwargs
     ) -> None:
         """
         Update the banner properties.
@@ -77,6 +78,9 @@ class Banner(Base):
             'is_active': empty if active is None else active,
             'url': check_url(url) or str(),
         }
+
+        if kwargs:  # pragma: no cover
+            update_dict.update(kwargs)
 
         update_dict = clean_empty_values(update_dict=update_dict)
 

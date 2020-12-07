@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+* :+1: Added `category` keywords to `edit()` method of `Scope` class and enabled providing of keyword argument to all edit methods.
+
+
 v3.9.2 (3DEC20)
 ---------------
 
