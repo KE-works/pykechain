@@ -7,10 +7,10 @@ jobs:
 
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 5
+      max-parallel: 6
       fail-fast: False
       matrix:
-        python-version: [3.5, 3.6, 3.7, 3.8-dev, pypy3]
+        python-version: [3.5, 3.6, 3.7, 3.8, 3.9, pypy3]
 
     steps:
     - uses: actions/checkout@v1
@@ -32,7 +32,7 @@ jobs:
         pytest --cov=pykechain tests
 
     - name: Check docs and distribution
-      if: matrix.python-version == 3.7
+      if: matrix.python-version == 3.8
       run: |
         pip install flake8 pydocstyle check-manifest readme_renderer[md] twine>=2.0.0
 
@@ -43,7 +43,7 @@ jobs:
         twine check dist/*
 
     - name: Upload coverage to coveralls.io
-      if: matrix.python-version == 3.7
+      if: matrix.python-version == 3.8
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |

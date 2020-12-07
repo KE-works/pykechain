@@ -3,6 +3,13 @@ Change Log
 
 * :+1: Added `category` keywords to `edit()` method of `Scope` class and enabled providing of keyword argument to all edit methods.
 
+
+v3.9.2 (3DEC20)
+---------------
+
+* :+1: Pykechain now supports Python version 3.7 and 3.8 on its `Scripts` and `Notebook` classes. Removed the support of Python 2.7, 3.5 and 3.6.
+
+
 v3.9.1 (27NOV20)
 ----------------
 
