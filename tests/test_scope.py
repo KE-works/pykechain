@@ -1,6 +1,6 @@
 import datetime
 
-from pykechain.enums import ScopeStatus, KEChainPages, ScopeMemberActions, ScopeRoles
+from pykechain.enums import ScopeStatus, KEChainPages, ScopeMemberActions, ScopeRoles, ScopeCategory
 from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
 from pykechain.models import Team, Scope
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
@@ -266,6 +266,7 @@ class TestScopeEdit(TestBetamax):
             start_date=new_start_date,
             due_date=new_due_date,
             status=ScopeStatus.CLOSED,
+            category=ScopeCategory.TEMPLATE_SCOPE,
             tags=new_tags,
         )
 
@@ -277,6 +278,7 @@ class TestScopeEdit(TestBetamax):
         self.assertIn(retrieved_project._json_data['start_date'], ('2018-12-05T00:00:00Z', '2018-12-05T00:00:00+00:00'))
         self.assertIn(retrieved_project._json_data['due_date'], ('2018-12-08T00:00:00Z', '2018-12-08T00:00:00+00:00'))
         self.assertEqual(ScopeStatus.CLOSED, retrieved_project.status)
+        self.assertEqual(ScopeCategory.TEMPLATE_SCOPE, retrieved_project.category)
         self.assertEqual(new_tags, retrieved_project.tags)
 
         with self.assertRaises(IllegalArgumentError):
@@ -293,6 +295,9 @@ class TestScopeEdit(TestBetamax):
 
         with self.assertRaises(IllegalArgumentError):
             self.scope.edit(status='ILLEGAL_STATUS_WILL_CAUSE_ERR')
+
+        with self.assertRaises(IllegalArgumentError):
+            self.scope.edit(category="Ice scoop")
 
         with self.assertRaises(IllegalArgumentError):
             self.scope.edit(tags='tags must be a list of strings')
