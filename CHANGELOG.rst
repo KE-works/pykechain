@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v3.9.3 (UNRELEASED)
+-------------------
+
+* :bug: Fixed a wrong `MetaWidget` enum that was causing an issue when creating a `FilteredGrid` widget.
 * :+1: Added `category` keywords to `edit()` method of `Scope` class and enabled providing of keyword argument to all edit methods.
 
 
