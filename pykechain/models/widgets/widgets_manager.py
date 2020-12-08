@@ -325,7 +325,7 @@ class WidgetsManager(Iterable):
             # columns
             MetaWidget.SORTED_COLUMN: sort_property_id if sort_property_id else None,
             MetaWidget.SORTED_DIRECTION: sort_direction,
-            MetaWidget.NAME: show_name_column,
+            MetaWidget.SHOW_NAME_COLUMN: show_name_column,
             MetaWidget.SHOW_IMAGES: show_images,
             # buttons
             MetaWidget.VISIBLE_ADD_BUTTON: new_instance if parent_instance else False,
@@ -495,7 +495,7 @@ class WidgetsManager(Iterable):
             MetaWidget.FILTERS_EXPANDED,
             MetaWidget.COLLAPSE_FILTERS: collapse_filters,
             MetaWidget.CUSTOM_PAGE_SIZE: page_size,
-            MetaWidget.NAME: show_name_column,
+            MetaWidget.SHOW_NAME_COLUMN: show_name_column,
             MetaWidget.SHOW_IMAGES: show_images,
             # buttons
             MetaWidget.VISIBLE_ADD_BUTTON: new_instance if parent_instance_id else False,
