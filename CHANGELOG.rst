@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+* :bug: Removed multiple `return` statements from `_validate_edit_arguments` helper function in the `Activity` class, enabling usage of kwargs.
+
+
 v3.9.3 (8DEC20)
 ---------------
 

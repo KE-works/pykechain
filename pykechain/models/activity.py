@@ -629,11 +629,12 @@ class Activity(TreeObject, TagsMixin, Activity2):
 
         # If both are empty that means the user is not interested in changing them
         if isinstance(assignees_ids, Empty) and isinstance(assignees, Empty):
-            return update_dict
+            pass
+
         # If one of them is None, then the assignees will be cleared from the Activity
         elif assignees is None or assignees_ids is None:
             update_dict['assignees_ids'] = list()
-            return update_dict
+
         # In case both of them have values specified, then an Error is raised
         elif assignees and assignees_ids and not isinstance(assignees, Empty) and not isinstance(assignees_ids, Empty):
             raise IllegalArgumentError('Provide either assignee names or their ids, but not both.')
@@ -641,19 +642,20 @@ class Activity(TreeObject, TagsMixin, Activity2):
         else:
             assignees = assignees if assignees is not None and not isinstance(assignees, Empty) else assignees_ids
 
-        if assignees:
-            if not isinstance(assignees, (list, tuple, set)) or not all(isinstance(a, (str, int)) for a in assignees):
-                raise IllegalArgumentError('All assignees must be provided as list, tuple or set of names or IDs.')
+            if assignees:
+                if not isinstance(assignees, (list, tuple, set)) or \
+                        not all(isinstance(a, (str, int)) for a in assignees):
+                    raise IllegalArgumentError('All assignees must be provided as list, tuple or set of names or IDs.')
 
-            update_assignees_ids = [m.get('id') for m in self.scope.members()
-                                    if m.get('id') in assignees or m.get('username') in set(assignees)]
+                update_assignees_ids = [m.get('id') for m in self.scope.members()
+                                        if m.get('id') in assignees or m.get('username') in set(assignees)]
 
-            if len(update_assignees_ids) != len(assignees):
-                raise NotFoundError('All assignees should be a member of the project.')
-        else:
-            update_assignees_ids = list()
+                if len(update_assignees_ids) != len(assignees):
+                    raise NotFoundError('All assignees should be a member of the project.')
+            else:
+                update_assignees_ids = list()
 
-        update_dict['assignees_ids'] = update_assignees_ids
+            update_dict['assignees_ids'] = update_assignees_ids
 
         if kwargs:
             update_dict.update(kwargs)
