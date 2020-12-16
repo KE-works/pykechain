@@ -791,8 +791,15 @@ class Activity(TreeObject, TagsMixin, Activity2):
             self._widgets_manager = WidgetsManager(widgets=widgets, activity=self)
         return self._widgets_manager
 
-    def download_as_pdf(self, target_dir=None, pdf_filename=None, paper_size=PaperSize.A4,
-                        paper_orientation=PaperOrientation.PORTRAIT, include_appendices=False):
+    def download_as_pdf(
+            self,
+            target_dir: str = None,
+            pdf_filename: str = None,
+            paper_size: PaperSize = PaperSize.A4,
+            paper_orientation: PaperOrientation = PaperOrientation.PORTRAIT,
+            include_appendices: bool = False,
+            include_qr_code: bool = False,
+    ):
         """
         Retrieve the PDF of the Activity.
 
@@ -815,6 +822,8 @@ class Activity(TreeObject, TagsMixin, Activity2):
         :type paper_size: basestring (see :class:`enums.PaperOrientation`)
         :param include_appendices: True if the PDF should contain appendices, False (default) if otherwise.
         :type include_appendices: bool
+        :param include_qr_code: True if the PDF should include a QR-code, False (default) if otherwise.
+        :type include_qr_code: bool
         :raises APIError: if the pdf file could not be found.
         :raises OSError: if the file could not be written.
         """
@@ -828,7 +837,8 @@ class Activity(TreeObject, TagsMixin, Activity2):
         request_params = {
             'papersize': paper_size,
             'orientation': paper_orientation,
-            'appendices': include_appendices
+            'appendices': include_appendices,
+            'includeqr': include_qr_code,
         }
 
         url = self._client._build_url('activity_export', activity_id=self.id)
