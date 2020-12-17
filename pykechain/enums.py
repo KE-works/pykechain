@@ -518,6 +518,7 @@ class PaperSize(Enum):
     A2 = 'a2paper'
     A3 = 'a3paper'
     A4 = 'a4paper'
+    AUTO = 'automatic'
 
 
 class PaperOrientation(Enum):

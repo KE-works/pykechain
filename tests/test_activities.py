@@ -888,8 +888,13 @@ class TestActivityDownloadAsPDF(TestBetamax):
 
         # testing
         with temp_chdir() as target_dir:
-            activity.download_as_pdf(target_dir=target_dir, pdf_filename="pdf_file")
-            activity.download_as_pdf(target_dir=target_dir)
+            activity.download_as_pdf(
+                target_dir=target_dir,
+                pdf_filename="pdf_file",
+            )
+            activity.download_as_pdf(
+                target_dir=target_dir,
+            )
             pdf_file = os.path.join(target_dir, "pdf_file.pdf")
             pdf_file_called_after_activity = os.path.join(
                 target_dir, activity_name + ".pdf"
@@ -908,7 +913,10 @@ class TestActivityDownloadAsPDF(TestBetamax):
         # testing
         with temp_chdir() as target_dir:
             activity.download_as_pdf(
-                target_dir=target_dir, pdf_filename="pdf_file", include_appendices=True
+                target_dir=target_dir,
+                pdf_filename="pdf_file",
+                include_appendices=True,
+                include_qr_code=True,
             )
             pdf_file = os.path.join(target_dir, "pdf_file.pdf")
             pdf_file_called_after_activity = os.path.join(
@@ -929,7 +937,9 @@ class TestActivityDownloadAsPDF(TestBetamax):
         activity = self.project.activity(name=activity_name)
 
         activity.share_link(
-            subject=subject, message=message, recipient_users=recipient_users
+            subject=subject,
+            message=message,
+            recipient_users=recipient_users,
         )
 
         # testing
@@ -964,6 +974,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
             paper_size=paper_size,
             paper_orientation=paper_orientation,
             include_appendices=False,
+            include_qr_code=True,
         )
 
         # testing

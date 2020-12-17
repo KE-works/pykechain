@@ -791,8 +791,15 @@ class Activity(TreeObject, TagsMixin, Activity2):
             self._widgets_manager = WidgetsManager(widgets=widgets, activity=self)
         return self._widgets_manager
 
-    def download_as_pdf(self, target_dir=None, pdf_filename=None, paper_size=PaperSize.A4,
-                        paper_orientation=PaperOrientation.PORTRAIT, include_appendices=False):
+    def download_as_pdf(
+            self,
+            target_dir: str = None,
+            pdf_filename: str = None,
+            paper_size: PaperSize = PaperSize.A4,
+            paper_orientation: PaperOrientation = PaperOrientation.PORTRAIT,
+            include_appendices: bool = False,
+            include_qr_code: bool = False,
+    ):
         """
         Retrieve the PDF of the Activity.
 
@@ -815,6 +822,8 @@ class Activity(TreeObject, TagsMixin, Activity2):
         :type paper_size: basestring (see :class:`enums.PaperOrientation`)
         :param include_appendices: True if the PDF should contain appendices, False (default) if otherwise.
         :type include_appendices: bool
+        :param include_qr_code: True if the PDF should include a QR-code, False (default) if otherwise.
+        :type include_qr_code: bool
         :raises APIError: if the pdf file could not be found.
         :raises OSError: if the file could not be written.
         """
@@ -825,11 +834,12 @@ class Activity(TreeObject, TagsMixin, Activity2):
 
         full_path = os.path.join(target_dir or os.getcwd(), pdf_filename)
 
-        request_params = {
-            'papersize': paper_size,
-            'orientation': paper_orientation,
-            'appendices': include_appendices
-        }
+        request_params = dict(
+            papersize=check_enum(paper_size, PaperSize, "paper_size"),
+            orientation=check_enum(paper_orientation, PaperOrientation, "paper_orientation"),
+            appendices=check_type(include_appendices, bool, "include_appendices"),
+            includeqr=check_type(include_qr_code, bool, "include_qr_code"),
+        )
 
         url = self._client._build_url('activity_export', activity_id=self.id)
         response = self._client._request('GET', url, params=request_params)
@@ -918,7 +928,8 @@ class Activity(TreeObject, TagsMixin, Activity2):
             recipient_users: List[Union[User, Text]],
             paper_size: Optional[PaperSize] = PaperSize.A3,
             paper_orientation: Optional[PaperOrientation] = PaperOrientation.PORTRAIT,
-            include_appendices: Optional[bool] = False
+            include_appendices: Optional[bool] = False,
+            include_qr_code: Optional[bool] = False,
     ) -> None:
         """
         Share the PDF of the `Activity` through email.
@@ -942,6 +953,8 @@ class Activity(TreeObject, TagsMixin, Activity2):
         :type paper_size: basestring (see :class:`enums.PaperOrientation`)
         :param include_appendices: True if the PDF should contain appendices, False (default) if otherwise.
         :type include_appendices: bool
+        :param include_qr_code: True if the PDF should include a QR-code, False (default) if otherwise.
+        :type include_qr_code: bool
         :raises APIError: if an internal server error occurred.
         """
         recipient_emails = list()
@@ -957,14 +970,15 @@ class Activity(TreeObject, TagsMixin, Activity2):
                                        '"{}" ({}) is not.'.format(recipient_users, type(recipient_users)))
 
         params = dict(
-            message=check_text(message, 'message'),
-            subject=check_text(subject, 'subject'),
+            message=check_text(message, "message"),
+            subject=check_text(subject, "subject"),
             recipient_users=recipient_users_ids,
             recipient_emails=recipient_emails,
             activity_id=self.id,
-            papersize=check_enum(paper_size, PaperSize, 'paper_size'),
-            orientation=check_enum(paper_orientation, PaperOrientation, 'paper_orientation'),
-            appendices=check_type(include_appendices, bool, 'bool'),
+            papersize=check_enum(paper_size, PaperSize, "paper_size"),
+            orientation=check_enum(paper_orientation, PaperOrientation, "paper_orientation"),
+            appendices=check_type(include_appendices, bool, "include_appendices"),
+            includeqr=check_type(include_qr_code, bool, "include_qr_code"),
         )
 
         url = self._client._build_url('notification_share_activity_pdf')
