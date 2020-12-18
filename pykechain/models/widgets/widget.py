@@ -1,6 +1,9 @@
-from typing import Any, Optional, List, Dict, Union, Text
-
+import datetime
+import os
+import pytz
 import requests
+
+from typing import Any, Optional, List, Dict, Union, Text, Tuple, Callable
 from jsonschema import validate
 
 from pykechain.defaults import API_EXTRA_PARAMS
@@ -10,7 +13,7 @@ from pykechain.models import BaseInScope
 from pykechain.models.widgets.enums import MetaWidget, AssociatedObjectId
 from pykechain.models.widgets.helpers import _set_title, TITLE_TYPING
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
-from pykechain.utils import Empty, empty
+from pykechain.utils import Empty, empty, slugify_ref
 
 
 class Widget(BaseInScope):
@@ -410,3 +413,102 @@ class Widget(BaseInScope):
         self.delete()
 
         return moved_widget
+
+    @staticmethod
+    def _validate_excel_export_inputs(
+            target_dir: Text,
+            file_name: Text,
+            user: 'User',
+            default_file_name: Callable,
+    ) -> Tuple[
+        Text, Text, 'User'
+    ]:
+        """Check, convert and return the inputs for the Excel exporter functions."""
+        if target_dir is None:
+            target_dir = os.getcwd()
+        elif not isinstance(target_dir, str) or not os.path.isdir(target_dir):
+            raise IllegalArgumentError('`target_dir` must be a valid directory.')
+
+        if file_name is None:
+            file_name = default_file_name()
+        else:
+            if not isinstance(file_name, str):
+                raise IllegalArgumentError('`file_name` must be a string, "{}" is not.'.format(file_name))
+            elif '.xls' in file_name:
+                file_name = file_name.split('.xls')[0]
+            file_name = slugify_ref(file_name)
+
+        if not file_name.endswith('.xlsx'):
+            file_name += '.xlsx'
+
+        from pykechain.models import User
+        if user is not None and not isinstance(user, User):
+            raise IllegalArgumentError('`user` must be a Pykechain User object, "{}" is not.'.format(user))
+
+        return target_dir, file_name, user
+
+    def download_as_excel(
+            self,
+            target_dir: Optional[Text] = None,
+            file_name: Optional[Text] = None,
+            user: 'User' = None,
+    ) -> Text:
+        """
+        Export a grid widget as an Excel sheet.
+
+        :param target_dir: directory (path) to store the Excel sheet.
+        :type target_dir: str
+        :param file_name: optional, name of the Excel file
+        :type file_name: str
+        :param user: User object to create timezone-aware datetime values
+        :type user: User
+        :return: file path of the created Excel sheet
+        :rtype str
+        """
+        if self.widget_type in {WidgetTypes.SUPERGRID, WidgetTypes.FILTEREDGRID}:
+            raise IllegalArgumentError('Only grid widgets can be exported to Excel, "{}" is not.'.format(self))
+
+        part_model_id = self.meta.get('partModelId')
+        parent_instance_id = self.meta.get('parentInstanceId')
+
+        def default_file_name():
+            return self._client.model(pk=part_model_id).name if file_name is None else ''
+
+        target_dir, file_name, user = self._validate_excel_export_inputs(target_dir, file_name, user, default_file_name)
+
+        json = dict(
+            model_id=part_model_id,
+            parent_id=parent_instance_id,
+            widget_id=self.id,
+            export_format='xlsx',
+        )
+
+        if user:
+            now_utc = datetime.datetime.now(tz=pytz.utc).replace(tzinfo=None)
+
+            # Convert UTC time to local timezone based on the user
+            timezone_definition = user._json_data['timezone']
+            timezone = pytz.timezone(timezone_definition)
+            now_local = now_utc.astimezone(timezone)
+
+            offset_minutes = int(round((now_utc-now_local).total_seconds() / 60.0))
+        else:
+            offset_minutes = 0
+
+        params = dict(
+            offset=offset_minutes
+        )
+
+        url = self._client._build_url('parts_export')
+        response = self._client._request('GET', url, data=json, params=params)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not export widget {}: {}".format(str(response), response.content))
+
+        full_path = os.path.join(target_dir, file_name)
+
+        with open(full_path, 'wb') as f:
+            for chunk in response:
+                f.write(chunk)
+
+        return full_path

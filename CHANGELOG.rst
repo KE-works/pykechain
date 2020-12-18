@@ -1,7 +1,10 @@
 Change Log
 ==========
 
+* :star: Implemented `download_as_excel` method to the `Widget` class, to export any grid widget as an Excel file.
+
 * :bug: Removed multiple `return` statements from `_validate_edit_arguments` helper function in the `Activity` class, enabling usage of kwargs.
+
 * :+1: Added `include_qr_code` keyword to the `download_as_pdf` and `share_pdf` methods of the `Activity` class, to include a QR-code to the original KE-chain activity.
 * :+1: Added `automatic` paper-size option for `PaperSize` enumeration class.
 
