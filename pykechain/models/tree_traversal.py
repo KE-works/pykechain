@@ -85,6 +85,15 @@ class TreeObject(BaseInScope, ABC):
 
         return all_children
 
+    def count_children(self) -> int:
+        """
+        Retrieve the number of child objects using a light-weight request.
+
+        :return: number of child objects
+        :rtype int
+        """
+        raise NotImplementedError  # pragma: no cover
+
     def _populate_cached_children(
             self,
             all_descendants: List[T],
