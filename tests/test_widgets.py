@@ -1,3 +1,5 @@
+import os
+from typing import List
 from unittest import TestCase
 
 from pykechain.enums import (WidgetTypes, ShowColumnTypes, FilterType, ProgressBarColors,
@@ -18,7 +20,7 @@ from pykechain.models.widgets.helpers import _set_title
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widget_models import ServicecardWidget, DashboardWidget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
-from pykechain.utils import slugify_ref
+from pykechain.utils import slugify_ref, temp_chdir, find
 from tests.classes import TestBetamax
 
 
@@ -992,3 +994,60 @@ class TestWidgetsCopyMove(TestBetamax):
         self.assertEqual(widget_manager_2[0].title, title)
         self.assertTrue(all(prop.output for prop in associated_model.properties))
         self.assertEqual(1, len(self.task.widgets()))
+
+
+class TestWidgetDownloadAsExcel(TestBetamax):
+
+    def setUp(self):
+        super().setUp()
+        task = self.project.activity(name="Task - Form + Tables + Service")
+        all_widgets = task.widgets()  # type: List[Widget]
+
+        self.grid_widget = find(all_widgets, lambda w: w.widget_type == WidgetTypes.FILTEREDGRID)
+        self.form_widget = find(all_widgets, lambda w: w.widget_type == WidgetTypes.PROPERTYGRID)
+
+    def tearDown(self):
+        super().tearDown()
+
+    def test_download_as_excel(self):
+        file_name = "My excel file"
+
+        with temp_chdir() as target_dir:
+
+            path = self.grid_widget.download_as_excel(
+                target_dir=target_dir,
+                file_name=file_name,
+            )
+
+            self.assertTrue(os.path.exists(path))
+            self.assertIn(slugify_ref(file_name), path)
+
+    def test_timezone_aware(self):
+        file_name = "My excel file.xls"
+        user = self.client.user("testuser")
+        timezone_definition = user._json_data['timezone']
+
+        self.assertEqual("Europe/Amsterdam", timezone_definition)
+
+        with temp_chdir() as target_dir:
+            path = self.grid_widget.download_as_excel(
+                target_dir=target_dir,
+                file_name=file_name,
+                user=user,
+            )
+
+            self.assertTrue(os.path.exists(path))
+
+    # noinspection PyTypeChecker
+    def test_invalid_inputs(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.form_widget.download_as_excel()
+
+        with self.assertRaises(IllegalArgumentError):
+            self.grid_widget.download_as_excel(target_dir=3)
+
+        with self.assertRaises(IllegalArgumentError):
+            self.grid_widget.download_as_excel(file_name=15.3)
+
+        with self.assertRaises(IllegalArgumentError):
+            self.grid_widget.download_as_excel(user="Testuser")

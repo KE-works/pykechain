@@ -465,11 +465,13 @@ class Widget(BaseInScope):
         :return: file path of the created Excel sheet
         :rtype str
         """
-        if self.widget_type in {WidgetTypes.SUPERGRID, WidgetTypes.FILTEREDGRID}:
-            raise IllegalArgumentError('Only grid widgets can be exported to Excel, "{}" is not.'.format(self))
+        grid_widgets = {WidgetTypes.SUPERGRID, WidgetTypes.FILTEREDGRID}
+        if self.widget_type not in grid_widgets:
+            raise IllegalArgumentError(
+                "Only widgets of type {} can be exported to Excel, `{}` is not.".format(grid_widgets, self.widget_type))
 
-        part_model_id = self.meta.get('partModelId')
-        parent_instance_id = self.meta.get('parentInstanceId')
+        part_model_id = self.meta.get("partModelId")
+        parent_instance_id = self.meta.get("parentInstanceId")
 
         def default_file_name():
             return self._client.model(pk=part_model_id).name if file_name is None else ''
@@ -484,7 +486,7 @@ class Widget(BaseInScope):
         )
 
         if user:
-            now_utc = datetime.datetime.now(tz=pytz.utc).replace(tzinfo=None)
+            now_utc = datetime.datetime.now(tz=pytz.utc)
 
             # Convert UTC time to local timezone based on the user
             timezone_definition = user._json_data['timezone']
