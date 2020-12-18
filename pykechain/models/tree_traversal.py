@@ -1,6 +1,9 @@
 from abc import ABC
 from typing import Optional, Text, List, TypeVar
 
+import requests
+
+from pykechain.exceptions import NotFoundError
 from pykechain.models import BaseInScope
 
 T = TypeVar('T')
@@ -85,14 +88,31 @@ class TreeObject(BaseInScope, ABC):
 
         return all_children
 
-    def count_children(self, **kwargs) -> int:
+    def count_children(self, method: Text, **kwargs) -> int:
         """
         Retrieve the number of child objects using a light-weight request.
 
+        :param method
+        :type method
         :return: number of child objects
         :rtype int
         """
-        raise NotImplementedError  # pragma: no cover
+        parameters = {
+            "scope_id": self.scope_id,
+            "parent_id": self.id,
+            "limit": 1
+        }
+        if kwargs:
+            parameters.update(kwargs)
+
+        response = self._client._request('GET', self._client._build_url(method), params=parameters)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve {}".format(method))
+
+        count = response.json()['count']
+
+        return count
 
     def _populate_cached_children(
             self,

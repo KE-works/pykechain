@@ -419,22 +419,7 @@ class Activity(TreeObject, TagsMixin, Activity2):
             raise IllegalArgumentError(
                 "You can only count the number of children of an Activity of type {}".format(ActivityType.PROCESS))
 
-        parameters = {
-            "parent_id": self.id,
-            "scope_id": self.scope_id,
-            "limit": 1,
-        }
-        if kwargs:
-            parameters.update(kwargs)
-
-        response = self._client._request('GET', self._client._build_url('activities'), params=parameters)
-
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve activities")
-
-        count = response.json()['count']
-
-        return count
+        return super().count_children(method="activities")
 
     def clone(
         self,

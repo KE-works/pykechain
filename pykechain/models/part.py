@@ -433,23 +433,7 @@ class Part(TreeObject, Part2):
         :return: number of Parts
         :rtype int
         """
-        parameters = {
-            "scope_id": self.scope_id,
-            "parent_id": self.id,
-            "category": self.category,
-            "limit": 1
-        }
-        if kwargs:
-            parameters.update(kwargs)
-
-        response = self._client._request('GET', self._client._build_url('parts'), params=parameters)
-
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve parts")
-
-        count = response.json()['count']
-
-        return count
+        return super().count_children(method="parts", category=self.category)
 
     #
     # CRUD operations
