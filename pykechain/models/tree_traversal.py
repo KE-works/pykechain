@@ -85,7 +85,7 @@ class TreeObject(BaseInScope, ABC):
 
         return all_children
 
-    def count_children(self) -> int:
+    def count_children(self, **kwargs) -> int:
         """
         Retrieve the number of child objects using a light-weight request.
 
