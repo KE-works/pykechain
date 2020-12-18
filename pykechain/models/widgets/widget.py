@@ -493,7 +493,7 @@ class Widget(BaseInScope):
             timezone = pytz.timezone(timezone_definition)
             now_local = now_utc.astimezone(timezone)
 
-            offset_minutes = int(round((now_utc-now_local).total_seconds() / 60.0))
+            offset_minutes = int(round((now_utc - now_local).total_seconds() / 60.0))
         else:
             offset_minutes = 0
 
