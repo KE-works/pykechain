@@ -1,6 +1,8 @@
 Change Log
 ==========
 
+* :bug: Removed multiple `return` statements from `_validate_edit_arguments` helper function in the `Activity` class, enabling usage of kwargs.
+
 * :+1: Added `count_children` method to the `TreeObject`, `Activity` and `Part` classes for a light-weight count of the number of child objects.
 * :+1: Added `include_qr_code` keyword to the `download_as_pdf` and `share_pdf` methods of the `Activity` class, to include a QR-code to the original KE-chain activity.
 * :+1: Added `automatic` paper-size option for `PaperSize` enumeration class.
@@ -9,7 +11,6 @@ v3.9.3 (8DEC20)
 ---------------
 
 * :bug: Fixed a wrong `MetaWidget` enum that was causing an issue when creating a `FilteredGrid` widget.
-
 * :+1: Added `category` keywords to `edit()` method of `Scope` class and enabled providing of keyword argument to all edit methods.
 
 
@@ -17,7 +18,6 @@ v3.9.2 (3DEC20)
 ---------------
 
 * :+1: Pykechain now supports Python version 3.7 and 3.8 on its `Scripts` and `Notebook` classes. Removed the support of Python 2.7, 3.5 and 3.6.
-
 
 v3.9.1 (27NOV20)
 ----------------
