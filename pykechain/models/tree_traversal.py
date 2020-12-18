@@ -92,8 +92,8 @@ class TreeObject(BaseInScope, ABC):
         """
         Retrieve the number of child objects using a light-weight request.
 
-        :param method
-        :type method
+        :param method: which type of object to retrieve, either parts or activities
+        :type method: str
         :return: number of child objects
         :rtype int
         """
