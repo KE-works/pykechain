@@ -3,7 +3,7 @@ Change Log
 
 * :bug: Removed multiple `return` statements from `_validate_edit_arguments` helper function in the `Activity` class, enabling usage of kwargs.
 
-* :+1: Added `count_children` method to the `TreeObject`, `Activity` and `Part` classes for a light-weight count of the number of child objects.
+* :+1: Added `count_children` method to the `Activity` and `Part` classes for a light-weight count of the number of child objects.
 * :+1: Added `include_qr_code` keyword to the `download_as_pdf` and `share_pdf` methods of the `Activity` class, to include a QR-code to the original KE-chain activity.
 * :+1: Added `automatic` paper-size option for `PaperSize` enumeration class.
 

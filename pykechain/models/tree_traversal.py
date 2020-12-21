@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Optional, Text, List, TypeVar
 
 import requests
@@ -88,6 +88,7 @@ class TreeObject(BaseInScope, ABC):
 
         return all_children
 
+    @abstractmethod
     def count_children(self, method: Text, **kwargs) -> int:
         """
         Retrieve the number of child objects using a light-weight request.
