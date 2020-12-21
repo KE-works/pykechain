@@ -122,6 +122,15 @@ class TestServices(TestBetamax):
             service_execution.refresh()
             self.assertTrue(service_execution.status in ServiceExecutionStatus.values())
 
+    @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+                        reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
+    def test_service_context(self):
+        some_activity = self.project.activities()[0]
+        service = self.project.service(name='Service Gears - Successful')
+
+        service_execution = service.execute(activity_id=some_activity.id)
+        self.assertEqual(some_activity.id, service_execution.activity_id)
+
     def test_update_service(self):
         # setUp
         service_name = 'Service Gears - Successful'
