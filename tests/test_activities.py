@@ -744,6 +744,16 @@ class TestActivities(TestBetamax):
         for child in children:
             self.assertEqual(child._json_data.get("parent_id"), subprocess.id)
 
+    def test_count_children(self):
+        process = self.project.activity(name="Tasks with Widgets")
+        nr = process.count_children()
+
+        self.assertIsInstance(nr, int)
+        self.assertEqual(7, nr)
+
+        with self.assertRaises(IllegalArgumentError):
+            self.task.count_children()
+
     def test_rootlevel_activity_is_rootlevel(self):
         specify_wd = self.project.activity("Specify wheel diameter")
 
