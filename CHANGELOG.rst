@@ -1,6 +1,8 @@
 Change Log
 ==========
 
+* :star: Implemented `download_as_excel` method to the `Widget` class, to export any grid widget as an Excel file.
+
 * :bug: Removed multiple `return` statements from `_validate_edit_arguments` helper function in the `Activity` class, enabling usage of kwargs.
 
 * :+1: Added `count_children` method to the `Activity` and `Part` classes for a light-weight count of the number of child objects.
