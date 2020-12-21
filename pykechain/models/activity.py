@@ -408,6 +408,19 @@ class Activity(TreeObject, TagsMixin, Activity2):
             return []
         return super().all_children()
 
+    def count_children(self, **kwargs) -> int:
+        """
+        Retrieve the number of child activities using a light-weight request.
+
+        :return: number of Activities
+        :rtype int
+        """
+        if self.activity_type != ActivityType.PROCESS:
+            raise IllegalArgumentError(
+                "You can only count the number of children of an Activity of type {}".format(ActivityType.PROCESS))
+
+        return super().count_children(method="activities")
+
     def clone(
         self,
         parent: Optional[Union['Activity', Text]] = None,
