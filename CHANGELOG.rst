@@ -1,6 +1,8 @@
 Change Log
 ==========
 
+* :star: Implemented `download_as_excel` method to the `Widget` class, to export any grid widget as an Excel file.
+
 * :bug: Removed multiple `return` statements from `_validate_edit_arguments` helper function in the `Activity` class, enabling usage of kwargs.
 
 * :+1: Added keyword arguments (kwargs) to the `execute()` method of the `Service` class, in order to insert contextual information into the `ServiceExecution`.
