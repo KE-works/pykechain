@@ -422,9 +422,18 @@ class Part(TreeObject, Part2):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve Parts instances")
 
-        data = response.json()["count"]
+        count = response.json()["count"]
 
-        return data
+        return count
+
+    def count_children(self, **kwargs) -> int:
+        """
+        Retrieve the number of child parts using a light-weight request.
+
+        :return: number of Parts
+        :rtype int
+        """
+        return super().count_children(method="parts", category=self.category)
 
     #
     # CRUD operations

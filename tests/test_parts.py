@@ -377,6 +377,19 @@ class TestParts(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             bike_part.count_instances()
 
+    def test_count_children(self):
+        bike_instance = self.project.part("Bike")
+        bike_model = self.project.model("Bike")
+
+        nr = bike_instance.count_children()
+
+        self.assertIsInstance(nr, int)
+        self.assertEqual(7, nr)
+
+        nr = bike_model.count_children()
+
+        self.assertEqual(5, nr)
+
     def test_retrieve_catalog_model_of_proxy(self):
         catalog_container = self.project.model(name__startswith='Catalog')
         bearing_catalog_model = catalog_container.add_model('Bearing', multiplicity=Multiplicity.ZERO_MANY)
