@@ -62,7 +62,7 @@ class Service(BaseInScope):
     def __repr__(self):  # pragma: no cover
         return "<pyke Service '{}' id {}>".format(self.name, self.id[-8:])
 
-    def execute(self, interactive: Optional[bool] = False) -> 'ServiceExecution':
+    def execute(self, interactive: Optional[bool] = False, **kwargs) -> 'ServiceExecution':
         """
         Execute the service.
 
@@ -75,8 +75,14 @@ class Service(BaseInScope):
         :return: ServiceExecution when successful.
         :raises APIError: when unable to execute
         """
+        request_params = dict(
+            interactive=check_type(interactive, bool, 'interactive'),
+            format='json',
+            **kwargs
+        )
+
         url = self._client._build_url('service_execute', service_id=self.id)
-        response = self._client._request('GET', url, params=dict(interactive=interactive, format='json'))
+        response = self._client._request('GET', url, params=request_params)
 
         if response.status_code == requests.codes.conflict:  # pragma: no cover
             raise APIError(
