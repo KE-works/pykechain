@@ -933,7 +933,7 @@ class Activity(TreeObject, TagsMixin, Activity2):
 
         response = self._client._request('POST', url, data=params)
 
-        if response.status_code != requests.codes.created:  # pragma: no cover
+        if response.status_code not in (requests.codes.created, requests.codes.accepted):  # pragma: no cover
             raise APIError("Could not share the link to Activity {}".format(self), response=response)
 
     def share_pdf(
@@ -1000,5 +1000,5 @@ class Activity(TreeObject, TagsMixin, Activity2):
 
         response = self._client._request('POST', url, data=params)
 
-        if response.status_code != requests.codes.created:  # pragma: no cover
+        if response.status_code not in (requests.codes.created, requests.codes.accepted):  # pragma: no cover
             raise APIError("Could not share the link to Activity {}".format(self), response=response)
