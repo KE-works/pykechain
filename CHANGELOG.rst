@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+v3.9.4 (23DEC20)
+----------------
+
 * :star: Implemented `download_as_excel` method to the `Widget` class, to export any grid widget as an Excel file.
 
 * :bug: Removed multiple `return` statements from `_validate_edit_arguments` helper function in the `Activity` class, enabling usage of kwargs.
@@ -10,6 +13,7 @@ Change Log
 * :+1: Added `count_children` method to the `Activity` and `Part` classes for a light-weight count of the number of child objects.
 * :+1: Added `include_qr_code` keyword to the `download_as_pdf` and `share_pdf` methods of the `Activity` class, to include a QR-code to the original KE-chain activity.
 * :+1: Added `automatic` paper-size option for `PaperSize` enumeration class.
+* :+1: dependent versions for development: sphinx (3.4.0), requests (2.25.1), pytest (6.2.1), pre-commit (2.9.3)
 
 v3.9.3 (8DEC20)
 ---------------
