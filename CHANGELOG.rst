@@ -1,7 +1,10 @@
 Change Log
 ==========
 
-* :bug: Forwarding of `kwargs` in the new `count_children()` method was not implemented yet.
+v3.9.5 (23DEC20)
+----------------
+
+* :bug: Any `kwargs` in the `count_children()` methods of the `Activity` and `Part` classes were not being forwarded to the actual function. Now filters such as `name__contains` are properly supported.
 
 v3.9.4 (23DEC20)
 ----------------
