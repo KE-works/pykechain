@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-* :bug: Forwarding of `kwargs` in the new `count_children()` method was not implemented yet
+* :bug: Forwarding of `kwargs` in the new `count_children()` method was not implemented yet.
 
 v3.9.4 (23DEC20)
 ----------------

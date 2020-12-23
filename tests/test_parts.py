@@ -390,6 +390,10 @@ class TestParts(TestBetamax):
 
         self.assertEqual(5, nr)
 
+        nr = bike_instance.count_children(name__contains="Wheel")
+
+        self.assertEqual(2, nr)
+
     def test_retrieve_catalog_model_of_proxy(self):
         catalog_container = self.project.model(name__startswith='Catalog')
         bearing_catalog_model = catalog_container.add_model('Bearing', multiplicity=Multiplicity.ZERO_MANY)
