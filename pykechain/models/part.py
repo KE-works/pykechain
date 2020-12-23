@@ -433,7 +433,7 @@ class Part(TreeObject, Part2):
         :return: number of Parts
         :rtype int
         """
-        return super().count_children(method="parts", category=self.category)
+        return super().count_children(method="parts", category=self.category, **kwargs)
 
     #
     # CRUD operations

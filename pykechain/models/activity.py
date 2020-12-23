@@ -419,7 +419,7 @@ class Activity(TreeObject, TagsMixin, Activity2):
             raise IllegalArgumentError(
                 "You can only count the number of children of an Activity of type {}".format(ActivityType.PROCESS))
 
-        return super().count_children(method="activities")
+        return super().count_children(method="activities", **kwargs)
 
     def clone(
         self,

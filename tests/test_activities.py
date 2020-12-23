@@ -751,6 +751,9 @@ class TestActivities(TestBetamax):
         self.assertIsInstance(nr, int)
         self.assertEqual(7, nr)
 
+        nr = process.count_children(name__contains="Service")
+        self.assertEqual(4, nr)
+
         with self.assertRaises(IllegalArgumentError):
             self.task.count_children()
 
