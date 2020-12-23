@@ -1,5 +1,5 @@
 # basis
-requests==2.25.0
+requests==2.25.1
 envparse==0.2.0
 
 # json validation (inspector)
