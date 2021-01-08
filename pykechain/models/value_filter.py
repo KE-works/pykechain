@@ -33,7 +33,7 @@ class BaseFilter(object):
     @abstractmethod
     def write_options(cls, filters: List) -> Dict:
         """
-        Convert the list of Filter objects to a dict
+        Convert the list of Filter objects to a dict.
 
         :param filters: List of BaseFilter objects
         :returns options dict to be used to update the options dict of a property
@@ -128,7 +128,7 @@ class PropertyValueFilter(BaseFilter):
     @classmethod
     def write_options(cls, filters: List) -> Dict:
         """
-        Convert the list of Filter objects to a dict
+        Convert the list of Filter objects to a dict.
 
         :param filters: List of BaseFilter objects
         :returns options dict to be used to update the options dict of a property
@@ -198,12 +198,13 @@ class ScopeFilter(BaseFilter):
     @classmethod
     def write_options(cls, filters: List) -> Dict:
         """
-        Convert the list of Filter objects to a dict
+        Convert the list of Filter objects to a dict.
 
         :param filters: List of BaseFilter objects
         :returns options dict to be used to update the options dict of a property
         """
         super().write_options(filters=filters)
+
         prefilters = dict()
         options = {MetaWidget.PREFILTERS: prefilters}
 

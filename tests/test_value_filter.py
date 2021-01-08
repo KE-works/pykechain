@@ -90,6 +90,15 @@ class TestPropertyValueFilter(TestBetamax):
         self.assertIsInstance(prefilters, list)
         self.assertEqual(1, len(prefilters))
 
+    def test_write_options(self):
+        options_dict = PropertyValueFilter.write_options(filters=[self.filter])
+
+        self.assertIsInstance(options_dict, dict)
+
+        with self.assertRaises(IllegalArgumentError):
+            ScopeFilter.write_options(filters=[self.filter])
+
+    # noinspection PyTypeChecker
     def test__eq__(self):
         second_filter = PropertyValueFilter(self.bike.property("Gears"), 15, FilterType.GREATER_THAN_EQUAL)
         third_filter = PropertyValueFilter(self.bike.property("Gears"), 16, FilterType.GREATER_THAN_EQUAL)
@@ -119,6 +128,14 @@ class TestScopeFilter(TestCase):
 
         self.assertEqual(self.filter, second_filter)
         self.assertNotEqual(self.filter, third_filter)
+
+    def test_write_options(self):
+        options_dict = ScopeFilter.write_options(filters=[self.filter])
+
+        self.assertIsInstance(options_dict, dict)
+
+        with self.assertRaises(IllegalArgumentError):
+            PropertyValueFilter.write_options(filters=[self.filter])
 
     # noinspection PyTypeChecker
     def test_creation(self):
