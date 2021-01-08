@@ -111,7 +111,7 @@ class PropertyValueFilter(BaseFilter):
         """
         check_type(options, dict, "options")
 
-        prefilter_string = options.get("prefilters", {}).get("property_value")
+        prefilter_string = options.get(MetaWidget.PREFILTERS, {}).get("property_value")
         prefilter_string_list = prefilter_string.split(",") if prefilter_string else []
 
         prefilters = list()
@@ -181,7 +181,7 @@ class ScopeFilter(BaseFilter):
         """
         check_type(options, dict, "options")
 
-        filters_dict = options.get("prefilters", {})
+        filters_dict = options.get(MetaWidget.PREFILTERS, {})
         scope_filters = []
 
         tags_string = filters_dict.get("tags__contains", "")
