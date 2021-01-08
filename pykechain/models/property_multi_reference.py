@@ -152,14 +152,10 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
 
         # Only update the options if there are any prefilters to be set, or if the original filters have to overwritten
         if list_of_prefilters or clear:
-            options_to_set = self._options
-
-            # Always create the entire prefilter json structure
-            options_to_set["prefilters"] = {
-                "property_value": ",".join([pf.format() for pf in list_of_prefilters])
-            }
-
-            self.edit(options=options_to_set)
+            self._options.update(
+                PropertyValueFilter.write_options(filters=list_of_prefilters)
+            )
+            self.edit(options=self._options)
 
     def get_prefilters(
             self,

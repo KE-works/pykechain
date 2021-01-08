@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from pykechain.enums import FilterType
+from pykechain.enums import FilterType, ScopeStatus
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import PropertyValueFilter
 from pykechain.models.value_filter import ScopeFilter
@@ -120,7 +120,16 @@ class TestScopeFilter(TestCase):
         self.assertEqual(self.filter, second_filter)
         self.assertNotEqual(self.filter, third_filter)
 
-    def test_format(self):
-        string = self.filter.format()
+    # noinspection PyTypeChecker
+    def test_creation(self):
+        ScopeFilter(tag="My scope tag")
+        ScopeFilter(status=ScopeStatus.ACTIVE)
 
-        self.assertIsInstance(string, str)
+        with self.assertRaises(IllegalArgumentError):
+            ScopeFilter(tag=3)
+
+        with self.assertRaises(IllegalArgumentError):
+            ScopeFilter(status="Scope for the upper class")
+
+        with self.assertRaises(IllegalArgumentError):
+            ScopeFilter(tag="My scope tag", status=ScopeStatus.ACTIVE)
