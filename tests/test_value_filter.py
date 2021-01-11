@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from pykechain.enums import FilterType
+from pykechain.enums import FilterType, ScopeStatus
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import PropertyValueFilter
 from pykechain.models.value_filter import ScopeFilter
@@ -90,6 +90,15 @@ class TestPropertyValueFilter(TestBetamax):
         self.assertIsInstance(prefilters, list)
         self.assertEqual(1, len(prefilters))
 
+    def test_write_options(self):
+        options_dict = PropertyValueFilter.write_options(filters=[self.filter])
+
+        self.assertIsInstance(options_dict, dict)
+
+        with self.assertRaises(IllegalArgumentError):
+            ScopeFilter.write_options(filters=[self.filter])
+
+    # noinspection PyTypeChecker
     def test__eq__(self):
         second_filter = PropertyValueFilter(self.bike.property("Gears"), 15, FilterType.GREATER_THAN_EQUAL)
         third_filter = PropertyValueFilter(self.bike.property("Gears"), 16, FilterType.GREATER_THAN_EQUAL)
@@ -120,7 +129,24 @@ class TestScopeFilter(TestCase):
         self.assertEqual(self.filter, second_filter)
         self.assertNotEqual(self.filter, third_filter)
 
-    def test_format(self):
-        string = self.filter.format()
+    def test_write_options(self):
+        options_dict = ScopeFilter.write_options(filters=[self.filter])
 
-        self.assertIsInstance(string, str)
+        self.assertIsInstance(options_dict, dict)
+
+        with self.assertRaises(IllegalArgumentError):
+            PropertyValueFilter.write_options(filters=[self.filter])
+
+    # noinspection PyTypeChecker
+    def test_creation(self):
+        ScopeFilter(tag="My scope tag")
+        ScopeFilter(status=ScopeStatus.ACTIVE)
+
+        with self.assertRaises(IllegalArgumentError):
+            ScopeFilter(tag=3)
+
+        with self.assertRaises(IllegalArgumentError):
+            ScopeFilter(status="Scope for the upper class")
+
+        with self.assertRaises(IllegalArgumentError):
+            ScopeFilter(tag="My scope tag", status=ScopeStatus.ACTIVE)
