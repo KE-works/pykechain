@@ -2,9 +2,10 @@ import warnings
 from abc import abstractmethod
 from typing import Text, Union, Any, Dict, List, Optional
 
-from pykechain.enums import FilterType, Category, PropertyType
+from pykechain.enums import FilterType, Category, PropertyType, ScopeStatus
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models.input_checks import check_base, check_enum, check_type, check_text
+from pykechain.models.widgets.enums import MetaWidget
 
 
 class BaseFilter(object):
@@ -12,14 +13,9 @@ class BaseFilter(object):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self.format() == other.format()
+            return self.__class__.write_options(filters=[self]) == self.__class__.write_options(filters=[other])
         else:
             return False
-
-    @abstractmethod
-    def format(self) -> Text:  # pragma: no cover
-        """Format a filter as a string."""
-        pass
 
     @classmethod
     @abstractmethod
@@ -32,6 +28,18 @@ class BaseFilter(object):
         :rtype list
         """
         pass
+
+    @classmethod
+    @abstractmethod
+    def write_options(cls, filters: List) -> Dict:
+        """
+        Convert the list of Filter objects to a dict.
+
+        :param filters: List of BaseFilter objects
+        :returns options dict to be used to update the options dict of a property
+        """
+        if not all(isinstance(f, cls) for f in filters):
+            raise IllegalArgumentError("All `filters` must be of type `{}`".format(cls))
 
 
 class PropertyValueFilter(BaseFilter):
@@ -103,7 +111,7 @@ class PropertyValueFilter(BaseFilter):
         """
         check_type(options, dict, "options")
 
-        prefilter_string = options.get("prefilters", {}).get("property_value")
+        prefilter_string = options.get(MetaWidget.PREFILTERS, {}).get("property_value")
         prefilter_string_list = prefilter_string.split(",") if prefilter_string else []
 
         prefilters = list()
@@ -117,6 +125,23 @@ class PropertyValueFilter(BaseFilter):
 
         return prefilters
 
+    @classmethod
+    def write_options(cls, filters: List) -> Dict:
+        """
+        Convert the list of Filter objects to a dict.
+
+        :param filters: List of BaseFilter objects
+        :returns options dict to be used to update the options dict of a property
+        """
+        super().write_options(filters=filters)
+
+        prefilters = {
+            "property_value": ",".join([pf.format() for pf in filters])
+        }
+        options = {MetaWidget.PREFILTERS: prefilters}
+
+        return options
+
 
 class ScopeFilter(BaseFilter):
     """
@@ -128,16 +153,22 @@ class ScopeFilter(BaseFilter):
     def __init__(
             self,
             tag: Optional[Text] = None,
+            status: Optional[ScopeStatus] = None,
     ):
         """Create a ScopeFilter object."""
+        if sum([p is not None for p in [tag, status]]) != 1:
+            raise IllegalArgumentError("Every ScopeFilter object must apply only 1 filter!")
+
         self.tag = check_text(tag, "tag")
+        self.status = check_enum(status, ScopeStatus, "status")
 
     def __repr__(self):
-        return "ScopeFilter: tag: {}".format(self.tag)
-
-    def format(self) -> Text:
-        """Format ScopeFilter as a string."""
-        return self.tag if self.tag else ""
+        _repr = "ScopeFilter: "
+        if self.tag:
+            _repr += "tag `{}`".format(self.tag)
+        if self.status:
+            _repr += "status `{}`".format(self.status)
+        return _repr
 
     @classmethod
     def parse_options(cls, options: Dict) -> List['ScopeFilter']:
@@ -150,8 +181,41 @@ class ScopeFilter(BaseFilter):
         """
         check_type(options, dict, "options")
 
-        filters_dict = options.get("prefilters", {})
+        filters_dict = options.get(MetaWidget.PREFILTERS, {})
+        scope_filters = []
+
         tags_string = filters_dict.get("tags__contains", "")
         tags = tags_string.split(",") if tags_string else []
+        for tag in tags:
+            scope_filters.append(ScopeFilter(tag=tag))
 
-        return [ScopeFilter(tag=tag) for tag in tags]
+        status_string = filters_dict.get("status__in", None)
+        if status_string is not None:
+            scope_filters.append(ScopeFilter(status=status_string))
+
+        return scope_filters
+
+    @classmethod
+    def write_options(cls, filters: List) -> Dict:
+        """
+        Convert the list of Filter objects to a dict.
+
+        :param filters: List of BaseFilter objects
+        :returns options dict to be used to update the options dict of a property
+        """
+        super().write_options(filters=filters)
+
+        prefilters = dict()
+        options = {MetaWidget.PREFILTERS: prefilters}
+
+        for f in filters:
+            if f.tag:
+                if "tags__contains" not in prefilters:
+                    prefilters["tags__contains"] = []
+                prefilters["tags__contains"].append(f.tag)
+            elif f.status:
+                prefilters["status__in"] = f.status
+            else:
+                raise NotImplementedError("ScopeFilter `{}` not recognized.".format(f))
+
+        return options

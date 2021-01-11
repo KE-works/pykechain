@@ -1,6 +1,8 @@
 Change Log
 ==========
 
+* :+1: Added `status` keyword to the `ScopeFilter` class. All filters are now parsed and written to option dicts internally, encapsulating the property-specific format of the filters.
+
 v3.9.5 (23DEC20)
 ----------------
 
