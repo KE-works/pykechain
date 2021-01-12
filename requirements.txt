@@ -13,7 +13,7 @@ pytest==6.2.1
 betamax==0.8.1
 coverage<=4.5.99
 pytest-cov==2.10.1
-coveralls==2.2.0
+coveralls==3.0.0
 
 # documentation
 Sphinx==3.4.0
