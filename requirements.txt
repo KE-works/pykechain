@@ -17,7 +17,7 @@ coveralls==2.2.0
 
 # documentation
 Sphinx==3.4.0
-nbsphinx==0.8.0
+nbsphinx==0.8.1
 
 # integration
 tox==3.20.1
