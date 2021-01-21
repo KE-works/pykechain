@@ -8,10 +8,15 @@ from pykechain.models import Base
 
 
 class ExpiringDownload(Base):
-    """
-    Expiring Download class
-    """
+    """Expiring Download class."""
+
     def __init__(self, json: Dict, **kwargs) -> None:
+        """
+        Init function.
+
+        :param json:
+        :param kwargs:
+        """
         super().__init__(json, **kwargs)
 
         self.expires_in = json.get('expires_in')
@@ -21,30 +26,9 @@ class ExpiringDownload(Base):
     def __repr__(self):  # pragma: no cover
         return "<pyke ExpiringDownload id {}>".format(self.id[-8:])
 
-    # def upload(self, content_path):
-    #
-    #     if os.path.exists(content_path):
-    #         self._upload(content_path=content_path)
-    #     else:
-    #         raise OSError("Could not locate file to upload at the path '{}'".format(content_path))
-    #
-    # def _upload(self, content_path):
-    #     url = self._client._build_url('service_upload', service_id=self.id)
-    #
-    #     with open(pkg_path, 'rb') as pkg:
-    #         response = self._client._request(
-    #             'POST', url,
-    #             files={'attachment': (os.path.basename(pkg_path), pkg)}
-    #         )
-    #
-    #     if response.status_code != requests.codes.accepted:  # pragma: no cover
-    #         raise APIError("Could not upload script file (or kecpkg) to Service {}".format(self), response=response)
-    #
-    #     self.refresh(json=response.json()['results'][0])
-
     def save_as(self, target_dir=None):
         """
-        Saves the Expiring Download content.
+        Save the Expiring Download content.
 
         :param target_dir:
         :return:
