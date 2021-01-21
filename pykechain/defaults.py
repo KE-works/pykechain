@@ -113,7 +113,12 @@ API_PATH = {
     'banners': 'api/v3/banners.json',
     'banner': 'api/v3/banners/{banner_id}.json',
     'banner_active': 'api/v3/banners/active.json',
+    'expiring_downloads': 'api/downloads.json',
+    'expiring_download': 'api/downloads/{download_id}.json',
+    'expiring_download_download': 'api/downloads/{download_id}/download',
+    'expiring_download_upload': 'api/downloads/{download_id}/upload'
 }
+
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
 API_EXTRA_PARAMS = {
     'activity': {'fields': ",".join(
@@ -170,4 +175,7 @@ API_EXTRA_PARAMS = {
         ['id', 'subject', 'status', 'message', 'team', 'created_at', 'options', 'updated_at'])},
     'notification': {'fields': ",".join(
         ['id', 'subject', 'status', 'message', 'team', 'created_at', 'options', 'updated_at'])},
+    'expiring_downloads': {'fields': ",".join(
+        ['id', 'subject', 'status', 'message', 'team', 'created_at', 'options', 'updated_at'])},
+
 }
