@@ -3074,7 +3074,7 @@ class Client(object):
         request_params = {
             'id': check_uuid(pk)
         }
-        request_params.update(API_EXTRA_PARAMS['expiring_download'])
+        request_params.update(API_EXTRA_PARAMS['expiring_downloads'])
 
         if kwargs:
             request_params.update(**kwargs)
@@ -3084,17 +3084,19 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve Expiring Downloads", response=response)
 
-        return [ExpiringDownload(expiring_download, client=self) for expiring_download in response.json()['results']]
+        return [ExpiringDownload(json=download, client=self) for download in response.json()['results']]
 
     def create_expiring_download(
             self,
             expires_at: Optional[datetime.datetime] = None,
+            expires_in: Optional[int] = None,
             content: Optional[Text] = None
     ) -> ExpiringDownload:
         """
-        Creates an Expiring Download
+        Create an Expiring Download.
 
         :param expires_at:
+        :param expires_in:
         :param content:
         :return:
         """
@@ -3102,7 +3104,8 @@ class Client(object):
             expires_at = expires_at.isoformat()
         data = dict(
             created_at=datetime.datetime.now().isoformat(),
-            expires_at=expires_at
+            expires_at=expires_at,
+            expires_in=expires_in
         )
         response = self._request('POST', self._build_url('expiring_downloads'), json=data)
         if response.status_code != requests.codes.created:  # pragma: no cover

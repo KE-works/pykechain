@@ -1,10 +1,13 @@
+import datetime
 import os
-from typing import Dict
+from typing import Dict, Optional
 
 import requests
 
 from pykechain.exceptions import APIError
 from pykechain.models import Base
+from pykechain.models.input_checks import check_type
+from pykechain.utils import empty, clean_empty_values
 
 
 class ExpiringDownload(Base):
@@ -43,3 +46,45 @@ class ExpiringDownload(Base):
         with open(full_path, 'w+b') as f:
             for chunk in response:
                 f.write(chunk)
+
+    def delete(self) -> None:
+        """Delete this expiring download.
+
+        :raises APIError: if delete was not successful.
+        """
+        response = self._client._request('DELETE', self._client._build_url('expiring_download', download_id=self.id))
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            raise APIError("Could not delete Expiring Download {}".format(self), response=response)
+
+    def edit(
+            self,
+            expires_at: Optional[datetime.datetime] = empty,
+            expires_in: Optional[int] = empty,
+            **kwargs
+    ) -> None:
+        """
+        Edit Expiring Download details.
+
+        :param expires_at:
+        :param expires_in:
+        :return:
+        """
+        update_dict = {
+            'id': self.id,
+            'expires_at': check_type(expires_at, datetime.datetime, 'expires_at') or self.expires_at,
+            'expires_in': check_type(expires_in, int, 'expires_in') or self.expires_in
+        }
+
+        if kwargs:  # pragma: no cover
+            update_dict.update(**kwargs)
+
+        update_dict = clean_empty_values(update_dict=update_dict)
+
+        response = self._client._request('PUT', self._client._build_url('expiring_download', download_id=self.id),
+                                         json=update_dict)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not update Expiring Download {}".format(self), response=response)
+
+        self.refresh(json=response.json()['results'][0])
