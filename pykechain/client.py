@@ -3090,14 +3090,14 @@ class Client(object):
             self,
             expires_at: Optional[datetime.datetime] = None,
             expires_in: Optional[int] = None,
-            content: Optional[Text] = None
+            content_path: Optional[Text] = None
     ) -> ExpiringDownload:
         """
         Create an Expiring Download.
 
         :param expires_at:
         :param expires_in:
-        :param content:
+        :param content_path:
         :return:
         """
         if isinstance(expires_at, datetime.datetime):
@@ -3105,7 +3105,7 @@ class Client(object):
         data = dict(
             created_at=datetime.datetime.now().isoformat(),
             expires_at=expires_at,
-            expires_in=expires_in
+            expires_in=expires_in,
         )
         response = self._request('POST', self._build_url('expiring_downloads'), json=data)
         if response.status_code != requests.codes.created:  # pragma: no cover
@@ -3113,8 +3113,7 @@ class Client(object):
 
         expiring_download = ExpiringDownload(response.json().get('results')[0], client=self)
 
-        if content:
-            # upload the package / refresh of the service will be done in the upload function
-            expiring_download.upload(content)
+        if content_path:
+            expiring_download.upload(content_path)
 
         return expiring_download

@@ -21,7 +21,7 @@ class ExpiringDownload(Base):
         :param kwargs:
         """
         super().__init__(json, **kwargs)
-
+        self.filename = json.get('content_file_name')
         self.expires_in = json.get('expires_in')
         self.expires_at = json.get('expires_at')
         self.token_hint = json.get('token_hint')
@@ -86,5 +86,35 @@ class ExpiringDownload(Base):
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Expiring Download {}".format(self), response=response)
+
+        self.refresh(json=response.json()['results'][0])
+
+    def upload(self, content_path):
+        """
+        Upload a file to the Expiring Download.
+
+        .. versionadded:: 3.10.0
+
+        :param content_path: path to the file to upload.
+        :type content_path: basestring
+        :raises APIError: if the file could not be uploaded.
+        :raises OSError: if the file could not be located on disk.
+        """
+        if os.path.exists(content_path):
+            self._upload(content_path=content_path)
+        else:
+            raise OSError("Could not locate file to upload in '{}'".format(content_path))
+
+    def _upload(self, content_path):
+        url = self._client._build_url('expiring_download_upload', download_id=self.id)
+
+        with open(content_path, 'rb') as file:
+            response = self._client._request(
+                'POST', url,
+                files={'attachment': (os.path.basename(content_path), file)}
+            )
+
+        if response.status_code != requests.codes.accepted:  # pragma: no cover
+            raise APIError("Could not upload  file to Expiring Download {}".format(self), response=response)
 
         self.refresh(json=response.json()['results'][0])

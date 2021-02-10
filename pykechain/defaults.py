@@ -176,6 +176,6 @@ API_EXTRA_PARAMS = {
     'notification': {'fields': ",".join(
         ['id', 'subject', 'status', 'message', 'team', 'created_at', 'options', 'updated_at'])},
     'expiring_downloads': {'fields': ",".join(
-        ['id', 'created_at', 'updated_at', 'expires_at', 'expires_in'])},
+        ['id', 'created_at', 'updated_at', 'expires_at', 'expires_in', 'content'])},
 
 }
