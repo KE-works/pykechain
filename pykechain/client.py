@@ -3050,29 +3050,34 @@ class Client(object):
         return Banner(json=data, client=self)
 
     def expiring_download(self, *args, **kwargs) -> ExpiringDownload:
-        """
-        Retrieve the Expiring Download.
+        """Retrieve a single expiring download.
 
-        :param args:
-        :param kwargs:
-        :return:
+        :return: a single :class:`models.ExpiringDownload`
+        :raises NotFoundError: When no `ExpiringDownload` is found
+        :raises MultipleFoundError: When more than a single `ExpiringDownload` is found
         """
         return self._retrieve_singular(self.expiring_downloads, **args, **kwargs)
 
     def expiring_downloads(
             self,
             pk: Optional[Text] = None,
+            expires_at: Optional[datetime.datetime] = None,
+            expires_in: Optional[int] = None,
             **kwargs
     ) -> List[ExpiringDownload]:
-        """
-        Retrieve the Expiring Downloads.
+        """Search fore xpiring downloads with optional pk, .
 
-        :param pk:
-        :param kwargs:
-        :return:
+        :param pk: if provided, filter the search for an expiring download by download_id
+        :type pk: basestring or None
+        :param expires_at: if provided, filter the search for the expires_at date and time
+        :type expires_at: datetime.datetime
+        :param expires_in: if provided, filter the search for the expires_in (in seconds)
+        :type expires_in: int
+        :return: list of Expiring Downloads objects
         """
         request_params = {
             'id': check_uuid(pk)
+            # 'expires_in':
         }
         request_params.update(API_EXTRA_PARAMS['expiring_downloads'])
 
@@ -3093,7 +3098,7 @@ class Client(object):
             content_path: Optional[Text] = None
     ) -> ExpiringDownload:
         """
-        Create an Expiring Download.
+        Create an new Expiring Download.
 
         :param expires_at:
         :param expires_in:
