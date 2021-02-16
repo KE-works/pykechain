@@ -30,6 +30,6 @@ pre-commit==2.9.3
 
 # for package management (uploads)
 twine>=3.0.0; python_version >= '3.6'
-twine==3.2.0; python_version <= '3.5.99'
+twine==3.3.0; python_version <= '3.5.99'
 
 pytz==2020.4
