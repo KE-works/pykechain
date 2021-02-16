@@ -20,7 +20,7 @@ class TestExpiringDownloads(TestBetamax):
     def tearDown(self):
         self.test_expiring_download.delete()
 
-    def test_create_expiring_download(self):
+    def test_create_expiring_download_with_content(self):
         content_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_content_to_expiring_download',
                                     'test_upload_content.pdf')
         new_expiring_download = self.client.create_expiring_download(
@@ -29,6 +29,7 @@ class TestExpiringDownloads(TestBetamax):
             content_path=content_path
         )
         self.assertTrue(isinstance(new_expiring_download, ExpiringDownload))
+        new_expiring_download.delete()
 
     def test_retrieve_expiring_downloads(self):
         expiring_downloads = self.client.expiring_downloads()

@@ -114,7 +114,7 @@ class ExpiringDownload(Base):
                 files={'attachment': (os.path.basename(content_path), file)}
             )
 
-        if response.status_code != requests.codes.accepted:  # pragma: no cover
+        if response.status_code not in (requests.codes.accepted, requests.codes.ok):  # pragma: no cover
             raise APIError("Could not upload  file to Expiring Download {}".format(self), response=response)
 
         self.refresh(json=response.json()['results'][0])
