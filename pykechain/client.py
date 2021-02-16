@@ -3065,7 +3065,7 @@ class Client(object):
             expires_in: Optional[int] = None,
             **kwargs
     ) -> List[ExpiringDownload]:
-        """Search fore xpiring downloads with optional pk, .
+        """Search for Expiring Downloads with optional pk.
 
         :param pk: if provided, filter the search for an expiring download by download_id
         :type pk: basestring or None
