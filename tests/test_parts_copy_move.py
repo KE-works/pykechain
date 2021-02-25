@@ -128,6 +128,28 @@ class TestPartsCopyMove(TestBetamax):
         self.assertEqual(len(copied_model.properties), 5)
         self.assertEqual(len(copied_model._cached_children), 0)
 
+    def test_copy_references(self):
+        child_model = self.model_to_be_copied.children()[0]
+        self.model_to_be_copied.add_property(
+            name='__Property internal reference',
+            default_value=child_model,
+            # options={S},
+            property_type=PropertyType.REFERENCES_VALUE
+        )
+
+        model_target_parent = self.project.model('Bike')
+        self.dump_part = self.model_to_be_copied.copy(
+            target_parent=model_target_parent,
+            name='__Copied model under Bike',
+            include_children=True,
+            include_instances=False
+        )
+
+        copied_child = self.dump_part.children()[0]
+        reference_property = self.dump_part.property(name="__Property internal reference")
+
+        self.assertEqual(copied_child, reference_property.value[0])
+
     def test_move_part_model(self):
         # setUp
         model_target_parent = self.project.model('Bike')
