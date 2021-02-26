@@ -1,15 +1,18 @@
 import os
+from typing import Optional, Text
 
 from pykechain.enums import PropertyType, Multiplicity
 from pykechain.exceptions import IllegalArgumentError
+from pykechain.models import Part, AnyProperty, Property
 from pykechain.utils import temp_chdir
 
 # global variable
 __mapping_dictionary = None
 __edited_one_many = list()  # type: list
+__references = dict()
 
 
-def get_mapping_dictionary(clean=False):
+def get_mapping_dictionary(clean=False) -> dict:
     """
     Get a temporary helper to map some keys to some values. Mainly used in the relocation of parts and models.
 
@@ -23,15 +26,15 @@ def get_mapping_dictionary(clean=False):
     return __mapping_dictionary
 
 
-def get_edited_one_many(clean=False):
+def get_edited_one_many(clean=False) -> list:
     """
     Get a temporary helper to help relocating Parts with one to many relationships.
 
     Only used in the relocation of parts and models.
 
-    :param clean: (optional) boolean flag to reset the mapping dictionary
+    :param clean: (optional) boolean flag to reset the list of Parts
     :type clean: bool
-    :return: singleton dictionary (persistent in the script) for mapping use.
+    :return: singleton list (persistent in the script) for tracking purposes
     """
     global __edited_one_many
     if not __edited_one_many or clean:
@@ -39,110 +42,21 @@ def get_edited_one_many(clean=False):
     return __edited_one_many
 
 
-def relocate_model(part, target_parent, name=None, include_children=True):
+def get_references(clean=False) -> dict:
     """
-    Move the `Part` model to target parent.
+    Get a temporary helper dictionary to store references (values) per property (keys).
 
-    .. versionadded:: 2.3
-
-    :param part: `Part` object to be moved
-    :type part: :class:`Part`
-    :param target_parent: `Part` object under which the desired `Part` is moved
-    :type target_parent: :class:`Part`
-    :param name: how the moved top-level `Part` should be called
-    :type name: basestring
-    :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
-    :type include_children: bool
-    :return: moved :class: Part model.
-    :raises IllegalArgumentError: if target_parent is descendant of part
+    :param clean: (optional) boolean flag to reset the list of references
+    :type clean: bool
+    :return: singleton dictionary (persistent in the script) for tracking purposes
     """
-    if target_parent.id in get_illegal_targets(part, include={part.id}):
-        raise IllegalArgumentError('cannot relocate part "{}" under target parent "{}", because the target is part of '
-                                   'its descendants'.format(part.name, target_parent.name))
-
-    # First, if the user doesn't provide the name, then just use the default "Clone - ..." name
-    if not name:
-        name = "CLONE - {}".format(part.name)
-
-    # The description cannot be added when creating a model, so edit the model after creation.
-    part_desc = part.description
-    moved_part_model = target_parent.add_model(name=name, multiplicity=part.multiplicity)
-    if part_desc:
-        moved_part_model.edit(description=str(part_desc))
-
-    # Map the current part model id with newly created part model Object
-    get_mapping_dictionary().update({part.id: moved_part_model})
-
-    # Loop through properties and retrieve their type, description and unit
-    list_of_properties_sorted_by_order = part.properties
-    list_of_properties_sorted_by_order.sort(key=lambda x: x._json_data['order'])
-    for prop in list_of_properties_sorted_by_order:
-        prop_type = prop.type
-        description = prop.description
-        unit = prop.unit
-
-        # For KE-chain 3 (PIM2) we have value_options instead of options.
-        if prop._client.match_app_version(label='pim', version='>=3.0.0'):
-            options = prop._json_data.get('value_options')
-        else:
-            options = prop._json_data.get('options')
-
-        # On "Part references" properties, the models referenced also need to be added
-        if prop_type == PropertyType.REFERENCES_VALUE:
-            referenced_part_ids = [referenced_part.id for referenced_part in prop.value]
-            moved_prop = moved_part_model.add_property(
-                name=prop.name,
-                description=description,
-                property_type=prop_type,
-                default_value=referenced_part_ids,
-                options=options
-            )
-
-        # On "Attachment" properties, attachments needs to be downloaded and re-uploaded to the new property.
-        elif prop_type == PropertyType.ATTACHMENT_VALUE:
-            moved_prop = moved_part_model.add_property(
-                name=prop.name,
-                description=description,
-                property_type=prop_type,
-                options=options
-            )
-            if prop.value:
-                attachment_name = prop._json_data['value'].split('/')[-1]
-                with temp_chdir() as target_dir:
-                    full_path = os.path.join(target_dir or os.getcwd(), attachment_name)
-                    prop.save_as(filename=full_path)
-                    moved_prop.upload(full_path)
-
-        # Other properties are quite straightforward
-        else:
-            moved_prop = moved_part_model.add_property(
-                name=prop.name,
-                description=description,
-                property_type=prop_type,
-                default_value=prop.value,
-                unit=unit,
-                options=options
-            )
-
-        # Map the current property model id with newly created property model Object
-        get_mapping_dictionary()[prop.id] = moved_prop
-
-    # Now copy the sub-tree of the part
-    if include_children:
-        # Populate the part so multiple children retrieval is not needed
-        part.populate_descendants()
-        # For each part, recursively run this function
-        for sub_part in part._cached_children:
-            relocate_model(
-                part=sub_part,
-                target_parent=moved_part_model,
-                name=sub_part.name,
-                include_children=include_children
-            )
-    return moved_part_model
+    global __references
+    if not __references or clean:
+        __references = dict()
+    return __references
 
 
-def get_illegal_targets(part, include):
+def get_illegal_targets(part: Part, include: set):
     """
     Retrieve the illegal parent parts where `Part` can be moved/copied.
 
@@ -158,9 +72,150 @@ def get_illegal_targets(part, include):
     return list_of_illegal_targets
 
 
-def relocate_instance(part, target_parent, name=None, include_children=True):
+def relocate_model(
+        part: Part,
+        target_parent: Part,
+        name: Optional[Text] = None,
+        include_children: Optional[bool] = True
+) -> Part:
     """
-    Move the `Part` instance to target parent.
+    Move the `Part` model under a target parent `Part` model.
+
+    .. versionadded:: 2.3
+
+    :param part: `Part` object to be moved
+    :type part: :class:`Part`
+    :param target_parent: `Part` object under which the desired `Part` is moved
+    :type target_parent: :class:`Part`
+    :param name: how the moved top-level `Part` should be called
+    :type name: basestring
+    :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
+    :type include_children: bool
+    :return: moved :class: Part model.
+    :raises IllegalArgumentError: if target_parent is descendant of part
+    """
+    if target_parent.id in get_illegal_targets(part, include={part.id}):
+        raise IllegalArgumentError("Cannot relocate part `{}` under target parent `{}`, because the target is part of "
+                                   "its descendants".format(part.name, target_parent.name))
+
+    if include_children:
+        part.populate_descendants()
+        
+    # First, if the user doesn't provide the name, then just use the default "Clone - ..." name
+    if not name:
+        name = "CLONE - {}".format(part.name)
+
+    # Recursively create the part model copy
+    moved_part_model = move_part_model(
+        part=part,
+        target_parent=target_parent,
+        name=name,
+        include_children=include_children,
+    )
+
+    # Try to update references to parts by updating the UUID via the mapping dictionary
+    Property.set_bulk_update(True)
+    mapping = get_mapping_dictionary()
+    for prop_old, references_old in get_references().items():  # type: (AnyProperty, list)
+        # try to map to a new ID, default to the existing reference ID
+        references_new = [mapping.get(r, r) for r in references_old]
+        prop_new = mapping.get(prop_old.id)
+        prop_new.value = references_new
+    Property.update_values(client=part._client)
+
+    return moved_part_model
+
+
+def move_part_model(
+        part: Part,
+        target_parent: Part,
+        name: Text,
+        include_children: bool,
+) -> Part:
+    """
+    Copy the `Part` model under a target parent `Part` model, recursively.
+
+    .. versionadded:: 2.3
+
+    :param part: `Part` object to be moved
+    :type part: :class:`Part`
+    :param target_parent: `Part` object under which the desired `Part` is moved
+    :type target_parent: :class:`Part`
+    :param name: how the moved top-level `Part` should be called
+    :type name: basestring
+    :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
+    :type include_children: bool
+    :return: moved :class: Part model.
+    :raises IllegalArgumentError: if target_parent is descendant of part
+    """
+    
+    # The description cannot be added when creating a model, so edit the model after creation.
+    part_desc = part.description
+    moved_part_model = target_parent.add_model(name=name, multiplicity=part.multiplicity)
+    if part_desc:
+        moved_part_model.edit(description=str(part_desc))
+
+    # Map the current part model id with newly created part model Object
+    get_mapping_dictionary().update({part.id: moved_part_model})
+
+    # Loop through properties and retrieve their type, description and unit
+    list_of_properties_sorted_by_order = part.properties
+    list_of_properties_sorted_by_order.sort(key=lambda x: x._json_data['order'])
+    for prop in list_of_properties_sorted_by_order:  # type: AnyProperty
+
+        # For KE-chain 3 (PIM2) we have value_options instead of options.
+        if prop._client.match_app_version(label='pim', version='>=3.0.0'):
+            options = prop._json_data.get('value_options')
+        else:
+            options = prop._json_data.get('options')
+
+        if prop.type == PropertyType.REFERENCES_VALUE:
+            get_references()[prop] = prop.value_ids()
+            prop_value = None
+        else:
+            prop_value = prop._value
+
+        moved_prop = moved_part_model.add_property(
+            name=prop.name,
+            description=prop.description,
+            property_type=prop.type,
+            default_value=prop_value,
+            unit=prop.unit,
+            options=options,
+        )
+
+        # For attachment properties, the value is a file that must be transferred manually
+        if prop.type == PropertyType.ATTACHMENT_VALUE and prop.has_value():
+            with temp_chdir() as target_dir:
+                full_path = os.path.join(target_dir or os.getcwd(), prop.filename)
+                prop.save_as(filename=full_path)
+                moved_prop.upload(full_path)
+
+        # Map the current property model id with newly created property model Object
+        get_mapping_dictionary()[prop.id] = moved_prop
+
+    # Now copy the sub-tree of the part
+    if include_children:
+        # For each part, recursively run this function
+        for sub_part in part.children():
+            move_part_model(
+                part=sub_part,
+                target_parent=moved_part_model,
+                name=sub_part.name,
+                include_children=include_children,
+            )
+            
+    return moved_part_model
+
+
+def relocate_instance(
+        part: Part,
+        target_parent: Part,
+        name: Optional[Text] = None,
+        include_children: Optional[bool] = True,
+) -> Part:
+    """
+    Move the `Part` instance under a target parent `Part` instance.
 
     .. versionadded:: 2.3
 
@@ -177,28 +232,54 @@ def relocate_instance(part, target_parent, name=None, include_children=True):
     # First, if the user doesn't provide the name, then just use the default "Clone - ..." name
     if not name:
         name = "CLONE - {}".format(part.name)
+
     # Initially the model of the part needs to be recreated under the model of the target_parent. Retrieve them.
     part_model = part.model()
     target_parent_model = target_parent.model()
 
-    # Call the move_part() function for those models.
-    relocate_model(part=part_model, target_parent=target_parent_model, name=part_model.name,
-                   include_children=include_children)
-
-    # Populate the descendants of the Part (category=Instance), in order to avoid to retrieve children for every
-    # level and save time. Only need it the children should be included.
     if include_children:
-        part.populate_descendants()
+        part_model.populate_descendants()
+
+    # To relocate an instance, its model has to go first
+    relocate_model(
+        part=part_model,
+        target_parent=target_parent_model,
+        name=part_model.name,
+        include_children=include_children,
+    )
+    get_references(clean=True)
 
     # This function will move the part instance under the target_parent instance, and its children if required.
-    moved_instance = move_part_instance(part_instance=part, target_parent=target_parent, part_model=part_model,
-                                        name=name, include_children=include_children)
+    moved_instance = move_part_instance(
+        part_instance=part,
+        target_parent=target_parent,
+        part_model=part_model,
+        name=name,
+        include_children=include_children,
+    )
+
+    # Try to update references to parts by updating the UUID via the mapping dictionary
+    Property.set_bulk_update(True)
+    mapping = get_mapping_dictionary()
+    for prop_old, references_old in get_references().items():  # type: (AnyProperty, list)
+        # try to map to a new ID, default to the existing reference ID
+        references_new = [mapping.get(r, r) for r in references_old]
+        prop_new = mapping.get(prop_old.id)
+        prop_new.value = references_new
+    Property.update_values(client=part._client)
+
     return moved_instance
 
 
-def move_part_instance(part_instance, target_parent, part_model, name=None, include_children=True):
+def move_part_instance(
+        part_instance: Part,
+        target_parent: Part,
+        part_model: Part,
+        name: Optional[Text] = None,
+        include_children: Optional[bool] = True
+) -> Part:
     """
-    Move the `Part` instance to target parent and updates the properties based on the original part instance.
+    Copy the `Part` instance to target parent and updates the properties based on the original part instance.
 
     .. versionadded:: 2.3
 
@@ -214,7 +295,6 @@ def move_part_instance(part_instance, target_parent, part_model, name=None, incl
     :type include_children: bool
     :return: moved :class: `Part` instance
     """
-    # If no specific name has been required, then call in as Clone of the part_instance.
     if not name:
         name = part_instance.name
 
@@ -242,22 +322,26 @@ def move_part_instance(part_instance, target_parent, part_model, name=None, incl
     map_property_instances(part_instance, moved_instance)
     moved_instance = update_part_with_properties(part_instance, moved_instance, name=str(name))
 
-    # If include_children is True, then recursively call this function for every descendant. Keep the name of the
-    # original sub-instance.
-
     if include_children:
-        if part_instance._cached_children is None:
-            part_instance.populate_descendants()
-
-        for sub_instance in part_instance._cached_children:
-            move_part_instance(part_instance=sub_instance, target_parent=moved_instance,
-                               part_model=sub_instance.model(),
-                               name=sub_instance.name, include_children=True)
+        sub_models = {child.id: child for child in part_model.children()}
+        # Recursively call this function for every descendant. Keep the name of the original sub-instance.
+        for sub_instance in part_instance.children():
+            move_part_instance(
+                part_instance=sub_instance,
+                target_parent=moved_instance,
+                part_model=sub_models.get(sub_instance.model_id, sub_instance.model()),
+                name=sub_instance.name,
+                include_children=True,
+            )
 
     return moved_instance
 
 
-def update_part_with_properties(part_instance, moved_instance, name=None):
+def update_part_with_properties(
+        part_instance: Part,
+        moved_instance: Part,
+        name: Optional[Text] = None,
+) -> Part:
     """
     Update the newly created part and its properties based on the original one.
 
@@ -269,26 +353,26 @@ def update_part_with_properties(part_instance, moved_instance, name=None):
     :type name: basestring
     :return: moved :class: `Part` instance
     """
-    # Instantiate and empty dictionary later used to map {property.id: property.value} in order to update the part
+    # Instantiate an empty dictionary later used to map {property.id: property.value} in order to update the part
     # in one go
     properties_id_dict = dict()
-    for prop_instance in part_instance.properties:
+    for prop_instance in part_instance.properties:  # type: AnyProperty
         moved_prop_instance = get_mapping_dictionary()[prop_instance.id]
 
         # Do different magic if there is an attachment property and it has a value
         if prop_instance.type == PropertyType.ATTACHMENT_VALUE:
-            if prop_instance.value:
-                attachment_name = prop_instance._json_data['value'].split('/')[-1]
+            if prop_instance.has_value():
                 with temp_chdir() as target_dir:
-                    full_path = os.path.join(target_dir or os.getcwd(), attachment_name)
+                    full_path = os.path.join(target_dir or os.getcwd(), prop_instance.filename)
                     prop_instance.save_as(filename=full_path)
                     moved_prop_instance.upload(full_path)
             else:
                 moved_prop_instance.clear()
+
         # For a reference value property, add the id's of the part referenced {property.id: [part1.id, part2.id, ...]},
         # if there is part referenced at all.
         elif prop_instance.type == PropertyType.REFERENCES_VALUE:
-            if prop_instance.value:
+            if prop_instance.has_value():
                 properties_id_dict[moved_prop_instance.id] = [ref_part.id for ref_part in prop_instance.value]
         elif prop_instance.type == PropertyType.SINGLE_SELECT_VALUE:
             if prop_instance.model().options:
@@ -300,13 +384,14 @@ def update_part_with_properties(part_instance, moved_instance, name=None):
                     properties_id_dict[moved_prop_instance.id] = prop_instance.value
         else:
             properties_id_dict[moved_prop_instance.id] = prop_instance.value
+
     # Update the name and property values in one go.
     moved_instance.update(name=str(name), update_dict=properties_id_dict, bulk=True, suppress_kevents=True)
-    moved_instance.populate_descendants()
+
     return moved_instance
 
 
-def map_property_instances(original_part, new_part):
+def map_property_instances(original_part: Part, new_part: Part) -> None:
     """
     Map the id of the original part with the `Part` object of the newly created one.
 

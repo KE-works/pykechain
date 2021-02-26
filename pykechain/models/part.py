@@ -5,8 +5,6 @@ import requests
 from pykechain.defaults import API_EXTRA_PARAMS, PARTS_BATCH_LIMIT
 from pykechain.enums import Category, Multiplicity, Classification, PropertyType
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
-from pykechain.extra_utils import relocate_model, move_part_instance, relocate_instance, get_mapping_dictionary, \
-    get_edited_one_many
 from pykechain.models.part2 import Part2
 from pykechain.models.input_checks import check_text, check_type, check_list_of_base, check_list_of_dicts
 from pykechain.models.property import Property
@@ -845,11 +843,13 @@ class Part(TreeObject, Part2):
         parent = self.parent()
         return self._client._create_clone(parent=parent, part=self, **kwargs)
 
-    def copy(self,
-             target_parent: 'Part',
-             name: Optional[Text] = None,
-             include_children: bool = True,
-             include_instances: bool = True) -> 'Part':
+    def copy(
+            self,
+            target_parent: 'Part',
+            name: Optional[Text] = None,
+            include_children: bool = True,
+            include_instances: bool = True,
+    ) -> 'Part':
         """
         Copy the `Part` to target parent, both of them having the same category.
 
@@ -876,44 +876,71 @@ class Part(TreeObject, Part2):
         >>>                    include_instances=True)
 
         """
+        check_type(target_parent, Part, 'target_parent')
+
+        if self.category != target_parent.category:
+            # Cannot add a model under an instance or vice versa
+            raise IllegalArgumentError("part `{}` and target parent `{}`` must have the same category".
+                                       format(self, target_parent))
+
+        from pykechain.extra_utils import (
+            relocate_model,
+            move_part_instance,
+            relocate_instance,
+            get_mapping_dictionary,
+            get_edited_one_many,
+            get_references,
+        )
+
         get_mapping_dictionary(clean=True)
         get_edited_one_many(clean=True)
+        get_references(clean=True)
 
         # to ensure that all properties are retrieved from the backend
         # as it might be the case that a part is retrieved in the context of a widget and there could be a possibility
         # that not all properties are retrieved we perform a refresh of the part itself first.
         self.refresh()
 
-        check_type(target_parent, Part, 'target_parent')
+        if self.category == Category.MODEL:
+            copied_part = relocate_model(
+                part=self,
+                target_parent=target_parent,
+                name=name,
+                include_children=include_children,
+            )
 
-        if self.category == Category.MODEL and target_parent.category == Category.MODEL:
-            # Cannot add a model under an instance or vice versa
-            copied_model = relocate_model(part=self, target_parent=target_parent, name=name,
-                                          include_children=include_children)
             if include_instances:
-                instances_to_be_copied = list(self.instances())
-                parent_instances = list(target_parent.instances())
-                for parent_instance in parent_instances:
-                    for instance in instances_to_be_copied:
+                for instance in self.instances():  # type: Part
+                    if include_children:
                         instance.populate_descendants()
-                        move_part_instance(part_instance=instance, target_parent=parent_instance,
-                                           part_model=self, name=instance.name,
-                                           include_children=include_children)
-            return copied_model
 
-        elif self.category == Category.INSTANCE and target_parent.category == Category.INSTANCE:
-            copied_instance = relocate_instance(part=self, target_parent=target_parent, name=name,
-                                                include_children=include_children)
-            return copied_instance
+                    # Create the instances per parent
+                    for parent_instance in target_parent.instances():
+                        move_part_instance(
+                            part_instance=instance,
+                            target_parent=parent_instance,
+                            part_model=self,
+                            name=instance.name,
+                            include_children=include_children,
+                        )
+
         else:
-            raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category'.
-                                       format(self, target_parent))
+            copied_part = relocate_instance(
+                part=self,
+                target_parent=target_parent,
+                name=name,
+                include_children=include_children,
+            )
 
-    def move(self,
-             target_parent: 'Part',
-             name: Optional[Text] = None,
-             include_children: bool = True,
-             include_instances: bool = True) -> 'Part':
+        return copied_part
+
+    def move(
+        self,
+        target_parent: 'Part',
+        name: Optional[Text] = None,
+        include_children: bool = True,
+        include_instances: bool = True,
+     ) -> 'Part':
         """
         Move the `Part` to target parent, both of them the same category.
 
@@ -940,37 +967,21 @@ class Part(TreeObject, Part2):
         >>>                    include_instances=True)
 
         """
-        self.refresh()
-        get_mapping_dictionary(clean=True)
-        get_edited_one_many(clean=True)
+        copied_part = self.copy(
+            target_parent=target_parent,
+            name=name,
+            include_children=include_children,
+            include_instances=include_instances,
+        )
 
-        if not name:
-            name = self.name
-        if self.category == Category.MODEL and target_parent.category == Category.MODEL:
-            moved_model = relocate_model(part=self, target_parent=target_parent, name=name,
-                                         include_children=include_children)
-            if include_instances:
-                retrieve_instances_to_copied = list(self.instances())
-                retrieve_parent_instances = list(target_parent.instances())
-                for parent_instance in retrieve_parent_instances:
-                    for instance in retrieve_instances_to_copied:
-                        instance.populate_descendants()
-                        move_part_instance(part_instance=instance, target_parent=parent_instance,
-                                           part_model=self, name=instance.name, include_children=include_children)
+        try:
             self.delete()
-            return moved_model
-        elif self.category == Category.INSTANCE and target_parent.category == Category.INSTANCE:
-            moved_instance = relocate_instance(part=self, target_parent=target_parent, name=name,
-                                               include_children=include_children)
-            try:
-                self.delete()
-            except APIError:
-                model_of_instance = self.model()
-                model_of_instance.delete()
-            return moved_instance
-        else:
-            raise IllegalArgumentError('part "{}" and target parent "{}" must have the same category'.format(
-                self, target_parent))
+        except APIError:
+            # In case of Part instances where the model has multiplicity 1 or 1-or-many, the model must be deleted
+            model_of_instance = self.model()
+            model_of_instance.delete()
+
+        return copied_part
 
     def update(self,
                name: Optional[Text] = None,
