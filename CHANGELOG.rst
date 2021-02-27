@@ -5,7 +5,7 @@ Improved the `copy` and `move` methods of the `Part` class.
 * :bug: Internal Part reference properties of the Part's children are correctly maintained.
 * :+1: `move` now makes use of the `copy` method directly, simplifying the `move` method and reducing duplicate code.
 * :+1: More efficient use of `populate_descendants`.
-
+* :+1: Refreshing a `part` now also refreshes its `properties` in-place, instead of creating new Python objects.
 * :+1: Added `status` keyword to the `ScopeFilter` class. All filters are now parsed and written to option dicts internally, encapsulating the property-specific format of the filters.
 
 v3.9.5 (23DEC20)

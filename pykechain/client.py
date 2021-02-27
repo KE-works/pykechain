@@ -1546,9 +1546,6 @@ class Client(object):
         """
         Create multiple part instances simultaneously.
 
-        :param update_dict: dictionary with keys being property names (str) or property_id (from the property models)
-                            and values being property values
-        :type update_dict: dict or None
         :param parts: list of dicts, each specifying a part instance. Available fields per dict:
             :param name: (optional) name provided for the new instance as string otherwise use the name of the model
             :type name: basestring or None

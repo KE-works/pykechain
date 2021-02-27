@@ -86,8 +86,8 @@ class Part(TreeObject, Part2):
         self.multiplicity = json.get('multiplicity')  # type: Text
         self.classification = json.get('classification')  # type: Classification
 
-        self.properties = [Property.create(p, client=self._client)
-                           for p in sorted(json['properties'], key=lambda p: p.get('order', 0))]  # type: List[Property]
+        sorted_properties = sorted(json['properties'], key=lambda p: p.get('order', 0))  # type: List[Dict]
+        self.properties = [Property.create(p, client=self._client) for p in sorted_properties]  # type: List[Property]
 
         proxy_data = json.get('proxy_source_id_name', dict())  # type: Optional[Dict]
         self._proxy_model_id = proxy_data.get('id') if proxy_data else None  # type: Optional[Text]
@@ -101,9 +101,22 @@ class Part(TreeObject, Part2):
         if extra_params is None:
             extra_params = {}
         extra_params.update(API_EXTRA_PARAMS['part'])
+        existing_properties = {p.id: p for p in self.properties}
+
         super().refresh(json=json,
                         url=self._client._build_url('part', part_id=self.id),
                         extra_params=extra_params)
+
+        # The properties have been recreated anew when refreshing the part, but should be refreshed in-place.
+        new_properties = list(self.properties)
+        self.properties = []
+        for new_prop in new_properties:
+            if new_prop.id in existing_properties:
+                prop = existing_properties.pop(new_prop.id)
+                prop.refresh(json=new_prop._json_data)
+            else:
+                prop = new_prop
+            self.properties.append(prop)
 
     #
     # Family and structure methods
@@ -910,12 +923,14 @@ class Part(TreeObject, Part2):
             )
 
             if include_instances:
+                parent_instances = target_parent.instances()
+
                 for instance in self.instances():  # type: Part
                     if include_children:
                         instance.populate_descendants()
 
                     # Create the instances per parent
-                    for parent_instance in target_parent.instances():
+                    for parent_instance in parent_instances:
                         move_part_instance(
                             part_instance=instance,
                             target_parent=parent_instance,
@@ -940,7 +955,7 @@ class Part(TreeObject, Part2):
         name: Optional[Text] = None,
         include_children: bool = True,
         include_instances: bool = True,
-     ) -> 'Part':
+    ) -> 'Part':
         """
         Move the `Part` to target parent, both of them the same category.
 

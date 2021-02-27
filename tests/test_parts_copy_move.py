@@ -128,7 +128,7 @@ class TestPartsCopyMove(TestBetamax):
         self.assertEqual(len(copied_model.properties), 5)
         self.assertEqual(len(copied_model._cached_children), 0)
 
-    def test_copy_references(self):
+    def test_copy_internal_references_on_model(self):
         child_model = self.model_to_be_copied.children()[0]
         self.model_to_be_copied.add_property(
             name='__Property internal reference',
@@ -147,6 +147,31 @@ class TestPartsCopyMove(TestBetamax):
 
         copied_child = self.dump_part.children()[0]
         reference_property = self.dump_part.property(name="__Property internal reference")
+
+        self.assertEqual(copied_child, reference_property.value[0])
+
+    def test_copy_internal_references_on_instance(self):
+        prop_name = "__Property internal reference"
+        child_model = self.model_to_be_copied.children()[0]
+        self.model_to_be_copied.add_property(
+            name=prop_name,
+            default_value=child_model,
+            property_type=PropertyType.REFERENCES_VALUE
+        )
+
+        self.instance_to_be_copied.refresh()  # to load the new property
+        self.instance_to_be_copied.property(name=prop_name).value = self.instance_to_be_copied.children()[0]
+
+        instance_target_parent = self.project.part('Bike')
+        copied_instance = self.instance_to_be_copied.copy(
+            target_parent=instance_target_parent,
+            name='__Copied instance under Bike',
+            include_children=True,
+        )
+        self.dump_part = copied_instance.model()
+
+        copied_child = copied_instance.children()[0]
+        reference_property = copied_instance.property(name=prop_name)
 
         self.assertEqual(copied_child, reference_property.value[0])
 

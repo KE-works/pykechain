@@ -100,7 +100,7 @@ def relocate_model(
 
     if include_children:
         part.populate_descendants()
-        
+
     # First, if the user doesn't provide the name, then just use the default "Clone - ..." name
     if not name:
         name = "CLONE - {}".format(part.name)
@@ -117,9 +117,10 @@ def relocate_model(
     Property.set_bulk_update(True)
     mapping = get_mapping_dictionary()
     for prop_old, references_old in get_references().items():  # type: (AnyProperty, list)
+        prop_new = mapping.get(prop_old.id)
+
         # try to map to a new ID, default to the existing reference ID
         references_new = [mapping.get(r, r) for r in references_old]
-        prop_new = mapping.get(prop_old.id)
         prop_new.value = references_new
     Property.update_values(client=part._client)
 
@@ -148,7 +149,6 @@ def move_part_model(
     :return: moved :class: Part model.
     :raises IllegalArgumentError: if target_parent is descendant of part
     """
-    
     # The description cannot be added when creating a model, so edit the model after creation.
     part_desc = part.description
     moved_part_model = target_parent.add_model(name=name, multiplicity=part.multiplicity)
@@ -204,7 +204,7 @@ def move_part_model(
                 name=sub_part.name,
                 include_children=include_children,
             )
-            
+
     return moved_part_model
 
 
@@ -262,9 +262,10 @@ def relocate_instance(
     Property.set_bulk_update(True)
     mapping = get_mapping_dictionary()
     for prop_old, references_old in get_references().items():  # type: (AnyProperty, list)
+        prop_new = mapping.get(prop_old.id)
+
         # try to map to a new ID, default to the existing reference ID
         references_new = [mapping.get(r, r) for r in references_old]
-        prop_new = mapping.get(prop_old.id)
         prop_new.value = references_new
     Property.update_values(client=part._client)
 
@@ -305,9 +306,10 @@ def move_part_instance(
     if moved_model.multiplicity == Multiplicity.ONE:
         # If multiplicity is 'Exactly 1', that means the instance was automatically created with the model.
         moved_instance = moved_model.instances(parent_id=target_parent.id)[0]
+
     elif moved_model.multiplicity == Multiplicity.ONE_MANY:
         # If multiplicity is '1 or more', that means one instance has automatically been created with the model.
-        # Store the model in a list, in case there are multiple instance that need to be recreated.
+        # This first instance has to be used, but only once. Therefore, store the model in a global list after doing so.
         if moved_model.id not in get_edited_one_many():
             moved_instance = moved_model.instances(parent_id=target_parent.id)[0]
             get_edited_one_many().append(moved_model.id)
@@ -319,12 +321,13 @@ def move_part_instance(
         moved_instance = target_parent.add(name=name, model=moved_model, suppress_kevents=True)
 
     # Update properties of the instance
-    map_property_instances(part_instance, moved_instance)
-    moved_instance = update_part_with_properties(part_instance, moved_instance, name=str(name))
+    map_property_instances(original_part=part_instance, new_part=moved_instance)
+    update_part_with_properties(part_instance, moved_instance, name=str(name))
 
     if include_children:
         sub_models = {child.id: child for child in part_model.children()}
         # Recursively call this function for every descendant. Keep the name of the original sub-instance.
+
         for sub_instance in part_instance.children():
             move_part_instance(
                 part_instance=sub_instance,
@@ -343,7 +346,7 @@ def update_part_with_properties(
         name: Optional[Text] = None,
 ) -> Part:
     """
-    Update the newly created part and its properties based on the original one.
+    Update the properties of the `moved_instance` based on the original `part_instance`.
 
     :param part_instance: `Part` object to be copied
     :type part_instance: :class:`Part`
@@ -353,8 +356,7 @@ def update_part_with_properties(
     :type name: basestring
     :return: moved :class: `Part` instance
     """
-    # Instantiate an empty dictionary later used to map {property.id: property.value} in order to update the part
-    # in one go
+    # Instantiate an empty dictionary used to collect all property values in order to update the part in one go.
     properties_id_dict = dict()
     for prop_instance in part_instance.properties:  # type: AnyProperty
         moved_prop_instance = get_mapping_dictionary()[prop_instance.id]
@@ -373,15 +375,18 @@ def update_part_with_properties(
         # if there is part referenced at all.
         elif prop_instance.type == PropertyType.REFERENCES_VALUE:
             if prop_instance.has_value():
-                properties_id_dict[moved_prop_instance.id] = [ref_part.id for ref_part in prop_instance.value]
+                get_references()[prop_instance] = prop_instance.value_ids()
+
         elif prop_instance.type == PropertyType.SINGLE_SELECT_VALUE:
             if prop_instance.model().options:
                 if prop_instance.value in prop_instance.model().options:
                     properties_id_dict[moved_prop_instance.id] = prop_instance.value
+
         elif prop_instance.type == PropertyType.MULTI_SELECT_VALUE:
-            if prop_instance.value:
+            if prop_instance.has_value():
                 if all(value in prop_instance.model().options for value in prop_instance.value):
                     properties_id_dict[moved_prop_instance.id] = prop_instance.value
+
         else:
             properties_id_dict[moved_prop_instance.id] = prop_instance.value
 
