@@ -149,25 +149,8 @@ def move_part_model(
     :return: moved :class: Part model.
     :raises IllegalArgumentError: if target_parent is descendant of part
     """
-    # The description cannot be added when creating a model, so edit the model after creation.
-    part_desc = part.description
-    moved_part_model = target_parent.add_model(name=name, multiplicity=part.multiplicity)
-    if part_desc:
-        moved_part_model.edit(description=str(part_desc))
-
-    # Map the current part model id with newly created part model Object
-    get_mapping_dictionary().update({part.id: moved_part_model})
-
-    # Loop through properties and retrieve their type, description and unit
-    list_of_properties_sorted_by_order = part.properties
-    list_of_properties_sorted_by_order.sort(key=lambda x: x._json_data['order'])
-    for prop in list_of_properties_sorted_by_order:  # type: AnyProperty
-
-        # For KE-chain 3 (PIM2) we have value_options instead of options.
-        if prop._client.match_app_version(label='pim', version='>=3.0.0'):
-            options = prop._json_data.get('value_options')
-        else:
-            options = prop._json_data.get('options')
+    property_fvalues = list()
+    for prop in part.properties:  # type: AnyProperty
 
         if prop.type == PropertyType.REFERENCES_VALUE:
             get_references()[prop] = prop.value_ids()
@@ -175,16 +158,31 @@ def move_part_model(
         else:
             prop_value = prop._value
 
-        moved_prop = moved_part_model.add_property(
+        property_fvalues.append(dict(
             name=prop.name,
             description=prop.description,
             property_type=prop.type,
-            default_value=prop_value,
+            value=prop_value,
             unit=prop.unit,
-            options=options,
-        )
+            value_options=prop._options,
+        ))
 
-        # For attachment properties, the value is a file that must be transferred manually
+    # Create the model and its properties in a single request
+    moved_part_model = part._client.create_model_with_properties(
+        name=name,
+        parent=target_parent,
+        multiplicity=part.multiplicity,
+        properties_fvalues=property_fvalues,
+    )
+
+    # Map the current part model id with newly created part model Object
+    get_mapping_dictionary().update({part.id: moved_part_model})
+
+    # The description cannot be added when creating a model, so edit the model after creation.
+    if part.description:
+        moved_part_model.edit(description=str(part.description))
+
+    for prop, moved_prop in zip(part.properties, moved_part_model.properties):
         if prop.type == PropertyType.ATTACHMENT_VALUE and prop.has_value():
             with temp_chdir() as target_dir:
                 full_path = os.path.join(target_dir or os.getcwd(), prop.filename)
