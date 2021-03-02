@@ -675,10 +675,10 @@ def _copy_instances_recursive(
             asynchronous=False,
             retrieve_instances=True,
         )
-        for index, new_instance, original_instance in \
+        for index, new_instance, i in \
                 zip(created_instances_indices, created_instances, original_instances):  # type: int, Part, _InstanceCopy
             new_instances[index] = new_instance
-            map_property_instances(original_part=original_instance.instance_original, new_part=new_instance)
+            map_property_instances(original_part=i.instance_original, new_part=new_instance)
 
     if include_children:
         child_instances = []

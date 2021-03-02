@@ -1605,10 +1605,13 @@ class Client(object):
             raise APIError("Could not create Parts. ({})".format(response.status_code), response=response)
 
         part_ids = response.json()['results'][0]['parts_created']
-        part_instances = list()
         if retrieve_instances:
-            for parts_list in get_in_chunks(lst=part_ids, chunk_size=50):
-                part_instances.extend(self.parts(id__in=",".join(parts_list)))
+            instances_per_id = dict()
+            for part_ids_chunk in get_in_chunks(lst=part_ids, chunk_size=50):
+                instances_per_id.update(
+                    {p.id: p for p in self.parts(id__in=",".join(part_ids_chunk))}  # `id__in` does not guarantee order
+                )
+            part_instances = [instances_per_id[pk] for pk in part_ids]  # Ensures order of parts wrt request
             return PartSet(parts=part_instances)
         return part_ids
 

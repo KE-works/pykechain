@@ -10,6 +10,7 @@ Improved the `copy` and `move` methods of the `Part` class.
 * :+1: Refreshing a `part` now also refreshes its `properties` in-place, instead of creating new Python objects.
 * :+1: Added `DeprecationWarnings` to the original, public functions, for deprecation in July 2021.
 
+* :+1: The order of `Part` instances returned from the `Client._create_parts_bulk()` method is now guaranteed to match the request.
 * :+1: Datetime properties can now be set using (valid) string values.
 * :+1: Added file path as return value of the `download_as_pdf` method of the `Activity` class.
 * :+1: Added `status` keyword to the `ScopeFilter` class. All filters are now parsed and written to option dicts internally, encapsulating the property-specific format of the filters.
