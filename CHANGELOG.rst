@@ -3,6 +3,7 @@ Change Log
 
 Improved the `copy` and `move` methods of the `Part` class.
 * :bug: Internal Part reference properties of the Part's children are correctly maintained.
+* :bug: In case a `Part` model is copied to a `target_parent` model with zero (or more than one) instances, using `include_instances` now results in an `IllegalArgumentError`.
 * :+1: `move` now makes use of the `copy` method directly, simplifying the `move` method and reducing duplicate code.
 * :+1: More efficient use of `populate_descendants` and other bulk operations when cloning the data model.
 * :+1: Refreshing a `part` now also refreshes its `properties` in-place, instead of creating new Python objects.

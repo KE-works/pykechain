@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from pykechain.enums import Multiplicity, PropertyType
@@ -45,17 +46,18 @@ class TestPartsCopyMove(TestBetamax):
             # options={S},
             property_type=PropertyType.REFERENCES_VALUE
         )
-        sub_part1 = self.model_to_be_copied.add_model(
+        self.sub_part1 = self.model_to_be_copied.add_model(
             name="__subpart 1",
             multiplicity=Multiplicity.ONE
         )
-        sub_part2 = self.model_to_be_copied.add_model(
+        self.sub_part2 = self.model_to_be_copied.add_model(
             name="__subpart 2",
-            multiplicity=Multiplicity.ONE
+            multiplicity=Multiplicity.ZERO_MANY
         )
 
         self.model_target_parent = self.project.model(ref='bike')
         self.instance_to_be_copied = self.model_to_be_copied.instances()[0]
+        self.instance_to_be_copied.add(model=self.sub_part2)
         self.instance_target_parent = self.model_to_be_copied.parent().instances()[0]
         self.dump_part = None
 
@@ -96,7 +98,7 @@ class TestPartsCopyMove(TestBetamax):
         )
         bike_part = self.project.part('Bike')
 
-        copied_instance = [child for child in bike_part.children() if 'to be Copied' in child.name][0]
+        copied_instance = [child for child in bike_part.children() if 'Copied' in child.name][0]
         copied_instance.populate_descendants()
 
         # testing
@@ -173,6 +175,7 @@ class TestPartsCopyMove(TestBetamax):
         copied_child = copied_instance.children()[0]
         reference_property = copied_instance.property(name=prop_name)
 
+        self.assertTrue(reference_property.has_value())
         self.assertEqual(copied_child, reference_property.value[0])
 
     def test_move_part_model(self):
@@ -254,3 +257,52 @@ class TestPartsCopyMove(TestBetamax):
 
         with self.assertRaisesRegex(IllegalArgumentError, 'must have the same category'):
             self.model_to_be_copied.move(target_parent=target_instance)
+
+    def test_copy_target_parent_inside_tree(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.model_to_be_copied.copy(
+                target_parent=self.sub_part1,
+            )
+
+    def test_copy_missing_target_parent_instance(self):
+        target_parent = self.project.product_root_model.add_model(
+            name="__ZERO+ MODEL", multiplicity=Multiplicity.ZERO_MANY,
+        )
+        self.dump_part = target_parent
+        with self.assertRaises(IllegalArgumentError):
+            self.model_to_be_copied.copy(
+                target_parent=target_parent,
+                include_instances=True,
+            )
+
+    def test_copy_too_many_target_parent_instances(self):
+        target_parent = self.project.product_root_model.add_model(
+            name="__ONE+ MODEL", multiplicity=Multiplicity.ONE_MANY,
+        )
+        self.project.product_root_instance.add(model=target_parent)
+        self.dump_part = target_parent
+        with self.assertRaises(IllegalArgumentError):
+            self.model_to_be_copied.copy(
+                target_parent=target_parent,
+                include_instances=True,
+            )
+
+    def test_copy_attachments(self):
+        name = "__Property attachment"
+        self.model_to_be_copied.add_property(
+            name=name,
+            property_type=PropertyType.ATTACHMENT_VALUE,
+        )
+        self.instance_to_be_copied.refresh()
+
+        p_attachment = self.instance_to_be_copied.property(name)
+        file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "requirements.txt")
+
+        p_attachment.upload(file)
+
+        self.dump_part = self.model_to_be_copied.copy(
+            target_parent=self.model_target_parent,
+        )
+
+        copied_prop = self.dump_part.instance().property(name)
+        self.assertTrue(copied_prop.has_value())

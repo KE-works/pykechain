@@ -896,56 +896,20 @@ class Part(TreeObject, Part2):
             raise IllegalArgumentError("part `{}` and target parent `{}`` must have the same category".
                                        format(self, target_parent))
 
-        from pykechain.extra_utils import (
-            relocate_model,
-            move_part_instance,
-            relocate_instance,
-            get_mapping_dictionary,
-            get_edited_one_many,
-            get_references,
-        )
-
-        get_mapping_dictionary(clean=True)
-        get_edited_one_many(clean=True)
-        get_references(clean=True)
-
         # to ensure that all properties are retrieved from the backend
         # as it might be the case that a part is retrieved in the context of a widget and there could be a possibility
         # that not all properties are retrieved we perform a refresh of the part itself first.
         self.refresh()
 
-        if self.category == Category.MODEL:
-            copied_part = relocate_model(
-                part=self,
-                target_parent=target_parent,
-                name=name,
-                include_children=include_children,
-            )
+        from pykechain.extra_utils import _copy_part
 
-            if include_instances:
-                parent_instances = target_parent.instances()
-
-                for instance in self.instances():  # type: Part
-                    if include_children:
-                        instance.populate_descendants()
-
-                    # Create the instances per parent
-                    for parent_instance in parent_instances:
-                        move_part_instance(
-                            part_instance=instance,
-                            target_parent=parent_instance,
-                            part_model=self,
-                            name=instance.name,
-                            include_children=include_children,
-                        )
-
-        else:
-            copied_part = relocate_instance(
-                part=self,
-                target_parent=target_parent,
-                name=name,
-                include_children=include_children,
-            )
+        copied_part = _copy_part(
+            part=self,
+            target_parent=target_parent,
+            name=name,
+            include_children=include_children,
+            include_instances=include_instances,
+        )
 
         return copied_part
 
