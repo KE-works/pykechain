@@ -27,6 +27,9 @@ _InstanceCopy = namedtuple(
 )
 
 
+# TODO Deprecate original utility functions on July 2021
+
+
 def get_mapping_dictionary(clean=False) -> dict:
     """
     Get a temporary helper to map some keys to some values. Mainly used in the relocation of parts and models.
@@ -101,6 +104,28 @@ def get_illegal_targets(part: Part, include: set):
     return list_of_illegal_targets
 
 
+def map_property_instances(original_part: Part, new_part: Part) -> None:
+    """
+    Map the id of the original part with the `Part` object of the newly created one.
+
+    Updated the singleton `mapping dictionary` with the new mapping table values.
+
+    :param original_part: `Part` object to be copied/moved
+    :type original_part: :class:`Part`
+    :param new_part: `Part` object copied/moved
+    :type new_part: :class:`Part`
+    :return: None
+    """
+    # Map the original part with the new one
+    mapping = get_mapping_dictionary()
+    mapping[original_part.id] = new_part
+
+    # Do the same for each Property of original part instance, using the 'model' id and the get_mapping_dictionary
+    for prop_original in original_part.properties:
+        mapping[prop_original.id] = [
+            prop_new for prop_new in new_part.properties if mapping[prop_original.model_id].id == prop_new.model_id][0]
+
+
 def relocate_model(
         part: Part,
         target_parent: Part,
@@ -125,7 +150,6 @@ def relocate_model(
     """
     warnings.warn(
         "`relocate_model` is no longer in use and will be deprecated in July 2021.",
-        # TODO Deprecate July 2021
         PendingDeprecationWarning,
     )
 
@@ -185,7 +209,6 @@ def move_part_model(
     """
     warnings.warn(
         "`move_part_model` is no longer in use and will be deprecated in July 2021.",
-        # TODO Deprecate July 2021
         PendingDeprecationWarning,
     )
     return _copy_part_model(
@@ -280,7 +303,7 @@ def relocate_instance(
     :return: moved :class: `Part` instance
     """
     warnings.warn(
-        "`relocate_instance` is no longer in use and will be deprecated in July 2021.",  # TODO Deprecate July 2021
+        "`relocate_instance` is no longer in use and will be deprecated in July 2021.",
         PendingDeprecationWarning,
     )
 
@@ -352,7 +375,7 @@ def move_part_instance(
     :return: moved :class: `Part` instance
     """
     warnings.warn(
-        "`move_part_instance` is no longer in use and will be deprecated in July 2021.",  # TODO Deprecate July 2021
+        "`move_part_instance` is no longer in use and will be deprecated in July 2021.",
         PendingDeprecationWarning,
     )
 
@@ -418,7 +441,6 @@ def update_part_with_properties(
     """
     warnings.warn(
         "`update_part_with_properties` is no longer in use and will be deprecated in July 2021.",
-        # TODO Deprecate July 2021
         PendingDeprecationWarning,
     )
 
@@ -460,28 +482,6 @@ def update_part_with_properties(
     moved_instance.update(name=str(name), update_dict=properties_id_dict, bulk=True, suppress_kevents=True)
 
     return moved_instance
-
-
-def map_property_instances(original_part: Part, new_part: Part) -> None:
-    """
-    Map the id of the original part with the `Part` object of the newly created one.
-
-    Updated the singleton `mapping dictionary` with the new mapping table values.
-
-    :param original_part: `Part` object to be copied/moved
-    :type original_part: :class:`Part`
-    :param new_part: `Part` object copied/moved
-    :type new_part: :class:`Part`
-    :return: None
-    """
-    # Map the original part with the new one
-    mapping = get_mapping_dictionary()
-    mapping[original_part.id] = new_part
-
-    # Do the same for each Property of original part instance, using the 'model' id and the get_mapping_dictionary
-    for prop_original in original_part.properties:
-        mapping[prop_original.id] = [
-            prop_new for prop_new in new_part.properties if mapping[prop_original.model_id].id == prop_new.model_id][0]
 
 
 def _copy_part(
@@ -592,26 +592,6 @@ def _copy_part(
     return copied_model if part.category == Category.MODEL else copied_instances[0]
 
 
-def _update_references() -> None:
-    """
-    Set part reference values found when copying the Part(s).
-
-    Part reference properties referring to child parts in the provided part tree should be updated to refer to
-    the new child parts in the new tree. References to parts outside the provided tree can remain identical.
-    Therefore, try to update the ID of the reference via the mapping dictionary.
-    """
-    mapping = get_mapping_dictionary()
-
-    for prop_original, references_original in get_references().items():  # type: (AnyProperty, list)
-        prop_new = mapping.get(prop_original.id)
-
-        # Try to map to a new Part, default to the existing reference ID itself.
-        references_new = [mapping.get(r, r) for r in references_original]
-        prop_new.value = references_new
-
-    get_references(clean=True)
-
-
 def _copy_instances_recursive(
         client: Client,
         instances: List[_InstanceCopy],
@@ -634,6 +614,7 @@ def _copy_instances_recursive(
     mapping = get_mapping_dictionary()
     create_request = []  # request for the bulk create
     created_instances_indices = []  # indices in a list
+    original_instances = []  # part instances that require a copy
     new_instances = []  # all new Part objects
 
     for index, i in enumerate(instances):
@@ -669,6 +650,7 @@ def _copy_instances_recursive(
         else:
             new_instances.append(None)
             created_instances_indices.append(index)
+            original_instances.append(i)
 
             properties = []
             for prop in i.instance_original.properties:  # type: AnyProperty
@@ -688,15 +670,15 @@ def _copy_instances_recursive(
             ))
 
     if create_request:
-        for new_instance, index in zip(
-                client._create_parts_bulk(
-                    parts=create_request,
-                    asynchronous=False,
-                    retrieve_instances=True,
-                ),
-                created_instances_indices
-        ):  # type: Part, int
+        created_instances = client._create_parts_bulk(
+            parts=create_request,
+            asynchronous=False,
+            retrieve_instances=True,
+        )
+        for index, new_instance, original_instance in \
+                zip(created_instances_indices, created_instances, original_instances):  # type: int, Part, Part
             new_instances[index] = new_instance
+            map_property_instances(original_part=original_instance, new_part=new_instance)
 
     if include_children:
         child_instances = []
@@ -718,6 +700,26 @@ def _copy_instances_recursive(
         )
 
     return new_instances
+
+
+def _update_references() -> None:
+    """
+    Set part reference values found when copying the Part(s).
+
+    Part reference properties referring to child parts in the provided part tree should be updated to refer to
+    the new child parts in the new tree. References to parts outside the provided tree can remain identical.
+    Therefore, try to update the ID of the reference via the mapping dictionary.
+    """
+    mapping = get_mapping_dictionary()
+
+    for prop_original, references_original in get_references().items():  # type: (AnyProperty, list)
+        prop_new = mapping.get(prop_original.id)
+
+        # Try to map to a new Part, default to the existing reference ID itself.
+        references_new = [mapping.get(r, r) for r in references_original]
+        prop_new.value = references_new
+
+    get_references(clean=True)
 
 
 def _get_property_value(prop: AnyProperty) -> Any:
