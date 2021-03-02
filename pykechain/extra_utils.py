@@ -676,9 +676,9 @@ def _copy_instances_recursive(
             retrieve_instances=True,
         )
         for index, new_instance, original_instance in \
-                zip(created_instances_indices, created_instances, original_instances):  # type: int, Part, Part
+                zip(created_instances_indices, created_instances, original_instances):  # type: int, Part, _InstanceCopy
             new_instances[index] = new_instance
-            map_property_instances(original_part=original_instance, new_part=new_instance)
+            map_property_instances(original_part=original_instance.instance_original, new_part=new_instance)
 
     if include_children:
         child_instances = []
@@ -737,6 +737,6 @@ def _get_property_value(prop: AnyProperty) -> Any:
     elif prop.type == PropertyType.ATTACHMENT_VALUE:
         get_attachments().append(prop)
     else:
-        prop_value = prop.value
+        prop_value = prop._value
 
     return prop_value
