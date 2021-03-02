@@ -735,6 +735,6 @@ def _get_property_value(prop: AnyProperty) -> Any:
     elif prop.type == PropertyType.ATTACHMENT_VALUE:
         get_attachments().append(prop)
     else:
-        prop_value = prop._value
+        prop_value = prop.value
 
     return prop_value
