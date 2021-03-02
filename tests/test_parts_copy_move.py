@@ -54,6 +54,11 @@ class TestPartsCopyMove(TestBetamax):
             name="__subpart 2",
             multiplicity=Multiplicity.ZERO_MANY
         )
+        self.sub_part2.add_property(
+            name="__Property boolean",
+            default_value=False,
+            property_type=PropertyType.BOOLEAN_VALUE,
+        )
 
         self.model_target_parent = self.project.model(ref='bike')
         self.instance_to_be_copied = self.model_to_be_copied.instances()[0]

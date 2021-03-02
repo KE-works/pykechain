@@ -675,10 +675,9 @@ def _copy_instances_recursive(
                 prop_value = _get_property_value(prop)
                 if prop_value is not None:
                     properties.append(dict(
-                        id=prop.id,
                         name=prop.name,
                         value=prop_value,
-                        model_id=prop.model_id,
+                        model_id=mapping[prop.model_id].id,
                     ))
 
             create_request.append(dict(
