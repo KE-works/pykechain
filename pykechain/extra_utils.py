@@ -1,4 +1,5 @@
 import os
+import warnings
 from collections import namedtuple
 from typing import Optional, Text, List, Any
 
@@ -122,6 +123,12 @@ def relocate_model(
     :return: moved :class: Part model.
     :raises IllegalArgumentError: if target_parent is descendant of part
     """
+    warnings.warn(
+        "`relocate_model` is no longer in use and will be deprecated in July 2021.",
+        # TODO Deprecate July 2021
+        PendingDeprecationWarning,
+    )
+
     if target_parent.id in get_illegal_targets(part, include={part.id}):
         raise IllegalArgumentError("Cannot relocate part `{}` under target parent `{}`, because the target is part of "
                                    "its descendants".format(part.name, target_parent.name))
@@ -175,7 +182,40 @@ def move_part_model(
     :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
     :type include_children: bool
     :return: moved :class: Part model.
-    :raises IllegalArgumentError: if target_parent is descendant of part
+    """
+    warnings.warn(
+        "`move_part_model` is no longer in use and will be deprecated in July 2021.",
+        # TODO Deprecate July 2021
+        PendingDeprecationWarning,
+    )
+    return _copy_part_model(
+        part=part,
+        target_parent=target_parent,
+        name=name,
+        include_children=include_children,
+    )
+
+
+def _copy_part_model(
+        part: Part,
+        target_parent: Part,
+        name: Text,
+        include_children: bool,
+) -> Part:
+    """
+    Copy the `Part` model under a target parent `Part` model, including its descendants recursively.
+
+    .. versionadded:: 2.3
+
+    :param part: `Part` object to be copied
+    :type part: :class:`Part`
+    :param target_parent: `Part` object under which the desired `Part` is copied
+    :type target_parent: :class:`Part`
+    :param name: how the copied top-level `Part` should be called
+    :type name: basestring
+    :param include_children: True to also copy the descendants of `Part`. If False, the children will be lost.
+    :type include_children: bool
+    :return: moved :class: Part model.
     """
     property_fvalues = list()
     for prop in part.properties:  # type: AnyProperty
@@ -208,7 +248,7 @@ def move_part_model(
     # Recursively, copy the sub-tree of the model
     if include_children:
         for sub_part in part.children():
-            move_part_model(
+            _copy_part_model(
                 part=sub_part,
                 target_parent=moved_part_model,
                 name=sub_part.name,
@@ -239,6 +279,11 @@ def relocate_instance(
     :type include_children: bool
     :return: moved :class: `Part` instance
     """
+    warnings.warn(
+        "`relocate_instance` is no longer in use and will be deprecated in July 2021.",  # TODO Deprecate July 2021
+        PendingDeprecationWarning,
+    )
+
     # First, if the user doesn't provide the name, then just use the default "Clone - ..." name
     if not name:
         name = "CLONE - {}".format(part.name)
@@ -306,6 +351,11 @@ def move_part_instance(
     :type include_children: bool
     :return: moved :class: `Part` instance
     """
+    warnings.warn(
+        "`move_part_instance` is no longer in use and will be deprecated in July 2021.",  # TODO Deprecate July 2021
+        PendingDeprecationWarning,
+    )
+
     if not name:
         name = part_instance.name
 
@@ -366,6 +416,12 @@ def update_part_with_properties(
     :type name: basestring
     :return: moved :class: `Part` instance
     """
+    warnings.warn(
+        "`update_part_with_properties` is no longer in use and will be deprecated in July 2021.",
+        # TODO Deprecate July 2021
+        PendingDeprecationWarning,
+    )
+
     # Instantiate an empty dictionary used to collect all property values in order to update the part in one go.
     properties_id_dict = dict()
     for prop_instance in part_instance.properties:  # type: AnyProperty
@@ -502,7 +558,7 @@ def _copy_part(
         raise IllegalArgumentError("Cannot relocate part `{}` under target parent `{}`, because the target is part of "
                                    "its descendants".format(model.name, target_parent.name))
 
-    copied_model = move_part_model(
+    copied_model = _copy_part_model(
         part=model,
         target_parent=target_parent_model,
         name=name_model,
@@ -538,6 +594,8 @@ def _copy_part(
 
 def _update_references() -> None:
     """
+    Set part reference values found when copying the Part(s).
+
     Part reference properties referring to child parts in the provided part tree should be updated to refer to
     the new child parts in the new tree. References to parts outside the provided tree can remain identical.
     Therefore, try to update the ID of the reference via the mapping dictionary.
