@@ -255,7 +255,13 @@ class ScopeFilter(BaseFilter):
             if field in mapping:
                 attr, is_list = mapping[field]
 
-                values = value.split(",") if is_list else [value]
+                try:
+                    if is_list:
+                        values = value.split(",")
+                    else:
+                        values = [value]
+                except AttributeError:
+                    values = value
 
                 for item in values:
                     scope_filters.append(cls(**{attr: item}))
