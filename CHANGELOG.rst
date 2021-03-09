@@ -1,6 +1,7 @@
 Change Log
 ==========
 
+* :+1: Expanded `ScopeFilter` options to the support the following `Scope` attributes: tag, status, name, team, due date, start date and progress.
 * :+1: Added file path as return value of the `download_as_pdf` method of the `Activity` class.
 * :+1: Added `status` keyword to the `ScopeFilter` class. All filters are now parsed and written to option dicts internally, encapsulating the property-specific format of the filters.
 
