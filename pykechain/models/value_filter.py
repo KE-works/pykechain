@@ -8,19 +8,6 @@ from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models.input_checks import check_base, check_enum, check_type, check_text, check_datetime
 from pykechain.models.widgets.enums import MetaWidget
 
-SCOPE_FILTER_MAP = [
-    ("name__icontains", "name", False),
-    ("status__in", "status", False),
-    ("due_date__gte", "due_date_gte", False),
-    ("due_date__lte", "due_date_lte", False),
-    ("start_date__gte", "start_date_gte", False),
-    ("start_date__lte", "start_date_lte", False),
-    ("progress__gte", "progress_gte", False),
-    ("progress__lte", "progress_lte", False),
-    ("tags__contains", "tag", True),
-    ("team__in", "team", True),
-]  # map between KE-chain field and Pykechain attribute, and whether the filter is stored as a list (cs-string)
-
 
 class BaseFilter(object):
     """Base class for any filters used in pykechain."""
@@ -164,6 +151,20 @@ class ScopeFilter(BaseFilter):
     :ivar tag: string
     """
 
+    # map between KE-chain field and Pykechain attribute, and whether the filter is stored as a list (cs-string)
+    MAP = [
+        ("name__icontains", "name", False),
+        ("status__in", "status", False),
+        ("due_date__gte", "due_date_gte", False),
+        ("due_date__lte", "due_date_lte", False),
+        ("start_date__gte", "start_date_gte", False),
+        ("start_date__lte", "start_date_lte", False),
+        ("progress__gte", "progress_gte", False),
+        ("progress__lte", "progress_lte", False),
+        ("tags__contains", "tag", True),
+        ("team__in", "team", True),
+    ]
+
     def __init__(
             self,
             tag: Optional[Text] = None,
@@ -249,7 +250,7 @@ class ScopeFilter(BaseFilter):
         filters_dict = options.get(MetaWidget.PREFILTERS, {})
         scope_filters = []
 
-        mapping = {field: (attr, is_list) for field, attr, is_list in SCOPE_FILTER_MAP}
+        mapping = {field: (attr, is_list) for field, attr, is_list in cls.MAP}
 
         for field, value in filters_dict.items():
             if field in mapping:
@@ -285,7 +286,7 @@ class ScopeFilter(BaseFilter):
 
         for f in filters:  # type: cls
             found = False
-            for field, attr, is_list in SCOPE_FILTER_MAP:
+            for field, attr, is_list in cls.MAP:
                 filter_value = getattr(f, attr)
 
                 if filter_value is not None:
