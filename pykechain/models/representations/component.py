@@ -135,6 +135,7 @@ def _valid_object_type(representation: BaseRepresentation, obj: "Base") -> bool:
                     PropertyType.DATETIME_VALUE,
                     PropertyType.DATE_VALUE,
                     PropertyType.TIME_VALUE,
+                    PropertyType.USER_REFERENCES_VALUE,
                 ]
             else:
                 return False
