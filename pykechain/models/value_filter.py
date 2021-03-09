@@ -1,10 +1,11 @@
+import datetime
 import warnings
 from abc import abstractmethod
 from typing import Text, Union, Any, Dict, List, Optional
 
 from pykechain.enums import FilterType, Category, PropertyType, ScopeStatus
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
-from pykechain.models.input_checks import check_base, check_enum, check_type, check_text
+from pykechain.models.input_checks import check_base, check_enum, check_type, check_text, check_datetime
 from pykechain.models.widgets.enums import MetaWidget
 
 
@@ -150,24 +151,89 @@ class ScopeFilter(BaseFilter):
     :ivar tag: string
     """
 
+    # map between KE-chain field and Pykechain attribute, and whether the filter is stored as a list (cs-string)
+    MAP = [
+        ("name__icontains", "name", False),
+        ("status__in", "status", False),
+        ("due_date__gte", "due_date_gte", False),
+        ("due_date__lte", "due_date_lte", False),
+        ("start_date__gte", "start_date_gte", False),
+        ("start_date__lte", "start_date_lte", False),
+        ("progress__gte", "progress_gte", False),
+        ("progress__lte", "progress_lte", False),
+        ("tags__contains", "tag", True),
+        ("team__in", "team", True),
+    ]
+
     def __init__(
             self,
             tag: Optional[Text] = None,
             status: Optional[ScopeStatus] = None,
+            name: Optional[Text] = None,
+            team: Optional[Union[Text, 'Team']] = None,
+            due_date_gte: Optional[datetime.datetime] = None,
+            due_date_lte: Optional[datetime.datetime] = None,
+            start_date_gte: Optional[datetime.datetime] = None,
+            start_date_lte: Optional[datetime.datetime] = None,
+            progress_gte: Optional[float] = None,
+            progress_lte: Optional[float] = None,
+            **kwargs
     ):
         """Create a ScopeFilter object."""
-        if sum([p is not None for p in [tag, status]]) != 1:
+        from pykechain.models import Team
+
+        filters = [
+            tag,
+            status,
+            name,
+            team,
+            due_date_gte,
+            due_date_lte,
+            start_date_gte,
+            start_date_lte,
+            progress_gte,
+            progress_lte,
+        ]
+        if sum([p is not None for p in filters]) + len(kwargs) != 1:
             raise IllegalArgumentError("Every ScopeFilter object must apply only 1 filter!")
 
-        self.tag = check_text(tag, "tag")
         self.status = check_enum(status, ScopeStatus, "status")
+        self.name = check_text(name, "name")
+        self.due_date_gte = check_datetime(due_date_gte, "due_date_gte")
+        self.due_date_lte = check_datetime(due_date_lte, "due_date_lte")
+        self.start_date_gte = check_datetime(start_date_gte, "start_date_gte")
+        self.start_date_lte = check_datetime(start_date_lte, "start_date_lte")
+        self.progress_gte = check_type(progress_gte, float, "progress_gte")
+        self.progress_lte = check_type(progress_lte, float, "progress_lte")
+        self.tag = check_text(tag, "tag")
+        self.team = check_base(team, Team, "team")
+        self.extra_filter = kwargs  # type: dict
 
     def __repr__(self):
         _repr = "ScopeFilter: "
-        if self.tag:
-            _repr += "tag `{}`".format(self.tag)
-        if self.status:
+        if self.name:
+            _repr += "name: `{}`".format(self.name)
+        elif self.status:
             _repr += "status `{}`".format(self.status)
+        elif self.due_date_gte:
+            _repr += "due date greater or equal than: `{}`".format(self.due_date_gte)
+        elif self.due_date_lte:
+            _repr += "due date lesser or equal than: `{}`".format(self.due_date_lte)
+        elif self.start_date_gte:
+            _repr += "start date greater or equal than: `{}`".format(self.start_date_gte)
+        elif self.start_date_lte:
+            _repr += "start date lesser or equal than: `{}`".format(self.start_date_lte)
+        elif self.progress_gte:
+            _repr += "progress greater or equal than: {}%".format(self.progress_gte * 100)
+        elif self.progress_lte:
+            _repr += "progress lesser or equal than: {}%".format(self.progress_lte * 100)
+        elif self.tag:
+            _repr += "tag `{}`".format(self.tag)
+        elif self.team:
+            _repr += "team: `{}`".format(self.team)
+        else:
+            _repr += "{}".format(self.extra_filter)
+
         return _repr
 
     @classmethod
@@ -184,14 +250,24 @@ class ScopeFilter(BaseFilter):
         filters_dict = options.get(MetaWidget.PREFILTERS, {})
         scope_filters = []
 
-        tags_string = filters_dict.get("tags__contains", "")
-        tags = tags_string.split(",") if tags_string else []
-        for tag in tags:
-            scope_filters.append(ScopeFilter(tag=tag))
+        mapping = {field: (attr, is_list) for field, attr, is_list in cls.MAP}
 
-        status_string = filters_dict.get("status__in", None)
-        if status_string is not None:
-            scope_filters.append(ScopeFilter(status=status_string))
+        for field, value in filters_dict.items():
+            if field in mapping:
+                attr, is_list = mapping[field]
+
+                try:
+                    if is_list:
+                        values = value.split(",")
+                    else:
+                        values = [value]
+                except AttributeError:
+                    values = value
+
+                for item in values:
+                    scope_filters.append(cls(**{attr: item}))
+            else:
+                scope_filters.append(cls(**{field: value}))
 
         return scope_filters
 
@@ -208,14 +284,23 @@ class ScopeFilter(BaseFilter):
         prefilters = dict()
         options = {MetaWidget.PREFILTERS: prefilters}
 
-        for f in filters:
-            if f.tag:
-                if "tags__contains" not in prefilters:
-                    prefilters["tags__contains"] = []
-                prefilters["tags__contains"].append(f.tag)
-            elif f.status:
-                prefilters["status__in"] = f.status
-            else:
-                raise NotImplementedError("ScopeFilter `{}` not recognized.".format(f))
+        for f in filters:  # type: cls
+            found = False
+            for field, attr, is_list in cls.MAP:
+                filter_value = getattr(f, attr)
+
+                if filter_value is not None:
+                    if is_list:
+                        if field not in prefilters:
+                            prefilters[field] = []
+                        prefilters[field].append(filter_value)
+                    else:
+                        prefilters[field] = filter_value
+
+                    found = True
+                    break
+
+            if not found:
+                prefilters.update(f.extra_filter)
 
         return options
