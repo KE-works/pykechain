@@ -12,6 +12,8 @@ Improved the `copy` and `move` methods of the `Part` class.
 
 * :+1: The order of `Part` instances returned from the `Client._create_parts_bulk()` method is now guaranteed to match the request.
 * :+1: Datetime properties can now be set using (valid) string values.
+* :bug: Added allowed use of `Autofill` representation object on `UserReferenceProperty` classes.
+* :+1: Expanded `ScopeFilter` options to the support the following `Scope` attributes: tag, status, name, team, due date, start date and progress.
 * :+1: Added file path as return value of the `download_as_pdf` method of the `Activity` class.
 * :+1: Added `status` keyword to the `ScopeFilter` class. All filters are now parsed and written to option dicts internally, encapsulating the property-specific format of the filters.
 
