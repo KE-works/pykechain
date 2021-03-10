@@ -1,4 +1,5 @@
 import os
+import tempfile
 import warnings
 from collections import namedtuple
 from typing import Optional, Text, List, Any
@@ -27,7 +28,7 @@ _InstanceCopy = namedtuple(
 )
 
 
-# TODO Deprecate original utility functions on July 2021
+# TODO Deprecate original utility functions in July 2021
 
 
 def get_mapping_dictionary(clean=False) -> dict:
@@ -578,13 +579,14 @@ def _copy_part(
     mapping = get_mapping_dictionary()
     attachment_properties = get_attachments()
     if attachment_properties:
-        with temp_chdir() as target_dir:
-            for prop_original in attachment_properties:
-                prop_new = mapping[prop_original.id]
-                if prop_original.has_value():
-                    full_path = os.path.join(target_dir or os.getcwd(), prop_original.filename)
-                    prop_original.save_as(filename=full_path)
-                    prop_new.upload(full_path)
+        temp_dir = tempfile.TemporaryDirectory()
+        for prop_original in attachment_properties:
+            prop_new = mapping[prop_original.id]
+            if prop_original.has_value():
+                full_path = os.path.join(temp_dir.name or os.getcwd(), prop_original.filename)
+                prop_original.save_as(filename=full_path)
+                prop_new.upload(full_path)
+                temp_dir.cleanup()
 
     _update_references()
     Property.update_values(client=copied_model._client)
@@ -712,7 +714,7 @@ def _update_references() -> None:
     """
     mapping = get_mapping_dictionary()
 
-    for prop_original, references_original in get_references().items():  # type: (AnyProperty, list)
+    for prop_original, references_original in get_references().items():  # type: AnyProperty, List[Text]
         prop_new = mapping.get(prop_original.id)
 
         # Try to map to a new Part, default to the existing reference ID itself.

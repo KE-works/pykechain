@@ -3,12 +3,15 @@ Change Log
 
 Improved the `copy` and `move` methods of the `Part` class.
 
-* :bug: Internal Part reference properties of the Part's children are correctly maintained.
-* :bug: In case a `Part` model is copied to a `target_parent` model with zero (or more than one) instances, using `include_instances` now results in an `IllegalArgumentError`.
+* :bug: Part reference properties with a value set to the copied Part's children will no longer refer to the original child Parts. That is, such "internal" references are updated with the new child Parts.
 * :+1: `move` now makes use of the `copy` method directly, simplifying the `move` method and reducing duplicate code.
 * :+1: More efficient use of `populate_descendants` and other bulk operations when cloning the data model.
 * :+1: Refreshing a `part` now also refreshes its `properties` in-place, instead of creating new Python objects.
 * :+1: Added `DeprecationWarnings` to the original, public functions, for deprecation in July 2021.
+
+Backwards incompatible changes:
+-------------------------------
+* In case a `Part` model is copied to a `target_parent` model with zero (or more than one) instances, using `include_instances` now results in an `IllegalArgumentError`. Previously, zero parents would not produce any instance and multiple parents would create duplicate instances.
 
 * :+1: The order of `Part` instances returned from the `Client._create_parts_bulk()` method is now guaranteed to match the request.
 * :+1: Datetime properties can now be set using (valid) string values.
