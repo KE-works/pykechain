@@ -142,7 +142,11 @@ class WidgetsManager(Iterable):
         for widget in widgets:
             widget["activity"] = self.activity
 
-        return self._client.create_widgets(widgets=widgets)
+        new_widgets = self._client.create_widgets(widgets=widgets)
+        self._widgets.extend(new_widgets)
+        self._widgets.sort(key=lambda w: w.order)
+
+        return new_widgets
 
     def create_widget(self, *args, **kwargs) -> Widget:
         """Create a widget inside an activity.

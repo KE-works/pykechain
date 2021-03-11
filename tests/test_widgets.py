@@ -755,6 +755,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertIsInstance(new_widgets, list)
         self.assertTrue(all(isinstance(w, Widget) for w in new_widgets))
         self.assertEqual(len(new_widgets), 2)
+        self.assertIn(new_widgets[0], self.wm._widgets)
 
         # tearDown
         [w.delete() for w in new_widgets]
