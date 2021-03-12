@@ -446,7 +446,7 @@ class WidgetsManager(Iterable):
         :type show_name_column: bool
         :param show_images: (O) show the attachments in the grid as images, not as hyperlinks (default False).
         :type show_images: bool
-        :param collapse_filters: Hide or show the filters pane (default False)
+        :param collapse_filters: Boolean to collapses the filters pane, or fully hide if None. (default = False)
         :type collapse_filters: bool
         :param page_size: Number of parts that will be shown per page in the grid.
         :type page_size: int
@@ -498,6 +498,7 @@ class WidgetsManager(Iterable):
             MetaWidget.SHOW_FILTERS_VALUE: MetaWidget.FILTERS_COLLAPSED if collapse_filters else
             MetaWidget.FILTERS_EXPANDED,
             MetaWidget.COLLAPSE_FILTERS: collapse_filters,
+            MetaWidget.SHOW_FILTERS: collapse_filters is not None,
             MetaWidget.CUSTOM_PAGE_SIZE: page_size,
             MetaWidget.SHOW_NAME_COLUMN: show_name_column,
             MetaWidget.SHOW_IMAGES: show_images,

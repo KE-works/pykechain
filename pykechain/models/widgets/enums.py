@@ -106,6 +106,7 @@ class MetaWidget(Enum):
     FILTERS_COLLAPSED = "Collapsed"
     FILTERS_EXPANDED = "Expanded"
     COLLAPSE_FILTERS = "collapseFilters"
+    SHOW_FILTERS = "showFiltersPane"
     CUSTOM_PAGE_SIZE = "customPageSize"
     SHOW_NAME_COLUMN = "showNameColumn"
     SHOW_IMAGES = "showImages"
