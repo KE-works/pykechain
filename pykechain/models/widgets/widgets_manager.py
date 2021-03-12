@@ -495,8 +495,6 @@ class WidgetsManager(Iterable):
             # columns
             MetaWidget.SORTED_COLUMN: sort_property_id if sort_property_id else None,
             MetaWidget.SORTED_DIRECTION: sort_direction,
-            MetaWidget.SHOW_FILTERS_VALUE: MetaWidget.FILTERS_COLLAPSED if collapse_filters else
-            MetaWidget.FILTERS_EXPANDED,
             MetaWidget.COLLAPSE_FILTERS: collapse_filters,
             MetaWidget.SHOW_FILTERS: collapse_filters is not None,
             MetaWidget.CUSTOM_PAGE_SIZE: page_size,
