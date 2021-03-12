@@ -103,7 +103,7 @@ class MetaWidget(Enum):
     SORTED_DIRECTION = "sortDirection"
     SHOW_COLUMNS = 'showColumns'
     COLLAPSE_FILTERS = "collapseFilters"
-    SHOW_FILTERS = "showFiltersPane"
+    SHOW_FILTERS = "showFilterPane"
     CUSTOM_PAGE_SIZE = "customPageSize"
     SHOW_NAME_COLUMN = "showNameColumn"
     SHOW_IMAGES = "showImages"
