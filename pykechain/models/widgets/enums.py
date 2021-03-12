@@ -197,7 +197,8 @@ class MetaWidget(Enum):
 
 
 class TasksAssignmentFilterTypes(Enum):
-    """User assignment filter options of a task widget."""
+    """User assignment filter options of a `TasksWidget`."""
+
     ALL = "ALL"
     FILTER_ASSIGNED_TO_USER = "LOGGED_USER_ASSIGNED"
     FILTER_ASSIGNED = "ASSIGNED"
@@ -206,6 +207,7 @@ class TasksAssignmentFilterTypes(Enum):
 
 class TasksWidgetColumns(Enum):
     """Columns shown in a `TasksWidget`."""
+
     ASSIGNEES = "assignees"
     PROGRESS = "progress"
     START_DATE = "start_date"
