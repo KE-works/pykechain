@@ -15,7 +15,7 @@ from pykechain.models import Activity, Part
 from pykechain.models.widgets import (
     UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, SupergridWidget, FilteredgridWidget,
     TasknavigationbarWidget, SignatureWidget, ServiceWidget, NotebookWidget, MulticolumnWidget, CardWidget,
-    MetapanelWidget, ScopeWidget)
+    MetapanelWidget, ScopeWidget, TasksWidget)
 from pykechain.models.widgets.helpers import _set_title
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widget_models import ServicecardWidget, DashboardWidget
@@ -821,7 +821,11 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertTrue(widget_current_project.meta['showAssignees'])
         self.assertFalse(widget_tagged_projects.meta['showAssignees'])
-        return
+
+    def test_add_tasks_widget(self):
+        tasks_widget = self.wm.add_tasks_widgets()
+
+        self.assertIsInstance(tasks_widget, TasksWidget)
 
 
 class TestWidgetManagerWeatherWidget(TestBetamax):

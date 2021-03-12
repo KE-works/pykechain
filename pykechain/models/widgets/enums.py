@@ -96,7 +96,7 @@ class MetaWidget(Enum):
     VALUES = "values"
     FILTERS_TYPE = "filters_type"
 
-    # Paginated and Super Grids widgets
+    # Paginated, Super Grids and Tasks widgets
     NAME = "name"
     PROPERTY_VALUE_PREFILTER = "property_value"
     SORTED_COLUMN = "sortedColumn"
@@ -119,10 +119,20 @@ class MetaWidget(Enum):
     EMPHASIZE_CLONE_BUTTON = "primaryCloneUiValue"
     EMPHASIZE_DELETE_BUTTON = "primaryDeleteUiValue"
 
-    # ScopeGrid widgets
+    # ScopeGrid and Tasks widgets
     VISIBLE_ACTIVE_FILTER = "activeFilterVisible"
     VISIBLE_SEARCH_FILTER = "searchFilterVisible"
     TAGS = "tags"
+
+    # Tasks Widget
+    VISIBLE_MY_TASKS_FILTER = "myTasksFilterVisible"
+    VISIBLE_OPEN_TASKS_FILTER = "openTasksFilterVisible"
+    PARENT_ACTIVITY_ID = "parent_id"
+    ASSIGNED = "assigned"
+    ACTIVITY_STATUS = "status__in"
+    ACTIVITY_TYPE = "activity_type"
+    ACTIVITY_CLASSIFICATION = "classification"
+    TAGS_FILTER = "tags__contains"
 
     # Attachment viewer widgets
     ALIGNMENT = "alignment"
@@ -184,3 +194,21 @@ class MetaWidget(Enum):
 
     # Meta Panel Widget
     SHOW_ALL = "showAll"
+
+
+class TasksAssignmentFilterTypes(Enum):
+    """User assignment filter options of a task widget."""
+    ALL = "ALL"
+    FILTER_ASSIGNED_TO_USER = "LOGGED_USER_ASSIGNED"
+    FILTER_ASSIGNED = "ASSIGNED"
+    FILTER_UNASSIGNED = "UNASSIGNED"
+
+
+class TasksWidgetColumns(Enum):
+    """Columns shown in a `TasksWidget`."""
+    ASSIGNEES = "assignees"
+    PROGRESS = "progress"
+    START_DATE = "start_date"
+    DUE_DATE = "due_date"
+    STATUS = "status"
+    TAGS = "tags"
