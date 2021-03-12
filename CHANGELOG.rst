@@ -1,6 +1,7 @@
 Change Log
 ==========
 
+* :bug: For grid widgets, corrected name of field `incompleteRowsVisible` to `incompleteRowsButtonVisible`.
 * :bug: Widgets created with the `create_widgets` method of the `WidgetsManager` class now append the internal `_widgets` attribute.
 * :bug: Added allowed use of `Autofill` representation object on `UserReferenceProperty` classes.
 * :+1: Expanded `ScopeFilter` options to the support the following `Scope` attributes: tag, status, name, team, due date, start date and progress.

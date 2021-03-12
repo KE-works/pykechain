@@ -115,7 +115,7 @@ class MetaWidget(Enum):
     VISIBLE_CLONE_BUTTON = "cloneButtonVisible"
     VISIBLE_DOWNLOAD_BUTTON = "downloadButtonVisible"
     VISIBLE_UPLOAD_BUTTON = "uploadButtonVisible"
-    VISIBLE_INCOMPLETE_ROWS = "incompleteRowsVisible"
+    VISIBLE_INCOMPLETE_ROWS = "incompleteRowsButtonVisible"
     EMPHASIZE_ADD_BUTTON = "primaryAddUiValue"
     EMPHASIZE_EDIT_BUTTON = "primaryEditUiValue"
     EMPHASIZE_CLONE_BUTTON = "primaryCloneUiValue"
