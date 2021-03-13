@@ -1796,6 +1796,70 @@ class WidgetsManager(Iterable):
 
         return widget
 
+    def add_scopemembers_widget(
+            self,
+            title: TITLE_TYPING = False,
+            parent_widget: Optional[Union[Widget, Text]] = None,
+            add: Optional[bool] = True,
+            edit: Optional[bool] = True,
+            remove: Optional[bool] = True,
+            show_username_column: Optional[bool] = True,
+            show_name_column: Optional[bool] = True,
+            show_email_column: Optional[bool] = True,
+            show_role_column: Optional[bool] = True,
+            **kwargs
+    ) -> Widget:
+        """
+        Add a KE-chain Scope Members Widget to the WidgetManager and the activity.
+
+        The widget will be saved in KE-chain
+
+        :param title: A custom title for the card widget
+            * False (default): Card name
+            * String value: Custom title
+            * None: No title
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or basestring or None
+        :param add: Show "add user" button (default = True)
+        :type add: bool
+        :param edit: Show "edit role" button (default = True)
+        :type edit: bool
+        :param remove: Show "remove user" button (default = True)
+        :type remove: bool
+        :param show_username_column: Show "username" column (default = True)
+        :type show_username_column: bool
+        :param show_name_column: Show "name" column (default = True)
+        :type show_name_column: bool
+        :param show_email_column: Show "email" column (default = True)
+        :type show_email_column: bool
+        :param show_role_column: Show "role" column (default = True)
+        :type show_role_column: bool
+        :return: Scope members Widget
+        :rtype Widget
+        """
+        meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
+        meta, title = _set_title(meta, title=title, **kwargs)
+
+        meta.update({
+            MetaWidget.SHOW_ADD_USER_BUTTON: check_type(add, bool, "add"),
+            MetaWidget.SHOW_EDIT_ROLE_BUTTON: check_type(edit, bool, "edit"),
+            MetaWidget.SHOW_REMOVE_USER_BUTTON: check_type(remove, bool, "remove"),
+            MetaWidget.SHOW_USERNAME_COLUMN: check_type(show_username_column, bool, "show_username_columns"),
+            MetaWidget.SHOW_NAME_COLUMN: check_type(show_name_column, bool, "show_name_column"),
+            MetaWidget.SHOW_EMAIL_COLUMN: check_type(show_email_column, bool, "show_email_column"),
+            MetaWidget.SHOW_ROLE_COLUMN: check_type(show_role_column, bool, "show_role_column"),
+        })
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.SCOPEMEMBERS,
+            meta=meta,
+            title=title,
+            parent=parent_widget,
+            **kwargs
+        )
+
+        return widget
+
     #
     # Widget manager methods
     #

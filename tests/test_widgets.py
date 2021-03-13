@@ -18,7 +18,7 @@ from pykechain.models.widgets import (
     MetapanelWidget, ScopeWidget, TasksWidget)
 from pykechain.models.widgets.helpers import _set_title
 from pykechain.models.widgets.widget import Widget
-from pykechain.models.widgets.widget_models import ServicecardWidget, DashboardWidget
+from pykechain.models.widgets.widget_models import ServicecardWidget, DashboardWidget, ScopemembersWidget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import slugify_ref, temp_chdir, find
 from tests.classes import TestBetamax
@@ -838,6 +838,11 @@ class TestWidgetManagerInActivity(TestBetamax):
         )
 
         self.assertIsInstance(tasks_widget, TasksWidget)
+
+    def test_add_scopemembers_widget(self):
+        scope_members_widget = self.wm.add_scopemembers_widget()
+
+        self.assertIsInstance(scope_members_widget, ScopemembersWidget)
 
 
 class TestWidgetManagerWeatherWidget(TestBetamax):

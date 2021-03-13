@@ -96,7 +96,7 @@ class MetaWidget(Enum):
     VALUES = "values"
     FILTERS_TYPE = "filters_type"
 
-    # Paginated, Super Grids and Tasks widgets
+    # Paginated, Super Grids, Scope Members, Tasks widgets
     NAME = "name"
     PROPERTY_VALUE_PREFILTER = "property_value"
     SORTED_COLUMN = "sortedColumn"
@@ -194,6 +194,14 @@ class MetaWidget(Enum):
 
     # Meta Panel Widget
     SHOW_ALL = "showAll"
+
+    # Scope members Widget
+    SHOW_ADD_USER_BUTTON = "showAddUserButton"
+    SHOW_EDIT_ROLE_BUTTON = "showEditRoleButton"
+    SHOW_REMOVE_USER_BUTTON = "showRemoveUserButton"
+    SHOW_USERNAME_COLUMN = "showUsernameColumn"
+    SHOW_EMAIL_COLUMN = "showEmailColumn"
+    SHOW_ROLE_COLUMN = "showRoleColumn"
 
 
 class TasksAssignmentFilterTypes(Enum):
