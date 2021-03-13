@@ -1661,7 +1661,7 @@ class WidgetsManager(Iterable):
         )
         return widget
 
-    def add_tasks_widgets(
+    def add_tasks_widget(
             self,
             title: TITLE_TYPING = False,
             parent_widget: Optional[Union[Widget, Text]] = None,

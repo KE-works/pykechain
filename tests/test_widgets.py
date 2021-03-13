@@ -823,12 +823,12 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertFalse(widget_tagged_projects.meta['showAssignees'])
 
     def test_add_tasks_widget(self):
-        tasks_widget = self.wm.add_tasks_widgets()
+        tasks_widget = self.wm.add_tasks_widget()
 
         self.assertIsInstance(tasks_widget, TasksWidget)
 
     def test_add_tasks_widget_with_filters(self):
-        tasks_widget = self.wm.add_tasks_widgets(
+        tasks_widget = self.wm.add_tasks_widget(
             parent_activity=self.wm.activity.parent(),
             status_filter=ActivityStatus.OPEN,
             assigned_filter=TasksAssignmentFilterTypes.FILTER_ASSIGNED_TO_USER,
