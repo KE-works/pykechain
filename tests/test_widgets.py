@@ -5,11 +5,11 @@ from unittest import TestCase
 from pykechain.enums import (WidgetTypes, ShowColumnTypes, FilterType, ProgressBarColors,
                              Category, LinkTargets, KEChainPages, WidgetTitleValue, Alignment, ActivityType,
                              CardWidgetLinkValue, CardWidgetLinkTarget, ImageFitValue, PropertyType, Classification,
-                             Multiplicity)
+                             Multiplicity, ActivityStatus, ActivityClassification)
 from pykechain.models.widgets.enums import (
     DashboardWidgetShowTasks,
     DashboardWidgetShowScopes,
-)
+    TasksAssignmentFilterTypes)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Activity, Part
 from pykechain.models.widgets import (
@@ -824,6 +824,18 @@ class TestWidgetManagerInActivity(TestBetamax):
 
     def test_add_tasks_widget(self):
         tasks_widget = self.wm.add_tasks_widgets()
+
+        self.assertIsInstance(tasks_widget, TasksWidget)
+
+    def test_add_tasks_widget_with_filters(self):
+        tasks_widget = self.wm.add_tasks_widgets(
+            parent_activity=self.wm.activity.parent(),
+            status_filter=ActivityStatus.OPEN,
+            assigned_filter=TasksAssignmentFilterTypes.FILTER_ASSIGNED_TO_USER,
+            activity_type_filter=ActivityType.TASK,
+            classification_filter=ActivityClassification.CATALOG,
+            tags_filter=["One", "Two", "Five"],
+        )
 
         self.assertIsInstance(tasks_widget, TasksWidget)
 
