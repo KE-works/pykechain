@@ -702,7 +702,7 @@ class WidgetsManager(Iterable):
                                 title: TITLE_TYPING = False,
                                 max_height: Optional[int] = None,
                                 show_headers: Optional[bool] = True,
-                                show_columns: Optional[Iterable] = None,
+                                show_columns: Optional[Iterable[ShowColumnTypes]] = None,
                                 parent_widget: Optional[Union[Text, Widget]] = None,
                                 readable_models: Optional[Iterable] = None,
                                 writable_models: Optional[Iterable] = None,
