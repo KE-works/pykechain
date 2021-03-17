@@ -1127,7 +1127,9 @@ class Client(object):
         if kwargs:
             data.update(kwargs)
 
-        response = self._request('POST', self._build_url('activities'), data=data,
+        data = {k: v for k, v in data.items() if v is not None}
+
+        response = self._request('POST', self._build_url('activities'), json=data,
                                  params=API_EXTRA_PARAMS['activities'])
 
         if response.status_code != requests.codes.created:  # pragma: no cover

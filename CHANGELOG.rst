@@ -3,6 +3,7 @@ Change Log
 
 * :star: It is now possible to create a `TasksWidget` with the new `add_tasks_widget` method to the `WidgetsManager` class. The enums `TasksAssignmentFiltersTypes` and `TasksWidgetColumns` support the inputs to this method.
 * :star: It is now possible to create a `ScopemembersWidget` with the new `add_scopemembers_widget` method to the `WidgetsManager` class.
+* :bug: Creating of new activities was performed using `data` instead of `json`. Now, `None` values are cleared and the request allows `kwargs`.
 * :bug: For grid widgets, corrected name of field `incompleteRowsVisible` to `incompleteRowsButtonVisible`.
 * :bug: Widgets created with the `create_widgets` method of the `WidgetsManager` class now append the internal `_widgets` attribute.
 * :bug: Added allowed use of `Autofill` representation object on `UserReferenceProperty` classes.
