@@ -909,7 +909,7 @@ class Client(object):
 
         return [User(user, client=self) for user in response.json()['results']]
 
-    def user(self, *args, **kwargs):
+    def user(self, *args, **kwargs) -> User:
         """
         User of KE-chain.
 
