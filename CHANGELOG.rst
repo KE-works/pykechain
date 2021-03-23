@@ -4,18 +4,6 @@ Change Log
 v3.10.0 (23MAR21)
 -----------------
 
-Improved the `copy` and `move` methods of the `Part` class.
-
-* :bug: Part reference properties with a value set to the copied Part's children will no longer refer to the original child Parts. That is, such "internal" references are updated with the new child Parts.
-* :+1: `move` now makes use of the `copy` method directly, simplifying the `move` method and reducing duplicate code.
-* :+1: More efficient use of `populate_descendants` and other bulk operations when cloning the data model.
-* :+1: Refreshing a `part` now also refreshes its `properties` in-place, instead of creating new Python objects.
-* :+1: Added `DeprecationWarnings` to the original, public functions, for deprecation in July 2021.
-
-Backwards incompatible changes:
--------------------------------
-* In case a `Part` model is copied to a `target_parent` model with zero (or more than one) instances, using `include_instances` now results in an `IllegalArgumentError`. Previously, zero parents would not produce any instance and multiple parents would create duplicate instances.
-
 * :star: It is now possible to create a `TasksWidget` with the new `add_tasks_widget` method to the `WidgetsManager` class. The enums `TasksAssignmentFiltersTypes` and `TasksWidgetColumns` support the inputs to this method.
 * :star: It is now possible to create a `ScopemembersWidget` with the new `add_scopemembers_widget` method to the `WidgetsManager` class.
 * :bug: For grid widgets, corrected name of field `incompleteRowsVisible` to `incompleteRowsButtonVisible`.
@@ -29,6 +17,20 @@ Backwards incompatible changes:
 * :+1: Expanded `ScopeFilter` options to the support the following `Scope` attributes: tag, status, name, team, due date, start date and progress.
 * :+1: Added file path as return value of the `download_as_pdf` method of the `Activity` class.
 * :+1: Added `status` keyword to the `ScopeFilter` class. All filters are now parsed and written to option dicts internally, encapsulating the property-specific format of the filters.
+
+
+Improved the `copy` and `move` methods of the `Part` class.
+
+* :bug: Part reference properties with a value set to the copied Part's children will no longer refer to the original child Parts. That is, such "internal" references are updated with the new child Parts.
+* :+1: `move` now makes use of the `copy` method directly, simplifying the `move` method and reducing duplicate code.
+* :+1: More efficient use of `populate_descendants` and other bulk operations when cloning the data model.
+* :+1: Refreshing a `part` now also refreshes its `properties` in-place, instead of creating new Python objects.
+* :+1: Added `DeprecationWarnings` to the original, public functions, for deprecation in July 2021.
+
+Backwards incompatible changes:
+-------------------------------
+* In case a `Part` model is copied to a `target_parent` model with zero (or more than one) instances, using `include_instances` now results in an `IllegalArgumentError`. Previously, zero parents would not produce any instance and multiple parents would create duplicate instances.
+
 
 v3.9.5 (23DEC20)
 ----------------
