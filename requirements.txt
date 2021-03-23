@@ -23,7 +23,7 @@ nbsphinx==0.8.2
 tox==3.23.0
 
 # code style
-flake8==3.8.4
+flake8==3.9.0
 pydocstyle==5.1.1
 mypy==0.812; python_version >= '3.4'
 pre-commit==2.9.3
