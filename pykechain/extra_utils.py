@@ -1,8 +1,12 @@
 import os
-from typing import Optional, Text
+import tempfile
+import warnings
+from collections import namedtuple
+from typing import Optional, Text, List, Any
 
-from pykechain.enums import PropertyType, Multiplicity
-from pykechain.exceptions import IllegalArgumentError
+from pykechain import Client
+from pykechain.enums import PropertyType, Multiplicity, Category
+from pykechain.exceptions import IllegalArgumentError, NotFoundError, MultipleFoundError
 from pykechain.models import Part, AnyProperty, Property
 from pykechain.utils import temp_chdir
 
@@ -10,6 +14,21 @@ from pykechain.utils import temp_chdir
 __mapping_dictionary = None
 __edited_one_many = list()  # type: list
 __references = dict()
+__attachments = list()
+
+
+_InstanceCopy = namedtuple(
+    "InstanceCopyAttributes",
+    field_names=[
+        "instance_original",
+        "model_original",
+        "target_parent_instance",
+        "name",
+    ],
+)
+
+
+# TODO Deprecate original utility functions in July 2021
 
 
 def get_mapping_dictionary(clean=False) -> dict:
@@ -56,6 +75,20 @@ def get_references(clean=False) -> dict:
     return __references
 
 
+def get_attachments(clean=False) -> list:
+    """
+    Get a temporary helper list to store attachment properties.
+
+    :param clean: (optional) boolean flag to reset the list
+    :type clean: bool
+    :return: singleton list (persistent in the script) for tracking purposes
+    """
+    global __attachments
+    if not __attachments or clean:
+        __attachments = list()
+    return __attachments
+
+
 def get_illegal_targets(part: Part, include: set):
     """
     Retrieve the illegal parent parts where `Part` can be moved/copied.
@@ -70,6 +103,28 @@ def get_illegal_targets(part: Part, include: set):
     list_of_illegal_targets = include or set()
     list_of_illegal_targets.update({c.id for c in part.all_children()})
     return list_of_illegal_targets
+
+
+def map_property_instances(original_part: Part, new_part: Part) -> None:
+    """
+    Map the id of the original part with the `Part` object of the newly created one.
+
+    Updated the singleton `mapping dictionary` with the new mapping table values.
+
+    :param original_part: `Part` object to be copied/moved
+    :type original_part: :class:`Part`
+    :param new_part: `Part` object copied/moved
+    :type new_part: :class:`Part`
+    :return: None
+    """
+    # Map the original part with the new one
+    mapping = get_mapping_dictionary()
+    mapping[original_part.id] = new_part
+
+    # Do the same for each Property of original part instance, using the 'model' id and the get_mapping_dictionary
+    for prop_original in original_part.properties:
+        mapping[prop_original.id] = [
+            prop_new for prop_new in new_part.properties if mapping[prop_original.model_id].id == prop_new.model_id][0]
 
 
 def relocate_model(
@@ -94,6 +149,11 @@ def relocate_model(
     :return: moved :class: Part model.
     :raises IllegalArgumentError: if target_parent is descendant of part
     """
+    warnings.warn(
+        "`relocate_model` is no longer in use and will be deprecated in July 2021.",
+        PendingDeprecationWarning,
+    )
+
     if target_parent.id in get_illegal_targets(part, include={part.id}):
         raise IllegalArgumentError("Cannot relocate part `{}` under target parent `{}`, because the target is part of "
                                    "its descendants".format(part.name, target_parent.name))
@@ -147,58 +207,72 @@ def move_part_model(
     :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
     :type include_children: bool
     :return: moved :class: Part model.
-    :raises IllegalArgumentError: if target_parent is descendant of part
     """
-    # The description cannot be added when creating a model, so edit the model after creation.
-    part_desc = part.description
-    moved_part_model = target_parent.add_model(name=name, multiplicity=part.multiplicity)
-    if part_desc:
-        moved_part_model.edit(description=str(part_desc))
+    warnings.warn(
+        "`move_part_model` is no longer in use and will be deprecated in July 2021.",
+        PendingDeprecationWarning,
+    )
+    return _copy_part_model(
+        part=part,
+        target_parent=target_parent,
+        name=name,
+        include_children=include_children,
+    )
 
-    # Map the current part model id with newly created part model Object
-    get_mapping_dictionary().update({part.id: moved_part_model})
 
-    # Loop through properties and retrieve their type, description and unit
-    list_of_properties_sorted_by_order = part.properties
-    list_of_properties_sorted_by_order.sort(key=lambda x: x._json_data['order'])
-    for prop in list_of_properties_sorted_by_order:  # type: AnyProperty
+def _copy_part_model(
+        part: Part,
+        target_parent: Part,
+        name: Text,
+        include_children: bool,
+) -> Part:
+    """
+    Copy the `Part` model under a target parent `Part` model, including its descendants recursively.
 
-        # For KE-chain 3 (PIM2) we have value_options instead of options.
-        if prop._client.match_app_version(label='pim', version='>=3.0.0'):
-            options = prop._json_data.get('value_options')
-        else:
-            options = prop._json_data.get('options')
+    .. versionadded:: 2.3
 
-        if prop.type == PropertyType.REFERENCES_VALUE:
-            get_references()[prop] = prop.value_ids()
-            prop_value = None
-        else:
-            prop_value = prop._value
-
-        moved_prop = moved_part_model.add_property(
+    :param part: `Part` object to be copied
+    :type part: :class:`Part`
+    :param target_parent: `Part` object under which the desired `Part` is copied
+    :type target_parent: :class:`Part`
+    :param name: how the copied top-level `Part` should be called
+    :type name: basestring
+    :param include_children: True to also copy the descendants of `Part`. If False, the children will be lost.
+    :type include_children: bool
+    :return: moved :class: Part model.
+    """
+    property_fvalues = list()
+    for prop in part.properties:  # type: AnyProperty
+        property_fvalues.append(dict(
             name=prop.name,
             description=prop.description,
             property_type=prop.type,
-            default_value=prop_value,
+            value=_get_property_value(prop),
             unit=prop.unit,
-            options=options,
-        )
+            value_options=prop._options,
+        ))
 
-        # For attachment properties, the value is a file that must be transferred manually
-        if prop.type == PropertyType.ATTACHMENT_VALUE and prop.has_value():
-            with temp_chdir() as target_dir:
-                full_path = os.path.join(target_dir or os.getcwd(), prop.filename)
-                prop.save_as(filename=full_path)
-                moved_prop.upload(full_path)
+    # Create the model and its properties in a single request
+    moved_part_model = part._client.create_model_with_properties(
+        name=name,
+        parent=target_parent,
+        multiplicity=part.multiplicity,
+        properties_fvalues=property_fvalues,
+    )
 
-        # Map the current property model id with newly created property model Object
+    # Map the current IDs with newly created objects
+    get_mapping_dictionary().update({part.id: moved_part_model})
+    for prop, moved_prop in zip(part.properties, moved_part_model.properties):
         get_mapping_dictionary()[prop.id] = moved_prop
 
-    # Now copy the sub-tree of the part
+    # The description cannot be added when creating a model, so edit the model after creation.
+    if part.description:
+        moved_part_model.edit(description=str(part.description))
+
+    # Recursively, copy the sub-tree of the model
     if include_children:
-        # For each part, recursively run this function
         for sub_part in part.children():
-            move_part_model(
+            _copy_part_model(
                 part=sub_part,
                 target_parent=moved_part_model,
                 name=sub_part.name,
@@ -229,6 +303,11 @@ def relocate_instance(
     :type include_children: bool
     :return: moved :class: `Part` instance
     """
+    warnings.warn(
+        "`relocate_instance` is no longer in use and will be deprecated in July 2021.",
+        PendingDeprecationWarning,
+    )
+
     # First, if the user doesn't provide the name, then just use the default "Clone - ..." name
     if not name:
         name = "CLONE - {}".format(part.name)
@@ -296,6 +375,11 @@ def move_part_instance(
     :type include_children: bool
     :return: moved :class: `Part` instance
     """
+    warnings.warn(
+        "`move_part_instance` is no longer in use and will be deprecated in July 2021.",
+        PendingDeprecationWarning,
+    )
+
     if not name:
         name = part_instance.name
 
@@ -356,6 +440,11 @@ def update_part_with_properties(
     :type name: basestring
     :return: moved :class: `Part` instance
     """
+    warnings.warn(
+        "`update_part_with_properties` is no longer in use and will be deprecated in July 2021.",
+        PendingDeprecationWarning,
+    )
+
     # Instantiate an empty dictionary used to collect all property values in order to update the part in one go.
     properties_id_dict = dict()
     for prop_instance in part_instance.properties:  # type: AnyProperty
@@ -396,23 +485,260 @@ def update_part_with_properties(
     return moved_instance
 
 
-def map_property_instances(original_part: Part, new_part: Part) -> None:
+def _copy_part(
+        part: Part,
+        target_parent: Part,
+        name: Optional[Text] = None,
+        include_children: Optional[bool] = True,
+        include_instances: Optional[bool] = True,
+) -> Part:
     """
-    Map the id of the original part with the `Part` object of the newly created one.
+    Copy `part` below `target_parent`, optionally including all child Parts.
 
-    Updated the singleton `mapping dictionary` with the new mapping table values.
+    Distinguish between `part` of different category:
+    Part MODELS simply need a copy of themselves, and optionally copies of their instances.
+    Part INSTANCES first need to have a copy of their part MODEL prior to a copy of themselves.
 
-    :param original_part: `Part` object to be copied/moved
-    :type original_part: :class:`Part`
-    :param new_part: `Part` object copied/moved
-    :type new_part: :class:`Part`
-    :return: None
+    :param part: Part to copy
+    :param target_parent: Part to copy below
+    :param name: (O) new name of the `part` copy
+    :param include_children: (O) include the descendants of `part`, defaults to True
+    :param include_instances: (O) In case of `part` being of category MODEL, include the instance Parts of that model.
+        WARNING: By default, every instance is created per instance of the `target_parent`.
+    :return: copy of `part`
+    :rtype Part
     """
-    # Map the original part with the new one
-    get_mapping_dictionary()[original_part.id] = new_part
+    get_mapping_dictionary(clean=True)
+    get_edited_one_many(clean=True)
+    get_references(clean=True)
+    get_attachments(clean=True)
 
-    # Do the same for each Property of original part instance, using the 'model' id and the get_mapping_dictionary
-    for prop_original in original_part.properties:
-        get_mapping_dictionary()[prop_original.id] = [
-            prop_new for prop_new in new_part.properties if
-            get_mapping_dictionary()[prop_original.model_id].id == prop_new.model_id][0]
+    if part.category == Category.INSTANCE:
+        model = part.model()
+        target_parent_model = target_parent.model()
+        name_model = model.name
+
+        instances = [_InstanceCopy(
+            instance_original=part,
+            target_parent_instance=target_parent,
+            model_original=model,
+            name=part.name if name is None else name,
+        )]
+
+    else:  # part.category == Category.MODEL
+
+        model = part
+        target_parent_model = target_parent
+        name_model = part.name if name is None else name
+
+        if include_instances:
+            try:
+                target_parent_instance = target_parent_model.instance()
+            except NotFoundError:
+                raise IllegalArgumentError(
+                    "Cannot copy part model `{}` including instances, since the target_parent model `{}` has no "
+                    "instance to act as parent for the instances.".format(model, target_parent_model))
+            except MultipleFoundError:
+                raise IllegalArgumentError(
+                    "Cannot copy part model `{}` including instances, since the target_parent model `{}` has multiple "
+                    "instances, making the parent for the instances ambiguous.".format(model, target_parent_model)
+                )
+
+            instances = [_InstanceCopy(
+                instance_original=instance,
+                target_parent_instance=target_parent_instance,
+                model_original=model,
+                name=instance.name,
+            ) for instance in model.instances()]
+        else:
+            instances = []
+
+    # Verify if the target_parent is not below the part
+    model.populate_descendants()
+    if target_parent_model.id in get_illegal_targets(model, include={model.id}):
+        raise IllegalArgumentError("Cannot relocate part `{}` under target parent `{}`, because the target is part of "
+                                   "its descendants".format(model.name, target_parent.name))
+
+    copied_model = _copy_part_model(
+        part=model,
+        target_parent=target_parent_model,
+        name=name_model,
+        include_children=include_children,
+    )
+
+    Property.set_bulk_update(True)
+    _update_references()
+    Property.update_values(client=copied_model._client, use_bulk_update=True)
+
+    copied_instances = _copy_instances_recursive(
+        client=copied_model._client,
+        instances=instances,
+        include_children=include_children,
+    )
+
+    mapping = get_mapping_dictionary()
+    attachment_properties = get_attachments()
+    if attachment_properties:
+        temp_dir = tempfile.TemporaryDirectory()
+        for prop_original in attachment_properties:
+            prop_new = mapping[prop_original.id]
+            if prop_original.has_value():
+                full_path = os.path.join(temp_dir.name or os.getcwd(), prop_original.filename)
+                prop_original.save_as(filename=full_path)
+                prop_new.upload(full_path)
+                temp_dir.cleanup()
+
+    _update_references()
+    Property.update_values(client=copied_model._client)
+
+    return copied_model if part.category == Category.MODEL else copied_instances[0]
+
+
+def _copy_instances_recursive(
+        client: Client,
+        instances: List[_InstanceCopy],
+        include_children: bool,
+) -> List[Part]:
+    """
+    Create new Part instances in bulk, recursively.
+
+    Reference and Attachment properties have to be updated outside this function.
+
+    :param client: Client object
+    :param instances: list of _Instance instances.
+    :param include_children: whether to create instance parts
+    :return: list of new Part instances
+    :rtype list
+    """
+    if not instances:
+        return []
+
+    mapping = get_mapping_dictionary()
+    create_request = []  # request for the bulk create
+    created_instances_indices = []  # indices in a list
+    original_instances = []  # part instances that require a copy
+    new_instances = []  # all new Part objects
+
+    for index, i in enumerate(instances):
+        model_new = get_mapping_dictionary()[i.model_original.id]
+        existing_instance = None
+
+        if model_new.multiplicity == Multiplicity.ONE:
+            # If multiplicity is 'Exactly 1', that means the instance was automatically created with the model.
+            existing_instance = model_new.instances(parent_id=i.target_parent_instance.id)[0]
+
+        elif model_new.multiplicity == Multiplicity.ONE_MANY:
+            # If multiplicity is '1 or more', that means one instance has automatically been created with the model.
+            # This first instance has to be used, but only once. Therefore, store the model in a global list after
+            # doing so.
+            if model_new.id not in get_edited_one_many():
+                existing_instance = model_new.instances(parent_id=i.target_parent_instance.id)[0]
+                get_edited_one_many().append(model_new.id)
+        else:
+            # If multiplicity is '0 or more' or '0 or 1', no instance has been created automatically with the model.
+            pass
+
+        if existing_instance:
+            new_instances.append(existing_instance)
+            map_property_instances(original_part=i.instance_original, new_part=existing_instance)
+
+            if i.name != existing_instance.name:
+                existing_instance.edit(name=i.name)
+
+            # part already exists, but properties need to be updated
+            for prop_original in i.instance_original.properties:
+                prop = mapping.get(prop_original.id)
+                prop.value = _get_property_value(prop_original)
+        else:
+            new_instances.append(None)
+            created_instances_indices.append(index)
+            original_instances.append(i)
+
+            properties = []
+            for prop in i.instance_original.properties:  # type: AnyProperty
+                prop_value = _get_property_value(prop)
+                if prop_value is not None:
+                    properties.append(dict(
+                        name=prop.name,
+                        value=prop_value,
+                        model_id=mapping[prop.model_id].id,
+                    ))
+
+            create_request.append(dict(
+                name=i.name,
+                parent_id=i.target_parent_instance.id,
+                model_id=model_new.id,
+                properties=properties,
+            ))
+
+    if create_request:
+        created_instances = client._create_parts_bulk(
+            parts=create_request,
+            asynchronous=False,
+            retrieve_instances=True,
+        )
+        for index, new_instance, i in \
+                zip(created_instances_indices, created_instances, original_instances):  # type: int, Part, _InstanceCopy
+            new_instances[index] = new_instance
+            map_property_instances(original_part=i.instance_original, new_part=new_instance)
+
+    if include_children:
+        child_instances = []
+        for i, new_instance in zip(instances, new_instances):
+            child_models = {c.id: c for c in i.model_original.children()}
+
+            for child_instance in i.instance_original.children():
+                child_instances.append(_InstanceCopy(
+                    instance_original=child_instance,
+                    model_original=child_models[child_instance.model_id],
+                    target_parent_instance=new_instance,
+                    name=child_instance.name
+                ))
+
+        _copy_instances_recursive(
+            client=client,
+            instances=child_instances,
+            include_children=include_children,
+        )
+
+    return new_instances
+
+
+def _update_references() -> None:
+    """
+    Set part reference values found when copying the Part(s).
+
+    Part reference properties referring to child parts in the provided part tree should be updated to refer to
+    the new child parts in the new tree. References to parts outside the provided tree can remain identical.
+    Therefore, try to update the ID of the reference via the mapping dictionary.
+    """
+    mapping = get_mapping_dictionary()
+
+    for prop_original, references_original in get_references().items():  # type: AnyProperty, List[Text]
+        prop_new = mapping.get(prop_original.id)
+
+        # Try to map to a new Part, default to the existing reference ID itself.
+        references_new = [mapping.get(r, r) for r in references_original]
+        prop_new.value = references_new
+
+    get_references(clean=True)
+
+
+def _get_property_value(prop: AnyProperty) -> Any:
+    """
+    Get the property value, if directly applicable.
+
+    In case of reference and attachment properties, the value has to be applied later via global attributes.
+
+    :param prop: Any Property object
+    :return: Any value
+    """
+    prop_value = None
+    if prop.type == PropertyType.REFERENCES_VALUE:
+        get_references()[prop] = prop.value_ids() if prop.has_value() else []
+    elif prop.type == PropertyType.ATTACHMENT_VALUE:
+        get_attachments().append(prop)
+    else:
+        prop_value = prop._value
+
+    return prop_value
