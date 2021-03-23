@@ -1,3 +1,4 @@
+import datetime
 from typing import Text
 
 import pytz
@@ -77,3 +78,27 @@ class User(Base):
         :rtype: basestring
         """
         return self._json_data.get('email', '')
+
+    def now_in_my_timezone(self) -> datetime.datetime:
+        """
+        Get current time in the timezone of the User.
+
+        Defaults to timezone GMT+1 (Europe/Amsterdam).
+
+        :return: Current datetime
+        :rtype datetime.datetime
+        """
+        timezone_definition = self._json_data['timezone']
+        if timezone_definition:
+            timezone = pytz.timezone(timezone_definition)
+        else:
+            # if there is no timezone set then the Europe/Amsterdam timezone
+            timezone = pytz.timezone('Europe/Amsterdam')
+
+        # Default is utc timezone
+        utc_time = datetime.datetime.now(tz=pytz.utc)
+
+        # Convert to local timezone
+        local_time = utc_time.astimezone(timezone)
+
+        return local_time
