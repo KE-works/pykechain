@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+v3.10.0 (23MAR21)
+-----------------
+
 Improved the `copy` and `move` methods of the `Part` class.
 
 * :bug: Part reference properties with a value set to the copied Part's children will no longer refer to the original child Parts. That is, such "internal" references are updated with the new child Parts.
