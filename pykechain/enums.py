@@ -204,6 +204,7 @@ class WidgetNames(Enum):
     :cvar TASKSWIDGET: tasksWidget
     :cvar SERVICECARDWIDGET: serviceCardWidget
     :cvar DASHBOARDWIDGET: 'dashboardWidget'
+    :cvar SCOPEMEMBERS: 'scopeMembersWidget'
     """
 
     SUPERGRIDWIDGET = 'superGridWidget'
@@ -223,6 +224,7 @@ class WidgetNames(Enum):
     TASKSWIDGET = 'taskWidget'
     SERVICECARDWIDGET = 'serviceCardWidget'
     DASHBOARDWIDGET = 'dashboardWidget'
+    SCOPEMEMBERS = 'scopeMembersWidget'
 
 
 class WidgetTypes(Enum):
@@ -249,6 +251,7 @@ class WidgetTypes(Enum):
     :cvar WEATHER: Weather widget
     :cvar SERVICECARD: Servicecard widget
     :cvar DASHBOARD: Dashboard widget
+    :cvar SCOPEMEMBERS: Scopemembers widget
     """
 
     UNDEFINED = 'UNDEFINED'
@@ -272,6 +275,7 @@ class WidgetTypes(Enum):
     WEATHER = 'WEATHER'
     SERVICECARD = 'SERVICECARD'
     DASHBOARD = 'DASHBOARD'
+    SCOPEMEMBERS = 'SCOPEMEMBERS'
 
 
 WidgetCompatibleTypes = {
@@ -291,7 +295,8 @@ WidgetCompatibleTypes = {
     WidgetNames.CARDWIDGET: WidgetTypes.CARD,
     WidgetNames.TASKSWIDGET: WidgetTypes.TASKS,
     WidgetNames.SERVICECARDWIDGET: WidgetTypes.SERVICECARD,
-    WidgetNames.DASHBOARDWIDGET: WidgetTypes.DASHBOARD
+    WidgetNames.DASHBOARDWIDGET: WidgetTypes.DASHBOARD,
+    WidgetNames.SCOPEMEMBERS: WidgetTypes.SCOPEMEMBERS,
 }
 
 default_metapanel_widget = dict(
