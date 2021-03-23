@@ -32,6 +32,9 @@ class TestDateTime(TestBetamax):
     def test_set_value_none(self):
         self.property.value = None
 
+    def test_set_value_iso_string(self):
+        self.property.value = self.example_time.isoformat()
+
     def test_set_value_non_datetime(self):
         with self.assertRaises(IllegalArgumentError):
             self.property.value = '3'

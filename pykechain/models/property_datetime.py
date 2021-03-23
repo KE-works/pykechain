@@ -20,7 +20,13 @@ class DatetimeProperty(Property, DatetimeProperty2):
         return self._value
 
     @value.setter
-    def value(self, value):
+    def value(self, value: Union[Text, datetime.datetime]):
+        if isinstance(value, str):
+            parsed_value = parse_datetime(value)
+            if parsed_value is not None:
+                # If the parsed value is None, the provided value was not a valid string. This will be checked below.
+                value = parsed_value
+
         value = check_datetime(dt=value, key='value')
 
         value = self.serialize_value(value)
