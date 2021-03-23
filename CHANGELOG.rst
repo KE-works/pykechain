@@ -1,7 +1,14 @@
 Change Log
 ==========
 
+* :star: It is now possible to create a `TasksWidget` with the new `add_tasks_widget` method to the `WidgetsManager` class. The enums `TasksAssignmentFiltersTypes` and `TasksWidgetColumns` support the inputs to this method.
+* :star: It is now possible to create a `ScopemembersWidget` with the new `add_scopemembers_widget` method to the `WidgetsManager` class.
+* :bug: Creating of new activities was performed using `data` instead of `json`. Now, `None` values are cleared and the request allows `kwargs`.
+* :bug: For grid widgets, corrected name of field `incompleteRowsVisible` to `incompleteRowsButtonVisible`.
+* :bug: Widgets created with the `create_widgets` method of the `WidgetsManager` class now append the internal `_widgets` attribute.
 * :bug: Added allowed use of `Autofill` representation object on `UserReferenceProperty` classes.
+* :+1: Added `now_in_my_timezone` method to the `User` class, to retrieve the current time based on the timezone of that user.
+* :+1: The input `collapse_filter` in the `add_filteredgrid_widget` method now accepts the input `None` to fully hide the filter panel.
 * :+1: Expanded `ScopeFilter` options to the support the following `Scope` attributes: tag, status, name, team, due date, start date and progress.
 * :+1: Added file path as return value of the `download_as_pdf` method of the `Activity` class.
 * :+1: Added `status` keyword to the `ScopeFilter` class. All filters are now parsed and written to option dicts internally, encapsulating the property-specific format of the filters.

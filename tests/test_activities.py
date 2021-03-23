@@ -27,6 +27,7 @@ from pykechain.exceptions import (
     APIError,
 )
 from pykechain.models import Activity
+from pykechain.models.representations import CustomIconRepresentation
 from pykechain.utils import temp_chdir, slugify_ref
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_WIM2
@@ -72,6 +73,11 @@ class TestActivityConstruction(TestBetamax):
             due_date=self.time,
             activity_type=activity_type,
             classification=classification,
+            activity_options=dict(
+                representations=[
+                    CustomIconRepresentation(value="pennant").as_json(),
+                ],
+            ),
         )
 
         # testing
