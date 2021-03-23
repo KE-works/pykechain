@@ -57,3 +57,9 @@ class TestUsers(TestBetamax):
         user_retrieved = self.client.user(username='testuser')
         language_retrieved = user_retrieved.language
         self.assertIn(language_retrieved, LanguageCodes.values())
+
+    def test_now_in_my_timezone(self):
+        user_retrieved = self.client.user(username="testuser")
+        now = user_retrieved.now_in_my_timezone()
+        import datetime
+        self.assertIsInstance(now, datetime.datetime)

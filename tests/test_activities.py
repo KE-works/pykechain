@@ -27,6 +27,7 @@ from pykechain.exceptions import (
     APIError,
 )
 from pykechain.models import Activity
+from pykechain.models.representations import CustomIconRepresentation
 from pykechain.utils import temp_chdir, slugify_ref
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_WIM2
@@ -72,6 +73,11 @@ class TestActivityConstruction(TestBetamax):
             due_date=self.time,
             activity_type=activity_type,
             classification=classification,
+            activity_options=dict(
+                representations=[
+                    CustomIconRepresentation(value="pennant").as_json(),
+                ],
+            ),
         )
 
         # testing
@@ -901,19 +907,16 @@ class TestActivityDownloadAsPDF(TestBetamax):
 
         # testing
         with temp_chdir() as target_dir:
-            activity.download_as_pdf(
+            pdf_file = activity.download_as_pdf(
                 target_dir=target_dir,
                 pdf_filename="pdf_file",
             )
-            activity.download_as_pdf(
+            self.assertTrue(os.path.exists(pdf_file))
+
+            pdf_file_called_after_activity = activity.download_as_pdf(
                 target_dir=target_dir,
             )
-            pdf_file = os.path.join(target_dir, "pdf_file.pdf")
-            pdf_file_called_after_activity = os.path.join(
-                target_dir, activity_name + ".pdf"
-            )
-            self.assertTrue(pdf_file)
-            self.assertTrue(pdf_file_called_after_activity)
+            self.assertTrue(os.path.exists(pdf_file_called_after_activity))
 
     @pytest.mark.skipif(
         "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
@@ -925,18 +928,13 @@ class TestActivityDownloadAsPDF(TestBetamax):
 
         # testing
         with temp_chdir() as target_dir:
-            activity.download_as_pdf(
+            pdf_file = activity.download_as_pdf(
                 target_dir=target_dir,
                 pdf_filename="pdf_file",
                 include_appendices=True,
                 include_qr_code=True,
             )
-            pdf_file = os.path.join(target_dir, "pdf_file.pdf")
-            pdf_file_called_after_activity = os.path.join(
-                target_dir, activity_name + ".pdf"
-            )
-            self.assertTrue(pdf_file)
-            self.assertTrue(pdf_file_called_after_activity)
+            self.assertTrue(os.path.exists(pdf_file))
 
     def test_activity_share_link(self):
         # setUp

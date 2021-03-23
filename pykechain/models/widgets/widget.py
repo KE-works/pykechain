@@ -487,11 +487,7 @@ class Widget(BaseInScope):
 
         if user:
             now_utc = datetime.datetime.now(tz=pytz.utc)
-
-            # Convert UTC time to local timezone based on the user
-            timezone_definition = user._json_data['timezone']
-            timezone = pytz.timezone(timezone_definition)
-            now_local = now_utc.astimezone(timezone)
+            now_local = user.now_in_my_timezone()
 
             offset_minutes = int(round((now_utc - now_local).total_seconds() / 60.0))
         else:

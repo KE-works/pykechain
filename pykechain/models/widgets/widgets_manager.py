@@ -20,6 +20,9 @@ from pykechain.enums import (
     ImageFitValue,
     KEChainPages,
     Alignment,
+    ActivityStatus,
+    ActivityType,
+    ActivityClassification,
 )
 from pykechain.models.widgets.enums import (
     DashboardWidgetSourceScopes,
@@ -27,6 +30,8 @@ from pykechain.models.widgets.enums import (
     DashboardWidgetShowScopes,
     MetaWidget,
     AssociatedObjectId,
+    TasksAssignmentFilterTypes,
+    TasksWidgetColumns,
 )
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from pykechain.models.input_checks import (
@@ -142,7 +147,11 @@ class WidgetsManager(Iterable):
         for widget in widgets:
             widget["activity"] = self.activity
 
-        return self._client.create_widgets(widgets=widgets)
+        new_widgets = self._client.create_widgets(widgets=widgets)
+        self._widgets.extend(new_widgets)
+        self._widgets.sort(key=lambda w: w.order)
+
+        return new_widgets
 
     def create_widget(self, *args, **kwargs) -> Widget:
         """Create a widget inside an activity.
@@ -442,7 +451,7 @@ class WidgetsManager(Iterable):
         :type show_name_column: bool
         :param show_images: (O) show the attachments in the grid as images, not as hyperlinks (default False).
         :type show_images: bool
-        :param collapse_filters: Hide or show the filters pane (default False)
+        :param collapse_filters: Boolean to collapses the filters pane, or fully hide if None. (default = False)
         :type collapse_filters: bool
         :param page_size: Number of parts that will be shown per page in the grid.
         :type page_size: int
@@ -491,9 +500,8 @@ class WidgetsManager(Iterable):
             # columns
             MetaWidget.SORTED_COLUMN: sort_property_id if sort_property_id else None,
             MetaWidget.SORTED_DIRECTION: sort_direction,
-            MetaWidget.SHOW_FILTERS_VALUE: MetaWidget.FILTERS_COLLAPSED if collapse_filters else
-            MetaWidget.FILTERS_EXPANDED,
             MetaWidget.COLLAPSE_FILTERS: collapse_filters,
+            MetaWidget.SHOW_FILTERS: collapse_filters is not None,
             MetaWidget.CUSTOM_PAGE_SIZE: page_size,
             MetaWidget.SHOW_NAME_COLUMN: show_name_column,
             MetaWidget.SHOW_IMAGES: show_images,
@@ -694,7 +702,7 @@ class WidgetsManager(Iterable):
                                 title: TITLE_TYPING = False,
                                 max_height: Optional[int] = None,
                                 show_headers: Optional[bool] = True,
-                                show_columns: Optional[Iterable] = None,
+                                show_columns: Optional[Iterable[ShowColumnTypes]] = None,
                                 parent_widget: Optional[Union[Text, Widget]] = None,
                                 readable_models: Optional[Iterable] = None,
                                 writable_models: Optional[Iterable] = None,
@@ -1652,6 +1660,206 @@ class WidgetsManager(Iterable):
             **kwargs
         )
         return widget
+
+    def add_tasks_widget(
+            self,
+            title: TITLE_TYPING = False,
+            parent_widget: Optional[Union[Widget, Text]] = None,
+            add: Optional[bool] = True,
+            clone: Optional[bool] = True,
+            edit: Optional[bool] = True,
+            delete: Optional[bool] = True,
+            emphasize_add: Optional[bool] = True,
+            emphasize_clone: Optional[bool] = False,
+            emphasize_edit: Optional[bool] = False,
+            emphasize_delete: Optional[bool] = False,
+            show_my_tasks_filter: Optional[bool] = True,
+            show_open_tasks_filter: Optional[bool] = True,
+            show_search_filter: Optional[bool] = True,
+            parent_activity: Optional[Union['Activity', Text]] = None,
+            assigned_filter: Optional[TasksAssignmentFilterTypes] = TasksAssignmentFilterTypes.ALL,
+            status_filter: Optional[ActivityStatus] = None,
+            activity_type_filter: Optional[ActivityType] = ActivityType.TASK,
+            classification_filter: Optional[ActivityClassification] = ActivityClassification.WORKFLOW,
+            tags_filter: Optional[List[Text]] = (),
+            collapse_filter: Optional[bool] = False,
+            show_columns: Optional[List[TasksWidgetColumns]] = None,
+            sorted_column: Optional[TasksWidgetColumns] = None,
+            sorted_direction: Optional[SortTable] = SortTable.ASCENDING,
+            page_size: Optional[int] = 25,
+            **kwargs
+    ) -> Widget:
+        """
+        Add a KE-chain Tasks Widget to the WidgetManager and the activity.
+
+        The widget will be saved in KE-chain
+
+        :param title: A custom title for the card widget
+            * False (default): Card name
+            * String value: Custom title
+            * None: No title
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or basestring or None
+        :param add: Show the "add task" button, only visible if a `parent_activity` is provided (default = True)
+        :type add: bool
+        :param clone: Show the "clone task" button (default = True)
+        :type clone: bool
+        :param edit: Show the "edit task" button (default = True)
+        :type edit: bool
+        :param delete: Show the "delete task" button (default = True)
+        :type delete: bool
+        :param emphasize_add: Show green backdrop for "add task" button (default = True)
+        :type emphasize_add: bool
+        :param emphasize_clone: Show green backdrop for "clone task" button (default = False)
+        :type emphasize_clone: bool
+        :param emphasize_edit: Show green backdrop for "edit task" button (default = False)
+        :type emphasize_edit: bool
+        :param emphasize_delete: Show green backdrop for "delete task" button (default = False)
+        :type emphasize_delete: bool
+        :param show_my_tasks_filter: Show the switch to filter on assigned tasks (default = True)
+        :type show_my_tasks_filter: bool
+        :param show_open_tasks_filter: Show the switch to filter on tasks with status OPEN (default = True)
+        :type show_open_tasks_filter: bool
+        :param show_search_filter: Show textfield to filter on a task name (default = True)
+        :type show_search_filter: bool
+        :param parent_activity: Filter on task parent Activity, thereby enabling the "add task" button
+        :type parent_activity: Activity
+        :param assigned_filter: Filter on the assignment of the tasks (default = ALL)
+        :type assigned_filter: TasksAssignmentFilterTypes
+        :param status_filter: Filter on the status of the tasks (default = OPEN)
+        :type status_filter: ActivityStatus
+        :param activity_type_filter: Filter on the activity type (default = TASK)
+        :type activity_type_filter: ActivityType
+        :param classification_filter: Filter on the activity classification (default = WORKFLOW)
+        :type classification_filter: ActivityClassification
+        :param tags_filter: Filter on list of tags
+        :type tags_filter: list
+        :param collapse_filter: Collapse the filter pane, or hide the pane if `None` (default = False)
+        :type collapse_filter: bool
+        :param show_columns: List of task attributes to show (default = all)
+        :type show_columns: list
+        :param sorted_column: Task attribute to sort on (default = no sorting)
+        :type sorted_column: TasksWidgetColumns
+        :param sorted_direction: Direction of sorting (default = ascending)
+        :type sorted_direction: SortTable
+        :param page_size: Number of tasks to show per pagination (default = 25)
+        :type page_size: int
+        :return: Task widget
+        :rtype Widget
+        """
+        meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
+        meta, title = _set_title(meta, title=title, **kwargs)
+
+        from pykechain.models import Activity
+        filters = {
+            MetaWidget.PARENT_ACTIVITY_ID: check_base(parent_activity, Activity, "parent_activity"),
+            MetaWidget.ASSIGNED:
+                check_enum(assigned_filter, TasksAssignmentFilterTypes, "assigned_filter"),
+            MetaWidget.ACTIVITY_STATUS:
+                check_enum(status_filter, ActivityStatus, "status_filter") or "",
+            MetaWidget.ACTIVITY_TYPE:
+                check_enum(activity_type_filter, ActivityType, "activity_type_filter"),
+            MetaWidget.ACTIVITY_CLASSIFICATION:
+                check_enum(classification_filter, ActivityClassification, "classification_filter"),
+            MetaWidget.TAGS_FILTER:
+                check_list_of_text(tags_filter, "tags_filter", unique=True),
+        }
+
+        meta.update({
+            MetaWidget.VISIBLE_ADD_BUTTON: check_type(add, bool, "add") if parent_activity else None,
+            MetaWidget.VISIBLE_CLONE_BUTTON: check_type(clone, bool, "clone"),
+            MetaWidget.VISIBLE_EDIT_BUTTON: check_type(edit, bool, "edit"),
+            MetaWidget.VISIBLE_DELETE_BUTTON: check_type(delete, bool, "delete"),
+            MetaWidget.EMPHASIZE_ADD_BUTTON: check_type(emphasize_add, bool, "emphasize_add"),
+            MetaWidget.EMPHASIZE_CLONE_BUTTON: check_type(emphasize_clone, bool, "emphasize_clone"),
+            MetaWidget.EMPHASIZE_EDIT_BUTTON: check_type(emphasize_edit, bool, "emphasize_edit"),
+            MetaWidget.EMPHASIZE_DELETE_BUTTON: check_type(emphasize_delete, bool, "emphasize_delete"),
+            MetaWidget.VISIBLE_MY_TASKS_FILTER: check_type(show_my_tasks_filter, bool, "show_my_tasks_filter"),
+            MetaWidget.VISIBLE_OPEN_TASKS_FILTER: check_type(show_open_tasks_filter, bool, "show_open_tasks_filter"),
+            MetaWidget.VISIBLE_SEARCH_FILTER: check_type(show_search_filter, bool, "show_search_filter"),
+            MetaWidget.PREFILTERS: filters,
+            MetaWidget.COLLAPSE_FILTERS: check_type(collapse_filter, bool, "collapse_filter"),
+            MetaWidget.SHOW_FILTERS: collapse_filter is not None,
+            MetaWidget.SHOW_COLUMNS: check_list_of_text(show_columns, "show_columns") or TasksWidgetColumns.values(),
+            MetaWidget.SORTED_COLUMN: check_enum(sorted_column, TasksWidgetColumns, "sorted_column"),
+            MetaWidget.SORTED_DIRECTION: check_enum(sorted_direction, SortTable, "sorted_direction"),
+            MetaWidget.CUSTOM_PAGE_SIZE: check_type(page_size, int, "page_size"),
+        })
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.TASKS,
+            meta=meta,
+            title=title,
+            parent=parent_widget,
+            **kwargs
+        )
+
+        return widget
+
+    def add_scopemembers_widget(
+            self,
+            title: TITLE_TYPING = False,
+            parent_widget: Optional[Union[Widget, Text]] = None,
+            add: Optional[bool] = True,
+            edit: Optional[bool] = True,
+            remove: Optional[bool] = True,
+            show_username_column: Optional[bool] = True,
+            show_name_column: Optional[bool] = True,
+            show_email_column: Optional[bool] = True,
+            show_role_column: Optional[bool] = True,
+            **kwargs
+    ) -> Widget:
+        """
+        Add a KE-chain Scope Members Widget to the WidgetManager and the activity.
+
+        The widget will be saved in KE-chain
+
+        :param title: A custom title for the card widget
+            * False (default): Card name
+            * String value: Custom title
+            * None: No title
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or basestring or None
+        :param add: Show "add user" button (default = True)
+        :type add: bool
+        :param edit: Show "edit role" button (default = True)
+        :type edit: bool
+        :param remove: Show "remove user" button (default = True)
+        :type remove: bool
+        :param show_username_column: Show "username" column (default = True)
+        :type show_username_column: bool
+        :param show_name_column: Show "name" column (default = True)
+        :type show_name_column: bool
+        :param show_email_column: Show "email" column (default = True)
+        :type show_email_column: bool
+        :param show_role_column: Show "role" column (default = True)
+        :type show_role_column: bool
+        :return: Scope members Widget
+        :rtype Widget
+        """
+        meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
+        meta, title = _set_title(meta, title=title, **kwargs)
+
+        meta.update({
+            MetaWidget.SHOW_ADD_USER_BUTTON: check_type(add, bool, "add"),
+            MetaWidget.SHOW_EDIT_ROLE_BUTTON: check_type(edit, bool, "edit"),
+            MetaWidget.SHOW_REMOVE_USER_BUTTON: check_type(remove, bool, "remove"),
+            MetaWidget.SHOW_USERNAME_COLUMN: check_type(show_username_column, bool, "show_username_columns"),
+            MetaWidget.SHOW_NAME_COLUMN: check_type(show_name_column, bool, "show_name_column"),
+            MetaWidget.SHOW_EMAIL_COLUMN: check_type(show_email_column, bool, "show_email_column"),
+            MetaWidget.SHOW_ROLE_COLUMN: check_type(show_role_column, bool, "show_role_column"),
+        })
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.SCOPEMEMBERS,
+            meta=meta,
+            title=title,
+            parent=parent_widget,
+            **kwargs
+        )
+
+        return widget
+
     #
     # Widget manager methods
     #
