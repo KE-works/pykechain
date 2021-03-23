@@ -5,20 +5,20 @@ from unittest import TestCase
 from pykechain.enums import (WidgetTypes, ShowColumnTypes, FilterType, ProgressBarColors,
                              Category, LinkTargets, KEChainPages, WidgetTitleValue, Alignment, ActivityType,
                              CardWidgetLinkValue, CardWidgetLinkTarget, ImageFitValue, PropertyType, Classification,
-                             Multiplicity)
+                             Multiplicity, ActivityStatus, ActivityClassification)
 from pykechain.models.widgets.enums import (
     DashboardWidgetShowTasks,
     DashboardWidgetShowScopes,
-)
+    TasksAssignmentFilterTypes)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Activity, Part
 from pykechain.models.widgets import (
     UndefinedWidget, HtmlWidget, PropertygridWidget, AttachmentviewerWidget, SupergridWidget, FilteredgridWidget,
     TasknavigationbarWidget, SignatureWidget, ServiceWidget, NotebookWidget, MulticolumnWidget, CardWidget,
-    MetapanelWidget, ScopeWidget)
+    MetapanelWidget, ScopeWidget, TasksWidget)
 from pykechain.models.widgets.helpers import _set_title
 from pykechain.models.widgets.widget import Widget
-from pykechain.models.widgets.widget_models import ServicecardWidget, DashboardWidget
+from pykechain.models.widgets.widget_models import ServicecardWidget, DashboardWidget, ScopemembersWidget
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import slugify_ref, temp_chdir, find
 from tests.classes import TestBetamax
@@ -755,6 +755,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertIsInstance(new_widgets, list)
         self.assertTrue(all(isinstance(w, Widget) for w in new_widgets))
         self.assertEqual(len(new_widgets), 2)
+        self.assertIn(new_widgets[0], self.wm._widgets)
 
         # tearDown
         [w.delete() for w in new_widgets]
@@ -820,7 +821,28 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertTrue(widget_current_project.meta['showAssignees'])
         self.assertFalse(widget_tagged_projects.meta['showAssignees'])
-        return
+
+    def test_add_tasks_widget(self):
+        tasks_widget = self.wm.add_tasks_widget()
+
+        self.assertIsInstance(tasks_widget, TasksWidget)
+
+    def test_add_tasks_widget_with_filters(self):
+        tasks_widget = self.wm.add_tasks_widget(
+            parent_activity=self.wm.activity.parent(),
+            status_filter=ActivityStatus.OPEN,
+            assigned_filter=TasksAssignmentFilterTypes.FILTER_ASSIGNED_TO_USER,
+            activity_type_filter=ActivityType.TASK,
+            classification_filter=ActivityClassification.CATALOG,
+            tags_filter=["One", "Two", "Five"],
+        )
+
+        self.assertIsInstance(tasks_widget, TasksWidget)
+
+    def test_add_scopemembers_widget(self):
+        scope_members_widget = self.wm.add_scopemembers_widget()
+
+        self.assertIsInstance(scope_members_widget, ScopemembersWidget)
 
 
 class TestWidgetManagerWeatherWidget(TestBetamax):
