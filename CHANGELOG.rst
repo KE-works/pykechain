@@ -17,6 +17,7 @@ v3.10.0 (23MAR21)
 * :+1: Expanded `ScopeFilter` options to the support the following `Scope` attributes: tag, status, name, team, due date, start date and progress.
 * :+1: Added file path as return value of the `download_as_pdf` method of the `Activity` class.
 * :+1: Added `status` keyword to the `ScopeFilter` class. All filters are now parsed and written to option dicts internally, encapsulating the property-specific format of the filters.
+* :+1: dependent versions for development: pytest (6.2.2), pytz (2021.1), mypy (0.812), nbsphinx (0.8.2), coveralls (3.0.1), tox (3.23.0), flake8 (3.9.0), twine (3.4.1), sphinx (3.5.3), pytest-cov (2.11.1), pre-commit (2.11.1), pydocstyle (6.0.0)
 
 
 Improved the `copy` and `move` methods of the `Part` class.
