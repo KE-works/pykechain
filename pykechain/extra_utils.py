@@ -243,14 +243,16 @@ def _copy_part_model(
     """
     property_fvalues = list()
     for prop in part.properties:  # type: AnyProperty
-        property_fvalues.append(dict(
+        property_values = dict(
             name=prop.name,
             description=prop.description,
             property_type=prop.type,
             value=_get_property_value(prop),
             unit=prop.unit,
             value_options=prop._options,
-        ))
+        )
+        property_values = {k: v for k, v in property_values.items() if v is not None}
+        property_fvalues.append(property_values)
 
     # Create the model and its properties in a single request
     moved_part_model = part._client.create_model_with_properties(
