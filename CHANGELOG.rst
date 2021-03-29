@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-v3.10.0 (23MAR21)
+v3.10.0 (29MAR21)
 -----------------
 
 * :star: It is now possible to create a `TasksWidget` with the new `add_tasks_widget` method to the `WidgetsManager` class. The enums `TasksAssignmentFiltersTypes` and `TasksWidgetColumns` support the inputs to this method.
