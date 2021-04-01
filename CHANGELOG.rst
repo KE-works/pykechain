@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v3.10.1 (01APR21)
+-----------------
+
+* :bug: Copying multiple attachments using the `part.copy()` method caused the temporary directory to be removed.
+
 v3.10.0 (29MAR21)
 -----------------
 

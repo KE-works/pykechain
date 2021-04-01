@@ -293,21 +293,30 @@ class TestPartsCopyMove(TestBetamax):
             )
 
     def test_copy_attachments(self):
-        name = "__Property attachment"
-        self.model_to_be_copied.add_property(
-            name=name,
-            property_type=PropertyType.ATTACHMENT_VALUE,
-        )
+        names = [
+            "__Property attachment_1",
+            "__Property attachment_2",
+        ]
+
+        for name in names:
+            self.model_to_be_copied.add_property(
+                name=name,
+                property_type=PropertyType.ATTACHMENT_VALUE,
+            )
+
         self.instance_to_be_copied.refresh()
 
-        p_attachment = self.instance_to_be_copied.property(name)
-        file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "requirements.txt")
-
-        p_attachment.upload(file)
+        for name in names:
+            p_attachment = self.instance_to_be_copied.property(name)
+            file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "requirements.txt")
+            p_attachment.upload(file)
 
         self.dump_part = self.model_to_be_copied.copy(
             target_parent=self.model_target_parent,
         )
 
-        copied_prop = self.dump_part.instance().property(name)
-        self.assertTrue(copied_prop.has_value())
+        copied_instance = self.dump_part.instance()
+
+        for name in names:
+            copied_prop = copied_instance.property(name)
+            self.assertTrue(copied_prop.has_value())
