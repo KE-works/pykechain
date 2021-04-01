@@ -580,15 +580,13 @@ def _copy_part(
 
     mapping = get_mapping_dictionary()
     attachment_properties = get_attachments()
-    if attachment_properties:
-        temp_dir = tempfile.TemporaryDirectory()
-        for prop_original in attachment_properties:
-            prop_new = mapping[prop_original.id]
-            if prop_original.has_value():
-                full_path = os.path.join(temp_dir.name or os.getcwd(), prop_original.filename)
+    for prop_original in attachment_properties:
+        prop_new = mapping[prop_original.id]
+        if prop_original.has_value():
+            with tempfile.TemporaryDirectory() as target_dir:
+                full_path = os.path.join(target_dir, prop_original.filename)
                 prop_original.save_as(filename=full_path)
                 prop_new.upload(full_path)
-                temp_dir.cleanup()
 
     _update_references()
     Property.update_values(client=copied_model._client)
