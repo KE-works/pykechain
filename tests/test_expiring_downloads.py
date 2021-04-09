@@ -1,6 +1,8 @@
 import datetime
 import os
 
+from pykechain.utils import temp_chdir
+
 from pykechain.models.expiring_download import ExpiringDownload
 from tests.classes import TestBetamax
 
@@ -40,4 +42,22 @@ class TestExpiringDownloads(TestBetamax):
         self.assertEqual(self.test_expiring_download.expires_in, 42000)
 
     def test_upload_expiring_download(self):
-        pass
+        upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_content_to_expiring_download',
+                                   'test_upload_content.pdf')
+        self.test_expiring_download.upload(content_path=upload_path)
+        self.assertIsNotNone(self.test_expiring_download.filename)
+        self.assertEqual(self.test_expiring_download.filename, 'test_upload_content.pdf')
+
+    def test_upload_wrong_content_path(self):
+        upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_content_to_expiring_download',
+                                   'test_upload_content.py')
+        with self.assertRaises(OSError):
+            self.test_expiring_download.upload(content_path=upload_path)
+
+    def test_save_expiring_download_content(self):
+        upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_content_to_expiring_download',
+                                   'test_upload_content.pdf')
+        self.test_expiring_download.upload(content_path=upload_path)
+        with temp_chdir() as target_dir:
+            self.test_expiring_download.save_as(target_dir=target_dir)
+            self.assertEqual(len(os.listdir(target_dir)), 1)

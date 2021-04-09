@@ -1,6 +1,6 @@
 import datetime
 import os
-from typing import Dict, Optional
+from typing import Dict, Optional, Text
 
 import requests
 
@@ -29,14 +29,14 @@ class ExpiringDownload(Base):
     def __repr__(self):  # pragma: no cover
         return "<pyke ExpiringDownload id {}>".format(self.id[-8:])
 
-    def save_as(self, target_dir=None):
+    def save_as(self, target_dir: Optional[Text] = None) -> None:
         """
         Save the Expiring Download content.
 
         :param target_dir:
         :return:
         """
-        full_path = os.path.join(target_dir or os.getcwd(), "filename_content")
+        full_path = os.path.join(target_dir or os.getcwd(), self.filename)
 
         url = self._client._build_url('expiring_download_download', download_id=self.id)
         response = self._client._request('GET', url)
