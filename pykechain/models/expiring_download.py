@@ -17,8 +17,8 @@ class ExpiringDownload(Base):
         """
         Init function.
 
-        :param json:
-        :param kwargs:
+        :param json: the json response to construct the :class:`ExpiringDownload` from
+        :type json: dict
         """
         super().__init__(json, **kwargs)
         self.filename = json.get('content_file_name')
@@ -33,8 +33,8 @@ class ExpiringDownload(Base):
         """
         Save the Expiring Download content.
 
-        :param target_dir:
-        :return:
+        :param target_dir: the target directory where the file will be stored
+        :type target_dir: str
         """
         full_path = os.path.join(target_dir or os.getcwd(), self.filename)
 
@@ -66,9 +66,10 @@ class ExpiringDownload(Base):
         """
         Edit Expiring Download details.
 
-        :param expires_at:
-        :param expires_in:
-        :return:
+        :param expires_at: The moment at which the ExpiringDownload will expire
+        :type expires_at: datetime.datetime
+        :param expires_in: The amount of time (in seconds) in which the ExpiringDownload will expire
+        :type expires_in: int
         """
         update_dict = {
             'id': self.id,

@@ -14,6 +14,8 @@ class TestExpiringDownloads(TestBetamax):
         self.test_content_path = os.path.join(self.test_assets_dir, 'tests', 'files',
                                               'test_upload_content_to_expiring_download',
                                               'test_upload_content.pdf')
+        self.now = datetime.datetime.now()
+
         self.test_expiring_download = self.client.create_expiring_download(
             expires_in=56000,
             expires_at=datetime.datetime.now(),

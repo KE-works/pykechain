@@ -3063,7 +3063,6 @@ class Client(object):
     def expiring_downloads(
             self,
             pk: Optional[Text] = None,
-            expires_at: Optional[datetime.datetime] = None,
             expires_in: Optional[int] = None,
             **kwargs
     ) -> List[ExpiringDownload]:
@@ -3071,15 +3070,13 @@ class Client(object):
 
         :param pk: if provided, filter the search for an expiring download by download_id
         :type pk: basestring or None
-        :param expires_at: if provided, filter the search for the expires_at date and time
-        :type expires_at: datetime.datetime
         :param expires_in: if provided, filter the search for the expires_in (in seconds)
         :type expires_in: int
         :return: list of Expiring Downloads objects
         """
         request_params = {
-            'id': check_uuid(pk)
-            # 'expires_in':
+            'id': check_uuid(pk),
+            'expires_in': check_type(expires_in, int, 'expires_in'),
         }
         request_params.update(API_EXTRA_PARAMS['expiring_downloads'])
 
@@ -3102,16 +3099,18 @@ class Client(object):
         """
         Create an new Expiring Download.
 
-        :param expires_at:
-        :param expires_in:
-        :param content_path:
+        :param expires_at: The moment at which the ExpiringDownload will expire
+        :type expires_at: datetime.datetime
+        :param expires_in: The amount of time (in seconds) in which the ExpiringDownload will expire
+        :type expires_in: int
+        :param content_path: the path to the file to be uploaded in the newly created `ExpiringDownload` object
+        :type content_path: str
         :return:
         """
-        if isinstance(expires_at, datetime.datetime):
-            expires_at = expires_at.isoformat()
+        expires_at = check_type(expires_at, datetime.datetime, 'expires_at')
         data = dict(
             created_at=datetime.datetime.now().isoformat(),
-            expires_at=expires_at,
+            expires_at=expires_at.isoformat(),
             expires_in=expires_in,
         )
         response = self._request('POST', self._build_url('expiring_downloads'), json=data)
