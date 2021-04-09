@@ -270,6 +270,13 @@ class TestReprAutofill(Bases._TestPropertyRepresentation):
     new_value = True
 
 
+class TestReprAutofillUser(Bases._TestPropertyRepresentation):
+    property_type = PropertyType.USER_REFERENCES_VALUE
+    representation_class = Autofill
+    value = False
+    new_value = True
+
+
 class TestReprActivity(Bases._TestCustomIconRepresentation):
 
     def _get_object(self):

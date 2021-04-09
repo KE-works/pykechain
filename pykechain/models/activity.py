@@ -814,7 +814,7 @@ class Activity(TreeObject, TagsMixin, Activity2):
             paper_orientation: PaperOrientation = PaperOrientation.PORTRAIT,
             include_appendices: bool = False,
             include_qr_code: bool = False,
-    ):
+    ) -> Text:
         """
         Retrieve the PDF of the Activity.
 
@@ -841,6 +841,8 @@ class Activity(TreeObject, TagsMixin, Activity2):
         :type include_qr_code: bool
         :raises APIError: if the pdf file could not be found.
         :raises OSError: if the file could not be written.
+        :returns Path to the saved pdf file
+        :rtype str
         """
         if not pdf_filename:
             pdf_filename = self.name + '.pdf'
@@ -878,7 +880,7 @@ class Activity(TreeObject, TagsMixin, Activity2):
                     with open(full_path, 'wb') as f:
                         for chunk in response.iter_content(1024):
                             f.write(chunk)
-                    return
+                    return full_path
 
                 count += ASYNC_REFRESH_INTERVAL
                 time.sleep(ASYNC_REFRESH_INTERVAL)
@@ -889,6 +891,8 @@ class Activity(TreeObject, TagsMixin, Activity2):
         with open(full_path, 'wb') as f:
             for chunk in response.iter_content(1024):
                 f.write(chunk)
+
+        return full_path
 
     def move(self, parent, classification=None):
         """
