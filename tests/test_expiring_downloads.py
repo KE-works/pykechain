@@ -9,7 +9,7 @@ from tests.classes import TestBetamax
 
 class TestExpiringDownloads(TestBetamax):
     def setUp(self):
-        super(TestExpiringDownloads, self).setUp()
+        super().setUp()
         self.test_assets_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/'))
         self.test_content_path = os.path.join(self.test_assets_dir, 'tests', 'files',
                                               'test_upload_content_to_expiring_download',
