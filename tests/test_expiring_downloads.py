@@ -23,6 +23,7 @@ class TestExpiringDownloads(TestBetamax):
 
     def tearDown(self):
         self.test_expiring_download.delete()
+        super().tearDown()
 
     def test_create_expiring_download_with_content(self):
         content_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_content_to_expiring_download',
