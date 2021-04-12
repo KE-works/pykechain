@@ -25,6 +25,7 @@ from pykechain.models.notification import Notification
 from pykechain.models.widgets.widget import Widget
 from pykechain.utils import is_uuid, find, is_valid_email, get_in_chunks, slugify_ref
 from .__about__ import version as pykechain_version
+from .models.expiring_download import ExpiringDownload
 from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
     check_list_of_base, check_base, check_uuid, check_list_of_dicts, check_url, check_user
 from .models.banner import Banner
@@ -3049,3 +3050,76 @@ class Client(object):
             data = active_banner_list[0]
 
         return Banner(json=data, client=self)
+
+    def expiring_download(self, *args, **kwargs) -> ExpiringDownload:
+        """Retrieve a single expiring download.
+
+        :return: a single :class:`models.ExpiringDownload`
+        :raises NotFoundError: When no `ExpiringDownload` is found
+        :raises MultipleFoundError: When more than a single `ExpiringDownload` is found
+        """
+        return self._retrieve_singular(self.expiring_downloads, **args, **kwargs)
+
+    def expiring_downloads(
+            self,
+            pk: Optional[Text] = None,
+            expires_in: Optional[int] = None,
+            **kwargs
+    ) -> List[ExpiringDownload]:
+        """Search for Expiring Downloads with optional pk.
+
+        :param pk: if provided, filter the search for an expiring download by download_id
+        :type pk: basestring or None
+        :param expires_in: if provided, filter the search for the expires_in (in seconds)
+        :type expires_in: int
+        :return: list of Expiring Downloads objects
+        """
+        request_params = {
+            'id': check_uuid(pk),
+            'expires_in': check_type(expires_in, int, 'expires_in'),
+        }
+        request_params.update(API_EXTRA_PARAMS['expiring_downloads'])
+
+        if kwargs:
+            request_params.update(**kwargs)
+
+        response = self._request('GET', self._build_url('expiring_downloads'), params=request_params)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve Expiring Downloads", response=response)
+
+        return [ExpiringDownload(json=download, client=self) for download in response.json()['results']]
+
+    def create_expiring_download(
+            self,
+            expires_at: Optional[datetime.datetime] = None,
+            expires_in: Optional[int] = None,
+            content_path: Optional[Text] = None
+    ) -> ExpiringDownload:
+        """
+        Create an new Expiring Download.
+
+        :param expires_at: The moment at which the ExpiringDownload will expire
+        :type expires_at: datetime.datetime
+        :param expires_in: The amount of time (in seconds) in which the ExpiringDownload will expire
+        :type expires_in: int
+        :param content_path: the path to the file to be uploaded in the newly created `ExpiringDownload` object
+        :type content_path: str
+        :return:
+        """
+        expires_at = check_type(expires_at, datetime.datetime, 'expires_at')
+        data = dict(
+            created_at=datetime.datetime.now().isoformat(),
+            expires_at=expires_at.isoformat(),
+            expires_in=expires_in,
+        )
+        response = self._request('POST', self._build_url('expiring_downloads'), json=data)
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create Expiring Download", response=response)
+
+        expiring_download = ExpiringDownload(response.json().get('results')[0], client=self)
+
+        if content_path:
+            expiring_download.upload(content_path)
+
+        return expiring_download
