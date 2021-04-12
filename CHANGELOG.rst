@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+# UNRELEASED
+----------------
+* :star: It is now possible to create, retrieve, edit and delete `ExpiringDownloads` using the `Client` and `Class` methods.
+
+
 v3.10.1 (01APR21)
 -----------------
 
