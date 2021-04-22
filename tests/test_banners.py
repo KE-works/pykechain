@@ -55,7 +55,7 @@ class TestBanners(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             self.banner = self.client.create_banner(text='some text', icon=True, active_from=NEW_YEAR_2020)
         with self.assertRaises(IllegalArgumentError):
-            self.banner = self.client.create_banner(text='some text', icon=self.ICON, active_from='2020-01-01T00:01:00')
+            self.banner = self.client.create_banner(text='some text', icon=self.ICON, active_from=2)
         with self.assertRaises(IllegalArgumentError):
             self.banner = self.client.create_banner(active_until='later', **self.KWARGS)
         with self.assertRaises(IllegalArgumentError):

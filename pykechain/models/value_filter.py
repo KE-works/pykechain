@@ -162,7 +162,7 @@ class ScopeFilter(BaseFilter):
         ("progress__gte", "progress_gte", False),
         ("progress__lte", "progress_lte", False),
         ("tags__contains", "tag", True),
-        ("team__in", "team", True),
+        ("team__in", "team", False),
     ]
 
     def __init__(
@@ -292,8 +292,8 @@ class ScopeFilter(BaseFilter):
                 if filter_value is not None:
                     if is_list:
                         if field not in prefilters:
-                            prefilters[field] = []
-                        prefilters[field].append(filter_value)
+                            prefilters[field] = ""
+                        prefilters[field] += ",{}".format(filter_value)
                     else:
                         prefilters[field] = filter_value
 

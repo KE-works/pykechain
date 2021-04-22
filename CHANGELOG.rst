@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+* :+1: Correctly formatted datetime strings are now accepted as valid datetime values.
+* :bug: Formatting of prefilters using lists in the `ScopeFilter` class is now based on comma's.
+
 v3.10.1 (01APR21)
 -----------------
 
