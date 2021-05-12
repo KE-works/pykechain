@@ -4,7 +4,8 @@ Change Log
 # UNRELEASED
 ----------------
 * :star: It is now possible to create, retrieve, edit and delete `ExpiringDownloads` using the `Client` and `Class` methods.
-
+* :+1: Correctly formatted datetime strings are now accepted as valid datetime values.
+* :bug: Formatting of prefilters using lists in the `ScopeFilter` class is now based on comma's.
 
 v3.10.1 (01APR21)
 -----------------

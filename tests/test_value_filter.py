@@ -105,7 +105,6 @@ class TestPropertyValueFilter(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             ScopeFilter.write_options(filters=[self.filter])
 
-    # noinspection PyTypeChecker
     def test__eq__(self):
         second_filter = PropertyValueFilter(self.bike.property("Gears"), 15, FilterType.GREATER_THAN_EQUAL)
         third_filter = PropertyValueFilter(self.bike.property("Gears"), 16, FilterType.GREATER_THAN_EQUAL)
@@ -127,7 +126,6 @@ class BaseTest(object):
         INVALID_VALUE = None
         FIELD = None
         ATTR = None
-        AS_LIST = None
 
         @classmethod
         def setUpClass(cls) -> None:
@@ -136,6 +134,7 @@ class BaseTest(object):
                 raise ValueError("Test needs 2 different values ({}, {})".format(cls.VALUE, cls.VALUE_2))
 
         def setUp(self) -> None:
+            super().setUp()
             self.filter = ScopeFilter(**{self.ATTR: self.VALUE})
 
         def test__repr__(self):
@@ -151,7 +150,10 @@ class BaseTest(object):
             self.assertNotEqual(self.filter, third_filter)
 
         def test_write_options(self):
-            options_dict = ScopeFilter.write_options(filters=[self.filter])
+            filter_2 = ScopeFilter(**{self.ATTR: self.VALUE_2})
+            filters = [self.filter, filter_2]
+
+            options_dict = ScopeFilter.write_options(filters=filters)
 
             self.assertIsInstance(options_dict, dict)
 
@@ -159,12 +161,7 @@ class BaseTest(object):
                 PropertyValueFilter.write_options(filters=[self.filter])
 
         def test_parse_options(self):
-            if self.AS_LIST:
-                value = ",".join([self.VALUE, self.VALUE_2])
-            else:
-                value = self.VALUE
-
-            options = {MetaWidget.PREFILTERS: {self.FIELD: value}}
+            options = ScopeFilter.write_options(filters=[self.filter])
 
             scope_filters = ScopeFilter.parse_options(options=options)
 
@@ -172,7 +169,6 @@ class BaseTest(object):
             self.assertIsInstance(scope_filters, list)
             self.assertTrue(all(isinstance(sf, ScopeFilter) for sf in scope_filters))
 
-        # noinspection PyTypeChecker
         def test_creation(self):
             if self.INVALID_VALUE is not None:
                 with self.assertRaises(IllegalArgumentError):
@@ -188,7 +184,6 @@ class TestScopeFilterName(BaseTest._TestScopeFilter):
     INVALID_VALUE = 3
     FIELD = "name__icontains"
     ATTR = "name"
-    AS_LIST = False
 
 
 class TestScopeFilterStatus(BaseTest._TestScopeFilter):
@@ -197,7 +192,6 @@ class TestScopeFilterStatus(BaseTest._TestScopeFilter):
     INVALID_VALUE = "Just a fleshwound"
     FIELD = "status__in"
     ATTR = "status"
-    AS_LIST = False
 
 
 class TestScopeFilterDueDateGTE(BaseTest._TestScopeFilter):
@@ -206,8 +200,7 @@ class TestScopeFilterDueDateGTE(BaseTest._TestScopeFilter):
     INVALID_VALUE = 3
     FIELD = "due_date__gte"
     ATTR = "due_date_gte"
-    AS_LIST = False
-    
+
     
 class TestScopeFilterDueDateLTE(BaseTest._TestScopeFilter):
     VALUE = TIMESTAMP
@@ -215,8 +208,7 @@ class TestScopeFilterDueDateLTE(BaseTest._TestScopeFilter):
     INVALID_VALUE = 3
     FIELD = "due_date__lte"
     ATTR = "due_date_lte"
-    AS_LIST = False
-    
+
     
 class TestScopeFilterStartDateGTE(BaseTest._TestScopeFilter):
     VALUE = TIMESTAMP
@@ -224,8 +216,7 @@ class TestScopeFilterStartDateGTE(BaseTest._TestScopeFilter):
     INVALID_VALUE = 3
     FIELD = "start_date__gte"
     ATTR = "start_date_gte"
-    AS_LIST = False
-    
+
     
 class TestScopeFilterStartDateLTE(BaseTest._TestScopeFilter):
     VALUE = TIMESTAMP
@@ -233,7 +224,6 @@ class TestScopeFilterStartDateLTE(BaseTest._TestScopeFilter):
     INVALID_VALUE = 3
     FIELD = "start_date__lte"
     ATTR = "start_date_lte"
-    AS_LIST = False
 
 
 class TestScopeFilterProgressGTE(BaseTest._TestScopeFilter):
@@ -242,7 +232,6 @@ class TestScopeFilterProgressGTE(BaseTest._TestScopeFilter):
     INVALID_VALUE = "completed"
     FIELD = "progress__gte"
     ATTR = "progress_gte"
-    AS_LIST = False
 
 
 class TestScopeFilterProgressLTE(BaseTest._TestScopeFilter):
@@ -251,7 +240,6 @@ class TestScopeFilterProgressLTE(BaseTest._TestScopeFilter):
     INVALID_VALUE = "completed"
     FIELD = "progress__lte"
     ATTR = "progress_lte"
-    AS_LIST = False
 
 
 class TestScopeFilterTag(BaseTest._TestScopeFilter):
@@ -260,7 +248,6 @@ class TestScopeFilterTag(BaseTest._TestScopeFilter):
     INVALID_VALUE = 3
     FIELD = "tags__contains"
     ATTR = "tag"
-    AS_LIST = True
 
 
 class TestScopeFilterTeam(BaseTest._TestScopeFilter):
@@ -269,7 +256,6 @@ class TestScopeFilterTeam(BaseTest._TestScopeFilter):
     INVALID_VALUE = 3
     FIELD = "team__in"
     ATTR = "team"
-    AS_LIST = True
 
 
 class TestScopeFilterUnknown(BaseTest._TestScopeFilter):
@@ -278,4 +264,3 @@ class TestScopeFilterUnknown(BaseTest._TestScopeFilter):
     INVALID_VALUE = None
     FIELD = "new_filter__type"
     ATTR = "new_filter_type"
-    AS_LIST = False
