@@ -1,10 +1,10 @@
 import warnings
 from datetime import datetime
-from typing import Text, Optional, List, Iterable, Any, Callable, Dict
+from typing import Text, Optional, List, Iterable, Any, Callable, Dict, Union
 
 from pykechain.enums import Enum
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.utils import is_uuid, is_url, Empty, empty
+from pykechain.utils import is_uuid, is_url, Empty, empty, parse_datetime
 
 iter_types = (list, tuple, set)
 
@@ -99,9 +99,12 @@ def check_enum(value: Optional[Any], enum: type(Enum), key: Text) -> Optional[An
     return value
 
 
-def check_datetime(dt: Optional[datetime], key: Text) -> Optional[Text]:
+def check_datetime(dt: Optional[Union[datetime, Text]], key: Text) -> Optional[Text]:
     """Validate a datetime value to be a datetime and be timezone aware."""
     if dt is not None and dt is not empty:
+        if isinstance(dt, str):
+            dt = parse_datetime(dt)
+
         if isinstance(dt, datetime):
             if not dt.tzinfo:
                 warnings.warn("`{}` '{}' is naive and not timezone aware, use pytz.timezone info. "
@@ -109,7 +112,8 @@ def check_datetime(dt: Optional[datetime], key: Text) -> Optional[Text]:
             dt = dt.isoformat(sep='T')
         else:
             raise IllegalArgumentError(
-                '`{}` should be a datetime.datetime() object, "{}" ({}) is not.'.format(key, dt, type(dt)))
+                '`{}` should be a correctly formatted string or a datetime.datetime() object, '
+                '"{}" ({}) is not.'.format(key, dt, type(dt)))
     return dt
 
 

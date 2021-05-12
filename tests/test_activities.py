@@ -167,9 +167,7 @@ class TestActivityConstruction(TestBetamax):
             self.project.create_activity("__test_task", status="COMPLETE")
 
         with self.assertRaises(IllegalArgumentError):
-            self.project.create_activity(
-                "__test_task", start_date=self.time.isoformat()
-            )
+            self.project.create_activity("__test_task", start_date=4)
 
         with self.assertRaises(IllegalArgumentError):
             self.project.create_activity("__test_task", description=1234)
