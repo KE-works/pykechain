@@ -12,7 +12,7 @@ semver==2.13.0
 pytest==6.2.2
 betamax==0.8.1
 coverage<=4.5.99
-pytest-cov==2.11.1
+pytest-cov==2.12.0
 coveralls==3.0.1
 
 # documentation
