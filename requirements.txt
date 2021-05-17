@@ -9,7 +9,7 @@ jsonschema==3.2.0
 semver==2.13.0
 
 # testing
-pytest==6.2.2
+pytest==6.2.4
 betamax==0.8.1
 coverage<=4.5.99
 pytest-cov==2.11.1
