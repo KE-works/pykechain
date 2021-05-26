@@ -12,23 +12,24 @@ from pykechain.defaults import API_PATH, API_EXTRA_PARAMS, RETRY_ON_CONNECTION_E
     RETRY_TOTAL, RETRY_ON_READ_ERRORS, RETRY_ON_REDIRECT_ERRORS, PARTS_BATCH_LIMIT
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
-    ActivityClassification, ActivityStatus, NotificationStatus, NotificationEvent, NotificationChannels
+    ActivityClassification, ActivityStatus, NotificationStatus, NotificationEvent, NotificationChannels, ContextTypes
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
-
 from pykechain.models import Part, Property, Activity, Scope, PartSet, Base, AnyProperty, Service, \
     ServiceExecution
 from pykechain.models.association import Association
+from pykechain.models.notification import Notification
 from pykechain.models.team import Team
 from pykechain.models.user import User
-from pykechain.models.notification import Notification
 from pykechain.models.widgets.widget import Widget
 from pykechain.utils import is_uuid, find, is_valid_email, get_in_chunks, slugify_ref
 from .__about__ import version as pykechain_version
+from .models.banner import Banner
+from .models.context import Context
 from .models.expiring_download import ExpiringDownload
 from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
     check_list_of_base, check_base, check_uuid, check_list_of_dicts, check_url, check_user
-from .models.banner import Banner
+from .typing import ObjectID
 
 
 class Client(object):
@@ -1142,20 +1143,20 @@ class Client(object):
         return new_activity
 
     def clone_activities(
-        self,
-        activities: List[Union[Activity, Text]],
-        activity_parent: Union[Activity, Text],
-        activity_update_dicts: Optional[Dict] = None,
-        include_part_models: Optional[bool] = False,
-        include_part_instances: Optional[bool] = False,
-        include_children: Optional[bool] = True,
-        excluded_parts: Optional[List[Text]] = None,
-        part_parent_model: Optional[Union[Part, Text]] = None,
-        part_parent_instance: Optional[Union[Part, Text]] = None,
-        part_model_rename_template: Optional[Text] = None,
-        part_instance_rename_template: Optional[Text] = None,
-        asynchronous: Optional[bool] = False,
-        **kwargs
+            self,
+            activities: List[Union[Activity, Text]],
+            activity_parent: Union[Activity, Text],
+            activity_update_dicts: Optional[Dict] = None,
+            include_part_models: Optional[bool] = False,
+            include_part_instances: Optional[bool] = False,
+            include_children: Optional[bool] = True,
+            excluded_parts: Optional[List[Text]] = None,
+            part_parent_model: Optional[Union[Part, Text]] = None,
+            part_parent_instance: Optional[Union[Part, Text]] = None,
+            part_model_rename_template: Optional[Text] = None,
+            part_instance_rename_template: Optional[Text] = None,
+            asynchronous: Optional[bool] = False,
+            **kwargs
     ) -> List[Activity]:
         """
         Clone multiple activities.
@@ -3058,7 +3059,7 @@ class Client(object):
         :raises NotFoundError: When no `ExpiringDownload` is found
         :raises MultipleFoundError: When more than a single `ExpiringDownload` is found
         """
-        return self._retrieve_singular(self.expiring_downloads, **args, **kwargs)
+        return self._retrieve_singular(self.expiring_downloads, *args, **kwargs)
 
     def expiring_downloads(
             self,
@@ -3123,3 +3124,44 @@ class Client(object):
             expiring_download.upload(content_path)
 
         return expiring_download
+
+    def create_context(self, *args, **kwargs) -> Context:
+        pass
+
+    def delete_context(self, context: Context) -> None:
+        """Delete the Context.
+
+        :param context: The context object to delete
+        """
+        context = check_type(context, Context, 'context')
+        self._build_url('context', context_id=context.id)
+
+        response = self._request('DELETE', self._build_url('contexts'))
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            raise APIError("Could not delete Contexts", response=response)
+
+    def context(self, *args, **kwargs) -> Context:
+        return self._retrieve_singular(self.contexts, *args, **kwargs)  # noqa
+
+    def contexts(
+            self,
+            pk: Optional[ObjectID] = None,
+            context_type: ContextTypes = None,
+            **kwargs
+    ) -> List[Context]:
+        request_params = {
+            'id': check_uuid(pk),
+            context_type: check_enum(context_type, ContextTypes)
+        }
+        request_params.update(API_EXTRA_PARAMS['contexts'])
+
+        if kwargs:
+            request_params.update(**kwargs)
+
+        response = self._request('GET', self._build_url('contexts'), params=request_params)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve Contexts", response=response)
+
+        return [Context(json=download, client=self) for download in response.json()['results']]
