@@ -137,5 +137,7 @@ def _valid_object_type(representation: BaseRepresentation, obj: "Base") -> bool:
                     PropertyType.TIME_VALUE,
                     PropertyType.USER_REFERENCES_VALUE,
                 ]
+            elif rtype == _AllRepresentations.GEOCOORDINATE:
+                return obj.type == PropertyType.GEOJSON_VALUE
             else:
                 return False

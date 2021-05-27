@@ -2,7 +2,7 @@ from pykechain.enums import (
     PropertyRepresentation,
     SelectListRepresentations,
     LinkTargets,
-    FontAwesomeMode,
+    FontAwesomeMode, GeoCoordinateConfig,
 )
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_type
@@ -173,3 +173,38 @@ class CustomIconRepresentation(BaseRepresentation):
 
         self._config[self._display_mode_key] = mode
         self.value = self.value  # trigger update
+
+
+class GeoCoordinateRepresentation(BaseRepresentation):
+    """Representation for HTML link reference properties.
+
+    It should look like this in the value_options
+    #         "representations": [
+    #             {
+    #                 "rtype": "geoCoordinate",
+    #                 "config": {
+    #                     "geoCoordinate": "rd_amersfoort"  # can be any of GeoCoordinateConfig
+    #                 }
+    #             }
+    #         ]
+    #     },
+
+    """
+
+    rtype = PropertyRepresentation.GEOCOORDINATE
+    _config_value_key = "geoCoordinate"
+
+    def validate_representation(self, value: GeoCoordinateConfig) -> None:
+        """
+        Validate whether the representation value can be set.
+
+        :param value: representation value to set.
+        :type value: one of GeoCoordinateConfig
+        :return: None
+        """
+        if value not in GeoCoordinateConfig.values():
+            raise IllegalArgumentError(
+                "{} value '{}' is not correct: Not a GeoCoordinateConfig option: {}".format(
+                    self.__class__.__name__, value, GeoCoordinateConfig.values()
+                )
+            )
