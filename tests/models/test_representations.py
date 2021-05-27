@@ -3,12 +3,13 @@ from typing import Union
 
 from jsonschema import validate
 
-from pykechain.enums import PropertyType, Multiplicity, LinkTargets, SelectListRepresentations, FontAwesomeMode
+from pykechain.enums import PropertyType, Multiplicity, LinkTargets, SelectListRepresentations, FontAwesomeMode, \
+    GeoCoordinateConfig
 from pykechain.exceptions import IllegalArgumentError, APIError
 from pykechain.models import AnyProperty, Property, Scope, Activity, SelectListProperty
 from pykechain.models.representations.representation_base import BaseRepresentation
 from pykechain.models.representations.representations import ButtonRepresentation, LinkTarget, SignificantDigits, \
-    DecimalPlaces, ThousandsSeparator, CustomIconRepresentation, Autofill
+    DecimalPlaces, ThousandsSeparator, CustomIconRepresentation, Autofill, GeoCoordinateRepresentation
 from pykechain.models.validators.validator_schemas import options_json_schema
 from tests.classes import SixTestCase, TestBetamax
 
@@ -118,12 +119,16 @@ class Bases:
         def setUp(self):
             super().setUp()
             self.obj = self._get_object()
-            self.obj.representations = [
-                self.representation_class(
-                    obj=self.obj,
-                    value=self.value,
-                ),
-            ]
+            try:
+                self.obj.representations = [
+                    self.representation_class(
+                        obj=self.obj,
+                        value=self.value,
+                    ),
+                ]
+            except Exception as e:
+                self.obj.part.delete()
+                raise e
 
         def tearDown(self):
             if self.obj:
@@ -250,6 +255,13 @@ class TestReprLinkTarget(Bases._TestPropertyRepresentation):
     representation_class = LinkTarget
     value = LinkTargets.SAME_TAB
     new_value = LinkTargets.NEW_TAB
+
+
+class TestGeocoordinateRepresentation(Bases._TestPropertyRepresentation):
+    property_type = PropertyType.GEOJSON_VALUE
+    representation_class = GeoCoordinateRepresentation
+    value = GeoCoordinateConfig.RD_AMERSFOORT
+    new_value = GeoCoordinateConfig.APPROX_ADDRESS
 
 
 class TestReprButton(Bases._TestPropertyRepresentation):
