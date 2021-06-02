@@ -3125,8 +3125,44 @@ class Client(object):
 
         return expiring_download
 
-    def create_context(self, *args, **kwargs) -> Context:
+    def create_context(
+            self,
+            name: Text,
+            context_type: ContextTypes,
+            scope: Scope,
+            activities=None,
+            description: Text = None,
+            tags=None,
+            **kwargs,
+    ) -> Context:
+        """
+        Create a new Context object of a ContextType in a scope.
+
+        :param name: Name of the Context to be displayed to the end-user.
+        :context_type: A type of Context, as defined in `ContextTypes` eg: STATIC_LOCATION, TIME_PERIOD
+        :param scope: Scope object or Scope Id where the Context is active on.
+        :param description: (optional) description of the Context
+        :param activities: (optional) associated list of Activity or activity object ID
+        :param tags: (optional) tags
+        :param options: (optional) dictionary with options.
+        :param feature_collection: (optional) dict with a geojson feature collection to store for a STATIC_LOCATION
+        :param start_date: (optional) start datetime for a TIME_PERIOD context
+        :param due_date: (optional) start datetime for a TIME_PERIOD context
+        :return: a created Context Object
+        :raises APIError: When the object cannot be created.
+        """
         pass
+
+    # self,
+    # description: Optional[Text, Empty] = empty,
+    # tags = empty,
+    # scope = empty,
+    # # context_type=empty,
+    # options = empty,
+    # activities = empty,
+    # feature_collection = empty,
+    # start_date = empty,
+    # due_date = empty
 
     def delete_context(self, context: Context) -> None:
         """Delete the Context.
