@@ -459,6 +459,7 @@ class ContextType(Enum):
     :cvar STATIC_LOCATION: Geolocation / Featurecollection context with a geolocation.
     :cvar TIME_PERIOD: Time Period Context with start_date and due_date
     """
+
     STATIC_LOCATION = "STATIC_LOCATION"
     TIME_PERIOD = "TIME_PERIOD"
 

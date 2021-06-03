@@ -15,6 +15,12 @@ from pykechain.utils import parse_datetime, empty, Empty
 
 
 class Context(BaseInScope, TagsMixin):
+    """
+    A virtual object representing a KE-chain Context.
+
+    .. versionadded:: 3.11
+    """
+
     def __init__(self, json, **kwargs):
         """Construct a service from provided json data."""
         super(Context, self).__init__(json, **kwargs)
@@ -63,10 +69,8 @@ class Context(BaseInScope, TagsMixin):
         :param due_date:
         :return:
         """
-
-    pass
+        pass
 
     def delete(self):
         """Delete the Context."""
-
         return self._client.delete_context(self)

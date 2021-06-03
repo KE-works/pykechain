@@ -31,7 +31,6 @@ RETRY_TOTAL = 10
 # If the backoff_factor is 0.1, then sleep() will sleep for [0.0s, 0.2s, 0.4s, …] between retries.
 RETRY_BACKOFF_FACTOR = 0.8
 
-
 # Batching of parts when a large number of parts are requested at once
 PARTS_BATCH_LIMIT = 100  # number of parts
 
@@ -185,7 +184,7 @@ API_EXTRA_PARAMS = {
         ['id', 'created_at', 'updated_at', 'expires_at', 'expires_in', 'content'])},
     'context': {'fields': ",".join(
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'description', 'tags', 'context_type',
-         'activities','options','feature_collection','start_date','due_date']
+         'activities', 'options', 'feature_collection', 'start_date', 'due_date']
     )}
 
 }

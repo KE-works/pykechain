@@ -2972,7 +2972,7 @@ class Client(object):
         Retrieve a single Banner, see `banners()` for available arguments.
 
         :return: single banner
-        :rtype Banner
+        :rtype: Banner
         """
         return self._retrieve_singular(self.banners, *args, **kwargs)
 
@@ -3003,7 +3003,7 @@ class Client(object):
         :param url: str
         :param kwargs: additional arguments for the request
         :return: the new banner
-        :rtype Banner
+        :rtype: Banner
         """
         data = {
             'text': check_text(text, 'text'),
@@ -3032,7 +3032,7 @@ class Client(object):
         Retrieve the currently active banner.
 
         :return: Banner object. If no banner is active, returns None.
-        :rtype Banner
+        :rtype: Banner
         :raise APIError whenever the banners could not be retrieved properly.
         :raises NotFoundError whenever there is no active banner.
         :raises MultipleFoundError whenever multiple banners are active.
@@ -3134,10 +3134,10 @@ class Client(object):
             description: Text = None,
             tags=None,
             options=None,
-            feature_collection = None,
-            start_date = None,
-            due_date = None,
-            **kwargs,
+            feature_collection=None,
+            start_date=None,
+            due_date=None,
+            **kwargs
     ) -> Context:
         """
         Create a new Context object of a ContextType in a scope.
@@ -3200,17 +3200,37 @@ class Client(object):
             raise APIError("Could not delete Contexts", response=response)
 
     def context(self, *args, **kwargs) -> Context:
+        """
+        Retrieve a single Context, see `contexts()` for available arguments.
+
+        :return: a single Contexts
+        :rtype: Context
+        """
         return self._retrieve_singular(self.contexts, *args, **kwargs)  # noqa
 
     def contexts(
             self,
             pk: Optional[ObjectID] = None,
-            context_type: ContextType = None,
+            context_type: Optional[ContextType] = None,
+            activities: Optional[List[Union[Activity, ObjectID]]] = None,
+            scope: Optional[Union[Scope, ObjectID]] = None,
             **kwargs
     ) -> List[Context]:
+        """
+        Retrieve Contexts.
+
+        :param pk: (optional) retrieve a single primary key (object ID)
+        :param context_type: (optional) filter on context_type (should be of `ContextType`)
+        :param activities: (optional) filter on a list of Activities or Activity Id's
+        :param scope: (optional) filter on a scope.
+        :return: a list of Contexts
+        :rtype: List[Context]
+        """
         request_params = {
             'id': check_uuid(pk),
-            context_type: check_enum(context_type, ContextType, key='context')
+            context_type: check_enum(context_type, ContextType, 'context'),
+            activities: check_list_of_base(activities, Activity, 'activities'),
+            scope: check_base(scope, Scope, "scope")
         }
         request_params.update(API_EXTRA_PARAMS['context'])
 
