@@ -25,10 +25,10 @@ class Context(BaseInScope, TagsMixin):
         """Construct a service from provided json data."""
         super(Context, self).__init__(json, **kwargs)
 
-        self.ref: Text = json.get("ref")
-        self.description: Text = json.get("description", "")
-        self.context_type: ContextType = json.get("context_type")
-        self.options: Dict = json.get("options", dict())
+        self.ref = json.get("ref")  # type: Text
+        self.description = json.get("description", "")  # type:Text
+        self.context_type = json.get("context_type")  # type: ContextType
+        self.options = json.get("options", dict())  # type: Dict
         self._tags = json.get("tags")
 
         # associated activities
