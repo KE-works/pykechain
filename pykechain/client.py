@@ -3228,9 +3228,9 @@ class Client(object):
         """
         request_params = {
             'id': check_uuid(pk),
-            context_type: check_enum(context_type, ContextType, 'context'),
-            activities: check_list_of_base(activities, Activity, 'activities'),
-            scope: check_base(scope, Scope, "scope")
+            'context_type': check_enum(context_type, ContextType, 'context'),
+            'activities': check_list_of_base(activities, Activity, 'activities'),
+            'scope': check_base(scope, Scope, "scope")
         }
         request_params.update(API_EXTRA_PARAMS['context'])
 
