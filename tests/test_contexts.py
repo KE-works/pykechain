@@ -1,5 +1,9 @@
+from unittest import skip
+
 from pykechain.enums import ContextType
 # new in 1.13
+from pykechain.models import Activity
+from pykechain.models.context import Context
 from tests.classes import TestBetamax
 
 
@@ -43,8 +47,33 @@ class TestContextCreate(TestBetamax):
 
 
 class TestContexts(TestContextSetup):
-    def test_retrieve_contexts_via_client(self):
-        self.assertTrue(self.client.contexts(scope=self.project.id))
+    def test_retrieve_contexts_via_client_using_scope_filter(self):
+        with self.subTest("via uuid"):
+            contexts = self.client.contexts(scope=self.project.id)
+            self.assertIsInstance(contexts[0], Context)
+
+        with self.subTest("via Scope"):
+            contexts = self.client.contexts(scope=self.project)
+            self.assertIsInstance(contexts[0], Context)
+
+        with self.subTest("via uuid string"):
+            contexts = self.client.contexts(scope=str(self.project.id))
+            self.assertIsInstance(contexts[0], Context)
+
+    @skip("WIP for now")
+    def test_retrieve_single_context_via_client_with_pk_filter(self):
+        self.assertIsInstance(self.client.context(pk=self.context.id), Context)
+        self.assertTrue(self.client.context(pk=self.context), Context)
+
+    @skip("WIP for now")
+    def test_create_contexts_bound_to_an_activity(self):
+        task = self.project.create_activity("__Test task")
+        self.assertIsInstance(task, Activity)
+        self.context.edit(activities=[task])
+
+        self.context.refresh()
+        self.assertTrue(self.context.activities, [task])
+
 
 #     def test_retrieve_services_with_kwargs(self):
 #         # setUp
