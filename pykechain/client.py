@@ -12,7 +12,7 @@ from pykechain.defaults import API_PATH, API_EXTRA_PARAMS, RETRY_ON_CONNECTION_E
     RETRY_TOTAL, RETRY_ON_READ_ERRORS, RETRY_ON_REDIRECT_ERRORS, PARTS_BATCH_LIMIT
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
-    ActivityClassification, ActivityStatus, NotificationStatus, NotificationEvent, NotificationChannels, ContextTypes
+    ActivityClassification, ActivityStatus, NotificationStatus, NotificationEvent, NotificationChannels, ContextType
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
 from pykechain.models import Part, Property, Activity, Scope, PartSet, Base, AnyProperty, Service, \
@@ -3128,18 +3128,22 @@ class Client(object):
     def create_context(
             self,
             name: Text,
-            context_type: ContextTypes,
+            context_type: ContextType,
             scope: Scope,
             activities=None,
             description: Text = None,
             tags=None,
+            options=None,
+            feature_collection = None,
+            start_date = None,
+            due_date = None,
             **kwargs,
     ) -> Context:
         """
         Create a new Context object of a ContextType in a scope.
 
         :param name: Name of the Context to be displayed to the end-user.
-        :context_type: A type of Context, as defined in `ContextTypes` eg: STATIC_LOCATION, TIME_PERIOD
+        :context_type: A type of Context, as defined in `ContextType` eg: STATIC_LOCATION, TIME_PERIOD
         :param scope: Scope object or Scope Id where the Context is active on.
         :param description: (optional) description of the Context
         :param activities: (optional) associated list of Activity or activity object ID
@@ -3151,18 +3155,36 @@ class Client(object):
         :return: a created Context Object
         :raises APIError: When the object cannot be created.
         """
-        pass
+        data = {
+            'name': check_text(name, 'name'),
+            'description': check_text(description, 'description'),
+            'scope': check_base(scope, Scope, 'scope'),
+            'context_type': check_enum(context_type, ContextType, 'context_type'),
+            'tags': check_list_of_text(tags, 'tags'),
+            'activities': check_list_of_base(activities, Activity, 'activities'),
+            'options': check_type(options, dict, 'options'),
+            'feature_collection': check_type(feature_collection, dict, 'feature_collection'),
+            'start_date': check_datetime(start_date, 'start_date'),
+            'due_date': check_datetime(due_date, 'due_date'),
+        }
 
-    # self,
-    # description: Optional[Text, Empty] = empty,
-    # tags = empty,
-    # scope = empty,
-    # # context_type=empty,
-    # options = empty,
-    # activities = empty,
-    # feature_collection = empty,
-    # start_date = empty,
-    # due_date = empty
+        if data['feature_collection'] is None:
+            data['feature_collection'] = {}
+        if data['activities'] is None:
+            data['activities'] = []
+
+        # prepare url query parameters
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['context'])
+
+        response = self._request('POST', self._build_url('contexts'),
+                                 params=query_params,
+                                 json=data)
+
+        if response.status_code != requests.codes.created:
+            raise APIError("Could not create Context", response=response)
+
+        return Context(response.json()['results'][0], client=self)
 
     def delete_context(self, context: Context) -> None:
         """Delete the Context.
@@ -3172,7 +3194,7 @@ class Client(object):
         context = check_type(context, Context, 'context')
         self._build_url('context', context_id=context.id)
 
-        response = self._request('DELETE', self._build_url('contexts'))
+        response = self._request('DELETE', self._build_url('context', context_id=context.id))
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete Contexts", response=response)
@@ -3183,14 +3205,14 @@ class Client(object):
     def contexts(
             self,
             pk: Optional[ObjectID] = None,
-            context_type: ContextTypes = None,
+            context_type: ContextType = None,
             **kwargs
     ) -> List[Context]:
         request_params = {
             'id': check_uuid(pk),
-            context_type: check_enum(context_type, ContextTypes)
+            context_type: check_enum(context_type, ContextType, key='context')
         }
-        request_params.update(API_EXTRA_PARAMS['contexts'])
+        request_params.update(API_EXTRA_PARAMS['context'])
 
         if kwargs:
             request_params.update(**kwargs)

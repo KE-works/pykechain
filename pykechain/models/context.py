@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import Text, Dict, Optional
+from typing import Text, Dict, Optional, Union, List
 
-from pykechain.enums import ContextTypes
+from pykechain.enums import ContextType
 from pykechain.models import BaseInScope
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectIDs
@@ -21,8 +21,9 @@ class Context(BaseInScope, TagsMixin):
 
         self.ref: Text = json.get("ref")
         self.description: Text = json.get("description", "")
-        self.context_type: ContextTypes = json.get("context_type")
+        self.context_type: ContextType = json.get("context_type")
         self.options: Dict = json.get("options", dict())
+        self._tags = json.get("tags")
 
         # associated activities
         self.activities: ObjectIDs = json.get("activities")
@@ -38,8 +39,8 @@ class Context(BaseInScope, TagsMixin):
 
     def edit(
             self,
-            description: Optional[Text, Empty] = empty,
-            tags=empty,
+            description: Optional[Union[Text, Empty]] = empty,
+            tags: Optional[List[Union[Text, Empty]]] = empty,
             scope=empty,
             # context_type=empty,
             options=empty,
@@ -62,7 +63,8 @@ class Context(BaseInScope, TagsMixin):
         :param due_date:
         :return:
         """
-        pass
+
+    pass
 
     def delete(self):
         """Delete the Context."""

@@ -183,8 +183,9 @@ API_EXTRA_PARAMS = {
         ['id', 'subject', 'status', 'message', 'team', 'created_at', 'options', 'updated_at'])},
     'expiring_downloads': {'fields': ",".join(
         ['id', 'created_at', 'updated_at', 'expires_at', 'expires_in', 'content'])},
-    'contexts': {'fields': ",".join(
-        ['id', 'name', 'ref', 'created_at', 'updated_at', 'description', 'tags', 'context_type']
+    'context': {'fields': ",".join(
+        ['id', 'name', 'ref', 'created_at', 'updated_at', 'description', 'tags', 'context_type',
+         'activities','options','feature_collection','start_date','due_date']
     )}
 
 }

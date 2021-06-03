@@ -453,7 +453,7 @@ class ScopeMemberActions(Enum):
     REMOVE = 'remove'
 
 
-class ContextTypes(Enum):
+class ContextType(Enum):
     """Types of Contexts.
 
     :cvar STATIC_LOCATION: Geolocation / Featurecollection context with a geolocation.

@@ -1,7 +1,8 @@
 from pykechain.exceptions import _DeprecationMixin
+from pykechain.models import Scope
 
 
-class Scope2(_DeprecationMixin):
-    """Deprecated Part2 class in favor of Part class."""
+class Scope2(Scope, _DeprecationMixin):
+    """Deprecated Scope2 class in favor of Part class."""
 
     pass

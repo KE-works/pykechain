@@ -14,7 +14,6 @@ from pykechain.enums import (
     ScopeCategory,
 )
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
-from pykechain.models.scope2 import Scope2
 from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.activity import Activity
 from pykechain.models.part import Part
@@ -36,7 +35,7 @@ from pykechain.models.team import Team
 from pykechain.utils import parse_datetime, find, Empty, clean_empty_values, empty
 
 
-class Scope(Base, TagsMixin, Scope2):
+class Scope(Base, TagsMixin):
     """A virtual object representing a KE-chain scope.
 
     :ivar id: id of the activity
