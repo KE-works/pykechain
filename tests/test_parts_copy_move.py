@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, date
 
 from pykechain.enums import Multiplicity, PropertyType
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
@@ -7,6 +7,7 @@ from tests.classes import TestBetamax
 
 
 class TestPartsCopyMove(TestBetamax):
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/'))
 
     def setUp(self):
         super(TestPartsCopyMove, self).setUp()
@@ -14,37 +15,116 @@ class TestPartsCopyMove(TestBetamax):
         self.cross_scope_project = self.client.scope(ref='cannondale-project')
         self.cross_scope_bike = self.cross_scope_project.model(ref='cannondale-bike')
         self.cross_scope_wheel = self.cross_scope_bike.add_model(name='__Wheel')
-
+        self.specify_wheel_diameter = self.project.activity(name='Specify wheel diameter')
         self.model_to_be_copied = self.project.create_model(
             parent=self.base, name='__Model to be Copied @ {} [TEST]'.format(str(datetime.now())),
             multiplicity=Multiplicity.ONE_MANY)  # type Part
-        p_char = self.model_to_be_copied.add_property(
-            name='__Property single text',
+        self.p_char_name = '__Property single text'
+        self.p_multi_name = '__Property multi text'
+        self.p_bool_name = '__Property boolean'
+        self.p_int_name = '__Property integer'
+        self.p_float_name = '__Property float'
+        self.p_date_name = '__Property date'
+        self.p_datetime_name = '__Property datetime'
+        self.p_attach_name = '__Property attachment'
+        self.p_link_name = '__Property link'
+        self.p_single_select_name = '__Property single select'
+        self.p_multi_select_name = '__Property multi select'
+        self.p_part_reference_name = '__Property part reference'
+        self.p_geo_json_name = '__Property geographical'
+        self.p_weather_name = '__Property weather'
+        self.p_activity_reference_name = '__Property activity reference'
+        self.p_user_reference_name = '__Property user reference'
+        self.p_project_reference_name = '__Property project reference'
+
+        self.model_to_be_copied.add_property(
+            name=self.p_char_name,
             description='Description of Property single text',
             unit='mm',
+            default_value="test value",
             property_type=PropertyType.CHAR_VALUE
         )
-        p_decimal = self.model_to_be_copied.add_property(
-            name='__Property decimal number',
+        self.model_to_be_copied.add_property(
+            name=self.p_multi_name,
+            unit='mm',
+            default_value="test multi value",
+            property_type=PropertyType.TEXT_VALUE
+        )
+        self.model_to_be_copied.add_property(
+            name=self.p_bool_name,
+            default_value=True,
+            property_type=PropertyType.BOOLEAN_VALUE
+        )
+        self.model_to_be_copied.add_property(
+            name=self.p_int_name,
             default_value=33,
+            property_type=PropertyType.INT_VALUE
+        )
+        self.model_to_be_copied.add_property(
+            name=self.p_float_name,
+            default_value=33.55,
             property_type=PropertyType.FLOAT_VALUE
         )
-        p_single_select = self.model_to_be_copied.add_property(
-            name='__Property single select list',
+        self.model_to_be_copied.add_property(
+            name=self.p_date_name,
+            default_value=str(date.today()),
+            property_type=PropertyType.DATE_VALUE
+        )
+        self.model_to_be_copied.add_property(
+            name=self.p_datetime_name,
+            default_value=str(datetime.now()),
+            property_type=PropertyType.DATETIME_VALUE
+        )
+        self.attachment_property = self.model_to_be_copied.add_property(
+            name=self.p_attach_name,
+            property_type=PropertyType.ATTACHMENT_VALUE
+        )
+        self.attachment_property.upload(self.project_root + '/requirements.txt')
+
+        self.model_to_be_copied.add_property(
+            name=self.p_link_name,
+            default_value="http://ke-chain.com",
+            property_type=PropertyType.LINK_VALUE
+        )
+        self.model_to_be_copied.add_property(
+            name=self.p_single_select_name,
             options=dict(value_choices=['a', 'b', 'c']),
+            default_value='a',
             property_type=PropertyType.SINGLE_SELECT_VALUE
         )
-        p_multi_select = self.model_to_be_copied.add_property(
-            name='__Property multi select list',
+        self.model_to_be_copied.add_property(
+            name=self.p_multi_select_name,
             default_value=['a', 'c'],
             options=dict(value_choices=['a', 'b', 'c', 'd']),
             property_type=PropertyType.MULTI_SELECT_VALUE
         )
-        p_multi_reference_property = self.model_to_be_copied.add_property(
-            name='__Property multi reference',
+        self.model_to_be_copied.add_property(
+            name=self.p_part_reference_name,
             default_value=self.cross_scope_wheel,
-            # options={S},
             property_type=PropertyType.REFERENCES_VALUE
+        )
+        self.model_to_be_copied.add_property(
+            name=self.p_geo_json_name,
+            property_type=PropertyType.GEOJSON_VALUE
+        )
+        self.model_to_be_copied.add_property(
+            name=self.p_weather_name,
+            property_type=PropertyType.WEATHER_VALUE
+        )
+        self.model_to_be_copied.add_property(
+            name=self.p_activity_reference_name,
+            property_type=PropertyType.ACTIVITY_REFERENCES_VALUE,
+            default_value=[self.specify_wheel_diameter.id]
+        )
+        self.model_to_be_copied.add_property(
+            name=self.p_user_reference_name,
+            property_type=PropertyType.USER_REFERENCES_VALUE,
+            default_value=[3, 333]
+        )
+        self.model_to_be_copied.add_property(
+            name=self.p_project_reference_name,
+            property_type=PropertyType.SCOPE_REFERENCES_VALUE,
+            default_value=[self.project.id]
         )
         self.sub_part1 = self.model_to_be_copied.add_model(
             name="__subpart 1",
