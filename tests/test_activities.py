@@ -241,7 +241,7 @@ class TestActivityClone(TestBetamax):
 
     def test_update_incorrect(self):
         with self.assertRaises(IllegalArgumentError):
-            self.task.clone(part_parent_instance="Something")
+            self.task.clone(part_parent_instance=True)
 
     def test_async_via_task(self):
         response = self.task.clone(asynchronous=True)
