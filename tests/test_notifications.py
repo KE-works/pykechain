@@ -78,7 +78,7 @@ class TestNotificationCreation(_TestNotification):
         with self.assertRaises(IllegalArgumentError):
             self.bucket.append(self.client.create_notification(recipients=['not a user id'], **kwargs))
         with self.assertRaises(IllegalArgumentError):
-            self.bucket.append(self.client.create_notification(team=0, **kwargs))
+            self.bucket.append(self.client.create_notification(team="Team name", **kwargs))
         with self.assertRaises(IllegalArgumentError):
             self.bucket.append(self.client.create_notification(from_user='Myself', **kwargs))
         with self.assertRaises(IllegalArgumentError):
@@ -213,15 +213,15 @@ class TestNotifications(_TestNotification):
         with self.assertRaises(IllegalArgumentError):
             self.notification.edit(subject=['Not a string'])
         with self.assertRaises(IllegalArgumentError):
-            self.notification.edit(message=False)
+            self.notification.edit(message={"Should not be key": "Should not be value"})
         with self.assertRaises(IllegalArgumentError):
             self.notification.edit(status='Deleting')
         with self.assertRaises(IllegalArgumentError):
-            self.notification.edit(recipients=True)
+            self.notification.edit(recipients={"Should not be key": "Should not be value"})
         with self.assertRaises(IllegalArgumentError):
             self.notification.edit(recipients=['Not a user ID'])
         with self.assertRaises(IllegalArgumentError):
-            self.notification.edit(team=5)
+            self.notification.edit(team=5.5)
         with self.assertRaises(IllegalArgumentError):
             self.notification.edit(from_user='self')
         with self.assertRaises(IllegalArgumentError):
