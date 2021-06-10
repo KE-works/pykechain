@@ -131,7 +131,7 @@ def check_base(obj: Optional[Any],
 
         if isinstance(obj, cls):
             obj = obj.id
-        elif (isinstance(obj, str) and is_uuid(obj)) or isinstance(obj, int):
+        elif isinstance(obj, str) and is_uuid(obj):
             pass
         elif isinstance(obj, str) and method:
             obj = method(obj).id

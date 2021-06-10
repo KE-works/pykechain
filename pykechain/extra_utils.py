@@ -738,10 +738,10 @@ def _get_property_value(prop: AnyProperty) -> Any:
                      PropertyType.ACTIVITY_REFERENCES_VALUE,
                      PropertyType.SCOPE_REFERENCES_VALUE,
                      PropertyType.TEAM_REFERENCES_VALUE,
-                     PropertyType.SERVICE_REFERENCES_VALUE,
-                     PropertyType.USER_REFERENCES_VALUE):
+                     PropertyType.SERVICE_REFERENCES_VALUE):
         get_references()[prop] = prop.value_ids() if prop.has_value() else []
-
+    elif prop.type == PropertyType.USER_REFERENCES_VALUE:
+        get_references()[prop] = prop.value if prop.has_value() else []
     elif prop.type == PropertyType.ATTACHMENT_VALUE:
         get_attachments().append(prop)
     else:
