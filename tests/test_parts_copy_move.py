@@ -43,7 +43,7 @@ class TestPartsCopyMove(TestBetamax):
         self.p_int_value = 33
         self.p_float_value = 42.42
         self.p_date_value = str(date.today())
-        self.p_datetime_value = str(datetime.now(timezone.utc).isoformat())
+        self.p_datetime_value = str(datetime(1991, 4, 12, 13, 5, 5).isoformat())
         self.p_attach_value = self.project_root + '/requirements.txt'
         self.p_link_value = "http://ke-chain.com"
         self.p_select_value_choices = ['apples', 'oranges', 'bananas', 'lemons']
@@ -192,7 +192,7 @@ class TestPartsCopyMove(TestBetamax):
         self.assertEqual(copied_model.property(name=self.p_float_name).value, self.p_float_value)
         self.assertEqual(copied_model.property(name=self.p_bool_name).value, self.p_bool_value)
         self.assertEqual(copied_model.property(name=self.p_date_name).value, self.p_date_value)
-        self.assertEqual(copied_model.property(name=self.p_datetime_name).value, self.p_datetime_value)
+        self.assertIn(self.p_datetime_value, copied_model.property(name=self.p_datetime_name).value)
         self.assertIn(copied_model.property(name=self.p_attach_name).filename, self.p_attach_value)
         self.assertEqual(copied_model.property(name=self.p_link_name).value, self.p_link_value)
         self.assertEqual(copied_model.property(name=self.p_single_select_name).value, self.p_single_select_value)
@@ -232,7 +232,7 @@ class TestPartsCopyMove(TestBetamax):
         self.assertEqual(copied_instance.property(name=self.p_float_name).value, self.p_float_value)
         self.assertEqual(copied_instance.property(name=self.p_bool_name).value, self.p_bool_value)
         self.assertEqual(copied_instance.property(name=self.p_date_name).value, self.p_date_value)
-        self.assertEqual(copied_instance.property(name=self.p_datetime_name).value, self.p_datetime_value)
+        self.assertIn(self.p_datetime_value, copied_instance.property(name=self.p_datetime_name).value)
         self.assertEqual(copied_instance.property(name=self.p_link_name).value, self.p_link_value)
         self.assertEqual(copied_instance.property(name=self.p_single_select_name).value, self.p_single_select_value)
         self.assertEqual(copied_instance.property(name=self.p_multi_select_name).value, self.p_multi_select_value)
@@ -347,7 +347,7 @@ class TestPartsCopyMove(TestBetamax):
         self.assertEqual(copied_instance.property(name=self.p_float_name).value, self.p_float_value)
         self.assertEqual(copied_instance.property(name=self.p_bool_name).value, self.p_bool_value)
         self.assertEqual(copied_instance.property(name=self.p_date_name).value, self.p_date_value)
-        self.assertEqual(copied_instance.property(name=self.p_datetime_name).value, self.p_datetime_value)
+        self.assertIn(self.p_datetime_value, copied_instance.property(name=self.p_datetime_name).value)
         self.assertIn(copied_instance.property(name=self.p_attach_name).filename, self.p_attach_value)
         self.assertEqual(copied_instance.property(name=self.p_link_name).value, self.p_link_value)
         self.assertEqual(copied_instance.property(name=self.p_single_select_name).value, self.p_single_select_value)
