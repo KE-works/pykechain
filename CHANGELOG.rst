@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+vUNRELEASED
+-----------------
+* :bug: Fixed a bug related to a `UserReferenceProperty` not being copied over if there was a `User` already filled in. Improved the tests to cover all property types.
+
 v3.11.0 (27MAY21)
 -----------------
 * :star: It is now possible to create, retrieve, edit and delete `ExpiringDownloads` using the `Client` and `Class` methods.
