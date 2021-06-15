@@ -695,8 +695,8 @@ class FilterType(Enum):
 
     GREATER_THAN_EQUAL = 'gte'
     LOWER_THAN_EQUAL = 'lte'
-    ICONTAINS = 'icontains'
-    CONTAINS = 'contains'
+    CONTAINS = 'icontains'
+    CONTAINS_SET = 'contains'
     EXACT = 'exact'
 
 
