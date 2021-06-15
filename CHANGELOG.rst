@@ -1,8 +1,9 @@
 Change Log
 ==========
 
-vUNRELEASED
+v3.11.1 (15JUN21)
 -----------------
+* :bug: Fixed an issue related to setting prefilters on a `ScopeReferenceProperty`.
 * :bug: Fixed a bug related to a `UserReferenceProperty` not being copied over if there was a `User` already filled in. Improved the tests to cover all property types.
 
 v3.11.0 (27MAY21)
