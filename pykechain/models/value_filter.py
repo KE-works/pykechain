@@ -292,8 +292,9 @@ class ScopeFilter(BaseFilter):
                 if filter_value is not None:
                     if is_list:
                         if field not in prefilters:
-                            prefilters[field] = ""
-                        prefilters[field] += ",{}".format(filter_value)
+                            prefilters[field] = filter_value
+                        else:
+                            prefilters[field] += ",{}".format(filter_value)
                     else:
                         prefilters[field] = filter_value
 
