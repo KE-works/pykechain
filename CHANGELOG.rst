@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+vUNRELEASED ()
+________________
+* :bug: Fixed an issue related to setting prefilters on a `ScopeReferenceProperty`.
+
 v3.11.0 (27MAY21)
 -----------------
 * :star: It is now possible to create, retrieve, edit and delete `ExpiringDownloads` using the `Client` and `Class` methods.
