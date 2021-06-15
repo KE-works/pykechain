@@ -140,8 +140,9 @@ class TestFilterAllPropertyTypes(TestBetamax):
     def tearDown(self):
         self.test_activity.delete()
         self.new_part.delete()
+        super().tearDown()
 
-    def test_test_property_filter_in_grid(self):
+    def test_text_property_filter_in_grid(self):
         filter_type = FilterType.CONTAINS
         filter_value = 'sample'
         test_prop = self.new_part.add_property(
@@ -543,8 +544,6 @@ class TestFilterAllPropertyTypes(TestBetamax):
                          '{}:{}:{}'.format(filter_property_model.id, filter_value, filter_type))
 
     def test_activity_reference_property_prefilter(self):
-        filter_type = FilterType.EXACT
-        filter_value = 100
         test_prop = self.new_part.add_property(
             name=self.prop_test_name,
             property_type=PropertyType.SCOPE_REFERENCES_VALUE
@@ -642,7 +641,7 @@ class TestScopeFilterDueDateGTE(BaseTest._TestScopeFilter):
     FIELD = "due_date__gte"
     ATTR = "due_date_gte"
 
-    
+
 class TestScopeFilterDueDateLTE(BaseTest._TestScopeFilter):
     VALUE = TIMESTAMP
     VALUE_2 = TIMESTAMP_2
@@ -650,7 +649,7 @@ class TestScopeFilterDueDateLTE(BaseTest._TestScopeFilter):
     FIELD = "due_date__lte"
     ATTR = "due_date_lte"
 
-    
+
 class TestScopeFilterStartDateGTE(BaseTest._TestScopeFilter):
     VALUE = TIMESTAMP
     VALUE_2 = TIMESTAMP_2
@@ -658,7 +657,7 @@ class TestScopeFilterStartDateGTE(BaseTest._TestScopeFilter):
     FIELD = "start_date__gte"
     ATTR = "start_date_gte"
 
-    
+
 class TestScopeFilterStartDateLTE(BaseTest._TestScopeFilter):
     VALUE = TIMESTAMP
     VALUE_2 = TIMESTAMP_2
