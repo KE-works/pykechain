@@ -291,6 +291,9 @@ class ScopeFilter(BaseFilter):
 
                 if filter_value is not None:
                     if is_list:
+                        # creata a string with commaseparted prefilters, the first item directly and
+                        # consequent items with a ,
+                        # TODO: refactor to create a list and then join them with a ','
                         if field not in prefilters:
                             prefilters[field] = filter_value
                         else:
