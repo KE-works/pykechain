@@ -6,8 +6,14 @@ import requests
 from pykechain.enums import ContextType
 from pykechain.exceptions import APIError
 from pykechain.models import BaseInScope, Activity, Scope
-from pykechain.models.input_checks import check_text, check_base, check_enum, check_list_of_text, check_list_of_base, \
-    check_type, check_datetime
+from pykechain.models.input_checks import (
+    check_text,
+    check_base,
+    check_list_of_text,
+    check_list_of_base,
+    check_type,
+    check_datetime,
+)
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectIDs
 from pykechain.utils import parse_datetime, empty, Empty, clean_empty_values
@@ -49,18 +55,18 @@ class Context(BaseInScope, TagsMixin):
         self.due_date: Optional[datetime] = parse_datetime(json.get("due_date"))
 
     def edit(
-            self,
-            name: Optional[Union[Text, Empty]] = empty,
-            description: Optional[Union[Text, Empty]] = empty,
-            tags: Optional[List[Union[Text, Empty]]] = empty,
-            scope=empty,
-            # context_type=empty,
-            options=empty,
-            activities=empty,
-            feature_collection=empty,
-            start_date=empty,
-            due_date=empty,
-            **kwargs
+        self,
+        name: Optional[Union[Text, Empty]] = empty,
+        description: Optional[Union[Text, Empty]] = empty,
+        tags: Optional[List[Union[Text, Empty]]] = empty,
+        scope=empty,
+        # context_type=empty,
+        options=empty,
+        activities=empty,
+        feature_collection=empty,
+        start_date=empty,
+        due_date=empty,
+        **kwargs
     ):
         """
         Edit the Context.
@@ -77,34 +83,87 @@ class Context(BaseInScope, TagsMixin):
         :return:
         """
         update_dict = {
-            'name': check_text(name, 'name'),
-            'description': check_text(description, 'description'),
-            'scope': check_base(scope, Scope, 'scope'),
-            'tags': check_list_of_text(tags, 'tags'),
-            'activities': check_list_of_base(activities, Activity, 'activities'),
-            'options': check_type(options, dict, 'options'),
-            'feature_collection': check_type(feature_collection, dict, 'feature_collection'),
-            'start_date': check_datetime(start_date, 'start_date'),
-            'due_date': check_datetime(due_date, 'due_date'),
+            "name": check_text(name, "name"),
+            "description": check_text(description, "description"),
+            "scope": check_base(scope, Scope, "scope"),
+            "tags": check_list_of_text(tags, "tags"),
+            "activities": check_list_of_base(activities, Activity, "activities"),
+            "options": check_type(options, dict, "options"),
+            "feature_collection": check_type(
+                feature_collection, dict, "feature_collection"
+            ),
+            "start_date": check_datetime(start_date, "start_date"),
+            "due_date": check_datetime(due_date, "due_date"),
         }
 
         if feature_collection is None:
-            update_dict['feature_collection'] = {}
-
+            update_dict["feature_collection"] = {}
 
         if kwargs:  # pragma: no cover
             update_dict.update(kwargs)
 
         update_dict = clean_empty_values(update_dict=update_dict)
 
-        url = self._client._build_url('context', context_id=self.id)
+        url = self._client._build_url("context", context_id=self.id)
 
-        response = self._client._request('PUT', url, json=update_dict)
+        response = self._client._request("PUT", url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Context: {}".format(self), response=response)
+            raise APIError(
+                "Could not update Context: {}".format(self), response=response
+            )
 
-        self.refresh(json=response.json().get('results')[0])
+        return self.refresh(json=response.json().get("results")[0])
+
+    def link_activities(
+        self, activities: Optional[List[Union[Activity, ObjectIDs]]] = empty, **kwargs
+    ):
+        """
+        Link a context to one or more activities.
+
+        :param activities: optional list of Activities or object Id's from activities.
+        :returns: updated context objects
+        """
+        update_dict = {
+            "activities": check_list_of_base(activities, Activity, "activities"),
+        }
+        if kwargs:  # pragma: no cover
+            update_dict.update(kwargs)
+
+        url = self._client._build_url("context_link_activities", context_id=self.id)
+        response = self._client._request("POST", url, json=update_dict)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError(
+                "Could not update Context: {}".format(self), response=response
+            )
+
+        return self.refresh(json=response.json().get("results")[0])
+
+    def unlink_activities(
+        self, activities: Optional[List[Union[Activity, ObjectIDs]]] = empty, **kwargs
+    ):
+        """
+        Unlink a context to one or more activities.
+
+        :param activities: optional list of Activities or object Id's from activities.
+        :returns: updated context objects
+        """
+        update_dict = {
+            "activities": check_list_of_base(activities, Activity, "activities"),
+        }
+        if kwargs:  # pragma: no cover
+            update_dict.update(kwargs)
+
+        url = self._client._build_url("context_unlink_activities", context_id=self.id)
+        response = self._client._request("POST", url, json=update_dict)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError(
+                "Could not update Context: {}".format(self), response=response
+            )
+
+        return self.refresh(json=response.json().get("results")[0])
 
     def delete(self):
         """Delete the Context."""

@@ -118,6 +118,8 @@ API_PATH = {
     'expiring_download_upload': 'api/downloads/{download_id}/upload',
     'contexts': 'api/v3/contexts/contexts.json',
     'context': 'api/v3/contexts/contexts/{context_id}.json',
+    'context_link_activities': 'api/v3/contexts/contexts/{context_id}/link_activities',
+    'context_unlink_activities': 'api/v3/contexts/contexts/{context_id}/unlink_activities',
     # 'feature_collections': 'api/v3/contexts/feature_collections.json',
     # 'feature_collection': 'api/v3/contexts/feature_collections/{context_id}.json',
     # 'time_periods': 'api/v3/contexts/time_periods.json',

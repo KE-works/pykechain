@@ -462,6 +462,7 @@ class ContextType(Enum):
 
     STATIC_LOCATION = "STATIC_LOCATION"
     TIME_PERIOD = "TIME_PERIOD"
+    TEXT_LABEL = "TEXT_LABEL"
 
 
 class KechainEnv(Enum):

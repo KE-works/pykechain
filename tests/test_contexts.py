@@ -20,7 +20,7 @@ class TestContextSetup(TestBetamax):
             context_type=ContextType.TIME_PERIOD,
             name="__my first context for testing",
             tags = ["testing"]
-        )
+        )  # type: Context
 
     def tearDown(self):
         self.context.delete()
@@ -60,16 +60,14 @@ class TestContexts(TestContextSetup):
             contexts = self.client.contexts(scope=str(self.project.id))
             self.assertIsInstance(contexts[0], Context)
 
-    @skip("WIP for now")
     def test_retrieve_single_context_via_client_with_pk_filter(self):
         self.assertIsInstance(self.client.context(pk=self.context.id), Context)
         self.assertTrue(self.client.context(pk=self.context), Context)
 
-    @skip("WIP for now")
     def test_create_contexts_bound_to_an_activity(self):
         task = self.project.create_activity("__Test task")
         self.assertIsInstance(task, Activity)
-        self.context.edit(activities=[task])
+        self.context.link_activities(activities=[task])
 
         self.context.refresh()
         self.assertTrue(self.context.activities, [task])
