@@ -3172,6 +3172,8 @@ class Client(object):
             data['feature_collection'] = {}
         if data['activities'] is None:
             data['activities'] = []
+        if data['options'] is None:
+            data['options'] = {}
 
         # prepare url query parameters
         query_params = kwargs

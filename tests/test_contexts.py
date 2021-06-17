@@ -62,7 +62,7 @@ class TestContexts(TestContextSetup):
 
     def test_retrieve_single_context_via_client_with_pk_filter(self):
         self.assertIsInstance(self.client.context(pk=self.context.id), Context)
-        self.assertTrue(self.client.context(pk=self.context), Context)
+        self.assertTrue(self.client.context(pk=self.context.id), Context)
 
     def test_create_contexts_bound_to_an_activity(self):
         task = self.project.create_activity("__Test task")
@@ -71,6 +71,38 @@ class TestContexts(TestContextSetup):
 
         self.context.refresh()
         self.assertTrue(self.context.activities, [task])
+
+    def test_retrieve_multiple_context_via_client_using_filters(self):
+        contexts = self.client.contexts(context_type=ContextType.TIME_PERIOD)
+        self.assertEqual(len(contexts), 1)
+
+    def test_link_context_to_activity(self):
+        self.assertFalse(self.context.activities)
+        self.context.link_activities(activities=[self.project.activity(name="Specify wheel diameter")])
+        self.assertTrue(self.context.activities)
+
+    def test_context_consequetive_link_many_activities(self):
+        self.assertFalse(self.context.activities)
+        self.context.link_activities(activities=[self.project.activity(name="Specify wheel diameter")])
+        self.assertEqual(len(self.context.activities), 1)
+        self.context.link_activities(activities=[self.project.activity(name="Task - Form")])
+        self.assertEqual(len(self.context.activities), 2)
+
+    def test_unlink_context_to_activity(self):
+        self.assertFalse(self.context.activities)
+        self.context.link_activities(activities=[self.project.activity(name="Specify wheel diameter")])
+        self.assertTrue(self.context.activities)
+        self.context.unlink_activities(activities=[self.project.activity(name="Specify wheel diameter")])
+        self.assertFalse(self.context.activities)
+
+    def test_context_unlink_single_activity_when_more_activities(self):
+        self.assertFalse(self.context.activities)
+        self.context.link_activities(activities=[self.project.activity(name="Specify wheel diameter"), self.project.activity(name="Task - Form")])
+        self.assertEqual(len(self.context.activities), 2)
+        self.context.unlink_activities(activities=[self.project.activity(name="Specify wheel diameter")])
+        self.assertEqual(len(self.context.activities), 1)
+        self.assertListEqual(list(self.context.activities), [self.project.activity(name="Task - Form").id])
+
 
 
 #     def test_retrieve_services_with_kwargs(self):
