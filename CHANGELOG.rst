@@ -2,9 +2,9 @@ Change Log
 ==========
 
 UNRELEASED
-________________
+----------
 * :bug: Fixed a test_cassette that was failing on a date check. Made it use a fixed date rather than doing it on today.
-
+* :bug: Fixed automatic compilation of the pykechain documentation on https://readthedocs.org/projects/pykechain/.
 
 v3.11.1 (15JUN21)
 -----------------
