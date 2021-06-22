@@ -965,8 +965,8 @@ class TestActivityDownloadAsPDF(TestBetamax):
 
     def test_activity_share_pdf(self):
         # setUp
-        test_user = self.client.user(username="testuser")
-
+        test_user = self.client.user(username="radu.iordache")
+        from_user = self.client.user(username="testuser")
         activity_name = "Task - Form"
         message = "EXAMPLE_MESSAGE"
         subject = "EXAMPLE_SUBJECT"
@@ -977,6 +977,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
         activity = self.project.activity(name=activity_name)
 
         activity.share_pdf(
+            from_user=from_user,
             subject=subject,
             message=message,
             recipient_users=recipient_users,

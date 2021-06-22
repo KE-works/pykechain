@@ -942,6 +942,7 @@ class Activity(TreeObject, TagsMixin, Activity2):
 
     def share_pdf(
             self,
+            from_user: User,
             subject: Text,
             message: Text,
             recipient_users: List[Union[User, Text]],
@@ -949,6 +950,7 @@ class Activity(TreeObject, TagsMixin, Activity2):
             paper_orientation: Optional[PaperOrientation] = PaperOrientation.PORTRAIT,
             include_appendices: Optional[bool] = False,
             include_qr_code: Optional[bool] = False,
+            **kwargs
     ) -> None:
         """
         Share the PDF of the `Activity` through email.
@@ -989,6 +991,7 @@ class Activity(TreeObject, TagsMixin, Activity2):
                                        '"{}" ({}) is not.'.format(recipient_users, type(recipient_users)))
 
         params = dict(
+            from_user=from_user.id,
             message=check_text(message, "message"),
             subject=check_text(subject, "subject"),
             recipient_users=recipient_users_ids,
