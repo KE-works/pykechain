@@ -10,6 +10,7 @@ from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
+from pykechain.models.context import Context
 from pykechain.models.input_checks import check_datetime, check_text, check_list_of_text, check_enum, check_user, \
     check_type, check_base
 from pykechain.models.representations.component import RepresentationsComponent
@@ -1005,3 +1006,66 @@ class Activity(TreeObject, TagsMixin):
 
         if response.status_code not in (requests.codes.created, requests.codes.accepted):  # pragma: no cover
             raise APIError("Could not share the link to Activity {}".format(self), response=response)
+
+    #
+    # Context Methods
+    #
+    def context(self, *args, **kwargs) -> Context:
+        """
+        Retrieve a context object associated to this activity and scope.
+
+        See :class:`pykechain.Client.context` for available parameters.
+
+        .. versionadded:: 3.11
+
+        :return: a Context object
+        """
+        return self._client.context(*args, scope=self.scope, activity=self, **kwargs)
+
+    def contexts(self, *args, **kwargs) -> List[Context]:
+        """
+        Retrieve context objects t associated to this activity and scope.
+
+        See :class:`pykechain.Client.contexts` for available parameters.
+
+        .. versionadded:: 3.11
+
+        :return: a list of Context objects
+        """
+        return self._client.contexts(*args, scope=self.scope, activity=self, **kwargs)
+
+    def create_context(self, *args, **kwargs) -> Context:
+        """
+        Create a new Context object of a ContextType in a scope and associated it to this activity.
+
+        See :class:`pykechain.Client.create_context` for available parameters.
+
+        .. versionadded:: 3.11
+
+        :return: a Context object
+        """
+        return self._client.create_context(*args, scope=self.scope, actitivities=[self], **kwargs)
+
+    def link_context(self, context: Context) -> None:
+        """
+        Link the current activity to an existing Context.
+
+        :param context: A Context object to link the current activity to.
+        :raises IllegalArgumentError: When the context is not a Context object.
+        """
+        if not isinstance(context, Context):
+            raise IllegalArgumentError(f"`context` should be a proper Context object. Got: {context}")
+        context.link_activities(activities=[self])
+        self.refresh()
+
+    def unlink_context(self, context: Context) -> None:
+        """
+        Link the current activity to an existing Context.
+
+        :param context: A Context object to unlink the current activity from.
+        :raises IllegalArgumentError: When the context is not a Context object.
+        """
+        if not isinstance(context, Context):
+            raise IllegalArgumentError(f"`context` should be a proper Context object. Got: {context}")
+        context.link_activities(activities=[self])
+        self.refresh()

@@ -11,14 +11,11 @@ from pykechain.enums import (
     KEChainPages,
     ScopeRoles,
     ScopeMemberActions,
-    ScopeCategory,
-)
+    ScopeCategory, )
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
-from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.activity import Activity
-from pykechain.models.part import Part
 from pykechain.models.base import Base
-from pykechain.models.property import Property
+from pykechain.models.context import Context
 from pykechain.models.input_checks import (
     check_text,
     check_datetime,
@@ -27,8 +24,11 @@ from pykechain.models.input_checks import (
     check_base,
     check_type,
 )
+from pykechain.models.part import Part
+from pykechain.models.property import Property
 from pykechain.models.representations import BaseRepresentation
 from pykechain.models.representations.component import RepresentationsComponent
+from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
@@ -422,12 +422,12 @@ class Scope(Base, TagsMixin):
         return self._client.create_model(parent, name, multiplicity=multiplicity)
 
     def create_model_with_properties(
-        self,
-        parent,
-        name,
-        multiplicity=Multiplicity.ZERO_MANY,
-        properties_fvalues=None,
-        **kwargs
+            self,
+            parent,
+            name,
+            multiplicity=Multiplicity.ZERO_MANY,
+            properties_fvalues=None,
+            **kwargs
     ) -> 'Part':
         """Create a model with its properties in a single API request.
 
@@ -471,11 +471,11 @@ class Scope(Base, TagsMixin):
         return SideBarManager(scope=self, *args, **kwargs)
 
     def set_landing_page(
-        self,
-        activity: Union["Activity", KEChainPages],
-        task_display_mode: Optional[
-            SubprocessDisplayMode
-        ] = SubprocessDisplayMode.ACTIVITIES,
+            self,
+            activity: Union["Activity", KEChainPages],
+            task_display_mode: Optional[
+                SubprocessDisplayMode
+            ] = SubprocessDisplayMode.ACTIVITIES,
     ) -> None:
         """
         Update the landing page of the scope.
@@ -569,10 +569,10 @@ class Scope(Base, TagsMixin):
     #
 
     def members(
-        self,
-        is_manager: Optional[bool] = None,
-        is_supervisor: Optional[bool] = None,
-        is_leadmember: Optional[bool] = None,
+            self,
+            is_manager: Optional[bool] = None,
+            is_supervisor: Optional[bool] = None,
+            is_leadmember: Optional[bool] = None,
     ) -> List[Dict]:
         """
         Retrieve members of the scope.
@@ -735,3 +735,42 @@ class Scope(Base, TagsMixin):
             role=ScopeRoles.SUPERVISOR,
             user=supervisor,
         )
+
+    #
+    # Context Methods
+    #
+    def context(self, *args, **kwargs) -> Context:
+        """
+        Retrieve a context object in this scope.
+
+        See :class:`pykechain.Client.context` for available parameters.
+
+        .. versionadded:: 3.11
+
+        :return: a Context object
+        """
+        return self._client.context(*args, scope=self, **kwargs)
+
+    def contexts(self, *args, **kwargs) -> List[Context]:
+        """
+        Retrieve one or more contexts object in this scope.
+
+        See :class:`pykechain.Client.contexts` for available parameters.
+
+        .. versionadded:: 3.11
+
+        :return: a list of Context objects
+        """
+        return self._client.contexts(*args, scope=self, **kwargs)
+
+    def create_context(self, *args, **kwargs) -> Context:
+        """
+        Create a new Context object of a ContextType in a scope.
+
+        See :class:`pykechain.Client.create_context` for available parameters.
+
+        .. versionadded:: 3.11
+
+        :return: a Context object
+        """
+        return self._client.create_context(*args, scope=self, **kwargs)
