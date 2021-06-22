@@ -5,7 +5,7 @@ import requests
 
 from pykechain.enums import ContextType
 from pykechain.exceptions import APIError
-from pykechain.models import BaseInScope, Activity, Scope
+from pykechain.models import BaseInScope
 from pykechain.models.input_checks import (
     check_text,
     check_base,
@@ -15,7 +15,7 @@ from pykechain.models.input_checks import (
     check_datetime,
 )
 from pykechain.models.tags import TagsMixin
-from pykechain.typing import ObjectIDs
+from pykechain.typing import ObjectIDs, ObjectID
 from pykechain.utils import parse_datetime, empty, Empty, clean_empty_values
 
 
@@ -55,33 +55,35 @@ class Context(BaseInScope, TagsMixin):
         self.due_date = parse_datetime(json.get("due_date"))  # type: Optional[datetime]
 
     def edit(
-        self,
-        name: Optional[Union[Text, Empty]] = empty,
-        description: Optional[Union[Text, Empty]] = empty,
-        tags: Optional[List[Union[Text, Empty]]] = empty,
-        scope=empty,
-        # context_type=empty,
-        options=empty,
-        activities=empty,
-        feature_collection=empty,
-        start_date=empty,
-        due_date=empty,
-        **kwargs
-    ):
+            self,
+            name: Optional[Union[Text, Empty]] = empty,
+            description: Optional[Union[Text, Empty]] = empty,
+            tags: Optional[List[Union[Text, Empty]]] = empty,
+            scope: Optional[Union['Scope', ObjectID]] = empty,
+            options: Optional[dict] = empty,
+            activities: Optional[Union[List['Activity'], ObjectIDs]] = empty,
+            feature_collection: Optional[dict] = empty,
+            start_date: Optional[datetime] = empty,
+            due_date: Optional[datetime] = empty,
+            **kwargs
+    ) -> 'self':
         """
         Edit the Context.
 
-        :param description:
-        :param tags:
-        :param scope:
-        :param context_type:
-        :param options:
-        :param activities:
-        :param feature_collection:
-        :param start_date:
-        :param due_date:
-        :return:
+        :param name: Name of the Context to be displayed to the end-user.
+        :param scope: Scope object or Scope Id where the Context is active on.
+        :param description: (optional) description of the Context
+        :param activities: (optional) associated list of Activity or activity object ID
+        :param tags: (optional) tags
+        :param options: (optional) dictionary with options.
+        :param feature_collection: (optional) dict with a geojson feature collection to store for a STATIC_LOCATION
+        :param start_date: (optional) start datetime for a TIME_PERIOD context
+        :param due_date: (optional) start datetime for a TIME_PERIOD context
+        :return: a created Context Object
+        :return: The updated Context object
         """
+        from pykechain.models import Scope
+        from pykechain.models import Activity
         update_dict = {
             "name": check_text(name, "name"),
             "description": check_text(description, "description"),
@@ -116,7 +118,7 @@ class Context(BaseInScope, TagsMixin):
         return self.refresh(json=response.json().get("results")[0])
 
     def link_activities(
-        self, activities: Optional[List[Union[Activity, ObjectIDs]]] = empty, **kwargs
+            self, activities: Optional[List[Union['Activity', ObjectIDs]]] = empty, **kwargs
     ):
         """
         Link a context to one or more activities.
@@ -124,6 +126,7 @@ class Context(BaseInScope, TagsMixin):
         :param activities: optional list of Activities or object Id's from activities.
         :returns: updated context objects
         """
+        from pykechain.models import Activity
         update_dict = {
             "activities": check_list_of_base(activities, Activity, "activities"),
         }
@@ -141,7 +144,7 @@ class Context(BaseInScope, TagsMixin):
         return self.refresh(json=response.json().get("results")[0])
 
     def unlink_activities(
-        self, activities: Optional[List[Union[Activity, ObjectIDs]]] = empty, **kwargs
+            self, activities: Optional[List[Union['Activity', ObjectIDs]]] = empty, **kwargs
     ):
         """
         Unlink a context to one or more activities.
@@ -149,6 +152,7 @@ class Context(BaseInScope, TagsMixin):
         :param activities: optional list of Activities or object Id's from activities.
         :returns: updated context objects
         """
+        from pykechain.models import Activity
         update_dict = {
             "activities": check_list_of_base(activities, Activity, "activities"),
         }
