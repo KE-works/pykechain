@@ -6,6 +6,8 @@ UNRELEASED
 * :bug: Fixed a test_cassette that was failing on a date check. Made it use a fixed date rather than doing it on today.
 * :bug: Fixed automatic compilation of the pykechain documentation on https://readthedocs.org/projects/pykechain/.
 
+* :+1: When connecting to a server with a self-signed certificate which cannot be checked, we provide a message fast. (KE-1052, #997)
+
 v3.11.1 (15JUN21)
 -----------------
 * :bug: Fixed an issue related to setting prefilters on a `ScopeReferenceProperty`.
