@@ -4,12 +4,11 @@ from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Scope, user
 from pykechain.models.base_reference import _ReferencePropertyInScope, _ReferenceProperty
-from pykechain.models.property2_activity_reference import ActivityReferencesProperty as ActivityReferencesProperty2
 from pykechain.models.value_filter import ScopeFilter
 from pykechain.utils import get_in_chunks
 
 
-class ActivityReferencesProperty(_ReferencePropertyInScope, ActivityReferencesProperty2):
+class ActivityReferencesProperty(_ReferencePropertyInScope):
     """A virtual object representing a KE-chain Activity References property.
 
     .. versionadded:: 3.7
