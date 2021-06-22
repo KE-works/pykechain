@@ -5,14 +5,13 @@ import requests
 from pykechain.defaults import API_EXTRA_PARAMS, PARTS_BATCH_LIMIT
 from pykechain.enums import Category, Multiplicity, Classification, PropertyType
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
-from pykechain.models.part2 import Part2
 from pykechain.models.input_checks import check_text, check_type, check_list_of_base, check_list_of_dicts
 from pykechain.models.property import Property
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.utils import is_uuid, find, Empty, clean_empty_values, empty
 
 
-class Part(TreeObject, Part2):
+class Part(TreeObject):
     """A virtual object representing a KE-chain part.
 
     :ivar id: UUID of the part
@@ -914,11 +913,11 @@ class Part(TreeObject, Part2):
         return copied_part
 
     def move(
-        self,
-        target_parent: 'Part',
-        name: Optional[Text] = None,
-        include_children: bool = True,
-        include_instances: bool = True,
+            self,
+            target_parent: 'Part',
+            name: Optional[Text] = None,
+            include_children: bool = True,
+            include_instances: bool = True,
     ) -> 'Part':
         """
         Move the `Part` to target parent, both of them the same category.

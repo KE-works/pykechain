@@ -1,12 +1,12 @@
 import datetime
 from typing import Union, Text
+
 from pykechain.models import Property
-from pykechain.models.property2_datetime import DatetimeProperty2
 from pykechain.models.input_checks import check_datetime
 from pykechain.utils import parse_datetime
 
 
-class DatetimeProperty(Property, DatetimeProperty2):
+class DatetimeProperty(Property):
     """A virtual object representing a KE-chain datetime property."""
 
     def to_datetime(self) -> Union[type(None), datetime.datetime]:

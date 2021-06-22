@@ -3,9 +3,8 @@ from typing import List, Optional, Text, Union, Any, Tuple
 
 from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.enums import Category, FilterType
-from pykechain.models.input_checks import check_type
-from pykechain.models.property2_multi_reference import MultiReferenceProperty2
 from pykechain.models.base_reference import _ReferencePropertyInScope
+from pykechain.models.input_checks import check_type
 from pykechain.models.part import Part
 from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets.enums import MetaWidget
@@ -13,7 +12,7 @@ from pykechain.models.widgets.helpers import _check_prefilters, _check_excluded_
 from pykechain.utils import get_in_chunks
 
 
-class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2):
+class MultiReferenceProperty(_ReferencePropertyInScope):
     """A virtual object representing a KE-chain multi-references property.
 
     .. versionadded:: 1.14
@@ -75,7 +74,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope, MultiReferenceProperty2)
             choices_model_id = self.model()._value[0].get('id')
 
             # Determine which parts are filtered out
-            prefilter = self._options.get(MetaWidget.PREFILTERS, {}).\
+            prefilter = self._options.get(MetaWidget.PREFILTERS, {}). \
                 get(MetaWidget.PROPERTY_VALUE_PREFILTER)  # type: Optional[Text]
 
             # Retrieve all part instances with this model ID
