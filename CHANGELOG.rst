@@ -6,6 +6,8 @@ UNRELEASED
 * :bug: Fixed a test_cassette that was failing on a date check. Made it use a fixed date rather than doing it on today.
 * :bug: Fixed automatic compilation of the pykechain documentation on https://readthedocs.org/projects/pykechain/.
 
+* :+1: From now on python 3.5 is deprecated. We can now start to insert f-strings in our pykechain codebase.
+
 v3.11.1 (15JUN21)
 -----------------
 * :bug: Fixed an issue related to setting prefilters on a `ScopeReferenceProperty`.
