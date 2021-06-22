@@ -10,7 +10,6 @@ from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_
 from pykechain.enums import ActivityType, ActivityStatus, Category, ActivityClassification, ActivityRootNames, \
     PaperSize, PaperOrientation
 from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
-from pykechain.models.context import Context
 from pykechain.models.input_checks import check_datetime, check_text, check_list_of_text, check_enum, check_user, \
     check_type, check_base
 from pykechain.models.representations.component import RepresentationsComponent
@@ -1010,7 +1009,7 @@ class Activity(TreeObject, TagsMixin):
     #
     # Context Methods
     #
-    def context(self, *args, **kwargs) -> Context:
+    def context(self, *args, **kwargs) -> 'Context':
         """
         Retrieve a context object associated to this activity and scope.
 
@@ -1022,7 +1021,7 @@ class Activity(TreeObject, TagsMixin):
         """
         return self._client.context(*args, scope=self.scope, activity=self, **kwargs)
 
-    def contexts(self, *args, **kwargs) -> List[Context]:
+    def contexts(self, *args, **kwargs) -> List['Context']:
         """
         Retrieve context objects t associated to this activity and scope.
 
@@ -1034,7 +1033,7 @@ class Activity(TreeObject, TagsMixin):
         """
         return self._client.contexts(*args, scope=self.scope, activity=self, **kwargs)
 
-    def create_context(self, *args, **kwargs) -> Context:
+    def create_context(self, *args, **kwargs) -> 'Context':
         """
         Create a new Context object of a ContextType in a scope and associated it to this activity.
 
@@ -1046,26 +1045,30 @@ class Activity(TreeObject, TagsMixin):
         """
         return self._client.create_context(*args, scope=self.scope, actitivities=[self], **kwargs)
 
-    def link_context(self, context: Context) -> None:
+    def link_context(self, context: 'Context') -> None:
         """
         Link the current activity to an existing Context.
+
+        If you want to link multiple activities at once, use the `Context.link_activities()` method.
 
         :param context: A Context object to link the current activity to.
         :raises IllegalArgumentError: When the context is not a Context object.
         """
-        if not isinstance(context, Context):
-            raise IllegalArgumentError(f"`context` should be a proper Context object. Got: {context}")
+        if not context.__class__.__name__ == 'Context':
+            raise IllegalArgumentError("`context` should be a proper Context object. Got: {}".format(context))
         context.link_activities(activities=[self])
         self.refresh()
 
-    def unlink_context(self, context: Context) -> None:
+    def unlink_context(self, context: 'Context') -> None:
         """
         Link the current activity to an existing Context.
+
+        If you want to unlink multiple activities at once, use the `Context.unlink_activities()` method.
 
         :param context: A Context object to unlink the current activity from.
         :raises IllegalArgumentError: When the context is not a Context object.
         """
-        if not isinstance(context, Context):
-            raise IllegalArgumentError(f"`context` should be a proper Context object. Got: {context}")
-        context.link_activities(activities=[self])
+        if not context.__class__.__name__ == 'Context':
+            raise IllegalArgumentError("`context` should be a proper Context object. Got: {}".format(context))
+        context.unlink_activities(activities=[self])
         self.refresh()
