@@ -1,7 +1,8 @@
 from pykechain.exceptions import _DeprecationMixin
+from pykechain.models import Property
 
 
-class Property2(_DeprecationMixin):
+class Property2(Property, _DeprecationMixin):
     """A virtual object representing a KE-chain property.
 
     .. versionadded: 3.0
