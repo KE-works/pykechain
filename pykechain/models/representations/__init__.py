@@ -12,6 +12,7 @@ from .representations import (
     ButtonRepresentation,
     CustomIconRepresentation,
     Autofill,
+    GeoCoordinateRepresentation,
 )
 
 AnyRepresentation = [
@@ -28,6 +29,8 @@ AnyRepresentation = [
     Autofill,
     # Scopes and activities
     CustomIconRepresentation,
+    # Geocoordinate
+    GeoCoordinateRepresentation,
 ]
 
 __all__ = [

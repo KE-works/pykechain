@@ -609,11 +609,15 @@ class PropertyRepresentation(Enum):
     The Representation configuration to display a property value.
 
     .. versionadded:: 3.0
+    .. versionupdated:: 3.11 added geocoordinate in line with KE-chain v2021.5.0
 
     :cvar DECIMAL_PLACES: Amount of decimal places to show the number
     :cvar SIGNIFICANT_DIGITS: Number (count) of significant digits to display the number
     :cvar LINK_TARGET: configuration of a link to open the link in a new browsertab or not.
     :cvar BUTTON: options to represent the choices of a select-list
+    :cvar THOUSANDS_SEPARATOR: option to display the thousand separator
+    :cvar AUTOFILL: option to autofill the content of the property
+    :cvar GEOCOORDINATE: option to display an alternative representation for the geocoordinate
     """
 
     DECIMAL_PLACES = "decimalPlaces"
@@ -622,6 +626,24 @@ class PropertyRepresentation(Enum):
     BUTTON = 'buttonRepresentation'
     THOUSANDS_SEPARATOR = "thousandsSeparator"
     AUTOFILL = 'autofill'
+    GEOCOORDINATE = 'geoCoordinate'
+
+
+class GeoCoordinateConfig(Enum):
+    """GeoCoordinate Configuration Enumerations.
+
+    :cvar APPROX_ADDRESS: represent the coordinate as approximate address (lookup by Google)
+    :cvar RD_AMERSFOORT: represent the coordinate as Amersfoort / RN New (epsg: 28992)
+    :cvar DD: represent the coordinate as Decimal Degrees (WGS84, epsg:4326)
+    :cvar DMS: represent the coordinate as as Degrees Minutes Seconds (WGS84, epsg:4326)
+
+    """
+
+    APPROX_ADDRESS = "approx_address"  # As approximated address
+    # Amersfoort/RD (epsg: 28992) https://www.spatialreference.org/ref/epsg/amersfoort-rd-new/
+    RD_AMERSFOORT = "rd_amersfoort"
+    DD = "dd"  # As WSG84 (epsg:4326) decimal degrees representation first lat (-90,+90) then lng (-180,+180)
+    DMS = "dms"  # As WSG84 (epsg:4326) degrees, minutes, seconds representation first lat N/S then lng E/W
 
 
 class OtherRepresentations(Enum):
@@ -686,6 +708,7 @@ class FilterType(Enum):
     GREATER_THAN_EQUAL = 'gte'
     LOWER_THAN_EQUAL = 'lte'
     CONTAINS = 'icontains'
+    CONTAINS_SET = 'contains'
     EXACT = 'exact'
 
 

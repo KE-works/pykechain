@@ -12,21 +12,21 @@ semver==2.13.0
 pytest==6.2.4
 betamax==0.8.1
 coverage~=5.5
-pytest-cov==2.12.0
+pytest-cov==2.12.1
 coveralls==3.0.1
 
 # documentation
-Sphinx==4.0.1
-nbsphinx==0.8.5
+Sphinx==4.0.2
+nbsphinx==0.8.6
 
 # integration
 tox==3.23.1
 
 # code style
 flake8==3.9.2
-pydocstyle==6.1.0
-mypy==0.812; python_version >= '3.4'
-pre-commit==2.12.1
+pydocstyle==6.1.1
+mypy==0.902; python_version >= '3.4'
+pre-commit==2.13.0
 
 # for package management (uploads)
 twine>=3.0.0; python_version >= '3.6'

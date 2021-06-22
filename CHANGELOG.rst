@@ -1,11 +1,24 @@
 Change Log
 ==========
 
-# UNRELEASED
-----------------
+UNRELEASED
+----------
+* :bug: Fixed a test_cassette that was failing on a date check. Made it use a fixed date rather than doing it on today.
+* :bug: Fixed automatic compilation of the pykechain documentation on https://readthedocs.org/projects/pykechain/.
+
+v3.11.1 (15JUN21)
+-----------------
+* :bug: Fixed an issue related to setting prefilters on a `ScopeReferenceProperty`.
+* :bug: Fixed a bug related to a `UserReferenceProperty` not being copied over if there was a `User` already filled in. Improved the tests to cover all property types.
+* :star: Added `CONTAINS_SET` filter type enum for `contains`.
+
+v3.11.0 (27MAY21)
+-----------------
 * :star: It is now possible to create, retrieve, edit and delete `ExpiringDownloads` using the `Client` and `Class` methods.
-* :+1: Correctly formatted datetime strings are now accepted as valid datetime values.
+* :star: Added the GeoCoordinate representation for Geojson properties. We can now represent a geocoordinate as approximate address, Rijksdriehoekstelsel RD Amersfoort, as decimal degrees and degrees minutes seconds.
 * :bug: Formatting of prefilters using lists in the `ScopeFilter` class is now based on comma's.
+* :+1: Correctly formatted datetime strings are now accepted as valid datetime values.
+* :+1: dependent versions for development: pytest (6.2.4), nbsphinx (0.8.5), coveralls (3.1.0), tox (3.23.1), flake8 (3.9.2), sphinx (4.0.2), pytest-cov (2.12.0), pre-commit (2.13.0), pydocstyle (6.1.1)
 
 v3.10.1 (01APR21)
 -----------------
