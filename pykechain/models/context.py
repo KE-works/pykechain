@@ -43,16 +43,16 @@ class Context(BaseInScope, TagsMixin):
         self._tags = json.get("tags")
 
         # associated activities
-        self.activities: ObjectIDs = json.get("activities")
+        self.activities = json.get("activities")  # type: ObjectIDs
 
         # LocationContext
         # these attributes are enabled when context_type == STATIC_LOCATION
-        self.feature_collection: Dict = json.get("feature_collection", dict())
+        self.feature_collection = json.get("feature_collection", dict())  # type: dict
 
         # TimeperiodContext
         # these attributes are enabled when context_type == TIME_PERIOD
-        self.start_date: Optional[datetime] = parse_datetime(json.get("start_date"))
-        self.due_date: Optional[datetime] = parse_datetime(json.get("due_date"))
+        self.start_date = parse_datetime(json.get("start_date"))  # type: Optional[datetime]
+        self.due_date = parse_datetime(json.get("due_date"))  # type: Optional[datetime]
 
     def edit(
         self,
