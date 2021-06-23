@@ -3234,7 +3234,7 @@ class Client(object):
             'activities': check_list_of_base(activities, Activity, 'activities'),
             'scope': check_base(scope, Scope, "scope")
         }
-        request_params.update(API_EXTRA_PARAMS['context'])
+        request_params.update(API_EXTRA_PARAMS['contexts'])
 
         if kwargs:
             request_params.update(**kwargs)

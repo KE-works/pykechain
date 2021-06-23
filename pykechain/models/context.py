@@ -19,12 +19,6 @@ from pykechain.typing import ObjectIDs, ObjectID
 from pykechain.utils import parse_datetime, empty, Empty, clean_empty_values
 
 
-# TODO: make crud methods in the client
-# TODO: make curd methods in the scope
-# TODO: ensure that context_type is either location/time and enable/disable use of various attributes.
-# TODO: write tests
-
-
 class Context(BaseInScope, TagsMixin):
     """
     A virtual object representing a KE-chain Context.
