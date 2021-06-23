@@ -42,7 +42,7 @@ class TestPartsCopyMove(TestBetamax):
         self.p_bool_value = True
         self.p_int_value = 33
         self.p_float_value = 42.42
-        self.p_date_value = str(date.today())
+        self.p_date_value = str(date(2021, 12, 15))
         self.p_datetime_value = str(datetime(1991, 4, 12, 13, 5, 5).isoformat())
         self.p_attach_value = self.project_root + '/requirements.txt'
         self.p_link_value = "http://ke-chain.com"

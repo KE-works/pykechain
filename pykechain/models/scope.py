@@ -14,12 +14,8 @@ from pykechain.enums import (
     ScopeCategory,
 )
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
-from pykechain.models.scope2 import Scope2
-from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.activity import Activity
-from pykechain.models.part import Part
 from pykechain.models.base import Base
-from pykechain.models.property import Property
 from pykechain.models.input_checks import (
     check_text,
     check_datetime,
@@ -28,15 +24,18 @@ from pykechain.models.input_checks import (
     check_base,
     check_type,
 )
+from pykechain.models.part import Part
+from pykechain.models.property import Property
 from pykechain.models.representations import BaseRepresentation
 from pykechain.models.representations.component import RepresentationsComponent
+from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
 from pykechain.utils import parse_datetime, find, Empty, clean_empty_values, empty
 
 
-class Scope(Base, TagsMixin, Scope2):
+class Scope(Base, TagsMixin):
     """A virtual object representing a KE-chain scope.
 
     :ivar id: id of the activity
@@ -423,12 +422,12 @@ class Scope(Base, TagsMixin, Scope2):
         return self._client.create_model(parent, name, multiplicity=multiplicity)
 
     def create_model_with_properties(
-        self,
-        parent,
-        name,
-        multiplicity=Multiplicity.ZERO_MANY,
-        properties_fvalues=None,
-        **kwargs
+            self,
+            parent,
+            name,
+            multiplicity=Multiplicity.ZERO_MANY,
+            properties_fvalues=None,
+            **kwargs
     ) -> 'Part':
         """Create a model with its properties in a single API request.
 
@@ -472,11 +471,11 @@ class Scope(Base, TagsMixin, Scope2):
         return SideBarManager(scope=self, *args, **kwargs)
 
     def set_landing_page(
-        self,
-        activity: Union["Activity", KEChainPages],
-        task_display_mode: Optional[
-            SubprocessDisplayMode
-        ] = SubprocessDisplayMode.ACTIVITIES,
+            self,
+            activity: Union["Activity", KEChainPages],
+            task_display_mode: Optional[
+                SubprocessDisplayMode
+            ] = SubprocessDisplayMode.ACTIVITIES,
     ) -> None:
         """
         Update the landing page of the scope.
@@ -570,10 +569,10 @@ class Scope(Base, TagsMixin, Scope2):
     #
 
     def members(
-        self,
-        is_manager: Optional[bool] = None,
-        is_supervisor: Optional[bool] = None,
-        is_leadmember: Optional[bool] = None,
+            self,
+            is_manager: Optional[bool] = None,
+            is_supervisor: Optional[bool] = None,
+            is_leadmember: Optional[bool] = None,
     ) -> List[Dict]:
         """
         Retrieve members of the scope.

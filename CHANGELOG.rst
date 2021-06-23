@@ -1,10 +1,18 @@
 Change Log
 ==========
 
+UNRELEASED
+----------
+* :bug: Fixed a test_cassette that was failing on a date check. Made it use a fixed date rather than doing it on today.
+* :bug: Fixed automatic compilation of the pykechain documentation on https://readthedocs.org/projects/pykechain/.
+* :+1: From now on python 3.5 is deprecated. We can now start to insert f-strings in our pykechain codebase.
+* :+1: refactoring all models that were shadowed with a `<classname>2` to enable fast and smooth deprecation in July 2021.
+
 v3.11.1 (15JUN21)
 -----------------
 * :bug: Fixed an issue related to setting prefilters on a `ScopeReferenceProperty`.
 * :bug: Fixed a bug related to a `UserReferenceProperty` not being copied over if there was a `User` already filled in. Improved the tests to cover all property types.
+* :star: Added `CONTAINS_SET` filter type enum for `contains`.
 
 v3.11.0 (27MAY21)
 -----------------

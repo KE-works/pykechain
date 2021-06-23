@@ -11,7 +11,7 @@ semver==2.13.0
 # testing
 pytest==6.2.4
 betamax==0.8.1
-coverage<=4.5.99
+coverage==5.5
 pytest-cov==2.12.1
 coveralls==3.1.0
 
@@ -25,7 +25,7 @@ tox==3.23.1
 # code style
 flake8==3.9.2
 pydocstyle==6.1.1
-mypy==0.902; python_version >= '3.4'
+mypy==0.910; python_version >= '3.4'
 pre-commit==2.13.0
 
 # for package management (uploads)

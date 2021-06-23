@@ -3,21 +3,20 @@ from typing import Any, List, Dict, Optional, Text, Union, Tuple, Iterable, Type
 import requests
 from jsonschema import validate
 
+from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import Category
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Base, BaseInScope
-from pykechain.models.property2 import Property2
 from pykechain.models.input_checks import check_text, check_type
 from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.validators import PropertyValidator
 from pykechain.models.validators.validator_schemas import options_json_schema
-from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.utils import clean_empty_values, empty
 
 T = TypeVar("T")
 
 
-class Property(BaseInScope, Property2):
+class Property(BaseInScope):
     """A virtual object representing a KE-chain property.
 
     .. versionadded: 3.0
