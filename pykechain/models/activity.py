@@ -913,7 +913,12 @@ class Activity(TreeObject, TagsMixin):
         """
         return self._client.move_activity(self, parent, classification=classification)
 
-    def share_link(self, subject: Text, message: Text, recipient_users: List[Union[User, Text]]) -> None:
+    def share_link(
+            self,
+            subject: Text,
+            message: Text,
+            recipient_users: List[Union[User, Text]],
+            from_user: Optional[User] = None) -> None:
         """
         Share the link of the `Activity` through email.
 
@@ -923,6 +928,8 @@ class Activity(TreeObject, TagsMixin):
         :type message: basestring
         :param recipient_users: users that will receive the email
         :type recipient_users: list(Union(User, Id))
+        :param from_user: User that shared the link (optional)
+        :type from_user: User object
         :raises APIError: if an internal server error occurred.
         """
         params = dict(
@@ -931,6 +938,12 @@ class Activity(TreeObject, TagsMixin):
             recipient_users=[check_user(recipient, User, 'recipient') for recipient in recipient_users],
             activity_id=self.id
         )
+
+        if from_user:
+            check_user(from_user, User, 'from_user')
+            params.update(
+                from_user=from_user.id
+            )
 
         url = self._client._build_url('notification_share_activity_link')
 
@@ -946,8 +959,10 @@ class Activity(TreeObject, TagsMixin):
             recipient_users: List[Union[User, Text]],
             paper_size: Optional[PaperSize] = PaperSize.A3,
             paper_orientation: Optional[PaperOrientation] = PaperOrientation.PORTRAIT,
+            from_user: Optional[User] = None,
             include_appendices: Optional[bool] = False,
             include_qr_code: Optional[bool] = False,
+            **kwargs
     ) -> None:
         """
         Share the PDF of the `Activity` through email.
@@ -969,6 +984,8 @@ class Activity(TreeObject, TagsMixin):
                                - portrait (default): portrait orientation
                                - landscape: landscape orientation
         :type paper_size: basestring (see :class:`enums.PaperOrientation`)
+        :param from_user: User that shared the PDF (optional)
+        :type from_user: User object
         :param include_appendices: True if the PDF should contain appendices, False (default) if otherwise.
         :type include_appendices: bool
         :param include_qr_code: True if the PDF should include a QR-code, False (default) if otherwise.
@@ -998,6 +1015,12 @@ class Activity(TreeObject, TagsMixin):
             appendices=check_type(include_appendices, bool, "include_appendices"),
             includeqr=check_type(include_qr_code, bool, "include_qr_code"),
         )
+
+        if from_user:
+            check_user(from_user, User, 'from_user')
+            params.update(
+                from_user=from_user.id
+            )
 
         url = self._client._build_url('notification_share_activity_pdf')
 
