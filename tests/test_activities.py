@@ -965,7 +965,39 @@ class TestActivityDownloadAsPDF(TestBetamax):
 
     def test_activity_share_pdf(self):
         # setUp
-        test_user = self.client.user(username="radu.iordache")
+        test_user = self.client.user(username="testuser")
+        activity_name = "Task - Form"
+        message = "EXAMPLE_MESSAGE"
+        subject = "EXAMPLE_SUBJECT"
+        paper_size = PaperSize.A2
+        paper_orientation = PaperOrientation.PORTRAIT
+        recipient_users = [test_user]
+
+        activity = self.project.activity(name=activity_name)
+
+        activity.share_pdf(
+            subject=subject,
+            message=message,
+            recipient_users=recipient_users,
+            paper_size=paper_size,
+            paper_orientation=paper_orientation,
+            include_appendices=False,
+            include_qr_code=True,
+        )
+
+        # testing
+        notifications = self.client.notifications(
+            subject=subject, message=message, event=NotificationEvent.SHARE_ACTIVITY_PDF
+        )
+        self.assertEqual(self.client.last_response.status_code, requests.codes.ok)
+        self.assertTrue(len(notifications), 1)
+
+        # tearDown
+        notifications[0].delete()
+
+    def test_activity_share_pdf_with_from_user(self):
+        # setUp
+        test_user = self.client.user(username="anotheruser")
         from_user = self.client.user(username="testuser")
         activity_name = "Task - Form"
         message = "EXAMPLE_MESSAGE"
@@ -990,6 +1022,37 @@ class TestActivityDownloadAsPDF(TestBetamax):
         # testing
         notifications = self.client.notifications(
             subject=subject, message=message, event=NotificationEvent.SHARE_ACTIVITY_PDF
+        )
+        self.assertEqual(self.client.last_response.status_code, requests.codes.ok)
+        self.assertTrue(len(notifications), 1)
+
+        # tearDown
+        notifications[0].delete()
+
+    def test_activity_share_link_with_from_user(self):
+        # setUp
+        test_user = self.client.user(username="anotheruser")
+        from_user = self.client.user(username="testuser")
+
+        activity_name = "Task - Form"
+        message = "EXAMPLE_MESSAGE"
+        subject = "EXAMPLE_SUBJECT"
+        recipient_users = [test_user]
+
+        activity = self.project.activity(name=activity_name)
+
+        activity.share_link(
+            from_user=from_user,
+            subject=subject,
+            message=message,
+            recipient_users=recipient_users,
+        )
+
+        # testing
+        notifications = self.client.notifications(
+            subject=subject,
+            message=message,
+            event=NotificationEvent.SHARE_ACTIVITY_LINK,
         )
         self.assertEqual(self.client.last_response.status_code, requests.codes.ok)
         self.assertTrue(len(notifications), 1)
