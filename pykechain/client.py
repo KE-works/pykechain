@@ -1,5 +1,6 @@
 import datetime
 import warnings
+from ssl import SSLCertVerificationError
 from typing import Dict, Tuple, Optional, Any, List, Union, Text, Callable
 from urllib.parse import urljoin, urlparse
 
@@ -29,6 +30,36 @@ from .models.expiring_download import ExpiringDownload
 from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
     check_list_of_base, check_base, check_uuid, check_list_of_dicts, check_url, check_user
 from .models.banner import Banner
+
+
+class KERetry(Retry):
+    def increment(
+        self,
+        method=None,
+        url=None,
+        response=None,
+        error=None,
+        _pool=None,
+        _stacktrace=None,
+    ):
+        """
+        In case of failed verification of self signed certificate we short circuit the retry routine.
+        """
+        if self._is_self_signed_certificate_error(error):
+            return self.new(total=0, read=False)
+
+        return super().increment(
+            method=method,
+            url=url,
+            response=response,
+            error=error,
+            _pool=_pool,
+            _stacktrace=_stacktrace,
+        )
+
+    def _is_self_signed_certificate_error(self, error):
+        error_msg = "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self signed certificate"
+        return error and isinstance(error, SSLCertVerificationError) and error_msg in str(error)
 
 
 class Client(object):
@@ -86,7 +117,7 @@ class Client(object):
 
         # Retry implementation
         adapter = HTTPAdapter(
-            max_retries=Retry(total=RETRY_TOTAL,
+            max_retries=KERetry(total=RETRY_TOTAL,
                               connect=RETRY_ON_CONNECTION_ERRORS,
                               read=RETRY_ON_READ_ERRORS,
                               redirect=RETRY_ON_REDIRECT_ERRORS,
