@@ -1,35 +1,75 @@
 import datetime
 import warnings
 from ssl import SSLCertVerificationError
-from typing import Dict, Tuple, Optional, Any, List, Union, Text, Callable
+from typing import Any, Callable, Dict, List, Optional, Text, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
 import requests
 from envparse import env
 from requests.adapters import HTTPAdapter  # type: ignore
 from urllib3 import Retry
+from urllib3.exceptions import MaxRetryError
 
-from pykechain.defaults import API_PATH, API_EXTRA_PARAMS, RETRY_ON_CONNECTION_ERRORS, RETRY_BACKOFF_FACTOR, \
-    RETRY_TOTAL, RETRY_ON_READ_ERRORS, RETRY_ON_REDIRECT_ERRORS, PARTS_BATCH_LIMIT
-from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
-    PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
-    ActivityClassification, ActivityStatus, NotificationStatus, NotificationEvent, NotificationChannels
-from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
-    APIError
-
-from pykechain.models import Part, Property, Activity, Scope, PartSet, Base, AnyProperty, Service, \
-    ServiceExecution
+from pykechain.defaults import (
+    API_EXTRA_PARAMS,
+    API_PATH,
+    PARTS_BATCH_LIMIT,
+    RETRY_BACKOFF_FACTOR,
+    RETRY_ON_CONNECTION_ERRORS,
+    RETRY_ON_READ_ERRORS,
+    RETRY_ON_REDIRECT_ERRORS,
+    RETRY_TOTAL
+)
+from pykechain.enums import (
+    ActivityClassification,
+    ActivityStatus,
+    ActivityType,
+    Category,
+    KechainEnv,
+    Multiplicity,
+    NotificationChannels,
+    NotificationEvent,
+    NotificationStatus,
+    PropertyType,
+    ScopeStatus,
+    ServiceEnvironmentVersion,
+    ServiceScriptUser,
+    ServiceType,
+    TeamRoles,
+    WidgetTypes
+)
+from pykechain.exceptions import (
+    APIError,
+    ClientError,
+    ForbiddenError,
+    IllegalArgumentError,
+    MultipleFoundError,
+    NotFoundError
+)
+from pykechain.models import Activity, AnyProperty, Base, Part, PartSet, Property, Scope, Service, ServiceExecution
 from pykechain.models.association import Association
+from pykechain.models.notification import Notification
 from pykechain.models.team import Team
 from pykechain.models.user import User
-from pykechain.models.notification import Notification
 from pykechain.models.widgets.widget import Widget
-from pykechain.utils import is_uuid, find, is_valid_email, get_in_chunks, slugify_ref
+from pykechain.utils import find, get_in_chunks, is_uuid, is_valid_email, slugify_ref
+
 from .__about__ import version as pykechain_version
-from .models.expiring_download import ExpiringDownload
-from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
-    check_list_of_base, check_base, check_uuid, check_list_of_dicts, check_url, check_user
 from .models.banner import Banner
+from .models.expiring_download import ExpiringDownload
+from .models.input_checks import (
+    check_base,
+    check_datetime,
+    check_enum,
+    check_list_of_base,
+    check_list_of_dicts,
+    check_list_of_text,
+    check_text,
+    check_type,
+    check_url,
+    check_user,
+    check_uuid
+)
 
 
 class PykeRetry(Retry):
@@ -46,7 +86,7 @@ class PykeRetry(Retry):
         In case of failed verification of self signed certificate we short circuit the retry routine.
         """
         if self._is_self_signed_certificate_error(error):
-            return self.new(total=0, read=False)
+            raise MaxRetryError(_pool, url, error)
 
         return super().increment(
             method=method,
