@@ -1,8 +1,8 @@
 from ssl import SSLCertVerificationError
 from unittest import TestCase
 
-from client import PykeRetry
-from defaults import (
+from pykechain.client_utils import PykeRetry
+from pykechain.defaults import (
     RETRY_BACKOFF_FACTOR,
     RETRY_ON_CONNECTION_ERRORS,
     RETRY_ON_READ_ERRORS,

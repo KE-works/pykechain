@@ -1,14 +1,11 @@
 import datetime
 import warnings
-from ssl import SSLCertVerificationError
 from typing import Any, Callable, Dict, List, Optional, Text, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
 import requests
 from envparse import env
 from requests.adapters import HTTPAdapter  # type: ignore
-from urllib3 import Retry
-from urllib3.exceptions import MaxRetryError
 
 from pykechain.defaults import (
     API_EXTRA_PARAMS,
@@ -55,6 +52,7 @@ from pykechain.models.widgets.widget import Widget
 from pykechain.utils import find, get_in_chunks, is_uuid, is_valid_email, slugify_ref
 
 from .__about__ import version as pykechain_version
+from .client_utils import PykeRetry
 from .models.banner import Banner
 from .models.expiring_download import ExpiringDownload
 from .models.input_checks import (
@@ -70,36 +68,6 @@ from .models.input_checks import (
     check_user,
     check_uuid
 )
-
-
-class PykeRetry(Retry):
-    def increment(
-        self,
-        method=None,
-        url=None,
-        response=None,
-        error=None,
-        _pool=None,
-        _stacktrace=None,
-    ):
-        """
-        In case of failed verification of self signed certificate we short circuit the retry routine.
-        """
-        if self._is_self_signed_certificate_error(error):
-            raise MaxRetryError(_pool, url, error)
-
-        return super().increment(
-            method=method,
-            url=url,
-            response=response,
-            error=error,
-            _pool=_pool,
-            _stacktrace=_stacktrace,
-        )
-
-    def _is_self_signed_certificate_error(self, error):
-        error_msg = "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self signed certificate"
-        return error and isinstance(error, SSLCertVerificationError) and error_msg in str(error)
 
 
 class Client(object):
