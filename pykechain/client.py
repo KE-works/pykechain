@@ -32,7 +32,7 @@ from .models.input_checks import check_datetime, check_list_of_text, check_text,
 from .models.banner import Banner
 
 
-class KERetry(Retry):
+class PykeRetry(Retry):
     def increment(
         self,
         method=None,
@@ -117,11 +117,11 @@ class Client(object):
 
         # Retry implementation
         adapter = HTTPAdapter(
-            max_retries=KERetry(total=RETRY_TOTAL,
-                              connect=RETRY_ON_CONNECTION_ERRORS,
-                              read=RETRY_ON_READ_ERRORS,
-                              redirect=RETRY_ON_REDIRECT_ERRORS,
-                              backoff_factor=RETRY_BACKOFF_FACTOR)
+            max_retries=PykeRetry(total=RETRY_TOTAL,
+                                  connect=RETRY_ON_CONNECTION_ERRORS,
+                                  read=RETRY_ON_READ_ERRORS,
+                                  redirect=RETRY_ON_REDIRECT_ERRORS,
+                                  backoff_factor=RETRY_BACKOFF_FACTOR)
         )
         self.session.mount('https://', adapter=adapter)
         self.session.mount('http://', adapter=adapter)
