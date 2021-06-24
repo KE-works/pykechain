@@ -12,7 +12,8 @@ from pykechain.defaults import API_PATH, API_EXTRA_PARAMS, RETRY_ON_CONNECTION_E
     RETRY_TOTAL, RETRY_ON_READ_ERRORS, RETRY_ON_REDIRECT_ERRORS, PARTS_BATCH_LIMIT
 from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
     PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
-    ActivityClassification, ActivityStatus, NotificationStatus, NotificationEvent, NotificationChannels, ContextType
+    ActivityClassification, ActivityStatus, NotificationStatus, NotificationEvent, NotificationChannels, ContextType, \
+    ContextGroup
 from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
     APIError
 from pykechain.models import Part, Property, Activity, Scope, PartSet, Base, AnyProperty, Service, \
@@ -3130,6 +3131,7 @@ class Client(object):
             name: Text,
             context_type: ContextType,
             scope: Scope,
+            group: ContextGroup = None,
             activities=None,
             description: Text = None,
             tags=None,
@@ -3147,7 +3149,8 @@ class Client(object):
         :param scope: Scope object or Scope Id where the Context is active on.
         :param description: (optional) description of the Context
         :param activities: (optional) associated list of Activity or activity object ID
-        :param tags: (optional) tags
+        :param group: (optional) group of the context. Choose from `ContextGroup` enumeration.
+        :param tags: (optional) list of tags
         :param options: (optional) dictionary with options.
         :param feature_collection: (optional) dict with a geojson feature collection to store for a STATIC_LOCATION
         :param start_date: (optional) start datetime for a TIME_PERIOD context
@@ -3161,6 +3164,7 @@ class Client(object):
             'scope': check_base(scope, Scope, 'scope'),
             'context_type': check_enum(context_type, ContextType, 'context_type'),
             'tags': check_list_of_text(tags, 'tags'),
+            'group': check_enum(group, ContextGroup, "group"),
             'activities': check_list_of_base(activities, Activity, 'activities'),
             'options': check_type(options, dict, 'options'),
             'feature_collection': check_type(feature_collection, dict, 'feature_collection'),
@@ -3216,6 +3220,7 @@ class Client(object):
             context_type: Optional[ContextType] = None,
             activities: Optional[List[Union[Activity, ObjectID]]] = None,
             scope: Optional[Union[Scope, ObjectID]] = None,
+            group: Optional[ContextGroup] = None,
             **kwargs
     ) -> List[Context]:
         """
@@ -3230,11 +3235,12 @@ class Client(object):
         """
         request_params = {
             'id': check_uuid(pk),
-            'context_type': check_enum(context_type, ContextType, 'context'),
-            'activities': check_list_of_base(activities, Activity, 'activities'),
-            'scope': check_base(scope, Scope, "scope")
+            'context_type': check_enum(context_type, ContextType, "context"),
+            'activities': check_list_of_base(activities, Activity, "activities"),
+            'scope': check_base(scope, Scope, "scope"),
+            'group': check_enum(group, ContextGroup, "group"),
         }
-        request_params.update(API_EXTRA_PARAMS['contexts'])
+        request_params.update(API_EXTRA_PARAMS["contexts"])
 
         if kwargs:
             request_params.update(**kwargs)

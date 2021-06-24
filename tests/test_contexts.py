@@ -1,6 +1,6 @@
 from unittest import skip
 
-from pykechain.enums import ContextType
+from pykechain.enums import ContextType, ContextGroup
 # new in 1.13
 from pykechain.models import Activity
 from pykechain.models.context import Context
