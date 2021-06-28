@@ -5,6 +5,12 @@ from urllib3.exceptions import MaxRetryError
 
 
 class PykeRetry(Retry):
+    """
+    Pykechain Implementation of urllib3.Retry function.
+
+    It contains a fast bailout of any SSLCertificate Errors.
+    """
+
     def increment(
         self,
         method=None,
@@ -14,9 +20,7 @@ class PykeRetry(Retry):
         _pool=None,
         _stacktrace=None,
     ):
-        """
-        In case of failed verification of self signed certificate we short circuit the retry routine.
-        """
+        """In case of failed verification of self signed certificate we short circuit the retry routine."""
         if self._is_self_signed_certificate_error(error):
             raise MaxRetryError(_pool, url, error)
 
