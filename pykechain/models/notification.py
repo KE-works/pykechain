@@ -37,17 +37,17 @@ class Notification(Base):
         super().__init__(json, **kwargs)
 
         self.message = json.get('message', '')
-        self.subject = json.get('subject', '')  # type: Text
-        self.status = json.get('status', '')  # type: Text
-        self.event = json.get('event', '')  # type: Text
-        self.channels = json.get('channels', list())  # type: List
-        self.recipient_user_ids = json.get('recipient_users', list())  # type: List
-        self.team_id = json.get('team', '')  # type: Text
-        self.from_user_id = json.get('from_user', '')  # type: Text
+        self.subject: Text = json.get('subject', '')
+        self.status: Text = json.get('status', '')
+        self.event: Text = json.get('event', '')
+        self.channels: List = json.get('channels', list())
+        self.recipient_user_ids: List = json.get('recipient_users', list())
+        self.team_id: Text = json.get('team', '')
+        self.from_user_id: Text = json.get('from_user', '')
 
-        self._from_user = None  # type: Optional['User']
-        self._recipient_users = None  # type: Optional[List['User']]
-        self._team = None  # type: Optional['Team']
+        self._from_user: Optional['User'] = None
+        self._recipient_users: Optional[List['User']] = None
+        self._team: Optional['Team'] = None
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Notification id {}>".format(self.id[-8:])

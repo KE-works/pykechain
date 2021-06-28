@@ -78,18 +78,18 @@ class Part(TreeObject):
         # we need to run the init of 'Base' instead of 'Part' as we do not need the instantiation of properties
         super().__init__(json, **kwargs)
 
-        self.ref = json.get('ref')  # type: Text
-        self.model_id = json.get("model_id")  # type: Text
-        self.category = json.get('category')  # type: Category
-        self.description = json.get('description')  # type: Text
-        self.multiplicity = json.get('multiplicity')  # type: Text
-        self.classification = json.get('classification')  # type: Classification
+        self.ref: Text = json.get('ref')
+        self.model_id: Text = json.get("model_id")
+        self.category: Category = json.get('category')
+        self.description: Text = json.get('description')
+        self.multiplicity: Text = json.get('multiplicity')
+        self.classification: Classification = json.get('classification')
 
-        sorted_properties = sorted(json['properties'], key=lambda p: p.get('order', 0))  # type: List[Dict]
-        self.properties = [Property.create(p, client=self._client) for p in sorted_properties]  # type: List[Property]
+        sorted_properties: List[Dict] = sorted(json['properties'], key=lambda p: p.get('order', 0))
+        self.properties: List[Property] = [Property.create(p, client=self._client) for p in sorted_properties]
 
-        proxy_data = json.get('proxy_source_id_name', dict())  # type: Optional[Dict]
-        self._proxy_model_id = proxy_data.get('id') if proxy_data else None  # type: Optional[Text]
+        proxy_data: Optional[Dict] = json.get('proxy_source_id_name', dict())
+        self._proxy_model_id: Optional[Text] = proxy_data.get('id') if proxy_data else None
 
     def __call__(self, *args, **kwargs) -> 'Part':
         """Short-hand version of the `child` method."""
@@ -712,7 +712,7 @@ class Part(TreeObject):
         parsed_dict = dict()
 
         for prop_name_or_id, property_value in update_dict.items():
-            property_to_update = part.property(prop_name_or_id)  # type: Property
+            property_to_update: Property = part.property(prop_name_or_id)
 
             updated_p = {
                 "value": property_to_update.serialize_value(property_value),
@@ -810,7 +810,7 @@ class Part(TreeObject):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not add to Part {}".format(self), response=response)
 
-        new_part_instance = Part(response.json()['results'][0], client=self._client)  # type: Part
+        new_part_instance: Part = Part(response.json()['results'][0], client=self._client)
 
         # ensure that cached children are updated
         if self._cached_children is not None:

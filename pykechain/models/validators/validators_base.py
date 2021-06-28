@@ -19,7 +19,7 @@ class BaseValidator(object):
     :type accuracy: float
     """
 
-    jsonschema = None  # type: Union[Dict, None]
+    jsonschema: Union[Dict, None] = None
     accuracy = 1E-6
 
     def __init__(self, json=None, *args, **kwargs):
@@ -54,7 +54,7 @@ class PropertyValidator(BaseValidator):
     :type jsonschema: dict
     """
 
-    vtype = PropertyVTypes.NONEVALIDATOR  # type: str
+    vtype: str = PropertyVTypes.NONEVALIDATOR
     jsonschema = validator_jsonschema_stub
 
     def __init__(self, json=None, *args, **kwargs):

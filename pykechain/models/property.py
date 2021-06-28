@@ -55,8 +55,8 @@ class Property(BaseInScope):
         """Construct a Property from a json object."""
         super().__init__(json, **kwargs)
 
-        self.output = json.get('output')  # type: bool
-        self.model_id = json.get('model_id')  # type: Optional[Text]
+        self.output: bool = json.get('output')
+        self.model_id: Optional[Text] = json.get('model_id')
         self.part_id = json.get('part_id')
         self.ref = json.get('ref')
         self.type = json.get('property_type')
@@ -66,13 +66,13 @@ class Property(BaseInScope):
         self.order = json.get('order')
 
         # Create protected variables
-        self._value = json.get('value')  # type: Any
-        self._options = json.get('value_options', {})  # type: Dict
-        self._part = None  # type: Optional['Part']
-        self._model = None  # type: Optional['Property']
-        self._validators = []  # type: List[PropertyValidator]
-        self._validation_results = []  # type: List
-        self._validation_reasons = []  # type: List
+        self._value: Any = json.get('value')
+        self._options: Dict = json.get('value_options', {})
+        self._part: Optional['Part'] = None
+        self._model: Optional['Property'] = None
+        self._validators: List[PropertyValidator] = []
+        self._validation_results: List = []
+        self._validation_reasons: List = []
 
         self._representations_container = RepresentationsComponent(
             self,

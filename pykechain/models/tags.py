@@ -13,7 +13,7 @@ class TagsMixin:
     :type tags: list
     """
 
-    _tags = list()  # type: List[Text]
+    _tags: List[Text] = list()
 
     @abstractmethod
     def edit(self, tags: Optional[Iterable[Text]] = None, *args, **kwargs) -> None:

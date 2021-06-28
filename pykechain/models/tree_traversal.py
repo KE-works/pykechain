@@ -20,9 +20,9 @@ class TreeObject(BaseInScope, ABC):
         """
         super().__init__(json=json, **kwargs)
 
-        self.parent_id = json.get('parent_id', None)  # type: Optional[Text]
-        self._parent = None  # type: Optional[T]
-        self._cached_children = None  # type: Optional[List[T]]
+        self.parent_id: Optional[Text] = json.get('parent_id', None)
+        self._parent: Optional[T] = None
+        self._cached_children: Optional[List[T]] = None
 
     def __call__(self: T, *args, **kwargs) -> T:
         """Short-hand version of the `child` method."""

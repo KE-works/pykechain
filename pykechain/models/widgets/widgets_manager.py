@@ -84,7 +84,7 @@ class WidgetsManager(Iterable):
         :returns: None
         :raises IllegalArgumentError: if not provided one of :class:`Activity` or activity uuid and a `Client`
         """
-        self._widgets = list(widgets)  # type: List[Widget]
+        self._widgets: List[Widget] = list(widgets)
         for widget in self._widgets:
             widget.manager = self
 
@@ -95,9 +95,9 @@ class WidgetsManager(Iterable):
             raise IllegalArgumentError(
                 "The `WidgetsManager` should be provided a :class:`Activity` to function properly.")
 
-        self.activity = activity  # type: Activity
+        self.activity: Activity = activity
         self._activity_id = activity.id
-        self._client = activity._client  # type: Client
+        self._client: Client = activity._client
 
     def __repr__(self) -> Text:  # pragma: no cover
         return "<pyke {} object {} widgets>".format(self.__class__.__name__, self.__len__())
@@ -323,8 +323,8 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: 'Part'  # noqa
-        parent_instance = _retrieve_object_id(obj=parent_instance)  # type: 'Part'  # noqa
+        part_model: 'Part' = _retrieve_object(obj=part_model, method=self._client.model)  # noqa
+        parent_instance: 'Part' = _retrieve_object_id(obj=parent_instance)  # noqa
         sort_property_id = _retrieve_object_id(obj=sort_property)
 
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
@@ -479,9 +479,9 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: 'Part'  # noqa
-        parent_instance_id = _retrieve_object_id(obj=parent_instance)  # type: text_type
-        sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
+        part_model: 'Part' = _retrieve_object(obj=part_model, method=self._client.model)  # noqa
+        parent_instance_id: text_type = _retrieve_object_id(obj=parent_instance)
+        sort_property_id: text_type = _retrieve_object_id(obj=sort_property)
         if not sort_property_id and sort_name:
             sort_property_id = MetaWidget.NAME
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
@@ -576,8 +576,8 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        attachment_property = _retrieve_object(attachment_property,
-                                               method=self._client.property)  # type: 'Property'
+        attachment_property: 'Property' = _retrieve_object(attachment_property,
+                                               method=self._client.property)
         meta = _initiate_meta(kwargs, activity=self.activity)
 
         meta.update({
@@ -745,7 +745,7 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_instance = _retrieve_object(part_instance, method=self._client.part)  # type: 'Part'  # noqa: F821
+        part_instance: 'Part' = _retrieve_object(part_instance, method=self._client.part)  # noqa: F821
 
         if not show_columns:
             show_columns = list()
@@ -830,7 +830,7 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the script is uuid type or class `Service`
-        service = _retrieve_object(obj=service, method=self._client.service)  # type: 'Service'  # noqa
+        service: 'Service' = _retrieve_object(obj=service, method=self._client.service)  # noqa
 
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
@@ -1286,8 +1286,8 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        attachment_property = _retrieve_object(attachment_property,
-                                               method=self._client.property)  # type: 'AttachmentProperty'  # noqa
+        attachment_property: 'AttachmentProperty' = _retrieve_object(attachment_property,
+                                               method=self._client.property)  # noqa
         meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
         check_type(editable, bool, "editable")
@@ -1407,7 +1407,7 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        weather_property = _retrieve_object(weather_property, method=self._client.property)  # type: 'Property'  # noqa
+        weather_property: 'Property' = _retrieve_object(weather_property, method=self._client.property)  # noqa
         meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
 
@@ -1482,7 +1482,7 @@ class WidgetsManager(Iterable):
         :return: Service Card Widget
         """
         # Check whether the script is uuid type or class `Service`
-        service = _retrieve_object(obj=service, method=self._client.service)  # type: 'Service'  # noqa
+        service: 'Service' = _retrieve_object(obj=service, method=self._client.service)  # noqa
 
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)

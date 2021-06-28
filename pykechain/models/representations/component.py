@@ -29,10 +29,10 @@ class RepresentationsComponent(object):
         """
         self._parent_object = parent_object
         self._repr_options = representation_options
-        self._update_method = update_method  # type: Callable
+        self._update_method: Callable = update_method
 
         # Construct representation objects
-        self._representations = []  # type: List['AnyRepresentation']
+        self._representations: List['AnyRepresentation'] = []
         representations_json = self._repr_options
         for representation_json in representations_json:
             self._representations.append(

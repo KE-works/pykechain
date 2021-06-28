@@ -43,9 +43,9 @@ class BaseRepresentation(object):
             del prop
 
         self._obj = obj
-        self._json = json or dict(rtype=self.rtype, config=dict())  # type: dict
+        self._json: dict = json or dict(rtype=self.rtype, config=dict())
 
-        self._config = self._json.get("config", dict())  # type: dict
+        self._config: dict = self._json.get("config", dict())
         self._json["config"] = self._config
 
         if value is not None:
@@ -85,7 +85,7 @@ class BaseRepresentation(object):
         try:
             from pykechain.models.representations import rtype_class_map
 
-            repr_class = rtype_class_map[rtype]  # type: type(BaseRepresentation)
+            repr_class: type(BaseRepresentation) = rtype_class_map[rtype]
         except KeyError:
             raise TypeError('Unknown rtype "{}" in json'.format(rtype))
 

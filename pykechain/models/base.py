@@ -19,7 +19,7 @@ class Base(object):
     def __init__(self, json: Dict, client: 'Client'):
         """Construct a model from provided json data."""
         self._json_data = json
-        self._client = client  # type: 'Client'
+        self._client: 'Client' = client
 
         self.id = json.get('id', None)
         self.name = json.get('name', None)
@@ -74,7 +74,7 @@ class BaseInScope(Base):
         super().__init__(json, *args, **kwargs)
 
         self.scope_id = json.get('scope_id', json.get('scope', None))
-        self._scope = None  # type: Optional['Scope']
+        self._scope: Optional['Scope'] = None
 
     @property
     def scope(self):

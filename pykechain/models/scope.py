@@ -211,8 +211,8 @@ class Scope(Base, TagsMixin):
         role = check_enum(role, ScopeRoles, "role")
         user = check_text(user, "user")
 
-        users = self._client._retrieve_users()["results"]  # type: List[Dict]
-        user_object = find(users, lambda u: u["username"] == user)  # type: Dict
+        users: List[Dict] = self._client._retrieve_users()["results"]
+        user_object: Dict = find(users, lambda u: u["username"] == user)
         if user_object is None:
             raise NotFoundError('User "{}" does not exist'.format(user))
 
