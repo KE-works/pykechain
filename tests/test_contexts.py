@@ -1,6 +1,4 @@
-from unittest import skip
-
-from pykechain.enums import ContextType, ContextGroup
+from pykechain.enums import ContextType
 # new in 1.13
 from pykechain.models import Activity
 from pykechain.models.context import Context
@@ -16,10 +14,9 @@ class TestContextSetup(TestBetamax):
     def setUp(self):
         super().setUp()
         self.context = self.client.create_context(
-            scope=self.project.id,
-            context_type=ContextType.TIME_PERIOD,
             name="__my first context for testing",
-            tags = ["testing"]
+            context_type=ContextType.TIME_PERIOD, scope=self.project.id,
+            tags=["testing"]
         )  # type: Context
 
     def tearDown(self):
@@ -30,10 +27,8 @@ class TestContextSetup(TestBetamax):
 class TestContextCreate(TestBetamax):
     def test_create_context(self):
         context = self.client.create_context(
-            scope=self.project,
-            context_type=ContextType.TIME_PERIOD,
             name="__my first context for testing",
-            tags=["testing"]
+            context_type=ContextType.TIME_PERIOD, scope=self.project, tags=["testing"]
         )
         self.assertTrue(context)
         self.assertSetEqual(set(context.tags), {"testing"})
@@ -43,7 +38,6 @@ class TestContextCreate(TestBetamax):
 
         # destroy
         context.delete()
-
 
 
 class TestContexts(TestContextSetup):
@@ -97,7 +91,12 @@ class TestContexts(TestContextSetup):
 
     def test_context_unlink_single_activity_when_more_activities(self):
         self.assertFalse(self.context.activities)
-        self.context.link_activities(activities=[self.project.activity(name="Specify wheel diameter"), self.project.activity(name="Task - Form")])
+        self.context.link_activities(
+            activities=[
+                self.project.activity(name="Specify wheel diameter"),
+                self.project.activity(name="Task - Form")
+            ]
+        )
         self.assertEqual(len(self.context.activities), 2)
         self.context.unlink_activities(activities=[self.project.activity(name="Specify wheel diameter")])
         self.assertEqual(len(self.context.activities), 1)

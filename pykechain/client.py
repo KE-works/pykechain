@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Dict, Tuple, Optional, Any, List, Union, Text, Callable
+from typing import Any, Callable, Dict, List, Optional, Text, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -8,28 +8,26 @@ from envparse import env
 from requests.adapters import HTTPAdapter  # type: ignore
 from urllib3 import Retry
 
-from pykechain.defaults import API_PATH, API_EXTRA_PARAMS, RETRY_ON_CONNECTION_ERRORS, RETRY_BACKOFF_FACTOR, \
-    RETRY_TOTAL, RETRY_ON_READ_ERRORS, RETRY_ON_REDIRECT_ERRORS, PARTS_BATCH_LIMIT
-from pykechain.enums import Category, KechainEnv, ScopeStatus, ActivityType, ServiceType, ServiceEnvironmentVersion, \
-    PropertyType, TeamRoles, Multiplicity, ServiceScriptUser, WidgetTypes, \
-    ActivityClassification, ActivityStatus, NotificationStatus, NotificationEvent, NotificationChannels, ContextType, \
-    ContextGroup
-from pykechain.exceptions import ClientError, ForbiddenError, IllegalArgumentError, NotFoundError, MultipleFoundError, \
-    APIError
-from pykechain.models import Part, Property, Activity, Scope, PartSet, Base, AnyProperty, Service, \
-    ServiceExecution
+from pykechain.defaults import API_EXTRA_PARAMS, API_PATH, PARTS_BATCH_LIMIT, RETRY_BACKOFF_FACTOR, \
+    RETRY_ON_CONNECTION_ERRORS, RETRY_ON_READ_ERRORS, RETRY_ON_REDIRECT_ERRORS, RETRY_TOTAL
+from pykechain.enums import ActivityClassification, ActivityStatus, ActivityType, Category, ContextGroup, ContextType, \
+    KechainEnv, Multiplicity, NotificationChannels, NotificationEvent, NotificationStatus, PropertyType, ScopeStatus, \
+    ServiceEnvironmentVersion, ServiceScriptUser, ServiceType, TeamRoles, WidgetTypes
+from pykechain.exceptions import APIError, ClientError, ForbiddenError, IllegalArgumentError, MultipleFoundError, \
+    NotFoundError
+from pykechain.models import Activity, AnyProperty, Base, Part, PartSet, Property, Scope, Service, ServiceExecution
 from pykechain.models.association import Association
 from pykechain.models.notification import Notification
 from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.widgets.widget import Widget
-from pykechain.utils import is_uuid, find, is_valid_email, get_in_chunks, slugify_ref
+from pykechain.utils import find, get_in_chunks, is_uuid, is_valid_email, slugify_ref
 from .__about__ import version as pykechain_version
 from .models.banner import Banner
 from .models.context import Context
 from .models.expiring_download import ExpiringDownload
-from .models.input_checks import check_datetime, check_list_of_text, check_text, check_enum, check_type, \
-    check_list_of_base, check_base, check_uuid, check_list_of_dicts, check_url, check_user
+from .models.input_checks import check_base, check_datetime, check_enum, check_list_of_base, check_list_of_dicts, \
+    check_list_of_text, check_text, check_type, check_url, check_user, check_uuid
 from .typing import ObjectID
 
 
@@ -3131,7 +3129,7 @@ class Client(object):
             name: Text,
             context_type: ContextType,
             scope: Scope,
-            group: ContextGroup = None,
+            context_group: ContextGroup = None,
             activities=None,
             description: Text = None,
             tags=None,
@@ -3149,7 +3147,7 @@ class Client(object):
         :param scope: Scope object or Scope Id where the Context is active on.
         :param description: (optional) description of the Context
         :param activities: (optional) associated list of Activity or activity object ID
-        :param group: (optional) group of the context. Choose from `ContextGroup` enumeration.
+        :param context_group: (optional) context_group of the context. Choose from `ContextGroup` enumeration.
         :param tags: (optional) list of tags
         :param options: (optional) dictionary with options.
         :param feature_collection: (optional) dict with a geojson feature collection to store for a STATIC_LOCATION
@@ -3164,7 +3162,7 @@ class Client(object):
             'scope': check_base(scope, Scope, 'scope'),
             'context_type': check_enum(context_type, ContextType, 'context_type'),
             'tags': check_list_of_text(tags, 'tags'),
-            'group': check_enum(group, ContextGroup, "group"),
+            'context_group': check_enum(context_group, ContextGroup, "context_group"),
             'activities': check_list_of_base(activities, Activity, 'activities'),
             'options': check_type(options, dict, 'options'),
             'feature_collection': check_type(feature_collection, dict, 'feature_collection'),
@@ -3220,7 +3218,7 @@ class Client(object):
             context_type: Optional[ContextType] = None,
             activities: Optional[List[Union[Activity, ObjectID]]] = None,
             scope: Optional[Union[Scope, ObjectID]] = None,
-            group: Optional[ContextGroup] = None,
+            context_group: Optional[ContextGroup] = None,
             **kwargs
     ) -> List[Context]:
         """
@@ -3238,7 +3236,7 @@ class Client(object):
             'context_type': check_enum(context_type, ContextType, "context"),
             'activities': check_list_of_base(activities, Activity, "activities"),
             'scope': check_base(scope, Scope, "scope"),
-            'group': check_enum(group, ContextGroup, "group"),
+            'context_group': check_enum(context_group, ContextGroup, "context_group"),
         }
         request_params.update(API_EXTRA_PARAMS["contexts"])
 

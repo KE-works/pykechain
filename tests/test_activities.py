@@ -546,20 +546,12 @@ class TestActivities(TestBetamax):
         initial_tags = ['tag_one', 'tag_two']
         initial_assignee = self.client.user(username="testuser")
 
-        self.task.edit(
-            name=initial_name,
-            description=initial_description,
-            start_date=initial_start_date,
-            assignees=[initial_assignee.username],
-            due_date=initial_due_date,
-            tags=initial_tags,
-        )
+        self.task.edit(name=initial_name, description=initial_description, tags=initial_tags,
+                       start_date=initial_start_date, due_date=initial_due_date, assignees=[initial_assignee.username])
 
         # Edit without mentioning values, everything should stay the same
         new_name = 'New name for task'
-        self.task.edit(
-            name=new_name
-        )
+        self.task.edit(name=new_name)
 
         # testing
         self.assertEqual(self.task.name, new_name)
@@ -571,15 +563,8 @@ class TestActivities(TestBetamax):
         self.assertEqual(self.task.tags, initial_tags)
 
         # Edit with clearing the values, name and status cannot be cleared
-        self.task.edit(
-            name=None,
-            description=None,
-            start_date=None,
-            due_date=None,
-            status=None,
-            assignees=None,
-            tags=None
-        )
+        self.task.edit(name=None, description=None, tags=None, start_date=None, due_date=None, status=None,
+                       assignees=None)
         self.task.refresh()
         self.assertEqual(self.task.name, new_name)
         self.assertEqual(self.task.description, str())

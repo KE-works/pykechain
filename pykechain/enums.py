@@ -468,7 +468,7 @@ class ContextType(Enum):
 
 class ContextGroup(Enum):
     """
-    Context may have a group.
+    Context may have a context_group.
 
     ..versionadded: 3.11
 

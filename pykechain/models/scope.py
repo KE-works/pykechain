@@ -281,10 +281,8 @@ class Scope(Base, TagsMixin):
         Examples
         --------
         >>> from datetime import datetime
-        >>> project.edit(name='New project name',
-        ...              description='Changing the description just because I can',
-        ...              start_date=datetime.now(),  # naive time is interpreted as UTC time
-        ...              status=ScopeStatus.CLOSED)
+        >>> project.edit(name='New project name',description='Changing the description just because I can',
+        ... start_date=datetime.now(),status=ScopeStatus.CLOSED)
 
         If we want to provide timezone aware datetime objects we can use the 3rd party convenience library :mod:`pytz`.
         Mind that we need to fetch the timezone first and use `<timezone>.localize(<your datetime>)` to make it
@@ -300,7 +298,7 @@ class Scope(Base, TagsMixin):
         >>> start_date_tzaware = datetime.now(pytz.utc)
         >>> mytimezone = pytz.timezone('Europe/Amsterdam')
         >>> due_date_tzaware = mytimezone.localize(datetime(2019, 10, 27, 23, 59, 0))
-        >>> project.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
+        >>> project.edit(start_date=start_date_tzaware,due_date=due_date_tzaware)
 
         To assign a scope to a team see the following example::
 
@@ -761,7 +759,7 @@ class Scope(Base, TagsMixin):
 
         :return: a list of Context objects
         """
-        return self._client.contexts(*args, scope=self, **kwargs)
+        return self._client.contexts(scope=self, **kwargs)
 
     def create_context(self, *args, **kwargs) -> Context:
         """
@@ -773,4 +771,4 @@ class Scope(Base, TagsMixin):
 
         :return: a Context object
         """
-        return self._client.create_context(*args, scope=self, **kwargs)
+        return self._client.create_context(scope=self, **kwargs)

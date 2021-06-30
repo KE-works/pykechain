@@ -566,10 +566,8 @@ class Activity(TreeObject, TagsMixin):
         -------
         >>> from datetime import datetime
         >>> my_task = project.activity('Specify the wheel diameter')
-        >>> my_task.edit(name='Specify wheel diameter and circumference',
-        ...              description='The diameter and circumference are specified in inches',
-        ...              start_date=datetime.utcnow(),  # naive time is interpreted as UTC time
-        ...              assignee='testuser')
+        >>> my_task.edit(name='Specify wheel diameter and circumference',description='The diameter and circumference'
+        ... 'are specified in inches', start_date=datetime.utcnow(), assignee='testuser')
 
         If we want to provide timezone aware datetime objects we can use the 3rd party convenience library :mod:`pytz`.
         Mind that we need to fetch the timezone first and use `<timezone>.localize(<your datetime>)` to make it
@@ -585,7 +583,7 @@ class Activity(TreeObject, TagsMixin):
         >>> start_date_tzaware = datetime.now(pytz.utc)
         >>> mytimezone = pytz.timezone('Europe/Amsterdam')
         >>> due_date_tzaware = mytimezone.localize(datetime(2019, 10, 27, 23, 59, 0))
-        >>> my_task.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
+        >>> my_task.edit(start_date=start_date_tzaware,due_date=due_date_tzaware)
 
         Not mentioning an input parameter in the function will leave it unchanged. Setting a parameter as None will
         clear its value (where that is possible). The example below will clear the due_date, but leave everything else
@@ -1031,7 +1029,7 @@ class Activity(TreeObject, TagsMixin):
 
         :return: a list of Context objects
         """
-        return self._client.contexts(*args, scope=self.scope, activity=self, **kwargs)
+        return self._client.contexts(scope=self.scope, activity=self, **kwargs)
 
     def create_context(self, *args, **kwargs) -> 'Context':
         """
@@ -1043,7 +1041,7 @@ class Activity(TreeObject, TagsMixin):
 
         :return: a Context object
         """
-        return self._client.create_context(*args, scope=self.scope, actitivities=[self], **kwargs)
+        return self._client.create_context(scope=self.scope, actitivities=[self], **kwargs)
 
     def link_context(self, context: 'Context') -> None:
         """

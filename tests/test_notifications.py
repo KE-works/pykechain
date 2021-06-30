@@ -189,16 +189,8 @@ class TestNotifications(_TestNotification):
         event = NotificationEvent.EXPORT_ACTIVITY_ASYNC
         channel = NotificationChannels.APP
 
-        self.notification.edit(
-            subject=subject,
-            message=message,
-            status=status,
-            recipients=recipients,
-            team=self.TEAM,
-            from_user=from_user,
-            event=event,
-            channel=channel,
-        )
+        self.notification.edit(subject=subject, message=message, status=status, recipients=recipients, team=self.TEAM,
+                               from_user=from_user, event=event, channel=channel)
 
         self.assertEqual(subject, self.notification.subject)
         self.assertEqual(message, self.notification.message)
@@ -242,23 +234,14 @@ class TestNotifications(_TestNotification):
         initial_event = NotificationEvent.EXPORT_ACTIVITY_ASYNC
         initial_channel = NotificationChannels.APP
 
-        self.notification.edit(
-            subject=initial_subject,
-            message=initial_message,
-            status=initial_status,
-            recipients=initial_recipients,
-            team=self.TEAM,
-            from_user=initial_from_user,
-            event=initial_event,
-            channel=initial_channel,
-        )
+        self.notification.edit(subject=initial_subject, message=initial_message, status=initial_status,
+                               recipients=initial_recipients, team=self.TEAM, from_user=initial_from_user,
+                               event=initial_event, channel=initial_channel)
 
         # Edit without mentioning values, everything should stay the same
         new_subject = "AWESOME SUBJECT NEW"
 
-        self.notification.edit(
-            subject=new_subject
-        )
+        self.notification.edit(subject=new_subject)
 
         # testing
         self.assertEqual(self.notification.subject, new_subject)
@@ -270,16 +253,8 @@ class TestNotifications(_TestNotification):
         self.assertEqual(self.notification.channels, [initial_channel])
 
         # Edit with clearing the values, name and status cannot be cleared
-        self.notification.edit(
-            subject=None,
-            message=None,
-            status=None,
-            recipients=None,
-            team=None,
-            from_user=None,
-            event=None,
-            channel=None,
-        )
+        self.notification.edit(subject=None, message=None, status=None, recipients=None, team=None, from_user=None,
+                               event=None, channel=None)
 
         self.assertEqual(self.notification.subject, new_subject)
         self.assertEqual(self.notification.message, initial_message)

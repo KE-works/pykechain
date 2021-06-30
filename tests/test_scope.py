@@ -260,15 +260,9 @@ class TestScopeEdit(TestBetamax):
         new_due_date = datetime.datetime(2018, 12, 8, tzinfo=None)
         new_tags = ['tag_one', 'tag_two']
 
-        self.scope.edit(
-            name=new_scope_name,
-            description=new_scope_description,
-            start_date=new_start_date,
-            due_date=new_due_date,
-            status=ScopeStatus.CLOSED,
-            category=ScopeCategory.TEMPLATE_SCOPE,
-            tags=new_tags,
-        )
+        self.scope.edit(name=new_scope_name, description=new_scope_description, tags=new_tags,
+                        start_date=new_start_date, due_date=new_due_date, status=ScopeStatus.CLOSED,
+                        category=ScopeCategory.TEMPLATE_SCOPE)
 
         retrieved_project = self.client.scope(id=self.scope.id, status=ScopeStatus.CLOSED)
 
@@ -312,20 +306,12 @@ class TestScopeEdit(TestBetamax):
         initial_tags = ['tag_one', 'tag_two']
         team_one, team_two = self.client.teams()[:2]
 
-        self.scope.edit(
-            name=initial_name,
-            description=initial_description,
-            start_date=initial_start_date,
-            due_date=initial_due_date,
-            tags=initial_tags,
-            team=team_two
-        )
+        self.scope.edit(name=initial_name, description=initial_description, tags=initial_tags,
+                        start_date=initial_start_date, due_date=initial_due_date, team=team_two)
 
         # Edit without mentioning values, everything should stay the same
         new_name = 'Just Pykechain testing (bike project)'
-        self.scope.edit(
-            name=new_name
-        )
+        self.scope.edit(name=new_name)
 
         # testing
         self.assertEqual(self.scope.name, new_name)
@@ -337,14 +323,7 @@ class TestScopeEdit(TestBetamax):
         self.assertEqual(self.scope.tags, initial_tags)
 
         # Edit with clearing the values, name and status cannot be cleared
-        self.scope.edit(
-            name=None,
-            description=None,
-            start_date=None,
-            due_date=None,
-            status=None,
-            tags=None
-        )
+        self.scope.edit(name=None, description=None, tags=None, start_date=None, due_date=None, status=None)
         self.scope.refresh()
         self.assertEqual(self.scope.name, new_name)
         self.assertEqual(self.scope.description, str())

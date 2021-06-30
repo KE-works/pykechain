@@ -132,12 +132,12 @@ class Service(BaseInScope):
 
         Example
         -------
-        >>> service.edit(name='Car service', version='203')
+        >>> service.edit(name='Car service',version='203')
 
         Not mentioning an input parameter in the function will leave it unchanged. Setting a parameter as None will
         clear its value (where that is possible). The example below will clear the description and edit the name.
 
-        >>> service.edit(name="Plane service", description=None)
+        >>> service.edit(name="Plane service",description=None)
 
         """
         update_dict = {

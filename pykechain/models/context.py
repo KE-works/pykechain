@@ -1,22 +1,16 @@
 from datetime import datetime
-from typing import Text, Dict, Optional, Union, List
+from typing import Dict, List, Optional, Text, Union
 
 import requests
 
-from pykechain.enums import ContextType, ContextGroup
+from pykechain.enums import ContextGroup, ContextType
 from pykechain.exceptions import APIError
 from pykechain.models import BaseInScope
-from pykechain.models.input_checks import (
-    check_text,
-    check_base,
-    check_list_of_text,
-    check_list_of_base,
-    check_type,
-    check_datetime, check_enum,
-)
+from pykechain.models.input_checks import (check_base, check_datetime, check_enum, check_list_of_base,
+                                           check_list_of_text, check_text, check_type)
 from pykechain.models.tags import TagsMixin
-from pykechain.typing import ObjectIDs, ObjectID
-from pykechain.utils import parse_datetime, empty, Empty, clean_empty_values
+from pykechain.typing import ObjectID, ObjectIDs
+from pykechain.utils import Empty, clean_empty_values, empty, parse_datetime
 
 
 class Context(BaseInScope, TagsMixin):
@@ -34,7 +28,7 @@ class Context(BaseInScope, TagsMixin):
         self.description = json.get("description", "")  # type:Text
         self.context_type = json.get("context_type")  # type: ContextType
         self.options = json.get("options", dict())  # type: Dict
-        self.group = json.get("group", "")  # type: ContextGroup
+        self.context_group = json.get("context_group", "")  # type: ContextGroup
         self._tags = json.get("tags")
 
         # associated activities
@@ -54,7 +48,7 @@ class Context(BaseInScope, TagsMixin):
             name: Optional[Union[Text, Empty]] = empty,
             description: Optional[Union[Text, Empty]] = empty,
             tags: Optional[List[Union[Text, Empty]]] = empty,
-            group: Optional[Union[ContextGroup, Empty]] = empty,
+            context_group: Optional[Union[ContextGroup, Empty]] = empty,
             scope: Optional[Union['Scope', ObjectID]] = empty,
             options: Optional[dict] = empty,
             activities: Optional[Union[List['Activity'], ObjectIDs]] = empty,
@@ -71,7 +65,7 @@ class Context(BaseInScope, TagsMixin):
         :param description: (optional) description of the Context
         :param activities: (optional) associated list of Activity or activity object ID
         :param tags: (optional) tags
-        :param group: (optional) a context group of the choices of `ContextGroup`
+        :param context_group: (optional) a context context_group of the choices of `ContextGroup`
         :param options: (optional) dictionary with options.
         :param feature_collection: (optional) dict with a geojson feature collection to store for a STATIC_LOCATION
         :param start_date: (optional) start datetime for a TIME_PERIOD context
@@ -86,7 +80,7 @@ class Context(BaseInScope, TagsMixin):
             "description": check_text(description, "description"),
             "scope": check_base(scope, Scope, "scope"),
             "tags": check_list_of_text(tags, "tags"),
-            "group": check_enum(group, ContextGroup, "group"),
+            "context_group": check_enum(context_group, ContextGroup, "context_group"),
             "activities": check_list_of_base(activities, Activity, "activities"),
             "options": check_type(options, dict, "options"),
             "feature_collection": check_type(
