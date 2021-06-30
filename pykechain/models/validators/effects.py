@@ -23,8 +23,7 @@ class TextEffect(ValidatorEffect):
         super(TextEffect, self).__init__(json=json, text=text, **kwargs)
         self.text = text
 
-    def as_json(self):
-        # type: () -> dict
+    def as_json(self) -> dict:
         """Represent effect as JSON dict."""
         self._config['text'] = self.text
         return self._json
@@ -95,8 +94,7 @@ class VisualEffect(ValidatorEffect):
         super(VisualEffect, self).__init__(json=json, **kwargs)
         self.applyCss = applyCss or self._config.get('applyCss')
 
-    def as_json(self):
-        # type: () -> dict
+    def as_json(self) -> dict:
         """Represent effect as JSON dict."""
         self._config['applyCss'] = self.applyCss
         self._json['config'] = self._config

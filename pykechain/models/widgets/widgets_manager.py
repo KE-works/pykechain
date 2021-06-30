@@ -24,15 +24,6 @@ from pykechain.enums import (
     ActivityType,
     ActivityClassification,
 )
-from pykechain.models.widgets.enums import (
-    DashboardWidgetSourceScopes,
-    DashboardWidgetShowTasks,
-    DashboardWidgetShowScopes,
-    MetaWidget,
-    AssociatedObjectId,
-    TasksAssignmentFilterTypes,
-    TasksWidgetColumns,
-)
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from pykechain.models.input_checks import (
     check_enum,
@@ -43,6 +34,15 @@ from pykechain.models.input_checks import (
 )
 from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets import Widget
+from pykechain.models.widgets.enums import (
+    DashboardWidgetSourceScopes,
+    DashboardWidgetShowTasks,
+    DashboardWidgetShowScopes,
+    MetaWidget,
+    AssociatedObjectId,
+    TasksAssignmentFilterTypes,
+    TasksWidgetColumns,
+)
 from pykechain.models.widgets.helpers import (
     _set_title,
     _initiate_meta,
@@ -84,7 +84,7 @@ class WidgetsManager(Iterable):
         :returns: None
         :raises IllegalArgumentError: if not provided one of :class:`Activity` or activity uuid and a `Client`
         """
-        self._widgets = list(widgets)  # type: List[Widget]
+        self._widgets: List[Widget] = list(widgets)
         for widget in self._widgets:
             widget.manager = self
 
@@ -95,9 +95,9 @@ class WidgetsManager(Iterable):
             raise IllegalArgumentError(
                 "The `WidgetsManager` should be provided a :class:`Activity` to function properly.")
 
-        self.activity = activity  # type: Activity
+        self.activity: Activity = activity
         self._activity_id = activity.id
-        self._client = activity._client  # type: Client
+        self._client: Client = activity._client
 
     def __repr__(self) -> Text:  # pragma: no cover
         return "<pyke {} object {} widgets>".format(self.__class__.__name__, self.__len__())
@@ -323,8 +323,8 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: 'Part'  # noqa
-        parent_instance = _retrieve_object_id(obj=parent_instance)  # type: 'Part'  # noqa
+        part_model: 'Part' = _retrieve_object(obj=part_model, method=self._client.model)  # noqa
+        parent_instance: 'Part' = _retrieve_object_id(obj=parent_instance)  # noqa
         sort_property_id = _retrieve_object_id(obj=sort_property)
 
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
@@ -370,36 +370,36 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_filteredgrid_widget(
-        self,
-        part_model: Union['Part', Text],
-        parent_instance: Optional[Union['Part', Text]] = None,
-        title: TITLE_TYPING = False,
-        parent_widget: Optional[Union[Widget, Text]] = None,
-        new_instance: Optional[bool] = True,
-        edit: Optional[bool] = True,
-        clone: Optional[bool] = True,
-        export: Optional[bool] = True,
-        upload: Optional[bool] = True,
-        delete: Optional[bool] = False,
-        incomplete_rows: Optional[bool] = True,
-        emphasize_new_instance: Optional[bool] = True,
-        emphasize_edit: Optional[bool] = False,
-        emphasize_clone: Optional[bool] = False,
-        emphasize_delete: Optional[bool] = False,
-        sort_property: Optional[Union['AnyProperty', Text]] = None,
-        sort_name: Optional[Union[bool, Text]] = False,
-        sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
-        show_name_column: Optional[bool] = True,
-        show_images: Optional[bool] = False,
-        collapse_filters: Optional[bool] = False,
-        page_size: Optional[int] = 25,
-        readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
-        writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
-        all_readable: Optional[bool] = False,
-        all_writable: Optional[bool] = False,
-        excluded_propmodels: Optional[List[Union['AnyProperty', Text]]] = None,
-        prefilters: Optional[Union[List[PropertyValueFilter], Dict]] = None,
-        **kwargs
+            self,
+            part_model: Union['Part', Text],
+            parent_instance: Optional[Union['Part', Text]] = None,
+            title: TITLE_TYPING = False,
+            parent_widget: Optional[Union[Widget, Text]] = None,
+            new_instance: Optional[bool] = True,
+            edit: Optional[bool] = True,
+            clone: Optional[bool] = True,
+            export: Optional[bool] = True,
+            upload: Optional[bool] = True,
+            delete: Optional[bool] = False,
+            incomplete_rows: Optional[bool] = True,
+            emphasize_new_instance: Optional[bool] = True,
+            emphasize_edit: Optional[bool] = False,
+            emphasize_clone: Optional[bool] = False,
+            emphasize_delete: Optional[bool] = False,
+            sort_property: Optional[Union['AnyProperty', Text]] = None,
+            sort_name: Optional[Union[bool, Text]] = False,
+            sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
+            show_name_column: Optional[bool] = True,
+            show_images: Optional[bool] = False,
+            collapse_filters: Optional[bool] = False,
+            page_size: Optional[int] = 25,
+            readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+            writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+            all_readable: Optional[bool] = False,
+            all_writable: Optional[bool] = False,
+            excluded_propmodels: Optional[List[Union['AnyProperty', Text]]] = None,
+            prefilters: Optional[Union[List[PropertyValueFilter], Dict]] = None,
+            **kwargs
     ) -> Widget:
         """
         Add a KE-chain superGrid (e.g. basic table widget) to the customization.
@@ -479,9 +479,9 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_model = _retrieve_object(obj=part_model, method=self._client.model)  # type: 'Part'  # noqa
-        parent_instance_id = _retrieve_object_id(obj=parent_instance)  # type: text_type
-        sort_property_id = _retrieve_object_id(obj=sort_property)  # type: text_type
+        part_model: 'Part' = _retrieve_object(obj=part_model, method=self._client.model)  # noqa
+        parent_instance_id: text_type = _retrieve_object_id(obj=parent_instance)
+        sort_property_id: text_type = _retrieve_object_id(obj=sort_property)
         if not sort_property_id and sort_name:
             sort_property_id = MetaWidget.NAME
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
@@ -576,8 +576,8 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        attachment_property = _retrieve_object(attachment_property,
-                                               method=self._client.property)  # type: 'Property'
+        attachment_property: 'Property' = _retrieve_object(attachment_property,
+                                                           method=self._client.property)
         meta = _initiate_meta(kwargs, activity=self.activity)
 
         meta.update({
@@ -745,7 +745,7 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_instance = _retrieve_object(part_instance, method=self._client.part)  # type: 'Part'  # noqa: F821
+        part_instance: 'Part' = _retrieve_object(part_instance, method=self._client.part)  # noqa: F821
 
         if not show_columns:
             show_columns = list()
@@ -785,16 +785,16 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_service_widget(
-        self,
-        service: 'Service',
-        title: TITLE_TYPING = False,
-        custom_button_text: TITLE_TYPING = False,
-        emphasize_run: Optional[bool] = True,
-        alignment: Optional[Alignment] = Alignment.LEFT,
-        download_log: Optional[bool] = False,
-        show_log: Optional[bool] = True,
-        parent_widget: Optional[Union[Widget, Text]] = None,
-        **kwargs
+            self,
+            service: 'Service',
+            title: TITLE_TYPING = False,
+            custom_button_text: TITLE_TYPING = False,
+            emphasize_run: Optional[bool] = True,
+            alignment: Optional[Alignment] = Alignment.LEFT,
+            download_log: Optional[bool] = False,
+            show_log: Optional[bool] = True,
+            parent_widget: Optional[Union[Widget, Text]] = None,
+            **kwargs
     ) -> Widget:
         """
         Add a KE-chain Service (e.g. script widget) to the widget manager.
@@ -830,7 +830,7 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the script is uuid type or class `Service`
-        service = _retrieve_object(obj=service, method=self._client.service)  # type: 'Service'  # noqa
+        service: 'Service' = _retrieve_object(obj=service, method=self._client.service)  # noqa
 
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
@@ -1286,8 +1286,8 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        attachment_property = _retrieve_object(attachment_property,
-                                               method=self._client.property)  # type: 'AttachmentProperty'  # noqa
+        attachment_property: 'AttachmentProperty' = _retrieve_object(attachment_property,
+                                                                     method=self._client.property)  # noqa
         meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
         check_type(editable, bool, "editable")
@@ -1407,7 +1407,7 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        weather_property = _retrieve_object(weather_property, method=self._client.property)  # type: 'Property'  # noqa
+        weather_property: 'Property' = _retrieve_object(weather_property, method=self._client.property)  # noqa
         meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
 
@@ -1426,20 +1426,20 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_service_card_widget(
-        self,
-        service: 'Service',
-        image: Optional['AttachmentProperty'] = None,
-        title: TITLE_TYPING = False,
-        description: Optional[Union[Text]] = None,
-        parent_widget: Optional[Union[Widget, Text]] = None,
-        custom_button_text: TITLE_TYPING = False,
-        emphasize_run: Optional[bool] = True,
-        alignment: Optional[Alignment] = Alignment.LEFT,
-        link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
-        link_value: Optional[CardWidgetLinkValue] = None,
-        link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
-        image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
-        **kwargs
+            self,
+            service: 'Service',
+            image: Optional['AttachmentProperty'] = None,
+            title: TITLE_TYPING = False,
+            description: Optional[Union[Text]] = None,
+            parent_widget: Optional[Union[Widget, Text]] = None,
+            custom_button_text: TITLE_TYPING = False,
+            emphasize_run: Optional[bool] = True,
+            alignment: Optional[Alignment] = Alignment.LEFT,
+            link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
+            link_value: Optional[CardWidgetLinkValue] = None,
+            link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
+            image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
+            **kwargs
     ) -> Widget:
         """
         Add a KE-chain Service Card widget to the WidgetManager and the activity.
@@ -1482,7 +1482,7 @@ class WidgetsManager(Iterable):
         :return: Service Card Widget
         """
         # Check whether the script is uuid type or class `Service`
-        service = _retrieve_object(obj=service, method=self._client.service)  # type: 'Service'  # noqa
+        service: 'Service' = _retrieve_object(obj=service, method=self._client.service)  # noqa
 
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
@@ -1510,22 +1510,22 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_dashboard_widget(
-        self,
-        title: TITLE_TYPING = False,
-        parent_widget: Optional[Union[Widget, Text]] = None,
-        source_scopes: Optional[DashboardWidgetSourceScopes] = DashboardWidgetSourceScopes.CURRENT_SCOPE,
-        source_scopes_tags: Optional[List] = None,
-        source_subprocess: Optional[List] = None,
-        source_selected_scopes: Optional[List] = None,
-        show_tasks: Optional[List[DashboardWidgetShowTasks]] = None,
-        show_scopes: Optional[List[DashboardWidgetShowScopes]] = None,
-        no_background: Optional[bool] = False,
-        show_assignees: Optional[bool] = True,
-        show_assignees_table: Optional[bool] = True,
-        show_open_task_assignees: Optional[bool] = True,
-        show_open_vs_closed_tasks: Optional[bool] = True,
-        show_open_closed_tasks_assignees: Optional[bool] = True,
-        **kwargs
+            self,
+            title: TITLE_TYPING = False,
+            parent_widget: Optional[Union[Widget, Text]] = None,
+            source_scopes: Optional[DashboardWidgetSourceScopes] = DashboardWidgetSourceScopes.CURRENT_SCOPE,
+            source_scopes_tags: Optional[List] = None,
+            source_subprocess: Optional[List] = None,
+            source_selected_scopes: Optional[List] = None,
+            show_tasks: Optional[List[DashboardWidgetShowTasks]] = None,
+            show_scopes: Optional[List[DashboardWidgetShowScopes]] = None,
+            no_background: Optional[bool] = False,
+            show_assignees: Optional[bool] = True,
+            show_assignees_table: Optional[bool] = True,
+            show_open_task_assignees: Optional[bool] = True,
+            show_open_vs_closed_tasks: Optional[bool] = True,
+            show_open_closed_tasks_assignees: Optional[bool] = True,
+            **kwargs
     ) -> Widget:
         """
         Add a KE-chain Dashboard Widget to the WidgetManager and the activity.

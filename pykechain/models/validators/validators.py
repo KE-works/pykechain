@@ -86,8 +86,7 @@ class NumericRangeValidator(PropertyValidator):
         if self.enforce_stepsize and self.stepsize is None:
             raise Exception('The stepsize should be provided when enforcing stepsize')
 
-    def _logic(self, value=None):
-        # type: (Any) -> Tuple[Union[bool, None], str]
+    def _logic(self, value: Any = None) -> Tuple[Union[bool, None], str]:
         basereason = "Value '{}' should be between {} and {}".format(value, self.minvalue, self.maxvalue)
         self._validation_result, self._validation_reason = None, "No reason"
 
@@ -137,8 +136,7 @@ class RequiredFieldValidator(PropertyValidator):
 
     vtype = PropertyVTypes.REQUIREDFIELD
 
-    def _logic(self, value=None):
-        # type: (Any) -> Tuple[Union[bool, None], str]
+    def _logic(self, value: Any = None) -> Tuple[Union[bool, None], str]:
         basereason = "Value is required"
         self._validation_result, self._validation_reason = None, "No reason"
 
@@ -181,8 +179,7 @@ class EvenNumberValidator(PropertyValidator):
 
     vtype = PropertyVTypes.EVENNUMBER
 
-    def _logic(self, value=None):
-        # type: (Any) -> Tuple[Union[bool, None], str]
+    def _logic(self, value: Any = None) -> Tuple[Union[bool, None], str]:
         if value is None:
             self._validation_result, self.validation_reason = None, "No reason"
             return self._validation_result, self._validation_reason
@@ -216,8 +213,7 @@ class OddNumberValidator(PropertyValidator):
 
     vtype = PropertyVTypes.ODDNUMBER
 
-    def _logic(self, value=None):
-        # type: (Any) -> Tuple[Union[bool, None], str]
+    def _logic(self, value: Any = None) -> Tuple[Union[bool, None], str]:
         if value is None:
             self._validation_result, self.validation_reason = None, "No reason"
             return self._validation_result, self._validation_reason
@@ -244,8 +240,7 @@ class SingleReferenceValidator(PropertyValidator):
 
     vtype = PropertyVTypes.SINGLEREFERENCE
 
-    def _logic(self, value=None):
-        # type: (Any) -> Tuple[Union[bool, None], str]
+    def _logic(self, value: Any = None) -> Tuple[Union[bool, None], str]:
         if value is None:
             self._validation_result, self.validation_reason = None, "No reason"
             return self._validation_result, self._validation_reason
@@ -313,8 +308,7 @@ class RegexStringValidator(PropertyValidator):
         self.pattern = self._config.get('pattern', r'.+')
         self._re = re.compile(self.pattern)
 
-    def _logic(self, value=None):
-        # type: (Any) -> Tuple[Union[bool, None], str]
+    def _logic(self, value: Any = None) -> Tuple[Union[bool, None], str]:
         if value is None:
             self._validation_result, self.validation_reason = None, "No reason"
             return self._validation_result, self._validation_reason
@@ -359,8 +353,7 @@ class AlwaysAllowValidator(PropertyValidator):
 
     vtype = PropertyVTypes.ALWAYSALLOW
 
-    def _logic(self, value=None):
-        # type: (Any) -> Tuple[Union[bool, None], str]
+    def _logic(self, value: Any = None) -> Tuple[Union[bool, None], str]:
         """Process the inner logic of the validator.
 
         The validation results are returned as tuple (boolean (true/false), reasontext)

@@ -47,13 +47,13 @@ class SideBarManager(Iterable):
         from pykechain.models import Scope
         check_type(scope, Scope, 'scope')
 
-        self.scope = scope  # type: Scope
-        self._override = scope.options.get('overrideSideBar', False)  # type: bool
+        self.scope: Scope = scope
+        self._override: bool = scope.options.get('overrideSideBar', False)
 
         self._scope_uri = "#/scopes/{}".format(self.scope.id)
         self._perform_bulk_creation = False
 
-        self._buttons = []  # type: List[SideBarButton]
+        self._buttons: List[SideBarButton] = []
 
         # Load existing buttons from the scope
         for button_dict in scope.options.get('customNavigation', []):

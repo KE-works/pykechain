@@ -16,7 +16,7 @@ class _ReferenceProperty(Property):
     :cvar REFERENCED_CLASS: handle to the Pykechain class that is referenced using this ReferenceProperty class.
     """
 
-    REFERENCED_CLASS = Base  # type: type(Base)
+    REFERENCED_CLASS: type(Base) = Base
 
     def __init__(self, json, **kwargs):
         """Construct a ReferenceProperty from a json object."""
