@@ -21,7 +21,7 @@ class PykeRetry(Retry):
         _stacktrace=None,
     ):
         """In case of failed verification of self signed certificate we short circuit the retry routine."""
-        if self._is_self_signed_certificate_error(error):
+        if self._is_ssl_error(error):
             raise MaxRetryError(_pool, url, error)
 
         return super().increment(
@@ -33,6 +33,5 @@ class PykeRetry(Retry):
             _stacktrace=_stacktrace,
         )
 
-    def _is_self_signed_certificate_error(self, error):
-        error_msg = "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self signed certificate"
-        return error and isinstance(error, SSLError) and error_msg in str(error)
+    def _is_ssl_error(self, error):
+        return error and isinstance(error, SSLError)
