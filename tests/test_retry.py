@@ -1,4 +1,5 @@
-from ssl import SSLCertVerificationError
+from ssl import SSLError
+
 from unittest import TestCase
 
 from pykechain.client_utils import PykeRetry
@@ -25,7 +26,7 @@ class TestPykeRetry(TestCase):
 
         with self.assertRaises(MaxRetryError):
             retry.increment(
-                error=SSLCertVerificationError(
+                error=SSLError(
                     "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self signed certificate"
                 )
             )

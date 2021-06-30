@@ -12,7 +12,7 @@ from pykechain.utils import temp_chdir
 
 # global variable
 __mapping_dictionary = None
-__edited_one_many = list()  # type: list
+__edited_one_many: list = list()
 __references = dict()
 __attachments = list()
 

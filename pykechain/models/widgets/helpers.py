@@ -375,7 +375,7 @@ def _check_prefilters(part_model: 'Part', prefilters: Union[Dict, List]) -> List
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
     if isinstance(prefilters, dict):
-        property_models = prefilters.get(MetaWidget.PROPERTY_MODELS, [])  # type: List[Property, Text]  # noqa
+        property_models: List[Property, Text] = prefilters.get(MetaWidget.PROPERTY_MODELS, [])  # noqa
         values = prefilters.get(MetaWidget.VALUES, [])
         filters_type = prefilters.get(MetaWidget.FILTERS_TYPE, [])
 
@@ -423,7 +423,7 @@ def _check_excluded_propmodels(part_model: 'Part', property_models: List['AnyPro
     if not isinstance(part_model, Part):
         raise IllegalArgumentError('`part_model` must be a Part object, "{}" is not.'.format(part_model))
 
-    list_of_propmodels_excl = list()  # type: List['AnyProperty']
+    list_of_propmodels_excl: List['AnyProperty'] = list()
     for property_model in property_models:
         if is_uuid(property_model):
             property_model = part_model.property(property_model)

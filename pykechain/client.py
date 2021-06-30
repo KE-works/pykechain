@@ -50,7 +50,6 @@ from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.widgets.widget import Widget
 from pykechain.utils import find, get_in_chunks, is_uuid, is_valid_email, slugify_ref
-
 from .__about__ import version as pykechain_version
 from .client_utils import PykeRetry
 from .models.banner import Banner
@@ -98,24 +97,25 @@ class Client(object):
         >>> client = Client(url='https://default-tst.localhost:9443', check_certificates=False)
 
         """
-        self.auth = None  # type: Optional[Tuple[str, str]]
-        self.headers = {'X-Requested-With': 'XMLHttpRequest',
-                        'PyKechain-Version': pykechain_version}  # type: Dict[str, str]
-        self.session = requests.Session()  # type: requests.Session
+        self.auth: Optional[Tuple[str, str]] = None
+        self.headers: Dict[str, str] = {
+            'X-Requested-With': 'XMLHttpRequest', 'PyKechain-Version': pykechain_version
+        }
+        self.session: requests.Session = requests.Session()
 
         parsed_url = urlparse(url)
         if not (parsed_url.scheme and parsed_url.netloc):
             raise ClientError("Please provide a valid URL to a KE-chain instance")
 
         self.api_root = url
-        self.headers = {'X-Requested-With': 'XMLHttpRequest',
-                        'PyKechain-Version': pykechain_version}  # type: Dict[Text, Text]
-        self.auth = None  # type: Optional[Tuple[Text, Text]]
-        self.last_request = None  # type: Optional[requests.PreparedRequest]
-        self.last_response = None  # type: Optional[requests.Response]
-        self.last_url = None  # type: Optional[Text]
-        self._app_versions = None  # type: Optional[List[Dict]]
-        self._widget_schemas = None  # type: Optional[List[Dict]]
+        self.headers: Dict[Text, Text] = {'X-Requested-With': 'XMLHttpRequest',
+                                          'PyKechain-Version': pykechain_version}
+        self.auth: Optional[Tuple[Text, Text]] = None
+        self.last_request: Optional[requests.PreparedRequest] = None
+        self.last_response: Optional[requests.Response] = None
+        self.last_url: Optional[Text] = None
+        self._app_versions: Optional[List[Dict]] = None
+        self._widget_schemas: Optional[List[Dict]] = None
 
         if check_certificates is None:
             check_certificates = env.bool(KechainEnv.KECHAIN_CHECK_CERTIFICATES, default=True)
@@ -1181,20 +1181,20 @@ class Client(object):
         return new_activity
 
     def clone_activities(
-        self,
-        activities: List[Union[Activity, Text]],
-        activity_parent: Union[Activity, Text],
-        activity_update_dicts: Optional[Dict] = None,
-        include_part_models: Optional[bool] = False,
-        include_part_instances: Optional[bool] = False,
-        include_children: Optional[bool] = True,
-        excluded_parts: Optional[List[Text]] = None,
-        part_parent_model: Optional[Union[Part, Text]] = None,
-        part_parent_instance: Optional[Union[Part, Text]] = None,
-        part_model_rename_template: Optional[Text] = None,
-        part_instance_rename_template: Optional[Text] = None,
-        asynchronous: Optional[bool] = False,
-        **kwargs
+            self,
+            activities: List[Union[Activity, Text]],
+            activity_parent: Union[Activity, Text],
+            activity_update_dicts: Optional[Dict] = None,
+            include_part_models: Optional[bool] = False,
+            include_part_instances: Optional[bool] = False,
+            include_children: Optional[bool] = True,
+            excluded_parts: Optional[List[Text]] = None,
+            part_parent_model: Optional[Union[Part, Text]] = None,
+            part_parent_instance: Optional[Union[Part, Text]] = None,
+            part_model_rename_template: Optional[Text] = None,
+            part_instance_rename_template: Optional[Text] = None,
+            asynchronous: Optional[bool] = False,
+            **kwargs
     ) -> List[Activity]:
         """
         Clone multiple activities.

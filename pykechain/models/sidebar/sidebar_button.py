@@ -76,13 +76,13 @@ class SideBarButton(object):
                 raise IllegalArgumentError(
                     'Attribute "{}" is not supported in the configuration of a side-bar button.'.format(key))
 
-        self._manager = side_bar_manager  # type: 'SideBarManager'
-        self.display_name = title  # type: str
-        self.order = order  # type: int
-        self.display_icon = icon  # type: str
-        self.uri = uri  # type: str
-        self.uri_target = uri_target  # type: URITarget
-        self.display_icon_mode = icon_mode  # type: FontAwesomeMode
+        self._manager: 'SideBarManager' = side_bar_manager
+        self.display_name: str = title
+        self.order: int = order
+        self.display_icon: str = icon
+        self.uri: str = uri
+        self.uri_target: URITarget = uri_target
+        self.display_icon_mode: FontAwesomeMode = icon_mode
 
         self._other_attributes = kwargs
         for key in allowed_attributes:

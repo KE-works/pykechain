@@ -54,10 +54,10 @@ class Service(BaseInScope):
         self.environment = json.get('env_version')
 
         # for SIM3 version
-        self.trusted = json.get('trusted')  # type: bool
-        self.run_as = json.get('run_as')  # type: Text
-        self.verified_on = parse_datetime(json.get('verified_on'))  # type: Optional[datetime]
-        self.verification_results = json.get('verification_results')  # type: Dict
+        self.trusted: bool = json.get('trusted')
+        self.run_as: Text = json.get('run_as')
+        self.verified_on: Optional[datetime] = parse_datetime(json.get('verified_on'))
+        self.verification_results: Dict = json.get('verification_results')
 
     def __repr__(self):  # pragma: no cover
         return "<pyke Service '{}' id {}>".format(self.name, self.id[-8:])
@@ -272,18 +272,18 @@ class ServiceExecution(Base):
 
         self.name = json.get('service_name')
         self.service_id = json.get('service')
-        self.status = json.get('status', '')  # type: ServiceExecutionStatus
+        self.status: ServiceExecutionStatus = json.get('status', '')
 
         self.user = json.get('username')
         if json.get('activity') is not None:
-            self.activity_id = json['activity'].get('id')  # type: Optional[Text]
+            self.activity_id: Optional[Text] = json['activity'].get('id')
         else:
             self.activity_id = None
 
-        self.started_at = parse_datetime(json.get('started_at'))  # type: Optional[datetime]
-        self.finished_at = parse_datetime(json.get('finished_at'))  # type: Optional[datetime]
+        self.started_at: Optional[datetime] = parse_datetime(json.get('started_at'))
+        self.finished_at: Optional[datetime] = parse_datetime(json.get('finished_at'))
 
-        self._service = None  # type: Optional[Service]
+        self._service: Optional[Service] = None
 
     def __repr__(self):  # pragma: no cover
         return "<pyke ServiceExecution '{}' id {}>".format(self.name, self.id[-8:])

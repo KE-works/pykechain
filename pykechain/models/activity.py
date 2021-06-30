@@ -49,23 +49,23 @@ class Activity(TreeObject, TagsMixin):
 
         self._scope_id = json.get('scope_id')
 
-        self.ref = json.get('ref')  # type: Text
-        self.description = json.get('description', '')  # type: Text
-        self.status = json.get('status')  # type: ActivityStatus
-        self.classification = json.get('classification')  # type: ActivityClassification
-        self.activity_type = json.get('activity_type')  # type: ActivityType
+        self.ref: Text = json.get('ref')
+        self.description: Text = json.get('description', '')
+        self.status: ActivityStatus = json.get('status')
+        self.classification: ActivityClassification = json.get('classification')
+        self.activity_type: ActivityType = json.get('activity_type')
         self.start_date = parse_datetime(json.get('start_date'))
         self.due_date = parse_datetime(json.get('due_date'))
-        self.assignees_ids = json.get('assignees_ids', [])  # type: List[Text]
+        self.assignees_ids: List[Text] = json.get('assignees_ids', [])
         self._options = json.get('activity_options', {})
 
-        self._tags = json.get('tags', [])  # type: List[Text]
+        self._tags: List[Text] = json.get('tags', [])
         self._representations_container = RepresentationsComponent(
             self,
             self._options.get('representations', {}),
             self._save_representations,
         )
-        self._widgets_manager = None  # type: Optional[WidgetsManager]
+        self._widgets_manager: Optional[WidgetsManager] = None
 
     def __call__(self, *args, **kwargs) -> 'Activity':
         """Short-hand version of the `child` method."""
