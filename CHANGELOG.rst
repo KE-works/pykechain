@@ -8,6 +8,9 @@ UNRELEASED
 * :+1: From now on python 3.5 is deprecated. We can now start to insert f-strings in our pykechain codebase.
 * :+1: refactoring all models that were shadowed with a `<classname>2` to enable fast and smooth deprecation in July 2021.
 
+* :+1: When connecting to a server with a SSL certificate error which cannot be checked, we provide a message fast and dont retry. (KE-1052, #997)
+* :+1: We converted all type annotations in comments to proper type and variable annotations.
+
 v3.11.1 (15JUN21)
 -----------------
 * :bug: Fixed an issue related to setting prefilters on a `ScopeReferenceProperty`.

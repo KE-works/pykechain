@@ -6,15 +6,43 @@ from urllib.parse import urljoin, urlparse
 import requests
 from envparse import env
 from requests.adapters import HTTPAdapter  # type: ignore
-from urllib3 import Retry
 
-from pykechain.defaults import API_EXTRA_PARAMS, API_PATH, PARTS_BATCH_LIMIT, RETRY_BACKOFF_FACTOR, \
-    RETRY_ON_CONNECTION_ERRORS, RETRY_ON_READ_ERRORS, RETRY_ON_REDIRECT_ERRORS, RETRY_TOTAL
-from pykechain.enums import ActivityClassification, ActivityStatus, ActivityType, Category, ContextGroup, ContextType, \
-    KechainEnv, Multiplicity, NotificationChannels, NotificationEvent, NotificationStatus, PropertyType, ScopeStatus, \
-    ServiceEnvironmentVersion, ServiceScriptUser, ServiceType, TeamRoles, WidgetTypes
-from pykechain.exceptions import APIError, ClientError, ForbiddenError, IllegalArgumentError, MultipleFoundError, \
+from pykechain.defaults import (
+    API_EXTRA_PARAMS,
+    API_PATH,
+    PARTS_BATCH_LIMIT,
+    RETRY_BACKOFF_FACTOR,
+    RETRY_ON_CONNECTION_ERRORS,
+    RETRY_ON_READ_ERRORS,
+    RETRY_ON_REDIRECT_ERRORS,
+    RETRY_TOTAL
+)
+from pykechain.enums import (
+    ActivityClassification,
+    ActivityStatus,
+    ActivityType,
+    Category,
+    KechainEnv,
+    Multiplicity,
+    NotificationChannels,
+    NotificationEvent,
+    NotificationStatus,
+    PropertyType,
+    ScopeStatus,
+    ServiceEnvironmentVersion,
+    ServiceScriptUser,
+    ServiceType,
+    TeamRoles,
+    WidgetTypes
+)
+from pykechain.exceptions import (
+    APIError,
+    ClientError,
+    ForbiddenError,
+    IllegalArgumentError,
+    MultipleFoundError,
     NotFoundError
+)
 from pykechain.models import Activity, AnyProperty, Base, Part, PartSet, Property, Scope, Service, ServiceExecution
 from pykechain.models.association import Association
 from pykechain.models.notification import Notification
@@ -23,12 +51,22 @@ from pykechain.models.user import User
 from pykechain.models.widgets.widget import Widget
 from pykechain.utils import find, get_in_chunks, is_uuid, is_valid_email, slugify_ref
 from .__about__ import version as pykechain_version
+from .client_utils import PykeRetry
 from .models.banner import Banner
-from .models.context import Context
 from .models.expiring_download import ExpiringDownload
-from .models.input_checks import check_base, check_datetime, check_enum, check_list_of_base, check_list_of_dicts, \
-    check_list_of_text, check_text, check_type, check_url, check_user, check_uuid
-from .typing import ObjectID
+from .models.input_checks import (
+    check_base,
+    check_datetime,
+    check_enum,
+    check_list_of_base,
+    check_list_of_dicts,
+    check_list_of_text,
+    check_text,
+    check_type,
+    check_url,
+    check_user,
+    check_uuid
+)
 
 
 class Client(object):
@@ -59,24 +97,25 @@ class Client(object):
         >>> client = Client(url='https://default-tst.localhost:9443', check_certificates=False)
 
         """
-        self.auth = None  # type: Optional[Tuple[str, str]]
-        self.headers = {'X-Requested-With': 'XMLHttpRequest',
-                        'PyKechain-Version': pykechain_version}  # type: Dict[str, str]
-        self.session = requests.Session()  # type: requests.Session
+        self.auth: Optional[Tuple[str, str]] = None
+        self.headers: Dict[str, str] = {
+            'X-Requested-With': 'XMLHttpRequest', 'PyKechain-Version': pykechain_version
+        }
+        self.session: requests.Session = requests.Session()
 
         parsed_url = urlparse(url)
         if not (parsed_url.scheme and parsed_url.netloc):
             raise ClientError("Please provide a valid URL to a KE-chain instance")
 
         self.api_root = url
-        self.headers = {'X-Requested-With': 'XMLHttpRequest',
-                        'PyKechain-Version': pykechain_version}  # type: Dict[Text, Text]
-        self.auth = None  # type: Optional[Tuple[Text, Text]]
-        self.last_request = None  # type: Optional[requests.PreparedRequest]
-        self.last_response = None  # type: Optional[requests.Response]
-        self.last_url = None  # type: Optional[Text]
-        self._app_versions = None  # type: Optional[List[Dict]]
-        self._widget_schemas = None  # type: Optional[List[Dict]]
+        self.headers: Dict[Text, Text] = {'X-Requested-With': 'XMLHttpRequest',
+                                          'PyKechain-Version': pykechain_version}
+        self.auth: Optional[Tuple[Text, Text]] = None
+        self.last_request: Optional[requests.PreparedRequest] = None
+        self.last_response: Optional[requests.Response] = None
+        self.last_url: Optional[Text] = None
+        self._app_versions: Optional[List[Dict]] = None
+        self._widget_schemas: Optional[List[Dict]] = None
 
         if check_certificates is None:
             check_certificates = env.bool(KechainEnv.KECHAIN_CHECK_CERTIFICATES, default=True)
@@ -86,11 +125,11 @@ class Client(object):
 
         # Retry implementation
         adapter = HTTPAdapter(
-            max_retries=Retry(total=RETRY_TOTAL,
-                              connect=RETRY_ON_CONNECTION_ERRORS,
-                              read=RETRY_ON_READ_ERRORS,
-                              redirect=RETRY_ON_REDIRECT_ERRORS,
-                              backoff_factor=RETRY_BACKOFF_FACTOR)
+            max_retries=PykeRetry(total=RETRY_TOTAL,
+                                  connect=RETRY_ON_CONNECTION_ERRORS,
+                                  read=RETRY_ON_READ_ERRORS,
+                                  redirect=RETRY_ON_REDIRECT_ERRORS,
+                                  backoff_factor=RETRY_BACKOFF_FACTOR)
         )
         self.session.mount('https://', adapter=adapter)
         self.session.mount('http://', adapter=adapter)

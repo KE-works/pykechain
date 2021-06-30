@@ -207,7 +207,7 @@ class ScopeFilter(BaseFilter):
         self.progress_lte = check_type(progress_lte, float, "progress_lte")
         self.tag = check_text(tag, "tag")
         self.team = check_base(team, Team, "team")
-        self.extra_filter = kwargs  # type: dict
+        self.extra_filter: dict = kwargs
 
     def __repr__(self):
         _repr = "ScopeFilter: "

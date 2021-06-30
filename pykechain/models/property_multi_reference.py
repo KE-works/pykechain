@@ -74,8 +74,8 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
             choices_model_id = self.model()._value[0].get('id')
 
             # Determine which parts are filtered out
-            prefilter = self._options.get(MetaWidget.PREFILTERS, {}). \
-                get(MetaWidget.PROPERTY_VALUE_PREFILTER)  # type: Optional[Text]
+            prefilter: Optional[Text] = self._options.get(MetaWidget.PREFILTERS, {}). \
+                get(MetaWidget.PROPERTY_VALUE_PREFILTER)
 
             # Retrieve all part instances with this model ID
             possible_choices = self._client.parts(
