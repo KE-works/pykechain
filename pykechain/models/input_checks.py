@@ -122,9 +122,23 @@ def check_base(obj: Optional[Any],
                key: Optional[Text] = 'object',
                method: Optional[Callable] = None,
                ) -> Optional[Text]:
-    """Validate whether the object provided as input is a Base (or subclass) instance and return its ID."""
-    if obj is not None and obj is not empty:
+    """
+    Validate whether the object provided as input is a Base (or subclass) instance and return its ID.
 
+    When the obj is None, it returns None. Otherwise it will check if the object is a pykechain class and will
+    extract the UUID from it.
+
+    It will NOT check if the uuid (if a UUID is provided) is an actual class. It won't lookup the UUID in KE-chain
+    and check that against the corresponding pykechain class.
+
+    :param obj: Object that needs the checking.
+    :param cls: (optional) See if the object is of a certain pykechain Class (subclass of Base)
+    :param key: (optional) a key that may be provided to improve the legability of the provided Error
+    :param method: (optional) a method that is used to convert the object into an instance that has the attribute 'id'.
+    :returns: None or UUID
+    :raises IllegalArgumentError: When the object is not of type of the class or not a UUID.
+    """
+    if obj is not None and obj is not empty:
         if cls is None:
             from pykechain.models import Base
             cls = Base
@@ -170,10 +184,10 @@ def check_user(obj: Optional[Any],
 
 
 def check_list_of_base(
-    objects: Optional[List[Any]],
-    cls: Optional[type(object)] = None,
-    key: Optional[Text] = 'objects',
-    method: Optional[Callable] = None,
+        objects: Optional[List[Any]],
+        cls: Optional[type(object)] = None,
+        key: Optional[Text] = 'objects',
+        method: Optional[Callable] = None,
 ) -> Optional[List[Text]]:
     """Validate the iterable of objects provided as input are Base (or subclass) instances and return a list of IDs.
 

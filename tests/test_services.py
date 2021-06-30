@@ -4,8 +4,8 @@ from datetime import datetime
 
 import pytest
 
-from pykechain.enums import ServiceExecutionStatus, ServiceType, ServiceEnvironmentVersion
-from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError, APIError
+from pykechain.enums import ServiceEnvironmentVersion, ServiceExecutionStatus, ServiceType
+from pykechain.exceptions import APIError, IllegalArgumentError, MultipleFoundError, NotFoundError
 # new in 1.13
 from pykechain.models import Service
 from pykechain.utils import temp_chdir
@@ -167,22 +167,14 @@ class TestServices(TestBetamax):
 
         self.service = self.project.create_service(name=initial_name)
 
-        self.service.edit(
-            name=initial_name,
-            description=initial_description,
-            version=initial_version,
-            type=initial_type,
-            environment_version=initial_env,
-            run_as=initial_run_as,
-            trusted=initial_trusted
-        )
+        self.service.edit(name=initial_name, description=initial_description, version=initial_version,
+                          type=initial_type, environment_version=initial_env, run_as=initial_run_as,
+                          trusted=initial_trusted)
 
         # Edit without mentioning values, everything should stay the same
         new_name = 'Changed service name'
 
-        self.service.edit(
-            name=new_name
-        )
+        self.service.edit(name=new_name)
 
         # testing
         self.assertEqual(self.service.name, new_name)
@@ -194,15 +186,8 @@ class TestServices(TestBetamax):
         self.assertEqual(self.service.trusted, initial_trusted)
 
         # Edit with clearing the values, name and status cannot be cleared
-        self.service.edit(
-            name=None,
-            description=None,
-            version=None,
-            type=None,
-            environment_version=None,
-            run_as=None,
-            trusted=None
-        )
+        self.service.edit(name=None, description=None, version=None, type=None, environment_version=None, run_as=None,
+                          trusted=None)
 
         self.assertEqual(self.service.name, new_name)
         self.assertEqual(self.service.description, str())

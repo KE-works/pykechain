@@ -482,17 +482,17 @@ class Part(TreeObject):
 
         >>> front_fork = project.part('Front Fork')
         >>> front_fork.edit(name='Front Fork - updated')
-        >>> front_fork.edit(name='Front Fork cruizer', description='With my ragtop down so my hair can blow' )
+        >>> front_fork.edit(name='Front Fork cruizer',description='With my ragtop down so my hair can blow')
 
         for changing a model:
 
         >>> front_fork = project.model('Front Fork')
-        >>> front_fork.edit(name='Front Fork basemodel', description='Some description here')
+        >>> front_fork.edit(name='Front Fork basemodel',description='Some description here')
 
         Not mentioning an input parameter in the function will leave it unchanged. Setting a parameter as None will
         clear its value (where that is possible). The example below will clear the description and edit the name.
 
-        >>> front_fork.edit(name="Front spoon", description=None)
+        >>> front_fork.edit(name="Front spoon",description=None)
 
         """
         update_dict = {

@@ -453,6 +453,51 @@ class ScopeMemberActions(Enum):
     REMOVE = 'remove'
 
 
+class ContextType(Enum):
+    """Types of Contexts.
+
+    :cvar STATIC_LOCATION: Geolocation / Featurecollection context with a geolocation.
+    :cvar TIME_PERIOD: Time Period Context with start_date and due_date
+    :cvar TEXT_LABEL: generic textual label
+    """
+
+    STATIC_LOCATION = "STATIC_LOCATION"
+    TIME_PERIOD = "TIME_PERIOD"
+    TEXT_LABEL = "TEXT_LABEL"
+
+
+class ContextGroup(Enum):
+    """
+    Context may have a context_group.
+
+    ..versionadded: 3.11
+
+    This is for context API versions 1.2.0 or later.
+
+    :cvar UNDEFINED: UNDEFINED
+    :cvar DISCIPLINE: Discipline, in nl: Discipline
+    :cvar ASSET: Asset, in nl: Object, Kunstwerk
+    :cvar DEPARTMENT: Department, in nl: Onderdeel, Afdeling
+    :cvar PERIOD: Workperiod, in nl: Werkperiode
+    :cvar LOCATION: Location, in nl: Locatie
+    :cvar PHASE: Phase, in nl: Fase
+    :cvar REQUIREMENT: Requirement, in nl: Eis
+    :cvar EXTERNALID: External identifier, to be used to provide a generic link to an external application
+    :cvar WORKPACKAGE: Workpackage, in nl: Werkpakket
+    """
+
+    UNDEFINED = "UNDEFINED"
+    DISCIPLINE = "DISCIPLINE"  # nl: Discipline
+    ASSET = "ASSET"  # nl: Object, Kunstwerk
+    DEPARTMENT = "DEPARTMENT"  # nl: Onderdeel, Afdeling
+    PERIOD = "WORKPERIOD"  # nl: Werkperiode
+    LOCATION = "LOCATION"  # nl: Locatie
+    PHASE = "PHASE"  # nl: Fase
+    REQUIREMENT = "REQUIREMENT"  # nl: Eis
+    EXTERNALID = "EXTERNALID"
+    WORKPACKAGE = "WORKPACKAGE"  # nl: Werkpakket
+
+
 class KechainEnv(Enum):
     """Environment variables that can be set for pykechain.
 

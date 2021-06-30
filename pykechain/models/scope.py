@@ -11,11 +11,11 @@ from pykechain.enums import (
     KEChainPages,
     ScopeRoles,
     ScopeMemberActions,
-    ScopeCategory,
-)
+    ScopeCategory, )
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.activity import Activity
 from pykechain.models.base import Base
+from pykechain.models.context import Context
 from pykechain.models.input_checks import (
     check_text,
     check_datetime,
@@ -281,10 +281,8 @@ class Scope(Base, TagsMixin):
         Examples
         --------
         >>> from datetime import datetime
-        >>> project.edit(name='New project name',
-        ...              description='Changing the description just because I can',
-        ...              start_date=datetime.now(),  # naive time is interpreted as UTC time
-        ...              status=ScopeStatus.CLOSED)
+        >>> project.edit(name='New project name',description='Changing the description just because I can',
+        ... start_date=datetime.now(),status=ScopeStatus.CLOSED)
 
         If we want to provide timezone aware datetime objects we can use the 3rd party convenience library :mod:`pytz`.
         Mind that we need to fetch the timezone first and use `<timezone>.localize(<your datetime>)` to make it
@@ -300,7 +298,7 @@ class Scope(Base, TagsMixin):
         >>> start_date_tzaware = datetime.now(pytz.utc)
         >>> mytimezone = pytz.timezone('Europe/Amsterdam')
         >>> due_date_tzaware = mytimezone.localize(datetime(2019, 10, 27, 23, 59, 0))
-        >>> project.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
+        >>> project.edit(start_date=start_date_tzaware,due_date=due_date_tzaware)
 
         To assign a scope to a team see the following example::
 
@@ -735,3 +733,42 @@ class Scope(Base, TagsMixin):
             role=ScopeRoles.SUPERVISOR,
             user=supervisor,
         )
+
+    #
+    # Context Methods
+    #
+    def context(self, *args, **kwargs) -> Context:
+        """
+        Retrieve a context object in this scope.
+
+        See :class:`pykechain.Client.context` for available parameters.
+
+        .. versionadded:: 3.11
+
+        :return: a Context object
+        """
+        return self._client.context(*args, scope=self, **kwargs)
+
+    def contexts(self, *args, **kwargs) -> List[Context]:
+        """
+        Retrieve one or more contexts object in this scope.
+
+        See :class:`pykechain.Client.contexts` for available parameters.
+
+        .. versionadded:: 3.11
+
+        :return: a list of Context objects
+        """
+        return self._client.contexts(scope=self, **kwargs)
+
+    def create_context(self, *args, **kwargs) -> Context:
+        """
+        Create a new Context object of a ContextType in a scope.
+
+        See :class:`pykechain.Client.create_context` for available parameters.
+
+        .. versionadded:: 3.11
+
+        :return: a Context object
+        """
+        return self._client.create_context(scope=self, **kwargs)

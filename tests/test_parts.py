@@ -307,10 +307,7 @@ class TestParts(TestBetamax):
         front_fork_name = str(front_fork.name)
         front_fork_description = str(front_fork.description)
 
-        front_fork.edit(
-            name=None,
-            description=None
-        )
+        front_fork.edit(name=None, description=None)
 
         # testing
         self.assertEqual(front_fork.name, front_fork_name)

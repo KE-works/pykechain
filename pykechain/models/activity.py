@@ -566,10 +566,8 @@ class Activity(TreeObject, TagsMixin):
         -------
         >>> from datetime import datetime
         >>> my_task = project.activity('Specify the wheel diameter')
-        >>> my_task.edit(name='Specify wheel diameter and circumference',
-        ...              description='The diameter and circumference are specified in inches',
-        ...              start_date=datetime.utcnow(),  # naive time is interpreted as UTC time
-        ...              assignee='testuser')
+        >>> my_task.edit(name='Specify wheel diameter and circumference',description='The diameter and circumference'
+        ... 'are specified in inches', start_date=datetime.utcnow(), assignee='testuser')
 
         If we want to provide timezone aware datetime objects we can use the 3rd party convenience library :mod:`pytz`.
         Mind that we need to fetch the timezone first and use `<timezone>.localize(<your datetime>)` to make it
@@ -585,7 +583,7 @@ class Activity(TreeObject, TagsMixin):
         >>> start_date_tzaware = datetime.now(pytz.utc)
         >>> mytimezone = pytz.timezone('Europe/Amsterdam')
         >>> due_date_tzaware = mytimezone.localize(datetime(2019, 10, 27, 23, 59, 0))
-        >>> my_task.edit(due_date=due_date_tzaware, start_date=start_date_tzaware)
+        >>> my_task.edit(start_date=start_date_tzaware,due_date=due_date_tzaware)
 
         Not mentioning an input parameter in the function will leave it unchanged. Setting a parameter as None will
         clear its value (where that is possible). The example below will clear the due_date, but leave everything else
@@ -1028,3 +1026,70 @@ class Activity(TreeObject, TagsMixin):
 
         if response.status_code not in (requests.codes.created, requests.codes.accepted):  # pragma: no cover
             raise APIError("Could not share the link to Activity {}".format(self), response=response)
+
+    #
+    # Context Methods
+    #
+    def context(self, *args, **kwargs) -> 'Context':
+        """
+        Retrieve a context object associated to this activity and scope.
+
+        See :class:`pykechain.Client.context` for available parameters.
+
+        .. versionadded:: 3.11
+
+        :return: a Context object
+        """
+        return self._client.context(*args, scope=self.scope, activity=self, **kwargs)
+
+    def contexts(self, *args, **kwargs) -> List['Context']:
+        """
+        Retrieve context objects t associated to this activity and scope.
+
+        See :class:`pykechain.Client.contexts` for available parameters.
+
+        .. versionadded:: 3.11
+
+        :return: a list of Context objects
+        """
+        return self._client.contexts(scope=self.scope, activity=self, **kwargs)
+
+    def create_context(self, *args, **kwargs) -> 'Context':
+        """
+        Create a new Context object of a ContextType in a scope and associated it to this activity.
+
+        See :class:`pykechain.Client.create_context` for available parameters.
+
+        .. versionadded:: 3.11
+
+        :return: a Context object
+        """
+        return self._client.create_context(scope=self.scope, actitivities=[self], **kwargs)
+
+    def link_context(self, context: 'Context') -> None:
+        """
+        Link the current activity to an existing Context.
+
+        If you want to link multiple activities at once, use the `Context.link_activities()` method.
+
+        :param context: A Context object to link the current activity to.
+        :raises IllegalArgumentError: When the context is not a Context object.
+        """
+        if not context.__class__.__name__ == 'Context':
+            raise IllegalArgumentError("`context` should be a proper Context object. Got: {}".format(context))
+        context.link_activities(activities=[self])
+        self.refresh()
+
+    def unlink_context(self, context: 'Context') -> None:
+        """
+        Link the current activity to an existing Context.
+
+        If you want to unlink multiple activities at once, use the `Context.unlink_activities()` method.
+
+        :param context: A Context object to unlink the current activity from.
+        :raises IllegalArgumentError: When the context is not a Context object.
+        """
+        if not context.__class__.__name__ == 'Context':
+            raise IllegalArgumentError("`context` should be a proper Context object. Got: {}".format(context))
+        context.unlink_activities(activities=[self])
+        self.refresh()

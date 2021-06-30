@@ -22,7 +22,7 @@ from pykechain.enums import (
     ActivityStatus,
     ActivityType,
     Category,
-    KechainEnv,
+    ContextGroup, ContextType, KechainEnv,
     Multiplicity,
     NotificationChannels,
     NotificationEvent,
@@ -53,6 +53,7 @@ from pykechain.utils import find, get_in_chunks, is_uuid, is_valid_email, slugif
 from .__about__ import version as pykechain_version
 from .client_utils import PykeRetry
 from .models.banner import Banner
+from .models.context import Context
 from .models.expiring_download import ExpiringDownload
 from .models.input_checks import (
     check_base,
@@ -67,6 +68,7 @@ from .models.input_checks import (
     check_user,
     check_uuid
 )
+from .typing import ObjectID
 
 
 class Client(object):
@@ -3010,7 +3012,7 @@ class Client(object):
         Retrieve a single Banner, see `banners()` for available arguments.
 
         :return: single banner
-        :rtype Banner
+        :rtype: Banner
         """
         return self._retrieve_singular(self.banners, *args, **kwargs)
 
@@ -3041,7 +3043,7 @@ class Client(object):
         :param url: str
         :param kwargs: additional arguments for the request
         :return: the new banner
-        :rtype Banner
+        :rtype: Banner
         """
         data = {
             'text': check_text(text, 'text'),
@@ -3070,7 +3072,7 @@ class Client(object):
         Retrieve the currently active banner.
 
         :return: Banner object. If no banner is active, returns None.
-        :rtype Banner
+        :rtype: Banner
         :raise APIError whenever the banners could not be retrieved properly.
         :raises NotFoundError whenever there is no active banner.
         :raises MultipleFoundError whenever multiple banners are active.
@@ -3097,7 +3099,7 @@ class Client(object):
         :raises NotFoundError: When no `ExpiringDownload` is found
         :raises MultipleFoundError: When more than a single `ExpiringDownload` is found
         """
-        return self._retrieve_singular(self.expiring_downloads, **args, **kwargs)
+        return self._retrieve_singular(self.expiring_downloads, *args, **kwargs)
 
     def expiring_downloads(
             self,
@@ -3162,3 +3164,129 @@ class Client(object):
             expiring_download.upload(content_path)
 
         return expiring_download
+
+    def create_context(
+            self,
+            name: Text,
+            context_type: ContextType,
+            scope: Scope,
+            context_group: ContextGroup = None,
+            activities=None,
+            description: Text = None,
+            tags=None,
+            options=None,
+            feature_collection=None,
+            start_date=None,
+            due_date=None,
+            **kwargs
+    ) -> Context:
+        """
+        Create a new Context object of a ContextType in a scope.
+
+        :param name: Name of the Context to be displayed to the end-user.
+        :context_type: A type of Context, as defined in `ContextType` eg: STATIC_LOCATION, TIME_PERIOD
+        :param scope: Scope object or Scope Id where the Context is active on.
+        :param description: (optional) description of the Context
+        :param activities: (optional) associated list of Activity or activity object ID
+        :param context_group: (optional) context_group of the context. Choose from `ContextGroup` enumeration.
+        :param tags: (optional) list of tags
+        :param options: (optional) dictionary with options.
+        :param feature_collection: (optional) dict with a geojson feature collection to store for a STATIC_LOCATION
+        :param start_date: (optional) start datetime for a TIME_PERIOD context
+        :param due_date: (optional) start datetime for a TIME_PERIOD context
+        :return: a created Context Object
+        :raises APIError: When the object cannot be created.
+        """
+        data = {
+            'name': check_text(name, 'name'),
+            'description': check_text(description, 'description'),
+            'scope': check_base(scope, Scope, 'scope'),
+            'context_type': check_enum(context_type, ContextType, 'context_type'),
+            'tags': check_list_of_text(tags, 'tags'),
+            'context_group': check_enum(context_group, ContextGroup, "context_group"),
+            'activities': check_list_of_base(activities, Activity, 'activities'),
+            'options': check_type(options, dict, 'options'),
+            'feature_collection': check_type(feature_collection, dict, 'feature_collection'),
+            'start_date': check_datetime(start_date, 'start_date'),
+            'due_date': check_datetime(due_date, 'due_date'),
+        }
+
+        if data['feature_collection'] is None:
+            data['feature_collection'] = {}
+        if data['activities'] is None:
+            data['activities'] = []
+        if data['options'] is None:
+            data['options'] = {}
+
+        # prepare url query parameters
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS['context'])
+
+        response = self._request('POST', self._build_url('contexts'),
+                                 params=query_params,
+                                 json=data)
+
+        if response.status_code != requests.codes.created:
+            raise APIError("Could not create Context", response=response)
+
+        return Context(response.json()['results'][0], client=self)
+
+    def delete_context(self, context: Context) -> None:
+        """Delete the Context.
+
+        :param context: The context object to delete
+        """
+        context = check_type(context, Context, 'context')
+        self._build_url('context', context_id=context.id)
+
+        response = self._request('DELETE', self._build_url('context', context_id=context.id))
+
+        if response.status_code != requests.codes.no_content:  # pragma: no cover
+            raise APIError("Could not delete Contexts", response=response)
+
+    def context(self, *args, **kwargs) -> Context:
+        """
+        Retrieve a single Context, see `contexts()` for available arguments.
+
+        :return: a single Contexts
+        :rtype: Context
+        """
+        return self._retrieve_singular(self.contexts, *args, **kwargs)  # noqa
+
+    def contexts(
+            self,
+            pk: Optional[ObjectID] = None,
+            context_type: Optional[ContextType] = None,
+            activities: Optional[List[Union[Activity, ObjectID]]] = None,
+            scope: Optional[Union[Scope, ObjectID]] = None,
+            context_group: Optional[ContextGroup] = None,
+            **kwargs
+    ) -> List[Context]:
+        """
+        Retrieve Contexts.
+
+        :param pk: (optional) retrieve a single primary key (object ID)
+        :param context_type: (optional) filter on context_type (should be of `ContextType`)
+        :param activities: (optional) filter on a list of Activities or Activity Id's
+        :param scope: (optional) filter on a scope.
+        :return: a list of Contexts
+        :rtype: List[Context]
+        """
+        request_params = {
+            'id': check_uuid(pk),
+            'context_type': check_enum(context_type, ContextType, "context"),
+            'activities': check_list_of_base(activities, Activity, "activities"),
+            'scope': check_base(scope, Scope, "scope"),
+            'context_group': check_enum(context_group, ContextGroup, "context_group"),
+        }
+        request_params.update(API_EXTRA_PARAMS["contexts"])
+
+        if kwargs:
+            request_params.update(**kwargs)
+
+        response = self._request('GET', self._build_url('contexts'), params=request_params)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve Contexts", response=response)
+
+        return [Context(json=download, client=self) for download in response.json()['results']]

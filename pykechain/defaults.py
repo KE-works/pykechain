@@ -31,7 +31,6 @@ RETRY_TOTAL = 10
 # If the backoff_factor is 0.1, then sleep() will sleep for [0.0s, 0.2s, 0.4s, …] between retries.
 RETRY_BACKOFF_FACTOR = 0.8
 
-
 # Batching of parts when a large number of parts are requested at once
 PARTS_BATCH_LIMIT = 100  # number of parts
 
@@ -116,7 +115,15 @@ API_PATH = {
     'expiring_downloads': 'api/downloads.json',
     'expiring_download': 'api/downloads/{download_id}.json',
     'expiring_download_download': 'api/downloads/{download_id}/download',
-    'expiring_download_upload': 'api/downloads/{download_id}/upload'
+    'expiring_download_upload': 'api/downloads/{download_id}/upload',
+    'contexts': 'api/v3/contexts/contexts.json',
+    'context': 'api/v3/contexts/contexts/{context_id}.json',
+    'context_link_activities': 'api/v3/contexts/contexts/{context_id}/link_activities',
+    'context_unlink_activities': 'api/v3/contexts/contexts/{context_id}/unlink_activities',
+    # 'feature_collections': 'api/v3/contexts/feature_collections.json',
+    # 'feature_collection': 'api/v3/contexts/feature_collections/{context_id}.json',
+    # 'time_periods': 'api/v3/contexts/time_periods.json',
+    # 'time_period': 'api/v3/contexts/time_periods/{context_id}.json'
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
@@ -177,5 +184,10 @@ API_EXTRA_PARAMS = {
         ['id', 'subject', 'status', 'message', 'team', 'created_at', 'options', 'updated_at'])},
     'expiring_downloads': {'fields': ",".join(
         ['id', 'created_at', 'updated_at', 'expires_at', 'expires_in', 'content'])},
-
+    'context': {'fields': ",".join(
+        ['id', 'name', 'ref', 'created_at', 'updated_at', 'description', 'tags', 'context_type',
+         'activities', 'scope', 'options', 'feature_collection', 'start_date', 'due_date'])},
+    'contexts': {'fields': ",".join(
+        ['id', 'name', 'ref', 'created_at', 'updated_at', 'description', 'tags', 'context_type',
+         'activities', 'scope', 'options', 'feature_collection', 'start_date', 'due_date'])}
 }
