@@ -626,6 +626,34 @@ Improvements
 --------------
  * The details of a scope can now be edited using `Scope.edit()` method. This contains action already prepared for the KE-chain 2.16.0-143 release (Mid August). (#357)
 
+    For example:
+
+     >>> from datetime import datetime
+     >>> project.edit(name='New project name',description='Changing the description just because I can',start_date=datetime.utcnow(),status=ScopeStatus.CLOSED)
+
+  * Updated dependent versions for development: pytest (3.7.0)
+
+    For example:
+
+     >>> from datetime import datetime
+     >>> project.edit(name='New project name',description='Changing the description just because I can',start_date=datetime.utcnow(),status=ScopeStatus.CLOSED)
+
+  * Updated dependent versions for development: pytest (3.7.0)
+
+    For example:
+
+     >>> from datetime import datetime
+     >>> project.edit(name='New project name',description='Changing the description just because I can',start_date=datetime.utcnow(),status=ScopeStatus.CLOSED)
+
+  * Updated dependent versions for development: pytest (3.7.0)
+
+    For example:
+
+     >>> from datetime import datetime
+     >>> project.edit(name='New project name',description='Changing the description just because I can',start_date=datetime.utcnow(),status=ScopeStatus.CLOSED)
+
+  * Updated dependent versions for development: pytest (3.7.0)
+
    For example:
 
     >>> from datetime import datetime

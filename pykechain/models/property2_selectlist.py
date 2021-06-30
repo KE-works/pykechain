@@ -1,5 +1,5 @@
 from pykechain.exceptions import _DeprecationMixin
-from pykechain.models import MultiSelectListProperty, SelectListProperty
+from pykechain.models import SelectListProperty, MultiSelectListProperty
 
 
 class SelectListProperty2(SelectListProperty, _DeprecationMixin):

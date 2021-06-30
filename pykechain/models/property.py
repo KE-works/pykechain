@@ -394,8 +394,7 @@ class Property(BaseInScope):
         --------
         >>> front_fork = project.part('Front Fork')
         >>> color_property = front_fork.property(name='Color')
-        >>> color_property.edit(name='Shade', description='Could also be called tint, depending on mixture',
-        >>> unit='RGB')
+        >>> color_property.edit(name='Shade',description='Could also be called tint, depending on mixture',unit='RGB')
 
         >>> wheel_property_reference = self.project.model('Bike').property('Reference wheel')
         >>> wheel_model = self.project.model('Wheel')

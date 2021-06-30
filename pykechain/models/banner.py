@@ -64,7 +64,7 @@ class Banner(Base):
         clear its value (when that is possible). The example below will clear the url and edit the text, but leave
         everything else unchanged.
 
-        >>> banner.edit(text='New text here', url=None)
+        >>> banner.edit(text='New text here',url=None)
 
         """
         active = check_type(is_active, bool, 'is_active')
