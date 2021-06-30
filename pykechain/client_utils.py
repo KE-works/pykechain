@@ -1,4 +1,4 @@
-from ssl import SSLCertVerificationError
+from ssl import SSLError
 
 from urllib3 import Retry
 from urllib3.exceptions import MaxRetryError
@@ -35,4 +35,4 @@ class PykeRetry(Retry):
 
     def _is_self_signed_certificate_error(self, error):
         error_msg = "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self signed certificate"
-        return error and isinstance(error, SSLCertVerificationError) and error_msg in str(error)
+        return error and isinstance(error, SSLError) and error_msg in str(error)
