@@ -22,7 +22,7 @@ from pykechain.enums import (
     ActivityStatus,
     ActivityType,
     Category,
-    KechainEnv,
+    ContextGroup, ContextType, KechainEnv,
     Multiplicity,
     NotificationChannels,
     NotificationEvent,
@@ -53,6 +53,7 @@ from pykechain.utils import find, get_in_chunks, is_uuid, is_valid_email, slugif
 from .__about__ import version as pykechain_version
 from .client_utils import PykeRetry
 from .models.banner import Banner
+from .models.context import Context
 from .models.expiring_download import ExpiringDownload
 from .models.input_checks import (
     check_base,
@@ -67,6 +68,7 @@ from .models.input_checks import (
     check_user,
     check_uuid
 )
+from .typing import ObjectID
 
 
 class Client(object):
