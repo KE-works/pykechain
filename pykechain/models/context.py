@@ -17,7 +17,7 @@ class Context(BaseInScope, TagsMixin):
     """
     A virtual object representing a KE-chain Context.
 
-    .. versionadded:: 3.11
+    .. versionadded:: 3.12
     """
 
     def __init__(self, json, **kwargs):

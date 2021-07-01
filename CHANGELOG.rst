@@ -1,15 +1,19 @@
 Change Log
 ==========
 
-UNRELEASED
-----------
-* :bug: Fixed a test_cassette that was failing on a date check. Made it use a fixed date rather than doing it on today.
+v3.12.0 (1JUL21)
+----------------
+* :star: We added the `Context` object to pykechain that has full API access to the `Context` API in KE-chain v2021.6 and newer. You can add time period contexts, static location contexts and textlabel contexta and put them under a `context_group` if desired. This `Context` feature is now implemented limitly for `Activities` but in the coming period will be extended to support extensive usecases for the Forms NG featureset that is coming this fall. (KE-925)
+* :bug: Fixed a test cassette that was failing on a date check. Made it use a fixed date rather than doing it on today.
 * :bug: Fixed automatic compilation of the pykechain documentation on https://readthedocs.org/projects/pykechain/.
-* :+1: From now on python 3.5 is deprecated. We can now start to insert f-strings in our pykechain codebase.
+* :+1: From now on python 3.5 is deprecated. The lowest version we support is Python 3.6. We can now start to insert f-strings and variable type annotations in our pykechain codebase.
 * :+1: refactoring all models that were shadowed with a `<classname>2` to enable fast and smooth deprecation in July 2021.
-
-* :+1: When connecting to a server with a SSL certificate error which cannot be checked, we provide a message fast and dont retry. (KE-1052, #997)
 * :+1: We converted all type annotations in comments to proper type and variable annotations.
+* :+1: When connecting to a server with a SSL certificate error which cannot be checked, we provide a message fast and dont retry. (KE-1052, #997)
+
+# Backward Incompatible Changes
+
+* We dropped support for Python versions 3.5 and lower. Python 3.5 reached end of life in Sep 2020 and no more new releases will be made. Consider upgrading to a newer version of Python. See: https://www.python.org/dev/peps/pep-0478/
 
 v3.11.1 (15JUN21)
 -----------------

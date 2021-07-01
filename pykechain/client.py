@@ -3183,6 +3183,8 @@ class Client(object):
         """
         Create a new Context object of a ContextType in a scope.
 
+        .. versionadded:: 3.12
+
         :param name: Name of the Context to be displayed to the end-user.
         :context_type: A type of Context, as defined in `ContextType` eg: STATIC_LOCATION, TIME_PERIOD
         :param scope: Scope object or Scope Id where the Context is active on.
@@ -3234,6 +3236,8 @@ class Client(object):
     def delete_context(self, context: Context) -> None:
         """Delete the Context.
 
+        .. versionadded:: 3.12
+
         :param context: The context object to delete
         """
         context = check_type(context, Context, 'context')
@@ -3247,6 +3251,8 @@ class Client(object):
     def context(self, *args, **kwargs) -> Context:
         """
         Retrieve a single Context, see `contexts()` for available arguments.
+
+        .. versionadded:: 3.12
 
         :return: a single Contexts
         :rtype: Context
@@ -3264,6 +3270,8 @@ class Client(object):
     ) -> List[Context]:
         """
         Retrieve Contexts.
+
+        .. versionadded:: 3.12
 
         :param pk: (optional) retrieve a single primary key (object ID)
         :param context_type: (optional) filter on context_type (should be of `ContextType`)
