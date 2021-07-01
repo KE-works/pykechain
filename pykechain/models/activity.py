@@ -1036,7 +1036,7 @@ class Activity(TreeObject, TagsMixin):
 
         See :class:`pykechain.Client.context` for available parameters.
 
-        .. versionadded:: 3.11
+        .. versionadded:: 3.12
 
         :return: a Context object
         """
@@ -1048,7 +1048,7 @@ class Activity(TreeObject, TagsMixin):
 
         See :class:`pykechain.Client.contexts` for available parameters.
 
-        .. versionadded:: 3.11
+        .. versionadded:: 3.12
 
         :return: a list of Context objects
         """
@@ -1060,7 +1060,7 @@ class Activity(TreeObject, TagsMixin):
 
         See :class:`pykechain.Client.create_context` for available parameters.
 
-        .. versionadded:: 3.11
+        .. versionadded:: 3.12
 
         :return: a Context object
         """
