@@ -124,6 +124,8 @@ API_PATH = {
     # 'feature_collection': 'api/v3/contexts/feature_collections/{context_id}.json',
     # 'time_periods': 'api/v3/contexts/time_periods.json',
     # 'time_period': 'api/v3/contexts/time_periods/{context_id}.json'
+    # 'text_labels': 'api/v3/contexts/text_labels.json',
+    # 'text_label': 'api/v3/contexts/text_labels/{context_id}.json'
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
