@@ -186,8 +186,8 @@ API_EXTRA_PARAMS = {
         ['id', 'created_at', 'updated_at', 'expires_at', 'expires_in', 'content'])},
     'context': {'fields': ",".join(
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'description', 'tags', 'context_type',
-         'activities', 'scope', 'options', 'feature_collection', 'start_date', 'due_date'])},
+         'activities', 'scope', 'options', 'context_group', 'feature_collection', 'start_date', 'due_date'])},
     'contexts': {'fields': ",".join(
         ['id', 'name', 'ref', 'created_at', 'updated_at', 'description', 'tags', 'context_type',
-         'activities', 'scope', 'options', 'feature_collection', 'start_date', 'due_date'])}
+         'activities', 'scope', 'options', 'context_group', 'feature_collection', 'start_date', 'due_date'])}
 }
