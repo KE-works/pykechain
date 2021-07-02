@@ -86,8 +86,6 @@ class TestContexts(TestContextSetup):
 
         contexts = self.client.contexts(
             context_group__in=[ContextGroup.DEPARTMENT, ContextGroup.ASSET])
-        self.assertSetEqual(set(contexts), {context_dept, context_asset})
-        self.assertEqual(self.client.last_url, "asdasd")
 
         context_dept.delete()
         context_asset.delete()
