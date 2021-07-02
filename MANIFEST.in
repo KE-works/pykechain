@@ -18,3 +18,4 @@ exclude requirements-ci.txt
 exclude *-OFF
 exclude *.yml
 exclude *.yaml
+exclude .editorconfig
