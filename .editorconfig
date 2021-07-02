@@ -1,0 +1,42 @@
+# http://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+# pycharm specific
+ij_visual_guides = 79,99
+
+[*.{py, rst, ini}]
+indent_style = space
+indent_size = 4
+
+[*.py]
+max_line_length = 99
+line_length = 99
+known_first_party = kechain2, config
+multi_line_output = 3
+default_section = THIRDPARTY
+recursive = true
+skip = venv/
+skip_glob = **/migrations/*.py
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+# pycharm specific settings
+ij_python_optimize_imports_always_split_from_imports = false
+ij_python_optimize_imports_case_insensitive_order = false
+ij_python_optimize_imports_join_from_imports_with_same_source = true
+ij_python_optimize_imports_sort_by_type_first = true
+ij_python_optimize_imports_sort_imports = true
+ij_python_optimize_imports_sort_names_in_from_imports = true
+ij_python_keep_indents_on_empty_lines = false
+
+[*.{html, css, scss, json, yml}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
