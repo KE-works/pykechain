@@ -42,14 +42,18 @@ validators_options_json_schema = {
 }
 
 fileextensionvalidator_schema = copy.deepcopy(validator_jsonschema_stub)
-fileextensionvalidator_schema['properties']['config']['properties'].update({
-    "accept": {"type": "array", "items": {"type": ["string", "null"]}}
-})
+fileextensionvalidator_schema['properties']['config']['properties'].update(
+    {
+        "accept": {"type": "array", "items": {"type": ["string", "null"]}}
+    }
+)
 
 filesizevalidator_schema = copy.deepcopy(validator_jsonschema_stub)
-filesizevalidator_schema['properties']['config']['properties'].update({
-    "maxSize": {"type": "number", "minimum": 0, "multipleOf": 1.0}
-})
+filesizevalidator_schema['properties']['config']['properties'].update(
+    {
+        "maxSize": {"type": "number", "minimum": 0, "multipleOf": 1.0}
+    }
+)
 
 #
 # Representation of a property configurations

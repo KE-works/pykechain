@@ -1,7 +1,9 @@
 import datetime
 
-from pykechain.enums import KEChainPages, ScopeCategory, ScopeMemberActions, ScopeRoles, \
-    ScopeStatus
+from pykechain.enums import (
+    KEChainPages, ScopeCategory, ScopeMemberActions, ScopeRoles,
+    ScopeStatus,
+)
 from pykechain.exceptions import IllegalArgumentError, MultipleFoundError, NotFoundError
 from pykechain.models import Scope, Team
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
@@ -22,8 +24,10 @@ class TestScopes(TestBetamax):
         obj = self.project
         for attribute in attributes:
             with self.subTest(attribute):
-                self.assertTrue(hasattr(obj, attribute),
-                                f"Could not find '{attribute}' in the object: '{obj.__dict__.keys()}'")
+                self.assertTrue(
+                    hasattr(obj, attribute),
+                    f"Could not find '{attribute}' in the object: '{obj.__dict__.keys()}'"
+                    )
 
     def test_retrieve_scopes(self):
         self.assertTrue(self.client.scopes())
@@ -101,9 +105,11 @@ class TestScopeMembers(TestBetamax):
 
     def _reset_members(self):
         """Reset the scope members by removing all members and adding the defaults"""
-        [self.project.remove_member(member=member['username']) for member in self.project.members()]
+        [self.project.remove_member(member=member['username']) for member in
+         self.project.members()]
 
-        for role in [ScopeRoles.MANAGER, ScopeRoles.LEADMEMBER, ScopeRoles.MEMBER, ScopeRoles.SUPERVISOR]:
+        for role in [ScopeRoles.MANAGER, ScopeRoles.LEADMEMBER, ScopeRoles.MEMBER,
+                     ScopeRoles.SUPERVISOR]:
             for member in self.DEFAULTS[role]:
                 self.project._update_scope_project_team(ScopeMemberActions.ADD, role, member)
 
@@ -135,14 +141,18 @@ class TestScopeMembers(TestBetamax):
         basic_members = set(get_member_names(is_manager=False, is_leadmember=False))
 
         self.assertEqual(5, len(all_members), msg=','.join(all_members))
-        self.assertTrue(basic_members and leads and managers and supervisors,
-                        msg='Test scope must have a member of every type!')
+        self.assertTrue(
+            basic_members and leads and managers and supervisors,
+            msg='Test scope must have a member of every type!'
+            )
 
         all_roles = basic_members | leads | managers | supervisors
         remaining_non_leads = all_roles - leads
         remaining_non_managers = all_roles - managers
 
-        self.assertSetEqual(all_roles, all_members, msg='The sum of all roles should equal all members.')
+        self.assertSetEqual(
+            all_roles, all_members, msg='The sum of all roles should equal all members.'
+            )
         self.assertSetEqual(remaining_non_leads, non_leads)
         self.assertSetEqual(remaining_non_managers, non_managers)
 
@@ -174,7 +184,9 @@ class TestScopeMembers(TestBetamax):
         self.project.remove_member(member_to_be_removed)
         self.project = self.client.scope(pk=self.project.id)
         project_members = self.project.members()
-        self.assertTrue(member_to_be_removed not in [member['username'] for member in project_members])
+        self.assertTrue(
+            member_to_be_removed not in [member['username'] for member in project_members]
+            )
 
     def test_add_manager(self):
         manager_to_be_added = 'anotheruser'
@@ -182,7 +194,9 @@ class TestScopeMembers(TestBetamax):
         self.project.add_manager(manager_to_be_added)
         self.project = self.client.scope(pk=self.project.id)
         project_managers = self.project.members(is_manager=True)
-        self.assertTrue(manager_to_be_added in [manager['username'] for manager in project_managers])
+        self.assertTrue(
+            manager_to_be_added in [manager['username'] for manager in project_managers]
+            )
 
     def test_remove_manager(self):
         manager_to_be_removed = 'anotheruser'
@@ -192,9 +206,13 @@ class TestScopeMembers(TestBetamax):
         self.project.remove_manager(manager_to_be_removed)
         self.project = self.client.scope(pk=self.project.id)
         project_managers = self.project.members(is_manager=True)
-        self.assertTrue(manager_to_be_removed not in [manager['username'] for manager in project_managers])
+        self.assertTrue(
+            manager_to_be_removed not in [manager['username'] for manager in project_managers]
+            )
         project_managers = self.project.members(is_manager=False)
-        self.assertTrue(manager_to_be_removed in [manager['username'] for manager in project_managers])
+        self.assertTrue(
+            manager_to_be_removed in [manager['username'] for manager in project_managers]
+            )
 
     def test_add_leadmember(self):
         leadmember_to_be_added = 'anotheruser'
@@ -202,7 +220,10 @@ class TestScopeMembers(TestBetamax):
         self.project.add_leadmember(leadmember_to_be_added)
         self.project = self.client.scope(pk=self.project.id)
         project_leadmembers = self.project.members(is_leadmember=True)
-        self.assertTrue(leadmember_to_be_added in [leadmember['username'] for leadmember in project_leadmembers])
+        self.assertTrue(
+            leadmember_to_be_added in [leadmember['username'] for leadmember in
+                                       project_leadmembers]
+            )
 
     def test_remove_leadmember(self):
         leadmember_to_be_removed = 'anotheruser'
@@ -212,9 +233,15 @@ class TestScopeMembers(TestBetamax):
         self.project.remove_leadmember(leadmember_to_be_removed)
         self.project = self.client.scope(pk=self.project.id)
         project_leadmembers = self.project.members(is_leadmember=True)
-        self.assertTrue(leadmember_to_be_removed not in [leadmember['username'] for leadmember in project_leadmembers])
+        self.assertTrue(
+            leadmember_to_be_removed not in [leadmember['username'] for leadmember in
+                                             project_leadmembers]
+            )
         project_leadmembers = self.project.members(is_leadmember=False)
-        self.assertTrue(leadmember_to_be_removed in [leadmember['username'] for leadmember in project_leadmembers])
+        self.assertTrue(
+            leadmember_to_be_removed in [leadmember['username'] for leadmember in
+                                         project_leadmembers]
+            )
 
     def test_add_supervisor(self):
         supervisor_to_be_added = 'anotheruser'
@@ -222,7 +249,10 @@ class TestScopeMembers(TestBetamax):
         self.project.add_supervisor(supervisor_to_be_added)
         self.project = self.client.scope(pk=self.project.id)
         project_supervisors = self.project.members(is_supervisor=True)
-        self.assertTrue(supervisor_to_be_added in [supervisor['username'] for supervisor in project_supervisors])
+        self.assertTrue(
+            supervisor_to_be_added in [supervisor['username'] for supervisor in
+                                       project_supervisors]
+            )
 
     def test_remove_supervisor(self):
         supervisor_to_be_removed = 'anotheruser'
@@ -232,7 +262,10 @@ class TestScopeMembers(TestBetamax):
         self.project.remove_supervisor(supervisor_to_be_removed)
         self.project = self.client.scope(pk=self.project.id)
         project_supervisors = self.project.members(is_supervisor=True)
-        self.assertTrue(supervisor_to_be_removed not in [supervisor['username'] for supervisor in project_supervisors])
+        self.assertTrue(
+            supervisor_to_be_removed not in [supervisor['username'] for supervisor in
+                                             project_supervisors]
+            )
 
 
 class TestScopeEdit(TestBetamax):
@@ -261,17 +294,25 @@ class TestScopeEdit(TestBetamax):
         new_due_date = datetime.datetime(2018, 12, 8, tzinfo=None)
         new_tags = ['tag_one', 'tag_two']
 
-        self.scope.edit(name=new_scope_name, description=new_scope_description, tags=new_tags,
-                        start_date=new_start_date, due_date=new_due_date, status=ScopeStatus.CLOSED,
-                        category=ScopeCategory.TEMPLATE_SCOPE)
+        self.scope.edit(
+            name=new_scope_name, description=new_scope_description, tags=new_tags,
+            start_date=new_start_date, due_date=new_due_date, status=ScopeStatus.CLOSED,
+            category=ScopeCategory.TEMPLATE_SCOPE
+            )
 
         retrieved_project = self.client.scope(id=self.scope.id, status=ScopeStatus.CLOSED)
 
         # testing
         self.assertEqual(new_scope_name, retrieved_project.name)
         self.assertEqual(new_scope_description, retrieved_project.description)
-        self.assertIn(retrieved_project._json_data['start_date'], ('2018-12-05T00:00:00Z', '2018-12-05T00:00:00+00:00'))
-        self.assertIn(retrieved_project._json_data['due_date'], ('2018-12-08T00:00:00Z', '2018-12-08T00:00:00+00:00'))
+        self.assertIn(
+            retrieved_project._json_data['start_date'],
+            ('2018-12-05T00:00:00Z', '2018-12-05T00:00:00+00:00')
+            )
+        self.assertIn(
+            retrieved_project._json_data['due_date'],
+            ('2018-12-08T00:00:00Z', '2018-12-08T00:00:00+00:00')
+            )
         self.assertEqual(ScopeStatus.CLOSED, retrieved_project.status)
         self.assertEqual(ScopeCategory.TEMPLATE_SCOPE, retrieved_project.category)
         self.assertEqual(new_tags, retrieved_project.tags)
@@ -307,8 +348,10 @@ class TestScopeEdit(TestBetamax):
         initial_tags = ['tag_one', 'tag_two']
         team_one, team_two = self.client.teams()[:2]
 
-        self.scope.edit(name=initial_name, description=initial_description, tags=initial_tags,
-                        start_date=initial_start_date, due_date=initial_due_date, team=team_two)
+        self.scope.edit(
+            name=initial_name, description=initial_description, tags=initial_tags,
+            start_date=initial_start_date, due_date=initial_due_date, team=team_two
+            )
 
         # Edit without mentioning values, everything should stay the same
         new_name = 'Just Pykechain testing (bike project)'
@@ -317,14 +360,20 @@ class TestScopeEdit(TestBetamax):
         # testing
         self.assertEqual(self.scope.name, new_name)
         self.assertEqual(self.scope.description, initial_description)
-        self.assertEqual(self.scope.start_date.strftime("%Y/%m/%d, %H:%M:%S"),
-                         initial_start_date.strftime("%Y/%m/%d, %H:%M:%S"))
-        self.assertEqual(self.scope.due_date.strftime("%Y/%m/%d, %H:%M:%S"),
-                         initial_due_date.strftime("%Y/%m/%d, %H:%M:%S"))
+        self.assertEqual(
+            self.scope.start_date.strftime("%Y/%m/%d, %H:%M:%S"),
+            initial_start_date.strftime("%Y/%m/%d, %H:%M:%S")
+            )
+        self.assertEqual(
+            self.scope.due_date.strftime("%Y/%m/%d, %H:%M:%S"),
+            initial_due_date.strftime("%Y/%m/%d, %H:%M:%S")
+            )
         self.assertEqual(self.scope.tags, initial_tags)
 
         # Edit with clearing the values, name and status cannot be cleared
-        self.scope.edit(name=None, description=None, tags=None, start_date=None, due_date=None, status=None)
+        self.scope.edit(
+            name=None, description=None, tags=None, start_date=None, due_date=None, status=None
+            )
         self.scope.refresh()
         self.assertEqual(self.scope.name, new_name)
         self.assertEqual(self.scope.description, '')

@@ -17,8 +17,10 @@ from .property2_selectlist import SelectListProperty2
 from .property_attachment import AttachmentProperty
 from .property_datetime import DatetimeProperty
 from .property_multi_reference import MultiReferenceProperty
-from .property_reference import ActivityReferencesProperty, ScopeReferencesProperty, \
-    UserReferencesProperty
+from .property_reference import (
+    ActivityReferencesProperty, ScopeReferencesProperty,
+    UserReferencesProperty,
+)
 from .property_selectlist import MultiSelectListProperty, SelectListProperty
 from .scope import Scope
 from .scope2 import Scope2

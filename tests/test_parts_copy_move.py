@@ -15,11 +15,14 @@ class TestPartsCopyMove(TestBetamax):
         self.cross_scope_project = self.client.scope(ref='cannondale-project')
         self.cross_scope_bike = self.cross_scope_project.model(ref='cannondale-bike')
         self.wheel = self.project.model(name='Wheel')
-        self.front_wheel, self.rear_wheel = self.project.part(name='Front Wheel'), self.project.part(name='Rear Wheel')
+        self.front_wheel, self.rear_wheel = self.project.part(
+            name='Front Wheel'
+            ), self.project.part(name='Rear Wheel')
         self.specify_wheel_diameter = self.project.activity(name='Specify wheel diameter')
         self.model_to_be_copied = self.project.create_model(
             parent=self.base, name=f'__Model to be Copied @ {str(datetime.now())} [TEST]',
-            multiplicity=Multiplicity.ONE_MANY)  # type Part
+            multiplicity=Multiplicity.ONE_MANY
+        )  # type Part
         self.p_char_name = '__Property single text'
         self.p_multi_name = '__Property multi text'
         self.p_bool_name = '__Property boolean'
@@ -182,8 +185,10 @@ class TestPartsCopyMove(TestBetamax):
         # testing
         self.assertTrue(copied_model)
         self.assertEqual(len(copied_model.properties), len(self.model_to_be_copied.properties))
-        self.assertEqual(copied_model.property(name=self.p_char_name)._json_data['description'],
-                         'Description of Property single text')
+        self.assertEqual(
+            copied_model.property(name=self.p_char_name)._json_data['description'],
+            'Description of Property single text'
+            )
         self.assertEqual(copied_model.property(name=self.p_char_name)._json_data['unit'], 'mm')
         self.assertEqual(copied_model.property(name=self.p_int_name).value, self.p_int_value)
         self.assertEqual(copied_model.property(name=self.p_char_name).value, self.p_char_value)
@@ -192,22 +197,41 @@ class TestPartsCopyMove(TestBetamax):
         self.assertEqual(copied_model.property(name=self.p_float_name).value, self.p_float_value)
         self.assertEqual(copied_model.property(name=self.p_bool_name).value, self.p_bool_value)
         self.assertEqual(copied_model.property(name=self.p_date_name).value, self.p_date_value)
-        self.assertIn(self.p_datetime_value, copied_model.property(name=self.p_datetime_name).value)
+        self.assertIn(
+            self.p_datetime_value, copied_model.property(name=self.p_datetime_name).value
+            )
         self.assertIn(copied_model.property(name=self.p_attach_name).filename, self.p_attach_value)
         self.assertEqual(copied_model.property(name=self.p_link_name).value, self.p_link_value)
-        self.assertEqual(copied_model.property(name=self.p_single_select_name).value, self.p_single_select_value)
-        self.assertEqual(copied_model.property(name=self.p_multi_select_name).value, self.p_multi_select_value)
-        list_of_user_ids = [user.id for user in copied_model.property(name=self.p_user_reference_name).value]
-        self.assertIn(self.wheel.id,
-                      [part.id for part in copied_model.property(name=self.p_part_reference_name).value])
-        self.assertIn(self.specify_wheel_diameter.id,
-                      [act.id for act in copied_model.property(name=self.p_activity_reference_name).value])
-        self.assertIn(self.project.id,
-                      [scope.id for scope in copied_model.property(name=self.p_project_reference_name).value])
+        self.assertEqual(
+            copied_model.property(name=self.p_single_select_name).value, self.p_single_select_value
+            )
+        self.assertEqual(
+            copied_model.property(name=self.p_multi_select_name).value, self.p_multi_select_value
+            )
+        list_of_user_ids = [user.id for user in
+                            copied_model.property(name=self.p_user_reference_name).value]
+        self.assertIn(
+            self.wheel.id,
+            [part.id for part in copied_model.property(name=self.p_part_reference_name).value]
+            )
+        self.assertIn(
+            self.specify_wheel_diameter.id,
+            [act.id for act in copied_model.property(name=self.p_activity_reference_name).value]
+            )
+        self.assertIn(
+            self.project.id,
+            [scope.id for scope in copied_model.property(name=self.p_project_reference_name).value]
+            )
         self.assertIn(self.test_manager.id, list_of_user_ids)
         self.assertIn(self.test_supervisor.id, list_of_user_ids)
-        self.assertEqual(copied_model.property(name=self.p_single_select_name).options, self.p_select_value_choices)
-        self.assertEqual(copied_model.property(name=self.p_multi_select_name).options, self.p_select_value_choices)
+        self.assertEqual(
+            copied_model.property(name=self.p_single_select_name).options,
+            self.p_select_value_choices
+            )
+        self.assertEqual(
+            copied_model.property(name=self.p_multi_select_name).options,
+            self.p_select_value_choices
+            )
         self.assertEqual(len(copied_model._cached_children), 2)
 
     def test_copy_part_model_include_instances(self):
@@ -227,20 +251,38 @@ class TestPartsCopyMove(TestBetamax):
         self.assertTrue(copied_instance)
         self.assertEqual(len(copied_instance.properties), len(self.model_to_be_copied.properties))
         self.assertEqual(copied_instance.property(name=self.p_char_name).value, self.p_char_value)
-        self.assertEqual(copied_instance.property(name=self.p_multi_name).value, self.p_multi_value)
+        self.assertEqual(
+            copied_instance.property(name=self.p_multi_name).value, self.p_multi_value
+            )
         self.assertEqual(copied_instance.property(name=self.p_int_name).value, self.p_int_value)
-        self.assertEqual(copied_instance.property(name=self.p_float_name).value, self.p_float_value)
+        self.assertEqual(
+            copied_instance.property(name=self.p_float_name).value, self.p_float_value
+            )
         self.assertEqual(copied_instance.property(name=self.p_bool_name).value, self.p_bool_value)
         self.assertEqual(copied_instance.property(name=self.p_date_name).value, self.p_date_value)
-        self.assertIn(self.p_datetime_value, copied_instance.property(name=self.p_datetime_name).value)
+        self.assertIn(
+            self.p_datetime_value, copied_instance.property(name=self.p_datetime_name).value
+            )
         self.assertEqual(copied_instance.property(name=self.p_link_name).value, self.p_link_value)
-        self.assertEqual(copied_instance.property(name=self.p_single_select_name).value, self.p_single_select_value)
-        self.assertEqual(copied_instance.property(name=self.p_multi_select_name).value, self.p_multi_select_value)
-        list_of_user_ids = [user.id for user in copied_instance.property(name=self.p_user_reference_name).value]
-        self.assertIn(self.specify_wheel_diameter.id,
-                      [act.id for act in copied_instance.property(name=self.p_activity_reference_name).value])
-        self.assertIn(self.project.id,
-                      [scope.id for scope in copied_instance.property(name=self.p_project_reference_name).value])
+        self.assertEqual(
+            copied_instance.property(name=self.p_single_select_name).value,
+            self.p_single_select_value
+            )
+        self.assertEqual(
+            copied_instance.property(name=self.p_multi_select_name).value,
+            self.p_multi_select_value
+            )
+        list_of_user_ids = [user.id for user in
+                            copied_instance.property(name=self.p_user_reference_name).value]
+        self.assertIn(
+            self.specify_wheel_diameter.id,
+            [act.id for act in copied_instance.property(name=self.p_activity_reference_name).value]
+            )
+        self.assertIn(
+            self.project.id,
+            [scope.id for scope in
+             copied_instance.property(name=self.p_project_reference_name).value]
+            )
         self.assertIn(self.test_manager.id, list_of_user_ids)
         self.assertIn(self.test_supervisor.id, list_of_user_ids)
 
@@ -297,7 +339,8 @@ class TestPartsCopyMove(TestBetamax):
         )
 
         self.instance_to_be_copied.refresh()  # to load the new property
-        self.instance_to_be_copied.property(name=prop_name).value = self.instance_to_be_copied.children()[0]
+        self.instance_to_be_copied.property(name=prop_name).value = \
+        self.instance_to_be_copied.children()[0]
 
         instance_target_parent = self.project.part('Bike')
         copied_instance = self.instance_to_be_copied.copy(
@@ -317,9 +360,11 @@ class TestPartsCopyMove(TestBetamax):
         # setUp
         model_target_parent = self.project.model('Bike')
         original_model_to_be_copied_name = self.model_to_be_copied.name
-        self.model_to_be_copied = self.model_to_be_copied.move(target_parent=model_target_parent,
-                                                               name='__New part under bike',
-                                                               include_children=True)
+        self.model_to_be_copied = self.model_to_be_copied.move(
+            target_parent=model_target_parent,
+            name='__New part under bike',
+            include_children=True
+            )
 
         # testing
         with self.assertRaises(NotFoundError):
@@ -329,11 +374,14 @@ class TestPartsCopyMove(TestBetamax):
         # setUp
         instance_to_be_copied = self.model_to_be_copied.instances()[0]
         instance_to_be_copied.property(name=self.p_attach_name).upload(self.p_attach_value)
-        instance_to_be_copied.property(name=self.p_part_reference_name).value = [self.front_wheel, self.rear_wheel]
+        instance_to_be_copied.property(name=self.p_part_reference_name).value = [self.front_wheel,
+                                                                                 self.rear_wheel]
 
         instance_target_parent = self.project.part('Bike')
-        copied_instance = instance_to_be_copied.\
-            copy(target_parent=instance_target_parent, name='__Copied instance', include_children=True)
+        copied_instance = instance_to_be_copied. \
+            copy(
+            target_parent=instance_target_parent, name='__Copied instance', include_children=True
+            )
         copied_instance.populate_descendants()
         self.dump_part = copied_instance.model()
 
@@ -342,24 +390,45 @@ class TestPartsCopyMove(TestBetamax):
         self.assertEqual(copied_instance.name, '__Copied instance')
         self.assertEqual(len(copied_instance.properties), len(self.model_to_be_copied.properties))
         self.assertEqual(copied_instance.property(name=self.p_char_name).value, self.p_char_value)
-        self.assertEqual(copied_instance.property(name=self.p_multi_name).value, self.p_multi_value)
+        self.assertEqual(
+            copied_instance.property(name=self.p_multi_name).value, self.p_multi_value
+            )
         self.assertEqual(copied_instance.property(name=self.p_int_name).value, self.p_int_value)
-        self.assertEqual(copied_instance.property(name=self.p_float_name).value, self.p_float_value)
+        self.assertEqual(
+            copied_instance.property(name=self.p_float_name).value, self.p_float_value
+            )
         self.assertEqual(copied_instance.property(name=self.p_bool_name).value, self.p_bool_value)
         self.assertEqual(copied_instance.property(name=self.p_date_name).value, self.p_date_value)
-        self.assertIn(self.p_datetime_value, copied_instance.property(name=self.p_datetime_name).value)
-        self.assertIn(copied_instance.property(name=self.p_attach_name).filename, self.p_attach_value)
+        self.assertIn(
+            self.p_datetime_value, copied_instance.property(name=self.p_datetime_name).value
+            )
+        self.assertIn(
+            copied_instance.property(name=self.p_attach_name).filename, self.p_attach_value
+            )
         self.assertEqual(copied_instance.property(name=self.p_link_name).value, self.p_link_value)
-        self.assertEqual(copied_instance.property(name=self.p_single_select_name).value, self.p_single_select_value)
-        self.assertEqual(copied_instance.property(name=self.p_multi_select_name).value, self.p_multi_select_value)
-        list_of_parts_ids = [part.id for part in copied_instance.property(name=self.p_part_reference_name).value]
-        list_of_user_ids = [user.id for user in copied_instance.property(name=self.p_user_reference_name).value]
+        self.assertEqual(
+            copied_instance.property(name=self.p_single_select_name).value,
+            self.p_single_select_value
+            )
+        self.assertEqual(
+            copied_instance.property(name=self.p_multi_select_name).value,
+            self.p_multi_select_value
+            )
+        list_of_parts_ids = [part.id for part in
+                             copied_instance.property(name=self.p_part_reference_name).value]
+        list_of_user_ids = [user.id for user in
+                            copied_instance.property(name=self.p_user_reference_name).value]
         self.assertIn(self.front_wheel.id, list_of_parts_ids)
         self.assertIn(self.rear_wheel.id, list_of_parts_ids)
-        self.assertIn(self.specify_wheel_diameter.id,
-                      [act.id for act in copied_instance.property(name=self.p_activity_reference_name).value])
-        self.assertIn(self.project.id,
-                      [scope.id for scope in copied_instance.property(name=self.p_project_reference_name).value])
+        self.assertIn(
+            self.specify_wheel_diameter.id,
+            [act.id for act in copied_instance.property(name=self.p_activity_reference_name).value]
+            )
+        self.assertIn(
+            self.project.id,
+            [scope.id for scope in
+             copied_instance.property(name=self.p_project_reference_name).value]
+            )
         self.assertIn(self.test_manager.id, list_of_user_ids)
         self.assertIn(self.test_supervisor.id, list_of_user_ids)
 
@@ -382,9 +451,11 @@ class TestPartsCopyMove(TestBetamax):
 
         clone_of_original_instance = multiplicity_part2.clone()
 
-        moved_instance = clone_of_original_instance.move(target_parent=self.project.part('Bike'),
-                                                         name='__Moved clone instance',
-                                                         include_children=False)
+        moved_instance = clone_of_original_instance.move(
+            target_parent=self.project.part('Bike'),
+            name='__Moved clone instance',
+            include_children=False
+            )
 
         moved_instance.populate_descendants()
         self.dump_part = moved_instance.model()

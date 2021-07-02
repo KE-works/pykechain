@@ -4,16 +4,20 @@ from typing import Dict, List, Optional, Text, Union  # noqa: F401
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.enums import (KEChainPages, Multiplicity, ScopeCategory, ScopeMemberActions,
-                             ScopeRoles, ScopeStatus,
-                             SubprocessDisplayMode)
+from pykechain.enums import (
+    KEChainPages, Multiplicity, ScopeCategory, ScopeMemberActions,
+    ScopeRoles, ScopeStatus,
+    SubprocessDisplayMode,
+)
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models.activity import Activity
 from pykechain.models.base import Base
 from pykechain.models.context import Context
-from pykechain.models.input_checks import (check_base, check_datetime, check_enum,
-                                           check_list_of_text, check_text,
-                                           check_type)
+from pykechain.models.input_checks import (
+    check_base, check_datetime, check_enum,
+    check_list_of_text, check_text,
+    check_type,
+)
 from pykechain.models.part import Part
 from pykechain.models.property import Property
 from pykechain.models.representations import BaseRepresentation
@@ -214,17 +218,17 @@ class Scope(Base, TagsMixin):
         self.refresh(json=response.json().get("results")[0])
 
     def edit(
-            self,
-            name: Optional[Union[str, Empty]] = empty,
-            description: Optional[Union[str, Empty]] = empty,
-            start_date: Optional[Union[datetime, Empty]] = empty,
-            due_date: Optional[Union[datetime, Empty]] = empty,
-            status: Optional[Union[str, ScopeStatus, Empty]] = empty,
-            category: Optional[Union[str, ScopeCategory, Empty]] = empty,
-            tags: Optional[Union[List[str], Empty]] = empty,
-            team: Optional[Union[Team, str, Empty]] = empty,
-            options: Optional[Union[Dict, Empty]] = empty,
-            **kwargs
+        self,
+        name: Optional[Union[str, Empty]] = empty,
+        description: Optional[Union[str, Empty]] = empty,
+        start_date: Optional[Union[datetime, Empty]] = empty,
+        due_date: Optional[Union[datetime, Empty]] = empty,
+        status: Optional[Union[str, ScopeStatus, Empty]] = empty,
+        category: Optional[Union[str, ScopeCategory, Empty]] = empty,
+        tags: Optional[Union[List[str], Empty]] = empty,
+        team: Optional[Union[Team, str, Empty]] = empty,
+        options: Optional[Union[Dict, Empty]] = empty,
+        **kwargs
     ) -> None:
         """
         Edit the details of a scope.
@@ -390,12 +394,12 @@ class Scope(Base, TagsMixin):
         return self._client.create_model(parent, name, multiplicity=multiplicity)
 
     def create_model_with_properties(
-            self,
-            parent,
-            name,
-            multiplicity=Multiplicity.ZERO_MANY,
-            properties_fvalues=None,
-            **kwargs
+        self,
+        parent,
+        name,
+        multiplicity=Multiplicity.ZERO_MANY,
+        properties_fvalues=None,
+        **kwargs
     ) -> 'Part':
         """Create a model with its properties in a single API request.
 
@@ -439,11 +443,11 @@ class Scope(Base, TagsMixin):
         return SideBarManager(scope=self, *args, **kwargs)
 
     def set_landing_page(
-            self,
-            activity: Union["Activity", KEChainPages],
-            task_display_mode: Optional[
-                SubprocessDisplayMode
-            ] = SubprocessDisplayMode.ACTIVITIES,
+        self,
+        activity: Union["Activity", KEChainPages],
+        task_display_mode: Optional[
+            SubprocessDisplayMode
+        ] = SubprocessDisplayMode.ACTIVITIES,
     ) -> None:
         """
         Update the landing page of the scope.
@@ -534,10 +538,10 @@ class Scope(Base, TagsMixin):
     #
 
     def members(
-            self,
-            is_manager: Optional[bool] = None,
-            is_supervisor: Optional[bool] = None,
-            is_leadmember: Optional[bool] = None,
+        self,
+        is_manager: Optional[bool] = None,
+        is_supervisor: Optional[bool] = None,
+        is_leadmember: Optional[bool] = None,
     ) -> List[Dict]:
         """
         Retrieve members of the scope.

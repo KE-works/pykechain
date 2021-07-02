@@ -44,11 +44,13 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
                     parts = list()
                     for chunk in get_in_chunks(part_ids, PARTS_BATCH_LIMIT):
                         parts.extend(
-                            list(self._client.parts(
-                                id__in=','.join(chunk),
-                                model=models[0],
-                                category=None,
-                            ))
+                            list(
+                                self._client.parts(
+                                    id__in=','.join(chunk),
+                                    model=models[0],
+                                    category=None,
+                                )
+                            )
                         )
         return parts
 
@@ -86,14 +88,14 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
         return possible_choices
 
     def set_prefilters(
-            self,
-            property_models: List[Union[str, 'AnyProperty']] = None,
-            values: List[Any] = None,
-            filters_type: List[FilterType] = None,
-            prefilters: List[PropertyValueFilter] = None,
-            overwrite: Optional[bool] = False,
-            clear: Optional[bool] = False,
-            validate: Optional[Union[bool, Part]] = True,
+        self,
+        property_models: List[Union[str, 'AnyProperty']] = None,
+        values: List[Any] = None,
+        filters_type: List[FilterType] = None,
+        prefilters: List[PropertyValueFilter] = None,
+        overwrite: Optional[bool] = False,
+        clear: Optional[bool] = False,
+        validate: Optional[Union[bool, Part]] = True,
     ) -> None:
         """
         Set the pre-filters on a `MultiReferenceProperty`.
@@ -138,7 +140,8 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
 
         if overwrite:  # Remove pre-filters from the existing prefilters if they match the property model UUID
             provided_filter_ids = {pf.id for pf in verified_prefilters}
-            list_of_prefilters = [pf for pf in list_of_prefilters if pf.id not in provided_filter_ids]
+            list_of_prefilters = [pf for pf in list_of_prefilters if
+                                  pf.id not in provided_filter_ids]
 
         list_of_prefilters += verified_prefilters
 
@@ -150,8 +153,8 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
             self.edit(options=self._options)
 
     def get_prefilters(
-            self,
-            as_lists: Optional[bool] = False,
+        self,
+        as_lists: Optional[bool] = False,
     ) -> Union[
         List[PropertyValueFilter],
         Tuple[List[str]]
@@ -175,17 +178,18 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
 
             warnings.warn(
                 "Prefilters will be provided as list of `PropertyValueFilter` objects. "
-                "Separate lists will be deprecated in January 2021.",  # TODO Deprecate January 2021
+                "Separate lists will be deprecated in January 2021.",
+                # TODO Deprecate January 2021
                 PendingDeprecationWarning,
             )
 
         return prefilters
 
     def set_excluded_propmodels(
-            self,
-            property_models: List[Union[str, 'AnyProperty']],
-            overwrite: Optional[bool] = False,
-            validate: Optional[Union[bool, Part]] = True,
+        self,
+        property_models: List[Union[str, 'AnyProperty']],
+        overwrite: Optional[bool] = False,
+        validate: Optional[Union[bool, Part]] = True,
     ) -> None:
         """
         Exclude a list of properties from being visible in the part-shop and modal (pop-up) of the reference property.
@@ -208,10 +212,12 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
         else:
             part_model = self.value[0]
 
-        list_of_propmodels_excl.extend(_check_excluded_propmodels(
-            part_model=part_model,
-            property_models=property_models,
-        ))
+        list_of_propmodels_excl.extend(
+            _check_excluded_propmodels(
+                part_model=part_model,
+                property_models=property_models,
+            )
+        )
 
         options_to_set = self._options
         options_to_set['propmodels_excl'] = list(set(list_of_propmodels_excl))

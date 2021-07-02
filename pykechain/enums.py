@@ -16,7 +16,9 @@ class Enum:
     @classmethod
     def options(cls):
         """Provide a sorted list of options."""
-        return sorted((value, name) for (name, value) in __dict__inherited__(cls=cls, stop=Enum).items())
+        return sorted(
+            (value, name) for (name, value) in __dict__inherited__(cls=cls, stop=Enum).items()
+        )
 
     @classmethod
     def values(cls):

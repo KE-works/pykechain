@@ -14,16 +14,18 @@ class SideBarButton:
     The original KE-chain buttons for the project detail, tasks and work breakdown structure are not separate buttons.
     """
 
-    def __init__(self,
-                 side_bar_manager: 'SideBarManager',
-                 json: Optional[Dict] = None,
-                 order: Optional[int] = None,
-                 title: Optional[str] = None,
-                 icon: Optional[str] = None,
-                 uri: Optional[str] = None,
-                 uri_target: URITarget = URITarget.INTERNAL,
-                 icon_mode: FontAwesomeMode = FontAwesomeMode.REGULAR,
-                 **kwargs):
+    def __init__(
+        self,
+        side_bar_manager: 'SideBarManager',
+        json: Optional[Dict] = None,
+        order: Optional[int] = None,
+        title: Optional[str] = None,
+        icon: Optional[str] = None,
+        uri: Optional[str] = None,
+        uri_target: URITarget = URITarget.INTERNAL,
+        icon_mode: FontAwesomeMode = FontAwesomeMode.REGULAR,
+        **kwargs
+    ):
         """
         Create a side-bar button.
 
@@ -59,14 +61,19 @@ class SideBarButton:
         if not isinstance(uri, str):
             raise IllegalArgumentError(f'uri must be a string, "{uri}" is not.')
         if uri_target not in URITarget.values():
-            raise IllegalArgumentError(f'uri_target must be a URITarget option, "{uri_target}" is not.')
+            raise IllegalArgumentError(
+                f'uri_target must be a URITarget option, "{uri_target}" is not.'
+            )
         if icon_mode not in FontAwesomeMode.values():
-            raise IllegalArgumentError(f'icon_mode must be a FontAwesomeMode option, "{icon_mode}" is not.')
+            raise IllegalArgumentError(
+                f'icon_mode must be a FontAwesomeMode option, "{icon_mode}" is not.'
+            )
 
         for key in kwargs.keys():
             if key not in allowed_attributes:
                 raise IllegalArgumentError(
-                    f'Attribute "{key}" is not supported in the configuration of a side-bar button.')
+                    f'Attribute "{key}" is not supported in the configuration of a side-bar button.'
+                )
 
         self._manager: 'SideBarManager' = side_bar_manager
         self.display_name: str = title

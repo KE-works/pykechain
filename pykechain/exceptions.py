@@ -34,7 +34,8 @@ class APIError(Exception):
             arg = args[0]
             context = [arg if isinstance(arg, str) else arg.__repr__()]
         else:
-            context = ['Error in request to the server.']  # Default message if `APIError()`, without inputs,  is used.
+            context = [
+                'Error in request to the server.']  # Default message if `APIError()`, without inputs,  is used.
 
         import json
 
@@ -55,28 +56,36 @@ class APIError(Exception):
                 self.detail = None
                 self.results = None
 
-            context.extend([
-                f'Server {self.traceback}',
-                f'Results:\n{json.dumps(self.results, indent=4)}',
-                f'Detail: {self.detail}',
-                f'Elapsed: {self.response.elapsed}',
-            ])
+            context.extend(
+                [
+                    f'Server {self.traceback}',
+                    f'Results:\n{json.dumps(self.results, indent=4)}',
+                    f'Detail: {self.detail}',
+                    f'Elapsed: {self.response.elapsed}',
+                ]
+            )
 
         if self.request is not None and isinstance(self.request, PreparedRequest):
-            context.extend([
-                f'Request URL: {self.request.url}',
-                f'Request method: {self.request.method}',
-            ])
+            context.extend(
+                [
+                    f'Request URL: {self.request.url}',
+                    f'Request method: {self.request.method}',
+                ]
+            )
             if self.request.body:
                 try:
-                    decoded_body = self.request.body.decode("UTF-8")  # Convert byte-string to string
+                    decoded_body = self.request.body.decode(
+                        "UTF-8"
+                    )  # Convert byte-string to string
                 except AttributeError:
                     decoded_body = self.request.body  # strings (e.g. from testing cassettes) cant be decoded
                 try:
                     body = json.loads(decoded_body)  # Convert string to Python object(s)
                 except json.decoder.JSONDecodeError:
                     body = decoded_body.split('&')  # parameters in URL
-                context.append(f'Request data:\n{json.dumps(body, indent=4)}')  # pretty printing of a json
+                context.append(
+                    f'Request data:\n{json.dumps(body, indent=4)}'
+                )  # pretty printing of a json
 
         message = '\n'.join(context)
         new_args = [message]
@@ -121,13 +130,14 @@ class InspectorComponentError(Exception):
 
 
 class _DeprecationMixin:
-
     __notified = False
 
     def __new__(cls, *args, **kwargs):
         if not cls.__notified:
-            warnings.warn('`{n}` is a wrapping class for `{nn}`. `{n}` will be deprecated in July 2021.'
-                          .format(n=cls.__name__, nn=str(cls.__name__)[:-1]), PendingDeprecationWarning)
+            warnings.warn(
+                '`{n}` is a wrapping class for `{nn}`. `{n}` will be deprecated in July 2021.'
+                .format(n=cls.__name__, nn=str(cls.__name__)[:-1]), PendingDeprecationWarning
+            )
             cls.__notified = True
 
         return super().__new__(cls)

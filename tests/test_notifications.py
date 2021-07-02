@@ -35,8 +35,10 @@ class TestNotificationCreation(_TestNotification):
 
     def test_create(self):
         # setUp
-        notification = self.client.create_notification(subject=self.SUBJECT,
-                                                       message=self.MESSAGE)
+        notification = self.client.create_notification(
+            subject=self.SUBJECT,
+            message=self.MESSAGE
+            )
         self.bucket.append(notification)
 
         # testing
@@ -68,15 +70,21 @@ class TestNotificationCreation(_TestNotification):
     def test_create_invalid_inputs(self):
         kwargs = dict(subject=self.SUBJECT, message=self.MESSAGE)
         with self.assertRaises(IllegalArgumentError):
-            self.bucket.append(self.client.create_notification(subject=False, message=self.MESSAGE))
+            self.bucket.append(
+                self.client.create_notification(subject=False, message=self.MESSAGE)
+                )
         with self.assertRaises(IllegalArgumentError):
-            self.bucket.append(self.client.create_notification(subject=self.SUBJECT, message=[self.MESSAGE]))
+            self.bucket.append(
+                self.client.create_notification(subject=self.SUBJECT, message=[self.MESSAGE])
+                )
         with self.assertRaises(IllegalArgumentError):
             self.bucket.append(self.client.create_notification(status='sending', **kwargs))
         with self.assertRaises(IllegalArgumentError):
             self.bucket.append(self.client.create_notification(recipients='not a list', **kwargs))
         with self.assertRaises(IllegalArgumentError):
-            self.bucket.append(self.client.create_notification(recipients=['not a user id'], **kwargs))
+            self.bucket.append(
+                self.client.create_notification(recipients=['not a user id'], **kwargs)
+                )
         with self.assertRaises(IllegalArgumentError):
             self.bucket.append(self.client.create_notification(team=0, **kwargs))
         with self.assertRaises(IllegalArgumentError):
@@ -84,7 +92,9 @@ class TestNotificationCreation(_TestNotification):
         with self.assertRaises(IllegalArgumentError):
             self.bucket.append(self.client.create_notification(event='Update', **kwargs))
         with self.assertRaises(IllegalArgumentError):
-            self.bucket.append(self.client.create_notification(channel=[NotificationChannels.EMAIL], **kwargs))
+            self.bucket.append(
+                self.client.create_notification(channel=[NotificationChannels.EMAIL], **kwargs)
+                )
 
     def test_delete_notification_from_client(self):
         # setUp
@@ -123,7 +133,9 @@ class TestNotifications(_TestNotification):
         # setUp
         notifications = self.client.notifications()
         number_of_notification = len(notifications)
-        dummy_notification = self.client.create_notification(subject="Dummy subject", message="Dummy message")
+        dummy_notification = self.client.create_notification(
+            subject="Dummy subject", message="Dummy message"
+            )
 
         notifications_retrieved_again = self.client.notifications()
 
@@ -135,7 +147,9 @@ class TestNotifications(_TestNotification):
 
     def test_retrieve_notification(self):
         # testing
-        retrieved_notification = self.client.notification(message=self.MESSAGE, subject=self.SUBJECT)
+        retrieved_notification = self.client.notification(
+            message=self.MESSAGE, subject=self.SUBJECT
+            )
 
         self.assertIsInstance(retrieved_notification, Notification)
         self.assertEqual(self.notification, retrieved_notification)
@@ -146,7 +160,9 @@ class TestNotifications(_TestNotification):
 
     def test_retrieve_notification_raise_multiple_found(self):
         # setUp
-        clone_testing_notification = self.client.create_notification(subject=self.SUBJECT, message=self.MESSAGE)
+        clone_testing_notification = self.client.create_notification(
+            subject=self.SUBJECT, message=self.MESSAGE
+            )
 
         # testing
         with self.assertRaises(MultipleFoundError):
@@ -189,8 +205,10 @@ class TestNotifications(_TestNotification):
         event = NotificationEvent.EXPORT_ACTIVITY_ASYNC
         channel = NotificationChannels.APP
 
-        self.notification.edit(subject=subject, message=message, status=status, recipients=recipients, team=self.TEAM,
-                               from_user=from_user, event=event, channel=channel)
+        self.notification.edit(
+            subject=subject, message=message, status=status, recipients=recipients, team=self.TEAM,
+            from_user=from_user, event=event, channel=channel
+            )
 
         self.assertEqual(subject, self.notification.subject)
         self.assertEqual(message, self.notification.message)
@@ -234,9 +252,11 @@ class TestNotifications(_TestNotification):
         initial_event = NotificationEvent.EXPORT_ACTIVITY_ASYNC
         initial_channel = NotificationChannels.APP
 
-        self.notification.edit(subject=initial_subject, message=initial_message, status=initial_status,
-                               recipients=initial_recipients, team=self.TEAM, from_user=initial_from_user,
-                               event=initial_event, channel=initial_channel)
+        self.notification.edit(
+            subject=initial_subject, message=initial_message, status=initial_status,
+            recipients=initial_recipients, team=self.TEAM, from_user=initial_from_user,
+            event=initial_event, channel=initial_channel
+            )
 
         # Edit without mentioning values, everything should stay the same
         new_subject = "AWESOME SUBJECT NEW"
@@ -253,8 +273,10 @@ class TestNotifications(_TestNotification):
         self.assertEqual(self.notification.channels, [initial_channel])
 
         # Edit with clearing the values, name and status cannot be cleared
-        self.notification.edit(subject=None, message=None, status=None, recipients=None, team=None, from_user=None,
-                               event=None, channel=None)
+        self.notification.edit(
+            subject=None, message=None, status=None, recipients=None, team=None, from_user=None,
+            event=None, channel=None
+            )
 
         self.assertEqual(self.notification.subject, new_subject)
         self.assertEqual(self.notification.message, initial_message)

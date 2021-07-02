@@ -1,12 +1,16 @@
 import mimetypes
 import re
-from typing import Any, Dict, List, Optional, Text, Tuple, \
-    Union  # noqa: F401 # pylint: disable=unused-import
+from typing import (
+    Any, Dict, List, Optional, Tuple,
+    Union,  # noqa: F401 # pylint: disable=unused-import
+)
 
 from pykechain.enums import PropertyVTypes
 from pykechain.models.validators.mime_types_defaults import predefined_mimes
-from pykechain.models.validators.validator_schemas import fileextensionvalidator_schema, \
-    filesizevalidator_schema
+from pykechain.models.validators.validator_schemas import (
+    fileextensionvalidator_schema,
+    filesizevalidator_schema,
+)
 from pykechain.models.validators.validators_base import PropertyValidator
 from pykechain.utils import EMAIL_REGEX_PATTERN
 
@@ -51,7 +55,10 @@ class NumericRangeValidator(PropertyValidator):
 
     vtype = PropertyVTypes.NUMERICRANGE
 
-    def __init__(self, json=None, minvalue=None, maxvalue=None, stepsize=None, enforce_stepsize=None, **kwargs):
+    def __init__(
+        self, json=None, minvalue=None, maxvalue=None, stepsize=None, enforce_stepsize=None,
+        **kwargs
+    ):
         """Construct the numeric range validator."""
         super().__init__(json=json, **kwargs)
 
@@ -77,8 +84,10 @@ class NumericRangeValidator(PropertyValidator):
         self.enforce_stepsize = self._config.get('enforce_stepsize', None)
 
         if self.minvalue > self.maxvalue:
-            raise Exception('The minvalue ({}) should be smaller than the maxvalue ({}) of the numeric '
-                            'range validation'.format(self.minvalue, self.maxvalue))
+            raise Exception(
+                'The minvalue ({}) should be smaller than the maxvalue ({}) of the numeric '
+                'range validation'.format(self.minvalue, self.maxvalue)
+            )
         if self.enforce_stepsize and self.stepsize is None:
             raise Exception('The stepsize should be provided when enforcing stepsize')
 
@@ -96,10 +105,15 @@ class NumericRangeValidator(PropertyValidator):
         if self.stepsize != 1 and self.enforce_stepsize:
             # to account also for floating point stepsize checks: https://stackoverflow.com/a/30445184/246235
             if self.minvalue == float('-inf'):
-                self._validation_result = abs(value / self.stepsize - round(value / self.stepsize)) < self.accuracy
+                self._validation_result = abs(
+                    value / self.stepsize - round(value / self.stepsize)
+                ) < self.accuracy
             else:
-                self._validation_result = abs((value - self.minvalue) / self.stepsize - round(
-                    (value - self.minvalue) / self.stepsize)) < self.accuracy
+                self._validation_result = abs(
+                    (value - self.minvalue) / self.stepsize - round(
+                        (value - self.minvalue) / self.stepsize
+                    )
+                ) < self.accuracy
 
             if not self._validation_result:
                 self._validation_reason = "Value '{}' is not in alignment with a stepsize of {}". \
@@ -377,7 +391,9 @@ class FileSizeValidator(PropertyValidator):
     vtype = PropertyVTypes.FILESIZE
     jsonschema = filesizevalidator_schema
 
-    def __init__(self, json: Optional[Dict] = None, max_size: Optional[Union[int, float]] = None, **kwargs):
+    def __init__(
+        self, json: Optional[Dict] = None, max_size: Optional[Union[int, float]] = None, **kwargs
+    ):
         """Construct a file size validator.
 
         :param json: (optional) dict (json) object to construct the object from
@@ -392,7 +408,8 @@ class FileSizeValidator(PropertyValidator):
                 raise ValueError("`max_size` should be a number.")
         self.max_size = self._config.get('maxSize', float('inf'))
 
-    def _logic(self, value: Optional[Union[int, float]] = None) -> Tuple[Optional[bool], Optional[str]]:
+    def _logic(self, value: Optional[Union[int, float]] = None) -> Tuple[
+            Optional[bool], Optional[str]]:
         """Based on a filesize (numeric) or  filepath of the property (value), the filesize is checked."""
         if value is None:
             return None, "No reason"
@@ -438,7 +455,9 @@ class FileExtensionValidator(PropertyValidator):
     jsonschema = fileextensionvalidator_schema
     mimetype_regex = r'^[-\w.]+/[-\w.\*]+$'
 
-    def __init__(self, json: Optional[Dict] = None, accept: Optional[Union[str, List[str]]] = None, **kwargs):
+    def __init__(
+        self, json: Optional[Dict] = None, accept: Optional[Union[str, List[str]]] = None, **kwargs
+    ):
         """Construct a file extension validator.
 
         :param json: (optional) dict (json) object to construct the object from

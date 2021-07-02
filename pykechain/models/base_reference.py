@@ -103,9 +103,9 @@ class _ReferenceProperty(Property):
             return check_list_of_base(value, cls=self.REFERENCED_CLASS, key='references')
 
     def set_prefilters(
-            self,
-            prefilters: Optional[List[BaseFilter]] = None,
-            clear: Optional[bool] = False,
+        self,
+        prefilters: Optional[List[BaseFilter]] = None,
+        clear: Optional[bool] = False,
     ):
         """
         Set the prefilters on the reference property.
@@ -152,7 +152,9 @@ class _ReferencePropertyInScope(_ReferenceProperty, ABC):
             else:
                 # retrieve the scope_id from the property model's value (which is an object in a scope (x_scope))
                 referenced_models = self.model().value
-                if not referenced_models or not isinstance(referenced_models[0], self.REFERENCED_CLASS):
+                if not referenced_models or not isinstance(
+                    referenced_models[0], self.REFERENCED_CLASS
+                ):
                     # if the referenced model is not set or the referenced value is not in current scope
                     x_scope_id = self.scope_id
                 else:

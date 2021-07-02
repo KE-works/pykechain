@@ -73,11 +73,15 @@ class Property(BaseInScope):
         if self._options.get('validators'):
             self._parse_validators()
 
-    def refresh(self, json: Optional[Dict] = None, url: Optional[str] = None, extra_params: Optional = None) -> None:
+    def refresh(
+        self, json: Optional[Dict] = None, url: Optional[str] = None, extra_params: Optional = None
+    ) -> None:
         """Refresh the object in place."""
-        super().refresh(json=json,
-                        url=self._client._build_url('property', property_id=self.id),
-                        extra_params=API_EXTRA_PARAMS['property'])
+        super().refresh(
+            json=json,
+            url=self._client._build_url('property', property_id=self.id),
+            extra_params=API_EXTRA_PARAMS['property']
+        )
 
     def has_value(self) -> bool:
         """Predicate to indicate if the property has a value set.
@@ -108,7 +112,9 @@ class Property(BaseInScope):
     @classmethod
     def set_bulk_update(cls, value):
         """Set global class attribute to toggle the use of bulk-updates of properties."""
-        assert isinstance(value, bool), f"`bulk_update` must be set to a boolean, not {type(value)}"
+        assert isinstance(
+            value, bool
+        ), f"`bulk_update` must be set to a boolean, not {type(value)}"
         cls._USE_BULK_UPDATE = value
 
     @property
@@ -157,7 +163,9 @@ class Property(BaseInScope):
         """Send the value to KE-chain."""
         url = self._client._build_url('property', property_id=self.id)
 
-        response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['property'], json={'value': value})
+        response = self._client._request(
+            'PUT', url, params=API_EXTRA_PARAMS['property'], json={'value': value}
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError(f"Could not update Property {self}", response=response)
@@ -211,12 +219,18 @@ class Property(BaseInScope):
     @validators.setter
     def validators(self, validators: Iterable[PropertyValidator]) -> None:
         if self.category != Category.MODEL:
-            raise IllegalArgumentError("To update the list of validators, it can only work on "
-                                       "`Property` of category 'MODEL'")
+            raise IllegalArgumentError(
+                "To update the list of validators, it can only work on "
+                "`Property` of category 'MODEL'"
+            )
 
-        if not isinstance(validators, (tuple, list)) or not all(isinstance(v, PropertyValidator) for v in validators):
-            raise IllegalArgumentError('Should be a list or tuple with PropertyValidator objects, '
-                                       'got {}'.format(type(validators)))
+        if not isinstance(validators, (tuple, list)) or not all(
+            isinstance(v, PropertyValidator) for v in validators
+        ):
+            raise IllegalArgumentError(
+                'Should be a list or tuple with PropertyValidator objects, '
+                'got {}'.format(type(validators))
+            )
         for validator in validators:
             validator.validate_json()
 
@@ -296,7 +310,8 @@ class Property(BaseInScope):
                  a list of validation results, reasons [(bool, str), ...]
         :raises Exception: for incorrect validators or incompatible values
         """
-        self._validation_results = [validator.is_valid(self._value) for validator in self._validators]
+        self._validation_results = [validator.is_valid(self._value) for validator in
+                                    self._validators]
         self._validation_reasons = [validator.get_reason() for validator in self._validators]
 
         if reason:
@@ -312,8 +327,10 @@ class Property(BaseInScope):
     @representations.setter
     def representations(self, value):
         if self.category != Category.MODEL:
-            raise IllegalArgumentError("To update the list of representations, it can only work on a "
-                                       "`Property` of category '{}'".format(Category.MODEL))
+            raise IllegalArgumentError(
+                "To update the list of representations, it can only work on a "
+                "`Property` of category '{}'".format(Category.MODEL)
+            )
 
         self._representations_container.set_representations(value)
 
@@ -343,12 +360,12 @@ class Property(BaseInScope):
         return property_class(json, **kwargs)
 
     def edit(
-            self,
-            name: Optional[str] = empty,
-            description: Optional[str] = empty,
-            unit: Optional[str] = empty,
-            options: Optional[Dict] = empty,
-            **kwargs
+        self,
+        name: Optional[str] = empty,
+        description: Optional[str] = empty,
+        unit: Optional[str] = empty,
+        options: Optional[Dict] = empty,
+        **kwargs
     ) -> None:
         """Edit the details of a property (model).
 
@@ -422,7 +439,9 @@ class Property(BaseInScope):
         :return: None
         :raises APIError: if delete was not successful
         """
-        response = self._client._request('DELETE', self._client._build_url('property', property_id=self.id))
+        response = self._client._request(
+            'DELETE', self._client._build_url('property', property_id=self.id)
+        )
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError(f"Could not delete Property {self}", response=response)
@@ -448,31 +467,35 @@ class Property(BaseInScope):
         name = check_text(name, 'name') or self.name
         if self.category == Category.MODEL and target_part.category == Category.MODEL:
             # Cannot move a `Property` model under a `Part` instance or vice versa
-            copied_property_model = target_part.add_property(name=name,
-                                                             property_type=self.type,
-                                                             description=self.description,
-                                                             unit=self.unit,
-                                                             default_value=self.value,
-                                                             options=self._options
-                                                             )
+            copied_property_model = target_part.add_property(
+                name=name,
+                property_type=self.type,
+                description=self.description,
+                unit=self.unit,
+                default_value=self.value,
+                options=self._options
+            )
             return copied_property_model
         elif self.category == Category.INSTANCE and target_part.category == Category.INSTANCE:
             target_model = target_part.model()
             self_model = self.model()
-            target_model.add_property(name=name,
-                                      property_type=self_model.type,
-                                      description=self_model.description,
-                                      unit=self_model.unit,
-                                      default_value=self_model.value,
-                                      options=self_model._options
-                                      )
+            target_model.add_property(
+                name=name,
+                property_type=self_model.type,
+                description=self_model.description,
+                unit=self_model.unit,
+                default_value=self_model.value,
+                options=self_model._options
+            )
             target_part.refresh()
             copied_property_instance = target_part.property(name=name)
             copied_property_instance.value = self.value
             return copied_property_instance
         else:
-            raise IllegalArgumentError('property "{}" and target part "{}" must have the same category'.
-                                       format(self.name, target_part.name))
+            raise IllegalArgumentError(
+                'property "{}" and target part "{}" must have the same category'.
+                format(self.name, target_part.name)
+            )
 
     def move(self, target_part: 'Part', name: Optional[str] = None) -> 'Property':
         """Move a property model or instance.

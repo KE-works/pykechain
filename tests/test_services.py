@@ -26,8 +26,10 @@ class TestServiceSetup(TestBetamax):
             description="Only used for testing - you can safely remove this",
             environment_version=ServiceEnvironmentVersion.PYTHON_3_8,
         )
-        upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_script_to_service',
-                                   'test_upload_script.py')
+        upload_path = os.path.join(
+            self.test_assets_dir, 'tests', 'files', 'test_upload_script_to_service',
+            'test_upload_script.py'
+            )
 
         # testing
         new_service.upload(pkg_path=upload_path)
@@ -36,7 +38,9 @@ class TestServiceSetup(TestBetamax):
 
     def setUp(self):
         super().setUp()
-        self.test_assets_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/'))
+        self.test_assets_dir = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
+            )
         self.service = self._create_service()
 
     def tearDown(self):
@@ -52,7 +56,9 @@ class TestServices(TestBetamax):
             name=name or 'Test upload script to service',
             description="Only used for testing - you can safely remove this"
         )
-        upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'uploaded', 'test_upload_script.py')
+        upload_path = os.path.join(
+            self.test_assets_dir, 'tests', 'files', 'uploaded', 'test_upload_script.py'
+            )
 
         # testing
         new_service.upload(pkg_path=upload_path)
@@ -62,14 +68,18 @@ class TestServices(TestBetamax):
 
     def setUp(self):
         super().setUp()
-        self.test_assets_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/'))
+        self.test_assets_dir = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
+            )
 
     def test_retrieve_services(self):
         self.assertTrue(self.project.services())
 
     def test_retrieve_services_with_kwargs(self):
         # setUp
-        retrieved_services_with_kwargs = self.project.services(script_type=ServiceType.PYTHON_SCRIPT)
+        retrieved_services_with_kwargs = self.project.services(
+            script_type=ServiceType.PYTHON_SCRIPT
+            )
 
         # testing
         self.assertTrue(retrieved_services_with_kwargs)
@@ -108,22 +118,27 @@ class TestServices(TestBetamax):
             with self.subTest(msg=f'{key}: {value}'):
                 self.assertIsNotNone(value)
 
-    @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
-                        reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
+    @pytest.mark.skipif(
+        "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+        reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided"
+        )
     def test_debug_service_execute(self):
         service_name = 'Service Gears - Successful'
         service = self.project.service(name=service_name)
 
         service_execution = service.execute()
         self.assertTrue(service_execution.status in ServiceExecutionStatus.values())
-        if service_execution.status in (ServiceExecutionStatus.LOADING, ServiceExecutionStatus.RUNNING):
+        if service_execution.status in (
+        ServiceExecutionStatus.LOADING, ServiceExecutionStatus.RUNNING):
             # sleep 2000 ms
             time.sleep(2)
             service_execution.refresh()
             self.assertTrue(service_execution.status in ServiceExecutionStatus.values())
 
-    @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
-                        reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
+    @pytest.mark.skipif(
+        "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+        reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided"
+        )
     def test_service_context(self):
         some_activity = self.project.activities()[0]
         service = self.project.service(name='Service Gears - Successful')
@@ -167,9 +182,11 @@ class TestServices(TestBetamax):
 
         self.service = self.project.create_service(name=initial_name)
 
-        self.service.edit(name=initial_name, description=initial_description, version=initial_version,
-                          type=initial_type, environment_version=initial_env, run_as=initial_run_as,
-                          trusted=initial_trusted)
+        self.service.edit(
+            name=initial_name, description=initial_description, version=initial_version,
+            type=initial_type, environment_version=initial_env, run_as=initial_run_as,
+            trusted=initial_trusted
+            )
 
         # Edit without mentioning values, everything should stay the same
         new_name = 'Changed service name'
@@ -186,8 +203,11 @@ class TestServices(TestBetamax):
         self.assertEqual(self.service.trusted, initial_trusted)
 
         # Edit with clearing the values, name and status cannot be cleared
-        self.service.edit(name=None, description=None, version=None, type=None, environment_version=None, run_as=None,
-                          trusted=None)
+        self.service.edit(
+            name=None, description=None, version=None, type=None, environment_version=None,
+            run_as=None,
+            trusted=None
+            )
 
         self.assertEqual(self.service.name, new_name)
         self.assertEqual(self.service.description, '')
@@ -249,11 +269,15 @@ class TestServicesWithCustomUploadedService(TestServiceSetup):
 
     def test_create_service_with_wrong_service_type(self):
         with self.assertRaisesRegex(IllegalArgumentError, 'must be an option from enum'):
-            self.project.create_service(name='This service type does not exist', service_type='RUBY_SCRIPT')
+            self.project.create_service(
+                name='This service type does not exist', service_type='RUBY_SCRIPT'
+                )
 
     def test_create_service_with_wrong_environment_version(self):
         with self.assertRaisesRegex(IllegalArgumentError, 'must be an option from enum'):
-            self.project.create_service(name='This env version does not exist', environment_version='0.0')
+            self.project.create_service(
+                name='This env version does not exist', environment_version='0.0'
+                )
 
     def test_save_service_script(self):
         # setUp
@@ -263,8 +287,10 @@ class TestServicesWithCustomUploadedService(TestServiceSetup):
 
     def test_upload_script_to_service(self):
         # setUp
-        upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_script_to_service',
-                                   'test_upload_script.py')
+        upload_path = os.path.join(
+            self.test_assets_dir, 'tests', 'files', 'test_upload_script_to_service',
+            'test_upload_script.py'
+            )
 
         # testing
         self.service.upload(pkg_path=upload_path)
@@ -273,7 +299,9 @@ class TestServicesWithCustomUploadedService(TestServiceSetup):
 
     def test_upload_script_to_service_with_wrong_path(self):
         # setUp
-        upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'uploaded', 'this_file_does_exists.not')
+        upload_path = os.path.join(
+            self.test_assets_dir, 'tests', 'files', 'uploaded', 'this_file_does_exists.not'
+            )
 
         # testing
         with self.assertRaisesRegex(OSError, 'Could not locate python package to upload in'):
@@ -298,16 +326,21 @@ class TestServiceExecutions(TestServiceSetup):
         self.assertTrue(service_executions)
         service_execution_1 = service_executions[0]
 
-        self.assertEqual(self.project.service_execution(pk=service_execution_1.id), service_execution_1)
+        self.assertEqual(
+            self.project.service_execution(pk=service_execution_1.id), service_execution_1
+            )
 
     def test_retrieve_single_service_execution_but_found_none(self):
         with self.assertRaises(NotFoundError):
-            self.project.service_execution(username='No service execution as this user does not exist')
+            self.project.service_execution(
+                username='No service execution as this user does not exist'
+                )
 
     def test_retrieve_single_service_execution_but_found_multiple(self):
         # setUp
         service_execution = self.service.execute()
-        while service_execution.status in [ServiceExecutionStatus.LOADING, ServiceExecutionStatus.RUNNING]:
+        while service_execution.status in [ServiceExecutionStatus.LOADING,
+                                           ServiceExecutionStatus.RUNNING]:
             time.sleep(0.500)  # 200ms
             service_execution.refresh()
 
@@ -349,8 +382,10 @@ class TestServiceExecutions(TestServiceSetup):
             with self.subTest(msg=f'{key}: {value}'):
                 self.assertIsNotNone(value)
 
-    @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
-                        reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
+    @pytest.mark.skipif(
+        "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+        reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided"
+        )
     def test_debug_service_execution_terminate(self):
         service_execution = self.service.execute()
         self.assertEqual(service_execution.status, ServiceExecutionStatus.LOADING)
@@ -359,9 +394,11 @@ class TestServiceExecutions(TestServiceSetup):
         self.assertEqual(service_execution.status, ServiceExecutionStatus.RUNNING)
         service_execution.terminate()
 
-        self.assertNotEqual(service_execution.status, ServiceExecutionStatus.FAILED,
-                            "The service execution is status 'FAILED', please upload working debugging scripts before "
-                            "running the tests")
+        self.assertNotEqual(
+            service_execution.status, ServiceExecutionStatus.FAILED,
+            "The service execution is status 'FAILED', please upload working debugging scripts before "
+            "running the tests"
+            )
 
     def test_log_of_service_execution(self):
         # setUp

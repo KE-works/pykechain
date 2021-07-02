@@ -29,7 +29,6 @@ class SixTestCase(TestCase):
 
 
 class TestBetamax(SixTestCase):
-
     time = datetime.datetime(year=2020, month=1, day=1, tzinfo=pytz.UTC)
 
     @property
@@ -58,8 +57,10 @@ class TestBetamax(SixTestCase):
         elif TEST_SCOPE_ID:
             self.project = self.client.scope(id=TEST_SCOPE_ID)
         else:
-            raise Exception('Could not retrieve the test scope, you need to provide a '
-                            '`TEST_SCOPE_ID` or `TEST_SCOPE_NAME` in your `.env` file')
+            raise Exception(
+                'Could not retrieve the test scope, you need to provide a '
+                '`TEST_SCOPE_ID` or `TEST_SCOPE_NAME` in your `.env` file'
+                )
 
     def tearDown(self):
         self.recorder.stop()

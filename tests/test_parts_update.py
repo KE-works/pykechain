@@ -31,8 +31,10 @@ class TestPartUpdate(TestBetamax):
         self.assertEqual(live_wheel.name, 'Better wheel')
 
         for name, value in update_dict.items():
-            self.assertEqual(value, live_wheel.property(name=name).value,
-                             f"property {name} with value {value} did not match contents with KEC")
+            self.assertEqual(
+                value, live_wheel.property(name=name).value,
+                f"property {name} with value {value} did not match contents with KEC"
+                )
 
     def test_model(self):
         update_dict = {
@@ -79,7 +81,9 @@ class TestPartUpdate(TestBetamax):
         bike_part = self.project.part('Bike')  # type: Part
         bike_part.property(name='Picture').value = None
 
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/'))
+        project_root = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
+            )
         attachment_path = project_root + '/requirements.txt'
         update_dict = {
             'Picture': attachment_path,
@@ -120,8 +124,13 @@ class TestPartUpdate(TestBetamax):
 
         live_frame = self.project.part("Frame")
 
-        self.assertIsNot(frame, live_frame, msg="Frames must be 2 different Python objects, by memory allocation")
-        self.assertEqual(frame, live_frame, msg="Frames must be identical KE-chain objects, by UUID")
+        self.assertIsNot(
+            frame, live_frame,
+            msg="Frames must be 2 different Python objects, by memory allocation"
+            )
+        self.assertEqual(
+            frame, live_frame, msg="Frames must be identical KE-chain objects, by UUID"
+            )
         self.assertEqual("Aluminum", live_frame.property("Material").value)
         self.assertEqual("KE-works orange", live_frame.property("Color").value)
         self.assertEqual(front_wheel, live_frame.property("Ref to wheel").value[0])

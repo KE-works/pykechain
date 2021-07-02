@@ -9,10 +9,14 @@ from tests.classes import TestBetamax
 class TestExpiringDownloads(TestBetamax):
     def setUp(self):
         super().setUp()
-        self.test_assets_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/'))
-        self.test_content_path = os.path.join(self.test_assets_dir, 'tests', 'files',
-                                              'test_upload_content_to_expiring_download',
-                                              'test_upload_content.pdf')
+        self.test_assets_dir = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')
+            )
+        self.test_content_path = os.path.join(
+            self.test_assets_dir, 'tests', 'files',
+            'test_upload_content_to_expiring_download',
+            'test_upload_content.pdf'
+            )
         self.now = datetime.datetime.now()
 
         self.test_expiring_download = self.client.create_expiring_download(
@@ -25,8 +29,10 @@ class TestExpiringDownloads(TestBetamax):
         super().tearDown()
 
     def test_create_expiring_download_with_content(self):
-        content_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_content_to_expiring_download',
-                                    'test_upload_content.pdf')
+        content_path = os.path.join(
+            self.test_assets_dir, 'tests', 'files', 'test_upload_content_to_expiring_download',
+            'test_upload_content.pdf'
+            )
         new_expiring_download = self.client.create_expiring_download(
             expires_at=datetime.datetime.now(),
             expires_in=42000,
@@ -44,21 +50,27 @@ class TestExpiringDownloads(TestBetamax):
         self.assertEqual(self.test_expiring_download.expires_in, 42000)
 
     def test_upload_expiring_download(self):
-        upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_content_to_expiring_download',
-                                   'test_upload_content.pdf')
+        upload_path = os.path.join(
+            self.test_assets_dir, 'tests', 'files', 'test_upload_content_to_expiring_download',
+            'test_upload_content.pdf'
+            )
         self.test_expiring_download.upload(content_path=upload_path)
         self.assertIsNotNone(self.test_expiring_download.filename)
         self.assertEqual(self.test_expiring_download.filename, 'test_upload_content.pdf')
 
     def test_upload_wrong_content_path(self):
-        upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_content_to_expiring_download',
-                                   'test_upload_content.py')
+        upload_path = os.path.join(
+            self.test_assets_dir, 'tests', 'files', 'test_upload_content_to_expiring_download',
+            'test_upload_content.py'
+            )
         with self.assertRaises(OSError):
             self.test_expiring_download.upload(content_path=upload_path)
 
     def test_save_expiring_download_content(self):
-        upload_path = os.path.join(self.test_assets_dir, 'tests', 'files', 'test_upload_content_to_expiring_download',
-                                   'test_upload_content.pdf')
+        upload_path = os.path.join(
+            self.test_assets_dir, 'tests', 'files', 'test_upload_content_to_expiring_download',
+            'test_upload_content.pdf'
+            )
         self.test_expiring_download.upload(content_path=upload_path)
         with temp_chdir() as target_dir:
             self.test_expiring_download.save_as(target_dir=target_dir)

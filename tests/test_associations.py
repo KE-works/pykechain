@@ -52,9 +52,13 @@ class TestAssociations(TestBetamax):
         association = self.client.associations(limit=1)[0]
         for attribute in attributes:
             with self.subTest(msg=attribute):
-                self.assertTrue(hasattr(association, attribute),
-                                "Could not find '{}' in the association: '{}'".format(attribute,
-                                                                                      association.__dict__.keys()))
+                self.assertTrue(
+                    hasattr(association, attribute),
+                    "Could not find '{}' in the association: '{}'".format(
+                        attribute,
+                        association.__dict__.keys()
+                        )
+                    )
 
     def test_retrieve_associations(self):
         for inputs, nr in [
@@ -154,7 +158,9 @@ class TestAssociations(TestBetamax):
                 widgets=[self.task.widgets()[0], 'Not a widget'],
                 associations=[]
             )
-        with self.assertRaises(IllegalArgumentError, msg='Second set of associations is not of length 2!'):
+        with self.assertRaises(
+            IllegalArgumentError, msg='Second set of associations is not of length 2!'
+            ):
             self.client._validate_associations(
                 widgets=list(self.task.widgets()),
                 associations=[([], []), ()]
@@ -177,7 +183,9 @@ class TestAssociations(TestBetamax):
             check_list_of_base(objects='not a list')
 
         with self.assertRaises(IllegalArgumentError):
-            check_list_of_base(objects=[self.frame_model.properties[0], 'Not a property'], cls=Property)
+            check_list_of_base(
+                objects=[self.frame_model.properties[0], 'Not a property'], cls=Property
+                )
 
     def test_validate_widget_input(self):
         for method in [

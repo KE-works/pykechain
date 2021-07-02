@@ -53,11 +53,15 @@ class TestPropertyCreation(TestBetamax):
 
     def test_create_property_unknown_type(self):
         with self.assertRaises(IllegalArgumentError):
-            self.part_model.add_property(name='Incorrect property type', property_type='Incorrect property type')
+            self.part_model.add_property(
+                name='Incorrect property type', property_type='Incorrect property type'
+                )
 
     def test_create_property_on_instance(self):
         with self.assertRaises(IllegalArgumentError):
-            self.client.create_property(name='Properties are created on models only', model=self.part_instance)
+            self.client.create_property(
+                name='Properties are created on models only', model=self.part_instance
+                )
 
     def test_create_property_incorrect_value(self):
         with self.assertRaises(APIError):
@@ -167,8 +171,10 @@ class TestProperties(TestBetamax):
         obj = self.project.property(name='Cheap?', category=Category.MODEL)
         for attribute in attributes:
             with self.subTest(msg=attribute):
-                self.assertTrue(hasattr(obj, attribute),
-                                f"Could not find '{attribute}' in the object: '{obj.__dict__.keys()}'")
+                self.assertTrue(
+                    hasattr(obj, attribute),
+                    f"Could not find '{attribute}' in the object: '{obj.__dict__.keys()}'"
+                    )
 
     def test_retrieve_properties_with_kwargs(self):
         # setUp
@@ -294,7 +300,9 @@ class TestProperties(TestBetamax):
     # 3.0
     def test_copy_property_model(self):
         # setUp
-        copied_property = self.prop_model.copy(target_part=self.wheel_model, name='Copied property')
+        copied_property = self.prop_model.copy(
+            target_part=self.wheel_model, name='Copied property'
+            )
 
         # testing
         self.assertEqual(copied_property.name, 'Copied property')
@@ -308,8 +316,10 @@ class TestProperties(TestBetamax):
     def test_copy_property_instance(self):
         # setUp
         self.prop.value = 200
-        copied_property = self.prop.copy(target_part=self.project.part(name='Front Wheel'),
-                                         name='Copied property instance')
+        copied_property = self.prop.copy(
+            target_part=self.project.part(name='Front Wheel'),
+            name='Copied property instance'
+            )
 
         # testing
         self.assertEqual(copied_property.name, 'Copied property instance')
@@ -342,7 +352,9 @@ class TestProperties(TestBetamax):
 
     def test_move_property_instance(self):
         # setUp
-        moved_property = self.prop.move(target_part=self.wheel_model.instances()[0], name='moved property')
+        moved_property = self.prop.move(
+            target_part=self.wheel_model.instances()[0], name='moved property'
+            )
 
         # testing
         with self.assertRaises(APIError):
@@ -384,8 +396,12 @@ class TestUpdateProperties(TestBetamax):
         self.bike = self.project.model('Bike')
         self.submodel = self.project.create_model(name='_test submodel', parent=self.bike)
 
-        self.prop_1 = self.submodel.add_property(name=PropertyType.CHAR_VALUE, property_type=PropertyType.CHAR_VALUE)
-        self.prop_2 = self.submodel.add_property(name=PropertyType.TEXT_VALUE, property_type=PropertyType.TEXT_VALUE)
+        self.prop_1 = self.submodel.add_property(
+            name=PropertyType.CHAR_VALUE, property_type=PropertyType.CHAR_VALUE
+            )
+        self.prop_2 = self.submodel.add_property(
+            name=PropertyType.TEXT_VALUE, property_type=PropertyType.TEXT_VALUE
+            )
         self.props = [self.prop_1, self.prop_2]
 
     def tearDown(self):
@@ -456,11 +472,13 @@ class TestPropertiesWithReferenceProperty(TestBetamax):
         self.wheel_model = self.project.model('Wheel')
         self.bike = self.project.model('Bike')
 
-        self.test_ref_property_model = self.bike.add_property(name=f"__Test ref property @ {datetime.now()}",
-                                                              property_type=PropertyType.REFERENCES_VALUE,
-                                                              description='Description of test ref property',
-                                                              unit='no unit',
-                                                              default_value=[self.wheel_model])
+        self.test_ref_property_model = self.bike.add_property(
+            name=f"__Test ref property @ {datetime.now()}",
+            property_type=PropertyType.REFERENCES_VALUE,
+            description='Description of test ref property',
+            unit='no unit',
+            default_value=[self.wheel_model]
+            )
         self.test_ref_property_model.validators = [SingleReferenceValidator()]
 
     def tearDown(self):
@@ -469,8 +487,10 @@ class TestPropertiesWithReferenceProperty(TestBetamax):
 
     def test_copy_reference_property_with_options(self):
         # setUp
-        copied_ref_property = self.test_ref_property_model.copy(target_part=self.wheel_model,
-                                                                name='__Copied ref property')
+        copied_ref_property = self.test_ref_property_model.copy(
+            target_part=self.wheel_model,
+            name='__Copied ref property'
+            )
 
         # testing
         self.assertEqual(copied_ref_property.name, '__Copied ref property')

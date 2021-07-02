@@ -5,8 +5,10 @@ from typing import Any, Dict, List, Optional, Union
 
 from pykechain.enums import Category, FilterType, PropertyType, ScopeStatus
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
-from pykechain.models.input_checks import check_base, check_datetime, check_enum, check_text, \
-    check_type
+from pykechain.models.input_checks import (
+    check_base, check_datetime, check_enum, check_text,
+    check_type,
+)
 from pykechain.models.widgets.enums import MetaWidget
 
 
@@ -15,7 +17,9 @@ class BaseFilter:
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self.__class__.write_options(filters=[self]) == self.__class__.write_options(filters=[other])
+            return self.__class__.write_options(filters=[self]) == self.__class__.write_options(
+                filters=[other]
+            )
         else:
             return False
 
@@ -91,15 +95,20 @@ class PropertyValueFilter(BaseFilter):
             prop = part_model.property(self.id)
         except NotFoundError:
             raise IllegalArgumentError(
-                "Property value filters can only be set on properties belonging to the selected Part model.")
+                "Property value filters can only be set on properties belonging to the selected Part model."
+            )
 
         if prop.category != Category.MODEL:
             raise IllegalArgumentError(
-                f'Property value filters can only be set on Property models, received "{prop}".')
+                f'Property value filters can only be set on Property models, received "{prop}".'
+            )
         else:
             if prop.type == PropertyType.BOOLEAN_VALUE and self.type != FilterType.EXACT:
-                warnings.warn("A PropertyValueFilter on a boolean property should use filter type `{}`".format(
-                    FilterType.EXACT), Warning)
+                warnings.warn(
+                    "A PropertyValueFilter on a boolean property should use filter type `{}`".format(
+                        FilterType.EXACT
+                    ), Warning
+                )
 
     @classmethod
     def parse_options(cls, options: Dict) -> List['PropertyValueFilter']:
@@ -118,7 +127,7 @@ class PropertyValueFilter(BaseFilter):
         for pf_string in prefilter_string_list:
             prefilter_raw = pf_string.split(":")
 
-            if len(prefilter_raw) == 1:   # FIXME encoding problem KE-chain
+            if len(prefilter_raw) == 1:  # FIXME encoding problem KE-chain
                 prefilter_raw = pf_string.split("%3A")
 
             prefilters.append(PropertyValueFilter(*prefilter_raw))
@@ -165,18 +174,18 @@ class ScopeFilter(BaseFilter):
     ]
 
     def __init__(
-            self,
-            tag: Optional[str] = None,
-            status: Optional[ScopeStatus] = None,
-            name: Optional[str] = None,
-            team: Optional[Union[str, 'Team']] = None,
-            due_date_gte: Optional[datetime.datetime] = None,
-            due_date_lte: Optional[datetime.datetime] = None,
-            start_date_gte: Optional[datetime.datetime] = None,
-            start_date_lte: Optional[datetime.datetime] = None,
-            progress_gte: Optional[float] = None,
-            progress_lte: Optional[float] = None,
-            **kwargs
+        self,
+        tag: Optional[str] = None,
+        status: Optional[ScopeStatus] = None,
+        name: Optional[str] = None,
+        team: Optional[Union[str, 'Team']] = None,
+        due_date_gte: Optional[datetime.datetime] = None,
+        due_date_lte: Optional[datetime.datetime] = None,
+        start_date_gte: Optional[datetime.datetime] = None,
+        start_date_lte: Optional[datetime.datetime] = None,
+        progress_gte: Optional[float] = None,
+        progress_lte: Optional[float] = None,
+        **kwargs
     ):
         """Create a ScopeFilter object."""
         from pykechain.models import Team

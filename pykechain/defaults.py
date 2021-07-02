@@ -128,66 +128,145 @@ API_PATH = {
 
 API_QUERY_PARAM_ALL_FIELDS = {'fields': '__all__'}
 API_EXTRA_PARAMS = {
-    'activity': {'fields': ",".join(
-        ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'activity_type', 'classification', 'tags',
-         'progress', 'assignees_ids', 'start_date', 'due_date', 'status', 'parent_id', 'scope_id', 'customization',
-         'activity_options'])},
-    'activities': {'fields': ",".join(
-        ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'activity_type', 'classification', 'tags',
-         'progress', 'assignees_ids', 'start_date', 'due_date', 'status', 'parent_id', 'scope_id', 'customization',
-         'activity_options'])},
-    'banner': {'fields': ",".join(
-        ['id', 'text', 'icon', 'is_active', 'active_from', 'active_until', 'url', 'created_at', 'updated_at'])},
-    'banners': {'fields': ",".join(
-        ['id', 'text', 'icon', 'is_active', 'active_from', 'active_until', 'url', 'created_at', 'updated_at'])},
-    'scope': {'fields': ",".join(
-        ['id', 'name', 'ref', 'text', 'created_at', 'updated_at', 'start_date', 'due_date', 'status', 'category',
-         'progress', 'members', 'team', 'tags', 'scope_options', 'team_id_name',
-         'workflow_root_id', 'catalog_root_id', 'app_root_id',
-         'product_model_id', 'product_instance_id', 'catalog_model_id', 'catalog_instance_id',
-         ])},
-    'scopes': {'fields': ",".join(
-        ['id', 'name', 'ref', 'text', 'created_at', 'updated_at', 'start_date', 'due_date', 'status', 'category',
-         'progress', 'members', 'team', 'tags', 'scope_options', 'team_id_name',
-         'workflow_root_id', 'catalog_root_id', 'app_root_id',
-         'product_model_id', 'product_instance_id', 'catalog_model_id', 'catalog_instance_id',
-         ])},
-    'part': {'fields': ",".join(
-        ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'properties', 'category', 'classification',
-         'parent_id', 'multiplicity', 'value_options', 'property_type', 'value', 'output', 'order',
-         'part_id', 'scope_id', 'model_id', 'proxy_source_id_name', 'unit'])},
-    'parts': {'fields': ",".join(
-        ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'properties', 'category', 'classification',
-         'parent_id', 'multiplicity', 'value_options', 'property_type', 'value', 'output', 'order',
-         'part_id', 'scope_id', 'model_id', 'proxy_source_id_name', 'unit'])},
-    'properties': {'fields': ",".join(
-        ['id', 'name', 'ref', 'created_at', 'updated_at', 'model_id', 'part_id', 'order', 'scope_id', 'category',
-         'property_type', 'value', 'value_options', 'output', 'description', 'unit'])},
-    'property': {'fields': ",".join(
-        ['id', 'name', 'ref', 'created_at', 'updated_at', 'model_id', 'part_id', 'order', 'scope_id', 'category',
-         'property_type', 'value', 'value_options', 'output', 'description', 'unit'])},
-    'service': {'fields': ",".join(
-        ['id', 'name', 'ref', 'created_at', 'updated_at', 'script_version', 'script_type', 'script_file_name',
-         'description', 'env_version', 'scope', 'run_as', 'trusted', 'verified_on', 'verification_results'])},
-    'services': {'fields': ",".join(
-        ['id', 'name', 'ref', 'created_at', 'updated_at', 'script_version', 'script_type', 'script_file_name',
-         'description', 'env_version', 'scope', 'run_as', 'trusted', 'verified_on', 'verification_results'])},
-    'widgets': {'fields': ",".join(
-        ['id', 'name', 'ref', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
-         'parent_id', 'progress', 'has_subwidgets', 'scope_id'])},
-    'widget': {'fields': ",".join(
-        ['id', 'name', 'ref', 'created_at', 'updated_at', 'title', 'widget_type', 'meta', 'order', 'activity_id',
-         'parent_id', 'progress', 'has_subwidgets', 'scope_id'])},
-    'notifications': {'fields': ",".join(
-        ['id', 'subject', 'status', 'message', 'team', 'created_at', 'options', 'updated_at'])},
-    'notification': {'fields': ",".join(
-        ['id', 'subject', 'status', 'message', 'team', 'created_at', 'options', 'updated_at'])},
-    'expiring_downloads': {'fields': ",".join(
-        ['id', 'created_at', 'updated_at', 'expires_at', 'expires_in', 'content'])},
-    'context': {'fields': ",".join(
-        ['id', 'name', 'ref', 'created_at', 'updated_at', 'description', 'tags', 'context_type',
-         'activities', 'scope', 'options', 'feature_collection', 'start_date', 'due_date'])},
-    'contexts': {'fields': ",".join(
-        ['id', 'name', 'ref', 'created_at', 'updated_at', 'description', 'tags', 'context_type',
-         'activities', 'scope', 'options', 'feature_collection', 'start_date', 'due_date'])}
+    'activity': {
+        'fields': ",".join(
+            ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'activity_type',
+             'classification', 'tags',
+             'progress', 'assignees_ids', 'start_date', 'due_date', 'status', 'parent_id',
+             'scope_id', 'customization',
+             'activity_options']
+        )
+    },
+    'activities': {
+        'fields': ",".join(
+            ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'activity_type',
+             'classification', 'tags',
+             'progress', 'assignees_ids', 'start_date', 'due_date', 'status', 'parent_id',
+             'scope_id', 'customization',
+             'activity_options']
+        )
+    },
+    'banner': {
+        'fields': ",".join(
+            ['id', 'text', 'icon', 'is_active', 'active_from', 'active_until', 'url', 'created_at',
+             'updated_at']
+        )
+    },
+    'banners': {
+        'fields': ",".join(
+            ['id', 'text', 'icon', 'is_active', 'active_from', 'active_until', 'url', 'created_at',
+             'updated_at']
+        )
+    },
+    'scope': {
+        'fields': ",".join(
+            ['id', 'name', 'ref', 'text', 'created_at', 'updated_at', 'start_date', 'due_date',
+             'status', 'category',
+             'progress', 'members', 'team', 'tags', 'scope_options', 'team_id_name',
+             'workflow_root_id', 'catalog_root_id', 'app_root_id',
+             'product_model_id', 'product_instance_id', 'catalog_model_id', 'catalog_instance_id',
+             ]
+        )
+    },
+    'scopes': {
+        'fields': ",".join(
+            ['id', 'name', 'ref', 'text', 'created_at', 'updated_at', 'start_date', 'due_date',
+             'status', 'category',
+             'progress', 'members', 'team', 'tags', 'scope_options', 'team_id_name',
+             'workflow_root_id', 'catalog_root_id', 'app_root_id',
+             'product_model_id', 'product_instance_id', 'catalog_model_id', 'catalog_instance_id',
+             ]
+        )
+    },
+    'part': {
+        'fields': ",".join(
+            ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'properties',
+             'category', 'classification',
+             'parent_id', 'multiplicity', 'value_options', 'property_type', 'value', 'output',
+             'order',
+             'part_id', 'scope_id', 'model_id', 'proxy_source_id_name', 'unit']
+        )
+    },
+    'parts': {
+        'fields': ",".join(
+            ['id', 'name', 'ref', 'description', 'created_at', 'updated_at', 'properties',
+             'category', 'classification',
+             'parent_id', 'multiplicity', 'value_options', 'property_type', 'value', 'output',
+             'order',
+             'part_id', 'scope_id', 'model_id', 'proxy_source_id_name', 'unit']
+        )
+    },
+    'properties': {
+        'fields': ",".join(
+            ['id', 'name', 'ref', 'created_at', 'updated_at', 'model_id', 'part_id', 'order',
+             'scope_id', 'category',
+             'property_type', 'value', 'value_options', 'output', 'description', 'unit']
+        )
+    },
+    'property': {
+        'fields': ",".join(
+            ['id', 'name', 'ref', 'created_at', 'updated_at', 'model_id', 'part_id', 'order',
+             'scope_id', 'category',
+             'property_type', 'value', 'value_options', 'output', 'description', 'unit']
+        )
+    },
+    'service': {
+        'fields': ",".join(
+            ['id', 'name', 'ref', 'created_at', 'updated_at', 'script_version', 'script_type',
+             'script_file_name',
+             'description', 'env_version', 'scope', 'run_as', 'trusted', 'verified_on',
+             'verification_results']
+        )
+    },
+    'services': {
+        'fields': ",".join(
+            ['id', 'name', 'ref', 'created_at', 'updated_at', 'script_version', 'script_type',
+             'script_file_name',
+             'description', 'env_version', 'scope', 'run_as', 'trusted', 'verified_on',
+             'verification_results']
+        )
+    },
+    'widgets': {
+        'fields': ",".join(
+            ['id', 'name', 'ref', 'created_at', 'updated_at', 'title', 'widget_type', 'meta',
+             'order', 'activity_id',
+             'parent_id', 'progress', 'has_subwidgets', 'scope_id']
+        )
+    },
+    'widget': {
+        'fields': ",".join(
+            ['id', 'name', 'ref', 'created_at', 'updated_at', 'title', 'widget_type', 'meta',
+             'order', 'activity_id',
+             'parent_id', 'progress', 'has_subwidgets', 'scope_id']
+        )
+    },
+    'notifications': {
+        'fields': ",".join(
+            ['id', 'subject', 'status', 'message', 'team', 'created_at', 'options', 'updated_at']
+        )
+    },
+    'notification': {
+        'fields': ",".join(
+            ['id', 'subject', 'status', 'message', 'team', 'created_at', 'options', 'updated_at']
+        )
+    },
+    'expiring_downloads': {
+        'fields': ",".join(
+            ['id', 'created_at', 'updated_at', 'expires_at', 'expires_in', 'content']
+        )
+    },
+    'context': {
+        'fields': ",".join(
+            ['id', 'name', 'ref', 'created_at', 'updated_at', 'description', 'tags',
+             'context_type',
+             'activities', 'scope', 'options', 'feature_collection', 'start_date', 'due_date']
+        )
+    },
+    'contexts': {
+        'fields': ",".join(
+            ['id', 'name', 'ref', 'created_at', 'updated_at', 'description', 'tags',
+             'context_type',
+             'activities', 'scope', 'options', 'feature_collection', 'start_date', 'due_date']
+        )
+    }
 }

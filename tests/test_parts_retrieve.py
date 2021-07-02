@@ -36,8 +36,10 @@ class TestPartRetrieve(TestBetamax):
     # test added in 1.12.7
     def test_get_single_instance_of_a_model_without_instances_raises_notfounderror(self):
         catalog = self.project.model(name__startswith='Catalog')
-        model_without_instances = self.project.create_model(parent=catalog, name='model_without_instances',
-                                                            multiplicity=Multiplicity.ZERO_ONE)
+        model_without_instances = self.project.create_model(
+            parent=catalog, name='model_without_instances',
+            multiplicity=Multiplicity.ZERO_ONE
+            )
 
         with self.assertRaises(NotFoundError):
             model_without_instances.instance()
@@ -53,12 +55,17 @@ class TestPartRetrieve(TestBetamax):
 
         # testing
         self.assertIsInstance(root._cached_children, list)
-        self.assertEqual(1, len(root._cached_children), msg='Number of instances has changed, expected 1')
+        self.assertEqual(
+            1, len(root._cached_children), msg='Number of instances has changed, expected 1'
+            )
 
         # follow-up
         bike_part = find(root._cached_children, lambda d: d.name == 'Bike')
         self.assertIsNotNone(bike_part._cached_children)
-        self.assertEqual(7, len(bike_part._cached_children), msg='Number of child instances has changed, expected 7')
+        self.assertEqual(
+            7, len(bike_part._cached_children),
+            msg='Number of child instances has changed, expected 7'
+            )
 
     # test added in 2.1, changed in 3.2
     def test_get_models_with_descendants_tree(self):
@@ -68,12 +75,17 @@ class TestPartRetrieve(TestBetamax):
 
         # testing
         self.assertIsInstance(root._cached_children, list)
-        self.assertEqual(1, len(root._cached_children), msg='Number of models has changed, expected 1')
+        self.assertEqual(
+            1, len(root._cached_children), msg='Number of models has changed, expected 1'
+            )
 
         # follow-up
         bike_model = find(root._cached_children, lambda d: d.name == 'Bike')
         self.assertIsNotNone(bike_model._cached_children)
-        self.assertEqual(5, len(bike_model._cached_children), msg='Number of child models has changed, expected 5')
+        self.assertEqual(
+            5, len(bike_model._cached_children),
+            msg='Number of child models has changed, expected 5'
+            )
 
     # test added in 3.0
     def test_retrieve_parts_with_refs(self):
@@ -118,11 +130,15 @@ class TestPartRetrieve(TestBetamax):
         self.assertEqual(bike, bike_again, msg='Bike should be retrieved from cache, based on ID')
 
         still_the_bike = root.child(name=bike.name)
-        self.assertEqual(bike, still_the_bike, msg='Bike should be retrieved from cache, based on name')
+        self.assertEqual(
+            bike, still_the_bike, msg='Bike should be retrieved from cache, based on name'
+            )
 
         root._cached_children = None
         more_bike = root.child(pk=bike.id)
-        self.assertEqual(bike, more_bike, msg='Cache should be cleared, bike has to be retrieved anew.')
+        self.assertEqual(
+            bike, more_bike, msg='Cache should be cleared, bike has to be retrieved anew.'
+            )
 
     def test_child_invalid(self):
         root = self.project.model(name='Product')

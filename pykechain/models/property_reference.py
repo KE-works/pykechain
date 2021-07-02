@@ -56,9 +56,9 @@ class ScopeReferencesProperty(_ReferenceProperty):
         return scopes
 
     def set_prefilters(
-            self,
-            prefilters: List[ScopeFilter] = None,
-            clear: Optional[bool] = False,
+        self,
+        prefilters: List[ScopeFilter] = None,
+        clear: Optional[bool] = False,
     ) -> None:
         """
         Set pre-filters on the scope reference property.
@@ -69,9 +69,12 @@ class ScopeReferencesProperty(_ReferenceProperty):
         :return: None
         """
         if prefilters is not None:
-            if not isinstance(prefilters, list) or not all(isinstance(pf, ScopeFilter) for pf in prefilters):
+            if not isinstance(prefilters, list) or not all(
+                isinstance(pf, ScopeFilter) for pf in prefilters
+            ):
                 raise IllegalArgumentError(
-                    f"`prefilters` must be a list of ScopeFilter objects, `{prefilters}` is not.")
+                    f"`prefilters` must be a list of ScopeFilter objects, `{prefilters}` is not."
+                )
         else:
             prefilters = []
 

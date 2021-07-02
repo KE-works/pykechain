@@ -37,12 +37,12 @@ class Team(Base):
         self.refresh(json=response.json().get('results')[0])
 
     def edit(
-            self,
-            name: Optional[Union[str, Empty]] = empty,
-            description: Optional[Union[str, Empty]] = empty,
-            options: Optional[Union[Dict, Empty]] = empty,
-            is_hidden: Optional[Union[bool, Empty]] = empty,
-            **kwargs
+        self,
+        name: Optional[Union[str, Empty]] = empty,
+        description: Optional[Union[str, Empty]] = empty,
+        options: Optional[Union[Dict, Empty]] = empty,
+        is_hidden: Optional[Union[bool, Empty]] = empty,
+        **kwargs
     ) -> None:
         """
         Edit the attributes of the Team.
@@ -110,10 +110,11 @@ class Team(Base):
         else:
             return member_list
 
-    def add_members(self,
-                    users: Optional[List[Union[User, str]]] = None,
-                    role: Optional[Union[TeamRoles, str]] = TeamRoles.MEMBER,
-                    ) -> None:
+    def add_members(
+        self,
+        users: Optional[List[Union[User, str]]] = None,
+        role: Optional[Union[TeamRoles, str]] = TeamRoles.MEMBER,
+    ) -> None:
         """Members to add to a team.
 
         :param users: list of members, either `User` objects or usernames
@@ -153,9 +154,11 @@ class Team(Base):
         """
         update_dict = {'users': [check_user(user, User, 'users') for user in users]}
 
-        self._update('team_remove_members',
-                     update_dict=update_dict,
-                     team_id=self.id)
+        self._update(
+            'team_remove_members',
+            update_dict=update_dict,
+            team_id=self.id
+        )
 
     def scopes(self, status: Optional[ScopeStatus] = None, **kwargs) -> List['Scope']:
         """Scopes associated to the team."""

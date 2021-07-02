@@ -81,8 +81,10 @@ class TestCreateModelWithProperties(TestBetamax):
     properties_fvalues = [
         {"name": "char prop", "property_type": PropertyType.CHAR_VALUE},
         {"name": "number prop", "property_type": PropertyType.FLOAT_VALUE, "value": 3.14},
-        {"name": "boolean_prop", "property_type": PropertyType.BOOLEAN_VALUE, "value": False,
-         "value_options": {"validators": [RequiredFieldValidator().as_json()]}}
+        {
+            "name": "boolean_prop", "property_type": PropertyType.BOOLEAN_VALUE, "value": False,
+            "value_options": {"validators": [RequiredFieldValidator().as_json()]}
+        }
     ]
 
     def setUp(self):

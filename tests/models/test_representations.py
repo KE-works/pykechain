@@ -3,15 +3,19 @@ from typing import Union
 
 from jsonschema import validate
 
-from pykechain.enums import FontAwesomeMode, GeoCoordinateConfig, LinkTargets, Multiplicity, \
-    PropertyType, \
-    SelectListRepresentations
+from pykechain.enums import (
+    FontAwesomeMode, GeoCoordinateConfig, LinkTargets, Multiplicity,
+    PropertyType,
+    SelectListRepresentations,
+)
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Activity, AnyProperty, Property, Scope, SelectListProperty
 from pykechain.models.representations.representation_base import BaseRepresentation
-from pykechain.models.representations.representations import Autofill, ButtonRepresentation, \
-    CustomIconRepresentation, \
-    DecimalPlaces, GeoCoordinateRepresentation, LinkTarget, SignificantDigits, ThousandsSeparator
+from pykechain.models.representations.representations import (
+    Autofill, ButtonRepresentation,
+    CustomIconRepresentation,
+    DecimalPlaces, GeoCoordinateRepresentation, LinkTarget, SignificantDigits, ThousandsSeparator,
+)
 from pykechain.models.validators.validator_schemas import options_json_schema
 from tests.classes import SixTestCase, TestBetamax
 
@@ -199,7 +203,9 @@ class Bases:
 
         def _get_object(self):
             parent_model = self.project.model(name='Bike')
-            self.test_model = parent_model.add_model(name=self.test_model_name, multiplicity=Multiplicity.ONE)
+            self.test_model = parent_model.add_model(
+                name=self.test_model_name, multiplicity=Multiplicity.ONE
+            )
             obj = self.test_model.add_property(
                 name=self.test_object_name,
                 property_type=self.property_type,

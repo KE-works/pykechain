@@ -22,7 +22,11 @@ def main(*args, **kwargs):
     pprint(f'--- platform details (uname): {platform.uname()}', width=120)
     pprint(f'--- python paths: {sys.path}', width=120)
     mark_1 = time.time()
-    print('<<< intermediate timing on {}, duration: {}'.format(time.strftime('%c', time.gmtime(mark_1)), mark_1 - start))
+    print(
+        '<<< intermediate timing on {}, duration: {}'.format(
+            time.strftime('%c', time.gmtime(mark_1)), mark_1 - start
+        )
+    )
     print('--- python pip packages installed \n{}'.format(os.popen('pip freeze').readlines()))
     try:
         import pykechain
@@ -33,19 +37,29 @@ def main(*args, **kwargs):
     mark_2 = time.time()
 
     from envparse import env
-    if not env('KECHAIN_URL', None) or not env('KECHAIN_TOKEN', None) or not env('KECHAIN_SCOPE_ID', None):
-        print(r'/!\ cannot interact using pykechain as environment variables KECHAIN_URL, KECHAIN_TOKEN and '
-              'KECHAIN_SCOPE_ID are not set')
+    if not env('KECHAIN_URL', None) or not env('KECHAIN_TOKEN', None) or not env(
+        'KECHAIN_SCOPE_ID', None
+    ):
+        print(
+            r'/!\ cannot interact using pykechain as environment variables KECHAIN_URL, KECHAIN_TOKEN and '
+            'KECHAIN_SCOPE_ID are not set'
+        )
     else:
         project = pykechain.get_project()
         mark_3 = time.time()
-        print("--- retrieving project '{}' from kechain (url: {})".format(project.name, env('KECHAIN_URL')))
+        print(
+            "--- retrieving project '{}' from kechain (url: {})".format(
+                project.name, env('KECHAIN_URL')
+            )
+        )
         print(f"--- {len(project.activities())} activities, {len(project.parts())} parts")
         print("--- retrieving as user: '{}".format(env('KECHAIN_USERNAME')))
-        print(f"<<< interaction with ke-chain took: {mark_3-mark_2}s")
+        print(f"<<< interaction with ke-chain took: {mark_3 - mark_2}s")
 
     end = time.time()
-    print('<<< ending on {}, duration: {}'.format(time.strftime('%c', time.gmtime(end)), end - start))
+    print(
+        '<<< ending on {}, duration: {}'.format(time.strftime('%c', time.gmtime(end)), end - start)
+    )
 
 
 if __name__ == '__main__':

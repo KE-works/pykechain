@@ -6,9 +6,11 @@ import requests
 from pykechain.enums import ContextGroup, ContextType
 from pykechain.exceptions import APIError
 from pykechain.models import BaseInScope
-from pykechain.models.input_checks import (check_base, check_datetime, check_enum,
-                                           check_list_of_base,
-                                           check_list_of_text, check_text, check_type)
+from pykechain.models.input_checks import (
+    check_base, check_datetime, check_enum,
+    check_list_of_base,
+    check_list_of_text, check_text, check_type,
+)
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID, ObjectIDs
 from pykechain.utils import Empty, clean_empty_values, empty, parse_datetime
@@ -45,18 +47,18 @@ class Context(BaseInScope, TagsMixin):
         self.due_date = parse_datetime(json.get("due_date"))  # type: Optional[datetime]
 
     def edit(
-            self,
-            name: Optional[Union[str, Empty]] = empty,
-            description: Optional[Union[str, Empty]] = empty,
-            tags: Optional[List[Union[str, Empty]]] = empty,
-            context_group: Optional[Union[ContextGroup, Empty]] = empty,
-            scope: Optional[Union['Scope', ObjectID]] = empty,
-            options: Optional[dict] = empty,
-            activities: Optional[Union[List['Activity'], ObjectIDs]] = empty,
-            feature_collection: Optional[dict] = empty,
-            start_date: Optional[datetime] = empty,
-            due_date: Optional[datetime] = empty,
-            **kwargs
+        self,
+        name: Optional[Union[str, Empty]] = empty,
+        description: Optional[Union[str, Empty]] = empty,
+        tags: Optional[List[Union[str, Empty]]] = empty,
+        context_group: Optional[Union[ContextGroup, Empty]] = empty,
+        scope: Optional[Union['Scope', ObjectID]] = empty,
+        options: Optional[dict] = empty,
+        activities: Optional[Union[List['Activity'], ObjectIDs]] = empty,
+        feature_collection: Optional[dict] = empty,
+        start_date: Optional[datetime] = empty,
+        due_date: Optional[datetime] = empty,
+        **kwargs
     ) -> 'self':
         """
         Edit the Context.
@@ -111,7 +113,7 @@ class Context(BaseInScope, TagsMixin):
         return self.refresh(json=response.json().get("results")[0])
 
     def link_activities(
-            self, activities: Optional[List[Union['Activity', ObjectIDs]]] = empty, **kwargs
+        self, activities: Optional[List[Union['Activity', ObjectIDs]]] = empty, **kwargs
     ):
         """
         Link a context to one or more activities.
@@ -137,7 +139,7 @@ class Context(BaseInScope, TagsMixin):
         return self.refresh(json=response.json().get("results")[0])
 
     def unlink_activities(
-            self, activities: Optional[List[Union['Activity', ObjectIDs]]] = empty, **kwargs
+        self, activities: Optional[List[Union['Activity', ObjectIDs]]] = empty, **kwargs
     ):
         """
         Unlink a context to one or more activities.

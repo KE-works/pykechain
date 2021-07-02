@@ -5,7 +5,6 @@ from pykechain.models.base import Base
 
 
 class TestBase(TestCase):
-
     json = {
         'id': '123',
         'name': 'test'
@@ -14,12 +13,12 @@ class TestBase(TestCase):
     def test_id(self):
         obj = Base(self.json, None)
 
-        self.assertEqual(obj.id , '123')
+        self.assertEqual(obj.id, '123')
 
     def test_name(self):
         obj = Base(self.json, None)
 
-        self.assertEqual( obj.name ,'test')
+        self.assertEqual(obj.name, 'test')
 
     def test_given_client(self):
         client = Client()

@@ -19,8 +19,10 @@ class TestUsers(TestBetamax):
         obj = self.client.users()[0]
         for attribute in attributes:
             with self.subTest(msg=attribute):
-                self.assertTrue(hasattr(obj, attribute),
-                                f"Could not find '{attribute}' in the object: '{obj.__dict__}'")
+                self.assertTrue(
+                    hasattr(obj, attribute),
+                    f"Could not find '{attribute}' in the object: '{obj.__dict__}'"
+                    )
 
     def test_retrieve_single_multiple_user_raises_error(self):
         with self.assertRaises(MultipleFoundError):

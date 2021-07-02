@@ -51,11 +51,17 @@ class TestBanners(TestBetamax):
     def test_create_invalid_inputs(self):
         self.banner.delete()
         with self.assertRaises(IllegalArgumentError):
-            self.banner = self.client.create_banner(text=3, icon=self.ICON, active_from=NEW_YEAR_2020)
+            self.banner = self.client.create_banner(
+                text=3, icon=self.ICON, active_from=NEW_YEAR_2020
+                )
         with self.assertRaises(IllegalArgumentError):
-            self.banner = self.client.create_banner(text='some text', icon=True, active_from=NEW_YEAR_2020)
+            self.banner = self.client.create_banner(
+                text='some text', icon=True, active_from=NEW_YEAR_2020
+                )
         with self.assertRaises(IllegalArgumentError):
-            self.banner = self.client.create_banner(text='some text', icon=self.ICON, active_from=2)
+            self.banner = self.client.create_banner(
+                text='some text', icon=self.ICON, active_from=2
+                )
         with self.assertRaises(IllegalArgumentError):
             self.banner = self.client.create_banner(active_until='later', **self.KWARGS)
         with self.assertRaises(IllegalArgumentError):
@@ -112,7 +118,10 @@ class TestBanners(TestBetamax):
         url = 'https://www.google.com/'
         later = NEW_YEAR_2020 + datetime.timedelta(hours=1)
 
-        self.banner.edit(text=text, icon=icon, active_from=NEW_YEAR_2020, active_until=later, is_active=False, url=url)
+        self.banner.edit(
+            text=text, icon=icon, active_from=NEW_YEAR_2020, active_until=later, is_active=False,
+            url=url
+            )
 
         self.assertEqual(text, self.banner.text)
         self.assertEqual(icon, self.banner.icon)
@@ -158,9 +167,12 @@ class TestBanners(TestBetamax):
         initial_is_active = False
         initial_url = 'https://www.google.com'
 
-        self.banner.edit(text=initial_text, icon=initial_icon, active_from=NEW_YEAR_2020 - datetime.timedelta(days=1),
-                         active_until=NEW_YEAR_2020 + datetime.timedelta(days=1), is_active=initial_is_active,
-                         url=initial_url)
+        self.banner.edit(
+            text=initial_text, icon=initial_icon,
+            active_from=NEW_YEAR_2020 - datetime.timedelta(days=1),
+            active_until=NEW_YEAR_2020 + datetime.timedelta(days=1), is_active=initial_is_active,
+            url=initial_url
+            )
 
         # Edit without mentioning values, everything should stay the same
         new_text = '2021!!!'
@@ -177,7 +189,9 @@ class TestBanners(TestBetamax):
         self.assertEqual(self.banner.url, initial_url)
 
         # Edit with clearing the values, name and status cannot be cleared
-        self.banner.edit(text=None, icon=None, active_from=None, active_until=None, is_active=None, url=None)
+        self.banner.edit(
+            text=None, icon=None, active_from=None, active_until=None, is_active=None, url=None
+            )
 
         self.assertEqual(self.banner.text, new_text)
         self.assertEqual(self.banner.icon, '')

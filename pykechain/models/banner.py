@@ -67,9 +67,11 @@ class Banner(Base):
             'text': check_text(text, 'text'),
             'icon': check_text(icon, 'icon') or '',
             'active_from': check_datetime(active_from, 'active_from') or check_datetime(
-                self.active_from, 'active_from'),
+                self.active_from, 'active_from'
+            ),
             'active_until': check_datetime(active_until, 'active_until') or check_datetime(
-                self.active_until, 'active_until'),
+                self.active_until, 'active_until'
+            ),
             'is_active': empty if active is None else active,
             'url': check_url(url) or '',
         }
@@ -93,7 +95,9 @@ class Banner(Base):
 
     def delete(self) -> bool:
         """Delete this banner."""
-        response = self._client._request('DELETE', self._client._build_url('banner', banner_id=self.id))
+        response = self._client._request(
+            'DELETE', self._client._build_url('banner', banner_id=self.id)
+        )
 
         if response.status_code != requests.codes.no_content:
             raise APIError(f"Could not delete Banner: {self}", response=response)

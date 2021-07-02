@@ -1,28 +1,39 @@
 import warnings
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
-from pykechain.enums import (ActivityType, CardWidgetImageValue, CardWidgetKEChainPageLink,
-                             CardWidgetLinkValue,
-                             Category, ImageFitValue, KEChainPages, LinkTargets, PropertyType,
-                             WidgetTitleValue)
+from pykechain.enums import (
+    ActivityType,
+    CardWidgetImageValue,
+    CardWidgetKEChainPageLink,
+    CardWidgetLinkValue,
+    Category,
+    ImageFitValue,
+    KEChainPages,
+    LinkTargets,
+    PropertyType,
+    WidgetTitleValue,
+)
 from pykechain.exceptions import IllegalArgumentError
+from pykechain.models import AnyProperty
 from pykechain.models.input_checks import check_base, check_enum
 from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets.enums import AssociatedObjectId, MetaWidget
 from pykechain.utils import camelcase, is_uuid, snakecase
 
 # these are the common keys to all kecards.
-KECARD_COMMON_KEYS = [MetaWidget.COLLAPSED,
-                      MetaWidget.COLLAPSIBLE,
-                      MetaWidget.NO_BACKGROUND,
-                      MetaWidget.NO_PADDING,
-                      MetaWidget.IS_DISABLED,
-                      MetaWidget.IS_MERGED]
+KECARD_COMMON_KEYS = [
+    MetaWidget.COLLAPSED,
+    MetaWidget.COLLAPSIBLE,
+    MetaWidget.NO_BACKGROUND,
+    MetaWidget.NO_PADDING,
+    MetaWidget.IS_DISABLED,
+    MetaWidget.IS_MERGED,
+]
 
 TITLE_TYPING = Optional[Union[type(None), str, bool]]
 
 
-def _retrieve_object(obj: Union['Base', str], method: Callable) -> Union['Base']:
+def _retrieve_object(obj: Union["Base", str], method: Callable) -> Union["Base"]:
     """
     Object if object or uuid of object is provided as argument.
 
@@ -34,6 +45,7 @@ def _retrieve_object(obj: Union['Base', str], method: Callable) -> Union['Base']
     """
     # Check whether the part_model is uuid type or class `Part`
     from pykechain.models import Part, Property, Service, Team
+
     if isinstance(obj, (Part, Property, Service, Team)):
         return obj
     elif isinstance(obj, str) and is_uuid(obj):
@@ -41,11 +53,15 @@ def _retrieve_object(obj: Union['Base', str], method: Callable) -> Union['Base']
         obj = method(id=obj_id)
         return obj
     else:
-        raise IllegalArgumentError("When adding the widget, obj must be a Part, Property, Service, Team, "
-                                   " Part id, Property id, Service id or Team id. Type is: {}".format(type(obj)))
+        raise IllegalArgumentError(
+            "When adding the widget, obj must be a Part, Property, Service, Team, "
+            " Part id, Property id, Service id or Team id. Type is: {}".format(
+                type(obj)
+            )
+        )
 
 
-def _retrieve_object_id(obj: Optional[Union['Base', str]]) -> Optional[str]:
+def _retrieve_object_id(obj: Optional[Union["Base", str]]) -> Optional[str]:
     """
     Object id if object or uuid of object is provided as argument.
 
@@ -56,6 +72,7 @@ def _retrieve_object_id(obj: Optional[Union['Base', str]]) -> Optional[str]:
     """
     # Check whether the obj is an object of any subclass of Base, or uuid type
     from pykechain.models import Base
+
     if issubclass(type(obj), Base):
         return obj.id
     elif isinstance(obj, str) and is_uuid(obj):
@@ -63,15 +80,17 @@ def _retrieve_object_id(obj: Optional[Union['Base', str]]) -> Optional[str]:
     elif isinstance(obj, type(None)):
         return None
     else:
-        raise IllegalArgumentError("When adding the widget, obj must be an instance of `Base` or an object id. "
-                                   "Type is: {}".format(type(obj)))
+        raise IllegalArgumentError(
+            "When adding the widget, obj must be an instance of `Base` or an object id. "
+            "Type is: {}".format(type(obj))
+        )
 
 
 def _set_title(
-        meta: Dict,
-        title: TITLE_TYPING = None,
-        show_title_value: Optional[WidgetTitleValue] = None,
-        **kwargs
+    meta: Dict,
+    title: TITLE_TYPING = None,
+    show_title_value: Optional[WidgetTitleValue] = None,
+    **kwargs,
 ) -> Tuple[Dict, str]:
     """
     Set the customTitle in the meta based on provided optional custom title or default.
@@ -89,13 +108,13 @@ def _set_title(
     :return: tuple of meta and the title
     :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
-    check_enum(show_title_value, WidgetTitleValue, 'show_title_value')
+    check_enum(show_title_value, WidgetTitleValue, "show_title_value")
 
     if show_title_value is None:
         if title is False:
             show_title_value = WidgetTitleValue.DEFAULT
             title = None
-        elif title is None or title == '':
+        elif title is None or title == "":
             show_title_value = WidgetTitleValue.NO_TITLE
             title = None
         else:
@@ -104,17 +123,17 @@ def _set_title(
     if show_title_value == WidgetTitleValue.DEFAULT or title is False:
         title = None
 
-    meta.update({
-        MetaWidget.SHOW_TITLE_VALUE: show_title_value,
-        MetaWidget.CUSTOM_TITLE: title,
-    })
+    meta.update(
+        {
+            MetaWidget.SHOW_TITLE_VALUE: show_title_value,
+            MetaWidget.CUSTOM_TITLE: title,
+        }
+    )
     return meta, title
 
 
 def _set_description(
-        meta: Dict,
-        description: Optional[Union[str, bool]] = None,
-        **kwargs
+    meta: Dict, description: Optional[Union[str, bool]] = None, **kwargs
 ) -> Dict:
     """
     Set the customDescription in the meta based on provided optional custom description or no description.
@@ -136,21 +155,25 @@ def _set_description(
     elif isinstance(description, str):
         show_description_value = MetaWidget.DESCRIPTION_OPTION_CUSTOM
     else:
-        raise IllegalArgumentError("When using the add_card_widget or add_service_card_widget, 'description' must be "
-                                   "'text_type' or None or False. Type is: {}".format(type(description)))
-    meta.update({
-        MetaWidget.SHOW_DESCRIPTION_VALUE: show_description_value,
-        MetaWidget.CUSTOM_DESCRIPTION: description
-    })
+        raise IllegalArgumentError(
+            "When using the add_card_widget or add_service_card_widget, 'description' must be "
+            "'text_type' or None or False. Type is: {}".format(type(description))
+        )
+    meta.update(
+        {
+            MetaWidget.SHOW_DESCRIPTION_VALUE: show_description_value,
+            MetaWidget.CUSTOM_DESCRIPTION: description,
+        }
+    )
     return meta
 
 
 def _set_link(
-        meta: Dict,
-        link: Optional[Union[type(None), str, bool, KEChainPages]] = None,
-        link_value: Optional[CardWidgetLinkValue] = None,
-        link_target: Optional[Union[str, LinkTargets]] = LinkTargets.SAME_TAB,
-        **kwargs
+    meta: Dict,
+    link: Optional[Union[type(None), str, bool, KEChainPages]] = None,
+    link_value: Optional[CardWidgetLinkValue] = None,
+    link_target: Optional[Union[str, LinkTargets]] = LinkTargets.SAME_TAB,
+    **kwargs,
 ) -> Dict:
     """
     Set the link in the meta based on provided optional custom link.
@@ -170,53 +193,68 @@ def _set_link(
     :return: meta dictionary
     :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
-    meta['linkTarget'] = check_enum(link_target, LinkTargets, 'link_target')
+    meta["linkTarget"] = check_enum(link_target, LinkTargets, "link_target")
 
     from pykechain.models import Activity
+
     if isinstance(link, Activity):
         if link.activity_type == ActivityType.TASK:
             default_link_value = CardWidgetLinkValue.TASK_LINK
         else:
             default_link_value = CardWidgetLinkValue.TREE_VIEW
 
-        meta.update({
-            MetaWidget.CUSTOM_LINK: link.id,
-            MetaWidget.SHOW_LINK_VALUE: default_link_value,
-        })
+        meta.update(
+            {
+                MetaWidget.CUSTOM_LINK: link.id,
+                MetaWidget.SHOW_LINK_VALUE: default_link_value,
+            }
+        )
     elif isinstance(link, str) and is_uuid(link):
-        meta.update({
-            MetaWidget.CUSTOM_LINK: link,
-            MetaWidget.SHOW_LINK_VALUE: CardWidgetLinkValue.TASK_LINK,
-        })
+        meta.update(
+            {
+                MetaWidget.CUSTOM_LINK: link,
+                MetaWidget.SHOW_LINK_VALUE: CardWidgetLinkValue.TASK_LINK,
+            }
+        )
     elif link is None or link is False:
-        meta.update({
-            MetaWidget.CUSTOM_LINK: None,
-            MetaWidget.SHOW_LINK_VALUE: CardWidgetLinkValue.NO_LINK,
-        })
+        meta.update(
+            {
+                MetaWidget.CUSTOM_LINK: None,
+                MetaWidget.SHOW_LINK_VALUE: CardWidgetLinkValue.NO_LINK,
+            }
+        )
     elif link in KEChainPages.values():
-        meta.update({
-            MetaWidget.CUSTOM_LINK: "",
-            MetaWidget.SHOW_LINK_VALUE: CardWidgetKEChainPageLink[link],
-        })
+        meta.update(
+            {
+                MetaWidget.CUSTOM_LINK: "",
+                MetaWidget.SHOW_LINK_VALUE: CardWidgetKEChainPageLink[link],
+            }
+        )
     else:
-        meta.update({
-            MetaWidget.CUSTOM_LINK: link,
-            MetaWidget.SHOW_LINK_VALUE: CardWidgetLinkValue.EXTERNAL_LINK,
-        })
+        meta.update(
+            {
+                MetaWidget.CUSTOM_LINK: link,
+                MetaWidget.SHOW_LINK_VALUE: CardWidgetLinkValue.EXTERNAL_LINK,
+            }
+        )
 
     if link_value is not None:
-        meta.update({
-            MetaWidget.SHOW_LINK_VALUE: check_enum(link_value, CardWidgetLinkValue, 'link_value'),
-        })
+        meta.update(
+            {
+                MetaWidget.SHOW_LINK_VALUE: check_enum(
+                    link_value, CardWidgetLinkValue, "link_value"
+                ),
+            }
+        )
 
     return meta
 
 
 def _set_image(
-        meta: Dict,
-        image: Optional['AttachmentProperty'] = None,
-        image_fit: Optional[Union[str, ImageFitValue]] = ImageFitValue.CONTAIN,
-        **kwargs
+    meta: Dict,
+    image: Optional["AttachmentProperty"] = None,
+    image_fit: Optional[Union[str, ImageFitValue]] = ImageFitValue.CONTAIN,
+    **kwargs,
 ) -> Dict:
     """
     Set the image in the meta based on provided optional custom link.
@@ -231,30 +269,34 @@ def _set_image(
     :return: meta dictionary
     :raises IllegalArgumentError: When illegal `image` type is used.
     """
-    meta[MetaWidget.IMAGE_FIT] = check_enum(image_fit, ImageFitValue, 'image_fit')
+    meta[MetaWidget.IMAGE_FIT] = check_enum(image_fit, ImageFitValue, "image_fit")
 
     from pykechain.models import Property
+
     if isinstance(image, Property) and image.type == PropertyType.ATTACHMENT_VALUE:
-        meta.update({
-            MetaWidget.CUSTOM_IMAGE: f"/api/v3/properties/{image.id}/preview",
-            MetaWidget.SHOW_IMAGE_VALUE: CardWidgetImageValue.CUSTOM_IMAGE
-        })
+        meta.update(
+            {
+                MetaWidget.CUSTOM_IMAGE: f"/api/v3/properties/{image.id}/preview",
+                MetaWidget.SHOW_IMAGE_VALUE: CardWidgetImageValue.CUSTOM_IMAGE,
+            }
+        )
     elif image is None:
-        meta.update({
-            MetaWidget.CUSTOM_IMAGE: None,
-            MetaWidget.SHOW_IMAGE_VALUE: CardWidgetImageValue.NO_IMAGE
-        })
+        meta.update(
+            {
+                MetaWidget.CUSTOM_IMAGE: None,
+                MetaWidget.SHOW_IMAGE_VALUE: CardWidgetImageValue.NO_IMAGE,
+            }
+        )
     else:
-        raise IllegalArgumentError("When using the add_card_widget or add_service_card_widget, 'image' must be an "
-                                   "'AttachmentProperty' or None. Type is: {}".format(type(image)))
+        raise IllegalArgumentError(
+            "When using the add_card_widget or add_service_card_widget, 'image' must be an "
+            "'AttachmentProperty' or None. Type is: {}".format(type(image))
+        )
     return meta
 
 
 def _set_button_text(
-        meta: Dict,
-        service: 'Service',
-        custom_button_text: TITLE_TYPING = False,
-        **kwargs
+    meta: Dict, service: "Service", custom_button_text: TITLE_TYPING = False, **kwargs
 ) -> Dict:
     """
     Set the button text in the meta based on provided optional custom_button_text.
@@ -278,14 +320,16 @@ def _set_button_text(
         button_text = service.name
     elif custom_button_text is None:
         show_button_value = MetaWidget.BUTTON_NO_TEXT
-        button_text = ''
+        button_text = ""
     else:
         show_button_value = MetaWidget.BUTTON_TEXT_CUSTOM
         button_text = str(custom_button_text)
-    meta.update({
-        MetaWidget.SHOW_BUTTON_VALUE: show_button_value,
-        MetaWidget.CUSTOM_TEXT: button_text,
-    })
+    meta.update(
+        {
+            MetaWidget.SHOW_BUTTON_VALUE: show_button_value,
+            MetaWidget.CUSTOM_TEXT: button_text,
+        }
+    )
     return meta
 
 
@@ -327,7 +371,9 @@ def _initiate_meta(kwargs, activity, ignores=()):
     return meta
 
 
-def _check_prefilters(part_model: 'Part', prefilters: Union[Dict, List]) -> List[PropertyValueFilter]:  # noqa: F821
+def _check_prefilters(
+    part_model: "Part", prefilters: Union[Dict, List]
+) -> List[PropertyValueFilter]:  # noqa: F821
     """
     Check the format of the pre-filters.
 
@@ -337,27 +383,37 @@ def _check_prefilters(part_model: 'Part', prefilters: Union[Dict, List]) -> List
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
     if isinstance(prefilters, dict):
-        property_models: List[Property, str] = prefilters.get(MetaWidget.PROPERTY_MODELS, [])  # noqa
+        property_models: List[AnyProperty, str] = prefilters.get(
+            MetaWidget.PROPERTY_MODELS, []
+        )  # noqa
         values = prefilters.get(MetaWidget.VALUES, [])
         filters_type = prefilters.get(MetaWidget.FILTERS_TYPE, [])
 
         if any(len(lst) != len(property_models) for lst in [values, filters_type]):
-            raise IllegalArgumentError('The lists of "property_models", "values" and "filters_type" should be the '
-                                       'same length.')
-        prefilters = [PropertyValueFilter(
-            property_model=pf[0],
-            value=pf[1],
-            filter_type=pf[2],
-        ) for pf in zip(property_models, values, filters_type)]
+            raise IllegalArgumentError(
+                'The lists of "property_models", "values" and "filters_type" should be the '
+                "same length."
+            )
+        prefilters = [
+            PropertyValueFilter(
+                property_model=pf[0],
+                value=pf[1],
+                filter_type=pf[2],
+            )
+            for pf in zip(property_models, values, filters_type)
+        ]
 
         warnings.warn(
             "Prefilters must be provided as list of `PropertyValueFilter` objects. "
-            "Separate input lists will be deprecated in January 2021.",  # TODO Deprecate January 2021
+            "Separate input lists will be deprecated in January 2021.",
+            # TODO Deprecate January 2021
             PendingDeprecationWarning,
         )
 
     elif not all(isinstance(pf, PropertyValueFilter) for pf in prefilters):
-        raise IllegalArgumentError("`prefilters` must be a list of PropertyValueFilter objects.")
+        raise IllegalArgumentError(
+            "`prefilters` must be a list of PropertyValueFilter objects."
+        )
 
     if part_model:
         [pf.validate(part_model=part_model) for pf in prefilters]
@@ -365,7 +421,9 @@ def _check_prefilters(part_model: 'Part', prefilters: Union[Dict, List]) -> List
     return prefilters
 
 
-def _check_excluded_propmodels(part_model: 'Part', property_models: List['AnyProperty']) -> List['AnyProperty']:
+def _check_excluded_propmodels(
+    part_model: "Part", property_models: List["AnyProperty"]
+) -> List["AnyProperty"]:
     """
     Validate the excluded property models of the referenced part.
 
@@ -374,33 +432,41 @@ def _check_excluded_propmodels(part_model: 'Part', property_models: List['AnyPro
     :return: list of property IDs
     :raises IllegalArgumentError: whenever the properties are not of category MODEL or do not belong to the part model.
     """
-    from pykechain.models import Property
     from pykechain.models import Part
 
     if not part_model:
         # part model is unknown, only check for property_models
-        return [check_base(pm, Property, "property_model") for pm in property_models]
+        return [check_base(pm, AnyProperty, "property_model") for pm in property_models]
 
     if not isinstance(part_model, Part):
-        raise IllegalArgumentError(f'`part_model` must be a Part object, "{part_model}" is not.')
+        raise IllegalArgumentError(
+            f'`part_model` must be a Part object, "{part_model}" is not.'
+        )
 
-    list_of_propmodels_excl: List['AnyProperty'] = list()
+    list_of_propmodels_excl: List[AnyProperty] = list()
     for property_model in property_models:
         if is_uuid(property_model):
             property_model = part_model.property(property_model)
-        elif not isinstance(property_model, Property):
-            raise IllegalArgumentError('A part reference property can only exclude `Property` models or their UUIDs, '
-                                       'found type "{}"'.format(type(property_model)))
+        elif not isinstance(property_model, AnyProperty):
+            raise IllegalArgumentError(
+                "A part reference property can only exclude `Property` models or their UUIDs, "
+                'found type "{}"'.format(type(property_model))
+            )
 
         if property_model.category != Category.MODEL:
-            raise IllegalArgumentError('A part reference property can only exclude `Property` models, found '
-                                       'category "{}" on property "{}"'.format(property_model.category,
-                                                                               property_model.name))
+            raise IllegalArgumentError(
+                "A part reference property can only exclude `Property` models, found "
+                'category "{}" on property "{}"'.format(
+                    property_model.category, property_model.name
+                )
+            )
         elif part_model.id != property_model.part_id:
             raise IllegalArgumentError(
-                'A part reference property can only exclude properties belonging to the referenced Part model, '
+                "A part reference property can only exclude properties belonging to the referenced Part model, "
                 'found referenced Part model "{}" and Properties belonging to "{}"'.format(
-                    part_model.name, property_model.part.name))
+                    part_model.name, property_model.part.name
+                )
+            )
         else:
             list_of_propmodels_excl.append(property_model.id)
     return list_of_propmodels_excl

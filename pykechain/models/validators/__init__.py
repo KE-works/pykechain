@@ -3,11 +3,15 @@
 .. versionadded:: 2.2
 """
 
-from .effects import (ErrorTextEffect, HelpTextEffect, InvalidVisualEffect, TextEffect,
-                      ValidVisualEffect, VisualEffect)
-from .validators import (BooleanFieldValidator, EvenNumberValidator, NumericRangeValidator,
-                         OddNumberValidator,
-                         RegexStringValidator, RequiredFieldValidator, SingleReferenceValidator)
+from .effects import (
+    ErrorTextEffect, HelpTextEffect, InvalidVisualEffect, TextEffect,
+    ValidVisualEffect, VisualEffect,
+)
+from .validators import (
+    BooleanFieldValidator, EvenNumberValidator, NumericRangeValidator,
+    OddNumberValidator,
+    RegexStringValidator, RequiredFieldValidator, SingleReferenceValidator,
+)
 from .validators_base import PropertyValidator, ValidatorEffect  # noqa
 
 __all__ = (

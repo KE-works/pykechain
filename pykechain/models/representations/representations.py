@@ -1,6 +1,8 @@
-from pykechain.enums import (FontAwesomeMode, GeoCoordinateConfig, LinkTargets,
-                             PropertyRepresentation,
-                             SelectListRepresentations)
+from pykechain.enums import (
+    FontAwesomeMode, GeoCoordinateConfig, LinkTargets,
+    PropertyRepresentation,
+    SelectListRepresentations,
+)
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_type
 from pykechain.models.representations.representation_base import BaseRepresentation

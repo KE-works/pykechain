@@ -8,20 +8,26 @@ from tests.classes import TestBetamax
 
 class TestAttachment(TestBetamax):
     test_dict = {'a': 1, 'b': 3}
-    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/')))
+    project_root = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/'))
+    )
 
     def setUp(self):
         super().setUp()
         self.property_name = 'Plot Attachment'
 
         self.root_model = self.project.model(name='Product')
-        self.part_model = self.root_model.add_model(name='__Testing attachments', multiplicity=Multiplicity.ONE_MANY)
+        self.part_model = self.root_model.add_model(
+            name='__Testing attachments', multiplicity=Multiplicity.ONE_MANY
+        )
         self.property_model = self.part_model.add_property(
             name=self.property_name,
             property_type=PropertyType.ATTACHMENT_VALUE
         )  # type: AttachmentProperty
 
-        self.property = self.part_model.instance().property(name=self.property_name)  # type: AttachmentProperty
+        self.property = self.part_model.instance().property(
+            name=self.property_name
+        )  # type: AttachmentProperty
 
     def tearDown(self):
         self.part_model.delete()

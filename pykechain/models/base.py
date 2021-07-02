@@ -34,7 +34,10 @@ class Base:
     def __hash__(self):
         return hash(self.id)
 
-    def refresh(self, json: Optional[Dict] = None, url: Optional[str] = None, extra_params: Optional[Dict] = None):
+    def refresh(
+        self, json: Optional[Dict] = None, url: Optional[str] = None,
+        extra_params: Optional[Dict] = None
+    ):
         """Refresh the object in place.
 
         Can be called on the object without any arguments and should refresh the object inplace. If you want to

@@ -28,10 +28,12 @@ class TreeObject(BaseInScope, ABC):
         """Short-hand version of the `child` method."""
         return self.child(*args, **kwargs)
 
-    def child(self: T,
-              name: Optional[str] = None,
-              pk: Optional[str] = None,
-              **kwargs) -> T:
+    def child(
+        self: T,
+        name: Optional[str] = None,
+        pk: Optional[str] = None,
+        **kwargs
+    ) -> T:
         """
         Retrieve a child object.
 
@@ -110,9 +112,9 @@ class TreeObject(BaseInScope, ABC):
         return count
 
     def _populate_cached_children(
-            self,
-            all_descendants: List[T],
-            overwrite: Optional[bool] = False,
+        self,
+        all_descendants: List[T],
+        overwrite: Optional[bool] = False,
     ) -> None:
         """
         Fill the `_cached_children` attribute with a list of descendants.

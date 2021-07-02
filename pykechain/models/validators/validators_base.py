@@ -1,11 +1,15 @@
-from typing import Any, AnyStr, Dict, Optional, Text, Tuple, \
-    Union  # noqa: F401 # pylint: disable=unused-import
+from typing import (
+    Any, AnyStr, Dict, Optional, Tuple,
+    Union,  # noqa: F401 # pylint: disable=unused-import
+)
 
 from jsonschema import validate
 
 from pykechain.enums import PropertyVTypes, ValidatorEffectTypes
-from pykechain.models.validators.validator_schemas import effects_jsonschema_stub, \
-    validator_jsonschema_stub
+from pykechain.models.validators.validator_schemas import (
+    effects_jsonschema_stub,
+    validator_jsonschema_stub,
+)
 
 
 class BaseValidator:
@@ -81,8 +85,10 @@ class PropertyValidator(BaseValidator):
         elif isinstance(effects_json, dict):
             return ValidatorEffect.parse(effects_json)
         else:
-            raise Exception("The provided json, should be a list of valid effects, "
-                            "or a single effect. Got '{}'".format(effects_json))
+            raise Exception(
+                "The provided json, should be a list of valid effects, "
+                "or a single effect. Got '{}'".format(effects_json)
+            )
 
     @classmethod
     def parse(cls, json: Dict) -> 'PropertyValidator':

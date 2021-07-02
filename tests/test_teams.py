@@ -84,7 +84,7 @@ class TestTeams(TestBetamax):
         members = self.team.members(role=TeamRoles.MEMBER)
         self.assertTrue(len(owner) > 0)
 
-        self.assertEqual(len(all_members), len(manager)+len(owner)+len(members))
+        self.assertEqual(len(all_members), len(manager) + len(owner) + len(members))
 
     def test_retrieve_member_with_invalid_role(self):
         with self.assertRaisesRegex(IllegalArgumentError, 'must be an option from enum'):
@@ -96,7 +96,9 @@ class TestTeams(TestBetamax):
 
         self.team.add_members([a_user.id], role=TeamRoles.MEMBER)
 
-        self.assertIn(a_user.id, [member.get('pk') for member in self.team.members(role=TeamRoles.MEMBER)])
+        self.assertIn(
+            a_user.id, [member.get('pk') for member in self.team.members(role=TeamRoles.MEMBER)]
+            )
 
         self.team.remove_members([a_user.id])
 
@@ -121,8 +123,10 @@ class TestTeams(TestBetamax):
 
         obj = self.team
         for attribute in attributes:
-            self.assertTrue(hasattr(obj, attribute),
-                            f"Could not find '{attribute}' in the object: '{obj.__dict__}'")
+            self.assertTrue(
+                hasattr(obj, attribute),
+                f"Could not find '{attribute}' in the object: '{obj.__dict__}'"
+                )
 
     def test_team_edit(self):
         # setUp

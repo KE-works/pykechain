@@ -4,10 +4,12 @@
 """
 from .component import RepresentationsComponent
 from .representation_base import BaseRepresentation
-from .representations import (Autofill, ButtonRepresentation, CustomIconRepresentation,
-                              DecimalPlaces,
-                              GeoCoordinateRepresentation, LinkTarget, SignificantDigits,
-                              ThousandsSeparator)
+from .representations import (
+    Autofill, ButtonRepresentation, CustomIconRepresentation,
+    DecimalPlaces,
+    GeoCoordinateRepresentation, LinkTarget, SignificantDigits,
+    ThousandsSeparator,
+)
 
 AnyRepresentation = [
     BaseRepresentation,

@@ -51,7 +51,7 @@ class TestIsURL(SixTestCase):
         ]
         for address in addresses:
             with self.subTest(address):
-                self.assertTrue(is_url(address),  f"should be a valid address: '{address}'")
+                self.assertTrue(is_url(address), f"should be a valid address: '{address}'")
 
     def test_is_url_returns_False_on_failed_url(self):
         failed_addresses = [
@@ -133,7 +133,7 @@ class TestIsEmail(SixTestCase):
         ]
         for email in valid_addresses:
             with self.subTest(email):
-                self.assertTrue(is_valid_email(email),  f"should be a valid address: '{email}'")
+                self.assertTrue(is_valid_email(email), f"should be a valid address: '{email}'")
 
     def test_is_email_returns_false_on_invalid_url(self):
         invalid_addresses = [

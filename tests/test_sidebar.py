@@ -37,8 +37,10 @@ class TestSideBar(TestBetamax):
         manager_1 = SideBarManager(scope=self.scope)
         manager_2 = self.scope.side_bar()
 
-        self.assertTrue(manager_1 is manager_2,
-                        msg='There are 2 different manager objects while the same object is expected.')
+        self.assertTrue(
+            manager_1 is manager_2,
+            msg='There are 2 different manager objects while the same object is expected.'
+            )
 
     def test_loading_of_existing_buttons(self):
         for scope in self.client.scopes(status=ScopeStatus.ACTIVE):
@@ -76,16 +78,22 @@ class TestSideBar(TestBetamax):
             SideBarButton(self.manager, order=1, title='Button', icon='pennant', uri=44)
 
         with self.assertRaises(IllegalArgumentError):
-            SideBarButton(self.manager, order=1, title='Button', icon='pennant', uri='http://www.google.com',
-                          uri_target='any')
+            SideBarButton(
+                self.manager, order=1, title='Button', icon='pennant', uri='http://www.google.com',
+                uri_target='any'
+                )
 
         with self.assertRaises(IllegalArgumentError):
-            SideBarButton(self.manager, order=1, title='Button', icon='pennant', uri='http://www.google.com',
-                          icon_mode='best')
+            SideBarButton(
+                self.manager, order=1, title='Button', icon='pennant', uri='http://www.google.com',
+                icon_mode='best'
+                )
 
         with self.assertRaises(IllegalArgumentError):
-            SideBarButton(self.manager, order=1, title='Button', icon='pennant', uri='http://www.google.com',
-                          random='unsupported keyword')
+            SideBarButton(
+                self.manager, order=1, title='Button', icon='pennant', uri='http://www.google.com',
+                random='unsupported keyword'
+                )
 
     def test_edit_button(self):
         custom_name = "Custom Dutch name"
@@ -173,7 +181,6 @@ class TestSideBar(TestBetamax):
 
     def test_context_manager(self):
         with SideBarManager(scope=self.scope) as bulk_creation_manager:
-
             bulk_creation_manager.override_sidebar = True
 
             bulk_creation_manager.add_task_button(
@@ -190,15 +197,21 @@ class TestSideBar(TestBetamax):
                 icon='sitemap',
             )
 
-            self.assertEqual(0, len(self.scope.options['customNavigation']),
-                             msg='During bulk creation of buttons, KE-chain should not be updated yet.')
+            self.assertEqual(
+                0, len(self.scope.options['customNavigation']),
+                msg='During bulk creation of buttons, KE-chain should not be updated yet.'
+                )
 
-        self.assertEqual(3, len(self.scope.options['customNavigation']),
-                         msg='After closing the context `with`, update should be performed.')
+        self.assertEqual(
+            3, len(self.scope.options['customNavigation']),
+            msg='After closing the context `with`, update should be performed.'
+            )
 
         updated_side_bar_buttons = self.scope.options.get('customNavigation')
-        self.assertTrue(len(updated_side_bar_buttons) == 3,
-                        msg='At the end of bulk creation, the buttons must have been created.')
+        self.assertTrue(
+            len(updated_side_bar_buttons) == 3,
+            msg='At the end of bulk creation, the buttons must have been created.'
+            )
 
         self.assertTrue(self.scope.options.get('overrideSideBar'))
 

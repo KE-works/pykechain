@@ -143,4 +143,5 @@ class TestMultiSelectListProperty(SelectListBaseTests.Tests):
 
     def test_set_value_not_in_options_raises_error(self):
         with self.assertRaises(IllegalArgumentError):
-            self.select.value = ['Some illegal value that is not inside the list of options for sure']
+            self.select.value = [
+                'Some illegal value that is not inside the list of options for sure']

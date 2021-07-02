@@ -7,13 +7,25 @@ import pytest
 import pytz
 import requests
 
-from pykechain.enums import (ActivityClassification, ActivityRootNames, ActivityStatus,
-                             ActivityType, Category,
-                             Multiplicity, NotificationEvent, PaperOrientation, PaperSize,
-                             PropertyType,
-                             activity_root_name_by_classification)
-from pykechain.exceptions import (APIError, IllegalArgumentError, MultipleFoundError,
-                                  NotFoundError)
+from pykechain.enums import (
+    ActivityClassification,
+    ActivityRootNames,
+    ActivityStatus,
+    ActivityType,
+    Category,
+    Multiplicity,
+    NotificationEvent,
+    PaperOrientation,
+    PaperSize,
+    PropertyType,
+    activity_root_name_by_classification,
+)
+from pykechain.exceptions import (
+    APIError,
+    IllegalArgumentError,
+    MultipleFoundError,
+    NotFoundError,
+)
 from pykechain.models import Activity
 from pykechain.models.representations import CustomIconRepresentation
 from pykechain.utils import slugify_ref, temp_chdir
@@ -25,11 +37,11 @@ ISOFORMAT_HIGHPRECISION = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 class TestActivityConstruction(TestBetamax):
-
     def setUp(self):
         super().setUp()
         self.process = self.project.create_activity(
-            name="__Test process", activity_type=ActivityType.PROCESS,
+            name="__Test process",
+            activity_type=ActivityType.PROCESS,
         )
         self.task = None
 
@@ -93,7 +105,8 @@ class TestActivityConstruction(TestBetamax):
         )
 
         new_task = self.process.create(
-            name="__Testing task", activity_type=ActivityType.TASK,
+            name="__Testing task",
+            activity_type=ActivityType.TASK,
         )
 
         current_children = self.process.children()
@@ -133,13 +146,15 @@ class TestActivityConstruction(TestBetamax):
     def test_create_with_incorrect_classification(self):
         with self.assertRaises(IllegalArgumentError):
             self.project.create_activity(
-                name="Impossible classification", classification="Gummy bears",
+                name="Impossible classification",
+                classification="Gummy bears",
             )
 
     def test_create_with_incorrect_parent(self):
         with self.assertRaises(IllegalArgumentError):
             self.client.create_activity(
-                name="Impossible parent", parent="Darth vader",
+                name="Impossible parent",
+                parent="Darth vader",
             )
 
     def test_create_with_task_as_parent(self):
@@ -213,17 +228,22 @@ class TestActivityClone(TestBetamax):
 
     def test_parent_id(self):
         second_process = self.project.create_activity(
-            name="__Test process 2", activity_type=ActivityType.PROCESS,
+            name="__Test process 2",
+            activity_type=ActivityType.PROCESS,
         )
         self.bucket.append(second_process)
 
-        clone = self.task.clone(parent=second_process,)
+        clone = self.task.clone(
+            parent=second_process,
+        )
 
         self.assertNotEqual(self.task.parent_id, clone.parent_id)
 
     def test_update(self):
         new_name = "__TEST TASK RENAMED"
-        clone = self.task.clone(update_dict=dict(name=new_name),)
+        clone = self.task.clone(
+            update_dict=dict(name=new_name),
+        )
 
         self.assertEqual(new_name, clone.name)
 
@@ -287,7 +307,8 @@ class TestActivityCloneParts(TestBetamax):
         self.bike_model = self.project.model("Bike")
         self.bike_instance = self.bike_model.instance()
         wm.add_propertygrid_widget(
-            part_instance=self.bike_instance, all_readable=True,
+            part_instance=self.bike_instance,
+            all_readable=True,
         )
 
         # Create target parents to move to
@@ -354,12 +375,11 @@ class TestActivityCloneParts(TestBetamax):
             "Bike",
             {c.name for c in new_children},
             msg="Bike should not have been copied over. "
-            "Actually it is not copied over, it is moved to the parent_instance",
+                "Actually it is not copied over, it is moved to the parent_instance",
         )
 
 
 class TestActivities(TestBetamax):
-
     NAME = "__TEST ACTIVITY"
 
     def setUp(self):
@@ -527,35 +547,52 @@ class TestActivities(TestBetamax):
     # test added due to #847 - providing no inputs overwrites values
     def test_edit_activity_clearing_values(self):
         # setup
-        initial_name = 'Pykechain testing task'
-        initial_description = 'Task created to test editing.'
+        initial_name = "Pykechain testing task"
+        initial_description = "Task created to test editing."
         initial_start_date = datetime(2018, 12, 5, tzinfo=None)
         initial_due_date = datetime(2018, 12, 8, tzinfo=None)
-        initial_tags = ['tag_one', 'tag_two']
+        initial_tags = ["tag_one", "tag_two"]
         initial_assignee = self.client.user(username="testuser")
 
-        self.task.edit(name=initial_name, description=initial_description, tags=initial_tags,
-                       start_date=initial_start_date, due_date=initial_due_date, assignees=[initial_assignee.username])
+        self.task.edit(
+            name=initial_name,
+            description=initial_description,
+            tags=initial_tags,
+            start_date=initial_start_date,
+            due_date=initial_due_date,
+            assignees=[initial_assignee.username],
+        )
 
         # Edit without mentioning values, everything should stay the same
-        new_name = 'New name for task'
+        new_name = "New name for task"
         self.task.edit(name=new_name)
 
         # testing
         self.assertEqual(self.task.name, new_name)
         self.assertEqual(self.task.description, initial_description)
-        self.assertEqual(self.task.start_date.strftime("%Y/%m/%d, %H:%M:%S"),
-                         initial_start_date.strftime("%Y/%m/%d, %H:%M:%S"))
-        self.assertEqual(self.task.due_date.strftime("%Y/%m/%d, %H:%M:%S"),
-                         initial_due_date.strftime("%Y/%m/%d, %H:%M:%S"))
+        self.assertEqual(
+            self.task.start_date.strftime("%Y/%m/%d, %H:%M:%S"),
+            initial_start_date.strftime("%Y/%m/%d, %H:%M:%S"),
+        )
+        self.assertEqual(
+            self.task.due_date.strftime("%Y/%m/%d, %H:%M:%S"),
+            initial_due_date.strftime("%Y/%m/%d, %H:%M:%S"),
+        )
         self.assertEqual(self.task.tags, initial_tags)
 
         # Edit with clearing the values, name and status cannot be cleared
-        self.task.edit(name=None, description=None, tags=None, start_date=None, due_date=None, status=None,
-                       assignees=None)
+        self.task.edit(
+            name=None,
+            description=None,
+            tags=None,
+            start_date=None,
+            due_date=None,
+            status=None,
+            assignees=None,
+        )
         self.task.refresh()
         self.assertEqual(self.task.name, new_name)
-        self.assertEqual(self.task.description, '')
+        self.assertEqual(self.task.description, "")
         self.assertEqual(self.task.start_date, None)
         self.assertEqual(self.task.due_date, None)
         self.assertEqual(self.task.assignees, list())
@@ -638,19 +675,19 @@ class TestActivities(TestBetamax):
         ):
             self.project.create_activity(name="New", activity_type="DEFUNCTActivity")
 
-#
-# @skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
-# class TestActivitiesWIM2(TestBetamax):
-#
-#     def setUp(self):
-#         super().setUp()
-#         self.root = self.project.activity(ActivityRootNames.WORKFLOW_ROOT)
-#         self.task = self.root.create(name='test task', activity_type=ActivityType.TASK)
-#
-#     def tearDown(self):
-#         if self.task:
-#             self.task.delete()
-#         super().tearDown()
+    #
+    # @skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
+    # class TestActivitiesWIM2(TestBetamax):
+    #
+    #     def setUp(self):
+    #         super().setUp()
+    #         self.root = self.project.activity(ActivityRootNames.WORKFLOW_ROOT)
+    #         self.task = self.root.create(name='test task', activity_type=ActivityType.TASK)
+    #
+    #     def tearDown(self):
+    #         if self.task:
+    #             self.task.delete()
+    #         super().tearDown()
 
     # 2.0 new activity
     # noinspection PyTypeChecker
@@ -765,7 +802,6 @@ class TestActivities(TestBetamax):
         assignees_list = self.task.assignees
 
         self.assertSetEqual(
-
             set(list_of_assignees_in_data), {u.id for u in assignees_list}
         )
 

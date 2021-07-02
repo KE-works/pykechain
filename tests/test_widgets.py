@@ -2,27 +2,35 @@ import os
 from typing import List
 from unittest import TestCase
 
-from pykechain.enums import (ActivityClassification, ActivityStatus, ActivityType, Alignment,
-                             CardWidgetLinkTarget,
-                             CardWidgetLinkValue, Category, Classification, FilterType,
-                             ImageFitValue, KEChainPages,
-                             LinkTargets, Multiplicity, ProgressBarColors, PropertyType,
-                             ShowColumnTypes,
-                             WidgetTitleValue, WidgetTypes)
+from pykechain.enums import (
+    ActivityClassification, ActivityStatus, ActivityType, Alignment,
+    CardWidgetLinkTarget,
+    CardWidgetLinkValue, Category, Classification, FilterType,
+    ImageFitValue, KEChainPages,
+    LinkTargets, Multiplicity, ProgressBarColors, PropertyType,
+    ShowColumnTypes,
+    WidgetTitleValue, WidgetTypes,
+)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Activity, Part
-from pykechain.models.widgets import (AttachmentviewerWidget, CardWidget, FilteredgridWidget,
-                                      HtmlWidget,
-                                      MetapanelWidget, MulticolumnWidget, NotebookWidget,
-                                      PropertygridWidget,
-                                      ScopeWidget, ServiceWidget, SignatureWidget, SupergridWidget,
-                                      TasknavigationbarWidget, TasksWidget, UndefinedWidget)
-from pykechain.models.widgets.enums import (DashboardWidgetShowScopes, DashboardWidgetShowTasks,
-                                            TasksAssignmentFilterTypes)
+from pykechain.models.widgets import (
+    AttachmentviewerWidget, CardWidget, FilteredgridWidget,
+    HtmlWidget,
+    MetapanelWidget, MulticolumnWidget, NotebookWidget,
+    PropertygridWidget,
+    ScopeWidget, ServiceWidget, SignatureWidget, SupergridWidget,
+    TasknavigationbarWidget, TasksWidget, UndefinedWidget,
+)
+from pykechain.models.widgets.enums import (
+    DashboardWidgetShowScopes, DashboardWidgetShowTasks,
+    TasksAssignmentFilterTypes,
+)
 from pykechain.models.widgets.helpers import _set_title
 from pykechain.models.widgets.widget import Widget
-from pykechain.models.widgets.widget_models import DashboardWidget, ScopemembersWidget, \
-    ServicecardWidget
+from pykechain.models.widgets.widget_models import (
+    DashboardWidget, ScopemembersWidget,
+    ServicecardWidget,
+)
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import find, slugify_ref, temp_chdir
 from tests.classes import TestBetamax
@@ -71,27 +79,32 @@ class TestSetTitle(TestCase):
         title_in = 'title'
 
         meta, title = _set_title(
-            dict(), title=title_in, show_title_value=WidgetTitleValue.NO_TITLE)
+            dict(), title=title_in, show_title_value=WidgetTitleValue.NO_TITLE
+        )
 
         self.assertEqual(title_in, title)
         self.assertEqual(title_in, meta['customTitle'])
         self.assertEqual(WidgetTitleValue.NO_TITLE, meta['showTitleValue'])
 
         meta, title = _set_title(
-            dict(), title=title_in, show_title_value=WidgetTitleValue.CUSTOM_TITLE)
+            dict(), title=title_in, show_title_value=WidgetTitleValue.CUSTOM_TITLE
+        )
 
         self.assertEqual(title_in, title)
         self.assertEqual(title_in, meta['customTitle'])
         self.assertEqual(WidgetTitleValue.CUSTOM_TITLE, meta['showTitleValue'])
 
         meta, title = _set_title(
-            dict(), title=title_in, show_title_value=WidgetTitleValue.DEFAULT)
+            dict(), title=title_in, show_title_value=WidgetTitleValue.DEFAULT
+        )
 
         self.assertIsNone(title)
         self.assertIsNone(meta['customTitle'])
         self.assertEqual(WidgetTitleValue.DEFAULT, meta['showTitleValue'])
 
-        with self.assertRaises(IllegalArgumentError, msg='Unrecognized show_title_value must be caught!'):
+        with self.assertRaises(
+            IllegalArgumentError, msg='Unrecognized show_title_value must be caught!'
+            ):
             # noinspection PyTypeChecker
             _set_title(dict(), 'title', show_title_value='Maybe')
 
@@ -179,7 +192,8 @@ class TestWidgets(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             double_update = [widgets[0], widgets[0], widgets[1]]
             self.client.update_widgets(
-                widgets=[dict(id=w.id, title=f"widget {i + 1}") for i, w in enumerate(double_update)]
+                widgets=[dict(id=w.id, title=f"widget {i + 1}") for i, w in
+                         enumerate(double_update)]
             )
 
 
@@ -187,7 +201,9 @@ class TestWidgetManager(TestBetamax):
 
     def setUp(self):
         super().setUp()
-        self.wm = self.project.activity('Task - Form + Tables + Service').widgets()  # type: WidgetsManager
+        self.wm = self.project.activity(
+            'Task - Form + Tables + Service'
+            ).widgets()  # type: WidgetsManager
 
     def test_widget_manager_creation(self):
         with self.assertRaises(IllegalArgumentError):
@@ -315,7 +331,9 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertEqual(new_title, live_widget.title)
         self.assertEqual(new_title, live_widget.title_visible)
-        self.assertEqual([ShowColumnTypes.UNIT, ShowColumnTypes.DESCRIPTION], live_widget.meta["showColumns"])
+        self.assertEqual(
+            [ShowColumnTypes.UNIT, ShowColumnTypes.DESCRIPTION], live_widget.meta["showColumns"]
+            )
 
     def test_widget_title(self):
         title = 'Hidden title'
@@ -461,12 +479,16 @@ class TestWidgetManagerInActivity(TestBetamax):
         bike_part = self.project.part(name='Bike')
         picture = bike_part.property(name='Picture')
 
-        widget1 = self.wm.add_signature_widget(attachment_property=picture, title="Yes, my precious",
-                                               custom_undo_button_text="Remove za widget",
-                                               custom_button_text="Sign za widget")
-        widget2 = self.wm.add_signature_widget(attachment_property=picture, title=False,
-                                               custom_undo_button_text=False,
-                                               custom_button_text=False)
+        widget1 = self.wm.add_signature_widget(
+            attachment_property=picture, title="Yes, my precious",
+            custom_undo_button_text="Remove za widget",
+            custom_button_text="Sign za widget"
+            )
+        widget2 = self.wm.add_signature_widget(
+            attachment_property=picture, title=False,
+            custom_undo_button_text=False,
+            custom_button_text=False
+            )
         widget3 = self.wm.add_signature_widget(attachment_property=picture)
         self.assertIsInstance(widget1, SignatureWidget)
         self.assertIsInstance(widget2, SignatureWidget)
@@ -483,10 +505,14 @@ class TestWidgetManagerInActivity(TestBetamax):
         process = self.project.activities(activity_type=ActivityType.PROCESS)[0]
 
         widget1 = self.wm.add_card_widget(description='Some description')
-        widget2 = self.wm.add_card_widget(image=picture, title=False, image_fit=ImageFitValue.COVER,
-                                          link=self.task.id, link_target=LinkTargets.SAME_TAB)
-        widget3 = self.wm.add_card_widget(title='Tree view', description='Process opens in tree view',
-                                          link=process)
+        widget2 = self.wm.add_card_widget(
+            image=picture, title=False, image_fit=ImageFitValue.COVER,
+            link=self.task.id, link_target=LinkTargets.SAME_TAB
+            )
+        widget3 = self.wm.add_card_widget(
+            title='Tree view', description='Process opens in tree view',
+            link=process
+            )
 
         # testing
         self.assertEqual(len(self.wm), 1 + 3)
@@ -521,11 +547,15 @@ class TestWidgetManagerInActivity(TestBetamax):
     def test_add_card_widget_ke_chain_pages(self):
         for native_page_name in KEChainPages.values():
             with self.subTest(msg=f'Page {native_page_name}'):
-                card_widget = self.wm.add_card_widget(title=native_page_name, link=native_page_name)
+                card_widget = self.wm.add_card_widget(
+                    title=native_page_name, link=native_page_name
+                    )
                 self.assertIsInstance(card_widget, CardWidget)
 
-        self.assertEqual(len(self.wm), 9, msg='New KE-chain page has been added to the Enum, '
-                                              'check if the mapping dicts in enums.py need updating too!')
+        self.assertEqual(
+            len(self.wm), 9, msg='New KE-chain page has been added to the Enum, '
+                                 'check if the mapping dicts in enums.py need updating too!'
+            )
 
     def test_add_service_widget(self):
         service_gears_successful = self.project.service("Service Gears - Successful")
@@ -553,7 +583,9 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(service_gears_successful.name, widget1.title_visible)
 
     def test_add_html_widget(self):
-        widget_1 = self.wm.add_html_widget(html='Or is this just fantasy?', title='Is this the real life?')
+        widget_1 = self.wm.add_html_widget(
+            html='Or is this just fantasy?', title='Is this the real life?'
+            )
 
         self.assertIsInstance(widget_1, HtmlWidget)
         self.assertEqual(len(self.wm), 1 + 1)
@@ -591,8 +623,10 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(len(self.wm), 1 + 1)
 
     def test_add_progress_widget(self):
-        self.wm.add_progress_widget(custom_height=35,
-                                    show_progress_text=False)
+        self.wm.add_progress_widget(
+            custom_height=35,
+            show_progress_text=False
+            )
         self.assertEqual(len(self.wm), 1 + 1)
 
     def test_delete_all_widgets(self):
@@ -624,17 +658,20 @@ class TestWidgetManagerInActivity(TestBetamax):
         notebook = self.project.service(name="Service Gears - Successful")
         widget1 = self.wm.add_notebook_widget(
             notebook=notebook,
-            title=False)
+            title=False
+        )
 
         widget2 = self.wm.add_notebook_widget(
             notebook=notebook,
-            title="With custom title")
+            title="With custom title"
+        )
 
         widget3 = self.wm.add_notebook_widget(
             notebook=notebook.id,
             title="With no padding and custom height",
             customHeight=400,
-            noPadding=True)
+            noPadding=True
+        )
 
         self.assertIsInstance(widget1, NotebookWidget)
         self.assertIsInstance(widget2, NotebookWidget)
@@ -648,11 +685,15 @@ class TestWidgetManagerInActivity(TestBetamax):
         bike_part = self.project.part('Bike')
         picture_instance = bike_part.property('Picture')
         picture_model = picture_instance.model()
-        multi_column_widget = self.wm.add_multicolumn_widget(title="Multi column Grid + Attachment")
+        multi_column_widget = self.wm.add_multicolumn_widget(
+            title="Multi column Grid + Attachment"
+            )
 
-        widget1 = self.wm.add_propertygrid_widget(part_instance=bike_part,
-                                                  writable_models=[picture_model],
-                                                  parent_widget=multi_column_widget)
+        widget1 = self.wm.add_propertygrid_widget(
+            part_instance=bike_part,
+            writable_models=[picture_model],
+            parent_widget=multi_column_widget
+            )
 
         widget2 = self.wm.add_attachmentviewer_widget(
             attachment_property=picture_instance, parent_widget=multi_column_widget.id
@@ -667,7 +708,8 @@ class TestWidgetManagerInActivity(TestBetamax):
         multi_column_widget = self.wm.add_multicolumn_widget(title="Multi column widget")
 
         child_widget = self.wm.add_html_widget(
-            title='Text widget', html='Text', parent_widget=multi_column_widget)
+            title='Text widget', html='Text', parent_widget=multi_column_widget
+        )
 
         parent_widget = child_widget.parent()
 
@@ -738,22 +780,24 @@ class TestWidgetManagerInActivity(TestBetamax):
 
     def test_create_widgets(self):
         # setUp
-        new_widgets = self.wm.create_widgets(widgets=[
-            dict(
-                widget_type=WidgetTypes.HTML,
-                title='A new text widget',
-                meta=dict(
-                    htmlContent='This is HTML text.'
+        new_widgets = self.wm.create_widgets(
+            widgets=[
+                dict(
+                    widget_type=WidgetTypes.HTML,
+                    title='A new text widget',
+                    meta=dict(
+                        htmlContent='This is HTML text.'
+                    ),
                 ),
-            ),
-            dict(
-                widget_type=WidgetTypes.HTML,
-                title='Another HTML widget',
-                meta=dict(
-                    htmlContent='They keep on multiplying.'
+                dict(
+                    widget_type=WidgetTypes.HTML,
+                    title='Another HTML widget',
+                    meta=dict(
+                        htmlContent='They keep on multiplying.'
+                    ),
                 ),
-            ),
-        ])
+            ]
+        )
 
         # testing
         self.assertIsInstance(new_widgets, list)
@@ -805,7 +849,8 @@ class TestWidgetManagerInActivity(TestBetamax):
         widget_tagged_projects = self.wm.add_dashboard_widget(
             title=title_widget_2,
             source_scopes_tags=['catalog-scope'],
-            show_tasks=[DashboardWidgetShowTasks.UNASSIGNED_TASKS, DashboardWidgetShowTasks.CLOSED_TASKS],
+            show_tasks=[DashboardWidgetShowTasks.UNASSIGNED_TASKS,
+                        DashboardWidgetShowTasks.CLOSED_TASKS],
             show_scopes=[DashboardWidgetShowScopes.CLOSED_SCOPES],
             show_assignees=False
         )
@@ -817,11 +862,22 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(widget_current_project.title, title_widget_1)
         self.assertEqual(widget_tagged_projects.title, title_widget_2)
 
-        self.assertTrue(all(elem['selected'] for elem in widget_current_project.meta['showNumbers']))
-        self.assertTrue(all(elem['selected'] for elem in widget_current_project.meta['showNumbersProjects']))
+        self.assertTrue(
+            all(elem['selected'] for elem in widget_current_project.meta['showNumbers'])
+            )
+        self.assertTrue(
+            all(elem['selected'] for elem in widget_current_project.meta['showNumbersProjects'])
+            )
 
-        self.assertTrue(any(elem['selected'] is False for elem in widget_tagged_projects.meta['showNumbers']))
-        self.assertTrue(any(elem['selected'] is False for elem in widget_tagged_projects.meta['showNumbersProjects']))
+        self.assertTrue(
+            any(elem['selected'] is False for elem in widget_tagged_projects.meta['showNumbers'])
+            )
+        self.assertTrue(
+            any(
+                elem['selected'] is False for elem in
+                widget_tagged_projects.meta['showNumbersProjects']
+                )
+            )
 
         self.assertTrue(widget_current_project.meta['showAssignees'])
         self.assertFalse(widget_tagged_projects.meta['showAssignees'])
@@ -855,15 +911,22 @@ class TestWidgetManagerWeatherWidget(TestBetamax):
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
         self.wm = self.task.widgets()  # type: WidgetsManager
 
-        catalog_root_model = self.project.part(name='Catalog', classification=Classification.CATALOG,
-                                               category=Category.MODEL)
+        catalog_root_model = self.project.part(
+            name='Catalog', classification=Classification.CATALOG,
+            category=Category.MODEL
+            )
         self.part_model_with_weather_prop = self.project.create_model_with_properties(
             parent=catalog_root_model,
             name='___TEST PART', multiplicity=Multiplicity.ONE,
             properties_fvalues=[
-                dict(name='weather',
-                     property_type=PropertyType.WEATHER_VALUE)])
-        self.weather_prop_instance = self.part_model_with_weather_prop.instances()[0].property('weather')
+                dict(
+                    name='weather',
+                    property_type=PropertyType.WEATHER_VALUE
+                    )]
+        )
+        self.weather_prop_instance = self.part_model_with_weather_prop.instances()[0].property(
+            'weather'
+            )
 
     def tearDown(self):
         self.weather_widget.delete()
@@ -980,8 +1043,10 @@ class TestWidgetsCopyMove(TestBetamax):
         title = "Widget to copy"
         bike_part = self.project.part('Bike')
         widget_manager = self.task.widgets()  # type: WidgetsManager
-        widget_1 = widget_manager.add_propertygrid_widget(part_instance=bike_part, all_writable=True,
-                                                          title=title)
+        widget_1 = widget_manager.add_propertygrid_widget(
+            part_instance=bike_part, all_writable=True,
+            title=title
+            )
         widget_1.copy(target_activity=self.task_2, order=0)
         widget_manager_2 = self.task_2.widgets()  # type: WidgetsManager
         associated_model = widget_manager_2[0].parts(category=Category.MODEL)[0]
@@ -997,8 +1062,10 @@ class TestWidgetsCopyMove(TestBetamax):
         title = "Widget to copy"
         bike_part = self.project.part('Bike')
         self.wm = self.task.widgets()  # type: WidgetsManager
-        widget_1 = self.wm.add_propertygrid_widget(part_instance=bike_part, all_writable=True,
-                                                   title=title)
+        widget_1 = self.wm.add_propertygrid_widget(
+            part_instance=bike_part, all_writable=True,
+            title=title
+            )
 
         # testing
         with self.assertRaises(IllegalArgumentError):
@@ -1009,8 +1076,10 @@ class TestWidgetsCopyMove(TestBetamax):
         title = "Widget to move"
         bike_part = self.project.part('Bike')
         widget_manager = self.task.widgets()  # type: WidgetsManager
-        widget_1 = widget_manager.add_propertygrid_widget(part_instance=bike_part, all_writable=True,
-                                                          title=title)
+        widget_1 = widget_manager.add_propertygrid_widget(
+            part_instance=bike_part, all_writable=True,
+            title=title
+            )
         widget_1.move(target_activity=self.task_2, order=0)
         widget_manager_2 = self.task_2.widgets()  # type: WidgetsManager
         associated_model = widget_manager_2[0].parts(category=Category.MODEL)[0]
@@ -1039,7 +1108,6 @@ class TestWidgetDownloadAsExcel(TestBetamax):
         file_name = "My excel file"
 
         with temp_chdir() as target_dir:
-
             path = self.grid_widget.download_as_excel(
                 target_dir=target_dir,
                 file_name=file_name,

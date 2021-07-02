@@ -7,13 +7,17 @@ from urllib.parse import urljoin
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS, ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT
-from pykechain.enums import ActivityClassification, ActivityRootNames, ActivityStatus, \
-    ActivityType, Category, \
-    PaperOrientation, PaperSize
+from pykechain.enums import (
+    ActivityClassification, ActivityRootNames, ActivityStatus,
+    ActivityType, Category,
+    PaperOrientation, PaperSize,
+)
 from pykechain.exceptions import APIError, IllegalArgumentError, MultipleFoundError, NotFoundError
-from pykechain.models.input_checks import check_base, check_datetime, check_enum, \
-    check_list_of_text, check_text, \
-    check_type, check_user
+from pykechain.models.input_checks import (
+    check_base, check_datetime, check_enum,
+    check_list_of_text, check_text,
+    check_type, check_user,
+)
 from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
@@ -67,8 +71,10 @@ class Activity(TreeObject, TagsMixin):
 
     def refresh(self, *args, **kwargs):
         """Refresh the object in place."""
-        super().refresh(url=self._client._build_url('activity', activity_id=self.id),
-                        extra_params=API_EXTRA_PARAMS['activity'], *args, **kwargs)
+        super().refresh(
+            url=self._client._build_url('activity', activity_id=self.id),
+            extra_params=API_EXTRA_PARAMS['activity'], *args, **kwargs
+        )
 
     #
     # additional properties
@@ -82,8 +88,10 @@ class Activity(TreeObject, TagsMixin):
 
         :return: a list of `User` objects or an empty list.
         """
-        return self._client.users(id__in=self.assignees_ids,
-                                  is_hidden=False) if self.assignees_ids else []
+        return self._client.users(
+            id__in=self.assignees_ids,
+            is_hidden=False
+        ) if self.assignees_ids else []
 
     @property
     def scope_id(self):
@@ -271,7 +279,8 @@ class Activity(TreeObject, TagsMixin):
         """
         if self.parent_id is None:
             raise NotFoundError(
-                f"Cannot find parent for task '{self}', as this task exist on top level.")
+                f"Cannot find parent for task '{self}', as this task exist on top level."
+            )
         elif self._parent is None:
             self._parent = self._client.activity(pk=self.parent_id, scope=self.scope_id)
         return self._parent
@@ -300,21 +309,26 @@ class Activity(TreeObject, TagsMixin):
         if self.activity_type != ActivityType.PROCESS:
             raise NotFoundError(
                 "Only subprocesses can have children, please choose a subprocess instead of a '{}' "
-                "(activity '{}')".format(self.activity_type, self.name))
+                "(activity '{}')".format(self.activity_type, self.name)
+            )
         if not kwargs:
             if self._cached_children is None:
-                self._cached_children = self._client.activities(parent_id=self.id,
-                                                                scope=self.scope_id, **kwargs)
+                self._cached_children = self._client.activities(
+                    parent_id=self.id,
+                    scope=self.scope_id, **kwargs
+                )
                 for child in self._cached_children:
                     child._parent = self
             return self._cached_children
         else:
             return self._client.activities(parent_id=self.id, scope=self.scope_id, **kwargs)
 
-    def child(self,
-              name: Optional[str] = None,
-              pk: Optional[str] = None,
-              **kwargs) -> 'Activity':
+    def child(
+        self,
+        name: Optional[str] = None,
+        pk: Optional[str] = None,
+        **kwargs
+    ) -> 'Activity':
         """
         Retrieve a child object.
 
@@ -375,7 +389,8 @@ class Activity(TreeObject, TagsMixin):
         """
         if self.parent_id is None:
             raise NotFoundError(
-                f"Cannot find siblings for task '{self}', as this task exist on top level.")
+                f"Cannot find siblings for task '{self}', as this task exist on top level."
+            )
         return self._client.activities(parent_id=self.parent_id, scope=self.scope_id, **kwargs)
 
     def all_children(self) -> List['Activity']:
@@ -398,7 +413,8 @@ class Activity(TreeObject, TagsMixin):
         """
         if self.activity_type != ActivityType.PROCESS:
             raise IllegalArgumentError(
-                f"You can only count the number of children of an Activity of type {ActivityType.PROCESS}")
+                f"You can only count the number of children of an Activity of type {ActivityType.PROCESS}"
+            )
 
         return super().count_children(method="activities", **kwargs)
 
@@ -483,7 +499,8 @@ class Activity(TreeObject, TagsMixin):
                 # Append the existing assignees of the task to the new assignees
                 existing_assignees = [u.id for u in task.assignees]
                 task_specific_update_dict['assignees_ids'] = list(
-                    set(existing_assignees + new_assignees))
+                    set(existing_assignees + new_assignees)
+                )
 
             task_specific_update_dict.update({'id': task.id})
             data.append(task_specific_update_dict)
@@ -578,8 +595,10 @@ class Activity(TreeObject, TagsMixin):
 
         url = self._client._build_url('activity', activity_id=self.id)
 
-        response = self._client._request('PUT', url, json=update_dict,
-                                         params=API_EXTRA_PARAMS['activity'])
+        response = self._client._request(
+            'PUT', url, json=update_dict,
+            params=API_EXTRA_PARAMS['activity']
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError(f"Could not update Activity {self}", response=response)
@@ -597,11 +616,13 @@ class Activity(TreeObject, TagsMixin):
         **kwargs
     ) -> Dict:
         """Verify inputs provided in both the `clone`, `edit` and `edit_cascade_down` methods."""
-        update_dict.update({
-            'start_date': check_datetime(dt=start_date, key='start_date'),
-            'due_date': check_datetime(dt=due_date, key='due_date'),
-            'status': check_enum(status, ActivityStatus, 'status') or self.status
-        })
+        update_dict.update(
+            {
+                'start_date': check_datetime(dt=start_date, key='start_date'),
+                'due_date': check_datetime(dt=due_date, key='due_date'),
+                'status': check_enum(status, ActivityStatus, 'status') or self.status
+            }
+        )
 
         # If both are empty that means the user is not interested in changing them
         if isinstance(assignees_ids, Empty) and isinstance(assignees, Empty):
@@ -613,22 +634,27 @@ class Activity(TreeObject, TagsMixin):
 
         # In case both of them have values specified, then an Error is raised
         elif assignees and assignees_ids and not isinstance(assignees, Empty) and not isinstance(
-                assignees_ids, Empty):
+            assignees_ids, Empty
+        ):
             raise IllegalArgumentError('Provide either assignee names or their ids, but not both.')
         # Otherwise, pick the one that has a value specified which is not Empty
         else:
-            assignees = assignees if assignees is not None and not isinstance(assignees,
-                                                                              Empty) else assignees_ids
+            assignees = assignees if assignees is not None and not isinstance(
+                assignees,
+                Empty
+            ) else assignees_ids
 
             if assignees:
                 if not isinstance(assignees, (list, tuple, set)) or \
                         not all(isinstance(a, (str, int)) for a in assignees):
                     raise IllegalArgumentError(
-                        'All assignees must be provided as list, tuple or set of names or IDs.')
+                        'All assignees must be provided as list, tuple or set of names or IDs.'
+                    )
 
                 update_assignees_ids = [m.get('id') for m in self.scope.members()
                                         if m.get('id') in assignees or m.get('username') in set(
-                    assignees)]
+                    assignees
+                )]
 
                 if len(update_assignees_ids) != len(assignees):
                     raise NotFoundError('All assignees should be a member of the project.')
@@ -648,8 +674,10 @@ class Activity(TreeObject, TagsMixin):
         :return: True when successful
         :raises APIError: when unable to delete the activity
         """
-        response = self._client._request('DELETE',
-                                         self._client._build_url('activity', activity_id=self.id))
+        response = self._client._request(
+            'DELETE',
+            self._client._build_url('activity', activity_id=self.id)
+        )
 
         if response.status_code != requests.codes.no_content:
             raise APIError(f"Could not delete Activity {self}.", response=response)
@@ -748,8 +776,10 @@ class Activity(TreeObject, TagsMixin):
         response = self._client._request('GET', url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError(f"Could not retrieve Associations on Activity {self}",
-                                response=response)
+            raise NotFoundError(
+                f"Could not retrieve Associations on Activity {self}",
+                response=response
+            )
 
         data = response.json()
         return data['results']
@@ -846,8 +876,10 @@ class Activity(TreeObject, TagsMixin):
                 count += ASYNC_REFRESH_INTERVAL
                 time.sleep(ASYNC_REFRESH_INTERVAL)
 
-            raise APIError("Could not download PDF of Activity {} within the time-out limit of {} "
-                           "seconds".format(self, ASYNC_TIMEOUT_LIMIT), response=response)
+            raise APIError(
+                "Could not download PDF of Activity {} within the time-out limit of {} "
+                "seconds".format(self, ASYNC_TIMEOUT_LIMIT), response=response
+            )
 
         with open(full_path, 'wb') as f:
             for chunk in response.iter_content(1024):
@@ -874,11 +906,12 @@ class Activity(TreeObject, TagsMixin):
         return self._client.move_activity(self, parent, classification=classification)
 
     def share_link(
-            self,
-            subject: str,
-            message: str,
-            recipient_users: List[Union[User, str]],
-            from_user: Optional[User] = None) -> None:
+        self,
+        subject: str,
+        message: str,
+        recipient_users: List[Union[User, str]],
+        from_user: Optional[User] = None
+    ) -> None:
         """
         Share the link of the `Activity` through email.
 
@@ -945,7 +978,8 @@ class Activity(TreeObject, TagsMixin):
         recipient_emails = list()
         recipient_users_ids = list()
         if isinstance(recipient_users, list) and all(
-                isinstance(r, (str, int, User)) for r in recipient_users):
+            isinstance(r, (str, int, User)) for r in recipient_users
+        ):
             for user in recipient_users:
                 if is_valid_email(user):
                     recipient_emails.append(user)
@@ -954,7 +988,8 @@ class Activity(TreeObject, TagsMixin):
         else:
             raise IllegalArgumentError(
                 '`recipients` must be a list of User objects, IDs or email addresses, '
-                '"{}" ({}) is not.'.format(recipient_users, type(recipient_users)))
+                '"{}" ({}) is not.'.format(recipient_users, type(recipient_users))
+            )
 
         params = dict(
             message=check_text(message, "message"),
@@ -1032,7 +1067,8 @@ class Activity(TreeObject, TagsMixin):
         """
         if not context.__class__.__name__ == 'Context':
             raise IllegalArgumentError(
-                f"`context` should be a proper Context object. Got: {context}")
+                f"`context` should be a proper Context object. Got: {context}"
+            )
         context.link_activities(activities=[self])
         self.refresh()
 
@@ -1047,6 +1083,7 @@ class Activity(TreeObject, TagsMixin):
         """
         if not context.__class__.__name__ == 'Context':
             raise IllegalArgumentError(
-                f"`context` should be a proper Context object. Got: {context}")
+                f"`context` should be a proper Context object. Got: {context}"
+            )
         context.unlink_activities(activities=[self])
         self.refresh()

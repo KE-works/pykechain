@@ -72,21 +72,29 @@ class TestContexts(TestContextSetup):
 
     def test_link_context_to_activity(self):
         self.assertFalse(self.context.activities)
-        self.context.link_activities(activities=[self.project.activity(name="Specify wheel diameter")])
+        self.context.link_activities(
+            activities=[self.project.activity(name="Specify wheel diameter")]
+            )
         self.assertTrue(self.context.activities)
 
     def test_context_consequetive_link_many_activities(self):
         self.assertFalse(self.context.activities)
-        self.context.link_activities(activities=[self.project.activity(name="Specify wheel diameter")])
+        self.context.link_activities(
+            activities=[self.project.activity(name="Specify wheel diameter")]
+            )
         self.assertEqual(len(self.context.activities), 1)
         self.context.link_activities(activities=[self.project.activity(name="Task - Form")])
         self.assertEqual(len(self.context.activities), 2)
 
     def test_unlink_context_to_activity(self):
         self.assertFalse(self.context.activities)
-        self.context.link_activities(activities=[self.project.activity(name="Specify wheel diameter")])
+        self.context.link_activities(
+            activities=[self.project.activity(name="Specify wheel diameter")]
+            )
         self.assertTrue(self.context.activities)
-        self.context.unlink_activities(activities=[self.project.activity(name="Specify wheel diameter")])
+        self.context.unlink_activities(
+            activities=[self.project.activity(name="Specify wheel diameter")]
+            )
         self.assertFalse(self.context.activities)
 
     def test_context_unlink_single_activity_when_more_activities(self):
@@ -98,6 +106,10 @@ class TestContexts(TestContextSetup):
             ]
         )
         self.assertEqual(len(self.context.activities), 2)
-        self.context.unlink_activities(activities=[self.project.activity(name="Specify wheel diameter")])
+        self.context.unlink_activities(
+            activities=[self.project.activity(name="Specify wheel diameter")]
+            )
         self.assertEqual(len(self.context.activities), 1)
-        self.assertListEqual(list(self.context.activities), [self.project.activity(name="Task - Form").id])
+        self.assertListEqual(
+            list(self.context.activities), [self.project.activity(name="Task - Form").id]
+            )

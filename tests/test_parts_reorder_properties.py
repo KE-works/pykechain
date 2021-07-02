@@ -9,7 +9,9 @@ class TestPartsReorderProperties(TestBetamax):
         front_fork_model = self.project.model('Front Fork')
 
         # Sort the properties of the front fork model based on their original order
-        original_sorted_list_of_props = sorted(front_fork_model.properties, key=lambda k: k._json_data['order'])
+        original_sorted_list_of_props = sorted(
+            front_fork_model.properties, key=lambda k: k._json_data['order']
+            )
 
         # Make a new list with only the names of the properties sorted by order. This will later be used to
         # reverse the order to the initial status
@@ -25,7 +27,9 @@ class TestPartsReorderProperties(TestBetamax):
         front_fork_model = self.project.model('Front Fork')
 
         # Do the same steps as above. This will be used to check whether the action performed correctly.
-        new_sorted_list_of_props = sorted(front_fork_model.properties, key=lambda k: k._json_data['order'])
+        new_sorted_list_of_props = sorted(
+            front_fork_model.properties, key=lambda k: k._json_data['order']
+            )
         new_list_of_prop_names = [prop.name for prop in new_sorted_list_of_props]
 
         # Check the new list with the desired one
@@ -39,7 +43,9 @@ class TestPartsReorderProperties(TestBetamax):
         front_fork_model = self.project.model('Front Fork')
 
         # Sort the properties of the front fork model based on their original order
-        original_sorted_list_of_props = sorted(front_fork_model.properties, key=lambda k: k._json_data['order'])
+        original_sorted_list_of_props = sorted(
+            front_fork_model.properties, key=lambda k: k._json_data['order']
+            )
 
         # Instantiate the list that will be used to reorder the properties
         desired_order_list = [front_fork_model.property('Material'),
@@ -54,7 +60,9 @@ class TestPartsReorderProperties(TestBetamax):
 
         # Create a list of property id's, after the properties have been sorted.
         # This will be used to check whether the action performed correctly.
-        new_sorted_list_of_props = sorted(front_fork_model.properties, key=lambda k: k._json_data['order'])
+        new_sorted_list_of_props = sorted(
+            front_fork_model.properties, key=lambda k: k._json_data['order']
+            )
         new_list_of_prop_ids = [prop.id for prop in new_sorted_list_of_props]
 
         # Create a list of property id's, based on the desired order.

@@ -87,8 +87,10 @@ class _SelectListProperty(Property):
         if not isinstance(options_list, list):
             raise IllegalArgumentError("The list of options should be a list")
         if self._json_data.get('category') != Category.MODEL:
-            raise IllegalArgumentError("We can only update the options list of the model of this property. The "
-                                       "model of this property has id '{}'".format(self._json_data.get('model')))
+            raise IllegalArgumentError(
+                "We can only update the options list of the model of this property. The "
+                "model of this property has id '{}'".format(self._json_data.get('model'))
+            )
 
         # stringify the options list
         options_list = list(map(str, options_list))
@@ -134,8 +136,10 @@ class SelectListProperty(_SelectListProperty):
 
     def _check_new_value(self, value: Any):
         if value not in self.options:
-            raise IllegalArgumentError('The new value "{}" of the Property should be in the list of options:'
-                                       '\n{}'.format(value, self.options))
+            raise IllegalArgumentError(
+                'The new value "{}" of the Property should be in the list of options:'
+                '\n{}'.format(value, self.options)
+            )
 
 
 class MultiSelectListProperty(_SelectListProperty):
@@ -143,8 +147,12 @@ class MultiSelectListProperty(_SelectListProperty):
 
     def _check_new_value(self, value: Iterable[Any]):
         if not isinstance(value, (list, tuple)):
-            raise IllegalArgumentError(f'The new values must be provided as a list or tuple, "{value}" is not.')
+            raise IllegalArgumentError(
+                f'The new values must be provided as a list or tuple, "{value}" is not.'
+            )
 
         if not all(v in self.options for v in value):
-            raise IllegalArgumentError('The new values "{}" of the Property should be in the list of options:'
-                                       '\n{}'.format(value, self.options))
+            raise IllegalArgumentError(
+                'The new values "{}" of the Property should be in the list of options:'
+                '\n{}'.format(value, self.options)
+            )

@@ -76,14 +76,22 @@ class Widget(BaseInScope):
         elif show_title_value == WidgetTitleValue.DEFAULT:
             try:
                 if self.widget_type == WidgetTypes.PROPERTYGRID:
-                    return self._client.part(pk=self.meta.get(AssociatedObjectId.PART_INSTANCE_ID)).name
+                    return self._client.part(
+                        pk=self.meta.get(AssociatedObjectId.PART_INSTANCE_ID)
+                    ).name
                 elif self.widget_type in [WidgetTypes.FILTEREDGRID, WidgetTypes.SUPERGRID]:
-                    return self._client.part(pk=self.meta.get(AssociatedObjectId.PART_MODEL_ID), category=None).name
+                    return self._client.part(
+                        pk=self.meta.get(AssociatedObjectId.PART_MODEL_ID), category=None
+                    ).name
                 elif self.widget_type in [WidgetTypes.SERVICE, WidgetTypes.NOTEBOOK]:
-                    return self._client.service(pk=self.meta.get(AssociatedObjectId.SERVICE_ID)).name
+                    return self._client.service(
+                        pk=self.meta.get(AssociatedObjectId.SERVICE_ID)
+                    ).name
                 elif self.widget_type in [WidgetTypes.ATTACHMENTVIEWER, WidgetTypes.SIGNATURE]:
-                    return self._client.property(pk=self.meta.get(AssociatedObjectId.PROPERTY_INSTANCE_ID),
-                                                 category=None).name
+                    return self._client.property(
+                        pk=self.meta.get(AssociatedObjectId.PROPERTY_INSTANCE_ID),
+                        category=None
+                    ).name
                 elif self.widget_type == WidgetTypes.CARD:
                     return self.scope.name
                 else:
@@ -133,6 +141,7 @@ class Widget(BaseInScope):
         :param json: the json from which the :class:`Widget` object to create
         :return: a :class:`Widget` object
         """
+
         def _type_to_classname(type_widget: str):
             """
             Generate corresponding inner classname based on the widget type.
@@ -149,10 +158,16 @@ class Widget(BaseInScope):
         import importlib
         all_widgets = importlib.import_module("pykechain.models.widgets")
         if hasattr(all_widgets, _type_to_classname(widget_type)):
-            return getattr(all_widgets, _type_to_classname(widget_type))(json, client=kwargs.pop('client'), **kwargs)
+            return getattr(all_widgets, _type_to_classname(widget_type))(
+                json, client=kwargs.pop(
+                    'client'
+                ), **kwargs
+            )
         else:
-            return getattr(all_widgets, _type_to_classname(WidgetTypes.UNDEFINED))(json, client=kwargs.pop('client'),
-                                                                                   **kwargs)
+            return getattr(all_widgets, _type_to_classname(WidgetTypes.UNDEFINED))(
+                json, client=kwargs.pop('client'),
+                **kwargs
+            )
 
         #
         # Searchers and retrievers
@@ -200,12 +215,12 @@ class Widget(BaseInScope):
     #
 
     def update_associations(
-            self,
-            readable_models: Optional[List] = None,
-            writable_models: Optional[List] = None,
-            part_instance: Optional[Union['Part', str]] = None,
-            parent_part_instance: Optional[Union['Part', str]] = None,
-            **kwargs
+        self,
+        readable_models: Optional[List] = None,
+        writable_models: Optional[List] = None,
+        part_instance: Optional[Union['Part', str]] = None,
+        parent_part_instance: Optional[Union['Part', str]] = None,
+        **kwargs
     ) -> None:
         """
         Update associations on this widget.
@@ -236,12 +251,12 @@ class Widget(BaseInScope):
         )
 
     def set_associations(
-            self,
-            readable_models: Optional[List] = None,
-            writable_models: Optional[List] = None,
-            part_instance: Optional[Union['Part', str]] = None,
-            parent_part_instance: Optional[Union['Part', str]] = None,
-            **kwargs
+        self,
+        readable_models: Optional[List] = None,
+        writable_models: Optional[List] = None,
+        part_instance: Optional[Union['Part', str]] = None,
+        parent_part_instance: Optional[Union['Part', str]] = None,
+        **kwargs
     ) -> None:
         """
         Set associations on this widget.
@@ -272,9 +287,9 @@ class Widget(BaseInScope):
         )
 
     def remove_associations(
-            self,
-            models: List[Union['Property', str]],
-            **kwargs
+        self,
+        models: List[Union['Property', str]],
+        **kwargs
     ) -> None:
         """
         Remove associated properties from the widget.
@@ -289,10 +304,10 @@ class Widget(BaseInScope):
         )
 
     def edit(
-            self,
-            title: Union[TITLE_TYPING, Empty] = empty,
-            meta: Optional[Dict] = None,
-            **kwargs
+        self,
+        title: Union[TITLE_TYPING, Empty] = empty,
+        meta: Optional[Dict] = None,
+        **kwargs
     ) -> None:
         """Edit the details of a widget.
 
@@ -317,7 +332,9 @@ class Widget(BaseInScope):
             update_dict.update(**kwargs)
 
         url = self._client._build_url('widget', widget_id=self.id)
-        response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['widgets'], json=update_dict)
+        response = self._client._request(
+            'PUT', url, params=API_EXTRA_PARAMS['widgets'], json=update_dict
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError(f"Could not update Widget {self}", response=response)
@@ -352,8 +369,11 @@ class Widget(BaseInScope):
         """
         from pykechain.models import Activity
         if not isinstance(target_activity, Activity):
-            raise IllegalArgumentError("`target_activity` needs to be an activity, got '{}'".format(
-                type(target_activity)))
+            raise IllegalArgumentError(
+                "`target_activity` needs to be an activity, got '{}'".format(
+                    type(target_activity)
+                )
+            )
 
         # Retrieve the widget manager of the target activity
         widget_manager = target_activity.widgets()
@@ -369,9 +389,11 @@ class Widget(BaseInScope):
                 readable_models.append(associated_property)
 
         # Create a perfect copy of the widget
-        copied_widget = widget_manager.create_widget(meta=self.meta, widget_type=self.widget_type, title=self.title,
-                                                     writable_models=writable_models, readable_models=readable_models,
-                                                     order=order)
+        copied_widget = widget_manager.create_widget(
+            meta=self.meta, widget_type=self.widget_type, title=self.title,
+            writable_models=writable_models, readable_models=readable_models,
+            order=order
+        )
 
         return copied_widget
 
@@ -392,10 +414,10 @@ class Widget(BaseInScope):
 
     @staticmethod
     def _validate_excel_export_inputs(
-            target_dir: str,
-            file_name: str,
-            user: 'User',
-            default_file_name: Callable,
+        target_dir: str,
+        file_name: str,
+        user: 'User',
+        default_file_name: Callable,
     ) -> Tuple[
         str, str, 'User'
     ]:
@@ -424,10 +446,10 @@ class Widget(BaseInScope):
         return target_dir, file_name, user
 
     def download_as_excel(
-            self,
-            target_dir: Optional[str] = None,
-            file_name: Optional[str] = None,
-            user: 'User' = None,
+        self,
+        target_dir: Optional[str] = None,
+        file_name: Optional[str] = None,
+        user: 'User' = None,
     ) -> str:
         """
         Export a grid widget as an Excel sheet.
@@ -440,7 +462,8 @@ class Widget(BaseInScope):
         grid_widgets = {WidgetTypes.SUPERGRID, WidgetTypes.FILTEREDGRID}
         if self.widget_type not in grid_widgets:
             raise IllegalArgumentError(
-                f"Only widgets of type {grid_widgets} can be exported to Excel, `{self.widget_type}` is not.")
+                f"Only widgets of type {grid_widgets} can be exported to Excel, `{self.widget_type}` is not."
+            )
 
         part_model_id = self.meta.get("partModelId")
         parent_instance_id = self.meta.get("parentInstanceId")
@@ -448,7 +471,9 @@ class Widget(BaseInScope):
         def default_file_name():
             return self._client.model(pk=part_model_id).name if file_name is None else ''
 
-        target_dir, file_name, user = self._validate_excel_export_inputs(target_dir, file_name, user, default_file_name)
+        target_dir, file_name, user = self._validate_excel_export_inputs(
+            target_dir, file_name, user, default_file_name
+        )
 
         json = dict(
             model_id=part_model_id,

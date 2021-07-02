@@ -47,7 +47,9 @@ class Notification(Base):
     def get_recipient_users(self) -> List['User']:
         """Return the list of actual `User` objects based on recipient_users_ids."""
         if self._recipient_users is None:
-            self._recipient_users = self._client.users(id__in=','.join([str(pk) for pk in self.recipient_user_ids]))
+            self._recipient_users = self._client.users(
+                id__in=','.join([str(pk) for pk in self.recipient_user_ids])
+            )
         return self._recipient_users
 
     def get_from_user(self) -> 'User':
@@ -67,16 +69,16 @@ class Notification(Base):
         return self._client.delete_notification(notification=self)
 
     def edit(
-            self,
-            subject: Optional[Union[str, Empty]] = empty,
-            message: Optional[Union[str, Empty]] = empty,
-            status: Optional[Union[NotificationStatus, Empty]] = empty,
-            recipients: Optional[Union[List[Union['User', str, int]], Empty]] = empty,
-            team: Optional[Union['Team', str, Empty]] = empty,
-            from_user: Optional[Union['User', str, Empty]] = empty,
-            event: Optional[Union[NotificationEvent, Empty]] = empty,
-            channel: Optional[Union[NotificationChannels, Empty]] = empty,
-            **kwargs
+        self,
+        subject: Optional[Union[str, Empty]] = empty,
+        message: Optional[Union[str, Empty]] = empty,
+        status: Optional[Union[NotificationStatus, Empty]] = empty,
+        recipients: Optional[Union[List[Union['User', str, int]], Empty]] = empty,
+        team: Optional[Union['Team', str, Empty]] = empty,
+        from_user: Optional[Union['User', str, Empty]] = empty,
+        event: Optional[Union[NotificationEvent, Empty]] = empty,
+        channel: Optional[Union[NotificationChannels, Empty]] = empty,
+        **kwargs
     ) -> None:
         """
         Update the current `Notification` attributes.
@@ -108,7 +110,9 @@ class Notification(Base):
         recipient_emails = list()
 
         if recipients is not None:
-            if isinstance(recipients, list) and all(isinstance(r, (str, int, User)) for r in recipients):
+            if isinstance(recipients, list) and all(
+                isinstance(r, (str, int, User)) for r in recipients
+            ):
                 for recipient in recipients:
                     if is_valid_email(recipient):
                         recipient_emails.append(recipient)
@@ -118,8 +122,10 @@ class Notification(Base):
                 recipient_emails = empty
                 recipient_users = empty
             else:
-                raise IllegalArgumentError('`recipients` must be a list of User objects, IDs or email addresses, '
-                                           '"{}" ({}) is not.'.format(recipients, type(recipients)))
+                raise IllegalArgumentError(
+                    '`recipients` must be a list of User objects, IDs or email addresses, '
+                    '"{}" ({}) is not.'.format(recipients, type(recipients))
+                )
 
         if isinstance(channel, Empty):
             channels = empty
