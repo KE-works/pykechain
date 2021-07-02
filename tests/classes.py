@@ -8,7 +8,7 @@ from betamax import Betamax
 
 if six.PY2:
     from test.test_support import EnvironmentVarGuard
-elif six.PY3:
+else:
     from test.support import EnvironmentVarGuard
 
 from pykechain import Client
@@ -22,16 +22,10 @@ with Betamax.configure() as config:
 
 class SixTestCase(TestCase):
     def assertRaisesRegex(self, expected_exception, expected_regex, *args, **kwargs):
-        if six.PY2:
-            return self.assertRaisesRegexp(expected_exception, expected_regex, *args, **kwargs)
-        else:
-            return super().assertRaisesRegex(expected_exception, expected_regex, *args, **kwargs)
+        return super().assertRaisesRegex(expected_exception, expected_regex, *args, **kwargs)
 
     def assertRegex(self, text, expected_regex, *args, **kwargs):
-        if six.PY2:
-            return self.assertRegexpMatches(text, expected_regex, *args, **kwargs)
-        else:
-            return super().assertRegex(text, expected_regex, *args, **kwargs)
+        return super().assertRegex(text, expected_regex, *args, **kwargs)
 
 
 class TestBetamax(SixTestCase):
@@ -41,7 +35,7 @@ class TestBetamax(SixTestCase):
     @property
     def cassette_name(self):
         test = self._testMethodName
-        return '{0}.{1}'.format(self.__class__.__name__, test)
+        return f'{self.__class__.__name__}.{test}'
 
     def setUp(self):
         # use self.env.set('var', 'value') and with self.env: ... to use custom environmental variables

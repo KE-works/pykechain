@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Text, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -43,7 +43,8 @@ from pykechain.exceptions import (
     MultipleFoundError,
     NotFoundError
 )
-from pykechain.models import Activity, AnyProperty, Base, Part, PartSet, Property, Scope, Service, ServiceExecution
+from pykechain.models import Activity, AnyProperty, Base, Part, PartSet, Property, Scope, Service, \
+    ServiceExecution
 from pykechain.models.association import Association
 from pykechain.models.notification import Notification
 from pykechain.models.team import Team
@@ -71,7 +72,7 @@ from .models.input_checks import (
 from .typing import ObjectID
 
 
-class Client(object):
+class Client:
     """The KE-chain python client to connect to a KE-chain instance.
 
     :ivar last_request: last executed request. Which is of type `requests.Request`_
@@ -82,13 +83,11 @@ class Client(object):
     .. _requests.Response: http://docs.python-requests.org/en/master/api/#requests.Response
     """
 
-    def __init__(self, url: Text = 'http://localhost:8000/', check_certificates: Optional[bool] = None) -> None:
+    def __init__(self, url: str = 'http://localhost:8000/', check_certificates: Optional[bool] = None) -> None:
         """Create a KE-chain client with given settings.
 
         :param url: the url of the KE-chain instance to connect to (defaults to http://localhost:8000)
-        :type url: basestring
         :param check_certificates: if to check TLS/SSL Certificates. Defaults to True
-        :type check_certificates: bool
 
         Examples
         --------
@@ -110,12 +109,12 @@ class Client(object):
             raise ClientError("Please provide a valid URL to a KE-chain instance")
 
         self.api_root = url
-        self.headers: Dict[Text, Text] = {'X-Requested-With': 'XMLHttpRequest',
-                                          'PyKechain-Version': pykechain_version}
-        self.auth: Optional[Tuple[Text, Text]] = None
+        self.headers: Dict[str, str] = {'X-Requested-With': 'XMLHttpRequest',
+                                        'PyKechain-Version': pykechain_version}
+        self.auth: Optional[Tuple[str, str]] = None
         self.last_request: Optional[requests.PreparedRequest] = None
         self.last_response: Optional[requests.Response] = None
-        self.last_url: Optional[Text] = None
+        self.last_url: Optional[str] = None
         self._app_versions: Optional[List[Dict]] = None
         self._widget_schemas: Optional[List[Dict]] = None
 
@@ -144,17 +143,15 @@ class Client(object):
         del self.headers
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke Client '{}'>".format(self.api_root)
+        return f"<pyke Client '{self.api_root}'>"
 
     @classmethod
-    def from_env(cls, env_filename: Optional[Text] = None, check_certificates: Optional[bool] = None) -> 'Client':
+    def from_env(cls, env_filename: Optional[str] = None, check_certificates: Optional[bool] = None) -> 'Client':
         """Create a client from environment variable settings.
 
         :param env_filename: filename of the environment file, defaults to '.env' in the local dir
                                         (or parent dir)
-        :type env_filename: basestring
         :param check_certificates: if to check TLS/SSL Certificates. Defaults to True
-        :type check_certificates: bool
         :return: :class:`pykechain.Client`
 
         Example
@@ -197,15 +194,12 @@ class Client(object):
         return client
 
     def login(self,
-              username: Optional[Text] = None, password: Optional[Text] = None, token: Optional[Text] = None) -> None:
+              username: Optional[str] = None, password: Optional[str] = None, token: Optional[str] = None) -> None:
         """Login into KE-chain with either username/password or token.
 
         :param username: username for your user from KE-chain
-        :type username: basestring
         :param password: password for your user from KE-chain
-        :type password: basestring
         :param token: user authentication token retrieved from KE-chain
-        :type token: basestring
 
         Examples
         --------
@@ -224,17 +218,16 @@ class Client(object):
 
         """
         if token:
-            self.headers['Authorization'] = 'Token {}'.format(token)
+            self.headers['Authorization'] = f'Token {token}'
             self.auth = None
         elif username and password:
             self.headers.pop('Authorization', None)
             self.auth = (username, password)
 
-    def _build_url(self, resource: Text, **kwargs) -> Text:
+    def _build_url(self, resource: str, **kwargs) -> str:
         """Build the correct API url.
 
         :param resource: name the resource from the API_PATH
-        :type resource: basestring
         :param kwargs: (optional) id of the detail path to follow, eg. activity_id=...
         :return: url of the resource to the resource (id)
         """
@@ -245,7 +238,6 @@ class Client(object):
         Retrieve user objects of the entire administration.
 
         :return: list of dictionary with users information
-        :rtype: list(dict)
         -------
 
         """
@@ -254,7 +246,7 @@ class Client(object):
         users = response.json()
         return users
 
-    def _request(self, method: Text, url: Text, **kwargs) -> requests.Response:
+    def _request(self, method: str, url: str, **kwargs) -> requests.Response:
         """Perform the request on the API."""
         self.last_request = None
         if method in ('PUT', 'POST', 'DELETE'):
@@ -301,7 +293,6 @@ class Client(object):
         ..versionadded:: 3.0
 
         :return: list of widget meta schemas
-        :rtype: list of dict
         :raises APIError: When it could not retrieve the widget schemas
         :raises NotImplementedError: When the KE-chain version is lower than 3.
         """
@@ -315,15 +306,13 @@ class Client(object):
 
         return self._widget_schemas
 
-    def widget_schema(self, widget_type: Text) -> Dict:
+    def widget_schema(self, widget_type: str) -> Dict:
         """Widget schema for widget type.
 
         ..versionadded:: 3.0
 
         :param widget_type: Type of the widget to return the widgetschema for.
-        :type widget_type: basestring
         :returns: dictionary with jsonschema to validate the widget meta
-        :rtype: dict
         :raises APIError: When it could not retrieve the jsonschema from KE-chain
         :raises NotFoundError: When it could not find the correct schema
         """
@@ -331,14 +320,14 @@ class Client(object):
 
         found = find(self.widget_schemas, lambda ws: ws.get('widget_type') == widget_type)
         if not found:
-            raise NotFoundError("Could not find a widget_schema for widget_type: `{}`".format(widget_type))
+            raise NotFoundError(f"Could not find a widget_schema for widget_type: `{widget_type}`")
         return found
 
     def match_app_version(
             self,
-            app: Optional[Text] = None,
-            label: Optional[Text] = None,
-            version: Optional[Text] = None,
+            app: Optional[str] = None,
+            label: Optional[str] = None,
+            version: Optional[str] = None,
             default: Optional[bool] = False,
     ) -> bool:
         """Match app version against a semantic version string.
@@ -358,14 +347,10 @@ class Client(object):
         >>> True
 
         :param app: (optional) appname eg. 'kechain.core.wim'
-        :type app: basestring or None
         :param label: (optional) app label (last part of the app name) eb 'wim'
-        :type label: basestring or None
         :param version: semantic version string to match appname version against eg '2.0.0' or '>=2.0.0'
-        :type version: basestring
         :param default: (optional) boolean to return if the version of the app is not set but the app found.
                         Set to None to return a NotFoundError when a version if not found in the app.
-        :type default: bool or None
         :return: True if the version of the app matches against the match_version, otherwise False
         :raises IllegalArgumentError: if no app nor a label is provided
         :raises NotFoundError: if the app is not found
@@ -396,7 +381,7 @@ class Client(object):
             else:
                 raise NotFoundError("No version found on the app '{}'".format(target_app[0].get('app')))
 
-    def reload(self, obj: Base, url: Optional[Text] = None, extra_params: Optional[Dict] = None):
+    def reload(self, obj: Base, url: Optional[str] = None, extra_params: Optional[Dict] = None):
         """Reload an object from server. The original object is immutable and it will return a new object.
 
         The object will be refetched from KE-chain. If the object has a 'url' field the url will be taken from
@@ -406,11 +391,8 @@ class Client(object):
         added/updated automatically before the request is performed.
 
         :param obj: object to reload
-        :type obj: :py:obj:`obj`
         :param url: (optional) url to use
-        :type url: basestring or None
         :param extra_params: additional object specific extra query string params (eg for activity)
-        :type extra_params: dict
         :return: a new object
         :raises NotFoundError: if original object is not found or deleted in the mean time
         """
@@ -433,14 +415,14 @@ class Client(object):
 
                 try:
                     # set the id from the `obj.id` which is normally a keyname `<class_name>_id` (without the '2' if so)
-                    url = self._build_url(resource=resource, **{"{}_id".format(stripped): obj.id})
+                    url = self._build_url(resource=resource, **{f"{stripped}_id": obj.id})
                     extra_api_params = API_EXTRA_PARAMS.get(resource)
                     break
                 except KeyError:
                     if resource != stripped:
                         # Try again with stripped resource name
                         try:
-                            url = self._build_url(resource=stripped, **{"{}_id".format(stripped): obj.id})
+                            url = self._build_url(resource=stripped, **{f"{stripped}_id": obj.id})
                             extra_api_params = API_EXTRA_PARAMS.get(stripped)
                             break
                         except KeyError:
@@ -451,7 +433,7 @@ class Client(object):
 
             if url is None:
                 raise IllegalArgumentError(
-                    'Provide URL to reload the "{}" object (could not identify the API resource).'.format(obj))
+                    f'Provide URL to reload the "{obj}" object (could not identify the API resource).')
 
             # add the additional API params to the already provided extra params if they are provided.
             extra_params = extra_params.update(**extra_api_params) if extra_params else extra_api_params
@@ -460,7 +442,7 @@ class Client(object):
         data = response.json().get('results', [])
 
         if response.status_code != requests.codes.ok or not len(data) > 0:
-            raise NotFoundError("Could not reload {} {}".format(obj.__class__.__name__, obj), response=response)
+            raise NotFoundError(f"Could not reload {obj.__class__.__name__} {obj}", response=response)
 
         return obj.__class__(data[0], client=self)
 
@@ -470,7 +452,6 @@ class Client(object):
         Use the method for multiple objects to retrieve a single object, raising the appropriate errors.
 
         :param method: function used to retrieve multiple objects.
-        :type method: callable
         :return the single result
         :raises NotFoundError: When no result is found.
         :raises MultipleFoundError: When more than a single result is found.
@@ -478,20 +459,20 @@ class Client(object):
         kwargs['limit'] = kwargs.get('limit', 2)
         results = method(*args, **kwargs)
 
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+        criteria = f'\nargs: {args}\nkwargs: {kwargs}'
 
         if len(results) == 0:
-            raise NotFoundError("No {} fit criteria:{}".format(method.__name__, criteria))
+            raise NotFoundError(f"No {method.__name__} fit criteria:{criteria}")
         if len(results) != 1:
-            raise MultipleFoundError("Multiple {} fit criteria:{}".format(method.__name__, criteria))
+            raise MultipleFoundError(f"Multiple {method.__name__} fit criteria:{criteria}")
 
         return results[0]
 
     def scopes(
             self,
-            name: Optional[Text] = None,
-            pk: Optional[Text] = None,
-            status: Optional[Union[ScopeStatus, Text]] = ScopeStatus.ACTIVE,
+            name: Optional[str] = None,
+            pk: Optional[str] = None,
+            status: Optional[Union[ScopeStatus, str]] = ScopeStatus.ACTIVE,
             **kwargs
     ) -> List[Scope]:
         """Return all scopes visible / accessible for the logged in user.
@@ -500,14 +481,10 @@ class Client(object):
         refer to the documentation of the KE-chain API for additional query parameters.
 
         :param name: if provided, filter the search for a scope/project by name
-        :type name: basestring or None
         :param pk: if provided, filter the search by scope_id
-        :type pk: basestring or None
         :param status: if provided, filter the search for the status. eg. 'ACTIVE', 'TEMPLATE', 'LIBRARY'
-        :type status: basestring or None
         :param kwargs: optional additional search arguments
         :return: list of `Scopes`
-        :rtype: list(:class:`models.Scope`)
         :raises NotFoundError: if no scopes are not found.
 
         Example
@@ -564,9 +541,9 @@ class Client(object):
 
     def activities(
             self,
-            name: Optional[Text] = None,
-            pk: Optional[Text] = None,
-            scope: Optional[Text] = None,
+            name: Optional[str] = None,
+            pk: Optional[str] = None,
+            scope: Optional[str] = None,
             **kwargs
     ) -> List[Activity]:
         """Search for activities with optional name, pk and scope filter.
@@ -575,11 +552,8 @@ class Client(object):
         refer to the documentation of the KE-chain API for additional query parameters.
 
         :param pk: id (primary key) of the activity to retrieve
-        :type pk: basestring or None
         :param name: filter the activities by name
-        :type name: basestring or None
         :param scope: filter by scope id
-        :type scope: basestring or None
         :return: list of :class:`models.Activity`
         :raises NotFoundError: If no `Activities` are found
         """
@@ -609,11 +583,8 @@ class Client(object):
         refer to the documentation of the KE-chain API for additional query parameters.
 
         :param pk: id (primary key) of the activity to retrieve
-        :type pk: basestring or None
         :param name: filter the activities by name
-        :type name: basestring or None
         :param scope: filter by scope id
-        :type scope: basestring or None
         :return: a single :class:`models.Activity`
         :raises NotFoundError: When no `Activity` is found
         :raises MultipleFoundError: When more than a single `Activity` is found
@@ -622,14 +593,14 @@ class Client(object):
 
     def parts(
             self,
-            name: Optional[Text] = None,
-            pk: Optional[Text] = None,
+            name: Optional[str] = None,
+            pk: Optional[str] = None,
             model: Optional[Part] = None,
-            category: Optional[Union[Category, Text]] = Category.INSTANCE,
-            scope_id: Optional[Text] = None,
-            parent: Optional[Text] = None,
-            activity: Optional[Text] = None,
-            widget: Optional[Text] = None,
+            category: Optional[Union[Category, str]] = Category.INSTANCE,
+            scope_id: Optional[str] = None,
+            parent: Optional[str] = None,
+            activity: Optional[str] = None,
+            widget: Optional[str] = None,
             limit: Optional[int] = None,
             batch: Optional[int] = PARTS_BATCH_LIMIT,
             **kwargs
@@ -642,25 +613,15 @@ class Client(object):
         refer to the documentation of the KE-chain API for additional query parameters.
 
         :param name: filter on name
-        :type name: basestring or None
         :param pk: filter on primary key
-        :type pk: basestring or None
         :param model: filter on model_id
-        :type model: basestring or None
         :param category: filter on category (INSTANCE, MODEL, None)
-        :type category: basestring or None
         :param scope_id: filter on scope_id
-        :type scope_id: basestring or None
         :param parent: filter on the parent_id, returns all children of the parent_id
-        :type parent: basestring or None
         :param activity: filter on activity_id
-        :type activity: basestring or None
         :param widget: filter on widget_id
-        :type activity: basestring or None
         :param limit: limit the return to # items (default unlimited, so return all results)
-        :type limit: int or None
         :param batch: limit the batch size to # items (defaults to 100 items per batch)
-        :type batch: int or None
         :param kwargs: additional `keyword=value` arguments for the api
         :return: :class:`models.PartSet` which is an iterator of :class:`models.Part`
         :raises NotFoundError: If no `Part` is found
@@ -724,7 +685,7 @@ class Client(object):
                 data = response.json()
                 part_results.extend(data['results'])
 
-        return PartSet((Part(p, client=self) for p in part_results))
+        return PartSet(Part(p, client=self) for p in part_results)
 
     def part(self, *args, **kwargs) -> Part:
         """Retrieve single KE-chain part.
@@ -759,9 +720,9 @@ class Client(object):
 
     def properties(
             self,
-            name: Optional[Text] = None,
-            pk: Optional[Text] = None,
-            category: Optional[Union[Category, Text]] = Category.INSTANCE,
+            name: Optional[str] = None,
+            pk: Optional[str] = None,
+            category: Optional[Union[Category, str]] = Category.INSTANCE,
             **kwargs
     ) -> List['AnyProperty']:
         """Retrieve properties.
@@ -770,11 +731,8 @@ class Client(object):
         refer to the documentation of the KE-chain API for additional query parameters.
 
         :param name: name to limit the search for.
-        :type name: basestring or None
         :param pk: primary key or id (UUID) of the property to search for
-        :type pk: basestring or None
         :param category: filter the properties by category. Defaults to INSTANCE. Other options MODEL or None
-        :type category: basestring or None
         :param kwargs: (optional) additional search keyword arguments
         :return: list of :class:`models.Property`
         :raises NotFoundError: When no `Property` is found
@@ -812,9 +770,9 @@ class Client(object):
 
     def services(
             self,
-            name: Optional[Text] = None,
-            pk: Optional[Text] = None,
-            scope: Optional[Text] = None,
+            name: Optional[str] = None,
+            pk: Optional[str] = None,
+            scope: Optional[str] = None,
             **kwargs
     ) -> List[Service]:
         """
@@ -824,11 +782,8 @@ class Client(object):
         refer to the documentation of the KE-chain API for additional query parameters.
 
         :param name: (optional) name to limit the search for
-        :type name: basestring or None
         :param pk: (optional) primary key or id (UUID) of the service to search for
-        :type pk: basestring or None
         :param scope: (optional) id (UUID) of the scope to search in
-        :type scope: basestring or None
         :param kwargs: (optional) additional search keyword arguments
         :return: list of :class:`models.Service` objects
         :raises NotFoundError: When no `Service` objects are found
@@ -866,10 +821,10 @@ class Client(object):
 
     def service_executions(
             self,
-            name: Optional[Text] = None,
-            pk: Optional[Text] = None,
-            scope: Optional[Text] = None,
-            service: Optional[Text] = None,
+            name: Optional[str] = None,
+            pk: Optional[str] = None,
+            scope: Optional[str] = None,
+            service: Optional[str] = None,
             **kwargs
     ) -> List[ServiceExecution]:
         """
@@ -879,13 +834,9 @@ class Client(object):
         refer to the documentation of the KE-chain API for additional query parameters.
 
         :param name: (optional) name to limit the search for
-        :type name: basestring or None
         :param pk: (optional) primary key or id (UUID) of the service to search for
-        :type pk: basestring or None
         :param scope: (optional) id (UUID) of the scope to search in
-        :type scope: basestring or None
         :param service: (optional) service UUID to filter on
-        :type service: basestring or None
         :param kwargs: (optional) additional search keyword arguments
         :return: a single :class:`models.ServiceExecution` object
         :raises NotFoundError: When no `ServiceExecution` object is found
@@ -923,16 +874,14 @@ class Client(object):
         """
         return self._retrieve_singular(self.service_executions, *args, **kwargs)
 
-    def users(self, username: Optional[Text] = None, pk: Optional[Text] = None, **kwargs) -> List[User]:
+    def users(self, username: Optional[str] = None, pk: Optional[str] = None, **kwargs) -> List[User]:
         """
         Users of KE-chain.
 
         Provide a list of :class:`User`'s of KE-chain. You can filter on username or id or any other advanced filter.
 
         :param username: (optional) username to filter
-        :type username: basestring or None
         :param pk: (optional) id of the user to filter
-        :type pk: basestring or None
         :param kwargs: Additional filtering keyword=value arguments
         :return: List of :class:`Users`
         :raises NotFoundError: when a user could not be found
@@ -971,12 +920,11 @@ class Client(object):
         :raises APIError if not logged in yet.
         :raises NotFoundError if user could not be found.
         :returns User
-        :rtype User
         """
         try:
             response = self._request(method='GET', url=self._build_url(resource='user_current'))
         except Exception as e:
-            raise APIError("No authentication provided to retrieve the current user:\n{}".format(e.args[0]))
+            raise APIError(f"No authentication provided to retrieve the current user:\n{e.args[0]}")
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve current User", response=response)
@@ -985,8 +933,8 @@ class Client(object):
 
     def teams(
             self,
-            name: Optional[Text] = None,
-            pk: Optional[Text] = None,
+            name: Optional[str] = None,
+            pk: Optional[str] = None,
             is_hidden: Optional[bool] = False,
             **kwargs
     ) -> List[Team]:
@@ -996,11 +944,8 @@ class Client(object):
         Provide a list of :class:`Team`'s of KE-chain. You can filter on teamname or id or any other advanced filter.
 
         :param name: (optional) teamname to filter
-        :type name: basestring or None
         :param pk: (optional) id of the team to filter
-        :type pk: basestring or None
         :param is_hidden: (optional) boolean to show non-hidden or hidden teams or both (None) (default is non-hidden)
-        :type is_hidden: bool or None
         :param kwargs: Additional filtering keyword=value arguments
         :return: List of :class:`Teams`
         :raises NotFoundError: when a team could not be found
@@ -1035,8 +980,8 @@ class Client(object):
 
     def widgets(
             self,
-            pk: Optional[Text] = None,
-            activity: Optional[Union[Activity, Text]] = None,
+            pk: Optional[str] = None,
+            activity: Optional[Union[Activity, str]] = None,
             **kwargs
     ) -> List[Widget]:
         """
@@ -1045,12 +990,9 @@ class Client(object):
         Only works for KE-chain version 3.
 
         :param pk: (optional) the uuid of the widget.
-        :type pk: basestring or None
         :param activity: (optional) the :class:`Activity` or UUID of the activity to filter the widgets for.
-        :type activity: basestring or None
         :param kwargs: additional keyword arguments
         :return: A list of Widget objects
-        :rtype: List
         :raises NotFoundError: when the widgets could not be found
         :raises APIError: when the API does not support the widgets, or when the API gives an error.
         """
@@ -1087,41 +1029,31 @@ class Client(object):
 
     def create_activity(
             self,
-            parent: Union[Activity, Text],
-            name: Text,
+            parent: Union[Activity, str],
+            name: str,
             activity_type: ActivityType = ActivityType.TASK,
-            ref: Optional[Text] = None,
+            ref: Optional[str] = None,
             status: ActivityStatus = ActivityStatus.OPEN,
-            description: Optional[Text] = None,
+            description: Optional[str] = None,
             start_date: Optional[datetime.datetime] = None,
             due_date: Optional[datetime.datetime] = None,
             classification: ActivityClassification = None,
-            tags: Optional[List[Text]] = None,
+            tags: Optional[List[str]] = None,
             **kwargs
     ) -> Activity:
         """
         Create a new activity.
 
         :param parent: parent under which to create the activity
-        :type parent: basestring or :class:`models.Activity`
         :param name: new activity name
-        :type name: basestring
         :param activity_type: type of activity: TASK (default) or PROCESS
-        :type activity_type: basestring
         :param ref: activity ref, slug
-        :type ref: basestring
         :param status: status of the activity: OPEN (default) or COMPLETED
-        :type status: ActivityStatus
         :param description: description of the activity
-        :type description: basestring
         :param start_date: starting date of the activity
-        :type start_date: datetime.datetime
         :param due_date: due date of the activity
-        :type due_date: datetime.datetime
         :param classification: classification of activity: defaults to `parent`'s if provided, WORKFLOW otherwise.
-        :type classification: ActivityClassification
         :param tags: list of activity tags
-        :type tags: list
         :return: the created :class:`models.Activity`
         :raises APIError: When the object could not be created
         :raises IllegalArgumentError: When an incorrect arguments are provided
@@ -1133,7 +1065,7 @@ class Client(object):
             parent_classification = None
             parent_id = parent
         else:
-            raise IllegalArgumentError('`parent` must be an Activity or UUID, "{}" is neither'.format(parent))
+            raise IllegalArgumentError(f'`parent` must be an Activity or UUID, "{parent}" is neither')
 
         if classification is None:
             if parent_classification is None:
@@ -1184,17 +1116,17 @@ class Client(object):
 
     def clone_activities(
             self,
-            activities: List[Union[Activity, Text]],
-            activity_parent: Union[Activity, Text],
+            activities: List[Union[Activity, str]],
+            activity_parent: Union[Activity, str],
             activity_update_dicts: Optional[Dict] = None,
             include_part_models: Optional[bool] = False,
             include_part_instances: Optional[bool] = False,
             include_children: Optional[bool] = True,
-            excluded_parts: Optional[List[Text]] = None,
-            part_parent_model: Optional[Union[Part, Text]] = None,
-            part_parent_instance: Optional[Union[Part, Text]] = None,
-            part_model_rename_template: Optional[Text] = None,
-            part_instance_rename_template: Optional[Text] = None,
+            excluded_parts: Optional[List[str]] = None,
+            part_parent_model: Optional[Union[Part, str]] = None,
+            part_parent_instance: Optional[Union[Part, str]] = None,
+            part_model_rename_template: Optional[str] = None,
+            part_instance_rename_template: Optional[str] = None,
             asynchronous: Optional[bool] = False,
             **kwargs
     ) -> List[Activity]:
@@ -1205,34 +1137,21 @@ class Client(object):
         The bulk clone activities with parts API is included in KE-chain backend since version 3.6.
 
         :param activities: list of Activity object or UUIDs
-        :type activities: list
         :param activity_parent: parent Activity sub-process object or UUID
-        :type activity_parent: Activity
         :param activity_update_dicts: (O) dict of dictionaries, each key-value combination relating to an activity
         to clone and a dict of new values to assign, e.g. `{activity.id: {"name": "Cloned activity"}}`
-        :type activity_update_dicts: dict
         :param include_part_models: (O) whether to clone the data models configured in the activities, defaults to False
-        :type include_part_models: bool
         :param include_part_instances: (O) whether to clone the part instances of the data model configured in the
             activities, defaults to True
-        :type include_part_instances: bool
         :param include_children: (O) whether to clone child parts
-        :type include_children: bool
         :param excluded_parts: (O) list of Part2 objects or UUIDs to exclude from being cloned,
             maintaining the original configuration of the widgets.
-        :type excluded_parts: list
         :param part_parent_model: (O) parent Part object or UUID for the copied data model(s)
-        :type part_parent_model: Part
         :param part_parent_instance: (O) parent Part object or UUID for the copied part instance(s)
-        :type part_parent_instance: Part
         :param part_model_rename_template: (O) renaming template for part models. Must contain "{name}"
-        :type part_model_rename_template: str
         :param part_instance_rename_template: (O) renaming template for part instances. Must contain "{name}"
-        :type part_instance_rename_template: str
         :param asynchronous: If true, immediately returns without activities (default = False)
-        :type asynchronous: bool
         :return: list of cloned activities
-        :rtype: list
         :raises APIError if cloned
         """
         if self.match_app_version(label='kechain2.core.pim', version=">=3.7.0"):  # pragma: no cover
@@ -1249,7 +1168,7 @@ class Client(object):
                 "Did not recognize the following UUIDs:\n{}".format(update_name, '\n'.join(incorrect_ids)))
 
         elif not all(isinstance(value, dict) for value in update_dicts.values()):
-            raise IllegalArgumentError("The `{}` must be a dict of dicts.".format(update_name))
+            raise IllegalArgumentError(f"The `{update_name}` must be a dict of dicts.")
 
         activities = [dict(id=uuid, **update_dicts.get(uuid, {})) for uuid in activity_ids]
 
@@ -1307,7 +1226,7 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Activities", response=response)
 
-    def _create_part(self, action: Text, data: Dict, **kwargs) -> Optional[Part]:
+    def _create_part(self, action: str, data: Dict, **kwargs) -> Optional[Part]:
         """Create a part for PIM 2 internal core function."""
         # suppress_kevents should be in the data (not the query_params)
         if 'suppress_kevents' in kwargs:
@@ -1317,7 +1236,7 @@ class Client(object):
         query_params = kwargs
         query_params.update(API_EXTRA_PARAMS['parts'])
 
-        response = self._request('POST', self._build_url('parts_{}'.format(action)),
+        response = self._request('POST', self._build_url(f'parts_{action}'),
                                  params=query_params,
                                  json=data)
 
@@ -1326,7 +1245,7 @@ class Client(object):
 
         return Part(response.json()['results'][0], client=self)
 
-    def create_part(self, parent: Part, model: Part, name: Optional[Text] = None, **kwargs) -> Part:
+    def create_part(self, parent: Part, model: Part, name: Optional[str] = None, **kwargs) -> Part:
         """Create a new part instance from a given model under a given parent.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
@@ -1335,11 +1254,8 @@ class Client(object):
         is refreshed.
 
         :param parent: parent part instance of the new instance
-        :type parent: :class:`models.Part`
         :param model: target part model on which the new instance is based
-        :type model: :class:`models.Part`
         :param name: new part name
-        :type name: basestring
         :param kwargs: (optional) additional keyword=value arguments
         :return: Part (category = instance)
         :return: :class:`models.Part` with category `INSTANCE`
@@ -1359,8 +1275,8 @@ class Client(object):
         return self._create_part(action="new_instance", data=data, **kwargs)
 
     def create_model(self,
-                     parent: Union[Part, Text],
-                     name: Text,
+                     parent: Union[Part, str],
+                     name: str,
                      multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
                      **kwargs) -> Part:
         """Create a new child model under a given parent.
@@ -1371,11 +1287,8 @@ class Client(object):
         is refreshed.
 
         :param parent: parent part instance or a part uuid
-        :type parent: :class:`models.Part`
         :param name: new part name
-        :type name: basestring
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N  :class:`enums.Multiplicity`
-        :type multiplicity: basestring
         :param kwargs: (optional) additional keyword=value arguments
         :return: :class:`models.Part` with category `MODEL` (from :class:`enums.Category`)
         :raises IllegalArgumentError: When the provided arguments are incorrect
@@ -1386,7 +1299,7 @@ class Client(object):
         elif is_uuid(parent):
             parent = self.model(id=parent)
         else:
-            raise IllegalArgumentError("`parent` should be either a parent part or a uuid, got '{}'".format(parent))
+            raise IllegalArgumentError(f"`parent` should be either a parent part or a uuid, got '{parent}'")
 
         if parent.category != Category.MODEL:
             raise IllegalArgumentError("The parent should be of category 'MODEL'")
@@ -1400,8 +1313,8 @@ class Client(object):
 
     def create_model_with_properties(
             self,
-            parent: Union[Part, Text],
-            name: Text,
+            parent: Union[Part, str],
+            name: str,
             multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
             properties_fvalues: Optional[List[Dict]] = None,
             **kwargs) -> Part:
@@ -1424,13 +1337,9 @@ class Client(object):
            This version makes a model including properties in a single API call
 
         :param parent: parent part instance or a part uuid
-        :type parent: :class:`models.Part`
         :param name: new part name
-        :type name: basestring
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N of :class:`enums.Multiplicity`
-        :type multiplicity: basestring
         :param properties_fvalues: list of dicts per property, each must have fields `name` and `property_type`.
-        :type properties_fvalues: list
         :param kwargs: (optional) additional keyword=value arguments
         :return: :class:`models.Part` with category `MODEL` (of :class:`enums.Category`)
         :raises IllegalArgumentError: When the provided arguments are incorrect
@@ -1457,7 +1366,7 @@ class Client(object):
         elif is_uuid(parent):
             parent = self.model(id=parent)
         else:
-            raise IllegalArgumentError("`parent` should be either a parent part or a uuid, got '{}'".format(parent))
+            raise IllegalArgumentError(f"`parent` should be either a parent part or a uuid, got '{parent}'")
 
         if parent.category != Category.MODEL:
             raise IllegalArgumentError("`parent` should be of category 'MODEL'")
@@ -1475,7 +1384,7 @@ class Client(object):
     def _create_clone(self,
                       parent: Part,
                       part: Part,
-                      name: Optional[Text] = None,
+                      name: Optional[str] = None,
                       multiplicity: Optional[Multiplicity] = None,
                       **kwargs
                       ) -> Part:
@@ -1489,13 +1398,9 @@ class Client(object):
            Added the name parameter. Added option to add multiplicity as well.
 
         :param parent: parent part
-        :type parent: :class:`models.Part`
         :param part: part to be cloned
-        :type part: :class:`models.Part`
         :param name: (optional) Name of the to be cloned part
-        :type name: basestring or None
         :param multiplicity: In case of Models, to specify a new multiplicity. Defaults to the `part` multiplicity.
-        :type multiplicity: Multiplicity
         :param kwargs: (optional) additional keyword=value arguments
         :return: cloned :class:`models.Part`
         :raises APIError: if the `Part` could not be cloned
@@ -1504,7 +1409,7 @@ class Client(object):
         check_type(parent, Part, 'parent')
 
         data = dict(
-            name=check_text(name, 'name') or "CLONE - {}".format(part.name),
+            name=check_text(name, 'name') or f"CLONE - {part.name}",
             parent_id=parent.id,
             suppress_kevents=kwargs.pop('suppress_kevents', None),
         )
@@ -1524,7 +1429,7 @@ class Client(object):
 
         query_params = kwargs
         query_params.update(API_EXTRA_PARAMS['parts'])
-        url = self._build_url('parts_{}'.format(select_action))
+        url = self._build_url(f'parts_{select_action}')
 
         response = self._request('POST', url, params=query_params, data=data)
 
@@ -1537,7 +1442,7 @@ class Client(object):
             self,
             model: Part,
             parent: Part,
-            name: Text,
+            name: str,
             multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
             **kwargs
     ) -> Part:
@@ -1552,13 +1457,9 @@ class Client(object):
         is refreshed.
 
         :param model: the catalog proxy model the new proxied model should be based upon
-        :type model: :class:`models.Part`
         :param parent: parent part instance
-        :type parent: :class:`models.Part`
         :param name: new part name
-        :type name: basestring
         :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N, default is `ZERO_MANY`
-        :type multiplicity: basestring
         :param kwargs: (optional) additional keyword=value arguments
         :return: the new proxy :class:`models.Part` with category `MODEL`
         :raises IllegalArgumentError: When the provided arguments are incorrect
@@ -1592,27 +1493,16 @@ class Client(object):
 
         :param parts: list of dicts, each specifying a part instance. Available fields per dict:
             :param name: (optional) name provided for the new instance as string otherwise use the name of the model
-            :type name: basestring or None
             :param model_id: model of the part which to add new instances, should follow the model tree in KE-chain
-            :type model_id: UUID
             :param parent_id: parent where to add new instances, should follow the model tree in KE-chain
-            :type parent_id: UUID
             :param properties: list of dicts, each specifying a property to update. Available fields per dict:
                 :param name: Name of the property model
-                :type name: basestring
                 :param value: The value of the Property instance after it is created
-                :type value: basestring or int or bool or list (depending on the PropertyType)
                 :param model_id: model of the property should follow the model tree in KE-chain
-                :type model_id: UUID
-            :type properties: list
-        :type parts: list
         :param asynchronous: If true, immediately returns without parts (default = False)
-        :type asynchronous: bool
         :param retrieve_instances: If true, will retrieve the created Part Instances in a PartSet
-        :type retrieve_instances: bool
         :param kwargs:
         :return: list of Part instances or list of part UUIDs
-        :rtype list
         """
         check_list_of_dicts(
             parts,
@@ -1646,7 +1536,7 @@ class Client(object):
 
         if (asynchronous and response.status_code != requests.codes.accepted) or \
                 (not asynchronous and response.status_code != requests.codes.created):  # pragma: no cover
-            raise APIError("Could not create Parts. ({})".format(response.status_code), response=response)
+            raise APIError(f"Could not create Parts. ({response.status_code})", response=response)
 
         part_ids = response.json()['results'][0]['parts_created']
         if retrieve_instances:
@@ -1661,16 +1551,14 @@ class Client(object):
 
     def _delete_parts_bulk(
             self,
-            parts: List[Union[Part, Text]],
+            parts: List[Union[Part, str]],
             asynchronous: Optional[bool] = False,
             **kwargs
     ) -> bool:
         """Delete multiple Parts simultaneously.
 
         :param parts: list of Part objects or UUIDs
-        :type parts: List[Property] or List[UUID]
         :param asynchronous: If true, immediately returns (default = False)
-        :type asynchronous: bool
         :param kwargs:
         :return: True if parts are delete successfully
         :raises APIError: if the parts could not be deleted
@@ -1685,7 +1573,7 @@ class Client(object):
             elif is_uuid(part):
                 list_parts.append(part)
             else:
-                raise IllegalArgumentError("{} is not a Part nor an UUID".format(part))
+                raise IllegalArgumentError(f"{part} is not a Part nor an UUID")
         payload = {"parts": list_parts}
         query_params = kwargs
         query_params.update(API_EXTRA_PARAMS['parts'])
@@ -1695,17 +1583,17 @@ class Client(object):
         if (asynchronous and response.status_code not in (requests.codes.ok, requests.codes.accepted) or (
                 not asynchronous and response.status_code not in (
                 requests.codes.ok, requests.codes.accepted))):  # pragma: no cover
-            raise APIError("Could not delete Parts. ({})".format(response.status_code), response=response)
+            raise APIError(f"Could not delete Parts. ({response.status_code})", response=response)
         return True
 
     def create_property(
             self,
             model: Part,
-            name: Text,
-            description: Optional[Text] = None,
-            property_type: Optional[Union[PropertyType, Text]] = PropertyType.CHAR_VALUE,
+            name: str,
+            description: Optional[str] = None,
+            property_type: Optional[Union[PropertyType, str]] = PropertyType.CHAR_VALUE,
             default_value: Optional[Any] = None,
-            unit: Optional[Text] = None,
+            unit: Optional[str] = None,
             options: Optional[Dict] = None,
             **kwargs
     ) -> AnyProperty:
@@ -1720,19 +1608,12 @@ class Client(object):
 
 
         :param model: parent part model
-        :type model: :class:`models.Part`
         :param name: property model name
-        :type name: basestring
         :param description: property model description (optional)
-        :type description: basestring or None
         :param property_type: choose one of the :class:`enums.PropertyType`, defaults to `PropertyType.CHAR_VALUE`.
-        :type property_type: basestring or None
         :param default_value: (optional) default value used for part instances when creating a model.
-        :type default_value: any
         :param unit: (optional) unit of the property
-        :type unit: basestring or None
         :param options: (optional) property options (eg. validators or 'single selectlist choices')
-        :type options: basestring or None
         :return: a :class:`models.Property` with category `MODEL`
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: if the `Property` model could not be created
@@ -1792,14 +1673,14 @@ class Client(object):
 
     def create_service(
             self,
-            name: Text,
+            name: str,
             scope: Scope,
-            description: Optional[Text] = None,
-            version: Optional[Text] = None,
+            description: Optional[str] = None,
+            version: Optional[str] = None,
             service_type: Optional[ServiceType] = ServiceType.PYTHON_SCRIPT,
             environment_version: Optional[ServiceEnvironmentVersion] = ServiceEnvironmentVersion.PYTHON_3_8,
             run_as: Optional[ServiceScriptUser] = ServiceScriptUser.KENODE_USER,
-            pkg_path: Optional[Text] = None
+            pkg_path: Optional[str] = None
     ) -> Service:
         """
         Create a Service.
@@ -1813,23 +1694,15 @@ class Client(object):
         Manager of the scope to which you are uploading the script.
 
         :param name: Name of the service
-        :type name: basestring
         :param scope: Scope where the create the Service under
-        :type scope: :class:`models.Scope`
         :param description: (optional) description of the Service
-        :type description: basestring or None
         :param version: (optional) version information of the Service
-        :type version: basestring or None
         :param service_type: (optional) service type of the service (refer to :class:`pykechain.enums.ServiceType`),
                              defaults to `PYTHON_SCRIPT`
-        :type service_type: basestring or None
         :param environment_version: (optional) execution environment of the service (refer to
          :class:`pykechain.enums.ServiceEnvironmentVersion`), defaults to `PYTHON_3_8`
-        :type environment_version: basestring or None
         :param run_as: (optional) user to run the service as. Defaults to kenode user (bound to scope)
-        :type run_as: basestring or None
         :param pkg_path: (optional) full path name to the `kecpkg` (or python script) to upload
-        :type pkg_path: basestring or None
         :return: the created :class:`models.Service`
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: In case of failure of the creation or failure to upload the pkg_path
@@ -1860,13 +1733,13 @@ class Client(object):
 
     def create_scope(
             self,
-            name: Text,
+            name: str,
             status: Optional[ScopeStatus] = ScopeStatus.ACTIVE,
-            description: Optional[Text] = None,
-            tags: Optional[List[Text]] = None,
+            description: Optional[str] = None,
+            tags: Optional[List[str]] = None,
             start_date: Optional[datetime.datetime] = None,
             due_date: Optional[datetime.datetime] = None,
-            team: Optional[Union[Team, Text]] = None,
+            team: Optional[Union[Team, str]] = None,
             **kwargs
     ) -> Scope:
         """
@@ -1878,19 +1751,12 @@ class Client(object):
         ..versionadded: 2.6
 
         :param name: Name of the scope
-        :type name: basestring
         :param status: choose one of the :class:`enums.ScopeStatus`, defaults to `ScopeStatus.ACTIVE`
-        :type status: basestring or None
         :param description: (optional) Description of the scope
-        :type description: basestring or None
         :param tags: (optional) List of tags to be added to the new scope
-        :type tags: list or None
         :param start_date: (optional) start date of the scope. Will default to 'now' if not provided.
-        :type start_date: datetime.datetime or None
         :param due_date: (optional) due date of the scope
-        :type due_date: datetime.datetime or None
         :param team: (optional) team_id or Team object to assign membership of scope to a team.
-        :type team: basestring or :class:`models.Team` or None
         :param kwargs: optional additional search arguments
         :return: the created :class:`models.Scope`
         :raises APIError: In case of failure of the creation of new Scope
@@ -1928,9 +1794,7 @@ class Client(object):
         deleted.
 
         :param scope: Scope object to be deleted
-        :type scope: :class: `models.Scope`
         :param asynchronous: (optional) if the scope deletion should be performed asynchronous (default True)
-        :type asynchronous: bool
         :return: True when the delete is a success.
         :raises APIError: in case of failure in the deletion of the scope
         """
@@ -1945,20 +1809,20 @@ class Client(object):
                                  params=query_options)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Scope {}".format(scope), response=response)
+            raise APIError(f"Could not delete Scope {scope}", response=response)
 
         return True
 
     def clone_scope(
             self,
             source_scope: Scope,
-            name: Optional[Text] = None,
+            name: Optional[str] = None,
             status: Optional[ScopeStatus] = None,
             start_date: Optional[datetime.datetime] = None,
             due_date: Optional[datetime.datetime] = None,
-            description: Optional[Text] = None,
-            tags: Optional[List[Text]] = None,
-            team: Optional[Union[Team, Text]] = None,
+            description: Optional[str] = None,
+            tags: Optional[List[str]] = None,
+            team: Optional[Union[Team, str]] = None,
             scope_options: Optional[Dict] = None,
             asynchronous: Optional[bool] = False,
     ) -> Optional[Scope]:
@@ -1974,27 +1838,16 @@ class Client(object):
         .. versionadded: 3.0
 
         :param source_scope: Scope object to be cloned itself
-        :type source_scope: :class:`models.Scope`
         :param name: (optional) new name of the scope
-        :type name: basestring or None
         :param status: (optional) statis of the new scope
-        :type status: one of :class:`enums.ScopeStatus`
         :param tags: (optional) list of new scope tags
-        :type tags: list or None
         :param start_date: (optional) start date of the to be cloned scope
-        :type start_date: datetime or None
         :param due_date: (optional) due data of the to be cloned scope
-        :type due_date: datetime or None
         :param description: (optional) description of the new scope
-        :type description: basestring or None
         :param team: (optional) team_id or Team object to assign membership of scope to a team.
-        :type team: basestring or :class:`models.Team` or None
         :param scope_options: (optional) dictionary with scope options (NO EFFECT)
-        :type scope_options: dict or None
         :param asynchronous: (optional) option to use asynchronous cloning of the scope, default to False.
-        :type asynchronous: bool or None
         :return: New scope that is cloned
-        :rtype: :class:`models.Scope`
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: When the server is unable to clone the scope (eg. permissions)
         """
@@ -2006,7 +1859,7 @@ class Client(object):
         tags = check_list_of_text(tags, 'tags', True) or source_scope.tags
         data_dict = {
             'scope_id': source_scope.id,
-            'name': check_text(name, 'name') or 'CLONE - {}'.format(source_scope.name),
+            'name': check_text(name, 'name') or f'CLONE - {source_scope.name}',
             'start_date': check_datetime(dt=start_date, key='start_date'),
             'due_date': check_datetime(dt=due_date, key='due_date'),
             'text': check_text(description, 'description') or source_scope.description,
@@ -2028,9 +1881,9 @@ class Client(object):
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             if response.status_code == requests.codes.forbidden:
-                raise ForbiddenError("Forbidden to clone Scope {}".format(source_scope), response=response)
+                raise ForbiddenError(f"Forbidden to clone Scope {source_scope}", response=response)
             else:
-                raise APIError("Could not clone Scope {}".format(source_scope), response=response)
+                raise APIError(f"Could not clone Scope {source_scope}", response=response)
 
         if asynchronous:
             return None
@@ -2045,9 +1898,9 @@ class Client(object):
 
     def create_team(
             self,
-            name: Text,
-            user: Union[Text, int, User],
-            description: Optional[Text] = None,
+            name: str,
+            user: Union[str, int, User],
+            description: Optional[str] = None,
             options: Optional[Dict] = None,
             is_hidden: Optional[bool] = False
     ) -> Team:
@@ -2062,15 +1915,10 @@ class Client(object):
         .. versionadded: 3.0
 
         :param name: name of the team
-        :type name: basestring
         :param user: user (userid, username or `User`) that will become owner of the team
-        :type user: userid or username or :class:`models.User`
         :param description: (optional) description of the team
-        :type name: basestring or None
         :param options: (optional) provide additional team advanced options (as dict)
-        :type options: dict or None
         :param is_hidden: (optional) if the team needs to be hidden (defaults to false)
-        :type is_hidden: bool or None
         :return: the created :class:`models.Team`
         :raises IllegalArgumentError: When the provided arguments are incorrect
         :raises APIError: When an API Error occurs
@@ -2113,12 +1961,12 @@ class Client(object):
 
     @staticmethod
     def _validate_widget(
-            activity: Union[Activity, Text],
-            widget_type: Union[WidgetTypes, Text],
-            title: Optional[Text],
+            activity: Union[Activity, str],
+            widget_type: Union[WidgetTypes, str],
+            title: Optional[str],
             meta: Dict,
             order: Optional[int],
-            parent: Optional[Union[Widget, Text]],
+            parent: Optional[Union[Widget, str]],
             **kwargs
     ) -> Dict:
         """Validate the format and content of the configuration of a widget."""
@@ -2148,10 +1996,10 @@ class Client(object):
     def _validate_related_models(
             readable_models: List,
             writable_models: List,
-            part_instance: Union[Part, Text],
-            parent_part_instance: Union[Part, Text],
+            part_instance: Union[Part, str],
+            parent_part_instance: Union[Part, str],
             **kwargs
-    ) -> Tuple[List, List, Text, Text]:
+    ) -> Tuple[List, List, str, str]:
         """
         Verify the format and content of the readable and writable models.
 
@@ -2159,7 +2007,6 @@ class Client(object):
         :param writable_models: list of Properties or UUIDs
         :param kwargs: option to insert "inputs" and "outputs", instead of new inputs.
         :return: Tuple with both input lists, now with only UUIDs
-        :rtype Tuple[List, List]
         """
         if kwargs.get('inputs'):
             readable_models = kwargs.pop('inputs')
@@ -2175,16 +2022,16 @@ class Client(object):
 
     def create_widget(
             self,
-            activity: Union[Activity, Text],
-            widget_type: Union[WidgetTypes, Text],
+            activity: Union[Activity, str],
+            widget_type: Union[WidgetTypes, str],
             meta: Dict,
-            title: Optional[Text] = None,
+            title: Optional[str] = None,
             order: Optional[int] = None,
-            parent: Optional[Union[Widget, Text]] = None,
+            parent: Optional[Union[Widget, str]] = None,
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
-            part_instance: Optional[Union[Part, Text]] = None,
-            parent_part_instance: Optional[Union[Part, Text]] = None,
+            part_instance: Optional[Union[Part, str]] = None,
+            parent_part_instance: Optional[Union[Part, str]] = None,
             **kwargs
     ) -> Widget:
         """
@@ -2197,28 +2044,17 @@ class Client(object):
         `readable_model_ids` and `writable_models_ids`.
 
         :param activity: activity objects to create the widget in.
-        :type activity: :class:`Activity` or UUID
         :param widget_type: type of the widget, one of :class:`WidgetTypes`
-        :type: string
         :param meta: meta dictionary of the widget.
-        :type meta: dict
         :param title: (optional) title of the widget
-        :type title: str or None
         :param order: (optional) order in the activity of the widget.
-        :type order: int or None
         :param parent: (optional) parent of the widget for Multicolumn and Multirow widget.
-        :type parent: :class:`Widget` or UUID
         :param readable_models: (optional) list of property model ids to be configured as readable (alias = inputs)
-        :type readable_models: list of properties or list of property id's
         :param writable_models: (optional) list of property model ids to be configured as writable (alias = ouputs)
-        :type writable_models: list of properties or list of property id's
         :param part_instance: Part object or UUID to be used as instance of the widget
-        :type part_instance: Part or UUID
         :param parent_part_instance: Part object or UUID to be used as parent of the widget
-        :type parent_part_instance: Part or UUID
         :param kwargs: (optional) additional keyword=value arguments to create widget
         :return: the created subclass of :class:`Widget`
-        :rtype: :class:`Widget`
         :raises IllegalArgumentError: when an illegal argument is send.
         :raises APIError: when an API Error occurs.
         """
@@ -2269,9 +2105,7 @@ class Client(object):
         Bulk-create of widgets.
 
         :param widgets: list of dictionaries defining the configuration of the widget.
-        :type widgets: List[Dict]
         :return: list of `Widget` objects
-        :rtype List[Widget]
         """
         bulk_data = list()
         bulk_associations = list()
@@ -2316,9 +2150,7 @@ class Client(object):
         Bulk-update of widgets.
 
         :param widgets: list of widget configurations.
-        :type widgets: List[Dict]
         :return: list of Widget objects
-        :rtype List[Widget]
         """
         check_list_of_dicts(widgets, 'widgets', fields=["id"])
         if len(widgets) != len({w.get("id") for w in widgets}):
@@ -2338,12 +2170,11 @@ class Client(object):
         widgets_response = response.json().get('results')
         return [Widget.create(json=widget_json, client=self) for widget_json in widgets_response]
 
-    def delete_widget(self, widget: Union[Widget, Text]) -> None:
+    def delete_widget(self, widget: Union[Widget, str]) -> None:
         """
         Delete a single Widget.
 
         :param widget: Widget or its UUID to be deleted
-        :type widget: Widget or basestring
         :return: None
         :raises APIError: whenever the widget could not be deleted
         :raises IllegalArgumentError: whenever the input `widget` is invalid
@@ -2353,14 +2184,13 @@ class Client(object):
         response = self._request('DELETE', url)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Widget {}".format(widget), response=response)
+            raise APIError(f"Could not delete Widget {widget}", response=response)
 
-    def delete_widgets(self, widgets: List[Union[Widget, Text]]) -> None:
+    def delete_widgets(self, widgets: List[Union[Widget, str]]) -> None:
         """
         Delete multiple Widgets.
 
         :param widgets: List, Tuple or Set of Widgets or their UUIDs to be deleted
-        :type widgets: List[Union[Widget, Text]]
         :return: None
         :raises APIError: whenever the widgets could not be deleted
         :raises IllegalArgumentError: whenever the input `widgets` is invalid
@@ -2377,9 +2207,9 @@ class Client(object):
 
     @staticmethod
     def _validate_associations(
-            widgets: List[Union[Widget, Text]],
+            widgets: List[Union[Widget, str]],
             associations: List[Tuple[List, List, Part, Part]],
-    ) -> List[Text]:
+    ) -> List[str]:
         """Perform the validation of the internal widgets and associations."""
         widget_ids = check_list_of_base(widgets, Widget, 'widgets')
 
@@ -2407,19 +2237,12 @@ class Client(object):
         Retrieve a list of associations.
 
         :param widget: widget for which to retrieve associations
-        :type widget: Widget
         :param activity: activity for which to retrieve associations
-        :type activity: Activity
         :param part: part for which to retrieve associations
-        :type part: Part
         :param property: property for which to retrieve associations
-        :type property: AnyProperty
         :param scope: scope for which to retrieve associations
-        :type scope: Scope
         :param limit: maximum number of associations to retrieve
-        :type limit: int
         :return: list of association objects
-        :rtype List[Association]
         """
         part = check_type(part, Part, 'part')
         if part is not None:
@@ -2472,11 +2295,11 @@ class Client(object):
 
     def update_widget_associations(
             self,
-            widget: Union[Widget, Text],
+            widget: Union[Widget, str],
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
-            part_instance: Optional[Union[Part, Text]] = None,
-            parent_part_instance: Optional[Union[Part, Text]] = None,
+            part_instance: Optional[Union[Part, str]] = None,
+            parent_part_instance: Optional[Union[Part, str]] = None,
             **kwargs
     ) -> None:
         """
@@ -2485,17 +2308,12 @@ class Client(object):
         This is a patch to the list list of associations. Existing associations are not replaced.
 
         :param widget: widget to update associations for
-        :type widget: :class:`Widget` or UUID
         :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    read rights
-        :type readable_models: List[Property] or List[UUID] or None
         :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    write rights
-        :type writable_models: List[Property] or List[UUID] or None
         :param part_instance: Part object or UUID to be used as instance of the widget
-        :type part_instance: Part or UUID
         :param parent_part_instance: Part object or UUID to be used as parent of the widget
-        :type parent_part_instance: Part or UUID
         :return: None
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
@@ -2513,7 +2331,7 @@ class Client(object):
 
     def update_widgets_associations(
             self,
-            widgets: List[Union[Widget, Text]],
+            widgets: List[Union[Widget, str]],
             associations: List[Tuple],
             **kwargs
     ) -> None:
@@ -2523,10 +2341,8 @@ class Client(object):
         This is patch to the list of associations. Existing associations are not replaced.
 
         :param widgets: list of widgets to update associations for.
-        :type widgets: :class: list
         :param associations: list of tuples, each tuple containing 2 lists of properties
                              (of :class:`Property` or property_ids (uuids)
-        :type associations: List[Tuple]
         :return: None
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
@@ -2578,11 +2394,11 @@ class Client(object):
 
     def set_widget_associations(
             self,
-            widget: Union[Widget, Text],
+            widget: Union[Widget, str],
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
-            part_instance: Optional[Union[Part, Text]] = None,
-            parent_part_instance: Optional[Union[Part, Text]] = None,
+            part_instance: Optional[Union[Part, str]] = None,
+            parent_part_instance: Optional[Union[Part, str]] = None,
             **kwargs
     ) -> None:
         """
@@ -2592,17 +2408,12 @@ class Client(object):
         emptied out and replaced with no associations.
 
         :param widget: widget to set associations for.
-        :type widget: :class:`Widget` or UUID
         :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    read rights
-        :type readable_models: List[Property] or List[UUID] or None
         :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                    write rights
-        :type writable_models: List[Property] or List[UUID] or None
         :param part_instance: Part object or UUID to be used as instance of the widget
-        :type part_instance: Part or UUID
         :param parent_part_instance: Part object or UUID to be used as parent of the widget
-        :type parent_part_instance: Part or UUID
         :return: None
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
@@ -2620,7 +2431,7 @@ class Client(object):
 
     def set_widgets_associations(
             self,
-            widgets: List[Union[Widget, Text]],
+            widgets: List[Union[Widget, str]],
             associations: List[Tuple],
             **kwargs
     ) -> None:
@@ -2631,10 +2442,8 @@ class Client(object):
         emptied out and replaced with no associations.
 
         :param widgets: list of widgets to set associations for.
-        :type widgets: :class: list
         :param associations: list of tuples, each tuple containing 2 lists of properties
                              (of :class:`Property` or property_ids (uuids)
-        :type associations: List[Tuple]
         :return: None
         :raises APIError: when the associations could not be changed
         :raise IllegalArgumentError: when the list is not of the right type
@@ -2692,7 +2501,6 @@ class Client(object):
         Remove all associations of a widget.
 
         :param widget: widget to clear associations from.
-        :type widget: Widget
         :return: None
         :raises APIError: when the associations could not be cleared.
         :raise IllegalArgumentError: if the widget is not of type Widget
@@ -2704,23 +2512,21 @@ class Client(object):
         response = self._request(method='PUT', url=url)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not clear Associations of Widget {}".format(widget), response=response)
+            raise APIError(f"Could not clear Associations of Widget {widget}", response=response)
 
         return None
 
     def remove_widget_associations(
             self,
             widget: Widget,
-            models: Optional[List[Union['AnyProperty', Text]]] = (),
+            models: Optional[List[Union['AnyProperty', str]]] = (),
             **kwargs
     ) -> None:
         """
         Remove specific associations from a widget.
 
         :param widget: widget to remove associations from.
-        :type widget: Widget
         :param models: list of Property models or their UUIDs
-        :type models: list
         :return: None
         :raises APIError: when the associations could not be removed
         :raise IllegalArgumentError: if the widget is not of type Widget
@@ -2742,7 +2548,7 @@ class Client(object):
         response = self._request(method='PUT', url=url, params=API_EXTRA_PARAMS['widget'], json=data)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not remove Associations of Widget {}".format(widget), response=response)
+            raise APIError(f"Could not remove Associations of Widget {widget}", response=response)
 
         return
 
@@ -2760,11 +2566,8 @@ class Client(object):
            Add ability to move activity from one classification to another.
 
         :param activity: The `Activity` object to be moved.
-        :type activity: :class: `Activity`
         :param parent: The parent `Subprocess` under which this `Activity` will be moved.
-        :type parent: :class:`Activity` or UUID
         :param classification: The target classification if it is desirable to change ActivityClassification
-        :type classification: Text
         :raises IllegalArgumentError: if the 'parent' activity_type is not :class:`enums.ActivityType.SUBPROCESS`
         :raises IllegalArgumentError: if the 'parent' type is not :class:`Activity` or UUID
         :raises APIError: if an Error occurs.
@@ -2793,7 +2596,7 @@ class Client(object):
         response = self._request('PUT', url, data=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not move Activity {}".format(activity), response=response)
+            raise APIError(f"Could not move Activity {activity}", response=response)
 
         activity.parent_id = parent_id
 
@@ -2802,10 +2605,8 @@ class Client(object):
         Update multiple properties simultaneously.
 
         :param properties: list of dictionaries to set the properties
-        :type properties: List[Dict]
         :raises: IllegalArgumentError
         :return: list of Properties
-        :rtype List[AnyProperty]
 
 
         Examples
@@ -2831,14 +2632,13 @@ class Client(object):
 
         return properties
 
-    def notifications(self, pk: Optional[Text] = None, **kwargs) -> List[Notification]:
+    def notifications(self, pk: Optional[str] = None, **kwargs) -> List[Notification]:
         """Retrieve one or more notifications stored on the instance.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
         refer to the documentation of the KE-chain API for additional query parameters.
 
         :param pk: if provided, filter the search by notification_id
-        :type pk: basestring or None
         :param kwargs: (optional) additional search keyword arguments
         :return: list of :class:`models.Notification` objects
         :raises APIError: When the retrieval call failed due to various reasons
@@ -2859,7 +2659,7 @@ class Client(object):
 
         return [Notification(notification, client=self) for notification in data['results']]
 
-    def notification(self, pk: Optional[Text] = None, *args, **kwargs) -> Notification:
+    def notification(self, pk: Optional[str] = None, *args, **kwargs) -> Notification:
         """Retrieve a single KE-chain notification.
 
         Uses the same interface as the :func:`notifications` method but returns only a single pykechain
@@ -2869,7 +2669,6 @@ class Client(object):
         refer to the documentation of the KE-chain API for additional query parameters.
 
         :param pk: if provided, filter the search by notification_id
-        :type pk: basestring or None
         :param kwargs: (optional) additional search keyword arguments
         :return: a single :class:`models.Notification`
         :raises NotFoundError: When no `Notification` is found based on the search arguments
@@ -2879,12 +2678,12 @@ class Client(object):
 
     def create_notification(
             self,
-            subject: Text,
-            message: Text,
+            subject: str,
+            message: str,
             status: Optional[NotificationStatus] = NotificationStatus.DRAFT,
-            recipients: Optional[List[Union[User, Text]]] = None,
-            team: Optional[Union[Team, Text]] = None,
-            from_user: Optional[Union[User, Text]] = None,
+            recipients: Optional[List[Union[User, str]]] = None,
+            team: Optional[Union[Team, str]] = None,
+            from_user: Optional[Union[User, str]] = None,
             event: Optional[NotificationEvent] = None,
             channel: Optional[NotificationChannels] = NotificationChannels.EMAIL,
             **kwargs
@@ -2893,21 +2692,13 @@ class Client(object):
         Create a single `Notification`.
 
         :param subject: Header text of the notification
-        :type subject: str
         :param message: Content message of the notification
-        :type message: str
         :param status: (O) life-cycle status of the notification, defaults to "DRAFT".
-        :type status: NotificationStatus
         :param recipients: (O) list of recipients, each being a User object, user ID or an email address.
-        :type recipients: list
         :param team: (O) team object to which the notification is constrained
-        :type team: Team object or Team UUID
         :param from_user: (O) Sender of the notification, either a User object or user ID. Defaults to script user.
-        :type from_user: User or user ID
         :param event: (O) originating event of the notification.
-        :type event: NotificationEvent
         :param channel: (O) method used to send the notification, defaults to "EMAIL".
-        :type channel: NotificationChannels
         :param kwargs: (optional) keyword=value arguments
         :return: the newly created `Notification`
         :raises: APIError: when the `Notification` could not be created
@@ -2955,12 +2746,11 @@ class Client(object):
         notification = Notification(response.json().get('results')[0], client=self)
         return notification
 
-    def delete_notification(self, notification: Union[Notification, Text]) -> None:
+    def delete_notification(self, notification: Union[Notification, str]) -> None:
         """
         Delete a single Notification.
 
         :param notification: Notification or its UUID to be deleted
-        :type notification: Notification or basestring
         :return: None
         :raises APIError: whenever the notification could not be deleted
         :raises IllegalArgumentError: whenever the input `notification` is invalid
@@ -2971,12 +2761,12 @@ class Client(object):
         response = self._request('DELETE', url)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Notification {}".format(notification), response=response)
+            raise APIError(f"Could not delete Notification {notification}", response=response)
 
     def banners(
             self,
-            pk: Optional[Text] = None,
-            text: Optional[Text] = None,
+            pk: Optional[str] = None,
+            text: Optional[str] = None,
             is_active: Optional[bool] = None,
             **kwargs
     ) -> List[Banner]:
@@ -2987,7 +2777,6 @@ class Client(object):
         :param text: Text displayed in the banner
         :param is_active: Whether the banner is currently active
         :return: list of Banner objects
-        :rtype list
         """
         request_params = {
             'text': check_text(text, 'text'),
@@ -3012,38 +2801,31 @@ class Client(object):
         Retrieve a single Banner, see `banners()` for available arguments.
 
         :return: single banner
-        :rtype: Banner
         """
         return self._retrieve_singular(self.banners, *args, **kwargs)
 
     def create_banner(
             self,
-            text: Text,
-            icon: Text,
+            text: str,
+            icon: str,
             active_from: datetime.datetime,
             active_until: Optional[datetime.datetime] = None,
             is_active: Optional[bool] = False,
-            url: Optional[Text] = None,
+            url: Optional[str] = None,
             **kwargs
     ) -> Banner:
         """
         Create a new banner.
 
         :param text: Text to display in the banner. May use HTML.
-        :type text: str
         :param icon: Font-awesome icon to stylize the banner
-        :type icon: str
         :param active_from: Datetime from when the banner will become active.
-        :type active_from: datetime.datetime
         :param active_until: Datetime from when the banner will no longer be active.
-        :type active_until: datetime.datetime
         :param is_active: Boolean whether to set the banner as active, defaults to False.
-        :type is_active: bool
         :param url: target for the "more info" button within the banner.
         :param url: str
         :param kwargs: additional arguments for the request
         :return: the new banner
-        :rtype: Banner
         """
         data = {
             'text': check_text(text, 'text'),
@@ -3072,7 +2854,6 @@ class Client(object):
         Retrieve the currently active banner.
 
         :return: Banner object. If no banner is active, returns None.
-        :rtype: Banner
         :raise APIError whenever the banners could not be retrieved properly.
         :raises NotFoundError whenever there is no active banner.
         :raises MultipleFoundError whenever multiple banners are active.
@@ -3103,16 +2884,14 @@ class Client(object):
 
     def expiring_downloads(
             self,
-            pk: Optional[Text] = None,
+            pk: Optional[str] = None,
             expires_in: Optional[int] = None,
             **kwargs
     ) -> List[ExpiringDownload]:
         """Search for Expiring Downloads with optional pk.
 
         :param pk: if provided, filter the search for an expiring download by download_id
-        :type pk: basestring or None
         :param expires_in: if provided, filter the search for the expires_in (in seconds)
-        :type expires_in: int
         :return: list of Expiring Downloads objects
         """
         request_params = {
@@ -3135,17 +2914,14 @@ class Client(object):
             self,
             expires_at: Optional[datetime.datetime] = None,
             expires_in: Optional[int] = None,
-            content_path: Optional[Text] = None
+            content_path: Optional[str] = None
     ) -> ExpiringDownload:
         """
         Create an new Expiring Download.
 
         :param expires_at: The moment at which the ExpiringDownload will expire
-        :type expires_at: datetime.datetime
         :param expires_in: The amount of time (in seconds) in which the ExpiringDownload will expire
-        :type expires_in: int
         :param content_path: the path to the file to be uploaded in the newly created `ExpiringDownload` object
-        :type content_path: str
         :return:
         """
         expires_at = check_type(expires_at, datetime.datetime, 'expires_at')
@@ -3167,12 +2943,12 @@ class Client(object):
 
     def create_context(
             self,
-            name: Text,
+            name: str,
             context_type: ContextType,
             scope: Scope,
             context_group: ContextGroup = None,
             activities=None,
-            description: Text = None,
+            description: str = None,
             tags=None,
             options=None,
             feature_collection=None,
@@ -3255,7 +3031,6 @@ class Client(object):
         .. versionadded:: 3.12
 
         :return: a single Contexts
-        :rtype: Context
         """
         return self._retrieve_singular(self.contexts, *args, **kwargs)  # noqa
 
@@ -3278,7 +3053,6 @@ class Client(object):
         :param activities: (optional) filter on a list of Activities or Activity Id's
         :param scope: (optional) filter on a scope.
         :return: a list of Contexts
-        :rtype: List[Context]
         """
         request_params = {
             'id': check_uuid(pk),

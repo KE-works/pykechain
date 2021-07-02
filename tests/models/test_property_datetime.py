@@ -11,7 +11,7 @@ class TestDateTime(TestBetamax):
     NAME = "_TESTING DATE"
 
     def setUp(self) -> None:
-        super(TestDateTime, self).setUp()
+        super().setUp()
 
         self.bike_model = self.project.model('Bike')
         self.property_model = self.bike_model.add_property(
@@ -22,7 +22,7 @@ class TestDateTime(TestBetamax):
 
     def tearDown(self):
         self.property_model.delete()
-        super(TestDateTime, self).tearDown()
+        super().tearDown()
 
     def test_get_datetime(self):
         value = self.property.value
@@ -73,4 +73,3 @@ class TestDateTime(TestBetamax):
         iso_format_datetime = DatetimeProperty.to_iso_format(date_time_value)
 
         self.assertIsInstance(iso_format_datetime, str)
-

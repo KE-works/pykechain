@@ -2,9 +2,9 @@ from unittest import TestCase
 
 from requests import PreparedRequest
 
-from pykechain.exceptions import (
-    APIError, ForbiddenError, MultipleFoundError, NotFoundError, ClientError, IllegalArgumentError,
-    InspectorComponentError)
+from pykechain.exceptions import (APIError, ClientError, ForbiddenError, IllegalArgumentError,
+                                  InspectorComponentError,
+                                  MultipleFoundError, NotFoundError)
 from tests.classes import TestBetamax
 
 

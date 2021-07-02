@@ -1,14 +1,15 @@
 import os
 from datetime import datetime
+from typing import Dict, Optional, Union
 
 import requests
-from typing import Text, Dict, Optional, Union
 
-from pykechain.enums import ServiceScriptUser, ServiceExecutionStatus, ServiceType, ServiceEnvironmentVersion
+from pykechain.enums import ServiceEnvironmentVersion, ServiceExecutionStatus, ServiceScriptUser, \
+    ServiceType
 from pykechain.exceptions import APIError
 from pykechain.models.base import Base, BaseInScope
-from pykechain.models.input_checks import check_text, check_enum, check_type
-from pykechain.utils import parse_datetime, Empty, clean_empty_values, empty
+from pykechain.models.input_checks import check_enum, check_text, check_type
+from pykechain.utils import Empty, clean_empty_values, empty, parse_datetime
 
 
 class Service(BaseInScope):
@@ -18,21 +19,13 @@ class Service(BaseInScope):
     .. versionadded:: 1.13
 
     :ivar id: id of the service
-    :type id: uuid
     :ivar name: name of the service
-    :type name: str
     :ivar description: description of the service
-    :type description: str
     :ivar version: version number of the service, as provided by uploaded
-    :type version: str
     :ivar type: type of the service. One of the :class:`ServiceType`
-    :type type: str
     :ivar filename: filename of the service
-    :type filename: str
     :ivar environment: environment in which the service will execute. One of :class:`ServiceEnvironmentVersion`
-    :type environment: str
     :ivar updated_at: datetime in UTC timezone when the Service was last updated
-    :type updated_at: datetime
 
     .. versionadded:: 3.0
 
@@ -44,7 +37,7 @@ class Service(BaseInScope):
 
     def __init__(self, json, **kwargs):
         """Construct a service from provided json data."""
-        super(Service, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
         del self.created_at
 
         self.description = json.get('description', '')
@@ -55,12 +48,12 @@ class Service(BaseInScope):
 
         # for SIM3 version
         self.trusted: bool = json.get('trusted')
-        self.run_as: Text = json.get('run_as')
+        self.run_as: str = json.get('run_as')
         self.verified_on: Optional[datetime] = parse_datetime(json.get('verified_on'))
         self.verification_results: Dict = json.get('verification_results')
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke Service '{}' id {}>".format(self.name, self.id[-8:])
+        return f"<pyke Service '{self.name}' id {self.id[-8:]}>"
 
     def execute(self, interactive: Optional[bool] = False, **kwargs) -> 'ServiceExecution':
         """
@@ -71,7 +64,6 @@ class Service(BaseInScope):
         .. versionadded:: 1.13
 
         :param interactive: (optional) True if the notebook service should execute in interactive mode.
-        :type interactive: bool or None
         :return: ServiceExecution when successful.
         :raises APIError: when unable to execute
         """
@@ -86,19 +78,19 @@ class Service(BaseInScope):
 
         if response.status_code == requests.codes.conflict:  # pragma: no cover
             raise APIError(
-                "Conflict: Could not execute Service {} as it is already running.".format(self), response=response)
+                f"Conflict: Could not execute Service {self} as it is already running.", response=response)
         elif response.status_code != requests.codes.accepted:  # pragma: no cover
             raise APIError(
-                "Could not execute Service {}".format(self), response=response)
+                f"Could not execute Service {self}", response=response)
 
         data = response.json()
         return ServiceExecution(json=data.get('results')[0], client=self._client)
 
     def edit(
             self,
-            name: Optional[Union[Text, Empty]] = empty,
-            description: Optional[Union[Text, Empty]] = empty,
-            version: Optional[Union[Text, Empty]] = empty,
+            name: Optional[Union[str, Empty]] = empty,
+            description: Optional[Union[str, Empty]] = empty,
+            version: Optional[Union[str, Empty]] = empty,
             type: Optional[Union[ServiceType, Empty]] = empty,
             environment_version: Optional[Union[ServiceEnvironmentVersion, Empty]] = empty,
             run_as: Optional[Union[ServiceScriptUser, Empty]] = empty,
@@ -113,20 +105,13 @@ class Service(BaseInScope):
         .. versionadded:: 1.13
 
         :param name: (optional) name of the service to change. Cannot be cleared.
-        :type name: basestring or None or Empty
         :param description: (optional) description of the service. Can be cleared.
-        :type description: basestring or None or Empty
         :param version: (optional) version number of the service. Can be cleared.
-        :type version: basestring or None or Empty
         :param type: (optional) script type (Python or Notebook). Cannot be cleared.
-        :type type: ServiceType or None or Empty
         :param environment_version: (optional) environment version of the service. Cannot be cleared.
-        :type environment_version: ServiceEnvironmentVersion or None or Empty
         :param run_as: (optional) user to run the service as. Defaults to kenode user (bound to scope).
                     Cannot be cleared.
-        :type run_as: ServiceScriptUser or None or Empty
         :param trusted: (optional) flag whether the service is trusted, default if False. Cannot be cleared.
-        :type trusted: bool or None or Empty
         :raises IllegalArgumentError: when you provide an illegal argument.
         :raises APIError: if the service could not be updated.
 
@@ -143,13 +128,13 @@ class Service(BaseInScope):
         update_dict = {
             'id': self.id,
             'name': check_text(name, 'name') or self.name,
-            'description': check_text(description, 'description') or str(),
+            'description': check_text(description, 'description') or '',
             'trusted': check_type(trusted, bool, 'trusted') or self.trusted,
             'script_type': check_enum(type, ServiceType, 'type') or self.type,
             'env_version': check_enum(environment_version, ServiceEnvironmentVersion,
                                       'environment version') or self.environment,
             'run_as': check_enum(run_as, ServiceScriptUser, 'run_as') or self.run_as,
-            'script_version': check_text(version, 'version') or str()
+            'script_version': check_text(version, 'version') or ''
         }
 
         if kwargs:  # pragma: no cover
@@ -161,7 +146,7 @@ class Service(BaseInScope):
                                          json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Service {}".format(self), response=response)
+            raise APIError(f"Could not update Service {self}", response=response)
 
         self.refresh(json=response.json()['results'][0])
 
@@ -173,7 +158,7 @@ class Service(BaseInScope):
         response = self._client._request('DELETE', self._client._build_url('service', service_id=self.id))
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Service {}".format(self), response=response)
+            raise APIError(f"Could not delete Service {self}", response=response)
 
     def upload(self, pkg_path):
         """
@@ -182,14 +167,13 @@ class Service(BaseInScope):
         .. versionadded:: 1.13
 
         :param pkg_path: path to the python script or kecpkg to upload.
-        :type pkg_path: basestring
         :raises APIError: if the python package could not be uploaded.
         :raises OSError: if the python package could not be located on disk.
         """
         if os.path.exists(pkg_path):
             self._upload(pkg_path=pkg_path)
         else:
-            raise OSError("Could not locate python package to upload in '{}'".format(pkg_path))
+            raise OSError(f"Could not locate python package to upload in '{pkg_path}'")
 
     def _upload(self, pkg_path):
         url = self._client._build_url('service_upload', service_id=self.id)
@@ -201,7 +185,7 @@ class Service(BaseInScope):
             )
 
         if response.status_code != requests.codes.accepted:  # pragma: no cover
-            raise APIError("Could not upload script file (or kecpkg) to Service {}".format(self), response=response)
+            raise APIError(f"Could not upload script file (or kecpkg) to Service {self}", response=response)
 
         self.refresh(json=response.json()['results'][0])
 
@@ -214,7 +198,6 @@ class Service(BaseInScope):
         .. versionadded:: 1.13
 
         :param target_dir: (optional) target dir. If not provided will save to current working directory.
-        :type target_dir: basestring or None
         :raises APIError: if unable to download the service.
         :raises OSError: if unable to save the service kecpkg file to disk.
         """
@@ -223,7 +206,7 @@ class Service(BaseInScope):
         url = self._client._build_url('service_download', service_id=self.id)
         response = self._client._request('GET', url)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not download script file from Service {}".format(self), response=response)
+            raise APIError(f"Could not download script file from Service {self}", response=response)
 
         with open(full_path, 'w+b') as f:
             for chunk in response:
@@ -236,7 +219,6 @@ class Service(BaseInScope):
         .. versionadded:: 1.13
 
         :param kwargs: (optional) additional search keyword arguments to limit the search even further.
-        :type kwargs: dict
         :return: list of ServiceExecutions associated to the current service.
         """
         return self._client.service_executions(service=self.id, scope=self.scope_id, **kwargs)
@@ -249,24 +231,17 @@ class ServiceExecution(Base):
     .. versionadded:: 1.13
 
     :ivar id: id of the service execution
-    :type id: uuid
     :ivar name: name of the service to which the execution is associated
-    :type name: str
     :ivar status: status of the service. One of :class:`ServiceExecutionStatus`
-    :type status: str
     :ivar service: the :class:`Service` object associated to this service execution
-    :type service: :class:`Service`
     :ivar service_id: the uuid of the associated Service object
-    :type service_id: uuid
     :ivar user: (optional) username of the user that executed the service
-    :type user: str or None
     :ivar activity_id: (optional) the uuid of the activity where the service was executed from
-    :type activity_id: uuid or None
     """
 
     def __init__(self, json, **kwargs):
         """Construct a scope from provided json data."""
-        super(ServiceExecution, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
         del self.created_at
         del self.updated_at
 
@@ -276,7 +251,7 @@ class ServiceExecution(Base):
 
         self.user = json.get('username')
         if json.get('activity') is not None:
-            self.activity_id: Optional[Text] = json['activity'].get('id')
+            self.activity_id: Optional[str] = json['activity'].get('id')
         else:
             self.activity_id = None
 
@@ -286,7 +261,7 @@ class ServiceExecution(Base):
         self._service: Optional[Service] = None
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke ServiceExecution '{}' id {}>".format(self.name, self.id[-8:])
+        return f"<pyke ServiceExecution '{self.name}' id {self.id[-8:]}>"
 
     @property
     def service(self) -> Service:
@@ -308,7 +283,7 @@ class ServiceExecution(Base):
         response = self._client._request('GET', url, params=dict(format='json'))
 
         if response.status_code != requests.codes.accepted:  # pragma: no cover
-            raise APIError("Could not terminate Service {}".format(self), response=response)
+            raise APIError(f"Could not terminate Service {self}", response=response)
 
     def get_log(self, target_dir=None, log_filename='log.txt'):
         """
@@ -317,9 +292,7 @@ class ServiceExecution(Base):
         .. versionadded:: 1.13
 
         :param target_dir: (optional) directory path name where the store the log.txt to.
-        :type target_dir: basestring or None
         :param log_filename: (optional) log filename to write the log to, defaults to `log.txt`.
-        :type log_filename: basestring or None
         :raises APIError: if the logfile could not be found.
         :raises OSError: if the file could not be written.
         """
@@ -328,7 +301,7 @@ class ServiceExecution(Base):
         url = self._client._build_url('service_execution_log', service_execution_id=self.id)
         response = self._client._request('GET', url)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not download execution log of Service {}".format(self), response=response)
+            raise APIError(f"Could not download execution log of Service {self}", response=response)
 
         with open(full_path, 'w+b') as f:
             for chunk in response:
@@ -347,7 +320,7 @@ class ServiceExecution(Base):
         response = self._client._request('GET', url, params=dict(format='json'))
 
         if response.status_code != requests.codes.ok:
-            raise APIError("Could not retrieve notebook url of Service {}".format(self), response=response)
+            raise APIError(f"Could not retrieve notebook url of Service {self}", response=response)
 
         data = response.json()
         url = data.get('results')[0].get('url')

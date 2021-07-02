@@ -1,17 +1,17 @@
 import datetime
 import os
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
 import pytz
 import requests
-
-from typing import Any, Optional, List, Dict, Union, Text, Tuple, Callable
 from jsonschema import validate
 
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.enums import WidgetTypes, Category, WidgetTitleValue
+from pykechain.enums import Category, WidgetTitleValue, WidgetTypes
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import BaseInScope
-from pykechain.models.widgets.enums import MetaWidget, AssociatedObjectId
-from pykechain.models.widgets.helpers import _set_title, TITLE_TYPING
+from pykechain.models.widgets.enums import AssociatedObjectId, MetaWidget
+from pykechain.models.widgets.helpers import TITLE_TYPING, _set_title
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 from pykechain.utils import Empty, empty, slugify_ref
 
@@ -35,10 +35,9 @@ class Widget(BaseInScope):
         """Construct a Widget from a KE-chain 2 json response.
 
         :param json: the json response to construct the :class:`Part` from
-        :type json: dict
         """
         # we need to run the init of 'Base' instead of 'Part' as we do not need the instantiation of properties
-        super(Widget, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
         del self.name
 
         self.title = json.get("title")
@@ -59,15 +58,14 @@ class Widget(BaseInScope):
         self.progress = json.get('progress')
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.widget_type, self.id[-8:])
+        return f"<pyke {self.__class__.__name__} '{self.widget_type}' id {self.id[-8:]}>"
 
     @property
-    def title_visible(self) -> Optional[Text]:
+    def title_visible(self) -> Optional[str]:
         """
         Return the title of the widget displayed in KE-chain.
 
         :return: title string
-        :rtype str
         """
         show_title_value = self.meta.get(MetaWidget.SHOW_TITLE_VALUE)
         if show_title_value == WidgetTitleValue.NO_TITLE:
@@ -102,7 +100,6 @@ class Widget(BaseInScope):
         """Activity associated to the widget.
 
         :return: The Activity
-        :rtype: :class:`Activity`
         """
         return self._client.activity(id=self._activity_id)
 
@@ -110,7 +107,6 @@ class Widget(BaseInScope):
         """Parent widget.
 
         :return: The parent of this widget.
-        :rtype: :class:`Widget`
         """
         if not self._parent_id:
             raise NotFoundError('Widget has no parent widget (parent_id is null).')
@@ -121,7 +117,6 @@ class Widget(BaseInScope):
         """Validate the meta and return the meta if validation is successfull.
 
         :param meta: meta of the widget to be validated.
-        :type meta: dict
         :return meta: if the meta is validated correctly
         :raise: `ValidationError`
         """
@@ -136,20 +131,16 @@ class Widget(BaseInScope):
         It does not create a widget object in KE-chain. But a pseudo :class:`Widget` object.
 
         :param json: the json from which the :class:`Widget` object to create
-        :type json: dict
         :return: a :class:`Widget` object
-        :rtype: :class:`Widget`
         """
         def _type_to_classname(type_widget: str):
             """
             Generate corresponding inner classname based on the widget type.
 
             :param type_widget: type of the widget (one of :class:`WidgetTypes`)
-            :type type_widget: str
             :return: classname corresponding to the widget type
-            :rtype: str
             """
-            return "{}Widget".format(type_widget.title()) if type_widget else WidgetTypes.UNDEFINED
+            return f"{type_widget.title()}Widget" if type_widget else WidgetTypes.UNDEFINED
 
         widget_type = json.get('widget_type')
 
@@ -212,8 +203,8 @@ class Widget(BaseInScope):
             self,
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
-            part_instance: Optional[Union['Part', Text]] = None,
-            parent_part_instance: Optional[Union['Part', Text]] = None,
+            part_instance: Optional[Union['Part', str]] = None,
+            parent_part_instance: Optional[Union['Part', str]] = None,
             **kwargs
     ) -> None:
         """
@@ -226,14 +217,10 @@ class Widget(BaseInScope):
 
         :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                 read rights (alias = inputs)
-        :type readable_models: List[Property] or List[UUID] or None
         :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                 write rights (alias = outputs)
-        :type writable_models: List[Property] or List[UUID] or None
         :param part_instance: Part object or UUID to be used as instance of the widget
-        :type part_instance: Part or UUID
         :param parent_part_instance: Part object or UUID to be used as parent of the widget
-        :type parent_part_instance: Part or UUID
         :param kwargs: additional keyword arguments to be passed into the API call as param.
         :return: None
         :raises APIError: when the associations could not be changed
@@ -252,8 +239,8 @@ class Widget(BaseInScope):
             self,
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
-            part_instance: Optional[Union['Part', Text]] = None,
-            parent_part_instance: Optional[Union['Part', Text]] = None,
+            part_instance: Optional[Union['Part', str]] = None,
+            parent_part_instance: Optional[Union['Part', str]] = None,
             **kwargs
     ) -> None:
         """
@@ -266,14 +253,10 @@ class Widget(BaseInScope):
 
         :param readable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                 read rights (alias = inputs)
-        :type readable_models: List[Property] or List[UUID] or None
         :param writable_models: list of property models (of :class:`Property` or property_ids (uuids) that has
                                 write rights (alias = outputs)
-        :type writable_models: List[Property] or List[UUID] or None
         :param part_instance: Part object or UUID to be used as instance of the widget
-        :type part_instance: Part or UUID
         :param parent_part_instance: Part object or UUID to be used as parent of the widget
-        :type parent_part_instance: Part or UUID
         :param kwargs: additional keyword arguments to be passed into the API call as param.
         :return: None
         :raises APIError: when the associations could not be set
@@ -290,7 +273,7 @@ class Widget(BaseInScope):
 
     def remove_associations(
             self,
-            models: List[Union['Property', Text]],
+            models: List[Union['Property', str]],
             **kwargs
     ) -> None:
         """
@@ -317,9 +300,7 @@ class Widget(BaseInScope):
             * False: use the default title, depending on the widget type
             * String value: use this title
             * None: No title at all
-        :type title: basestring, None or False
         :param meta: (optional) new Meta definition
-        :type meta: dict or None
         :raises APIError: if the widget could not be updated.
         """
         update_dict = dict()
@@ -339,7 +320,7 @@ class Widget(BaseInScope):
         response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['widgets'], json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Widget {}".format(self), response=response)
+            raise APIError(f"Could not update Widget {self}", response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
@@ -347,7 +328,6 @@ class Widget(BaseInScope):
         """Delete the widget.
 
         :return: True when successful
-        :rtype: bool
         :raises APIError: when unable to delete the activity
         """
         if self.manager:
@@ -359,9 +339,7 @@ class Widget(BaseInScope):
         """Copy the widget.
 
         :param target_activity: `Activity` object under which the desired `Widget` is copied
-        :type target_activity: :class:`Activity`
         :param order: (optional) order in the activity of the widget.
-        :type order: int or None
         :returns: copied :class:`Widget `
         :raises IllegalArgumentError: if target_activity is not :class:`Activity`
 
@@ -401,9 +379,7 @@ class Widget(BaseInScope):
         """Move the widget.
 
         :param target_activity: `Activity` object under which the desired `Widget` is moved
-        :type target_activity: :class:`Activity`
         :param order: (optional) order in the activity of the widget.
-        :type order: int or None
         :returns: copied :class:`Widget `
         :raises IllegalArgumentError: if target_activity is not :class:`Activity`
 
@@ -416,12 +392,12 @@ class Widget(BaseInScope):
 
     @staticmethod
     def _validate_excel_export_inputs(
-            target_dir: Text,
-            file_name: Text,
+            target_dir: str,
+            file_name: str,
             user: 'User',
             default_file_name: Callable,
     ) -> Tuple[
-        Text, Text, 'User'
+        str, str, 'User'
     ]:
         """Check, convert and return the inputs for the Excel exporter functions."""
         if target_dir is None:
@@ -433,7 +409,7 @@ class Widget(BaseInScope):
             file_name = default_file_name()
         else:
             if not isinstance(file_name, str):
-                raise IllegalArgumentError('`file_name` must be a string, "{}" is not.'.format(file_name))
+                raise IllegalArgumentError(f'`file_name` must be a string, "{file_name}" is not.')
             elif '.xls' in file_name:
                 file_name = file_name.split('.xls')[0]
             file_name = slugify_ref(file_name)
@@ -443,32 +419,28 @@ class Widget(BaseInScope):
 
         from pykechain.models import User
         if user is not None and not isinstance(user, User):
-            raise IllegalArgumentError('`user` must be a Pykechain User object, "{}" is not.'.format(user))
+            raise IllegalArgumentError(f'`user` must be a Pykechain User object, "{user}" is not.')
 
         return target_dir, file_name, user
 
     def download_as_excel(
             self,
-            target_dir: Optional[Text] = None,
-            file_name: Optional[Text] = None,
+            target_dir: Optional[str] = None,
+            file_name: Optional[str] = None,
             user: 'User' = None,
-    ) -> Text:
+    ) -> str:
         """
         Export a grid widget as an Excel sheet.
 
         :param target_dir: directory (path) to store the Excel sheet.
-        :type target_dir: str
         :param file_name: optional, name of the Excel file
-        :type file_name: str
         :param user: User object to create timezone-aware datetime values
-        :type user: User
         :return: file path of the created Excel sheet
-        :rtype str
         """
         grid_widgets = {WidgetTypes.SUPERGRID, WidgetTypes.FILTEREDGRID}
         if self.widget_type not in grid_widgets:
             raise IllegalArgumentError(
-                "Only widgets of type {} can be exported to Excel, `{}` is not.".format(grid_widgets, self.widget_type))
+                f"Only widgets of type {grid_widgets} can be exported to Excel, `{self.widget_type}` is not.")
 
         part_model_id = self.meta.get("partModelId")
         parent_instance_id = self.meta.get("parentInstanceId")
@@ -501,7 +473,7 @@ class Widget(BaseInScope):
         response = self._client._request('GET', url, data=json, params=params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not export widget {}: {}".format(str(response), response.content))
+            raise APIError(f"Could not export widget {str(response)}: {response.content}")
 
         full_path = os.path.join(target_dir, file_name)
 

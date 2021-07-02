@@ -1,44 +1,33 @@
-from typing import Union, List, Dict, Optional, Text, Tuple, Any  # noqa: F401
+from typing import Any, Dict, List, Optional, Text, Tuple, Union  # noqa: F401
 
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS, PARTS_BATCH_LIMIT
-from pykechain.enums import Category, Multiplicity, Classification, PropertyType
-from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
-from pykechain.models.input_checks import check_text, check_type, check_list_of_base, check_list_of_dicts
+from pykechain.enums import Category, Classification, Multiplicity, PropertyType
+from pykechain.exceptions import APIError, IllegalArgumentError, MultipleFoundError, NotFoundError
+from pykechain.models.input_checks import check_list_of_base, check_list_of_dicts, check_text, \
+    check_type
 from pykechain.models.property import Property
 from pykechain.models.tree_traversal import TreeObject
-from pykechain.utils import is_uuid, find, Empty, clean_empty_values, empty
+from pykechain.utils import Empty, clean_empty_values, empty, find, is_uuid
 
 
 class Part(TreeObject):
     """A virtual object representing a KE-chain part.
 
     :ivar id: UUID of the part
-    :type id: basestring
     :ivar name: Name of the part
-    :type name: basestring
     :ivar ref: Reference of the part (slug of the original name)
-    :type ref: basestring
     :ivar description: description of the part
-    :type description: basestring or None
     :ivar created_at: the datetime when the object was created if available (otherwise None)
-    :type created_at: datetime or None
     :ivar updated_at: the datetime when the object was last updated if available (otherwise None)
-    :type updated_at: datetime or None
     :ivar category: The category of the part, either 'MODEL' or 'INSTANCE' (of :class:`pykechain.enums.Category`)
-    :type category: basestring
     :ivar parent_id: The UUID of the parent of this part
-    :type parent_id: basestring or None
     :ivar properties: The list of :class:`Property` objects belonging to this part.
-    :type properties: List[Property]
     :ivar multiplicity: The multiplicity of the part being one of the following options: ZERO_ONE, ONE, ZERO_MANY,
                         ONE_MANY, (reserved) M_N (of :class:`pykechain.enums.Multiplicity`)
-    :type multiplicity: basestring
     :ivar scope_id: scope UUID of the Part
-    :type scope_id: basestring
     :ivar properties: the list of properties of this part
-    :type properties: List[AnyProperty]
 
     Examples
     --------
@@ -73,29 +62,28 @@ class Part(TreeObject):
         """Construct a part from a KE-chain 2 json response.
 
         :param json: the json response to construct the :class:`Part` from
-        :type json: dict
         """
         # we need to run the init of 'Base' instead of 'Part' as we do not need the instantiation of properties
         super().__init__(json, **kwargs)
 
-        self.ref: Text = json.get('ref')
-        self.model_id: Text = json.get("model_id")
+        self.ref: str = json.get('ref')
+        self.model_id: str = json.get("model_id")
         self.category: Category = json.get('category')
-        self.description: Text = json.get('description')
-        self.multiplicity: Text = json.get('multiplicity')
+        self.description: str = json.get('description')
+        self.multiplicity: str = json.get('multiplicity')
         self.classification: Classification = json.get('classification')
 
         sorted_properties: List[Dict] = sorted(json['properties'], key=lambda p: p.get('order', 0))
         self.properties: List[Property] = [Property.create(p, client=self._client) for p in sorted_properties]
 
         proxy_data: Optional[Dict] = json.get('proxy_source_id_name', dict())
-        self._proxy_model_id: Optional[Text] = proxy_data.get('id') if proxy_data else None
+        self._proxy_model_id: Optional[str] = proxy_data.get('id') if proxy_data else None
 
     def __call__(self, *args, **kwargs) -> 'Part':
         """Short-hand version of the `child` method."""
         return self.child(*args, **kwargs)
 
-    def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional[Dict] = None):
+    def refresh(self, json: Optional[Dict] = None, url: Optional[str] = None, extra_params: Optional[Dict] = None):
         """Refresh the object in place."""
         if extra_params is None:
             extra_params = {}
@@ -121,7 +109,7 @@ class Part(TreeObject):
     # Family and structure methods
     #
 
-    def property(self, name: Text = None) -> 'AnyProperty':
+    def property(self, name: str = None) -> 'AnyProperty':
         """Retrieve the property belonging to this part based on its name, ref or uuid.
 
         :param name: property name, ref or UUID to search for
@@ -153,9 +141,9 @@ class Part(TreeObject):
                 matches = [p for p in self.properties if p.ref == name]
 
         if not matches:
-            raise NotFoundError("Could not find a property with name, id or ref: {}".format(name))
+            raise NotFoundError(f"Could not find a property with name, id or ref: {name}")
         elif len(matches) > 1:
-            raise MultipleFoundError("Found multiple properties with name, id or ref: {}".format(name))
+            raise MultipleFoundError(f"Found multiple properties with name, id or ref: {name}")
         else:
             return matches[0]
 
@@ -165,7 +153,6 @@ class Part(TreeObject):
         This property will return a `Scope` object. It will make an additional call to the KE-chain API.
 
         :return: the scope
-        :rtype: :class:`pykechain.models.Scope`
         :raises NotFoundError: if the scope could not be found
         """
         return super().scope
@@ -228,16 +215,14 @@ class Part(TreeObject):
             return self._client.parts(parent=self.id, category=self.category, **kwargs)
 
     def child(self,
-              name: Optional[Text] = None,
-              pk: Optional[Text] = None,
+              name: Optional[str] = None,
+              pk: Optional[str] = None,
               **kwargs) -> 'Part':
         """
         Retrieve a child object.
 
         :param name: optional, name of the child
-        :type name: str
         :param pk: optional, UUID of the child
-        :type: pk: str
         :return: Child object
         :raises MultipleFoundError: whenever multiple children fit match inputs.
         :raises NotFoundError: whenever no child matching the inputs could be found.
@@ -261,7 +246,7 @@ class Part(TreeObject):
             else:
                 part_list = self.children(pk=pk)
 
-        criteria = '\nname: {}\npk: {}\nkwargs: {}'.format(name, pk, kwargs)
+        criteria = f'\nname: {name}\npk: {pk}\nkwargs: {kwargs}'
 
         # If there is only one, then that is the part you are looking for
         if len(part_list) == 1:
@@ -269,9 +254,9 @@ class Part(TreeObject):
 
         # Otherwise raise the appropriate error
         elif len(part_list) > 1:
-            raise MultipleFoundError('{} has more than one matching child.{}'.format(self, criteria))
+            raise MultipleFoundError(f'{self} has more than one matching child.{criteria}')
         else:
-            raise NotFoundError('{} has no matching child.{}'.format(self, criteria))
+            raise NotFoundError(f'{self} has no matching child.{criteria}')
         return part
 
     def populate_descendants(self, batch: int = PARTS_BATCH_LIMIT) -> None:
@@ -287,7 +272,6 @@ class Part(TreeObject):
         .. versionchanged:: 3.3.2 now populates child parts instead of this part
 
         :param batch: Number of Parts to be retrieved in a batch
-        :type batch: int (defaults to 100)
         :returns: None
         :raises APIError: if you cannot create the children tree.
 
@@ -312,7 +296,6 @@ class Part(TreeObject):
         Retrieve a flat list of all descendants, sorted depth-first. Also populates all descendants.
 
         :returns list of child objects
-        :rtype List
         """
         if self._cached_children is None:
             self.populate_descendants()
@@ -359,7 +342,7 @@ class Part(TreeObject):
         if self.category == Category.INSTANCE:
             return self._client.model(pk=self.model_id)
         else:
-            raise NotFoundError('Part "{}" already is a model'.format(self))
+            raise NotFoundError(f'Part "{self}" already is a model')
 
     def instances(self, **kwargs) -> Union['PartSet', List['Part']]:
         """
@@ -388,7 +371,7 @@ class Part(TreeObject):
         if self.category == Category.MODEL:
             return self._client.parts(model=self, category=Category.INSTANCE, **kwargs)
         else:
-            raise NotFoundError('Part "{}" is not a model, hence it has no instances.'.format(self))
+            raise NotFoundError(f'Part "{self}" is not a model, hence it has no instances.')
 
     def instance(self) -> 'Part':
         """
@@ -407,14 +390,13 @@ class Part(TreeObject):
             raise MultipleFoundError("Part {} has more than a single instance. "
                                      "Use the `Part.instances()` method".format(self))
         else:
-            raise NotFoundError("Part {} has no instance".format(self))
+            raise NotFoundError(f"Part {self} has no instance")
 
     def count_instances(self) -> int:
         """
         Retrieve the number of instances of this Part model without the parts themselves.
 
         :return: number of Part instances
-        :rtype
         """
         if not self.category == Category.MODEL:
             raise IllegalArgumentError("You can only count the number of instances of a Part with category MODEL")
@@ -441,7 +423,6 @@ class Part(TreeObject):
         Retrieve the number of child parts using a light-weight request.
 
         :return: number of Parts
-        :rtype int
         """
         return super().count_children(method="parts", category=self.category, **kwargs)
 
@@ -451,8 +432,8 @@ class Part(TreeObject):
 
     def edit(
             self,
-            name: Optional[Union[Text, Empty]] = empty,
-            description: Optional[Union[Text, Empty]] = empty,
+            name: Optional[Union[str, Empty]] = empty,
+            description: Optional[Union[str, Empty]] = empty,
             **kwargs
     ) -> None:
         """Edit the details of a part (model or instance).
@@ -468,9 +449,7 @@ class Part(TreeObject):
         is refreshed.
 
         :param name: optional name of the part to edit. Cannot be cleared.
-        :type name: basestring or None or Empty
         :param description: (optional) description of the part. Can be cleared.
-        :type description: basestring or None or Empty
         :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
         :return: None
         :raises IllegalArgumentError: when the type or value of an argument provided is incorrect
@@ -498,7 +477,7 @@ class Part(TreeObject):
         update_dict = {
             'id': self.id,
             'name': check_text(name, 'name') or self.name,
-            'description': check_text(description, 'description') or str(),
+            'description': check_text(description, 'description') or '',
         }
 
         if kwargs:  # pragma: no cover
@@ -512,7 +491,7 @@ class Part(TreeObject):
                                          json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Part {}".format(self), response=response)
+            raise APIError(f"Could not update Part {self}", response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
@@ -540,9 +519,9 @@ class Part(TreeObject):
         """
         if self.category != Category.MODEL:
             raise IllegalArgumentError(
-                'Part "{}" is not a product model, therefore it cannot have a proxy model'.format(self))
+                f'Part "{self}" is not a product model, therefore it cannot have a proxy model')
         if self.classification != Classification.PRODUCT or not self._proxy_model_id:
-            raise NotFoundError('Part "{}" is not a product model, therefore it cannot have a proxy model'.format(self))
+            raise NotFoundError(f'Part "{self}" is not a product model, therefore it cannot have a proxy model')
 
         return self._client.model(pk=self._proxy_model_id)
 
@@ -557,7 +536,6 @@ class Part(TreeObject):
         is refreshed.
 
         :param model: `Part` object with category `MODEL`.
-        :type model: :class:`Part`
         :param kwargs: (optional) additional keyword=value arguments
         :return: :class:`Part` with category `INSTANCE`.
         :raises APIError: if unable to add the new child instance
@@ -591,7 +569,6 @@ class Part(TreeObject):
         is refreshed.
 
         :param parent: part to add the new instance to
-        :type parent: :class:`Part`
         :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
         :return: :class:`Part` with category `INSTANCE`
         :raises APIError: if unable to add the new child instance
@@ -635,7 +612,7 @@ class Part(TreeObject):
 
     def add_proxy_to(self,
                      parent: 'Part',
-                     name: Text,
+                     name: str,
                      multiplicity: Multiplicity = Multiplicity.ONE_MANY,
                      **kwargs) -> 'Part':
         """Add this model as a proxy to another parent model.
@@ -649,11 +626,8 @@ class Part(TreeObject):
         is refreshed.
 
         :param name: Name of the new proxy model
-        :type name: basestring
         :param parent: parent of the to be proxied model
-        :type parent: :class:`Part`
         :param multiplicity: the multiplicity of the new proxy model (default ONE_MANY)
-        :type multiplicity: basestring or None
         :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
         :return: the new proxied :class:`Part`.
         :raises APIError: in case an Error occurs
@@ -687,7 +661,7 @@ class Part(TreeObject):
     @staticmethod
     def _parse_update_dict(
             part: 'Part',
-            properties_fvalues: List[Dict[Text, Any]],
+            properties_fvalues: List[Dict[str, Any]],
             update_dict: Dict,
             creating: bool = False,
     ) -> Tuple[List[Dict], List[Dict], Dict]:
@@ -699,7 +673,6 @@ class Part(TreeObject):
         :param update_dict: dictionary with property values, keyed by property names
         :param creating: flag to indicate creation of new properties, hence using the `model_id` instead of `id`
         :return: Tuple with 2 lists of dicts
-        :rtype tuple
         """
         properties_fvalues = check_list_of_dicts(properties_fvalues, 'properties_fvalues') or list()
         check_type(update_dict, dict, "update_dict")
@@ -729,7 +702,7 @@ class Part(TreeObject):
 
     def add_with_properties(self,
                             model: 'Part',
-                            name: Optional[Text] = None,
+                            name: Optional[str] = None,
                             update_dict: Optional[Dict] = None,
                             properties_fvalues: Optional[List[Dict]] = None,
                             **kwargs) -> 'Part':
@@ -759,14 +732,10 @@ class Part(TreeObject):
            once these children are retrieved earlier.
 
         :param model: model of the part which to add a new instance, should follow the model tree in KE-chain
-        :type model: :class:`Part`
         :param name: (optional) name provided for the new instance as string otherwise use the name of the model
-        :type name: basestring or None
         :param update_dict: dictionary with keys being property names (str) or property_id (from the property models)
                             and values being property values
-        :type update_dict: dict or None
         :param properties_fvalues: (optional) keyword argument with raw list of properties update dicts
-        :type properties_fvalues: list of dict or None
         :param kwargs: (optional) additional keyword arguments that will be passed inside the update request
         :return: the newly created :class:`Part`
         :raises NotFoundError: when the property name is not a valid property of this part
@@ -784,7 +753,7 @@ class Part(TreeObject):
             raise APIError("Part should be of category INSTANCE")
 
         if not isinstance(model, Part) or model.category != Category.MODEL:
-            raise IllegalArgumentError('`model` must be a Part object of category MODEL, "{}" is not.'.format(model))
+            raise IllegalArgumentError(f'`model` must be a Part object of category MODEL, "{model}" is not.')
 
         instance_name = check_text(name, 'name') or model.name
         properties_fvalues, exception_fvalues, _ = self._parse_update_dict(
@@ -808,7 +777,7 @@ class Part(TreeObject):
         )
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not add to Part {}".format(self), response=response)
+            raise APIError(f"Could not add to Part {self}", response=response)
 
         new_part_instance: Part = Part(response.json()['results'][0], client=self._client)
 
@@ -858,7 +827,7 @@ class Part(TreeObject):
     def copy(
             self,
             target_parent: 'Part',
-            name: Optional[Text] = None,
+            name: Optional[str] = None,
             include_children: bool = True,
             include_instances: bool = True,
     ) -> 'Part':
@@ -868,13 +837,9 @@ class Part(TreeObject):
         .. versionadded:: 2.3
 
         :param target_parent: `Part` object under which the desired `Part` is copied
-        :type target_parent: :class:`Part`
         :param name: how the copied top-level `Part` should be called
-        :type name: basestring
         :param include_children: True to copy also the descendants of `Part`.
-        :type include_children: bool
         :param include_instances: True to copy also the instances of `Part` to ALL the instances of target_parent.
-        :type include_instances: bool
         :returns: copied :class:`Part` model.
         :raises IllegalArgumentError: if part and target_parent have different `Category`
         :raises IllegalArgumentError: if part and target_parent are identical
@@ -915,7 +880,7 @@ class Part(TreeObject):
     def move(
             self,
             target_parent: 'Part',
-            name: Optional[Text] = None,
+            name: Optional[str] = None,
             include_children: bool = True,
             include_instances: bool = True,
     ) -> 'Part':
@@ -925,13 +890,9 @@ class Part(TreeObject):
         .. versionadded:: 2.3
 
         :param target_parent: `Part` object under which the desired `Part` is moved
-        :type target_parent: :class:`Part`
         :param name: how the moved top-level `Part` should be called
-        :type name: basestring
         :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
-        :type include_children: bool
         :param include_instances: True to move also the instances of `Part` to ALL the instances of target_parent.
-        :type include_instances: bool
         :returns: moved :class:`Part` model.
         :raises IllegalArgumentError: if part and target_parent have different `Category`
         :raises IllegalArgumentError: if target_parent is descendant of part
@@ -962,7 +923,7 @@ class Part(TreeObject):
         return copied_part
 
     def update(self,
-               name: Optional[Text] = None,
+               name: Optional[str] = None,
                update_dict: Optional[Dict] = None,
                properties_fvalues: Optional[List[Dict]] = None,
                **kwargs) -> None:
@@ -985,12 +946,9 @@ class Part(TreeObject):
            Bulk option removed.
 
         :param name: new part name (defined as a string)
-        :type name: basestring or None
         :param update_dict: dictionary with keys being property names (str) or property ids (uuid)
                             and values being property values
-        :type update_dict: dict or None
         :param properties_fvalues: (optional) keyword argument with raw list of properties update dicts
-        :type properties_fvalues: list of dict or None
         :param kwargs: additional keyword-value arguments that will be passed into the part update request.
         :return: the updated :class:`Part`
         :raises NotFoundError: when the property name is not a valid property of this part
@@ -1038,7 +996,7 @@ class Part(TreeObject):
             )
 
             if response.status_code != requests.codes.ok:  # pragma: no cover
-                raise APIError("Could not update Part {}".format(self), response=response)
+                raise APIError(f"Could not update Part {self}", response=response)
 
             # update local properties (without a call)
             self.refresh(json=response.json()['results'][0])
@@ -1056,9 +1014,9 @@ class Part(TreeObject):
         response = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Part {}".format(self), response=response)
+            raise APIError(f"Could not delete Part {self}", response=response)
 
-    def order_properties(self, property_list: Optional[List[Union['AnyProperty', Text]]] = None) -> None:
+    def order_properties(self, property_list: Optional[List[Union['AnyProperty', str]]] = None) -> None:
         """
         Order the properties of a part model using a list of property objects or property names or property id's.
 
@@ -1071,7 +1029,6 @@ class Part(TreeObject):
 
         :param property_list: ordered list of property names (basestring) or property id's (uuid) or
                               a `Property` object.
-        :type property_list: list(basestring)
         :returns: the :class:`Part` with the reordered list of properties
         :raises APIError: when an Error occurs
         :raises IllegalArgumentError: When provided a wrong argument
@@ -1096,7 +1053,7 @@ class Part(TreeObject):
 
         """
         if self.category != Category.MODEL:
-            raise APIError("Ordering of properties must be done on a Part of category {}.".format(Category.MODEL))
+            raise APIError(f"Ordering of properties must be done on a Part of category {Category.MODEL}.")
 
         property_ids = check_list_of_base(property_list, Property, 'property_list', method=self.property)
 
@@ -1108,16 +1065,15 @@ class Part(TreeObject):
     # Utility Functions
     #
 
-    def _repr_html_(self) -> Text:
+    def _repr_html_(self) -> str:
         """
         Represent the part in a HTML table for the use in notebooks.
 
         :return: html text
-        :rtype: Text
         """
         html = [
             "<table width=100%>",
-            "<caption>{}</caption>".format(self.name),
+            f"<caption>{self.name}</caption>",
             "<tr>",
             "<th>Property</th>",
             "<th>Value</th>",
@@ -1127,9 +1083,9 @@ class Part(TreeObject):
         for prop in self.properties:
             style = "color:blue;" if prop._json_data.get('output', False) else ""
 
-            html.append("<tr style=\"{}\">".format(style))
-            html.append("<td>{}</td>".format(prop.name))
-            html.append("<td>{}</td>".format(prop.value))
+            html.append(f"<tr style=\"{style}\">")
+            html.append(f"<td>{prop.name}</td>")
+            html.append(f"<td>{prop.value}</td>")
             html.append("</tr>")
 
         html.append("</table>")
@@ -1143,7 +1099,6 @@ class Part(TreeObject):
         .. versionadded:: 1.9
 
         :returns: the values of the properties as a `dict`
-        :rtype: dict
 
         Example
         -------

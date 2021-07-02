@@ -1,15 +1,17 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from typing import Union
 
 from jsonschema import validate
 
-from pykechain.enums import PropertyType, Multiplicity, LinkTargets, SelectListRepresentations, FontAwesomeMode, \
-    GeoCoordinateConfig
-from pykechain.exceptions import IllegalArgumentError, APIError
-from pykechain.models import AnyProperty, Property, Scope, Activity, SelectListProperty
+from pykechain.enums import FontAwesomeMode, GeoCoordinateConfig, LinkTargets, Multiplicity, \
+    PropertyType, \
+    SelectListRepresentations
+from pykechain.exceptions import APIError, IllegalArgumentError
+from pykechain.models import Activity, AnyProperty, Property, Scope, SelectListProperty
 from pykechain.models.representations.representation_base import BaseRepresentation
-from pykechain.models.representations.representations import ButtonRepresentation, LinkTarget, SignificantDigits, \
-    DecimalPlaces, ThousandsSeparator, CustomIconRepresentation, Autofill, GeoCoordinateRepresentation
+from pykechain.models.representations.representations import Autofill, ButtonRepresentation, \
+    CustomIconRepresentation, \
+    DecimalPlaces, GeoCoordinateRepresentation, LinkTarget, SignificantDigits, ThousandsSeparator
 from pykechain.models.validators.validator_schemas import options_json_schema
 from tests.classes import SixTestCase, TestBetamax
 

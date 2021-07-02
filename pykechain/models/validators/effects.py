@@ -14,13 +14,10 @@ class TextEffect(ValidatorEffect):
         """Construct an helptext effect.
 
         :param json: (optional) dict (json) object to construct the object from
-        :type json: dict
         :param text: (optional) text to provide, default empty
-        :type text: basestring
         :param kwargs: (optional) additional kwargs to pass down
-        :type kwargs: dict
         """
-        super(TextEffect, self).__init__(json=json, text=text, **kwargs)
+        super().__init__(json=json, text=text, **kwargs)
         self.text = text
 
     def as_json(self) -> dict:
@@ -41,13 +38,10 @@ class ErrorTextEffect(ValidatorEffect):
         """Construct an errortext effect.
 
         :param json: (optional) dict (json) object to construct the object from
-        :type json: dict
         :param text: (optional) text to provide, default empty
-        :type text: basestring
         :param kwargs: (optional) additional kwargs to pass down
-        :type kwargs: dict
         """
-        super(ErrorTextEffect, self).__init__(json=json, **kwargs)
+        super().__init__(json=json, **kwargs)
 
 
 class HelpTextEffect(ValidatorEffect):
@@ -62,13 +56,10 @@ class HelpTextEffect(ValidatorEffect):
         """Construct an helptext effect.
 
         :param json: (optional) dict (json) object to construct the object from
-        :type json: dict
         :param text: (optional) text to provide, default empty
-        :type text: basestring
         :param kwargs: (optional) additional kwargs to pass down
-        :type kwargs: dict
         """
-        super(HelpTextEffect, self).__init__(json=json, text=text, **kwargs)
+        super().__init__(json=json, text=text, **kwargs)
 
 
 class VisualEffect(ValidatorEffect):
@@ -85,13 +76,10 @@ class VisualEffect(ValidatorEffect):
         """Construct an visual effect.
 
         :param json: (optional) dict (json) object to construct the object from
-        :type json: dict
         :param applyCss: (optional) class to apply, defaults to 'valid'
-        :type applyCss: basestring
         :param kwargs: (optional) additional kwargs to pass down
-        :type kwargs: dict
         """
-        super(VisualEffect, self).__init__(json=json, **kwargs)
+        super().__init__(json=json, **kwargs)
         self.applyCss = applyCss or self._config.get('applyCss')
 
     def as_json(self) -> dict:
@@ -111,11 +99,9 @@ class ValidVisualEffect(VisualEffect):
         """Construct an valid visual effect.
 
         :param json: (optional) dict (json) object to construct the object from
-        :type json: dict
         :param applyCss: (optional) class to apply, defaults to 'valid'
-        :type applyCss: basestring
         """
-        super(ValidVisualEffect, self).__init__(json=json, applyCss=applyCss, **kwargs)
+        super().__init__(json=json, applyCss=applyCss, **kwargs)
 
 
 class InvalidVisualEffect(VisualEffect):
@@ -128,8 +114,6 @@ class InvalidVisualEffect(VisualEffect):
         """Construct an invalid visual effect.
 
         :param json: (optional) dict (json) object to construct the object from
-        :type json: dict
         :param applyCss: (optional) class to apply, defaults to 'invalid'
-        :type applyCss: basestring
         """
-        super(InvalidVisualEffect, self).__init__(json=json, applyCss=applyCss, **kwargs)
+        super().__init__(json=json, applyCss=applyCss, **kwargs)

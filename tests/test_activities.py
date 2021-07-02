@@ -7,28 +7,16 @@ import pytest
 import pytz
 import requests
 
-from pykechain.enums import (
-    ActivityType,
-    ActivityStatus,
-    ActivityClassification,
-    Category,
-    activity_root_name_by_classification,
-    ActivityRootNames,
-    PaperSize,
-    PaperOrientation,
-    NotificationEvent,
-    Multiplicity,
-    PropertyType,
-)
-from pykechain.exceptions import (
-    NotFoundError,
-    MultipleFoundError,
-    IllegalArgumentError,
-    APIError,
-)
+from pykechain.enums import (ActivityClassification, ActivityRootNames, ActivityStatus,
+                             ActivityType, Category,
+                             Multiplicity, NotificationEvent, PaperOrientation, PaperSize,
+                             PropertyType,
+                             activity_root_name_by_classification)
+from pykechain.exceptions import (APIError, IllegalArgumentError, MultipleFoundError,
+                                  NotFoundError)
 from pykechain.models import Activity
 from pykechain.models.representations import CustomIconRepresentation
-from pykechain.utils import temp_chdir, slugify_ref
+from pykechain.utils import slugify_ref, temp_chdir
 from tests.classes import TestBetamax
 from tests.utils import TEST_FLAG_IS_WIM2
 
@@ -120,7 +108,7 @@ class TestActivityConstruction(TestBetamax):
     def test_create_with_classification(self):
 
         for classification in ActivityClassification.values():
-            with self.subTest(msg="Classification: {}".format(classification)):
+            with self.subTest(msg=f"Classification: {classification}"):
                 # setUp 1
                 root_name = activity_root_name_by_classification[classification]
                 root = self.project.activity(name=root_name)
@@ -132,7 +120,7 @@ class TestActivityConstruction(TestBetamax):
                 # setUp 2
                 task = self.client.create_activity(
                     parent=root,
-                    name="{}".format(classification),
+                    name=f"{classification}",
                     classification=classification,
                 )
 
@@ -567,7 +555,7 @@ class TestActivities(TestBetamax):
                        assignees=None)
         self.task.refresh()
         self.assertEqual(self.task.name, new_name)
-        self.assertEqual(self.task.description, str())
+        self.assertEqual(self.task.description, '')
         self.assertEqual(self.task.start_date, None)
         self.assertEqual(self.task.due_date, None)
         self.assertEqual(self.task.assignees, list())
@@ -778,7 +766,7 @@ class TestActivities(TestBetamax):
 
         self.assertSetEqual(
 
-            set(list_of_assignees_in_data), set([u.id for u in assignees_list])
+            set(list_of_assignees_in_data), {u.id for u in assignees_list}
         )
 
     def test_activity_assignees_list_no_assignees_gives_empty_list(self):

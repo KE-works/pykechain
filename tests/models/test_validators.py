@@ -1,15 +1,19 @@
-from jsonschema import validate, ValidationError
+from jsonschema import ValidationError, validate
 
-from pykechain.enums import PropertyVTypes, PropertyType
+from pykechain.enums import PropertyType, PropertyVTypes
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Property, AttachmentProperty
-from pykechain.models.validators import PropertyValidator, ValidatorEffect, VisualEffect, ValidVisualEffect, \
-    InvalidVisualEffect, NumericRangeValidator, BooleanFieldValidator
-from pykechain.models.validators.validator_schemas import options_json_schema, validator_jsonschema_stub, \
-    effects_jsonschema_stub
-from pykechain.models.validators.validators import RegexStringValidator, RequiredFieldValidator, EvenNumberValidator, \
-    OddNumberValidator, SingleReferenceValidator, EmailValidator, AlwaysAllowValidator, FileSizeValidator, \
-    FileExtensionValidator
+from pykechain.models import AttachmentProperty, Property
+from pykechain.models.validators import BooleanFieldValidator, InvalidVisualEffect, \
+    NumericRangeValidator, \
+    PropertyValidator, ValidVisualEffect, ValidatorEffect, VisualEffect
+from pykechain.models.validators.validator_schemas import effects_jsonschema_stub, \
+    options_json_schema, \
+    validator_jsonschema_stub
+from pykechain.models.validators.validators import AlwaysAllowValidator, EmailValidator, \
+    EvenNumberValidator, \
+    FileExtensionValidator, FileSizeValidator, OddNumberValidator, RegexStringValidator, \
+    RequiredFieldValidator, \
+    SingleReferenceValidator
 from tests.classes import SixTestCase, TestBetamax
 
 
@@ -688,7 +692,7 @@ class TestPropertyWithValidator(SixTestCase):
 class TestPropertyWithValidatorFromLiveServer(TestBetamax):
 
     def setUp(self):
-        super(TestPropertyWithValidatorFromLiveServer, self).setUp()
+        super().setUp()
         self.part_model = self.project.model(name='Model')
         self.numeric_range_prop_model = self.part_model.add_property(name='numericrange_validatortest',
                                                                      property_type=PropertyType.FLOAT_VALUE)
@@ -699,7 +703,7 @@ class TestPropertyWithValidatorFromLiveServer(TestBetamax):
     def tearDown(self):
         self.numeric_range_prop_model.delete()
         self.part.delete()
-        super(TestPropertyWithValidatorFromLiveServer, self).tearDown()
+        super().tearDown()
 
     def test_numeric_property_with_validator_parses(self):
         self.assertIsInstance(self.numeric_range_prop_instance._validators, list)

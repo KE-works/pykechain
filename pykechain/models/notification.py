@@ -1,56 +1,48 @@
+from typing import Dict, List, Optional, Union
+
 import requests
 
-from pykechain.enums import NotificationStatus, NotificationEvent, NotificationChannels
-from pykechain.exceptions import IllegalArgumentError, APIError
+from pykechain.enums import NotificationChannels, NotificationEvent, NotificationStatus
+from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Base
-from typing import Text, List, Optional, Dict, Union
-
-from pykechain.models.input_checks import check_text, check_enum, check_base, check_user
-from pykechain.utils import is_valid_email, Empty, clean_empty_values, empty
+from pykechain.models.input_checks import check_base, check_enum, check_text, check_user
+from pykechain.utils import Empty, clean_empty_values, empty, is_valid_email
 
 
 class Notification(Base):
     """A virtual object representing a KE-chain notification.
 
     :ivar id: UUID of the notification
-    :type id: basestring
     :ivar subject: subject of the notification
-    :type subject: basestring or None
     :ivar created_at: the datetime when the object was created if available (otherwise None)
-    :type created_at: datetime or None
     :ivar updated_at: the datetime when the object was last updated if available (otherwise None)
-    :type updated_at: datetime or None
     :ivar status: The status of the notification (see :class:`pykechain.enums.NotificationStatus`)
-    :type status: basestring or None
     :ivar event: The event of the notification (see :class:`pykechain.enums.NotificationEvent`)
-    :type event: basestring or None
     :ivar recipient_users: The list of ids of the users
-    :type recipient_users: List[User ids]
     """
 
     def __init__(self, json: Dict, **kwargs) -> None:
         """Construct a notification from a KE-chain 2 json response.
 
         :param json: the json response to construct the :class:`Notification` from
-        :type json: dict
         """
         super().__init__(json, **kwargs)
 
         self.message = json.get('message', '')
-        self.subject: Text = json.get('subject', '')
-        self.status: Text = json.get('status', '')
-        self.event: Text = json.get('event', '')
+        self.subject: str = json.get('subject', '')
+        self.status: str = json.get('status', '')
+        self.event: str = json.get('event', '')
         self.channels: List = json.get('channels', list())
         self.recipient_user_ids: List = json.get('recipient_users', list())
-        self.team_id: Text = json.get('team', '')
-        self.from_user_id: Text = json.get('from_user', '')
+        self.team_id: str = json.get('team', '')
+        self.from_user_id: str = json.get('from_user', '')
 
         self._from_user: Optional['User'] = None
         self._recipient_users: Optional[List['User']] = None
         self._team: Optional['Team'] = None
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke Notification id {}>".format(self.id[-8:])
+        return f"<pyke Notification id {self.id[-8:]}>"
 
     def get_recipient_users(self) -> List['User']:
         """Return the list of actual `User` objects based on recipient_users_ids."""
@@ -76,12 +68,12 @@ class Notification(Base):
 
     def edit(
             self,
-            subject: Optional[Union[Text, Empty]] = empty,
-            message: Optional[Union[Text, Empty]] = empty,
+            subject: Optional[Union[str, Empty]] = empty,
+            message: Optional[Union[str, Empty]] = empty,
             status: Optional[Union[NotificationStatus, Empty]] = empty,
-            recipients: Optional[Union[List[Union['User', Text, int]], Empty]] = empty,
-            team: Optional[Union['Team', Text, Empty]] = empty,
-            from_user: Optional[Union['User', Text, Empty]] = empty,
+            recipients: Optional[Union[List[Union['User', str, int]], Empty]] = empty,
+            team: Optional[Union['Team', str, Empty]] = empty,
+            from_user: Optional[Union['User', str, Empty]] = empty,
             event: Optional[Union[NotificationEvent, Empty]] = empty,
             channel: Optional[Union[NotificationChannels, Empty]] = empty,
             **kwargs
@@ -92,21 +84,13 @@ class Notification(Base):
         Setting an input to None will clear out the value (only applicable to recipients and from_user).
 
         :param subject: (O) Header text of the notification. Cannot be cleared.
-        :type subject: basestring or None or Empty
         :param message: (O) Content message of the notification. Cannot be cleared.
-        :type message: basestring or None or Empty
         :param status: (O) life-cycle status of the notification, defaults to "DRAFT". Cannot be cleared.
-        :type status: NotificationStatus
         :param recipients: (O) list of recipients, each being a User object, user ID or an email address.
-        :type recipients: list or None or Empty
         :param team: (O) team object to which the notification is constrained
-        :type team: Team object or Team UUID
         :param from_user: (O) Sender of the notification, either a User object or user ID. Defaults to script user.
-        :type from_user: User or user ID or None or Empty
         :param event: (O) originating event of the notification. Cannot be cleared.
-        :type event: NotificationEvent
         :param channel: (O) method used to send the notification, defaults to "EMAIL". Cannot be cleared.
-        :type channel: NotificationChannels
         :param kwargs: (optional) keyword=value arguments
         :return: None
         :raises: APIError: when the `Notification` could not be updated
@@ -166,6 +150,6 @@ class Notification(Base):
         response = self._client._request('PUT', url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Notification {}".format(self), response=response)
+            raise APIError(f"Could not update Notification {self}", response=response)
 
         self.refresh(json=response.json().get('results')[0])

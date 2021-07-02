@@ -1,4 +1,4 @@
-from typing import Any, List, Dict, Optional, Text, Union, Tuple, Iterable, TypeVar
+from typing import Any, Dict, Iterable, List, Optional, Tuple, TypeVar, Union
 
 import requests
 from jsonschema import validate
@@ -23,29 +23,17 @@ class Property(BaseInScope):
        This is a `Property` to communicate with a KE-chain 3 backend.
 
     :cvar bulk_update: flag to postpone update of properties until manually requested
-    :type bulk_update: bool
     :ivar type: The property type of the property. One of the types described in :class:`pykechain.enums.PropertyType`
-    :type type: str
     :ivar category: The category of the property, either `Category.MODEL` of `Category.INSTANCE`
-    :type category: str
     :ivar description: description of the property
-    :type description: str or None
     :ivar unit: unit of measure of the property
-    :type unit: str or None
     :ivar model: the id of the model (not the model object)
-    :type model: str
     :ivar output: a boolean if the value is configured as an output (in an activity)
-    :type output: bool
     :ivar part: The (parent) part in which this property is available
-    :type part: :class:`Part`
     :ivar value: the property value, can be set as well as property
-    :type value: Any
     :ivar validators: the list of validators that are available in the property
-    :type validators: List[PropertyValidator]
     :ivar is_valid: if the property conforms to the validators
-    :type is_valid: bool
     :ivar is_invalid: if the property does not conform to the validator
-    :type is_invalid: bool
     """
 
     _USE_BULK_UPDATE = False
@@ -56,7 +44,7 @@ class Property(BaseInScope):
         super().__init__(json, **kwargs)
 
         self.output: bool = json.get('output')
-        self.model_id: Optional[Text] = json.get('model_id')
+        self.model_id: Optional[str] = json.get('model_id')
         self.part_id = json.get('part_id')
         self.ref = json.get('ref')
         self.type = json.get('property_type')
@@ -85,7 +73,7 @@ class Property(BaseInScope):
         if self._options.get('validators'):
             self._parse_validators()
 
-    def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional = None) -> None:
+    def refresh(self, json: Optional[Dict] = None, url: Optional[str] = None, extra_params: Optional = None) -> None:
         """Refresh the object in place."""
         super().refresh(json=json,
                         url=self._client._build_url('property', property_id=self.id),
@@ -101,7 +89,6 @@ class Property(BaseInScope):
         It will return True if the property_type is a Boolean and set to a value of False.
 
         :returns: True if the property has a value set, otherwise (also when value is None) returns False
-        :rtype: Bool
         """
         if isinstance(self._value, (float, int, bool)):
             return True  # to prevent "bool(0.00) = False" or "False = False"
@@ -121,7 +108,7 @@ class Property(BaseInScope):
     @classmethod
     def set_bulk_update(cls, value):
         """Set global class attribute to toggle the use of bulk-updates of properties."""
-        assert isinstance(value, bool), "`bulk_update` must be set to a boolean, not {}".format(type(value))
+        assert isinstance(value, bool), f"`bulk_update` must be set to a boolean, not {type(value)}"
         cls._USE_BULK_UPDATE = value
 
     @property
@@ -149,9 +136,7 @@ class Property(BaseInScope):
         Perform the bulk update of property values using the stored values in the `Property` class.
 
         :param client: Client object
-        :type client: Client
         :param use_bulk_update: set the class attribute, defaults to False.
-        :type use_bulk_update: bool
         :return: None
         """
         if cls._USE_BULK_UPDATE:
@@ -175,7 +160,7 @@ class Property(BaseInScope):
         response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['property'], json={'value': value})
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Property {}".format(self), response=response)
+            raise APIError(f"Could not update Property {self}", response=response)
 
         self.refresh(json=response.json()['results'][0])
 
@@ -184,7 +169,6 @@ class Property(BaseInScope):
         Serialize the value to be set on the property.
 
         :param value: non-serialized value
-        :type value: Any
         :return: serialized value
         """
         return value.id if isinstance(value, Base) else value
@@ -209,7 +193,6 @@ class Property(BaseInScope):
         to the backend to retrieve its model object.
 
         :return: `Property` model object if the current `Property` is an instance.
-        :rtype: :class:`pykechain.models.AnyProperty`
         """
         if self.category == Category.MODEL:
             return self
@@ -222,7 +205,6 @@ class Property(BaseInScope):
         """Provide list of Validator objects.
 
         :returns: list of :class:`PropertyValidator` objects
-        :rtype: list(PropertyValidator)
         """
         return self._validators
 
@@ -261,7 +243,7 @@ class Property(BaseInScope):
             if isinstance(validator, PropertyValidator):
                 validators_json.append(validator.as_json())
             else:
-                raise APIError("validator is not a PropertyValidator: '{}'".format(validator))
+                raise APIError(f"validator is not a PropertyValidator: '{validator}'")
         if self._options.get('validators', list()) == validators_json:
             # no change
             pass
@@ -280,7 +262,6 @@ class Property(BaseInScope):
         and returns a single boolean outcome.
 
         :returns: True when the `value` is valid
-        :rtype: bool or None
         """
         if not self._validators:
             return None
@@ -300,7 +281,6 @@ class Property(BaseInScope):
         and returns a single boolean outcome.
 
         :returns: True when the `value` is invalid
-        :rtype: bool
         """
         return not self.is_valid if self.is_valid is not None else None
 
@@ -312,10 +292,8 @@ class Property(BaseInScope):
         for each configured validator is returned.
 
         :param reason: (optional) switch to indicate if the reason of the validation should be provided
-        :type reason: bool
         :return: list of validation results [bool, bool, ...] or
                  a list of validation results, reasons [(bool, str), ...]
-        :rtype: list(bool) or list((bool, str))
         :raises Exception: for incorrect validators or incompatible values
         """
         self._validation_results = [validator.is_valid(self._value) for validator in self._validators]
@@ -352,7 +330,6 @@ class Property(BaseInScope):
         It does not create a property object in KE-chain. But a pseudo :class:`Property` object.
 
         :param json: the json from which the :class:`Property` object to create
-        :type json: dict
         :return: a :class:`Property` object
         """
         property_type = json.get('property_type')
@@ -367,9 +344,9 @@ class Property(BaseInScope):
 
     def edit(
             self,
-            name: Optional[Text] = empty,
-            description: Optional[Text] = empty,
-            unit: Optional[Text] = empty,
+            name: Optional[str] = empty,
+            description: Optional[str] = empty,
+            unit: Optional[str] = empty,
             options: Optional[Dict] = empty,
             **kwargs
     ) -> None:
@@ -378,13 +355,9 @@ class Property(BaseInScope):
         Setting an input to None will clear out the value (exception being name).
 
         :param name: (optional) new name of the property to edit. Cannot be cleared.
-        :type name: basestring or None or Empty
         :param description: (optional) new description of the property. Can be cleared.
-        :type description: basestring or None or Empty
         :param unit: (optional) new unit of the property. Can be cleared.
-        :type unit: basestring or None or Empty
         :param options: (options) new options of the property. Can be cleared.
-        :type options: dict or None or Empty
         :param kwargs: (optional) additional kwargs to be edited
         :return: None
         :raises APIError: When unable to edit the property
@@ -416,8 +389,8 @@ class Property(BaseInScope):
         """
         update_dict = {
             'name': check_text(name, 'name') or self.name,
-            'description': check_text(description, 'description') or str(),
-            'unit': check_text(unit, 'unit') or str(),
+            'description': check_text(description, 'description') or '',
+            'unit': check_text(unit, 'unit') or '',
             'value_options': check_type(options, dict, 'options') or dict()
         }
 
@@ -439,7 +412,7 @@ class Property(BaseInScope):
             )
 
             if response.status_code != requests.codes.ok:  # pragma: no cover
-                raise APIError("Could not update Property {}".format(self), response=response)
+                raise APIError(f"Could not update Property {self}", response=response)
 
             self.refresh(json=response.json()['results'][0])
 
@@ -452,15 +425,13 @@ class Property(BaseInScope):
         response = self._client._request('DELETE', self._client._build_url('property', property_id=self.id))
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Property {}".format(self), response=response)
+            raise APIError(f"Could not delete Property {self}", response=response)
 
-    def copy(self, target_part: 'Part', name: Optional[Text] = None) -> 'Property':
+    def copy(self, target_part: 'Part', name: Optional[str] = None) -> 'Property':
         """Copy a property model or instance.
 
         :param target_part: `Part` object under which the desired `Property` is copied
-        :type target_part: :class:`Part`
         :param name: how the copied `Property` should be called
-        :type name: basestring
         :return: copied :class:`Property` model.
         :raises IllegalArgumentError: if property and target_part have different `Category`
 
@@ -503,13 +474,11 @@ class Property(BaseInScope):
             raise IllegalArgumentError('property "{}" and target part "{}" must have the same category'.
                                        format(self.name, target_part.name))
 
-    def move(self, target_part: 'Part', name: Optional[Text] = None) -> 'Property':
+    def move(self, target_part: 'Part', name: Optional[str] = None) -> 'Property':
         """Move a property model or instance.
 
         :param target_part: `Part` object under which the desired `Property` is moved
-        :type target_part: :class:`Part`
         :param name: how the moved `Property` should be called
-        :type name: basestring
         :return: copied :class:`Property` model.
         :raises IllegalArgumentError: if property and target_part have different `Category`
 

@@ -1,9 +1,9 @@
-from typing import List, Optional, Text
+from typing import List, Optional
 
 from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Scope, user
-from pykechain.models.base_reference import _ReferencePropertyInScope, _ReferenceProperty
+from pykechain.models.base_reference import _ReferenceProperty, _ReferencePropertyInScope
 from pykechain.models.value_filter import ScopeFilter
 from pykechain.utils import get_in_chunks
 
@@ -64,16 +64,14 @@ class ScopeReferencesProperty(_ReferenceProperty):
         Set pre-filters on the scope reference property.
 
         :param prefilters: list of Scope Filter objects
-        :type prefilters: list
         :param clear: whether all existing pre-filters should be cleared. (default = False)
-        :type clear: bool
 
         :return: None
         """
         if prefilters is not None:
             if not isinstance(prefilters, list) or not all(isinstance(pf, ScopeFilter) for pf in prefilters):
                 raise IllegalArgumentError(
-                    "`prefilters` must be a list of ScopeFilter objects, `{}` is not.".format(prefilters))
+                    f"`prefilters` must be a list of ScopeFilter objects, `{prefilters}` is not.")
         else:
             prefilters = []
 
@@ -96,7 +94,6 @@ class ScopeReferencesProperty(_ReferenceProperty):
         Return a list of ScopeFilter objects currently configured on the property.
 
         :return: list of ScopeFilter objects
-        :rtype list
         """
         return ScopeFilter.parse_options(self._options)
 
@@ -109,12 +106,11 @@ class UserReferencesProperty(_ReferenceProperty):
 
     REFERENCED_CLASS = user.User
 
-    def _validate_values(self) -> List[Text]:
+    def _validate_values(self) -> List[str]:
         """
         Check if the `_value` attribute has valid content.
 
         :return list of UUIDs:
-        :rtype list
         """
         if not self._value:
             return []
@@ -128,7 +124,7 @@ class UserReferencesProperty(_ReferenceProperty):
                 object_ids.append(str(value))
             else:  # pragma: no cover
                 raise ValueError(
-                    'Value "{}" must be a dict with field `pk` or a UUID.'.format(value)
+                    f'Value "{value}" must be a dict with field `pk` or a UUID.'
                 )
         return object_ids
 
@@ -154,6 +150,5 @@ class UserReferencesProperty(_ReferenceProperty):
         Retrieve the referenced object UUIDs only.
 
         :return: list of UUIDs
-        :rtype list
         """
         return [value.get("pk") for value in self._value] if self.has_value() else None

@@ -6,7 +6,8 @@ import requests
 from pykechain.enums import ContextGroup, ContextType
 from pykechain.exceptions import APIError
 from pykechain.models import BaseInScope
-from pykechain.models.input_checks import (check_base, check_datetime, check_enum, check_list_of_base,
+from pykechain.models.input_checks import (check_base, check_datetime, check_enum,
+                                           check_list_of_base,
                                            check_list_of_text, check_text, check_type)
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID, ObjectIDs
@@ -22,7 +23,7 @@ class Context(BaseInScope, TagsMixin):
 
     def __init__(self, json, **kwargs):
         """Construct a service from provided json data."""
-        super(Context, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self.ref = json.get("ref")  # type: Text
         self.description = json.get("description", "")  # type:Text
@@ -45,9 +46,9 @@ class Context(BaseInScope, TagsMixin):
 
     def edit(
             self,
-            name: Optional[Union[Text, Empty]] = empty,
-            description: Optional[Union[Text, Empty]] = empty,
-            tags: Optional[List[Union[Text, Empty]]] = empty,
+            name: Optional[Union[str, Empty]] = empty,
+            description: Optional[Union[str, Empty]] = empty,
+            tags: Optional[List[Union[str, Empty]]] = empty,
             context_group: Optional[Union[ContextGroup, Empty]] = empty,
             scope: Optional[Union['Scope', ObjectID]] = empty,
             options: Optional[dict] = empty,
@@ -104,7 +105,7 @@ class Context(BaseInScope, TagsMixin):
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError(
-                "Could not update Context: {}".format(self), response=response
+                f"Could not update Context: {self}", response=response
             )
 
         return self.refresh(json=response.json().get("results")[0])
@@ -130,7 +131,7 @@ class Context(BaseInScope, TagsMixin):
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError(
-                "Could not update Context: {}".format(self), response=response
+                f"Could not update Context: {self}", response=response
             )
 
         return self.refresh(json=response.json().get("results")[0])
@@ -156,7 +157,7 @@ class Context(BaseInScope, TagsMixin):
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError(
-                "Could not update Context: {}".format(self), response=response
+                f"Could not update Context: {self}", response=response
             )
 
         return self.refresh(json=response.json().get("results")[0])

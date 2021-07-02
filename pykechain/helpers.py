@@ -34,24 +34,15 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
     .. versionadded:: 1.12
 
     :param url: (optional) url of KE-chain
-    :type url: basestring or None
     :param username: (optional) username for authentication (together with password, if not token)
-    :type username: basestring or None
     :param password: (optional) password for username/password authentication (together with username, if not token)
-    :type password: basestring or None
     :param token: (optional) token for authentication (if not username/password)
-    :type token: basestring or None
     :param scope: (optional) name of the scope to retrieve from KE-chain.
-    :type scope: basestring or None
     :param scope_id: (optional) UUID of the scope to retrieve and return from KE-chain
-    :type scope_id: basestring or None
     :param env_filename: (optional) name of the environment filename to bootstrap the Client
-    :type env_filename: basestring or None
     :param status: (optional) status of the scope to retrieve, defaults to :attr:`enums.Scopestatus.ACTIVE`
-    :type status: basestring or None
     :param check_certificates: (optional) if to check TLS/SSL Certificates. If nothing provided (None) it
                                ensures it does check certficates.
-    :type check_certificates: bool or None
     :return: pykechain.models.Scope
     :raises NotFoundError: If the scope could not be found
     :raises ClientError: If the client connection to KE-chain was unsuccessful

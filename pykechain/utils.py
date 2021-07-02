@@ -3,10 +3,10 @@ import re
 import unicodedata
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
-from typing import TypeVar, Iterable, Callable, Optional, Text, Dict, Union, List  # noqa: F401
+from tempfile import TemporaryDirectory
+from typing import Callable, Dict, Iterable, List, Optional, Text, TypeVar, Union  # noqa: F401
 
 import pytz
-import six
 
 T = TypeVar("T")
 
@@ -30,7 +30,7 @@ def find(iterable: Iterable[T], predicate: Callable[[T], bool]) -> Optional[T]:
     return None
 
 
-def is_uuid(value: Text) -> bool:
+def is_uuid(value: str) -> bool:
     """
     Check if the string value is a proper UUID string.
 
@@ -38,12 +38,11 @@ def is_uuid(value: Text) -> bool:
         `r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"`
 
     :return: True if there is a match, otherwise False
-    :rtype: bool
     """
     return bool(re.match(UUID_REGEX_PATTERN, str(value)))
 
 
-def is_url(value: Text) -> bool:
+def is_url(value: str) -> bool:
     """
     Return whether or not given value is a valid URL.
 
@@ -58,9 +57,7 @@ def is_url(value: Text) -> bool:
         https://gist.github.com/dperini/729294
 
     :param value: an alleged url
-    :type value: Text
     :return: True if it is an URL, otherwise False
-    :rtype: bool
 
     Examples
     --------
@@ -146,7 +143,7 @@ def is_url(value: Text) -> bool:
         # port number
         r"(?::\d{2,5})?"
         # resource path
-        u"(?:/[-a-z\u00a1-\uffff0-9._~%!$&'()*+,;=:@/]*)?"
+        "(?:/[-a-z\u00a1-\uffff0-9._~%!$&'()*+,;=:@/]*)?"
         # query string
         r"(?:\?\S*)?"
         # fragment
@@ -156,7 +153,7 @@ def is_url(value: Text) -> bool:
     return bool(regex.match(value))
 
 
-def is_valid_email(value: Text) -> bool:
+def is_valid_email(value: str) -> bool:
     """
     Return whether or not given value is a valid email address.
 
@@ -166,9 +163,7 @@ def is_valid_email(value: Text) -> bool:
     in this case we check if the email has the form of `name@domain.tld`.
 
     :param value: an alleged email
-    :type value: Text
     :return: True if it is an email, otherwise False
-    :rtype: bool
 
     Examples
     --------
@@ -185,7 +180,7 @@ def is_valid_email(value: Text) -> bool:
 
 
 @contextmanager
-def temp_chdir(cwd: Optional[Text] = None):
+def temp_chdir(cwd: Optional[str] = None):
     """
     Create and return a temporary directory which you can use as a context manager.
 
@@ -194,7 +189,6 @@ def temp_chdir(cwd: Optional[Text] = None):
     .. versionadded:: 2.3
 
     :param cwd: path to change working directory back to path when out of context
-    :type cwd: basestring or None
     :return: in context a temporary directory
 
     Example
@@ -207,30 +201,17 @@ def temp_chdir(cwd: Optional[Text] = None):
     >>> pass
 
     """
-    if six.PY3:
-        from tempfile import TemporaryDirectory
-
-        with TemporaryDirectory() as tempwd:
-            origin = cwd or os.getcwd()
-            os.chdir(tempwd)
-
-            try:
-                yield tempwd if os.path.exists(tempwd) else ""
-            finally:
-                os.chdir(origin)
-    else:
-        from tempfile import mkdtemp
-
-        tempwd = mkdtemp()
+    with TemporaryDirectory() as tempwd:
         origin = cwd or os.getcwd()
         os.chdir(tempwd)
+
         try:
             yield tempwd if os.path.exists(tempwd) else ""
         finally:
             os.chdir(origin)
 
 
-def parse_datetime(value: Optional[Text]) -> Optional[datetime]:
+def parse_datetime(value: Optional[str]) -> Optional[datetime]:
     """
     Convert datetime string to datetime object.
 
@@ -247,9 +228,7 @@ def parse_datetime(value: Optional[Text]) -> Optional[datetime]:
     ..versionadded 2.5:
 
     :param value: datetime string
-    :type value: str or None
     :return: datetime of the value is well formatted. Otherwise (including if value is None) returns None
-    :rtype: datetime or None
     :raises ValueError: if the value is well formatted but not a valid datetime
     """
     if value is None:
@@ -286,7 +265,7 @@ def parse_datetime(value: Optional[Text]) -> Optional[datetime]:
             if tzinfo[0] == "-":
                 offset = -offset
             tzinfo = _get_fixed_timezone(offset)
-        kw = {k: int(v) for k, v in six.iteritems(kw) if v is not None}
+        kw = {k: int(v) for k, v in kw.items() if v is not None}
         kw["tzinfo"] = tzinfo
         return datetime(**kw)
 
@@ -297,7 +276,7 @@ def parse_datetime(value: Optional[Text]) -> Optional[datetime]:
 #
 
 
-def camelcase(string: Text) -> Text:
+def camelcase(string: str) -> str:
     """Convert string into camel case.
 
     Inspired by: https://github.com/okunishinishi/python-stringcase
@@ -322,7 +301,7 @@ def camelcase(string: Text) -> Text:
     )
 
 
-def capitalcase(string: Text) -> Text:
+def capitalcase(string: str) -> str:
     """Convert string into capital case.
 
     First letters will be uppercase.
@@ -347,7 +326,7 @@ def capitalcase(string: Text) -> Text:
     return uppercase(string[0]) + string[1:]
 
 
-def lowercase(string: Text) -> Text:
+def lowercase(string: str) -> str:
     """Convert string into lower case.
 
     Inspired by: https://github.com/okunishinishi/python-stringcase
@@ -367,7 +346,7 @@ def lowercase(string: Text) -> Text:
     return str(string).lower()
 
 
-def snakecase(string: Text) -> Text:
+def snakecase(string: str) -> str:
     """Convert string into snake case.
 
     Join punctuation with underscore
@@ -396,7 +375,7 @@ def snakecase(string: Text) -> Text:
     )
 
 
-def uppercase(string: Text) -> Text:
+def uppercase(string: str) -> str:
     """Convert string into upper case.
 
     Inspired by: https://github.com/okunishinishi/python-stringcase
@@ -416,7 +395,7 @@ def uppercase(string: Text) -> Text:
     return str(string).upper()
 
 
-def slugify_ref(value: Text, allow_unicode: bool = False) -> Text:
+def slugify_ref(value: str, allow_unicode: bool = False) -> str:
     """
     Convert to ASCII if 'allow_unicode' is False. Convert spaces to hyphens.
 
@@ -460,13 +439,9 @@ def __dict__inherited__(cls: type(object), stop: type(object) = type, public: Op
     Get all __dict__ items of the class and its superclasses up to `type`, or the `stop` class given as input.
 
     :param cls: class from which to retrieve the dict.
-    :type cls: type(object)
     :param stop: optional class to indicate up to which superclass the inheritance should accumulate the dict.
-    :type stop: type(object)
     :param public: optional flag, will only retrieve public (without double underscore) attributes and methods.
-    :type public: bool
     :return: dictionary of key, value pairs
-    :rtype dict
 
     Example
     -------
@@ -497,17 +472,14 @@ def get_in_chunks(lst: Union[List, Iterable], chunk_size: int) -> Iterable:
     Yield successive chunks from a list based on the chunk_size.
 
     :param lst: list or Iterable
-    :type lst: List or Iterable
     :param chunk_size: size of the chunks
-    :type chunk_size: int
     :returns: Iterator that returns list of length chunk_size until original lst is depleted.
-    :rtype: Iterable
     """
     for i in range(0, len(lst), chunk_size):
         yield lst[i: i + chunk_size]
 
 
-class Empty(object):
+class Empty:
     """
     Represents an empty value.
 
@@ -573,10 +545,8 @@ def clean_empty_values(update_dict: Dict) -> Dict:
     Clean a dictionary by removing all the keys that have an empty value.
 
     :param update_dict: dictionary with keys=request parameters
-    :type update_dict: dict
 
     :return: same dictionary but cleaned up if there are values None
-    :rtype: dict
     """
     cleaned_up_dict = {k: v for k, v in update_dict.items() if not isinstance(v, Empty)}
     return cleaned_up_dict

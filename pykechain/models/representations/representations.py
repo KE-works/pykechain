@@ -1,9 +1,6 @@
-from pykechain.enums import (
-    PropertyRepresentation,
-    SelectListRepresentations,
-    LinkTargets,
-    FontAwesomeMode, GeoCoordinateConfig,
-)
+from pykechain.enums import (FontAwesomeMode, GeoCoordinateConfig, LinkTargets,
+                             PropertyRepresentation,
+                             SelectListRepresentations)
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_type
 from pykechain.models.representations.representation_base import BaseRepresentation
@@ -20,7 +17,6 @@ class DecimalPlaces(BaseRepresentation):
         Validate whether the representation value can be set.
 
         :param value: representation value to set.
-        :type value: int
         :return: None
         """
         if not isinstance(value, int):
@@ -47,7 +43,6 @@ class ThousandsSeparator(BaseRepresentation):
         Validate whether the representation value can be set.
 
         :param value: representation value to set.
-        :type value: int or float
         :return: None
         """
         if not (isinstance(value, type(None))):
@@ -69,7 +64,6 @@ class LinkTarget(BaseRepresentation):
         Validate whether the representation value can be set.
 
         :param value: representation value to set.
-        :type value: LinkTargets
         :return: None
         """
         if value not in LinkTargets.values():
@@ -91,7 +85,6 @@ class ButtonRepresentation(BaseRepresentation):
         Validate whether the representation value can be set.
 
         :param value: representation value to set.
-        :type value: SelectListRepresentations
         :return: None
         """
         if value not in SelectListRepresentations.values():
@@ -113,7 +106,6 @@ class Autofill(BaseRepresentation):
         Validate whether the representation value can be set.
 
         :param value: representation value to set.
-        :type value: bool
         :return: None
         """
         check_type(value, bool, "autofill")
@@ -141,7 +133,6 @@ class CustomIconRepresentation(BaseRepresentation):
         Validate whether the representation value can be set.
 
         :param value: representation value to set.
-        :type value: str
         :return: None
         """
         if not isinstance(value, str):
@@ -162,7 +153,6 @@ class CustomIconRepresentation(BaseRepresentation):
         Set the the display mode of the custom icon representation.
 
         :param mode: FontAwesome display mode
-        :type mode: FontAwesomeMode
         """
         if mode not in set(FontAwesomeMode.values()):
             raise IllegalArgumentError(
@@ -199,7 +189,6 @@ class GeoCoordinateRepresentation(BaseRepresentation):
         Validate whether the representation value can be set.
 
         :param value: representation value to set.
-        :type value: one of GeoCoordinateConfig
         :return: None
         """
         if value not in GeoCoordinateConfig.values():

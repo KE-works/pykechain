@@ -1,5 +1,5 @@
 from pykechain.enums import LanguageCodes
-from pykechain.exceptions import NotFoundError, MultipleFoundError
+from pykechain.exceptions import MultipleFoundError, NotFoundError
 from tests.classes import TestBetamax
 
 
@@ -20,7 +20,7 @@ class TestUsers(TestBetamax):
         for attribute in attributes:
             with self.subTest(msg=attribute):
                 self.assertTrue(hasattr(obj, attribute),
-                                "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__))
+                                f"Could not find '{attribute}' in the object: '{obj.__dict__}'")
 
     def test_retrieve_single_multiple_user_raises_error(self):
         with self.assertRaises(MultipleFoundError):

@@ -32,7 +32,7 @@ class TestPartUpdate(TestBetamax):
 
         for name, value in update_dict.items():
             self.assertEqual(value, live_wheel.property(name=name).value,
-                             "property {} with value {} did not match contents with KEC".format(name, value))
+                             f"property {name} with value {value} did not match contents with KEC")
 
     def test_model(self):
         update_dict = {

@@ -1,5 +1,5 @@
 from pykechain.enums import TeamRoles
-from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
+from pykechain.exceptions import IllegalArgumentError, MultipleFoundError, NotFoundError
 from pykechain.models import User
 from pykechain.models.team import Team
 from tests.classes import TestBetamax
@@ -8,7 +8,7 @@ from tests.classes import TestBetamax
 class TestTeams(TestBetamax):
 
     def setUp(self):
-        super(TestTeams, self).setUp()
+        super().setUp()
 
         self.required_kwargs = dict(
             name='_test team',
@@ -28,7 +28,7 @@ class TestTeams(TestBetamax):
 
     def test_create_team_with_inputs(self):
         # setUp
-        landing_page = '#/scopes/{}'.format(self.project.id)
+        landing_page = f'#/scopes/{self.project.id}'
         new_team = self.client.create_team(
             description='This is the description',
             options=dict(
@@ -50,7 +50,7 @@ class TestTeams(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             self.client.create_team(description=1, **self.required_kwargs)
         with self.assertRaises(IllegalArgumentError):
-            self.client.create_team(options='#/scopes/{}'.format(self.project.id), **self.required_kwargs)
+            self.client.create_team(options=f'#/scopes/{self.project.id}', **self.required_kwargs)
         with self.assertRaises(IllegalArgumentError):
             self.client.create_team(is_hidden='False', **self.required_kwargs)
 
@@ -122,12 +122,12 @@ class TestTeams(TestBetamax):
         obj = self.team
         for attribute in attributes:
             self.assertTrue(hasattr(obj, attribute),
-                            "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__))
+                            f"Could not find '{attribute}' in the object: '{obj.__dict__}'")
 
     def test_team_edit(self):
         # setUp
         options = dict(
-            landingPage='#/scopes/{}'.format(self.project.id)
+            landingPage=f'#/scopes/{self.project.id}'
         )
         self.team.edit(
             name='renamed team',

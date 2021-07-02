@@ -1,23 +1,15 @@
 import warnings
-from typing import Dict, Optional, Union, Text, Tuple, List, Callable
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
-from pykechain.enums import (
-    Category,
-    PropertyType,
-    WidgetTitleValue,
-    ActivityType,
-    CardWidgetLinkValue,
-    KEChainPages,
-    CardWidgetKEChainPageLink,
-    LinkTargets,
-    ImageFitValue,
-    CardWidgetImageValue,
-)
+from pykechain.enums import (ActivityType, CardWidgetImageValue, CardWidgetKEChainPageLink,
+                             CardWidgetLinkValue,
+                             Category, ImageFitValue, KEChainPages, LinkTargets, PropertyType,
+                             WidgetTitleValue)
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models.input_checks import check_enum, check_base
+from pykechain.models.input_checks import check_base, check_enum
 from pykechain.models.value_filter import PropertyValueFilter
-from pykechain.models.widgets.enums import MetaWidget, AssociatedObjectId
-from pykechain.utils import is_uuid, snakecase, camelcase
+from pykechain.models.widgets.enums import AssociatedObjectId, MetaWidget
+from pykechain.utils import camelcase, is_uuid, snakecase
 
 # these are the common keys to all kecards.
 KECARD_COMMON_KEYS = [MetaWidget.COLLAPSED,
@@ -27,19 +19,16 @@ KECARD_COMMON_KEYS = [MetaWidget.COLLAPSED,
                       MetaWidget.IS_DISABLED,
                       MetaWidget.IS_MERGED]
 
-TITLE_TYPING = Optional[Union[type(None), Text, bool]]
+TITLE_TYPING = Optional[Union[type(None), str, bool]]
 
 
-def _retrieve_object(obj: Union['Base', Text], method: Callable) -> Union['Base']:
+def _retrieve_object(obj: Union['Base', str], method: Callable) -> Union['Base']:
     """
     Object if object or uuid of object is provided as argument.
 
     :param obj: object or uuid to retrieve the object for
-    :type obj: :class:`Base` or basestring
     :param method: client object to retrieve the object if only uuid is provided.
-    :type method: `Client`
     :return: object based on the object or uuid of the objet
-    :rtype: `Part` or `Team` or `Property`
     :raises APIError: If the object could not be retrieved based on the UUID
     :raises IllegalArgumentError: if the object provided is not a Part, Property or UUID.
     """
@@ -56,14 +45,12 @@ def _retrieve_object(obj: Union['Base', Text], method: Callable) -> Union['Base'
                                    " Part id, Property id, Service id or Team id. Type is: {}".format(type(obj)))
 
 
-def _retrieve_object_id(obj: Optional[Union['Base', Text]]) -> Optional[Text]:
+def _retrieve_object_id(obj: Optional[Union['Base', str]]) -> Optional[str]:
     """
     Object id if object or uuid of object is provided as argument.
 
     :param obj: object or uuid to retrieve the object id for
-    :type obj: :class:`Base` or basestring
     :return: object based on the object or uuid of the object
-    :rtype: basestring or None
     :raises APIError: If the object could not be retrieved based on the UUID
     :raises IllegalArgumentError: if the object provided is not a Base instance or UUID.
     """
@@ -85,7 +72,7 @@ def _set_title(
         title: TITLE_TYPING = None,
         show_title_value: Optional[WidgetTitleValue] = None,
         **kwargs
-) -> Tuple[Dict, Text]:
+) -> Tuple[Dict, str]:
     """
     Set the customTitle in the meta based on provided optional custom title or default.
 
@@ -94,16 +81,12 @@ def _set_title(
     title of the widget (to be used to set `widget.title`).
 
     :param meta: meta dictionary to augment
-    :type meta: dict
     :param title: A title for the multi column widget
             * False: use the default title
             * String value: use the title
             * None: No title at all.
-    :type title: basestring or bool or None
     :param show_title_value: (optional) Specify how the title is displayed, regardless of other inputs.
-    :type show_title_value: WidgetTitleValue
     :return: tuple of meta and the title
-    :rtype: Tuple[Dict,Text]
     :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
     check_enum(show_title_value, WidgetTitleValue, 'show_title_value')
@@ -130,7 +113,7 @@ def _set_title(
 
 def _set_description(
         meta: Dict,
-        description: Optional[Union[Text, bool]] = None,
+        description: Optional[Union[str, bool]] = None,
         **kwargs
 ) -> Dict:
     """
@@ -140,14 +123,11 @@ def _set_description(
     as argument, otherwise it will inject 'no description'. It returns the meta definition of the widget.
 
     :param meta: meta dictionary to augment
-    :type meta: dict
     :param description: A description for the widget
             * String value: use the description
             * None or False: No description at all.
-    :type description: basestring or None or bool
 
     :return: meta dictionary
-    :rtype: dict
     :raises IllegalArgumentError: When description is neither str, bool or None.
     """
     if description is False or description is None:
@@ -167,9 +147,9 @@ def _set_description(
 
 def _set_link(
         meta: Dict,
-        link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
+        link: Optional[Union[type(None), str, bool, KEChainPages]] = None,
         link_value: Optional[CardWidgetLinkValue] = None,
-        link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
+        link_target: Optional[Union[str, LinkTargets]] = LinkTargets.SAME_TAB,
         **kwargs
 ) -> Dict:
     """
@@ -179,20 +159,15 @@ def _set_link(
     as argument, otherwise it will inject 'no link'. It returns the meta definition of the widget.
 
     :param meta: meta dictionary to augment
-    :type meta: dict
     :param link: Where the card widget refers to. This can be one of the following:
         * None (default): no link
         * task: another KE-chain task, provided as an Activity object or its UUID
         * String value: URL to a webpage
         * KE-chain page: built-in KE-chain page of the current scope
-    :type link: basestring or None or bool or KEChainPages
     :param link_value: Overwrite the default link value (obtained from the type of the link)
-    :type link_value: CardWidgetLinkValue
     :param link_target: how the link is opened, one of the values of CardWidgetLinkTarget enum.
-    :type link_target: CardWidgetLinkTarget
 
     :return: meta dictionary
-    :rtype: dict
     :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
     meta['linkTarget'] = check_enum(link_target, LinkTargets, 'link_target')
@@ -240,7 +215,7 @@ def _set_link(
 def _set_image(
         meta: Dict,
         image: Optional['AttachmentProperty'] = None,
-        image_fit: Optional[Union[Text, ImageFitValue]] = ImageFitValue.CONTAIN,
+        image_fit: Optional[Union[str, ImageFitValue]] = ImageFitValue.CONTAIN,
         **kwargs
 ) -> Dict:
     """
@@ -250,14 +225,10 @@ def _set_image(
     as argument, otherwise it will inject 'no link'. It returns the meta definition of the widget.
 
     :param meta: meta dictionary to augment
-    :type meta: dict
     :param image: AttachmentProperty providing the source of the image shown in the card widget.
-    :type image: AttachmentProperty or None
     :param image_fit: how the image on the card widget is displayed
-    :type image_fit: ImageFitValue
 
     :return: meta dictionary
-    :rtype: dict
     :raises IllegalArgumentError: When illegal `image` type is used.
     """
     meta[MetaWidget.IMAGE_FIT] = check_enum(image_fit, ImageFitValue, 'image_fit')
@@ -265,7 +236,7 @@ def _set_image(
     from pykechain.models import Property
     if isinstance(image, Property) and image.type == PropertyType.ATTACHMENT_VALUE:
         meta.update({
-            MetaWidget.CUSTOM_IMAGE: "/api/v3/properties/{}/preview".format(image.id),
+            MetaWidget.CUSTOM_IMAGE: f"/api/v3/properties/{image.id}/preview",
             MetaWidget.SHOW_IMAGE_VALUE: CardWidgetImageValue.CUSTOM_IMAGE
         })
     elif image is None:
@@ -293,17 +264,13 @@ def _set_button_text(
     of the widget.
 
     :param meta: meta dictionary to augment
-    :type meta: dict
     :param service: The Service to which the button will be coupled and will be ran when the button is pressed.
-    :type service: :class:`Service` or UUID
     :param custom_button_text: A custom text for the button linked to the script
         * False (default): Script name
         * String value: Custom title
         * None: No title
-    :type custom_button_text: bool or basestring or None
 
     :return: meta dictionary
-    :rtype: dict
     :raises IllegalArgumentError: When illegal (combination) of arguments are set.
     """
     if custom_button_text is False:
@@ -311,7 +278,7 @@ def _set_button_text(
         button_text = service.name
     elif custom_button_text is None:
         show_button_value = MetaWidget.BUTTON_NO_TEXT
-        button_text = str()
+        button_text = ''
     else:
         show_button_value = MetaWidget.BUTTON_TEXT_CUSTOM
         button_text = str(custom_button_text)
@@ -335,13 +302,9 @@ def _initiate_meta(kwargs, activity, ignores=()):
     than you may want to add them to ignores.
 
     :param kwargs: the keyword arguments provided to the widget function which are checked for the kecard definition
-    :type kwargs: dict
     :param activity: uuid or `activity` object
-    :type activity: Activity or basestring
     :param ignores: list or tuple of keys to ensure they are not present in the initated meta on return
-    :type ignores: list or tuple
     :return: kecard dictionary
-    :rtype: dict
     """
     meta = {AssociatedObjectId.ACTIVITY_ID: str(_retrieve_object_id(activity))}
     # also add the keys' in their snake case appearance so noPadding and no_padding, customHeight and custom_height
@@ -371,11 +334,10 @@ def _check_prefilters(part_model: 'Part', prefilters: Union[Dict, List]) -> List
     :param part_model: The part model of which the properties are filtered.
     :param prefilters: Dictionary or list with PropertyValueFilter objects.
     :returns: list of PropertyValueFilter objects
-    :rtype list
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
     if isinstance(prefilters, dict):
-        property_models: List[Property, Text] = prefilters.get(MetaWidget.PROPERTY_MODELS, [])  # noqa
+        property_models: List[Property, str] = prefilters.get(MetaWidget.PROPERTY_MODELS, [])  # noqa
         values = prefilters.get(MetaWidget.VALUES, [])
         filters_type = prefilters.get(MetaWidget.FILTERS_TYPE, [])
 
@@ -410,7 +372,6 @@ def _check_excluded_propmodels(part_model: 'Part', property_models: List['AnyPro
     :param part_model: Part model that is referenced
     :param property_models: Properties of the part model to be excluded.
     :return: list of property IDs
-    :rtype list
     :raises IllegalArgumentError: whenever the properties are not of category MODEL or do not belong to the part model.
     """
     from pykechain.models import Property
@@ -421,7 +382,7 @@ def _check_excluded_propmodels(part_model: 'Part', property_models: List['AnyPro
         return [check_base(pm, Property, "property_model") for pm in property_models]
 
     if not isinstance(part_model, Part):
-        raise IllegalArgumentError('`part_model` must be a Part object, "{}" is not.'.format(part_model))
+        raise IllegalArgumentError(f'`part_model` must be a Part object, "{part_model}" is not.')
 
     list_of_propmodels_excl: List['AnyProperty'] = list()
     for property_model in property_models:

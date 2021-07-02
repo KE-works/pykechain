@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Text, List, TypeVar
+from typing import List, Optional, TypeVar
 
 import requests
 
@@ -20,7 +20,7 @@ class TreeObject(BaseInScope, ABC):
         """
         super().__init__(json=json, **kwargs)
 
-        self.parent_id: Optional[Text] = json.get('parent_id', None)
+        self.parent_id: Optional[str] = json.get('parent_id', None)
         self._parent: Optional[T] = None
         self._cached_children: Optional[List[T]] = None
 
@@ -29,16 +29,14 @@ class TreeObject(BaseInScope, ABC):
         return self.child(*args, **kwargs)
 
     def child(self: T,
-              name: Optional[Text] = None,
-              pk: Optional[Text] = None,
+              name: Optional[str] = None,
+              pk: Optional[str] = None,
               **kwargs) -> T:
         """
         Retrieve a child object.
 
         :param name: optional, name of the child
-        :type name: str
         :param pk: optional, UUID of the child
-        :type: pk: str
         :return: Child object
         :raises MultipleFoundError: whenever multiple children fit match inputs.
         :raises NotFoundError: whenever no child matching the inputs could be found.
@@ -68,7 +66,6 @@ class TreeObject(BaseInScope, ABC):
         Retrieve all children objects.
 
         :return: iterable of child objects.
-        :rtype Iterable
         :raises APIError:
         """
         raise NotImplementedError  # pragma: no cover
@@ -78,7 +75,6 @@ class TreeObject(BaseInScope, ABC):
         Retrieve a flat list of all descendants, sorted depth-first.
 
         :returns list of child objects
-        :rtype List
         """
         all_children = list()
 
@@ -89,14 +85,12 @@ class TreeObject(BaseInScope, ABC):
         return all_children
 
     @abstractmethod
-    def count_children(self, method: Text, **kwargs) -> int:
+    def count_children(self, method: str, **kwargs) -> int:
         """
         Retrieve the number of child objects using a light-weight request.
 
         :param method: which type of object to retrieve, either parts or activities
-        :type method: str
         :return: number of child objects
-        :rtype int
         """
         parameters = {
             "scope_id": self.scope_id,
@@ -109,7 +103,7 @@ class TreeObject(BaseInScope, ABC):
         response = self._client._request('GET', self._client._build_url(method), params=parameters)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve {}".format(method))
+            raise NotFoundError(f"Could not retrieve {method}")
 
         count = response.json()['count']
 
@@ -124,9 +118,7 @@ class TreeObject(BaseInScope, ABC):
         Fill the `_cached_children` attribute with a list of descendants.
 
         :param all_descendants: list of TreeObject objects of possible descendants of this TreeObject.
-        :type all_descendants: list
         :param overwrite: whether to remove existing cached children, defaults to False
-        :type overwrite: bool
         :return: None
         """
         # Create mapping table from a parent ID to its children

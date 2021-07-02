@@ -1,12 +1,12 @@
-from __future__ import division
-
 import mimetypes
 import re
-from typing import Any, Union, Tuple, Optional, Text, Dict, List  # noqa: F401 # pylint: disable=unused-import
+from typing import Any, Dict, List, Optional, Text, Tuple, \
+    Union  # noqa: F401 # pylint: disable=unused-import
 
 from pykechain.enums import PropertyVTypes
 from pykechain.models.validators.mime_types_defaults import predefined_mimes
-from pykechain.models.validators.validator_schemas import filesizevalidator_schema, fileextensionvalidator_schema
+from pykechain.models.validators.validator_schemas import fileextensionvalidator_schema, \
+    filesizevalidator_schema
 from pykechain.models.validators.validators_base import PropertyValidator
 from pykechain.utils import EMAIL_REGEX_PATTERN
 
@@ -25,13 +25,9 @@ class NumericRangeValidator(PropertyValidator):
     .. versionadded:: 2.2
 
     :ivar minvalue: minimum value of the range
-    :type minvalue: float or int
     :ivar maxvalue: maximum value of the range
-    :type maxvalue: float or int
     :ivar stepsize: stepsize
-    :type stepsize: float or int
     :ivar enforce_stepsize: flag to ensure that the stepsize is enforced
-    :type enforce_stepsize: bool
 
     Examples
     --------
@@ -57,7 +53,7 @@ class NumericRangeValidator(PropertyValidator):
 
     def __init__(self, json=None, minvalue=None, maxvalue=None, stepsize=None, enforce_stepsize=None, **kwargs):
         """Construct the numeric range validator."""
-        super(NumericRangeValidator, self).__init__(json=json, **kwargs)
+        super().__init__(json=json, **kwargs)
 
         if minvalue is not None:
             self._config['minvalue'] = minvalue
@@ -87,7 +83,7 @@ class NumericRangeValidator(PropertyValidator):
             raise Exception('The stepsize should be provided when enforcing stepsize')
 
     def _logic(self, value: Any = None) -> Tuple[Union[bool, None], str]:
-        basereason = "Value '{}' should be between {} and {}".format(value, self.minvalue, self.maxvalue)
+        basereason = f"Value '{value}' should be between {self.minvalue} and {self.maxvalue}"
         self._validation_result, self._validation_reason = None, "No reason"
 
         if value is not None:
@@ -187,7 +183,7 @@ class EvenNumberValidator(PropertyValidator):
             self._validation_result, self.validation_reason = False, "Value should be an integer, or float (floored)"
             return self._validation_result, self._validation_reason
 
-        basereason = "Value '{}' should be an even number".format(value)
+        basereason = f"Value '{value}' should be an even number"
 
         self._validation_result = int(value) % 2 < self.accuracy
         if self._validation_result:
@@ -221,7 +217,7 @@ class OddNumberValidator(PropertyValidator):
             self._validation_result, self.validation_reason = False, "Value should be an integer, or float (floored)"
             return self._validation_result, self._validation_reason
 
-        basereason = "Value '{}' should be a odd number".format(value)
+        basereason = f"Value '{value}' should be a odd number"
 
         self._validation_result = int(value) % 2 > self.accuracy
         if self._validation_result:
@@ -294,13 +290,10 @@ class RegexStringValidator(PropertyValidator):
         at least a single character. Does not match `''` (empty string).
 
         :param json: (optional) dict (json) object to construct the object from
-        :type json: dict
         :param pattern: (optional) valid regex string, defaults to r'.+' which matches all text.
-        :type text: basestring
         :param kwargs: (optional) additional kwargs to pass down
-        :type kwargs: dict
         """
-        super(RegexStringValidator, self).__init__(json=json, **kwargs)
+        super().__init__(json=json, **kwargs)
 
         if pattern is not None:
             self._config['pattern'] = pattern
@@ -313,7 +306,7 @@ class RegexStringValidator(PropertyValidator):
             self._validation_result, self.validation_reason = None, "No reason"
             return self._validation_result, self._validation_reason
 
-        basereason = "Value '{}' should match the regex pattern '{}'".format(value, self.pattern)
+        basereason = f"Value '{value}' should match the regex pattern '{self.pattern}'"
 
         self._validation_result = re.match(self._re, value) is not None
         if not self._validation_result:
@@ -337,11 +330,9 @@ class EmailValidator(RegexStringValidator):
         """Construct an email string validator.
 
         :param json: (optional) dict (json) object to construct the object from
-        :type json: dict
         :param kwargs: (optional) additional kwargs to pass down
-        :type kwargs: dict
         """
-        super(EmailValidator, self).__init__(json=json, pattern=self.pattern, **kwargs)
+        super().__init__(json=json, pattern=self.pattern, **kwargs)
 
 
 class AlwaysAllowValidator(PropertyValidator):
@@ -368,7 +359,6 @@ class FileSizeValidator(PropertyValidator):
     when the validator is used inside an attachment property, the validator returns always being valid.
 
     :ivar max_size: maximum size to check
-    :type max_size: Union[int,float]
 
     Example
     -------
@@ -391,12 +381,10 @@ class FileSizeValidator(PropertyValidator):
         """Construct a file size validator.
 
         :param json: (optional) dict (json) object to construct the object from
-        :type json: Optional[Dict]
         :param max_size: (optional) number that counts as maximum size of the file
-        :type accept: Optional[Union[int,float]]
         :param kwargs: (optional) additional kwargs to pass down
         """
-        super(FileSizeValidator, self).__init__(json=json, **kwargs)
+        super().__init__(json=json, **kwargs)
         if max_size is not None:
             if isinstance(max_size, (int, float)):
                 self._config['maxSize'] = int(max_size)
@@ -404,12 +392,12 @@ class FileSizeValidator(PropertyValidator):
                 raise ValueError("`max_size` should be a number.")
         self.max_size = self._config.get('maxSize', float('inf'))
 
-    def _logic(self, value: Optional[Union[int, float]] = None) -> Tuple[Optional[bool], Optional[Text]]:
+    def _logic(self, value: Optional[Union[int, float]] = None) -> Tuple[Optional[bool], Optional[str]]:
         """Based on a filesize (numeric) or  filepath of the property (value), the filesize is checked."""
         if value is None:
             return None, "No reason"
 
-        basereason = "Value '{}' should be of a size less then '{}'".format(value, self.max_size)
+        basereason = f"Value '{value}' should be of a size less then '{self.max_size}'"
 
         if isinstance(value, (int, float)):
             if int(value) <= self.max_size and int(value) >= 0:
@@ -417,7 +405,7 @@ class FileSizeValidator(PropertyValidator):
             else:
                 return False, basereason
 
-        return True, "We determine the filesize of '{}' to be valid. We cannot check it at this end.".format(value)
+        return True, f"We determine the filesize of '{value}' to be valid. We cannot check it at this end."
 
 
 class FileExtensionValidator(PropertyValidator):
@@ -450,18 +438,16 @@ class FileExtensionValidator(PropertyValidator):
     jsonschema = fileextensionvalidator_schema
     mimetype_regex = r'^[-\w.]+/[-\w.\*]+$'
 
-    def __init__(self, json: Optional[Dict] = None, accept: Optional[Union[Text, List[Text]]] = None, **kwargs):
+    def __init__(self, json: Optional[Dict] = None, accept: Optional[Union[str, List[str]]] = None, **kwargs):
         """Construct a file extension validator.
 
         :param json: (optional) dict (json) object to construct the object from
-        :type json: Optional[Dict]
         :param accept: (optional) list of mimetypes or file extensions (including a `.`, eg `.csv`, `.pdf`)
-        :type accept: Optional[List[Text]]
         :param kwargs: (optional) additional kwargs to pass down
         """
-        super(FileExtensionValidator, self).__init__(json=json, **kwargs)
+        super().__init__(json=json, **kwargs)
         if accept is not None:
-            if isinstance(accept, Text):
+            if isinstance(accept, str):
                 self._config['accept'] = accept.split(',')
             elif isinstance(accept, List):
                 self._config['accept'] = accept
@@ -471,7 +457,7 @@ class FileExtensionValidator(PropertyValidator):
         self.accept = self._config.get('accept', None)
         self._accepted_mimetypes = self._convert_to_mimetypes(self.accept)
 
-    def _convert_to_mimetypes(self, accept: List[Text]) -> Optional[List[Text]]:
+    def _convert_to_mimetypes(self, accept: List[str]) -> Optional[List[str]]:
         """
         Convert accept array to array of mimetypes.
 
@@ -479,9 +465,7 @@ class FileExtensionValidator(PropertyValidator):
         2. convert aggregator (if inside mime_types_defaults) to list of mimetypes
 
         :param accept: list of mimetypes or extensions
-        :type accept: List[Text]
         :return: array of mimetypes:
-        :rtype: List[Text]
         """
         if accept is None:
             return None
@@ -497,7 +481,7 @@ class FileExtensionValidator(PropertyValidator):
             else:
                 # we assume this is an extension.
                 # we can only guess a url, we make a url like: "file.ext" to check.
-                fake_filename = "file{}".format(item) if item.startswith(".") else "file.{}".format(item)
+                fake_filename = f"file{item}" if item.startswith(".") else f"file.{item}"
 
                 # do guess
                 guess, _ = mimetypes.guess_type(fake_filename)
@@ -505,7 +489,7 @@ class FileExtensionValidator(PropertyValidator):
 
         return marray
 
-    def _logic(self, value: Optional[Text] = None) -> Tuple[Optional[bool], Optional[Text]]:
+    def _logic(self, value: Optional[str] = None) -> Tuple[Optional[bool], Optional[str]]:
         """Based on the filename of the property (value), the type is checked.
 
         1. convert filename to mimetype
@@ -514,11 +498,11 @@ class FileExtensionValidator(PropertyValidator):
         if value is None:
             return None, "No reason"
 
-        basereason = "Value '{}' should match the mime types '{}'".format(value, self.accept)
+        basereason = f"Value '{value}' should match the mime types '{self.accept}'"
 
         guessed_type, _ = mimetypes.guess_type(value)
         if guessed_type is None:
-            return False, "Could not determine the mimetype of '{}'".format(value)
+            return False, f"Could not determine the mimetype of '{value}'"
         elif guessed_type in self._accepted_mimetypes:
             return True, basereason.replace('match', 'matches')
 

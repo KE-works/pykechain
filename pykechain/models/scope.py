@@ -1,29 +1,19 @@
 from datetime import datetime
-from typing import Union, Text, Dict, Optional, List  # noqa: F401
+from typing import Dict, List, Optional, Text, Union  # noqa: F401
 
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.enums import (
-    Multiplicity,
-    ScopeStatus,
-    SubprocessDisplayMode,
-    KEChainPages,
-    ScopeRoles,
-    ScopeMemberActions,
-    ScopeCategory, )
-from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
+from pykechain.enums import (KEChainPages, Multiplicity, ScopeCategory, ScopeMemberActions,
+                             ScopeRoles, ScopeStatus,
+                             SubprocessDisplayMode)
+from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models.activity import Activity
 from pykechain.models.base import Base
 from pykechain.models.context import Context
-from pykechain.models.input_checks import (
-    check_text,
-    check_datetime,
-    check_enum,
-    check_list_of_text,
-    check_base,
-    check_type,
-)
+from pykechain.models.input_checks import (check_base, check_datetime, check_enum,
+                                           check_list_of_text, check_text,
+                                           check_type)
 from pykechain.models.part import Part
 from pykechain.models.property import Property
 from pykechain.models.representations import BaseRepresentation
@@ -32,28 +22,20 @@ from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
-from pykechain.utils import parse_datetime, find, Empty, clean_empty_values, empty
+from pykechain.utils import Empty, clean_empty_values, empty, find, parse_datetime
 
 
 class Scope(Base, TagsMixin):
     """A virtual object representing a KE-chain scope.
 
     :ivar id: id of the activity
-    :type id: uuid
     :ivar name: name of the activity
-    :type name: basestring
     :ivar created_at: created datetime of the activity
-    :type created_at: datetime
     :ivar updated_at: updated datetime of the activity
-    :type updated_at: datetime
     :ivar description: description of the activity
-    :type description: basestring
     :ivar workflow_root: uuid of the workflow root object
-    :type workflow_root: uuid
     :ivar status: status of the scope. One of :class:`pykechain.enums.ScopeStatus`
-    :type status: basestring
     :ivar type: Type of the Scope. One of :class:`pykechain.enums.ScopeType` for WIM version 2
-    :type type: basestring
     """
 
     def __init__(self, json: Dict, **kwargs) -> None:
@@ -200,11 +182,8 @@ class Scope(Base, TagsMixin):
         Update the Project Team of the Scope. Updates include addition or removing of managers or members.
 
         :param action: type of action to be applied
-        :type action: ScopeMemberActions
         :param role: type of role to be applied to the user
-        :type role: ScopeRoles
         :param user: the username of the user to which the action applies to
-        :type user: basestring
         :raises APIError: When unable to update the scope project team.
         """
         action = check_enum(action, ScopeMemberActions, "action")
@@ -214,10 +193,10 @@ class Scope(Base, TagsMixin):
         users: List[Dict] = self._client._retrieve_users()["results"]
         user_object: Dict = find(users, lambda u: u["username"] == user)
         if user_object is None:
-            raise NotFoundError('User "{}" does not exist'.format(user))
+            raise NotFoundError(f'User "{user}" does not exist')
 
         url = self._client._build_url(
-            "scope_{}_{}".format(action, role), scope_id=self.id
+            f"scope_{action}_{role}", scope_id=self.id
         )
 
         response = self._client._request(
@@ -229,21 +208,21 @@ class Scope(Base, TagsMixin):
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError(
-                "Could not {} {} in Scope".format(action, role), response=response
+                f"Could not {action} {role} in Scope", response=response
             )
 
         self.refresh(json=response.json().get("results")[0])
 
     def edit(
             self,
-            name: Optional[Union[Text, Empty]] = empty,
-            description: Optional[Union[Text, Empty]] = empty,
+            name: Optional[Union[str, Empty]] = empty,
+            description: Optional[Union[str, Empty]] = empty,
             start_date: Optional[Union[datetime, Empty]] = empty,
             due_date: Optional[Union[datetime, Empty]] = empty,
-            status: Optional[Union[Text, ScopeStatus, Empty]] = empty,
-            category: Optional[Union[Text, ScopeCategory, Empty]] = empty,
-            tags: Optional[Union[List[Text], Empty]] = empty,
-            team: Optional[Union[Team, Text, Empty]] = empty,
+            status: Optional[Union[str, ScopeStatus, Empty]] = empty,
+            category: Optional[Union[str, ScopeCategory, Empty]] = empty,
+            tags: Optional[Union[List[str], Empty]] = empty,
+            team: Optional[Union[Team, str, Empty]] = empty,
             options: Optional[Union[Dict, Empty]] = empty,
             **kwargs
     ) -> None:
@@ -253,26 +232,17 @@ class Scope(Base, TagsMixin):
         Setting an input to None will clear out the value (exception being name and status).
 
         :param name: (optionally) edit the name of the scope. Name cannot be cleared.
-        :type name: basestring or None or Empty
         :param description: (optionally) edit the description of the scope or clear it
-        :type description: basestring or None or Empty
         :param start_date: (optionally) edit the start date of the scope as a datetime object (UTC time/timezone
                             aware preferred) or clear it
-        :type start_date: datetime or None or Empty
         :param due_date: (optionally) edit the due_date of the scope as a datetime object (UTC time/timzeone
                             aware preferred) or clear it
-        :type due_date: datetime or None or Empty
         :param status: (optionally) edit the status of the scope as a string based. Status cannot be cleared.
-        :type status: ScopeStatus or Empty
         :param category (optionally) edit the category of the scope
-        :type category: ScopeCategory or Empty
         :param tags: (optionally) replace the tags on a scope, which is a list of strings ["one","two","three"] or
                     clear them
-        :type tags: list of basestring or None or Empty
         :param team: (optionally) add the scope to a team. Team cannot be cleared.
-        :type team: UUIDstring or None or Empty
         :param options: (optionally) custom options dictionary stored on the scope object
-        :type options: dict or None or Empty
 
         :raises IllegalArgumentError: if the type of the inputs is not correct
         :raises APIError: if another Error occurs
@@ -315,13 +285,13 @@ class Scope(Base, TagsMixin):
         update_dict = {
             "id": self.id,
             "name": check_text(name, "name") or self.name,
-            "text": check_text(description, "description") or str(),
+            "text": check_text(description, "description") or '',
             "start_date": check_datetime(start_date, "start_date"),
             "due_date": check_datetime(due_date, "due_date"),
             "status": check_enum(status, ScopeStatus, "status") or self.status,
             "category": check_enum(category, ScopeCategory, "category"),
             "tags": check_list_of_text(tags, "tags", True) or list(),
-            "team_id": check_base(team, Team, "team") or str(),
+            "team_id": check_base(team, Team, "team") or '',
             "scope_options": check_type(options, dict, "options") or dict(),
         }
 
@@ -340,7 +310,7 @@ class Scope(Base, TagsMixin):
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Scope {}".format(self), response=response)
+            raise APIError(f"Could not update Scope {self}", response=response)
 
         self.refresh(json=response.json().get("results")[0])
 
@@ -479,11 +449,8 @@ class Scope(Base, TagsMixin):
         Update the landing page of the scope.
 
         :param activity: Activity object or KEChainPages option
-        :type activity: (Activity, KEChainPages)
         :param task_display_mode: display mode of the activity in KE-chain
-        :type task_display_mode: SubprocessDisplayMode
         :return: None
-        :rtype None
         """
         from pykechain.models import Activity
 
@@ -497,15 +464,15 @@ class Scope(Base, TagsMixin):
         check_enum(task_display_mode, SubprocessDisplayMode, "task_display_mode")
 
         if isinstance(activity, Activity):
-            url = "#/scopes/{}/{}/{}".format(self.id, task_display_mode, activity.id)
+            url = f"#/scopes/{self.id}/{task_display_mode}/{activity.id}"
         else:
-            url = "#/scopes/{}/{}".format(self.id, activity)
+            url = f"#/scopes/{self.id}/{activity}"
 
         options = dict(self.options)
         options.update({"landingPage": url})
         self.options = options
 
-    def get_landing_page_url(self) -> Optional[Text]:
+    def get_landing_page_url(self) -> Optional[str]:
         """
         Retrieve the landing page URL, if it is set in the options.
 
@@ -579,11 +546,8 @@ class Scope(Base, TagsMixin):
            we added the supervisor members for backend that support this.
 
         :param is_manager: (otional) set to True/False to filter members that are/aren't managers, resp.
-        :type is_manager: bool
         :param is_supervisor: (optional) set to True/False to filter members that are/aren't supervisors, resp.
-        :type is_supervisor: bool
         :param is_leadmember: (optional) set to True/False to filter members that are/aren't leadmembers, resp.
-        :type is_leadmember: bool
         :return: List of members, each defined as a dict
 
         Examples
@@ -616,74 +580,68 @@ class Scope(Base, TagsMixin):
             ]
         return members
 
-    def add_member(self, member: Text) -> None:
+    def add_member(self, member: str) -> None:
         """
         Add a single member to the scope.
 
         You may only edit the list of members if the pykechain credentials allow this.
 
         :param member: single username to be added to the scope list of members
-        :type member: basestring
         :raises APIError: when unable to update the scope member
         """
         self._update_scope_project_team(
             action=ScopeMemberActions.ADD, role=ScopeRoles.MEMBER, user=member
         )
 
-    def remove_member(self, member: Text) -> None:
+    def remove_member(self, member: str) -> None:
         """
         Remove a single member to the scope.
 
         :param member: single username to be removed from the scope list of members
-        :type member: basestring
         :raises APIError: when unable to update the scope member
         """
         self._update_scope_project_team(
             action=ScopeMemberActions.REMOVE, role=ScopeRoles.MEMBER, user=member
         )
 
-    def add_manager(self, manager: Text) -> None:
+    def add_manager(self, manager: str) -> None:
         """
         Add a single manager to the scope.
 
         :param manager: single username to be added to the scope list of managers
-        :type manager: basestring
         :raises APIError: when unable to update the scope manager
         """
         self._update_scope_project_team(
             action=ScopeMemberActions.ADD, role=ScopeRoles.MANAGER, user=manager
         )
 
-    def remove_manager(self, manager: Text) -> None:
+    def remove_manager(self, manager: str) -> None:
         """
         Remove a single manager to the scope.
 
         :param manager: single username to be added to the scope list of managers
-        :type manager: basestring
         :raises APIError: when unable to update the scope manager
         """
         self._update_scope_project_team(
             action=ScopeMemberActions.REMOVE, role=ScopeRoles.MANAGER, user=manager
         )
 
-    def add_leadmember(self, leadmember: Text) -> None:
+    def add_leadmember(self, leadmember: str) -> None:
         """
         Add a single leadmember to the scope.
 
         :param leadmember: single username to be added to the scope list of leadmembers
-        :type leadmember: basestring
         :raises APIError: when unable to update the scope leadmember
         """
         self._update_scope_project_team(
             action=ScopeMemberActions.ADD, role=ScopeRoles.LEADMEMBER, user=leadmember
         )
 
-    def remove_leadmember(self, leadmember: Text) -> None:
+    def remove_leadmember(self, leadmember: str) -> None:
         """
         Remove a single leadmember to the scope.
 
         :param leadmember: single username to be added to the scope list of leadmembers
-        :type leadmember: basestring
         :raises APIError: when unable to update the scope leadmember
         """
         self._update_scope_project_team(
@@ -692,7 +650,7 @@ class Scope(Base, TagsMixin):
             user=leadmember,
         )
 
-    def add_supervisor(self, supervisor: Text) -> None:
+    def add_supervisor(self, supervisor: str) -> None:
         """
         Add a single supervisor to the scope.
 
@@ -700,7 +658,6 @@ class Scope(Base, TagsMixin):
            requires backend version 3.7 as well.
 
         :param supervisor: single username to be added to the scope list of supervisors
-        :type supervisor: basestring
         :raises APIError: when unable to update the scope supervisor
         """
         if self._client.match_app_version(label="scope", version="<3.6.0"):
@@ -712,7 +669,7 @@ class Scope(Base, TagsMixin):
             action=ScopeMemberActions.ADD, role=ScopeRoles.SUPERVISOR, user=supervisor
         )
 
-    def remove_supervisor(self, supervisor: Text) -> None:
+    def remove_supervisor(self, supervisor: str) -> None:
         """
         Remove a single supervisor to the scope.
 
@@ -720,7 +677,6 @@ class Scope(Base, TagsMixin):
            requires backend version 3.7 as well.
 
         :param supervisor: single username to be added to the scope list of supervisors
-        :type supervisor: basestring
         :raises APIError: when unable to update the scope supervisor
         """
         if self._client.match_app_version(label="scope", version="<3.6.0"):

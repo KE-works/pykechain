@@ -1,62 +1,27 @@
 import warnings
-from typing import (
-    Iterable,
-    Union,
-    Optional,
-    Text,
-    Dict,
-    List,
-    Any,
-)
+from typing import (Any, Dict, Iterable, List, Optional, Union)
 
-from pykechain.enums import (
-    SortTable,
-    WidgetTypes,
-    ShowColumnTypes,
-    ScopeWidgetColumnTypes,
-    ProgressBarColors,
-    CardWidgetLinkValue,
-    LinkTargets,
-    ImageFitValue,
-    KEChainPages,
-    Alignment,
-    ActivityStatus,
-    ActivityType,
-    ActivityClassification,
-)
-from pykechain.exceptions import NotFoundError, IllegalArgumentError
-from pykechain.models.input_checks import (
-    check_enum,
-    check_text,
-    check_base,
-    check_type,
-    check_list_of_text,
-)
+from pykechain.enums import (ActivityClassification, ActivityStatus, ActivityType, Alignment,
+                             CardWidgetLinkValue,
+                             ImageFitValue, KEChainPages, LinkTargets, ProgressBarColors,
+                             ScopeWidgetColumnTypes,
+                             ShowColumnTypes, SortTable, WidgetTypes)
+from pykechain.exceptions import IllegalArgumentError, NotFoundError
+from pykechain.models.input_checks import (check_base, check_enum, check_list_of_text, check_text,
+                                           check_type)
 from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets import Widget
-from pykechain.models.widgets.enums import (
-    DashboardWidgetSourceScopes,
-    DashboardWidgetShowTasks,
-    DashboardWidgetShowScopes,
-    MetaWidget,
-    AssociatedObjectId,
-    TasksAssignmentFilterTypes,
-    TasksWidgetColumns,
-)
-from pykechain.models.widgets.helpers import (
-    _set_title,
-    _initiate_meta,
-    _retrieve_object,
-    _retrieve_object_id,
-    _check_prefilters,
-    _check_excluded_propmodels,
-    _set_description,
-    _set_link,
-    _set_image,
-    _set_button_text,
-    TITLE_TYPING,
-)
-from pykechain.utils import is_uuid, find, snakecase, is_url
+from pykechain.models.widgets.enums import (AssociatedObjectId, DashboardWidgetShowScopes,
+                                            DashboardWidgetShowTasks,
+                                            DashboardWidgetSourceScopes, MetaWidget,
+                                            TasksAssignmentFilterTypes,
+                                            TasksWidgetColumns)
+from pykechain.models.widgets.helpers import (TITLE_TYPING, _check_excluded_propmodels,
+                                              _check_prefilters,
+                                              _initiate_meta, _retrieve_object,
+                                              _retrieve_object_id, _set_button_text,
+                                              _set_description, _set_image, _set_link, _set_title)
+from pykechain.utils import find, is_url, is_uuid, snakecase
 
 
 class WidgetsManager(Iterable):
@@ -76,11 +41,8 @@ class WidgetsManager(Iterable):
         activity uuid and a :class:`Client`.
 
         :param widgets: list of widgets.
-        :type widgets: List[Widget]
         :param activity: an :class:`Activity` object
-        :type activity: Activity
         :param kwargs: additional keyword arguments
-        :type kwargs: dict or None
         :returns: None
         :raises IllegalArgumentError: if not provided one of :class:`Activity` or activity uuid and a `Client`
         """
@@ -99,8 +61,8 @@ class WidgetsManager(Iterable):
         self._activity_id = activity.id
         self._client: Client = activity._client
 
-    def __repr__(self) -> Text:  # pragma: no cover
-        return "<pyke {} object {} widgets>".format(self.__class__.__name__, self.__len__())
+    def __repr__(self) -> str:  # pragma: no cover
+        return f"<pyke {self.__class__.__name__} object {self.__len__()} widgets>"
 
     def __iter__(self):
         return iter(self._widgets)
@@ -112,9 +74,7 @@ class WidgetsManager(Iterable):
         """Widget from the list of widgets based on index, uuid, title or ref.
 
         :param key: index, uuid, title or ref of the widget to retrieve
-        :type key: int or basestring
         :return: Retrieved widget
-        :rtype: Widget
         :raises NotFoundError: when the widget could not be found
         """
         found = None
@@ -129,7 +89,7 @@ class WidgetsManager(Iterable):
 
         if found is not None:
             return found
-        raise NotFoundError("Could not find widget with index, title, ref, or id '{}'".format(key))
+        raise NotFoundError(f"Could not find widget with index, title, ref, or id '{key}'")
 
     def __contains__(self, item: Widget) -> bool:
         return item in self._widgets
@@ -139,9 +99,7 @@ class WidgetsManager(Iterable):
         Create widgets in bulk.
 
         :param widgets: list of dicts defining the configuration per widget.
-        :type widgets: List[Dict]
         :returns list of widgets
-        :rtype: List[Widget]
         """
         # Insert the current widget
         for widget in widgets:
@@ -163,24 +121,15 @@ class WidgetsManager(Iterable):
         `readable_model_ids` and `writable_models_ids`.
 
         :param activity: activity objects to create the widget in.
-        :type activity: :class:`Activity` or UUID
         :param widget_type: type of the widget, one of :class:`WidgetTypes`
-        :type: string
         :param title: (O) title of the widget
-        :type title: basestring or None
         :param meta: meta dictionary of the widget.
-        :type meta: dict
         :param order: (O) order in the activity of the widget.
-        :type order: int or None
         :param parent: (O) parent of the widget for Multicolumn and Multirow widget.
-        :type parent: :class:`Widget` or UUID
         :param readable_models: (O) list of property model ids to be configured as readable (alias = inputs)
-        :type readable_models: list of properties or list of property id's
         :param writable_models: (O) list of property model ids to be configured as writable (alias = outputs)
-        :type writable_models: list of properties or list of property id's
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
-        :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
@@ -200,23 +149,18 @@ class WidgetsManager(Iterable):
             part: 'Part',
             all_readable: Optional[bool] = None,
             all_writable: Optional[bool] = None,
-            readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
-            writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+            readable_models: Optional[List[Union['AnyProperty', str]]] = None,
+            writable_models: Optional[List[Union['AnyProperty', str]]] = None,
             **kwargs
     ) -> Widget:
         """
         Create a widget with configured properties.
 
         :param part: Part to retrieve the properties from if all_readable or all_writable is True.
-        :type part: Part
         :param all_readable: Selects all the `Properties` of part_model and configures them as readable in the widget
-        :type all_readable: bool
         :param all_writable: Selects all the `Properties` of part_model and configures them as writable in the widget
-        :type all_writable: bool
         :param readable_models: (O) list of property model ids to be configured as readable (alias = inputs)
-        :type readable_models: list of properties or list of property id's
         :param writable_models: (O) list of property model ids to be configured as writable (alias = outputs)
-        :type writable_models: list of properties or list of property id's
         :param kwargs: additional keyword arguments to pass
         :return: Widget
         """
@@ -236,10 +180,10 @@ class WidgetsManager(Iterable):
             **kwargs)
 
     def add_supergrid_widget(self,
-                             part_model: Union['Part', Text],
-                             parent_instance: Optional[Union['Part', Text]] = None,
+                             part_model: Union['Part', str],
+                             parent_instance: Optional[Union['Part', str]] = None,
                              title: TITLE_TYPING = False,
-                             parent_widget: Optional[Union[Widget, Text]] = None,
+                             parent_widget: Optional[Union[Widget, str]] = None,
                              new_instance: Optional[bool] = True,
                              edit: Optional[bool] = True,
                              clone: Optional[bool] = True,
@@ -251,12 +195,12 @@ class WidgetsManager(Iterable):
                              emphasize_edit: Optional[bool] = False,
                              emphasize_clone: Optional[bool] = False,
                              emphasize_delete: Optional[bool] = False,
-                             sort_property: Optional[Union['AnyProperty', Text]] = None,
-                             sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
+                             sort_property: Optional[Union['AnyProperty', str]] = None,
+                             sort_direction: Optional[Union[SortTable, str]] = SortTable.ASCENDING,
                              show_name_column: Optional[bool] = True,
                              show_images: Optional[bool] = False,
-                             readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
-                             writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+                             readable_models: Optional[List[Union['AnyProperty', str]]] = None,
+                             writable_models: Optional[List[Union['AnyProperty', str]]] = None,
                              all_readable: Optional[bool] = False,
                              all_writable: Optional[bool] = False,
                              **kwargs) -> Widget:
@@ -266,59 +210,36 @@ class WidgetsManager(Iterable):
         The widget will be saved to KE-chain.
 
         :param part_model: The part model based on which all instances will be shown.
-        :type part_model: :class:`Part` or UUID
         :param parent_instance: The parent part instance for which the instances will be shown or to which new
             instances will be added.
-        :type parent_instance: :class:`Part` or UUID
         :param title: A custom title for the supergrid::
             * False (default): Part instance name
             * String value: Custom title
             * None: No title
-        :type title: bool or basestring or None
         :param new_instance: Show or hide the New instance button (default False). You need to provide a
             `parent_instance` in order for this to work.
-        :type new_instance: bool
         :param edit: Show or hide the Edit button (default True)
-        :type edit: bool
         :param clone: Show or hide the Clone button (default True)
-        :type clone: bool
         :param export: Show or hide the Export Grid button (default True)
-        :type export: bool
         :param upload: Show or hide the Import Grid button (default True)
-        :type upload: bool
         :param delete: Show or hide the Delete button (default False)
-        :type delete: bool
         :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
-        :type incomplete_rows: bool
         :param emphasize_new_instance: Emphasize the New instance button (default True)
-        :type emphasize_new_instance: bool
         :param emphasize_edit: Emphasize the Edit button (default False)
-        :type emphasize_edit: bool
         :param emphasize_clone: Emphasize the Clone button (default False)
-        :type emphasize_clone: bool
         :param emphasize_delete: Emphasize the Delete button (default False)
-        :type emphasize_delete: bool
         :param sort_property: The property model on which the part instances are being sorted on
-        :type sort_property: :class:`Property` or UUID
         :param sort_direction: The direction on which the values of property instances are being sorted on:
             * ASC (default): Sort in ascending order
             * DESC: Sort in descending order
-        :type sort_direction: basestring (see :class:`enums.SortTable`)
         :param show_name_column: (O) show the column with part names
-        :type show_name_column: bool
         :param show_images: (O) show the attachments in the grid as images, not as hyperlinks (default False).
-        :type show_images: bool
         :param readable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as readable
-        :type readable_models: list
         :param writable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as writable
-        :type writable_models: list
         :param all_readable: Selects all the `Properties` of part_model and configures them as readable in the widget
-        :type all_readable: bool
         :param all_writable: Selects all the `Properties` of part_model and configures them as writable in the widget
-        :type all_writable: bool
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
-        :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
@@ -371,10 +292,10 @@ class WidgetsManager(Iterable):
 
     def add_filteredgrid_widget(
             self,
-            part_model: Union['Part', Text],
-            parent_instance: Optional[Union['Part', Text]] = None,
+            part_model: Union['Part', str],
+            parent_instance: Optional[Union['Part', str]] = None,
             title: TITLE_TYPING = False,
-            parent_widget: Optional[Union[Widget, Text]] = None,
+            parent_widget: Optional[Union[Widget, str]] = None,
             new_instance: Optional[bool] = True,
             edit: Optional[bool] = True,
             clone: Optional[bool] = True,
@@ -386,18 +307,18 @@ class WidgetsManager(Iterable):
             emphasize_edit: Optional[bool] = False,
             emphasize_clone: Optional[bool] = False,
             emphasize_delete: Optional[bool] = False,
-            sort_property: Optional[Union['AnyProperty', Text]] = None,
-            sort_name: Optional[Union[bool, Text]] = False,
-            sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
+            sort_property: Optional[Union['AnyProperty', str]] = None,
+            sort_name: Optional[Union[bool, str]] = False,
+            sort_direction: Optional[Union[SortTable, str]] = SortTable.ASCENDING,
             show_name_column: Optional[bool] = True,
             show_images: Optional[bool] = False,
             collapse_filters: Optional[bool] = False,
             page_size: Optional[int] = 25,
-            readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
-            writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+            readable_models: Optional[List[Union['AnyProperty', str]]] = None,
+            writable_models: Optional[List[Union['AnyProperty', str]]] = None,
             all_readable: Optional[bool] = False,
             all_writable: Optional[bool] = False,
-            excluded_propmodels: Optional[List[Union['AnyProperty', Text]]] = None,
+            excluded_propmodels: Optional[List[Union['AnyProperty', str]]] = None,
             prefilters: Optional[Union[List[PropertyValueFilter], Dict]] = None,
             **kwargs
     ) -> Widget:
@@ -407,74 +328,46 @@ class WidgetsManager(Iterable):
         The widget will be saved to KE-chain.
 
         :param part_model: The part model based on which all instances will be shown.
-        :type part_model: :class:`Part` or UUID
         :param parent_instance: The parent part instance for which the instances will be shown or to which new
             instances will be added.
-        :type parent_instance: :class:`Part` or UUID
         :param title: A custom title for the supergrid:
             * False (default): Part instance name
             * String value: Custom title
             * None: No title
-        :type title: bool or basestring or None
         :param new_instance: Show or hide the New instance button (default False). You need to provide a
             `parent_instance` in order for this to work.
-        :type new_instance: bool
         :param edit: Show or hide the Edit button (default True)
-        :type edit: bool
         :param clone: Show or hide the Clone button (default True)
-        :type clone: bool
         :param export: Show or hide the Export Grid button (default True)
-        :type export: bool
         :param upload: Show or hide the Import Grid button (default True)
-        :type upload: bool
         :param delete: Show or hide the Delete button (default False)
-        :type delete: bool
         :param incomplete_rows: Show or hide the Incomplete Rows filter button (default True)
-        :type incomplete_rows: bool
         :param emphasize_new_instance: Emphasize the New instance button (default True)
-        :type emphasize_new_instance: bool
         :param emphasize_edit: Emphasize the Edit button (default False)
-        :type emphasize_edit: bool
         :param emphasize_clone: Emphasize the Clone button (default False)
-        :type emphasize_clone: bool
         :param emphasize_delete: Emphasize the Delete button (default False)
-        :type emphasize_delete: bool
         :param sort_property: The property model on which the part instances are being sorted on
-        :type sort_property: :class:`Property` or UUID
         :param sort_name: If set to True it will sort on name of the part. It is ignored if sort_property is None
-        :type sort_name: bool
         :param sort_direction: The direction on which the values of property instances are being sorted on:
             * ASC (default): Sort in ascending order
             * DESC: Sort in descending order
-        :type sort_direction: basestring (see :class:`enums.SortTable`)
         :param show_name_column: (O) show the column with part names
-        :type show_name_column: bool
         :param show_images: (O) show the attachments in the grid as images, not as hyperlinks (default False).
-        :type show_images: bool
         :param collapse_filters: Boolean to collapses the filters pane, or fully hide if None. (default = False)
-        :type collapse_filters: bool
         :param page_size: Number of parts that will be shown per page in the grid.
-        :type page_size: int
         :param readable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as readable
-        :type readable_models: list
         :param writable_models: List of `Property` models or `Property` UUIDs to be configured in the widget as writable
-        :type writable_models: list
         :param all_readable: Selects all the `Properties` of part_model and configures them as readable in the widget
-        :type all_readable: bool
         :param all_writable: Selects all the `Properties` of part_model and configures them as writable in the widget
-        :type all_writable: bool
         :param excluded_propmodels: (O) list of properties not shown in the filter pane
-        :type excluded_propmodels: list
         :param prefilters: (O) default filters active in the grid.
             Defined as either a list of PropertyValueFilter objects or a dict with the following fields:
             * property_models: list of Properties, defined as Property objects or UUIDs
             * values: the pre-filter value for each property to filter on
             * filters_type: the types of filters, either `le`, `ge`, `icontains` or `exact`
-        :type prefilters: dict
 
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
-        :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
@@ -539,12 +432,12 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_attachmentviewer_widget(self,
-                                    attachment_property: Union[Text, 'AttachmentProperty'],
+                                    attachment_property: Union[str, 'AttachmentProperty'],
                                     editable: Optional[bool] = False,
                                     title: TITLE_TYPING = False,
-                                    parent_widget: Optional[Union[Widget, Text]] = None,
+                                    parent_widget: Optional[Union[Widget, str]] = None,
                                     alignment: Optional[Alignment] = None,
-                                    image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
+                                    image_fit: Optional[Union[ImageFitValue, str]] = ImageFitValue.CONTAIN,
                                     show_download_button: Optional[bool] = True,
                                     show_full_screen_button: Optional[bool] = True,
                                     **kwargs) -> Widget:
@@ -554,25 +447,17 @@ class WidgetsManager(Iterable):
         The widget will be saved to KE-chain.
 
         :param attachment_property: KE-chain Attachment property to display
-        :type attachment_property: AttachmentProperty
         :param editable: Whether the attachment can be added, edited or deleted (default: False)
-        :type editable: bool
         :param title: A custom title for the script widget
             * False (default): Property name
             * String value: Custom title
             * None: No title
-        :type title: bool or basestring or None
         :param alignment: horizontal alignment of the previewed attachment (Alignment enum class)
-        :type alignment: Alignment
         :param image_fit: (O) enumeration to address the image_fit (defaults to 'contain', otherwise 'cover')
-        :type image_fit: basestring or None
         :param show_download_button: (O) whether a user can download the attached figure (defaults to True)
-        :type show_download_button: bool
         :param show_full_screen_button: (O) whether the figure can be expanded to fit the full screen (defaults to True)
-        :type show_full_screen_button: bool
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
-        :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
@@ -614,8 +499,8 @@ class WidgetsManager(Iterable):
 
     def add_tasknavigationbar_widget(self,
                                      activities: Union[Iterable[Dict]],
-                                     alignment: Optional[Text] = Alignment.CENTER,
-                                     parent_widget: Optional[Union[Widget, Text]] = None,
+                                     alignment: Optional[str] = Alignment.CENTER,
+                                     parent_widget: Optional[Union[Widget, str]] = None,
                                      **kwargs) -> Widget:
         """
         Add a KE-chain Navigation Bar (e.g. navigation bar widget) to the activity.
@@ -629,15 +514,12 @@ class WidgetsManager(Iterable):
             * activityId: class `Activity` or UUID
             * isDisabled: (O) to disable the navbar button
             * link: str URL to external web page
-        :type activities: list of dict
         :param alignment: The alignment of the buttons inside navigation bar. One of :class:`Alignment`
             * left: Left aligned
             * center (default): Center aligned
             * right: Right aligned
-        :type alignment: basestring (see :class:`enums.NavigationBarAlignment`)
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
-        :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
@@ -676,7 +558,7 @@ class WidgetsManager(Iterable):
                                            "Button {} has neither.".format(nr + 1))
 
             if MetaWidget.CUSTOM_TEXT not in input_dict or not input_dict[MetaWidget.CUSTOM_TEXT]:
-                button_dict[MetaWidget.CUSTOM_TEXT] = str()
+                button_dict[MetaWidget.CUSTOM_TEXT] = ''
             else:
                 button_dict[MetaWidget.CUSTOM_TEXT] = str(input_dict[MetaWidget.CUSTOM_TEXT])
 
@@ -698,12 +580,12 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_propertygrid_widget(self,
-                                part_instance: Union['Part', Text],
+                                part_instance: Union['Part', str],
                                 title: TITLE_TYPING = False,
                                 max_height: Optional[int] = None,
                                 show_headers: Optional[bool] = True,
                                 show_columns: Optional[Iterable[ShowColumnTypes]] = None,
-                                parent_widget: Optional[Union[Text, Widget]] = None,
+                                parent_widget: Optional[Union[str, Widget]] = None,
                                 readable_models: Optional[Iterable] = None,
                                 writable_models: Optional[Iterable] = None,
                                 all_readable: Optional[bool] = False,
@@ -714,33 +596,22 @@ class WidgetsManager(Iterable):
 
         The widget will be saved to KE-chain.
         :param part_instance: The part instance on which the property grid will be based
-        :type part_instance: :class:`Part` or UUID
         :param max_height: The max height of the property grid in pixels
-        :type max_height: int or None
         :param title: A custom title for the property grid::
             * False (default): Part instance name
             * String value: Custom title
             * None: No title
-        :type title: bool or basestring or None
         :param show_headers: Show or hide the headers in the grid (default True)
-        :type show_headers: bool
         :param show_columns: Columns to be hidden or shown (default to 'unit' and 'description')
-        :type show_columns: list
         :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
-        :type parent_widget: Widget or basestring or None
         :param readable_models: list of property model ids to be configured as readable (alias = inputs)
-        :type readable_models: list of properties or list of property id's
         :param writable_models: list of property model ids to be configured as writable (alias = outputs)
-        :type writable_models: list of properties or list of property id's
         :param all_readable: (O) boolean indicating if all properties should automatically be configured as
         readable (if True) or writable (if False).
-        :type all_readable: bool
         :param all_writable: (O) boolean indicating if all properties should automatically be configured as
         writable (if True) or writable (if False).
-        :type all_writable: bool
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
-        :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
@@ -793,7 +664,7 @@ class WidgetsManager(Iterable):
             alignment: Optional[Alignment] = Alignment.LEFT,
             download_log: Optional[bool] = False,
             show_log: Optional[bool] = True,
-            parent_widget: Optional[Union[Widget, Text]] = None,
+            parent_widget: Optional[Union[Widget, str]] = None,
             **kwargs
     ) -> Widget:
         """
@@ -802,30 +673,21 @@ class WidgetsManager(Iterable):
         The widget will be saved to KE-chain.
 
         :param service: The Service to which the button will be coupled and will be ran when the button is pressed.
-        :type service: :class:`Service` or UUID
         :param title: A custom title for the script widget
             * False (default): Script name
             * String value: Custom title
             * None: No title
-        :type title: bool or basestring or None
         :param custom_button_text: A custom text for the button linked to the script
             * False (default): Script name
             * String value: Custom title
             * None: No title
-        :type custom_button_text: bool or basestring or None
         :param emphasize_run: Emphasize the run button (default True)
-        :type emphasize_run: bool
         :param alignment: Horizontal alignment of the button
-        :type alignment: Alignment
         :param download_log: Include the possibility of downloading the log inside the activity (default False)
-        :type download_log: bool
         :param show_log: Include the log message inside the activity (default True)
-        :type show_log: bool
         :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
-        :type parent_widget: Widget or basestring or None
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
-        :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
@@ -858,9 +720,9 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_html_widget(self,
-                        html: Optional[Text],
+                        html: Optional[str],
                         title: TITLE_TYPING = None,
-                        parent_widget: Optional[Union[Widget, Text]] = None,
+                        parent_widget: Optional[Union[Widget, str]] = None,
                         **kwargs) -> Widget:
         """
         Add a KE-chain HTML widget to the widget manager.
@@ -868,16 +730,12 @@ class WidgetsManager(Iterable):
         The widget will be saved to KE-chain.
 
         :param html: The text that will be shown by the widget.
-        :type html: basestring or None
         :param title: A custom title for the text panel::
             * None (default): No title
             * String value: Custom title
-        :type title: basestring or None
         :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
-        :type parent_widget: Widget or basestring or None
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
-        :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
@@ -900,7 +758,7 @@ class WidgetsManager(Iterable):
     def add_notebook_widget(self,
                             notebook: 'Service',
                             title: TITLE_TYPING = False,
-                            parent_widget: Optional[Union[Widget, Text]] = None,
+                            parent_widget: Optional[Union[Widget, str]] = None,
                             **kwargs) -> Widget:
         """
         Add a KE-chain Notebook (e.g. notebook widget) to the WidgetManager.
@@ -908,17 +766,13 @@ class WidgetsManager(Iterable):
         The widget will be saved to KE-chain.
 
         :param notebook: The Notebook to which the button will be coupled and will start when the button is pressed.
-        :type notebook: :class:`Service` or UUID
         :param title: A custom title for the notebook widget
             * False (default): Notebook name
             * String value: Custom title
             * None: No title
-        :type title: bool or basestring or None
         :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
-        :type parent_widget: Widget or basestring or None
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
-        :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
 
@@ -971,35 +825,21 @@ class WidgetsManager(Iterable):
         The widget will be saved to KE-chain.
 
         :param show_all: Show all elements of the metapanel (defaults to True). If True other arguments are ignored.
-        :type show_all: bool
         :param show_due_date: show Due date
-        :type show_due_date: bool
         :param show_start_date: show Start date
-        :type show_start_date: bool
         :param show_title: Show Title of the activity
-        :type show_title: bool
         :param show_status: Show status
-        :type show_status: bool
         :param show_progress: Show progress. If True, the progressbar is not shown.
-        :type show_progress: bool
         :param show_assignees: show Assignees
-        :type show_assignees: bool
         :param show_breadcrumbs: show Breadcrumbs
-        :type show_breadcrumbs: bool
         :param show_download_pdf: Show the Download PDF button
-        :type show_download_pdf: bool
         :param show_menu: show Menu
-        :type show_menu: bool
         :param show_progressbar: Show the progress bar. Shown when progress is not True.
-        :type show_progressbar: bool
         :param progress_bar: Progress bar custom settings. Allowed dictionary items `colorNoProgress, showProgressText,
         showProgressText, customHeight, colorInProgress, colorCompleted, colorInProgressBackground`
-        :type progress_bar: dict or None
         :param breadcrumb_root: Activity object or UUID to specify the breadcrumb root
-        :type breadcrumb_root: Activity
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
-        :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
@@ -1075,7 +915,6 @@ class WidgetsManager(Iterable):
         :param show_progress_text: visualize the progress percentage
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
-        :rtype Widget
         """
         meta = _initiate_meta(kwargs, activity=self.activity)
 
@@ -1106,10 +945,8 @@ class WidgetsManager(Iterable):
             * False: Widget id
             * String value: Custom title
             * None (default): No title
-        :type title: bool or basestring or None
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
-        :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
@@ -1126,7 +963,7 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_scope_widget(self,
-                         team: Union['Team', Text] = None,
+                         team: Union['Team', str] = None,
                          title: TITLE_TYPING = None,
                          add: Optional[bool] = True,
                          edit: Optional[bool] = True,
@@ -1136,13 +973,13 @@ class WidgetsManager(Iterable):
                          emphasize_edit: Optional[bool] = False,
                          emphasize_clone: Optional[bool] = False,
                          emphasize_delete: Optional[bool] = False,
-                         show_columns: Optional[Iterable[Text]] = None,
+                         show_columns: Optional[Iterable[str]] = None,
                          show_all_columns: Optional[bool] = True,
                          page_size: Optional[int] = 25,
-                         tags: Optional[Iterable[Text]] = None,
-                         sorted_column: Optional[Text] = ScopeWidgetColumnTypes.PROJECT_NAME,
+                         tags: Optional[Iterable[str]] = None,
+                         sorted_column: Optional[str] = ScopeWidgetColumnTypes.PROJECT_NAME,
                          sorted_direction: Optional[SortTable] = SortTable.ASCENDING,
-                         parent_widget: Optional[Union[Widget, Text]] = None,
+                         parent_widget: Optional[Union[Widget, str]] = None,
                          active_filter: Optional[bool] = True,
                          search_filter: Optional[bool] = True,
                          **kwargs) -> Widget:
@@ -1152,51 +989,31 @@ class WidgetsManager(Iterable):
         The widget will be saved in KE-chain.
 
         :param team: Team to limit the list of scopes to. Providing this is not obligated but highly preferred.
-        :type team: :class:`Team` or basestring
         :param title:A custom title for the multi column widget
             * False: Widget id
             * String value: Custom title
             * None (default): No title
-        :type title: bool or basestring or None
         :param add: (O) Show or hide the Add button (default True)
-        :type add: bool
         :param clone: (O) Show or hide the Clone button (default True)
-        :type clone: bool
         :param edit: (O) Show or hide the Edit button (default True)
-        :type edit: bool
         :param delete: (O) Show or hide the Delete button (default True)
-        :type delete: bool
         :param emphasize_add: (O) Emphasize the Add button (default True)
-        :type emphasize_add: bool
         :param emphasize_clone: (O) Emphasize the Clone button (default False)
-        :type emphasize_clone: bool
         :param emphasize_edit: (O) Emphasize the Edit button (default False)
-        :type emphasize_edit: bool
         :param emphasize_delete: (O) Emphasize the Delete button (default False)
-        :type emphasize_delete: bool
         :param show_columns: (O) list of column headers to show. One of `ScopeWidgetColumnTypes`.
-        :type show_columns: list of basestring
         :param show_all_columns: boolean to show all columns (defaults to True). If True, will override `show_columns`
-        :type show_all_columns: bool
         :param page_size: number of scopes to show per page (defaults to 25)
-        :type page_size: int
         :param tags: (O) list of scope tags to filter the Scopes on
-        :type tags: list of basestring
         :param sorted_column: column name to sort on. (defaults to project name column). One of `ScopeWidgetColumnTypes`
-        :type sorted_column: basestring
         :param sorted_direction: The direction on which the values of property instances are being sorted on:
             * ASC (default): Sort in ascending order
             * DESC: Sort in descending order
-        :type sorted_direction: basestring
         :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
-        :type parent_widget: Widget or basestring or None
         :param active_filter: (O) whether to show the active-scopes filter, defaults to True
-        :type active_filter: bool
         :param search_filter: (O) whether to show the search filter, defaults to True
-        :type search_filter: bool
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
-        :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
@@ -1207,14 +1024,14 @@ class WidgetsManager(Iterable):
 
         if not show_all_columns and show_columns:
             if not isinstance(show_columns, (list, tuple)):
-                raise IllegalArgumentError("`show_columns` must be a list or tuple, `{}` is not.".format(show_columns))
+                raise IllegalArgumentError(f"`show_columns` must be a list or tuple, `{show_columns}` is not.")
             options = set(ScopeWidgetColumnTypes.values())
             if not all(sc in options for sc in show_columns):
                 raise IllegalArgumentError("`show_columns` must consist out of ScopeWidgetColumnTypes options.")
             meta[MetaWidget.SHOW_COLUMNS] = [snakecase(c) for c in show_columns]
 
         if not isinstance(page_size, int) or page_size < 1:
-            raise IllegalArgumentError("`page_size` must be a positive integer, `{}` is not.".format(page_size))
+            raise IllegalArgumentError(f"`page_size` must be a positive integer, `{page_size}` is not.")
 
         if team:
             meta[AssociatedObjectId.TEAM_ID] = _retrieve_object_id(team)
@@ -1254,9 +1071,9 @@ class WidgetsManager(Iterable):
             self,
             attachment_property: 'AttachmentProperty',
             title: TITLE_TYPING = False,
-            parent_widget: Optional[Union[Widget, Text]] = None,
-            custom_button_text: Optional[Union[bool, Text]] = False,
-            custom_undo_button_text: Optional[Union[bool, Text]] = False,
+            parent_widget: Optional[Union[Widget, str]] = None,
+            custom_button_text: Optional[Union[bool, str]] = False,
+            custom_undo_button_text: Optional[Union[bool, str]] = False,
             editable: Optional[bool] = True,
             **kwargs
     ) -> Widget:
@@ -1266,23 +1083,16 @@ class WidgetsManager(Iterable):
         The widget will be saved in KE-chain.
 
         :param attachment_property: KE-chain Attachment property to display
-        :type attachment_property: AttachmentProperty
         :param title: A custom title for the script widget
             * False (default): Script name
             * String value: Custom title
             * None: No title
-        :type title: bool or basestring or None
         :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
-        :type parent_widget: Widget or basestring or None
         :param custom_button_text: Custom text for 'Add signature' button
-        :type custom_button_text: bool or basestring
         :param custom_undo_button_text: Custom text for 'Remove signature' button
-        :type custom_undo_button_text: bool or basestring
         :param editable: (optional) if False, creates a viewable, not editable, signature widget (default = True)
-        :type editable: bool
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
-        :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
@@ -1295,7 +1105,7 @@ class WidgetsManager(Iterable):
         # Add custom button text
         if not custom_button_text:
             show_button_value = MetaWidget.BUTTON_TEXT_DEFAULT
-            button_text = str()
+            button_text = ''
         else:
             show_button_value = MetaWidget.BUTTON_TEXT_CUSTOM
             button_text = str(custom_button_text)
@@ -1303,7 +1113,7 @@ class WidgetsManager(Iterable):
         # Add custom undo button text
         if not custom_undo_button_text:
             show_undo_button_value = MetaWidget.BUTTON_TEXT_DEFAULT
-            undo_button_text = str()
+            undo_button_text = ''
         else:
             show_undo_button_value = MetaWidget.BUTTON_TEXT_CUSTOM
             undo_button_text = str(custom_undo_button_text)
@@ -1330,12 +1140,12 @@ class WidgetsManager(Iterable):
     def add_card_widget(self,
                         image: Optional['AttachmentProperty'] = None,
                         title: TITLE_TYPING = False,
-                        parent_widget: Optional[Union[Widget, Text]] = None,
-                        description: Optional[Union[Text, bool]] = None,
-                        link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
+                        parent_widget: Optional[Union[Widget, str]] = None,
+                        description: Optional[Union[str, bool]] = None,
+                        link: Optional[Union[type(None), str, bool, KEChainPages]] = None,
                         link_value: Optional[CardWidgetLinkValue] = None,
-                        link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
-                        image_fit: Optional[Union[Text, ImageFitValue]] = ImageFitValue.CONTAIN,
+                        link_target: Optional[Union[str, LinkTargets]] = LinkTargets.SAME_TAB,
+                        image_fit: Optional[Union[str, ImageFitValue]] = ImageFitValue.CONTAIN,
                         **kwargs) -> Widget:
         """
         Add a KE-chain Card widget to the WidgetManager and the activity.
@@ -1357,13 +1167,9 @@ class WidgetsManager(Iterable):
             * String value: URL to a webpage
             * KE-chain page: built-in KE-chain page of the current scope
         :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
-        :type parent_widget: Widget or basestring or None
         :param link_value: Overwrite the default link value (obtained from the type of the link)
-        :type link_value: CardWidgetLinkValue
         :param link_target: how the link is opened, one of the values of CardWidgetLinkTarget enum.
-        :type link_target: CardWidgetLinkTarget
         :param image_fit: how the image on the card widget is displayed
-        :type image_fit: ImageFitValue
         :return: Card Widget
         """
         meta = _initiate_meta(kwargs, activity=self.activity)
@@ -1385,7 +1191,7 @@ class WidgetsManager(Iterable):
                            weather_property: 'Property',
                            autofill: Optional[bool] = None,
                            title: TITLE_TYPING = False,
-                           parent_widget: Optional[Union[Widget, Text]] = None,
+                           parent_widget: Optional[Union[Widget, str]] = None,
                            **kwargs) -> Widget:
         """
         Add a KE-chain Weather widget to the Widgetmanager and the activity.
@@ -1393,17 +1199,13 @@ class WidgetsManager(Iterable):
         The widget will be saved in KE-chain.
 
         :param weather_property: KE-chain Weather property to display
-        :type weather_property: Property
         :param title: A custom title for the script widget
             * False (default): Script name
             * String value: Custom title
             * None: No title
-        :type title: bool or basestring or None
         :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
-        :type parent_widget: Widget or basestring or None
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
-        :rtype: Widget
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
@@ -1430,15 +1232,15 @@ class WidgetsManager(Iterable):
             service: 'Service',
             image: Optional['AttachmentProperty'] = None,
             title: TITLE_TYPING = False,
-            description: Optional[Union[Text]] = None,
-            parent_widget: Optional[Union[Widget, Text]] = None,
+            description: Optional[Union[str]] = None,
+            parent_widget: Optional[Union[Widget, str]] = None,
             custom_button_text: TITLE_TYPING = False,
             emphasize_run: Optional[bool] = True,
             alignment: Optional[Alignment] = Alignment.LEFT,
-            link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
+            link: Optional[Union[type(None), str, bool, KEChainPages]] = None,
             link_value: Optional[CardWidgetLinkValue] = None,
-            link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
-            image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
+            link_target: Optional[Union[str, LinkTargets]] = LinkTargets.SAME_TAB,
+            image_fit: Optional[Union[ImageFitValue, str]] = ImageFitValue.CONTAIN,
             **kwargs
     ) -> Widget:
         """
@@ -1447,7 +1249,6 @@ class WidgetsManager(Iterable):
         The widget will be saved in KE-chain.
 
         :param service: The Service to which the button will be coupled and will be ran when the button is pressed.
-        :type service: :class:`Service` or UUID
         :param image: AttachmentProperty providing the source of the image shown in the card widget.
         :param title: A custom title for the card widget
             * False (default): Card name
@@ -1458,27 +1259,20 @@ class WidgetsManager(Iterable):
             * String value: Custom title
             * None: No title
         :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
-        :type parent_widget: Widget or basestring or None
         :param custom_button_text: A custom text for the button linked to the script
             * False (default): Script name
             * String value: Custom title
             * None: No title
-        :type custom_button_text: bool or basestring or None
         :param emphasize_run: Emphasize the run button (default True)
-        :type emphasize_run: bool
         :param alignment: Horizontal alignment of the button
-        :type alignment: Alignment
         :param link: Where the card widget refers to. This can be one of the following:
             * None (default): no link
             * task: another KE-chain task, provided as an Activity object or its UUID
             * String value: URL to a webpage
             * KE-chain page: built-in KE-chain page of the current scope
         :param link_value: Overwrite the default link value (obtained from the type of the link)
-        :type link_value: CardWidgetLinkValue
         :param link_target: how the link is opened, one of the values of CardWidgetLinkTarget enum.
-        :type link_target: CardWidgetLinkTarget
         :param image_fit: how the image on the card widget is displayed
-        :type image_fit: ImageFitValue
         :return: Service Card Widget
         """
         # Check whether the script is uuid type or class `Service`
@@ -1512,7 +1306,7 @@ class WidgetsManager(Iterable):
     def add_dashboard_widget(
             self,
             title: TITLE_TYPING = False,
-            parent_widget: Optional[Union[Widget, Text]] = None,
+            parent_widget: Optional[Union[Widget, str]] = None,
             source_scopes: Optional[DashboardWidgetSourceScopes] = DashboardWidgetSourceScopes.CURRENT_SCOPE,
             source_scopes_tags: Optional[List] = None,
             source_subprocess: Optional[List] = None,
@@ -1537,35 +1331,22 @@ class WidgetsManager(Iterable):
             * String value: Custom title
             * None: No title
         :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
-        :type parent_widget: Widget or basestring or None
         :param source_scopes: The `Project(s)` to be used as source when displaying the Widget.
             Defaults on CURRENT_SCOPE.
-        :type source_scopes: basestring (see :class:`models.widgets.enums.DashboardWidgetSourceScopes`)
         :param source_scopes_tags: Tags on which the source projects can be filtered on. Source is selected
             automatically as TAGGED_SCOPES
-        :type source_scopes_tags: list of tags
         :param source_subprocess: Subprocess that the `Widget` uses as source. Source is selected automatically
             SUBPROCESS
-        :type source_subprocess: list of str (UUID of an `Activity`)
         :param source_selected_scopes: List of `Scope` to be used by the `Widget` as source. Source is selected
             automatically as SELECTED_SCOPES
-        :type source_selected_scopes: list of str (UUIDs of `Scopes`)
         :param show_tasks: Type of tasks to be displayed in the `Widget`. If left None, all of them will be selected
-        :type show_tasks: list of basestring (see :class:`models.widgets.enums.DashboardWidgetShowTasks`)
         :param show_scopes: Type of scopes to be displayed in the `Widget`. If left None, all of them will be selected
-        :type show_scopes: list of basestring (see :class:`models.widgets.enums.DashboardWidgetShowScopes`)
         :param no_background: Reverse the shadows (default False)
-        :type no_background: bool
         :param show_assignees: Show the assignees pie chart
-        :type show_assignees: bool
         :param show_assignees_table: Show the assignees table
-        :type show_assignees_table: bool
         :param show_open_task_assignees: Show the `Open tasks per assignees` pie chart
-        :type show_open_task_assignees: bool
         :param show_open_vs_closed_tasks: Show the `Open vs closed tasks` pie chart
-        :type show_open_vs_closed_tasks: bool
         :param show_open_closed_tasks_assignees: Show the `Open open and closed tasks per assignees` pie chart
-        :type show_open_closed_tasks_assignees: bool
         :param kwargs:
         :return:
         """
@@ -1664,7 +1445,7 @@ class WidgetsManager(Iterable):
     def add_tasks_widget(
             self,
             title: TITLE_TYPING = False,
-            parent_widget: Optional[Union[Widget, Text]] = None,
+            parent_widget: Optional[Union[Widget, str]] = None,
             add: Optional[bool] = True,
             clone: Optional[bool] = True,
             edit: Optional[bool] = True,
@@ -1676,12 +1457,12 @@ class WidgetsManager(Iterable):
             show_my_tasks_filter: Optional[bool] = True,
             show_open_tasks_filter: Optional[bool] = True,
             show_search_filter: Optional[bool] = True,
-            parent_activity: Optional[Union['Activity', Text]] = None,
+            parent_activity: Optional[Union['Activity', str]] = None,
             assigned_filter: Optional[TasksAssignmentFilterTypes] = TasksAssignmentFilterTypes.ALL,
             status_filter: Optional[ActivityStatus] = None,
             activity_type_filter: Optional[ActivityType] = ActivityType.TASK,
             classification_filter: Optional[ActivityClassification] = ActivityClassification.WORKFLOW,
-            tags_filter: Optional[List[Text]] = (),
+            tags_filter: Optional[List[str]] = (),
             collapse_filter: Optional[bool] = False,
             show_columns: Optional[List[TasksWidgetColumns]] = None,
             sorted_column: Optional[TasksWidgetColumns] = None,
@@ -1699,53 +1480,29 @@ class WidgetsManager(Iterable):
             * String value: Custom title
             * None: No title
         :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
-        :type parent_widget: Widget or basestring or None
         :param add: Show the "add task" button, only visible if a `parent_activity` is provided (default = True)
-        :type add: bool
         :param clone: Show the "clone task" button (default = True)
-        :type clone: bool
         :param edit: Show the "edit task" button (default = True)
-        :type edit: bool
         :param delete: Show the "delete task" button (default = True)
-        :type delete: bool
         :param emphasize_add: Show green backdrop for "add task" button (default = True)
-        :type emphasize_add: bool
         :param emphasize_clone: Show green backdrop for "clone task" button (default = False)
-        :type emphasize_clone: bool
         :param emphasize_edit: Show green backdrop for "edit task" button (default = False)
-        :type emphasize_edit: bool
         :param emphasize_delete: Show green backdrop for "delete task" button (default = False)
-        :type emphasize_delete: bool
         :param show_my_tasks_filter: Show the switch to filter on assigned tasks (default = True)
-        :type show_my_tasks_filter: bool
         :param show_open_tasks_filter: Show the switch to filter on tasks with status OPEN (default = True)
-        :type show_open_tasks_filter: bool
         :param show_search_filter: Show textfield to filter on a task name (default = True)
-        :type show_search_filter: bool
         :param parent_activity: Filter on task parent Activity, thereby enabling the "add task" button
-        :type parent_activity: Activity
         :param assigned_filter: Filter on the assignment of the tasks (default = ALL)
-        :type assigned_filter: TasksAssignmentFilterTypes
         :param status_filter: Filter on the status of the tasks (default = OPEN)
-        :type status_filter: ActivityStatus
         :param activity_type_filter: Filter on the activity type (default = TASK)
-        :type activity_type_filter: ActivityType
         :param classification_filter: Filter on the activity classification (default = WORKFLOW)
-        :type classification_filter: ActivityClassification
         :param tags_filter: Filter on list of tags
-        :type tags_filter: list
         :param collapse_filter: Collapse the filter pane, or hide the pane if `None` (default = False)
-        :type collapse_filter: bool
         :param show_columns: List of task attributes to show (default = all)
-        :type show_columns: list
         :param sorted_column: Task attribute to sort on (default = no sorting)
-        :type sorted_column: TasksWidgetColumns
         :param sorted_direction: Direction of sorting (default = ascending)
-        :type sorted_direction: SortTable
         :param page_size: Number of tasks to show per pagination (default = 25)
-        :type page_size: int
         :return: Task widget
-        :rtype Widget
         """
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
@@ -1799,7 +1556,7 @@ class WidgetsManager(Iterable):
     def add_scopemembers_widget(
             self,
             title: TITLE_TYPING = False,
-            parent_widget: Optional[Union[Widget, Text]] = None,
+            parent_widget: Optional[Union[Widget, str]] = None,
             add: Optional[bool] = True,
             edit: Optional[bool] = True,
             remove: Optional[bool] = True,
@@ -1819,23 +1576,14 @@ class WidgetsManager(Iterable):
             * String value: Custom title
             * None: No title
         :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
-        :type parent_widget: Widget or basestring or None
         :param add: Show "add user" button (default = True)
-        :type add: bool
         :param edit: Show "edit role" button (default = True)
-        :type edit: bool
         :param remove: Show "remove user" button (default = True)
-        :type remove: bool
         :param show_username_column: Show "username" column (default = True)
-        :type show_username_column: bool
         :param show_name_column: Show "name" column (default = True)
-        :type show_name_column: bool
         :param show_email_column: Show "email" column (default = True)
-        :type show_email_column: bool
         :param show_role_column: Show "role" column (default = True)
-        :type show_role_column: bool
         :return: Scope members Widget
-        :rtype Widget
         """
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
@@ -1872,9 +1620,7 @@ class WidgetsManager(Iterable):
         the list will be `[w0,w3,w1,w2]`
 
         :param index: integer (position) starting from 0 at first position in which the widget is inserted
-        :type index: int
         :param widget: Widget object to insert
-        :type widget: Widget
         :return: None
         :raises IndexError: The index is out of range
         :raises APIError: The list of widgets could not be updated
@@ -1896,7 +1642,6 @@ class WidgetsManager(Iterable):
         Delete a widget in the task.
 
         :param key: index, uuid, title or ref of the widget to delete, or the widget itself.
-        :type key: Widget, int or basestring
         :return: True if the widget is deleted successfully
         :raises APIError: if the widget could not be deleted
         :raises NotFoundError: if the WidgetsManager (activity) has no such widget

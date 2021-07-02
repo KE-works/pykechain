@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from pykechain.enums import PropertyType, Category, Multiplicity
-from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
+from pykechain.enums import Category, Multiplicity, PropertyType
+from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import Property
 from pykechain.models.validators import SingleReferenceValidator
 from tests.classes import TestBetamax
@@ -117,7 +117,7 @@ class TestPropertyCreation(TestBetamax):
 
 class TestProperties(TestBetamax):
     def setUp(self):
-        super(TestProperties, self).setUp()
+        super().setUp()
 
         self.wheel_model = self.project.model('Wheel')
         self.bike_model = self.project.model('Bike')
@@ -136,7 +136,7 @@ class TestProperties(TestBetamax):
     def tearDown(self):
         if self.prop_model:
             self.prop_model.delete()
-        super(TestProperties, self).tearDown()
+        super().tearDown()
 
     def test_retrieve_properties(self):
         properties = self.project.properties('Diameter')
@@ -168,7 +168,7 @@ class TestProperties(TestBetamax):
         for attribute in attributes:
             with self.subTest(msg=attribute):
                 self.assertTrue(hasattr(obj, attribute),
-                                "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
+                                f"Could not find '{attribute}' in the object: '{obj.__dict__.keys()}'")
 
     def test_retrieve_properties_with_kwargs(self):
         # setUp
@@ -278,8 +278,8 @@ class TestProperties(TestBetamax):
         self.prop_model.edit(name=None, description=None, unit=None)
 
         self.assertEqual(self.prop_model.name, new_name)
-        self.assertEqual(self.prop_model.description, str())
-        self.assertEqual(self.prop_model.unit, str())
+        self.assertEqual(self.prop_model.description, '')
+        self.assertEqual(self.prop_model.unit, '')
 
     # 2.5.4
     def test_property_type(self):
@@ -451,12 +451,12 @@ class TestUpdateProperties(TestBetamax):
 
 class TestPropertiesWithReferenceProperty(TestBetamax):
     def setUp(self):
-        super(TestPropertiesWithReferenceProperty, self).setUp()
+        super().setUp()
 
         self.wheel_model = self.project.model('Wheel')
         self.bike = self.project.model('Bike')
 
-        self.test_ref_property_model = self.bike.add_property(name="__Test ref property @ {}".format(datetime.now()),
+        self.test_ref_property_model = self.bike.add_property(name=f"__Test ref property @ {datetime.now()}",
                                                               property_type=PropertyType.REFERENCES_VALUE,
                                                               description='Description of test ref property',
                                                               unit='no unit',
@@ -465,7 +465,7 @@ class TestPropertiesWithReferenceProperty(TestBetamax):
 
     def tearDown(self):
         self.test_ref_property_model.delete()
-        super(TestPropertiesWithReferenceProperty, self).tearDown()
+        super().tearDown()
 
     def test_copy_reference_property_with_options(self):
         # setUp

@@ -1,14 +1,14 @@
-from typing import List, Any, Dict, Callable
+from typing import Any, Callable, Dict, List
 
 from jsonschema import validate
 
-from pykechain.enums import _AllRepresentations, PropertyType
+from pykechain.enums import PropertyType, _AllRepresentations
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.representations.representation_base import BaseRepresentation
 from pykechain.models.validators.validator_schemas import representation_jsonschema_stub
 
 
-class RepresentationsComponent(object):
+class RepresentationsComponent:
     """
     Aggregate class to use representations on an object.
 
@@ -74,7 +74,7 @@ class RepresentationsComponent(object):
         for r in representations:
             if not isinstance(r, BaseRepresentation):
                 raise IllegalArgumentError(
-                    "Representation '{}' should be a Representation object".format(r)
+                    f"Representation '{r}' should be a Representation object"
                 )
             if not _valid_object_type(r, self._parent_object):
                 raise IllegalArgumentError(
@@ -100,11 +100,8 @@ def _valid_object_type(representation: BaseRepresentation, obj: "Base") -> bool:
     Check whether the representation can be used on the provided object.
 
     :param representation: representation to check
-    :type representation: BaseRepresentation
     :param obj: object to attach the representation to
-    :type obj: Base
     :return: True if feasible, False if not.
-    :rtype bool
     """
     rtype = representation.rtype
     if rtype == _AllRepresentations.CUSTOM_ICON:

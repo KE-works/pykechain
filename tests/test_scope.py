@@ -1,8 +1,9 @@
 import datetime
 
-from pykechain.enums import ScopeStatus, KEChainPages, ScopeMemberActions, ScopeRoles, ScopeCategory
-from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
-from pykechain.models import Team, Scope
+from pykechain.enums import KEChainPages, ScopeCategory, ScopeMemberActions, ScopeRoles, \
+    ScopeStatus
+from pykechain.exceptions import IllegalArgumentError, MultipleFoundError, NotFoundError
+from pykechain.models import Scope, Team
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.utils import is_url
 from tests.classes import TestBetamax
@@ -22,7 +23,7 @@ class TestScopes(TestBetamax):
         for attribute in attributes:
             with self.subTest(attribute):
                 self.assertTrue(hasattr(obj, attribute),
-                                "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
+                                f"Could not find '{attribute}' in the object: '{obj.__dict__.keys()}'")
 
     def test_retrieve_scopes(self):
         self.assertTrue(self.client.scopes())
@@ -326,7 +327,7 @@ class TestScopeEdit(TestBetamax):
         self.scope.edit(name=None, description=None, tags=None, start_date=None, due_date=None, status=None)
         self.scope.refresh()
         self.assertEqual(self.scope.name, new_name)
-        self.assertEqual(self.scope.description, str())
+        self.assertEqual(self.scope.description, '')
         self.assertEqual(self.scope.start_date, None)
         self.assertEqual(self.scope.due_date, None)
         self.assertEqual(self.scope.tags, list())

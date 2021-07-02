@@ -1,5 +1,5 @@
 import warnings
-from typing import List, Optional, Text, Union, Any, Tuple
+from typing import Any, List, Optional, Tuple, Union
 
 from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.enums import Category, FilterType
@@ -8,7 +8,7 @@ from pykechain.models.input_checks import check_type
 from pykechain.models.part import Part
 from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets.enums import MetaWidget
-from pykechain.models.widgets.helpers import _check_prefilters, _check_excluded_propmodels
+from pykechain.models.widgets.helpers import _check_excluded_propmodels, _check_prefilters
 from pykechain.utils import get_in_chunks
 
 
@@ -74,7 +74,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
             choices_model_id = self.model()._value[0].get('id')
 
             # Determine which parts are filtered out
-            prefilter: Optional[Text] = self._options.get(MetaWidget.PREFILTERS, {}). \
+            prefilter: Optional[str] = self._options.get(MetaWidget.PREFILTERS, {}). \
                 get(MetaWidget.PROPERTY_VALUE_PREFILTER)
 
             # Retrieve all part instances with this model ID
@@ -87,7 +87,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
 
     def set_prefilters(
             self,
-            property_models: List[Union[Text, 'AnyProperty']] = None,
+            property_models: List[Union[str, 'AnyProperty']] = None,
             values: List[Any] = None,
             filters_type: List[FilterType] = None,
             prefilters: List[PropertyValueFilter] = None,
@@ -99,21 +99,14 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
         Set the pre-filters on a `MultiReferenceProperty`.
 
         :param property_models: `list` of `Property` models (or their IDs) to set pre-filters on
-        :type property_models: list
         :param values: `list` of values to pre-filter on, value has to match the property type.
-        :type values: list
         :param filters_type: `list` of filter types per pre-filter, one of :class:`enums.FilterType`,
                 defaults to `FilterType.CONTAINS`
-        :type filters_type: list
         :param prefilters: `list` of PropertyValueFilter objects
-        :type prefilters: list
         :param overwrite: whether existing pre-filters should be overwritten, if new filters to the same property
             are provided as input. Does not remove non-conflicting prefilters. (default = False)
-        :type overwrite: bool
         :param clear: whether all existing pre-filters should be cleared. (default = False)
-        :type clear: bool
         :param validate: whether the pre-filters are validated to the referenced model, which can be provided as well
-        :type validate: bool
 
         :raises IllegalArgumentError: when the type of the input is provided incorrect.
         """
@@ -161,7 +154,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
             as_lists: Optional[bool] = False,
     ) -> Union[
         List[PropertyValueFilter],
-        Tuple[List[Text]]
+        Tuple[List[str]]
     ]:
         """
         Retrieve the pre-filters applied to the reference property.
@@ -190,7 +183,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
 
     def set_excluded_propmodels(
             self,
-            property_models: List[Union[Text, 'AnyProperty']],
+            property_models: List[Union[str, 'AnyProperty']],
             overwrite: Optional[bool] = False,
             validate: Optional[Union[bool, Part]] = True,
     ) -> None:
@@ -198,11 +191,8 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
         Exclude a list of properties from being visible in the part-shop and modal (pop-up) of the reference property.
 
         :param property_models: `list` of Property models (or their IDs) to exclude.
-        :type property_models: list
         :param overwrite: flag whether to overwrite existing (True) or append (False, default) to existing filter(s).
-        :type overwrite bool
         :param validate: whether the pre-filters are validated to the referenced model, which can be provided as well
-        :type validate: bool
 
         :raises IllegalArgumentError
         """
@@ -228,11 +218,10 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
 
         self.edit(options=options_to_set)
 
-    def get_excluded_propmodel_ids(self) -> List[Text]:
+    def get_excluded_propmodel_ids(self) -> List[str]:
         """
         Retrieve a list of property model UUIDs which are not visible.
 
         :return: list of UUIDs
-        :rtype list
         """
         return self._options.get("propmodels_excl", [])

@@ -1,10 +1,10 @@
-from abc import abstractmethod, ABC
-from typing import Optional, Any, Text, Union, Tuple, List
+from abc import ABC, abstractmethod
+from typing import Any, List, Optional, Tuple, Union
 
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Property, Base
+from pykechain.models import Base, Property
 from pykechain.models.base import BaseInScope
-from pykechain.models.input_checks import check_list_of_base, check_base
+from pykechain.models.input_checks import check_base, check_list_of_base
 from pykechain.models.value_filter import BaseFilter
 
 
@@ -30,7 +30,6 @@ class _ReferenceProperty(Property):
         Retrieve the referenced objects of this reference property.
 
         :return: list or generator of `Base` objects.
-        :rtype list
         """
         if not self._value:
             return None
@@ -48,21 +47,19 @@ class _ReferenceProperty(Property):
         else:
             self._put_value(value)
 
-    def value_ids(self) -> Optional[List[Text]]:
+    def value_ids(self) -> Optional[List[str]]:
         """
         Retrieve the referenced object UUIDs only.
 
         :return: list of UUIDs
-        :rtype list
         """
         return [value.get("id") for value in self._value] if self.has_value() else None
 
-    def _validate_values(self) -> List[Text]:
+    def _validate_values(self) -> List[str]:
         """
         Check if the `_value` attribute has valid content.
 
         :return list of UUIDs:
-        :rtype list
         """
         if not self._value:
             return []
@@ -75,7 +72,7 @@ class _ReferenceProperty(Property):
                 object_ids.append(str(value))
             else:  # pragma: no cover
                 raise ValueError(
-                    'Value "{}" must be a dict with field `id` or a UUID.'.format(value)
+                    f'Value "{value}" must be a dict with field `id` or a UUID.'
                 )
         return object_ids
 
@@ -91,12 +88,11 @@ class _ReferenceProperty(Property):
         """
         pass  # pragma: no cover
 
-    def serialize_value(self, value: Union[Base, List, Tuple]) -> Optional[List[Text]]:
+    def serialize_value(self, value: Union[Base, List, Tuple]) -> Optional[List[str]]:
         """
         Serialize the value to be set on the property by checking for a list of Base objects.
 
         :param value: non-serialized value
-        :type value: Any
         :return: serialized value
         """
         try:
@@ -116,7 +112,7 @@ class _ReferenceProperty(Property):
 
         :return: None
         """
-        raise NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
+        raise NotImplementedError(f"Method not (yet) implemented for {self.__class__}")
 
     def get_prefilters(self):
         """
@@ -124,7 +120,7 @@ class _ReferenceProperty(Property):
 
         :return: list of filter values.
         """
-        raise NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
+        raise NotImplementedError(f"Method not (yet) implemented for {self.__class__}")
 
 
 class _ReferencePropertyInScope(_ReferenceProperty, ABC):

@@ -2,12 +2,12 @@ import os
 import tempfile
 import warnings
 from collections import namedtuple
-from typing import Optional, Text, List, Any
+from typing import Any, List, Optional, Text
 
 from pykechain import Client
-from pykechain.enums import PropertyType, Multiplicity, Category
-from pykechain.exceptions import IllegalArgumentError, NotFoundError, MultipleFoundError
-from pykechain.models import Part, AnyProperty, Property
+from pykechain.enums import Category, Multiplicity, PropertyType
+from pykechain.exceptions import IllegalArgumentError, MultipleFoundError, NotFoundError
+from pykechain.models import AnyProperty, Part, Property
 from pykechain.utils import temp_chdir
 
 # global variable
@@ -36,7 +36,6 @@ def get_mapping_dictionary(clean=False) -> dict:
     Get a temporary helper to map some keys to some values. Mainly used in the relocation of parts and models.
 
     :param clean: (optional) boolean flag to reset the mapping dictionary
-    :type clean: bool
     :return: singleton dictionary (persistent in the script) for mapping use.
     """
     global __mapping_dictionary
@@ -52,7 +51,6 @@ def get_edited_one_many(clean=False) -> list:
     Only used in the relocation of parts and models.
 
     :param clean: (optional) boolean flag to reset the list of Parts
-    :type clean: bool
     :return: singleton list (persistent in the script) for tracking purposes
     """
     global __edited_one_many
@@ -66,7 +64,6 @@ def get_references(clean=False) -> dict:
     Get a temporary helper dictionary to store references (values) per property (keys).
 
     :param clean: (optional) boolean flag to reset the list of references
-    :type clean: bool
     :return: singleton dictionary (persistent in the script) for tracking purposes
     """
     global __references
@@ -80,7 +77,6 @@ def get_attachments(clean=False) -> list:
     Get a temporary helper list to store attachment properties.
 
     :param clean: (optional) boolean flag to reset the list
-    :type clean: bool
     :return: singleton list (persistent in the script) for tracking purposes
     """
     global __attachments
@@ -94,11 +90,8 @@ def get_illegal_targets(part: Part, include: set):
     Retrieve the illegal parent parts where `Part` can be moved/copied.
 
     :param part: `Part` to be moved/copied.
-    :type part: :class:`Part`
     :param include: `Set` object with id's to be avoided as target parent `Part`
-    :type include: set
     :return: `List` object of illegal id's
-    :rtype: list
     """
     list_of_illegal_targets = include or set()
     list_of_illegal_targets.update({c.id for c in part.all_children()})
@@ -112,9 +105,7 @@ def map_property_instances(original_part: Part, new_part: Part) -> None:
     Updated the singleton `mapping dictionary` with the new mapping table values.
 
     :param original_part: `Part` object to be copied/moved
-    :type original_part: :class:`Part`
     :param new_part: `Part` object copied/moved
-    :type new_part: :class:`Part`
     :return: None
     """
     # Map the original part with the new one
@@ -130,7 +121,7 @@ def map_property_instances(original_part: Part, new_part: Part) -> None:
 def relocate_model(
         part: Part,
         target_parent: Part,
-        name: Optional[Text] = None,
+        name: Optional[str] = None,
         include_children: Optional[bool] = True
 ) -> Part:
     """
@@ -139,13 +130,9 @@ def relocate_model(
     .. versionadded:: 2.3
 
     :param part: `Part` object to be moved
-    :type part: :class:`Part`
     :param target_parent: `Part` object under which the desired `Part` is moved
-    :type target_parent: :class:`Part`
     :param name: how the moved top-level `Part` should be called
-    :type name: basestring
     :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
-    :type include_children: bool
     :return: moved :class: Part model.
     :raises IllegalArgumentError: if target_parent is descendant of part
     """
@@ -163,7 +150,7 @@ def relocate_model(
 
     # First, if the user doesn't provide the name, then just use the default "Clone - ..." name
     if not name:
-        name = "CLONE - {}".format(part.name)
+        name = f"CLONE - {part.name}"
 
     # Recursively create the part model copy
     moved_part_model = move_part_model(
@@ -190,7 +177,7 @@ def relocate_model(
 def move_part_model(
         part: Part,
         target_parent: Part,
-        name: Text,
+        name: str,
         include_children: bool,
 ) -> Part:
     """
@@ -199,13 +186,9 @@ def move_part_model(
     .. versionadded:: 2.3
 
     :param part: `Part` object to be moved
-    :type part: :class:`Part`
     :param target_parent: `Part` object under which the desired `Part` is moved
-    :type target_parent: :class:`Part`
     :param name: how the moved top-level `Part` should be called
-    :type name: basestring
     :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
-    :type include_children: bool
     :return: moved :class: Part model.
     """
     warnings.warn(
@@ -223,7 +206,7 @@ def move_part_model(
 def _copy_part_model(
         part: Part,
         target_parent: Part,
-        name: Text,
+        name: str,
         include_children: bool,
 ) -> Part:
     """
@@ -232,13 +215,9 @@ def _copy_part_model(
     .. versionadded:: 2.3
 
     :param part: `Part` object to be copied
-    :type part: :class:`Part`
     :param target_parent: `Part` object under which the desired `Part` is copied
-    :type target_parent: :class:`Part`
     :param name: how the copied top-level `Part` should be called
-    :type name: basestring
     :param include_children: True to also copy the descendants of `Part`. If False, the children will be lost.
-    :type include_children: bool
     :return: moved :class: Part model.
     """
     property_fvalues = list()
@@ -287,7 +266,7 @@ def _copy_part_model(
 def relocate_instance(
         part: Part,
         target_parent: Part,
-        name: Optional[Text] = None,
+        name: Optional[str] = None,
         include_children: Optional[bool] = True,
 ) -> Part:
     """
@@ -296,13 +275,9 @@ def relocate_instance(
     .. versionadded:: 2.3
 
     :param part: `Part` object to be moved
-    :type part: :class:`Part`
     :param target_parent: `Part` object under which the desired `Part` is moved
-    :type target_parent: :class:`Part`
     :param name: how the moved top-level `Part` should be called
-    :type name: basestring
     :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
-    :type include_children: bool
     :return: moved :class: `Part` instance
     """
     warnings.warn(
@@ -312,7 +287,7 @@ def relocate_instance(
 
     # First, if the user doesn't provide the name, then just use the default "Clone - ..." name
     if not name:
-        name = "CLONE - {}".format(part.name)
+        name = f"CLONE - {part.name}"
 
     # Initially the model of the part needs to be recreated under the model of the target_parent. Retrieve them.
     part_model = part.model()
@@ -357,7 +332,7 @@ def move_part_instance(
         part_instance: Part,
         target_parent: Part,
         part_model: Part,
-        name: Optional[Text] = None,
+        name: Optional[str] = None,
         include_children: Optional[bool] = True
 ) -> Part:
     """
@@ -366,15 +341,10 @@ def move_part_instance(
     .. versionadded:: 2.3
 
     :param part_instance: `Part` object to be moved
-    :type part_instance: :class:`Part`
     :param part_model: `Part` object representing the model of part_instance
-    :type part_model: :class: `Part`
     :param target_parent: `Part` object under which the desired `Part` is moved
-    :type target_parent: :class:`Part`
     :param name: how the moved top-level `Part` should be called
-    :type name: basestring
     :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
-    :type include_children: bool
     :return: moved :class: `Part` instance
     """
     warnings.warn(
@@ -429,17 +399,14 @@ def move_part_instance(
 def update_part_with_properties(
         part_instance: Part,
         moved_instance: Part,
-        name: Optional[Text] = None,
+        name: Optional[str] = None,
 ) -> Part:
     """
     Update the properties of the `moved_instance` based on the original `part_instance`.
 
     :param part_instance: `Part` object to be copied
-    :type part_instance: :class:`Part`
     :param moved_instance: `Part` object copied
-    :type moved_instance: :class:`Part`
     :param name: Name of the updated part
-    :type name: basestring
     :return: moved :class: `Part` instance
     """
     warnings.warn(
@@ -490,7 +457,7 @@ def update_part_with_properties(
 def _copy_part(
         part: Part,
         target_parent: Part,
-        name: Optional[Text] = None,
+        name: Optional[str] = None,
         include_children: Optional[bool] = True,
         include_instances: Optional[bool] = True,
 ) -> Part:
@@ -508,7 +475,6 @@ def _copy_part(
     :param include_instances: (O) In case of `part` being of category MODEL, include the instance Parts of that model.
         WARNING: By default, every instance is created per instance of the `target_parent`.
     :return: copy of `part`
-    :rtype Part
     """
     get_mapping_dictionary(clean=True)
     get_edited_one_many(clean=True)
@@ -608,7 +574,6 @@ def _copy_instances_recursive(
     :param instances: list of _Instance instances.
     :param include_children: whether to create instance parts
     :return: list of new Part instances
-    :rtype list
     """
     if not instances:
         return []

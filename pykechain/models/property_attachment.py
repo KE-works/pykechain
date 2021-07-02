@@ -1,7 +1,7 @@
 import io
 import json
 import os
-from typing import Text, Any, Optional
+from typing import Any, Optional
 
 import requests
 
@@ -29,7 +29,7 @@ class AttachmentProperty(Property):
 
         """
         if self.has_value():
-            return "[Attachment: {}]".format(self.filename)
+            return f"[Attachment: {self.filename}]"
         else:
             return None
 
@@ -50,7 +50,7 @@ class AttachmentProperty(Property):
             self._json_data['value'] = None
 
     @property
-    def filename(self) -> Optional[Text]:
+    def filename(self) -> Optional[str]:
         """Filename of the attachment, without the full 'attachment' path."""
         return self._value.split('/')[-1] if self.has_value() else None
 
@@ -78,7 +78,6 @@ class AttachmentProperty(Property):
         For this, `matplotlib`_ should be installed.
 
         :param data: File path
-        :type data: basestring
         :raises APIError: When unable to upload the file to KE-chain
         :raises OSError: When the path to the file is incorrect or file could not be found
 
@@ -100,12 +99,11 @@ class AttachmentProperty(Property):
             self._upload_json(data, **kwargs)
         self._value = data
 
-    def save_as(self, filename: Optional[Text] = None) -> None:
+    def save_as(self, filename: Optional[str] = None) -> None:
         """Download the attachment to a file.
 
         :param filename: (optional) File path. If not provided, will be saved to current working dir
                          with `self.filename`.
-        :type filename: basestring or None
         :raises APIError: When unable to download the data
         :raises OSError: When unable to save the data to disk
         """
