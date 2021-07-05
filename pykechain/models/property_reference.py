@@ -73,7 +73,7 @@ class ScopeReferencesProperty(_ReferenceProperty):
         if prefilters is not None:
             if not isinstance(prefilters, list) or not all(isinstance(pf, ScopeFilter) for pf in prefilters):
                 raise IllegalArgumentError(
-                    "`prefilters` must be a list of ScopeFilter objects, `{}` is not.".format(prefilters))
+                    f"`prefilters` must be a list of ScopeFilter objects, `{prefilters}` is not.")
         else:
             prefilters = []
 
@@ -109,7 +109,7 @@ class UserReferencesProperty(_ReferenceProperty):
 
     REFERENCED_CLASS = user.User
 
-    def _validate_values(self) -> List[Text]:
+    def _validate_values(self) -> List[str]:
         """
         Check if the `_value` attribute has valid content.
 
@@ -128,7 +128,7 @@ class UserReferencesProperty(_ReferenceProperty):
                 object_ids.append(str(value))
             else:  # pragma: no cover
                 raise ValueError(
-                    'Value "{}" must be a dict with field `pk` or a UUID.'.format(value)
+                    f'Value "{value}" must be a dict with field `pk` or a UUID.'
                 )
         return object_ids
 

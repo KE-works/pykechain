@@ -31,7 +31,7 @@ class TestBaseReference(TestCase):
 
 class TestMultiReferenceProperty(TestBetamax):
     def setUp(self):
-        super(TestMultiReferenceProperty, self).setUp()
+        super().setUp()
 
         # reference Part target (model and 1 instance)
         _wheel_model = self.project.model(ref="wheel")
@@ -78,7 +78,7 @@ class TestMultiReferenceProperty(TestBetamax):
     def tearDown(self):
         self.target_model.delete()
         self.ref_prop_model.delete()
-        super(TestMultiReferenceProperty, self).tearDown()
+        super().tearDown()
 
     def test_referencing_a_model(self):
         # setUp
@@ -292,7 +292,7 @@ class TestMultiReferenceProperty(TestBetamax):
             filters,
         )
         self.assertIn(
-            "{}:{}:{}".format(spokes_property.id, 7, FilterType.LOWER_THAN_EQUAL),
+            f"{spokes_property.id}:{7}:{FilterType.LOWER_THAN_EQUAL}",
             filters,
         )
         self.assertIn(
@@ -465,11 +465,11 @@ class TestMultiReferenceProperty(TestBetamax):
         # testing
         self.assertTrue("property_value" in self.ref_prop_model._options["prefilters"])
         self.assertTrue(
-            "{}:{}:{}".format(diameter_property.id, 30.5, FilterType.GREATER_THAN_EQUAL)
+            f"{diameter_property.id}:{30.5}:{FilterType.GREATER_THAN_EQUAL}"
             in self.ref_prop_model._options["prefilters"]["property_value"]
         )
         self.assertTrue(
-            "{}:{}:{}".format(spokes_property.id, 7, FilterType.LOWER_THAN_EQUAL)
+            f"{spokes_property.id}:{7}:{FilterType.LOWER_THAN_EQUAL}"
             in self.ref_prop_model._options["prefilters"]["property_value"]
         )
 
@@ -768,7 +768,7 @@ class TestMultiReferenceProperty(TestBetamax):
 
 class TestMultiReferencePropertyXScope(TestBetamax):
     def setUp(self):
-        super(TestMultiReferencePropertyXScope, self).setUp()
+        super().setUp()
         self.x_scope = self.client.create_scope(
             name="Cross_reference scope", tags=["x-scope-target"]
         )
@@ -794,7 +794,7 @@ class TestMultiReferencePropertyXScope(TestBetamax):
     def tearDown(self):
         self.x_reference_model.delete()
         self.x_scope.delete()
-        super(TestMultiReferencePropertyXScope, self).tearDown()
+        super().tearDown()
 
     def test_set_model_value(self):
         # setUp

@@ -130,7 +130,7 @@ def map_property_instances(original_part: Part, new_part: Part) -> None:
 def relocate_model(
         part: Part,
         target_parent: Part,
-        name: Optional[Text] = None,
+        name: Optional[str] = None,
         include_children: Optional[bool] = True
 ) -> Part:
     """
@@ -163,7 +163,7 @@ def relocate_model(
 
     # First, if the user doesn't provide the name, then just use the default "Clone - ..." name
     if not name:
-        name = "CLONE - {}".format(part.name)
+        name = f"CLONE - {part.name}"
 
     # Recursively create the part model copy
     moved_part_model = move_part_model(
@@ -190,7 +190,7 @@ def relocate_model(
 def move_part_model(
         part: Part,
         target_parent: Part,
-        name: Text,
+        name: str,
         include_children: bool,
 ) -> Part:
     """
@@ -223,7 +223,7 @@ def move_part_model(
 def _copy_part_model(
         part: Part,
         target_parent: Part,
-        name: Text,
+        name: str,
         include_children: bool,
 ) -> Part:
     """
@@ -287,7 +287,7 @@ def _copy_part_model(
 def relocate_instance(
         part: Part,
         target_parent: Part,
-        name: Optional[Text] = None,
+        name: Optional[str] = None,
         include_children: Optional[bool] = True,
 ) -> Part:
     """
@@ -312,7 +312,7 @@ def relocate_instance(
 
     # First, if the user doesn't provide the name, then just use the default "Clone - ..." name
     if not name:
-        name = "CLONE - {}".format(part.name)
+        name = f"CLONE - {part.name}"
 
     # Initially the model of the part needs to be recreated under the model of the target_parent. Retrieve them.
     part_model = part.model()
@@ -357,7 +357,7 @@ def move_part_instance(
         part_instance: Part,
         target_parent: Part,
         part_model: Part,
-        name: Optional[Text] = None,
+        name: Optional[str] = None,
         include_children: Optional[bool] = True
 ) -> Part:
     """
@@ -429,7 +429,7 @@ def move_part_instance(
 def update_part_with_properties(
         part_instance: Part,
         moved_instance: Part,
-        name: Optional[Text] = None,
+        name: Optional[str] = None,
 ) -> Part:
     """
     Update the properties of the `moved_instance` based on the original `part_instance`.
@@ -490,7 +490,7 @@ def update_part_with_properties(
 def _copy_part(
         part: Part,
         target_parent: Part,
-        name: Optional[Text] = None,
+        name: Optional[str] = None,
         include_children: Optional[bool] = True,
         include_instances: Optional[bool] = True,
 ) -> Part:

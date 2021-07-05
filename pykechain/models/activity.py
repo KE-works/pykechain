@@ -49,17 +49,17 @@ class Activity(TreeObject, TagsMixin):
 
         self._scope_id = json.get('scope_id')
 
-        self.ref: Text = json.get('ref')
-        self.description: Text = json.get('description', '')
+        self.ref: str = json.get('ref')
+        self.description: str = json.get('description', '')
         self.status: ActivityStatus = json.get('status')
         self.classification: ActivityClassification = json.get('classification')
         self.activity_type: ActivityType = json.get('activity_type')
         self.start_date = parse_datetime(json.get('start_date'))
         self.due_date = parse_datetime(json.get('due_date'))
-        self.assignees_ids: List[Text] = json.get('assignees_ids', [])
+        self.assignees_ids: List[str] = json.get('assignees_ids', [])
         self._options = json.get('activity_options', {})
 
-        self._tags: List[Text] = json.get('tags', [])
+        self._tags: List[str] = json.get('tags', [])
         self._representations_container = RepresentationsComponent(
             self,
             self._options.get('representations', {}),
@@ -108,7 +108,7 @@ class Activity(TreeObject, TagsMixin):
         if self._scope_id is None:
             self.refresh()
             if self._scope_id is None:
-                raise NotFoundError("Activity '{}' has no related scope!".format(self))
+                raise NotFoundError(f"Activity '{self}' has no related scope!")
         return self._scope_id
 
     @scope_id.setter
@@ -288,7 +288,7 @@ class Activity(TreeObject, TagsMixin):
 
         """
         if self.parent_id is None:
-            raise NotFoundError("Cannot find parent for task '{}', as this task exist on top level.".format(self))
+            raise NotFoundError(f"Cannot find parent for task '{self}', as this task exist on top level.")
         elif self._parent is None:
             self._parent = self._client.activity(pk=self.parent_id, scope=self.scope_id)
         return self._parent
@@ -327,8 +327,8 @@ class Activity(TreeObject, TagsMixin):
             return self._client.activities(parent_id=self.id, scope=self.scope_id, **kwargs)
 
     def child(self,
-              name: Optional[Text] = None,
-              pk: Optional[Text] = None,
+              name: Optional[str] = None,
+              pk: Optional[str] = None,
               **kwargs) -> 'Activity':
         """
         Retrieve a child object.
@@ -359,15 +359,15 @@ class Activity(TreeObject, TagsMixin):
             else:
                 activity_list = self.children(pk=pk)
 
-        criteria = '\nname: {}\npk: {}\nkwargs: {}'.format(name, pk, kwargs)
+        criteria = f'\nname: {name}\npk: {pk}\nkwargs: {kwargs}'
 
         if len(activity_list) == 1:
             child = activity_list[0]
 
         elif len(activity_list) > 1:
-            raise MultipleFoundError('{} has more than one matching child.{}'.format(self, criteria))
+            raise MultipleFoundError(f'{self} has more than one matching child.{criteria}')
         else:
-            raise NotFoundError('{} has no matching child.{}'.format(self, criteria))
+            raise NotFoundError(f'{self} has no matching child.{criteria}')
         return child
 
     def siblings(self, **kwargs) -> List['Activity']:
@@ -391,7 +391,7 @@ class Activity(TreeObject, TagsMixin):
 
         """
         if self.parent_id is None:
-            raise NotFoundError("Cannot find siblings for task '{}', as this task exist on top level.".format(self))
+            raise NotFoundError(f"Cannot find siblings for task '{self}', as this task exist on top level.")
         return self._client.activities(parent_id=self.parent_id, scope=self.scope_id, **kwargs)
 
     def all_children(self) -> List['Activity']:
@@ -416,13 +416,13 @@ class Activity(TreeObject, TagsMixin):
         """
         if self.activity_type != ActivityType.PROCESS:
             raise IllegalArgumentError(
-                "You can only count the number of children of an Activity of type {}".format(ActivityType.PROCESS))
+                f"You can only count the number of children of an Activity of type {ActivityType.PROCESS}")
 
         return super().count_children(method="activities", **kwargs)
 
     def clone(
             self,
-            parent: Optional[Union['Activity', Text]] = None,
+            parent: Optional[Union['Activity', str]] = None,
             update_dict: Optional[Dict] = None,
             **kwargs
     ) -> Optional['Activity']:
@@ -455,9 +455,9 @@ class Activity(TreeObject, TagsMixin):
             self,
             start_date: Optional[Union[datetime.datetime, Empty]] = empty,
             due_date: Optional[Union[datetime.datetime, Empty]] = empty,
-            assignees: Optional[Union[List[Text], Empty]] = empty,
-            assignees_ids: Optional[Union[List[Text], Empty]] = empty,
-            status: Optional[Union[ActivityStatus, Text, Empty]] = empty,
+            assignees: Optional[Union[List[str], Empty]] = empty,
+            assignees_ids: Optional[Union[List[str], Empty]] = empty,
+            status: Optional[Union[ActivityStatus, str, Empty]] = empty,
             overwrite: Optional[bool] = False,
             **kwargs
     ) -> None:
@@ -520,14 +520,14 @@ class Activity(TreeObject, TagsMixin):
 
     def edit(
             self,
-            name: Optional[Union[Text, Empty]] = empty,
-            description: Optional[Union[Text, Empty]] = empty,
+            name: Optional[Union[str, Empty]] = empty,
+            description: Optional[Union[str, Empty]] = empty,
             start_date: Optional[Union[datetime.datetime, Empty]] = empty,
             due_date: Optional[Union[datetime.datetime, Empty]] = empty,
-            assignees: Optional[Union[List[Text], Empty]] = empty,
-            assignees_ids: Optional[Union[List[Text], Empty]] = empty,
-            status: Optional[Union[ActivityStatus, Text, Empty]] = empty,
-            tags: Optional[Union[List[Text], Empty]] = empty,
+            assignees: Optional[Union[List[str], Empty]] = empty,
+            assignees_ids: Optional[Union[List[str], Empty]] = empty,
+            status: Optional[Union[ActivityStatus, str, Empty]] = empty,
+            tags: Optional[Union[List[str], Empty]] = empty,
             **kwargs
     ) -> None:
         """Edit the details of an activity.
@@ -595,7 +595,7 @@ class Activity(TreeObject, TagsMixin):
         update_dict = {
             'id': self.id,
             'name': check_text(text=name, key='name') or self.name,
-            'description': check_text(text=description, key='description') or str(),
+            'description': check_text(text=description, key='description') or '',
             'tags': check_list_of_text(tags, 'tags', True) or list(),
         }
 
@@ -616,7 +616,7 @@ class Activity(TreeObject, TagsMixin):
         response = self._client._request('PUT', url, json=update_dict, params=API_EXTRA_PARAMS['activity'])
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Activity {}".format(self), response=response)
+            raise APIError(f"Could not update Activity {self}", response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
@@ -681,7 +681,7 @@ class Activity(TreeObject, TagsMixin):
         response = self._client._request('DELETE', self._client._build_url('activity', activity_id=self.id))
 
         if response.status_code != requests.codes.no_content:
-            raise APIError("Could not delete Activity {}.".format(self), response=response)
+            raise APIError(f"Could not delete Activity {self}.", response=response)
         return True
 
     #
@@ -777,7 +777,7 @@ class Activity(TreeObject, TagsMixin):
         response = self._client._request('GET', url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve Associations on Activity {}".format(self), response=response)
+            raise NotFoundError(f"Could not retrieve Associations on Activity {self}", response=response)
 
         data = response.json()
         return data['results']
@@ -811,7 +811,7 @@ class Activity(TreeObject, TagsMixin):
             paper_orientation: PaperOrientation = PaperOrientation.PORTRAIT,
             include_appendices: bool = False,
             include_qr_code: bool = False,
-    ) -> Text:
+    ) -> str:
         """
         Retrieve the PDF of the Activity.
 
@@ -858,7 +858,7 @@ class Activity(TreeObject, TagsMixin):
         url = self._client._build_url('activity_export', activity_id=self.id)
         response = self._client._request('GET', url, params=request_params)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not download PDF of Activity {}".format(self), response=response)
+            raise APIError(f"Could not download PDF of Activity {self}", response=response)
 
         # If appendices are included, the request becomes asynchronous
 
@@ -913,9 +913,9 @@ class Activity(TreeObject, TagsMixin):
 
     def share_link(
             self,
-            subject: Text,
-            message: Text,
-            recipient_users: List[Union[User, Text]],
+            subject: str,
+            message: str,
+            recipient_users: List[Union[User, str]],
             from_user: Optional[User] = None) -> None:
         """
         Share the link of the `Activity` through email.
@@ -948,13 +948,13 @@ class Activity(TreeObject, TagsMixin):
         response = self._client._request('POST', url, data=params)
 
         if response.status_code not in (requests.codes.created, requests.codes.accepted):  # pragma: no cover
-            raise APIError("Could not share the link to Activity {}".format(self), response=response)
+            raise APIError(f"Could not share the link to Activity {self}", response=response)
 
     def share_pdf(
             self,
-            subject: Text,
-            message: Text,
-            recipient_users: List[Union[User, Text]],
+            subject: str,
+            message: str,
+            recipient_users: List[Union[User, str]],
             paper_size: Optional[PaperSize] = PaperSize.A3,
             paper_orientation: Optional[PaperOrientation] = PaperOrientation.PORTRAIT,
             from_user: Optional[User] = None,
@@ -1025,7 +1025,7 @@ class Activity(TreeObject, TagsMixin):
         response = self._client._request('POST', url, data=params)
 
         if response.status_code not in (requests.codes.created, requests.codes.accepted):  # pragma: no cover
-            raise APIError("Could not share the link to Activity {}".format(self), response=response)
+            raise APIError(f"Could not share the link to Activity {self}", response=response)
 
     #
     # Context Methods
@@ -1076,7 +1076,7 @@ class Activity(TreeObject, TagsMixin):
         :raises IllegalArgumentError: When the context is not a Context object.
         """
         if not context.__class__.__name__ == 'Context':
-            raise IllegalArgumentError("`context` should be a proper Context object. Got: {}".format(context))
+            raise IllegalArgumentError(f"`context` should be a proper Context object. Got: {context}")
         context.link_activities(activities=[self])
         self.refresh()
 
@@ -1090,6 +1090,6 @@ class Activity(TreeObject, TagsMixin):
         :raises IllegalArgumentError: When the context is not a Context object.
         """
         if not context.__class__.__name__ == 'Context':
-            raise IllegalArgumentError("`context` should be a proper Context object. Got: {}".format(context))
+            raise IllegalArgumentError(f"`context` should be a proper Context object. Got: {context}")
         context.unlink_activities(activities=[self])
         self.refresh()

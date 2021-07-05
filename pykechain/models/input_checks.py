@@ -9,7 +9,7 @@ from pykechain.utils import is_uuid, is_url, Empty, empty, parse_datetime
 iter_types = (list, tuple, set)
 
 
-def check_type(value: Optional[Any], cls: Any, key: Text) -> Optional[Any]:
+def check_type(value: Optional[Any], cls: Any, key: str) -> Optional[Any]:
     """Validate any input to be an instance a specific class.
 
     :param value: value to check against
@@ -27,35 +27,35 @@ def check_type(value: Optional[Any], cls: Any, key: Text) -> Optional[Any]:
     return value
 
 
-def check_uuid(uuid: Optional[Text], key: Optional[Text] = 'pk') -> Optional[Text]:
+def check_uuid(uuid: Optional[str], key: Optional[str] = 'pk') -> Optional[str]:
     """Validate the UUID input to be a correct UUID."""
     if uuid is not None and uuid is not empty:
         if not is_uuid(uuid):
-            raise IllegalArgumentError('`{}` must be a valid UUID, "{}" ({}) is not.'.format(key, uuid, type(uuid)))
+            raise IllegalArgumentError(f'`{key}` must be a valid UUID, "{uuid}" ({type(uuid)}) is not.')
     return uuid
 
 
-def check_text(text: Optional[Text], key: Text) -> Optional[Text]:
+def check_text(text: Optional[str], key: str) -> Optional[str]:
     """Validate text input to be a string."""
     if text is not None and text is not empty:
         if not isinstance(text, str):
-            raise IllegalArgumentError('`{}` should be a string, "{}" ({}) is not.'.format(key, text, type(text)))
+            raise IllegalArgumentError(f'`{key}` should be a string, "{text}" ({type(text)}) is not.')
     return text
 
 
-def check_url(url: Optional[Text], key: Text = 'url') -> Optional[Text]:
+def check_url(url: Optional[str], key: str = 'url') -> Optional[str]:
     """Validate text input to be a valid format URL."""
     url = check_text(text=url, key=key)
     if url is not None and url is not empty:
         if not is_url(url):
-            raise IllegalArgumentError('`{}` should be a valid URL, "{}" ({}) is not.'.format(key, url, type(url)))
+            raise IllegalArgumentError(f'`{key}` should be a valid URL, "{url}" ({type(url)}) is not.')
     return url
 
 
-def check_list_of_text(list_of_text: Optional[Iterable[Text]], key: Text, unique: bool = False) -> Optional[List[Text]]:
+def check_list_of_text(list_of_text: Optional[Iterable[str]], key: str, unique: bool = False) -> Optional[List[str]]:
     """Validate iterable input to be a list/tuple/set of strings."""
     if list_of_text is not None and list_of_text is not empty:
-        if not isinstance(list_of_text, iter_types) or not all(isinstance(t, Text) for t in list_of_text):
+        if not isinstance(list_of_text, iter_types) or not all(isinstance(t, str) for t in list_of_text):
             raise IllegalArgumentError(
                 '`{}` should be a list, tuple or set of strings, "{}" ({}) is not.'.format(key, list_of_text,
                                                                                            type(list_of_text)))
@@ -65,8 +65,8 @@ def check_list_of_text(list_of_text: Optional[Iterable[Text]], key: Text, unique
 
 
 def check_list_of_dicts(list_of_dicts: Optional[Iterable[Dict]],
-                        key: Text,
-                        fields: Optional[List[Text]] = None,
+                        key: str,
+                        fields: Optional[List[str]] = None,
                         ) -> Optional[List[Dict]]:
     """Validate iterable input to be a list/tuple/set of dicts, optionally checking for required field names."""
     if list_of_dicts is not None and list_of_dicts is not empty:
@@ -90,7 +90,7 @@ def check_list_of_dicts(list_of_dicts: Optional[Iterable[Dict]],
     return list_of_dicts
 
 
-def check_enum(value: Optional[Any], enum: type(Enum), key: Text) -> Optional[Any]:
+def check_enum(value: Optional[Any], enum: type(Enum), key: str) -> Optional[Any]:
     """Validate input to be an option from an enum class."""
     if value is not None and value is not empty:
         if value not in enum.values():
@@ -99,7 +99,7 @@ def check_enum(value: Optional[Any], enum: type(Enum), key: Text) -> Optional[An
     return value
 
 
-def check_datetime(dt: Optional[Union[datetime, Text]], key: Text) -> Optional[Text]:
+def check_datetime(dt: Optional[Union[datetime, str]], key: str) -> Optional[str]:
     """Validate a datetime value to be a datetime and be timezone aware."""
     if dt is not None and dt is not empty:
         if isinstance(dt, str):
@@ -119,9 +119,9 @@ def check_datetime(dt: Optional[Union[datetime, Text]], key: Text) -> Optional[T
 
 def check_base(obj: Optional[Any],
                cls: Optional[type(object)] = None,
-               key: Optional[Text] = 'object',
+               key: Optional[str] = 'object',
                method: Optional[Callable] = None,
-               ) -> Optional[Text]:
+               ) -> Optional[str]:
     """
     Validate whether the object provided as input is a Base (or subclass) instance and return its ID.
 
@@ -151,13 +151,13 @@ def check_base(obj: Optional[Any],
             obj = method(obj).id
         else:
             raise IllegalArgumentError(
-                '`{}` must be an ID, UUID or `{}` object, "{}" ({}) is not.'.format(key, cls.__name__, obj, type(obj)))
+                f'`{key}` must be an ID, UUID or `{cls.__name__}` object, "{obj}" ({type(obj)}) is not.')
     return obj
 
 
 def check_user(obj: Optional[Any],
                cls: Optional[type(object)] = None,
-               key: Optional[Text] = 'user',
+               key: Optional[str] = 'user',
                method: Optional[Callable] = None,
                ) -> Optional[int]:
     """Provide same functionality as check_base(), although users dont use UUID but integers."""
@@ -174,21 +174,21 @@ def check_user(obj: Optional[Any],
                 obj = int(obj)
             except ValueError:
                 raise IllegalArgumentError(
-                    '`{}` must be an ID or `{}` object, "{}" ({}) is not.'.format(key, cls.__name__, obj, type(obj)))
+                    f'`{key}` must be an ID or `{cls.__name__}` object, "{obj}" ({type(obj)}) is not.')
         elif method:
             obj = method(obj).id
         else:
             raise IllegalArgumentError(
-                '`{}` must be an ID or `{}` object, "{}" ({}) is not.'.format(key, cls.__name__, obj, type(obj)))
+                f'`{key}` must be an ID or `{cls.__name__}` object, "{obj}" ({type(obj)}) is not.')
     return obj
 
 
 def check_list_of_base(
         objects: Optional[List[Any]],
         cls: Optional[type(object)] = None,
-        key: Optional[Text] = 'objects',
+        key: Optional[str] = 'objects',
         method: Optional[Callable] = None,
-) -> Optional[List[Text]]:
+) -> Optional[List[str]]:
     """Validate the iterable of objects provided as input are Base (or subclass) instances and return a list of IDs.
 
     :param objects: list of objects to check

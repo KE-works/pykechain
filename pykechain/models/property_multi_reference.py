@@ -74,7 +74,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
             choices_model_id = self.model()._value[0].get('id')
 
             # Determine which parts are filtered out
-            prefilter: Optional[Text] = self._options.get(MetaWidget.PREFILTERS, {}). \
+            prefilter: Optional[str] = self._options.get(MetaWidget.PREFILTERS, {}). \
                 get(MetaWidget.PROPERTY_VALUE_PREFILTER)
 
             # Retrieve all part instances with this model ID
@@ -87,7 +87,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
 
     def set_prefilters(
             self,
-            property_models: List[Union[Text, 'AnyProperty']] = None,
+            property_models: List[Union[str, 'AnyProperty']] = None,
             values: List[Any] = None,
             filters_type: List[FilterType] = None,
             prefilters: List[PropertyValueFilter] = None,
@@ -161,7 +161,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
             as_lists: Optional[bool] = False,
     ) -> Union[
         List[PropertyValueFilter],
-        Tuple[List[Text]]
+        Tuple[List[str]]
     ]:
         """
         Retrieve the pre-filters applied to the reference property.
@@ -190,7 +190,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
 
     def set_excluded_propmodels(
             self,
-            property_models: List[Union[Text, 'AnyProperty']],
+            property_models: List[Union[str, 'AnyProperty']],
             overwrite: Optional[bool] = False,
             validate: Optional[Union[bool, Part]] = True,
     ) -> None:
@@ -228,7 +228,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
 
         self.edit(options=options_to_set)
 
-    def get_excluded_propmodel_ids(self) -> List[Text]:
+    def get_excluded_propmodel_ids(self) -> List[str]:
         """
         Retrieve a list of property model UUIDs which are not visible.
 

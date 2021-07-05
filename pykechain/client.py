@@ -71,7 +71,7 @@ from .models.input_checks import (
 from .typing import ObjectID
 
 
-class Client(object):
+class Client:
     """The KE-chain python client to connect to a KE-chain instance.
 
     :ivar last_request: last executed request. Which is of type `requests.Request`_
@@ -82,7 +82,7 @@ class Client(object):
     .. _requests.Response: http://docs.python-requests.org/en/master/api/#requests.Response
     """
 
-    def __init__(self, url: Text = 'http://localhost:8000/', check_certificates: Optional[bool] = None) -> None:
+    def __init__(self, url: str = 'http://localhost:8000/', check_certificates: Optional[bool] = None) -> None:
         """Create a KE-chain client with given settings.
 
         :param url: the url of the KE-chain instance to connect to (defaults to http://localhost:8000)
@@ -110,12 +110,12 @@ class Client(object):
             raise ClientError("Please provide a valid URL to a KE-chain instance")
 
         self.api_root = url
-        self.headers: Dict[Text, Text] = {'X-Requested-With': 'XMLHttpRequest',
+        self.headers: Dict[str, str] = {'X-Requested-With': 'XMLHttpRequest',
                                           'PyKechain-Version': pykechain_version}
-        self.auth: Optional[Tuple[Text, Text]] = None
+        self.auth: Optional[Tuple[str, str]] = None
         self.last_request: Optional[requests.PreparedRequest] = None
         self.last_response: Optional[requests.Response] = None
-        self.last_url: Optional[Text] = None
+        self.last_url: Optional[str] = None
         self._app_versions: Optional[List[Dict]] = None
         self._widget_schemas: Optional[List[Dict]] = None
 
@@ -144,10 +144,10 @@ class Client(object):
         del self.headers
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke Client '{}'>".format(self.api_root)
+        return f"<pyke Client '{self.api_root}'>"
 
     @classmethod
-    def from_env(cls, env_filename: Optional[Text] = None, check_certificates: Optional[bool] = None) -> 'Client':
+    def from_env(cls, env_filename: Optional[str] = None, check_certificates: Optional[bool] = None) -> 'Client':
         """Create a client from environment variable settings.
 
         :param env_filename: filename of the environment file, defaults to '.env' in the local dir
@@ -197,7 +197,7 @@ class Client(object):
         return client
 
     def login(self,
-              username: Optional[Text] = None, password: Optional[Text] = None, token: Optional[Text] = None) -> None:
+              username: Optional[str] = None, password: Optional[str] = None, token: Optional[str] = None) -> None:
         """Login into KE-chain with either username/password or token.
 
         :param username: username for your user from KE-chain
@@ -224,13 +224,13 @@ class Client(object):
 
         """
         if token:
-            self.headers['Authorization'] = 'Token {}'.format(token)
+            self.headers['Authorization'] = f'Token {token}'
             self.auth = None
         elif username and password:
             self.headers.pop('Authorization', None)
             self.auth = (username, password)
 
-    def _build_url(self, resource: Text, **kwargs) -> Text:
+    def _build_url(self, resource: str, **kwargs) -> str:
         """Build the correct API url.
 
         :param resource: name the resource from the API_PATH
@@ -254,7 +254,7 @@ class Client(object):
         users = response.json()
         return users
 
-    def _request(self, method: Text, url: Text, **kwargs) -> requests.Response:
+    def _request(self, method: str, url: str, **kwargs) -> requests.Response:
         """Perform the request on the API."""
         self.last_request = None
         if method in ('PUT', 'POST', 'DELETE'):
@@ -315,7 +315,7 @@ class Client(object):
 
         return self._widget_schemas
 
-    def widget_schema(self, widget_type: Text) -> Dict:
+    def widget_schema(self, widget_type: str) -> Dict:
         """Widget schema for widget type.
 
         ..versionadded:: 3.0
@@ -331,14 +331,14 @@ class Client(object):
 
         found = find(self.widget_schemas, lambda ws: ws.get('widget_type') == widget_type)
         if not found:
-            raise NotFoundError("Could not find a widget_schema for widget_type: `{}`".format(widget_type))
+            raise NotFoundError(f"Could not find a widget_schema for widget_type: `{widget_type}`")
         return found
 
     def match_app_version(
             self,
-            app: Optional[Text] = None,
-            label: Optional[Text] = None,
-            version: Optional[Text] = None,
+            app: Optional[str] = None,
+            label: Optional[str] = None,
+            version: Optional[str] = None,
             default: Optional[bool] = False,
     ) -> bool:
         """Match app version against a semantic version string.
@@ -396,7 +396,7 @@ class Client(object):
             else:
                 raise NotFoundError("No version found on the app '{}'".format(target_app[0].get('app')))
 
-    def reload(self, obj: Base, url: Optional[Text] = None, extra_params: Optional[Dict] = None):
+    def reload(self, obj: Base, url: Optional[str] = None, extra_params: Optional[Dict] = None):
         """Reload an object from server. The original object is immutable and it will return a new object.
 
         The object will be refetched from KE-chain. If the object has a 'url' field the url will be taken from
@@ -433,14 +433,14 @@ class Client(object):
 
                 try:
                     # set the id from the `obj.id` which is normally a keyname `<class_name>_id` (without the '2' if so)
-                    url = self._build_url(resource=resource, **{"{}_id".format(stripped): obj.id})
+                    url = self._build_url(resource=resource, **{f"{stripped}_id": obj.id})
                     extra_api_params = API_EXTRA_PARAMS.get(resource)
                     break
                 except KeyError:
                     if resource != stripped:
                         # Try again with stripped resource name
                         try:
-                            url = self._build_url(resource=stripped, **{"{}_id".format(stripped): obj.id})
+                            url = self._build_url(resource=stripped, **{f"{stripped}_id": obj.id})
                             extra_api_params = API_EXTRA_PARAMS.get(stripped)
                             break
                         except KeyError:
@@ -451,7 +451,7 @@ class Client(object):
 
             if url is None:
                 raise IllegalArgumentError(
-                    'Provide URL to reload the "{}" object (could not identify the API resource).'.format(obj))
+                    f'Provide URL to reload the "{obj}" object (could not identify the API resource).')
 
             # add the additional API params to the already provided extra params if they are provided.
             extra_params = extra_params.update(**extra_api_params) if extra_params else extra_api_params
@@ -460,7 +460,7 @@ class Client(object):
         data = response.json().get('results', [])
 
         if response.status_code != requests.codes.ok or not len(data) > 0:
-            raise NotFoundError("Could not reload {} {}".format(obj.__class__.__name__, obj), response=response)
+            raise NotFoundError(f"Could not reload {obj.__class__.__name__} {obj}", response=response)
 
         return obj.__class__(data[0], client=self)
 
@@ -478,20 +478,20 @@ class Client(object):
         kwargs['limit'] = kwargs.get('limit', 2)
         results = method(*args, **kwargs)
 
-        criteria = '\nargs: {}\nkwargs: {}'.format(args, kwargs)
+        criteria = f'\nargs: {args}\nkwargs: {kwargs}'
 
         if len(results) == 0:
-            raise NotFoundError("No {} fit criteria:{}".format(method.__name__, criteria))
+            raise NotFoundError(f"No {method.__name__} fit criteria:{criteria}")
         if len(results) != 1:
-            raise MultipleFoundError("Multiple {} fit criteria:{}".format(method.__name__, criteria))
+            raise MultipleFoundError(f"Multiple {method.__name__} fit criteria:{criteria}")
 
         return results[0]
 
     def scopes(
             self,
-            name: Optional[Text] = None,
-            pk: Optional[Text] = None,
-            status: Optional[Union[ScopeStatus, Text]] = ScopeStatus.ACTIVE,
+            name: Optional[str] = None,
+            pk: Optional[str] = None,
+            status: Optional[Union[ScopeStatus, str]] = ScopeStatus.ACTIVE,
             **kwargs
     ) -> List[Scope]:
         """Return all scopes visible / accessible for the logged in user.
@@ -564,9 +564,9 @@ class Client(object):
 
     def activities(
             self,
-            name: Optional[Text] = None,
-            pk: Optional[Text] = None,
-            scope: Optional[Text] = None,
+            name: Optional[str] = None,
+            pk: Optional[str] = None,
+            scope: Optional[str] = None,
             **kwargs
     ) -> List[Activity]:
         """Search for activities with optional name, pk and scope filter.
@@ -622,14 +622,14 @@ class Client(object):
 
     def parts(
             self,
-            name: Optional[Text] = None,
-            pk: Optional[Text] = None,
+            name: Optional[str] = None,
+            pk: Optional[str] = None,
             model: Optional[Part] = None,
-            category: Optional[Union[Category, Text]] = Category.INSTANCE,
-            scope_id: Optional[Text] = None,
-            parent: Optional[Text] = None,
-            activity: Optional[Text] = None,
-            widget: Optional[Text] = None,
+            category: Optional[Union[Category, str]] = Category.INSTANCE,
+            scope_id: Optional[str] = None,
+            parent: Optional[str] = None,
+            activity: Optional[str] = None,
+            widget: Optional[str] = None,
             limit: Optional[int] = None,
             batch: Optional[int] = PARTS_BATCH_LIMIT,
             **kwargs
@@ -724,7 +724,7 @@ class Client(object):
                 data = response.json()
                 part_results.extend(data['results'])
 
-        return PartSet((Part(p, client=self) for p in part_results))
+        return PartSet(Part(p, client=self) for p in part_results)
 
     def part(self, *args, **kwargs) -> Part:
         """Retrieve single KE-chain part.
@@ -759,9 +759,9 @@ class Client(object):
 
     def properties(
             self,
-            name: Optional[Text] = None,
-            pk: Optional[Text] = None,
-            category: Optional[Union[Category, Text]] = Category.INSTANCE,
+            name: Optional[str] = None,
+            pk: Optional[str] = None,
+            category: Optional[Union[Category, str]] = Category.INSTANCE,
             **kwargs
     ) -> List['AnyProperty']:
         """Retrieve properties.
@@ -812,9 +812,9 @@ class Client(object):
 
     def services(
             self,
-            name: Optional[Text] = None,
-            pk: Optional[Text] = None,
-            scope: Optional[Text] = None,
+            name: Optional[str] = None,
+            pk: Optional[str] = None,
+            scope: Optional[str] = None,
             **kwargs
     ) -> List[Service]:
         """
@@ -866,10 +866,10 @@ class Client(object):
 
     def service_executions(
             self,
-            name: Optional[Text] = None,
-            pk: Optional[Text] = None,
-            scope: Optional[Text] = None,
-            service: Optional[Text] = None,
+            name: Optional[str] = None,
+            pk: Optional[str] = None,
+            scope: Optional[str] = None,
+            service: Optional[str] = None,
             **kwargs
     ) -> List[ServiceExecution]:
         """
@@ -923,7 +923,7 @@ class Client(object):
         """
         return self._retrieve_singular(self.service_executions, *args, **kwargs)
 
-    def users(self, username: Optional[Text] = None, pk: Optional[Text] = None, **kwargs) -> List[User]:
+    def users(self, username: Optional[str] = None, pk: Optional[str] = None, **kwargs) -> List[User]:
         """
         Users of KE-chain.
 
@@ -976,7 +976,7 @@ class Client(object):
         try:
             response = self._request(method='GET', url=self._build_url(resource='user_current'))
         except Exception as e:
-            raise APIError("No authentication provided to retrieve the current user:\n{}".format(e.args[0]))
+            raise APIError(f"No authentication provided to retrieve the current user:\n{e.args[0]}")
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve current User", response=response)
@@ -985,8 +985,8 @@ class Client(object):
 
     def teams(
             self,
-            name: Optional[Text] = None,
-            pk: Optional[Text] = None,
+            name: Optional[str] = None,
+            pk: Optional[str] = None,
             is_hidden: Optional[bool] = False,
             **kwargs
     ) -> List[Team]:
@@ -1035,8 +1035,8 @@ class Client(object):
 
     def widgets(
             self,
-            pk: Optional[Text] = None,
-            activity: Optional[Union[Activity, Text]] = None,
+            pk: Optional[str] = None,
+            activity: Optional[Union[Activity, str]] = None,
             **kwargs
     ) -> List[Widget]:
         """
@@ -1087,16 +1087,16 @@ class Client(object):
 
     def create_activity(
             self,
-            parent: Union[Activity, Text],
-            name: Text,
+            parent: Union[Activity, str],
+            name: str,
             activity_type: ActivityType = ActivityType.TASK,
-            ref: Optional[Text] = None,
+            ref: Optional[str] = None,
             status: ActivityStatus = ActivityStatus.OPEN,
-            description: Optional[Text] = None,
+            description: Optional[str] = None,
             start_date: Optional[datetime.datetime] = None,
             due_date: Optional[datetime.datetime] = None,
             classification: ActivityClassification = None,
-            tags: Optional[List[Text]] = None,
+            tags: Optional[List[str]] = None,
             **kwargs
     ) -> Activity:
         """
@@ -1133,7 +1133,7 @@ class Client(object):
             parent_classification = None
             parent_id = parent
         else:
-            raise IllegalArgumentError('`parent` must be an Activity or UUID, "{}" is neither'.format(parent))
+            raise IllegalArgumentError(f'`parent` must be an Activity or UUID, "{parent}" is neither')
 
         if classification is None:
             if parent_classification is None:
@@ -1184,17 +1184,17 @@ class Client(object):
 
     def clone_activities(
             self,
-            activities: List[Union[Activity, Text]],
-            activity_parent: Union[Activity, Text],
+            activities: List[Union[Activity, str]],
+            activity_parent: Union[Activity, str],
             activity_update_dicts: Optional[Dict] = None,
             include_part_models: Optional[bool] = False,
             include_part_instances: Optional[bool] = False,
             include_children: Optional[bool] = True,
-            excluded_parts: Optional[List[Text]] = None,
-            part_parent_model: Optional[Union[Part, Text]] = None,
-            part_parent_instance: Optional[Union[Part, Text]] = None,
-            part_model_rename_template: Optional[Text] = None,
-            part_instance_rename_template: Optional[Text] = None,
+            excluded_parts: Optional[List[str]] = None,
+            part_parent_model: Optional[Union[Part, str]] = None,
+            part_parent_instance: Optional[Union[Part, str]] = None,
+            part_model_rename_template: Optional[str] = None,
+            part_instance_rename_template: Optional[str] = None,
             asynchronous: Optional[bool] = False,
             **kwargs
     ) -> List[Activity]:
@@ -1249,7 +1249,7 @@ class Client(object):
                 "Did not recognize the following UUIDs:\n{}".format(update_name, '\n'.join(incorrect_ids)))
 
         elif not all(isinstance(value, dict) for value in update_dicts.values()):
-            raise IllegalArgumentError("The `{}` must be a dict of dicts.".format(update_name))
+            raise IllegalArgumentError(f"The `{update_name}` must be a dict of dicts.")
 
         activities = [dict(id=uuid, **update_dicts.get(uuid, {})) for uuid in activity_ids]
 
@@ -1307,7 +1307,7 @@ class Client(object):
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Activities", response=response)
 
-    def _create_part(self, action: Text, data: Dict, **kwargs) -> Optional[Part]:
+    def _create_part(self, action: str, data: Dict, **kwargs) -> Optional[Part]:
         """Create a part for PIM 2 internal core function."""
         # suppress_kevents should be in the data (not the query_params)
         if 'suppress_kevents' in kwargs:
@@ -1317,7 +1317,7 @@ class Client(object):
         query_params = kwargs
         query_params.update(API_EXTRA_PARAMS['parts'])
 
-        response = self._request('POST', self._build_url('parts_{}'.format(action)),
+        response = self._request('POST', self._build_url(f'parts_{action}'),
                                  params=query_params,
                                  json=data)
 
@@ -1326,7 +1326,7 @@ class Client(object):
 
         return Part(response.json()['results'][0], client=self)
 
-    def create_part(self, parent: Part, model: Part, name: Optional[Text] = None, **kwargs) -> Part:
+    def create_part(self, parent: Part, model: Part, name: Optional[str] = None, **kwargs) -> Part:
         """Create a new part instance from a given model under a given parent.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
@@ -1359,8 +1359,8 @@ class Client(object):
         return self._create_part(action="new_instance", data=data, **kwargs)
 
     def create_model(self,
-                     parent: Union[Part, Text],
-                     name: Text,
+                     parent: Union[Part, str],
+                     name: str,
                      multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
                      **kwargs) -> Part:
         """Create a new child model under a given parent.
@@ -1386,7 +1386,7 @@ class Client(object):
         elif is_uuid(parent):
             parent = self.model(id=parent)
         else:
-            raise IllegalArgumentError("`parent` should be either a parent part or a uuid, got '{}'".format(parent))
+            raise IllegalArgumentError(f"`parent` should be either a parent part or a uuid, got '{parent}'")
 
         if parent.category != Category.MODEL:
             raise IllegalArgumentError("The parent should be of category 'MODEL'")
@@ -1400,8 +1400,8 @@ class Client(object):
 
     def create_model_with_properties(
             self,
-            parent: Union[Part, Text],
-            name: Text,
+            parent: Union[Part, str],
+            name: str,
             multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
             properties_fvalues: Optional[List[Dict]] = None,
             **kwargs) -> Part:
@@ -1457,7 +1457,7 @@ class Client(object):
         elif is_uuid(parent):
             parent = self.model(id=parent)
         else:
-            raise IllegalArgumentError("`parent` should be either a parent part or a uuid, got '{}'".format(parent))
+            raise IllegalArgumentError(f"`parent` should be either a parent part or a uuid, got '{parent}'")
 
         if parent.category != Category.MODEL:
             raise IllegalArgumentError("`parent` should be of category 'MODEL'")
@@ -1475,7 +1475,7 @@ class Client(object):
     def _create_clone(self,
                       parent: Part,
                       part: Part,
-                      name: Optional[Text] = None,
+                      name: Optional[str] = None,
                       multiplicity: Optional[Multiplicity] = None,
                       **kwargs
                       ) -> Part:
@@ -1504,7 +1504,7 @@ class Client(object):
         check_type(parent, Part, 'parent')
 
         data = dict(
-            name=check_text(name, 'name') or "CLONE - {}".format(part.name),
+            name=check_text(name, 'name') or f"CLONE - {part.name}",
             parent_id=parent.id,
             suppress_kevents=kwargs.pop('suppress_kevents', None),
         )
@@ -1524,7 +1524,7 @@ class Client(object):
 
         query_params = kwargs
         query_params.update(API_EXTRA_PARAMS['parts'])
-        url = self._build_url('parts_{}'.format(select_action))
+        url = self._build_url(f'parts_{select_action}')
 
         response = self._request('POST', url, params=query_params, data=data)
 
@@ -1537,7 +1537,7 @@ class Client(object):
             self,
             model: Part,
             parent: Part,
-            name: Text,
+            name: str,
             multiplicity: Optional[Multiplicity] = Multiplicity.ZERO_MANY,
             **kwargs
     ) -> Part:
@@ -1646,7 +1646,7 @@ class Client(object):
 
         if (asynchronous and response.status_code != requests.codes.accepted) or \
                 (not asynchronous and response.status_code != requests.codes.created):  # pragma: no cover
-            raise APIError("Could not create Parts. ({})".format(response.status_code), response=response)
+            raise APIError(f"Could not create Parts. ({response.status_code})", response=response)
 
         part_ids = response.json()['results'][0]['parts_created']
         if retrieve_instances:
@@ -1661,7 +1661,7 @@ class Client(object):
 
     def _delete_parts_bulk(
             self,
-            parts: List[Union[Part, Text]],
+            parts: List[Union[Part, str]],
             asynchronous: Optional[bool] = False,
             **kwargs
     ) -> bool:
@@ -1685,7 +1685,7 @@ class Client(object):
             elif is_uuid(part):
                 list_parts.append(part)
             else:
-                raise IllegalArgumentError("{} is not a Part nor an UUID".format(part))
+                raise IllegalArgumentError(f"{part} is not a Part nor an UUID")
         payload = {"parts": list_parts}
         query_params = kwargs
         query_params.update(API_EXTRA_PARAMS['parts'])
@@ -1695,17 +1695,17 @@ class Client(object):
         if (asynchronous and response.status_code not in (requests.codes.ok, requests.codes.accepted) or (
                 not asynchronous and response.status_code not in (
                 requests.codes.ok, requests.codes.accepted))):  # pragma: no cover
-            raise APIError("Could not delete Parts. ({})".format(response.status_code), response=response)
+            raise APIError(f"Could not delete Parts. ({response.status_code})", response=response)
         return True
 
     def create_property(
             self,
             model: Part,
-            name: Text,
-            description: Optional[Text] = None,
-            property_type: Optional[Union[PropertyType, Text]] = PropertyType.CHAR_VALUE,
+            name: str,
+            description: Optional[str] = None,
+            property_type: Optional[Union[PropertyType, str]] = PropertyType.CHAR_VALUE,
             default_value: Optional[Any] = None,
-            unit: Optional[Text] = None,
+            unit: Optional[str] = None,
             options: Optional[Dict] = None,
             **kwargs
     ) -> AnyProperty:
@@ -1792,14 +1792,14 @@ class Client(object):
 
     def create_service(
             self,
-            name: Text,
+            name: str,
             scope: Scope,
-            description: Optional[Text] = None,
-            version: Optional[Text] = None,
+            description: Optional[str] = None,
+            version: Optional[str] = None,
             service_type: Optional[ServiceType] = ServiceType.PYTHON_SCRIPT,
             environment_version: Optional[ServiceEnvironmentVersion] = ServiceEnvironmentVersion.PYTHON_3_8,
             run_as: Optional[ServiceScriptUser] = ServiceScriptUser.KENODE_USER,
-            pkg_path: Optional[Text] = None
+            pkg_path: Optional[str] = None
     ) -> Service:
         """
         Create a Service.
@@ -1860,13 +1860,13 @@ class Client(object):
 
     def create_scope(
             self,
-            name: Text,
+            name: str,
             status: Optional[ScopeStatus] = ScopeStatus.ACTIVE,
-            description: Optional[Text] = None,
-            tags: Optional[List[Text]] = None,
+            description: Optional[str] = None,
+            tags: Optional[List[str]] = None,
             start_date: Optional[datetime.datetime] = None,
             due_date: Optional[datetime.datetime] = None,
-            team: Optional[Union[Team, Text]] = None,
+            team: Optional[Union[Team, str]] = None,
             **kwargs
     ) -> Scope:
         """
@@ -1945,20 +1945,20 @@ class Client(object):
                                  params=query_options)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Scope {}".format(scope), response=response)
+            raise APIError(f"Could not delete Scope {scope}", response=response)
 
         return True
 
     def clone_scope(
             self,
             source_scope: Scope,
-            name: Optional[Text] = None,
+            name: Optional[str] = None,
             status: Optional[ScopeStatus] = None,
             start_date: Optional[datetime.datetime] = None,
             due_date: Optional[datetime.datetime] = None,
-            description: Optional[Text] = None,
-            tags: Optional[List[Text]] = None,
-            team: Optional[Union[Team, Text]] = None,
+            description: Optional[str] = None,
+            tags: Optional[List[str]] = None,
+            team: Optional[Union[Team, str]] = None,
             scope_options: Optional[Dict] = None,
             asynchronous: Optional[bool] = False,
     ) -> Optional[Scope]:
@@ -2006,7 +2006,7 @@ class Client(object):
         tags = check_list_of_text(tags, 'tags', True) or source_scope.tags
         data_dict = {
             'scope_id': source_scope.id,
-            'name': check_text(name, 'name') or 'CLONE - {}'.format(source_scope.name),
+            'name': check_text(name, 'name') or f'CLONE - {source_scope.name}',
             'start_date': check_datetime(dt=start_date, key='start_date'),
             'due_date': check_datetime(dt=due_date, key='due_date'),
             'text': check_text(description, 'description') or source_scope.description,
@@ -2028,9 +2028,9 @@ class Client(object):
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             if response.status_code == requests.codes.forbidden:
-                raise ForbiddenError("Forbidden to clone Scope {}".format(source_scope), response=response)
+                raise ForbiddenError(f"Forbidden to clone Scope {source_scope}", response=response)
             else:
-                raise APIError("Could not clone Scope {}".format(source_scope), response=response)
+                raise APIError(f"Could not clone Scope {source_scope}", response=response)
 
         if asynchronous:
             return None
@@ -2045,9 +2045,9 @@ class Client(object):
 
     def create_team(
             self,
-            name: Text,
-            user: Union[Text, int, User],
-            description: Optional[Text] = None,
+            name: str,
+            user: Union[str, int, User],
+            description: Optional[str] = None,
             options: Optional[Dict] = None,
             is_hidden: Optional[bool] = False
     ) -> Team:
@@ -2113,12 +2113,12 @@ class Client(object):
 
     @staticmethod
     def _validate_widget(
-            activity: Union[Activity, Text],
-            widget_type: Union[WidgetTypes, Text],
-            title: Optional[Text],
+            activity: Union[Activity, str],
+            widget_type: Union[WidgetTypes, str],
+            title: Optional[str],
             meta: Dict,
             order: Optional[int],
-            parent: Optional[Union[Widget, Text]],
+            parent: Optional[Union[Widget, str]],
             **kwargs
     ) -> Dict:
         """Validate the format and content of the configuration of a widget."""
@@ -2148,10 +2148,10 @@ class Client(object):
     def _validate_related_models(
             readable_models: List,
             writable_models: List,
-            part_instance: Union[Part, Text],
-            parent_part_instance: Union[Part, Text],
+            part_instance: Union[Part, str],
+            parent_part_instance: Union[Part, str],
             **kwargs
-    ) -> Tuple[List, List, Text, Text]:
+    ) -> Tuple[List, List, str, str]:
         """
         Verify the format and content of the readable and writable models.
 
@@ -2175,16 +2175,16 @@ class Client(object):
 
     def create_widget(
             self,
-            activity: Union[Activity, Text],
-            widget_type: Union[WidgetTypes, Text],
+            activity: Union[Activity, str],
+            widget_type: Union[WidgetTypes, str],
             meta: Dict,
-            title: Optional[Text] = None,
+            title: Optional[str] = None,
             order: Optional[int] = None,
-            parent: Optional[Union[Widget, Text]] = None,
+            parent: Optional[Union[Widget, str]] = None,
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
-            part_instance: Optional[Union[Part, Text]] = None,
-            parent_part_instance: Optional[Union[Part, Text]] = None,
+            part_instance: Optional[Union[Part, str]] = None,
+            parent_part_instance: Optional[Union[Part, str]] = None,
             **kwargs
     ) -> Widget:
         """
@@ -2338,7 +2338,7 @@ class Client(object):
         widgets_response = response.json().get('results')
         return [Widget.create(json=widget_json, client=self) for widget_json in widgets_response]
 
-    def delete_widget(self, widget: Union[Widget, Text]) -> None:
+    def delete_widget(self, widget: Union[Widget, str]) -> None:
         """
         Delete a single Widget.
 
@@ -2353,9 +2353,9 @@ class Client(object):
         response = self._request('DELETE', url)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Widget {}".format(widget), response=response)
+            raise APIError(f"Could not delete Widget {widget}", response=response)
 
-    def delete_widgets(self, widgets: List[Union[Widget, Text]]) -> None:
+    def delete_widgets(self, widgets: List[Union[Widget, str]]) -> None:
         """
         Delete multiple Widgets.
 
@@ -2377,9 +2377,9 @@ class Client(object):
 
     @staticmethod
     def _validate_associations(
-            widgets: List[Union[Widget, Text]],
+            widgets: List[Union[Widget, str]],
             associations: List[Tuple[List, List, Part, Part]],
-    ) -> List[Text]:
+    ) -> List[str]:
         """Perform the validation of the internal widgets and associations."""
         widget_ids = check_list_of_base(widgets, Widget, 'widgets')
 
@@ -2472,11 +2472,11 @@ class Client(object):
 
     def update_widget_associations(
             self,
-            widget: Union[Widget, Text],
+            widget: Union[Widget, str],
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
-            part_instance: Optional[Union[Part, Text]] = None,
-            parent_part_instance: Optional[Union[Part, Text]] = None,
+            part_instance: Optional[Union[Part, str]] = None,
+            parent_part_instance: Optional[Union[Part, str]] = None,
             **kwargs
     ) -> None:
         """
@@ -2513,7 +2513,7 @@ class Client(object):
 
     def update_widgets_associations(
             self,
-            widgets: List[Union[Widget, Text]],
+            widgets: List[Union[Widget, str]],
             associations: List[Tuple],
             **kwargs
     ) -> None:
@@ -2578,11 +2578,11 @@ class Client(object):
 
     def set_widget_associations(
             self,
-            widget: Union[Widget, Text],
+            widget: Union[Widget, str],
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
-            part_instance: Optional[Union[Part, Text]] = None,
-            parent_part_instance: Optional[Union[Part, Text]] = None,
+            part_instance: Optional[Union[Part, str]] = None,
+            parent_part_instance: Optional[Union[Part, str]] = None,
             **kwargs
     ) -> None:
         """
@@ -2620,7 +2620,7 @@ class Client(object):
 
     def set_widgets_associations(
             self,
-            widgets: List[Union[Widget, Text]],
+            widgets: List[Union[Widget, str]],
             associations: List[Tuple],
             **kwargs
     ) -> None:
@@ -2704,14 +2704,14 @@ class Client(object):
         response = self._request(method='PUT', url=url)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not clear Associations of Widget {}".format(widget), response=response)
+            raise APIError(f"Could not clear Associations of Widget {widget}", response=response)
 
         return None
 
     def remove_widget_associations(
             self,
             widget: Widget,
-            models: Optional[List[Union['AnyProperty', Text]]] = (),
+            models: Optional[List[Union['AnyProperty', str]]] = (),
             **kwargs
     ) -> None:
         """
@@ -2742,7 +2742,7 @@ class Client(object):
         response = self._request(method='PUT', url=url, params=API_EXTRA_PARAMS['widget'], json=data)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not remove Associations of Widget {}".format(widget), response=response)
+            raise APIError(f"Could not remove Associations of Widget {widget}", response=response)
 
         return
 
@@ -2793,7 +2793,7 @@ class Client(object):
         response = self._request('PUT', url, data=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not move Activity {}".format(activity), response=response)
+            raise APIError(f"Could not move Activity {activity}", response=response)
 
         activity.parent_id = parent_id
 
@@ -2831,7 +2831,7 @@ class Client(object):
 
         return properties
 
-    def notifications(self, pk: Optional[Text] = None, **kwargs) -> List[Notification]:
+    def notifications(self, pk: Optional[str] = None, **kwargs) -> List[Notification]:
         """Retrieve one or more notifications stored on the instance.
 
         If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
@@ -2859,7 +2859,7 @@ class Client(object):
 
         return [Notification(notification, client=self) for notification in data['results']]
 
-    def notification(self, pk: Optional[Text] = None, *args, **kwargs) -> Notification:
+    def notification(self, pk: Optional[str] = None, *args, **kwargs) -> Notification:
         """Retrieve a single KE-chain notification.
 
         Uses the same interface as the :func:`notifications` method but returns only a single pykechain
@@ -2879,12 +2879,12 @@ class Client(object):
 
     def create_notification(
             self,
-            subject: Text,
-            message: Text,
+            subject: str,
+            message: str,
             status: Optional[NotificationStatus] = NotificationStatus.DRAFT,
-            recipients: Optional[List[Union[User, Text]]] = None,
-            team: Optional[Union[Team, Text]] = None,
-            from_user: Optional[Union[User, Text]] = None,
+            recipients: Optional[List[Union[User, str]]] = None,
+            team: Optional[Union[Team, str]] = None,
+            from_user: Optional[Union[User, str]] = None,
             event: Optional[NotificationEvent] = None,
             channel: Optional[NotificationChannels] = NotificationChannels.EMAIL,
             **kwargs
@@ -2955,7 +2955,7 @@ class Client(object):
         notification = Notification(response.json().get('results')[0], client=self)
         return notification
 
-    def delete_notification(self, notification: Union[Notification, Text]) -> None:
+    def delete_notification(self, notification: Union[Notification, str]) -> None:
         """
         Delete a single Notification.
 
@@ -2971,12 +2971,12 @@ class Client(object):
         response = self._request('DELETE', url)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Notification {}".format(notification), response=response)
+            raise APIError(f"Could not delete Notification {notification}", response=response)
 
     def banners(
             self,
-            pk: Optional[Text] = None,
-            text: Optional[Text] = None,
+            pk: Optional[str] = None,
+            text: Optional[str] = None,
             is_active: Optional[bool] = None,
             **kwargs
     ) -> List[Banner]:
@@ -3018,12 +3018,12 @@ class Client(object):
 
     def create_banner(
             self,
-            text: Text,
-            icon: Text,
+            text: str,
+            icon: str,
             active_from: datetime.datetime,
             active_until: Optional[datetime.datetime] = None,
             is_active: Optional[bool] = False,
-            url: Optional[Text] = None,
+            url: Optional[str] = None,
             **kwargs
     ) -> Banner:
         """
@@ -3103,7 +3103,7 @@ class Client(object):
 
     def expiring_downloads(
             self,
-            pk: Optional[Text] = None,
+            pk: Optional[str] = None,
             expires_in: Optional[int] = None,
             **kwargs
     ) -> List[ExpiringDownload]:
@@ -3135,7 +3135,7 @@ class Client(object):
             self,
             expires_at: Optional[datetime.datetime] = None,
             expires_in: Optional[int] = None,
-            content_path: Optional[Text] = None
+            content_path: Optional[str] = None
     ) -> ExpiringDownload:
         """
         Create an new Expiring Download.
@@ -3167,12 +3167,12 @@ class Client(object):
 
     def create_context(
             self,
-            name: Text,
+            name: str,
             context_type: ContextType,
             scope: Scope,
             context_group: ContextGroup = None,
             activities=None,
-            description: Text = None,
+            description: str = None,
             tags=None,
             options=None,
             feature_collection=None,

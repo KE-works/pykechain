@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from pykechain.enums import PropertyType
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import SelectListProperty, Property

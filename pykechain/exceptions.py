@@ -55,16 +55,16 @@ class APIError(Exception):
                 self.results = None
 
             context.extend([
-                'Server {}'.format(self.traceback),
-                'Results:\n{}'.format(json.dumps(self.results, indent=4)),
-                'Detail: {}'.format(self.detail),
-                'Elapsed: {}'.format(self.response.elapsed),
+                f'Server {self.traceback}',
+                f'Results:\n{json.dumps(self.results, indent=4)}',
+                f'Detail: {self.detail}',
+                f'Elapsed: {self.response.elapsed}',
             ])
 
         if self.request is not None and isinstance(self.request, PreparedRequest):
             context.extend([
-                'Request URL: {}'.format(self.request.url),
-                'Request method: {}'.format(self.request.method),
+                f'Request URL: {self.request.url}',
+                f'Request method: {self.request.method}',
             ])
             if self.request.body:
                 try:
@@ -75,7 +75,7 @@ class APIError(Exception):
                     body = json.loads(decoded_body)  # Convert string to Python object(s)
                 except json.decoder.JSONDecodeError:
                     body = decoded_body.split('&')  # parameters in URL
-                context.append('Request data:\n{}'.format(json.dumps(body, indent=4)))  # pretty printing of a json
+                context.append(f'Request data:\n{json.dumps(body, indent=4)}')  # pretty printing of a json
 
         message = '\n'.join(context)
         new_args = [message]

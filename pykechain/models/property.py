@@ -56,7 +56,7 @@ class Property(BaseInScope):
         super().__init__(json, **kwargs)
 
         self.output: bool = json.get('output')
-        self.model_id: Optional[Text] = json.get('model_id')
+        self.model_id: Optional[str] = json.get('model_id')
         self.part_id = json.get('part_id')
         self.ref = json.get('ref')
         self.type = json.get('property_type')
@@ -85,7 +85,7 @@ class Property(BaseInScope):
         if self._options.get('validators'):
             self._parse_validators()
 
-    def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional = None) -> None:
+    def refresh(self, json: Optional[Dict] = None, url: Optional[str] = None, extra_params: Optional = None) -> None:
         """Refresh the object in place."""
         super().refresh(json=json,
                         url=self._client._build_url('property', property_id=self.id),
@@ -121,7 +121,7 @@ class Property(BaseInScope):
     @classmethod
     def set_bulk_update(cls, value):
         """Set global class attribute to toggle the use of bulk-updates of properties."""
-        assert isinstance(value, bool), "`bulk_update` must be set to a boolean, not {}".format(type(value))
+        assert isinstance(value, bool), f"`bulk_update` must be set to a boolean, not {type(value)}"
         cls._USE_BULK_UPDATE = value
 
     @property
@@ -175,7 +175,7 @@ class Property(BaseInScope):
         response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['property'], json={'value': value})
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Property {}".format(self), response=response)
+            raise APIError(f"Could not update Property {self}", response=response)
 
         self.refresh(json=response.json()['results'][0])
 
@@ -261,7 +261,7 @@ class Property(BaseInScope):
             if isinstance(validator, PropertyValidator):
                 validators_json.append(validator.as_json())
             else:
-                raise APIError("validator is not a PropertyValidator: '{}'".format(validator))
+                raise APIError(f"validator is not a PropertyValidator: '{validator}'")
         if self._options.get('validators', list()) == validators_json:
             # no change
             pass
@@ -367,9 +367,9 @@ class Property(BaseInScope):
 
     def edit(
             self,
-            name: Optional[Text] = empty,
-            description: Optional[Text] = empty,
-            unit: Optional[Text] = empty,
+            name: Optional[str] = empty,
+            description: Optional[str] = empty,
+            unit: Optional[str] = empty,
             options: Optional[Dict] = empty,
             **kwargs
     ) -> None:
@@ -416,8 +416,8 @@ class Property(BaseInScope):
         """
         update_dict = {
             'name': check_text(name, 'name') or self.name,
-            'description': check_text(description, 'description') or str(),
-            'unit': check_text(unit, 'unit') or str(),
+            'description': check_text(description, 'description') or '',
+            'unit': check_text(unit, 'unit') or '',
             'value_options': check_type(options, dict, 'options') or dict()
         }
 
@@ -439,7 +439,7 @@ class Property(BaseInScope):
             )
 
             if response.status_code != requests.codes.ok:  # pragma: no cover
-                raise APIError("Could not update Property {}".format(self), response=response)
+                raise APIError(f"Could not update Property {self}", response=response)
 
             self.refresh(json=response.json()['results'][0])
 
@@ -452,9 +452,9 @@ class Property(BaseInScope):
         response = self._client._request('DELETE', self._client._build_url('property', property_id=self.id))
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Property {}".format(self), response=response)
+            raise APIError(f"Could not delete Property {self}", response=response)
 
-    def copy(self, target_part: 'Part', name: Optional[Text] = None) -> 'Property':
+    def copy(self, target_part: 'Part', name: Optional[str] = None) -> 'Property':
         """Copy a property model or instance.
 
         :param target_part: `Part` object under which the desired `Property` is copied
@@ -503,7 +503,7 @@ class Property(BaseInScope):
             raise IllegalArgumentError('property "{}" and target part "{}" must have the same category'.
                                        format(self.name, target_part.name))
 
-    def move(self, target_part: 'Part', name: Optional[Text] = None) -> 'Property':
+    def move(self, target_part: 'Part', name: Optional[str] = None) -> 'Property':
         """Move a property model or instance.
 
         :param target_part: `Part` object under which the desired `Property` is moved

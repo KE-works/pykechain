@@ -66,7 +66,7 @@ class TestAssociations(TestBetamax):
             (dict(property=self.frame.properties[0]), 4),
             (dict(scope=self.project), 48)
         ]:
-            with self.subTest(msg='{} should be len={}'.format(inputs, nr)):
+            with self.subTest(msg=f'{inputs} should be len={nr}'):
                 # setUp
                 associations = self.client.associations(limit=100, **inputs)
 
@@ -81,12 +81,12 @@ class TestAssociations(TestBetamax):
             scope='not a scope',
             property='not a property',
         ).items():
-            with self.subTest(msg='{}: "{}"'.format(keyword, value)):
+            with self.subTest(msg=f'{keyword}: "{value}"'):
                 with self.assertRaises(IllegalArgumentError):
                     self.client.associations(limit=1, **{keyword: value})
 
         for limit in [-5, '3']:
-            with self.subTest('limit: {} {}'.format(type(limit), limit)):
+            with self.subTest(f'limit: {type(limit)} {limit}'):
                 with self.assertRaises(IllegalArgumentError):
                     self.client.associations(limit=limit)
 

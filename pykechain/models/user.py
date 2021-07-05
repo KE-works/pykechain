@@ -26,16 +26,16 @@ class User(Base):
 
     def __init__(self, json, **kwargs):
         """Construct a user from provided json data."""
-        super(User, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self.username = self._json_data.get('username', '')
         self.id = self._json_data.get('pk', '')
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.username, self.id)
+        return f"<pyke {self.__class__.__name__} '{self.username}' id {self.id}>"
 
     @property
-    def default_name(self) -> Text:
+    def default_name(self) -> str:
         """
         Get default name, prioritizing the user name over the KE-chain name.
 
@@ -58,7 +58,7 @@ class User(Base):
         return pytz.timezone(zone=self._json_data.get('timezone', 'UTC'))
 
     @property
-    def language(self) -> Text:
+    def language(self) -> str:
         """
         Language code of the user.
 
@@ -70,7 +70,7 @@ class User(Base):
         return self._json_data.get('language_code', LanguageCodes.ENGLISH)
 
     @property
-    def email(self) -> Text:
+    def email(self) -> str:
         """
         Email of the user.
 

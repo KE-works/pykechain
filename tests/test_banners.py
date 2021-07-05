@@ -180,8 +180,8 @@ class TestBanners(TestBetamax):
         self.banner.edit(text=None, icon=None, active_from=None, active_until=None, is_active=None, url=None)
 
         self.assertEqual(self.banner.text, new_text)
-        self.assertEqual(self.banner.icon, str())
+        self.assertEqual(self.banner.icon, '')
         self.assertEqual(self.banner.active_from, initial_active_from)
         self.assertEqual(self.banner.active_until, initial_active_until)
         self.assertEqual(self.banner.is_active, new_is_active)
-        self.assertEqual(self.banner.url, str())
+        self.assertEqual(self.banner.url, '')

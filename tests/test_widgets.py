@@ -169,13 +169,13 @@ class TestWidgets(TestBetamax):
 
         widgets = list(test_task.widgets())[1:]  # remove meta-panel
         self.client.update_widgets(
-            widgets=[dict(id=w.id, title="widget {}".format(i + 1)) for i, w in enumerate(widgets)]
+            widgets=[dict(id=w.id, title=f"widget {i + 1}") for i, w in enumerate(widgets)]
         )
 
         with self.assertRaises(IllegalArgumentError):
             double_update = [widgets[0], widgets[0], widgets[1]]
             self.client.update_widgets(
-                widgets=[dict(id=w.id, title="widget {}".format(i + 1)) for i, w in enumerate(double_update)]
+                widgets=[dict(id=w.id, title=f"widget {i + 1}") for i, w in enumerate(double_update)]
             )
 
 
@@ -207,7 +207,7 @@ class TestWidgetManager(TestBetamax):
 
     def test_widget_in_widget_manager(self):
         for key in [0, self.wm[0], self.wm[0].id]:
-            with self.subTest(msg='key: {} {}'.format(type(key), key)):
+            with self.subTest(msg=f'key: {type(key)} {key}'):
                 widget = self.wm[key]
                 self.assertIn(widget, self.wm)
 
@@ -219,13 +219,13 @@ class TestWidgetManager(TestBetamax):
 
 class TestWidgetManagerInActivity(TestBetamax):
     def setUp(self):
-        super(TestWidgetManagerInActivity, self).setUp()
+        super().setUp()
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
         self.wm = self.task.widgets()  # type: WidgetsManager
 
     def tearDown(self):
         self.task.delete()
-        super(TestWidgetManagerInActivity, self).tearDown()
+        super().tearDown()
 
     def test_new_widget_using_widget_manager(self):
         self.assertEqual(len(self.wm), 1)
@@ -516,7 +516,7 @@ class TestWidgetManagerInActivity(TestBetamax):
 
     def test_add_card_widget_ke_chain_pages(self):
         for native_page_name in KEChainPages.values():
-            with self.subTest(msg='Page {}'.format(native_page_name)):
+            with self.subTest(msg=f'Page {native_page_name}'):
                 card_widget = self.wm.add_card_widget(title=native_page_name, link=native_page_name)
                 self.assertIsInstance(card_widget, CardWidget)
 
@@ -703,11 +703,11 @@ class TestWidgetManagerInActivity(TestBetamax):
         bike_part = self.project.part('Bike')
         w0 = self.wm[0]  # meta panel
 
-        w1, w2, w3 = [self.wm.add_propertygrid_widget(
+        w1, w2, w3 = (self.wm.add_propertygrid_widget(
             part_instance=bike_part,
             writable_models=bike_part.model().properties,
             title='Original widget {i} (w{i})'.format(i=i + 1),
-        ) for i in range(3)]
+        ) for i in range(3))
 
         # if widget order is `[w0,w1,w2]` and inserting `w3` at index 1 (before Widget1);
         #           index:     0 ^1  2
@@ -847,7 +847,7 @@ class TestWidgetManagerInActivity(TestBetamax):
 
 class TestWidgetManagerWeatherWidget(TestBetamax):
     def setUp(self):
-        super(TestWidgetManagerWeatherWidget, self).setUp()
+        super().setUp()
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
         self.wm = self.task.widgets()  # type: WidgetsManager
 
@@ -865,7 +865,7 @@ class TestWidgetManagerWeatherWidget(TestBetamax):
         self.weather_widget.delete()
         self.part_model_with_weather_prop.delete()
         self.task.delete()
-        super(TestWidgetManagerWeatherWidget, self).tearDown()
+        super().tearDown()
 
     def test_weather_widget(self):
         """Testing the weather widget."""
@@ -877,7 +877,7 @@ class TestWidgetManagerWeatherWidget(TestBetamax):
 class TestWidgetNavigationBarWidget(TestBetamax):
 
     def setUp(self):
-        super(TestWidgetNavigationBarWidget, self).setUp()
+        super().setUp()
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
         self.wm = self.task.widgets()  # type: WidgetsManager
 
@@ -896,7 +896,7 @@ class TestWidgetNavigationBarWidget(TestBetamax):
 
     def tearDown(self):
         self.task.delete()
-        super(TestWidgetNavigationBarWidget, self).tearDown()
+        super().tearDown()
 
     def test_add_navbar_widget(self):
         widget = self.wm.add_tasknavigationbar_widget(
@@ -962,14 +962,14 @@ class TestWidgetNavigationBarWidget(TestBetamax):
 
 class TestWidgetsCopyMove(TestBetamax):
     def setUp(self):
-        super(TestWidgetsCopyMove, self).setUp()
+        super().setUp()
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
         self.task_2 = self.project.create_activity(name="test_copy_widget")  # type: Activity
 
     def tearDown(self):
         self.task.delete()
         self.task_2.delete()
-        super(TestWidgetsCopyMove, self).tearDown()
+        super().tearDown()
 
     def test_copy_widget(self):
         # setUp

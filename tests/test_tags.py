@@ -103,12 +103,12 @@ class TestTagsActivity(TestBetamax):
     tags = ['one', 'two', 'three']
 
     def setUp(self):
-        super(TestTagsActivity, self).setUp()
+        super().setUp()
         self.task = self.project.activity(name='SubTask')  # type: Activity
 
     def tearDown(self):
         self.task.tags = None
-        super(TestTagsActivity, self).tearDown()
+        super().tearDown()
 
     def test_activity_tags(self):
         # setup

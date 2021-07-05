@@ -22,7 +22,7 @@ class TestScopes(TestBetamax):
         for attribute in attributes:
             with self.subTest(attribute):
                 self.assertTrue(hasattr(obj, attribute),
-                                "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__.keys()))
+                                f"Could not find '{attribute}' in the object: '{obj.__dict__.keys()}'")
 
     def test_retrieve_scopes(self):
         self.assertTrue(self.client.scopes())
@@ -326,7 +326,7 @@ class TestScopeEdit(TestBetamax):
         self.scope.edit(name=None, description=None, tags=None, start_date=None, due_date=None, status=None)
         self.scope.refresh()
         self.assertEqual(self.scope.name, new_name)
-        self.assertEqual(self.scope.description, str())
+        self.assertEqual(self.scope.description, '')
         self.assertEqual(self.scope.start_date, None)
         self.assertEqual(self.scope.due_date, None)
         self.assertEqual(self.scope.tags, list())
