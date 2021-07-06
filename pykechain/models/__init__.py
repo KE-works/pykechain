@@ -19,7 +19,11 @@ from .property2_attachment import AttachmentProperty2
 from .property2_selectlist import SelectListProperty2
 from .property2_multi_reference import MultiReferenceProperty2
 from .property2_datetime import DatetimeProperty2
-from .property_reference import ActivityReferencesProperty, ScopeReferencesProperty, UserReferencesProperty
+from .property_reference import (
+    ActivityReferencesProperty,
+    ScopeReferencesProperty,
+    UserReferencesProperty,
+)
 from .partset import PartSet
 from .service import Service, ServiceExecution
 from .team import Team
@@ -28,19 +32,18 @@ from .value_filter import PropertyValueFilter
 from ..enums import PropertyType
 
 AnyProperty = Union[
-    'Property',
-    'MultiReferenceProperty',
-    'AttachmentProperty',
-    'SelectListProperty',
-    'DatetimeProperty',
-    'Property2',
-    'MultiReferenceProperty2',
-    'AttachmentProperty2',
-    'SelectListProperty2',
-    'DatetimeProperty2'
-    'ActivityReferencesProperty',
-    'ScopeReferencesProperty',
-    'UserReferencesProperty',
+    "Property",
+    "MultiReferenceProperty",
+    "AttachmentProperty",
+    "SelectListProperty",
+    "DatetimeProperty",
+    "Property2",
+    "MultiReferenceProperty2",
+    "AttachmentProperty2",
+    "SelectListProperty2",
+    "DatetimeProperty2" "ActivityReferencesProperty",
+    "ScopeReferencesProperty",
+    "UserReferencesProperty",
 ]
 
 # This map is used to identify the correct class for the (KE-chain provided) property type.
@@ -56,34 +59,34 @@ property_type_to_class_map = {
 }
 
 __all__ = (
-    'Base',
-    'BaseInScope',
-    'Scope',
-    'Scope2',
-    'Activity',
-    'Association',
-    'Activity2',
-    'Part',
-    'Part2',
-    'PartSet',
-    'Service',
-    'ServiceExecution',
-    'User',
-    'Team',
-    'Property',
-    'MultiReferenceProperty',
-    'AttachmentProperty',
-    'SelectListProperty',
-    'DatetimeProperty',
-    'Property2',
-    'MultiReferenceProperty2',
-    'AttachmentProperty2',
-    'SelectListProperty2',
-    'DatetimeProperty2',
-    'ActivityReferencesProperty',
-    'ScopeReferencesProperty',
-    'UserReferencesProperty',
-    'AnyProperty',
-    'PropertyValueFilter',
-    'property_type_to_class_map',
+    "Base",
+    "BaseInScope",
+    "Scope",
+    "Scope2",
+    "Activity",
+    "Association",
+    "Activity2",
+    "Part",
+    "Part2",
+    "PartSet",
+    "Service",
+    "ServiceExecution",
+    "User",
+    "Team",
+    "Property",
+    "MultiReferenceProperty",
+    "AttachmentProperty",
+    "SelectListProperty",
+    "DatetimeProperty",
+    "Property2",
+    "MultiReferenceProperty2",
+    "AttachmentProperty2",
+    "SelectListProperty2",
+    "DatetimeProperty2",
+    "ActivityReferencesProperty",
+    "ScopeReferencesProperty",
+    "UserReferencesProperty",
+    "AnyProperty",
+    "PropertyValueFilter",
+    "property_type_to_class_map",
 )

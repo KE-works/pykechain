@@ -33,13 +33,9 @@ class PartSet(Iterable):
         raise NotImplementedError
 
     def _repr_html_(self) -> str:
-        all_instances = all(p.category == 'INSTANCE' for p in self._parts)
+        all_instances = all(p.category == "INSTANCE" for p in self._parts)
 
-        html = [
-            "<table width=100%>",
-            "<tr>",
-            "<th>Part</th>"
-        ]
+        html = ["<table width=100%>", "<tr>", "<th>Part</th>"]
 
         if not all_instances:
             html.append("<th>Category</th>")
@@ -59,4 +55,4 @@ class PartSet(Iterable):
 
         html.append("</table>")
 
-        return ''.join(html)
+        return "".join(html)

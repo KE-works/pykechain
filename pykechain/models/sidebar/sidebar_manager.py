@@ -1,9 +1,21 @@
 from collections.abc import Iterable
 from typing import Any, Optional, Text, List, Dict
 
-from pykechain.enums import URITarget, SubprocessDisplayMode, KEChainPages, KEChainPageLabels, KEChainPageIcons
+from pykechain.enums import (
+    URITarget,
+    SubprocessDisplayMode,
+    KEChainPages,
+    KEChainPageLabels,
+    KEChainPageIcons,
+)
 from pykechain.exceptions import NotFoundError
-from pykechain.models.input_checks import check_url, check_text, check_enum, check_list_of_dicts, check_type
+from pykechain.models.input_checks import (
+    check_url,
+    check_text,
+    check_enum,
+    check_list_of_dicts,
+    check_type,
+)
 from pykechain.models.sidebar.sidebar_button import SideBarButton
 from pykechain.utils import find
 
@@ -19,9 +31,11 @@ class SideBarManager(Iterable):
     :type bulk_creation: bool
     """
 
-    __existing_managers = dict()  # storage of manager objects to enforce 1 manager object per Scope
+    __existing_managers = (
+        dict()
+    )  # storage of manager objects to enforce 1 manager object per Scope
 
-    def __new__(cls, scope: 'Scope', *args, **kwargs):
+    def __new__(cls, scope: "Scope", *args, **kwargs):
         """Overwrite superclass method to enforce singleton manager per Scope object."""
         instance = super().__new__(cls)
 
@@ -33,7 +47,7 @@ class SideBarManager(Iterable):
 
         return instance
 
-    def __init__(self, scope: 'Scope', **kwargs):
+    def __init__(self, scope: "Scope", **kwargs):
         """
         Create a side-bar manager object for the Scope object.
 
@@ -45,10 +59,11 @@ class SideBarManager(Iterable):
         super().__init__(**kwargs)
 
         from pykechain.models import Scope
-        check_type(scope, Scope, 'scope')
+
+        check_type(scope, Scope, "scope")
 
         self.scope: Scope = scope
-        self._override: bool = scope.options.get('overrideSideBar', False)
+        self._override: bool = scope.options.get("overrideSideBar", False)
 
         self._scope_uri = "#/scopes/{}".format(self.scope.id)
         self._perform_bulk_creation = False
@@ -56,13 +71,15 @@ class SideBarManager(Iterable):
         self._buttons: List[SideBarButton] = []
 
         # Load existing buttons from the scope
-        for button_dict in scope.options.get('customNavigation', []):
+        for button_dict in scope.options.get("customNavigation", []):
             self._buttons.append(SideBarButton(side_bar_manager=self, json=button_dict))
 
         self._iter = iter(self._buttons)
 
     def __repr__(self) -> Text:  # pragma: no cover
-        return "<pyke {} object {} buttons>".format(self.__class__.__name__, self.__len__())
+        return "<pyke {} object {} buttons>".format(
+            self.__class__.__name__, self.__len__()
+        )
 
     def __iter__(self):
         return self
@@ -131,9 +148,11 @@ class SideBarManager(Iterable):
         if button in self._buttons:
             self._buttons.remove(button)
 
-        self._buttons.insert(check_type(index, int, 'index'), button)
+        self._buttons.insert(check_type(index, int, "index"), button)
 
-    def create_button(self, order: Optional[int] = None, *args, **kwargs) -> SideBarButton:
+    def create_button(
+        self, order: Optional[int] = None, *args, **kwargs
+    ) -> SideBarButton:
         """
         Create a side-bar button.
 
@@ -145,7 +164,7 @@ class SideBarManager(Iterable):
         if order is None:
             index = len(self._buttons)
         else:
-            index = check_type(order, int, 'order')
+            index = check_type(order, int, "order")
 
         button = SideBarButton(side_bar_manager=self, order=index, *args, **kwargs)
 
@@ -155,11 +174,16 @@ class SideBarManager(Iterable):
 
         return button
 
-    def add_task_button(self,
-                        activity: 'Activity',
-                        title: Optional[Text] = None,
-                        task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
-                        *args, **kwargs) -> SideBarButton:
+    def add_task_button(
+        self,
+        activity: "Activity",
+        title: Optional[Text] = None,
+        task_display_mode: Optional[
+            SubprocessDisplayMode
+        ] = SubprocessDisplayMode.ACTIVITIES,
+        *args,
+        **kwargs
+    ) -> SideBarButton:
         """
         Add a side-bar button to a KE-chain activity.
 
@@ -173,20 +197,26 @@ class SideBarManager(Iterable):
         :rtype SideBarButton
         """
         from pykechain.models import Activity
-        check_type(activity, Activity, 'activity')
-        check_enum(task_display_mode, SubprocessDisplayMode, 'task_display_mode')
-        title = check_text(title, 'title') or activity.name
 
-        uri = '{}/{}/{}'.format(self._scope_uri, task_display_mode, activity.id)
+        check_type(activity, Activity, "activity")
+        check_enum(task_display_mode, SubprocessDisplayMode, "task_display_mode")
+        title = check_text(title, "title") or activity.name
 
-        uri_target = URITarget.INTERNAL if activity.scope_id == self.scope.id else URITarget.EXTERNAL
+        uri = "{}/{}/{}".format(self._scope_uri, task_display_mode, activity.id)
 
-        return self.create_button(uri=uri, uri_target=uri_target, title=title, *args, **kwargs)
+        uri_target = (
+            URITarget.INTERNAL
+            if activity.scope_id == self.scope.id
+            else URITarget.EXTERNAL
+        )
 
-    def add_ke_chain_page(self,
-                          page_name: KEChainPages,
-                          title: Optional[Text] = None,
-                          *args, **kwargs) -> SideBarButton:
+        return self.create_button(
+            uri=uri, uri_target=uri_target, title=title, *args, **kwargs
+        )
+
+    def add_ke_chain_page(
+        self, page_name: KEChainPages, title: Optional[Text] = None, *args, **kwargs
+    ) -> SideBarButton:
         """
         Add a side-bar button to a built-in KE-chain page.
 
@@ -197,17 +227,26 @@ class SideBarManager(Iterable):
         :return: new side-bar button
         :rtype SideBarButton
         """
-        page_name = check_enum(page_name, KEChainPages, 'page_name')
-        title = check_text(title, 'title') or KEChainPageLabels[page_name]
+        page_name = check_enum(page_name, KEChainPages, "page_name")
+        title = check_text(title, "title") or KEChainPageLabels[page_name]
         icon = KEChainPageIcons[page_name]
-        if 'icon' in kwargs:
-            icon = kwargs.pop('icon')
+        if "icon" in kwargs:
+            icon = kwargs.pop("icon")
 
-        uri = '{}/{}'.format(self._scope_uri, page_name)
+        uri = "{}/{}".format(self._scope_uri, page_name)
 
-        return self.create_button(uri=uri, uri_target=URITarget.INTERNAL, title=title, icon=icon, *args, **kwargs)
+        return self.create_button(
+            uri=uri,
+            uri_target=URITarget.INTERNAL,
+            title=title,
+            icon=icon,
+            *args,
+            **kwargs
+        )
 
-    def add_external_button(self, url: Text, title: Text, *args, **kwargs) -> SideBarButton:
+    def add_external_button(
+        self, url: Text, title: Text, *args, **kwargs
+    ) -> SideBarButton:
         """
         Add a side-bar button to an external page defined by an URL.
 
@@ -219,14 +258,17 @@ class SideBarManager(Iterable):
         :rtype SideBarButton
         """
         button = self.create_button(
-            title=check_text(title, 'title'),
+            title=check_text(title, "title"),
             uri=check_url(url),
             uri_target=URITarget.EXTERNAL,
-            *args, **kwargs
+            *args,
+            **kwargs
         )
         return button
 
-    def add_buttons(self, buttons: List[Dict], override_sidebar: bool) -> List[SideBarButton]:
+    def add_buttons(
+        self, buttons: List[Dict], override_sidebar: bool
+    ) -> List[SideBarButton]:
         """
         Create a list of buttons in bulk. Each button is defined by a dict, provided in a sorted list.
 
@@ -237,8 +279,8 @@ class SideBarManager(Iterable):
         :return: list of SideBarButton objects
         :rtype List[SideBarButton]
         """
-        check_list_of_dicts(buttons, 'buttons')
-        check_type(override_sidebar, bool, 'override_sidebar')
+        check_list_of_dicts(buttons, "buttons")
+        check_type(override_sidebar, bool, "override_sidebar")
 
         for index, button in enumerate(buttons):
             button = SideBarButton(side_bar_manager=self, order=index, json=button)
@@ -280,7 +322,7 @@ class SideBarManager(Iterable):
         :type value: bool
         :return: None
         """
-        check_type(value, bool, 'override_sidebar')
+        check_type(value, bool, "override_sidebar")
         self._override = value
         self._update()
 

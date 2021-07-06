@@ -6,23 +6,28 @@ import pytz
 import six
 from betamax import Betamax
 
-if six.PY2:
-    from test.test_support import EnvironmentVarGuard
-else:
-    from test.support import EnvironmentVarGuard
+from test.support import EnvironmentVarGuard
 
 from pykechain import Client
-from tests.utils import TEST_TOKEN, TEST_SCOPE_NAME, TEST_URL, TEST_RECORD_CASSETTES, TEST_SCOPE_ID
+from tests.utils import (
+    TEST_TOKEN,
+    TEST_SCOPE_NAME,
+    TEST_URL,
+    TEST_RECORD_CASSETTES,
+    TEST_SCOPE_ID,
+)
 
 with Betamax.configure() as config:
-    config.cassette_library_dir = os.path.join(os.path.dirname(__file__), 'cassettes')
-    config.define_cassette_placeholder('<API_URL>', TEST_URL)
-    config.define_cassette_placeholder('<AUTH_TOKEN>', TEST_TOKEN)
+    config.cassette_library_dir = os.path.join(os.path.dirname(__file__), "cassettes")
+    config.define_cassette_placeholder("<API_URL>", TEST_URL)
+    config.define_cassette_placeholder("<AUTH_TOKEN>", TEST_TOKEN)
 
 
 class SixTestCase(TestCase):
     def assertRaisesRegex(self, expected_exception, expected_regex, *args, **kwargs):
-        return super().assertRaisesRegex(expected_exception, expected_regex, *args, **kwargs)
+        return super().assertRaisesRegex(
+            expected_exception, expected_regex, *args, **kwargs
+        )
 
     def assertRegex(self, text, expected_regex, *args, **kwargs):
         return super().assertRegex(text, expected_regex, *args, **kwargs)
@@ -35,7 +40,7 @@ class TestBetamax(SixTestCase):
     @property
     def cassette_name(self):
         test = self._testMethodName
-        return f'{self.__class__.__name__}.{test}'
+        return f"{self.__class__.__name__}.{test}"
 
     def setUp(self):
         # use self.env.set('var', 'value') and with self.env: ... to use custom environmental variables
@@ -58,8 +63,10 @@ class TestBetamax(SixTestCase):
         elif TEST_SCOPE_ID:
             self.project = self.client.scope(id=TEST_SCOPE_ID)
         else:
-            raise Exception('Could not retrieve the test scope, you need to provide a '
-                            '`TEST_SCOPE_ID` or `TEST_SCOPE_NAME` in your `.env` file')
+            raise Exception(
+                "Could not retrieve the test scope, you need to provide a "
+                "`TEST_SCOPE_ID` or `TEST_SCOPE_NAME` in your `.env` file"
+            )
 
     def tearDown(self):
         self.recorder.stop()

@@ -1,11 +1,17 @@
 import datetime
 import warnings
 from abc import abstractmethod
-from typing import Text, Union, Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
-from pykechain.enums import FilterType, Category, PropertyType, ScopeStatus
+from pykechain.enums import Category, FilterType, PropertyType, ScopeStatus
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
-from pykechain.models.input_checks import check_base, check_enum, check_type, check_text, check_datetime
+from pykechain.models.input_checks import (
+    check_base,
+    check_datetime,
+    check_enum,
+    check_text,
+    check_type,
+)
 from pykechain.models.widgets.enums import MetaWidget
 
 
@@ -14,13 +20,15 @@ class BaseFilter:
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self.__class__.write_options(filters=[self]) == self.__class__.write_options(filters=[other])
+            return self.__class__.write_options(
+                filters=[self]
+            ) == self.__class__.write_options(filters=[other])
         else:
             return False
 
     @classmethod
     @abstractmethod
-    def parse_options(cls, options: Dict) -> List['BaseFilter']:  # pragma: no cover
+    def parse_options(cls, options: Dict) -> List["BaseFilter"]:  # pragma: no cover
         """
         Convert the dict & string-based definition of a filter to a list of Filter objects.
 
@@ -54,7 +62,7 @@ class PropertyValueFilter(BaseFilter):
 
     def __init__(
         self,
-        property_model: Union[str, 'Property'],
+        property_model: Union[str, "Property"],
         value: Any,
         filter_type: FilterType,
     ):
@@ -76,7 +84,7 @@ class PropertyValueFilter(BaseFilter):
         value = str(self.value).lower() if isinstance(self.value, bool) else self.value
         return f"{self.id}:{value}:{self.type}"
 
-    def validate(self, part_model: 'Part') -> None:
+    def validate(self, part_model: "Part") -> None:
         """
         Validate data of the PropertyValueFilter.
 
@@ -91,18 +99,27 @@ class PropertyValueFilter(BaseFilter):
             prop = part_model.property(self.id)
         except NotFoundError:
             raise IllegalArgumentError(
-                "Property value filters can only be set on properties belonging to the selected Part model.")
+                "Property value filters can only be set on properties belonging to the selected Part model."
+            )
 
         if prop.category != Category.MODEL:
             raise IllegalArgumentError(
-                f'Property value filters can only be set on Property models, received "{prop}".')
+                f'Property value filters can only be set on Property models, received "{prop}".'
+            )
         else:
-            if prop.type == PropertyType.BOOLEAN_VALUE and self.type != FilterType.EXACT:
-                warnings.warn("A PropertyValueFilter on a boolean property should use filter type `{}`".format(
-                    FilterType.EXACT), Warning)
+            if (
+                prop.type == PropertyType.BOOLEAN_VALUE
+                and self.type != FilterType.EXACT
+            ):
+                warnings.warn(
+                    "A PropertyValueFilter on a boolean property should use filter type `{}`".format(
+                        FilterType.EXACT
+                    ),
+                    Warning,
+                )
 
     @classmethod
-    def parse_options(cls, options: Dict) -> List['PropertyValueFilter']:
+    def parse_options(cls, options: Dict) -> List["PropertyValueFilter"]:
         """
         Convert the dict & string-based definition of a property value filter to a list of PropertyValueFilter objects.
 
@@ -119,7 +136,7 @@ class PropertyValueFilter(BaseFilter):
         for pf_string in prefilter_string_list:
             prefilter_raw = pf_string.split(":")
 
-            if len(prefilter_raw) == 1:   # FIXME encoding problem KE-chain
+            if len(prefilter_raw) == 1:  # FIXME encoding problem KE-chain
                 prefilter_raw = pf_string.split("%3A")
 
             prefilters.append(PropertyValueFilter(*prefilter_raw))
@@ -136,9 +153,7 @@ class PropertyValueFilter(BaseFilter):
         """
         super().write_options(filters=filters)
 
-        prefilters = {
-            "property_value": ",".join([pf.format() for pf in filters])
-        }
+        prefilters = {"property_value": ",".join([pf.format() for pf in filters])}
         options = {MetaWidget.PREFILTERS: prefilters}
 
         return options
@@ -166,18 +181,18 @@ class ScopeFilter(BaseFilter):
     ]
 
     def __init__(
-            self,
-            tag: Optional[str] = None,
-            status: Optional[ScopeStatus] = None,
-            name: Optional[str] = None,
-            team: Optional[Union[str, 'Team']] = None,
-            due_date_gte: Optional[datetime.datetime] = None,
-            due_date_lte: Optional[datetime.datetime] = None,
-            start_date_gte: Optional[datetime.datetime] = None,
-            start_date_lte: Optional[datetime.datetime] = None,
-            progress_gte: Optional[float] = None,
-            progress_lte: Optional[float] = None,
-            **kwargs
+        self,
+        tag: Optional[str] = None,
+        status: Optional[ScopeStatus] = None,
+        name: Optional[str] = None,
+        team: Optional[Union[str, "Team"]] = None,
+        due_date_gte: Optional[datetime.datetime] = None,
+        due_date_lte: Optional[datetime.datetime] = None,
+        start_date_gte: Optional[datetime.datetime] = None,
+        start_date_lte: Optional[datetime.datetime] = None,
+        progress_gte: Optional[float] = None,
+        progress_lte: Optional[float] = None,
+        **kwargs,
     ):
         """Create a ScopeFilter object."""
         from pykechain.models import Team
@@ -195,7 +210,9 @@ class ScopeFilter(BaseFilter):
             progress_lte,
         ]
         if sum(p is not None for p in filters) + len(kwargs) != 1:
-            raise IllegalArgumentError("Every ScopeFilter object must apply only 1 filter!")
+            raise IllegalArgumentError(
+                "Every ScopeFilter object must apply only 1 filter!"
+            )
 
         self.status = check_enum(status, ScopeStatus, "status")
         self.name = check_text(name, "name")
@@ -237,7 +254,7 @@ class ScopeFilter(BaseFilter):
         return _repr
 
     @classmethod
-    def parse_options(cls, options: Dict) -> List['ScopeFilter']:
+    def parse_options(cls, options: Dict) -> List["ScopeFilter"]:
         """
         Convert the dict & string-based definition of a scope filter to a list of ScopeFilter objects.
 

@@ -1,9 +1,12 @@
-from typing import List, Optional, Text
+from typing import List, Optional
 
 from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Scope, user
-from pykechain.models.base_reference import _ReferencePropertyInScope, _ReferenceProperty
+from pykechain.models.base_reference import (
+    _ReferenceProperty,
+    _ReferencePropertyInScope,
+)
 from pykechain.models.value_filter import ScopeFilter
 from pykechain.utils import get_in_chunks
 
@@ -52,13 +55,15 @@ class ScopeReferencesProperty(_ReferenceProperty):
         if scope_ids:
             scopes = list()
             for chunk in get_in_chunks(scope_ids, PARTS_BATCH_LIMIT):
-                scopes.extend(list(self._client.scopes(id__in=",".join(chunk), status=None)))
+                scopes.extend(
+                    list(self._client.scopes(id__in=",".join(chunk), status=None))
+                )
         return scopes
 
     def set_prefilters(
-            self,
-            prefilters: List[ScopeFilter] = None,
-            clear: Optional[bool] = False,
+        self,
+        prefilters: List[ScopeFilter] = None,
+        clear: Optional[bool] = False,
     ) -> None:
         """
         Set pre-filters on the scope reference property.
@@ -71,9 +76,12 @@ class ScopeReferencesProperty(_ReferenceProperty):
         :return: None
         """
         if prefilters is not None:
-            if not isinstance(prefilters, list) or not all(isinstance(pf, ScopeFilter) for pf in prefilters):
+            if not isinstance(prefilters, list) or not all(
+                isinstance(pf, ScopeFilter) for pf in prefilters
+            ):
                 raise IllegalArgumentError(
-                    f"`prefilters` must be a list of ScopeFilter objects, `{prefilters}` is not.")
+                    f"`prefilters` must be a list of ScopeFilter objects, `{prefilters}` is not."
+                )
         else:
             prefilters = []
 
@@ -86,9 +94,7 @@ class ScopeReferencesProperty(_ReferenceProperty):
 
         # Only update the options if there are any prefilters to be set, or if the original filters have to overwritten
         if list_of_prefilters or clear:
-            self._options.update(
-                ScopeFilter.write_options(filters=list_of_prefilters)
-            )
+            self._options.update(ScopeFilter.write_options(filters=list_of_prefilters))
             self.edit(options=self._options)
 
     def get_prefilters(self) -> List[ScopeFilter]:

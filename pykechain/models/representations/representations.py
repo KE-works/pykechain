@@ -2,7 +2,8 @@ from pykechain.enums import (
     PropertyRepresentation,
     SelectListRepresentations,
     LinkTargets,
-    FontAwesomeMode, GeoCoordinateConfig,
+    FontAwesomeMode,
+    GeoCoordinateConfig,
 )
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_type

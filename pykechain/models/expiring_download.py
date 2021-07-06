@@ -1,13 +1,13 @@
 import datetime
 import os
-from typing import Dict, Optional, Text
+from typing import Dict, Optional
 
 import requests
 
 from pykechain.exceptions import APIError
 from pykechain.models import Base
 from pykechain.models.input_checks import check_type
-from pykechain.utils import empty, clean_empty_values
+from pykechain.utils import clean_empty_values, empty
 
 
 class ExpiringDownload(Base):
@@ -21,10 +21,10 @@ class ExpiringDownload(Base):
         :type json: dict
         """
         super().__init__(json, **kwargs)
-        self.filename = json.get('content_file_name')
-        self.expires_in = json.get('expires_in')
-        self.expires_at = json.get('expires_at')
-        self.token_hint = json.get('token_hint')
+        self.filename = json.get("content_file_name")
+        self.expires_in = json.get("expires_in")
+        self.expires_at = json.get("expires_at")
+        self.token_hint = json.get("token_hint")
 
     def __repr__(self):  # pragma: no cover
         return f"<pyke ExpiringDownload id {self.id[-8:]}>"
@@ -38,12 +38,15 @@ class ExpiringDownload(Base):
         """
         full_path = os.path.join(target_dir or os.getcwd(), self.filename)
 
-        url = self._client._build_url('expiring_download_download', download_id=self.id)
-        response = self._client._request('GET', url)
+        url = self._client._build_url("expiring_download_download", download_id=self.id)
+        response = self._client._request("GET", url)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError(f"Could not download file from Expiring download {self}", response=response)
+            raise APIError(
+                f"Could not download file from Expiring download {self}",
+                response=response,
+            )
 
-        with open(full_path, 'w+b') as f:
+        with open(full_path, "w+b") as f:
             for chunk in response:
                 f.write(chunk)
 
@@ -52,16 +55,20 @@ class ExpiringDownload(Base):
 
         :raises APIError: if delete was not successful.
         """
-        response = self._client._request('DELETE', self._client._build_url('expiring_download', download_id=self.id))
+        response = self._client._request(
+            "DELETE", self._client._build_url("expiring_download", download_id=self.id)
+        )
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError(f"Could not delete Expiring Download {self}", response=response)
+            raise APIError(
+                f"Could not delete Expiring Download {self}", response=response
+            )
 
     def edit(
-            self,
-            expires_at: Optional[datetime.datetime] = empty,
-            expires_in: Optional[int] = empty,
-            **kwargs
+        self,
+        expires_at: Optional[datetime.datetime] = empty,
+        expires_in: Optional[int] = empty,
+        **kwargs,
     ) -> None:
         """
         Edit Expiring Download details.
@@ -72,9 +79,10 @@ class ExpiringDownload(Base):
         :type expires_in: int
         """
         update_dict = {
-            'id': self.id,
-            'expires_at': check_type(expires_at, datetime.datetime, 'expires_at') or self.expires_at,
-            'expires_in': check_type(expires_in, int, 'expires_in') or self.expires_in
+            "id": self.id,
+            "expires_at": check_type(expires_at, datetime.datetime, "expires_at")
+            or self.expires_at,
+            "expires_in": check_type(expires_in, int, "expires_in") or self.expires_in,
         }
 
         if kwargs:  # pragma: no cover
@@ -82,13 +90,18 @@ class ExpiringDownload(Base):
 
         update_dict = clean_empty_values(update_dict=update_dict)
 
-        response = self._client._request('PUT', self._client._build_url('expiring_download', download_id=self.id),
-                                         json=update_dict)
+        response = self._client._request(
+            "PUT",
+            self._client._build_url("expiring_download", download_id=self.id),
+            json=update_dict,
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError(f"Could not update Expiring Download {self}", response=response)
+            raise APIError(
+                f"Could not update Expiring Download {self}", response=response
+            )
 
-        self.refresh(json=response.json()['results'][0])
+        self.refresh(json=response.json()["results"][0])
 
     def upload(self, content_path):
         """
@@ -107,15 +120,21 @@ class ExpiringDownload(Base):
             raise OSError(f"Could not locate file to upload in '{content_path}'")
 
     def _upload(self, content_path):
-        url = self._client._build_url('expiring_download_upload', download_id=self.id)
+        url = self._client._build_url("expiring_download_upload", download_id=self.id)
 
-        with open(content_path, 'rb') as file:
+        with open(content_path, "rb") as file:
             response = self._client._request(
-                'POST', url,
-                files={'attachment': (os.path.basename(content_path), file)}
+                "POST",
+                url,
+                files={"attachment": (os.path.basename(content_path), file)},
             )
 
-        if response.status_code not in (requests.codes.accepted, requests.codes.ok):  # pragma: no cover
-            raise APIError(f"Could not upload  file to Expiring Download {self}", response=response)
+        if response.status_code not in (
+            requests.codes.accepted,
+            requests.codes.ok,
+        ):  # pragma: no cover
+            raise APIError(
+                f"Could not upload  file to Expiring Download {self}", response=response
+            )
 
-        self.refresh(json=response.json()['results'][0])
+        self.refresh(json=response.json()["results"][0])

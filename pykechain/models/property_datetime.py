@@ -1,5 +1,5 @@
 import datetime
-from typing import Union, Text
+from typing import Union
 
 from pykechain.models import Property
 from pykechain.models.input_checks import check_datetime
@@ -29,4 +29,4 @@ class DatetimeProperty(Property):
         :type value: Any
         :return: serialized value
         """
-        return check_datetime(dt=value, key='value')
+        return check_datetime(dt=value, key="value")

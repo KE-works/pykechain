@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Iterable, Text, Optional, List
+from typing import Iterable, List, Optional
 
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_list_of_text, check_type
@@ -32,7 +32,7 @@ class TagsMixin:
 
     @tags.setter
     def tags(self, new_tags: Iterable[str]) -> None:
-        unique_tags = check_list_of_text(new_tags, 'tags', True)
+        unique_tags = check_list_of_text(new_tags, "tags", True)
         self.edit(tags=unique_tags)
         self._tags = unique_tags
 
@@ -44,11 +44,14 @@ class TagsMixin:
         :type tag: str
         :return: None
         """
-        check_type(tag, str, 'tag')
+        check_type(tag, str, "tag")
 
         if tag not in self.tags:
-            raise IllegalArgumentError("Tag '{}' is not among the existing tags. Existing tags: '{}'.".format(
-                tag, "', '".join(self.tags)))
+            raise IllegalArgumentError(
+                "Tag '{}' is not among the existing tags. Existing tags: '{}'.".format(
+                    tag, "', '".join(self.tags)
+                )
+            )
 
         remaining_tags = self.tags
         remaining_tags.remove(tag)
@@ -62,7 +65,7 @@ class TagsMixin:
         :type tag: str
         :return: None
         """
-        check_type(tag, str, 'tag')
+        check_type(tag, str, "tag")
         updated_tags = self.tags
         updated_tags.append(tag)
         self.tags = updated_tags
@@ -75,5 +78,5 @@ class TagsMixin:
         :return: boolean
         :rtype bool
         """
-        check_type(tag, str, 'tag')
+        check_type(tag, str, "tag")
         return tag in self.tags

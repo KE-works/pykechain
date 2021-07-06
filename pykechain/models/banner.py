@@ -1,12 +1,17 @@
 import datetime
-from typing import Text, Optional, Union
+from typing import Optional, Union
 
 import requests
 
 from pykechain.exceptions import APIError
 from pykechain.models import Base
-from pykechain.models.input_checks import check_text, check_datetime, check_type, check_url
-from pykechain.utils import parse_datetime, Empty, clean_empty_values, empty
+from pykechain.models.input_checks import (
+    check_datetime,
+    check_text,
+    check_type,
+    check_url,
+)
+from pykechain.utils import Empty, clean_empty_values, empty, parse_datetime
 
 
 class Banner(Base):
@@ -20,12 +25,12 @@ class Banner(Base):
         """Construct a banner from the provided json data."""
         super().__init__(json=json, client=client)
 
-        self.text = json.get('text')
-        self.icon = json.get('icon')
-        self.is_active = json.get('is_active')
-        self.active_from = parse_datetime(json.get('active_from'))
-        self.active_until = parse_datetime(json.get('active_until'))
-        self.url = json.get('url')
+        self.text = json.get("text")
+        self.icon = json.get("icon")
+        self.is_active = json.get("is_active")
+        self.active_from = parse_datetime(json.get("active_from"))
+        self.active_until = parse_datetime(json.get("active_until"))
+        self.url = json.get("url")
 
     def __repr__(self):  # pragma: no cover
         return f"<pyke Banner '{self.name}' id {self.id[-8:]}>"
@@ -38,7 +43,7 @@ class Banner(Base):
         active_until: Optional[Union[datetime.datetime, Empty]] = empty,
         is_active: Optional[Union[bool, Empty]] = empty,
         url: Optional[Union[str, Empty]] = empty,
-        **kwargs
+        **kwargs,
     ) -> None:
         """
         Update the banner properties.
@@ -67,16 +72,16 @@ class Banner(Base):
         >>> banner.edit(text='New text here',url=None)
 
         """
-        active = check_type(is_active, bool, 'is_active')
+        active = check_type(is_active, bool, "is_active")
         update_dict = {
-            'text': check_text(text, 'text'),
-            'icon': check_text(icon, 'icon') or '',
-            'active_from': check_datetime(active_from, 'active_from') or check_datetime(
-                self.active_from, 'active_from'),
-            'active_until': check_datetime(active_until, 'active_until') or check_datetime(
-                self.active_until, 'active_until'),
-            'is_active': empty if active is None else active,
-            'url': check_url(url) or '',
+            "text": check_text(text, "text"),
+            "icon": check_text(icon, "icon") or "",
+            "active_from": check_datetime(active_from, "active_from")
+            or check_datetime(self.active_from, "active_from"),
+            "active_until": check_datetime(active_until, "active_until")
+            or check_datetime(self.active_until, "active_until"),
+            "is_active": empty if active is None else active,
+            "url": check_url(url) or "",
         }
 
         if kwargs:  # pragma: no cover
@@ -87,18 +92,20 @@ class Banner(Base):
         if "text" not in update_dict or update_dict["text"] is None:
             update_dict["text"] = self.text
 
-        url = self._client._build_url('banner', banner_id=self.id)
+        url = self._client._build_url("banner", banner_id=self.id)
 
-        response = self._client._request('PUT', url, json=update_dict)
+        response = self._client._request("PUT", url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError(f"Could not update Banner {self}", response=response)
 
-        self.refresh(json=response.json().get('results')[0])
+        self.refresh(json=response.json().get("results")[0])
 
     def delete(self) -> bool:
         """Delete this banner."""
-        response = self._client._request('DELETE', self._client._build_url('banner', banner_id=self.id))
+        response = self._client._request(
+            "DELETE", self._client._build_url("banner", banner_id=self.id)
+        )
 
         if response.status_code != requests.codes.no_content:
             raise APIError(f"Could not delete Banner: {self}", response=response)

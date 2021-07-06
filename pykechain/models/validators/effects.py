@@ -10,7 +10,9 @@ class TextEffect(ValidatorEffect):
 
     effect = ValidatorEffectTypes.TEXT_EFFECT
 
-    def __init__(self, json=None, text="The validation resulted in an error.", **kwargs):
+    def __init__(
+        self, json=None, text="The validation resulted in an error.", **kwargs
+    ):
         """Construct an helptext effect.
 
         :param json: (optional) dict (json) object to construct the object from
@@ -25,7 +27,7 @@ class TextEffect(ValidatorEffect):
 
     def as_json(self) -> dict:
         """Represent effect as JSON dict."""
-        self._config['text'] = self.text
+        self._config["text"] = self.text
         return self._json
 
 
@@ -37,7 +39,9 @@ class ErrorTextEffect(ValidatorEffect):
 
     effect = ValidatorEffectTypes.ERRORTEXT_EFFECT
 
-    def __init__(self, json=None, text="The validation resulted in an error.", **kwargs):
+    def __init__(
+        self, json=None, text="The validation resulted in an error.", **kwargs
+    ):
         """Construct an errortext effect.
 
         :param json: (optional) dict (json) object to construct the object from
@@ -92,12 +96,12 @@ class VisualEffect(ValidatorEffect):
         :type kwargs: dict
         """
         super(VisualEffect, self).__init__(json=json, **kwargs)
-        self.applyCss = applyCss or self._config.get('applyCss')
+        self.applyCss = applyCss or self._config.get("applyCss")
 
     def as_json(self) -> dict:
         """Represent effect as JSON dict."""
-        self._config['applyCss'] = self.applyCss
-        self._json['config'] = self._config
+        self._config["applyCss"] = self.applyCss
+        self._json["config"] = self._config
         return self._json
 
 
@@ -107,7 +111,7 @@ class ValidVisualEffect(VisualEffect):
     .. versionadded:: 2.2
     """
 
-    def __init__(self, json=None, applyCss='valid', **kwargs):
+    def __init__(self, json=None, applyCss="valid", **kwargs):
         """Construct an valid visual effect.
 
         :param json: (optional) dict (json) object to construct the object from
@@ -124,7 +128,7 @@ class InvalidVisualEffect(VisualEffect):
     .. versionadded:: 2.2
     """
 
-    def __init__(self, json=None, applyCss='invalid', **kwargs):
+    def __init__(self, json=None, applyCss="invalid", **kwargs):
         """Construct an invalid visual effect.
 
         :param json: (optional) dict (json) object to construct the object from
@@ -132,4 +136,6 @@ class InvalidVisualEffect(VisualEffect):
         :param applyCss: (optional) class to apply, defaults to 'invalid'
         :type applyCss: basestring
         """
-        super(InvalidVisualEffect, self).__init__(json=json, applyCss=applyCss, **kwargs)
+        super(InvalidVisualEffect, self).__init__(
+            json=json, applyCss=applyCss, **kwargs
+        )

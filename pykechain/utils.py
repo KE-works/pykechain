@@ -3,10 +3,17 @@ import re
 import unicodedata
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
-from typing import TypeVar, Iterable, Callable, Optional, Text, Dict, Union, List  # noqa: F401
+from typing import (
+    TypeVar,
+    Iterable,
+    Callable,
+    Optional,
+    Dict,
+    Union,
+    List,
+)  # noqa: F401
 
 import pytz
-import six
 
 T = TypeVar("T")
 
@@ -444,7 +451,9 @@ def __dict_public__(cls: type(object)) -> Dict:
     return {k: v for (k, v) in cls.__dict__.items() if not k.startswith("__")}
 
 
-def __dict__inherited__(cls: type(object), stop: type(object) = type, public: Optional[bool] = True) -> Dict:
+def __dict__inherited__(
+    cls: type(object), stop: type(object) = type, public: Optional[bool] = True
+) -> Dict:
     """
     Get all __dict__ items of the class and its superclasses up to `type`, or the `stop` class given as input.
 
