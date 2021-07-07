@@ -54,13 +54,15 @@ class TestContexts(TestContextSetup):
             contexts = self.client.contexts(scope=str(self.project.id))
             self.assertIsInstance(contexts[0], Context)
 
-    def test_retrieve_contexts_via_client_using_tags_list__cointains_filter(self):
+    def test_retrieve_contexts_via_client_using_tags_list__contains_filter(self):
         context = self.client.create_context(
             name="__my first context for testing",
-            context_type=ContextType.TIME_PERIOD, scope=self.project, tags=["cat", "dog"]
+            context_type=ContextType.TIME_PERIOD,
+            scope=self.project,
+            tags=["cat", "dog"],
         )
 
-        contexts = self.client.contexts(tags__contains='cat')
+        contexts = self.client.contexts(tags__contains="cat")
         self.assertIsInstance(contexts[0], Context)
         self.assertEqual(contexts[0], context)
 
