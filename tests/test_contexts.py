@@ -37,7 +37,7 @@ class TestContextCreate(TestBetamax):
         self.assertEqual(context.context_type, ContextType.TIME_PERIOD)
 
         # destroy
-        self.addCleanup(context.delete())
+        self.addCleanup(context.delete)
 
 
 class TestContexts(TestContextSetup):
