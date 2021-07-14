@@ -37,7 +37,7 @@ class TestContextCreate(TestBetamax):
         self.assertEqual(context.context_type, ContextType.TIME_PERIOD)
 
         # destroy
-        self.addCleanup(context.delete)
+        context.delete()
 
 
 class TestContexts(TestContextSetup):
@@ -65,8 +65,6 @@ class TestContexts(TestContextSetup):
         contexts = self.client.contexts(tags__contains="cat")
         self.assertIsInstance(contexts[0], Context)
         self.assertEqual(contexts[0], context)
-
-        self.addCleanup(context.delete)
 
     def test_retrieve_single_context_via_client_with_pk_filter(self):
         self.assertIsInstance(self.client.context(pk=self.context.id), Context)
