@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+UNRELEASED
+----------
+* We added filter `tags__contains` to `Context` (KE-1054)
+
 v3.12.0 (1JUL21)
 ----------------
 * :star: We added the `Context` object to pykechain that has full API access to the `Context` API in KE-chain v2021.6 and newer. You can add time period contexts, static location contexts and textlabel contexta and put them under a `context_group` if desired. This `Context` feature is now implemented limitly for `Activities` but in the coming period will be extended to support extensive usecases for the Forms NG featureset that is coming this fall. (KE-925)
