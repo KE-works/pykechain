@@ -1,5 +1,5 @@
 # basis
-requests==2.25.1
+requests==2.26.0
 envparse==0.2.0
 
 # json validation (inspector)
@@ -13,20 +13,20 @@ pytest==6.2.4
 betamax==0.8.1
 coverage~=5.5
 pytest-cov==2.12.1
-coveralls==3.1.0
+coveralls==3.2.0
 
 # documentation
 Sphinx==4.1.2
-nbsphinx==0.8.6
+nbsphinx==0.8.7
 
 # integration
-tox==3.23.1
+tox==3.24.3
 
 # code style
 flake8==3.9.2
 pydocstyle==6.1.1
 mypy==0.910; python_version >= '3.4'
-pre-commit==2.13.0
+pre-commit==2.14.0
 
 # for package management (uploads)
 twine>=3.0.0; python_version >= '3.6'
