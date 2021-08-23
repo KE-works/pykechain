@@ -17,10 +17,10 @@ coveralls==3.1.0
 
 # documentation
 Sphinx==4.1.0
-nbsphinx==0.8.6
+nbsphinx==0.8.7
 
 # integration
-tox==3.23.1
+tox==3.24.3
 
 # code style
 flake8==3.9.2
