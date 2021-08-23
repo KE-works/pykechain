@@ -651,6 +651,7 @@ class PropertyRepresentation(Enum):
     :cvar THOUSANDS_SEPARATOR: option to display the thousand separator
     :cvar AUTOFILL: option to autofill the content of the property
     :cvar GEOCOORDINATE: option to display an alternative representation for the geocoordinate
+    :cvar USE_PROPERTY_NAME: option to display the name of a property for a part actvity ref prop
     """
 
     DECIMAL_PLACES = "decimalPlaces"
@@ -660,6 +661,7 @@ class PropertyRepresentation(Enum):
     THOUSANDS_SEPARATOR = "thousandsSeparator"
     AUTOFILL = 'autofill'
     GEOCOORDINATE = 'geoCoordinate'
+    USE_PROPERTY_NAME = 'usePropertyName'
 
 
 class GeoCoordinateConfig(Enum):
