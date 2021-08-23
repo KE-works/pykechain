@@ -1,8 +1,8 @@
 Change Log
 ==========
 
-UNRELEASED
-----------
+v3.13.0 (23AUG1)
+----------------
 * :star: We added filter `tags__contains` to `Context` (KE-1054)
 * :+1: Added the `usePropertyName` property representation to sync with the possibilities in the backend. (KE-1239)
 * :+1: dependent versions for development: requests (2.26.0), nbsphinx (0.8.7), coveralls (3.2.0), tox (3.24.3), sphinx (4.1.2), pre-commit (2.14.0), twine (3.4.2)
