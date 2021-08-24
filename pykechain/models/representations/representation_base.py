@@ -1,6 +1,6 @@
 import warnings
 from abc import abstractmethod
-from typing import Dict, Any
+from typing import Any, Dict
 
 from jsonschema import validate
 
@@ -99,7 +99,7 @@ class BaseRepresentation(object):
         :return: value
         :rtype Any
         """
-        return self._config[self._config_value_key] if self._config_value_key else None
+        return self._config.get(self._config_value_key) if self._config_value_key else None
 
     @value.setter
     def value(self, value):

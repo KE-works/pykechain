@@ -13,9 +13,10 @@ from .representations import (
     CustomIconRepresentation,
     Autofill,
     GeoCoordinateRepresentation,
+    UsePropertyNameRepresentation,
 )
 
-AnyRepresentation = [
+AnyRepresentation = (
     BaseRepresentation,
     # Numbers
     DecimalPlaces,
@@ -31,11 +32,13 @@ AnyRepresentation = [
     CustomIconRepresentation,
     # Geocoordinate
     GeoCoordinateRepresentation,
-]
+    # Use Property Name for reference property
+    UsePropertyNameRepresentation,
+)
 
-__all__ = [
+__all__ = (
     AnyRepresentation,
     RepresentationsComponent,
-]
+)
 
 rtype_class_map = {r.rtype: r for r in AnyRepresentation}

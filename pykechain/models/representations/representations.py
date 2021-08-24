@@ -1,8 +1,9 @@
 from pykechain.enums import (
+    FontAwesomeMode,
+    GeoCoordinateConfig,
+    LinkTargets,
     PropertyRepresentation,
     SelectListRepresentations,
-    LinkTargets,
-    FontAwesomeMode, GeoCoordinateConfig,
 )
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_type
@@ -208,3 +209,18 @@ class GeoCoordinateRepresentation(BaseRepresentation):
                     self.__class__.__name__, value, GeoCoordinateConfig.values()
                 )
             )
+
+
+class UsePropertyNameRepresentation(BaseRepresentation):
+    rtype = PropertyRepresentation.USE_PROPERTY_NAME
+    _config_value_key = PropertyRepresentation.USE_PROPERTY_NAME
+
+    def validate_representation(self, value: bool) -> None:
+        """
+        Validate whether the representation value can be set.
+
+        :param value: representation value to set.
+        :type value: a boolean
+        :return: None
+        """
+        check_type(value, bool, self._config_value_key)
