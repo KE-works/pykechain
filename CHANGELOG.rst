@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v3.13.1 (24AUG21)
+-----------------
+* :+1: Add additionally a `UsePropertyNameRepresentation` including additional testing for empty `config` objects inside the `Representation`. (KE-1239)
+
 v3.13.0 (23AUG1)
 ----------------
 * :star: We added filter `tags__contains` to `Context` (KE-1054)
