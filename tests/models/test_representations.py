@@ -1,23 +1,38 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from typing import Union
 
 from jsonschema import validate
 
-from pykechain.enums import PropertyType, Multiplicity, LinkTargets, SelectListRepresentations, FontAwesomeMode, \
-    GeoCoordinateConfig
-from pykechain.exceptions import IllegalArgumentError, APIError
-from pykechain.models import AnyProperty, Property, Scope, Activity, SelectListProperty
+from pykechain.enums import (
+    FontAwesomeMode,
+    GeoCoordinateConfig,
+    LinkTargets,
+    Multiplicity,
+    PropertyType,
+    SelectListRepresentations,
+)
+from pykechain.exceptions import APIError, IllegalArgumentError
+from pykechain.models import Activity, AnyProperty, Property, Scope, SelectListProperty
 from pykechain.models.representations.representation_base import BaseRepresentation
-from pykechain.models.representations.representations import ButtonRepresentation, LinkTarget, SignificantDigits, \
-    DecimalPlaces, ThousandsSeparator, CustomIconRepresentation, Autofill, GeoCoordinateRepresentation
+from pykechain.models.representations.representations import (
+    Autofill,
+    ButtonRepresentation,
+    CustomIconRepresentation,
+    DecimalPlaces,
+    GeoCoordinateRepresentation,
+    LinkTarget,
+    SignificantDigits,
+    ThousandsSeparator,
+    UsePropertyNameRepresentation,
+)
 from pykechain.models.validators.validator_schemas import options_json_schema
 from tests.classes import SixTestCase, TestBetamax
 
 representation_config = dict(
-    rtype='buttonRepresentation',
+    rtype="buttonRepresentation",
     config=dict(
         buttonRepresentation="dropdown",
-    )
+    ),
 )
 options = dict(
     representations=[representation_config],
@@ -25,7 +40,6 @@ options = dict(
 
 
 class TestRepresentationJSON(SixTestCase):
-
     def test_valid_button_representation_json(self):
         validate(options_json_schema, options)
 
@@ -48,7 +62,7 @@ class TestRepresentation(SixTestCase):
         self.assertIsInstance(representation, ButtonRepresentation)
 
     def test_parse(self):
-        empty_slp = SelectListProperty(json={'value_options': {}}, client=None)
+        empty_slp = SelectListProperty(json={"value_options": {}}, client=None)
         BaseRepresentation.parse(obj=empty_slp, json=representation_config)
 
     def test_parse_incorrect_rtype(self):
@@ -62,25 +76,27 @@ class TestRepresentation(SixTestCase):
 
     def test_parse_unknown_rtype(self):
         no_rtype_config = dict(
-            rtype='Not a representation type',
+            rtype="Not a representation type",
             config=dict(
                 buttonRepresentation="dropdown",
-            )
+            ),
         )
         with self.assertRaises(TypeError):
             BaseRepresentation.parse(obj=None, json=no_rtype_config)
 
     def test_component_invalid_object(self):
-        empty_activity = Activity(json={'id': '1234567890'}, client=None)
+        empty_activity = Activity(json={"id": "1234567890"}, client=None)
         representation = ThousandsSeparator(empty_activity)
 
         with self.assertRaises(IllegalArgumentError):
             empty_activity.representations = [representation]
 
     def test_component_invalid_property_type(self):
-        empty_prop = Property(json={'id': '1234567890', 'category': 'MODEL'}, client=None)
+        empty_prop = Property(
+            json={"id": "1234567890", "category": "MODEL"}, client=None
+        )
         representation = ThousandsSeparator(empty_prop)
-        representation.rtype = 'Broken rtype'
+        representation.rtype = "Broken rtype"
 
         with self.assertRaises(IllegalArgumentError):
             empty_prop.representations = [representation]
@@ -89,13 +105,13 @@ class TestRepresentation(SixTestCase):
         empty_activity = Activity(json={}, client=None)
 
         with self.assertRaises(IllegalArgumentError):
-            empty_activity.representations = 'Howdy!'
+            empty_activity.representations = "Howdy!"
 
     def test_component_not_a_representation(self):
         empty_activity = Activity(json={}, client=None)
 
         with self.assertRaises(IllegalArgumentError):
-            empty_activity.representations = ['Howdy again!']
+            empty_activity.representations = ["Howdy again!"]
 
 
 class Bases:
@@ -109,12 +125,13 @@ class Bases:
         """
         Specify these class attributes in every sub-class
         """
+
         representation_class = None  # type: type(BaseRepresentation)
         value = None
         new_value = None
         incorrect_value = None
 
-        test_object_name = '__test object for representations'
+        test_object_name = "__test object for representations"
 
         def setUp(self):
             super().setUp()
@@ -183,9 +200,9 @@ class Bases:
 
     class _TestPropertyRepresentation(_TestRepresentationLive):
         property_type = None
-        test_model_name = '__test model for representations'
+        test_model_name = "__test model for representations"
         test_model = None
-        incorrect_value = 'Unsupported value'
+        incorrect_value = "Unsupported value"
 
         def tearDown(self):
             if self.test_model:
@@ -196,8 +213,10 @@ class Bases:
             super().tearDown()
 
         def _get_object(self):
-            parent_model = self.project.model(name='Bike')
-            self.test_model = parent_model.add_model(name=self.test_model_name, multiplicity=Multiplicity.ONE)
+            parent_model = self.project.model(name="Bike")
+            self.test_model = parent_model.add_model(
+                name=self.test_model_name, multiplicity=Multiplicity.ONE
+            )
             obj = self.test_model.add_property(
                 name=self.test_object_name,
                 property_type=self.property_type,
@@ -206,12 +225,14 @@ class Bases:
 
     class _TestCustomIconRepresentation(_TestRepresentationLive, ABC):
         representation_class = CustomIconRepresentation
-        value = 'university'
-        new_value = 'bat'
-        incorrect_value = ['must be a string']
+        value = "university"
+        new_value = "bat"
+        incorrect_value = ["must be a string"]
 
         def test_set_mode(self):
-            representation = self.obj.representations[0]  # type: CustomIconRepresentation
+            representation = self.obj.representations[
+                0
+            ]  # type: CustomIconRepresentation
 
             # Set mode
             representation.display_mode = FontAwesomeMode.SOLID
@@ -223,10 +244,12 @@ class Bases:
             self.assertEqual(representation.display_mode, reloaded_repr.display_mode)
 
         def test_set_mode_incorrect(self):
-            representation = self.obj.representations[0]  # type: CustomIconRepresentation
+            representation = self.obj.representations[
+                0
+            ]  # type: CustomIconRepresentation
 
             with self.assertRaises(IllegalArgumentError):
-                representation.display_mode = 'fancy colors'
+                representation.display_mode = "fancy colors"
 
 
 class TestReprSignificantDigits(Bases._TestPropertyRepresentation):
@@ -272,7 +295,72 @@ class TestReprButton(Bases._TestPropertyRepresentation):
 
     def setUp(self):
         super().setUp()
-        self.obj.options = ['alpha', 'beta', 'gamma', 'omega']
+        self.obj.options = ["alpha", "beta", "gamma", "omega"]
+
+
+class TestUsePropertyNameRepresentationForPartReferences(
+    Bases._TestPropertyRepresentation
+):
+    property_type = PropertyType.REFERENCES_VALUE
+    representation_class = UsePropertyNameRepresentation
+    value = True
+    new_value = False
+
+    def test_empty_config_value(self):
+        # get the representation on the object
+        repr = self.obj.representations[-1]
+
+        # set it as an empty config object
+        repr_json = repr.as_json()
+        repr_json["config"] = {}
+        new_value_options = dict(representations=[repr_json])
+        # edit options directly otherwise it would not 'stick'
+        self.obj.edit(options=new_value_options)
+
+        # reload from server the representations
+        self.obj.refresh()
+        repr = self.obj.representations[-1]
+
+        # check sanity of the representation with the empty object.
+        self.assertDictEqual(self.obj._options.get("representations")[0], repr_json)
+        self.assertEqual(type(repr), UsePropertyNameRepresentation)
+        self.assertIsNone(repr.value)
+
+
+class TestUsePropertyNameRepresentationForUserReferences(
+    Bases._TestPropertyRepresentation
+):
+    property_type = PropertyType.USER_REFERENCES_VALUE
+    representation_class = UsePropertyNameRepresentation
+    value = True
+    new_value = False
+
+
+class TestUsePropertyNameRepresentationForScopeReferences(
+    Bases._TestPropertyRepresentation
+):
+    property_type = PropertyType.SCOPE_REFERENCES_VALUE
+    representation_class = UsePropertyNameRepresentation
+    value = True
+    new_value = False
+
+
+class TestUsePropertyNameRepresentationForServiceReferences(
+    Bases._TestPropertyRepresentation
+):
+    property_type = PropertyType.SERVICE_REFERENCES_VALUE
+    representation_class = UsePropertyNameRepresentation
+    value = True
+    new_value = False
+
+
+class TestUsePropertyNameRepresentationForActivityReferences(
+    Bases._TestPropertyRepresentation
+):
+    property_type = PropertyType.ACTIVITY_REFERENCES_VALUE
+    representation_class = UsePropertyNameRepresentation
+    value = True
+    new_value = False
 
 
 class TestReprAutofill(Bases._TestPropertyRepresentation):
@@ -290,12 +378,10 @@ class TestReprAutofillUser(Bases._TestPropertyRepresentation):
 
 
 class TestReprActivity(Bases._TestCustomIconRepresentation):
-
     def _get_object(self):
         return self.project.create_activity(name=self.test_object_name)
 
 
 class TestReprScope(Bases._TestCustomIconRepresentation):
-
     def _get_object(self):
         return self.client.create_scope(name=self.test_object_name)
