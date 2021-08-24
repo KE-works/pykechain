@@ -177,7 +177,7 @@ class CustomIconRepresentation(BaseRepresentation):
 
 
 class GeoCoordinateRepresentation(BaseRepresentation):
-    """Representation for HTML link reference properties.
+    """Representation for Geocoordinate properties.
 
     It should look like this in the value_options
     #         "representations": [
@@ -189,7 +189,6 @@ class GeoCoordinateRepresentation(BaseRepresentation):
     #             }
     #         ]
     #     },
-
     """
 
     rtype = PropertyRepresentation.GEOCOORDINATE
@@ -212,6 +211,7 @@ class GeoCoordinateRepresentation(BaseRepresentation):
 
 
 class UsePropertyNameRepresentation(BaseRepresentation):
+    """Representation for the use of Property Names in a reference property."""
     rtype = PropertyRepresentation.USE_PROPERTY_NAME
     _config_value_key = PropertyRepresentation.USE_PROPERTY_NAME
 
