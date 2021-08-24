@@ -212,6 +212,7 @@ class GeoCoordinateRepresentation(BaseRepresentation):
 
 class UsePropertyNameRepresentation(BaseRepresentation):
     """Representation for the use of Property Names in a reference property."""
+
     rtype = PropertyRepresentation.USE_PROPERTY_NAME
     _config_value_key = PropertyRepresentation.USE_PROPERTY_NAME
 
