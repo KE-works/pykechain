@@ -32,6 +32,7 @@ class TestPartsCopyMove(TestBetamax):
         self.p_single_select_name = '__Property single select'
         self.p_multi_select_name = '__Property multi select'
         self.p_part_reference_name = '__Property part reference'
+        self.p_part_reference_name_cross_scope = '__Property part reference cross scope'
         self.p_geo_json_name = '__Property geographical'
         self.p_weather_name = '__Property weather'
         self.p_activity_reference_name = '__Property activity reference'
@@ -53,6 +54,14 @@ class TestPartsCopyMove(TestBetamax):
         self.test_supervisor = self.client.user(username="testsupervisor")
         self.p_user_reference_value = [self.test_manager.id, self.test_supervisor.id]
 
+        self.sub_part1 = self.model_to_be_copied.add_model(
+            name="__subpart 1",
+            multiplicity=Multiplicity.ONE
+        )
+        self.sub_part2 = self.model_to_be_copied.add_model(
+            name="__subpart 2",
+            multiplicity=Multiplicity.ZERO_MANY
+        )
         self.model_to_be_copied.add_property(
             name=self.p_char_name,
             description='Description of Property single text',
@@ -116,6 +125,11 @@ class TestPartsCopyMove(TestBetamax):
         )
         self.model_to_be_copied.add_property(
             name=self.p_part_reference_name,
+            default_value=self.sub_part2,
+            property_type=PropertyType.REFERENCES_VALUE
+        )
+        self.model_to_be_copied.add_property(
+            name=self.p_part_reference_name_cross_scope,
             default_value=self.wheel,
             property_type=PropertyType.REFERENCES_VALUE
         )
@@ -141,14 +155,6 @@ class TestPartsCopyMove(TestBetamax):
             name=self.p_project_reference_name,
             property_type=PropertyType.SCOPE_REFERENCES_VALUE,
             default_value=[self.project.id]
-        )
-        self.sub_part1 = self.model_to_be_copied.add_model(
-            name="__subpart 1",
-            multiplicity=Multiplicity.ONE
-        )
-        self.sub_part2 = self.model_to_be_copied.add_model(
-            name="__subpart 2",
-            multiplicity=Multiplicity.ZERO_MANY
         )
         self.sub_part2.add_property(
             name="__Property boolean",
@@ -465,3 +471,13 @@ class TestPartsCopyMove(TestBetamax):
         for name in names:
             copied_prop = copied_instance.property(name)
             self.assertTrue(copied_prop.has_value())
+
+    def test_cross_scope_copy(self):
+        name_of_part = '__Copied model under Bike'
+        copied_model = self.model_to_be_copied.copy(
+            target_parent=self.cross_scope_bike,
+            name=name_of_part,
+            include_children=True,
+            include_instances=True
+        )
+        print()

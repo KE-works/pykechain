@@ -719,7 +719,11 @@ def _update_references() -> None:
 
         # Try to map to a new Part, default to the existing reference ID itself.
         references_new = [mapping.get(r, r) for r in references_original]
-        prop_new.value = references_new
+        if prop_new.type == PropertyType.REFERENCES_VALUE:
+            prop_new.edit(value=[ref.id for ref in references_new],
+                          options={"scope_id": references_new[0].scope_id})
+        else:
+            prop_new.value = references_new
 
     get_references(clean=True)
 
@@ -739,7 +743,7 @@ def _get_property_value(prop: AnyProperty) -> Any:
                      PropertyType.SCOPE_REFERENCES_VALUE,
                      PropertyType.TEAM_REFERENCES_VALUE,
                      PropertyType.SERVICE_REFERENCES_VALUE):
-        get_references()[prop] = prop.value_ids() if prop.has_value() else []
+        get_references()[prop] = prop.value if prop.has_value() else []
     elif prop.type == PropertyType.USER_REFERENCES_VALUE:
         get_references()[prop] = prop.value if prop.has_value() else []
     elif prop.type == PropertyType.ATTACHMENT_VALUE:
