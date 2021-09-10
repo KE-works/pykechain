@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, date, timezone
 
-from pykechain.enums import Multiplicity, PropertyType
+from pykechain.enums import FilterType, Multiplicity, PropertyType
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from tests.classes import TestBetamax
 
@@ -157,9 +157,25 @@ class TestPartsCopyMove(TestBetamax):
             default_value=[self.project.id]
         )
         self.sub_part2.add_property(
-            name="__Property boolean",
+            name=self.p_bool_name,
             default_value=False,
             property_type=PropertyType.BOOLEAN_VALUE,
+        )
+        self.sub_part2.add_property(
+            name=self.p_int_name,
+            default_value=3,
+            property_type=PropertyType.INT_VALUE,
+        )
+
+        self.model_to_be_copied.property(self.p_part_reference_name).\
+            set_excluded_propmodels(
+            [self.sub_part2.property(self.p_bool_name)]
+        )
+        self.model_to_be_copied.property(self.p_part_reference_name). \
+            set_prefilters(
+            property_models=[self.sub_part2.property(self.p_int_name)],
+            values=[3],
+            filters_type=[FilterType.GREATER_THAN_EQUAL]
         )
 
         self.model_target_parent = self.project.model(ref='bike')
@@ -480,4 +496,16 @@ class TestPartsCopyMove(TestBetamax):
             include_children=True,
             include_instances=True
         )
-        print()
+
+        copied_model.refresh()
+        copied_options = copied_model.property(self.p_part_reference_name_cross_scope)._options
+        self.assertTrue(self.model_to_be_copied.scope_id == copied_options.get('scope_id'))
+
+        copied_sub_part2_int_prop = copied_model(self.sub_part2.name).property(self.p_int_name)
+        copied_sub_part2_bool_prop = copied_model(self.sub_part2.name).property(self.p_bool_name)
+
+        copied_options = copied_model.property(self.p_part_reference_name)._options
+
+        self.assertTrue(copied_model.scope_id == copied_options.get('scope_id'))
+        self.assertTrue(copied_sub_part2_bool_prop.id in copied_options.get('propmodels_excl'))
+        self.assertTrue(copied_sub_part2_int_prop.id in copied_options['prefilters']['property_value'])

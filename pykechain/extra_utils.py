@@ -7,7 +7,7 @@ from typing import Optional, Text, List, Any
 from pykechain import Client
 from pykechain.enums import PropertyType, Multiplicity, Category
 from pykechain.exceptions import IllegalArgumentError, NotFoundError, MultipleFoundError
-from pykechain.models import Part, AnyProperty, Property
+from pykechain.models import Part, AnyProperty, Property, PropertyValueFilter
 from pykechain.utils import temp_chdir
 
 # global variable
@@ -720,8 +720,35 @@ def _update_references() -> None:
         # Try to map to a new Part, default to the existing reference ID itself.
         references_new = [mapping.get(r, r) for r in references_original]
         if prop_new.type == PropertyType.REFERENCES_VALUE:
+
+            if len(references_original) == 0:
+                continue
+
+            # Update the scope_id to match the new referenced part model
+            prop_new_options = {"scope_id": references_new[0].scope_id}
+
+            # Make sure the excluded property models ids are mapped on the new referenced part
+            # model
+            original_excluded_propmodel_ids = prop_original.get_excluded_propmodel_ids()
+            if original_excluded_propmodel_ids:
+                prop_new_options.update({
+                    "propmodels_excl": [mapping.get(r).id for r in
+                                        original_excluded_propmodel_ids if r in mapping]
+                })
+
+            # Remap the prefilters on new referenced part model.
+            original_prefilters = prop_original.get_prefilters()
+            if original_prefilters:
+                new_prefilters = [PropertyValueFilter(
+                    value=ovf.value,
+                    filter_type=ovf.type,
+                    property_model=mapping.get(ovf.id, ovf.id),
+                ) for ovf in original_prefilters]
+                prop_new_options.update(PropertyValueFilter.write_options(filters=new_prefilters))
+
+            # Update the value and options (prefilters, excluded prop models and scope_id) in bulk
             prop_new.edit(value=[ref.id for ref in references_new],
-                          options={"scope_id": references_new[0].scope_id})
+                          options=prop_new_options)
         else:
             prop_new.value = references_new
 
@@ -743,7 +770,7 @@ def _get_property_value(prop: AnyProperty) -> Any:
                      PropertyType.SCOPE_REFERENCES_VALUE,
                      PropertyType.TEAM_REFERENCES_VALUE,
                      PropertyType.SERVICE_REFERENCES_VALUE):
-        get_references()[prop] = prop.value if prop.has_value() else []
+        get_references()[prop] = prop.value_ids() if prop.has_value() else []
     elif prop.type == PropertyType.USER_REFERENCES_VALUE:
         get_references()[prop] = prop.value if prop.has_value() else []
     elif prop.type == PropertyType.ATTACHMENT_VALUE:
