@@ -719,14 +719,20 @@ def _update_references() -> None:
 
         # Try to map to a new Part, default to the existing reference ID itself.
         references_new = [mapping.get(r, r) for r in references_original]
-        if prop_new.type == PropertyType.REFERENCES_VALUE:
+        if prop_new.type == PropertyType.REFERENCES_VALUE and references_new:
 
             if len(references_original) == 0:
                 continue
 
             # Update the scope_id to match the new referenced part model
-            prop_new_options = {"scope_id": references_new[0].scope_id}
-
+            if references_new:
+                if isinstance(references_new[0], Part):
+                    prop_new_options = {"scope_id": references_new[0].scope_id}
+                else:
+                    referenced_part = prop_new._client.model(id=references_new[0])
+                    prop_new_options = {"scope_id": referenced_part.scope_id}
+            else:
+                prop_new_options = {}
             # Make sure the excluded property models ids are mapped on the new referenced part
             # model
             original_excluded_propmodel_ids = prop_original.get_excluded_propmodel_ids()

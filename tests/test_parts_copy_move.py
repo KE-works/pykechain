@@ -509,3 +509,10 @@ class TestPartsCopyMove(TestBetamax):
         self.assertTrue(copied_model.scope_id == copied_options.get('scope_id'))
         self.assertTrue(copied_sub_part2_bool_prop.id in copied_options.get('propmodels_excl'))
         self.assertTrue(copied_sub_part2_int_prop.id in copied_options['prefilters']['property_value'])
+
+    def test_part_reference(self):
+        test_prop = self.cross_scope_bike.add_property(name='test part ref',
+                                                       property_type=PropertyType.REFERENCES_VALUE)
+        test_prop.edit(value=self.sub_part2.id,
+                       options={"scope_id": self.project.id})
+        test_prop.delete()
