@@ -83,7 +83,7 @@ class Property(BaseInScope):
         if 'validators' in self._options:
             self._parse_validators()
 
-    def _options_valid(self):
+    def _options_valid(self) -> bool:
         """Validate the options of the Property object.
 
         It will validate if the Property options are valid against the options JSON schema.
