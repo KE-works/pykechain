@@ -186,6 +186,7 @@ class TestPartsCopyMove(TestBetamax):
 
     def tearDown(self):
         self.model_to_be_copied.delete()
+
         if self.dump_part:
             self.dump_part.delete()
         super(TestPartsCopyMove, self).tearDown()
@@ -199,6 +200,7 @@ class TestPartsCopyMove(TestBetamax):
             include_instances=False
         )
         copied_model.populate_descendants()
+        copied_model.refresh()
         self.dump_part = copied_model
 
         # testing
@@ -221,7 +223,7 @@ class TestPartsCopyMove(TestBetamax):
         self.assertEqual(copied_model.property(name=self.p_multi_select_name).value, self.p_multi_select_value)
         list_of_user_ids = [user.id for user in copied_model.property(name=self.p_user_reference_name).value]
         self.assertIn(self.wheel.id,
-                      [part.id for part in copied_model.property(name=self.p_part_reference_name).value])
+                      [part.id for part in copied_model.property(name=self.p_part_reference_name_cross_scope).value])
         self.assertIn(self.specify_wheel_diameter.id,
                       [act.id for act in copied_model.property(name=self.p_activity_reference_name).value])
         self.assertIn(self.project.id,
@@ -351,7 +353,7 @@ class TestPartsCopyMove(TestBetamax):
         # setUp
         instance_to_be_copied = self.model_to_be_copied.instances()[0]
         instance_to_be_copied.property(name=self.p_attach_name).upload(self.p_attach_value)
-        instance_to_be_copied.property(name=self.p_part_reference_name).value = [self.front_wheel, self.rear_wheel]
+        instance_to_be_copied.property(name=self.p_part_reference_name_cross_scope).value = [self.front_wheel, self.rear_wheel]
 
         instance_target_parent = self.project.part('Bike')
         copied_instance = instance_to_be_copied.\
@@ -374,7 +376,7 @@ class TestPartsCopyMove(TestBetamax):
         self.assertEqual(copied_instance.property(name=self.p_link_name).value, self.p_link_value)
         self.assertEqual(copied_instance.property(name=self.p_single_select_name).value, self.p_single_select_value)
         self.assertEqual(copied_instance.property(name=self.p_multi_select_name).value, self.p_multi_select_value)
-        list_of_parts_ids = [part.id for part in copied_instance.property(name=self.p_part_reference_name).value]
+        list_of_parts_ids = [part.id for part in copied_instance.property(name=self.p_part_reference_name_cross_scope).value]
         list_of_user_ids = [user.id for user in copied_instance.property(name=self.p_user_reference_name).value]
         self.assertIn(self.front_wheel.id, list_of_parts_ids)
         self.assertIn(self.rear_wheel.id, list_of_parts_ids)
@@ -490,23 +492,23 @@ class TestPartsCopyMove(TestBetamax):
 
     def test_cross_scope_copy(self):
         name_of_part = '__Copied model under Bike'
-        copied_model = self.model_to_be_copied.copy(
+        self.dump_part = self.model_to_be_copied.copy(
             target_parent=self.cross_scope_bike,
             name=name_of_part,
             include_children=True,
             include_instances=True
         )
 
-        copied_model.refresh()
-        copied_options = copied_model.property(self.p_part_reference_name_cross_scope)._options
+        self.dump_part.refresh()
+        copied_options = self.dump_part.property(self.p_part_reference_name_cross_scope)._options
         self.assertTrue(self.model_to_be_copied.scope_id == copied_options.get('scope_id'))
 
-        copied_sub_part2_int_prop = copied_model(self.sub_part2.name).property(self.p_int_name)
-        copied_sub_part2_bool_prop = copied_model(self.sub_part2.name).property(self.p_bool_name)
+        copied_sub_part2_int_prop = self.dump_part(self.sub_part2.name).property(self.p_int_name)
+        copied_sub_part2_bool_prop = self.dump_part(self.sub_part2.name).property(self.p_bool_name)
 
-        copied_options = copied_model.property(self.p_part_reference_name)._options
+        copied_options = self.dump_part.property(self.p_part_reference_name)._options
 
-        self.assertTrue(copied_model.scope_id == copied_options.get('scope_id'))
+        self.assertTrue(self.dump_part.scope_id == copied_options.get('scope_id'))
         self.assertTrue(copied_sub_part2_bool_prop.id in copied_options.get('propmodels_excl'))
         self.assertTrue(copied_sub_part2_int_prop.id in copied_options['prefilters']['property_value'])
 

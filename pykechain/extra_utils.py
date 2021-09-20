@@ -725,14 +725,16 @@ def _update_references() -> None:
                 continue
 
             # Update the scope_id to match the new referenced part model
-            if references_new:
-                if isinstance(references_new[0], Part):
-                    prop_new_options = {"scope_id": references_new[0].scope_id}
-                else:
-                    referenced_part = prop_new._client.model(id=references_new[0])
-                    prop_new_options = {"scope_id": referenced_part.scope_id}
+            # For parts copied in the same subtree
+            if isinstance(references_new[0], Part):
+                prop_new_options = {"scope_id": references_new[0].scope_id}
+                prop_value = [ref.id for ref in references_new]
+            # For parts left in the project from which they are copied from
             else:
-                prop_new_options = {}
+                referenced_part = prop_new._client.model(id=references_new[0])
+                prop_value = [referenced_part.id]
+                prop_new_options = {"scope_id": referenced_part.scope_id}
+
             # Make sure the excluded property models ids are mapped on the new referenced part
             # model
             original_excluded_propmodel_ids = prop_original.get_excluded_propmodel_ids()
@@ -753,7 +755,7 @@ def _update_references() -> None:
                 prop_new_options.update(PropertyValueFilter.write_options(filters=new_prefilters))
 
             # Update the value and options (prefilters, excluded prop models and scope_id) in bulk
-            prop_new.edit(value=[ref.id for ref in references_new],
+            prop_new.edit(value=prop_value,
                           options=prop_new_options)
         else:
             prop_new.value = references_new
