@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+v3.14.0 ()
+* :bug: Fixed a bug that was causing the part reference properties to not be copied correctly. (PROJ-241)
+
 v3.13.1 (24AUG21)
 -----------------
 * :+1: Add additionally a `UsePropertyNameRepresentation` including additional testing for empty `config` objects inside the `Representation`. (KE-1239)
