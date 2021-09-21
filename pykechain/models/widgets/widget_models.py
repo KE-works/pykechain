@@ -28,8 +28,9 @@ from pykechain.models.widgets.widget_schemas import undefined_meta_schema
 class MetapanelWidget(Widget):
     """Metapanel Widget."""
 
+
 class FormmetapanelWidget(Widget):
-    """Metapanel Widget."""
+    """FormMetapanel Widget."""
 
 
 class PropertygridWidget(Widget):
