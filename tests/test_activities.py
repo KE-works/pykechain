@@ -1,7 +1,7 @@
 import os
 import warnings
 from datetime import datetime
-from unittest import skipIf
+from unittest import skip, skipIf
 
 import pytest
 import pytz
@@ -117,6 +117,8 @@ class TestActivityConstruction(TestBetamax):
             msg="New child task should be among the children.",
         )
 
+    # NOTE: Change this test once we release the FORMS backend to production or a testing setup.
+    @skip("This test does not work as the testing backend does not have FORMS in the codebase")
     def test_create_with_classification(self):
 
         for classification in ActivityClassification.values():
