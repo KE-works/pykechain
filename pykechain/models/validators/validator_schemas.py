@@ -17,7 +17,7 @@ effects_jsonschema_stub = {
 }
 
 validator_jsonschema_stub = {
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "title": "Single Validator JSON schema",
     "additionalProperties": False,
@@ -35,7 +35,7 @@ validator_jsonschema_stub = {
 }
 
 validators_options_json_schema = {
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Validators JSON schema",
     "type": "array",
     "items": validator_jsonschema_stub
@@ -66,7 +66,7 @@ representation_jsonschema_stub = {
 }
 
 representation_options_json_schema = {
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Validators JSON schema",
     "type": "array",
     "items": representation_jsonschema_stub
@@ -77,7 +77,7 @@ representation_options_json_schema = {
 #
 
 options_json_schema = {
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Toplevel Property Options JSON schema",
     "type": "object",
     "additionalProperties": True,
