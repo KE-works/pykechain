@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+unreleased
+----------
+* :+1: Improved speed of the code by a different way of validation of the property options. We validated the property options using jsonschema validation on every instantiation of the property and that is overkill. Now we do it once we are updating the property itself. (#1029)
+
 v3.13.1 (24AUG21)
 -----------------
 * :+1: Add additionally a `UsePropertyNameRepresentation` including additional testing for empty `config` objects inside the `Representation`. (KE-1239)

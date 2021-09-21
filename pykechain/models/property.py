@@ -80,10 +80,20 @@ class Property(BaseInScope):
             self._save_representations,
         )
 
-        validate(self._options, options_json_schema)
-
-        if self._options.get('validators'):
+        if 'validators' in self._options:
             self._parse_validators()
+
+    def _options_valid(self) -> bool:
+        """Validate the options of the Property object.
+
+        It will validate if the Property options are valid against the options JSON schema.
+
+        :raises jsonschema.exceptions.ValidationError: if the options value is invalid
+        :raises jsonschema.exceptions.SchemaError: if the JSON schema of the options is invalid
+        :returns: Boolean True if valid
+        """
+        validate(self._options, options_json_schema)
+        return True
 
     def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional = None) -> None:
         """Refresh the object in place."""
@@ -137,6 +147,10 @@ class Property(BaseInScope):
     @value.setter
     def value(self, value: Any) -> None:
         value = self.serialize_value(value)
+
+        # check if the options are valid
+        self._options_valid()
+
         if self.use_bulk_update:
             self._pend_update(dict(value=value))
             self._value = value
