@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v3.14.0 (unreleased)
+-----------------
+* :+1: Added the FormMetapanel widget to the allowed list of widgets in preparation of the introduction of the Forms world.
+
 v3.13.1 (24AUG21)
 -----------------
 * :+1: Add additionally a `UsePropertyNameRepresentation` including additional testing for empty `config` objects inside the `Representation`. (KE-1239)
