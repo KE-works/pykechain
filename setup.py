@@ -66,7 +66,7 @@ setup(
     keywords="python api rest sdk KE-chain",
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    packages=find_packages(exclude=["tests"]),
+    packages=find_packages(exclude=["tests", "tests.*"]),
     # Project URLs
     project_urls={
         "Documentation": "https://pykechain.readthedocs.io/en/latest",
@@ -91,15 +91,15 @@ setup(
         "semver>=2.10.0",
         "pytz",
     ],
-    setup_requires=["pytest-runner"],
+    setup_requires=["pytest-runner", "wheel"],
     tests_require=["pytest", "betamax"],
     python_requires=">=3.6",
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
-    # package_data={
-    #     'sample': ['package_data.dat'],
-    # },
+    package_data={
+        'pykechain': ['py.typed'],
+    },
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages. See:
     # http://docs.python.org/3.4/distutils/setupscript.html#installing-additional-files # noqa
