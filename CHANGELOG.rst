@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v3.xxx (unreleased)
+-----------------
+* :+1: Added the FormMetapanel widget to the allowed list of widgets in preparation of the introduction of the Forms world.
+
 v3.14.0 (22SEP21)
 -----------------
 * :bug: Fixed a bug that was causing the part reference properties to not be copied correctly. (PROJ-241)
