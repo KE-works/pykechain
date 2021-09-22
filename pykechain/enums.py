@@ -146,16 +146,20 @@ class ActivityClassification(Enum):
     .. versionadded:: 2.0
     .. versionchanged:: 3.2
        Add 'APP' environment for KE-chain versions > 3.1
+    .. versionchanged:: 3.14
+       Add 'FORM' envornment for KE-chain versions > v2021.10
 
 
     :cvar WORKFLOW: Classification of the activity is WORKFLOW
     :cvar CATALOG: Classification of the activity is CATALOG
     :cvar APP: Classification of the activity is APP
+    :cvar FORM: Classification of the activity is FORM
     """
 
     WORKFLOW = 'WORKFLOW'
     CATALOG = 'CATALOG'
     APP = 'APP'
+    FORM = 'FORM'
 
 
 class ActivityRootNames(Enum):
@@ -164,6 +168,8 @@ class ActivityRootNames(Enum):
     .. versionadded:: 2.0
     .. versionchanged:: 3.2
        Add 'APP' environment for KE-chain versions > 3.1
+    .. versionchanged:: 3.14
+       Add 'FORM' environment for KE-chain versions >= v2021.10
 
     :cvar WORKFLOW_ROOT: Root of the activity is WORKFLOW_ROOT
     :cvar CATALOG_ROOT: Root of the activity is CATALOG_ROOT (below are CATALOG tasks)
@@ -173,17 +179,22 @@ class ActivityRootNames(Enum):
     WORKFLOW_ROOT = 'WORKFLOW_ROOT'
     CATALOG_ROOT = 'CATALOG_ROOT'
     APP_ROOT = 'APP_ROOT'
+    FORM_ROOT = 'FORM_ROOT'
 
 
 activity_root_name_by_classification = {
     ActivityClassification.WORKFLOW: ActivityRootNames.WORKFLOW_ROOT,
     ActivityClassification.CATALOG: ActivityRootNames.CATALOG_ROOT,
     ActivityClassification.APP: ActivityRootNames.APP_ROOT,
+    ActivityClassification.FORM: ActivityRootNames.FORM_ROOT,
 }
 
 
 class WidgetNames(Enum):
     """The various Names of the Widget that can be configured.
+
+    .. versionchanged:: 3.14
+       Added FORMMETAPANEL for KE-chain versions >= v2021.10
 
     :cvar SUPERGRIDWIDGET: superGridWidget
     :cvar PROPERTYGRIDWIDGET: propertyGridWidget
@@ -199,6 +210,7 @@ class WidgetNames(Enum):
     :cvar SIGNATUREWIDGET: signatureWidget
     :cvar CARDWIDGET: cardWidget
     :cvar METAPANELWIDGET: metaPanelWidget
+    :cvar FORMMETAPANEL: formMetaPanelWidget
     :cvar MULTICOLUMNWIDGET: multiColumnWidget
     :cvar PROGRESSWIDGET: progressWidget
     :cvar TASKSWIDGET: tasksWidget
@@ -217,6 +229,7 @@ class WidgetNames(Enum):
     TASKNAVIGATIONBARWIDGET = 'taskNavigationBarWidget'
     JSONWIDGET = 'jsonWidget'
     METAPANELWIDGET = 'metaPanelWidget'
+    FORMMETAPANELWIDGET = 'formMetaPanelWidget'
     MULTICOLUMNWIDGET = 'multiColumnWidget'
     SIGNATUREWIDGET = 'signatureWidget'
     CARDWIDGET = 'cardWidget'
@@ -230,6 +243,9 @@ class WidgetNames(Enum):
 class WidgetTypes(Enum):
     """The various widget types for the widget definitions available to the widget api.
 
+    .. versionchanged:: 3.14
+       Added FORMMETAPANEL for KE-chain versions >= v2021.10
+
     :cvar UNDEFINED: Undefined Widget
     :cvar PROPERTYGRID: Propertygrid widget
     :cvar SUPERGRID: Supergrid widget
@@ -241,6 +257,7 @@ class WidgetTypes(Enum):
     :cvar TASKNAVIGATIONBAR: Tasknavigationbar widget
     :cvar JSON: Json widget
     :cvar METAPANEL: Metapanel widget
+    :cvar FORMMETAPANEL: The FormMetapanel widget
     :cvar MULTICOLUMN: Multicolumn widget
     :cvar SCOPE: Scope widget
     :cvar THIRDPARTY: Thirdparty widget
@@ -265,6 +282,7 @@ class WidgetTypes(Enum):
     TASKNAVIGATIONBAR = 'TASKNAVIGATIONBAR'
     JSON = 'JSON'
     METAPANEL = 'METAPANEL'
+    FORMMETAPANEL = 'FORMMETAPANEL'
     MULTICOLUMN = 'MULTICOLUMN'
     SCOPE = 'SCOPE'
     THIRDPARTY = 'THIRDPARTY'
@@ -289,6 +307,7 @@ WidgetCompatibleTypes = {
     WidgetNames.TASKNAVIGATIONBARWIDGET: WidgetTypes.TASKNAVIGATIONBAR,
     WidgetNames.JSONWIDGET: WidgetTypes.JSON,
     WidgetNames.METAPANELWIDGET: WidgetTypes.METAPANEL,
+    WidgetNames.FORMMETAPANELWIDGET: WidgetTypes.FORMMETAPANEL,
     WidgetNames.MULTICOLUMNWIDGET: WidgetTypes.MULTICOLUMN,
     WidgetNames.PROGRESSWIDGET: WidgetTypes.PROGRESS,
     WidgetNames.SIGNATUREWIDGET: WidgetTypes.SIGNATURE,
@@ -376,8 +395,10 @@ class ServiceEnvironmentVersion(Enum):
     PYTHON_3_6 = '3.6'
     PYTHON_3_7 = '3.7'
     PYTHON_3_8 = '3.8'
+    PYTHON_3_9 = '3.9'
     PYTHON_3_6_NOTEBOOKS = '3.6_notebook'
     PYTHON_3_8_NOTEBOOKS = '3.8_notebook'
+    PYTHON_3_9_NOTEBOOKS = '3.9_notebook'
 
 
 class ServiceScriptUser(Enum):

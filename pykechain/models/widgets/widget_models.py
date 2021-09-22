@@ -13,6 +13,7 @@ from pykechain.models.widgets.widget_schemas import undefined_meta_schema
 # TASKNAVIGATIONBAR = 'TASKNAVIGATIONBAR'
 # JSON = 'JSON'
 # METAPANEL = 'METAPANEL'
+# FORMMETAPANEL = 'FORMMETAPANEL'
 # MULTICOLUMN = 'MULTICOLUMN'
 # SCOPE_WIDGET = 'SCOPE_WIDGET'
 # THIRD_PARTY = 'THIRD_PARTY'
@@ -26,6 +27,10 @@ from pykechain.models.widgets.widget_schemas import undefined_meta_schema
 
 class MetapanelWidget(Widget):
     """Metapanel Widget."""
+
+
+class FormmetapanelWidget(Widget):
+    """FormMetapanel Widget."""
 
 
 class PropertygridWidget(Widget):
