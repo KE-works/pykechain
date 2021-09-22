@@ -25,8 +25,8 @@ KE-chain Python SDK
     :target: https://pyup.io/repos/github/KE-works/pykechain/
     :alt: Updates
 
-.. image:: https://api.codacy.com/project/badge/Grade/d963ed6986b249699ce975cac1bc67f6
-    :target: https://www.codacy.com/app/KE-works/pykechain
+.. image:: https://app.codacy.com/project/badge/Grade/9584610f1d4d474798c89fe87137c157
+    :target: https://www.codacy.com/gh/KE-works/pykechain/dashboard
     :alt: Code Quality from Codacy
 
 .. image:: https://badges.gitter.im/KE-works/pykechain.svg
@@ -45,7 +45,7 @@ within python scripts or iPython / `Jupyter <http://jupyter.org>`__ notebooks.
 It requires a normal user access to a KE-chain (version 3) instance for it to work.
 
 .. note::
-   This version of pykechain (> 3.0.0) is suited from KE-chain versions > 3 running on ``python >= 3.5`` exclusively.
+   This version of pykechain (> 3.0.0) is suited from KE-chain versions > 3 running on ``python >= 3.6`` exclusively.
    If you desire to connect to an older version of KE-chain or run on ``python 2.7``, please use a `pykechain v2`
    release.
 
@@ -67,7 +67,7 @@ Now interact with it::
 Installation
 ------------
 
-pykechain is easily installed using pip. pykechain is Python ``3.5``, ``3.6``, ``3.7``, ``3.8``, ``3.9``
+pykechain is easily installed using pip. pykechain is Python ``3.6``, ``3.7``, ``3.8``, ``3.9``
 and ``pypy3`` compatible::
 
     pip install pykechain
