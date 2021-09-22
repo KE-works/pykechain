@@ -6,6 +6,7 @@ include tox.ini
 include mypy.ini
 include .env.template
 include Pipfile
+include pykechain/py.typed
 
 graft tests
 graft docs

@@ -1,8 +1,8 @@
-from typing import List, Any, Dict, Callable
+from typing import Any, Callable, Dict, List
 
 from jsonschema import validate
 
-from pykechain.enums import _AllRepresentations, PropertyType
+from pykechain.enums import PropertyType, _AllRepresentations
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.representations.representation_base import BaseRepresentation
 from pykechain.models.validators.validator_schemas import representation_jsonschema_stub
@@ -32,7 +32,7 @@ class RepresentationsComponent(object):
         self._update_method: Callable = update_method
 
         # Construct representation objects
-        self._representations: List['AnyRepresentation'] = []
+        self._representations: List["AnyRepresentation"] = []
         representations_json = self._repr_options
         for representation_json in representations_json:
             self._representations.append(
@@ -118,26 +118,34 @@ def _valid_object_type(representation: BaseRepresentation, obj: "Base") -> bool:
             return False
         else:
             if rtype == _AllRepresentations.BUTTON:
-                return obj.type in [
+                return obj.type in (
                     PropertyType.SINGLE_SELECT_VALUE,
                     PropertyType.MULTI_SELECT_VALUE,
-                ]
+                )
             elif rtype == _AllRepresentations.DECIMAL_PLACES:
                 return obj.type == PropertyType.FLOAT_VALUE
             elif rtype == _AllRepresentations.SIGNIFICANT_DIGITS:
                 return obj.type == PropertyType.FLOAT_VALUE
             elif rtype == _AllRepresentations.THOUSANDS_SEPARATOR:
-                return obj.type in [PropertyType.INT_VALUE, PropertyType.FLOAT_VALUE]
+                return obj.type in (PropertyType.INT_VALUE, PropertyType.FLOAT_VALUE)
             elif rtype == _AllRepresentations.LINK_TARGET:
                 return obj.type == PropertyType.LINK_VALUE
             elif rtype == _AllRepresentations.AUTOFILL:
-                return obj.type in [
+                return obj.type in (
                     PropertyType.DATETIME_VALUE,
                     PropertyType.DATE_VALUE,
                     PropertyType.TIME_VALUE,
                     PropertyType.USER_REFERENCES_VALUE,
-                ]
+                )
             elif rtype == _AllRepresentations.GEOCOORDINATE:
                 return obj.type == PropertyType.GEOJSON_VALUE
+            elif rtype == _AllRepresentations.USE_PROPERTY_NAME:
+                return obj.type in (
+                    PropertyType.REFERENCES_VALUE,
+                    PropertyType.ACTIVITY_REFERENCES_VALUE,
+                    PropertyType.USER_REFERENCES_VALUE,
+                    PropertyType.SCOPE_REFERENCES_VALUE,
+                    PropertyType.SERVICE_REFERENCES_VALUE,
+                )
             else:
                 return False

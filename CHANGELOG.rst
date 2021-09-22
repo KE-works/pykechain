@@ -1,9 +1,21 @@
 Change Log
 ==========
 
-UNRELEASED
-----------
-* We added filter `tags__contains` to `Context` (KE-1054)
+v3.14.0 (22SEP21)
+-----------------
+* :bug: Fixed a bug that was causing the part reference properties to not be copied correctly. (PROJ-241)
+* :+1: Improved speed of the code by a different way of validation of the property options. We validated the property options using jsonschema validation on every instantiation of the property and that is overkill. Now we do it once we are updating the property itself. (#1029)
+* :+1: Added py.typed to the bdist package to indicate that pykechain supports typing. According to PEP-561.
+
+v3.13.1 (24AUG21)
+-----------------
+* :+1: Add additionally a `UsePropertyNameRepresentation` including additional testing for empty `config` objects inside the `Representation`. (KE-1239)
+
+v3.13.0 (23AUG1)
+----------------
+* :star: We added filter `tags__contains` to `Context` (KE-1054)
+* :+1: Added the `usePropertyName` property representation to sync with the possibilities in the backend. (KE-1239)
+* :+1: dependent versions for development: requests (2.26.0), nbsphinx (0.8.7), coveralls (3.2.0), tox (3.24.3), sphinx (4.1.2), pre-commit (2.14.0), twine (3.4.2)
 
 v3.12.0 (1JUL21)
 ----------------
