@@ -1,8 +1,8 @@
 Change Log
 ==========
 
-unreleased
-----------
+v3.14.0 (22SEP21)
+-----------------
 * :bug: Fixed a bug that was causing the part reference properties to not be copied correctly. (PROJ-241)
 * :+1: Improved speed of the code by a different way of validation of the property options. We validated the property options using jsonschema validation on every instantiation of the property and that is overkill. Now we do it once we are updating the property itself. (#1029)
 * :+1: Added py.typed to the bdist package to indicate that pykechain supports typing. According to PEP-561.
