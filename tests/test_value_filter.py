@@ -95,7 +95,7 @@ class TestPropertyValueFilter(TestBetamax):
                 self.assertEqual(0, len(prefilters))
 
         prefilters = PropertyValueFilter.parse_options(
-            dict(prefilters=dict(property_value=self.filter.format()))
+            dict(prefilters=dict(property_value=[self.filter.format()]))
         )
 
         self.assertIsInstance(prefilters, list)
@@ -540,7 +540,7 @@ class TestFilterAllPropertyTypes(TestBetamax):
             filter_type=filter_type
         )
         test_prop.set_prefilters(prefilters=[prefilter])
-        self.assertEqual(test_prop._options.get('prefilters').get('property_value'),
+        self.assertEqual(test_prop._options.get('prefilters').get('property_value')[0],
                          '{}:{}:{}'.format(filter_property_model.id, filter_value, filter_type))
 
     def test_activity_reference_property_prefilter(self):

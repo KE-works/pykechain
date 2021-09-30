@@ -112,9 +112,7 @@ class PropertyValueFilter(BaseFilter):
         """
         check_type(options, dict, "options")
 
-        prefilter_string = options.get(MetaWidget.PREFILTERS, {}).get("property_value")
-        prefilter_string_list = prefilter_string.split(",") if prefilter_string else []
-
+        prefilter_string_list = options.get(MetaWidget.PREFILTERS, {}).get("property_value", [])
         prefilters = list()
         for pf_string in prefilter_string_list:
             prefilter_raw = pf_string.split(":")
@@ -135,9 +133,8 @@ class PropertyValueFilter(BaseFilter):
         :returns options dict to be used to update the options dict of a property
         """
         super().write_options(filters=filters)
-
         prefilters = {
-            "property_value": ",".join([pf.format() for pf in filters])
+            "property_value": [pf.format() for pf in filters]
         }
         options = {MetaWidget.PREFILTERS: prefilters}
 

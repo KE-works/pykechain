@@ -281,8 +281,7 @@ class TestMultiReferenceProperty(TestBetamax):
         )
         self.assertIn("property_value", self.ref_prop_model._options["prefilters"])
 
-        filter_string = self.ref_prop_model._options["prefilters"]["property_value"]
-        filters = set(filter_string.split(","))
+        filters = self.ref_prop_model._options["prefilters"]["property_value"]
 
         # testing
         self.assertIn(
