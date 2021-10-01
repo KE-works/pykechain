@@ -683,6 +683,7 @@ class PropertyRepresentation(Enum):
     AUTOFILL = 'autofill'
     GEOCOORDINATE = 'geoCoordinate'
     USE_PROPERTY_NAME = 'usePropertyName'
+    CAMERA_SCANNER_INPUT = 'cameraScannerInput'
 
 
 class GeoCoordinateConfig(Enum):

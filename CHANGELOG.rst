@@ -4,6 +4,7 @@ Change Log
 v3.xxx (unreleased)
 -----------------
 * :+1: Added the FormMetapanel widget to the allowed list of widgets in preparation of the introduction of the Forms world.
+* :+1: Added the `cameraInputScanner` representation object to the code.
 
 v3.14.0 (22SEP21)
 -----------------
