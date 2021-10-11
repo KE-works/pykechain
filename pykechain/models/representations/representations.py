@@ -210,11 +210,30 @@ class GeoCoordinateRepresentation(BaseRepresentation):
             )
 
 
-class UsePropertyNameRepresentation(BaseRepresentation):
-    """Representation for the use of Property Names in a reference property."""
+class SimpleConfigValueKeyRepresentation(BaseRepresentation):
+    """A simple representation object where the _config_value keys is the same as the rtype.
 
-    rtype = PropertyRepresentation.USE_PROPERTY_NAME
-    _config_value_key = PropertyRepresentation.USE_PROPERTY_NAME
+    This representations have the following basic json representation:
+
+    ```
+    { "rtype": "<simpleRepr>",
+      "config": {
+        "<simpleRepr>": <some value>
+      }
+    }
+    ```
+
+    This class is used in several very simplified 'boolean' type representation types.
+    Such as, ao:
+
+    UsePropertyNameRepresentation, the _config_value_type = "usePropertyName"
+    CameraScannerInputRepresentation, the _config_value_type = "cameraScannerInput"
+
+    What you need to do is to set the class variable `rtype` when you override.
+    """
+
+    rtype = None
+    _config_value_key = None
 
     def validate_representation(self, value: bool) -> None:
         """
@@ -225,3 +244,17 @@ class UsePropertyNameRepresentation(BaseRepresentation):
         :return: None
         """
         check_type(value, bool, self._config_value_key)
+
+
+class UsePropertyNameRepresentation(SimpleConfigValueKeyRepresentation):
+    """Representation for the use of Property Names in a reference property."""
+
+    rtype = PropertyRepresentation.USE_PROPERTY_NAME
+    _config_value_key = PropertyRepresentation.USE_PROPERTY_NAME
+
+
+class CameraScannerInputRepresentation(SimpleConfigValueKeyRepresentation):
+    """Representation for text and number inputs to be able to use the camera as scanner."""
+
+    rtype = PropertyRepresentation.CAMERA_SCANNER_INPUT
+    _config_value_key = "camera_scanner"
