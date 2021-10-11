@@ -25,3 +25,12 @@ models.validators.Validators
 
 .. autoclass:: pykechain.models.validators.RegexStringValidator
    :members:
+
+.. autoclass:: pykechain.models.validators.EmailValidator
+   :members:
+
+.. autoclass:: pykechain.models.validators.FileSizeValidator
+   :members:
+
+.. autoclass:: pykechain.models.validators.FileExtensionValidator
+   :members:
