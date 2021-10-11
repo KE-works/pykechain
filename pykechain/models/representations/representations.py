@@ -211,7 +211,7 @@ class GeoCoordinateRepresentation(BaseRepresentation):
 
 
 class SimpleConfigValueKeyRepresentation(BaseRepresentation):
-    """A simple representation object wheren the _config_value keys is the same as the rtype.
+    """A simple representation object where the _config_value keys is the same as the rtype.
 
     This representations have the following basic json representation:
 
