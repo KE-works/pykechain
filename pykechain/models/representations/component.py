@@ -78,9 +78,10 @@ class RepresentationsComponent(object):
                 )
             if not _valid_object_type(r, self._parent_object):
                 raise IllegalArgumentError(
-                    "Representation '{}' can not be added to '{}'.".format(
-                        r, self._parent_object
-                    )
+                    f"Representation '{r}' can not be added to "
+                    f"'{self._parent_object}' as the representation is not "
+                    f"allowed on that propertyType. Please check relation between allowed"
+                    f"representation and property type accordingly."
                 )
             r.validate_json()
 
@@ -146,6 +147,13 @@ def _valid_object_type(representation: BaseRepresentation, obj: "Base") -> bool:
                     PropertyType.USER_REFERENCES_VALUE,
                     PropertyType.SCOPE_REFERENCES_VALUE,
                     PropertyType.SERVICE_REFERENCES_VALUE,
+                )
+            elif rtype == _AllRepresentations.CAMERA_SCANNER_INPUT:
+                return obj.type in (
+                    PropertyType.INT_VALUE,
+                    PropertyType.FLOAT_VALUE,
+                    PropertyType.TEXT_VALUE,
+                    PropertyType.CHAR_VALUE
                 )
             else:
                 return False
