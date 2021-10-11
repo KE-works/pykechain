@@ -5,7 +5,7 @@
 from .component import RepresentationsComponent
 from .representation_base import BaseRepresentation
 from .representations import (
-    DecimalPlaces,
+    CameraScannerInputRepresentation, DecimalPlaces,
     SignificantDigits,
     ThousandsSeparator,
     LinkTarget,
@@ -34,6 +34,8 @@ AnyRepresentation = (
     GeoCoordinateRepresentation,
     # Use Property Name for reference property
     UsePropertyNameRepresentation,
+    # cameraScannerInput Representation for text inputs
+    CameraScannerInputRepresentation,
 )
 
 __all__ = (
