@@ -5,7 +5,8 @@ from typing import Text, Union, Any, Dict, List, Optional
 
 from pykechain.enums import FilterType, Category, PropertyType, ScopeStatus
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
-from pykechain.models.input_checks import check_base, check_enum, check_type, check_text, check_datetime
+from pykechain.models.input_checks import check_base, check_enum, check_type, check_text, \
+    check_datetime
 from pykechain.models.widgets.enums import MetaWidget
 
 
@@ -14,7 +15,8 @@ class BaseFilter(object):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self.__class__.write_options(filters=[self]) == self.__class__.write_options(filters=[other])
+            return self.__class__.write_options(filters=[self]) == self.__class__.write_options(
+                filters=[other])
         else:
             return False
 
@@ -94,7 +96,8 @@ class PropertyValueFilter(BaseFilter):
 
         if prop.category != Category.MODEL:
             raise IllegalArgumentError(
-                'Property value filters can only be set on Property models, received "{}".'.format(prop))
+                'Property value filters can only be set on Property models, received "{}".'.format(
+                    prop))
         else:
             property_type = prop.type
             if property_type in (PropertyType.BOOLEAN_VALUE,
@@ -120,15 +123,15 @@ class PropertyValueFilter(BaseFilter):
                                    PropertyType.DATE_VALUE,
                                    PropertyType.DATETIME_VALUE
                                    ) and self.type not in (
-                                   FilterType.LOWER_THAN_EQUAL,
-                                   FilterType.GREATER_THAN_EQUAL
-                                   ):
+                FilterType.LOWER_THAN_EQUAL,
+                FilterType.GREATER_THAN_EQUAL
+            ):
                 warnings.warn("A PropertyValueFilter on a `{}` property should use "
                               "filter type `{}` or `{}`, not `{}`".format(
-                               property_type,
-                               FilterType.LOWER_THAN_EQUAL,
-                               FilterType.GREATER_THAN_EQUAL,
-                               self.type), Warning)
+                    property_type,
+                    FilterType.LOWER_THAN_EQUAL,
+                    FilterType.GREATER_THAN_EQUAL,
+                    self.type), Warning)
             elif property_type in (PropertyType.MULTI_SELECT_VALUE,
                                    ) and self.type != FilterType.CONTAINS_SET:
                 warnings.warn("A PropertyValueFilter on a `{}` property should use "
@@ -156,7 +159,7 @@ class PropertyValueFilter(BaseFilter):
         for pf_string in prefilter_string_list:
             prefilter_raw = pf_string.split(":")
 
-            if len(prefilter_raw) == 1:   # FIXME encoding problem KE-chain
+            if len(prefilter_raw) == 1:  # FIXME encoding problem KE-chain
                 prefilter_raw = pf_string.split("%3A")
 
             prefilters.append(PropertyValueFilter(*prefilter_raw))
@@ -203,18 +206,18 @@ class ScopeFilter(BaseFilter):
     ]
 
     def __init__(
-            self,
-            tag: Optional[Text] = None,
-            status: Optional[ScopeStatus] = None,
-            name: Optional[Text] = None,
-            team: Optional[Union[Text, 'Team']] = None,
-            due_date_gte: Optional[datetime.datetime] = None,
-            due_date_lte: Optional[datetime.datetime] = None,
-            start_date_gte: Optional[datetime.datetime] = None,
-            start_date_lte: Optional[datetime.datetime] = None,
-            progress_gte: Optional[float] = None,
-            progress_lte: Optional[float] = None,
-            **kwargs
+        self,
+        tag: Optional[Text] = None,
+        status: Optional[ScopeStatus] = None,
+        name: Optional[Text] = None,
+        team: Optional[Union[Text, 'Team']] = None,
+        due_date_gte: Optional[datetime.datetime] = None,
+        due_date_lte: Optional[datetime.datetime] = None,
+        start_date_gte: Optional[datetime.datetime] = None,
+        start_date_lte: Optional[datetime.datetime] = None,
+        progress_gte: Optional[float] = None,
+        progress_lte: Optional[float] = None,
+        **kwargs
     ):
         """Create a ScopeFilter object."""
         from pykechain.models import Team
