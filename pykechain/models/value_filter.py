@@ -92,7 +92,8 @@ class PropertyValueFilter(BaseFilter):
             prop = part_model.property(self.id)
         except NotFoundError:
             raise IllegalArgumentError(
-                "Property value filters can only be set on properties belonging to the selected Part model.")
+                "Property value filters can only be set on properties belonging to the selected "
+                "Part model.")
 
         if prop.category != Category.MODEL:
             raise IllegalArgumentError(
@@ -127,11 +128,11 @@ class PropertyValueFilter(BaseFilter):
                 FilterType.GREATER_THAN_EQUAL
             ):
                 warnings.warn("A PropertyValueFilter on a `{}` property should use "
-                              "filter type `{}` or `{}`, not `{}`".format(
-                    property_type,
-                    FilterType.LOWER_THAN_EQUAL,
-                    FilterType.GREATER_THAN_EQUAL,
-                    self.type), Warning)
+                              "filter type `{}` or `{}`, not `{}`".
+                              format(property_type,
+                                     FilterType.LOWER_THAN_EQUAL,
+                                     FilterType.GREATER_THAN_EQUAL,
+                                     self.type), Warning)
             elif property_type in (PropertyType.MULTI_SELECT_VALUE,
                                    ) and self.type != FilterType.CONTAINS_SET:
                 warnings.warn("A PropertyValueFilter on a `{}` property should use "
