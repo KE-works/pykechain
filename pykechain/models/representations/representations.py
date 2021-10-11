@@ -233,7 +233,7 @@ class SimpleConfigValueKeyRepresentation(BaseRepresentation):
     """
 
     rtype = None
-    _config_value_key = rtype
+    _config_value_key = None
 
     def validate_representation(self, value: bool) -> None:
         """
@@ -250,9 +250,11 @@ class UsePropertyNameRepresentation(SimpleConfigValueKeyRepresentation):
     """Representation for the use of Property Names in a reference property."""
 
     rtype = PropertyRepresentation.USE_PROPERTY_NAME
+    _config_value_key = PropertyRepresentation.USE_PROPERTY_NAME
 
 
 class CameraScannerInputRepresentation(SimpleConfigValueKeyRepresentation):
     """Representation for text and number inputs to be able to use the camera as scanner."""
 
     rtype = PropertyRepresentation.CAMERA_SCANNER_INPUT
+    _config_value_key = "camera_scanner"

@@ -17,6 +17,7 @@ from pykechain.models.representations.representation_base import BaseRepresentat
 from pykechain.models.representations.representations import (
     Autofill,
     ButtonRepresentation,
+    CameraScannerInputRepresentation,
     CustomIconRepresentation,
     DecimalPlaces,
     GeoCoordinateRepresentation,
@@ -359,6 +360,43 @@ class TestUsePropertyNameRepresentationForActivityReferences(
 ):
     property_type = PropertyType.ACTIVITY_REFERENCES_VALUE
     representation_class = UsePropertyNameRepresentation
+    value = True
+    new_value = False
+
+
+class TestUseCameraScannerInputRepresentationForCharProperties(
+    Bases._TestPropertyRepresentation
+):
+    property_type = PropertyType.CHAR_VALUE
+    representation_class = CameraScannerInputRepresentation
+    value = True
+    new_value = False
+
+
+
+class TestUseCameraScannerInputRepresentationForTextAreaCharProperties(
+    Bases._TestPropertyRepresentation
+):
+    property_type = PropertyType.TEXT_VALUE
+    representation_class = CameraScannerInputRepresentation
+    value = True
+    new_value = False
+
+
+class TestUseCameraScannerInputRepresentationForFloatAreaProperties(
+    Bases._TestPropertyRepresentation
+):
+    property_type = PropertyType.FLOAT_VALUE
+    representation_class = CameraScannerInputRepresentation
+    value = True
+    new_value = False
+
+
+class TestUseCameraScannerInputRepresentationForIntegerAreaProperties(
+    Bases._TestPropertyRepresentation
+):
+    property_type = PropertyType.INT_VALUE
+    representation_class = CameraScannerInputRepresentation
     value = True
     new_value = False
 
