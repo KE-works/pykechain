@@ -428,6 +428,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         widget = self.wm.add_filteredgrid_widget(
             part_model=part_model,
             parent_instance=parent_instance,
+            custom_height=500,
             edit=True,
             sort_name=True,
             emphasize_edit=True,

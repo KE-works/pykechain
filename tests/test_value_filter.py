@@ -1,4 +1,5 @@
 import datetime
+import warnings
 from unittest import TestCase
 
 import pytz
@@ -136,6 +137,7 @@ class TestFilterAllPropertyTypes(TestBetamax):
         self.wm = self.test_activity.widgets()
         self.prop_test_name = '__PROP TEST'
         self.new_part = self.bike.add_model(name='__TEST_PART__', multiplicity=Multiplicity.ZERO_MANY)
+        self.filter_types = FilterType.values()
 
     def tearDown(self):
         self.test_activity.delete()
@@ -143,7 +145,6 @@ class TestFilterAllPropertyTypes(TestBetamax):
         super().tearDown()
 
     def test_text_property_filter_in_grid(self):
-        filter_type = FilterType.CONTAINS
         filter_value = 'sample'
         test_prop = self.new_part.add_property(
             name=self.prop_test_name,
@@ -157,22 +158,25 @@ class TestFilterAllPropertyTypes(TestBetamax):
             model=self.new_part,
             update_dict={test_prop.id: 'just text'}
         )
-        prefilter = PropertyValueFilter(
-            property_model=test_prop,
-            value=filter_value,
-            filter_type=filter_type
-        )
-        widget = self.wm.add_filteredgrid_widget(part_model=self.new_part,
-                                                 readable_models=list(),
-                                                 writable_models=[test_prop],
-                                                 customHeight=500,
-                                                 parent_instance=self.bike_instance,
-                                                 prefilters=[prefilter])
-        self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                         '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+        with warnings.catch_warnings(record=True) as w:
+            for filter_type in self.filter_types:
+                prefilter = PropertyValueFilter(
+                    property_model=test_prop,
+                    value=filter_value,
+                    filter_type=filter_type
+                )
+                widget = self.wm.add_filteredgrid_widget(title=filter_type,
+                                                         part_model=self.new_part,
+                                                         readable_models=list(),
+                                                         writable_models=[test_prop],
+                                                         custom_height=300,
+                                                         parent_instance=self.bike_instance,
+                                                         prefilters=[prefilter])
+                self.assertEqual(widget.meta.get('prefilters').get('property_value'),
+                                 '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+            self.assertEqual(len(w), 4)
 
     def test_multi_test_property_filter_in_grid(self):
-        filter_type = FilterType.CONTAINS
         filter_value = 'sample'
         test_prop = self.new_part.add_property(
             name=self.prop_test_name,
@@ -186,22 +190,25 @@ class TestFilterAllPropertyTypes(TestBetamax):
             model=self.new_part,
             update_dict={test_prop.id: 'just text'}
         )
-        prefilter = PropertyValueFilter(
-            property_model=test_prop,
-            value=filter_value,
-            filter_type=filter_type
-        )
-        widget = self.wm.add_filteredgrid_widget(part_model=self.new_part,
-                                                 readable_models=list(),
-                                                 customHeight=500,
-                                                 writable_models=[test_prop],
-                                                 parent_instance=self.bike_instance,
-                                                 prefilters=[prefilter])
-        self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                         '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+        with warnings.catch_warnings(record=True) as w:
+            for filter_type in self.filter_types:
+                prefilter = PropertyValueFilter(
+                    property_model=test_prop,
+                    value=filter_value,
+                    filter_type=filter_type
+                )
+                widget = self.wm.add_filteredgrid_widget(title=filter_type,
+                                                         part_model=self.new_part,
+                                                         readable_models=list(),
+                                                         writable_models=[test_prop],
+                                                         custom_height=300,
+                                                         parent_instance=self.bike_instance,
+                                                         prefilters=[prefilter])
+                self.assertEqual(widget.meta.get('prefilters').get('property_value'),
+                                 '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+            self.assertEqual(len(w), 4)
 
     def test_int_property_filter_in_grid(self):
-        filter_type = FilterType.GREATER_THAN_EQUAL
         filter_value = 17
         test_prop = self.new_part.add_property(
             name=self.prop_test_name,
@@ -215,22 +222,25 @@ class TestFilterAllPropertyTypes(TestBetamax):
             model=self.new_part,
             update_dict={test_prop.id: 24}
         )
-        prefilter = PropertyValueFilter(
-            property_model=test_prop,
-            value=filter_value,
-            filter_type=filter_type
-        )
-        widget = self.wm.add_filteredgrid_widget(part_model=self.new_part,
-                                                 readable_models=list(),
-                                                 customHeight=500,
-                                                 writable_models=[test_prop],
-                                                 parent_instance=self.bike_instance,
-                                                 prefilters=[prefilter])
-        self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                         '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+        with warnings.catch_warnings(record=True) as w:
+            for filter_type in self.filter_types:
+                prefilter = PropertyValueFilter(
+                    property_model=test_prop,
+                    value=filter_value,
+                    filter_type=filter_type
+                )
+                widget = self.wm.add_filteredgrid_widget(title=filter_type,
+                                                         part_model=self.new_part,
+                                                         readable_models=list(),
+                                                         writable_models=[test_prop],
+                                                         custom_height=300,
+                                                         parent_instance=self.bike_instance,
+                                                         prefilters=[prefilter])
+                self.assertEqual(widget.meta.get('prefilters').get('property_value'),
+                                 '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+            self.assertEqual(len(w), 3)
 
     def test_float_property_filter_in_grid(self):
-        filter_type = FilterType.LOWER_THAN_EQUAL
         filter_value = 22.55
         test_prop = self.new_part.add_property(
             name=self.prop_test_name,
@@ -244,22 +254,25 @@ class TestFilterAllPropertyTypes(TestBetamax):
             model=self.new_part,
             update_dict={test_prop.id: 24.4}
         )
-        prefilter = PropertyValueFilter(
-            property_model=test_prop,
-            value=filter_value,
-            filter_type=filter_type
-        )
-        widget = self.wm.add_filteredgrid_widget(part_model=self.new_part,
-                                                 readable_models=list(),
-                                                 customHeight=500,
-                                                 writable_models=[test_prop],
-                                                 parent_instance=self.bike_instance,
-                                                 prefilters=[prefilter])
-        self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                         '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+        with warnings.catch_warnings(record=True) as w:
+            for filter_type in self.filter_types:
+                prefilter = PropertyValueFilter(
+                    property_model=test_prop,
+                    value=filter_value,
+                    filter_type=filter_type
+                )
+                widget = self.wm.add_filteredgrid_widget(title=filter_type,
+                                                         part_model=self.new_part,
+                                                         readable_models=list(),
+                                                         writable_models=[test_prop],
+                                                         custom_height=300,
+                                                         parent_instance=self.bike_instance,
+                                                         prefilters=[prefilter])
+                self.assertEqual(widget.meta.get('prefilters').get('property_value'),
+                                 '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+            self.assertEqual(len(w), 3)
 
     def test_boolean_property_filter_in_grid(self):
-        filter_type = FilterType.EXACT
         filter_value = True
         test_prop = self.new_part.add_property(
             name=self.prop_test_name,
@@ -273,22 +286,26 @@ class TestFilterAllPropertyTypes(TestBetamax):
             model=self.new_part,
             update_dict={test_prop.id: True}
         )
-        prefilter = PropertyValueFilter(
-            property_model=test_prop,
-            value=filter_value,
-            filter_type=filter_type
-        )
-        widget = self.wm.add_filteredgrid_widget(part_model=self.new_part,
-                                                 readable_models=list(),
-                                                 customHeight=500,
-                                                 writable_models=[test_prop],
-                                                 parent_instance=self.bike_instance,
-                                                 prefilters=[prefilter])
-        self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                         '{}:{}:{}'.format(test_prop.id, str(filter_value).lower(), filter_type))
+        with warnings.catch_warnings(record=True) as w:
+            for filter_type in self.filter_types:
+                prefilter = PropertyValueFilter(
+                    property_model=test_prop,
+                    value=filter_value,
+                    filter_type=filter_type
+                )
+                widget = self.wm.add_filteredgrid_widget(title=filter_type,
+                                                         part_model=self.new_part,
+                                                         readable_models=list(),
+                                                         writable_models=[test_prop],
+                                                         custom_height=300,
+                                                         parent_instance=self.bike_instance,
+                                                         prefilters=[prefilter])
+                self.assertEqual(widget.meta.get('prefilters').get('property_value'),
+                                 '{}:{}:{}'.format(test_prop.id, str(filter_value).lower(),
+                                                   filter_type))
+            self.assertEqual(len(w), 4)
 
     def test_date_property_filter_in_grid(self):
-        filter_type = FilterType.GREATER_THAN_EQUAL
         filter_value = str(datetime.date(2021, 5, 4))
         test_prop = self.new_part.add_property(
             name=self.prop_test_name,
@@ -302,22 +319,26 @@ class TestFilterAllPropertyTypes(TestBetamax):
             model=self.new_part,
             update_dict={test_prop.id: str(datetime.date(2021, 5, 8))}
         )
-        prefilter = PropertyValueFilter(
-            property_model=test_prop,
-            value=filter_value,
-            filter_type=filter_type
-        )
-        widget = self.wm.add_filteredgrid_widget(part_model=self.new_part,
-                                                 readable_models=list(),
-                                                 customHeight=500,
-                                                 writable_models=[test_prop],
-                                                 parent_instance=self.bike_instance,
-                                                 prefilters=[prefilter])
-        self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                         '{}:{}:{}'.format(test_prop.id, str(filter_value).lower(), filter_type))
+        with warnings.catch_warnings(record=True) as w:
+            for filter_type in self.filter_types:
+                prefilter = PropertyValueFilter(
+                    property_model=test_prop,
+                    value=filter_value,
+                    filter_type=filter_type
+                )
+                widget = self.wm.add_filteredgrid_widget(title=filter_type,
+                                                         part_model=self.new_part,
+                                                         readable_models=list(),
+                                                         writable_models=[test_prop],
+                                                         custom_height=300,
+                                                         parent_instance=self.bike_instance,
+                                                         prefilters=[prefilter])
+                self.assertEqual(widget.meta.get('prefilters').get('property_value'),
+                                 '{}:{}:{}'.format(test_prop.id, filter_value,
+                                                   filter_type))
+            self.assertEqual(len(w), 3)
 
     def test_link_property_filter_in_grid(self):
-        filter_type = FilterType.CONTAINS
         filter_value = "nl"
         test_prop = self.new_part.add_property(
             name=self.prop_test_name,
@@ -331,22 +352,26 @@ class TestFilterAllPropertyTypes(TestBetamax):
             model=self.new_part,
             update_dict={test_prop.id: "https://ke-chain.nl"}
         )
-        prefilter = PropertyValueFilter(
-            property_model=test_prop,
-            value=filter_value,
-            filter_type=filter_type
-        )
-        widget = self.wm.add_filteredgrid_widget(part_model=self.new_part,
-                                                 readable_models=list(),
-                                                 customHeight=500,
-                                                 writable_models=[test_prop],
-                                                 parent_instance=self.bike_instance,
-                                                 prefilters=[prefilter])
-        self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                         '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+        with warnings.catch_warnings(record=True) as w:
+            for filter_type in self.filter_types:
+                prefilter = PropertyValueFilter(
+                    property_model=test_prop,
+                    value=filter_value,
+                    filter_type=filter_type
+                )
+                widget = self.wm.add_filteredgrid_widget(title=filter_type,
+                                                         part_model=self.new_part,
+                                                         readable_models=list(),
+                                                         writable_models=[test_prop],
+                                                         custom_height=300,
+                                                         parent_instance=self.bike_instance,
+                                                         prefilters=[prefilter])
+                self.assertEqual(widget.meta.get('prefilters').get('property_value'),
+                                 '{}:{}:{}'.format(test_prop.id, filter_value,
+                                                   filter_type))
+            self.assertEqual(len(w), 4)
 
     def test_single_select_property_filter_in_grid(self):
-        filter_type = FilterType.EXACT
         filter_value = "apples"
         test_prop = self.new_part.add_property(
             name=self.prop_test_name,
@@ -361,22 +386,26 @@ class TestFilterAllPropertyTypes(TestBetamax):
             model=self.new_part,
             update_dict={test_prop.id: "bananas"}
         )
-        prefilter = PropertyValueFilter(
-            property_model=test_prop,
-            value=filter_value,
-            filter_type=filter_type
-        )
-        widget = self.wm.add_filteredgrid_widget(part_model=self.new_part,
-                                                 readable_models=list(),
-                                                 customHeight=500,
-                                                 writable_models=[test_prop],
-                                                 parent_instance=self.bike_instance,
-                                                 prefilters=[prefilter])
-        self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                         '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+        with warnings.catch_warnings(record=True) as w:
+            for filter_type in self.filter_types:
+                prefilter = PropertyValueFilter(
+                    property_model=test_prop,
+                    value=filter_value,
+                    filter_type=filter_type
+                )
+                widget = self.wm.add_filteredgrid_widget(title=filter_type,
+                                                         part_model=self.new_part,
+                                                         readable_models=list(),
+                                                         writable_models=[test_prop],
+                                                         custom_height=300,
+                                                         parent_instance=self.bike_instance,
+                                                         prefilters=[prefilter])
+                self.assertEqual(widget.meta.get('prefilters').get('property_value'),
+                                 '{}:{}:{}'.format(test_prop.id, filter_value,
+                                                   filter_type))
+            self.assertEqual(len(w), 4)
 
     def test_multi_select_property_filter_in_grid(self):
-        filter_type = FilterType.CONTAINS
         filter_value = "apples"
         test_prop = self.new_part.add_property(
             name=self.prop_test_name,
@@ -391,22 +420,26 @@ class TestFilterAllPropertyTypes(TestBetamax):
             model=self.new_part,
             update_dict={test_prop.id: ["bananas", "lemons"]}
         )
-        prefilter = PropertyValueFilter(
-            property_model=test_prop,
-            value=filter_value,
-            filter_type=filter_type
-        )
-        widget = self.wm.add_filteredgrid_widget(part_model=self.new_part,
-                                                 readable_models=list(),
-                                                 customHeight=500,
-                                                 writable_models=[test_prop],
-                                                 parent_instance=self.bike_instance,
-                                                 prefilters=[prefilter])
-        self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                         '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+        with warnings.catch_warnings(record=True) as w:
+            for filter_type in self.filter_types:
+                prefilter = PropertyValueFilter(
+                    property_model=test_prop,
+                    value=filter_value,
+                    filter_type=filter_type
+                )
+                widget = self.wm.add_filteredgrid_widget(title=filter_type,
+                                                         part_model=self.new_part,
+                                                         readable_models=list(),
+                                                         writable_models=[test_prop],
+                                                         custom_height=300,
+                                                         parent_instance=self.bike_instance,
+                                                         prefilters=[prefilter])
+                self.assertEqual(widget.meta.get('prefilters').get('property_value'),
+                                 '{}:{}:{}'.format(test_prop.id, filter_value,
+                                                   filter_type))
+            self.assertEqual(len(w), 4)
 
     def test_part_reference_property_filter_in_grid(self):
-        filter_type = FilterType.EXACT
         filter_value = "Rear Wheel"
         test_prop = self.new_part.add_property(
             name=self.prop_test_name,
@@ -421,22 +454,26 @@ class TestFilterAllPropertyTypes(TestBetamax):
             model=self.new_part,
             update_dict={test_prop.id: [self.project.part(name="Front Wheel"), self.project.part(name="Rear Wheel")]}
         )
-        prefilter = PropertyValueFilter(
-            property_model=test_prop,
-            value=filter_value,
-            filter_type=filter_type
-        )
-        widget = self.wm.add_filteredgrid_widget(part_model=self.new_part,
-                                                 readable_models=list(),
-                                                 customHeight=500,
-                                                 writable_models=[test_prop],
-                                                 parent_instance=self.bike_instance,
-                                                 prefilters=[prefilter])
-        self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                         '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+        with warnings.catch_warnings(record=True) as w:
+            for filter_type in self.filter_types:
+                prefilter = PropertyValueFilter(
+                    property_model=test_prop,
+                    value=filter_value,
+                    filter_type=filter_type
+                )
+                widget = self.wm.add_filteredgrid_widget(title=filter_type,
+                                                         part_model=self.new_part,
+                                                         readable_models=list(),
+                                                         writable_models=[test_prop],
+                                                         custom_height=300,
+                                                         parent_instance=self.bike_instance,
+                                                         prefilters=[prefilter])
+                self.assertEqual(widget.meta.get('prefilters').get('property_value'),
+                                 '{}:{}:{}'.format(test_prop.id, filter_value,
+                                                   filter_type))
+            self.assertEqual(len(w), 4)
 
     def test_activity_reference_property_filter_in_grid(self):
-        filter_type = FilterType.EXACT
         filter_value = "Specify wheel diameter"
         test_prop = self.new_part.add_property(
             name=self.prop_test_name,
@@ -451,22 +488,26 @@ class TestFilterAllPropertyTypes(TestBetamax):
             update_dict={test_prop.id: [self.project.activity(name="Specify wheel diameter"),
                                         self.project.activity(name="Subprocess")]}
         )
-        prefilter = PropertyValueFilter(
-            property_model=test_prop,
-            value=filter_value,
-            filter_type=filter_type
-        )
-        widget = self.wm.add_filteredgrid_widget(part_model=self.new_part,
-                                                 readable_models=list(),
-                                                 customHeight=500,
-                                                 writable_models=[test_prop],
-                                                 parent_instance=self.bike_instance,
-                                                 prefilters=[prefilter])
-        self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                         '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+        with warnings.catch_warnings(record=True) as w:
+            for filter_type in self.filter_types:
+                prefilter = PropertyValueFilter(
+                    property_model=test_prop,
+                    value=filter_value,
+                    filter_type=filter_type
+                )
+                widget = self.wm.add_filteredgrid_widget(title=filter_type,
+                                                         part_model=self.new_part,
+                                                         readable_models=list(),
+                                                         writable_models=[test_prop],
+                                                         custom_height=300,
+                                                         parent_instance=self.bike_instance,
+                                                         prefilters=[prefilter])
+                self.assertEqual(widget.meta.get('prefilters').get('property_value'),
+                                 '{}:{}:{}'.format(test_prop.id, filter_value,
+                                                   filter_type))
+            self.assertEqual(len(w), 4)
 
     def test_user_reference_property_filter_in_grid(self):
-        filter_type = FilterType.CONTAINS
         filter_value = "Test"
         test_prop = self.new_part.add_property(
             name=self.prop_test_name,
@@ -481,22 +522,26 @@ class TestFilterAllPropertyTypes(TestBetamax):
             update_dict={test_prop.id: [self.client.user(username="testuser"),
                                         self.client.user(username="superuser")]}
         )
-        prefilter = PropertyValueFilter(
-            property_model=test_prop,
-            value=filter_value,
-            filter_type=filter_type
-        )
-        widget = self.wm.add_filteredgrid_widget(part_model=self.new_part,
-                                                 readable_models=list(),
-                                                 customHeight=500,
-                                                 writable_models=[test_prop],
-                                                 parent_instance=self.bike_instance,
-                                                 prefilters=[prefilter])
-        self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                         '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+        with warnings.catch_warnings(record=True) as w:
+            for filter_type in self.filter_types:
+                prefilter = PropertyValueFilter(
+                    property_model=test_prop,
+                    value=filter_value,
+                    filter_type=filter_type
+                )
+                widget = self.wm.add_filteredgrid_widget(title=filter_type,
+                                                         part_model=self.new_part,
+                                                         readable_models=list(),
+                                                         writable_models=[test_prop],
+                                                         custom_height=300,
+                                                         parent_instance=self.bike_instance,
+                                                         prefilters=[prefilter])
+                self.assertEqual(widget.meta.get('prefilters').get('property_value'),
+                                 '{}:{}:{}'.format(test_prop.id, filter_value,
+                                                   filter_type))
+            self.assertEqual(len(w), 4)
 
     def test_scope_reference_property_filter_in_grid(self):
-        filter_type = FilterType.CONTAINS
         filter_value = "Bike"
         test_prop = self.new_part.add_property(
             name=self.prop_test_name,
@@ -511,19 +556,24 @@ class TestFilterAllPropertyTypes(TestBetamax):
             update_dict={test_prop.id: [self.client.scope("Cannondale Project"),
                                         self.client.scope("Bike Project")]}
         )
-        prefilter = PropertyValueFilter(
-            property_model=test_prop,
-            value=filter_value,
-            filter_type=filter_type
-        )
-        widget = self.wm.add_filteredgrid_widget(part_model=self.new_part,
-                                                 readable_models=list(),
-                                                 customHeight=500,
-                                                 writable_models=[test_prop],
-                                                 parent_instance=self.bike_instance,
-                                                 prefilters=[prefilter])
-        self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                         '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+        with warnings.catch_warnings(record=True) as w:
+            for filter_type in self.filter_types:
+                prefilter = PropertyValueFilter(
+                    property_model=test_prop,
+                    value=filter_value,
+                    filter_type=filter_type
+                )
+                widget = self.wm.add_filteredgrid_widget(title=filter_type,
+                                                         part_model=self.new_part,
+                                                         readable_models=list(),
+                                                         writable_models=[test_prop],
+                                                         custom_height=300,
+                                                         parent_instance=self.bike_instance,
+                                                         prefilters=[prefilter])
+                self.assertEqual(widget.meta.get('prefilters').get('property_value'),
+                                 '{}:{}:{}'.format(test_prop.id, filter_value,
+                                                   filter_type))
+            self.assertEqual(len(w), 4)
 
     def test_part_reference_property_prefilter(self):
         filter_type = FilterType.GREATER_THAN_EQUAL

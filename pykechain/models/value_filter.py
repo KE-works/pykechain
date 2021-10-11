@@ -86,7 +86,6 @@ class PropertyValueFilter(BaseFilter):
         from pykechain.models import Part
 
         check_base(part_model, Part, "part_model")
-
         try:
             prop = part_model.property(self.id)
         except NotFoundError:
@@ -97,9 +96,47 @@ class PropertyValueFilter(BaseFilter):
             raise IllegalArgumentError(
                 'Property value filters can only be set on Property models, received "{}".'.format(prop))
         else:
-            if prop.type == PropertyType.BOOLEAN_VALUE and self.type != FilterType.EXACT:
-                warnings.warn("A PropertyValueFilter on a boolean property should use filter type `{}`".format(
-                    FilterType.EXACT), Warning)
+            property_type = prop.type
+            if property_type in (PropertyType.BOOLEAN_VALUE,
+                                 PropertyType.SINGLE_SELECT_VALUE,
+                                 PropertyType.REFERENCES_VALUE,
+                                 PropertyType.ACTIVITY_REFERENCES_VALUE
+                                 ) and self.type != FilterType.EXACT:
+                warnings.warn("A PropertyValueFilter on a `{}` property should use "
+                              "filter type `{}`, not `{}`".format(property_type, FilterType.EXACT,
+                                                                  self.type), Warning)
+            elif property_type in (PropertyType.TEXT_VALUE,
+                                   PropertyType.CHAR_VALUE,
+                                   PropertyType.LINK_VALUE,
+                                   PropertyType.USER_REFERENCES_VALUE,
+                                   PropertyType.SCOPE_REFERENCES_VALUE,
+                                   ) and self.type != FilterType.CONTAINS:
+                warnings.warn("A PropertyValueFilter on a `{}` property should use "
+                              "filter type `{}`, not `{}`".format(property_type,
+                                                                  FilterType.CONTAINS,
+                                                                  self.type), Warning)
+            elif property_type in (PropertyType.INT_VALUE,
+                                   PropertyType.FLOAT_VALUE,
+                                   PropertyType.DATE_VALUE,
+                                   PropertyType.DATETIME_VALUE
+                                   ) and self.type not in (
+                                   FilterType.LOWER_THAN_EQUAL,
+                                   FilterType.GREATER_THAN_EQUAL
+                                   ):
+                warnings.warn("A PropertyValueFilter on a `{}` property should use "
+                              "filter type `{}` or `{}`, not `{}`".format(
+                               property_type,
+                               FilterType.LOWER_THAN_EQUAL,
+                               FilterType.GREATER_THAN_EQUAL,
+                               self.type), Warning)
+            elif property_type in (PropertyType.MULTI_SELECT_VALUE,
+                                   ) and self.type != FilterType.CONTAINS_SET:
+                warnings.warn("A PropertyValueFilter on a `{}` property should use "
+                              "filter type `{}`, not `{}`".format(property_type,
+                                                                  FilterType.CONTAINS_SET,
+                                                                  self.type), Warning)
+            else:
+                pass
 
     @classmethod
     def parse_options(cls, options: Dict) -> List['PropertyValueFilter']:
