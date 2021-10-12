@@ -3,5 +3,5 @@
 models.Scope
 ============
 
-.. autoclass:: pykechain.models.Scope2
+.. autoclass:: pykechain.models.Scope
    :members:

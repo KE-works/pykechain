@@ -1,12 +1,14 @@
 Change Log
 ==========
 
-v3.xxx (unreleased)
+v3.15.0 (12OCT21)
 -----------------
 * :+1: Added the FormMetapanel widget to the allowed list of widgets in preparation of the introduction of the Forms world.
 * :+1: Added the `cameraInputScanner` representation object to the code.
 * :+1: Added extra validation checks on prefilters inside the `Paginated Widgets`. Warnings are now provided if the filter type and property value do not match correctly. (KLO-36, #1045)
 * :+1: Added the attribute `showNameAndDate` on the `Signature Widget`. Defaults to True. (#1037)
+* :+1: Updated the documentation for the newer concepts included over the past time.
+* :+1: dependent versions for development: pytz (2021.3), pytest-cov (3.0.0), jsonschema (4.1.0), flake8 (4.0.0), tox (3.24.4)
 
 v3.14.0 (22SEP21)
 -----------------
