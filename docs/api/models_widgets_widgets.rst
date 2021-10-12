@@ -19,6 +19,9 @@ Widget Classes
 .. autoclass:: pykechain.models.widgets.widget_models.MetapanelWidget
    :members:
 
+.. autoclass:: pykechain.models.widgets.widget_models.FormmetapanelWidget
+   :members:
+
 .. autoclass:: pykechain.models.widgets.widget_models.PropertygridWidget
    :members:
 
@@ -68,4 +71,16 @@ Widget Classes
    :members:
 
 .. autoclass:: pykechain.models.widgets.widget_models.TasksWidget
+   :members:
+
+.. autoclass:: pykechain.models.widgets.widget_models.WeatherWidget
+   :members:
+
+.. autoclass:: pykechain.models.widgets.widget_models.ServicecardWidget
+   :members:
+
+.. autoclass:: pykechain.models.widgets.widget_models.DashboardWidget
+   :members:
+
+.. autoclass:: pykechain.models.widgets.widget_models.ScopemembersWidget
    :members:

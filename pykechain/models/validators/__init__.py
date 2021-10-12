@@ -12,7 +12,7 @@ from .effects import (
     InvalidVisualEffect
 )
 from .validators import (
-    NumericRangeValidator,
+    EmailValidator, FileExtensionValidator, FileSizeValidator, NumericRangeValidator,
     BooleanFieldValidator,
     RequiredFieldValidator,
     OddNumberValidator,
@@ -38,4 +38,8 @@ __all__ = (
     'EvenNumberValidator',
     'RegexStringValidator',
     'SingleReferenceValidator',
+    'EmailValidator',
+    'FileSizeValidator',
+    'FileExtensionValidator',
+
 )
