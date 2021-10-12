@@ -29,9 +29,6 @@ KE-chain Python SDK
     :target: https://www.codacy.com/gh/KE-works/pykechain/dashboard
     :alt: Code Quality from Codacy
 
-.. image:: https://badges.gitter.im/KE-works/pykechain.svg
-   :alt: Join the chat at https://gitter.im/KE-works/pykechain
-   :target: https://gitter.im/KE-works/pykechain?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 About pykechain
 ---------------
@@ -45,9 +42,9 @@ within python scripts or iPython / `Jupyter <http://jupyter.org>`__ notebooks.
 It requires a normal user access to a KE-chain (version 3) instance for it to work.
 
 .. note::
-   This version of pykechain (> 3.0.0) is suited from KE-chain versions > 3 running on ``python >= 3.6`` exclusively.
-   If you desire to connect to an older version of KE-chain or run on ``python 2.7``, please use a `pykechain v2`
-   release.
+   This version of pykechain (> 3.0.0) is suited from KE-chain versions > 3 (or > v2021) running
+   on ``python >= 3.6`` exclusively. If you desire to connect to an older version of KE-chain or
+   run on ``python 2.7``, please use a ``pykechain v2`` release. Put in the requirements ``pykechain~=2.7``.
 
 Basic usage
 -----------
@@ -55,7 +52,7 @@ Basic usage
 Ensure you have member access to a KE-chain instance and login::
 
     from pykechain import Client
-    kec = Client(url='https://kec3api.ke-chain.com')
+    kec = Client(url='https://<domain>.ke-chain.com')
     kec.login(username='demo_user', password='pastaplease')
 
 Now interact with it::
@@ -67,29 +64,29 @@ Now interact with it::
 Installation
 ------------
 
-pykechain is easily installed using pip. pykechain is Python ``3.6``, ``3.7``, ``3.8``, ``3.9``
+pykechain is easily installed using pip. ``pykechain`` is Python ``3.6``, ``3.7``, ``3.8``, ``3.9``, ``3.10``
 and ``pypy3`` compatible::
 
     pip install pykechain
 
 Or if you want to live on the edge, install the latest and greatest from the master branch::
 
-    pip install https://github.com/KE-works/pykechain/archive/master.zip
+    pip install https://github.com/KE-works/pykechain/archive/main.zip
 
-In scripts you can either use [Pipenv]() or a pip requirements.txt file to install pykechain as a requirement
+In scripts you can either use `Pipenv <https://github.com/pypa/pipenv>`__ or a pip ``requirements.txt`` file to install ``pykechain`` as a requirement
 
 in a ``Pipfile``::
 
     [packages]
     pykechain = "*"
     # or when you want to install a certain branch
-    pykechain = {ref = "master", git = "https://github.com/KE-works/pykechain"}
+    pykechain = {ref = "main", git = "https://github.com/KE-works/pykechain"}
 
 in a pip ``requirements.txt``::
 
     pykechain
     # or when you want to install a certain branch i.e. `master`
-    git+https://github.com/KE-works/pykechain.git@master#egg=pykechain
+    git+https://github.com/KE-works/pykechain.git@main#egg=pykechain
 
 Changelog
 ---------

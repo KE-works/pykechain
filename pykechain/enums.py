@@ -663,7 +663,7 @@ class PropertyRepresentation(Enum):
     The Representation configuration to display a property value.
 
     .. versionadded:: 3.0
-    .. versionupdated:: 3.11 added geocoordinate in line with KE-chain v2021.5.0
+    .. versionchanged:: 3.11 added geocoordinate in line with KE-chain v2021.5.0
 
     :cvar DECIMAL_PLACES: Amount of decimal places to show the number
     :cvar SIGNIFICANT_DIGITS: Number (count) of significant digits to display the number
