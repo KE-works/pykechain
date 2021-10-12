@@ -1,5 +1,6 @@
-DESCRIPTION = """pykechain is a an open source Python API to KE-chain. Provide remote access and control through the
-public KE-chain API. Works only in combination with a valid KE-chain license. KE-chain BV (c) 2016 """
+DESCRIPTION = """pykechain is a an open source Python API to KE-chain.
+Provide remote access and control through the public KE-chain API. Works only
+in combination with a valid KE-chain license. KE-works BV (c) 2016 """
 
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
@@ -56,6 +57,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: Implementation :: PyPy",
         # OS
         "Operating System :: MacOS",

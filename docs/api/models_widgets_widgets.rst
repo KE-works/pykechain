@@ -19,7 +19,7 @@ Widget Classes
 .. autoclass:: pykechain.models.widgets.widget_models.MetapanelWidget
    :members:
 
-.. autoclass:: pykechain.models.widgets.widget_models.FormMetapanelWidget
+.. autoclass:: pykechain.models.widgets.widget_models.FormmetapanelWidget
    :members:
 
 .. autoclass:: pykechain.models.widgets.widget_models.PropertygridWidget
