@@ -102,7 +102,6 @@ class PropertyValueFilter(BaseFilter):
         else:
             property_type = prop.type
             if property_type in (PropertyType.BOOLEAN_VALUE,
-                                 PropertyType.SINGLE_SELECT_VALUE,
                                  PropertyType.REFERENCES_VALUE,
                                  PropertyType.ACTIVITY_REFERENCES_VALUE
                                  ) and self.type != FilterType.EXACT:
@@ -112,6 +111,7 @@ class PropertyValueFilter(BaseFilter):
             elif property_type in (PropertyType.TEXT_VALUE,
                                    PropertyType.CHAR_VALUE,
                                    PropertyType.LINK_VALUE,
+                                   PropertyType.SINGLE_SELECT_VALUE,
                                    PropertyType.USER_REFERENCES_VALUE,
                                    PropertyType.SCOPE_REFERENCES_VALUE,
                                    ) and self.type != FilterType.CONTAINS:
