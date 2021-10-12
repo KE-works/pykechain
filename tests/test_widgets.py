@@ -460,7 +460,7 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         widget1 = self.wm.add_signature_widget(attachment_property=picture, title="Yes, my precious",
                                                custom_undo_button_text="Remove za widget",
-                                               custom_button_text="Sign za widget",
+                                               custom_button_text="Sign za widget, plz",
                                                show_name_and_date=False)
         widget2 = self.wm.add_signature_widget(attachment_property=picture, title=False,
                                                custom_undo_button_text=False,
