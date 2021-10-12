@@ -164,6 +164,7 @@ class MetaWidget(Enum):
     CUSTOM_UNDO_BUTTON_TEXT = "customUndoText"
     CUSTOM_TEXT = "customText"  # Used for task-navigation bar and signature widgets
     SHOW_BUTTON_VALUE = "showButtonValue"
+    SHOW_NAME_AND_DATE = "showNameAndDate"
 
     # Dashboard Widget
     SOURCE = "source"

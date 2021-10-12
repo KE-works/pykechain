@@ -1258,6 +1258,7 @@ class WidgetsManager(Iterable):
             custom_button_text: Optional[Union[bool, Text]] = False,
             custom_undo_button_text: Optional[Union[bool, Text]] = False,
             editable: Optional[bool] = True,
+            show_name_and_date: Optional[bool] = True,
             **kwargs
     ) -> Widget:
         """
@@ -1280,6 +1281,8 @@ class WidgetsManager(Iterable):
         :type custom_undo_button_text: bool or basestring
         :param editable: (optional) if False, creates a viewable, not editable, signature widget (default = True)
         :type editable: bool
+        :param show_name_and_date: (optional) if True, embeds the name and date on the signature widget (default = True)
+        :type show_name_and_date: bool
         :param kwargs: additional keyword arguments to pass
         :return: newly created widget
         :rtype: Widget
@@ -1313,7 +1316,8 @@ class WidgetsManager(Iterable):
             MetaWidget.SHOW_UNDO_BUTTON: show_undo_button_value,
             MetaWidget.CUSTOM_UNDO_BUTTON_TEXT: undo_button_text,
             MetaWidget.CUSTOM_TEXT: button_text,
-            MetaWidget.SHOW_BUTTON_VALUE: show_button_value
+            MetaWidget.SHOW_BUTTON_VALUE: show_button_value,
+            MetaWidget.SHOW_NAME_AND_DATE: show_name_and_date
         })
 
         widget = self.create_widget(

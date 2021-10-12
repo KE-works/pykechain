@@ -6,6 +6,7 @@ v3.xxx (unreleased)
 * :+1: Added the FormMetapanel widget to the allowed list of widgets in preparation of the introduction of the Forms world.
 * :+1: Added the `cameraInputScanner` representation object to the code.
 * :+1: Added extra validation checks on prefilters inside the `Paginated Widgets`. Warnings are now provided if the filter type and property value do not match correctly. (KLO-36, #1045)
+* :+1: Added the attribute `showNameAndDate` on the `Signature Widget`. Defaults to True. (#1037)
 
 v3.14.0 (22SEP21)
 -----------------
