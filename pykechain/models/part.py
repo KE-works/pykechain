@@ -1158,4 +1158,3 @@ class Part(TreeObject):
         properties_dict = dict()
         for prop in self.properties:
             properties_dict[prop.name] = prop.value
-        return properties_dict

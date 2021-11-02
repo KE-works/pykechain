@@ -120,6 +120,7 @@ API_PATH = {
     'context': 'api/v3/contexts/contexts/{context_id}.json',
     'context_link_activities': 'api/v3/contexts/contexts/{context_id}/link_activities',
     'context_unlink_activities': 'api/v3/contexts/contexts/{context_id}/unlink_activities',
+    'parts_import': 'api/v3/parts/import_parts'
     # 'feature_collections': 'api/v3/contexts/feature_collections.json',
     # 'feature_collection': 'api/v3/contexts/feature_collections/{context_id}.json',
     # 'time_periods': 'api/v3/contexts/time_periods.json',
