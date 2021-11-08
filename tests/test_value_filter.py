@@ -1,4 +1,5 @@
 import datetime
+import urllib
 import warnings
 from unittest import TestCase
 
@@ -136,12 +137,14 @@ class TestFilterAllPropertyTypes(TestBetamax):
                                                           )
         self.wm = self.test_activity.widgets()
         self.prop_test_name = '__PROP TEST'
+        self.new_wheel = self.bike_instance.add(model=self.wheel, name="Wheel, Wheel")
         self.new_part = self.bike.add_model(name='__TEST_PART__', multiplicity=Multiplicity.ZERO_MANY)
         self.filter_types = FilterType.values()
 
     def tearDown(self):
         self.test_activity.delete()
         self.new_part.delete()
+        self.new_wheel.delete()
         super().tearDown()
 
     def test_text_property_filter_in_grid(self):
@@ -469,7 +472,41 @@ class TestFilterAllPropertyTypes(TestBetamax):
                                                          parent_instance=self.bike_instance,
                                                          prefilters=[prefilter])
                 self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                                 '{}:{}:{}'.format(test_prop.id, filter_value,
+                                 '{}:{}:{}'.format(test_prop.id, urllib.parse.quote(filter_value),
+                                                   filter_type))
+            self.assertEqual(len(w), 4)
+
+    def test_part_reference_property_filter_in_grid_with_commas(self):
+        filter_value = self.new_wheel.name
+        test_prop = self.new_part.add_property(
+            name=self.prop_test_name,
+            default_value=self.wheel,
+            property_type=PropertyType.REFERENCES_VALUE
+        )
+        self.bike_instance.add_with_properties(
+            model=self.new_part,
+            update_dict={test_prop.id: [self.project.part(name="Front Wheel")]}
+        )
+        self.bike_instance.add_with_properties(
+            model=self.new_part,
+            update_dict={test_prop.id: [self.project.part(name="Front Wheel"), self.project.part(name="Rear Wheel")]}
+        )
+        with warnings.catch_warnings(record=True) as w:
+            for filter_type in self.filter_types:
+                prefilter = PropertyValueFilter(
+                    property_model=test_prop,
+                    value=filter_value,
+                    filter_type=filter_type
+                )
+                widget = self.wm.add_filteredgrid_widget(title=filter_type,
+                                                         part_model=self.new_part,
+                                                         readable_models=list(),
+                                                         writable_models=[test_prop],
+                                                         custom_height=300,
+                                                         parent_instance=self.bike_instance,
+                                                         prefilters=[prefilter])
+                self.assertEqual(widget.meta.get('prefilters').get('property_value'),
+                                 '{}:{}:{}'.format(test_prop.id, urllib.parse.quote(filter_value),
                                                    filter_type))
             self.assertEqual(len(w), 4)
 
@@ -503,7 +540,7 @@ class TestFilterAllPropertyTypes(TestBetamax):
                                                          parent_instance=self.bike_instance,
                                                          prefilters=[prefilter])
                 self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                                 '{}:{}:{}'.format(test_prop.id, filter_value,
+                                 '{}:{}:{}'.format(test_prop.id, urllib.parse.quote(filter_value),
                                                    filter_type))
             self.assertEqual(len(w), 4)
 
