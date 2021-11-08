@@ -1,4 +1,5 @@
 import datetime
+import urllib
 import warnings
 from abc import abstractmethod
 from typing import Text, Union, Any, Dict, List, Optional
@@ -75,7 +76,12 @@ class PropertyValueFilter(BaseFilter):
 
     def format(self) -> Text:
         """Format PropertyValueFilter as a string."""
-        value = str(self.value).lower() if isinstance(self.value, bool) else self.value
+        if isinstance(self.value, str):
+            value = urllib.parse.quote(self.value)
+        elif isinstance(self.value, bool):
+            value = str(self.value).lower()
+        else:
+            value = self.value
         return "{}:{}:{}".format(self.id, value, self.type)
 
     def validate(self, part_model: 'Part') -> None:
