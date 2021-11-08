@@ -3,7 +3,7 @@ requests==2.26.0
 envparse==0.2.0
 
 # json validation (inspector)
-jsonschema==4.1.0
+jsonschema==4.2.0
 
 # for version comparison
 semver==2.13.0
@@ -13,7 +13,7 @@ pytest==6.2.5
 betamax==0.8.1
 coverage~=5.5
 pytest-cov==3.0.0
-coveralls==3.2.0
+coveralls==3.3.0
 
 # documentation
 Sphinx==4.2.0
@@ -30,6 +30,6 @@ pre-commit==2.15.0
 
 # for package management (uploads)
 twine>=3.0.0; python_version >= '3.6'
-twine==3.4.2; python_version <= '3.5.99'
+twine==3.5.0; python_version <= '3.5.99'
 
 pytz==2021.3
