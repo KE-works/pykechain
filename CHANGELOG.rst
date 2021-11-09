@@ -1,8 +1,10 @@
 Change Log
 ==========
-vUNRELEASED()
+
+v3.16.0 (9NOV21)
 ________________
 * :bug: Fixed a bug that caused the prefilters applied on `Part reference` properties to no work if the `Part` contained a comma or other special characters (#1054)
+* :+1: dependent versions for development: jsonschema (4.2.0), twine (3.5.0), coveralls (3.3.0)
 
 v3.15.0 (12OCT21)
 -----------------
