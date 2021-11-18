@@ -16,7 +16,7 @@ pytest-cov==3.0.0
 coveralls==3.3.0
 
 # documentation
-Sphinx==4.2.0
+Sphinx==4.3.0
 nbsphinx==0.8.7
 
 # integration
