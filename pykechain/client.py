@@ -685,7 +685,8 @@ class Client(object):
         ...
 
         """
-        # if limit is provided and the batchsize is bigger than the limit, ensure that the batch size is maximised
+        # if limit is provided and the batchsize is bigger than the limit, ensure that the
+        # batch size is maximised
         if limit and limit < batch:
             batch = limit
 
@@ -729,16 +730,46 @@ class Client(object):
     def part(self, *args, **kwargs) -> Part:
         """Retrieve single KE-chain part.
 
-        Uses the same interface as the :func:`parts` method but returns only a single pykechain :class:`models.Part`
-        instance.
+        Uses the same interface as the :func:`parts` method but returns only a single pykechain
+        :class:`models.Part` instance.
 
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
+        If additional `keyword=value` arguments are provided, these are added to the request
+        parameters. Please refer to the documentation of the KE-chain API for additional query
+        parameters.
+
+        When only the `pk` or `id` is provided as an input for the part search, the
+        detail route will be called.
 
         :return: a single :class:`models.Part`
         :raises NotFoundError: When no `Part` is found
         :raises MultipleFoundError: When more than a single `Part` is found
         """
+        part_id = None
+        if len(args) == 1:
+            # the first arg is the pk
+            part_id = check_uuid(args[0])
+        elif 'id' in kwargs:
+            part_id = check_uuid(kwargs.get('id'))
+        elif 'pk' in kwargs:
+            part_id = check_uuid(kwargs.get('pk'))
+
+        if part_id:
+            url = self._build_url('part', part_id=part_id)
+            request_params = API_EXTRA_PARAMS['part']
+
+            if kwargs:
+                request_params.update(**kwargs)
+
+            response = self._request('GET', url, params=request_params)
+
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise NotFoundError("Could not retrieve Part", response=response)
+
+            data = response.json()
+
+            part_results = data['results']
+            return Part(part_results)
+
         return self._retrieve_singular(self.parts, *args, **kwargs)
 
     def model(self, *args, **kwargs) -> Part:
@@ -747,15 +778,19 @@ class Client(object):
         Uses the same interface as the :func:`part` method but returns only a single pykechain
         :class:`models.Part` instance of category `MODEL`.
 
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
+        If additional `keyword=value` arguments are provided, these are added to the request
+        parameters. Please refer to the documentation of the KE-chain API for additional query
+        parameters.
+
+        When only the `id` or `pk` is provided, the detail route for the part id will be
+        called.
 
         :return: a single :class:`models.Part`
         :raises NotFoundError: When no `Part` is found
         :raises MultipleFoundError: When more than a single `Part` is found
         """
         kwargs['category'] = Category.MODEL
-        return self._retrieve_singular(self.parts, *args, **kwargs)
+        return self.part(*args, **kwargs)
 
     def properties(
             self,

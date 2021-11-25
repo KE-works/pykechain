@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+UNRELEASED
+----------
+* :+1: When a part is searched that on its `id` or `pk` than the `Client.part()` call will perform a API call to the detail route of the part api. This will greatly reduce the overhead on large databases and improve performance. (#1064)
+
 v3.16.0 (9NOV21)
 ________________
 * :bug: Fixed a bug that caused the prefilters applied on `Part reference` properties to no work if the `Part` contained a comma or other special characters (#1054)
