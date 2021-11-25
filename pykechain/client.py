@@ -737,7 +737,7 @@ class Client(object):
         parameters. Please refer to the documentation of the KE-chain API for additional query
         parameters.
 
-        When only the `pk` or `id` is provided as an input for the part search, the
+        When only the `pk` is provided as an input for the part search, the
         detail route will be called.
 
         :return: a single :class:`models.Part`
@@ -831,16 +831,43 @@ class Client(object):
     def property(self, *args, **kwargs) -> 'AnyProperty':  # noqa: F
         """Retrieve single KE-chain Property.
 
-        Uses the same interface as the :func:`properties` method but returns only a single pykechain :class:
-        `models.Property` instance.
+        Uses the same interface as the :func:`properties` method but returns only a single
+        pykechain :class:`models.Property` instance.
 
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
+        If additional `keyword=value` arguments are provided, these are added to the request
+        parameters. Please refer to the documentation of the KE-chain API for additional query
+        parameters.
+
+        When only the `pk` is provided as an input for the part search, the detail route will
+        be called.
 
         :return: a single :class:`models.Property`
         :raises NotFoundError: When no `Property` is found
         :raises MultipleFoundError: When more than a single `Property` is found
         """
+        property_id = None
+        if len(args) == 2:
+            # the 2nd arg (index 1) is the pk
+            property_id = check_uuid(args[1])
+        elif 'pk' in kwargs:
+            property_id = check_uuid(kwargs.pop('pk'))
+        elif 'id' in kwargs:
+            # for accidental use of 'id' on the part retrieving we have this smart
+            # popper from the kwargs to ensure that the intention is still correct
+            # it will result in a single Part retrieve.
+            property_id = check_uuid(kwargs.pop('id'))
+
+        if property_id:
+            url = self._build_url('property', property_id=property_id)
+            request_params = API_EXTRA_PARAMS['property']
+
+            response = self._request('GET', url, params=request_params)
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise NotFoundError("Could not retrieve Property", response=response)
+
+            data = response.json()
+            property_results = data['results'][0]
+            return Property.create(property_results, client=self)
         return self._retrieve_singular(self.properties, *args, **kwargs)
 
     def services(

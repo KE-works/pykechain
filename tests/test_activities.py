@@ -602,7 +602,7 @@ class TestActivities(TestBetamax):
 
         self.assertIsInstance(all_tasks, list)
         self.assertEqual(
-            12, len(all_tasks), msg="Number of tasks has changed, expected 12."
+            13, len(all_tasks), msg="Number of tasks has changed, expected 13."
         )
 
     def test_retrieve_activity_by_id(self):
@@ -779,7 +779,6 @@ class TestActivities(TestBetamax):
         assignees_list = self.task.assignees
 
         self.assertSetEqual(
-
             set(list_of_assignees_in_data), set([u.id for u in assignees_list])
         )
 
