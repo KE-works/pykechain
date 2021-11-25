@@ -739,10 +739,10 @@ def _update_references() -> None:
             else:
                 prop_value = list()
                 for part_id in references_new:
-                    referenced_part = prop_new._client.part(id=part_id, category=prop_new.category)
+                    referenced_part = prop_new._client.part(pk=part_id, category=prop_new.category)
                     prop_value.append(referenced_part.id)
                 prop_new_options = {"scope_id": prop_new._client.part(
-                    id=references_new[0], category=prop_new.category).scope_id}
+                    pk=references_new[0], category=prop_new.category).scope_id}
 
             # Make sure the excluded property models ids are mapped on the new referenced part
             # model

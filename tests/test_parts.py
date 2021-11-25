@@ -498,35 +498,6 @@ class TestParts(TestBetamax):
 
 
 @skipIf(not TEST_FLAG_IS_PIM3, reason="This tests is designed for PIM version 3, expected to fail on older PIM3")
-class TestPIM2SpecificPartTests(TestBetamax):
-    """Pim3 capable tests."""
-
-    def test_retrieve_part_without_parent_id(self):
-        # only the root does not have a parent_id
-        product_root_node = self.project.part(name='Product', classification=Classification.PRODUCT)
-        self.assertTrue(hasattr(product_root_node, 'parent_id'))
-        self.assertIsNotNone(product_root_node.parent_id)
-        self.assertIsNone(product_root_node.parent().parent_id)
-
-    def test_retrieve_parent_of_part_without_parent_id(self):
-        # only the root does not have a parent_id
-        product_root_node = self.project.part(name='Product', classification=Classification.PRODUCT)
-        root_node = product_root_node.parent()
-        self.assertEqual(root_node.name, "Root")
-        self.assertIsNone(root_node.parent())
-
-    def test_retrieve_siblings_of_part_without_parent_id(self):
-        product_root_node = self.project.part(name='Product', classification=Classification.PRODUCT)
-        siblings_of_product_root_node = product_root_node.siblings()
-        self.assertIsInstance(siblings_of_product_root_node, PartSet)
-        self.assertEqual(len(siblings_of_product_root_node), 2)
-
-        siblings_of_root_node = product_root_node.parent().siblings()
-        self.assertIsInstance(siblings_of_root_node, PartSet)
-        self.assertEqual(len(siblings_of_root_node), 0)
-
-
-@skipIf(not TEST_FLAG_IS_PIM3, reason="This tests is designed for PIM version 3, expected to fail on older PIM3")
 @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
                     reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
 class TestBulkPartsCreation(TestBetamax):

@@ -745,30 +745,28 @@ class Client(object):
         :raises MultipleFoundError: When more than a single `Part` is found
         """
         part_id = None
-        if len(args) == 1:
-            # the first arg is the pk
-            part_id = check_uuid(args[0])
-        elif 'id' in kwargs:
-            part_id = check_uuid(kwargs.get('id'))
+        if len(args) == 2:
+            # the 2nd arg (index 1) is the pk
+            part_id = check_uuid(args[1])
         elif 'pk' in kwargs:
-            part_id = check_uuid(kwargs.get('pk'))
+            part_id = check_uuid(kwargs.pop('pk'))
+        elif 'id' in kwargs:
+            # for accidental use of 'id' on the part retrieving we have this smart
+            # popper from the kwargs to ensure that the intention is still correct
+            # it will result in a single Part retrieve.
+            part_id = check_uuid(kwargs.pop('id'))
 
         if part_id:
             url = self._build_url('part', part_id=part_id)
             request_params = API_EXTRA_PARAMS['part']
 
-            if kwargs:
-                request_params.update(**kwargs)
-
             response = self._request('GET', url, params=request_params)
-
             if response.status_code != requests.codes.ok:  # pragma: no cover
                 raise NotFoundError("Could not retrieve Part", response=response)
 
             data = response.json()
-
-            part_results = data['results']
-            return Part(part_results)
+            part_results = data['results'][0]
+            return Part(part_results, client=self)
 
         return self._retrieve_singular(self.parts, *args, **kwargs)
 
@@ -1541,7 +1539,6 @@ class Client(object):
 
         data = dict(
             name=check_text(name, 'name') or "CLONE - {}".format(part.name),
-            parent_id=parent.id,
             suppress_kevents=kwargs.pop('suppress_kevents', None),
         )
 
@@ -1549,9 +1546,13 @@ class Client(object):
             data.update({
                 'multiplicity': check_enum(multiplicity, Multiplicity, 'multiplicity') or part.multiplicity,
                 'model_id': part.id,
+                'parent': parent.id
             })
         else:
-            data['instance_id'] = part.id
+            data.update({
+                'instance_id':  part.id,
+                'parent_id': parent.id
+            })
 
         if part.category == Category.MODEL:
             select_action = 'clone_model'

@@ -54,8 +54,7 @@ class TestScopes(TestBetamax):
         """Test for the property 'team' of a scope."""
         team = self.project.team
 
-        self.assertIsNotNone(team)
-        self.assertIsInstance(team, Team)
+        self.assertIsNone(team)
 
     def test_side_bar(self):
         side_bar_manager = self.project.side_bar()

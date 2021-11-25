@@ -267,7 +267,8 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         live_widget = self.client.widget(pk=widget.id)
 
-        self.assertEqual(new_title, live_widget.title)
+        self.assertEqual(new_title, live_widget.meta.get('customTitle'))
+        self.assertEqual("Custom title", live_widget.meta.get('showTitleValue'))
         self.assertEqual(new_title, live_widget.title_visible)
 
     def test_edit_widget_title_is_none(self):
@@ -309,7 +310,6 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         live_widget = self.client.widget(pk=widget.id)
 
-        self.assertEqual(new_title, live_widget.title)
         self.assertEqual(new_title, live_widget.title_visible)
         self.assertEqual([ShowColumnTypes.UNIT, ShowColumnTypes.DESCRIPTION], live_widget.meta["showColumns"])
 
