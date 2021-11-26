@@ -10,6 +10,7 @@ semver==2.13.0
 
 # testing
 pytest==6.2.5
+pytest-xdist[psutil]==2.4.0
 betamax==0.8.1
 coverage==6.1.2
 pytest-cov==3.0.0
