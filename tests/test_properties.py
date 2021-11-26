@@ -117,7 +117,7 @@ class TestPropertyCreation(TestBetamax):
 
 class TestProperties(TestBetamax):
     def setUp(self):
-        super(TestProperties, self).setUp()
+        super().setUp()
 
         self.wheel_model = self.project.model('Wheel')
         self.bike_model = self.project.model('Bike')
@@ -136,7 +136,7 @@ class TestProperties(TestBetamax):
     def tearDown(self):
         if self.prop_model:
             self.prop_model.delete()
-        super(TestProperties, self).tearDown()
+        super().tearDown()
 
     def test_retrieve_properties(self):
         properties = self.project.properties('Diameter')
@@ -377,7 +377,7 @@ class TestProperties(TestBetamax):
         self.assertEqual(dual_pad_property.id, dual_pad_prop_retrieved_from_seat.id)
 
 
-class TestUpdateProperties(TestBetamax):
+class TestPropertiesUpdateProperties(TestBetamax):
     def setUp(self):
         super().setUp()
 

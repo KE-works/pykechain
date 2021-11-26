@@ -610,6 +610,7 @@ class TestPartsCopyMove(TestBetamax):
             file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "requirements.txt")
             p_attachment.upload(file)
 
+
         self.dump_part = self.model_to_be_copied.copy(
             target_parent=self.model_target_parent,
         )

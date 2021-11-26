@@ -685,7 +685,8 @@ class Client(object):
         ...
 
         """
-        # if limit is provided and the batchsize is bigger than the limit, ensure that the batch size is maximised
+        # if limit is provided and the batchsize is bigger than the limit, ensure that the
+        # batch size is maximised
         if limit and limit < batch:
             batch = limit
 
@@ -729,16 +730,44 @@ class Client(object):
     def part(self, *args, **kwargs) -> Part:
         """Retrieve single KE-chain part.
 
-        Uses the same interface as the :func:`parts` method but returns only a single pykechain :class:`models.Part`
-        instance.
+        Uses the same interface as the :func:`parts` method but returns only a single pykechain
+        :class:`models.Part` instance.
 
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
+        If additional `keyword=value` arguments are provided, these are added to the request
+        parameters. Please refer to the documentation of the KE-chain API for additional query
+        parameters.
+
+        When only the `pk` is provided as an input for the part search, the
+        detail route will be called.
 
         :return: a single :class:`models.Part`
         :raises NotFoundError: When no `Part` is found
         :raises MultipleFoundError: When more than a single `Part` is found
         """
+        part_id = None
+        if len(args) >= 2:
+            # the 2nd arg (index 1) is the pk
+            part_id = check_uuid(args[1])
+        elif 'pk' in kwargs:
+            part_id = check_uuid(kwargs.pop('pk'))
+        elif 'id' in kwargs:
+            # for accidental use of 'id' on the part retrieving we have this smart
+            # popper from the kwargs to ensure that the intention is still correct
+            # it will result in a single Part retrieve.
+            part_id = check_uuid(kwargs.pop('id'))
+
+        if part_id:
+            url = self._build_url('part', part_id=part_id)
+            request_params = API_EXTRA_PARAMS['part']
+
+            response = self._request('GET', url, params=request_params)
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise NotFoundError("Could not retrieve Part", response=response)
+
+            data = response.json()
+            part_results = data['results'][0]
+            return Part(part_results, client=self)
+
         return self._retrieve_singular(self.parts, *args, **kwargs)
 
     def model(self, *args, **kwargs) -> Part:
@@ -747,15 +776,19 @@ class Client(object):
         Uses the same interface as the :func:`part` method but returns only a single pykechain
         :class:`models.Part` instance of category `MODEL`.
 
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
+        If additional `keyword=value` arguments are provided, these are added to the request
+        parameters. Please refer to the documentation of the KE-chain API for additional query
+        parameters.
+
+        When only the `id` or `pk` is provided, the detail route for the part id will be
+        called.
 
         :return: a single :class:`models.Part`
         :raises NotFoundError: When no `Part` is found
         :raises MultipleFoundError: When more than a single `Part` is found
         """
         kwargs['category'] = Category.MODEL
-        return self._retrieve_singular(self.parts, *args, **kwargs)
+        return self.part(*args, **kwargs)
 
     def properties(
             self,
@@ -798,16 +831,43 @@ class Client(object):
     def property(self, *args, **kwargs) -> 'AnyProperty':  # noqa: F
         """Retrieve single KE-chain Property.
 
-        Uses the same interface as the :func:`properties` method but returns only a single pykechain :class:
-        `models.Property` instance.
+        Uses the same interface as the :func:`properties` method but returns only a single
+        pykechain :class:`models.Property` instance.
 
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
+        If additional `keyword=value` arguments are provided, these are added to the request
+        parameters. Please refer to the documentation of the KE-chain API for additional query
+        parameters.
+
+        When only the `pk` is provided as an input for the part search, the detail route will
+        be called.
 
         :return: a single :class:`models.Property`
         :raises NotFoundError: When no `Property` is found
         :raises MultipleFoundError: When more than a single `Property` is found
         """
+        property_id = None
+        if len(args) >= 2:
+            # the 2nd arg (index 1) is the pk
+            property_id = check_uuid(args[1])
+        elif 'pk' in kwargs:
+            property_id = check_uuid(kwargs.pop('pk'))
+        elif 'id' in kwargs:
+            # for accidental use of 'id' on the part retrieving we have this smart
+            # popper from the kwargs to ensure that the intention is still correct
+            # it will result in a single Part retrieve.
+            property_id = check_uuid(kwargs.pop('id'))
+
+        if property_id:
+            url = self._build_url('property', property_id=property_id)
+            request_params = API_EXTRA_PARAMS['property']
+
+            response = self._request('GET', url, params=request_params)
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise NotFoundError("Could not retrieve Property", response=response)
+
+            data = response.json()
+            property_results = data['results'][0]
+            return Property.create(property_results, client=self)
         return self._retrieve_singular(self.properties, *args, **kwargs)
 
     def services(
@@ -1506,7 +1566,6 @@ class Client(object):
 
         data = dict(
             name=check_text(name, 'name') or "CLONE - {}".format(part.name),
-            parent_id=parent.id,
             suppress_kevents=kwargs.pop('suppress_kevents', None),
         )
 
@@ -1514,9 +1573,13 @@ class Client(object):
             data.update({
                 'multiplicity': check_enum(multiplicity, Multiplicity, 'multiplicity') or part.multiplicity,
                 'model_id': part.id,
+                'parent': parent.id
             })
         else:
-            data['instance_id'] = part.id
+            data.update({
+                'instance_id': part.id,
+                'parent_id': parent.id
+            })
 
         if part.category == Category.MODEL:
             select_action = 'clone_model'

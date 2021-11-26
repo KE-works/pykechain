@@ -15,7 +15,7 @@ from pykechain.utils import find, is_uuid
 from tests.classes import TestBetamax
 
 
-class TestBaseReference(TestCase):
+class TestPropertyBaseReference(TestCase):
 
     def setUp(self) -> None:
         super().setUp()
@@ -29,9 +29,9 @@ class TestBaseReference(TestCase):
             self.base_ref.get_prefilters()
 
 
-class TestMultiReferenceProperty(TestBetamax):
+class TestPropertyMultiReferenceProperty(TestBetamax):
     def setUp(self):
-        super(TestMultiReferenceProperty, self).setUp()
+        super().setUp()
 
         # reference Part target (model and 1 instance)
         _wheel_model = self.project.model(ref="wheel")
@@ -78,7 +78,7 @@ class TestMultiReferenceProperty(TestBetamax):
     def tearDown(self):
         self.target_model.delete()
         self.ref_prop_model.delete()
-        super(TestMultiReferenceProperty, self).tearDown()
+        super().tearDown()
 
     def test_referencing_a_model(self):
         # setUp
@@ -766,9 +766,9 @@ class TestMultiReferenceProperty(TestBetamax):
         copied_ref_property.delete()
 
 
-class TestMultiReferencePropertyXScope(TestBetamax):
+class TestPropertyMultiReferencePropertyXScope(TestBetamax):
     def setUp(self):
-        super(TestMultiReferencePropertyXScope, self).setUp()
+        super().setUp()
         self.x_scope = self.client.create_scope(
             name="Cross_reference scope", tags=["x-scope-target"]
         )
@@ -794,7 +794,7 @@ class TestMultiReferencePropertyXScope(TestBetamax):
     def tearDown(self):
         self.x_reference_model.delete()
         self.x_scope.delete()
-        super(TestMultiReferencePropertyXScope, self).tearDown()
+        super().tearDown()
 
     def test_set_model_value(self):
         # setUp
@@ -824,7 +824,7 @@ class TestMultiReferencePropertyXScope(TestBetamax):
         self.assertEqual(self.x_target.id, self.x_reference.value[0].id)
 
 
-class TestActivityReference(TestBetamax):
+class TestPropertyActivityReference(TestBetamax):
     def setUp(self):
         super().setUp()
         root = self.project.model(name="Product")
@@ -880,7 +880,7 @@ class TestActivityReference(TestBetamax):
         )
 
 
-class TestScopeReference(TestBetamax):
+class TestPropertyScopeReference(TestBetamax):
     def setUp(self):
         super().setUp()
         root = self.project.model(name="Product")
@@ -964,7 +964,7 @@ class TestScopeReference(TestBetamax):
             self.scope_ref_prop.set_prefilters(prefilters=filters[0])
 
 
-class TestUserReference(TestBetamax):
+class TestPropertyUserReference(TestBetamax):
     def setUp(self):
         super().setUp()
         root = self.project.model(name="Product")

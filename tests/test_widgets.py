@@ -219,13 +219,13 @@ class TestWidgetManager(TestBetamax):
 
 class TestWidgetManagerInActivity(TestBetamax):
     def setUp(self):
-        super(TestWidgetManagerInActivity, self).setUp()
+        super().setUp()
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
         self.wm = self.task.widgets()  # type: WidgetsManager
 
     def tearDown(self):
         self.task.delete()
-        super(TestWidgetManagerInActivity, self).tearDown()
+        super().tearDown()
 
     def test_new_widget_using_widget_manager(self):
         self.assertEqual(len(self.wm), 1)
@@ -267,7 +267,8 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         live_widget = self.client.widget(pk=widget.id)
 
-        self.assertEqual(new_title, live_widget.title)
+        self.assertEqual(new_title, live_widget.meta.get('customTitle'))
+        self.assertEqual("Custom title", live_widget.meta.get('showTitleValue'))
         self.assertEqual(new_title, live_widget.title_visible)
 
     def test_edit_widget_title_is_none(self):
@@ -309,7 +310,6 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         live_widget = self.client.widget(pk=widget.id)
 
-        self.assertEqual(new_title, live_widget.title)
         self.assertEqual(new_title, live_widget.title_visible)
         self.assertEqual([ShowColumnTypes.UNIT, ShowColumnTypes.DESCRIPTION], live_widget.meta["showColumns"])
 

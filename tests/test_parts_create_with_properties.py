@@ -77,7 +77,7 @@ class TestPartCreateWithProperties(TestBetamax):
         self.assertTrue(self.new_wheel.property('Diameter'), 42.43)
 
 
-class TestCreateModelWithProperties(TestBetamax):
+class TestPartCreateModelWithProperties(TestBetamax):
     properties_fvalues = [
         {"name": "char prop", "property_type": PropertyType.CHAR_VALUE},
         {"name": "number prop", "property_type": PropertyType.FLOAT_VALUE, "value": 3.14},

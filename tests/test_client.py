@@ -2,17 +2,17 @@ import datetime
 import time
 import warnings
 from test.support import EnvironmentVarGuard
-from unittest import TestCase, skipIf
+from unittest import TestCase
 
 import pytz
 
 from pykechain.client import Client
 from pykechain.enums import ScopeStatus
-from pykechain.exceptions import ForbiddenError, ClientError, NotFoundError, IllegalArgumentError, APIError
-from pykechain.models import Team, Base
+from pykechain.exceptions import APIError, ClientError, ForbiddenError, IllegalArgumentError, \
+    NotFoundError
+from pykechain.models import Base, Team
 from pykechain.models.scope import Scope
 from tests.classes import TestBetamax
-from tests.utils import TEST_FLAG_IS_WIM2
 
 
 class TestClient(TestCase):
@@ -80,11 +80,13 @@ class TestClient(TestCase):
         client = Client()
 
         not_a_kechain_object = 3
-        with self.assertRaises(IllegalArgumentError, msg='Reload must receive an object of type Base.'):
+        with self.assertRaises(IllegalArgumentError,
+                               msg='Reload must receive an object of type Base.'):
             client.reload(not_a_kechain_object)
 
         empty_kechain_object = Base(json=dict(name='empty', id='1234567890'), client=client)
-        with self.assertRaises(IllegalArgumentError, msg='Reload cant find API resource for type Base'):
+        with self.assertRaises(IllegalArgumentError,
+                               msg='Reload cant find API resource for type Base'):
             client.reload(empty_kechain_object)
 
 
@@ -319,7 +321,6 @@ class TestCloneScopeAsync(TestBetamax):
         self.assertIsInstance(self.temp_scope, Scope)
 
 
-@skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
 class TestClientAppVersions(TestBetamax):
     def test_retrieve_versions(self):
         """Test to retrieve the app versions from KE-chain"""
@@ -355,24 +356,31 @@ class TestClientAppVersions(TestBetamax):
 
         # no version found on the app kechain2.metrics
         with self.assertRaises(NotFoundError):
-            self.client.match_app_version(app='kechain2.core.activitylog', version='>0.0.0', default=None)
+            self.client.match_app_version(app='kechain2.core.activitylog', version='>0.0.0',
+                                          default=None)
 
         # no version found on the app kechain2.metrics, default = True, returns True
-        self.assertTrue(self.client.match_app_version(app='kechain2.core.activitylog', version='>0.0.0', default=True))
+        self.assertTrue(
+            self.client.match_app_version(app='kechain2.core.activitylog', version='>0.0.0',
+                                          default=True))
 
         # no version found on the app kechain2.metrics, default = False, returns False
-        self.assertFalse(self.client.match_app_version(app='kechain2.core.activitylog', version='>0.0.0', default=False))
+        self.assertFalse(
+            self.client.match_app_version(app='kechain2.core.activitylog', version='>0.0.0',
+                                          default=False))
 
         # no version found on the app kechain2.metrics, default = False, returns False
         # default is set to return False in the method
-        self.assertFalse(self.client.match_app_version(app='kechain2.core.activitylog', version='>0.0.0'))
+        self.assertFalse(
+            self.client.match_app_version(app='kechain2.core.activitylog', version='>0.0.0'))
 
         # did not find the app
         with self.assertRaises(NotFoundError):
             self.client.match_app_version(app='nonexistingapp', version='>0.0.0', default=None)
 
         # did not find the app, but the default returns a False
-        self.assertFalse(self.client.match_app_version(app='nonexistingapp', version='>0.0.0', default=False))
+        self.assertFalse(
+            self.client.match_app_version(app='nonexistingapp', version='>0.0.0', default=False))
 
         # did not find the app, but the default returns a False, without providing the default, as the default is False
         self.assertFalse(self.client.match_app_version(app='nonexistingapp', version='>0.0.0'))

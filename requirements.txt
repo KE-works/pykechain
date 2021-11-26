@@ -10,8 +10,9 @@ semver==2.13.0
 
 # testing
 pytest==6.2.5
+pytest-xdist[psutil]==2.4.0
 betamax==0.8.1
-coverage~=5.5
+coverage==6.1.2
 pytest-cov==3.0.0
 coveralls==3.3.1
 
@@ -29,7 +30,7 @@ mypy==0.910; python_version >= '3.4'
 pre-commit==2.15.0
 
 # for package management (uploads)
-twine>=3.0.0; python_version >= '3.6'
+twine~=3.0; python_version >= '3.6'
 twine==3.6.0; python_version <= '3.5.99'
 
 pytz==2021.3
