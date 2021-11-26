@@ -377,7 +377,7 @@ class TestProperties(TestBetamax):
         self.assertEqual(dual_pad_property.id, dual_pad_prop_retrieved_from_seat.id)
 
 
-class TestUpdateProperties(TestBetamax):
+class TestPropertiesUpdateProperties(TestBetamax):
     def setUp(self):
         super().setUp()
 
