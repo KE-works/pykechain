@@ -85,7 +85,7 @@ class SelectListBaseTests:
             self.assertEqual(original_options_dict, testing_options_dict)
 
 
-class TestSelectListProperty(SelectListBaseTests.Tests):
+class TestPropertySelectListProperty(SelectListBaseTests.Tests):
     PROPERTY_TYPE = PropertyType.SINGLE_SELECT_VALUE
 
     def test_value(self):
@@ -124,7 +124,7 @@ class TestSelectListProperty(SelectListBaseTests.Tests):
             self.select.value = 'Some illegal value that is not inside the list of options for sure'
 
 
-class TestMultiSelectListProperty(SelectListBaseTests.Tests):
+class TestPropertyMultiSelectListProperty(SelectListBaseTests.Tests):
     PROPERTY_TYPE = PropertyType.MULTI_SELECT_VALUE
 
     def test_value(self):

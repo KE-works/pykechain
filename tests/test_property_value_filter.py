@@ -33,6 +33,10 @@ class TestPropertyValueFilter(TestBetamax):
         self.new_test_property = self.new_part.add_property(name="__test_propERTY__",
                                                             property_type=PropertyType.TEXT_VALUE)
 
+    def tearDown(self):
+        self.new_part.delete()
+        super().tearDown()
+
     # noinspection PyTypeChecker
     def test_creation(self):
         with self.assertRaises(IllegalArgumentError):
@@ -124,7 +128,7 @@ class TestPropertyValueFilter(TestBetamax):
         self.assertNotEqual(self.filter, fifth_filter)
 
 
-class TestFilterAllPropertyTypes(TestBetamax):
+class TestPropertyFilterAllPropertyTypes(TestBetamax):
     def setUp(self):
         super().setUp()
 

@@ -652,20 +652,6 @@ class TestActivities(TestBetamax):
         ):
             self.project.create_activity(name="New", activity_type="DEFUNCTActivity")
 
-#
-# @skipIf(not TEST_FLAG_IS_WIM2, reason="This tests is designed for WIM version 2, expected to fail on older WIM")
-# class TestActivitiesWIM2(TestBetamax):
-#
-#     def setUp(self):
-#         super().setUp()
-#         self.root = self.project.activity(ActivityRootNames.WORKFLOW_ROOT)
-#         self.task = self.root.create(name='test task', activity_type=ActivityType.TASK)
-#
-#     def tearDown(self):
-#         if self.task:
-#             self.task.delete()
-#         super().tearDown()
-
     # 2.0 new activity
     # noinspection PyTypeChecker
     def test_edit_activity_assignee(self):
@@ -775,6 +761,10 @@ class TestActivities(TestBetamax):
         self.assertFalse(subprocess.is_task())
 
     def test_activity_assignees_list(self):
+        test_user = self.client.user(username="testuser")
+        self.task.edit(assignees_ids=[test_user.id])
+        self.task.refresh()
+
         list_of_assignees_in_data = self.task._json_data.get("assignees_ids")
         assignees_list = self.task.assignees
 
