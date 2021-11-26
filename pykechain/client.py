@@ -846,7 +846,7 @@ class Client(object):
         :raises MultipleFoundError: When more than a single `Property` is found
         """
         property_id = None
-        if len(args) == 2:
+        if len(args) >= 2:
             # the 2nd arg (index 1) is the pk
             property_id = check_uuid(args[1])
         elif 'pk' in kwargs:
