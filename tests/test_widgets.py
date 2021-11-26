@@ -219,13 +219,13 @@ class TestWidgetManager(TestBetamax):
 
 class TestWidgetManagerInActivity(TestBetamax):
     def setUp(self):
-        super(TestWidgetManagerInActivity, self).setUp()
+        super().setUp()
         self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
         self.wm = self.task.widgets()  # type: WidgetsManager
 
     def tearDown(self):
         self.task.delete()
-        super(TestWidgetManagerInActivity, self).tearDown()
+        super().tearDown()
 
     def test_new_widget_using_widget_manager(self):
         self.assertEqual(len(self.wm), 1)
