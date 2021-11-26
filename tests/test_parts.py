@@ -1,13 +1,11 @@
 import datetime
-from unittest import skipIf
 
 import pytest
 
-from pykechain.enums import Multiplicity, Category, Classification, PropertyType
-from pykechain.exceptions import NotFoundError, MultipleFoundError, APIError, IllegalArgumentError
-from pykechain.models import PartSet, Part
+from pykechain.enums import Category, Classification, Multiplicity, PropertyType
+from pykechain.exceptions import APIError, IllegalArgumentError, MultipleFoundError, NotFoundError
+from pykechain.models import Part, PartSet
 from tests.classes import TestBetamax
-from tests.utils import TEST_FLAG_IS_PIM3
 
 
 class TestParts(TestBetamax):
@@ -38,9 +36,11 @@ class TestParts(TestBetamax):
         all_parts = self.project.parts()
 
         tip = ' See Base.__eq__() method.'
-        self.assertFalse(all_parts[0] == all_parts[1], msg='2 different parts must not be equal.' + tip)
+        self.assertFalse(all_parts[0] == all_parts[1],
+                         msg='2 different parts must not be equal.' + tip)
         self.assertTrue(all_parts[0] == all_parts[0], msg='The same part must be equal.' + tip)
-        self.assertFalse(all_parts[0] == 5, msg='A part must not be equal to a non-pykechain object.' + tip)
+        self.assertFalse(all_parts[0] == 5,
+                         msg='A part must not be equal to a non-pykechain object.' + tip)
 
     def test_base_hash(self):
         wheel = self.project.model('Wheel')
@@ -59,8 +59,9 @@ class TestParts(TestBetamax):
         obj = self.project.parts(limit=1)[0]
         for attribute in attributes:
             with self.subTest(msg=attribute):
-                self.assertTrue(hasattr(obj, attribute), "Could not find '{}' in the object: '{}'".format(
-                    attribute, obj.__dict__.keys()))
+                self.assertTrue(hasattr(obj, attribute),
+                                "Could not find '{}' in the object: '{}'".format(
+                                    attribute, obj.__dict__.keys()))
 
     def test_retrieve_single_unknown(self):
         with self.assertRaises(NotFoundError):
@@ -105,7 +106,8 @@ class TestParts(TestBetamax):
 
         # testing
         with self.assertRaises(IllegalArgumentError):
-            self.client.create_model(name='Multiplicity does not exist', parent=bike_model, multiplicity='TEN')
+            self.client.create_model(name='Multiplicity does not exist', parent=bike_model,
+                                     multiplicity='TEN')
 
     def test_part_add_delete_part(self):
         bike = self.project.part('Bike')
@@ -145,7 +147,8 @@ class TestParts(TestBetamax):
         # testing
         with self.assertRaises(IllegalArgumentError):
             self._part = self.client.create_model(name='Parent should be model',
-                                                  parent=bike_instance, multiplicity=Multiplicity.ONE)
+                                                  parent=bike_instance,
+                                                  multiplicity=Multiplicity.ONE)
 
     def test_create_proxy_model_where_model_is_instance(self):
         # setUp
@@ -327,16 +330,19 @@ class TestParts(TestBetamax):
 
     def test_add_proxy_to(self):
         catalog_container = self.project.model(name__startswith='Catalog')
-        bearing_catalog_model = catalog_container.add_model('Bearing', multiplicity=Multiplicity.ZERO_MANY)
+        bearing_catalog_model = catalog_container.add_model('Bearing',
+                                                            multiplicity=Multiplicity.ZERO_MANY)
         wheel_model = self.project.model('Wheel')
 
-        bearing_proxy_model = bearing_catalog_model.add_proxy_to(wheel_model, 'Bearing', Multiplicity.ZERO_ONE)
+        bearing_proxy_model = bearing_catalog_model.add_proxy_to(wheel_model, 'Bearing',
+                                                                 Multiplicity.ZERO_ONE)
 
         self.assertTrue(bearing_proxy_model.category, Category.MODEL)
         self.assertTrue(bearing_proxy_model.parent(), wheel_model)
 
         # teardown
-        all_bearing_proxies = self.project.parts(name='Bearing', category=Category.MODEL, parent=wheel_model.id)
+        all_bearing_proxies = self.project.parts(name='Bearing', category=Category.MODEL,
+                                                 parent=wheel_model.id)
         self.assertGreaterEqual(len(all_bearing_proxies), 1)
         for bearing_proxy in all_bearing_proxies:
             bearing_proxy.delete()
@@ -393,21 +399,25 @@ class TestParts(TestBetamax):
 
     def test_retrieve_catalog_model_of_proxy(self):
         catalog_container = self.project.model(name__startswith='Catalog')
-        bearing_catalog_model = catalog_container.add_model('Bearing', multiplicity=Multiplicity.ZERO_MANY)
+        bearing_catalog_model = catalog_container.add_model('Bearing',
+                                                            multiplicity=Multiplicity.ZERO_MANY)
         wheel_model = self.project.model('Wheel')
 
         # add proxy model to product Bike > Wheel based on catalog model 'Bearing'
-        bearing_proxy_model = bearing_catalog_model.add_proxy_to(wheel_model, 'Bearing', Multiplicity.ZERO_ONE)
+        bearing_proxy_model = bearing_catalog_model.add_proxy_to(wheel_model, 'Bearing',
+                                                                 Multiplicity.ZERO_ONE)
 
         self.assertTrue(bearing_proxy_model.category, Category.MODEL)
         self.assertTrue(bearing_proxy_model.parent(), wheel_model)
 
         # the call to test here
-        re_retrieved_bearing_catalog_model = self.project.model('Bearing', classification=Classification.CATALOG)
+        re_retrieved_bearing_catalog_model = self.project.model('Bearing',
+                                                                classification=Classification.CATALOG)
         self.assertEqual(bearing_catalog_model, re_retrieved_bearing_catalog_model)
 
         # teardown
-        all_bearing_proxies = self.project.parts(name='Bearing', category=Category.MODEL, parent=wheel_model.id)
+        all_bearing_proxies = self.project.parts(name='Bearing', category=Category.MODEL,
+                                                 parent=wheel_model.id)
         self.assertGreaterEqual(len(all_bearing_proxies), 1)
         for bearing_proxy in all_bearing_proxies:
             bearing_proxy.delete()
@@ -497,7 +507,6 @@ class TestParts(TestBetamax):
             self._part = seat.clone()
 
 
-@skipIf(not TEST_FLAG_IS_PIM3, reason="This tests is designed for PIM version 3, expected to fail on older PIM3")
 @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
                     reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
 class TestBulkPartsCreation(TestBetamax):
@@ -506,18 +515,25 @@ class TestBulkPartsCreation(TestBetamax):
 
         self.product_model = self.project.model(name="Product")
         self.part_model = self.project.create_model(name="Part", parent=self.product_model)
-        self.text_prop = self.part_model.add_property(name="Text Property", property_type=PropertyType.TEXT_VALUE, unit="mm")
-        self.char_prop = self.part_model.add_property(name="Char Property", property_type=PropertyType.CHAR_VALUE)
-        self.int_prop = self.part_model.add_property(name="Int Property", property_type=PropertyType.INT_VALUE)
-        self.float_prop = self.part_model.add_property(name="Float Property", property_type=PropertyType.FLOAT_VALUE)
+        self.text_prop = self.part_model.add_property(name="Text Property",
+                                                      property_type=PropertyType.TEXT_VALUE,
+                                                      unit="mm")
+        self.char_prop = self.part_model.add_property(name="Char Property",
+                                                      property_type=PropertyType.CHAR_VALUE)
+        self.int_prop = self.part_model.add_property(name="Int Property",
+                                                     property_type=PropertyType.INT_VALUE)
+        self.float_prop = self.part_model.add_property(name="Float Property",
+                                                       property_type=PropertyType.FLOAT_VALUE)
         self.bool_prop = self.part_model.add_property(
             name="Boolean Property", property_type=PropertyType.BOOLEAN_VALUE)
-        self.date_prop = self.part_model.add_property(name="Date Property", property_type=PropertyType.DATE_VALUE)
+        self.date_prop = self.part_model.add_property(name="Date Property",
+                                                      property_type=PropertyType.DATE_VALUE)
         self.datetime_prop = self.part_model.add_property(
             name="Datetime Property", property_type=PropertyType.DATETIME_VALUE)
         self.attachment_prop = self.part_model.add_property(
             name="Attach Property", property_type=PropertyType.ATTACHMENT_VALUE)
-        self.link_prop = self.part_model.add_property(name="Link Property", property_type=PropertyType.LINK_VALUE)
+        self.link_prop = self.part_model.add_property(name="Link Property",
+                                                      property_type=PropertyType.LINK_VALUE)
         self.ss_prop = self.part_model.add_property(
             name="SS Property", property_type=PropertyType.SINGLE_SELECT_VALUE)
         self.ss_prop.options = ["1", "2", "3", "4", "5"]
@@ -552,6 +568,7 @@ class TestBulkPartsCreation(TestBetamax):
         self.part_model.delete()
 
     """Bulk parts creation"""
+
     def test_bulk_create_parts(self):
         new_parts = list()
         for idx in range(1, 5):
@@ -639,17 +656,24 @@ class TestBulkPartsCreation(TestBetamax):
             self.assertEqual(part_created.property(name=self.text_prop.name).value, str(idx))
             self.assertEqual(part_created.property(name=self.char_prop.name).value, str(idx))
             self.assertEqual(part_created.property(name=self.int_prop.name).value, idx)
-            self.assertEqual(part_created.property(name=self.float_prop.name).value, float("{}.{}".format(idx, idx)))
-            self.assertEqual(part_created.property(name=self.bool_prop.name).value, True if idx % 2 == 0 else False)
+            self.assertEqual(part_created.property(name=self.float_prop.name).value,
+                             float("{}.{}".format(idx, idx)))
+            self.assertEqual(part_created.property(name=self.bool_prop.name).value,
+                             True if idx % 2 == 0 else False)
             self.assertEqual(part_created.property(name=self.date_prop.name).value,
                              datetime.date(2020, idx, idx).isoformat())
-            self.assertEqual(part_created.property(name=self.datetime_prop.name).value.split("+")[0],
-                             datetime.datetime(2020, idx, idx, 15, 00, 00).isoformat("T"))
-            self.assertEqual(part_created.property(name=self.link_prop.name).value, "http://{}.com".format(idx))
+            self.assertEqual(
+                part_created.property(name=self.datetime_prop.name).value.split("+")[0],
+                datetime.datetime(2020, idx, idx, 15, 00, 00).isoformat("T"))
+            self.assertEqual(part_created.property(name=self.link_prop.name).value,
+                             "http://{}.com".format(idx))
             self.assertEqual(part_created.property(name=self.ss_prop.name).value, "{}".format(idx))
-            self.assertEqual(part_created.property(name=self.ms_prop.name).value, ["{}".format(idx)])
-            self.assertEqual(part_created.property(name=self.part_ref_prop.name).value[0].name, "Front Wheel")
-            self.assertEqual(part_created.property(name=self.act_ref_prop.name).value[0].name, "Specify wheel diameter")
+            self.assertEqual(part_created.property(name=self.ms_prop.name).value,
+                             ["{}".format(idx)])
+            self.assertEqual(part_created.property(name=self.part_ref_prop.name).value[0].name,
+                             "Front Wheel")
+            self.assertEqual(part_created.property(name=self.act_ref_prop.name).value[0].name,
+                             "Specify wheel diameter")
             self.assertEqual(part_created.property(name=self.weather_prop.name).value, dict())
             self.assertEqual(part_created.property(name=self.geo_info_prop.name).value, dict())
 
@@ -703,7 +727,6 @@ class TestBulkPartsCreation(TestBetamax):
             )
 
 
-@skipIf(not TEST_FLAG_IS_PIM3, reason="This tests is designed for PIM version 3, expected to fail on older PIM3")
 @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
                     reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
 class TestBulkPartsDeletion(TestBetamax):

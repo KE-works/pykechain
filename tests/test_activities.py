@@ -1,36 +1,23 @@
 import os
 import warnings
 from datetime import datetime
-from unittest import skip, skipIf
+from unittest import skip
 
 import pytest
 import pytz
 import requests
 
-from pykechain.enums import (
-    ActivityType,
-    ActivityStatus,
-    ActivityClassification,
-    Category,
-    activity_root_name_by_classification,
-    ActivityRootNames,
-    PaperSize,
-    PaperOrientation,
-    NotificationEvent,
-    Multiplicity,
-    PropertyType,
-)
-from pykechain.exceptions import (
-    NotFoundError,
-    MultipleFoundError,
-    IllegalArgumentError,
-    APIError,
-)
+from pykechain.enums import (ActivityClassification, ActivityRootNames, ActivityStatus,
+                             ActivityType, Category,
+                             Multiplicity, NotificationEvent, PaperOrientation, PaperSize,
+                             PropertyType,
+                             activity_root_name_by_classification)
+from pykechain.exceptions import (APIError, IllegalArgumentError, MultipleFoundError,
+                                  NotFoundError)
 from pykechain.models import Activity
 from pykechain.models.representations import CustomIconRepresentation
-from pykechain.utils import temp_chdir, slugify_ref
+from pykechain.utils import slugify_ref, temp_chdir
 from tests.classes import TestBetamax
-from tests.utils import TEST_FLAG_IS_WIM2
 
 ISOFORMAT = "%Y-%m-%dT%H:%M:%SZ"
 ISOFORMAT_HIGHPRECISION = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -231,13 +218,13 @@ class TestActivityClone(TestBetamax):
         )
         self.bucket.append(second_process)
 
-        clone = self.task.clone(parent=second_process,)
+        clone = self.task.clone(parent=second_process, )
 
         self.assertNotEqual(self.task.parent_id, clone.parent_id)
 
     def test_update(self):
         new_name = "__TEST TASK RENAMED"
-        clone = self.task.clone(update_dict=dict(name=new_name),)
+        clone = self.task.clone(update_dict=dict(name=new_name), )
 
         self.assertEqual(new_name, clone.name)
 
@@ -368,12 +355,11 @@ class TestActivityCloneParts(TestBetamax):
             "Bike",
             {c.name for c in new_children},
             msg="Bike should not have been copied over. "
-            "Actually it is not copied over, it is moved to the parent_instance",
+                "Actually it is not copied over, it is moved to the parent_instance",
         )
 
 
 class TestActivities(TestBetamax):
-
     NAME = "__TEST ACTIVITY"
 
     def setUp(self):
@@ -549,7 +535,8 @@ class TestActivities(TestBetamax):
         initial_assignee = self.client.user(username="testuser")
 
         self.task.edit(name=initial_name, description=initial_description, tags=initial_tags,
-                       start_date=initial_start_date, due_date=initial_due_date, assignees=[initial_assignee.username])
+                       start_date=initial_start_date, due_date=initial_due_date,
+                       assignees=[initial_assignee.username])
 
         # Edit without mentioning values, everything should stay the same
         new_name = 'New name for task'
@@ -565,7 +552,8 @@ class TestActivities(TestBetamax):
         self.assertEqual(self.task.tags, initial_tags)
 
         # Edit with clearing the values, name and status cannot be cleared
-        self.task.edit(name=None, description=None, tags=None, start_date=None, due_date=None, status=None,
+        self.task.edit(name=None, description=None, tags=None, start_date=None, due_date=None,
+                       status=None,
                        assignees=None)
         self.task.refresh()
         self.assertEqual(self.task.name, new_name)
@@ -632,10 +620,6 @@ class TestActivities(TestBetamax):
         self.assertIn(task.id, [sibling.id for sibling in siblings])
         self.assertEqual(1, len(siblings))
 
-    @skipIf(
-        not TEST_FLAG_IS_WIM2,
-        reason="This tests is designed for WIM version 2, expected to fail on old WIM",
-    )
     def test_activity_without_scope_id_will_fix_itself(self):
         specify_wheel_diam_cripled = self.project.activity(
             name="Specify wheel diameter", fields="id,name,status"
