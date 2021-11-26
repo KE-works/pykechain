@@ -27,9 +27,9 @@ jobs:
 
     - name: Perform Testing
       run: |
-        pip install pytest pytest-xdist[psutil] betamax pytest-runner pytest-cov
+        pip install pytest betamax pytest-runner pytest-cov
         pip install -U coverage\<5.0
-        pytest -n logical --cov=pykechain tests
+        pytest --cov=pykechain tests
 
     - name: Check docs and distribution
       if: matrix.python-version == 3.8
