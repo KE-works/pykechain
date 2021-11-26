@@ -745,7 +745,7 @@ class Client(object):
         :raises MultipleFoundError: When more than a single `Part` is found
         """
         part_id = None
-        if len(args) == 2:
+        if len(args) >= 2:
             # the 2nd arg (index 1) is the pk
             part_id = check_uuid(args[1])
         elif 'pk' in kwargs:
