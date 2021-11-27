@@ -12,11 +12,11 @@ class DashboardWidgetSourceScopes(Enum):
     :cvar OWN_SCOPES: source is list of scopes based on user
     """
 
-    TAGGED_SCOPES = 'taggedScopes'
-    CURRENT_SCOPE = 'project'
-    SELECTED_SCOPES = 'selectedScopes'
-    SUBPROCESS = 'subProcess'
-    OWN_SCOPES = 'scopes'
+    TAGGED_SCOPES = "taggedScopes"
+    CURRENT_SCOPE = "project"
+    SELECTED_SCOPES = "selectedScopes"
+    SUBPROCESS = "subProcess"
+    OWN_SCOPES = "scopes"
 
 
 class DashboardWidgetShowTasks(Enum):
@@ -65,10 +65,10 @@ class AssociatedObjectId(Enum):
     PART_INSTANCE_ID = "partInstanceId"
     PARENT_INSTANCE_ID = "parentInstanceId"
     PART_MODEL_ID = "partModelId"
-    TEAM_ID = 'teamId'
+    TEAM_ID = "teamId"
     PROPERTY_INSTANCE_ID = "propertyInstanceId"
     SERVICE_ID = "serviceId"
-    ACTIVITY_ID = 'activityId'
+    ACTIVITY_ID = "activityId"
 
 
 class MetaWidget(Enum):
@@ -101,7 +101,7 @@ class MetaWidget(Enum):
     PROPERTY_VALUE_PREFILTER = "property_value"
     SORTED_COLUMN = "sortedColumn"
     SORTED_DIRECTION = "sortDirection"
-    SHOW_COLUMNS = 'showColumns'
+    SHOW_COLUMNS = "showColumns"
     COLLAPSE_FILTERS = "collapseFilters"
     SHOW_FILTERS = "showFilterPane"
     CUSTOM_PAGE_SIZE = "customPageSize"

@@ -373,7 +373,6 @@ class TestUseCameraScannerInputRepresentationForCharProperties(
     new_value = False
 
 
-
 class TestUseCameraScannerInputRepresentationForTextAreaCharProperties(
     Bases._TestPropertyRepresentation
 ):

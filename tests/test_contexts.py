@@ -1,4 +1,5 @@
 from pykechain.enums import ContextType
+
 # new in 1.13
 from pykechain.models import Activity
 from pykechain.models.context import Context
@@ -15,8 +16,9 @@ class TestContextSetup(TestBetamax):
         super().setUp()
         self.context = self.client.create_context(
             name="__my first context for testing",
-            context_type=ContextType.TIME_PERIOD, scope=self.project.id,
-            tags=["testing"]
+            context_type=ContextType.TIME_PERIOD,
+            scope=self.project.id,
+            tags=["testing"],
         )  # type: Context
 
     def tearDown(self):
@@ -28,7 +30,9 @@ class TestContextCreate(TestBetamax):
     def test_create_context(self):
         context = self.client.create_context(
             name="__my first context for testing",
-            context_type=ContextType.TIME_PERIOD, scope=self.project, tags=["testing"]
+            context_type=ContextType.TIME_PERIOD,
+            scope=self.project,
+            tags=["testing"],
         )
         self.assertTrue(context)
         self.assertSetEqual(set(context.tags), {"testing"})
@@ -84,21 +88,31 @@ class TestContexts(TestContextSetup):
 
     def test_link_context_to_activity(self):
         self.assertFalse(self.context.activities)
-        self.context.link_activities(activities=[self.project.activity(name="Specify wheel diameter")])
+        self.context.link_activities(
+            activities=[self.project.activity(name="Specify wheel diameter")]
+        )
         self.assertTrue(self.context.activities)
 
     def test_context_consequetive_link_many_activities(self):
         self.assertFalse(self.context.activities)
-        self.context.link_activities(activities=[self.project.activity(name="Specify wheel diameter")])
+        self.context.link_activities(
+            activities=[self.project.activity(name="Specify wheel diameter")]
+        )
         self.assertEqual(len(self.context.activities), 1)
-        self.context.link_activities(activities=[self.project.activity(name="Task - Form")])
+        self.context.link_activities(
+            activities=[self.project.activity(name="Task - Form")]
+        )
         self.assertEqual(len(self.context.activities), 2)
 
     def test_unlink_context_to_activity(self):
         self.assertFalse(self.context.activities)
-        self.context.link_activities(activities=[self.project.activity(name="Specify wheel diameter")])
+        self.context.link_activities(
+            activities=[self.project.activity(name="Specify wheel diameter")]
+        )
         self.assertTrue(self.context.activities)
-        self.context.unlink_activities(activities=[self.project.activity(name="Specify wheel diameter")])
+        self.context.unlink_activities(
+            activities=[self.project.activity(name="Specify wheel diameter")]
+        )
         self.assertFalse(self.context.activities)
 
     def test_context_unlink_single_activity_when_more_activities(self):
@@ -106,10 +120,15 @@ class TestContexts(TestContextSetup):
         self.context.link_activities(
             activities=[
                 self.project.activity(name="Specify wheel diameter"),
-                self.project.activity(name="Task - Form")
+                self.project.activity(name="Task - Form"),
             ]
         )
         self.assertEqual(len(self.context.activities), 2)
-        self.context.unlink_activities(activities=[self.project.activity(name="Specify wheel diameter")])
+        self.context.unlink_activities(
+            activities=[self.project.activity(name="Specify wheel diameter")]
+        )
         self.assertEqual(len(self.context.activities), 1)
-        self.assertListEqual(list(self.context.activities), [self.project.activity(name="Task - Form").id])
+        self.assertListEqual(
+            list(self.context.activities),
+            [self.project.activity(name="Task - Form").id],
+        )
