@@ -6,13 +6,11 @@ from tests.classes import TestBetamax
 
 
 class TestTeams(TestBetamax):
-
     def setUp(self):
-        super(TestTeams, self).setUp()
+        super().setUp()
 
         self.required_kwargs = dict(
-            name='_test team',
-            user=self.client.user('testuser')  # type: User
+            name="_test team", user=self.client.user("testuser")  # type: User
         )
 
         self.team = self.client.create_team(**self.required_kwargs)  # type: Team
@@ -24,13 +22,13 @@ class TestTeams(TestBetamax):
     def test_create_team(self):
         self.assertIsInstance(self.team, Team)
         self.assertEqual(len(self.team.members()), 1)
-        self.assertEqual(self.team.name, '_test team')
+        self.assertEqual(self.team.name, "_test team")
 
     def test_create_team_with_inputs(self):
         # setUp
-        landing_page = '#/scopes/{}'.format(self.project.id)
+        landing_page = f"#/scopes/{self.project.id}"
         new_team = self.client.create_team(
-            description='This is the description',
+            description="This is the description",
             options=dict(
                 landingPage=landing_page,
             ),
@@ -39,8 +37,8 @@ class TestTeams(TestBetamax):
         )
 
         # testing
-        self.assertEqual(new_team.description, 'This is the description')
-        self.assertDictEqual(new_team.options, {'landingPage': landing_page})
+        self.assertEqual(new_team.description, "This is the description")
+        self.assertDictEqual(new_team.options, {"landingPage": landing_page})
         self.assertTrue(new_team.is_hidden)
 
         # tearDown
@@ -50,16 +48,18 @@ class TestTeams(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             self.client.create_team(description=1, **self.required_kwargs)
         with self.assertRaises(IllegalArgumentError):
-            self.client.create_team(options='#/scopes/{}'.format(self.project.id), **self.required_kwargs)
+            self.client.create_team(
+                options=f"#/scopes/{self.project.id}", **self.required_kwargs
+            )
         with self.assertRaises(IllegalArgumentError):
-            self.client.create_team(is_hidden='False', **self.required_kwargs)
+            self.client.create_team(is_hidden="False", **self.required_kwargs)
 
     def test_retrieve_teams(self):
         self.assertTrue(self.client.teams())
 
     def test_retrieve_single_unknown_team(self):
         with self.assertRaises(NotFoundError):
-            self.client.team('This is not a existing team name for sure')
+            self.client.team("This is not a existing team name for sure")
 
     def test_retrieve_single_multiple_team_raises_error(self):
         with self.assertRaises(MultipleFoundError):
@@ -84,19 +84,24 @@ class TestTeams(TestBetamax):
         members = self.team.members(role=TeamRoles.MEMBER)
         self.assertTrue(len(owner) > 0)
 
-        self.assertEqual(len(all_members), len(manager)+len(owner)+len(members))
+        self.assertEqual(len(all_members), len(manager) + len(owner) + len(members))
 
     def test_retrieve_member_with_invalid_role(self):
-        with self.assertRaisesRegex(IllegalArgumentError, 'must be an option from enum'):
+        with self.assertRaisesRegex(
+            IllegalArgumentError, "must be an option from enum"
+        ):
             self.team.members(role="FOOBARROLE")
 
     def test_add_and_remove_member(self):
         members = self.team.members()
-        a_user = self.client.user(username='anotheruser')
+        a_user = self.client.user(username="anotheruser")
 
         self.team.add_members([a_user.id], role=TeamRoles.MEMBER)
 
-        self.assertIn(a_user.id, [member.get('pk') for member in self.team.members(role=TeamRoles.MEMBER)])
+        self.assertIn(
+            a_user.id,
+            [member.get("pk") for member in self.team.members(role=TeamRoles.MEMBER)],
+        )
 
         self.team.remove_members([a_user.id])
 
@@ -104,7 +109,7 @@ class TestTeams(TestBetamax):
 
     def test_add_scope_to_team(self):
         # setup
-        old_team = self.project._json_data.get('team')
+        old_team = self.project._json_data.get("team")
 
         self.project.edit(team=self.team.id)
         self.assertEqual(self.project.team, self.team)
@@ -114,31 +119,39 @@ class TestTeams(TestBetamax):
         self.assertEqual([t.id for t in team_scopes], [self.project.id])
 
         # teardown
-        self.project.edit(team=old_team and old_team.get('id') or None)
+        self.project.edit(team=old_team and old_team.get("id") or None)
 
     def test_team_attributes(self):
-        attributes = ['_client', '_json_data', 'id', 'name', 'created_at', 'updated_at', 'ref']
+        attributes = [
+            "_client",
+            "_json_data",
+            "id",
+            "name",
+            "created_at",
+            "updated_at",
+            "ref",
+        ]
 
         obj = self.team
         for attribute in attributes:
-            self.assertTrue(hasattr(obj, attribute),
-                            "Could not find '{}' in the object: '{}'".format(attribute, obj.__dict__))
+            self.assertTrue(
+                hasattr(obj, attribute),
+                f"Could not find '{attribute}' in the object: '{obj.__dict__}'",
+            )
 
     def test_team_edit(self):
         # setUp
-        options = dict(
-            landingPage='#/scopes/{}'.format(self.project.id)
-        )
+        options = dict(landingPage=f"#/scopes/{self.project.id}")
         self.team.edit(
-            name='renamed team',
-            description='My team description',
+            name="renamed team",
+            description="My team description",
             options=options,
             is_hidden=True,
         )
 
         # testing
-        self.assertEqual(self.team.name, 'renamed team')
-        self.assertEqual(self.team.description, 'My team description')
+        self.assertEqual(self.team.name, "renamed team")
+        self.assertEqual(self.team.description, "My team description")
         self.assertDictEqual(self.team.options, options)
         self.assertTrue(self.team.is_hidden)
 
@@ -149,6 +162,6 @@ class TestTeams(TestBetamax):
         with self.assertRaises(IllegalArgumentError):
             self.team.edit(description=False)
         with self.assertRaises(IllegalArgumentError):
-            self.team.edit(options='New scope')
+            self.team.edit(options="New scope")
         with self.assertRaises(IllegalArgumentError):
             self.team.edit(is_hidden=1)

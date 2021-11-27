@@ -20,12 +20,12 @@ class APIError(Exception):
         :param response:
         :param kwargs:
         """
-        self.response = kwargs.pop('response', None)
+        self.response = kwargs.pop("response", None)
 
-        if hasattr(self.response, 'request'):
+        if hasattr(self.response, "request"):
             self.request = self.response.request
         else:
-            self.request = kwargs.pop('request', None)
+            self.request = kwargs.pop("request", None)
 
         self.msg, self.traceback, self.detail = None, None, None
 
@@ -33,7 +33,9 @@ class APIError(Exception):
             arg = args[0]
             context = [arg if isinstance(arg, str) else arg.__repr__()]
         else:
-            context = ['Error in request to the server.']  # Default message if `APIError()`, without inputs,  is used.
+            context = [
+                "Error in request to the server."
+            ]  # Default message if `APIError()`, without inputs,  is used.
 
         import json
 
@@ -44,40 +46,54 @@ class APIError(Exception):
                 response_json = None
 
             if response_json:
-                self.msg = response_json.get('msg')
-                self.traceback = response_json.get('traceback', 'provided no traceback.')
-                self.detail = response_json.get('detail')
-                self.results = response_json.get('results')
+                self.msg = response_json.get("msg")
+                self.traceback = response_json.get(
+                    "traceback", "provided no traceback."
+                )
+                self.detail = response_json.get("detail")
+                self.results = response_json.get("results")
             else:
                 self.traceback = self.response.text
-                self.msg = self.traceback.split(r'\n'[-1])
+                self.msg = self.traceback.split(r"\n"[-1])
                 self.detail = None
                 self.results = None
 
-            context.extend([
-                'Server {}'.format(self.traceback),
-                'Results:\n{}'.format(json.dumps(self.results, indent=4)),
-                'Detail: {}'.format(self.detail),
-                'Elapsed: {}'.format(self.response.elapsed),
-            ])
+            context.extend(
+                [
+                    f"Server {self.traceback}",
+                    f"Results:\n{json.dumps(self.results, indent=4)}",
+                    f"Detail: {self.detail}",
+                    f"Elapsed: {self.response.elapsed}",
+                ]
+            )
 
         if self.request is not None and isinstance(self.request, PreparedRequest):
-            context.extend([
-                'Request URL: {}'.format(self.request.url),
-                'Request method: {}'.format(self.request.method),
-            ])
+            context.extend(
+                [
+                    f"Request URL: {self.request.url}",
+                    f"Request method: {self.request.method}",
+                ]
+            )
             if self.request.body:
                 try:
-                    decoded_body = self.request.body.decode("UTF-8")  # Convert byte-string to string
+                    decoded_body = self.request.body.decode(
+                        "UTF-8"
+                    )  # Convert byte-string to string
                 except AttributeError:
-                    decoded_body = self.request.body  # strings (e.g. from testing cassettes) cant be decoded
+                    decoded_body = (
+                        self.request.body
+                    )  # strings (e.g. from testing cassettes) cant be decoded
                 try:
-                    body = json.loads(decoded_body)  # Convert string to Python object(s)
+                    body = json.loads(
+                        decoded_body
+                    )  # Convert string to Python object(s)
                 except json.decoder.JSONDecodeError:
-                    body = decoded_body.split('&')  # parameters in URL
-                context.append('Request data:\n{}'.format(json.dumps(body, indent=4)))  # pretty printing of a json
+                    body = decoded_body.split("&")  # parameters in URL
+                context.append(
+                    f"Request data:\n{json.dumps(body, indent=4)}"
+                )  # pretty printing of a json
 
-        message = '\n'.join(context)
+        message = "\n".join(context)
         new_args = [message]
 
         super().__init__(*new_args)
@@ -125,8 +141,12 @@ class _DeprecationMixin:
 
     def __new__(cls, *args, **kwargs):
         if not cls.__notified:
-            warnings.warn('`{n}` is a wrapping class for `{nn}`. `{n}` will be deprecated in July 2021.'
-                          .format(n=cls.__name__, nn=str(cls.__name__)[:-1]), PendingDeprecationWarning)
+            warnings.warn(
+                "`{n}` is a wrapping class for `{nn}`. `{n}` will be deprecated in July 2021.".format(
+                    n=cls.__name__, nn=str(cls.__name__)[:-1]
+                ),
+                PendingDeprecationWarning,
+            )
             cls.__notified = True
 
         return super().__new__(cls)

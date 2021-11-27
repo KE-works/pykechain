@@ -18,7 +18,7 @@ class PartSet(Iterable):
         self._parts = list(parts)
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke {} object {} parts>".format(self.__class__.__name__, self.__len__())
+        return f"<pyke {self.__class__.__name__} object {self.__len__()} parts>"
 
     def __iter__(self):
         return iter(self._parts)
@@ -32,14 +32,10 @@ class PartSet(Iterable):
 
         raise NotImplementedError
 
-    def _repr_html_(self) -> Text:
-        all_instances = all(p.category == 'INSTANCE' for p in self._parts)
+    def _repr_html_(self) -> str:
+        all_instances = all(p.category == "INSTANCE" for p in self._parts)
 
-        html = [
-            "<table width=100%>",
-            "<tr>",
-            "<th>Part</th>"
-        ]
+        html = ["<table width=100%>", "<tr>", "<th>Part</th>"]
 
         if not all_instances:
             html.append("<th>Category</th>")
@@ -49,14 +45,14 @@ class PartSet(Iterable):
 
         for part in self._parts:
             html.append("<tr>")
-            html.append("<td>{}</td>".format(part.name))
+            html.append(f"<td>{part.name}</td>")
 
             if not all_instances:
-                html.append("<td>{}</td>".format(part.category))
+                html.append(f"<td>{part.category}</td>")
 
-            html.append("<td>{}</td>".format(part.id))
+            html.append(f"<td>{part.id}</td>")
             html.append("</tr>")
 
         html.append("</table>")
 
-        return ''.join(html)
+        return "".join(html)

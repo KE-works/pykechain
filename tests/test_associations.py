@@ -7,18 +7,19 @@ from tests.classes import TestBetamax
 
 
 class TestAssociations(TestBetamax):
-
     def setUp(self):
         super().setUp()
-        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
+        self.task = self.project.create_activity(
+            name="widget_test_task"
+        )  # type: Activity
 
         # Exactly 1 model
-        self.frame = self.project.part(name='Frame')  # type: Part
-        self.frame_model = self.project.model(name='Frame')
+        self.frame = self.project.part(name="Frame")  # type: Part
+        self.frame_model = self.project.model(name="Frame")
 
         # Zero or more model
-        self.wheel_parent = self.project.model(name='Bike')  # type: Property
-        self.wheel_model = self.project.model(name='Wheel')
+        self.wheel_parent = self.project.model(name="Bike")  # type: Property
+        self.wheel_model = self.project.model(name="Wheel")
 
         widgets_manager = self.task.widgets()
         self.form_widget = widgets_manager.add_propertygrid_widget(
@@ -47,14 +48,17 @@ class TestAssociations(TestBetamax):
         self.assertTrue(all(isinstance(a, Association) for a in associations))
 
     def test_association_attributes(self):
-        attributes = ['_client', '_json_data', 'id']
+        attributes = ["_client", "_json_data", "id"]
 
         association = self.client.associations(limit=1)[0]
         for attribute in attributes:
             with self.subTest(msg=attribute):
-                self.assertTrue(hasattr(association, attribute),
-                                "Could not find '{}' in the association: '{}'".format(attribute,
-                                                                                      association.__dict__.keys()))
+                self.assertTrue(
+                    hasattr(association, attribute),
+                    "Could not find '{}' in the association: '{}'".format(
+                        attribute, association.__dict__.keys()
+                    ),
+                )
 
     def test_retrieve_associations(self):
         for inputs, nr in [
@@ -64,9 +68,9 @@ class TestAssociations(TestBetamax):
             (dict(part=self.frame), 10),
             (dict(property=self.frame_model.properties[0]), 6),
             (dict(property=self.frame.properties[0]), 4),
-            (dict(scope=self.project), 48)
+            (dict(scope=self.project), 48),
         ]:
-            with self.subTest(msg='{} should be len={}'.format(inputs, nr)):
+            with self.subTest(msg=f"{inputs} should be len={nr}"):
                 # setUp
                 associations = self.client.associations(limit=100, **inputs)
 
@@ -75,18 +79,18 @@ class TestAssociations(TestBetamax):
 
     def test_retrieve_association_incorrect_inputs(self):
         for keyword, value in dict(
-            widget='not a widget',
-            activity='not a task',
-            part='not a part',
-            scope='not a scope',
-            property='not a property',
+            widget="not a widget",
+            activity="not a task",
+            part="not a part",
+            scope="not a scope",
+            property="not a property",
         ).items():
-            with self.subTest(msg='{}: "{}"'.format(keyword, value)):
+            with self.subTest(msg=f'{keyword}: "{value}"'):
                 with self.assertRaises(IllegalArgumentError):
                     self.client.associations(limit=1, **{keyword: value})
 
-        for limit in [-5, '3']:
-            with self.subTest('limit: {} {}'.format(type(limit), limit)):
+        for limit in [-5, "3"]:
+            with self.subTest(f"limit: {type(limit)} {limit}"):
                 with self.assertRaises(IllegalArgumentError):
                     self.client.associations(limit=limit)
 
@@ -144,22 +148,23 @@ class TestAssociations(TestBetamax):
         self.assertEqual(2, len(associations))
 
     def test_validate_widgets_input(self):
-        with self.assertRaises(IllegalArgumentError, msg='Widget must be a list!'):
+        with self.assertRaises(IllegalArgumentError, msg="Widget must be a list!"):
+            self.client._validate_associations(widgets="Not a list", associations=[])
+        with self.assertRaises(
+            IllegalArgumentError, msg="Not every widget is a widget!"
+        ):
             self.client._validate_associations(
-                widgets='Not a list',
-                associations=[]
+                widgets=[self.task.widgets()[0], "Not a widget"], associations=[]
             )
-        with self.assertRaises(IllegalArgumentError, msg='Not every widget is a widget!'):
+        with self.assertRaises(
+            IllegalArgumentError, msg="Second set of associations is not of length 2!"
+        ):
             self.client._validate_associations(
-                widgets=[self.task.widgets()[0], 'Not a widget'],
-                associations=[]
+                widgets=list(self.task.widgets()), associations=[([], []), ()]
             )
-        with self.assertRaises(IllegalArgumentError, msg='Second set of associations is not of length 2!'):
-            self.client._validate_associations(
-                widgets=list(self.task.widgets()),
-                associations=[([], []), ()]
-            )
-        with self.assertRaises(IllegalArgumentError, msg='Inputs are not of equal length!'):
+        with self.assertRaises(
+            IllegalArgumentError, msg="Inputs are not of equal length!"
+        ):
             self.client._validate_associations(
                 widgets=list(self.task.widgets()),
                 associations=[([], [])],
@@ -174,10 +179,12 @@ class TestAssociations(TestBetamax):
         self.assertEqual(len(self.frame_model.properties), len(model_ids))
 
         with self.assertRaises(IllegalArgumentError):
-            check_list_of_base(objects='not a list')
+            check_list_of_base(objects="not a list")
 
         with self.assertRaises(IllegalArgumentError):
-            check_list_of_base(objects=[self.frame_model.properties[0], 'Not a property'], cls=Property)
+            check_list_of_base(
+                objects=[self.frame_model.properties[0], "Not a property"], cls=Property
+            )
 
     def test_validate_widget_input(self):
         for method in [
@@ -187,7 +194,7 @@ class TestAssociations(TestBetamax):
             self.client.remove_widget_associations,
         ]:
             with self.assertRaises(IllegalArgumentError):
-                method(widget='Not a widget')
+                method(widget="Not a widget")
 
     def test_readable_models(self):
         self.client.update_widget_associations(

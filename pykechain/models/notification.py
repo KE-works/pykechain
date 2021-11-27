@@ -36,35 +36,37 @@ class Notification(Base):
         """
         super().__init__(json, **kwargs)
 
-        self.message = json.get('message', '')
-        self.subject: Text = json.get('subject', '')
-        self.status: Text = json.get('status', '')
-        self.event: Text = json.get('event', '')
-        self.channels: List = json.get('channels', list())
-        self.recipient_user_ids: List = json.get('recipient_users', list())
-        self.team_id: Text = json.get('team', '')
-        self.from_user_id: Text = json.get('from_user', '')
+        self.message = json.get("message", "")
+        self.subject: str = json.get("subject", "")
+        self.status: str = json.get("status", "")
+        self.event: str = json.get("event", "")
+        self.channels: List = json.get("channels", list())
+        self.recipient_user_ids: List = json.get("recipient_users", list())
+        self.team_id: str = json.get("team", "")
+        self.from_user_id: str = json.get("from_user", "")
 
-        self._from_user: Optional['User'] = None
-        self._recipient_users: Optional[List['User']] = None
-        self._team: Optional['Team'] = None
+        self._from_user: Optional["User"] = None
+        self._recipient_users: Optional[List["User"]] = None
+        self._team: Optional["Team"] = None
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke Notification id {}>".format(self.id[-8:])
+        return f"<pyke Notification id {self.id[-8:]}>"
 
-    def get_recipient_users(self) -> List['User']:
+    def get_recipient_users(self) -> List["User"]:
         """Return the list of actual `User` objects based on recipient_users_ids."""
         if self._recipient_users is None:
-            self._recipient_users = self._client.users(id__in=','.join([str(pk) for pk in self.recipient_user_ids]))
+            self._recipient_users = self._client.users(
+                id__in=",".join([str(pk) for pk in self.recipient_user_ids])
+            )
         return self._recipient_users
 
-    def get_from_user(self) -> 'User':
+    def get_from_user(self) -> "User":
         """Return the actual `User` object based on the from_user_id."""
         if self._from_user is None and self.from_user_id:
             self._from_user = self._client.user(pk=self.from_user_id)
         return self._from_user
 
-    def get_team(self) -> 'Team':
+    def get_team(self) -> "Team":
         """Return the actual `Team` object based on the team_id."""
         if self._team is None and self.team_id:
             self._team = self._client.team(pk=self.team_id)
@@ -75,16 +77,16 @@ class Notification(Base):
         return self._client.delete_notification(notification=self)
 
     def edit(
-            self,
-            subject: Optional[Union[Text, Empty]] = empty,
-            message: Optional[Union[Text, Empty]] = empty,
-            status: Optional[Union[NotificationStatus, Empty]] = empty,
-            recipients: Optional[Union[List[Union['User', Text, int]], Empty]] = empty,
-            team: Optional[Union['Team', Text, Empty]] = empty,
-            from_user: Optional[Union['User', Text, Empty]] = empty,
-            event: Optional[Union[NotificationEvent, Empty]] = empty,
-            channel: Optional[Union[NotificationChannels, Empty]] = empty,
-            **kwargs
+        self,
+        subject: Optional[Union[str, Empty]] = empty,
+        message: Optional[Union[str, Empty]] = empty,
+        status: Optional[Union[NotificationStatus, Empty]] = empty,
+        recipients: Optional[Union[List[Union["User", str, int]], Empty]] = empty,
+        team: Optional[Union["Team", str, Empty]] = empty,
+        from_user: Optional[Union["User", str, Empty]] = empty,
+        event: Optional[Union[NotificationEvent, Empty]] = empty,
+        channel: Optional[Union[NotificationChannels, Empty]] = empty,
+        **kwargs,
     ) -> None:
         """
         Update the current `Notification` attributes.
@@ -124,36 +126,40 @@ class Notification(Base):
         recipient_emails = list()
 
         if recipients is not None:
-            if isinstance(recipients, list) and all(isinstance(r, (str, int, User)) for r in recipients):
+            if isinstance(recipients, list) and all(
+                isinstance(r, (str, int, User)) for r in recipients
+            ):
                 for recipient in recipients:
                     if is_valid_email(recipient):
                         recipient_emails.append(recipient)
                     else:
-                        recipient_users.append(check_user(recipient, User, 'recipient'))
+                        recipient_users.append(check_user(recipient, User, "recipient"))
             elif isinstance(recipients, Empty):
                 recipient_emails = empty
                 recipient_users = empty
             else:
-                raise IllegalArgumentError('`recipients` must be a list of User objects, IDs or email addresses, '
-                                           '"{}" ({}) is not.'.format(recipients, type(recipients)))
+                raise IllegalArgumentError(
+                    "`recipients` must be a list of User objects, IDs or email addresses, "
+                    '"{}" ({}) is not.'.format(recipients, type(recipients))
+                )
 
         if isinstance(channel, Empty):
             channels = empty
-        elif check_enum(channel, NotificationChannels, 'channel'):
+        elif check_enum(channel, NotificationChannels, "channel"):
             channels = [channel]
         else:
             channels = list()
 
         update_dict = {
-            'status': check_enum(status, NotificationStatus, 'status') or self.status,
-            'event': check_enum(event, NotificationEvent, 'event') or self.event,
-            'subject': check_text(subject, 'subject') or self.subject,
-            'message': check_text(message, 'message') or self.message,
-            'recipient_users': recipient_users,
-            'recipient_emails': recipient_emails,
-            'team': check_base(team, Team, 'team'),
-            'from_user': check_user(from_user, User, 'from_user'),
-            'channels': channels or self.channels
+            "status": check_enum(status, NotificationStatus, "status") or self.status,
+            "event": check_enum(event, NotificationEvent, "event") or self.event,
+            "subject": check_text(subject, "subject") or self.subject,
+            "message": check_text(message, "message") or self.message,
+            "recipient_users": recipient_users,
+            "recipient_emails": recipient_emails,
+            "team": check_base(team, Team, "team"),
+            "from_user": check_user(from_user, User, "from_user"),
+            "channels": channels or self.channels,
         }
 
         if kwargs:
@@ -161,11 +167,11 @@ class Notification(Base):
 
         update_dict = clean_empty_values(update_dict=update_dict)
 
-        url = self._client._build_url('notification', notification_id=self.id)
+        url = self._client._build_url("notification", notification_id=self.id)
 
-        response = self._client._request('PUT', url, json=update_dict)
+        response = self._client._request("PUT", url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Notification {}".format(self), response=response)
+            raise APIError(f"Could not update Notification {self}", response=response)
 
-        self.refresh(json=response.json().get('results')[0])
+        self.refresh(json=response.json().get("results")[0])
