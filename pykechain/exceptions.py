@@ -1,6 +1,5 @@
 import warnings
-
-from requests import PreparedRequest, Response
+from requests import Response, PreparedRequest
 
 
 class APIError(Exception):

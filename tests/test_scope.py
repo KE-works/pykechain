@@ -1,10 +1,14 @@
 import datetime
 
 from pykechain.enums import (
-    KEChainPages, ScopeCategory, ScopeMemberActions, ScopeRoles, ScopeStatus
+    ScopeStatus,
+    KEChainPages,
+    ScopeMemberActions,
+    ScopeRoles,
+    ScopeCategory,
 )
-from pykechain.exceptions import IllegalArgumentError, MultipleFoundError, NotFoundError
-from pykechain.models import Scope
+from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
+from pykechain.models import Team, Scope
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.utils import is_url
 from tests.classes import TestBetamax

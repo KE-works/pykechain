@@ -1,8 +1,8 @@
 import os
-from datetime import date, datetime
+from datetime import datetime, date, timezone
 
 from pykechain.enums import FilterType, Multiplicity, PropertyType
-from pykechain.exceptions import IllegalArgumentError, NotFoundError
+from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from tests.classes import TestBetamax
 
 

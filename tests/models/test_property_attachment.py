@@ -1,7 +1,7 @@
 import json
 import os
 
-from pykechain.enums import Multiplicity, PropertyType
+from pykechain.enums import PropertyType, Multiplicity
 from pykechain.models import AttachmentProperty
 from tests.classes import TestBetamax
 

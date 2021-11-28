@@ -1,6 +1,6 @@
 from pykechain.enums import PropertyType
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Property, SelectListProperty
+from pykechain.models import SelectListProperty, Property
 from pykechain.models.property_selectlist import MultiSelectListProperty
 from tests.classes import TestBetamax
 

@@ -1,4 +1,5 @@
 import datetime
+from typing import Text
 
 import pytz
 

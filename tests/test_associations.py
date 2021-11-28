@@ -1,4 +1,4 @@
-from pykechain.exceptions import APIError, IllegalArgumentError
+from pykechain.exceptions import IllegalArgumentError, APIError
 from pykechain.models import Activity, Part, Property
 from pykechain.models.association import Association
 from pykechain.models.input_checks import check_list_of_base

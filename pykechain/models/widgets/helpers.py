@@ -1,16 +1,23 @@
 import warnings
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Dict, Optional, Union, Text, Tuple, List, Callable
 
 from pykechain.enums import (
-    ActivityType, CardWidgetImageValue, CardWidgetKEChainPageLink, CardWidgetLinkValue, Category,
+    Category,
+    PropertyType,
+    WidgetTitleValue,
+    ActivityType,
+    CardWidgetLinkValue,
+    KEChainPages,
+    CardWidgetKEChainPageLink,
+    LinkTargets,
     ImageFitValue,
-    KEChainPages, LinkTargets, PropertyType, WidgetTitleValue,
+    CardWidgetImageValue,
 )
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models.input_checks import check_base, check_enum
+from pykechain.models.input_checks import check_enum, check_base
 from pykechain.models.value_filter import PropertyValueFilter
-from pykechain.models.widgets.enums import AssociatedObjectId, MetaWidget
-from pykechain.utils import camelcase, is_uuid, snakecase
+from pykechain.models.widgets.enums import MetaWidget, AssociatedObjectId
+from pykechain.utils import is_uuid, snakecase, camelcase
 
 # these are the common keys to all kecards.
 KECARD_COMMON_KEYS = [

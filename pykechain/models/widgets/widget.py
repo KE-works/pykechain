@@ -1,17 +1,17 @@
 import datetime
 import os
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-
 import pytz
 import requests
+
+from typing import Any, Optional, List, Dict, Union, Text, Tuple, Callable
 from jsonschema import validate
 
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.enums import Category, WidgetTitleValue, WidgetTypes
+from pykechain.enums import WidgetTypes, Category, WidgetTitleValue
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import BaseInScope
-from pykechain.models.widgets.enums import AssociatedObjectId, MetaWidget
-from pykechain.models.widgets.helpers import TITLE_TYPING, _set_title
+from pykechain.models.widgets.enums import MetaWidget, AssociatedObjectId
+from pykechain.models.widgets.helpers import _set_title, TITLE_TYPING
 from pykechain.models.widgets.widget_schemas import widget_meta_schema
 from pykechain.utils import Empty, empty, slugify_ref
 

@@ -1,19 +1,29 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Text, Union  # noqa: F401
+from typing import Union, Text, Dict, Optional, List  # noqa: F401
 
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import (
-    KEChainPages, Multiplicity, ScopeCategory, ScopeMemberActions, ScopeRoles, ScopeStatus,
+    Multiplicity,
+    ScopeStatus,
     SubprocessDisplayMode,
+    KEChainPages,
+    ScopeRoles,
+    ScopeMemberActions,
+    ScopeCategory,
 )
-from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
+from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.activity import Activity
 from pykechain.models.base import Base
 from pykechain.models.context import Context
 from pykechain.models.input_checks import (
-    check_base, check_datetime, check_enum, check_list_of_text, check_text, check_type,
+    check_text,
+    check_datetime,
+    check_enum,
+    check_list_of_text,
+    check_base,
+    check_type,
 )
 from pykechain.models.part import Part
 from pykechain.models.property import Property
@@ -23,7 +33,7 @@ from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
-from pykechain.utils import Empty, clean_empty_values, empty, find, parse_datetime
+from pykechain.utils import parse_datetime, find, Empty, clean_empty_values, empty
 
 
 class Scope(Base, TagsMixin):

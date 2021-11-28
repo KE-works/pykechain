@@ -15,6 +15,7 @@ from pykechain.exceptions import (
     MultipleFoundError,
     NotFoundError,
 )
+
 # new in 1.13
 from pykechain.models import Service
 from pykechain.utils import temp_chdir

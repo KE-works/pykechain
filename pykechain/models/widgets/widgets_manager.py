@@ -1,29 +1,62 @@
 import warnings
-from typing import (Any, Dict, Iterable, List, Optional, Union)
+from typing import (
+    Iterable,
+    Union,
+    Optional,
+    Text,
+    Dict,
+    List,
+    Any,
+)
 
 from pykechain.enums import (
-    ActivityClassification, ActivityStatus, ActivityType, Alignment, CardWidgetLinkValue,
-    ImageFitValue, KEChainPages,
-    LinkTargets, ProgressBarColors, ScopeWidgetColumnTypes, ShowColumnTypes, SortTable,
+    SortTable,
     WidgetTypes,
+    ShowColumnTypes,
+    ScopeWidgetColumnTypes,
+    ProgressBarColors,
+    CardWidgetLinkValue,
+    LinkTargets,
+    ImageFitValue,
+    KEChainPages,
+    Alignment,
+    ActivityStatus,
+    ActivityType,
+    ActivityClassification,
 )
-from pykechain.exceptions import IllegalArgumentError, NotFoundError
+from pykechain.exceptions import NotFoundError, IllegalArgumentError
 from pykechain.models.input_checks import (
-    check_base, check_enum, check_list_of_text, check_text, check_type
+    check_enum,
+    check_text,
+    check_base,
+    check_type,
+    check_list_of_text,
 )
 from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.enums import (
-    AssociatedObjectId, DashboardWidgetShowScopes, DashboardWidgetShowTasks,
-    DashboardWidgetSourceScopes, MetaWidget,
-    TasksAssignmentFilterTypes, TasksWidgetColumns,
+    DashboardWidgetSourceScopes,
+    DashboardWidgetShowTasks,
+    DashboardWidgetShowScopes,
+    MetaWidget,
+    AssociatedObjectId,
+    TasksAssignmentFilterTypes,
+    TasksWidgetColumns,
 )
 from pykechain.models.widgets.helpers import (
-    TITLE_TYPING, _check_excluded_propmodels, _check_prefilters, _initiate_meta, _retrieve_object,
+    _set_title,
+    _initiate_meta,
+    _retrieve_object,
     _retrieve_object_id,
-    _set_button_text, _set_description, _set_image, _set_link, _set_title,
+    _check_prefilters,
+    _check_excluded_propmodels,
+    _set_description,
+    _set_link,
+    _set_image,
+    _set_button_text,
+    TITLE_TYPING,
 )
-from pykechain.utils import find, is_url, is_uuid, snakecase
+from pykechain.utils import is_uuid, find, snakecase, is_url
 
 
 class WidgetsManager(Iterable):

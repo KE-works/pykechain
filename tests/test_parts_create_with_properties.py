@@ -1,4 +1,4 @@
-from pykechain.enums import Multiplicity, PropertyType
+from pykechain.enums import PropertyType, Multiplicity
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Part
 from pykechain.models.validators import RequiredFieldValidator

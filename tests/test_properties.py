@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from pykechain.enums import Category, Multiplicity, PropertyType
-from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
+from pykechain.enums import PropertyType, Category, Multiplicity
+from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models import Property
 from pykechain.models.validators import SingleReferenceValidator
 from tests.classes import TestBetamax

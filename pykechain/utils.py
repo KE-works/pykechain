@@ -8,12 +8,14 @@ from typing import (
     Iterable,
     Callable,
     Optional,
+    Text,
     Dict,
     Union,
     List,
 )  # noqa: F401
 
 import pytz
+import six
 
 T = TypeVar("T")
 
@@ -502,7 +504,7 @@ def get_in_chunks(lst: Union[List, Iterable], chunk_size: int) -> Iterable:
     :rtype: Iterable
     """
     for i in range(0, len(lst), chunk_size):
-        yield lst[i: i + chunk_size]
+        yield lst[i : i + chunk_size]
 
 
 class Empty:

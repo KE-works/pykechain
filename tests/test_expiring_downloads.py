@@ -1,8 +1,9 @@
 import datetime
 import os
 
-from pykechain.models.expiring_download import ExpiringDownload
 from pykechain.utils import temp_chdir
+
+from pykechain.models.expiring_download import ExpiringDownload
 from tests.classes import TestBetamax
 
 

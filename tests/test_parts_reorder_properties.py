@@ -1,4 +1,4 @@
-from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
+from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError
 from tests.classes import TestBetamax
 
 

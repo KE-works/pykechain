@@ -1,6 +1,6 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Text
 
-from pykechain.enums import FontAwesomeMode, URITarget
+from pykechain.enums import URITarget, FontAwesomeMode
 from pykechain.exceptions import IllegalArgumentError
 
 allowed_attributes = [

@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Text, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -1446,7 +1446,8 @@ class Client:
             include_part_children=check_type(include_children, bool, "clone_children"),
             excluded_part_ids=check_list_of_base(
                 excluded_parts, Part, "excluded_models"
-            ) or [],
+            )
+            or [],
             part_parent_model_id=check_base(
                 part_parent_model, Part, "part_parent_model"
             ),
@@ -1725,7 +1726,8 @@ class Client:
                 {
                     "multiplicity": check_enum(
                         multiplicity, Multiplicity, "multiplicity"
-                    ) or part.multiplicity,
+                    )
+                    or part.multiplicity,
                     "model_id": part.id,
                     "parent": parent.id,
                 }

@@ -1,7 +1,7 @@
 import io
 import json
 import os
-from typing import Any, Optional
+from typing import Text, Any, Optional
 
 import requests
 

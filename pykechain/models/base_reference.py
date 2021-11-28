@@ -1,10 +1,10 @@
-from abc import ABC, abstractmethod
-from typing import Any, List, Optional, Tuple, Union
+from abc import abstractmethod, ABC
+from typing import Optional, Any, Text, Union, Tuple, List
 
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Base, Property
+from pykechain.models import Property, Base
 from pykechain.models.base import BaseInScope
-from pykechain.models.input_checks import check_base, check_list_of_base
+from pykechain.models.input_checks import check_list_of_base, check_base
 from pykechain.models.value_filter import BaseFilter
 
 

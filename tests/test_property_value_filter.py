@@ -6,11 +6,17 @@ from unittest import TestCase
 import pytz
 
 from pykechain.enums import (
-    ActivityRootNames, ActivityType, FilterType, Multiplicity, PropertyType, ScopeStatus
+    FilterType,
+    ScopeStatus,
+    Multiplicity,
+    PropertyType,
+    ActivityType,
+    ActivityRootNames,
 )
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import PropertyValueFilter
 from pykechain.models.value_filter import ScopeFilter
+from pykechain.models.widgets.enums import MetaWidget
 from tests.classes import TestBetamax
 
 TIMESTAMP = datetime.datetime(year=2020, month=1, day=1, tzinfo=pytz.UTC)

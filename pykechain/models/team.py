@@ -1,13 +1,13 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union, List, Text, Dict
 
 import requests
 
-from pykechain.enums import ScopeStatus, TeamRoles
+from pykechain.enums import TeamRoles, ScopeStatus
 from pykechain.exceptions import APIError
 from pykechain.models.user import User
 from .base import Base
-from .input_checks import check_enum, check_text, check_type, check_user
-from ..utils import Empty, clean_empty_values, empty
+from .input_checks import check_text, check_type, check_enum, check_user
+from ..utils import Empty, empty, clean_empty_values
 
 
 class Team(Base):

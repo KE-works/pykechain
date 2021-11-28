@@ -1,9 +1,12 @@
-from typing import List, Optional
+from typing import List, Optional, Text
 
 from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Scope, user
-from pykechain.models.base_reference import (_ReferenceProperty, _ReferencePropertyInScope)
+from pykechain.models.base_reference import (
+    _ReferencePropertyInScope,
+    _ReferenceProperty,
+)
 from pykechain.models.value_filter import ScopeFilter
 from pykechain.utils import get_in_chunks
 

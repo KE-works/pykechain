@@ -5,7 +5,7 @@ from pykechain import get_project
 from pykechain.enums import KechainEnv
 from pykechain.exceptions import ClientError
 from tests.classes import TestBetamax
-from tests.utils import TEST_SCOPE_ID, TEST_SCOPE_NAME, TEST_TOKEN, TEST_URL
+from tests.utils import TEST_TOKEN, TEST_URL, TEST_SCOPE_NAME, TEST_SCOPE_ID
 
 PSEUDO_TOKEN = "aabbccddeeffgg0011223344556677889900"
 PSEUDO_PASSWORD = "abc123!@#"
