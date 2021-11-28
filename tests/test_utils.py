@@ -1,10 +1,9 @@
 from unittest import TestCase
 
-from pykechain.utils import is_url, is_valid_email, Empty, get_in_chunks
-from tests.classes import SixTestCase
+from pykechain.utils import Empty, get_in_chunks, is_url, is_valid_email
 
 
-class TestIsURL(SixTestCase):
+class TestIsURL(TestCase):
     def test_is_url_returns_true_on_valid_url(self):
         addresses = [
             "http://foobar.dk",
@@ -116,7 +115,7 @@ class TestIsURL(SixTestCase):
                 )
 
 
-class TestIsEmail(SixTestCase):
+class TestIsEmail(TestCase):
     def test_is_email_returns_true_on_valid_url(self):
         valid_addresses = [
             "some@domain.org",

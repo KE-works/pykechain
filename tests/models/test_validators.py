@@ -1,3 +1,5 @@
+from unittest import TestCase
+
 from jsonschema import validate, ValidationError
 
 from pykechain.enums import PropertyVTypes, PropertyType
@@ -28,10 +30,10 @@ from pykechain.models.validators.validators import (
     FileSizeValidator,
     FileExtensionValidator,
 )
-from tests.classes import SixTestCase, TestBetamax
+from tests.classes import TestBetamax
 
 
-class TestValidatorJSON(SixTestCase):
+class TestValidatorJSON(TestCase):
     def test_valid_numeric_range_validator_json(self):
         options = dict(
             validators=[
@@ -161,13 +163,13 @@ class TestValidatorJSON(SixTestCase):
             validate(v, effects_jsonschema_stub)
 
 
-class TestPropertyValidatorClass(SixTestCase):
+class TestPropertyValidatorClass(TestCase):
     def test_propertyvalidator_produces_valid_json(self):
         pv = PropertyValidator()
         pv.validate_json()
 
 
-class TestValidatorEffects(SixTestCase):
+class TestValidatorEffects(TestCase):
     def test_validator_effect_produces_valid_json(self):
         ve = ValidatorEffect()
         ve.validate_json()
@@ -188,7 +190,7 @@ class TestValidatorEffects(SixTestCase):
         ve.validate_json()
 
 
-class TestValidatorParsing(SixTestCase):
+class TestValidatorParsing(TestCase):
     def test_valid_numeric_range_validator_json(self):
         validator_json = dict(
             vtype="numericRangeValidator",
@@ -217,7 +219,7 @@ class TestValidatorParsing(SixTestCase):
         pass
 
 
-class TestValidatorDumping(SixTestCase):
+class TestValidatorDumping(TestCase):
     def test_valid_numeric_range_validator_dumped(self):
         validator_json = dict(
             vtype="numericRangeValidator",
@@ -247,7 +249,7 @@ class TestValidatorDumping(SixTestCase):
         self.assertIsNone(validator.validate_json())
 
 
-class TestNumericRangeValidator(SixTestCase):
+class TestNumericRangeValidator(TestCase):
     def test_numeric_range_without_settings_validated_json(self):
         validator = NumericRangeValidator()
 
@@ -330,7 +332,7 @@ class TestNumericRangeValidator(SixTestCase):
         )
 
 
-class TestBooleanFieldValidator(SixTestCase):
+class TestBooleanFieldValidator(TestCase):
     def test_boolean_validator_without_settings(self):
         validator = BooleanFieldValidator()
         self.assertIsNone(validator.validate_json())
@@ -340,7 +342,7 @@ class TestBooleanFieldValidator(SixTestCase):
         )
 
 
-class TestRequiredFieldValidator(SixTestCase):
+class TestRequiredFieldValidator(TestCase):
     def test_requiredfield_validator_without_settings(self):
         validator = RequiredFieldValidator()
         self.assertIsNone(validator.validate_json())
@@ -375,7 +377,7 @@ class TestRequiredFieldValidator(SixTestCase):
         self.assertTrue(validator.is_valid(False))
 
 
-class TestRegexValidator(SixTestCase):
+class TestRegexValidator(TestCase):
     def test_regex_validator_without_settings(self):
         validator = RegexStringValidator()
         self.assertIsNone(validator.validate_json())
@@ -411,7 +413,7 @@ class TestRegexValidator(SixTestCase):
         self.assertFalse(validator.is_valid("user@domain"))
 
 
-class TestOddEvenNumberValidator(SixTestCase):
+class TestOddEvenNumberValidator(TestCase):
     def test_even_number_validator_without_settings(self):
         validator = EvenNumberValidator()
         self.assertIsNone(validator.validate_json())
@@ -490,7 +492,7 @@ class TestOddEvenNumberValidator(SixTestCase):
         self.assertFalse(validator.is_valid("3"))
 
 
-class TestSingleReferenceValidator(SixTestCase):
+class TestSingleReferenceValidator(TestCase):
     def test_singlereference_validator_without_settings(self):
         validator = SingleReferenceValidator()
         self.assertIsNone(validator.validate_json())
@@ -519,7 +521,7 @@ class TestSingleReferenceValidator(SixTestCase):
         self.assertFalse(validator.is_valid(dict()))
 
 
-class TestAlwaysAllowValidator(SixTestCase):
+class TestAlwaysAllowValidator(TestCase):
     def test_always_allow_validator_without_settings(self):
         validator = AlwaysAllowValidator()
         self.assertTrue(validator.is_valid("some text"))
@@ -537,7 +539,7 @@ class TestAlwaysAllowValidator(SixTestCase):
         self.assertIsNone(validator.validate_json())
 
 
-class TestFileSizeValidator(SixTestCase):
+class TestFileSizeValidator(TestCase):
     def test_validator_valid_json_with_settings(self):
         validator = FileSizeValidator(max_size=100)
         self.assertIsNone(validator.validate_json())
@@ -594,7 +596,7 @@ class TestFileSizeValidator(SixTestCase):
         self.assertIsNone(validator.is_valid(None))
 
 
-class TestFileExtensionValidator(SixTestCase):
+class TestFileExtensionValidator(TestCase):
     def test_validator_valid_json_with_settings(self):
         validator = FileExtensionValidator(accept=[".csv"])
         self.assertIsNone(validator.validate_json())
@@ -657,7 +659,7 @@ class TestFileExtensionValidator(SixTestCase):
         self.assertIsNone(validator.is_valid(None))
 
 
-class TestPropertyWithValidator(SixTestCase):
+class TestPropertyWithValidator(TestCase):
     def test_property_without_validator(self):
         prop = Property(json={}, client=None)
         self.assertIsNone(prop.is_valid)
