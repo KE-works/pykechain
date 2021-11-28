@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Iterable, Text, Optional, List
+from typing import Iterable, Optional, List
 
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_list_of_text, check_type

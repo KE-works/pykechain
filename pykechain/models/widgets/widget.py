@@ -3,7 +3,7 @@ import os
 import pytz
 import requests
 
-from typing import Any, Optional, List, Dict, Union, Text, Tuple, Callable
+from typing import Any, Optional, List, Dict, Union,  Tuple, Callable
 from jsonschema import validate
 
 from pykechain.defaults import API_EXTRA_PARAMS

@@ -3,7 +3,6 @@ from typing import (
     Iterable,
     Union,
     Optional,
-    Text,
     Dict,
     List,
     Any,

@@ -7,7 +7,7 @@ end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 # pycharm specific
-ij_visual_guides = 79,99
+ij_visual_guides = 79,99,120
 
 [*.{py, rst, ini}]
 indent_style = space

@@ -3,7 +3,7 @@ import requests
 from pykechain.enums import NotificationStatus, NotificationEvent, NotificationChannels
 from pykechain.exceptions import IllegalArgumentError, APIError
 from pykechain.models import Base
-from typing import Text, List, Optional, Dict, Union
+from typing import  List, Optional, Dict, Union
 
 from pykechain.models.input_checks import check_text, check_enum, check_base, check_user
 from pykechain.utils import is_valid_email, Empty, clean_empty_values, empty

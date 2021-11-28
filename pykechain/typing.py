@@ -1,4 +1,4 @@
-from typing import Union, Text, Iterable, KeysView
+from typing import Union, Iterable, KeysView
 from uuid import UUID
 
 ObjectID = Union[str, UUID]

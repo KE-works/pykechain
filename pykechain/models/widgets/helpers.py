@@ -1,5 +1,5 @@
 import warnings
-from typing import Dict, Optional, Union, Text, Tuple, List, Callable
+from typing import Dict, Optional, Union,  Tuple, List, Callable
 
 from pykechain.enums import (
     Category,

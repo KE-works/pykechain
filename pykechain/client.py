@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Text, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -101,7 +101,8 @@ class Client:
     ) -> None:
         """Create a KE-chain client with given settings.
 
-        :param url: the url of the KE-chain instance to connect to (defaults to http://localhost:8000)
+        :param url: the url of the KE-chain instance to connect to (defaults to
+            http://localhost:8000)
         :type url: basestring
         :param check_certificates: if to check TLS/SSL Certificates. Defaults to True
         :type check_certificates: bool
@@ -186,9 +187,9 @@ class Client:
 
         Example
         -------
-        Initiates the pykechain client from the contents of an environment file. Authentication information is optional
-        but ensure that you provide this later in your code. Offered are both username/password authentication and
-        user token authentication.
+        Initiates the pykechain client from the contents of an environment file. Authentication
+        information is optional but ensure that you provide this later in your code. Offered
+        are both username/password authentication and user token authentication.
 
         .. code-block:: none
            :caption: .env
@@ -307,7 +308,8 @@ class Client:
         self.last_request = self.last_response.request
         self.last_url = self.last_response.url
 
-        # print("{} {} {}".format(method, url, kwargs.get("params")))  # uncomment to track all requests
+        # print("{} {} {}".format(method, url, kwargs.get("params")))  # uncomment to track
+        # all requests
 
         if self.last_response.status_code == requests.codes.forbidden:
             raise ForbiddenError(self.last_response.json()["results"][0]["detail"])
@@ -411,16 +413,17 @@ class Client:
         :type app: basestring or None
         :param label: (optional) app label (last part of the app name) eb 'wim'
         :type label: basestring or None
-        :param version: semantic version string to match appname version against eg '2.0.0' or '>=2.0.0'
+        :param version: semantic version string to match appname version against eg '2.0.0' or
+            '>=2.0.0'
         :type version: basestring
-        :param default: (optional) boolean to return if the version of the app is not set but the app found.
-                        Set to None to return a NotFoundError when a version if not found in the app.
+        :param default: (optional) boolean to return if the version of the app is not set but the
+            app found. Set to None to return a NotFoundError when a version if not found in the app.
         :type default: bool or None
         :return: True if the version of the app matches against the match_version, otherwise False
         :raises IllegalArgumentError: if no app nor a label is provided
         :raises NotFoundError: if the app is not found
         :raises ValueError: if the version provided is not parseable by semver,
-                            should contain (<operand><major>.<minor>.<patch) where <operand> is '>,<,>=,<=,=='
+            should contain (<operand><major>.<minor>.<patch) where <operand> is '>,<,>=,<=,=='
 
         """
         if not app or not label and not (app and label):
@@ -458,13 +461,15 @@ class Client:
     def reload(
         self, obj: Base, url: Optional[str] = None, extra_params: Optional[Dict] = None
     ):
-        """Reload an object from server. The original object is immutable and it will return a new object.
+        """Reload an object from server. The original object is immutable and returns a new object.
 
-        The object will be refetched from KE-chain. If the object has a 'url' field the url will be taken from
-        that field (KE-chain version 2 and newer). If the object does not have an 'url' field it will be constructed
-        based on the class name and the id of the object itself. If `extra_params` are provided, these will be
-        respected. If additional API params are needed to be included (eg. for KE-chain 3/PIM2) these will be
-        added/updated automatically before the request is performed.
+        The object will be refetched from KE-chain. If the object has a 'url' field the url will
+        be taken from that field (KE-chain version 2 and newer). If the object does not have an
+        'url' field it will be constructed based on the class name and the id of the object itself.
+
+        If `extra_params` are provided, these will be respected. If additional API params are
+        needed to be included (eg. for KE-chain 3/PIM2) these will be added/updated automatically
+        before the request is performed.
 
         :param obj: object to reload
         :type obj: :py:obj:`obj`
@@ -484,8 +489,8 @@ class Client:
         elif obj._json_data.get("url"):
             url = obj._json_data.get("url")
         else:
-            # No known URL to reload the object: Try to build the url from the class name (in lower case)
-
+            # No known URL to reload the object: Try to build the url from the class name
+            # (in lower case)
             extra_api_params = dict()
             superclasses = (
                 obj.__class__.mro()
@@ -495,7 +500,8 @@ class Client:
                 stripped = resource.replace("2", "")
 
                 try:
-                    # set the id from the `obj.id` which is normally a keyname `<class_name>_id` (without the '2' if so)
+                    # set the id from the `obj.id` which is normally a keyname `<class_name>_id`
+                    # (without the '2' if so)
                     url = self._build_url(
                         resource=resource, **{f"{stripped}_id": obj.id}
                     )
@@ -518,10 +524,12 @@ class Client:
 
             if url is None:
                 raise IllegalArgumentError(
-                    f'Provide URL to reload the "{obj}" object (could not identify the API resource).'
+                    f'Provide URL to reload the "{obj}" '
+                    f'object (could not identify the API resource).'
                 )
 
-            # add the additional API params to the already provided extra params if they are provided.
+            # add the additional API params to the already provided extra params if they
+            # are provided.
             extra_params = (
                 extra_params.update(**extra_api_params)
                 if extra_params
@@ -541,7 +549,8 @@ class Client:
     @staticmethod
     def _retrieve_singular(method: Callable, *args, **kwargs):
         """
-        Use the method for multiple objects to retrieve a single object, raising the appropriate errors.
+        Use the method for multiple objects to retrieve a single object, raising the
+        appropriate errors.
 
         :param method: function used to retrieve multiple objects.
         :type method: callable
@@ -572,14 +581,16 @@ class Client:
     ) -> List[Scope]:
         """Return all scopes visible / accessible for the logged in user.
 
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
+        If additional `keyword=value` arguments are provided, these are added to the
+        request parameters. Please refer to the documentation of the KE-chain API for additional
+         query parameters.
 
         :param name: if provided, filter the search for a scope/project by name
         :type name: basestring or None
         :param pk: if provided, filter the search by scope_id
         :type pk: basestring or None
-        :param status: if provided, filter the search for the status. eg. 'ACTIVE', 'TEMPLATE', 'LIBRARY'
+        :param status: if provided, filter the search for the status. eg. 'ACTIVE',
+            'TEMPLATE', 'LIBRARY'
         :type status: basestring or None
         :param kwargs: optional additional search arguments
         :return: list of `Scopes`
@@ -629,8 +640,9 @@ class Client:
     def scope(self, *args, **kwargs) -> Scope:
         """Return a single scope based on the provided name.
 
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
+        If additional `keyword=value` arguments are provided, these are added to the
+        request parameters. Please refer to the documentation of the KE-chain API for
+        additional query parameters.
 
         :return: a single :class:`models.Scope`
         :raises NotFoundError: When no `Scope` is found
@@ -647,8 +659,9 @@ class Client:
     ) -> List[Activity]:
         """Search for activities with optional name, pk and scope filter.
 
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
+        If additional `keyword=value` arguments are provided, these are added to the
+        request parameters. Please refer to the documentation of the KE-chain API for
+        additional query parameters.
 
         :param pk: id (primary key) of the activity to retrieve
         :type pk: basestring or None
@@ -683,8 +696,9 @@ class Client:
     def activity(self, *args, **kwargs) -> Activity:
         """Search for a single activity.
 
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
+        If additional `keyword=value` arguments are provided, these are added to the
+        request parameters. Please refer to the documentation of the KE-chain API for
+        additional query parameters.
 
         :param pk: id (primary key) of the activity to retrieve
         :type pk: basestring or None
@@ -716,8 +730,9 @@ class Client:
 
         If no parameters are provided, all parts are retrieved.
 
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
+        If additional `keyword=value` arguments are provided, these are added to the
+        request parameters. Please refer to the documentation of the KE-chain API for
+        additional query parameters.
 
         :param name: filter on name
         :type name: basestring or None
@@ -877,14 +892,16 @@ class Client:
     ) -> List["AnyProperty"]:
         """Retrieve properties.
 
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
+        If additional `keyword=value` arguments are provided, these are added to the
+        request parameters. Please refer to the documentation of the KE-chain API for
+        additional query parameters.
 
         :param name: name to limit the search for.
         :type name: basestring or None
         :param pk: primary key or id (UUID) of the property to search for
         :type pk: basestring or None
-        :param category: filter the properties by category. Defaults to INSTANCE. Other options MODEL or None
+        :param category: filter the properties by category. Defaults to INSTANCE. Other
+            options MODEL or None
         :type category: basestring or None
         :param kwargs: (optional) additional search keyword arguments
         :return: list of :class:`models.Property`
@@ -960,8 +977,9 @@ class Client:
         """
         Retrieve Services.
 
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
+        If additional `keyword=value` arguments are provided, these are added to the
+        request parameters. Please refer to the documentation of the KE-chain API for
+        additional query parameters.
 
         :param name: (optional) name to limit the search for
         :type name: basestring or None
@@ -1017,8 +1035,9 @@ class Client:
         """
         Retrieve Service Executions.
 
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
+        If additional `keyword=value` arguments are provided, these are added to the
+        request parameters. Please refer to the documentation of the KE-chain API for
+        additional query parameters.
 
         :param name: (optional) name to limit the search for
         :type name: basestring or None
@@ -1062,8 +1081,9 @@ class Client:
         Uses the same interface as the :func:`service_executions` method but returns only a single
         pykechain :class:`models.ServiceExecution` instance.
 
-        If additional `keyword=value` arguments are provided, these are added to the request parameters. Please
-        refer to the documentation of the KE-chain API for additional query parameters.
+        If additional `keyword=value` arguments are provided, these are added to the
+        request parameters. Please refer to the documentation of the KE-chain API for
+        additional query parameters.
 
         :param kwargs: (optional) additional search keyword arguments
         :return: a single :class:`models.ServiceExecution` object
@@ -1106,7 +1126,12 @@ class Client:
         """
         User of KE-chain.
 
-        Provides single user of :class:`User` of KE-chain. You can filter on username or id or an advanced filter.
+        Provides single user of :class:`User` of KE-chain. You can filter on `username` or
+        `id` or an advanced filter.
+
+        If additional `keyword=value` arguments are provided, these are added to the
+        request parameters. Please refer to the documentation of the KE-chain API for
+        additional query parameters.
 
         :param kwargs: Additional filtering keyword=value arguments
         :return: List of :class:`User`
@@ -1148,13 +1173,19 @@ class Client:
         """
         Teams of KE-chain.
 
-        Provide a list of :class:`Team`'s of KE-chain. You can filter on teamname or id or any other advanced filter.
+        Provide a list of :class:`Team`'s of KE-chain. You can filter on `teamname` or `id`
+        or any other advanced filter.
+
+        If additional `keyword=value` arguments are provided, these are added to the
+        request parameters. Please refer to the documentation of the KE-chain API for
+        additional query parameters.
 
         :param name: (optional) teamname to filter
         :type name: basestring or None
         :param pk: (optional) id of the team to filter
         :type pk: basestring or None
-        :param is_hidden: (optional) boolean to show non-hidden or hidden teams or both (None) (default is non-hidden)
+        :param is_hidden: (optional) boolean to show non-hidden or hidden teams or
+            both (None) (default is non-hidden)
         :type is_hidden: bool or None
         :param kwargs: Additional filtering keyword=value arguments
         :return: List of :class:`Teams`
@@ -1201,13 +1232,14 @@ class Client:
 
         :param pk: (optional) the uuid of the widget.
         :type pk: basestring or None
-        :param activity: (optional) the :class:`Activity` or UUID of the activity to filter the widgets for.
+        :param activity: (optional) the :class:`Activity` or UUID of the activity to
+            filter the widgets for.
         :type activity: basestring or None
         :param kwargs: additional keyword arguments
         :return: A list of Widget objects
         :rtype: List
         :raises NotFoundError: when the widgets could not be found
-        :raises APIError: when the API does not support the widgets, or when the API gives an error.
+        :raises APIError: when the API does not support the widgets, or when API gives an error
         """
         """Widgets of an activity."""
         request_params = dict(API_EXTRA_PARAMS["widgets"])
@@ -1277,7 +1309,8 @@ class Client:
         :type start_date: datetime.datetime
         :param due_date: due date of the activity
         :type due_date: datetime.datetime
-        :param classification: classification of activity: defaults to `parent`'s if provided, WORKFLOW otherwise.
+        :param classification: classification of activity: defaults to `parent`'s if provided,
+            WORKFLOW otherwise.
         :type classification: ActivityClassification
         :param tags: list of activity tags
         :type tags: list
@@ -1379,13 +1412,15 @@ class Client:
         :type activities: list
         :param activity_parent: parent Activity sub-process object or UUID
         :type activity_parent: Activity
-        :param activity_update_dicts: (O) dict of dictionaries, each key-value combination relating to an activity
-        to clone and a dict of new values to assign, e.g. `{activity.id: {"name": "Cloned activity"}}`
+        :param activity_update_dicts: (O) dict of dictionaries, each key-value combination
+            relating to an activity to clone and a dict of new values to assign, e.g.
+            `{activity.id: {"name": "Cloned activity"}}`
         :type activity_update_dicts: dict
-        :param include_part_models: (O) whether to clone the data models configured in the activities, defaults to False
+        :param include_part_models: (O) whether to clone the data models configured in the
+            activities, defaults to False
         :type include_part_models: bool
-        :param include_part_instances: (O) whether to clone the part instances of the data model configured in the
-            activities, defaults to True
+        :param include_part_instances: (O) whether to clone the part instances of the data
+            model configured in the activities, defaults to True
         :type include_part_instances: bool
         :param include_children: (O) whether to clone child parts
         :type include_children: bool
@@ -1396,9 +1431,11 @@ class Client:
         :type part_parent_model: Part
         :param part_parent_instance: (O) parent Part object or UUID for the copied part instance(s)
         :type part_parent_instance: Part
-        :param part_model_rename_template: (O) renaming template for part models. Must contain "{name}"
+        :param part_model_rename_template: (O) renaming template for part models.
+            Must contain "{name}"
         :type part_model_rename_template: str
-        :param part_instance_rename_template: (O) renaming template for part instances. Must contain "{name}"
+        :param part_instance_rename_template: (O) renaming template for part instances.
+            Must contain "{name}"
         :type part_instance_rename_template: str
         :param asynchronous: If true, immediately returns without activities (default = False)
         :type asynchronous: bool
@@ -1530,10 +1567,10 @@ class Client:
     ) -> Part:
         """Create a new part instance from a given model under a given parent.
 
-        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
-        additional keyword=value argument to this method. This will improve performance of the backend
-        against a trade-off that someone looking at the frontend won't notice any changes unless the page
-        is refreshed.
+        In order to prevent the backend from updating the frontend you may add
+        `suppress_kevents=True` as additional keyword=value argument to this method. This will
+         improve performance of the backend against a trade-off that someone looking at the
+          frontend won't notice any changes unless the page is refreshed.
 
         :param parent: parent part instance of the new instance
         :type parent: :class:`models.Part`
@@ -1570,16 +1607,17 @@ class Client:
     ) -> Part:
         """Create a new child model under a given parent.
 
-        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
-        additional keyword=value argument to this method. This will improve performance of the backend
-        against a trade-off that someone looking at the frontend won't notice any changes unless the page
-        is refreshed.
+        In order to prevent the backend from updating the frontend you may add
+        `suppress_kevents=True` as additional keyword=value argument to this method.
+        This will improve performance of the backend against a trade-off that someone
+        looking at the frontend won't notice any changes unless the page is refreshed.
 
         :param parent: parent part instance or a part uuid
         :type parent: :class:`models.Part`
         :param name: new part name
         :type name: basestring
-        :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N  :class:`enums.Multiplicity`
+        :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N
+            :class:`enums.Multiplicity`
         :type multiplicity: basestring
         :param kwargs: (optional) additional keyword=value arguments
         :return: :class:`models.Part` with category `MODEL` (from :class:`enums.Category`)
@@ -1615,18 +1653,20 @@ class Client:
     ) -> Part:
         """Create a model with its properties in a single API request.
 
-        With KE-chain 3 backends you may now provide a whole set of properties to create using a `properties_fvalues`
-        list of dicts.
+        With KE-chain 3 backends you may now provide a whole set of properties to create
+        using a `properties_fvalues` list of dicts.
 
-        The `properties_fvalues` list is a list of dicts containing at least the `name` and `property_type`,
-        but other keys may provided as well in the single update eg. `default_value` and `value_options`.
+        The `properties_fvalues` list is a list of dicts containing at least the `name`
+        and `property_type`, but other keys may provided as well in the single update eg.
+        `default_value` and `value_options`.
 
-        Possible keys in a property dictionary are: `name` (req'd), `property_type` (req'd), `description`, `unit`,
-        `value`, `value_options` (type: `dict`), `order` (type `int`).
+        Possible keys in a property dictionary are: `name` (req'd), `property_type` (req'd),
+        `description`, `unit`, `value`, `value_options` (type: `dict`), `order` (type `int`).
 
         .. note::
-           It is wise to provide an `order` to ensure that the properties are stored and retrieved in order.
-           It cannot be guaranteed that the order of properties is the exact sequence of the list provided.
+           It is wise to provide an `order` to ensure that the properties are stored and
+           retrieved in order. It cannot be guaranteed that the order of properties is the
+           exact sequence of the list provided.
 
         .. versionadded:: 3.0
            This version makes a model including properties in a single API call
@@ -1635,9 +1675,11 @@ class Client:
         :type parent: :class:`models.Part`
         :param name: new part name
         :type name: basestring
-        :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N of :class:`enums.Multiplicity`
+        :param multiplicity: choose between ZERO_ONE, ONE, ZERO_MANY, ONE_MANY or M_N of
+            :class:`enums.Multiplicity`
         :type multiplicity: basestring
-        :param properties_fvalues: list of dicts per property, each must have fields `name` and `property_type`.
+        :param properties_fvalues: list of dicts per property, each must have fields `name`
+            and `property_type`.
         :type properties_fvalues: list
         :param kwargs: (optional) additional keyword=value arguments
         :return: :class:`models.Part` with category `MODEL` (of :class:`enums.Category`)
@@ -1650,14 +1692,19 @@ class Client:
         >>> from pykechain.models.validators import RequiredFieldValidator
         >>> properties_fvalues = [
         ...     {"name": "char prop", "property_type": PropertyType.CHAR_VALUE, "order": 1},
-        ...     {"name": "number prop", "property_type": PropertyType.FLOAT_VALUE, "value": 3.14, "order": 2},
-        ...     {"name": "boolean_prop", "property_type": PropertyType.BOOLEAN_VALUE, "value": False,
-        ...      "value_options": {"validators": [RequiredFieldValidator().as_json()]}, "order":3}
+        ...     {"name": "number prop", "property_type": PropertyType.FLOAT_VALUE,
+        ...      "value": 3.14, "order": 2},
+        ...     {"name": "boolean_prop", "property_type": PropertyType.BOOLEAN_VALUE,
+        ...      "value": False,
+        ...      "value_options": {"validators": [RequiredFieldValidator().as_json()]},
+        ...      "order":3}
         ... ]
         >>> client = Client()
-        >>> new_model = client.create_model_with_properties(name='A new model', parent='<uuid>',
-        ...                                                 multiplicity=Multiplicity.ONE,
-        ...                                                 properties_fvalues=properties_fvalues)
+        >>> new_model = client.create_model_with_properties(
+        ...     name='A new model', parent='<uuid>',
+        ...     multiplicity=Multiplicity.ONE,
+        ...     properties_fvalues=properties_fvalues
+        ... )
 
         """
         if isinstance(parent, Part):
@@ -1707,7 +1754,8 @@ class Client:
         :type part: :class:`models.Part`
         :param name: (optional) Name of the to be cloned part
         :type name: basestring or None
-        :param multiplicity: In case of Models, to specify a new multiplicity. Defaults to the `part` multiplicity.
+        :param multiplicity: In case of Models, to specify a new multiplicity. Defaults to the
+            `part` multiplicity.
         :type multiplicity: Multiplicity
         :param kwargs: (optional) additional keyword=value arguments
         :return: cloned :class:`models.Part`
@@ -1761,13 +1809,10 @@ class Client:
     ) -> Part:
         """Add this model as a proxy to another parent model.
 
-        This will add a model as a proxy model to another parent model. It ensure that it will copy the
-        whole sub-assembly to the 'parent' model.
+        This will add a model as a proxy model to another parent model. It ensure that it will
+        copy the whole sub-assembly to the 'parent' model.
 
-        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
-        additional keyword=value argument to this method. This will improve performance of the backend
-        against a trade-off that someone looking at the frontend won't notice any changes unless the page
-        is refreshed.
+        In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as additional keyword=value argument to this method. This will improve performance of the backend against a trade-off that someone looking at the frontend won't notice any changes unless the page is refreshed.
 
         :param model: the catalog proxy model the new proxied model should be based upon
         :type model: :class:`models.Part`

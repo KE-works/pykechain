@@ -2,7 +2,7 @@ import os
 import tempfile
 import warnings
 from collections import namedtuple
-from typing import Optional, Text, List, Any
+from typing import Optional, List, Any
 
 from pykechain import Client
 from pykechain.enums import PropertyType, Multiplicity, Category
@@ -32,7 +32,7 @@ _InstanceCopy = namedtuple(
 
 def get_mapping_dictionary(clean=False) -> dict:
     """
-    Get a temporary helper to map some keys to some values. Mainly used in the relocation of parts and models.
+    A helper to map some keys to some values. Mainly used in the relocation of parts and models.
 
     :param clean: (optional) boolean flag to reset the mapping dictionary
     :type clean: bool
@@ -120,7 +120,8 @@ def map_property_instances(original_part: Part, new_part: Part) -> None:
     mapping = get_mapping_dictionary()
     mapping[original_part.id] = new_part
 
-    # Do the same for each Property of original part instance, using the 'model' id and the get_mapping_dictionary
+    # Do the same for each Property of original part instance, using the 'model' id and
+    # the get_mapping_dictionary
     for prop_original in original_part.properties:
         mapping[prop_original.id] = [
             prop_new
@@ -146,7 +147,8 @@ def relocate_model(
     :type target_parent: :class:`Part`
     :param name: how the moved top-level `Part` should be called
     :type name: basestring
-    :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
+    :param include_children: True to move also the descendants of `Part`. If False,
+        the children will be lost.
     :type include_children: bool
     :return: moved :class: Part model.
     :raises IllegalArgumentError: if target_parent is descendant of part
@@ -211,7 +213,8 @@ def move_part_model(
     :type target_parent: :class:`Part`
     :param name: how the moved top-level `Part` should be called
     :type name: basestring
-    :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
+    :param include_children: True to move also the descendants of `Part`. If False,
+        the children will be lost.
     :type include_children: bool
     :return: moved :class: Part model.
     """
@@ -234,7 +237,7 @@ def _copy_part_model(
     include_children: bool,
 ) -> Part:
     """
-    Copy the `Part` model under a target parent `Part` model, including its descendants recursively.
+    Copy the `Part` model under a target parent `Part` model, incl its descendants recursively.
 
     .. versionadded:: 2.3
 
@@ -244,7 +247,8 @@ def _copy_part_model(
     :type target_parent: :class:`Part`
     :param name: how the copied top-level `Part` should be called
     :type name: basestring
-    :param include_children: True to also copy the descendants of `Part`. If False, the children will be lost.
+    :param include_children: True to also copy the descendants of `Part`. If False,
+        the children will be lost.
     :type include_children: bool
     :return: moved :class: Part model.
     """
@@ -308,7 +312,8 @@ def relocate_instance(
     :type target_parent: :class:`Part`
     :param name: how the moved top-level `Part` should be called
     :type name: basestring
-    :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
+    :param include_children: True to move also the descendants of `Part`. If False,
+        the children will be lost.
     :type include_children: bool
     :return: moved :class: `Part` instance
     """
@@ -321,7 +326,8 @@ def relocate_instance(
     if not name:
         name = f"CLONE - {part.name}"
 
-    # Initially the model of the part needs to be recreated under the model of the target_parent. Retrieve them.
+    # Initially the model of the part needs to be recreated under the model of the target_parent.
+    # Retrieve them.
     part_model = part.model()
     target_parent_model = target_parent.model()
 
@@ -337,7 +343,8 @@ def relocate_instance(
     )
     get_references(clean=True)
 
-    # This function will move the part instance under the target_parent instance, and its children if required.
+    # This function will move the part instance under the target_parent instance,
+    # and its children if required.
     moved_instance = move_part_instance(
         part_instance=part,
         target_parent=target_parent,
@@ -371,7 +378,8 @@ def move_part_instance(
     include_children: Optional[bool] = True,
 ) -> Part:
     """
-    Copy the `Part` instance to target parent and updates the properties based on the original part instance.
+    Copy the `Part` instance to target parent and updates the properties based on the
+    original part instance.
 
     .. versionadded:: 2.3
 
@@ -383,7 +391,8 @@ def move_part_instance(
     :type target_parent: :class:`Part`
     :param name: how the moved top-level `Part` should be called
     :type name: basestring
-    :param include_children: True to move also the descendants of `Part`. If False, the children will be lost.
+    :param include_children: True to move also the descendants of `Part`. If False,
+        the children will be lost.
     :type include_children: bool
     :return: moved :class: `Part` instance
     """
@@ -400,12 +409,15 @@ def move_part_instance(
 
     # Now act based on multiplicity
     if moved_model.multiplicity == Multiplicity.ONE:
-        # If multiplicity is 'Exactly 1', that means the instance was automatically created with the model.
+        # If multiplicity is 'Exactly 1', that means the instance was automatically
+        # created with the model.
         moved_instance = moved_model.instances(parent_id=target_parent.id)[0]
 
     elif moved_model.multiplicity == Multiplicity.ONE_MANY:
-        # If multiplicity is '1 or more', that means one instance has automatically been created with the model.
-        # This first instance has to be used, but only once. Therefore, store the model in a global list after doing so.
+        # If multiplicity is '1 or more', that means one instance has automatically been
+        # created with the model.
+        # This first instance has to be used, but only once. Therefore, store the model in
+        # a global list after doing so.
         if moved_model.id not in get_edited_one_many():
             moved_instance = moved_model.instances(parent_id=target_parent.id)[0]
             get_edited_one_many().append(moved_model.id)
@@ -414,8 +426,8 @@ def move_part_instance(
                 name=name, model=moved_model, suppress_kevents=True
             )
     else:
-        # If multiplicity is '0 or more' or '0 or 1', it means no instance has been created automatically with the
-        # model, so then everything must be created and then updated.
+        # If multiplicity is '0 or more' or '0 or 1', it means no instance has been created
+        # automatically with the model, so then everything must be created and then updated.
         moved_instance = target_parent.add(
             name=name, model=moved_model, suppress_kevents=True
         )
@@ -426,8 +438,8 @@ def move_part_instance(
 
     if include_children:
         sub_models = {child.id: child for child in part_model.children()}
-        # Recursively call this function for every descendant. Keep the name of the original sub-instance.
-
+        # Recursively call this function for every descendant. Keep the name of the
+        # original sub-instance.
         for sub_instance in part_instance.children():
             move_part_instance(
                 part_instance=sub_instance,
@@ -461,7 +473,8 @@ def update_part_with_properties(
         PendingDeprecationWarning,
     )
 
-    # Instantiate an empty dictionary used to collect all property values in order to update the part in one go.
+    # Instantiate an empty dictionary used to collect all property values in order to update
+    # the part in one go.
     properties_id_dict = dict()
     for prop_instance in part_instance.properties:  # type: AnyProperty
         moved_prop_instance = get_mapping_dictionary()[prop_instance.id]
@@ -478,7 +491,8 @@ def update_part_with_properties(
             else:
                 moved_prop_instance.clear()
 
-        # For a reference value property, add the id's of the part referenced {property.id: [part1.id, part2.id, ...]},
+        # For a reference value property, add the id's of the part referenced
+        # {property.id: [part1.id, part2.id, ...]},
         # if there is part referenced at all.
         elif prop_instance.type == PropertyType.REFERENCES_VALUE:
             if prop_instance.has_value():
@@ -526,7 +540,8 @@ def _copy_part(
     :param target_parent: Part to copy below
     :param name: (O) new name of the `part` copy
     :param include_children: (O) include the descendants of `part`, defaults to True
-    :param include_instances: (O) In case of `part` being of category MODEL, include the instance Parts of that model.
+    :param include_instances: (O) In case of `part` being of category MODEL, include the instance
+        Parts of that model.
         WARNING: By default, every instance is created per instance of the `target_parent`.
     :return: copy of `part`
     :rtype Part
@@ -561,14 +576,16 @@ def _copy_part(
                 target_parent_instance = target_parent_model.instance()
             except NotFoundError:
                 raise IllegalArgumentError(
-                    "Cannot copy part model `{}` including instances, since the target_parent model `{}` has no "
+                    "Cannot copy part model `{}` including instances, since the "
+                    "target_parent model `{}` has no "
                     "instance to act as parent for the instances.".format(
                         model, target_parent_model
                     )
                 )
             except MultipleFoundError:
                 raise IllegalArgumentError(
-                    "Cannot copy part model `{}` including instances, since the target_parent model `{}` has multiple "
+                    "Cannot copy part model `{}` including instances, since the "
+                    "target_parent model `{}` has multiple "
                     "instances, making the parent for the instances ambiguous.".format(
                         model, target_parent_model
                     )
@@ -657,22 +674,24 @@ def _copy_instances_recursive(
         existing_instance = None
 
         if model_new.multiplicity == Multiplicity.ONE:
-            # If multiplicity is 'Exactly 1', that means the instance was automatically created with the model.
+            # If multiplicity is 'Exactly 1', that means the instance was automatically
+            # created with the model.
             existing_instance = model_new.instances(
                 parent_id=i.target_parent_instance.id
             )[0]
 
         elif model_new.multiplicity == Multiplicity.ONE_MANY:
-            # If multiplicity is '1 or more', that means one instance has automatically been created with the model.
-            # This first instance has to be used, but only once. Therefore, store the model in a global list after
-            # doing so.
+            # If multiplicity is '1 or more', that means one instance has automatically been
+            # created with the model. This first instance has to be used, but only once. Therefore,
+            # store the model in a global list after doing so.
             if model_new.id not in get_edited_one_many():
                 existing_instance = model_new.instances(
                     parent_id=i.target_parent_instance.id
                 )[0]
                 get_edited_one_many().append(model_new.id)
         else:
-            # If multiplicity is '0 or more' or '0 or 1', no instance has been created automatically with the model.
+            # If multiplicity is '0 or more' or '0 or 1', no instance has been created
+            # automatically with the model.
             pass
 
         if existing_instance:
@@ -756,9 +775,10 @@ def _update_references() -> None:
     """
     Set part reference values found when copying the Part(s).
 
-    Part reference properties referring to child parts in the provided part tree should be updated to refer to
-    the new child parts in the new tree. References to parts outside the provided tree can remain identical.
-    Therefore, try to update the ID of the reference via the mapping dictionary.
+    Part reference properties referring to child parts in the provided part tree should be
+    updated to refer to the new child parts in the new tree. References to parts outside the
+    provided tree can remain identical. Therefore, try to update the ID of the reference via
+    the mapping dictionary.
     """
     mapping = get_mapping_dictionary()
 
@@ -838,7 +858,8 @@ def _get_property_value(prop: AnyProperty) -> Any:
     """
     Get the property value, if directly applicable.
 
-    In case of reference and attachment properties, the value has to be applied later via global attributes.
+    In case of reference and attachment properties, the value has to be applied later via
+    global attributes.
 
     :param prop: Any Property object
     :return: Any value

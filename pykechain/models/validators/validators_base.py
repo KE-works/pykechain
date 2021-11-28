@@ -5,7 +5,6 @@ from typing import (
     Tuple,
     Dict,
     Optional,
-    Text,
 )  # noqa: F401 # pylint: disable=unused-import
 
 from jsonschema import validate

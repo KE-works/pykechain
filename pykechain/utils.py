@@ -8,14 +8,12 @@ from typing import (
     Iterable,
     Callable,
     Optional,
-    Text,
     Dict,
     Union,
     List,
 )  # noqa: F401
 
 import pytz
-import six
 
 T = TypeVar("T")
 

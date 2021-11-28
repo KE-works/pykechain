@@ -20,7 +20,9 @@ class PykeRetry(Retry):
         _pool=None,
         _stacktrace=None,
     ):
-        """In case of failed verification of self signed certificate we short circuit the retry routine."""
+        """
+        Failed verification of self signed certificate cuts the retry routine.
+        """
         if self._is_ssl_error(error):
             raise MaxRetryError(_pool, url, error)
 

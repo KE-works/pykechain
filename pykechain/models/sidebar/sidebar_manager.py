@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from typing import Any, Optional, Text, List, Dict
+from typing import Any, Optional,  List, Dict
 
 from pykechain.enums import (
     URITarget,

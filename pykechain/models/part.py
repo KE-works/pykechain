@@ -1,4 +1,4 @@
-from typing import Union, List, Dict, Optional, Text, Tuple, Any  # noqa: F401
+from typing import Union, List, Dict, Optional,  Tuple, Any  # noqa: F401
 
 import requests
 

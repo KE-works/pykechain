@@ -5,7 +5,6 @@ from typing import (
     Union,
     Tuple,
     Optional,
-    Text,
     Dict,
     List,
 )  # noqa: F401 # pylint: disable=unused-import

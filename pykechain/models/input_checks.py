@@ -1,6 +1,6 @@
 import warnings
 from datetime import datetime
-from typing import Text, Optional, List, Iterable, Any, Callable, Dict, Union
+from typing import  Optional, List, Iterable, Any, Callable, Dict, Union
 
 from pykechain.enums import Enum
 from pykechain.exceptions import IllegalArgumentError

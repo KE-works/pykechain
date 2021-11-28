@@ -1,7 +1,7 @@
 import datetime
 import os
 import time
-from typing import List, Text, Dict, Optional, Union
+from typing import List, Dict, Optional, Union
 from urllib.parse import urljoin
 
 import requests
