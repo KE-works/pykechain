@@ -1,17 +1,12 @@
 import datetime
-from typing import Text, Optional, Union
+from typing import Optional, Union
 
 import requests
 
 from pykechain.exceptions import APIError
 from pykechain.models import Base
-from pykechain.models.input_checks import (
-    check_text,
-    check_datetime,
-    check_type,
-    check_url,
-)
-from pykechain.utils import parse_datetime, Empty, clean_empty_values, empty
+from pykechain.models.input_checks import (check_datetime, check_text, check_type, check_url)
+from pykechain.utils import Empty, clean_empty_values, empty, parse_datetime
 
 
 class Banner(Base):

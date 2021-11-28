@@ -1,11 +1,8 @@
-from pykechain.enums import NotificationEvent, NotificationChannels, NotificationStatus
+from pykechain.enums import NotificationChannels, NotificationEvent, NotificationStatus
 from pykechain.exceptions import (
-    NotFoundError,
-    MultipleFoundError,
-    APIError,
-    IllegalArgumentError,
+    APIError, IllegalArgumentError, MultipleFoundError, NotFoundError
 )
-from pykechain.models import User, Team
+from pykechain.models import Team, User
 from pykechain.models.notification import Notification
 from tests.classes import TestBetamax
 

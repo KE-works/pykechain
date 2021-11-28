@@ -1,34 +1,22 @@
 from unittest import TestCase
 
-from jsonschema import validate, ValidationError
+from jsonschema import ValidationError, validate
 
-from pykechain.enums import PropertyVTypes, PropertyType
+from pykechain.enums import PropertyType, PropertyVTypes
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Property, AttachmentProperty
+from pykechain.models import AttachmentProperty, Property
 from pykechain.models.validators import (
-    PropertyValidator,
-    ValidatorEffect,
-    VisualEffect,
+    BooleanFieldValidator, InvalidVisualEffect, NumericRangeValidator, PropertyValidator,
     ValidVisualEffect,
-    InvalidVisualEffect,
-    NumericRangeValidator,
-    BooleanFieldValidator,
+    ValidatorEffect, VisualEffect,
 )
 from pykechain.models.validators.validator_schemas import (
-    options_json_schema,
-    validator_jsonschema_stub,
-    effects_jsonschema_stub,
+    effects_jsonschema_stub, options_json_schema, validator_jsonschema_stub,
 )
 from pykechain.models.validators.validators import (
-    RegexStringValidator,
-    RequiredFieldValidator,
-    EvenNumberValidator,
-    OddNumberValidator,
-    SingleReferenceValidator,
-    EmailValidator,
-    AlwaysAllowValidator,
+    AlwaysAllowValidator, EmailValidator, EvenNumberValidator, FileExtensionValidator,
     FileSizeValidator,
-    FileExtensionValidator,
+    OddNumberValidator, RegexStringValidator, RequiredFieldValidator, SingleReferenceValidator,
 )
 from tests.classes import TestBetamax
 

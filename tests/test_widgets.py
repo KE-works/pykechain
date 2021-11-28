@@ -3,58 +3,31 @@ from typing import List
 from unittest import TestCase
 
 from pykechain.enums import (
-    WidgetTypes,
-    ShowColumnTypes,
-    FilterType,
-    ProgressBarColors,
-    Category,
-    LinkTargets,
-    KEChainPages,
-    WidgetTitleValue,
-    Alignment,
-    ActivityType,
+    ActivityClassification, ActivityStatus, ActivityType, Alignment, CardWidgetLinkTarget,
     CardWidgetLinkValue,
-    CardWidgetLinkTarget,
-    ImageFitValue,
-    PropertyType,
-    Classification,
-    Multiplicity,
-    ActivityStatus,
-    ActivityClassification,
-)
-from pykechain.models.widgets.enums import (
-    DashboardWidgetShowTasks,
-    DashboardWidgetShowScopes,
-    TasksAssignmentFilterTypes,
+    Category, Classification, FilterType, ImageFitValue, KEChainPages, LinkTargets, Multiplicity,
+    ProgressBarColors,
+    PropertyType, ShowColumnTypes, WidgetTitleValue, WidgetTypes,
 )
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Activity, Part
 from pykechain.models.widgets import (
-    UndefinedWidget,
-    HtmlWidget,
-    PropertygridWidget,
-    AttachmentviewerWidget,
-    SupergridWidget,
-    FilteredgridWidget,
-    TasknavigationbarWidget,
-    SignatureWidget,
-    ServiceWidget,
-    NotebookWidget,
+    AttachmentviewerWidget, CardWidget, FilteredgridWidget, HtmlWidget, MetapanelWidget,
     MulticolumnWidget,
-    CardWidget,
-    MetapanelWidget,
-    ScopeWidget,
-    TasksWidget,
+    NotebookWidget, PropertygridWidget, ScopeWidget, ServiceWidget, SignatureWidget,
+    SupergridWidget,
+    TasknavigationbarWidget, TasksWidget, UndefinedWidget,
+)
+from pykechain.models.widgets.enums import (
+    DashboardWidgetShowScopes, DashboardWidgetShowTasks, TasksAssignmentFilterTypes,
 )
 from pykechain.models.widgets.helpers import _set_title
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widget_models import (
-    ServicecardWidget,
-    DashboardWidget,
-    ScopemembersWidget,
+    DashboardWidget, ScopemembersWidget, ServicecardWidget
 )
 from pykechain.models.widgets.widgets_manager import WidgetsManager
-from pykechain.utils import slugify_ref, temp_chdir, find
+from pykechain.utils import find, slugify_ref, temp_chdir
 from tests.classes import TestBetamax
 
 

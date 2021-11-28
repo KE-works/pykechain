@@ -5,15 +5,9 @@
 from .component import RepresentationsComponent
 from .representation_base import BaseRepresentation
 from .representations import (
-    CameraScannerInputRepresentation,
+    Autofill, ButtonRepresentation, CameraScannerInputRepresentation, CustomIconRepresentation,
     DecimalPlaces,
-    SignificantDigits,
-    ThousandsSeparator,
-    LinkTarget,
-    ButtonRepresentation,
-    CustomIconRepresentation,
-    Autofill,
-    GeoCoordinateRepresentation,
+    GeoCoordinateRepresentation, LinkTarget, SignificantDigits, ThousandsSeparator,
     UsePropertyNameRepresentation,
 )
 

@@ -1,5 +1,5 @@
 from pykechain.enums import TeamRoles
-from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
+from pykechain.exceptions import IllegalArgumentError, MultipleFoundError, NotFoundError
 from pykechain.models import User
 from pykechain.models.team import Team
 from tests.classes import TestBetamax

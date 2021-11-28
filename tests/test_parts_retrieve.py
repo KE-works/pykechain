@@ -1,6 +1,6 @@
 from pykechain.enums import Category, Multiplicity
-from pykechain.exceptions import NotFoundError, MultipleFoundError, IllegalArgumentError
-from pykechain.models import PartSet, Part
+from pykechain.exceptions import IllegalArgumentError, MultipleFoundError, NotFoundError
+from pykechain.models import Part, PartSet
 from pykechain.utils import find
 from tests.classes import TestBetamax
 

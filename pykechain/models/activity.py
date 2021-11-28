@@ -1,52 +1,28 @@
 import datetime
 import os
 import time
-from typing import List, Text, Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 from urllib.parse import urljoin
 
 import requests
 
-from pykechain.defaults import (
-    ASYNC_REFRESH_INTERVAL,
-    ASYNC_TIMEOUT_LIMIT,
-    API_EXTRA_PARAMS,
-)
+from pykechain.defaults import (API_EXTRA_PARAMS, ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT)
 from pykechain.enums import (
-    ActivityType,
-    ActivityStatus,
-    Category,
-    ActivityClassification,
-    ActivityRootNames,
-    PaperSize,
-    PaperOrientation,
+    ActivityClassification, ActivityRootNames, ActivityStatus, ActivityType, Category,
+    PaperOrientation, PaperSize,
 )
 from pykechain.exceptions import (
-    NotFoundError,
-    IllegalArgumentError,
-    APIError,
-    MultipleFoundError,
+    APIError, IllegalArgumentError, MultipleFoundError, NotFoundError
 )
 from pykechain.models.input_checks import (
-    check_datetime,
-    check_text,
-    check_list_of_text,
-    check_enum,
-    check_user,
-    check_type,
-    check_base,
+    check_base, check_datetime, check_enum, check_list_of_text, check_text, check_type, check_user,
 )
 from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.models.user import User
 from pykechain.models.widgets.widgets_manager import WidgetsManager
-from pykechain.utils import (
-    parse_datetime,
-    is_valid_email,
-    empty,
-    Empty,
-    clean_empty_values,
-)
+from pykechain.utils import (Empty, clean_empty_values, empty, is_valid_email, parse_datetime)
 
 
 class Activity(TreeObject, TagsMixin):

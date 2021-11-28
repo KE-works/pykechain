@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from pykechain.enums import PropertyType, FilterType, Multiplicity, ActivityRootNames
+from pykechain.enums import ActivityRootNames, FilterType, Multiplicity, PropertyType
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import MultiReferenceProperty
 from pykechain.models.base_reference import _ReferenceProperty

@@ -3,10 +3,7 @@ import datetime
 import pytz
 
 from pykechain.exceptions import (
-    APIError,
-    NotFoundError,
-    MultipleFoundError,
-    IllegalArgumentError,
+    APIError, IllegalArgumentError, MultipleFoundError, NotFoundError
 )
 from pykechain.models.banner import Banner
 from tests.classes import TestBetamax

@@ -1,5 +1,5 @@
 from pykechain.enums import LanguageCodes
-from pykechain.exceptions import NotFoundError, MultipleFoundError
+from pykechain.exceptions import MultipleFoundError, NotFoundError
 from tests.classes import TestBetamax
 
 

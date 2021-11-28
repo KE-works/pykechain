@@ -2,12 +2,12 @@ import os
 import tempfile
 import warnings
 from collections import namedtuple
-from typing import Optional, Text, List, Any
+from typing import Any, List, Optional, Text
 
 from pykechain import Client
-from pykechain.enums import PropertyType, Multiplicity, Category
-from pykechain.exceptions import IllegalArgumentError, NotFoundError, MultipleFoundError
-from pykechain.models import Part, AnyProperty, Property, PropertyValueFilter
+from pykechain.enums import Category, Multiplicity, PropertyType
+from pykechain.exceptions import IllegalArgumentError, MultipleFoundError, NotFoundError
+from pykechain.models import AnyProperty, Part, Property, PropertyValueFilter
 from pykechain.utils import temp_chdir
 
 # global variable

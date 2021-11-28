@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Text
+from typing import Dict, Optional
 
 from pykechain.utils import parse_datetime
 

@@ -1,6 +1,7 @@
 from ssl import SSLError
-
 from unittest import TestCase
+
+from urllib3.exceptions import MaxRetryError
 
 from pykechain.client_utils import PykeRetry
 from pykechain.defaults import (
@@ -10,7 +11,6 @@ from pykechain.defaults import (
     RETRY_ON_REDIRECT_ERRORS,
     RETRY_TOTAL,
 )
-from urllib3.exceptions import MaxRetryError
 
 
 class TestPykeRetry(TestCase):

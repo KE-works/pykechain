@@ -2,16 +2,12 @@ import datetime
 import urllib
 import warnings
 from abc import abstractmethod
-from typing import Text, Union, Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
-from pykechain.enums import FilterType, Category, PropertyType, ScopeStatus
+from pykechain.enums import Category, FilterType, PropertyType, ScopeStatus
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models.input_checks import (
-    check_base,
-    check_enum,
-    check_type,
-    check_text,
-    check_datetime,
+    check_base, check_datetime, check_enum, check_text, check_type
 )
 from pykechain.models.widgets.enums import MetaWidget
 

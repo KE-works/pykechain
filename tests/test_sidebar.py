@@ -1,4 +1,4 @@
-from pykechain.enums import SubprocessDisplayMode, KEChainPages, ScopeStatus
+from pykechain.enums import KEChainPages, ScopeStatus, SubprocessDisplayMode
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Scope
 from pykechain.models.sidebar.sidebar_button import SideBarButton
