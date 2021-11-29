@@ -1,10 +1,10 @@
 import warnings
 from datetime import datetime
-from typing import Optional, List, Iterable, Any, Callable, Dict, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 from pykechain.enums import Enum
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.utils import is_uuid, is_url, Empty, empty, parse_datetime
+from pykechain.utils import Empty, empty, is_url, is_uuid, parse_datetime
 
 iter_types = (list, tuple, set)
 

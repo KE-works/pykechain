@@ -2,12 +2,12 @@ import os
 import tempfile
 import warnings
 from collections import namedtuple
-from typing import Optional, List, Any
+from typing import Any, List, Optional
 
 from pykechain import Client
-from pykechain.enums import PropertyType, Multiplicity, Category
-from pykechain.exceptions import IllegalArgumentError, NotFoundError, MultipleFoundError
-from pykechain.models import Part, AnyProperty, Property, PropertyValueFilter
+from pykechain.enums import Category, Multiplicity, PropertyType
+from pykechain.exceptions import IllegalArgumentError, MultipleFoundError, NotFoundError
+from pykechain.models import AnyProperty, Part, Property, PropertyValueFilter
 from pykechain.utils import temp_chdir
 
 # global variable
@@ -741,7 +741,7 @@ def _update_references() -> None:
     for (
         prop_original,
         references_original,
-    ) in get_references().items():  # type: AnyProperty, List[Text]
+    ) in get_references().items():  # type: AnyProperty, List[str]
         prop_new = mapping.get(prop_original.id)
 
         # Try to map to a new Part, default to the existing reference ID itself.

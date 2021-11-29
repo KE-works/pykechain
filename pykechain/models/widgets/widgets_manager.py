@@ -1,61 +1,29 @@
 import warnings
-from typing import (
-    Iterable,
-    Union,
-    Optional,
-    Dict,
-    List,
-    Any,
-)
+from typing import (Any, Dict, Iterable, List, Optional, Union)
 
 from pykechain.enums import (
-    SortTable,
+    ActivityClassification, ActivityStatus, ActivityType, Alignment, CardWidgetLinkValue,
+    ImageFitValue, KEChainPages,
+    LinkTargets, ProgressBarColors, ScopeWidgetColumnTypes, ShowColumnTypes, SortTable,
     WidgetTypes,
-    ShowColumnTypes,
-    ScopeWidgetColumnTypes,
-    ProgressBarColors,
-    CardWidgetLinkValue,
-    LinkTargets,
-    ImageFitValue,
-    KEChainPages,
-    Alignment,
-    ActivityStatus,
-    ActivityType,
-    ActivityClassification,
 )
-from pykechain.exceptions import NotFoundError, IllegalArgumentError
+from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models.input_checks import (
-    check_enum,
-    check_text,
-    check_base,
-    check_type,
-    check_list_of_text,
+    check_base, check_enum, check_list_of_text, check_text, check_type,
 )
 from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.enums import (
-    DashboardWidgetSourceScopes,
-    DashboardWidgetShowTasks,
-    DashboardWidgetShowScopes,
-    MetaWidget,
-    AssociatedObjectId,
-    TasksAssignmentFilterTypes,
-    TasksWidgetColumns,
+    AssociatedObjectId, DashboardWidgetShowScopes, DashboardWidgetShowTasks,
+    DashboardWidgetSourceScopes, MetaWidget,
+    TasksAssignmentFilterTypes, TasksWidgetColumns,
 )
 from pykechain.models.widgets.helpers import (
-    _set_title,
-    _initiate_meta,
-    _retrieve_object,
+    TITLE_TYPING, _check_excluded_propmodels, _check_prefilters, _initiate_meta, _retrieve_object,
     _retrieve_object_id,
-    _check_prefilters,
-    _check_excluded_propmodels,
-    _set_description,
-    _set_link,
-    _set_image,
-    _set_button_text,
-    TITLE_TYPING,
+    _set_button_text, _set_description, _set_image, _set_link, _set_title,
 )
-from pykechain.utils import is_uuid, find, snakecase, is_url
+from pykechain.utils import find, is_url, is_uuid, snakecase
 
 
 class WidgetsManager(Iterable):
@@ -611,7 +579,7 @@ class WidgetsManager(Iterable):
                 kwargs.pop(deprecated_kw)
                 warnings.warn(
                     "Argument `{}` is no longer supported as input to `add_attachment_viewer`."
-                    .format(deprecated_kw),
+                        .format(deprecated_kw),
                     Warning,
                 )
 
@@ -1080,7 +1048,7 @@ class WidgetsManager(Iterable):
                     showProgress=show_progress and not show_progressbar or show_progress,
                     showProgressBar=show_progressbar and not show_progress,
                     breadcrumbAncestor=check_base(breadcrumb_root, Activity, "breadcrumb_root")
-                    or None,
+                                       or None,
                 )
             )
         if progress_bar:
@@ -1895,7 +1863,7 @@ class WidgetsManager(Iterable):
                 assigned_filter, TasksAssignmentFilterTypes, "assigned_filter"
             ),
             MetaWidget.ACTIVITY_STATUS: check_enum(status_filter, ActivityStatus, "status_filter")
-            or "",
+                                        or "",
             MetaWidget.ACTIVITY_TYPE: check_enum(
                 activity_type_filter, ActivityType, "activity_type_filter"
             ),
@@ -1936,7 +1904,7 @@ class WidgetsManager(Iterable):
                 MetaWidget.COLLAPSE_FILTERS: check_type(collapse_filter, bool, "collapse_filter"),
                 MetaWidget.SHOW_FILTERS: collapse_filter is not None,
                 MetaWidget.SHOW_COLUMNS: check_list_of_text(show_columns, "show_columns")
-                or TasksWidgetColumns.values(),
+                                         or TasksWidgetColumns.values(),
                 MetaWidget.SORTED_COLUMN: check_enum(
                     sorted_column, TasksWidgetColumns, "sorted_column"
                 ),

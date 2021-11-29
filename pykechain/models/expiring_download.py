@@ -7,7 +7,7 @@ import requests
 from pykechain.exceptions import APIError
 from pykechain.models import Base
 from pykechain.models.input_checks import check_type
-from pykechain.utils import empty, clean_empty_values
+from pykechain.utils import clean_empty_values, empty
 
 
 class ExpiringDownload(Base):
@@ -78,7 +78,7 @@ class ExpiringDownload(Base):
         update_dict = {
             "id": self.id,
             "expires_at": check_type(expires_at, datetime.datetime, "expires_at")
-            or self.expires_at,
+                          or self.expires_at,
             "expires_in": check_type(expires_in, int, "expires_in") or self.expires_in,
         }
 
