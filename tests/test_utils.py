@@ -161,7 +161,6 @@ class TestIsEmail(TestCase):
 
 
 class TestEmpty(TestCase):
-
     def test_singleton(self):
         empty_1 = Empty()
         empty_2 = Empty()
@@ -172,7 +171,6 @@ class TestEmpty(TestCase):
 
 
 class TestChunks(TestCase):
-
     def test_get_in_chunks(self):
         chunks = get_in_chunks(
             lst=list(range(77)),
@@ -180,6 +178,7 @@ class TestChunks(TestCase):
         )
 
         import types
+
         self.assertIsInstance(chunks, types.GeneratorType)
 
         chunks_list = list(chunks)

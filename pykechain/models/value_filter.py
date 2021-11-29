@@ -6,8 +6,13 @@ from typing import Union, Any, Dict, List, Optional
 
 from pykechain.enums import FilterType, Category, PropertyType, ScopeStatus
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
-from pykechain.models.input_checks import check_base, check_enum, check_type, check_text, \
-    check_datetime
+from pykechain.models.input_checks import (
+    check_base,
+    check_enum,
+    check_type,
+    check_text,
+    check_datetime,
+)
 from pykechain.models.widgets.enums import MetaWidget
 
 
@@ -17,13 +22,14 @@ class BaseFilter:
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.__class__.write_options(filters=[self]) == self.__class__.write_options(
-                filters=[other])
+                filters=[other]
+            )
         else:
             return False
 
     @classmethod
     @abstractmethod
-    def parse_options(cls, options: Dict) -> List['BaseFilter']:  # pragma: no cover
+    def parse_options(cls, options: Dict) -> List["BaseFilter"]:  # pragma: no cover
         """
         Convert the dict & string-based definition of a filter to a list of Filter objects.
 
@@ -57,7 +63,7 @@ class PropertyValueFilter(BaseFilter):
 
     def __init__(
         self,
-        property_model: Union[str, 'Property'],
+        property_model: Union[str, "Property"],
         value: Any,
         filter_type: FilterType,
     ):
@@ -84,7 +90,7 @@ class PropertyValueFilter(BaseFilter):
             value = self.value
         return f"{self.id}:{value}:{self.type}"
 
-    def validate(self, part_model: 'Part') -> None:
+    def validate(self, part_model: "Part") -> None:
         """
         Validate data of the PropertyValueFilter.
 
@@ -99,57 +105,84 @@ class PropertyValueFilter(BaseFilter):
         except NotFoundError:
             raise IllegalArgumentError(
                 "Property value filters can only be set on properties belonging to the selected "
-                "Part model.")
+                "Part model."
+            )
 
         if prop.category != Category.MODEL:
             raise IllegalArgumentError(
                 'Property value filters can only be set on Property models, received "{}".'.format(
-                    prop))
+                    prop
+                )
+            )
         else:
             property_type = prop.type
-            if property_type in (PropertyType.BOOLEAN_VALUE,
-                                 PropertyType.REFERENCES_VALUE,
-                                 PropertyType.ACTIVITY_REFERENCES_VALUE
-                                 ) and self.type != FilterType.EXACT:
-                warnings.warn("A PropertyValueFilter on a `{}` property should use "
-                              "filter type `{}`, not `{}`".format(property_type, FilterType.EXACT,
-                                                                  self.type), Warning)
-            elif property_type in (PropertyType.TEXT_VALUE,
-                                   PropertyType.CHAR_VALUE,
-                                   PropertyType.LINK_VALUE,
-                                   PropertyType.SINGLE_SELECT_VALUE,
-                                   PropertyType.USER_REFERENCES_VALUE,
-                                   PropertyType.SCOPE_REFERENCES_VALUE,
-                                   ) and self.type != FilterType.CONTAINS:
-                warnings.warn("A PropertyValueFilter on a `{}` property should use "
-                              "filter type `{}`, not `{}`".format(property_type,
-                                                                  FilterType.CONTAINS,
-                                                                  self.type), Warning)
-            elif property_type in (PropertyType.INT_VALUE,
-                                   PropertyType.FLOAT_VALUE,
-                                   PropertyType.DATE_VALUE,
-                                   PropertyType.DATETIME_VALUE
-                                   ) and self.type not in (
-                FilterType.LOWER_THAN_EQUAL,
-                FilterType.GREATER_THAN_EQUAL
+            if (
+                property_type
+                in (
+                    PropertyType.BOOLEAN_VALUE,
+                    PropertyType.REFERENCES_VALUE,
+                    PropertyType.ACTIVITY_REFERENCES_VALUE,
+                )
+                and self.type != FilterType.EXACT
             ):
-                warnings.warn("A PropertyValueFilter on a `{}` property should use "
-                              "filter type `{}` or `{}`, not `{}`".
-                              format(property_type,
-                                     FilterType.LOWER_THAN_EQUAL,
-                                     FilterType.GREATER_THAN_EQUAL,
-                                     self.type), Warning)
-            elif property_type in (PropertyType.MULTI_SELECT_VALUE,
-                                   ) and self.type != FilterType.CONTAINS_SET:
-                warnings.warn("A PropertyValueFilter on a `{}` property should use "
-                              "filter type `{}`, not `{}`".format(property_type,
-                                                                  FilterType.CONTAINS_SET,
-                                                                  self.type), Warning)
+                warnings.warn(
+                    "A PropertyValueFilter on a `{}` property should use "
+                    "filter type `{}`, not `{}`".format(
+                        property_type, FilterType.EXACT, self.type
+                    ),
+                    Warning,
+                )
+            elif (
+                property_type
+                in (
+                    PropertyType.TEXT_VALUE,
+                    PropertyType.CHAR_VALUE,
+                    PropertyType.LINK_VALUE,
+                    PropertyType.SINGLE_SELECT_VALUE,
+                    PropertyType.USER_REFERENCES_VALUE,
+                    PropertyType.SCOPE_REFERENCES_VALUE,
+                )
+                and self.type != FilterType.CONTAINS
+            ):
+                warnings.warn(
+                    "A PropertyValueFilter on a `{}` property should use "
+                    "filter type `{}`, not `{}`".format(
+                        property_type, FilterType.CONTAINS, self.type
+                    ),
+                    Warning,
+                )
+            elif property_type in (
+                PropertyType.INT_VALUE,
+                PropertyType.FLOAT_VALUE,
+                PropertyType.DATE_VALUE,
+                PropertyType.DATETIME_VALUE,
+            ) and self.type not in (FilterType.LOWER_THAN_EQUAL, FilterType.GREATER_THAN_EQUAL):
+                warnings.warn(
+                    "A PropertyValueFilter on a `{}` property should use "
+                    "filter type `{}` or `{}`, not `{}`".format(
+                        property_type,
+                        FilterType.LOWER_THAN_EQUAL,
+                        FilterType.GREATER_THAN_EQUAL,
+                        self.type,
+                    ),
+                    Warning,
+                )
+            elif (
+                property_type in (PropertyType.MULTI_SELECT_VALUE,)
+                and self.type != FilterType.CONTAINS_SET
+            ):
+                warnings.warn(
+                    "A PropertyValueFilter on a `{}` property should use "
+                    "filter type `{}`, not `{}`".format(
+                        property_type, FilterType.CONTAINS_SET, self.type
+                    ),
+                    Warning,
+                )
             else:
                 pass
 
     @classmethod
-    def parse_options(cls, options: Dict) -> List['PropertyValueFilter']:
+    def parse_options(cls, options: Dict) -> List["PropertyValueFilter"]:
         """
         Convert the dict & string-based definition of a property value filter to a list of PropertyValueFilter objects.
 
@@ -183,9 +216,7 @@ class PropertyValueFilter(BaseFilter):
         """
         super().write_options(filters=filters)
 
-        prefilters = {
-            "property_value": ",".join([pf.format() for pf in filters])
-        }
+        prefilters = {"property_value": ",".join([pf.format() for pf in filters])}
         options = {MetaWidget.PREFILTERS: prefilters}
 
         return options
@@ -217,14 +248,14 @@ class ScopeFilter(BaseFilter):
         tag: Optional[str] = None,
         status: Optional[ScopeStatus] = None,
         name: Optional[str] = None,
-        team: Optional[Union[str, 'Team']] = None,
+        team: Optional[Union[str, "Team"]] = None,
         due_date_gte: Optional[datetime.datetime] = None,
         due_date_lte: Optional[datetime.datetime] = None,
         start_date_gte: Optional[datetime.datetime] = None,
         start_date_lte: Optional[datetime.datetime] = None,
         progress_gte: Optional[float] = None,
         progress_lte: Optional[float] = None,
-        **kwargs
+        **kwargs,
     ):
         """Create a ScopeFilter object."""
         from pykechain.models import Team
@@ -284,7 +315,7 @@ class ScopeFilter(BaseFilter):
         return _repr
 
     @classmethod
-    def parse_options(cls, options: Dict) -> List['ScopeFilter']:
+    def parse_options(cls, options: Dict) -> List["ScopeFilter"]:
         """
         Convert the dict & string-based definition of a scope filter to a list of ScopeFilter objects.
 

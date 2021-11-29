@@ -123,15 +123,17 @@ def map_property_instances(original_part: Part, new_part: Part) -> None:
     # Do the same for each Property of original part instance, using the 'model' id and the get_mapping_dictionary
     for prop_original in original_part.properties:
         mapping[prop_original.id] = [
-            prop_new for prop_new in new_part.properties if
-            mapping[prop_original.model_id].id == prop_new.model_id][0]
+            prop_new
+            for prop_new in new_part.properties
+            if mapping[prop_original.model_id].id == prop_new.model_id
+        ][0]
 
 
 def relocate_model(
     part: Part,
     target_parent: Part,
     name: Optional[str] = None,
-    include_children: Optional[bool] = True
+    include_children: Optional[bool] = True,
 ) -> Part:
     """
     Move the `Part` model under a target parent `Part` model.
@@ -157,7 +159,8 @@ def relocate_model(
     if target_parent.id in get_illegal_targets(part, include={part.id}):
         raise IllegalArgumentError(
             "Cannot relocate part `{}` under target parent `{}`, because the target is part of "
-            "its descendants".format(part.name, target_parent.name))
+            "its descendants".format(part.name, target_parent.name)
+        )
 
     if include_children:
         part.populate_descendants()
@@ -359,7 +362,7 @@ def move_part_instance(
     target_parent: Part,
     part_model: Part,
     name: Optional[str] = None,
-    include_children: Optional[bool] = True
+    include_children: Optional[bool] = True,
 ) -> Part:
     """
     Copy the `Part` instance to target parent and updates the properties based on the original part instance.
@@ -483,8 +486,9 @@ def update_part_with_properties(
             properties_id_dict[moved_prop_instance.id] = prop_instance.value
 
     # Update the name and property values in one go.
-    moved_instance.update(name=str(name), update_dict=properties_id_dict, bulk=True,
-                          suppress_kevents=True)
+    moved_instance.update(
+        name=str(name), update_dict=properties_id_dict, bulk=True, suppress_kevents=True
+    )
 
     return moved_instance
 
@@ -522,12 +526,14 @@ def _copy_part(
         target_parent_model = target_parent.model()
         name_model = model.name
 
-        instances = [_InstanceCopy(
-            instance_original=part,
-            target_parent_instance=target_parent,
-            model_original=model,
-            name=part.name if name is None else name,
-        )]
+        instances = [
+            _InstanceCopy(
+                instance_original=part,
+                target_parent_instance=target_parent,
+                model_original=model,
+                name=part.name if name is None else name,
+            )
+        ]
 
     else:  # part.category == Category.MODEL
 
@@ -540,22 +546,27 @@ def _copy_part(
                 target_parent_instance = target_parent_model.instance()
             except NotFoundError:
                 raise IllegalArgumentError(
-                    "Cannot copy part model `{}` including instances, since the target_parent model `{}` has no "
-                    "instance to act as parent for the instances.".format(model,
-                                                                          target_parent_model))
+                    "Cannot copy part model `{}` including instances, since the target_parent"
+                    " model `{}` has no instance to act as parent for the instances.".format(
+                        model, target_parent_model
+                    )
+                )
             except MultipleFoundError:
                 raise IllegalArgumentError(
-                    "Cannot copy part model `{}` including instances, since the target_parent model `{}` has multiple "
-                    "instances, making the parent for the instances ambiguous.".format(model,
-                                                                                       target_parent_model)
+                    "Cannot copy part model `{}` including instances, since the target_parent"
+                    " model `{}` has multiple instances, making the parent for the instances"
+                    " ambiguous.".format(model, target_parent_model)
                 )
 
-            instances = [_InstanceCopy(
-                instance_original=instance,
-                target_parent_instance=target_parent_instance,
-                model_original=model,
-                name=instance.name,
-            ) for instance in model.instances()]
+            instances = [
+                _InstanceCopy(
+                    instance_original=instance,
+                    target_parent_instance=target_parent_instance,
+                    model_original=model,
+                    name=instance.name,
+                )
+                for instance in model.instances()
+            ]
         else:
             instances = []
 
@@ -564,7 +575,8 @@ def _copy_part(
     if target_parent_model.id in get_illegal_targets(model, include={model.id}):
         raise IllegalArgumentError(
             "Cannot relocate part `{}` under target parent `{}`, because the target is part of "
-            "its descendants".format(model.name, target_parent.name))
+            "its descendants".format(model.name, target_parent.name)
+        )
 
     copied_model = _copy_part_model(
         part=model,
@@ -663,18 +675,22 @@ def _copy_instances_recursive(
             for prop in i.instance_original.properties:  # type: AnyProperty
                 prop_value = _get_property_value(prop)
                 if prop_value is not None:
-                    properties.append(dict(
-                        name=prop.name,
-                        value=prop_value,
-                        model_id=mapping[prop.model_id].id,
-                    ))
+                    properties.append(
+                        dict(
+                            name=prop.name,
+                            value=prop_value,
+                            model_id=mapping[prop.model_id].id,
+                        )
+                    )
 
-            create_request.append(dict(
-                name=i.name,
-                parent_id=i.target_parent_instance.id,
-                model_id=model_new.id,
-                properties=properties,
-            ))
+            create_request.append(
+                dict(
+                    name=i.name,
+                    parent_id=i.target_parent_instance.id,
+                    model_id=model_new.id,
+                    properties=properties,
+                )
+            )
 
     if create_request:
         created_instances = client._create_parts_bulk(
@@ -682,9 +698,9 @@ def _copy_instances_recursive(
             asynchronous=False,
             retrieve_instances=True,
         )
-        for index, new_instance, i in \
-            zip(created_instances_indices, created_instances,
-                original_instances):  # type: int, Part, _InstanceCopy
+        for index, new_instance, i in zip(
+            created_instances_indices, created_instances, original_instances
+        ):  # type: int, Part, _InstanceCopy
             new_instances[index] = new_instance
             map_property_instances(original_part=i.instance_original, new_part=new_instance)
 
@@ -694,12 +710,14 @@ def _copy_instances_recursive(
             child_models = {c.id: c for c in i.model_original.children()}
 
             for child_instance in i.instance_original.children():
-                child_instances.append(_InstanceCopy(
-                    instance_original=child_instance,
-                    model_original=child_models[child_instance.model_id],
-                    target_parent_instance=new_instance,
-                    name=child_instance.name
-                ))
+                child_instances.append(
+                    _InstanceCopy(
+                        instance_original=child_instance,
+                        model_original=child_models[child_instance.model_id],
+                        target_parent_instance=new_instance,
+                        name=child_instance.name,
+                    )
+                )
 
         _copy_instances_recursive(
             client=client,
@@ -720,7 +738,10 @@ def _update_references() -> None:
     """
     mapping = get_mapping_dictionary()
 
-    for prop_original, references_original in get_references().items():  # type: AnyProperty, List[Text]
+    for (
+        prop_original,
+        references_original,
+    ) in get_references().items():  # type: AnyProperty, List[Text]
         prop_new = mapping.get(prop_original.id)
 
         # Try to map to a new Part, default to the existing reference ID itself.
@@ -741,32 +762,42 @@ def _update_references() -> None:
                 for part_id in references_new:
                     referenced_part = prop_new._client.part(pk=part_id, category=prop_new.category)
                     prop_value.append(referenced_part.id)
-                prop_new_options = {"scope_id": prop_new._client.part(
-                    pk=references_new[0], category=prop_new.category).scope_id}
+                prop_new_options = {
+                    "scope_id": prop_new._client.part(
+                        pk=references_new[0], category=prop_new.category
+                    ).scope_id
+                }
 
             # Make sure the excluded property models ids are mapped on the new referenced part
             # model
             original_excluded_propmodel_ids = prop_original.get_excluded_propmodel_ids()
             if original_excluded_propmodel_ids:
-                prop_new_options.update({
-                    "propmodels_excl": [mapping.get(r).id for r in
-                                        original_excluded_propmodel_ids if r in mapping]
-                })
+                prop_new_options.update(
+                    {
+                        "propmodels_excl": [
+                            mapping.get(r).id
+                            for r in original_excluded_propmodel_ids
+                            if r in mapping
+                        ]
+                    }
+                )
 
             # Remap the prefilters on new referenced part model.
             original_prefilters = prop_original.get_prefilters()
             if original_prefilters:
-                new_prefilters = [PropertyValueFilter(
-                    value=ovf.value,
-                    filter_type=ovf.type,
-                    property_model=mapping.get(ovf.id, ovf.id),
-                ) for ovf in original_prefilters]
+                new_prefilters = [
+                    PropertyValueFilter(
+                        value=ovf.value,
+                        filter_type=ovf.type,
+                        property_model=mapping.get(ovf.id, ovf.id),
+                    )
+                    for ovf in original_prefilters
+                ]
                 prop_new_options.update(PropertyValueFilter.write_options(filters=new_prefilters))
 
             # Update the value and options (prefilters, excluded prop models and scope_id) in bulk
             if prop_new.category == Category.MODEL:
-                prop_new.edit(value=prop_value,
-                              options=prop_new_options)
+                prop_new.edit(value=prop_value, options=prop_new_options)
             else:
                 prop_new.value = prop_value
         else:
@@ -785,11 +816,13 @@ def _get_property_value(prop: AnyProperty) -> Any:
     :return: Any value
     """
     prop_value = None
-    if prop.type in (PropertyType.REFERENCES_VALUE,
-                     PropertyType.ACTIVITY_REFERENCES_VALUE,
-                     PropertyType.SCOPE_REFERENCES_VALUE,
-                     PropertyType.TEAM_REFERENCES_VALUE,
-                     PropertyType.SERVICE_REFERENCES_VALUE):
+    if prop.type in (
+        PropertyType.REFERENCES_VALUE,
+        PropertyType.ACTIVITY_REFERENCES_VALUE,
+        PropertyType.SCOPE_REFERENCES_VALUE,
+        PropertyType.TEAM_REFERENCES_VALUE,
+        PropertyType.SERVICE_REFERENCES_VALUE,
+    ):
         get_references()[prop] = prop.value_ids() if prop.has_value() else []
     elif prop.type == PropertyType.USER_REFERENCES_VALUE:
         get_references()[prop] = prop.value if prop.has_value() else []

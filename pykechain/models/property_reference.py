@@ -56,9 +56,9 @@ class ScopeReferencesProperty(_ReferenceProperty):
         return scopes
 
     def set_prefilters(
-            self,
-            prefilters: List[ScopeFilter] = None,
-            clear: Optional[bool] = False,
+        self,
+        prefilters: List[ScopeFilter] = None,
+        clear: Optional[bool] = False,
     ) -> None:
         """
         Set pre-filters on the scope reference property.
@@ -71,9 +71,12 @@ class ScopeReferencesProperty(_ReferenceProperty):
         :return: None
         """
         if prefilters is not None:
-            if not isinstance(prefilters, list) or not all(isinstance(pf, ScopeFilter) for pf in prefilters):
+            if not isinstance(prefilters, list) or not all(
+                isinstance(pf, ScopeFilter) for pf in prefilters
+            ):
                 raise IllegalArgumentError(
-                    f"`prefilters` must be a list of ScopeFilter objects, `{prefilters}` is not.")
+                    f"`prefilters` must be a list of ScopeFilter objects, `{prefilters}` is not."
+                )
         else:
             prefilters = []
 
@@ -86,9 +89,7 @@ class ScopeReferencesProperty(_ReferenceProperty):
 
         # Only update the options if there are any prefilters to be set, or if the original filters have to overwritten
         if list_of_prefilters or clear:
-            self._options.update(
-                ScopeFilter.write_options(filters=list_of_prefilters)
-            )
+            self._options.update(ScopeFilter.write_options(filters=list_of_prefilters))
             self.edit(options=self._options)
 
     def get_prefilters(self) -> List[ScopeFilter]:
@@ -127,9 +128,7 @@ class UserReferencesProperty(_ReferenceProperty):
             elif isinstance(value, (int, str)):
                 object_ids.append(str(value))
             else:  # pragma: no cover
-                raise ValueError(
-                    f'Value "{value}" must be a dict with field `pk` or a UUID.'
-                )
+                raise ValueError(f'Value "{value}" must be a dict with field `pk` or a UUID.')
         return object_ids
 
     def _retrieve_objects(self, **kwargs) -> List[user.User]:

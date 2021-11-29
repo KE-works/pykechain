@@ -11,7 +11,8 @@ from pykechain.enums import (
     KEChainPages,
     ScopeRoles,
     ScopeMemberActions,
-    ScopeCategory, )
+    ScopeCategory,
+)
 from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
 from pykechain.models.activity import Activity
 from pykechain.models.base import Base
@@ -84,7 +85,9 @@ class Scope(Base, TagsMixin):
         self.due_date = parse_datetime(json.get("due_date"))
 
         self._representations_container = RepresentationsComponent(
-            self, self.options.get("representations", {}), self._save_representations,
+            self,
+            self.options.get("representations", {}),
+            self._save_representations,
         )
 
     @property
@@ -117,7 +120,7 @@ class Scope(Base, TagsMixin):
         )
 
     @property
-    def representations(self) -> List['BaseRepresentation']:
+    def representations(self) -> List["BaseRepresentation"]:
         """Get and set the scope representations."""
         return self._representations_container.get_representations()
 
@@ -134,9 +137,7 @@ class Scope(Base, TagsMixin):
     def workflow_root_process(self) -> "Activity":
         """Retrieve the Activity root object with classification WORKFLOW."""
         if self._workflow_root_process is None:
-            self._workflow_root_process = self.activity(
-                id=self._json_data["workflow_root_id"]
-            )
+            self._workflow_root_process = self.activity(id=self._json_data["workflow_root_id"])
         return self._workflow_root_process
 
     @property
@@ -150,45 +151,35 @@ class Scope(Base, TagsMixin):
     def catalog_root_process(self) -> "Activity":
         """Retrieve the Activity root object with classification CATALOG."""
         if self._catalog_root_process is None:
-            self._catalog_root_process = self.activity(
-                id=self._json_data["catalog_root_id"]
-            )
+            self._catalog_root_process = self.activity(id=self._json_data["catalog_root_id"])
         return self._catalog_root_process
 
     @property
     def product_root_model(self) -> "Part":
         """Retrieve the Part root object with classification PRODUCT and category MODEL."""
         if self._product_root_model is None:
-            self._product_root_model = self.model(
-                id=self._json_data["product_model_id"]
-            )
+            self._product_root_model = self.model(id=self._json_data["product_model_id"])
         return self._product_root_model
 
     @property
     def product_root_instance(self) -> "Part":
         """Retrieve the Part root object with classification PRODUCT and category INSTANCE."""
         if self._product_root_instance is None:
-            self._product_root_instance = self.part(
-                id=self._json_data["product_instance_id"]
-            )
+            self._product_root_instance = self.part(id=self._json_data["product_instance_id"])
         return self._product_root_instance
 
     @property
     def catalog_root_model(self) -> "Part":
         """Retrieve the Part root object with classification CATALOG and category MODEL."""
         if self._catalog_root_model is None:
-            self._catalog_root_model = self.model(
-                id=self._json_data["catalog_model_id"]
-            )
+            self._catalog_root_model = self.model(id=self._json_data["catalog_model_id"])
         return self._catalog_root_model
 
     @property
     def catalog_root_instance(self) -> "Part":
         """Retrieve the Part root object with classification CATALOG and category INSTANCE."""
         if self._catalog_root_instance is None:
-            self._catalog_root_instance = self.part(
-                id=self._json_data["catalog_instance_id"]
-            )
+            self._catalog_root_instance = self.part(id=self._json_data["catalog_instance_id"])
         return self._catalog_root_instance
 
     #
@@ -216,9 +207,7 @@ class Scope(Base, TagsMixin):
         if user_object is None:
             raise NotFoundError(f'User "{user}" does not exist')
 
-        url = self._client._build_url(
-            f"scope_{action}_{role}", scope_id=self.id
-        )
+        url = self._client._build_url(f"scope_{action}_{role}", scope_id=self.id)
 
         response = self._client._request(
             "PUT",
@@ -228,24 +217,22 @@ class Scope(Base, TagsMixin):
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError(
-                f"Could not {action} {role} in Scope", response=response
-            )
+            raise APIError(f"Could not {action} {role} in Scope", response=response)
 
         self.refresh(json=response.json().get("results")[0])
 
     def edit(
-            self,
-            name: Optional[Union[str, Empty]] = empty,
-            description: Optional[Union[str, Empty]] = empty,
-            start_date: Optional[Union[datetime, Empty]] = empty,
-            due_date: Optional[Union[datetime, Empty]] = empty,
-            status: Optional[Union[str, ScopeStatus, Empty]] = empty,
-            category: Optional[Union[str, ScopeCategory, Empty]] = empty,
-            tags: Optional[Union[List[str], Empty]] = empty,
-            team: Optional[Union[Team, str, Empty]] = empty,
-            options: Optional[Union[Dict, Empty]] = empty,
-            **kwargs
+        self,
+        name: Optional[Union[str, Empty]] = empty,
+        description: Optional[Union[str, Empty]] = empty,
+        start_date: Optional[Union[datetime, Empty]] = empty,
+        due_date: Optional[Union[datetime, Empty]] = empty,
+        status: Optional[Union[str, ScopeStatus, Empty]] = empty,
+        category: Optional[Union[str, ScopeCategory, Empty]] = empty,
+        tags: Optional[Union[List[str], Empty]] = empty,
+        team: Optional[Union[Team, str, Empty]] = empty,
+        options: Optional[Union[Dict, Empty]] = empty,
+        **kwargs,
     ) -> None:
         """
         Edit the details of a scope.
@@ -315,13 +302,13 @@ class Scope(Base, TagsMixin):
         update_dict = {
             "id": self.id,
             "name": check_text(name, "name") or self.name,
-            "text": check_text(description, "description") or '',
+            "text": check_text(description, "description") or "",
             "start_date": check_datetime(start_date, "start_date"),
             "due_date": check_datetime(due_date, "due_date"),
             "status": check_enum(status, ScopeStatus, "status") or self.status,
             "category": check_enum(category, ScopeCategory, "category"),
             "tags": check_list_of_text(tags, "tags", True) or list(),
-            "team_id": check_base(team, Team, "team") or '',
+            "team_id": check_base(team, Team, "team") or "",
             "scope_options": check_type(options, dict, "options") or dict(),
         }
 
@@ -348,7 +335,7 @@ class Scope(Base, TagsMixin):
         if tags is not None and not isinstance(tags, Empty):
             self._tags = tags
 
-    def clone(self, **kwargs) -> 'Scope':
+    def clone(self, **kwargs) -> "Scope":
         """Clone a scope.
 
         See :method:`pykechain.Client.clone_scope()` for available parameters.
@@ -371,7 +358,7 @@ class Scope(Base, TagsMixin):
     # Part methods
     #
 
-    def parts(self, *args, **kwargs) -> List['Part']:
+    def parts(self, *args, **kwargs) -> List["Part"]:
         """Retrieve parts belonging to this scope.
 
         This uses
@@ -380,14 +367,14 @@ class Scope(Base, TagsMixin):
         """
         return self._client.parts(*args, scope_id=self.id, **kwargs)
 
-    def part(self, *args, **kwargs) -> 'Part':
+    def part(self, *args, **kwargs) -> "Part":
         """Retrieve a single part belonging to this scope.
 
         See :class:`pykechain.Client.part` for available parameters.
         """
         return self._client.part(*args, scope_id=self.id, **kwargs)
 
-    def properties(self, *args, **kwargs) -> List['Property']:
+    def properties(self, *args, **kwargs) -> List["Property"]:
         """Retrieve properties belonging to this scope.
 
         .. versionadded: 3.0
@@ -396,7 +383,7 @@ class Scope(Base, TagsMixin):
         """
         return self._client.properties(*args, scope_id=self.id, **kwargs)
 
-    def property(self, *args, **kwargs) -> 'Property':
+    def property(self, *args, **kwargs) -> "Property":
         """Retrieve a single property belonging to this scope.
 
         .. versionadded: 3.0
@@ -405,14 +392,14 @@ class Scope(Base, TagsMixin):
         """
         return self._client.property(*args, scope_id=self.id, **kwargs)
 
-    def model(self, *args, **kwargs) -> 'Part':
+    def model(self, *args, **kwargs) -> "Part":
         """Retrieve a single model belonging to this scope.
 
         See :class:`pykechain.Client.model` for available parameters.
         """
         return self._client.model(*args, scope_id=self.id, **kwargs)
 
-    def create_model(self, parent, name, multiplicity=Multiplicity.ZERO_MANY) -> 'Part':
+    def create_model(self, parent, name, multiplicity=Multiplicity.ZERO_MANY) -> "Part":
         """Create a single part model in this scope.
 
         See :class:`pykechain.Client.create_model` for available parameters.
@@ -420,13 +407,8 @@ class Scope(Base, TagsMixin):
         return self._client.create_model(parent, name, multiplicity=multiplicity)
 
     def create_model_with_properties(
-            self,
-            parent,
-            name,
-            multiplicity=Multiplicity.ZERO_MANY,
-            properties_fvalues=None,
-            **kwargs
-    ) -> 'Part':
+        self, parent, name, multiplicity=Multiplicity.ZERO_MANY, properties_fvalues=None, **kwargs
+    ) -> "Part":
         """Create a model with its properties in a single API request.
 
         See :func:`pykechain.Client.create_model_with_properties()` for available parameters.
@@ -436,28 +418,28 @@ class Scope(Base, TagsMixin):
             name,
             multiplicity=multiplicity,
             properties_fvalues=properties_fvalues,
-            **kwargs
+            **kwargs,
         )
 
     #
     # Activity methods
     #
 
-    def activities(self, *args, **kwargs) -> List['Activity']:
+    def activities(self, *args, **kwargs) -> List["Activity"]:
         """Retrieve activities belonging to this scope.
 
         See :class:`pykechain.Client.activities` for available parameters.
         """
         return self._client.activities(*args, scope=self.id, **kwargs)
 
-    def activity(self, *args, **kwargs) -> 'Activity':
+    def activity(self, *args, **kwargs) -> "Activity":
         """Retrieve a single activity belonging to this scope.
 
         See :class:`pykechain.Client.activity` for available parameters.
         """
         return self._client.activity(*args, scope=self.id, **kwargs)
 
-    def create_activity(self, *args, **kwargs) -> 'Activity':
+    def create_activity(self, *args, **kwargs) -> "Activity":
         """Create a new activity belonging to this scope.
 
         See :class:`pykechain.Client.create_activity` for available parameters.
@@ -469,11 +451,9 @@ class Scope(Base, TagsMixin):
         return SideBarManager(scope=self, *args, **kwargs)
 
     def set_landing_page(
-            self,
-            activity: Union["Activity", KEChainPages],
-            task_display_mode: Optional[
-                SubprocessDisplayMode
-            ] = SubprocessDisplayMode.ACTIVITIES,
+        self,
+        activity: Union["Activity", KEChainPages],
+        task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
     ) -> None:
         """
         Update the landing page of the scope.
@@ -517,7 +497,7 @@ class Scope(Base, TagsMixin):
     # Service Methods
     #
 
-    def services(self, *args, **kwargs) -> List['Service']:
+    def services(self, *args, **kwargs) -> List["Service"]:
         """Retrieve services belonging to this scope.
 
         See :class:`pykechain.Client.services` for available parameters.
@@ -526,7 +506,7 @@ class Scope(Base, TagsMixin):
         """
         return self._client.services(*args, scope=self.id, **kwargs)
 
-    def create_service(self, *args, **kwargs) -> 'Service':
+    def create_service(self, *args, **kwargs) -> "Service":
         """Create a service to current scope.
 
         See :class:`pykechain.Client.create_service` for available parameters.
@@ -535,7 +515,7 @@ class Scope(Base, TagsMixin):
         """
         return self._client.create_service(*args, scope=self.id, **kwargs)
 
-    def service(self, *args, **kwargs) -> 'Service':
+    def service(self, *args, **kwargs) -> "Service":
         """Retrieve a single service belonging to this scope.
 
         See :class:`pykechain.Client.service` for available parameters.
@@ -544,7 +524,7 @@ class Scope(Base, TagsMixin):
         """
         return self._client.service(*args, scope=self.id, **kwargs)
 
-    def service_executions(self, *args, **kwargs) -> List['ServiceExecution']:
+    def service_executions(self, *args, **kwargs) -> List["ServiceExecution"]:
         """Retrieve services belonging to this scope.
 
         See :class:`pykechain.Client.service_executions` for available parameters.
@@ -553,7 +533,7 @@ class Scope(Base, TagsMixin):
         """
         return self._client.service_executions(*args, scope=self.id, **kwargs)
 
-    def service_execution(self, *args, **kwargs) -> 'ServiceExecution':
+    def service_execution(self, *args, **kwargs) -> "ServiceExecution":
         """Retrieve a single service execution belonging to this scope.
 
         See :class:`pykechain.Client.service_execution` for available parameters.
@@ -567,10 +547,10 @@ class Scope(Base, TagsMixin):
     #
 
     def members(
-            self,
-            is_manager: Optional[bool] = None,
-            is_supervisor: Optional[bool] = None,
-            is_leadmember: Optional[bool] = None,
+        self,
+        is_manager: Optional[bool] = None,
+        is_supervisor: Optional[bool] = None,
+        is_leadmember: Optional[bool] = None,
     ) -> List[Dict]:
         """
         Retrieve members of the scope.
@@ -594,25 +574,17 @@ class Scope(Base, TagsMixin):
         >>> leadmembers = project.members(is_leadmember=True)
 
         """
-        members = [
-            member for member in self._json_data["members"] if member["is_active"]
-        ]
+        members = [member for member in self._json_data["members"] if member["is_active"]]
 
         if is_manager is not None:
-            members = [
-                member for member in members if member.get("is_manager") == is_manager
-            ]
+            members = [member for member in members if member.get("is_manager") == is_manager]
         if is_supervisor is not None:
             members = [
-                member
-                for member in members
-                if member.get("is_supervisor") == is_supervisor
+                member for member in members if member.get("is_supervisor") == is_supervisor
             ]
         if is_leadmember is not None:
             members = [
-                member
-                for member in members
-                if member.get("is_leadmember") == is_leadmember
+                member for member in members if member.get("is_leadmember") == is_leadmember
             ]
         return members
 

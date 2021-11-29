@@ -3,7 +3,7 @@ from typing import Dict, Optional
 from pykechain.enums import URITarget, FontAwesomeMode
 from pykechain.exceptions import IllegalArgumentError
 
-allowed_attributes = ['displayName_nl', 'displayName_de', 'displayName_fr', 'displayName_it']
+allowed_attributes = ["displayName_nl", "displayName_de", "displayName_fr", "displayName_it"]
 
 
 class SideBarButton:
@@ -14,16 +14,18 @@ class SideBarButton:
     The original KE-chain buttons for the project detail, tasks and work breakdown structure are not separate buttons.
     """
 
-    def __init__(self,
-                 side_bar_manager: 'SideBarManager',
-                 json: Optional[Dict] = None,
-                 order: Optional[int] = None,
-                 title: Optional[str] = None,
-                 icon: Optional[str] = None,
-                 uri: Optional[str] = None,
-                 uri_target: URITarget = URITarget.INTERNAL,
-                 icon_mode: FontAwesomeMode = FontAwesomeMode.REGULAR,
-                 **kwargs):
+    def __init__(
+        self,
+        side_bar_manager: "SideBarManager",
+        json: Optional[Dict] = None,
+        order: Optional[int] = None,
+        title: Optional[str] = None,
+        icon: Optional[str] = None,
+        uri: Optional[str] = None,
+        uri_target: URITarget = URITarget.INTERNAL,
+        icon_mode: FontAwesomeMode = FontAwesomeMode.REGULAR,
+        **kwargs,
+    ):
         """
         Create a side-bar button.
 
@@ -51,12 +53,12 @@ class SideBarButton:
         if json is None:
             json = {}
 
-        title = title if title else json.get('displayName')
-        order = order if order is not None else json.get('order')
-        icon = icon if icon else json.get('displayIcon')
-        uri = uri if uri else json.get('uri')
-        uri_target = json.get('uriTarget', uri_target)
-        icon_mode = json.get('displayIconMode', icon_mode)
+        title = title if title else json.get("displayName")
+        order = order if order is not None else json.get("order")
+        icon = icon if icon else json.get("displayIcon")
+        uri = uri if uri else json.get("uri")
+        uri_target = json.get("uriTarget", uri_target)
+        icon_mode = json.get("displayIconMode", icon_mode)
 
         if not isinstance(order, int):
             raise IllegalArgumentError(f'order must be an integer, "{order}" is not.')
@@ -67,16 +69,22 @@ class SideBarButton:
         if not isinstance(uri, str):
             raise IllegalArgumentError(f'uri must be a string, "{uri}" is not.')
         if uri_target not in URITarget.values():
-            raise IllegalArgumentError(f'uri_target must be a URITarget option, "{uri_target}" is not.')
+            raise IllegalArgumentError(
+                f'uri_target must be a URITarget option, "{uri_target}" is not.'
+            )
         if icon_mode not in FontAwesomeMode.values():
-            raise IllegalArgumentError(f'icon_mode must be a FontAwesomeMode option, "{icon_mode}" is not.')
+            raise IllegalArgumentError(
+                f'icon_mode must be a FontAwesomeMode option, "{icon_mode}" is not.'
+            )
 
         for key in kwargs.keys():
             if key not in allowed_attributes:
                 raise IllegalArgumentError(
-                    f'Attribute "{key}" is not supported in the configuration of a side-bar button.')
+                    f'Attribute "{key}" is not supported in the configuration of a side-bar'
+                    " button."
+                )
 
-        self._manager: 'SideBarManager' = side_bar_manager
+        self._manager: "SideBarManager" = side_bar_manager
         self.display_name: str = title
         self.order: int = order
         self.display_icon: str = icon
@@ -90,7 +98,7 @@ class SideBarButton:
                 self._other_attributes[key] = json[key]
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__} {self.order}: {self.display_name}'
+        return f"{self.__class__.__name__} {self.order}: {self.display_name}"
 
     def refresh(self, json: Optional[Dict] = None) -> None:
         """

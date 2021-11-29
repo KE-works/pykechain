@@ -27,8 +27,8 @@ class User(Base):
         """Construct a user from provided json data."""
         super().__init__(json, **kwargs)
 
-        self.username = self._json_data.get('username', '')
-        self.id = self._json_data.get('pk', '')
+        self.username = self._json_data.get("username", "")
+        self.id = self._json_data.get("pk", "")
 
     def __repr__(self):  # pragma: no cover
         return f"<pyke {self.__class__.__name__} '{self.username}' id {self.id}>"
@@ -54,7 +54,7 @@ class User(Base):
         :return: timezone object (compatible with datetime)
         :rtype: TzInfo
         """
-        return pytz.timezone(zone=self._json_data.get('timezone', 'UTC'))
+        return pytz.timezone(zone=self._json_data.get("timezone", "UTC"))
 
     @property
     def language(self) -> str:
@@ -66,7 +66,7 @@ class User(Base):
         :return: language code string
         :rtype: basestring
         """
-        return self._json_data.get('language_code', LanguageCodes.ENGLISH)
+        return self._json_data.get("language_code", LanguageCodes.ENGLISH)
 
     @property
     def email(self) -> str:
@@ -76,7 +76,7 @@ class User(Base):
         :return: email address, default is empty string.
         :rtype: basestring
         """
-        return self._json_data.get('email', '')
+        return self._json_data.get("email", "")
 
     def now_in_my_timezone(self) -> datetime.datetime:
         """
@@ -87,12 +87,12 @@ class User(Base):
         :return: Current datetime
         :rtype datetime.datetime
         """
-        timezone_definition = self._json_data['timezone']
+        timezone_definition = self._json_data["timezone"]
         if timezone_definition:
             timezone = pytz.timezone(timezone_definition)
         else:
             # if there is no timezone set then the Europe/Amsterdam timezone
-            timezone = pytz.timezone('Europe/Amsterdam')
+            timezone = pytz.timezone("Europe/Amsterdam")
 
         # Default is utc timezone
         utc_time = datetime.datetime.now(tz=pytz.utc)

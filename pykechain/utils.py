@@ -419,9 +419,7 @@ def slugify_ref(value: str, allow_unicode: bool = False) -> str:
         value = unicodedata.normalize("NFKC", value)
         value = re.sub(r"[^\w\s-]", "", value, flags=re.U).strip().lower()
         return re.sub(r"[-\s]+", "-", value, flags=re.U)
-    value = (
-        unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
-    )
+    value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
     value = re.sub(r"[^\w\s-]", "", value).strip().lower()
     return re.sub(r"[-\s]+", "-", value)
 
@@ -443,7 +441,9 @@ def __dict_public__(cls: type(object)) -> Dict:
     return {k: v for (k, v) in cls.__dict__.items() if not k.startswith("__")}
 
 
-def __dict__inherited__(cls: type(object), stop: type(object) = type, public: Optional[bool] = True) -> Dict:
+def __dict__inherited__(
+    cls: type(object), stop: type(object) = type, public: Optional[bool] = True
+) -> Dict:
     """
     Get all __dict__ items of the class and its superclasses up to `type`, or the `stop` class given as input.
 
@@ -492,7 +492,7 @@ def get_in_chunks(lst: Union[List, Iterable], chunk_size: int) -> Iterable:
     :rtype: Iterable
     """
     for i in range(0, len(lst), chunk_size):
-        yield lst[i: i + chunk_size]
+        yield lst[i : i + chunk_size]
 
 
 class Empty:

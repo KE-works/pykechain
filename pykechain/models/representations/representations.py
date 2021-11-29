@@ -53,9 +53,7 @@ class ThousandsSeparator(BaseRepresentation):
         """
         if not (isinstance(value, type(None))):
             raise IllegalArgumentError(
-                '{} value "{}" is not correct: not NoneType'.format(
-                    self.__class__.__name__, value
-                )
+                '{} value "{}" is not correct: not NoneType'.format(self.__class__.__name__, value)
             )
 
 
@@ -147,9 +145,7 @@ class CustomIconRepresentation(BaseRepresentation):
         """
         if not isinstance(value, str):
             raise IllegalArgumentError(
-                '{} value "{}" is not correct: not a string'.format(
-                    self.__class__.__name__, value
-                )
+                '{} value "{}" is not correct: not a string'.format(self.__class__.__name__, value)
             )
 
     @property

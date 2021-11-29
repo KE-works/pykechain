@@ -7,8 +7,17 @@ from pykechain.enums import KechainEnv as kecenv, ScopeStatus
 from pykechain.exceptions import ClientError
 
 
-def get_project(url=None, username=None, password=None, token=None, scope=None, scope_id=None,
-                env_filename=None, status=ScopeStatus.ACTIVE, check_certificates=None):
+def get_project(
+    url=None,
+    username=None,
+    password=None,
+    token=None,
+    scope=None,
+    scope_id=None,
+    env_filename=None,
+    status=ScopeStatus.ACTIVE,
+    check_certificates=None,
+):
     """
     Retrieve and return the KE-chain project to be used throughout an app.
 
@@ -96,31 +105,45 @@ def get_project(url=None, username=None, password=None, token=None, scope=None, 
     if env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False):
         if not os.getenv(kecenv.KECHAIN_URL):
             raise ClientError(
-                "Error: KECHAIN_URL should be provided as environment variable (use of env vars is enforced)")
-        if not (os.getenv(kecenv.KECHAIN_TOKEN) or  # noqa: W504
-                (os.getenv(kecenv.KECHAIN_PASSWORD) and os.getenv(kecenv.KECHAIN_PASSWORD))):
-            raise ClientError("Error: KECHAIN_TOKEN or KECHAIN_USERNAME and KECHAIN_PASSWORD should be provided as "
-                              "environment variable(s) (use of env vars is enforced)")
+                "Error: KECHAIN_URL should be provided as environment variable (use of env vars is"
+                " enforced)"
+            )
+        if not (
+            os.getenv(kecenv.KECHAIN_TOKEN)
+            or (  # noqa: W504
+                os.getenv(kecenv.KECHAIN_PASSWORD) and os.getenv(kecenv.KECHAIN_PASSWORD)
+            )
+        ):
+            raise ClientError(
+                "Error: KECHAIN_TOKEN or KECHAIN_USERNAME and KECHAIN_PASSWORD should be provided"
+                " as environment variable(s) (use of env vars is enforced)"
+            )
         if not (os.getenv(kecenv.KECHAIN_SCOPE) or os.getenv(kecenv.KECHAIN_SCOPE_ID)):
-            raise ClientError("Error: KECHAIN_SCOPE or KECHAIN_SCOPE_ID should be provided as environment variable "
-                              "(use of env vars is enforced)")
+            raise ClientError(
+                "Error: KECHAIN_SCOPE or KECHAIN_SCOPE_ID should be provided as environment"
+                " variable (use of env vars is enforced)"
+            )
 
-    if env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False) or \
-            not any((url, username, password, token, scope, scope_id)):
+    if env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False) or not any(
+        (url, username, password, token, scope, scope_id)
+    ):
         check_certificates = env.bool(kecenv.KECHAIN_CHECK_CERTIFICATES, default=True)
         client = Client.from_env(env_filename=env_filename, check_certificates=check_certificates)
         scope_id = env(kecenv.KECHAIN_SCOPE_ID, default=None)
         scope = env(kecenv.KECHAIN_SCOPE, default=None)
         status = env(kecenv.KECHAIN_SCOPE_STATUS, default=None)
-    elif (url and ((username and password) or (token)) and (scope or scope_id)) and \
-            not env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False):
+    elif (url and ((username and password) or (token)) and (scope or scope_id)) and not env.bool(
+        kecenv.KECHAIN_FORCE_ENV_USE, default=False
+    ):
         if check_certificates is None:
             check_certificates = env.bool(kecenv.KECHAIN_CHECK_CERTIFICATES, default=True)
         client = Client(url=url, check_certificates=check_certificates)
         client.login(username=username, password=password, token=token)
     else:
-        raise ClientError("Error: insufficient arguments to connect to KE-chain. "
-                          "See documentation of `pykechain.get_project()`")
+        raise ClientError(
+            "Error: insufficient arguments to connect to KE-chain. "
+            "See documentation of `pykechain.get_project()`"
+        )
 
     if scope_id:
         return client.scope(pk=scope_id, status=status)

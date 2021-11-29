@@ -13,6 +13,7 @@ class TestAbout(TestCase):
         self.assertTrue(about.name)
         self.assertTrue(about.version)
         import semver
+
         self.assertTrue(semver.VersionInfo.parse(about.version))
 
     def test_python_fstring(self):

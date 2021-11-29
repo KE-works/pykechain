@@ -5,9 +5,7 @@ from .__about__ import version
 from .client import Client
 from .helpers import get_project
 
-__all__ = (
-    'Client', 'get_project', 'version'
-)
+__all__ = ("Client", "get_project", "version")
 
 if sys.version_info.major == 2 or (sys.version_info.major == 3 and sys.version_info.minor < 6):
     raise RuntimeError(

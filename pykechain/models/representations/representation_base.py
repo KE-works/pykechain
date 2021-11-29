@@ -79,9 +79,7 @@ class BaseRepresentation:
         try:
             rtype = json["rtype"]
         except KeyError:
-            raise ValueError(
-                f"Representation unknown, incorrect json: '{json}'"
-            )
+            raise ValueError(f"Representation unknown, incorrect json: '{json}'")
         try:
             from pykechain.models.representations import rtype_class_map
 

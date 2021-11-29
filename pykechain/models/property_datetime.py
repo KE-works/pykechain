@@ -29,4 +29,4 @@ class DatetimeProperty(Property):
         :type value: Any
         :return: serialized value
         """
-        return check_datetime(dt=value, key='value')
+        return check_datetime(dt=value, key="value")
