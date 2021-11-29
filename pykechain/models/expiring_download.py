@@ -1,6 +1,6 @@
 import datetime
 import os
-from typing import Dict, Optional, Text
+from typing import Dict, Optional
 
 import requests
 

@@ -1,4 +1,4 @@
-from typing import List, Optional, Text
+from typing import List, Optional
 
 from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.exceptions import IllegalArgumentError

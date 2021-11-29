@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 import requests
-from typing import Text, Dict, Optional, Union
+from typing import Dict, Optional, Union
 
 from pykechain.enums import ServiceScriptUser, ServiceExecutionStatus, ServiceType, ServiceEnvironmentVersion
 from pykechain.exceptions import APIError

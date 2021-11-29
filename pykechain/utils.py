@@ -3,10 +3,9 @@ import re
 import unicodedata
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
-from typing import TypeVar, Iterable, Callable, Optional, Text, Dict, Union, List  # noqa: F401
+from typing import TypeVar, Iterable, Callable, Optional, Dict, Union, List  # noqa: F401
 
 import pytz
-import six
 
 T = TypeVar("T")
 

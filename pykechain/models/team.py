@@ -1,4 +1,4 @@
-from typing import Optional, Union, List, Text, Dict
+from typing import Optional, Union, List, Dict
 
 import requests
 

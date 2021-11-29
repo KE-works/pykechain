@@ -2,7 +2,7 @@ import datetime
 import urllib
 import warnings
 from abc import abstractmethod
-from typing import Text, Union, Any, Dict, List, Optional
+from typing import Union, Any, Dict, List, Optional
 
 from pykechain.enums import FilterType, Category, PropertyType, ScopeStatus
 from pykechain.exceptions import IllegalArgumentError, NotFoundError

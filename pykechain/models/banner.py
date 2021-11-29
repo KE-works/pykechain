@@ -1,5 +1,5 @@
 import datetime
-from typing import Text, Optional, Union
+from typing import Optional, Union
 
 import requests
 

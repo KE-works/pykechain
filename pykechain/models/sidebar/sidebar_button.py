@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Text
+from typing import Dict, Optional
 
 from pykechain.enums import URITarget, FontAwesomeMode
 from pykechain.exceptions import IllegalArgumentError

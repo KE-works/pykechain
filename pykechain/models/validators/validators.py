@@ -1,6 +1,6 @@
 import mimetypes
 import re
-from typing import Any, Union, Tuple, Optional, Text, Dict, List  # noqa: F401 # pylint: disable=unused-import
+from typing import Any, Union, Tuple, Optional, Dict, List  # noqa: F401 # pylint: disable=unused-import
 
 from pykechain.enums import PropertyVTypes
 from pykechain.models.validators.mime_types_defaults import predefined_mimes

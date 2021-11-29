@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Union, Text, Dict, Optional, List  # noqa: F401
+from typing import Union, Dict, Optional, List  # noqa: F401
 
 import requests
 

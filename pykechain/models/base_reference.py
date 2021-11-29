@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from typing import Optional, Any, Text, Union, Tuple, List
+from typing import Optional, Any, Union, Tuple, List
 
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Property, Base

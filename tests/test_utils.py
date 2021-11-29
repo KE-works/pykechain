@@ -1,10 +1,9 @@
 from unittest import TestCase
 
-from pykechain.utils import is_url, is_valid_email, Empty, get_in_chunks
-from tests.classes import SixTestCase
+from pykechain.utils import Empty, get_in_chunks, is_url, is_valid_email
 
 
-class TestIsURL(SixTestCase):
+class TestIsURL(TestCase):
     def test_is_url_returns_true_on_valid_url(self):
         addresses = [
             "http://foobar.dk",
@@ -51,7 +50,7 @@ class TestIsURL(SixTestCase):
         ]
         for address in addresses:
             with self.subTest(address):
-                self.assertTrue(is_url(address),  f"should be a valid address: '{address}'")
+                self.assertTrue(is_url(address), f"should be a valid address: '{address}'")
 
     def test_is_url_returns_False_on_failed_url(self):
         failed_addresses = [
@@ -112,7 +111,7 @@ class TestIsURL(SixTestCase):
                 self.assertFalse(is_url(address), f"should be a invalid address: '{address}'")
 
 
-class TestIsEmail(SixTestCase):
+class TestIsEmail(TestCase):
     def test_is_email_returns_true_on_valid_url(self):
         valid_addresses = [
             "some@domain.org",
@@ -133,7 +132,7 @@ class TestIsEmail(SixTestCase):
         ]
         for email in valid_addresses:
             with self.subTest(email):
-                self.assertTrue(is_valid_email(email),  f"should be a valid address: '{email}'")
+                self.assertTrue(is_valid_email(email), f"should be a valid address: '{email}'")
 
     def test_is_email_returns_false_on_invalid_url(self):
         invalid_addresses = [

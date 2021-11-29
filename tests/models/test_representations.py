@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Union
+from unittest import TestCase
 
 from jsonschema import validate
 
@@ -27,7 +28,7 @@ from pykechain.models.representations.representations import (
     UsePropertyNameRepresentation,
 )
 from pykechain.models.validators.validator_schemas import options_json_schema
-from tests.classes import SixTestCase, TestBetamax
+from tests.classes import TestBetamax
 
 representation_config = dict(
     rtype="buttonRepresentation",
@@ -40,12 +41,12 @@ options = dict(
 )
 
 
-class TestRepresentationJSON(SixTestCase):
+class TestRepresentationJSON(TestCase):
     def test_valid_button_representation_json(self):
         validate(options_json_schema, options)
 
 
-class TestRepresentation(SixTestCase):
+class TestRepresentation(TestCase):
     def test_create(self):
         representation = BaseRepresentation()
 
@@ -371,7 +372,6 @@ class TestUseCameraScannerInputRepresentationForCharProperties(
     representation_class = CameraScannerInputRepresentation
     value = True
     new_value = False
-
 
 
 class TestUseCameraScannerInputRepresentationForTextAreaCharProperties(

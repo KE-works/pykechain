@@ -1,4 +1,4 @@
-from typing import Any, List, Dict, Optional, Text, Union, Tuple, Iterable, TypeVar
+from typing import Any, List, Dict, Optional, Union, Tuple, Iterable, TypeVar
 
 import requests
 from jsonschema import validate

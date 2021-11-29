@@ -1,19 +1,28 @@
-from jsonschema import validate, ValidationError
+from unittest import TestCase
 
-from pykechain.enums import PropertyVTypes, PropertyType
+from jsonschema import ValidationError, validate
+
+from pykechain.enums import PropertyType, PropertyVTypes
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Property, AttachmentProperty
-from pykechain.models.validators import PropertyValidator, ValidatorEffect, VisualEffect, ValidVisualEffect, \
-    InvalidVisualEffect, NumericRangeValidator, BooleanFieldValidator
-from pykechain.models.validators.validator_schemas import options_json_schema, validator_jsonschema_stub, \
-    effects_jsonschema_stub
-from pykechain.models.validators.validators import RegexStringValidator, RequiredFieldValidator, EvenNumberValidator, \
-    OddNumberValidator, SingleReferenceValidator, EmailValidator, AlwaysAllowValidator, FileSizeValidator, \
-    FileExtensionValidator
-from tests.classes import SixTestCase, TestBetamax
+from pykechain.models import AttachmentProperty, Property
+from pykechain.models.validators import (
+    BooleanFieldValidator, InvalidVisualEffect, NumericRangeValidator,
+    PropertyValidator, ValidVisualEffect, ValidatorEffect, VisualEffect,
+)
+from pykechain.models.validators.validator_schemas import (
+    effects_jsonschema_stub, options_json_schema,
+    validator_jsonschema_stub,
+)
+from pykechain.models.validators.validators import (
+    AlwaysAllowValidator, EmailValidator, EvenNumberValidator,
+    FileExtensionValidator, FileSizeValidator, OddNumberValidator, RegexStringValidator,
+    RequiredFieldValidator,
+    SingleReferenceValidator,
+)
+from tests.classes import TestBetamax
 
 
-class TestValidatorJSON(SixTestCase):
+class TestValidatorJSON(TestCase):
     def test_valid_numeric_range_validator_json(self):
         options = dict(
             validators=[dict(
@@ -25,7 +34,8 @@ class TestValidatorJSON(SixTestCase):
                     on_valid=[dict(effect="CssEffect", config=dict(applyCss="valid"))],
                     on_invalid=[dict(effect="CssEffect", config=dict(applyCss="invalid")),
                                 dict(effect="ErrorText",
-                                     config=dict(text="Range should be between 2 and 10 with step 2."))]
+                                     config=dict(
+                                         text="Range should be between 2 and 10 with step 2."))]
                 )
             )]
         )
@@ -33,30 +43,37 @@ class TestValidatorJSON(SixTestCase):
         validate(options_json_schema, options)
 
     def test_valid_requiredfield_validator_json(self):
-        options = {'validators': [
-            {
-                'vtype': 'requiredFieldValidator',
-                'config': {
-                    'effects_when_valid': [],
-                    'effects_when_invalid': [{'effect': "ErrorText", 'config': {'Text': "This field is required."}}]
+        options = {
+            'validators': [
+                {
+                    'vtype': 'requiredFieldValidator',
+                    'config': {
+                        'effects_when_valid': [],
+                        'effects_when_invalid': [
+                            {'effect': "ErrorText", 'config': {'Text': "This field is required."}}]
+                    }
+                }, {
+                    'vtype': 'numericRangeValidator',
+                    'config': {'minValue': 0}
                 }
-            }, {
-                'vtype': 'numericRangeValidator',
-                'config': {'minValue': 0}
-            }
-        ]}
+            ]
+        }
 
         validate(options_json_schema, options)
 
     def test_valid_booleanfield_validator_json(self):
-        options = {'validators': [{
-            'vtype': 'booleanFieldValidator',
-            'config': {
-                'is_valid': False,
-                'is_invalid': [True, None],
-                'effects_when_valid': [],
-                'effects_when_invalid': [{'effect': 'ErrorText', 'text': 'Value of the field should be False'}]}
-        }]}
+        options = {
+            'validators': [{
+                'vtype': 'booleanFieldValidator',
+                'config': {
+                    'is_valid': False,
+                    'is_invalid': [True, None],
+                    'effects_when_valid': [],
+                    'effects_when_invalid': [
+                        {'effect': 'ErrorText', 'text': 'Value of the field should be False'}]
+                }
+            }]
+        }
 
         validate(options_json_schema, options)
 
@@ -143,13 +160,13 @@ class TestValidatorJSON(SixTestCase):
             validate(v, effects_jsonschema_stub)
 
 
-class TestPropertyValidatorClass(SixTestCase):
+class TestPropertyValidatorClass(TestCase):
     def test_propertyvalidator_produces_valid_json(self):
         pv = PropertyValidator()
         pv.validate_json()
 
 
-class TestValidatorEffects(SixTestCase):
+class TestValidatorEffects(TestCase):
     def test_validator_effect_produces_valid_json(self):
         ve = ValidatorEffect()
         ve.validate_json()
@@ -170,7 +187,7 @@ class TestValidatorEffects(SixTestCase):
         ve.validate_json()
 
 
-class TestValidatorParsing(SixTestCase):
+class TestValidatorParsing(TestCase):
 
     def test_valid_numeric_range_validator_json(self):
         validator_json = dict(
@@ -183,7 +200,8 @@ class TestValidatorParsing(SixTestCase):
                 on_valid=[dict(effect="visualEffect", config=dict(applyCss="valid"))],
                 on_invalid=[dict(effect="visualEffect", config=dict(applyCss="invalid")),
                             dict(effect="errorTextEffect",
-                                 config=dict(text="Range should be between 2 and 10 with step 2."))]
+                                 config=dict(
+                                     text="Range should be between 2 and 10 with step 2."))]
             )
         )
 
@@ -194,7 +212,7 @@ class TestValidatorParsing(SixTestCase):
         pass
 
 
-class TestValidatorDumping(SixTestCase):
+class TestValidatorDumping(TestCase):
 
     def test_valid_numeric_range_validator_dumped(self):
         validator_json = dict(
@@ -207,7 +225,8 @@ class TestValidatorDumping(SixTestCase):
                 on_valid=[dict(effect="visualEffect", config=dict(applyCss="valid"))],
                 on_invalid=[dict(effect="visualEffect", config=dict(applyCss="invalid")),
                             dict(effect="errorTextEffect",
-                                 config=dict(text="Range should be between 2 and 10 with step 2."))]
+                                 config=dict(
+                                     text="Range should be between 2 and 10 with step 2."))]
             )
         )
 
@@ -219,7 +238,7 @@ class TestValidatorDumping(SixTestCase):
         self.assertIsNone(validator.validate_json())
 
 
-class TestNumericRangeValidator(SixTestCase):
+class TestNumericRangeValidator(TestCase):
     def test_numeric_range_without_settings_validated_json(self):
         validator = NumericRangeValidator()
 
@@ -279,7 +298,8 @@ class TestNumericRangeValidator(SixTestCase):
             NumericRangeValidator(minvalue=11, maxvalue=-11)
 
     def test_numeric_range_raises_exception_when_enforce_stepsize_without_stepsize(self):
-        with self.assertRaisesRegex(Exception, 'The stepsize should be provided when enforcing stepsize'):
+        with self.assertRaisesRegex(Exception,
+                                    'The stepsize should be provided when enforcing stepsize'):
             NumericRangeValidator(stepsize=None, enforce_stepsize=True)
 
     def test_numeric_range_does_not_respect_max_issue_435(self):
@@ -294,7 +314,7 @@ class TestNumericRangeValidator(SixTestCase):
         self.assertRegex(validator.get_reason(), "Value '3333' should be between -inf and 1000")
 
 
-class TestBooleanFieldValidator(SixTestCase):
+class TestBooleanFieldValidator(TestCase):
     def test_boolean_validator_without_settings(self):
         validator = BooleanFieldValidator()
         self.assertIsNone(validator.validate_json())
@@ -302,12 +322,13 @@ class TestBooleanFieldValidator(SixTestCase):
         self.assertDictEqual(validator.as_json(), {'config': {}, 'vtype': 'booleanFieldValidator'})
 
 
-class TestRequiredFieldValidator(SixTestCase):
+class TestRequiredFieldValidator(TestCase):
     def test_requiredfield_validator_without_settings(self):
         validator = RequiredFieldValidator()
         self.assertIsNone(validator.validate_json())
         self.assertIsInstance(validator.as_json(), dict)
-        self.assertDictEqual(validator.as_json(), {'config': {}, 'vtype': 'requiredFieldValidator'})
+        self.assertDictEqual(validator.as_json(),
+                             {'config': {}, 'vtype': 'requiredFieldValidator'})
 
     def test_requiredfield_validator_is_false_on_nonevalue(self):
         validator = RequiredFieldValidator()
@@ -335,7 +356,7 @@ class TestRequiredFieldValidator(SixTestCase):
         self.assertTrue(validator.is_valid(False))
 
 
-class TestRegexValidator(SixTestCase):
+class TestRegexValidator(TestCase):
     def test_regex_validator_without_settings(self):
         validator = RegexStringValidator()
         self.assertIsNone(validator.validate_json())
@@ -369,7 +390,7 @@ class TestRegexValidator(SixTestCase):
         self.assertFalse(validator.is_valid('user@domain'))
 
 
-class TestOddEvenNumberValidator(SixTestCase):
+class TestOddEvenNumberValidator(TestCase):
     def test_even_number_validator_without_settings(self):
         validator = EvenNumberValidator()
         self.assertIsNone(validator.validate_json())
@@ -444,12 +465,13 @@ class TestOddEvenNumberValidator(SixTestCase):
         self.assertFalse(validator.is_valid("3"))
 
 
-class TestSingleReferenceValidator(SixTestCase):
+class TestSingleReferenceValidator(TestCase):
     def test_singlereference_validator_without_settings(self):
         validator = SingleReferenceValidator()
         self.assertIsNone(validator.validate_json())
         self.assertIsInstance(validator.as_json(), dict)
-        self.assertDictEqual(validator.as_json(), {'config': {}, 'vtype': 'singleReferenceValidator'})
+        self.assertDictEqual(validator.as_json(),
+                             {'config': {}, 'vtype': 'singleReferenceValidator'})
 
     def test_singlereference_validator_is_valid(self):
         validator = SingleReferenceValidator()
@@ -471,7 +493,7 @@ class TestSingleReferenceValidator(SixTestCase):
         self.assertFalse(validator.is_valid(dict()))
 
 
-class TestAlwaysAllowValidator(SixTestCase):
+class TestAlwaysAllowValidator(TestCase):
     def test_always_allow_validator_without_settings(self):
         validator = AlwaysAllowValidator()
         self.assertTrue(validator.is_valid('some text'))
@@ -489,7 +511,7 @@ class TestAlwaysAllowValidator(SixTestCase):
         self.assertIsNone(validator.validate_json())
 
 
-class TestFileSizeValidator(SixTestCase):
+class TestFileSizeValidator(TestCase):
     def test_validator_valid_json_with_settings(self):
         validator = FileSizeValidator(max_size=100)
         self.assertIsNone(validator.validate_json())
@@ -546,7 +568,7 @@ class TestFileSizeValidator(SixTestCase):
         self.assertIsNone(validator.is_valid(None))
 
 
-class TestFileExtensionValidator(SixTestCase):
+class TestFileExtensionValidator(TestCase):
     def test_validator_valid_json_with_settings(self):
         validator = FileExtensionValidator(accept=[".csv"])
         self.assertIsNone(validator.validate_json())
@@ -609,7 +631,7 @@ class TestFileExtensionValidator(SixTestCase):
         self.assertIsNone(validator.is_valid(None))
 
 
-class TestPropertyWithValidator(SixTestCase):
+class TestPropertyWithValidator(TestCase):
 
     def test_property_without_validator(self):
         prop = Property(json={}, client=None)
@@ -690,10 +712,12 @@ class TestPropertyWithValidatorFromLiveServer(TestBetamax):
     def setUp(self):
         super().setUp()
         self.part_model = self.project.model(name='Model')
-        self.numeric_range_prop_model = self.part_model.add_property(name='numericrange_validatortest',
-                                                                     property_type=PropertyType.FLOAT_VALUE)
+        self.numeric_range_prop_model = self.part_model.add_property(
+            name='numericrange_validatortest',
+            property_type=PropertyType.FLOAT_VALUE)
         self.numeric_range_prop_model.validators = [NumericRangeValidator(min=0., max=42.)]
-        self.part = self.project.part(name__startswith='Catalog').add(self.part_model, name='Model Instance for tests')
+        self.part = self.project.part(name__startswith='Catalog').add(self.part_model,
+                                                                      name='Model Instance for tests')
         self.numeric_range_prop_instance = self.part.property(name='numericrange_validatortest')
 
     def tearDown(self):
@@ -719,6 +743,7 @@ class TestPropertyWithValidatorFromLiveServer(TestBetamax):
         validators = self.numeric_range_prop_instance.validators
         validators.append(RequiredFieldValidator())
 
-        with self.assertRaisesRegex(IllegalArgumentError, "To update the list of validators, it can only work "
-                                                          "on `Property` of category 'MODEL'"):
+        with self.assertRaisesRegex(IllegalArgumentError,
+                                    "To update the list of validators, it can only work "
+                                    "on `Property` of category 'MODEL'"):
             self.numeric_range_prop_instance.validators = validators

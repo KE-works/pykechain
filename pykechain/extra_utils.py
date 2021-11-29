@@ -2,7 +2,7 @@ import os
 import tempfile
 import warnings
 from collections import namedtuple
-from typing import Optional, Text, List, Any
+from typing import Optional, List, Any
 
 from pykechain import Client
 from pykechain.enums import PropertyType, Multiplicity, Category

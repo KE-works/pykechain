@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Text, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -110,8 +110,10 @@ class Client:
             raise ClientError("Please provide a valid URL to a KE-chain instance")
 
         self.api_root = url
-        self.headers: Dict[str, str] = {'X-Requested-With': 'XMLHttpRequest',
-                                          'PyKechain-Version': pykechain_version}
+        self.headers: Dict[str, str] = {
+            'X-Requested-With': 'XMLHttpRequest',
+            'PyKechain-Version': pykechain_version
+        }
         self.auth: Optional[Tuple[str, str]] = None
         self.last_request: Optional[requests.PreparedRequest] = None
         self.last_response: Optional[requests.Response] = None

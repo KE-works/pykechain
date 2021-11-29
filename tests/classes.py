@@ -20,16 +20,7 @@ with Betamax.configure() as config:
     config.define_cassette_placeholder('<AUTH_TOKEN>', TEST_TOKEN)
 
 
-class SixTestCase(TestCase):
-    def assertRaisesRegex(self, expected_exception, expected_regex, *args, **kwargs):
-        return super().assertRaisesRegex(expected_exception, expected_regex, *args, **kwargs)
-
-    def assertRegex(self, text, expected_regex, *args, **kwargs):
-        return super().assertRegex(text, expected_regex, *args, **kwargs)
-
-
-class TestBetamax(SixTestCase):
-
+class TestBetamax(TestCase):
     time = datetime.datetime(year=2020, month=1, day=1, tzinfo=pytz.UTC)
 
     @property

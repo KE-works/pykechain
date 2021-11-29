@@ -1,5 +1,5 @@
 import warnings
-from typing import List, Optional, Text, Union, Any, Tuple
+from typing import List, Optional, Union, Any, Tuple
 
 from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.enums import Category, FilterType
