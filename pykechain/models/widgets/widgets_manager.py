@@ -479,8 +479,8 @@ class WidgetsManager(Iterable):
         """
         # Check whether the part_model is uuid type or class `Part`
         part_model: 'Part' = _retrieve_object(obj=part_model, method=self._client.model)  # noqa
-        parent_instance_id: text_type = _retrieve_object_id(obj=parent_instance)
-        sort_property_id: text_type = _retrieve_object_id(obj=sort_property)
+        parent_instance_id: str = _retrieve_object_id(obj=parent_instance)
+        sort_property_id: str = _retrieve_object_id(obj=sort_property)
         if not sort_property_id and sort_name:
             sort_property_id = MetaWidget.NAME
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
