@@ -1,9 +1,14 @@
 Change Log
 ==========
 
-UNRELEASED
-----------
+v3.17.1 (29NOV21)
+-----------------
+# a re-release of v3.17.0 due to missing version information and changelog info in the library itself. No new code.
+
+v3.17.0 (29NOV21)
+-----------------
 * :+1: When a part is searched that on its `id` or `pk` than the `Client.part()` call will perform a API call to the detail route of the part api. This will greatly reduce the overhead on large databases and improve performance. (#1064)
+* :+1: dependent versions for development: sphinx (4.3.1), twine (3.6.0), coveralls (3.3.1), coverage (6.2)
 
 v3.16.0 (9NOV21)
 ________________
