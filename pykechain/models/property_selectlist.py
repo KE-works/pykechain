@@ -125,7 +125,7 @@ class _SelectListProperty(Property):
         response = self._client._request('PUT', url, json={'value_options': new_options})
 
         if response.status_code != 200:  # pragma: no cover
-            raise APIError("Could not update options of Property {}".format(self), response=response)
+            raise APIError(f"Could not update options of Property {self}", response=response)
         else:
             self._options = new_options  # save the new options as the options
 
@@ -144,7 +144,7 @@ class MultiSelectListProperty(_SelectListProperty):
 
     def _check_new_value(self, value: Iterable[Any]):
         if not isinstance(value, (list, tuple)):
-            raise IllegalArgumentError('The new values must be provided as a list or tuple, "{}" is not.'.format(value))
+            raise IllegalArgumentError(f'The new values must be provided as a list or tuple, "{value}" is not.')
 
         if not all(v in self.options for v in value):
             raise IllegalArgumentError('The new values "{}" of the Property should be in the list of options:'

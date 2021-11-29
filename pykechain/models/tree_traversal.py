@@ -20,7 +20,7 @@ class TreeObject(BaseInScope, ABC):
         """
         super().__init__(json=json, **kwargs)
 
-        self.parent_id: Optional[Text] = json.get('parent_id', None)
+        self.parent_id: Optional[str] = json.get('parent_id', None)
         self._parent: Optional[T] = None
         self._cached_children: Optional[List[T]] = None
 
@@ -29,8 +29,8 @@ class TreeObject(BaseInScope, ABC):
         return self.child(*args, **kwargs)
 
     def child(self: T,
-              name: Optional[Text] = None,
-              pk: Optional[Text] = None,
+              name: Optional[str] = None,
+              pk: Optional[str] = None,
               **kwargs) -> T:
         """
         Retrieve a child object.
@@ -89,7 +89,7 @@ class TreeObject(BaseInScope, ABC):
         return all_children
 
     @abstractmethod
-    def count_children(self, method: Text, **kwargs) -> int:
+    def count_children(self, method: str, **kwargs) -> int:
         """
         Retrieve the number of child objects using a light-weight request.
 
@@ -109,7 +109,7 @@ class TreeObject(BaseInScope, ABC):
         response = self._client._request('GET', self._client._build_url(method), params=parameters)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve {}".format(method))
+            raise NotFoundError(f"Could not retrieve {method}")
 
         count = response.json()['count']
 

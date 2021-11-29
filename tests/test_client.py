@@ -49,7 +49,7 @@ class TestClient(TestCase):
 
         client.login(token=PSEUDO_TOKEN)
 
-        self.assertTrue(client.headers['Authorization'], 'Token {}'.format(PSEUDO_TOKEN))
+        self.assertTrue(client.headers['Authorization'], f'Token {PSEUDO_TOKEN}')
         self.assertIsNone(client.auth)
 
     def test_init_no_ssl(self):
@@ -235,7 +235,7 @@ class TestClientLive(TestBetamax):
 
         # testing
         self.assertIsInstance(self.temp_scope, Scope)
-        self.assertEqual(self.temp_scope.name, 'CLONE - {}'.format(self.project.name))
+        self.assertEqual(self.temp_scope.name, f'CLONE - {self.project.name}')
         self.assertEqual(self.temp_scope.status, self.project.status)
         self.assertEqual(self.temp_scope.start_date, self.project.start_date)
         self.assertEqual(self.temp_scope.due_date, self.project.due_date)

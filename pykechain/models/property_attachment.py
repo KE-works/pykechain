@@ -29,7 +29,7 @@ class AttachmentProperty(Property):
 
         """
         if self.has_value():
-            return "[Attachment: {}]".format(self.filename)
+            return f"[Attachment: {self.filename}]"
         else:
             return None
 
@@ -50,7 +50,7 @@ class AttachmentProperty(Property):
             self._json_data['value'] = None
 
     @property
-    def filename(self) -> Optional[Text]:
+    def filename(self) -> Optional[str]:
         """Filename of the attachment, without the full 'attachment' path."""
         return self._value.split('/')[-1] if self.has_value() else None
 
@@ -100,7 +100,7 @@ class AttachmentProperty(Property):
             self._upload_json(data, **kwargs)
         self._value = data
 
-    def save_as(self, filename: Optional[Text] = None) -> None:
+    def save_as(self, filename: Optional[str] = None) -> None:
         """Download the attachment to a file.
 
         :param filename: (optional) File path. If not provided, will be saved to current working dir

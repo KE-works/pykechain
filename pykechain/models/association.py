@@ -28,4 +28,4 @@ class Association(BaseInScope):
         self.permissions = json.get('permissions')
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke {} id {}>".format(self.__class__.__name__, self.id)
+        return f"<pyke {self.__class__.__name__} id {self.id}>"

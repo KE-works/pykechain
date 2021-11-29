@@ -10,7 +10,7 @@ class TestPartsCopyMove(TestBetamax):
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/'))
 
     def setUp(self):
-        super(TestPartsCopyMove, self).setUp()
+        super().setUp()
         self.base = self.project.model(name__startswith='Catalog')
         self.cross_scope_project = self.client.scope(ref='cannondale-project')
         self.cross_scope_bike = self.cross_scope_project.model(ref='cannondale-bike')
@@ -19,7 +19,7 @@ class TestPartsCopyMove(TestBetamax):
             name='Front Wheel'), self.project.part(name='Rear Wheel')
         self.specify_wheel_diameter = self.project.activity(name='Specify wheel diameter')
         self.model_to_be_copied = self.project.create_model(
-            parent=self.base, name='__Model to be Copied @ {} [TEST]'.format(str(datetime.now())),
+            parent=self.base, name=f'__Model to be Copied @ {str(datetime.now())} [TEST]',
             multiplicity=Multiplicity.ONE_MANY)  # type Part
         self.p_char_name = '__Property single text'
         self.p_multi_name = '__Property multi text'
@@ -266,7 +266,7 @@ class TestPartsCopyMove(TestBetamax):
 
         if self.dump_part:
             self.dump_part.delete()
-        super(TestPartsCopyMove, self).tearDown()
+        super().tearDown()
 
     def test_copy_part_model_given_name_include_children(self):
         model_target_parent = self.project.model('Bike')

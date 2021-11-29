@@ -314,7 +314,7 @@ class TestParts(TestBetamax):
 
         # testing
         self.assertEqual(front_fork.name, front_fork_name)
-        self.assertEqual(front_fork.description, str())
+        self.assertEqual(front_fork.description, '')
 
         # tearDown
         front_fork.edit(description=front_fork_description)
@@ -483,7 +483,7 @@ class TestParts(TestBetamax):
         self._part = seat.clone()
 
         # testing
-        clone_seat_model = self.project.model('CLONE - {}'.format(model_name))
+        clone_seat_model = self.project.model(f'CLONE - {model_name}')
         self.assertTrue(clone_seat_model)
 
     def test_clone_instance(self):
@@ -492,7 +492,7 @@ class TestParts(TestBetamax):
         self._part = wheel.clone()
 
         # testing
-        clone_spoke_instance = self.project.part('CLONE - {}'.format(instance_name))
+        clone_spoke_instance = self.project.part(f'CLONE - {instance_name}')
         self.assertTrue(clone_spoke_instance)
 
     def test_clone_instance_with_multiplicity_violation(self):
@@ -575,17 +575,17 @@ class TestBulkPartsCreation(TestBetamax):
             part_dict = {
                 "name": idx,
                 "parent_id": self.product_part.id,
-                "description": "Description part {}".format(idx),
+                "description": f"Description part {idx}",
                 "model_id": self.part_model.id,
                 "properties": [
                     {
                         "name": self.text_prop.name,
-                        "value": "{}".format(idx),
+                        "value": f"{idx}",
                         "model_id": self.text_prop.id,
                     },
                     {
                         "name": self.char_prop.name,
-                        "value": "{}".format(idx),
+                        "value": f"{idx}",
                         "model_id": self.char_prop.id
                     },
                     {
@@ -595,7 +595,7 @@ class TestBulkPartsCreation(TestBetamax):
                     },
                     {
                         "name": self.float_prop.name,
-                        "value": float("{}.{}".format(idx, idx)),
+                        "value": float(f"{idx}.{idx}"),
                         "model_id": self.float_prop.id
                     },
                     {
@@ -615,17 +615,17 @@ class TestBulkPartsCreation(TestBetamax):
                     },
                     {
                         "name": self.link_prop.name,
-                        "value": "http://{}.com".format(idx),
+                        "value": f"http://{idx}.com",
                         "model_id": self.link_prop.id
                     },
                     {
                         "name": self.ss_prop.name,
-                        "value": "{}".format(idx),
+                        "value": f"{idx}",
                         "model_id": self.ss_prop.id
                     },
                     {
                         "name": self.ms_prop.name,
-                        "value": ["{}".format(idx)],
+                        "value": [f"{idx}"],
                         "model_id": self.ms_prop.id
                     },
                     {
@@ -649,7 +649,7 @@ class TestBulkPartsCreation(TestBetamax):
         self.assertEqual(len(parts_created), 4)
         for part_created in parts_created:
             idx = int(part_created.name)
-            self.assertEqual(part_created.description, "Description part {}".format(idx))
+            self.assertEqual(part_created.description, f"Description part {idx}")
             self.assertEqual(part_created.category, Category.INSTANCE)
             self.assertEqual(len(part_created.properties), 15)
 
@@ -657,7 +657,7 @@ class TestBulkPartsCreation(TestBetamax):
             self.assertEqual(part_created.property(name=self.char_prop.name).value, str(idx))
             self.assertEqual(part_created.property(name=self.int_prop.name).value, idx)
             self.assertEqual(part_created.property(name=self.float_prop.name).value,
-                             float("{}.{}".format(idx, idx)))
+                             float(f"{idx}.{idx}"))
             self.assertEqual(part_created.property(name=self.bool_prop.name).value,
                              True if idx % 2 == 0 else False)
             self.assertEqual(part_created.property(name=self.date_prop.name).value,
@@ -666,10 +666,10 @@ class TestBulkPartsCreation(TestBetamax):
                 part_created.property(name=self.datetime_prop.name).value.split("+")[0],
                 datetime.datetime(2020, idx, idx, 15, 00, 00).isoformat("T"))
             self.assertEqual(part_created.property(name=self.link_prop.name).value,
-                             "http://{}.com".format(idx))
-            self.assertEqual(part_created.property(name=self.ss_prop.name).value, "{}".format(idx))
+                             f"http://{idx}.com")
+            self.assertEqual(part_created.property(name=self.ss_prop.name).value, f"{idx}")
             self.assertEqual(part_created.property(name=self.ms_prop.name).value,
-                             ["{}".format(idx)])
+                             [f"{idx}"])
             self.assertEqual(part_created.property(name=self.part_ref_prop.name).value[0].name,
                              "Front Wheel")
             self.assertEqual(part_created.property(name=self.act_ref_prop.name).value[0].name,
@@ -743,29 +743,29 @@ class TestBulkPartsDeletion(TestBetamax):
 
         for idx in range(1, 5):
             part_dict = {
-                "name": "Wheel {}".format(idx),
+                "name": f"Wheel {idx}",
                 "parent_id": self.bike_instance.id,
                 "description": "",
                 "model_id": self.wheel_model.id,
                 "properties": [
                     {
                         "name": self.diameter_prop.name,
-                        "value": float("{}.{}".format(idx, idx)),
+                        "value": float(f"{idx}.{idx}"),
                         "model_id": self.diameter_prop.id,
                     },
                     {
                         "name": self.spokes_prop.name,
-                        "value": "{}".format(idx),
+                        "value": f"{idx}",
                         "model_id": self.spokes_prop.id
                     },
                     {
                         "name": self.rim_material_prop.name,
-                        "value": "Material {}".format(idx),
+                        "value": f"Material {idx}",
                         "model_id": self.rim_material_prop.id
                     },
                     {
                         "name": self.tire_thickness_prop.name,
-                        "value": float("{}.{}".format(idx, idx)),
+                        "value": float(f"{idx}.{idx}"),
                         "model_id": self.tire_thickness_prop.id
                     }
                 ]
@@ -792,7 +792,7 @@ class TestBulkPartsDeletion(TestBetamax):
         for idx in range(1, 5):
             with self.subTest(idx=idx):
                 with self.assertRaises(NotFoundError):
-                    self.project.part(name="Wheel {}".format(idx))
+                    self.project.part(name=f"Wheel {idx}")
 
     def test_bulk_delete_parts_with_wrong_input(self):
         wrong_input = [self.project.activity(name="Specify wheel diameter")]

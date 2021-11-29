@@ -48,7 +48,7 @@ class _ReferenceProperty(Property):
         else:
             self._put_value(value)
 
-    def value_ids(self) -> Optional[List[Text]]:
+    def value_ids(self) -> Optional[List[str]]:
         """
         Retrieve the referenced object UUIDs only.
 
@@ -57,7 +57,7 @@ class _ReferenceProperty(Property):
         """
         return [value.get("id") for value in self._value] if self.has_value() else None
 
-    def _validate_values(self) -> List[Text]:
+    def _validate_values(self) -> List[str]:
         """
         Check if the `_value` attribute has valid content.
 
@@ -75,7 +75,7 @@ class _ReferenceProperty(Property):
                 object_ids.append(str(value))
             else:  # pragma: no cover
                 raise ValueError(
-                    'Value "{}" must be a dict with field `id` or a UUID.'.format(value)
+                    f'Value "{value}" must be a dict with field `id` or a UUID.'
                 )
         return object_ids
 
@@ -91,7 +91,7 @@ class _ReferenceProperty(Property):
         """
         pass  # pragma: no cover
 
-    def serialize_value(self, value: Union[Base, List, Tuple]) -> Optional[List[Text]]:
+    def serialize_value(self, value: Union[Base, List, Tuple]) -> Optional[List[str]]:
         """
         Serialize the value to be set on the property by checking for a list of Base objects.
 
@@ -116,7 +116,7 @@ class _ReferenceProperty(Property):
 
         :return: None
         """
-        raise NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
+        raise NotImplementedError(f"Method not (yet) implemented for {self.__class__}")
 
     def get_prefilters(self):
         """
@@ -124,7 +124,7 @@ class _ReferenceProperty(Property):
 
         :return: list of filter values.
         """
-        raise NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
+        raise NotImplementedError(f"Method not (yet) implemented for {self.__class__}")
 
 
 class _ReferencePropertyInScope(_ReferenceProperty, ABC):

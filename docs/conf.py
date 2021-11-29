@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # KE-chain Python API documentation build configuration file, created by
 # sphinx-quickstart on Sun Dec 18 22:24:00 2016.
@@ -56,7 +55,7 @@ master_doc = 'index'
 # General information about the project.
 project = about.description
 author = about.author
-copyright = '2017, {}'.format(author)
+copyright = f'2017, {author}'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

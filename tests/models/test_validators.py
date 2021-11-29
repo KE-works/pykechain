@@ -688,7 +688,7 @@ class TestPropertyWithValidator(SixTestCase):
 class TestPropertyWithValidatorFromLiveServer(TestBetamax):
 
     def setUp(self):
-        super(TestPropertyWithValidatorFromLiveServer, self).setUp()
+        super().setUp()
         self.part_model = self.project.model(name='Model')
         self.numeric_range_prop_model = self.part_model.add_property(name='numericrange_validatortest',
                                                                      property_type=PropertyType.FLOAT_VALUE)
@@ -699,7 +699,7 @@ class TestPropertyWithValidatorFromLiveServer(TestBetamax):
     def tearDown(self):
         self.numeric_range_prop_model.delete()
         self.part.delete()
-        super(TestPropertyWithValidatorFromLiveServer, self).tearDown()
+        super().tearDown()
 
     def test_numeric_property_with_validator_parses(self):
         self.assertIsInstance(self.numeric_range_prop_instance._validators, list)

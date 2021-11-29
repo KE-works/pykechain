@@ -292,7 +292,7 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
             filters,
         )
         self.assertIn(
-            "{}:{}:{}".format(spokes_property.id, 7, FilterType.LOWER_THAN_EQUAL),
+            f"{spokes_property.id}:{7}:{FilterType.LOWER_THAN_EQUAL}",
             filters,
         )
         self.assertIn(
@@ -465,11 +465,11 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
         # testing
         self.assertTrue("property_value" in self.ref_prop_model._options["prefilters"])
         self.assertTrue(
-            "{}:{}:{}".format(diameter_property.id, 30.5, FilterType.GREATER_THAN_EQUAL)
+            f"{diameter_property.id}:{30.5}:{FilterType.GREATER_THAN_EQUAL}"
             in self.ref_prop_model._options["prefilters"]["property_value"]
         )
         self.assertTrue(
-            "{}:{}:{}".format(spokes_property.id, 7, FilterType.LOWER_THAN_EQUAL)
+            f"{spokes_property.id}:{7}:{FilterType.LOWER_THAN_EQUAL}"
             in self.ref_prop_model._options["prefilters"]["property_value"]
         )
 

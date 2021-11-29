@@ -9,24 +9,24 @@ from tests.classes import TestBetamax
 class TestSideBar(TestBetamax):
 
     def setUp(self):
-        super(TestSideBar, self).setUp()
+        super().setUp()
 
         self.scope = self.project.clone(asynchronous=False)  # type: Scope
         del self.project
 
         self.manager = SideBarManager(scope=self.scope)
-        self.scope_uri = '#/scopes/{}'.format(self.scope.id)
-        self.scope_activity_uri = '{}/{}'.format(self.scope_uri, SubprocessDisplayMode.ACTIVITIES)
+        self.scope_uri = f'#/scopes/{self.scope.id}'
+        self.scope_activity_uri = f'{self.scope_uri}/{SubprocessDisplayMode.ACTIVITIES}'
 
         self.default_button_config = {
             'title': 'new button',
             'icon': 'bookmark',
-            'uri': '{}/{}'.format(self.scope_uri, KEChainPages.DATA_MODEL)
+            'uri': f'{self.scope_uri}/{KEChainPages.DATA_MODEL}'
         }
 
     def tearDown(self):
         self.scope.delete()
-        super(TestSideBar, self).tearDown()
+        super().tearDown()
 
     def test_manager(self):
         side_bar_manager = SideBarManager(scope=self.scope)
@@ -149,12 +149,12 @@ class TestSideBar(TestBetamax):
             {
                 'displayName': 'activity button',
                 'displayIcon': 'bookmark',
-                'uri': '{}/{}'.format(self.scope_activity_uri, self.scope.activities()[0].id),
+                'uri': f'{self.scope_activity_uri}/{self.scope.activities()[0].id}',
             },
             {
                 'displayName': 'ke-chain page',
                 'displayIcon': 'university',
-                'uri': '{}/{}'.format(self.scope_uri, KEChainPages.EXPLORER)
+                'uri': f'{self.scope_uri}/{KEChainPages.EXPLORER}'
             },
             {
                 'displayName': 'external button',

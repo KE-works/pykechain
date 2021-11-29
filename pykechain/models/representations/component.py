@@ -8,7 +8,7 @@ from pykechain.models.representations.representation_base import BaseRepresentat
 from pykechain.models.validators.validator_schemas import representation_jsonschema_stub
 
 
-class RepresentationsComponent(object):
+class RepresentationsComponent:
     """
     Aggregate class to use representations on an object.
 
@@ -74,7 +74,7 @@ class RepresentationsComponent(object):
         for r in representations:
             if not isinstance(r, BaseRepresentation):
                 raise IllegalArgumentError(
-                    "Representation '{}' should be a Representation object".format(r)
+                    f"Representation '{r}' should be a Representation object"
                 )
             if not _valid_object_type(r, self._parent_object):
                 raise IllegalArgumentError(

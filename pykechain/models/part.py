@@ -78,24 +78,24 @@ class Part(TreeObject):
         # we need to run the init of 'Base' instead of 'Part' as we do not need the instantiation of properties
         super().__init__(json, **kwargs)
 
-        self.ref: Text = json.get('ref')
-        self.model_id: Text = json.get("model_id")
+        self.ref: str = json.get('ref')
+        self.model_id: str = json.get("model_id")
         self.category: Category = json.get('category')
-        self.description: Text = json.get('description')
-        self.multiplicity: Text = json.get('multiplicity')
+        self.description: str = json.get('description')
+        self.multiplicity: str = json.get('multiplicity')
         self.classification: Classification = json.get('classification')
 
         sorted_properties: List[Dict] = sorted(json['properties'], key=lambda p: p.get('order', 0))
         self.properties: List[Property] = [Property.create(p, client=self._client) for p in sorted_properties]
 
         proxy_data: Optional[Dict] = json.get('proxy_source_id_name', dict())
-        self._proxy_model_id: Optional[Text] = proxy_data.get('id') if proxy_data else None
+        self._proxy_model_id: Optional[str] = proxy_data.get('id') if proxy_data else None
 
     def __call__(self, *args, **kwargs) -> 'Part':
         """Short-hand version of the `child` method."""
         return self.child(*args, **kwargs)
 
-    def refresh(self, json: Optional[Dict] = None, url: Optional[Text] = None, extra_params: Optional[Dict] = None):
+    def refresh(self, json: Optional[Dict] = None, url: Optional[str] = None, extra_params: Optional[Dict] = None):
         """Refresh the object in place."""
         if extra_params is None:
             extra_params = {}
@@ -121,7 +121,7 @@ class Part(TreeObject):
     # Family and structure methods
     #
 
-    def property(self, name: Text = None) -> 'AnyProperty':
+    def property(self, name: str = None) -> 'AnyProperty':
         """Retrieve the property belonging to this part based on its name, ref or uuid.
 
         :param name: property name, ref or UUID to search for
@@ -153,9 +153,9 @@ class Part(TreeObject):
                 matches = [p for p in self.properties if p.ref == name]
 
         if not matches:
-            raise NotFoundError("Could not find a property with name, id or ref: {}".format(name))
+            raise NotFoundError(f"Could not find a property with name, id or ref: {name}")
         elif len(matches) > 1:
-            raise MultipleFoundError("Found multiple properties with name, id or ref: {}".format(name))
+            raise MultipleFoundError(f"Found multiple properties with name, id or ref: {name}")
         else:
             return matches[0]
 
@@ -228,8 +228,8 @@ class Part(TreeObject):
             return self._client.parts(parent=self.id, category=self.category, **kwargs)
 
     def child(self,
-              name: Optional[Text] = None,
-              pk: Optional[Text] = None,
+              name: Optional[str] = None,
+              pk: Optional[str] = None,
               **kwargs) -> 'Part':
         """
         Retrieve a child object.
@@ -261,7 +261,7 @@ class Part(TreeObject):
             else:
                 part_list = self.children(pk=pk)
 
-        criteria = '\nname: {}\npk: {}\nkwargs: {}'.format(name, pk, kwargs)
+        criteria = f'\nname: {name}\npk: {pk}\nkwargs: {kwargs}'
 
         # If there is only one, then that is the part you are looking for
         if len(part_list) == 1:
@@ -269,9 +269,9 @@ class Part(TreeObject):
 
         # Otherwise raise the appropriate error
         elif len(part_list) > 1:
-            raise MultipleFoundError('{} has more than one matching child.{}'.format(self, criteria))
+            raise MultipleFoundError(f'{self} has more than one matching child.{criteria}')
         else:
-            raise NotFoundError('{} has no matching child.{}'.format(self, criteria))
+            raise NotFoundError(f'{self} has no matching child.{criteria}')
         return part
 
     def populate_descendants(self, batch: int = PARTS_BATCH_LIMIT) -> None:
@@ -359,7 +359,7 @@ class Part(TreeObject):
         if self.category == Category.INSTANCE:
             return self._client.model(pk=self.model_id)
         else:
-            raise NotFoundError('Part "{}" already is a model'.format(self))
+            raise NotFoundError(f'Part "{self}" already is a model')
 
     def instances(self, **kwargs) -> Union['PartSet', List['Part']]:
         """
@@ -388,7 +388,7 @@ class Part(TreeObject):
         if self.category == Category.MODEL:
             return self._client.parts(model=self, category=Category.INSTANCE, **kwargs)
         else:
-            raise NotFoundError('Part "{}" is not a model, hence it has no instances.'.format(self))
+            raise NotFoundError(f'Part "{self}" is not a model, hence it has no instances.')
 
     def instance(self) -> 'Part':
         """
@@ -407,7 +407,7 @@ class Part(TreeObject):
             raise MultipleFoundError("Part {} has more than a single instance. "
                                      "Use the `Part.instances()` method".format(self))
         else:
-            raise NotFoundError("Part {} has no instance".format(self))
+            raise NotFoundError(f"Part {self} has no instance")
 
     def count_instances(self) -> int:
         """
@@ -451,8 +451,8 @@ class Part(TreeObject):
 
     def edit(
             self,
-            name: Optional[Union[Text, Empty]] = empty,
-            description: Optional[Union[Text, Empty]] = empty,
+            name: Optional[Union[str, Empty]] = empty,
+            description: Optional[Union[str, Empty]] = empty,
             **kwargs
     ) -> None:
         """Edit the details of a part (model or instance).
@@ -498,7 +498,7 @@ class Part(TreeObject):
         update_dict = {
             'id': self.id,
             'name': check_text(name, 'name') or self.name,
-            'description': check_text(description, 'description') or str(),
+            'description': check_text(description, 'description') or '',
         }
 
         if kwargs:  # pragma: no cover
@@ -512,7 +512,7 @@ class Part(TreeObject):
                                          json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Part {}".format(self), response=response)
+            raise APIError(f"Could not update Part {self}", response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
@@ -540,9 +540,9 @@ class Part(TreeObject):
         """
         if self.category != Category.MODEL:
             raise IllegalArgumentError(
-                'Part "{}" is not a product model, therefore it cannot have a proxy model'.format(self))
+                f'Part "{self}" is not a product model, therefore it cannot have a proxy model')
         if self.classification != Classification.PRODUCT or not self._proxy_model_id:
-            raise NotFoundError('Part "{}" is not a product model, therefore it cannot have a proxy model'.format(self))
+            raise NotFoundError(f'Part "{self}" is not a product model, therefore it cannot have a proxy model')
 
         return self._client.model(pk=self._proxy_model_id)
 
@@ -635,7 +635,7 @@ class Part(TreeObject):
 
     def add_proxy_to(self,
                      parent: 'Part',
-                     name: Text,
+                     name: str,
                      multiplicity: Multiplicity = Multiplicity.ONE_MANY,
                      **kwargs) -> 'Part':
         """Add this model as a proxy to another parent model.
@@ -687,7 +687,7 @@ class Part(TreeObject):
     @staticmethod
     def _parse_update_dict(
             part: 'Part',
-            properties_fvalues: List[Dict[Text, Any]],
+            properties_fvalues: List[Dict[str, Any]],
             update_dict: Dict,
             creating: bool = False,
     ) -> Tuple[List[Dict], List[Dict], Dict]:
@@ -729,7 +729,7 @@ class Part(TreeObject):
 
     def add_with_properties(self,
                             model: 'Part',
-                            name: Optional[Text] = None,
+                            name: Optional[str] = None,
                             update_dict: Optional[Dict] = None,
                             properties_fvalues: Optional[List[Dict]] = None,
                             **kwargs) -> 'Part':
@@ -784,7 +784,7 @@ class Part(TreeObject):
             raise APIError("Part should be of category INSTANCE")
 
         if not isinstance(model, Part) or model.category != Category.MODEL:
-            raise IllegalArgumentError('`model` must be a Part object of category MODEL, "{}" is not.'.format(model))
+            raise IllegalArgumentError(f'`model` must be a Part object of category MODEL, "{model}" is not.')
 
         instance_name = check_text(name, 'name') or model.name
         properties_fvalues, exception_fvalues, _ = self._parse_update_dict(
@@ -808,7 +808,7 @@ class Part(TreeObject):
         )
 
         if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError("Could not add to Part {}".format(self), response=response)
+            raise APIError(f"Could not add to Part {self}", response=response)
 
         new_part_instance: Part = Part(response.json()['results'][0], client=self._client)
 
@@ -858,7 +858,7 @@ class Part(TreeObject):
     def copy(
             self,
             target_parent: 'Part',
-            name: Optional[Text] = None,
+            name: Optional[str] = None,
             include_children: bool = True,
             include_instances: bool = True,
     ) -> 'Part':
@@ -915,7 +915,7 @@ class Part(TreeObject):
     def move(
             self,
             target_parent: 'Part',
-            name: Optional[Text] = None,
+            name: Optional[str] = None,
             include_children: bool = True,
             include_instances: bool = True,
     ) -> 'Part':
@@ -962,7 +962,7 @@ class Part(TreeObject):
         return copied_part
 
     def update(self,
-               name: Optional[Text] = None,
+               name: Optional[str] = None,
                update_dict: Optional[Dict] = None,
                properties_fvalues: Optional[List[Dict]] = None,
                **kwargs) -> None:
@@ -1038,7 +1038,7 @@ class Part(TreeObject):
             )
 
             if response.status_code != requests.codes.ok:  # pragma: no cover
-                raise APIError("Could not update Part {}".format(self), response=response)
+                raise APIError(f"Could not update Part {self}", response=response)
 
             # update local properties (without a call)
             self.refresh(json=response.json()['results'][0])
@@ -1056,9 +1056,9 @@ class Part(TreeObject):
         response = self._client._request('DELETE', self._client._build_url('part', part_id=self.id))
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Part {}".format(self), response=response)
+            raise APIError(f"Could not delete Part {self}", response=response)
 
-    def order_properties(self, property_list: Optional[List[Union['AnyProperty', Text]]] = None) -> None:
+    def order_properties(self, property_list: Optional[List[Union['AnyProperty', str]]] = None) -> None:
         """
         Order the properties of a part model using a list of property objects or property names or property id's.
 
@@ -1096,7 +1096,7 @@ class Part(TreeObject):
 
         """
         if self.category != Category.MODEL:
-            raise APIError("Ordering of properties must be done on a Part of category {}.".format(Category.MODEL))
+            raise APIError(f"Ordering of properties must be done on a Part of category {Category.MODEL}.")
 
         property_ids = check_list_of_base(property_list, Property, 'property_list', method=self.property)
 
@@ -1108,7 +1108,7 @@ class Part(TreeObject):
     # Utility Functions
     #
 
-    def _repr_html_(self) -> Text:
+    def _repr_html_(self) -> str:
         """
         Represent the part in a HTML table for the use in notebooks.
 
@@ -1117,7 +1117,7 @@ class Part(TreeObject):
         """
         html = [
             "<table width=100%>",
-            "<caption>{}</caption>".format(self.name),
+            f"<caption>{self.name}</caption>",
             "<tr>",
             "<th>Property</th>",
             "<th>Value</th>",
@@ -1127,9 +1127,9 @@ class Part(TreeObject):
         for prop in self.properties:
             style = "color:blue;" if prop._json_data.get('output', False) else ""
 
-            html.append("<tr style=\"{}\">".format(style))
-            html.append("<td>{}</td>".format(prop.name))
-            html.append("<td>{}</td>".format(prop.value))
+            html.append(f"<tr style=\"{style}\">")
+            html.append(f"<td>{prop.name}</td>")
+            html.append(f"<td>{prop.value}</td>")
             html.append("</tr>")
 
         html.append("</table>")

@@ -16,7 +16,7 @@ PSEUDO_SCOPE_ID = 'eeb0937b-da50-4eb2-8d74-f36259cca96e'
                     reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided")
 class TestGetProjectHelperNotForTravis(TestBetamax):
     def setUp(self):
-        super(TestGetProjectHelperNotForTravis, self).setUp()
+        super().setUp()
         # unset all environment variables in the self.env protected env world
         for kec_env in KechainEnv.values():
             self.env.unset(kec_env)

@@ -1,4 +1,3 @@
-
 name = 'pykechain'
 description = 'KE-chain Python SDK'
 

@@ -6,7 +6,7 @@ from pykechain.enums import PropertyVTypes, ValidatorEffectTypes
 from pykechain.models.validators.validator_schemas import validator_jsonschema_stub, effects_jsonschema_stub
 
 
-class BaseValidator(object):
+class BaseValidator:
     """Base class for all Validators.
 
     This is the base implementation for both the :class:`PropertyValidator` as well as the :class:`ValidatorEffect`.
@@ -59,7 +59,7 @@ class PropertyValidator(BaseValidator):
 
     def __init__(self, json=None, *args, **kwargs):
         """Construct a Property Validator."""
-        super(PropertyValidator, self).__init__(json=json, *args, **kwargs)
+        super().__init__(json=json, *args, **kwargs)
         self._json = json or {'vtype': self.vtype, 'config': {}}
         self._validation_result = None
         self._validation_reason = None
@@ -101,15 +101,15 @@ class PropertyValidator(BaseValidator):
         if 'vtype' in json:
             vtype = json.get('vtype')
             if vtype not in PropertyVTypes.values():
-                raise Exception("Validator unknown, incorrect json: '{}'".format(json))
+                raise Exception(f"Validator unknown, incorrect json: '{json}'")
 
             from pykechain.models.validators import validators
-            vtype_implementation_classname = "{}{}".format(vtype[0].upper(), vtype[1:])  # type: ignore
+            vtype_implementation_classname = f"{vtype[0].upper()}{vtype[1:]}"  # type: ignore
             if hasattr(validators, vtype_implementation_classname):
                 return getattr(validators, vtype_implementation_classname)(json=json)
             else:
                 raise Exception('unknown vtype in json')
-        raise Exception("Validator unknown, incorrect json: '{}'".format(json))
+        raise Exception(f"Validator unknown, incorrect json: '{json}'")
 
     def as_json(self) -> Dict:
         """JSON representation of the effect.
@@ -182,7 +182,7 @@ class PropertyValidator(BaseValidator):
         """
         return self._validation_reason
 
-    def _logic(self, value: Optional[Any] = None) -> Tuple[Optional[bool], Text]:
+    def _logic(self, value: Optional[Any] = None) -> Tuple[Optional[bool], str]:
         """Process the inner logic of the validator.
 
         The validation results are returned as tuple (boolean (true/false), reasontext)
@@ -210,7 +210,7 @@ class ValidatorEffect(BaseValidator):
 
     def __init__(self, json=None, *args, **kwargs):
         """Construct a Validator Effect."""
-        super(ValidatorEffect, self).__init__(json=json, *args, **kwargs)
+        super().__init__(json=json, *args, **kwargs)
         self._json = json or {'effect': self.effect, 'config': {}}
 
     def __call__(self, **kwargs):
@@ -237,7 +237,7 @@ class ValidatorEffect(BaseValidator):
                 return getattr(effects, effect_implementation_classname)(json=json)
             else:
                 raise Exception('unknown effect in json')
-        raise Exception("Effect unknown, incorrect json: '{}'".format(json))
+        raise Exception(f"Effect unknown, incorrect json: '{json}'")
 
     def as_json(self) -> Dict:
         """JSON representation of the effect.

@@ -99,8 +99,8 @@ class WidgetsManager(Iterable):
         self._activity_id = activity.id
         self._client: Client = activity._client
 
-    def __repr__(self) -> Text:  # pragma: no cover
-        return "<pyke {} object {} widgets>".format(self.__class__.__name__, self.__len__())
+    def __repr__(self) -> str:  # pragma: no cover
+        return f"<pyke {self.__class__.__name__} object {self.__len__()} widgets>"
 
     def __iter__(self):
         return iter(self._widgets)
@@ -129,7 +129,7 @@ class WidgetsManager(Iterable):
 
         if found is not None:
             return found
-        raise NotFoundError("Could not find widget with index, title, ref, or id '{}'".format(key))
+        raise NotFoundError(f"Could not find widget with index, title, ref, or id '{key}'")
 
     def __contains__(self, item: Widget) -> bool:
         return item in self._widgets
@@ -200,8 +200,8 @@ class WidgetsManager(Iterable):
             part: 'Part',
             all_readable: Optional[bool] = None,
             all_writable: Optional[bool] = None,
-            readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
-            writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+            readable_models: Optional[List[Union['AnyProperty', str]]] = None,
+            writable_models: Optional[List[Union['AnyProperty', str]]] = None,
             **kwargs
     ) -> Widget:
         """
@@ -236,10 +236,10 @@ class WidgetsManager(Iterable):
             **kwargs)
 
     def add_supergrid_widget(self,
-                             part_model: Union['Part', Text],
-                             parent_instance: Optional[Union['Part', Text]] = None,
+                             part_model: Union['Part', str],
+                             parent_instance: Optional[Union['Part', str]] = None,
                              title: TITLE_TYPING = False,
-                             parent_widget: Optional[Union[Widget, Text]] = None,
+                             parent_widget: Optional[Union[Widget, str]] = None,
                              new_instance: Optional[bool] = True,
                              edit: Optional[bool] = True,
                              clone: Optional[bool] = True,
@@ -251,12 +251,12 @@ class WidgetsManager(Iterable):
                              emphasize_edit: Optional[bool] = False,
                              emphasize_clone: Optional[bool] = False,
                              emphasize_delete: Optional[bool] = False,
-                             sort_property: Optional[Union['AnyProperty', Text]] = None,
-                             sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
+                             sort_property: Optional[Union['AnyProperty', str]] = None,
+                             sort_direction: Optional[Union[SortTable, str]] = SortTable.ASCENDING,
                              show_name_column: Optional[bool] = True,
                              show_images: Optional[bool] = False,
-                             readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
-                             writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+                             readable_models: Optional[List[Union['AnyProperty', str]]] = None,
+                             writable_models: Optional[List[Union['AnyProperty', str]]] = None,
                              all_readable: Optional[bool] = False,
                              all_writable: Optional[bool] = False,
                              **kwargs) -> Widget:
@@ -371,10 +371,10 @@ class WidgetsManager(Iterable):
 
     def add_filteredgrid_widget(
             self,
-            part_model: Union['Part', Text],
-            parent_instance: Optional[Union['Part', Text]] = None,
+            part_model: Union['Part', str],
+            parent_instance: Optional[Union['Part', str]] = None,
             title: TITLE_TYPING = False,
-            parent_widget: Optional[Union[Widget, Text]] = None,
+            parent_widget: Optional[Union[Widget, str]] = None,
             new_instance: Optional[bool] = True,
             edit: Optional[bool] = True,
             clone: Optional[bool] = True,
@@ -386,18 +386,18 @@ class WidgetsManager(Iterable):
             emphasize_edit: Optional[bool] = False,
             emphasize_clone: Optional[bool] = False,
             emphasize_delete: Optional[bool] = False,
-            sort_property: Optional[Union['AnyProperty', Text]] = None,
-            sort_name: Optional[Union[bool, Text]] = False,
-            sort_direction: Optional[Union[SortTable, Text]] = SortTable.ASCENDING,
+            sort_property: Optional[Union['AnyProperty', str]] = None,
+            sort_name: Optional[Union[bool, str]] = False,
+            sort_direction: Optional[Union[SortTable, str]] = SortTable.ASCENDING,
             show_name_column: Optional[bool] = True,
             show_images: Optional[bool] = False,
             collapse_filters: Optional[bool] = False,
             page_size: Optional[int] = 25,
-            readable_models: Optional[List[Union['AnyProperty', Text]]] = None,
-            writable_models: Optional[List[Union['AnyProperty', Text]]] = None,
+            readable_models: Optional[List[Union['AnyProperty', str]]] = None,
+            writable_models: Optional[List[Union['AnyProperty', str]]] = None,
             all_readable: Optional[bool] = False,
             all_writable: Optional[bool] = False,
-            excluded_propmodels: Optional[List[Union['AnyProperty', Text]]] = None,
+            excluded_propmodels: Optional[List[Union['AnyProperty', str]]] = None,
             prefilters: Optional[Union[List[PropertyValueFilter], Dict]] = None,
             **kwargs
     ) -> Widget:
@@ -539,12 +539,12 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_attachmentviewer_widget(self,
-                                    attachment_property: Union[Text, 'AttachmentProperty'],
+                                    attachment_property: Union[str, 'AttachmentProperty'],
                                     editable: Optional[bool] = False,
                                     title: TITLE_TYPING = False,
-                                    parent_widget: Optional[Union[Widget, Text]] = None,
+                                    parent_widget: Optional[Union[Widget, str]] = None,
                                     alignment: Optional[Alignment] = None,
-                                    image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
+                                    image_fit: Optional[Union[ImageFitValue, str]] = ImageFitValue.CONTAIN,
                                     show_download_button: Optional[bool] = True,
                                     show_full_screen_button: Optional[bool] = True,
                                     **kwargs) -> Widget:
@@ -614,8 +614,8 @@ class WidgetsManager(Iterable):
 
     def add_tasknavigationbar_widget(self,
                                      activities: Union[Iterable[Dict]],
-                                     alignment: Optional[Text] = Alignment.CENTER,
-                                     parent_widget: Optional[Union[Widget, Text]] = None,
+                                     alignment: Optional[str] = Alignment.CENTER,
+                                     parent_widget: Optional[Union[Widget, str]] = None,
                                      **kwargs) -> Widget:
         """
         Add a KE-chain Navigation Bar (e.g. navigation bar widget) to the activity.
@@ -676,7 +676,7 @@ class WidgetsManager(Iterable):
                                            "Button {} has neither.".format(nr + 1))
 
             if MetaWidget.CUSTOM_TEXT not in input_dict or not input_dict[MetaWidget.CUSTOM_TEXT]:
-                button_dict[MetaWidget.CUSTOM_TEXT] = str()
+                button_dict[MetaWidget.CUSTOM_TEXT] = ''
             else:
                 button_dict[MetaWidget.CUSTOM_TEXT] = str(input_dict[MetaWidget.CUSTOM_TEXT])
 
@@ -698,12 +698,12 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_propertygrid_widget(self,
-                                part_instance: Union['Part', Text],
+                                part_instance: Union['Part', str],
                                 title: TITLE_TYPING = False,
                                 max_height: Optional[int] = None,
                                 show_headers: Optional[bool] = True,
                                 show_columns: Optional[Iterable[ShowColumnTypes]] = None,
-                                parent_widget: Optional[Union[Text, Widget]] = None,
+                                parent_widget: Optional[Union[str, Widget]] = None,
                                 readable_models: Optional[Iterable] = None,
                                 writable_models: Optional[Iterable] = None,
                                 all_readable: Optional[bool] = False,
@@ -793,7 +793,7 @@ class WidgetsManager(Iterable):
             alignment: Optional[Alignment] = Alignment.LEFT,
             download_log: Optional[bool] = False,
             show_log: Optional[bool] = True,
-            parent_widget: Optional[Union[Widget, Text]] = None,
+            parent_widget: Optional[Union[Widget, str]] = None,
             **kwargs
     ) -> Widget:
         """
@@ -858,9 +858,9 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_html_widget(self,
-                        html: Optional[Text],
+                        html: Optional[str],
                         title: TITLE_TYPING = None,
-                        parent_widget: Optional[Union[Widget, Text]] = None,
+                        parent_widget: Optional[Union[Widget, str]] = None,
                         **kwargs) -> Widget:
         """
         Add a KE-chain HTML widget to the widget manager.
@@ -900,7 +900,7 @@ class WidgetsManager(Iterable):
     def add_notebook_widget(self,
                             notebook: 'Service',
                             title: TITLE_TYPING = False,
-                            parent_widget: Optional[Union[Widget, Text]] = None,
+                            parent_widget: Optional[Union[Widget, str]] = None,
                             **kwargs) -> Widget:
         """
         Add a KE-chain Notebook (e.g. notebook widget) to the WidgetManager.
@@ -1126,7 +1126,7 @@ class WidgetsManager(Iterable):
         return widget
 
     def add_scope_widget(self,
-                         team: Union['Team', Text] = None,
+                         team: Union['Team', str] = None,
                          title: TITLE_TYPING = None,
                          add: Optional[bool] = True,
                          edit: Optional[bool] = True,
@@ -1136,13 +1136,13 @@ class WidgetsManager(Iterable):
                          emphasize_edit: Optional[bool] = False,
                          emphasize_clone: Optional[bool] = False,
                          emphasize_delete: Optional[bool] = False,
-                         show_columns: Optional[Iterable[Text]] = None,
+                         show_columns: Optional[Iterable[str]] = None,
                          show_all_columns: Optional[bool] = True,
                          page_size: Optional[int] = 25,
-                         tags: Optional[Iterable[Text]] = None,
-                         sorted_column: Optional[Text] = ScopeWidgetColumnTypes.PROJECT_NAME,
+                         tags: Optional[Iterable[str]] = None,
+                         sorted_column: Optional[str] = ScopeWidgetColumnTypes.PROJECT_NAME,
                          sorted_direction: Optional[SortTable] = SortTable.ASCENDING,
-                         parent_widget: Optional[Union[Widget, Text]] = None,
+                         parent_widget: Optional[Union[Widget, str]] = None,
                          active_filter: Optional[bool] = True,
                          search_filter: Optional[bool] = True,
                          **kwargs) -> Widget:
@@ -1207,14 +1207,14 @@ class WidgetsManager(Iterable):
 
         if not show_all_columns and show_columns:
             if not isinstance(show_columns, (list, tuple)):
-                raise IllegalArgumentError("`show_columns` must be a list or tuple, `{}` is not.".format(show_columns))
+                raise IllegalArgumentError(f"`show_columns` must be a list or tuple, `{show_columns}` is not.")
             options = set(ScopeWidgetColumnTypes.values())
             if not all(sc in options for sc in show_columns):
                 raise IllegalArgumentError("`show_columns` must consist out of ScopeWidgetColumnTypes options.")
             meta[MetaWidget.SHOW_COLUMNS] = [snakecase(c) for c in show_columns]
 
         if not isinstance(page_size, int) or page_size < 1:
-            raise IllegalArgumentError("`page_size` must be a positive integer, `{}` is not.".format(page_size))
+            raise IllegalArgumentError(f"`page_size` must be a positive integer, `{page_size}` is not.")
 
         if team:
             meta[AssociatedObjectId.TEAM_ID] = _retrieve_object_id(team)
@@ -1254,9 +1254,9 @@ class WidgetsManager(Iterable):
             self,
             attachment_property: 'AttachmentProperty',
             title: TITLE_TYPING = False,
-            parent_widget: Optional[Union[Widget, Text]] = None,
-            custom_button_text: Optional[Union[bool, Text]] = False,
-            custom_undo_button_text: Optional[Union[bool, Text]] = False,
+            parent_widget: Optional[Union[Widget, str]] = None,
+            custom_button_text: Optional[Union[bool, str]] = False,
+            custom_undo_button_text: Optional[Union[bool, str]] = False,
             editable: Optional[bool] = True,
             show_name_and_date: Optional[bool] = True,
             **kwargs
@@ -1298,7 +1298,7 @@ class WidgetsManager(Iterable):
         # Add custom button text
         if not custom_button_text:
             show_button_value = MetaWidget.BUTTON_TEXT_DEFAULT
-            button_text = str()
+            button_text = ''
         else:
             show_button_value = MetaWidget.BUTTON_TEXT_CUSTOM
             button_text = str(custom_button_text)
@@ -1306,7 +1306,7 @@ class WidgetsManager(Iterable):
         # Add custom undo button text
         if not custom_undo_button_text:
             show_undo_button_value = MetaWidget.BUTTON_TEXT_DEFAULT
-            undo_button_text = str()
+            undo_button_text = ''
         else:
             show_undo_button_value = MetaWidget.BUTTON_TEXT_CUSTOM
             undo_button_text = str(custom_undo_button_text)
@@ -1334,12 +1334,12 @@ class WidgetsManager(Iterable):
     def add_card_widget(self,
                         image: Optional['AttachmentProperty'] = None,
                         title: TITLE_TYPING = False,
-                        parent_widget: Optional[Union[Widget, Text]] = None,
-                        description: Optional[Union[Text, bool]] = None,
-                        link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
+                        parent_widget: Optional[Union[Widget, str]] = None,
+                        description: Optional[Union[str, bool]] = None,
+                        link: Optional[Union[type(None), str, bool, KEChainPages]] = None,
                         link_value: Optional[CardWidgetLinkValue] = None,
-                        link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
-                        image_fit: Optional[Union[Text, ImageFitValue]] = ImageFitValue.CONTAIN,
+                        link_target: Optional[Union[str, LinkTargets]] = LinkTargets.SAME_TAB,
+                        image_fit: Optional[Union[str, ImageFitValue]] = ImageFitValue.CONTAIN,
                         **kwargs) -> Widget:
         """
         Add a KE-chain Card widget to the WidgetManager and the activity.
@@ -1389,7 +1389,7 @@ class WidgetsManager(Iterable):
                            weather_property: 'Property',
                            autofill: Optional[bool] = None,
                            title: TITLE_TYPING = False,
-                           parent_widget: Optional[Union[Widget, Text]] = None,
+                           parent_widget: Optional[Union[Widget, str]] = None,
                            **kwargs) -> Widget:
         """
         Add a KE-chain Weather widget to the Widgetmanager and the activity.
@@ -1434,15 +1434,15 @@ class WidgetsManager(Iterable):
             service: 'Service',
             image: Optional['AttachmentProperty'] = None,
             title: TITLE_TYPING = False,
-            description: Optional[Union[Text]] = None,
-            parent_widget: Optional[Union[Widget, Text]] = None,
+            description: Optional[Union[str]] = None,
+            parent_widget: Optional[Union[Widget, str]] = None,
             custom_button_text: TITLE_TYPING = False,
             emphasize_run: Optional[bool] = True,
             alignment: Optional[Alignment] = Alignment.LEFT,
-            link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
+            link: Optional[Union[type(None), str, bool, KEChainPages]] = None,
             link_value: Optional[CardWidgetLinkValue] = None,
-            link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
-            image_fit: Optional[Union[ImageFitValue, Text]] = ImageFitValue.CONTAIN,
+            link_target: Optional[Union[str, LinkTargets]] = LinkTargets.SAME_TAB,
+            image_fit: Optional[Union[ImageFitValue, str]] = ImageFitValue.CONTAIN,
             **kwargs
     ) -> Widget:
         """
@@ -1516,7 +1516,7 @@ class WidgetsManager(Iterable):
     def add_dashboard_widget(
             self,
             title: TITLE_TYPING = False,
-            parent_widget: Optional[Union[Widget, Text]] = None,
+            parent_widget: Optional[Union[Widget, str]] = None,
             source_scopes: Optional[DashboardWidgetSourceScopes] = DashboardWidgetSourceScopes.CURRENT_SCOPE,
             source_scopes_tags: Optional[List] = None,
             source_subprocess: Optional[List] = None,
@@ -1668,7 +1668,7 @@ class WidgetsManager(Iterable):
     def add_tasks_widget(
             self,
             title: TITLE_TYPING = False,
-            parent_widget: Optional[Union[Widget, Text]] = None,
+            parent_widget: Optional[Union[Widget, str]] = None,
             add: Optional[bool] = True,
             clone: Optional[bool] = True,
             edit: Optional[bool] = True,
@@ -1680,12 +1680,12 @@ class WidgetsManager(Iterable):
             show_my_tasks_filter: Optional[bool] = True,
             show_open_tasks_filter: Optional[bool] = True,
             show_search_filter: Optional[bool] = True,
-            parent_activity: Optional[Union['Activity', Text]] = None,
+            parent_activity: Optional[Union['Activity', str]] = None,
             assigned_filter: Optional[TasksAssignmentFilterTypes] = TasksAssignmentFilterTypes.ALL,
             status_filter: Optional[ActivityStatus] = None,
             activity_type_filter: Optional[ActivityType] = ActivityType.TASK,
             classification_filter: Optional[ActivityClassification] = ActivityClassification.WORKFLOW,
-            tags_filter: Optional[List[Text]] = (),
+            tags_filter: Optional[List[str]] = (),
             collapse_filter: Optional[bool] = False,
             show_columns: Optional[List[TasksWidgetColumns]] = None,
             sorted_column: Optional[TasksWidgetColumns] = None,
@@ -1803,7 +1803,7 @@ class WidgetsManager(Iterable):
     def add_scopemembers_widget(
             self,
             title: TITLE_TYPING = False,
-            parent_widget: Optional[Union[Widget, Text]] = None,
+            parent_widget: Optional[Union[Widget, str]] = None,
             add: Optional[bool] = True,
             edit: Optional[bool] = True,
             remove: Optional[bool] = True,

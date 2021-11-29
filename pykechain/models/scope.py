@@ -214,10 +214,10 @@ class Scope(Base, TagsMixin):
         users: List[Dict] = self._client._retrieve_users()["results"]
         user_object: Dict = find(users, lambda u: u["username"] == user)
         if user_object is None:
-            raise NotFoundError('User "{}" does not exist'.format(user))
+            raise NotFoundError(f'User "{user}" does not exist')
 
         url = self._client._build_url(
-            "scope_{}_{}".format(action, role), scope_id=self.id
+            f"scope_{action}_{role}", scope_id=self.id
         )
 
         response = self._client._request(
@@ -229,21 +229,21 @@ class Scope(Base, TagsMixin):
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError(
-                "Could not {} {} in Scope".format(action, role), response=response
+                f"Could not {action} {role} in Scope", response=response
             )
 
         self.refresh(json=response.json().get("results")[0])
 
     def edit(
             self,
-            name: Optional[Union[Text, Empty]] = empty,
-            description: Optional[Union[Text, Empty]] = empty,
+            name: Optional[Union[str, Empty]] = empty,
+            description: Optional[Union[str, Empty]] = empty,
             start_date: Optional[Union[datetime, Empty]] = empty,
             due_date: Optional[Union[datetime, Empty]] = empty,
-            status: Optional[Union[Text, ScopeStatus, Empty]] = empty,
-            category: Optional[Union[Text, ScopeCategory, Empty]] = empty,
-            tags: Optional[Union[List[Text], Empty]] = empty,
-            team: Optional[Union[Team, Text, Empty]] = empty,
+            status: Optional[Union[str, ScopeStatus, Empty]] = empty,
+            category: Optional[Union[str, ScopeCategory, Empty]] = empty,
+            tags: Optional[Union[List[str], Empty]] = empty,
+            team: Optional[Union[Team, str, Empty]] = empty,
             options: Optional[Union[Dict, Empty]] = empty,
             **kwargs
     ) -> None:
@@ -315,13 +315,13 @@ class Scope(Base, TagsMixin):
         update_dict = {
             "id": self.id,
             "name": check_text(name, "name") or self.name,
-            "text": check_text(description, "description") or str(),
+            "text": check_text(description, "description") or '',
             "start_date": check_datetime(start_date, "start_date"),
             "due_date": check_datetime(due_date, "due_date"),
             "status": check_enum(status, ScopeStatus, "status") or self.status,
             "category": check_enum(category, ScopeCategory, "category"),
             "tags": check_list_of_text(tags, "tags", True) or list(),
-            "team_id": check_base(team, Team, "team") or str(),
+            "team_id": check_base(team, Team, "team") or '',
             "scope_options": check_type(options, dict, "options") or dict(),
         }
 
@@ -340,7 +340,7 @@ class Scope(Base, TagsMixin):
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Scope {}".format(self), response=response)
+            raise APIError(f"Could not update Scope {self}", response=response)
 
         self.refresh(json=response.json().get("results")[0])
 
@@ -497,15 +497,15 @@ class Scope(Base, TagsMixin):
         check_enum(task_display_mode, SubprocessDisplayMode, "task_display_mode")
 
         if isinstance(activity, Activity):
-            url = "#/scopes/{}/{}/{}".format(self.id, task_display_mode, activity.id)
+            url = f"#/scopes/{self.id}/{task_display_mode}/{activity.id}"
         else:
-            url = "#/scopes/{}/{}".format(self.id, activity)
+            url = f"#/scopes/{self.id}/{activity}"
 
         options = dict(self.options)
         options.update({"landingPage": url})
         self.options = options
 
-    def get_landing_page_url(self) -> Optional[Text]:
+    def get_landing_page_url(self) -> Optional[str]:
         """
         Retrieve the landing page URL, if it is set in the options.
 
@@ -616,7 +616,7 @@ class Scope(Base, TagsMixin):
             ]
         return members
 
-    def add_member(self, member: Text) -> None:
+    def add_member(self, member: str) -> None:
         """
         Add a single member to the scope.
 
@@ -630,7 +630,7 @@ class Scope(Base, TagsMixin):
             action=ScopeMemberActions.ADD, role=ScopeRoles.MEMBER, user=member
         )
 
-    def remove_member(self, member: Text) -> None:
+    def remove_member(self, member: str) -> None:
         """
         Remove a single member to the scope.
 
@@ -642,7 +642,7 @@ class Scope(Base, TagsMixin):
             action=ScopeMemberActions.REMOVE, role=ScopeRoles.MEMBER, user=member
         )
 
-    def add_manager(self, manager: Text) -> None:
+    def add_manager(self, manager: str) -> None:
         """
         Add a single manager to the scope.
 
@@ -654,7 +654,7 @@ class Scope(Base, TagsMixin):
             action=ScopeMemberActions.ADD, role=ScopeRoles.MANAGER, user=manager
         )
 
-    def remove_manager(self, manager: Text) -> None:
+    def remove_manager(self, manager: str) -> None:
         """
         Remove a single manager to the scope.
 
@@ -666,7 +666,7 @@ class Scope(Base, TagsMixin):
             action=ScopeMemberActions.REMOVE, role=ScopeRoles.MANAGER, user=manager
         )
 
-    def add_leadmember(self, leadmember: Text) -> None:
+    def add_leadmember(self, leadmember: str) -> None:
         """
         Add a single leadmember to the scope.
 
@@ -678,7 +678,7 @@ class Scope(Base, TagsMixin):
             action=ScopeMemberActions.ADD, role=ScopeRoles.LEADMEMBER, user=leadmember
         )
 
-    def remove_leadmember(self, leadmember: Text) -> None:
+    def remove_leadmember(self, leadmember: str) -> None:
         """
         Remove a single leadmember to the scope.
 
@@ -692,7 +692,7 @@ class Scope(Base, TagsMixin):
             user=leadmember,
         )
 
-    def add_supervisor(self, supervisor: Text) -> None:
+    def add_supervisor(self, supervisor: str) -> None:
         """
         Add a single supervisor to the scope.
 
@@ -712,7 +712,7 @@ class Scope(Base, TagsMixin):
             action=ScopeMemberActions.ADD, role=ScopeRoles.SUPERVISOR, user=supervisor
         )
 
-    def remove_supervisor(self, supervisor: Text) -> None:
+    def remove_supervisor(self, supervisor: str) -> None:
         """
         Remove a single supervisor to the scope.
 

@@ -50,7 +50,7 @@ class SideBarManager(Iterable):
         self.scope: Scope = scope
         self._override: bool = scope.options.get('overrideSideBar', False)
 
-        self._scope_uri = "#/scopes/{}".format(self.scope.id)
+        self._scope_uri = f"#/scopes/{self.scope.id}"
         self._perform_bulk_creation = False
 
         self._buttons: List[SideBarButton] = []
@@ -61,8 +61,8 @@ class SideBarManager(Iterable):
 
         self._iter = iter(self._buttons)
 
-    def __repr__(self) -> Text:  # pragma: no cover
-        return "<pyke {} object {} buttons>".format(self.__class__.__name__, self.__len__())
+    def __repr__(self) -> str:  # pragma: no cover
+        return f"<pyke {self.__class__.__name__} object {self.__len__()} buttons>"
 
     def __iter__(self):
         return self
@@ -87,7 +87,7 @@ class SideBarManager(Iterable):
 
         if found is not None:
             return found
-        raise NotFoundError("Could not find button with index or name '{}'".format(key))
+        raise NotFoundError(f"Could not find button with index or name '{key}'")
 
     def __enter__(self):
         """
@@ -157,7 +157,7 @@ class SideBarManager(Iterable):
 
     def add_task_button(self,
                         activity: 'Activity',
-                        title: Optional[Text] = None,
+                        title: Optional[str] = None,
                         task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
                         *args, **kwargs) -> SideBarButton:
         """
@@ -177,7 +177,7 @@ class SideBarManager(Iterable):
         check_enum(task_display_mode, SubprocessDisplayMode, 'task_display_mode')
         title = check_text(title, 'title') or activity.name
 
-        uri = '{}/{}/{}'.format(self._scope_uri, task_display_mode, activity.id)
+        uri = f'{self._scope_uri}/{task_display_mode}/{activity.id}'
 
         uri_target = URITarget.INTERNAL if activity.scope_id == self.scope.id else URITarget.EXTERNAL
 
@@ -185,7 +185,7 @@ class SideBarManager(Iterable):
 
     def add_ke_chain_page(self,
                           page_name: KEChainPages,
-                          title: Optional[Text] = None,
+                          title: Optional[str] = None,
                           *args, **kwargs) -> SideBarButton:
         """
         Add a side-bar button to a built-in KE-chain page.
@@ -203,11 +203,11 @@ class SideBarManager(Iterable):
         if 'icon' in kwargs:
             icon = kwargs.pop('icon')
 
-        uri = '{}/{}'.format(self._scope_uri, page_name)
+        uri = f'{self._scope_uri}/{page_name}'
 
         return self.create_button(uri=uri, uri_target=URITarget.INTERNAL, title=title, icon=icon, *args, **kwargs)
 
-    def add_external_button(self, url: Text, title: Text, *args, **kwargs) -> SideBarButton:
+    def add_external_button(self, url: str, title: str, *args, **kwargs) -> SideBarButton:
         """
         Add a side-bar button to an external page defined by an URL.
 

@@ -37,20 +37,20 @@ class Notification(Base):
         super().__init__(json, **kwargs)
 
         self.message = json.get('message', '')
-        self.subject: Text = json.get('subject', '')
-        self.status: Text = json.get('status', '')
-        self.event: Text = json.get('event', '')
+        self.subject: str = json.get('subject', '')
+        self.status: str = json.get('status', '')
+        self.event: str = json.get('event', '')
         self.channels: List = json.get('channels', list())
         self.recipient_user_ids: List = json.get('recipient_users', list())
-        self.team_id: Text = json.get('team', '')
-        self.from_user_id: Text = json.get('from_user', '')
+        self.team_id: str = json.get('team', '')
+        self.from_user_id: str = json.get('from_user', '')
 
         self._from_user: Optional['User'] = None
         self._recipient_users: Optional[List['User']] = None
         self._team: Optional['Team'] = None
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke Notification id {}>".format(self.id[-8:])
+        return f"<pyke Notification id {self.id[-8:]}>"
 
     def get_recipient_users(self) -> List['User']:
         """Return the list of actual `User` objects based on recipient_users_ids."""
@@ -76,12 +76,12 @@ class Notification(Base):
 
     def edit(
             self,
-            subject: Optional[Union[Text, Empty]] = empty,
-            message: Optional[Union[Text, Empty]] = empty,
+            subject: Optional[Union[str, Empty]] = empty,
+            message: Optional[Union[str, Empty]] = empty,
             status: Optional[Union[NotificationStatus, Empty]] = empty,
-            recipients: Optional[Union[List[Union['User', Text, int]], Empty]] = empty,
-            team: Optional[Union['Team', Text, Empty]] = empty,
-            from_user: Optional[Union['User', Text, Empty]] = empty,
+            recipients: Optional[Union[List[Union['User', str, int]], Empty]] = empty,
+            team: Optional[Union['Team', str, Empty]] = empty,
+            from_user: Optional[Union['User', str, Empty]] = empty,
             event: Optional[Union[NotificationEvent, Empty]] = empty,
             channel: Optional[Union[NotificationChannels, Empty]] = empty,
             **kwargs
@@ -166,6 +166,6 @@ class Notification(Base):
         response = self._client._request('PUT', url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Notification {}".format(self), response=response)
+            raise APIError(f"Could not update Notification {self}", response=response)
 
         self.refresh(json=response.json().get('results')[0])

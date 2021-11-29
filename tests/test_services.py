@@ -35,13 +35,13 @@ class TestServiceSetup(TestBetamax):
         return new_service
 
     def setUp(self):
-        super(TestServiceSetup, self).setUp()
+        super().setUp()
         self.test_assets_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/'))
         self.service = self._create_service()
 
     def tearDown(self):
         self.service.delete()
-        super(TestServiceSetup, self).tearDown()
+        super().tearDown()
 
 
 class TestServices(TestBetamax):
@@ -61,7 +61,7 @@ class TestServices(TestBetamax):
         return new_service
 
     def setUp(self):
-        super(TestServices, self).setUp()
+        super().setUp()
         self.test_assets_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/'))
 
     def test_retrieve_services(self):
@@ -105,7 +105,7 @@ class TestServices(TestBetamax):
             if key == 'verified_on':
                 continue
 
-            with self.subTest(msg='{}: {}'.format(key, value)):
+            with self.subTest(msg=f'{key}: {value}'):
                 self.assertIsNotNone(value)
 
     @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
@@ -190,8 +190,8 @@ class TestServices(TestBetamax):
                           trusted=None)
 
         self.assertEqual(self.service.name, new_name)
-        self.assertEqual(self.service.description, str())
-        self.assertEqual(self.service.version, str())
+        self.assertEqual(self.service.description, '')
+        self.assertEqual(self.service.version, '')
         self.assertEqual(self.service.type, initial_type)
         self.assertIn(self.service.environment, (initial_env, compatibility_env))
         self.assertEqual(self.service.run_as, initial_run_as)
@@ -269,7 +269,7 @@ class TestServicesWithCustomUploadedService(TestServiceSetup):
         # testing
         self.service.upload(pkg_path=upload_path)
         # second upload modified filename
-        self.assertRegex(self.service._json_data['script_file_name'], 'test_upload_\w+.py')
+        self.assertRegex(self.service._json_data['script_file_name'], r'test_upload_\w+.py')
 
     def test_upload_script_to_service_with_wrong_path(self):
         # setUp
@@ -346,7 +346,7 @@ class TestServiceExecutions(TestServiceSetup):
             if key == 'activity_id':
                 continue
 
-            with self.subTest(msg='{}: {}'.format(key, value)):
+            with self.subTest(msg=f'{key}: {value}'):
                 self.assertIsNotNone(value)
 
     @pytest.mark.skipif("os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",

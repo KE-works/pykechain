@@ -27,10 +27,10 @@ KECARD_COMMON_KEYS = [MetaWidget.COLLAPSED,
                       MetaWidget.IS_DISABLED,
                       MetaWidget.IS_MERGED]
 
-TITLE_TYPING = Optional[Union[type(None), Text, bool]]
+TITLE_TYPING = Optional[Union[type(None), str, bool]]
 
 
-def _retrieve_object(obj: Union['Base', Text], method: Callable) -> Union['Base']:
+def _retrieve_object(obj: Union['Base', str], method: Callable) -> Union['Base']:
     """
     Object if object or uuid of object is provided as argument.
 
@@ -56,7 +56,7 @@ def _retrieve_object(obj: Union['Base', Text], method: Callable) -> Union['Base'
                                    " Part id, Property id, Service id or Team id. Type is: {}".format(type(obj)))
 
 
-def _retrieve_object_id(obj: Optional[Union['Base', Text]]) -> Optional[Text]:
+def _retrieve_object_id(obj: Optional[Union['Base', str]]) -> Optional[str]:
     """
     Object id if object or uuid of object is provided as argument.
 
@@ -85,7 +85,7 @@ def _set_title(
         title: TITLE_TYPING = None,
         show_title_value: Optional[WidgetTitleValue] = None,
         **kwargs
-) -> Tuple[Dict, Text]:
+) -> Tuple[Dict, str]:
     """
     Set the customTitle in the meta based on provided optional custom title or default.
 
@@ -130,7 +130,7 @@ def _set_title(
 
 def _set_description(
         meta: Dict,
-        description: Optional[Union[Text, bool]] = None,
+        description: Optional[Union[str, bool]] = None,
         **kwargs
 ) -> Dict:
     """
@@ -167,9 +167,9 @@ def _set_description(
 
 def _set_link(
         meta: Dict,
-        link: Optional[Union[type(None), Text, bool, KEChainPages]] = None,
+        link: Optional[Union[type(None), str, bool, KEChainPages]] = None,
         link_value: Optional[CardWidgetLinkValue] = None,
-        link_target: Optional[Union[Text, LinkTargets]] = LinkTargets.SAME_TAB,
+        link_target: Optional[Union[str, LinkTargets]] = LinkTargets.SAME_TAB,
         **kwargs
 ) -> Dict:
     """
@@ -240,7 +240,7 @@ def _set_link(
 def _set_image(
         meta: Dict,
         image: Optional['AttachmentProperty'] = None,
-        image_fit: Optional[Union[Text, ImageFitValue]] = ImageFitValue.CONTAIN,
+        image_fit: Optional[Union[str, ImageFitValue]] = ImageFitValue.CONTAIN,
         **kwargs
 ) -> Dict:
     """
@@ -265,7 +265,7 @@ def _set_image(
     from pykechain.models import Property
     if isinstance(image, Property) and image.type == PropertyType.ATTACHMENT_VALUE:
         meta.update({
-            MetaWidget.CUSTOM_IMAGE: "/api/v3/properties/{}/preview".format(image.id),
+            MetaWidget.CUSTOM_IMAGE: f"/api/v3/properties/{image.id}/preview",
             MetaWidget.SHOW_IMAGE_VALUE: CardWidgetImageValue.CUSTOM_IMAGE
         })
     elif image is None:
@@ -311,7 +311,7 @@ def _set_button_text(
         button_text = service.name
     elif custom_button_text is None:
         show_button_value = MetaWidget.BUTTON_NO_TEXT
-        button_text = str()
+        button_text = ''
     else:
         show_button_value = MetaWidget.BUTTON_TEXT_CUSTOM
         button_text = str(custom_button_text)
@@ -375,7 +375,7 @@ def _check_prefilters(part_model: 'Part', prefilters: Union[Dict, List]) -> List
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
     if isinstance(prefilters, dict):
-        property_models: List[Property, Text] = prefilters.get(MetaWidget.PROPERTY_MODELS, [])  # noqa
+        property_models: List[Property, str] = prefilters.get(MetaWidget.PROPERTY_MODELS, [])  # noqa
         values = prefilters.get(MetaWidget.VALUES, [])
         filters_type = prefilters.get(MetaWidget.FILTERS_TYPE, [])
 
@@ -421,7 +421,7 @@ def _check_excluded_propmodels(part_model: 'Part', property_models: List['AnyPro
         return [check_base(pm, Property, "property_model") for pm in property_models]
 
     if not isinstance(part_model, Part):
-        raise IllegalArgumentError('`part_model` must be a Part object, "{}" is not.'.format(part_model))
+        raise IllegalArgumentError(f'`part_model` must be a Part object, "{part_model}" is not.')
 
     list_of_propmodels_excl: List['AnyProperty'] = list()
     for property_model in property_models:

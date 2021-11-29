@@ -109,7 +109,7 @@ class TestActivityConstruction(TestBetamax):
     def test_create_with_classification(self):
 
         for classification in ActivityClassification.values():
-            with self.subTest(msg="Classification: {}".format(classification)):
+            with self.subTest(msg=f"Classification: {classification}"):
                 # setUp 1
                 root_name = activity_root_name_by_classification[classification]
                 root = self.project.activity(name=root_name)
@@ -121,7 +121,7 @@ class TestActivityConstruction(TestBetamax):
                 # setUp 2
                 task = self.client.create_activity(
                     parent=root,
-                    name="{}".format(classification),
+                    name=f"{classification}",
                     classification=classification,
                 )
 
@@ -557,7 +557,7 @@ class TestActivities(TestBetamax):
                        assignees=None)
         self.task.refresh()
         self.assertEqual(self.task.name, new_name)
-        self.assertEqual(self.task.description, str())
+        self.assertEqual(self.task.description, '')
         self.assertEqual(self.task.start_date, None)
         self.assertEqual(self.task.due_date, None)
         self.assertEqual(self.task.assignees, list())
@@ -753,7 +753,7 @@ class TestActivities(TestBetamax):
         assignees_list = self.task.assignees
 
         self.assertSetEqual(
-            set(list_of_assignees_in_data), set([u.id for u in assignees_list])
+            set(list_of_assignees_in_data), {u.id for u in assignees_list}
         )
 
     def test_activity_assignees_list_no_assignees_gives_empty_list(self):

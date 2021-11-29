@@ -180,7 +180,7 @@ class TestPropertyFilterAllPropertyTypes(TestBetamax):
                                                          parent_instance=self.bike_instance,
                                                          prefilters=[prefilter])
                 self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                                 '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+                                 f'{test_prop.id}:{filter_value}:{filter_type}')
             self.assertEqual(len(w), 4)
 
     def test_multi_test_property_filter_in_grid(self):
@@ -212,7 +212,7 @@ class TestPropertyFilterAllPropertyTypes(TestBetamax):
                                                          parent_instance=self.bike_instance,
                                                          prefilters=[prefilter])
                 self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                                 '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+                                 f'{test_prop.id}:{filter_value}:{filter_type}')
             self.assertEqual(len(w), 4)
 
     def test_int_property_filter_in_grid(self):
@@ -244,7 +244,7 @@ class TestPropertyFilterAllPropertyTypes(TestBetamax):
                                                          parent_instance=self.bike_instance,
                                                          prefilters=[prefilter])
                 self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                                 '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+                                 f'{test_prop.id}:{filter_value}:{filter_type}')
             self.assertEqual(len(w), 3)
 
     def test_float_property_filter_in_grid(self):
@@ -276,7 +276,7 @@ class TestPropertyFilterAllPropertyTypes(TestBetamax):
                                                          parent_instance=self.bike_instance,
                                                          prefilters=[prefilter])
                 self.assertEqual(widget.meta.get('prefilters').get('property_value'),
-                                 '{}:{}:{}'.format(test_prop.id, filter_value, filter_type))
+                                 f'{test_prop.id}:{filter_value}:{filter_type}')
             self.assertEqual(len(w), 3)
 
     def test_boolean_property_filter_in_grid(self):
@@ -632,7 +632,7 @@ class TestPropertyFilterAllPropertyTypes(TestBetamax):
         )
         test_prop.set_prefilters(prefilters=[prefilter])
         self.assertEqual(test_prop._options.get('prefilters').get('property_value'),
-                         '{}:{}:{}'.format(filter_property_model.id, filter_value, filter_type))
+                         f'{filter_property_model.id}:{filter_value}:{filter_type}')
 
     def test_activity_reference_property_prefilter(self):
         test_prop = self.new_part.add_property(
@@ -649,7 +649,7 @@ class TestPropertyFilterAllPropertyTypes(TestBetamax):
         self.assertEqual(test_prop._options.get('prefilters').get('progress__gte'), 1.0)
 
 
-class BaseTest(object):
+class BaseTest:
     class _TestScopeFilter(TestCase):
 
         VALUE = None
@@ -662,7 +662,7 @@ class BaseTest(object):
         def setUpClass(cls) -> None:
             super().setUpClass()
             if cls.VALUE == cls.VALUE_2:  # pragma: no cover
-                raise ValueError("Test needs 2 different values ({}, {})".format(cls.VALUE, cls.VALUE_2))
+                raise ValueError(f"Test needs 2 different values ({cls.VALUE}, {cls.VALUE_2})")
 
         def setUp(self) -> None:
             super().setUp()

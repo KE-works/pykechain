@@ -11,7 +11,7 @@ from pykechain.models.input_checks import check_base, check_enum, check_type, ch
 from pykechain.models.widgets.enums import MetaWidget
 
 
-class BaseFilter(object):
+class BaseFilter:
     """Base class for any filters used in pykechain."""
 
     def __eq__(self, other):
@@ -43,7 +43,7 @@ class BaseFilter(object):
         :returns options dict to be used to update the options dict of a property
         """
         if not all(isinstance(f, cls) for f in filters):
-            raise IllegalArgumentError("All `filters` must be of type `{}`".format(cls))
+            raise IllegalArgumentError(f"All `filters` must be of type `{cls}`")
 
 
 class PropertyValueFilter(BaseFilter):
@@ -57,7 +57,7 @@ class PropertyValueFilter(BaseFilter):
 
     def __init__(
         self,
-        property_model: Union[Text, 'Property'],
+        property_model: Union[str, 'Property'],
         value: Any,
         filter_type: FilterType,
     ):
@@ -72,9 +72,9 @@ class PropertyValueFilter(BaseFilter):
         self.type = filter_type
 
     def __repr__(self):
-        return "PropertyValueFilter {}: {} ({})".format(self.type, self.value, self.id)
+        return f"PropertyValueFilter {self.type}: {self.value} ({self.id})"
 
-    def format(self) -> Text:
+    def format(self) -> str:
         """Format PropertyValueFilter as a string."""
         if isinstance(self.value, str):
             value = urllib.parse.quote(self.value)
@@ -82,7 +82,7 @@ class PropertyValueFilter(BaseFilter):
             value = str(self.value).lower()
         else:
             value = self.value
-        return "{}:{}:{}".format(self.id, value, self.type)
+        return f"{self.id}:{value}:{self.type}"
 
     def validate(self, part_model: 'Part') -> None:
         """
@@ -214,10 +214,10 @@ class ScopeFilter(BaseFilter):
 
     def __init__(
         self,
-        tag: Optional[Text] = None,
+        tag: Optional[str] = None,
         status: Optional[ScopeStatus] = None,
-        name: Optional[Text] = None,
-        team: Optional[Union[Text, 'Team']] = None,
+        name: Optional[str] = None,
+        team: Optional[Union[str, 'Team']] = None,
         due_date_gte: Optional[datetime.datetime] = None,
         due_date_lte: Optional[datetime.datetime] = None,
         start_date_gte: Optional[datetime.datetime] = None,
@@ -241,7 +241,7 @@ class ScopeFilter(BaseFilter):
             progress_gte,
             progress_lte,
         ]
-        if sum([p is not None for p in filters]) + len(kwargs) != 1:
+        if sum(p is not None for p in filters) + len(kwargs) != 1:
             raise IllegalArgumentError("Every ScopeFilter object must apply only 1 filter!")
 
         self.status = check_enum(status, ScopeStatus, "status")
@@ -259,27 +259,27 @@ class ScopeFilter(BaseFilter):
     def __repr__(self):
         _repr = "ScopeFilter: "
         if self.name:
-            _repr += "name: `{}`".format(self.name)
+            _repr += f"name: `{self.name}`"
         elif self.status:
-            _repr += "status `{}`".format(self.status)
+            _repr += f"status `{self.status}`"
         elif self.due_date_gte:
-            _repr += "due date greater or equal than: `{}`".format(self.due_date_gte)
+            _repr += f"due date greater or equal than: `{self.due_date_gte}`"
         elif self.due_date_lte:
-            _repr += "due date lesser or equal than: `{}`".format(self.due_date_lte)
+            _repr += f"due date lesser or equal than: `{self.due_date_lte}`"
         elif self.start_date_gte:
-            _repr += "start date greater or equal than: `{}`".format(self.start_date_gte)
+            _repr += f"start date greater or equal than: `{self.start_date_gte}`"
         elif self.start_date_lte:
-            _repr += "start date lesser or equal than: `{}`".format(self.start_date_lte)
+            _repr += f"start date lesser or equal than: `{self.start_date_lte}`"
         elif self.progress_gte:
-            _repr += "progress greater or equal than: {}%".format(self.progress_gte * 100)
+            _repr += f"progress greater or equal than: {self.progress_gte * 100}%"
         elif self.progress_lte:
-            _repr += "progress lesser or equal than: {}%".format(self.progress_lte * 100)
+            _repr += f"progress lesser or equal than: {self.progress_lte * 100}%"
         elif self.tag:
-            _repr += "tag `{}`".format(self.tag)
+            _repr += f"tag `{self.tag}`"
         elif self.team:
-            _repr += "team: `{}`".format(self.team)
+            _repr += f"team: `{self.team}`"
         else:
-            _repr += "{}".format(self.extra_filter)
+            _repr += f"{self.extra_filter}"
 
         return _repr
 
@@ -344,7 +344,7 @@ class ScopeFilter(BaseFilter):
                         if field not in prefilters:
                             prefilters[field] = filter_value
                         else:
-                            prefilters[field] += ",{}".format(filter_value)
+                            prefilters[field] += f",{filter_value}"
                     else:
                         prefilters[field] = filter_value
 

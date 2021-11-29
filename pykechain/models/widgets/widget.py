@@ -38,7 +38,7 @@ class Widget(BaseInScope):
         :type json: dict
         """
         # we need to run the init of 'Base' instead of 'Part' as we do not need the instantiation of properties
-        super(Widget, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
         del self.name
 
         self.title = json.get("title")
@@ -59,10 +59,10 @@ class Widget(BaseInScope):
         self.progress = json.get('progress')
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.widget_type, self.id[-8:])
+        return f"<pyke {self.__class__.__name__} '{self.widget_type}' id {self.id[-8:]}>"
 
     @property
-    def title_visible(self) -> Optional[Text]:
+    def title_visible(self) -> Optional[str]:
         """
         Return the title of the widget displayed in KE-chain.
 
@@ -149,7 +149,7 @@ class Widget(BaseInScope):
             :return: classname corresponding to the widget type
             :rtype: str
             """
-            return "{}Widget".format(type_widget.title()) if type_widget else WidgetTypes.UNDEFINED
+            return f"{type_widget.title()}Widget" if type_widget else WidgetTypes.UNDEFINED
 
         widget_type = json.get('widget_type')
 
@@ -212,8 +212,8 @@ class Widget(BaseInScope):
             self,
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
-            part_instance: Optional[Union['Part', Text]] = None,
-            parent_part_instance: Optional[Union['Part', Text]] = None,
+            part_instance: Optional[Union['Part', str]] = None,
+            parent_part_instance: Optional[Union['Part', str]] = None,
             **kwargs
     ) -> None:
         """
@@ -252,8 +252,8 @@ class Widget(BaseInScope):
             self,
             readable_models: Optional[List] = None,
             writable_models: Optional[List] = None,
-            part_instance: Optional[Union['Part', Text]] = None,
-            parent_part_instance: Optional[Union['Part', Text]] = None,
+            part_instance: Optional[Union['Part', str]] = None,
+            parent_part_instance: Optional[Union['Part', str]] = None,
             **kwargs
     ) -> None:
         """
@@ -290,7 +290,7 @@ class Widget(BaseInScope):
 
     def remove_associations(
             self,
-            models: List[Union['Property', Text]],
+            models: List[Union['Property', str]],
             **kwargs
     ) -> None:
         """
@@ -339,7 +339,7 @@ class Widget(BaseInScope):
         response = self._client._request('PUT', url, params=API_EXTRA_PARAMS['widgets'], json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Widget {}".format(self), response=response)
+            raise APIError(f"Could not update Widget {self}", response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
@@ -416,12 +416,12 @@ class Widget(BaseInScope):
 
     @staticmethod
     def _validate_excel_export_inputs(
-            target_dir: Text,
-            file_name: Text,
+            target_dir: str,
+            file_name: str,
             user: 'User',
             default_file_name: Callable,
     ) -> Tuple[
-        Text, Text, 'User'
+        str, str, 'User'
     ]:
         """Check, convert and return the inputs for the Excel exporter functions."""
         if target_dir is None:
@@ -433,7 +433,7 @@ class Widget(BaseInScope):
             file_name = default_file_name()
         else:
             if not isinstance(file_name, str):
-                raise IllegalArgumentError('`file_name` must be a string, "{}" is not.'.format(file_name))
+                raise IllegalArgumentError(f'`file_name` must be a string, "{file_name}" is not.')
             elif '.xls' in file_name:
                 file_name = file_name.split('.xls')[0]
             file_name = slugify_ref(file_name)
@@ -443,16 +443,16 @@ class Widget(BaseInScope):
 
         from pykechain.models import User
         if user is not None and not isinstance(user, User):
-            raise IllegalArgumentError('`user` must be a Pykechain User object, "{}" is not.'.format(user))
+            raise IllegalArgumentError(f'`user` must be a Pykechain User object, "{user}" is not.')
 
         return target_dir, file_name, user
 
     def download_as_excel(
             self,
-            target_dir: Optional[Text] = None,
-            file_name: Optional[Text] = None,
+            target_dir: Optional[str] = None,
+            file_name: Optional[str] = None,
             user: 'User' = None,
-    ) -> Text:
+    ) -> str:
         """
         Export a grid widget as an Excel sheet.
 
@@ -468,7 +468,7 @@ class Widget(BaseInScope):
         grid_widgets = {WidgetTypes.SUPERGRID, WidgetTypes.FILTEREDGRID}
         if self.widget_type not in grid_widgets:
             raise IllegalArgumentError(
-                "Only widgets of type {} can be exported to Excel, `{}` is not.".format(grid_widgets, self.widget_type))
+                f"Only widgets of type {grid_widgets} can be exported to Excel, `{self.widget_type}` is not.")
 
         part_model_id = self.meta.get("partModelId")
         parent_instance_id = self.meta.get("parentInstanceId")
@@ -501,7 +501,7 @@ class Widget(BaseInScope):
         response = self._client._request('GET', url, data=json, params=params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not export widget {}: {}".format(str(response), response.content))
+            raise APIError(f"Could not export widget {str(response)}: {response.content}")
 
         full_path = os.path.join(target_dir, file_name)
 

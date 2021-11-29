@@ -19,7 +19,7 @@ class Team(Base):
 
     def __init__(self, json, **kwargs):
         """Construct a team from provided json data."""
-        super(Team, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self.ref = json.get('ref')
         self.description = json.get('description')
@@ -32,14 +32,14 @@ class Team(Base):
         response = self._client._request('PUT', url, json=update_dict, params=params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Team {}".format(self), response=response)
+            raise APIError(f"Could not update Team {self}", response=response)
 
         self.refresh(json=response.json().get('results')[0])
 
     def edit(
             self,
-            name: Optional[Union[Text, Empty]] = empty,
-            description: Optional[Union[Text, Empty]] = empty,
+            name: Optional[Union[str, Empty]] = empty,
+            description: Optional[Union[str, Empty]] = empty,
             options: Optional[Union[Dict, Empty]] = empty,
             is_hidden: Optional[Union[bool, Empty]] = empty,
             **kwargs
@@ -85,9 +85,9 @@ class Team(Base):
         response = self._client._request('DELETE', url=url)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Team {}".format(self), response=response)
+            raise APIError(f"Could not delete Team {self}", response=response)
 
-    def members(self, role: Optional[Union[TeamRoles, Text]] = None) -> List[Dict]:
+    def members(self, role: Optional[Union[TeamRoles, str]] = None) -> List[Dict]:
         """Members of the team.
 
         You may provide the role in the team, to retrieve only the team member with that role. Normally there is a
@@ -116,8 +116,8 @@ class Team(Base):
             return member_list
 
     def add_members(self,
-                    users: Optional[List[Union[User, Text]]] = None,
-                    role: Optional[Union[TeamRoles, Text]] = TeamRoles.MEMBER,
+                    users: Optional[List[Union[User, str]]] = None,
+                    role: Optional[Union[TeamRoles, str]] = TeamRoles.MEMBER,
                     ) -> None:
         """Members to add to a team.
 
@@ -143,7 +143,7 @@ class Team(Base):
 
         self._update('team_add_members', team_id=self.id, update_dict=update_dict)
 
-    def remove_members(self, users: Optional[List[Union[User, Text]]] = None) -> None:
+    def remove_members(self, users: Optional[List[Union[User, str]]] = None) -> None:
         """
         Remove members from the team.
 
