@@ -1,15 +1,14 @@
 import warnings
-from typing import Any, List, Optional, Tuple, Union
+from typing import List, Optional, Union, Any, Tuple
 
 from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.enums import Category, FilterType
-from pykechain.models import AnyProperty
 from pykechain.models.base_reference import _ReferencePropertyInScope
 from pykechain.models.input_checks import check_type
 from pykechain.models.part import Part
 from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets.enums import MetaWidget
-from pykechain.models.widgets.helpers import _check_excluded_propmodels, _check_prefilters
+from pykechain.models.widgets.helpers import _check_prefilters, _check_excluded_propmodels
 from pykechain.utils import get_in_chunks
 
 
@@ -93,7 +92,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
 
     def set_prefilters(
         self,
-        property_models: List[Union[str, AnyProperty]] = None,
+        property_models: List[Union[str, "AnyProperty"]] = None,
         values: List[Any] = None,
         filters_type: List[FilterType] = None,
         prefilters: List[PropertyValueFilter] = None,
@@ -187,8 +186,7 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
 
             warnings.warn(
                 "Prefilters will be provided as list of `PropertyValueFilter` objects. "
-                "Separate lists will be deprecated in January 2021.",
-                # TODO Deprecate January 2021
+                "Separate lists will be deprecated in January 2021.",  # TODO Deprecate January 2021
                 PendingDeprecationWarning,
             )
 

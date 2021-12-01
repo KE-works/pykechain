@@ -2,12 +2,16 @@ import datetime
 import urllib
 import warnings
 from abc import abstractmethod
-from typing import Any, Dict, List, Optional, Union
+from typing import Union, Any, Dict, List, Optional
 
-from pykechain.enums import Category, FilterType, PropertyType, ScopeStatus
+from pykechain.enums import FilterType, Category, PropertyType, ScopeStatus
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models.input_checks import (
-    check_base, check_datetime, check_enum, check_text, check_type,
+    check_base,
+    check_enum,
+    check_type,
+    check_text,
+    check_datetime,
 )
 from pykechain.models.widgets.enums import MetaWidget
 
@@ -115,10 +119,10 @@ class PropertyValueFilter(BaseFilter):
             if (
                 property_type
                 in (
-                PropertyType.BOOLEAN_VALUE,
-                PropertyType.REFERENCES_VALUE,
-                PropertyType.ACTIVITY_REFERENCES_VALUE,
-            )
+                    PropertyType.BOOLEAN_VALUE,
+                    PropertyType.REFERENCES_VALUE,
+                    PropertyType.ACTIVITY_REFERENCES_VALUE,
+                )
                 and self.type != FilterType.EXACT
             ):
                 warnings.warn(

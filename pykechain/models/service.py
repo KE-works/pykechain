@@ -1,16 +1,19 @@
 import os
 from datetime import datetime
-from typing import Dict, Optional, Union
 
 import requests
+from typing import Dict, Optional, Union
 
 from pykechain.enums import (
-    ServiceEnvironmentVersion, ServiceExecutionStatus, ServiceScriptUser, ServiceType,
+    ServiceScriptUser,
+    ServiceExecutionStatus,
+    ServiceType,
+    ServiceEnvironmentVersion,
 )
 from pykechain.exceptions import APIError
 from pykechain.models.base import Base, BaseInScope
-from pykechain.models.input_checks import check_enum, check_text, check_type
-from pykechain.utils import Empty, clean_empty_values, empty, parse_datetime
+from pykechain.models.input_checks import check_text, check_enum, check_type
+from pykechain.utils import parse_datetime, Empty, clean_empty_values, empty
 
 
 class Service(BaseInScope):
@@ -150,7 +153,7 @@ class Service(BaseInScope):
             "env_version": check_enum(
                 environment_version, ServiceEnvironmentVersion, "environment version"
             )
-                           or self.environment,
+            or self.environment,
             "run_as": check_enum(run_as, ServiceScriptUser, "run_as") or self.run_as,
             "script_version": check_text(version, "version") or "",
         }

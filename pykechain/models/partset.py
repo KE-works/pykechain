@@ -1,4 +1,4 @@
-from typing import Iterable  # noqa: F401
+from typing import Iterable, Text  # noqa: F401
 
 from pykechain.models.part import Part  # noqa: F401
 

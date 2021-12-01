@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, TypeVar
+from typing import Optional, List, TypeVar
 
 import requests
 

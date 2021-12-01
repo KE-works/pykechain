@@ -1,18 +1,23 @@
 import warnings
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Dict, Optional, Union, Tuple, List, Callable
 
 from pykechain.enums import (
-    ActivityType, CardWidgetImageValue, CardWidgetKEChainPageLink, CardWidgetLinkValue, Category,
+    Category,
+    PropertyType,
+    WidgetTitleValue,
+    ActivityType,
+    CardWidgetLinkValue,
+    KEChainPages,
+    CardWidgetKEChainPageLink,
+    LinkTargets,
     ImageFitValue,
-    KEChainPages, LinkTargets, PropertyType, WidgetTitleValue,
+    CardWidgetImageValue,
 )
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import AnyProperty
-from pykechain.models.part import Part
-from pykechain.models.input_checks import check_base, check_enum
+from pykechain.models.input_checks import check_enum, check_base
 from pykechain.models.value_filter import PropertyValueFilter
-from pykechain.models.widgets.enums import AssociatedObjectId, MetaWidget
-from pykechain.utils import camelcase, is_uuid, snakecase
+from pykechain.models.widgets.enums import MetaWidget, AssociatedObjectId
+from pykechain.utils import is_uuid, snakecase, camelcase
 
 # these are the common keys to all kecards.
 KECARD_COMMON_KEYS = [
@@ -403,7 +408,7 @@ def _check_prefilters(
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
     if isinstance(prefilters, dict):
-        property_models: List[AnyProperty, str] = prefilters.get(
+        property_models: List[Property, str] = prefilters.get(
             MetaWidget.PROPERTY_MODELS, []
         )  # noqa
         values = prefilters.get(MetaWidget.VALUES, [])
@@ -425,8 +430,7 @@ def _check_prefilters(
 
         warnings.warn(
             "Prefilters must be provided as list of `PropertyValueFilter` objects. "
-            "Separate input lists will be deprecated in January 2021.",
-            # TODO Deprecate January 2021
+            "Separate input lists will be deprecated in January 2021.",  # TODO Deprecate January 2021
             PendingDeprecationWarning,
         )
 
@@ -440,8 +444,8 @@ def _check_prefilters(
 
 
 def _check_excluded_propmodels(
-    part_model: Part, property_models: List[AnyProperty]
-) -> List[AnyProperty]:
+    part_model: "Part", property_models: List["AnyProperty"]
+) -> List["AnyProperty"]:
     """
     Validate the excluded property models of the referenced part.
 
@@ -461,7 +465,7 @@ def _check_excluded_propmodels(
     if not isinstance(part_model, Part):
         raise IllegalArgumentError(f'`part_model` must be a Part object, "{part_model}" is not.')
 
-    list_of_propmodels_excl: List[AnyProperty] = list()
+    list_of_propmodels_excl: List["AnyProperty"] = list()
     for property_model in property_models:
         if is_uuid(property_model):
             property_model = part_model.property(property_model)
@@ -482,7 +486,7 @@ def _check_excluded_propmodels(
             raise IllegalArgumentError(
                 "A part reference property can only exclude properties belonging to the referenced"
                 ' Part model, found referenced Part model "{}" and Properties belonging to "{}"'
-                    .format(part_model.name, property_model.part.name)
+                .format(part_model.name, property_model.part.name)
             )
         else:
             list_of_propmodels_excl.append(property_model.id)

@@ -5,8 +5,8 @@ import requests
 
 from pykechain.exceptions import APIError
 from pykechain.models import Base
-from pykechain.models.input_checks import check_datetime, check_text, check_type, check_url
-from pykechain.utils import Empty, clean_empty_values, empty, parse_datetime
+from pykechain.models.input_checks import check_text, check_datetime, check_type, check_url
+from pykechain.utils import parse_datetime, Empty, clean_empty_values, empty
 
 
 class Banner(Base):
@@ -72,9 +72,9 @@ class Banner(Base):
             "text": check_text(text, "text"),
             "icon": check_text(icon, "icon") or "",
             "active_from": check_datetime(active_from, "active_from")
-                           or check_datetime(self.active_from, "active_from"),
+            or check_datetime(self.active_from, "active_from"),
             "active_until": check_datetime(active_until, "active_until")
-                            or check_datetime(self.active_until, "active_until"),
+            or check_datetime(self.active_until, "active_until"),
             "is_active": empty if active is None else active,
             "url": check_url(url) or "",
         }

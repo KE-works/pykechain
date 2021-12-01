@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from pykechain.enums import FontAwesomeMode, URITarget
+from pykechain.enums import URITarget, FontAwesomeMode
 from pykechain.exceptions import IllegalArgumentError
 
 allowed_attributes = ["displayName_nl", "displayName_de", "displayName_fr", "displayName_it"]

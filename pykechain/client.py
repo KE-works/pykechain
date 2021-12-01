@@ -1653,7 +1653,7 @@ class Client:
             data.update(
                 {
                     "multiplicity": check_enum(multiplicity, Multiplicity, "multiplicity")
-                                    or part.multiplicity,
+                    or part.multiplicity,
                     "model_id": part.id,
                     "parent": parent.id,
                 }
@@ -1845,9 +1845,9 @@ class Client:
             asynchronous
             and response.status_code not in (requests.codes.ok, requests.codes.accepted)
             or (
-            not asynchronous
-            and response.status_code not in (requests.codes.ok, requests.codes.accepted)
-        )
+                not asynchronous
+                and response.status_code not in (requests.codes.ok, requests.codes.accepted)
+            )
         ):  # pragma: no cover
             raise APIError(f"Could not delete Parts. ({response.status_code})", response=response)
         return True
@@ -2968,7 +2968,7 @@ class Client:
         update_dict = {
             "parent_id": parent_object.id,
             "classification": check_enum(classification, ActivityClassification, "classification")
-                              or parent_object.classification,
+            or parent_object.classification,
         }
 
         url = self._build_url("activity_move", activity_id=str(activity.id))

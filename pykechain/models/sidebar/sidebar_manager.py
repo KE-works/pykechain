@@ -1,12 +1,20 @@
 from collections.abc import Iterable
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional, List, Dict
 
 from pykechain.enums import (
-    KEChainPageIcons, KEChainPageLabels, KEChainPages, SubprocessDisplayMode, URITarget,
+    URITarget,
+    SubprocessDisplayMode,
+    KEChainPages,
+    KEChainPageLabels,
+    KEChainPageIcons,
 )
 from pykechain.exceptions import NotFoundError
 from pykechain.models.input_checks import (
-    check_enum, check_list_of_dicts, check_text, check_type, check_url,
+    check_url,
+    check_text,
+    check_enum,
+    check_list_of_dicts,
+    check_type,
 )
 from pykechain.models.sidebar.sidebar_button import SideBarButton
 from pykechain.utils import find
