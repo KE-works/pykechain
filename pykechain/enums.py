@@ -1104,3 +1104,13 @@ class LanguageCodes(Enum):
     GERMAN = "de"
     DUTCH = "nl"
     ITALIAN = "it"
+
+class FormCollectionCategory(Enum):
+    """
+    Options for the Category of a the FormCollection
+
+    :cvar MODEL: Model
+    :cvar INSTANCE: Instance
+    """
+    MODEL = "MODEL"
+    INSTANCE = "INSTANCE"
