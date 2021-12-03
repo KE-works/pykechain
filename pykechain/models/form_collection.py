@@ -29,7 +29,12 @@ class Status:
 class StatusForm:
     pass
 
-class FormCollection(BaseInScope, TagsMixin):
+
+class NameDescriptionTranslationMixin:
+    pass
+
+
+class FormCollection(BaseInScope, TagsMixin, NameDescriptionTranslationMixin):
     """
     A virtual object representing a KE-chain Form Collection.
 

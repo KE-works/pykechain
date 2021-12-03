@@ -119,10 +119,15 @@ API_PATH = {
     "context": "api/v3/contexts/contexts/{context_id}.json",
     "context_link_activities": "api/v3/contexts/contexts/{context_id}/link_activities",
     "context_unlink_activities": "api/v3/contexts/contexts/{context_id}/unlink_activities",
-    # 'feature_collections': 'api/v3/contexts/feature_collections.json',
-    # 'feature_collection': 'api/v3/contexts/feature_collections/{context_id}.json',
-    # 'time_periods': 'api/v3/contexts/time_periods.json',
-    # 'time_period': 'api/v3/contexts/time_periods/{context_id}.json'
+    # forms
+    "form_collections": "api/v3/forms/",
+    "form_collection": "api/v3/forms/{form_id}",
+    "workflows": "api/v3/forms/",
+    "workflow": "api/v3/forms/{form_id}",
+    "transitions": "api/v3/forms/",
+    "transition": "api/v3/forms/{transition_id}",
+    "statuses": "api/v3/forms/",
+    "status": "api/v3/forms/{status_id}",
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {"fields": "__all__"}
@@ -498,4 +503,24 @@ API_EXTRA_PARAMS = {
             ]
         )
     },
+    "forms": {
+        "fields": ",".join(
+            [
+                "id",
+                "name",
+                "ref",
+                "created_at",
+                "updated_at",
+                "description",
+                "tags",
+                "category",
+                "form_model_root",
+                "form_instance_root",
+                "model_id",
+                "workflow",
+                "status_forms",
+                "active_status",
+            ]
+        )
+    }
 }
