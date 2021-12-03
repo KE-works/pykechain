@@ -1,7 +1,7 @@
 import io
 import json
 import os
-from typing import Text, Any, Optional
+from typing import Any, Optional
 
 import requests
 
@@ -29,7 +29,7 @@ class AttachmentProperty(Property):
 
         """
         if self.has_value():
-            return "[Attachment: {}]".format(self.filename)
+            return f"[Attachment: {self.filename}]"
         else:
             return None
 
@@ -47,12 +47,12 @@ class AttachmentProperty(Property):
         """
         if self._put_value(None) is None:
             self._value = None
-            self._json_data['value'] = None
+            self._json_data["value"] = None
 
     @property
-    def filename(self) -> Optional[Text]:
+    def filename(self) -> Optional[str]:
         """Filename of the attachment, without the full 'attachment' path."""
-        return self._value.split('/')[-1] if self.has_value() else None
+        return self._value.split("/")[-1] if self.has_value() else None
 
     def json_load(self):
         """Download the data from the attachment and deserialise the contained json.
@@ -94,13 +94,13 @@ class AttachmentProperty(Property):
             pass
 
         if isinstance(data, str):
-            with open(data, 'rb') as fp:
+            with open(data, "rb") as fp:
                 self._upload(fp)
         else:
             self._upload_json(data, **kwargs)
         self._value = data
 
-    def save_as(self, filename: Optional[Text] = None) -> None:
+    def save_as(self, filename: Optional[str] = None) -> None:
         """Download the attachment to a file.
 
         :param filename: (optional) File path. If not provided, will be saved to current working dir
@@ -111,30 +111,30 @@ class AttachmentProperty(Property):
         """
         filename = filename or os.path.join(os.getcwd(), self.filename)
 
-        with open(filename, 'w+b') as f:
+        with open(filename, "w+b") as f:
             for chunk in self._download():
                 f.write(chunk)
 
-    def _upload_json(self, content, name='data.json'):
-        data = (name, json.dumps(content), 'application/json')
+    def _upload_json(self, content, name="data.json"):
+        data = (name, json.dumps(content), "application/json")
 
         self._upload(data)
 
-    def _upload_plot(self, figure, name='plot.png'):
+    def _upload_plot(self, figure, name="plot.png"):
         buffer = io.BytesIO()
 
         figure.savefig(buffer, format="png")
 
-        data = (name, buffer.getvalue(), 'image/png')
+        data = (name, buffer.getvalue(), "image/png")
 
         self._upload(data)
         self._value = name
 
     # custom for PIM2
     def _download(self):
-        url = self._client._build_url('property_download', property_id=self.id)
+        url = self._client._build_url("property_download", property_id=self.id)
 
-        response = self._client._request('GET', url)
+        response = self._client._request("GET", url)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not download property value.", response=response)
@@ -143,11 +143,11 @@ class AttachmentProperty(Property):
 
     # custom for PIM2
     def _upload(self, data):
-        url = self._client._build_url('property_upload', property_id=self.id)
+        url = self._client._build_url("property_upload", property_id=self.id)
 
-        response = self._client._request('POST', url,
-                                         data={"part": self._json_data['part_id']},
-                                         files={"attachment": data})
+        response = self._client._request(
+            "POST", url, data={"part": self._json_data["part_id"]}, files={"attachment": data}
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not upload attachment", response=response)

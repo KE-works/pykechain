@@ -1,13 +1,20 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Text, Union
+from typing import Dict, List, Optional, Union
 
 import requests
 
 from pykechain.enums import ContextGroup, ContextType
 from pykechain.exceptions import APIError
 from pykechain.models import BaseInScope
-from pykechain.models.input_checks import (check_base, check_datetime, check_enum, check_list_of_base,
-                                           check_list_of_text, check_text, check_type)
+from pykechain.models.input_checks import (
+    check_base,
+    check_datetime,
+    check_enum,
+    check_list_of_base,
+    check_list_of_text,
+    check_text,
+    check_type,
+)
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID, ObjectIDs
 from pykechain.utils import Empty, clean_empty_values, empty, parse_datetime
@@ -22,7 +29,7 @@ class Context(BaseInScope, TagsMixin):
 
     def __init__(self, json, **kwargs):
         """Construct a service from provided json data."""
-        super(Context, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
         self.ref = json.get("ref")  # type: Text
         self.description = json.get("description", "")  # type:Text
@@ -44,19 +51,19 @@ class Context(BaseInScope, TagsMixin):
         self.due_date = parse_datetime(json.get("due_date"))  # type: Optional[datetime]
 
     def edit(
-            self,
-            name: Optional[Union[Text, Empty]] = empty,
-            description: Optional[Union[Text, Empty]] = empty,
-            tags: Optional[List[Union[Text, Empty]]] = empty,
-            context_group: Optional[Union[ContextGroup, Empty]] = empty,
-            scope: Optional[Union['Scope', ObjectID]] = empty,
-            options: Optional[dict] = empty,
-            activities: Optional[Union[List['Activity'], ObjectIDs]] = empty,
-            feature_collection: Optional[dict] = empty,
-            start_date: Optional[datetime] = empty,
-            due_date: Optional[datetime] = empty,
-            **kwargs
-    ) -> 'self':
+        self,
+        name: Optional[Union[str, Empty]] = empty,
+        description: Optional[Union[str, Empty]] = empty,
+        tags: Optional[List[Union[str, Empty]]] = empty,
+        context_group: Optional[Union[ContextGroup, Empty]] = empty,
+        scope: Optional[Union["Scope", ObjectID]] = empty,
+        options: Optional[dict] = empty,
+        activities: Optional[Union[List["Activity"], ObjectIDs]] = empty,
+        feature_collection: Optional[dict] = empty,
+        start_date: Optional[datetime] = empty,
+        due_date: Optional[datetime] = empty,
+        **kwargs,
+    ) -> "self":
         """
         Edit the Context.
 
@@ -75,6 +82,7 @@ class Context(BaseInScope, TagsMixin):
         """
         from pykechain.models import Scope
         from pykechain.models import Activity
+
         update_dict = {
             "name": check_text(name, "name"),
             "description": check_text(description, "description"),
@@ -83,9 +91,7 @@ class Context(BaseInScope, TagsMixin):
             "context_group": check_enum(context_group, ContextGroup, "context_group"),
             "activities": check_list_of_base(activities, Activity, "activities"),
             "options": check_type(options, dict, "options"),
-            "feature_collection": check_type(
-                feature_collection, dict, "feature_collection"
-            ),
+            "feature_collection": check_type(feature_collection, dict, "feature_collection"),
             "start_date": check_datetime(start_date, "start_date"),
             "due_date": check_datetime(due_date, "due_date"),
         }
@@ -103,14 +109,12 @@ class Context(BaseInScope, TagsMixin):
         response = self._client._request("PUT", url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError(
-                "Could not update Context: {}".format(self), response=response
-            )
+            raise APIError(f"Could not update Context: {self}", response=response)
 
         return self.refresh(json=response.json().get("results")[0])
 
     def link_activities(
-            self, activities: Optional[List[Union['Activity', ObjectIDs]]] = empty, **kwargs
+        self, activities: Optional[List[Union["Activity", ObjectIDs]]] = empty, **kwargs
     ):
         """
         Link a context to one or more activities.
@@ -119,6 +123,7 @@ class Context(BaseInScope, TagsMixin):
         :returns: updated context objects
         """
         from pykechain.models import Activity
+
         update_dict = {
             "activities": check_list_of_base(activities, Activity, "activities"),
         }
@@ -129,14 +134,12 @@ class Context(BaseInScope, TagsMixin):
         response = self._client._request("POST", url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError(
-                "Could not update Context: {}".format(self), response=response
-            )
+            raise APIError(f"Could not update Context: {self}", response=response)
 
         return self.refresh(json=response.json().get("results")[0])
 
     def unlink_activities(
-            self, activities: Optional[List[Union['Activity', ObjectIDs]]] = empty, **kwargs
+        self, activities: Optional[List[Union["Activity", ObjectIDs]]] = empty, **kwargs
     ):
         """
         Unlink a context to one or more activities.
@@ -145,6 +148,7 @@ class Context(BaseInScope, TagsMixin):
         :returns: updated context objects
         """
         from pykechain.models import Activity
+
         update_dict = {
             "activities": check_list_of_base(activities, Activity, "activities"),
         }
@@ -155,9 +159,7 @@ class Context(BaseInScope, TagsMixin):
         response = self._client._request("POST", url, json=update_dict)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError(
-                "Could not update Context: {}".format(self), response=response
-            )
+            raise APIError(f"Could not update Context: {self}", response=response)
 
         return self.refresh(json=response.json().get("results")[0])
 

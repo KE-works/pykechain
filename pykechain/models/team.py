@@ -1,4 +1,4 @@
-from typing import Optional, Union, List, Text, Dict
+from typing import Optional, Union, List, Dict
 
 import requests
 
@@ -19,30 +19,30 @@ class Team(Base):
 
     def __init__(self, json, **kwargs):
         """Construct a team from provided json data."""
-        super(Team, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
-        self.ref = json.get('ref')
-        self.description = json.get('description')
-        self.options = json.get('options')
-        self.is_hidden = json.get('is_hidden')
+        self.ref = json.get("ref")
+        self.description = json.get("description")
+        self.options = json.get("options")
+        self.is_hidden = json.get("is_hidden")
 
     def _update(self, resource, update_dict=None, params=None, **kwargs):
         """Update the team in-place."""
         url = self._client._build_url(resource, **kwargs)
-        response = self._client._request('PUT', url, json=update_dict, params=params)
+        response = self._client._request("PUT", url, json=update_dict, params=params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not update Team {}".format(self), response=response)
+            raise APIError(f"Could not update Team {self}", response=response)
 
-        self.refresh(json=response.json().get('results')[0])
+        self.refresh(json=response.json().get("results")[0])
 
     def edit(
-            self,
-            name: Optional[Union[Text, Empty]] = empty,
-            description: Optional[Union[Text, Empty]] = empty,
-            options: Optional[Union[Dict, Empty]] = empty,
-            is_hidden: Optional[Union[bool, Empty]] = empty,
-            **kwargs
+        self,
+        name: Optional[Union[str, Empty]] = empty,
+        description: Optional[Union[str, Empty]] = empty,
+        options: Optional[Union[Dict, Empty]] = empty,
+        is_hidden: Optional[Union[bool, Empty]] = empty,
+        **kwargs,
     ) -> None:
         """
         Edit the attributes of the Team.
@@ -59,11 +59,11 @@ class Team(Base):
         :raises IllegalArgumentError whenever inputs are not of the correct type
         """
         update_dict = {
-            'id': self.id,
-            'name': check_text(name, 'name') or self.name,
-            'description': check_text(description, 'description'),
-            'options': check_type(options, dict, 'options'),
-            'is_hidden': check_type(is_hidden, bool, 'is_hidden'),
+            "id": self.id,
+            "name": check_text(name, "name") or self.name,
+            "description": check_text(description, "description"),
+            "options": check_type(options, dict, "options"),
+            "is_hidden": check_type(is_hidden, bool, "is_hidden"),
         }
 
         if kwargs:  # pragma: no cover
@@ -71,7 +71,7 @@ class Team(Base):
 
         update_dict = clean_empty_values(update_dict=update_dict)
 
-        self._update(resource='team', team_id=self.id, update_dict=update_dict)
+        self._update(resource="team", team_id=self.id, update_dict=update_dict)
 
     def delete(self) -> None:
         """
@@ -81,13 +81,13 @@ class Team(Base):
 
         :return: None
         """
-        url = self._client._build_url(resource='team', team_id=self.id)
-        response = self._client._request('DELETE', url=url)
+        url = self._client._build_url(resource="team", team_id=self.id)
+        response = self._client._request("DELETE", url=url)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError("Could not delete Team {}".format(self), response=response)
+            raise APIError(f"Could not delete Team {self}", response=response)
 
-    def members(self, role: Optional[Union[TeamRoles, Text]] = None) -> List[Dict]:
+    def members(self, role: Optional[Union[TeamRoles, str]] = None) -> List[Dict]:
         """Members of the team.
 
         You may provide the role in the team, to retrieve only the team member with that role. Normally there is a
@@ -107,18 +107,19 @@ class Team(Base):
         [{"pk":1, "username"="first user", "role"="OWNER", "email":"email@address.com"}, ...]
 
         """
-        check_enum(role, TeamRoles, 'role')
+        check_enum(role, TeamRoles, "role")
 
-        member_list = list(self._json_data.get('members'))
+        member_list = list(self._json_data.get("members"))
         if role:
-            return [teammember for teammember in member_list if teammember.get('role') == role]
+            return [teammember for teammember in member_list if teammember.get("role") == role]
         else:
             return member_list
 
-    def add_members(self,
-                    users: Optional[List[Union[User, Text]]] = None,
-                    role: Optional[Union[TeamRoles, Text]] = TeamRoles.MEMBER,
-                    ) -> None:
+    def add_members(
+        self,
+        users: Optional[List[Union[User, str]]] = None,
+        role: Optional[Union[TeamRoles, str]] = TeamRoles.MEMBER,
+    ) -> None:
         """Members to add to a team.
 
         :param users: list of members, either `User` objects or usernames
@@ -137,13 +138,13 @@ class Team(Base):
 
         """
         update_dict = {
-            'role': check_enum(role, TeamRoles, 'role'),
-            'users': [check_user(user, User, 'users') for user in users],
+            "role": check_enum(role, TeamRoles, "role"),
+            "users": [check_user(user, User, "users") for user in users],
         }
 
-        self._update('team_add_members', team_id=self.id, update_dict=update_dict)
+        self._update("team_add_members", team_id=self.id, update_dict=update_dict)
 
-    def remove_members(self, users: Optional[List[Union[User, Text]]] = None) -> None:
+    def remove_members(self, users: Optional[List[Union[User, str]]] = None) -> None:
         """
         Remove members from the team.
 
@@ -159,12 +160,10 @@ class Team(Base):
         >>> my_team.remove_members([other_user])
 
         """
-        update_dict = {'users': [check_user(user, User, 'users') for user in users]}
+        update_dict = {"users": [check_user(user, User, "users") for user in users]}
 
-        self._update('team_remove_members',
-                     update_dict=update_dict,
-                     team_id=self.id)
+        self._update("team_remove_members", update_dict=update_dict, team_id=self.id)
 
-    def scopes(self, status: Optional[ScopeStatus] = None, **kwargs) -> List['Scope']:
+    def scopes(self, status: Optional[ScopeStatus] = None, **kwargs) -> List["Scope"]:
         """Scopes associated to the team."""
         return self._client.scopes(team=self.id, status=status, **kwargs)

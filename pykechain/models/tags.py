@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Iterable, Text, Optional, List
+from typing import Iterable, Optional, List
 
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_list_of_text, check_type
@@ -13,15 +13,15 @@ class TagsMixin:
     :type tags: list
     """
 
-    _tags: List[Text] = list()
+    _tags: List[str] = list()
 
     @abstractmethod
-    def edit(self, tags: Optional[Iterable[Text]] = None, *args, **kwargs) -> None:
+    def edit(self, tags: Optional[Iterable[str]] = None, *args, **kwargs) -> None:
         """Edit the list of Tags."""
         pass  # pragma: no cover
 
     @property
-    def tags(self) -> List[Text]:
+    def tags(self) -> List[str]:
         """
         Get a list of tags, with each tag being a string.
 
@@ -31,12 +31,12 @@ class TagsMixin:
         return list(self._tags) if self._tags is not None else list()
 
     @tags.setter
-    def tags(self, new_tags: Iterable[Text]) -> None:
-        unique_tags = check_list_of_text(new_tags, 'tags', True)
+    def tags(self, new_tags: Iterable[str]) -> None:
+        unique_tags = check_list_of_text(new_tags, "tags", True)
         self.edit(tags=unique_tags)
         self._tags = unique_tags
 
-    def remove_tag(self, tag: Text) -> None:
+    def remove_tag(self, tag: str) -> None:
         """
         Remove a tag from the existing tags.
 
@@ -44,17 +44,20 @@ class TagsMixin:
         :type tag: str
         :return: None
         """
-        check_type(tag, Text, 'tag')
+        check_type(tag, str, "tag")
 
         if tag not in self.tags:
-            raise IllegalArgumentError("Tag '{}' is not among the existing tags. Existing tags: '{}'.".format(
-                tag, "', '".join(self.tags)))
+            raise IllegalArgumentError(
+                "Tag '{}' is not among the existing tags. Existing tags: '{}'.".format(
+                    tag, "', '".join(self.tags)
+                )
+            )
 
         remaining_tags = self.tags
         remaining_tags.remove(tag)
         self.tags = remaining_tags
 
-    def add_tag(self, tag: Text) -> None:
+    def add_tag(self, tag: str) -> None:
         """
         Append a tag to the existing tags.
 
@@ -62,12 +65,12 @@ class TagsMixin:
         :type tag: str
         :return: None
         """
-        check_type(tag, Text, 'tag')
+        check_type(tag, str, "tag")
         updated_tags = self.tags
         updated_tags.append(tag)
         self.tags = updated_tags
 
-    def has_tag(self, tag: Text) -> bool:
+    def has_tag(self, tag: str) -> bool:
         """
         Check whether a tag is used.
 
@@ -75,5 +78,5 @@ class TagsMixin:
         :return: boolean
         :rtype bool
         """
-        check_type(tag, Text, 'tag')
+        check_type(tag, str, "tag")
         return tag in self.tags
