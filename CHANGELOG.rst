@@ -1,9 +1,13 @@
 Change Log
 ==========
 
+UNRELEASED
+----------
+* :+1: we upgraded all code to python 3.6 and higher prefered style. See the implemented improvements found throughout the code: https://github.com/asottile/pyupgrade/blob/master/README.md#implemented-features. We also reformatted the code using black.
+
 v3.17.1 (29NOV21)
 -----------------
-# a re-release of v3.17.0 due to missing version information and changelog info in the library itself. No new code.
+A re-release of v3.17.0 due to missing version information and changelog info in the library itself. No new code.
 
 v3.17.0 (29NOV21)
 -----------------
