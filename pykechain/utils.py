@@ -3,10 +3,9 @@ import re
 import unicodedata
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
-from typing import TypeVar, Iterable, Callable, Optional, Text, Dict, Union, List  # noqa: F401
+from typing import TypeVar, Iterable, Callable, Optional, Dict, Union, List  # noqa: F401
 
 import pytz
-import six
 
 T = TypeVar("T")
 
@@ -30,7 +29,7 @@ def find(iterable: Iterable[T], predicate: Callable[[T], bool]) -> Optional[T]:
     return None
 
 
-def is_uuid(value: Text) -> bool:
+def is_uuid(value: str) -> bool:
     """
     Check if the string value is a proper UUID string.
 
@@ -43,7 +42,7 @@ def is_uuid(value: Text) -> bool:
     return bool(re.match(UUID_REGEX_PATTERN, str(value)))
 
 
-def is_url(value: Text) -> bool:
+def is_url(value: str) -> bool:
     """
     Return whether or not given value is a valid URL.
 
@@ -146,7 +145,7 @@ def is_url(value: Text) -> bool:
         # port number
         r"(?::\d{2,5})?"
         # resource path
-        u"(?:/[-a-z\u00a1-\uffff0-9._~%!$&'()*+,;=:@/]*)?"
+        "(?:/[-a-z\u00a1-\uffff0-9._~%!$&'()*+,;=:@/]*)?"
         # query string
         r"(?:\?\S*)?"
         # fragment
@@ -156,7 +155,7 @@ def is_url(value: Text) -> bool:
     return bool(regex.match(value))
 
 
-def is_valid_email(value: Text) -> bool:
+def is_valid_email(value: str) -> bool:
     """
     Return whether or not given value is a valid email address.
 
@@ -185,7 +184,7 @@ def is_valid_email(value: Text) -> bool:
 
 
 @contextmanager
-def temp_chdir(cwd: Optional[Text] = None):
+def temp_chdir(cwd: Optional[str] = None):
     """
     Create and return a temporary directory which you can use as a context manager.
 
@@ -207,30 +206,19 @@ def temp_chdir(cwd: Optional[Text] = None):
     >>> pass
 
     """
-    if six.PY3:
-        from tempfile import TemporaryDirectory
+    from tempfile import TemporaryDirectory
 
-        with TemporaryDirectory() as tempwd:
-            origin = cwd or os.getcwd()
-            os.chdir(tempwd)
-
-            try:
-                yield tempwd if os.path.exists(tempwd) else ""
-            finally:
-                os.chdir(origin)
-    else:
-        from tempfile import mkdtemp
-
-        tempwd = mkdtemp()
+    with TemporaryDirectory() as tempwd:
         origin = cwd or os.getcwd()
         os.chdir(tempwd)
+
         try:
             yield tempwd if os.path.exists(tempwd) else ""
         finally:
             os.chdir(origin)
 
 
-def parse_datetime(value: Optional[Text]) -> Optional[datetime]:
+def parse_datetime(value: Optional[str]) -> Optional[datetime]:
     """
     Convert datetime string to datetime object.
 
@@ -286,7 +274,7 @@ def parse_datetime(value: Optional[Text]) -> Optional[datetime]:
             if tzinfo[0] == "-":
                 offset = -offset
             tzinfo = _get_fixed_timezone(offset)
-        kw = {k: int(v) for k, v in six.iteritems(kw) if v is not None}
+        kw = {k: int(v) for k, v in kw.items() if v is not None}
         kw["tzinfo"] = tzinfo
         return datetime(**kw)
 
@@ -297,7 +285,7 @@ def parse_datetime(value: Optional[Text]) -> Optional[datetime]:
 #
 
 
-def camelcase(string: Text) -> Text:
+def camelcase(string: str) -> str:
     """Convert string into camel case.
 
     Inspired by: https://github.com/okunishinishi/python-stringcase
@@ -322,7 +310,7 @@ def camelcase(string: Text) -> Text:
     )
 
 
-def capitalcase(string: Text) -> Text:
+def capitalcase(string: str) -> str:
     """Convert string into capital case.
 
     First letters will be uppercase.
@@ -347,7 +335,7 @@ def capitalcase(string: Text) -> Text:
     return uppercase(string[0]) + string[1:]
 
 
-def lowercase(string: Text) -> Text:
+def lowercase(string: str) -> str:
     """Convert string into lower case.
 
     Inspired by: https://github.com/okunishinishi/python-stringcase
@@ -367,7 +355,7 @@ def lowercase(string: Text) -> Text:
     return str(string).lower()
 
 
-def snakecase(string: Text) -> Text:
+def snakecase(string: str) -> str:
     """Convert string into snake case.
 
     Join punctuation with underscore
@@ -396,7 +384,7 @@ def snakecase(string: Text) -> Text:
     )
 
 
-def uppercase(string: Text) -> Text:
+def uppercase(string: str) -> str:
     """Convert string into upper case.
 
     Inspired by: https://github.com/okunishinishi/python-stringcase
@@ -416,7 +404,7 @@ def uppercase(string: Text) -> Text:
     return str(string).upper()
 
 
-def slugify_ref(value: Text, allow_unicode: bool = False) -> Text:
+def slugify_ref(value: str, allow_unicode: bool = False) -> str:
     """
     Convert to ASCII if 'allow_unicode' is False. Convert spaces to hyphens.
 
@@ -431,9 +419,7 @@ def slugify_ref(value: Text, allow_unicode: bool = False) -> Text:
         value = unicodedata.normalize("NFKC", value)
         value = re.sub(r"[^\w\s-]", "", value, flags=re.U).strip().lower()
         return re.sub(r"[-\s]+", "-", value, flags=re.U)
-    value = (
-        unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
-    )
+    value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
     value = re.sub(r"[^\w\s-]", "", value).strip().lower()
     return re.sub(r"[-\s]+", "-", value)
 
@@ -455,7 +441,9 @@ def __dict_public__(cls: type(object)) -> Dict:
     return {k: v for (k, v) in cls.__dict__.items() if not k.startswith("__")}
 
 
-def __dict__inherited__(cls: type(object), stop: type(object) = type, public: Optional[bool] = True) -> Dict:
+def __dict__inherited__(
+    cls: type(object), stop: type(object) = type, public: Optional[bool] = True
+) -> Dict:
     """
     Get all __dict__ items of the class and its superclasses up to `type`, or the `stop` class given as input.
 
@@ -507,7 +495,7 @@ def get_in_chunks(lst: Union[List, Iterable], chunk_size: int) -> Iterable:
         yield lst[i: i + chunk_size]
 
 
-class Empty(object):
+class Empty:
     """
     Represents an empty value.
 

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Union
+from unittest import TestCase
 
 from jsonschema import validate
 
@@ -27,7 +28,7 @@ from pykechain.models.representations.representations import (
     UsePropertyNameRepresentation,
 )
 from pykechain.models.validators.validator_schemas import options_json_schema
-from tests.classes import SixTestCase, TestBetamax
+from tests.classes import TestBetamax
 
 representation_config = dict(
     rtype="buttonRepresentation",
@@ -40,12 +41,12 @@ options = dict(
 )
 
 
-class TestRepresentationJSON(SixTestCase):
+class TestRepresentationJSON(TestCase):
     def test_valid_button_representation_json(self):
         validate(options_json_schema, options)
 
 
-class TestRepresentation(SixTestCase):
+class TestRepresentation(TestCase):
     def test_create(self):
         representation = BaseRepresentation()
 
@@ -93,9 +94,7 @@ class TestRepresentation(SixTestCase):
             empty_activity.representations = [representation]
 
     def test_component_invalid_property_type(self):
-        empty_prop = Property(
-            json={"id": "1234567890", "category": "MODEL"}, client=None
-        )
+        empty_prop = Property(json={"id": "1234567890", "category": "MODEL"}, client=None)
         representation = ThousandsSeparator(empty_prop)
         representation.rtype = "Broken rtype"
 
@@ -231,9 +230,7 @@ class Bases:
         incorrect_value = ["must be a string"]
 
         def test_set_mode(self):
-            representation = self.obj.representations[
-                0
-            ]  # type: CustomIconRepresentation
+            representation = self.obj.representations[0]  # type: CustomIconRepresentation
 
             # Set mode
             representation.display_mode = FontAwesomeMode.SOLID
@@ -245,9 +242,7 @@ class Bases:
             self.assertEqual(representation.display_mode, reloaded_repr.display_mode)
 
         def test_set_mode_incorrect(self):
-            representation = self.obj.representations[
-                0
-            ]  # type: CustomIconRepresentation
+            representation = self.obj.representations[0]  # type: CustomIconRepresentation
 
             with self.assertRaises(IllegalArgumentError):
                 representation.display_mode = "fancy colors"
@@ -299,9 +294,7 @@ class TestReprButton(Bases._TestPropertyRepresentation):
         self.obj.options = ["alpha", "beta", "gamma", "omega"]
 
 
-class TestUsePropertyNameRepresentationForPartReferences(
-    Bases._TestPropertyRepresentation
-):
+class TestUsePropertyNameRepresentationForPartReferences(Bases._TestPropertyRepresentation):
     property_type = PropertyType.REFERENCES_VALUE
     representation_class = UsePropertyNameRepresentation
     value = True
@@ -328,50 +321,39 @@ class TestUsePropertyNameRepresentationForPartReferences(
         self.assertIsNone(repr.value)
 
 
-class TestUsePropertyNameRepresentationForUserReferences(
-    Bases._TestPropertyRepresentation
-):
+class TestUsePropertyNameRepresentationForUserReferences(Bases._TestPropertyRepresentation):
     property_type = PropertyType.USER_REFERENCES_VALUE
     representation_class = UsePropertyNameRepresentation
     value = True
     new_value = False
 
 
-class TestUsePropertyNameRepresentationForScopeReferences(
-    Bases._TestPropertyRepresentation
-):
+class TestUsePropertyNameRepresentationForScopeReferences(Bases._TestPropertyRepresentation):
     property_type = PropertyType.SCOPE_REFERENCES_VALUE
     representation_class = UsePropertyNameRepresentation
     value = True
     new_value = False
 
 
-class TestUsePropertyNameRepresentationForServiceReferences(
-    Bases._TestPropertyRepresentation
-):
+class TestUsePropertyNameRepresentationForServiceReferences(Bases._TestPropertyRepresentation):
     property_type = PropertyType.SERVICE_REFERENCES_VALUE
     representation_class = UsePropertyNameRepresentation
     value = True
     new_value = False
 
 
-class TestUsePropertyNameRepresentationForActivityReferences(
-    Bases._TestPropertyRepresentation
-):
+class TestUsePropertyNameRepresentationForActivityReferences(Bases._TestPropertyRepresentation):
     property_type = PropertyType.ACTIVITY_REFERENCES_VALUE
     representation_class = UsePropertyNameRepresentation
     value = True
     new_value = False
 
 
-class TestUseCameraScannerInputRepresentationForCharProperties(
-    Bases._TestPropertyRepresentation
-):
+class TestUseCameraScannerInputRepresentationForCharProperties(Bases._TestPropertyRepresentation):
     property_type = PropertyType.CHAR_VALUE
     representation_class = CameraScannerInputRepresentation
     value = True
     new_value = False
-
 
 
 class TestUseCameraScannerInputRepresentationForTextAreaCharProperties(

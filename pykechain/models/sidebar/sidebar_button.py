@@ -1,12 +1,12 @@
-from typing import Dict, Optional, Text
+from typing import Dict, Optional
 
 from pykechain.enums import URITarget, FontAwesomeMode
 from pykechain.exceptions import IllegalArgumentError
 
-allowed_attributes = ['displayName_nl', 'displayName_de', 'displayName_fr', 'displayName_it']
+allowed_attributes = ["displayName_nl", "displayName_de", "displayName_fr", "displayName_it"]
 
 
-class SideBarButton(object):
+class SideBarButton:
     """
     Side-bar button class.
 
@@ -14,16 +14,18 @@ class SideBarButton(object):
     The original KE-chain buttons for the project detail, tasks and work breakdown structure are not separate buttons.
     """
 
-    def __init__(self,
-                 side_bar_manager: 'SideBarManager',
-                 json: Optional[Dict] = None,
-                 order: Optional[int] = None,
-                 title: Optional[Text] = None,
-                 icon: Optional[Text] = None,
-                 uri: Optional[Text] = None,
-                 uri_target: URITarget = URITarget.INTERNAL,
-                 icon_mode: FontAwesomeMode = FontAwesomeMode.REGULAR,
-                 **kwargs):
+    def __init__(
+        self,
+        side_bar_manager: "SideBarManager",
+        json: Optional[Dict] = None,
+        order: Optional[int] = None,
+        title: Optional[str] = None,
+        icon: Optional[str] = None,
+        uri: Optional[str] = None,
+        uri_target: URITarget = URITarget.INTERNAL,
+        icon_mode: FontAwesomeMode = FontAwesomeMode.REGULAR,
+        **kwargs,
+    ):
         """
         Create a side-bar button.
 
@@ -51,32 +53,38 @@ class SideBarButton(object):
         if json is None:
             json = {}
 
-        title = title if title else json.get('displayName')
-        order = order if order is not None else json.get('order')
-        icon = icon if icon else json.get('displayIcon')
-        uri = uri if uri else json.get('uri')
-        uri_target = json.get('uriTarget', uri_target)
-        icon_mode = json.get('displayIconMode', icon_mode)
+        title = title if title else json.get("displayName")
+        order = order if order is not None else json.get("order")
+        icon = icon if icon else json.get("displayIcon")
+        uri = uri if uri else json.get("uri")
+        uri_target = json.get("uriTarget", uri_target)
+        icon_mode = json.get("displayIconMode", icon_mode)
 
         if not isinstance(order, int):
-            raise IllegalArgumentError('order must be an integer, "{}" is not.'.format(order))
+            raise IllegalArgumentError(f'order must be an integer, "{order}" is not.')
         if not isinstance(title, str):
-            raise IllegalArgumentError('title must be a string, "{}" is not.'.format(title))
+            raise IllegalArgumentError(f'title must be a string, "{title}" is not.')
         if not isinstance(icon, str):
-            raise IllegalArgumentError('icon must be a string, "{}" is not.'.format(icon))
+            raise IllegalArgumentError(f'icon must be a string, "{icon}" is not.')
         if not isinstance(uri, str):
-            raise IllegalArgumentError('uri must be a string, "{}" is not.'.format(uri))
+            raise IllegalArgumentError(f'uri must be a string, "{uri}" is not.')
         if uri_target not in URITarget.values():
-            raise IllegalArgumentError('uri_target must be a URITarget option, "{}" is not.'.format(uri_target))
+            raise IllegalArgumentError(
+                f'uri_target must be a URITarget option, "{uri_target}" is not.'
+            )
         if icon_mode not in FontAwesomeMode.values():
-            raise IllegalArgumentError('icon_mode must be a FontAwesomeMode option, "{}" is not.'.format(icon_mode))
+            raise IllegalArgumentError(
+                f'icon_mode must be a FontAwesomeMode option, "{icon_mode}" is not.'
+            )
 
         for key in kwargs.keys():
             if key not in allowed_attributes:
                 raise IllegalArgumentError(
-                    'Attribute "{}" is not supported in the configuration of a side-bar button.'.format(key))
+                    f'Attribute "{key}" is not supported in the configuration of a side-bar'
+                    " button."
+                )
 
-        self._manager: 'SideBarManager' = side_bar_manager
+        self._manager: "SideBarManager" = side_bar_manager
         self.display_name: str = title
         self.order: int = order
         self.display_icon: str = icon
@@ -89,8 +97,8 @@ class SideBarButton(object):
             if key in json:
                 self._other_attributes[key] = json[key]
 
-    def __repr__(self) -> Text:
-        return '{} {}: {}'.format(self.__class__.__name__, self.order, self.display_name)
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__} {self.order}: {self.display_name}"
 
     def refresh(self, json: Optional[Dict] = None) -> None:
         """

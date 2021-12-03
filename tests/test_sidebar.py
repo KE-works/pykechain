@@ -7,26 +7,25 @@ from tests.classes import TestBetamax
 
 
 class TestSideBar(TestBetamax):
-
     def setUp(self):
-        super(TestSideBar, self).setUp()
+        super().setUp()
 
         self.scope = self.project.clone(asynchronous=False)  # type: Scope
         del self.project
 
         self.manager = SideBarManager(scope=self.scope)
-        self.scope_uri = '#/scopes/{}'.format(self.scope.id)
-        self.scope_activity_uri = '{}/{}'.format(self.scope_uri, SubprocessDisplayMode.ACTIVITIES)
+        self.scope_uri = f"#/scopes/{self.scope.id}"
+        self.scope_activity_uri = f"{self.scope_uri}/{SubprocessDisplayMode.ACTIVITIES}"
 
         self.default_button_config = {
-            'title': 'new button',
-            'icon': 'bookmark',
-            'uri': '{}/{}'.format(self.scope_uri, KEChainPages.DATA_MODEL)
+            "title": "new button",
+            "icon": "bookmark",
+            "uri": f"{self.scope_uri}/{KEChainPages.DATA_MODEL}",
         }
 
     def tearDown(self):
         self.scope.delete()
-        super(TestSideBar, self).tearDown()
+        super().tearDown()
 
     def test_manager(self):
         side_bar_manager = SideBarManager(scope=self.scope)
@@ -37,8 +36,10 @@ class TestSideBar(TestBetamax):
         manager_1 = SideBarManager(scope=self.scope)
         manager_2 = self.scope.side_bar()
 
-        self.assertTrue(manager_1 is manager_2,
-                        msg='There are 2 different manager objects while the same object is expected.')
+        self.assertTrue(
+            manager_1 is manager_2,
+            msg="There are 2 different manager objects while the same object is expected.",
+        )
 
     def test_loading_of_existing_buttons(self):
         for scope in self.client.scopes(status=ScopeStatus.ACTIVE):
@@ -64,28 +65,46 @@ class TestSideBar(TestBetamax):
     # noinspection PyTypeChecker
     def test_create_button_incorrect_arguments(self):
         with self.assertRaises(IllegalArgumentError):
-            SideBarButton(self.manager, order='3')
+            SideBarButton(self.manager, order="3")
 
         with self.assertRaises(IllegalArgumentError):
             SideBarButton(self.manager, order=1, title=False)
 
         with self.assertRaises(IllegalArgumentError):
-            SideBarButton(self.manager, order=1, title='Button', icon=32)
+            SideBarButton(self.manager, order=1, title="Button", icon=32)
 
         with self.assertRaises(IllegalArgumentError):
-            SideBarButton(self.manager, order=1, title='Button', icon='pennant', uri=44)
+            SideBarButton(self.manager, order=1, title="Button", icon="pennant", uri=44)
 
         with self.assertRaises(IllegalArgumentError):
-            SideBarButton(self.manager, order=1, title='Button', icon='pennant', uri='http://www.google.com',
-                          uri_target='any')
+            SideBarButton(
+                self.manager,
+                order=1,
+                title="Button",
+                icon="pennant",
+                uri="http://www.google.com",
+                uri_target="any",
+            )
 
         with self.assertRaises(IllegalArgumentError):
-            SideBarButton(self.manager, order=1, title='Button', icon='pennant', uri='http://www.google.com',
-                          icon_mode='best')
+            SideBarButton(
+                self.manager,
+                order=1,
+                title="Button",
+                icon="pennant",
+                uri="http://www.google.com",
+                icon_mode="best",
+            )
 
         with self.assertRaises(IllegalArgumentError):
-            SideBarButton(self.manager, order=1, title='Button', icon='pennant', uri='http://www.google.com',
-                          random='unsupported keyword')
+            SideBarButton(
+                self.manager,
+                order=1,
+                title="Button",
+                icon="pennant",
+                uri="http://www.google.com",
+                random="unsupported keyword",
+            )
 
     def test_edit_button(self):
         custom_name = "Custom Dutch name"
@@ -110,7 +129,7 @@ class TestSideBar(TestBetamax):
         new_button = self.manager.create_button(**self.default_button_config)
 
         button_from_index = self.manager[0]
-        button_from_title = self.manager['new button']
+        button_from_title = self.manager["new button"]
         button_from_button = self.manager[new_button]
 
         self.assertIs(new_button, button_from_index)
@@ -123,7 +142,7 @@ class TestSideBar(TestBetamax):
 
         with self.assertRaises(NotFoundError):
             # noinspection PyStatementEffect
-            self.manager['unused button title']
+            self.manager["unused button title"]
 
     def test_remove_button(self):
         new_button = self.manager.create_button(**self.default_button_config)
@@ -147,19 +166,19 @@ class TestSideBar(TestBetamax):
     def test_bulk_add_buttons(self):
         buttons = [
             {
-                'displayName': 'activity button',
-                'displayIcon': 'bookmark',
-                'uri': '{}/{}'.format(self.scope_activity_uri, self.scope.activities()[0].id),
+                "displayName": "activity button",
+                "displayIcon": "bookmark",
+                "uri": f"{self.scope_activity_uri}/{self.scope.activities()[0].id}",
             },
             {
-                'displayName': 'ke-chain page',
-                'displayIcon': 'university',
-                'uri': '{}/{}'.format(self.scope_uri, KEChainPages.EXPLORER)
+                "displayName": "ke-chain page",
+                "displayIcon": "university",
+                "uri": f"{self.scope_uri}/{KEChainPages.EXPLORER}",
             },
             {
-                'displayName': 'external button',
-                'displayIcon': 'google',
-                'uri': 'https://www.google.com',
+                "displayName": "external button",
+                "displayIcon": "google",
+                "uri": "https://www.google.com",
             },
         ]
         new_buttons = self.manager.add_buttons(
@@ -178,29 +197,37 @@ class TestSideBar(TestBetamax):
 
             bulk_creation_manager.add_task_button(
                 activity=self.scope.activities()[0],
-                icon='bookmark',
+                icon="bookmark",
             )
             bulk_creation_manager.add_external_button(
-                url='https://www.google.com',
-                icon='google',
-                title='Google',
+                url="https://www.google.com",
+                icon="google",
+                title="Google",
             )
             bulk_creation_manager.add_ke_chain_page(
                 page_name=KEChainPages.WORK_BREAKDOWN,
-                icon='sitemap',
+                icon="sitemap",
             )
 
-            self.assertEqual(0, len(self.scope.options['customNavigation']),
-                             msg='During bulk creation of buttons, KE-chain should not be updated yet.')
+            self.assertEqual(
+                0,
+                len(self.scope.options["customNavigation"]),
+                msg="During bulk creation of buttons, KE-chain should not be updated yet.",
+            )
 
-        self.assertEqual(3, len(self.scope.options['customNavigation']),
-                         msg='After closing the context `with`, update should be performed.')
+        self.assertEqual(
+            3,
+            len(self.scope.options["customNavigation"]),
+            msg="After closing the context `with`, update should be performed.",
+        )
 
-        updated_side_bar_buttons = self.scope.options.get('customNavigation')
-        self.assertTrue(len(updated_side_bar_buttons) == 3,
-                        msg='At the end of bulk creation, the buttons must have been created.')
+        updated_side_bar_buttons = self.scope.options.get("customNavigation")
+        self.assertTrue(
+            len(updated_side_bar_buttons) == 3,
+            msg="At the end of bulk creation, the buttons must have been created.",
+        )
 
-        self.assertTrue(self.scope.options.get('overrideSideBar'))
+        self.assertTrue(self.scope.options.get("overrideSideBar"))
 
     def test_load_buttons(self):
         # setup: create a custom button
@@ -218,7 +245,7 @@ class TestSideBar(TestBetamax):
             sbm.override_sidebar = True
             sbm.add_ke_chain_page(KEChainPages.TASKS)
 
-        self.assertEqual(1, len(self.scope.options.get('customNavigation')))
+        self.assertEqual(1, len(self.scope.options.get("customNavigation")))
 
     def test_attributes_button(self):
         display_name_nl = "Het data model"

@@ -5,7 +5,8 @@
 from .component import RepresentationsComponent
 from .representation_base import BaseRepresentation
 from .representations import (
-    CameraScannerInputRepresentation, DecimalPlaces,
+    CameraScannerInputRepresentation,
+    DecimalPlaces,
     SignificantDigits,
     ThousandsSeparator,
     LinkTarget,

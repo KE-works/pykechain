@@ -7,7 +7,7 @@ from tests.classes import TestBetamax
 
 
 class TestTags(TestCase):
-    tags = ['one', 'two', 'three']
+    tags = ["one", "two", "three"]
 
     def setUp(self):
         self.obj = ConcreteTagsBase()
@@ -24,14 +24,14 @@ class TestTags(TestCase):
         self.assertTrue(sorted(self.tags) == sorted(self.obj.tags))
 
     def test_setter(self):
-        new_tags = ['1', '2', '3']
+        new_tags = ["1", "2", "3"]
         self.obj.tags = new_tags
 
         self.assertTrue(len(new_tags) == len(self.obj.tags))
         self.assertTrue(sorted(new_tags) == sorted(self.obj.tags))
 
     def test_setter_duplicate(self):
-        self.obj.add_tag(tag='one')
+        self.obj.add_tag(tag="one")
         self.assertTrue(len(self.obj.tags) == 3)
 
     def test_setter_none(self):
@@ -42,42 +42,41 @@ class TestTags(TestCase):
 
     def test_setter_not_an_iterable(self):
         with self.assertRaises(IllegalArgumentError):
-            self.obj.tags = 'four'
+            self.obj.tags = "four"
 
     def test_setter_not_a_string(self):
         with self.assertRaises(ValueError):
             self.obj.tags = [1, 2, 3]
 
     def test_remove_tag(self):
-        self.obj.remove_tag(tag='two')
+        self.obj.remove_tag(tag="two")
 
-        self.assertNotIn('two', self.obj.tags)
+        self.assertNotIn("two", self.obj.tags)
 
     def test_remove_tag_failure(self):
         with self.assertRaises(IllegalArgumentError):
-            self.obj.remove_tag(tag='just a flesh wound')
+            self.obj.remove_tag(tag="just a flesh wound")
 
     def test_add_tag(self):
-        self.obj.add_tag(tag='four')
+        self.obj.add_tag(tag="four")
 
-        self.assertIn('four', self.obj.tags)
+        self.assertIn("four", self.obj.tags)
 
     def test_has_tag_true(self):
-        self.assertTrue(self.obj.has_tag(tag='three'))
+        self.assertTrue(self.obj.has_tag(tag="three"))
 
     def test_has_tag_false(self):
-        self.assertFalse(self.obj.has_tag(tag='ten'))
+        self.assertFalse(self.obj.has_tag(tag="ten"))
 
 
 class TestTagsScope(TestBetamax):
-
     def test_scope_tags(self):
         """test to retrieve the tags for a scope"""
         # setup
         saved_tags = self.project.tags
 
         # test
-        scope_tags = ['a', 'list', 'of-tags']
+        scope_tags = ["a", "list", "of-tags"]
         self.project.edit(tags=scope_tags)
         self.assertListEqual(scope_tags, self.project.tags)
 
@@ -100,19 +99,19 @@ class TestTagsScope(TestBetamax):
 
 
 class TestTagsActivity(TestBetamax):
-    tags = ['one', 'two', 'three']
+    tags = ["one", "two", "three"]
 
     def setUp(self):
-        super(TestTagsActivity, self).setUp()
-        self.task = self.project.activity(name='SubTask')  # type: Activity
+        super().setUp()
+        self.task = self.project.activity(name="SubTask")  # type: Activity
 
     def tearDown(self):
         self.task.tags = None
-        super(TestTagsActivity, self).tearDown()
+        super().tearDown()
 
     def test_activity_tags(self):
         # setup
-        new_tags = ['four', 'five', 'six']
+        new_tags = ["four", "five", "six"]
         self.task.tags = new_tags
         reloaded = self.project.activity(pk=self.task.id)
 

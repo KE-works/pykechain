@@ -7,11 +7,10 @@ from tests.classes import TestBetamax
 
 
 class TestPartCreateWithProperties(TestBetamax):
-
     def setUp(self):
         super().setUp()
-        self.parent = self.project.part('Bike')  # type: Part
-        self.wheel_model = self.project.model('Wheel')  # type: Part
+        self.parent = self.project.part("Bike")  # type: Part
+        self.wheel_model = self.project.model("Wheel")  # type: Part
         self.new_wheel = None
 
     def tearDown(self):
@@ -21,11 +20,7 @@ class TestPartCreateWithProperties(TestBetamax):
 
     def test_create_part_with_properties_no_bulk(self):
         """Test create a part with the properties when bulk = False for old API compatibility"""
-        update_dict = {
-            'Diameter': 42.42,
-            'Spokes': 42,
-            'Rim Material': 'Unobtanium'
-        }
+        update_dict = {"Diameter": 42.42, "Spokes": 42, "Rim Material": "Unobtanium"}
 
         self.new_wheel = self.parent.add_with_properties(
             self.wheel_model,
@@ -35,15 +30,11 @@ class TestPartCreateWithProperties(TestBetamax):
         )
 
         self.assertIsInstance(self.new_wheel, Part)
-        self.assertTrue(self.new_wheel.property('Diameter'), 42.42)
+        self.assertTrue(self.new_wheel.property("Diameter"), 42.42)
 
     def test_create_part_with_properties_names_with_bulk(self):
         """Test create a part with the properties when bulk = False for old API compatibility"""
-        update_dict = {
-            'Diameter': 42.43,
-            'Spokes': 42,
-            'Rim Material': 'Unobtanium'
-        }
+        update_dict = {"Diameter": 42.43, "Spokes": 42, "Rim Material": "Unobtanium"}
 
         self.new_wheel = self.parent.add_with_properties(
             self.wheel_model,
@@ -53,14 +44,14 @@ class TestPartCreateWithProperties(TestBetamax):
         )
 
         self.assertIsInstance(self.new_wheel, Part)
-        self.assertTrue(self.new_wheel.property('Diameter'), 42.43)
+        self.assertTrue(self.new_wheel.property("Diameter"), 42.43)
 
     def test_create_part_with_properties_ids_with_bulk(self):
         """Test create a part with the properties when bulk = False for old API compatibility"""
         update_dict = {
-            self.wheel_model.property('Diameter').id: 42.43,
-            self.wheel_model.property('Spokes').id: 42,
-            self.wheel_model.property('Rim Material').id: 'Unobtanium'
+            self.wheel_model.property("Diameter").id: 42.43,
+            self.wheel_model.property("Spokes").id: 42,
+            self.wheel_model.property("Rim Material").id: "Unobtanium",
         }
 
         # check if the keys are really a UUID
@@ -74,15 +65,19 @@ class TestPartCreateWithProperties(TestBetamax):
         )
 
         self.assertIsInstance(self.new_wheel, Part)
-        self.assertTrue(self.new_wheel.property('Diameter'), 42.43)
+        self.assertTrue(self.new_wheel.property("Diameter"), 42.43)
 
 
 class TestPartCreateModelWithProperties(TestBetamax):
     properties_fvalues = [
         {"name": "char prop", "property_type": PropertyType.CHAR_VALUE},
         {"name": "number prop", "property_type": PropertyType.FLOAT_VALUE, "value": 3.14},
-        {"name": "boolean_prop", "property_type": PropertyType.BOOLEAN_VALUE, "value": False,
-         "value_options": {"validators": [RequiredFieldValidator().as_json()]}}
+        {
+            "name": "boolean_prop",
+            "property_type": PropertyType.BOOLEAN_VALUE,
+            "value": False,
+            "value_options": {"validators": [RequiredFieldValidator().as_json()]},
+        },
     ]
 
     def setUp(self):
@@ -95,10 +90,10 @@ class TestPartCreateModelWithProperties(TestBetamax):
         super().tearDown()
 
     def test_create_model_with_properties(self):
-        parent = self.project.model(name__startswith='Catalog')
+        parent = self.project.model(name__startswith="Catalog")
 
         new_model = self.project.create_model_with_properties(
-            name='A new model',
+            name="A new model",
             parent=parent.id,
             multiplicity=Multiplicity.ZERO_MANY,
             properties_fvalues=self.properties_fvalues,
@@ -106,19 +101,17 @@ class TestPartCreateModelWithProperties(TestBetamax):
         self.new_part = new_model
 
         self.assertEqual(3, len(new_model.properties))
-        self.assertEqual(new_model.property('number prop').value, 3.14)
-        self.assertEqual(new_model.property('boolean_prop').value, False)
-        self.assertTrue(new_model.property('boolean_prop')._options)
+        self.assertEqual(new_model.property("number prop").value, 3.14)
+        self.assertEqual(new_model.property("boolean_prop").value, False)
+        self.assertTrue(new_model.property("boolean_prop")._options)
 
     def test_create_with_invalid_properties(self):
-        parent = self.project.model(name__startswith='Catalog')
+        parent = self.project.model(name__startswith="Catalog")
 
         with self.assertRaises(IllegalArgumentError):
             self.new_part = self.project.create_model_with_properties(
-                name='A new model',
+                name="A new model",
                 parent=parent.id,
                 multiplicity=Multiplicity.ZERO_MANY,
-                properties_fvalues=[
-                    {"property_type": PropertyType.CHAR_VALUE}
-                ],
+                properties_fvalues=[{"property_type": PropertyType.CHAR_VALUE}],
             )

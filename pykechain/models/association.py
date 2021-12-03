@@ -18,14 +18,14 @@ class Association(BaseInScope):
         """Construct an association from provided json data."""
         super().__init__(json=json, client=client)
 
-        self.property_instance_id = json.get('instance_property')
-        self.property_model_id = json.get('model_property')
-        self.part_instance_id = json.get('instance_part')
-        self.part_model_id = json.get('model_part')
-        self.widget_id = json.get('widget')
-        self.activity_id = json.get('activity')
-        self.writable = json.get('writable')
-        self.permissions = json.get('permissions')
+        self.property_instance_id = json.get("instance_property")
+        self.property_model_id = json.get("model_property")
+        self.part_instance_id = json.get("instance_part")
+        self.part_model_id = json.get("model_part")
+        self.widget_id = json.get("widget")
+        self.activity_id = json.get("activity")
+        self.writable = json.get("writable")
+        self.permissions = json.get("permissions")
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke {} id {}>".format(self.__class__.__name__, self.id)
+        return f"<pyke {self.__class__.__name__} id {self.id}>"

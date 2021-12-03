@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from typing import Optional, Any, Text, Union, Tuple, List
+from typing import Optional, Any, Union, Tuple, List
 
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Property, Base
@@ -48,7 +48,7 @@ class _ReferenceProperty(Property):
         else:
             self._put_value(value)
 
-    def value_ids(self) -> Optional[List[Text]]:
+    def value_ids(self) -> Optional[List[str]]:
         """
         Retrieve the referenced object UUIDs only.
 
@@ -57,7 +57,7 @@ class _ReferenceProperty(Property):
         """
         return [value.get("id") for value in self._value] if self.has_value() else None
 
-    def _validate_values(self) -> List[Text]:
+    def _validate_values(self) -> List[str]:
         """
         Check if the `_value` attribute has valid content.
 
@@ -74,9 +74,7 @@ class _ReferenceProperty(Property):
             elif isinstance(value, (int, str)):
                 object_ids.append(str(value))
             else:  # pragma: no cover
-                raise ValueError(
-                    'Value "{}" must be a dict with field `id` or a UUID.'.format(value)
-                )
+                raise ValueError(f'Value "{value}" must be a dict with field `id` or a UUID.')
         return object_ids
 
     @abstractmethod
@@ -91,7 +89,7 @@ class _ReferenceProperty(Property):
         """
         pass  # pragma: no cover
 
-    def serialize_value(self, value: Union[Base, List, Tuple]) -> Optional[List[Text]]:
+    def serialize_value(self, value: Union[Base, List, Tuple]) -> Optional[List[str]]:
         """
         Serialize the value to be set on the property by checking for a list of Base objects.
 
@@ -100,23 +98,23 @@ class _ReferenceProperty(Property):
         :return: serialized value
         """
         try:
-            value = check_base(value, cls=self.REFERENCED_CLASS, key='Reference')
+            value = check_base(value, cls=self.REFERENCED_CLASS, key="Reference")
             return [value] if value is not None else value
         except IllegalArgumentError:
             # expected to fail, as value should be an iterable
-            return check_list_of_base(value, cls=self.REFERENCED_CLASS, key='references')
+            return check_list_of_base(value, cls=self.REFERENCED_CLASS, key="references")
 
     def set_prefilters(
-            self,
-            prefilters: Optional[List[BaseFilter]] = None,
-            clear: Optional[bool] = False,
+        self,
+        prefilters: Optional[List[BaseFilter]] = None,
+        clear: Optional[bool] = False,
     ):
         """
         Set the prefilters on the reference property.
 
         :return: None
         """
-        raise NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
+        raise NotImplementedError(f"Method not (yet) implemented for {self.__class__}")
 
     def get_prefilters(self):
         """
@@ -124,7 +122,7 @@ class _ReferenceProperty(Property):
 
         :return: list of filter values.
         """
-        raise NotImplementedError("Method not (yet) implemented for {}".format(self.__class__))
+        raise NotImplementedError(f"Method not (yet) implemented for {self.__class__}")
 
 
 class _ReferencePropertyInScope(_ReferenceProperty, ABC):
@@ -149,20 +147,22 @@ class _ReferencePropertyInScope(_ReferenceProperty, ABC):
         :param referenced_object: Either a pykechain object or a UUID string.
         :return: None
         """
-        if self._options and 'scope_id' not in self._options:
+        if self._options and "scope_id" not in self._options:
             # See whether the referenced model is an object with an ID
             if isinstance(referenced_object, self.REFERENCED_CLASS):
                 x_scope_id = referenced_object.scope_id
             else:
                 # retrieve the scope_id from the property model's value (which is an object in a scope (x_scope))
                 referenced_models = self.model().value
-                if not referenced_models or not isinstance(referenced_models[0], self.REFERENCED_CLASS):
+                if not referenced_models or not isinstance(
+                    referenced_models[0], self.REFERENCED_CLASS
+                ):
                     # if the referenced model is not set or the referenced value is not in current scope
                     x_scope_id = self.scope_id
                 else:
                     # get the scope_id from the referenced model
                     x_scope_id = referenced_models[0].scope_id
-            self._options['scope_id'] = x_scope_id
+            self._options["scope_id"] = x_scope_id
 
             # edit the model of the property, such that all instances are updated as well.
             self.model().edit(options=self._options)

@@ -1,5 +1,5 @@
 import datetime
-from typing import Union, Text
+from typing import Union
 
 from pykechain.models import Property
 from pykechain.models.input_checks import check_datetime
@@ -17,11 +17,11 @@ class DatetimeProperty(Property):
         return parse_datetime(self._value)
 
     @staticmethod
-    def to_iso_format(date_time: datetime.datetime) -> Text:
+    def to_iso_format(date_time: datetime.datetime) -> str:
         """Convert a datetime object to isoformat."""
         return date_time.isoformat()
 
-    def serialize_value(self, value) -> Text:
+    def serialize_value(self, value) -> str:
         """
         Serialize the value to be set on the property by checking for formatted strings or datetime objects.
 
@@ -29,4 +29,4 @@ class DatetimeProperty(Property):
         :type value: Any
         :return: serialized value
         """
-        return check_datetime(dt=value, key='value')
+        return check_datetime(dt=value, key="value")

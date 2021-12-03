@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from pykechain.enums import PropertyType
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import SelectListProperty, Property
@@ -13,24 +12,24 @@ class SelectListBaseTests:
         """Tests for the select list properties."""
 
         PROPERTY_TYPE = None
-        OPTIONS = ['1', '3.14', "text"]
+        OPTIONS = ["1", "3.14", "text"]
 
         def setUp(self):
             super().setUp()
 
-            self.select_model = self.project.model('Bike').add_property(
+            self.select_model = self.project.model("Bike").add_property(
                 name=self.PROPERTY_TYPE,
                 property_type=self.PROPERTY_TYPE,
-                options={'value_choices': ['1', '3.14', "text"]}
+                options={"value_choices": ["1", "3.14", "text"]},
             )
-            self.select = self.project.part('Bike').property(self.PROPERTY_TYPE)
+            self.select = self.project.part("Bike").property(self.PROPERTY_TYPE)
 
         def tearDown(self):
             self.select_model.delete()
             super().tearDown()
 
         def test_get_options_list(self):
-            self.assertTrue(hasattr(self.select_model, 'options'))
+            self.assertTrue(hasattr(self.select_model, "options"))
             self.assertIsInstance(self.select_model.options, list)
             for item in self.select_model.options:
                 self.assertTrue(type(item), str)
@@ -38,7 +37,7 @@ class SelectListBaseTests:
         def test_set_options_list(self):
             # setUp
             current_options_list = [1, 3.14, "text"]
-            new_options_list = ['some', 'new', 4, 'options']
+            new_options_list = ["some", "new", 4, "options"]
             self.select_model.options = new_options_list
 
             # testing
@@ -62,7 +61,7 @@ class SelectListBaseTests:
 
             with self.assertRaises(IllegalArgumentError):
                 # dict
-                self.select_model.options = {'a': 1, 'b': 2, 'c': 3}
+                self.select_model.options = {"a": 1, "b": 2, "c": 3}
 
             with self.assertRaises(IllegalArgumentError):
                 # tuple
@@ -70,7 +69,7 @@ class SelectListBaseTests:
 
         def test_fail_to_set_options_on_instance(self):
             """Test settings options on a property instance, only models are allowed options to be set"""
-            self.assertTrue(hasattr(self.select, 'options'))
+            self.assertTrue(hasattr(self.select, "options"))
 
             with self.assertRaises(IllegalArgumentError):
                 self.select.options = [1, 3.14]
@@ -121,7 +120,9 @@ class TestPropertySelectListProperty(SelectListBaseTests.Tests):
     # in 1.15
     def test_set_value_not_in_options_raises_error(self):
         with self.assertRaises(IllegalArgumentError):
-            self.select.value = 'Some illegal value that is not inside the list of options for sure'
+            self.select.value = (
+                "Some illegal value that is not inside the list of options for sure"
+            )
 
 
 class TestPropertyMultiSelectListProperty(SelectListBaseTests.Tests):
@@ -144,4 +145,6 @@ class TestPropertyMultiSelectListProperty(SelectListBaseTests.Tests):
 
     def test_set_value_not_in_options_raises_error(self):
         with self.assertRaises(IllegalArgumentError):
-            self.select.value = ['Some illegal value that is not inside the list of options for sure']
+            self.select.value = [
+                "Some illegal value that is not inside the list of options for sure"
+            ]
