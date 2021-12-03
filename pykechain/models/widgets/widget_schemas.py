@@ -7,14 +7,22 @@ widget_meta_schema = {
     "additionalProperties": False,
     "properties": {},
     "definitions": {
-        "uuidString": {"type": "string",
-                       "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"},
-        "nullUuidString": {"type": ["string", "null"],
-                           "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"},
+        "uuidString": {
+            "type": "string",
+            "pattern": (
+                "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+            ),
+        },
+        "nullUuidString": {
+            "type": ["string", "null"],
+            "pattern": (
+                "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+            ),
+        },
         "nullString": {"type": ["string", "null"]},
         "positiveInteger": {"type": ["integer", "null", "string"], "minimum": 0},
-        "booleanNull": {"type": ["boolean", "null"]}
-    }
+        "booleanNull": {"type": ["boolean", "null"]},
+    },
 }
 
 undefined_meta_schema = deepcopy(widget_meta_schema)

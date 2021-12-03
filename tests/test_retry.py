@@ -8,7 +8,7 @@ from pykechain.defaults import (
     RETRY_ON_CONNECTION_ERRORS,
     RETRY_ON_READ_ERRORS,
     RETRY_ON_REDIRECT_ERRORS,
-    RETRY_TOTAL
+    RETRY_TOTAL,
 )
 from urllib3.exceptions import MaxRetryError
 
@@ -27,6 +27,7 @@ class TestPykeRetry(TestCase):
         with self.assertRaises(MaxRetryError):
             retry.increment(
                 error=SSLError(
-                    "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self signed certificate"
+                    "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self signed"
+                    " certificate"
                 )
             )

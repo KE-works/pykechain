@@ -13,10 +13,13 @@ class TestPropertyDateTime(TestBetamax):
     def setUp(self) -> None:
         super().setUp()
 
-        self.bike_model = self.project.model('Bike')
+        self.bike_model = self.project.model("Bike")
         self.property_model = self.bike_model.add_property(
-            name=self.NAME, property_type=PropertyType.DATETIME_VALUE)  # type: DatetimeProperty
-        self.property = self.project.part('Bike').property(name=self.NAME)  # type: DatetimeProperty
+            name=self.NAME, property_type=PropertyType.DATETIME_VALUE
+        )  # type: DatetimeProperty
+        self.property = self.project.part("Bike").property(
+            name=self.NAME
+        )  # type: DatetimeProperty
 
         self.property.value = self.example_time
 
@@ -37,7 +40,7 @@ class TestPropertyDateTime(TestBetamax):
 
     def test_set_value_non_datetime(self):
         with self.assertRaises(IllegalArgumentError):
-            self.property.value = '3'
+            self.property.value = "3"
 
     def test_set_value(self):
         self.property.value = self.example_time
@@ -58,9 +61,11 @@ class TestPropertyDateTime(TestBetamax):
         self.assertTrue(live_property.has_value())
 
     def test_value_via_part(self):
-        self.bike_model.update(update_dict={
-            self.NAME: self.example_time,
-        })
+        self.bike_model.update(
+            update_dict={
+                self.NAME: self.example_time,
+            }
+        )
 
     def test_to_datetime(self):
         date_time_value = self.property.to_datetime()

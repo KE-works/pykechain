@@ -1,5 +1,4 @@
 import datetime
-from typing import Text
 
 import pytz
 
@@ -26,16 +25,16 @@ class User(Base):
 
     def __init__(self, json, **kwargs):
         """Construct a user from provided json data."""
-        super(User, self).__init__(json, **kwargs)
+        super().__init__(json, **kwargs)
 
-        self.username = self._json_data.get('username', '')
-        self.id = self._json_data.get('pk', '')
+        self.username = self._json_data.get("username", "")
+        self.id = self._json_data.get("pk", "")
 
     def __repr__(self):  # pragma: no cover
-        return "<pyke {} '{}' id {}>".format(self.__class__.__name__, self.username, self.id)
+        return f"<pyke {self.__class__.__name__} '{self.username}' id {self.id}>"
 
     @property
-    def default_name(self) -> Text:
+    def default_name(self) -> str:
         """
         Get default name, prioritizing the user name over the KE-chain name.
 
@@ -55,10 +54,10 @@ class User(Base):
         :return: timezone object (compatible with datetime)
         :rtype: TzInfo
         """
-        return pytz.timezone(zone=self._json_data.get('timezone', 'UTC'))
+        return pytz.timezone(zone=self._json_data.get("timezone", "UTC"))
 
     @property
-    def language(self) -> Text:
+    def language(self) -> str:
         """
         Language code of the user.
 
@@ -67,17 +66,17 @@ class User(Base):
         :return: language code string
         :rtype: basestring
         """
-        return self._json_data.get('language_code', LanguageCodes.ENGLISH)
+        return self._json_data.get("language_code", LanguageCodes.ENGLISH)
 
     @property
-    def email(self) -> Text:
+    def email(self) -> str:
         """
         Email of the user.
 
         :return: email address, default is empty string.
         :rtype: basestring
         """
-        return self._json_data.get('email', '')
+        return self._json_data.get("email", "")
 
     def now_in_my_timezone(self) -> datetime.datetime:
         """
@@ -88,12 +87,12 @@ class User(Base):
         :return: Current datetime
         :rtype datetime.datetime
         """
-        timezone_definition = self._json_data['timezone']
+        timezone_definition = self._json_data["timezone"]
         if timezone_definition:
             timezone = pytz.timezone(timezone_definition)
         else:
             # if there is no timezone set then the Europe/Amsterdam timezone
-            timezone = pytz.timezone('Europe/Amsterdam')
+            timezone = pytz.timezone("Europe/Amsterdam")
 
         # Default is utc timezone
         utc_time = datetime.datetime.now(tz=pytz.utc)

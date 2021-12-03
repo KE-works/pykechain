@@ -7,7 +7,7 @@ from jsonschema import validate
 from pykechain.models.validators.validator_schemas import representation_jsonschema_stub
 
 
-class BaseRepresentation(object):
+class BaseRepresentation:
     """
     Base class for all Representations.
 
@@ -53,7 +53,7 @@ class BaseRepresentation(object):
             self._config[self._config_value_key] = value
 
     def __repr__(self):
-        return "{} ({})".format(self.__class__.__name__, self.value)
+        return f"{self.__class__.__name__} ({self.value})"
 
     def as_json(self) -> Dict:
         """Parse the validator to a proper validator json."""
@@ -79,15 +79,13 @@ class BaseRepresentation(object):
         try:
             rtype = json["rtype"]
         except KeyError:
-            raise ValueError(
-                "Representation unknown, incorrect json: '{}'".format(json)
-            )
+            raise ValueError(f"Representation unknown, incorrect json: '{json}'")
         try:
             from pykechain.models.representations import rtype_class_map
 
             repr_class: type(BaseRepresentation) = rtype_class_map[rtype]
         except KeyError:
-            raise TypeError('Unknown rtype "{}" in json'.format(rtype))
+            raise TypeError(f'Unknown rtype "{rtype}" in json')
 
         return repr_class(obj=obj, json=json)
 

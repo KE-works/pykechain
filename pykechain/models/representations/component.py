@@ -8,7 +8,7 @@ from pykechain.models.representations.representation_base import BaseRepresentat
 from pykechain.models.validators.validator_schemas import representation_jsonschema_stub
 
 
-class RepresentationsComponent(object):
+class RepresentationsComponent:
     """
     Aggregate class to use representations on an object.
 
@@ -17,9 +17,7 @@ class RepresentationsComponent(object):
     .. versionadded:: 3.7
     """
 
-    def __init__(
-        self, parent_object, representation_options: Dict, update_method: Callable
-    ):
+    def __init__(self, parent_object, representation_options: Dict, update_method: Callable):
         """
         Extract the json with the representation options.
 
@@ -36,9 +34,7 @@ class RepresentationsComponent(object):
         representations_json = self._repr_options
         for representation_json in representations_json:
             self._representations.append(
-                BaseRepresentation.parse(
-                    obj=self._parent_object, json=representation_json
-                )
+                BaseRepresentation.parse(obj=self._parent_object, json=representation_json)
             )
 
     def get_representations(self) -> List["AnyRepresentation"]:
@@ -67,21 +63,22 @@ class RepresentationsComponent(object):
         """Check provided representation inputs."""
         if not isinstance(representations, (tuple, list)):
             raise IllegalArgumentError(
-                "Should be a list or tuple with Representation objects, "
-                "got {}".format(type(representations))
+                "Should be a list or tuple with Representation objects, got {}".format(
+                    type(representations)
+                )
             )
 
         for r in representations:
             if not isinstance(r, BaseRepresentation):
                 raise IllegalArgumentError(
-                    "Representation '{}' should be a Representation object".format(r)
+                    f"Representation '{r}' should be a Representation object"
                 )
             if not _valid_object_type(r, self._parent_object):
                 raise IllegalArgumentError(
                     f"Representation '{r}' can not be added to "
                     f"'{self._parent_object}' as the representation is not "
-                    f"allowed on that propertyType. Please check relation between allowed"
-                    f"representation and property type accordingly."
+                    "allowed on that propertyType. Please check relation between allowed"
+                    "representation and property type accordingly."
                 )
             r.validate_json()
 
@@ -153,7 +150,7 @@ def _valid_object_type(representation: BaseRepresentation, obj: "Base") -> bool:
                     PropertyType.INT_VALUE,
                     PropertyType.FLOAT_VALUE,
                     PropertyType.TEXT_VALUE,
-                    PropertyType.CHAR_VALUE
+                    PropertyType.CHAR_VALUE,
                 )
             else:
                 return False

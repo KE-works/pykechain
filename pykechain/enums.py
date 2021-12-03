@@ -1,7 +1,7 @@
 from pykechain.utils import __dict__inherited__
 
 
-class Enum(object):
+class Enum:
     """Custom enumeration class to support class attributes as options.
 
     Example
@@ -16,7 +16,9 @@ class Enum(object):
     @classmethod
     def options(cls):
         """Provide a sorted list of options."""
-        return sorted((value, name) for (name, value) in __dict__inherited__(cls=cls, stop=Enum).items())
+        return sorted(
+            (value, name) for (name, value) in __dict__inherited__(cls=cls, stop=Enum).items()
+        )
 
     @classmethod
     def values(cls):
@@ -136,8 +138,8 @@ class ActivityType(Enum):
     :cvar PROCESS: a subprocess (container) containing other tasks
     """
 
-    PROCESS = 'PROCESS'
-    TASK = 'TASK'
+    PROCESS = "PROCESS"
+    TASK = "TASK"
 
 
 class ActivityClassification(Enum):
@@ -156,10 +158,10 @@ class ActivityClassification(Enum):
     :cvar FORM: Classification of the activity is FORM
     """
 
-    WORKFLOW = 'WORKFLOW'
-    CATALOG = 'CATALOG'
-    APP = 'APP'
-    FORM = 'FORM'
+    WORKFLOW = "WORKFLOW"
+    CATALOG = "CATALOG"
+    APP = "APP"
+    FORM = "FORM"
 
 
 class ActivityRootNames(Enum):
@@ -176,10 +178,10 @@ class ActivityRootNames(Enum):
     :cvar APP_ROOT: Root of the activity is APP_ROOT (below are APP 'tasks' ie. 'screems')
     """
 
-    WORKFLOW_ROOT = 'WORKFLOW_ROOT'
-    CATALOG_ROOT = 'CATALOG_ROOT'
-    APP_ROOT = 'APP_ROOT'
-    FORM_ROOT = 'FORM_ROOT'
+    WORKFLOW_ROOT = "WORKFLOW_ROOT"
+    CATALOG_ROOT = "CATALOG_ROOT"
+    APP_ROOT = "APP_ROOT"
+    FORM_ROOT = "FORM_ROOT"
 
 
 activity_root_name_by_classification = {
@@ -219,25 +221,25 @@ class WidgetNames(Enum):
     :cvar SCOPEMEMBERS: 'scopeMembersWidget'
     """
 
-    SUPERGRIDWIDGET = 'superGridWidget'
-    PROPERTYGRIDWIDGET = 'propertyGridWidget'
-    HTMLWIDGET = 'htmlWidget'
-    FILTEREDGRIDWIDGET = 'filteredGridWidget'
-    SERVICEWIDGET = 'serviceWidget'
-    NOTEBOOKWIDGET = 'notebookWidget'
-    ATTACHMENTVIEWERWIDGET = 'attachmentViewerWidget'
-    TASKNAVIGATIONBARWIDGET = 'taskNavigationBarWidget'
-    JSONWIDGET = 'jsonWidget'
-    METAPANELWIDGET = 'metaPanelWidget'
-    FORMMETAPANELWIDGET = 'formMetaPanelWidget'
-    MULTICOLUMNWIDGET = 'multiColumnWidget'
-    SIGNATUREWIDGET = 'signatureWidget'
-    CARDWIDGET = 'cardWidget'
-    PROGRESSWIDGET = 'progressWidget'
-    TASKSWIDGET = 'taskWidget'
-    SERVICECARDWIDGET = 'serviceCardWidget'
-    DASHBOARDWIDGET = 'dashboardWidget'
-    SCOPEMEMBERS = 'scopeMembersWidget'
+    SUPERGRIDWIDGET = "superGridWidget"
+    PROPERTYGRIDWIDGET = "propertyGridWidget"
+    HTMLWIDGET = "htmlWidget"
+    FILTEREDGRIDWIDGET = "filteredGridWidget"
+    SERVICEWIDGET = "serviceWidget"
+    NOTEBOOKWIDGET = "notebookWidget"
+    ATTACHMENTVIEWERWIDGET = "attachmentViewerWidget"
+    TASKNAVIGATIONBARWIDGET = "taskNavigationBarWidget"
+    JSONWIDGET = "jsonWidget"
+    METAPANELWIDGET = "metaPanelWidget"
+    FORMMETAPANELWIDGET = "formMetaPanelWidget"
+    MULTICOLUMNWIDGET = "multiColumnWidget"
+    SIGNATUREWIDGET = "signatureWidget"
+    CARDWIDGET = "cardWidget"
+    PROGRESSWIDGET = "progressWidget"
+    TASKSWIDGET = "taskWidget"
+    SERVICECARDWIDGET = "serviceCardWidget"
+    DASHBOARDWIDGET = "dashboardWidget"
+    SCOPEMEMBERS = "scopeMembersWidget"
 
 
 class WidgetTypes(Enum):
@@ -271,29 +273,29 @@ class WidgetTypes(Enum):
     :cvar SCOPEMEMBERS: Scopemembers widget
     """
 
-    UNDEFINED = 'UNDEFINED'
-    PROPERTYGRID = 'PROPERTYGRID'
-    SUPERGRID = 'SUPERGRID'
-    HTML = 'HTML'
-    FILTEREDGRID = 'FILTEREDGRID'
-    SERVICE = 'SERVICE'
-    NOTEBOOK = 'NOTEBOOK'
-    ATTACHMENTVIEWER = 'ATTACHMENTVIEWER'
-    TASKNAVIGATIONBAR = 'TASKNAVIGATIONBAR'
-    JSON = 'JSON'
-    METAPANEL = 'METAPANEL'
-    FORMMETAPANEL = 'FORMMETAPANEL'
-    MULTICOLUMN = 'MULTICOLUMN'
-    SCOPE = 'SCOPE'
-    THIRDPARTY = 'THIRDPARTY'
-    PROGRESS = 'PROGRESS'
-    SIGNATURE = 'SIGNATURE'
-    CARD = 'CARD'
-    TASKS = 'TASKS'
-    WEATHER = 'WEATHER'
-    SERVICECARD = 'SERVICECARD'
-    DASHBOARD = 'DASHBOARD'
-    SCOPEMEMBERS = 'SCOPEMEMBERS'
+    UNDEFINED = "UNDEFINED"
+    PROPERTYGRID = "PROPERTYGRID"
+    SUPERGRID = "SUPERGRID"
+    HTML = "HTML"
+    FILTEREDGRID = "FILTEREDGRID"
+    SERVICE = "SERVICE"
+    NOTEBOOK = "NOTEBOOK"
+    ATTACHMENTVIEWER = "ATTACHMENTVIEWER"
+    TASKNAVIGATIONBAR = "TASKNAVIGATIONBAR"
+    JSON = "JSON"
+    METAPANEL = "METAPANEL"
+    FORMMETAPANEL = "FORMMETAPANEL"
+    MULTICOLUMN = "MULTICOLUMN"
+    SCOPE = "SCOPE"
+    THIRDPARTY = "THIRDPARTY"
+    PROGRESS = "PROGRESS"
+    SIGNATURE = "SIGNATURE"
+    CARD = "CARD"
+    TASKS = "TASKS"
+    WEATHER = "WEATHER"
+    SERVICECARD = "SERVICECARD"
+    DASHBOARD = "DASHBOARD"
+    SCOPEMEMBERS = "SCOPEMEMBERS"
 
 
 WidgetCompatibleTypes = {
@@ -334,8 +336,8 @@ class ActivityStatus(Enum):
     :cvar COMPLETED: status of activity is completed
     """
 
-    OPEN = 'OPEN'
-    COMPLETED = 'COMPLETED'
+    OPEN = "OPEN"
+    COMPLETED = "COMPLETED"
 
 
 class ScopeStatus(Enum):
@@ -350,10 +352,10 @@ class ScopeStatus(Enum):
     :cvar DELETING: Status of a scope when the scope is being deleted
     """
 
-    ACTIVE = 'ACTIVE'
-    CLOSED = 'CLOSED'
-    TEMPLATE = 'TEMPLATE'
-    DELETING = 'DELETING'
+    ACTIVE = "ACTIVE"
+    CLOSED = "CLOSED"
+    TEMPLATE = "TEMPLATE"
+    DELETING = "DELETING"
 
 
 class ScopeCategory(Enum):
@@ -366,9 +368,9 @@ class ScopeCategory(Enum):
     :cvar TEMPLATE_SCOPE: The scope is a template scope
     """
 
-    LIBRARY_SCOPE = 'LIBRARY_SCOPE'
-    USER_SCOPE = 'USER_SCOPE'
-    TEMPLATE_SCOPE = 'TEMPLATE_SCOPE'
+    LIBRARY_SCOPE = "LIBRARY_SCOPE"
+    USER_SCOPE = "USER_SCOPE"
+    TEMPLATE_SCOPE = "TEMPLATE_SCOPE"
 
 
 class ServiceType(Enum):
@@ -378,8 +380,8 @@ class ServiceType(Enum):
     :cvar NOTEBOOK: service is a jupyter notebook
     """
 
-    PYTHON_SCRIPT = 'PYTHON SCRIPT'
-    NOTEBOOK = 'NOTEBOOK'
+    PYTHON_SCRIPT = "PYTHON SCRIPT"
+    NOTEBOOK = "NOTEBOOK"
 
 
 class ServiceEnvironmentVersion(Enum):
@@ -392,13 +394,13 @@ class ServiceEnvironmentVersion(Enum):
     :cvar PYTHON_3_8_NOTEBOOKS: execution environment is a python 3.8 container with jupyter notebook preinstalled
     """
 
-    PYTHON_3_6 = '3.6'
-    PYTHON_3_7 = '3.7'
-    PYTHON_3_8 = '3.8'
-    PYTHON_3_9 = '3.9'
-    PYTHON_3_6_NOTEBOOKS = '3.6_notebook'
-    PYTHON_3_8_NOTEBOOKS = '3.8_notebook'
-    PYTHON_3_9_NOTEBOOKS = '3.9_notebook'
+    PYTHON_3_6 = "3.6"
+    PYTHON_3_7 = "3.7"
+    PYTHON_3_8 = "3.8"
+    PYTHON_3_9 = "3.9"
+    PYTHON_3_6_NOTEBOOKS = "3.6_notebook"
+    PYTHON_3_8_NOTEBOOKS = "3.8_notebook"
+    PYTHON_3_9_NOTEBOOKS = "3.9_notebook"
 
 
 class ServiceScriptUser(Enum):
@@ -425,12 +427,12 @@ class ServiceExecutionStatus(Enum):
     :cvar TERMINATED: Execution is in TERMINATED state
     """
 
-    LOADING = 'LOADING'
-    RUNNING = 'RUNNING'
-    COMPLETED = 'COMPLETED'
-    FAILED = 'FAILED'
-    TERMINATING = 'TERMINATING'
-    TERMINATED = 'TERMINATED'
+    LOADING = "LOADING"
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    TERMINATING = "TERMINATING"
+    TERMINATED = "TERMINATED"
 
 
 class TeamRoles(Enum):
@@ -470,8 +472,8 @@ class ScopeMemberActions(Enum):
     :cvar REMOVE: delete a member from the scope
     """
 
-    ADD = 'add'
-    REMOVE = 'remove'
+    ADD = "add"
+    REMOVE = "remove"
 
 
 class ContextType(Enum):
@@ -533,15 +535,15 @@ class KechainEnv(Enum):
     :cvar KECHAIN_CHECK_CERTIFICATES: if the certificates of the URL should be checked.
     """
 
-    KECHAIN_FORCE_ENV_USE = 'KECHAIN_FORCE_ENV_USE'
-    KECHAIN_URL = 'KECHAIN_URL'
-    KECHAIN_TOKEN = 'KECHAIN_TOKEN'
-    KECHAIN_USERNAME = 'KECHAIN_USERNAME'
-    KECHAIN_PASSWORD = 'KECHAIN_PASSWORD'
-    KECHAIN_SCOPE = 'KECHAIN_SCOPE'
-    KECHAIN_SCOPE_ID = 'KECHAIN_SCOPE_ID'
-    KECHAIN_SCOPE_STATUS = 'KECHAIN_SCOPE_STATUS'
-    KECHAIN_CHECK_CERTIFICATES = 'KECHAIN_CHECK_CERTIFICATES'
+    KECHAIN_FORCE_ENV_USE = "KECHAIN_FORCE_ENV_USE"
+    KECHAIN_URL = "KECHAIN_URL"
+    KECHAIN_TOKEN = "KECHAIN_TOKEN"
+    KECHAIN_USERNAME = "KECHAIN_USERNAME"
+    KECHAIN_PASSWORD = "KECHAIN_PASSWORD"
+    KECHAIN_SCOPE = "KECHAIN_SCOPE"
+    KECHAIN_SCOPE_ID = "KECHAIN_SCOPE_ID"
+    KECHAIN_SCOPE_STATUS = "KECHAIN_SCOPE_STATUS"
+    KECHAIN_CHECK_CERTIFICATES = "KECHAIN_CHECK_CERTIFICATES"
 
 
 class SortTable(Enum):
@@ -551,8 +553,8 @@ class SortTable(Enum):
     :cvar DESCENDING: Table is sorted in DESCENDING ORDER
     """
 
-    ASCENDING = 'ASC'
-    DESCENDING = 'DESC'
+    ASCENDING = "ASC"
+    DESCENDING = "DESC"
 
 
 class Alignment(Enum):
@@ -563,9 +565,9 @@ class Alignment(Enum):
     :cvar RIGHT: Aligned to the right
     """
 
-    LEFT = 'left'
-    CENTER = 'center'
-    RIGHT = 'right'
+    LEFT = "left"
+    CENTER = "center"
+    RIGHT = "right"
 
 
 class NavigationBarAlignment(Alignment):
@@ -584,12 +586,12 @@ class PaperSize(Enum):
     :cvar A4: Paper of size A4
     """
 
-    A0 = 'a0paper'
-    A1 = 'a1paper'
-    A2 = 'a2paper'
-    A3 = 'a3paper'
-    A4 = 'a4paper'
-    AUTO = 'automatic'
+    A0 = "a0paper"
+    A1 = "a1paper"
+    A2 = "a2paper"
+    A3 = "a3paper"
+    A4 = "a4paper"
+    AUTO = "automatic"
 
 
 class PaperOrientation(Enum):
@@ -599,8 +601,8 @@ class PaperOrientation(Enum):
     :cvar LANDSCAPE: Paper of orientation 'landscape'
     """
 
-    PORTRAIT = 'portrait'
-    LANDSCAPE = 'landscape'
+    PORTRAIT = "portrait"
+    LANDSCAPE = "landscape"
 
 
 class PropertyVTypes(Enum):
@@ -624,19 +626,19 @@ class PropertyVTypes(Enum):
     :cvar FILESIZE: 'fileSizeValidator'
     """
 
-    NONEVALIDATOR = 'noneValidator'
-    NUMERICRANGE = 'numericRangeValidator'
-    BOOLEANFIELD = 'booleanFieldValidator'
-    REQUIREDFIELD = 'requiredFieldValidator'
-    EVENNUMBER = 'evenNumberValidator'
-    ODDNUMBER = 'oddNumberValidator'
-    REGEXSTRING = 'regexStringValidator'
-    SINGLEREFERENCE = 'singleReferenceValidator'
-    FILEEXTENSION = 'fileExtensionValidator'
-    FILESIZE = 'fileSizeValidator'
+    NONEVALIDATOR = "noneValidator"
+    NUMERICRANGE = "numericRangeValidator"
+    BOOLEANFIELD = "booleanFieldValidator"
+    REQUIREDFIELD = "requiredFieldValidator"
+    EVENNUMBER = "evenNumberValidator"
+    ODDNUMBER = "oddNumberValidator"
+    REGEXSTRING = "regexStringValidator"
+    SINGLEREFERENCE = "singleReferenceValidator"
+    FILEEXTENSION = "fileExtensionValidator"
+    FILESIZE = "fileSizeValidator"
 
     # fallback
-    ALWAYSALLOW = 'alwaysAllowValidator'
+    ALWAYSALLOW = "alwaysAllowValidator"
 
 
 class ValidatorEffectTypes(Enum):
@@ -651,11 +653,11 @@ class ValidatorEffectTypes(Enum):
     :cvar HELPTEXT_EFFECT: helpTextEffect
     """
 
-    NONE_EFFECT = 'noneEffect'
-    VISUALEFFECT = 'visualEffect'
-    TEXT_EFFECT = 'textEffect'
-    ERRORTEXT_EFFECT = 'errorTextEffect'
-    HELPTEXT_EFFECT = 'helpTextEffect'
+    NONE_EFFECT = "noneEffect"
+    VISUALEFFECT = "visualEffect"
+    TEXT_EFFECT = "textEffect"
+    ERRORTEXT_EFFECT = "errorTextEffect"
+    HELPTEXT_EFFECT = "helpTextEffect"
 
 
 class PropertyRepresentation(Enum):
@@ -678,12 +680,12 @@ class PropertyRepresentation(Enum):
     DECIMAL_PLACES = "decimalPlaces"
     SIGNIFICANT_DIGITS = "significantDigits"
     LINK_TARGET = "linkTarget"
-    BUTTON = 'buttonRepresentation'
+    BUTTON = "buttonRepresentation"
     THOUSANDS_SEPARATOR = "thousandsSeparator"
-    AUTOFILL = 'autofill'
-    GEOCOORDINATE = 'geoCoordinate'
-    USE_PROPERTY_NAME = 'usePropertyName'
-    CAMERA_SCANNER_INPUT = 'cameraScannerInput'
+    AUTOFILL = "autofill"
+    GEOCOORDINATE = "geoCoordinate"
+    USE_PROPERTY_NAME = "usePropertyName"
+    CAMERA_SCANNER_INPUT = "cameraScannerInput"
 
 
 class GeoCoordinateConfig(Enum):
@@ -699,8 +701,12 @@ class GeoCoordinateConfig(Enum):
     APPROX_ADDRESS = "approx_address"  # As approximated address
     # Amersfoort/RD (epsg: 28992) https://www.spatialreference.org/ref/epsg/amersfoort-rd-new/
     RD_AMERSFOORT = "rd_amersfoort"
-    DD = "dd"  # As WSG84 (epsg:4326) decimal degrees representation first lat (-90,+90) then lng (-180,+180)
-    DMS = "dms"  # As WSG84 (epsg:4326) degrees, minutes, seconds representation first lat N/S then lng E/W
+    DD = (  # As WSG84 (epsg:4326) decimal degrees representation first lat (-90,+90) then lng (-180,+180)
+        "dd"
+    )
+    DMS = (  # As WSG84 (epsg:4326) degrees, minutes, seconds representation first lat N/S then lng E/W
+        "dms"
+    )
 
 
 class OtherRepresentations(Enum):
@@ -710,7 +716,7 @@ class OtherRepresentations(Enum):
     :cvar CUSTOM_ICON: different font-awesome icons
     """
 
-    CUSTOM_ICON = 'customIcon'
+    CUSTOM_ICON = "customIcon"
 
 
 class _AllRepresentations(PropertyRepresentation, OtherRepresentations):
@@ -726,8 +732,8 @@ class ShowColumnTypes(Enum):
     :cvar DESCRIPTION: description
     """
 
-    UNIT = 'unit'
-    DESCRIPTION = 'description'
+    UNIT = "unit"
+    DESCRIPTION = "description"
 
 
 class ScopeWidgetColumnTypes(Enum):
@@ -743,12 +749,12 @@ class ScopeWidgetColumnTypes(Enum):
     :cvar TAGS: Tags
     """
 
-    PROJECT_NAME = 'Name'
-    START_DATE = 'Start date'
-    DUE_DATE = 'Due date'
-    PROGRESS = 'Progress'
-    STATUS = 'Status'
-    TAGS = 'Tags'
+    PROJECT_NAME = "Name"
+    START_DATE = "Start date"
+    DUE_DATE = "Due date"
+    PROGRESS = "Progress"
+    STATUS = "Status"
+    TAGS = "Tags"
 
 
 class FilterType(Enum):
@@ -762,11 +768,11 @@ class FilterType(Enum):
     :cvar EXACT: 'exact'
     """
 
-    GREATER_THAN_EQUAL = 'gte'
-    LOWER_THAN_EQUAL = 'lte'
-    CONTAINS = 'icontains'
-    CONTAINS_SET = 'contains'
-    EXACT = 'exact'
+    GREATER_THAN_EQUAL = "gte"
+    LOWER_THAN_EQUAL = "lte"
+    CONTAINS = "icontains"
+    CONTAINS_SET = "contains"
+    EXACT = "exact"
 
 
 class ProgressBarColors(Enum):
@@ -797,26 +803,26 @@ class ProgressBarColors(Enum):
     :cvar DEFAULT_IN_PROGRESS_BACKGROUND: '#FC7C3D'
     """
 
-    BLACK = '#000000'
-    WHITE = '#FFFFFF'
-    RED = '#FF0000'
-    LIME = '#00FF00'
-    BLUE = '#0000FF'
-    YELLOW = '#FFFF00'
-    CYAN = '#00FFFF'
-    MAGENTA = '#FF00FF'
-    SILVER = '#C0C0C0'
-    GRAY = '#808080'
-    MAROON = '#800000'
-    OLIVE = '#808000'
-    GREEN = '#008000'
-    PURPLE = '#800080'
-    TEAL = '#008080'
-    NAVY = '#000080'
-    DEFAULT_COMPLETED = '#339447'
-    DEFAULT_IN_PROGRESS = '#FF6600'
-    DEFAULT_NO_PROGRESS = '#EEEEEE'
-    DEFAULT_IN_PROGRESS_BACKGROUND = '#FC7C3D'
+    BLACK = "#000000"
+    WHITE = "#FFFFFF"
+    RED = "#FF0000"
+    LIME = "#00FF00"
+    BLUE = "#0000FF"
+    YELLOW = "#FFFF00"
+    CYAN = "#00FFFF"
+    MAGENTA = "#FF00FF"
+    SILVER = "#C0C0C0"
+    GRAY = "#808080"
+    MAROON = "#800000"
+    OLIVE = "#808000"
+    GREEN = "#008000"
+    PURPLE = "#800080"
+    TEAL = "#008080"
+    NAVY = "#000080"
+    DEFAULT_COMPLETED = "#339447"
+    DEFAULT_IN_PROGRESS = "#FF6600"
+    DEFAULT_NO_PROGRESS = "#EEEEEE"
+    DEFAULT_IN_PROGRESS_BACKGROUND = "#FC7C3D"
 
 
 class LinkTargets(Enum):
@@ -830,7 +836,7 @@ class LinkTargets(Enum):
     """
 
     SAME_TAB = "_self"
-    NEW_TAB = '_blank'
+    NEW_TAB = "_blank"
 
 
 class CardWidgetLinkTarget(LinkTargets):
@@ -882,58 +888,58 @@ class KEChainPages(Enum):
     :cvar SERVICES: "scripts"
     """
 
-    DETAIL = 'detail'
-    TASKS = 'activities'
-    WORK_BREAKDOWN = 'activitytree'
-    DATA_MODEL = 'productmodel'
-    EXPLORER = 'product'
-    SERVICES = 'scripts'
-    CATALOG_WBS = 'catalogtree'
-    APP_WBS = 'apptree'
+    DETAIL = "detail"
+    TASKS = "activities"
+    WORK_BREAKDOWN = "activitytree"
+    DATA_MODEL = "productmodel"
+    EXPLORER = "product"
+    SERVICES = "scripts"
+    CATALOG_WBS = "catalogtree"
+    APP_WBS = "apptree"
 
 
 KEChainPageLabels = {
-    KEChainPages.DETAIL: 'Project details',
-    KEChainPages.TASKS: 'Tasks',
-    KEChainPages.WORK_BREAKDOWN: 'Work Breakdown',
-    KEChainPages.CATALOG_WBS: 'Catalog',
-    KEChainPages.APP_WBS: 'App Screens',
-    KEChainPages.DATA_MODEL: 'Data model',
-    KEChainPages.EXPLORER: 'Explorer',
-    KEChainPages.SERVICES: 'Scripts',
+    KEChainPages.DETAIL: "Project details",
+    KEChainPages.TASKS: "Tasks",
+    KEChainPages.WORK_BREAKDOWN: "Work Breakdown",
+    KEChainPages.CATALOG_WBS: "Catalog",
+    KEChainPages.APP_WBS: "App Screens",
+    KEChainPages.DATA_MODEL: "Data model",
+    KEChainPages.EXPLORER: "Explorer",
+    KEChainPages.SERVICES: "Scripts",
 }
 
 KEChainPageLabels_nl = {
-    KEChainPages.DETAIL: 'Project details',
-    KEChainPages.TASKS: 'Taken',
-    KEChainPages.WORK_BREAKDOWN: 'Taakverdeling',
-    KEChainPages.CATALOG_WBS: 'Catalogus',
-    KEChainPages.APP_WBS: 'App schermen',
-    KEChainPages.DATA_MODEL: 'Data model',
-    KEChainPages.EXPLORER: 'Explorer',
-    KEChainPages.SERVICES: 'Scripts',
+    KEChainPages.DETAIL: "Project details",
+    KEChainPages.TASKS: "Taken",
+    KEChainPages.WORK_BREAKDOWN: "Taakverdeling",
+    KEChainPages.CATALOG_WBS: "Catalogus",
+    KEChainPages.APP_WBS: "App schermen",
+    KEChainPages.DATA_MODEL: "Data model",
+    KEChainPages.EXPLORER: "Explorer",
+    KEChainPages.SERVICES: "Scripts",
 }
 
 CardWidgetKEChainPageLink = {
-    KEChainPages.DETAIL: 'Project',
-    KEChainPages.TASKS: 'Tasks',
-    KEChainPages.DATA_MODEL: 'Model',
-    KEChainPages.EXPLORER: 'Explorer',
-    KEChainPages.SERVICES: 'Script',
-    KEChainPages.WORK_BREAKDOWN: 'Work Breakdown',
-    KEChainPages.CATALOG_WBS: 'Catalog Tasks',
-    KEChainPages.APP_WBS: 'App Tasks',
+    KEChainPages.DETAIL: "Project",
+    KEChainPages.TASKS: "Tasks",
+    KEChainPages.DATA_MODEL: "Model",
+    KEChainPages.EXPLORER: "Explorer",
+    KEChainPages.SERVICES: "Script",
+    KEChainPages.WORK_BREAKDOWN: "Work Breakdown",
+    KEChainPages.CATALOG_WBS: "Catalog Tasks",
+    KEChainPages.APP_WBS: "App Tasks",
 }
 
 KEChainPageIcons = {
-    KEChainPages.DETAIL: 'bookmark',
-    KEChainPages.TASKS: 'edit',
-    KEChainPages.WORK_BREAKDOWN: 'sitemap',
-    KEChainPages.CATALOG_WBS: 'books',
-    KEChainPages.APP_WBS: 'tablet-alt',
-    KEChainPages.DATA_MODEL: 'cube',
-    KEChainPages.EXPLORER: 'folder',
-    KEChainPages.SERVICES: 'file-code',
+    KEChainPages.DETAIL: "bookmark",
+    KEChainPages.TASKS: "edit",
+    KEChainPages.WORK_BREAKDOWN: "sitemap",
+    KEChainPages.CATALOG_WBS: "books",
+    KEChainPages.APP_WBS: "tablet-alt",
+    KEChainPages.DATA_MODEL: "cube",
+    KEChainPages.EXPLORER: "folder",
+    KEChainPages.SERVICES: "file-code",
 }
 
 
@@ -945,8 +951,8 @@ class SubprocessDisplayMode(Enum):
     :cvar TREEVIEW: "treeview"
     """
 
-    ACTIVITIES = 'activities'
-    TREEVIEW = 'treeview'
+    ACTIVITIES = "activities"
+    TREEVIEW = "treeview"
 
 
 class URITarget(Enum):
@@ -957,8 +963,8 @@ class URITarget(Enum):
     :cvar EXTERNAL: "external"
     """
 
-    INTERNAL = 'internal'
-    EXTERNAL = 'external'
+    INTERNAL = "internal"
+    EXTERNAL = "external"
 
 
 class FontAwesomeMode(Enum):
@@ -973,9 +979,9 @@ class FontAwesomeMode(Enum):
     :cvar LIGHT: "light"
     """
 
-    SOLID = 'solid'
-    REGULAR = 'regular'
-    LIGHT = 'light'
+    SOLID = "solid"
+    REGULAR = "regular"
+    LIGHT = "light"
 
 
 class SelectListRepresentations(Enum):
@@ -987,9 +993,9 @@ class SelectListRepresentations(Enum):
     :cvar BUTTONS: "buttons"
     """
 
-    DROP_DOWN = 'dropdown'
-    CHECK_BOXES = 'checkboxes'
-    BUTTONS = 'buttons'
+    DROP_DOWN = "dropdown"
+    CHECK_BOXES = "checkboxes"
+    BUTTONS = "buttons"
 
 
 class ImageFitValue(Enum):
@@ -1004,8 +1010,8 @@ class ImageFitValue(Enum):
     .. _object-fit property: https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit
     """
 
-    CONTAIN = 'contain'
-    COVER = 'cover'
+    CONTAIN = "contain"
+    COVER = "cover"
 
 
 class WidgetTitleValue(Enum):
@@ -1017,9 +1023,9 @@ class WidgetTitleValue(Enum):
     :cvar CUSTOM_TITLE: Show a custom title text.
     """
 
-    DEFAULT = 'Default'
-    NO_TITLE = 'No title'
-    CUSTOM_TITLE = 'Custom title'
+    DEFAULT = "Default"
+    NO_TITLE = "No title"
+    CUSTOM_TITLE = "Custom title"
 
 
 class NotificationStatus(Enum):
@@ -1048,12 +1054,12 @@ class NotificationStatus(Enum):
     :cvar READY: "ready" notifications
     """
 
-    ARCHIVED = 'ARCHIVED'
-    COMPLETED = 'COMPLETED'
-    DRAFT = 'DRAFT'
-    FAILED = 'FAILED'
-    PROCESSING = 'PROCESSING'
-    READY = 'READY'
+    ARCHIVED = "ARCHIVED"
+    COMPLETED = "COMPLETED"
+    DRAFT = "DRAFT"
+    FAILED = "FAILED"
+    PROCESSING = "PROCESSING"
+    READY = "READY"
 
 
 class NotificationEvent(Enum):
@@ -1065,9 +1071,9 @@ class NotificationEvent(Enum):
     :cvar SHARE_ACTIVITY_PDF: notifications generated by sharing the pdf of an `Activity`
     """
 
-    SHARE_ACTIVITY_LINK = 'SHARE_ACTIVITY_LINK'
-    EXPORT_ACTIVITY_ASYNC = 'EXPORT_ACTIVITY_ASYNC'
-    SHARE_ACTIVITY_PDF = 'SHARE_ACTIVITY_PDF'
+    SHARE_ACTIVITY_LINK = "SHARE_ACTIVITY_LINK"
+    EXPORT_ACTIVITY_ASYNC = "EXPORT_ACTIVITY_ASYNC"
+    SHARE_ACTIVITY_PDF = "SHARE_ACTIVITY_PDF"
 
 
 class NotificationChannels(Enum):
@@ -1078,8 +1084,8 @@ class NotificationChannels(Enum):
     :cvar APP: app notification
     """
 
-    EMAIL = 'EMAIL'
-    APP = 'APP'
+    EMAIL = "EMAIL"
+    APP = "APP"
 
 
 class LanguageCodes(Enum):

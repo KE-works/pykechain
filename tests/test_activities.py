@@ -7,13 +7,20 @@ import pytest
 import pytz
 import requests
 
-from pykechain.enums import (ActivityClassification, ActivityRootNames, ActivityStatus,
-                             ActivityType, Category,
-                             Multiplicity, NotificationEvent, PaperOrientation, PaperSize,
-                             PropertyType,
-                             activity_root_name_by_classification)
-from pykechain.exceptions import (APIError, IllegalArgumentError, MultipleFoundError,
-                                  NotFoundError)
+from pykechain.enums import (
+    ActivityClassification,
+    ActivityRootNames,
+    ActivityStatus,
+    ActivityType,
+    Category,
+    Multiplicity,
+    NotificationEvent,
+    PaperOrientation,
+    PaperSize,
+    PropertyType,
+    activity_root_name_by_classification,
+)
+from pykechain.exceptions import APIError, IllegalArgumentError, MultipleFoundError, NotFoundError
 from pykechain.models import Activity
 from pykechain.models.representations import CustomIconRepresentation
 from pykechain.utils import slugify_ref, temp_chdir
@@ -24,11 +31,11 @@ ISOFORMAT_HIGHPRECISION = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 class TestActivityConstruction(TestBetamax):
-
     def setUp(self):
         super().setUp()
         self.process = self.project.create_activity(
-            name="__Test process", activity_type=ActivityType.PROCESS,
+            name="__Test process",
+            activity_type=ActivityType.PROCESS,
         )
         self.task = None
 
@@ -92,7 +99,8 @@ class TestActivityConstruction(TestBetamax):
         )
 
         new_task = self.process.create(
-            name="__Testing task", activity_type=ActivityType.TASK,
+            name="__Testing task",
+            activity_type=ActivityType.TASK,
         )
 
         current_children = self.process.children()
@@ -109,7 +117,7 @@ class TestActivityConstruction(TestBetamax):
     def test_create_with_classification(self):
 
         for classification in ActivityClassification.values():
-            with self.subTest(msg="Classification: {}".format(classification)):
+            with self.subTest(msg=f"Classification: {classification}"):
                 # setUp 1
                 root_name = activity_root_name_by_classification[classification]
                 root = self.project.activity(name=root_name)
@@ -121,7 +129,7 @@ class TestActivityConstruction(TestBetamax):
                 # setUp 2
                 task = self.client.create_activity(
                     parent=root,
-                    name="{}".format(classification),
+                    name=f"{classification}",
                     classification=classification,
                 )
 
@@ -134,13 +142,15 @@ class TestActivityConstruction(TestBetamax):
     def test_create_with_incorrect_classification(self):
         with self.assertRaises(IllegalArgumentError):
             self.project.create_activity(
-                name="Impossible classification", classification="Gummy bears",
+                name="Impossible classification",
+                classification="Gummy bears",
             )
 
     def test_create_with_incorrect_parent(self):
         with self.assertRaises(IllegalArgumentError):
             self.client.create_activity(
-                name="Impossible parent", parent="Darth vader",
+                name="Impossible parent",
+                parent="Darth vader",
             )
 
     def test_create_with_task_as_parent(self):
@@ -169,9 +179,7 @@ class TestActivityConstruction(TestBetamax):
         sub_process_name = "__Test subprocess"
         sub_task_name = "__Test subtask"
 
-        subprocess = self.process.create(
-            name=sub_process_name, activity_type=ActivityType.PROCESS
-        )
+        subprocess = self.process.create(name=sub_process_name, activity_type=ActivityType.PROCESS)
         self.task = subprocess.create(name=sub_task_name)
         subprocess.delete()
 
@@ -180,9 +188,7 @@ class TestActivityConstruction(TestBetamax):
             subprocess.delete()
         with self.assertRaises(NotFoundError, msg="Deleted Activity cant be found!"):
             self.project.activity(name=sub_process_name)
-        with self.assertRaises(
-            NotFoundError, msg="Children of deleted Activities cant be found!"
-        ):
+        with self.assertRaises(NotFoundError, msg="Children of deleted Activities cant be found!"):
             self.project.activity(name=sub_task_name)
 
 
@@ -214,17 +220,22 @@ class TestActivityClone(TestBetamax):
 
     def test_parent_id(self):
         second_process = self.project.create_activity(
-            name="__Test process 2", activity_type=ActivityType.PROCESS,
+            name="__Test process 2",
+            activity_type=ActivityType.PROCESS,
         )
         self.bucket.append(second_process)
 
-        clone = self.task.clone(parent=second_process, )
+        clone = self.task.clone(
+            parent=second_process,
+        )
 
         self.assertNotEqual(self.task.parent_id, clone.parent_id)
 
     def test_update(self):
         new_name = "__TEST TASK RENAMED"
-        clone = self.task.clone(update_dict=dict(name=new_name), )
+        clone = self.task.clone(
+            update_dict=dict(name=new_name),
+        )
 
         self.assertEqual(new_name, clone.name)
 
@@ -273,9 +284,7 @@ class TestActivityCloneParts(TestBetamax):
             PropertyType.CHAR_VALUE,
             PropertyType.DATE_VALUE,
         ]:
-            child_model.add_property(
-                name="__TEST " + prop_type, property_type=prop_type
-            )
+            child_model.add_property(name="__TEST " + prop_type, property_type=prop_type)
 
         # Add widget to add configured part models
         wm = self.task.widgets()
@@ -288,7 +297,8 @@ class TestActivityCloneParts(TestBetamax):
         self.bike_model = self.project.model("Bike")
         self.bike_instance = self.bike_model.instance()
         wm.add_propertygrid_widget(
-            part_instance=self.bike_instance, all_readable=True,
+            part_instance=self.bike_instance,
+            all_readable=True,
         )
 
         # Create target parents to move to
@@ -314,9 +324,7 @@ class TestActivityCloneParts(TestBetamax):
         clones = self.client.clone_activities(
             activities=[self.task],
             activity_parent=self.process,
-            activity_update_dicts={
-                self.task.id: {"name": "__TEST CLONE ACTIVITY WITH PARTS"}
-            },
+            activity_update_dicts={self.task.id: {"name": "__TEST CLONE ACTIVITY WITH PARTS"}},
             include_part_models=True,
             include_part_instances=True,
             include_children=True,
@@ -335,9 +343,7 @@ class TestActivityCloneParts(TestBetamax):
         clones = self.client.clone_activities(
             activities=[self.task],
             activity_parent=self.process,
-            activity_update_dicts={
-                self.task.id: {"name": "__TEST CLONE ACTIVITY WITH PARTS"}
-            },
+            activity_update_dicts={self.task.id: {"name": "__TEST CLONE ACTIVITY WITH PARTS"}},
             include_part_models=True,
             include_part_instances=True,
             include_children=True,
@@ -354,8 +360,10 @@ class TestActivityCloneParts(TestBetamax):
         self.assertNotIn(
             "Bike",
             {c.name for c in new_children},
-            msg="Bike should not have been copied over. "
-                "Actually it is not copied over, it is moved to the parent_instance",
+            msg=(
+                "Bike should not have been copied over. "
+                "Actually it is not copied over, it is moved to the parent_instance"
+            ),
         )
 
 
@@ -365,9 +373,7 @@ class TestActivities(TestBetamax):
     def setUp(self):
         super().setUp()
         self.workflow_root = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
-        self.task = self.project.create_activity(
-            name=self.NAME, activity_type=ActivityType.TASK
-        )
+        self.task = self.project.create_activity(name=self.NAME, activity_type=ActivityType.TASK)
 
     def tearDown(self):
         if self.task:
@@ -490,14 +496,10 @@ class TestActivities(TestBetamax):
         tzaware_start = tz.localize(datetime(2017, 6, 30, 0, 0, 0))
 
         self.task.edit(start_date=tzaware_start)
-        self.assertTrue(
-            self.task._json_data["start_date"], tzaware_start.isoformat(sep="T")
-        )
+        self.assertTrue(self.task._json_data["start_date"], tzaware_start.isoformat(sep="T"))
 
         self.task.edit(due_date=tzaware_due)
-        self.assertTrue(
-            self.task._json_data["due_date"], tzaware_due.isoformat(sep="T")
-        )
+        self.assertTrue(self.task._json_data["due_date"], tzaware_due.isoformat(sep="T"))
 
     def test_edit_cascade_down(self):
         # setup
@@ -527,37 +529,52 @@ class TestActivities(TestBetamax):
     # test added due to #847 - providing no inputs overwrites values
     def test_edit_activity_clearing_values(self):
         # setup
-        initial_name = 'Pykechain testing task'
-        initial_description = 'Task created to test editing.'
+        initial_name = "Pykechain testing task"
+        initial_description = "Task created to test editing."
         initial_start_date = datetime(2018, 12, 5, tzinfo=None)
         initial_due_date = datetime(2018, 12, 8, tzinfo=None)
-        initial_tags = ['tag_one', 'tag_two']
+        initial_tags = ["tag_one", "tag_two"]
         initial_assignee = self.client.user(username="testuser")
 
-        self.task.edit(name=initial_name, description=initial_description, tags=initial_tags,
-                       start_date=initial_start_date, due_date=initial_due_date,
-                       assignees=[initial_assignee.username])
+        self.task.edit(
+            name=initial_name,
+            description=initial_description,
+            tags=initial_tags,
+            start_date=initial_start_date,
+            due_date=initial_due_date,
+            assignees=[initial_assignee.username],
+        )
 
         # Edit without mentioning values, everything should stay the same
-        new_name = 'New name for task'
+        new_name = "New name for task"
         self.task.edit(name=new_name)
 
         # testing
         self.assertEqual(self.task.name, new_name)
         self.assertEqual(self.task.description, initial_description)
-        self.assertEqual(self.task.start_date.strftime("%Y/%m/%d, %H:%M:%S"),
-                         initial_start_date.strftime("%Y/%m/%d, %H:%M:%S"))
-        self.assertEqual(self.task.due_date.strftime("%Y/%m/%d, %H:%M:%S"),
-                         initial_due_date.strftime("%Y/%m/%d, %H:%M:%S"))
+        self.assertEqual(
+            self.task.start_date.strftime("%Y/%m/%d, %H:%M:%S"),
+            initial_start_date.strftime("%Y/%m/%d, %H:%M:%S"),
+        )
+        self.assertEqual(
+            self.task.due_date.strftime("%Y/%m/%d, %H:%M:%S"),
+            initial_due_date.strftime("%Y/%m/%d, %H:%M:%S"),
+        )
         self.assertEqual(self.task.tags, initial_tags)
 
         # Edit with clearing the values, name and status cannot be cleared
-        self.task.edit(name=None, description=None, tags=None, start_date=None, due_date=None,
-                       status=None,
-                       assignees=None)
+        self.task.edit(
+            name=None,
+            description=None,
+            tags=None,
+            start_date=None,
+            due_date=None,
+            status=None,
+            assignees=None,
+        )
         self.task.refresh()
         self.assertEqual(self.task.name, new_name)
-        self.assertEqual(self.task.description, str())
+        self.assertEqual(self.task.description, "")
         self.assertEqual(self.task.start_date, None)
         self.assertEqual(self.task.due_date, None)
         self.assertEqual(self.task.assignees, list())
@@ -589,9 +606,7 @@ class TestActivities(TestBetamax):
         all_tasks = self.workflow_root.all_children()
 
         self.assertIsInstance(all_tasks, list)
-        self.assertEqual(
-            13, len(all_tasks), msg="Number of tasks has changed, expected 13."
-        )
+        self.assertEqual(13, len(all_tasks), msg="Number of tasks has changed, expected 13.")
 
     def test_retrieve_activity_by_id(self):
         task = self.project.activity(name="Subprocess")  # type: Activity
@@ -631,9 +646,7 @@ class TestActivities(TestBetamax):
 
     # in 1.13
     def test_create_activity_with_incorrect_activity_class_fails(self):
-        with self.assertRaisesRegex(
-            IllegalArgumentError, "must be an option from enum"
-        ):
+        with self.assertRaisesRegex(IllegalArgumentError, "must be an option from enum"):
             self.project.create_activity(name="New", activity_type="DEFUNCTActivity")
 
     # 2.0 new activity
@@ -650,9 +663,7 @@ class TestActivities(TestBetamax):
 
         self.assertIsInstance(specify_wd._json_data.get("assignees_ids")[0], int)
 
-        self.assertEqual(
-            specify_wd._client.last_response.status_code, requests.codes.ok
-        )
+        self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
 
         # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
         # scope members
@@ -684,9 +695,7 @@ class TestActivities(TestBetamax):
         self.assertEqual(self.project._json_data.get("workflow_root_id"), parent.id)
 
     def test_activity_test_workflow_root_object(self):
-        workflow_root = self.project.activity(
-            id=self.project._json_data.get("workflow_root_id")
-        )
+        workflow_root = self.project.activity(id=self.project._json_data.get("workflow_root_id"))
 
         self.assertTrue(workflow_root.is_root())
         self.assertTrue(workflow_root.is_workflow_root())
@@ -752,9 +761,7 @@ class TestActivities(TestBetamax):
         list_of_assignees_in_data = self.task._json_data.get("assignees_ids")
         assignees_list = self.task.assignees
 
-        self.assertSetEqual(
-            set(list_of_assignees_in_data), set([u.id for u in assignees_list])
-        )
+        self.assertSetEqual(set(list_of_assignees_in_data), {u.id for u in assignees_list})
 
     def test_activity_assignees_list_no_assignees_gives_empty_list(self):
         activity_name = "Specify wheel diameter"
