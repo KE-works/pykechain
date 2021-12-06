@@ -5,7 +5,7 @@ from tests.classes import TestBetamax
 
 
 @pytest.mark.skipif(
-    "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+    "os.getenv('GITHUB_ACTIONS', False)",
     reason="Skipping tests when using Travis or Github Actions "
            "as there is no public forms world yet",
 )
