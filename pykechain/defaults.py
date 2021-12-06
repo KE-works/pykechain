@@ -120,14 +120,14 @@ API_PATH = {
     "context_link_activities": "api/v3/contexts/contexts/{context_id}/link_activities",
     "context_unlink_activities": "api/v3/contexts/contexts/{context_id}/unlink_activities",
     # forms
-    "form_collections": "api/v3/forms/",
-    "form_collection": "api/v3/forms/{form_id}",
-    "workflows": "api/v3/forms/",
-    "workflow": "api/v3/forms/{form_id}",
-    "transitions": "api/v3/forms/",
-    "transition": "api/v3/forms/{transition_id}",
-    "statuses": "api/v3/forms/",
-    "status": "api/v3/forms/{status_id}",
+    "forms": "api/v3/forms",
+    "form": "api/v3/forms/{form_id}",
+    "workflows": "api/v3/workflows",
+    "workflow": "api/v3/workflows/{workflow_id}",
+    "transitions": "api/v3/transitions",
+    "transition": "api/v3/transitions/{transition_id}",
+    "statuses": "api/v3/status",
+    "status": "api/v3/status/{status_id}",
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {"fields": "__all__"}

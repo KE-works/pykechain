@@ -24,7 +24,7 @@ from pykechain.enums import (
     Category,
     ContextGroup,
     ContextType,
-    KechainEnv,
+    FormCategory, KechainEnv,
     Multiplicity,
     NotificationChannels,
     NotificationEvent,
@@ -67,6 +67,7 @@ from .client_utils import PykeRetry
 from .models.banner import Banner
 from .models.context import Context
 from .models.expiring_download import ExpiringDownload
+from .models.form_collection import Form
 from .models.input_checks import (
     check_base,
     check_datetime,
@@ -3483,3 +3484,53 @@ class Client:
             raise NotFoundError("Could not retrieve Contexts", response=response)
 
         return [Context(json=download, client=self) for download in response.json()["results"]]
+
+    def form(self, *args, **kwargs) -> Form:
+        """
+        Retrieve a single Form, see `Forms()` for available arguments.
+
+        .. versionadded:: 3.20
+
+        :return: a single Contexts
+        :rtype: Context
+        """
+        return self._retrieve_singular(self.forms, *args, **kwargs)  # noqa
+
+    def forms(
+        self,
+        name: Optional[str] = None,
+        pk: Optional[ObjectID] = None,
+        category: Optional[FormCategory] = None,
+        description: Optional[str] = None,
+        scope: Optional[Union[Scope, ObjectID]] = None,
+        ref: Optional[str] = None,
+        **kwargs,
+    ) -> List[Form]:
+        """
+        Retrieve Forms.
+
+        .. versionadded:: 3.20
+
+        :param pk: (optional) retrieve a single primary key (object ID)
+        :return: a list of Forms
+        :rtype: List[Form]
+        """
+        request_params = {
+            "name": check_text(name, "name"),
+            "id": check_uuid(pk),
+            "category": check_enum(category, FormCategory, "category"),
+            "description": check_text(description, "description"),
+            "scope": check_base(scope, Scope, "scope"),
+            "ref": check_text(ref, "ref")
+        }
+        request_params.update(API_EXTRA_PARAMS["forms"])
+
+        if kwargs:
+            request_params.update(**kwargs)
+
+        response = self._request("GET", self._build_url("forms"), params=request_params)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve Forms", response=response)
+
+        return [Form(json=download, client=self) for download in response.json()["results"]]

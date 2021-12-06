@@ -5,7 +5,7 @@ import requests
 from typing import Dict, List, Optional, Union
 
 from pykechain.enums import (
-    FormCollectionCategory, ServiceScriptUser,
+    FormCategory, ServiceScriptUser,
     ServiceExecutionStatus,
     ServiceType,
     ServiceEnvironmentVersion,
@@ -34,7 +34,11 @@ class NameDescriptionTranslationMixin:
     pass
 
 
-class FormCollection(BaseInScope, TagsMixin, NameDescriptionTranslationMixin):
+class Form(BaseInScope, TagsMixin, NameDescriptionTranslationMixin):
+
+    url_detail_name = "form"
+    url_list_name = "forms"
+
     """
     A virtual object representing a KE-chain Form Collection.
 
@@ -69,9 +73,9 @@ class FormCollection(BaseInScope, TagsMixin, NameDescriptionTranslationMixin):
 
         self.form_model_root: "Part" = json.get("form_model_root")
         self.form_instance_root: "Part" = json.get("form_instance_root")
-        self.model_id: "FormCollection" = json.get("model")
+        self.model_id: "Form" = json.get("model")
 
-        self.category: FormCollectionCategory = json.get("category")
+        self.category: FormCategory = json.get("category")
         self.status_forms: List[StatusForm] = json.get("status_forms", [])
 
     def __repr__(self):  # pragma: no cover
@@ -119,33 +123,33 @@ class FormCollection(BaseInScope, TagsMixin, NameDescriptionTranslationMixin):
         >>> service.edit(name="Plane service",description=None)
 
         """
-        update_dict = {
-            "id": self.id,
-            "name": check_text(name, "name") or self.name,
-            "description": check_text(description, "description") or "",
-            "trusted": check_type(trusted, bool, "trusted") or self.trusted,
-            "script_type": check_enum(type, ServiceType, "type") or self.type,
-            "env_version": check_enum(
-                environment_version, ServiceEnvironmentVersion, "environment version"
-            )
-            or self.environment,
-            "run_as": check_enum(run_as, ServiceScriptUser, "run_as") or self.run_as,
-            "script_version": check_text(version, "version") or "",
-        }
-
-        if kwargs:  # pragma: no cover
-            update_dict.update(**kwargs)
-
-        update_dict = clean_empty_values(update_dict=update_dict)
-
-        response = self._client._request(
-            "PUT", self._client._build_url("service", service_id=self.id), json=update_dict
-        )
-
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError(f"Could not update Service {self}", response=response)
-
-        self.refresh(json=response.json()["results"][0])
+        # update_dict = {
+        #     "id": self.id,
+        #     "name": check_text(name, "name") or self.name,
+        #     "description": check_text(description, "description") or "",
+        #     "trusted": check_type(trusted, bool, "trusted") or self.trusted,
+        #     "script_type": check_enum(type, ServiceType, "type") or self.type,
+        #     "env_version": check_enum(
+        #         environment_version, ServiceEnvironmentVersion, "environment version"
+        #     )
+        #     or self.environment,
+        #     "run_as": check_enum(run_as, ServiceScriptUser, "run_as") or self.run_as,
+        #     "script_version": check_text(version, "version") or "",
+        # }
+        #
+        # if kwargs:  # pragma: no cover
+        #     update_dict.update(**kwargs)
+        #
+        # update_dict = clean_empty_values(update_dict=update_dict)
+        #
+        # response = self._client._request(
+        #     "PUT", self._client._build_url(self.url_detail_name, form_id=self.id), json=update_dict
+        # )
+        #
+        # if response.status_code != requests.codes.ok:  # pragma: no cover
+        #     raise APIError(f"Could not update Service {self}", response=response)
+        #
+        # self.refresh(json=response.json()["results"][0])
 
     def delete(self) -> None:
         """Delete this service.
@@ -153,7 +157,7 @@ class FormCollection(BaseInScope, TagsMixin, NameDescriptionTranslationMixin):
         :raises APIError: if delete was not successful.
         """
         response = self._client._request(
-            "DELETE", self._client._build_url("service", service_id=self.id)
+            "DELETE", self._client._build_url(self.url_detail_name, form_id=self.id)
         )
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
