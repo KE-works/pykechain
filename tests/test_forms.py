@@ -1,17 +1,18 @@
-from typing import Optional
+import pytest
 
-from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import FormCategory
-from pykechain.models.input_checks import check_list_of_base, check_uuid
-from pykechain.typing import ObjectID
 from tests.classes import TestBetamax
 
 
+@pytest.mark.skipif(
+    "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+    reason="Skipping tests when using Travis or Github Actions "
+           "as there is no public forms world yet",
+)
 class TestForms(TestBetamax):
     """
     Test retrieval and scope attributes and methods.
     """
-
 
     def test_froms_attributes(self):
         attributes = [
