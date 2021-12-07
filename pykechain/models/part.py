@@ -406,7 +406,7 @@ class Part(TreeObject):
         if self.category == Category.MODEL:
             return self._client.parts(model=self, category=Category.INSTANCE, **kwargs)
         else:
-            raise NotFoundError(f'Part "{self}" is not a model, hence it has no instances.')
+            raise NotFoundError(f"Part '{self}' is not a model, hence it has no instances.")
 
     def instance(self) -> "Part":
         """
