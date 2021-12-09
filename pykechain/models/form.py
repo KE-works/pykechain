@@ -1,4 +1,4 @@
-from typing import Iterable, List, Optional, Union
+from typing import List, Optional, Union
 
 import requests
 
@@ -6,7 +6,7 @@ from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import FormCategory
 from pykechain.exceptions import APIError
 from pykechain.models import Scope
-from pykechain.models.base import Base, BaseInScope
+from pykechain.models.base import BaseInScope, NameDescriptionTranslationMixin
 from pykechain.models.context import Context
 from pykechain.models.input_checks import check_base, check_list_of_base, check_text
 from pykechain.models.tags import TagsMixin
@@ -14,34 +14,12 @@ from pykechain.typing import ObjectID
 from pykechain.utils import Empty, empty
 
 
-class Workflow(BaseInScope, TagsMixin):
-    """Workflow object."""
-
-    def edit(self, tags: Optional[Iterable[str]] = None, *args, **kwargs) -> None:
-        """Change the workflow object."""
-        pass
-
-
-class Transition(Base):
-    """Transition Object."""
-
-    pass
-
-
-class Status(Base):
-    """Status object."""
-
-    pass
-
-
 class StatusForm:
-    """StatusForm object."""
+    """A virtual object representing a KE-chain StatusForm.
 
-    pass
-
-
-class NameDescriptionTranslationMixin:
-    """Mixin that includes translations of the name and description of an object."""
+    A StatusForm is an intermediate object linking the Forms to its 'subforms', where each
+    status of a form has a link to its Activity.
+    """
 
     pass
 
@@ -73,23 +51,19 @@ class Form(BaseInScope, TagsMixin, NameDescriptionTranslationMixin):
     def __init__(self, json, **kwargs):
         """Construct a service from provided json data."""
         super().__init__(json, **kwargs)
-
         self.description = json.get("description", "")
         self.ref = json.get("ref", "")
-
-        self._workflow: List[ObjectID] = json.get("workflow")
+        self._workflow = json.get("workflow")
         self.active_status: "Status" = json.get("active_status")
-
         self.form_model_root: "Part" = json.get("form_model_root")
         self.form_instance_root: "Part" = json.get("form_instance_root")
         self.model_id: "Form" = json.get("model")
         self.derived_from_id: Optional[ObjectID] = json.get("derived_from")
-
         self.category: FormCategory = json.get("category")
         self.status_forms: List[StatusForm] = json.get("status_forms", [])
 
     def __repr__(self):  # pragma: no cover
-        return f"<pyke Form '{self.name}' id {self.id[-8:]}>"
+        return f"<pyke Form  '{self.name}' '{self.category}' id {self.id[-8:]}>"
 
     def instances(self, **kwargs) -> [List["Form"]]:
         """Retrieve the instances of this Form Model."""

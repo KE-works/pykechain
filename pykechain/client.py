@@ -36,7 +36,7 @@ from pykechain.enums import (
     ServiceScriptUser,
     ServiceType,
     TeamRoles,
-    WidgetTypes,
+    WidgetTypes, WorkflowCategory,
 )
 from pykechain.exceptions import (
     APIError,
@@ -82,6 +82,7 @@ from .models.input_checks import (
     check_user,
     check_uuid,
 )
+from .models.workflow import Workflow
 from .typing import ObjectID
 
 
@@ -3672,7 +3673,7 @@ class Client:
 
     def form(self, *args, **kwargs) -> Form:
         """
-        Retrieve a single Form, see `Forms()` for available arguments.
+        Retrieve a single Form, see `forms()` method for available arguments.
 
         .. versionadded:: 3.20
 
@@ -3703,7 +3704,6 @@ class Client:
         :param scope: (optional) the scope of the form to filter on
         :param ref: (optional) the ref of the form to filter on
         :return: a list of Forms
-        :rtype: List[Form]
         """
         request_params = {
             "name": check_text(name, "name"),
@@ -3725,4 +3725,60 @@ class Client:
 
         return [
             Form(json=download, client=self) for download in response.json()["results"]
+        ]
+
+    def workflow(self, *args, **kwargs) -> Workflow:
+        """
+        Retrieve a single Workflow, see `workflows()` method for available arguments.
+
+        .. versionadded:: 3.20
+
+        :return: a single Contexts
+        :rtype: Context
+        """
+        return self._retrieve_singular(self.workflows, *args, **kwargs)  # noqa
+
+    def workflows(
+        self,
+        name: Optional[str] = None,
+        pk: Optional[ObjectID] = None,
+        category: Optional[FormCategory] = None,
+        description: Optional[str] = None,
+        scope: Optional[Union[Scope, ObjectID]] = None,
+        ref: Optional[str] = None,
+        **kwargs,
+    ) -> List[Workflow]:
+        """
+        Retrieve Workflows.
+
+        .. versionadded:: 3.20
+
+        :param pk: (optional) retrieve a single primary key (object ID)
+        :param name: (optional) name of the workflow to filter on
+        :param category: (optional) category of the workflow to search for
+        :param description: (optional) description of the workflow to filter on
+        :param scope: (optional) the scope of the workflow to filter on
+        :param ref: (optional) the ref of the workflow to filter on
+        :return: a list of Workflows
+        """
+        request_params = {
+            "name": check_text(name, "name"),
+            "id": check_uuid(pk),
+            "category": check_enum(category, WorkflowCategory, "category"),
+            "description": check_text(description, "description"),
+            "scope": check_base(scope, Scope, "scope"),
+            "ref": check_text(ref, "ref"),
+        }
+        # request_params.update(API_EXTRA_PARAMS["workflows"])
+
+        if kwargs:
+            request_params.update(**kwargs)
+
+        response = self._request("GET", self._build_url("workflows"), params=request_params)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise NotFoundError("Could not retrieve Workflows", response=response)
+
+        return [
+            Workflow(json=download, client=self) for download in response.json()["results"]
         ]

@@ -95,3 +95,9 @@ class BaseInScope(Base):
         if not self._scope:
             self._scope = self._client.scope(pk=self.scope_id, status=None)
         return self._scope
+
+
+class NameDescriptionTranslationMixin:
+    """Mixin that includes translations of the name and description of an object."""
+
+    pass
