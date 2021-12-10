@@ -58,7 +58,7 @@ class Form(BaseInScope, TagsMixin, NameDescriptionTranslationMixin):
         self.form_model_root: "Part" = json.get("form_model_root")
         self.form_instance_root: "Part" = json.get("form_instance_root")
         self.model_id: "Form" = json.get("model")
-        self.derived_from_id: Optional[ObjectID] = json.get("derived_from")
+        self.derived_from_id: Optional[ObjectID] = json.get("derived_from_id")
         self.category: FormCategory = json.get("category")
         self.status_forms: List[StatusForm] = json.get("status_forms", [])
 

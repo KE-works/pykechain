@@ -28,21 +28,19 @@ class TestWorkflows(TestBetamax):
 
     def test_workflow_attributes(self):
         attributes = [
-            "_client",
-            "_json_data",
             "id",
             "name",
+            "description",
             "ref",
+            "derived_from_id",  # derived_from on the serializer
             "created_at",
             "updated_at",
-            "description",
-            "derived_from",
-            "options",
             "category",
-            "active",
+            "scope_id",
             "statuses",
-            "is_consistent",
-            "transitions"
+            "_transitions",
+            "options",
+            "active",
         ]
 
         workflow = self.client.workflow("Simple Workflow", category=WorkflowCategory.CATALOG)
