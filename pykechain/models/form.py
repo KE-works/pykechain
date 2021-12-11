@@ -4,9 +4,9 @@ import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import FormCategory
-from pykechain.exceptions import APIError
+from pykechain.exceptions import APIError, NotFoundError
 from pykechain.models import Scope
-from pykechain.models.base import BaseInScope, NameDescriptionTranslationMixin
+from pykechain.models.base import BaseInScope, CrudActionsMixin, NameDescriptionTranslationMixin
 from pykechain.models.context import Context
 from pykechain.models.input_checks import check_base, check_list_of_base, check_text
 from pykechain.models.tags import TagsMixin
@@ -24,7 +24,7 @@ class StatusForm:
     pass
 
 
-class Form(BaseInScope, TagsMixin, NameDescriptionTranslationMixin):
+class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationMixin):
     """
     A virtual object representing a KE-chain Form Collection.
 
@@ -64,6 +64,17 @@ class Form(BaseInScope, TagsMixin, NameDescriptionTranslationMixin):
 
     def __repr__(self):  # pragma: no cover
         return f"<pyke Form  '{self.name}' '{self.category}' id {self.id[-8:]}>"
+    #
+    # @classmethod
+    # def list(cls, client: "Client", **kwargs) -> List["Form"]:
+    #     """Retrieve a list of Form objects through the client."""
+    #     return super().list(client=client, **kwargs)
+    #
+    # @classmethod
+    # def get(cls, client: "Client", **kwargs) -> "Form":
+    #     """Retrieve a Form object through the client."""
+    #     return super().get(client=client, **kwargs)
+
 
     def instances(self, **kwargs) -> [List["Form"]]:
         """Retrieve the instances of this Form Model."""

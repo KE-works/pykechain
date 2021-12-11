@@ -496,7 +496,8 @@ class Client:
         elif obj._json_data.get("url"):
             url = obj._json_data.get("url")
         else:
-            # No known URL to reload the object: Try to build the url from the class name (in lower case)
+            # No known URL to reload the object: Try to build the url from the
+            # class name (in lower case)
 
             extra_api_params = dict()
             superclasses = (
@@ -507,7 +508,8 @@ class Client:
                 stripped = resource.replace("2", "")
 
                 try:
-                    # set the id from the `obj.id` which is normally a keyname `<class_name>_id` (without the '2' if so)
+                    # set the id from the `obj.id` which is normally a keyname
+                    # `<class_name>_id` (without the '2' if so)
                     url = self._build_url(
                         resource=resource, **{f"{stripped}_id": obj.id}
                     )
@@ -3713,19 +3715,10 @@ class Client:
             "scope": check_base(scope, Scope, "scope"),
             "ref": check_text(ref, "ref"),
         }
-        request_params.update(API_EXTRA_PARAMS["forms"])
-
         if kwargs:
             request_params.update(**kwargs)
 
-        response = self._request("GET", self._build_url("forms"), params=request_params)
-
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve Forms", response=response)
-
-        return [
-            Form(json=download, client=self) for download in response.json()["results"]
-        ]
+        return Form.list(client=self, **request_params)
 
     def workflow(self, *args, **kwargs) -> Workflow:
         """
@@ -3736,13 +3729,20 @@ class Client:
         :return: a single Contexts
         :rtype: Context
         """
+        pk=None
+        if "pk" in kwargs:
+            pk = kwargs.pop("pk")
+        elif len(args) >= 2:
+            pk = args[1]
+        if pk:
+            return Workflow.get(client=self, pk=pk)
         return self._retrieve_singular(self.workflows, *args, **kwargs)  # noqa
 
     def workflows(
         self,
         name: Optional[str] = None,
         pk: Optional[ObjectID] = None,
-        category: Optional[FormCategory] = None,
+        category: Optional[WorkflowCategory] = None,
         description: Optional[str] = None,
         scope: Optional[Union[Scope, ObjectID]] = None,
         ref: Optional[str] = None,
@@ -3769,16 +3769,18 @@ class Client:
             "scope": check_base(scope, Scope, "scope"),
             "ref": check_text(ref, "ref"),
         }
-        # request_params.update(API_EXTRA_PARAMS["workflows"])
 
         if kwargs:
             request_params.update(**kwargs)
 
-        response = self._request("GET", self._build_url("workflows"), params=request_params)
-
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve Workflows", response=response)
-
-        return [
-            Workflow(json=download, client=self) for download in response.json()["results"]
-        ]
+        return Workflow.list(client=self, **request_params)
+        #
+        #
+        # response = self._request("GET", self._build_url("workflows"), params=request_params)
+        #
+        # if response.status_code != requests.codes.ok:  # pragma: no cover
+        #     raise NotFoundError("Could not retrieve Workflows", response=response)
+        #
+        # return [
+        #     Workflow(json=download, client=self) for download in response.json()["results"]
+        # ]
