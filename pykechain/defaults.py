@@ -452,12 +452,30 @@ API_EXTRA_PARAMS = {
     },
     "notifications": {
         "fields": ",".join(
-            ["id", "subject", "status", "message", "team", "created_at", "options", "updated_at"]
+            [
+                "id",
+                "subject",
+                "status",
+                "message",
+                "team",
+                "created_at",
+                "options",
+                "updated_at",
+            ]
         )
     },
     "notification": {
         "fields": ",".join(
-            ["id", "subject", "status", "message", "team", "created_at", "options", "updated_at"]
+            [
+                "id",
+                "subject",
+                "status",
+                "message",
+                "team",
+                "created_at",
+                "options",
+                "updated_at",
+            ]
         )
     },
     "expiring_downloads": {
@@ -541,7 +559,7 @@ API_EXTRA_PARAMS = {
                 "active",
                 "statuses",
                 "is_consistent",
-                "transitions"
+                "transitions",
             ]
         )
     },
@@ -555,13 +573,17 @@ API_EXTRA_PARAMS = {
                 "updated_at",
                 "description",
                 "derived_from",
-                "options",
-                "category",
-                "active",
-                "statuses",
-                "is_consistent",
-                "transitions"
+                "from_status",
+                "to_status",
+                "transition_type",
+                "conditions",
+                "validators",
+                "post_functions",
+                "transition_screen",
             ]
         )
-    }
+    },
+    "status": {
+        "fields": ",".join(["id", "name", "ref", "description", "status_category"])
+    },
 }

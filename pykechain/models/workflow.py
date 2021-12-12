@@ -1,6 +1,6 @@
 from typing import Iterable, List, Optional
 
-from pykechain.enums import TransitionType, WorkflowCategory
+from pykechain.enums import StatusCategory, TransitionType, WorkflowCategory
 from pykechain.models import Base, BaseInScope
 from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMixin
 from pykechain.models.tags import TagsMixin
@@ -31,8 +31,6 @@ class Transition(Base, CrudActionsMixin):
         self.post_functions: dict = json.get("post_functions", {})
         self.transition_screen_id: Optional[ObjectID] = json.get("transition_screen")
 
-
-
     @classmethod
     def list(cls, client: "Client", **kwargs) -> List["Transition"]:
         """Retrieve a list of Transition objects through the client."""
@@ -44,12 +42,22 @@ class Transition(Base, CrudActionsMixin):
         return super().get(client=client, **kwargs)
 
 
+
+
+
 class Status(Base, CrudActionsMixin):
     """Status object."""
 
     url_detail_name = "status"
     url_list_name = "statuses"
     url_pk_name = "status_id"
+
+    def __init__(self, json, **kwargs):
+        super().__init__(json, *kwargs)
+        self.description: str = json.get("description", "")
+        self.ref: str = json.get("ref", "")
+        self.status_category: StatusCategory = json.get("status_category")
+
 
     @classmethod
     def list(cls, client: "Client", **kwargs) -> List["Status"]:

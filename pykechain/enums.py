@@ -1143,3 +1143,19 @@ class TransitionType(Enum):
     INITIAL = "INITIAL"
     GLOBAL = "GLOBAL"
     DIRECTED = "DIRECTED"
+
+
+class StatusCategory(Enum):
+    """
+    Category of statuses.
+
+    :cvar UNDEFINED: Undefined status
+    :cvar TODO: Todo status
+    :cvar INPROGRESS: In progress status
+    :cvar DONE: Done status
+    """
+
+    UNDEFINED = "UNDEFINED"
+    TODO = "TODO"
+    INPROGRESS = "INPROGRESS"
+    DONE = "DONE"
