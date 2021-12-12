@@ -153,9 +153,9 @@ class CrudActionsMixin:
 
             request_params = {}
             if cls.url_detail_name in API_EXTRA_PARAMS:
-                request_params = API_EXTRA_PARAMS.get('cls.url_detail_name')
+                request_params = API_EXTRA_PARAMS.get(cls.url_detail_name)
             elif cls.url_list_name in API_EXTRA_PARAMS:
-                request_params = API_EXTRA_PARAMS.get('cls.url_list_name')
+                request_params = API_EXTRA_PARAMS.get(cls.url_list_name)
 
             response = client._request("GET", url, params=request_params)
             if response.status_code != requests.codes.ok:  # pragma: no cover

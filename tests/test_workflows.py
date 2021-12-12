@@ -55,3 +55,4 @@ class TestWorkflows(TestBetamax):
         workflow_id = self.workflow.id
 
         retr_on_id = self.client.workflow(pk=workflow_id)
+        pass
