@@ -2,13 +2,15 @@ from typing import Iterable, List, Optional, Union
 
 import requests
 
+from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import StatusCategory, TransitionType, WorkflowCategory
 from pykechain.exceptions import APIError
-from pykechain.models import Base, BaseInScope
+from pykechain.models import Base, BaseInScope, Scope
 from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMixin
-from pykechain.models.input_checks import check_list_of_base
+from pykechain.models.input_checks import check_base, check_list_of_base, check_text
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID
+from pykechain.utils import Empty, empty
 
 
 class Transition(Base, CrudActionsMixin):
@@ -122,11 +124,75 @@ class Workflow(
 
         :param value: a determined ordered list of Status or status UUID's
         """
-        data = {
-            "status_order": check_list_of_base(value, Status, "statuses")
-        }
+        data = {"status_order": check_list_of_base(value, Status, "statuses")}
         url = self._client._build_url("workflow_set_status_order", workflow_id=self.id)
         response = self._client._request("PUT", url=url, json=data)
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not alter the order of the statuses", response=response)
+            raise APIError(
+                "Could not alter the order of the statuses", response=response
+            )
         self.refresh(json=response.json()["results"][0])
+
+    def activate(self):
+        """
+        Set the active status to True.
+        """
+        if not self.active:
+            url = self._client._build_url("workflow_activate", workflow_id=self.id)
+            response = self._client._request("PUT", url=url)
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise APIError("Could not activate the workflow", response=response)
+            self.refresh(json=response.json()["results"][0])
+
+    def deactivate(self):
+        """
+        Set the active status to False.
+        """
+        if self.active:
+            url = self._client._build_url("workflow_deactivate", workflow_id=self.id)
+            response = self._client._request("PUT", url=url)
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise APIError("Could not activate the workflow", response=response)
+            self.refresh(json=response.json()["results"][0])
+
+    def clone(
+        self,
+        target_scope: "Scope",
+        name: Optional[str] = Empty(),
+        description: Optional[str] = Empty(),
+    ) -> "Workflow":
+        """Clone the current workflow into a new workflow.
+
+        :param target_scope: target scope where to clone the Workflow to
+        :param name: (optional) name of the new workflow
+        :param description: (optional) description of the new workflow
+        """
+        data = {
+            target_scope: check_base(target_scope, Scope, "scope"),
+            name: check_text(name, "name"),
+            description: check_text(description, "descrioption")
+        }
+        url = self._client._build_url("workflow_clone", workflow_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request("POST", url=url, params=query_params, json=data)
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not clone the workflow", response=response)
+        return Workflow(json=response.json()["results"][0])
+
+    def update_transition(self):
+        ...
+
+    def delete_transition(self):
+        ...
+
+    def create_transition(self):
+        ...
+
+    def create_status(self):
+        ...
+
+    def link_transition(self):
+        ...
+
+    def unlink_transition(self):
+        ...
