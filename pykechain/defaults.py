@@ -544,5 +544,24 @@ API_EXTRA_PARAMS = {
                 "transitions"
             ]
         )
+    },
+    "transitions": {
+        "fields": ",".join(
+            [
+                "id",
+                "name",
+                "ref",
+                "created_at",
+                "updated_at",
+                "description",
+                "derived_from",
+                "options",
+                "category",
+                "active",
+                "statuses",
+                "is_consistent",
+                "transitions"
+            ]
+        )
     }
 }

@@ -1110,7 +1110,7 @@ class LanguageCodes(Enum):
 
 class FormCategory(Enum):
     """
-    Options for the Category of a the Form
+    Options for the Category of a the Form.
 
     :cvar MODEL: Model
     :cvar INSTANCE: Instance
@@ -1121,7 +1121,7 @@ class FormCategory(Enum):
 
 class WorkflowCategory(Enum):
     """
-    Options for the Category of a Workflow
+    Options for the Category of a Workflow.
 
     :cvar CATALOG: Catalog Workflow (immutable)
     :cvar DEFINED: Defined Workflow belonging to a scope
@@ -1129,3 +1129,17 @@ class WorkflowCategory(Enum):
 
     CATALOG = "CATALOG"
     DEFINED = "DEFINED"
+
+
+class TransitionType(Enum):
+    """
+    Options for the Type of a Transition.
+
+    :cvar INITIAL: Initial transition, the initial transition to follow when the form is created.
+    :cvar GLOBAL: Global transition, possibility to transition to all statuses from any
+    :cvar DIRECTED: A Directed transition, a transition with a specific from -> to direction
+    """
+
+    INITIAL = "INITIAL"
+    GLOBAL = "GLOBAL"
+    DIRECTED = "DIRECTED"
