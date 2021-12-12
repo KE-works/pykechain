@@ -1,8 +1,12 @@
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Union
+
+import requests
 
 from pykechain.enums import StatusCategory, TransitionType, WorkflowCategory
+from pykechain.exceptions import APIError
 from pykechain.models import Base, BaseInScope
 from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMixin
+from pykechain.models.input_checks import check_list_of_base
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID
 
@@ -21,7 +25,7 @@ class Transition(Base, CrudActionsMixin):
         self.derived_from_id: Optional[ObjectID] = json.get("derived_from")
 
         self.from_status: List[Status] = [
-            Status(j, self._client) for j in json.get("grom_status", [])
+            Status(j, client=self._client) for j in json.get("grom_status", [])
         ]
         self.to_status: Status = json.get("to_status")
         self.transition_type: TransitionType = json.get("transition_type")
@@ -42,9 +46,6 @@ class Transition(Base, CrudActionsMixin):
         return super().get(client=client, **kwargs)
 
 
-
-
-
 class Status(Base, CrudActionsMixin):
     """Status object."""
 
@@ -57,7 +58,6 @@ class Status(Base, CrudActionsMixin):
         self.description: str = json.get("description", "")
         self.ref: str = json.get("ref", "")
         self.status_category: StatusCategory = json.get("status_category")
-
 
     @classmethod
     def list(cls, client: "Client", **kwargs) -> List["Status"]:
@@ -85,13 +85,13 @@ class Workflow(
         self.ref: str = json.get("ref", "")
         self.derived_from_id: Optional[ObjectID] = json.get("derived_from")
         self.transitions: List[Transition] = [
-            Transition(j, self._client) for j in json.get("transitions", [])
+            Transition(j, client=self._client) for j in json.get("transitions", [])
         ]
         self.category: WorkflowCategory = json.get("category")
         self.options: dict = json.get("options", {})
         self.active: bool = json.get("active")
         self.statuses: List[Status] = [
-            Status(j, self._client) for j in json.get("statuses")
+            Status(j, client=self._client) for j in json.get("statuses")
         ]
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -110,3 +110,23 @@ class Workflow(
     def get(cls, client: "Client", **kwargs) -> "Workflow":
         """Retrieve a single Workflow object using the client."""
         return super().get(client=client, **kwargs)
+
+    @property
+    def status_order(self) -> List[Status]:
+        return self.statuses
+
+    @status_order.setter
+    def status_order(self, value: List[Union[ObjectID, Status]]):
+        """
+        Set the order of the statuses specifically in a certain order.
+
+        :param value: a determined ordered list of Status or status UUID's
+        """
+        data = {
+            "status_order": check_list_of_base(value, Status, "statuses")
+        }
+        url = self._client._build_url("workflow_set_status_order", workflow_id=self.id)
+        response = self._client._request("PUT", url=url, json=data)
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not alter the order of the statuses", response=response)
+        self.refresh(json=response.json()["results"][0])

@@ -126,6 +126,7 @@ API_PATH = {
     "form_clone": "api/v3/forms/{form_id}/clone",
     "workflows": "api/v3/workflows",
     "workflow": "api/v3/workflows/{workflow_id}",
+    "workflow_set_status_order": "api/v2/worksflows/{workflow_id}/set_status_order",
     "transitions": "api/v3/transitions",
     "transition": "api/v3/transitions/{transition_id}",
     "statuses": "api/v3/status",
