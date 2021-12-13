@@ -3729,14 +3729,7 @@ class Client:
         :return: a single Contexts
         :rtype: Context
         """
-        pk=None
-        if "pk" in kwargs:
-            pk = kwargs.pop("pk")
-        elif len(args) >= 2:
-            pk = args[1]
-        if pk:
-            return Workflow.get(client=self, pk=pk)
-        return self._retrieve_singular(self.workflows, *args, **kwargs)  # noqa
+        return Workflow.get(client=self, **kwargs)
 
     def workflows(
         self,
@@ -3774,13 +3767,4 @@ class Client:
             request_params.update(**kwargs)
 
         return Workflow.list(client=self, **request_params)
-        #
-        #
-        # response = self._request("GET", self._build_url("workflows"), params=request_params)
-        #
-        # if response.status_code != requests.codes.ok:  # pragma: no cover
-        #     raise NotFoundError("Could not retrieve Workflows", response=response)
-        #
-        # return [
-        #     Workflow(json=download, client=self) for download in response.json()["results"]
-        # ]
+
