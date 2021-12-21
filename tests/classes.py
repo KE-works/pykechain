@@ -1,15 +1,13 @@
 import collections
 import datetime
 import os
-from collections import UserDict
 from unittest import TestCase
 
 import pytz
-import six
 from betamax import Betamax
 
 from pykechain import Client
-from tests.utils import TEST_TOKEN, TEST_SCOPE_NAME, TEST_URL, TEST_RECORD_CASSETTES, TEST_SCOPE_ID
+from tests.utils import TEST_RECORD_CASSETTES, TEST_SCOPE_ID, TEST_SCOPE_NAME, TEST_TOKEN, TEST_URL
 
 with Betamax.configure() as config:
     config.cassette_library_dir = os.path.join(os.path.dirname(__file__), "cassettes")
@@ -55,6 +53,7 @@ class TestBetamax(TestCase):
         self.recorder.stop()
         del self.env
         del self.client
+
 
 #
 # This is EnvironmentVarGuard implementation of python 3.
