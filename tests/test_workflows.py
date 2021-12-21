@@ -1,7 +1,6 @@
-import pytest
+import pytest as pytest
 
 from pykechain.enums import WorkflowCategory
-from pykechain.exceptions import NotFoundError
 from pykechain.models.workflow import Workflow
 from tests.classes import TestBetamax
 
