@@ -546,9 +546,9 @@ class TestPartsCopyMove(TestBetamax):
         self.assertIn(
             self.p_datetime_value, copied_instance.property(name=self.p_datetime_name).value
         )
-        self.assertIn(
-            copied_instance.property(name=self.p_attach_name).filename, self.p_attach_value
-        )
+        self.assertIn('requirements.txt',
+                      copied_instance.property(name=self.p_attach_name).filename)
+        self.assertIn('requirements.txt', self.p_attach_value)
         self.assertEqual(copied_instance.property(name=self.p_link_name).value, self.p_link_value)
         self.assertEqual(
             copied_instance.property(name=self.p_single_select_name).value,
