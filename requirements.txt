@@ -21,7 +21,7 @@ Sphinx==4.3.2
 nbsphinx==0.8.7
 
 # integration
-tox==3.24.4
+tox==3.24.5
 
 # code style
 flake8==4.0.1
