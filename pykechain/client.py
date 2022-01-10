@@ -3751,8 +3751,10 @@ class Client:
             "scope": check_base(scope, Scope, "scope"),
             "ref": check_text(ref, "ref"),
         }
-        kwargs.update(request_params)
-        return Workflow.get(client=self, **kwargs)
+
+        if kwargs:
+            request_params.update(**kwargs)
+        return Workflow.get(client=self, **request_params)
 
     def workflows(
         self,

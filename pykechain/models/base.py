@@ -110,7 +110,7 @@ class CrudActionsMixin:
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve Workflows", response=response)
+            raise NotFoundError(f"Could not retrieve {cls.__name__}", response=response)
 
         return [cls(json=j, client=client) for j in response.json()["results"]]
 
