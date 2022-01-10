@@ -19,7 +19,8 @@ class TestWorkflows(TestBetamax):
         super().setUp()
         self.workflow: Workflow = self.client.workflow(
             "Simple Workflow",
-            category=WorkflowCategory.CATALOG
+            category=WorkflowCategory.CATALOG,
+            scope=self.project
         )
 
     def tearDown(self):
@@ -42,7 +43,7 @@ class TestWorkflows(TestBetamax):
             "active",
         ]
 
-        workflow = self.client.workflow("Simple Workflow", category=WorkflowCategory.CATALOG)
+        workflow = self.client.workflow("Simple Workflow", category=WorkflowCategory.CATALOG, scope=self.project)
         for attr in attributes:
             with self.subTest(attr):
                 self.assertTrue(
