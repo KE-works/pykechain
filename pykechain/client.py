@@ -3720,15 +3720,38 @@ class Client:
 
         return Form.list(client=self, **request_params)
 
-    def workflow(self, *args, **kwargs) -> Workflow:
+    def workflow(self,
+        name: Optional[str] = None,
+        pk: Optional[ObjectID] = None,
+        category: Optional[WorkflowCategory] = None,
+        description: Optional[str] = None,
+        scope: Optional[Union[Scope, ObjectID]] = None,
+        ref: Optional[str] = None,
+        **kwargs
+    ) -> Workflow:
         """
         Retrieve a single Workflow, see `workflows()` method for available arguments.
 
         .. versionadded:: 3.20
 
+        :param pk: (optional) retrieve a single primary key (object ID)
+        :param name: (optional) name of the workflow to filter on
+        :param category: (optional) category of the workflow to search for
+        :param description: (optional) description of the workflow to filter on
+        :param scope: (optional) the scope of the workflow to filter on
+        :param ref: (optional) the ref of the workflow to filter on
         :return: a single Contexts
         :rtype: Context
         """
+        request_params = {
+            "name": check_text(name, "name"),
+            "id": check_uuid(pk),
+            "category": check_enum(category, WorkflowCategory, "category"),
+            "description": check_text(description, "description"),
+            "scope": check_base(scope, Scope, "scope"),
+            "ref": check_text(ref, "ref"),
+        }
+        kwargs.update(request_params)
         return Workflow.get(client=self, **kwargs)
 
     def workflows(
@@ -3767,4 +3790,3 @@ class Client:
             request_params.update(**kwargs)
 
         return Workflow.list(client=self, **request_params)
-
