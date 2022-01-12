@@ -47,12 +47,13 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
 
     url_detail_name = "form"
     url_list_name = "forms"
+    url_pk_name = "form_id"
 
     def __init__(self, json, **kwargs):
         """Construct a service from provided json data."""
         super().__init__(json, **kwargs)
-        self.description = json.get("description", "")
-        self.ref = json.get("ref", "")
+        self.description : str = json.get("description", "")
+        self.ref : str = json.get("ref", "")
         self._workflow = json.get("workflow")
         self.active_status: "Status" = json.get("active_status")
         self.form_model_root: "Part" = json.get("form_model_root")

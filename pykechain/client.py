@@ -3626,7 +3626,8 @@ class Client:
         :return: a single Contexts
         :rtype: Context
         """
-        return self._retrieve_singular(self.contexts, *args, **kwargs)  # noqa
+        return Context.get(client=self, **kwargs)
+        # return self._retrieve_singular(self.contexts, *args, **kwargs)  # noqa
 
     def contexts(
         self,
@@ -3661,17 +3662,19 @@ class Client:
         if kwargs:
             request_params.update(**kwargs)
 
-        response = self._request(
-            "GET", self._build_url("contexts"), params=request_params
-        )
+        return Context.list(client=self, **request_params)
 
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve Contexts", response=response)
-
-        return [
-            Context(json=download, client=self)
-            for download in response.json()["results"]
-        ]
+        # response = self._request(
+        #     "GET", self._build_url("contexts"), params=request_params
+        # )
+        #
+        # if response.status_code != requests.codes.ok:  # pragma: no cover
+        #     raise NotFoundError("Could not retrieve Contexts", response=response)
+        #
+        # return [
+        #     Context(json=download, client=self)
+        #     for download in response.json()["results"]
+        # ]
 
     def form(self, *args, **kwargs) -> Form:
         """
