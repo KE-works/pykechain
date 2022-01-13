@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+FORMS Feature
+-------------
+* We added the feature equivalence in pykechain for KE-chain Forms and Workflow.
+
 UNRELEASED
 ----------
 * :+1: we upgraded all code to python 3.6 and higher prefered style. See the implemented improvements found throughout the code: https://github.com/asottile/pyupgrade/blob/master/README.md#implemented-features. We also reformatted the code using black.
