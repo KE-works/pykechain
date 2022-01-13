@@ -10,7 +10,7 @@ from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMi
 from pykechain.models.input_checks import check_base, check_list_of_base, check_text
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID
-from pykechain.utils import Empty, empty
+from pykechain.utils import Empty
 
 
 class Transition(Base, CrudActionsMixin):
@@ -20,7 +20,8 @@ class Transition(Base, CrudActionsMixin):
     url_list_name = "transitions"
     url_pk_name = "transition_id"
 
-    def __init__(self, json, **kwargs):
+    def __init__(self, json, **kwargs) -> None:
+        """Initialise a Transition object."""
         super().__init__(json, *kwargs)
         self.description: str = json.get("description", "")
         self.ref: str = json.get("ref", "")
@@ -55,7 +56,8 @@ class Status(Base, CrudActionsMixin):
     url_list_name = "statuses"
     url_pk_name = "status_id"
 
-    def __init__(self, json, **kwargs):
+    def __init__(self, json, **kwargs) -> None:
+        """Initialize a Status object."""
         super().__init__(json, *kwargs)
         self.description: str = json.get("description", "")
         self.ref: str = json.get("ref", "")
@@ -81,7 +83,8 @@ class Workflow(
     url_list_name = "workflows"
     url_pk_name: str = "workflow_id"
 
-    def __init__(self, json, **kwargs):
+    def __init__(self, json, **kwargs) -> None:
+        """Initialize a Workflow Object."""
         super().__init__(json, *kwargs)
         self.description: str = json.get("description", "")
         self.ref: str = json.get("ref", "")
@@ -115,6 +118,7 @@ class Workflow(
 
     @property
     def status_order(self) -> List[Status]:
+        """Statuses in the right order."""
         return self.statuses
 
     @status_order.setter
@@ -134,9 +138,7 @@ class Workflow(
         self.refresh(json=response.json()["results"][0])
 
     def activate(self):
-        """
-        Set the active status to True.
-        """
+        """Set the active status to True."""
         if not self.active:
             url = self._client._build_url("workflow_activate", workflow_id=self.id)
             response = self._client._request("PUT", url=url)
@@ -145,9 +147,7 @@ class Workflow(
             self.refresh(json=response.json()["results"][0])
 
     def deactivate(self):
-        """
-        Set the active status to False.
-        """
+        """Set the active status to False."""
         if self.active:
             url = self._client._build_url("workflow_deactivate", workflow_id=self.id)
             response = self._client._request("PUT", url=url)
@@ -180,19 +180,25 @@ class Workflow(
         return Workflow(json=response.json()["results"][0])
 
     def update_transition(self):
+        """Update the Transition."""
         ...
 
     def delete_transition(self):
+        """Delete the Transition."""
         ...
 
     def create_transition(self):
+        """Create a new Transition."""
         ...
 
     def create_status(self):
+        """Create a new Status."""
         ...
 
     def link_transition(self):
+        """Link a Transition to a Workflow."""
         ...
 
     def unlink_transition(self):
+        """Unlink a Transition from a Workflow."""
         ...

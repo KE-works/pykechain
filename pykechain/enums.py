@@ -702,11 +702,11 @@ class GeoCoordinateConfig(Enum):
     # Amersfoort/RD (epsg: 28992) https://www.spatialreference.org/ref/epsg/amersfoort-rd-new/
     RD_AMERSFOORT = "rd_amersfoort"
     DD = (
-    # As WSG84 (epsg:4326) decimal degrees representation first lat (-90,+90) then lng (-180,+180)
+        # As WSG84 (epsg:4326) decimal degrees representation first lat (-90,+90) then lng (-180,+180)
         "dd"
     )
     DMS = (
-    # As WSG84 (epsg:4326) degrees, minutes, seconds representation first lat N/S then lng E/W
+        # As WSG84 (epsg:4326) degrees, minutes, seconds representation first lat N/S then lng E/W
         "dms"
     )
 
@@ -1115,6 +1115,7 @@ class FormCategory(Enum):
     :cvar MODEL: Model
     :cvar INSTANCE: Instance
     """
+
     MODEL = "MODEL"
     INSTANCE = "INSTANCE"
 

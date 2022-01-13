@@ -60,10 +60,12 @@ class Context(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslati
 
     @classmethod
     def list(cls, client: "Client", **kwargs) -> List["Context"]:
+        """List Context objects."""
         return super().list(client=client, **kwargs)
 
     @classmethod
     def get(cls, client: "Client", **kwargs) -> "Context":
+        """Retrieve a single Context object."""
         return super().get(client=client, **kwargs)
 
     def edit(

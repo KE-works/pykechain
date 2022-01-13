@@ -1459,10 +1459,7 @@ class Client:
                 include_part_instances, bool, "clone_part_instances"
             ),
             include_part_children=check_type(include_children, bool, "clone_children"),
-            excluded_part_ids=check_list_of_base(
-                excluded_parts, Part, "excluded_models"
-            )
-            or [],
+            excluded_part_ids=check_list_of_base(excluded_parts, Part, "excluded_models") or [],
             part_parent_model_id=check_base(
                 part_parent_model, Part, "part_parent_model"
             ),
@@ -1739,10 +1736,8 @@ class Client:
         if part.category == Category.MODEL:
             data.update(
                 {
-                    "multiplicity": check_enum(
-                        multiplicity, Multiplicity, "multiplicity"
-                    )
-                    or part.multiplicity,
+                    "multiplicity": check_enum(multiplicity, Multiplicity,
+                                               "multiplicity") or part.multiplicity,
                     "model_id": part.id,
                     "parent": parent.id,
                 }
@@ -1941,15 +1936,10 @@ class Client:
             json=payload,
         )
         # TODO - remove requests.codes.ok when async is implemented in the backend
-        if (
-            asynchronous
-            and response.status_code not in (requests.codes.ok, requests.codes.accepted)
-            or (
-                not asynchronous
-                and response.status_code
-                not in (requests.codes.ok, requests.codes.accepted)
-            )
-        ):  # pragma: no cover
+        if ((asynchronous and response.status_code not in (
+            requests.codes.ok, requests.codes.accepted))
+            or (not asynchronous and response.status_code not in (
+                requests.codes.ok, requests.codes.accepted))):  # pragma: no cover
             raise APIError(
                 f"Could not delete Parts. ({response.status_code})", response=response
             )
@@ -3126,10 +3116,8 @@ class Client:
 
         update_dict = {
             "parent_id": parent_object.id,
-            "classification": check_enum(
-                classification, ActivityClassification, "classification"
-            )
-            or parent_object.classification,
+            "classification": check_enum(classification, ActivityClassification,
+                                         "classification") or parent_object.classification,
         }
 
         url = self._build_url("activity_move", activity_id=str(activity.id))
@@ -3723,7 +3711,8 @@ class Client:
 
         return Form.list(client=self, **request_params)
 
-    def workflow(self,
+    def workflow(
+        self,
         name: Optional[str] = None,
         pk: Optional[ObjectID] = None,
         category: Optional[WorkflowCategory] = None,

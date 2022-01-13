@@ -4,7 +4,7 @@ import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import FormCategory
-from pykechain.exceptions import APIError, NotFoundError
+from pykechain.exceptions import APIError
 from pykechain.models import Scope
 from pykechain.models.base import BaseInScope, CrudActionsMixin, NameDescriptionTranslationMixin
 from pykechain.models.context import Context
@@ -52,8 +52,8 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
     def __init__(self, json, **kwargs):
         """Construct a service from provided json data."""
         super().__init__(json, **kwargs)
-        self.description : str = json.get("description", "")
-        self.ref : str = json.get("ref", "")
+        self.description: str = json.get("description", "")
+        self.ref: str = json.get("ref", "")
         self._workflow = json.get("workflow")
         self.active_status: "Status" = json.get("active_status")
         self.form_model_root: "Part" = json.get("form_model_root")
@@ -65,6 +65,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
 
     def __repr__(self):  # pragma: no cover
         return f"<pyke Form  '{self.name}' '{self.category}' id {self.id[-8:]}>"
+
     #
     # @classmethod
     # def list(cls, client: "Client", **kwargs) -> List["Form"]:
@@ -75,7 +76,6 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
     # def get(cls, client: "Client", **kwargs) -> "Form":
     #     """Retrieve a Form object through the client."""
     #     return super().get(client=client, **kwargs)
-
 
     def instances(self, **kwargs) -> [List["Form"]]:
         """Retrieve the instances of this Form Model."""
@@ -180,10 +180,9 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
 
         data_dict = {
             "name": check_text(name, "name") or self.name,
-            "description": check_text(kwargs.get("description"), "description")
-            or self.description,
-            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts")
-            or [],
+            "description": check_text(kwargs.get("description"),
+                                      "description") or self.description,
+            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts") or [],
         }
 
         url = self._client._build_url("form_instantiate", form_id=self.id)
@@ -211,8 +210,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         data_dict = {
             "name": check_text(name, "name") or f"{self.name}",
             "target_scope": check_base(target_scope, Scope, "scope"),
-            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts")
-            or [],
+            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts") or [],
         }
         if "description" in kwargs:
             data_dict["description"] = check_text(kwargs.get("description"), "description")
