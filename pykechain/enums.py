@@ -701,10 +701,12 @@ class GeoCoordinateConfig(Enum):
     APPROX_ADDRESS = "approx_address"  # As approximated address
     # Amersfoort/RD (epsg: 28992) https://www.spatialreference.org/ref/epsg/amersfoort-rd-new/
     RD_AMERSFOORT = "rd_amersfoort"
-    DD = (  # As WSG84 (epsg:4326) decimal degrees representation first lat (-90,+90) then lng (-180,+180)
+    DD = (
+    # As WSG84 (epsg:4326) decimal degrees representation first lat (-90,+90) then lng (-180,+180)
         "dd"
     )
-    DMS = (  # As WSG84 (epsg:4326) degrees, minutes, seconds representation first lat N/S then lng E/W
+    DMS = (
+    # As WSG84 (epsg:4326) degrees, minutes, seconds representation first lat N/S then lng E/W
         "dms"
     )
 
@@ -1104,3 +1106,56 @@ class LanguageCodes(Enum):
     GERMAN = "de"
     DUTCH = "nl"
     ITALIAN = "it"
+
+
+class FormCategory(Enum):
+    """
+    Options for the Category of a the Form.
+
+    :cvar MODEL: Model
+    :cvar INSTANCE: Instance
+    """
+    MODEL = "MODEL"
+    INSTANCE = "INSTANCE"
+
+
+class WorkflowCategory(Enum):
+    """
+    Options for the Category of a Workflow.
+
+    :cvar CATALOG: Catalog Workflow (immutable)
+    :cvar DEFINED: Defined Workflow belonging to a scope
+    """
+
+    CATALOG = "CATALOG"
+    DEFINED = "DEFINED"
+
+
+class TransitionType(Enum):
+    """
+    Options for the Type of a Transition.
+
+    :cvar INITIAL: Initial transition, the initial transition to follow when the form is created.
+    :cvar GLOBAL: Global transition, possibility to transition to all statuses from any
+    :cvar DIRECTED: A Directed transition, a transition with a specific from -> to direction
+    """
+
+    INITIAL = "INITIAL"
+    GLOBAL = "GLOBAL"
+    DIRECTED = "DIRECTED"
+
+
+class StatusCategory(Enum):
+    """
+    Category of statuses.
+
+    :cvar UNDEFINED: Undefined status
+    :cvar TODO: Todo status
+    :cvar INPROGRESS: In progress status
+    :cvar DONE: Done status
+    """
+
+    UNDEFINED = "UNDEFINED"
+    TODO = "TODO"
+    INPROGRESS = "INPROGRESS"
+    DONE = "DONE"

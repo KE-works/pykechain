@@ -130,7 +130,6 @@ class AttachmentProperty(Property):
         self._upload(data)
         self._value = name
 
-    # custom for PIM2
     def _download(self):
         url = self._client._build_url("property_download", property_id=self.id)
 
@@ -141,7 +140,6 @@ class AttachmentProperty(Property):
 
         return response
 
-    # custom for PIM2
     def _upload(self, data):
         url = self._client._build_url("property_upload", property_id=self.id)
 

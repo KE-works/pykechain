@@ -1,11 +1,12 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 import requests
 
 from pykechain.enums import ContextGroup, ContextType
 from pykechain.exceptions import APIError
 from pykechain.models import BaseInScope
+from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMixin
 from pykechain.models.input_checks import (
     check_base,
     check_datetime,
@@ -20,35 +21,50 @@ from pykechain.typing import ObjectID, ObjectIDs
 from pykechain.utils import Empty, clean_empty_values, empty, parse_datetime
 
 
-class Context(BaseInScope, TagsMixin):
+class Context(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationMixin):
     """
     A virtual object representing a KE-chain Context.
 
     .. versionadded:: 3.12
     """
 
+    url_detail_name = "context"
+    url_list_name = "contexts"
+    url_pk_name = "context_id"
+
     def __init__(self, json, **kwargs):
         """Construct a service from provided json data."""
         super().__init__(json, **kwargs)
 
-        self.ref = json.get("ref")  # type: Text
-        self.description = json.get("description", "")  # type:Text
-        self.context_type = json.get("context_type")  # type: ContextType
-        self.options = json.get("options", dict())  # type: Dict
-        self.context_group = json.get("context_group", "")  # type: ContextGroup
+        self.ref: str = json.get("ref")
+        self.description: str = json.get("description", "")
+        self.context_type: ContextType = json.get("context_type")
+        self.options: dict = json.get("options", dict())
+        self.context_group: ContextGroup = json.get("context_group", "")
         self._tags = json.get("tags")
 
         # associated activities
-        self.activities = json.get("activities")  # type: ObjectIDs
+        self.activities: ObjectIDs = json.get("activities")
+
+        # associated forms
+        self.forms: ObjectIDs = json.get("form_collections")
 
         # LocationContext
         # these attributes are enabled when context_type == STATIC_LOCATION
-        self.feature_collection = json.get("feature_collection", dict())  # type: dict
+        self.feature_collection: dict = json.get("feature_collection", dict())
 
         # TimeperiodContext
         # these attributes are enabled when context_type == TIME_PERIOD
-        self.start_date = parse_datetime(json.get("start_date"))  # type: Optional[datetime]
-        self.due_date = parse_datetime(json.get("due_date"))  # type: Optional[datetime]
+        self.start_date: Optional[datetime] = parse_datetime(json.get("start_date"))
+        self.due_date: Optional[datetime] = parse_datetime(json.get("due_date"))
+
+    @classmethod
+    def list(cls, client: "Client", **kwargs) -> List["Context"]:
+        return super().list(client=client, **kwargs)
+
+    @classmethod
+    def get(cls, client: "Client", **kwargs) -> "Context":
+        return super().get(client=client, **kwargs)
 
     def edit(
         self,
@@ -59,11 +75,12 @@ class Context(BaseInScope, TagsMixin):
         scope: Optional[Union["Scope", ObjectID]] = empty,
         options: Optional[dict] = empty,
         activities: Optional[Union[List["Activity"], ObjectIDs]] = empty,
+
         feature_collection: Optional[dict] = empty,
         start_date: Optional[datetime] = empty,
         due_date: Optional[datetime] = empty,
         **kwargs,
-    ) -> "self":
+    ) -> "Context":
         """
         Edit the Context.
 

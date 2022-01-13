@@ -39,7 +39,7 @@ repos:
     hooks:
     -   id: flake8
         args:
-        - --ignore=F821
+        - --ignore=F821,W503
         files: pykechain/.*
 -   repo: https://github.com/mgedmin/check-manifest
     rev: '0.44'
