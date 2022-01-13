@@ -3566,7 +3566,7 @@ class Client:
         """
         data = {
             "name": check_text(name, "name"),
-            "description": check_text(description, "description"),
+            "description": check_text(description or "", "description"),
             "scope": check_base(scope, Scope, "scope"),
             "context_type": check_enum(context_type, ContextType, "context_type"),
             "tags": check_list_of_text(tags, "tags"),
