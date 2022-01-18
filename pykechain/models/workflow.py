@@ -7,7 +7,7 @@ from pykechain.enums import StatusCategory, TransitionType, WorkflowCategory
 from pykechain.exceptions import APIError
 from pykechain.models import Base, BaseInScope, Scope
 from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMixin
-from pykechain.models.input_checks import check_base, check_list_of_base, check_text
+from pykechain.models.input_checks import check_base, check_enum, check_list_of_base, check_text
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID
 from pykechain.utils import Empty
@@ -168,9 +168,9 @@ class Workflow(
         :param description: (optional) description of the new workflow
         """
         data = {
-            target_scope: check_base(target_scope, Scope, "scope"),
-            name: check_text(name, "name"),
-            description: check_text(description, "descrioption")
+            "target_scope": check_base(target_scope, Scope, "scope"),
+            "name": check_text(name, "name"),
+            "description": check_text(description, "descrioption")
         }
         url = self._client._build_url("workflow_clone", workflow_id=self.id)
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
@@ -179,17 +179,88 @@ class Workflow(
             raise APIError("Could not clone the workflow", response=response)
         return Workflow(json=response.json()["results"][0])
 
-    def update_transition(self):
-        """Update the Transition."""
-        ...
+    def update_transition(
+        self,
+        transition: Union[Transition, ObjectID],
+        name: Optional[str] = Empty(),
+        description: Optional[str] = Empty(),
+        from_status: Optional[List[str]] = Empty()
+    ) -> Transition:
+        """Update a specific Transition in the current workflow.
 
-    def delete_transition(self):
-        """Delete the Transition."""
-        ...
+        Update the transition inside the worfklow based on a transition_id.
 
-    def create_transition(self):
-        """Create a new Transition."""
-        ...
+        :param transition: Transition object or transition id to alter
+        :param name: (optional) name to change
+        :param description: (optional) description to change
+        :param from_status: (optional) a list of from statuses to update
+        """
+        data = {
+            "transition_id": check_base(transition, Transition, "transition_id"),
+            "name": check_text(name, "name"),
+            "decription": check_text(description, "description"),
+            "from_status": check_list_of_base(from_status, Status, "from_statuses"),
+        }
+        url = self._client._build_url("workflow_update_transition", workflow_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request("POST", url=url, params=query_params, json=data)
+        if response.status_code != requests.codes.ok:
+            raise APIError(f"Could not update the specific transition '{transition}' in the "
+                           "workflow", response=response)
+        return Transition(json=response.json()["results"][0])
+
+    def delete_transition(
+        self,
+        transition: Union[Transition, ObjectID]
+    ) -> None:
+        """Remove Transition from the current Workflow and delete it.
+
+        If the Transition is still connected to *other* Workflows, it will *not* be
+        removed, and will result in a 400 reporting all attached Workflows.
+
+        :param transition: object or uuid of a transition to delete.
+        """
+        data = {
+            "transition_id": check_base(transition, Transition, "transition_id"),
+        }
+        url = self._client._build_url("workflow_delete_transition", workflow_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request("POST", url=url, params=query_params, json=data)
+        if response.status_code != requests.codes.no_content:
+            raise APIError(f"Could not delete the specific transition '{transition}' from the "
+                           "workflow", response=response)
+
+    def create_transition(
+        self,
+        name: str,
+        to_status: Union[Status, ObjectID],
+        transition_type: TransitionType = TransitionType.GLOBAL,
+        from_status: Optional[List[Union[Status, ObjectID]]] = Empty(),
+        description: Optional[str] = Empty(),
+    ):
+        """
+        Create a new Transition and associate it to the current Workflow.
+
+        :param name: name of the transition.
+        :param to_status: status where to transition to (a single status or status id)
+        :param transition_type: transition type to transition to. (defaults to Global)
+        :param from_status: (optional) status to transition from. Not used for Global transitions.
+        :param description: (optional) description.
+        """
+        data = {
+            "name": check_text(name, "name"),
+            "to_status": check_base(to_status, Status, "to_status"),
+            "transition_type": check_enum(transition_type, TransitionType, "transition_type"),
+            "from_status": check_list_of_base(from_status, Status, "from_statuses"),
+            "decription": check_text(description, "description"),
+        }
+        url = self._client._build_url("workflow_create_transition", workflow_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request("POST", url=url, params=query_params, json=data)
+        if response.status_code != requests.codes.ok:
+            raise APIError(f"Could not create the specific transition in the "
+                           "workflow", response=response)
+        return Transition(json=response.json()["results"][0])
 
     def create_status(self):
         """Create a new Status."""
