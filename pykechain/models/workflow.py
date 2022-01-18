@@ -258,7 +258,7 @@ class Workflow(
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
         response = self._client._request("POST", url=url, params=query_params, json=data)
         if response.status_code != requests.codes.ok:
-            raise APIError(f"Could not create the specific transition in the "
+            raise APIError("Could not create the specific transition in the "
                            "workflow", response=response)
         return Transition(json=response.json()["results"][0])
 
