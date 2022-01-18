@@ -225,7 +225,7 @@ class Workflow(
         }
         url = self._client._build_url("workflow_delete_transition", workflow_id=self.id)
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
-        response = self._client._request("POST", url=url, params=query_params, json=data)
+        response = self._client._request("DELETE", url=url, params=query_params, json=data)
         if response.status_code != requests.codes.no_content:
             raise APIError(f"Could not delete the specific transition '{transition}' from the "
                            "workflow", response=response)
@@ -252,7 +252,7 @@ class Workflow(
             "to_status": check_base(to_status, Status, "to_status"),
             "transition_type": check_enum(transition_type, TransitionType, "transition_type"),
             "from_status": check_list_of_base(from_status, Status, "from_statuses"),
-            "decription": check_text(description, "description"),
+            "description": check_text(description, "description"),
         }
         url = self._client._build_url("workflow_create_transition", workflow_id=self.id)
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
@@ -262,14 +262,71 @@ class Workflow(
                            "workflow", response=response)
         return Transition(json=response.json()["results"][0])
 
-    def create_status(self):
-        """Create a new Status."""
-        ...
+    def create_status(
+        self,
+        name: str,
+        category: StatusCategory = StatusCategory.UNDEFINED,
+        description: Optional[str] = Empty(),
+    ) -> Status:
+        """Create a new Status.
 
-    def link_transition(self):
-        """Link a Transition to a Workflow."""
-        ...
+        Will create a new status, a new global transition to that status and
+        will link the new Global transition to that status to the current
+        workflow.
 
-    def unlink_transition(self):
-        """Unlink a Transition from a Workflow."""
-        ...
+        :param name: name of the status
+        :param category: status category (defaults to UNDEFINED)
+        :param description: (optional) description of the status
+        """
+        data = {
+            "name": check_text(name, "name"),
+            "category": check_enum(category, StatusCategory, "status_category"),
+            "description": check_text(description, "description"),
+        }
+
+        url = self._client._build_url("workflow_create_status", workflow_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request("POST", url=url, params=query_params, json=data)
+        if response.status_code != requests.codes.ok:
+            raise APIError("Could not create the specific status, a global transition and"
+                           "link it to the workflow", response=response)
+        return Status(json=response.json()["results"][0])
+
+    def link_transition(
+        self,
+        transitions: List[Union[Transition, ObjectID]]
+    ):
+        """
+        Link a list of Transitions to a Workflow.
+
+        :param transitions: a list of Transition Objects or transition_ids to link to the workflow.
+        """
+        data = {
+            "transitions": check_list_of_base(transitions, Transition)
+        }
+        url = self._client._build_url("workflow_link_transitions", workflow_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request("POST", url=url, params=query_params, json=data)
+        if response.status_code != requests.codes.ok:
+            raise APIError("Could not create the specific status, a global transition and"
+                           "link it to the workflow", response=response)
+        return Status(json=response.json()["results"][0])
+
+    def unlink_transition(self,
+        transitions: List[Union[Transition, ObjectID]]
+    ) -> None:
+        """
+        Unlink a list of Transitions to a Workflow.
+
+        :param transitions: a list of Transition Objects or transition_ids to link to the workflow.
+        """
+        data = {
+            "transitions": check_list_of_base(transitions, Transition)
+        }
+        url = self._client._build_url("workflow_unlink_transitions", workflow_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request("POST", url=url, params=query_params, json=data)
+        if response.status_code != requests.codes.ok:
+            raise APIError("Could not create the specific status, a global transition and"
+                           "link it to the workflow", response=response)
+        self.refresh(json=response.json()["results"][0])
