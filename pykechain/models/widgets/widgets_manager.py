@@ -490,9 +490,11 @@ class WidgetsManager(Iterable):
         if prefilters:
             list_of_prefilters = _check_prefilters(part_model=part_model, prefilters=prefilters)
             prefilters = {
-                MetaWidget.PROPERTY_VALUE_PREFILTER: ",".join(
-                    [pf.format() for pf in list_of_prefilters]
-                )
+                # MetaWidget.PROPERTY_VALUE_PREFILTER: ",".join(
+                #     [pf.format() for pf in list_of_prefilters]
+                # )
+                MetaWidget.PROPERTY_VALUE_PREFILTER: "&".join(
+                    ["prop_value_query={}".format(pf.format()) for pf in list_of_prefilters])
             }
             meta[MetaWidget.PREFILTERS] = prefilters
         if excluded_propmodels:
@@ -1079,8 +1081,7 @@ class WidgetsManager(Iterable):
                     # if progress=False and Bar=False, both are False
                     showProgress=show_progress and not show_progressbar or show_progress,
                     showProgressBar=show_progressbar and not show_progress,
-                    breadcrumbAncestor=check_base(breadcrumb_root, Activity, "breadcrumb_root")
-                    or None,
+                    breadcrumbAncestor=check_base(breadcrumb_root, Activity, "breadcrumb_root") or None,
                 )
             )
         if progress_bar:

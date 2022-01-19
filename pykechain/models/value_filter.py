@@ -122,8 +122,7 @@ class PropertyValueFilter(BaseFilter):
                     PropertyType.BOOLEAN_VALUE,
                     PropertyType.REFERENCES_VALUE,
                     PropertyType.ACTIVITY_REFERENCES_VALUE,
-                )
-                and self.type != FilterType.EXACT
+                ) and self.type != FilterType.EXACT
             ):
                 warnings.warn(
                     "A PropertyValueFilter on a `{}` property should use "
@@ -215,8 +214,9 @@ class PropertyValueFilter(BaseFilter):
         :returns options dict to be used to update the options dict of a property
         """
         super().write_options(filters=filters)
-        prefilters = {"property_value": "&".join(["prop_value_query={}".format(pf.format()) for pf in filters])}
-        #
+        prefilters = {"property_value": "&".join(["prop_value_query={}".format(pf.format())
+                                                  for pf in filters])}
+
         # prefilters = {"property_value": ",".join([pf.format() for pf in filters])}
         options = {MetaWidget.PREFILTERS: prefilters}
 

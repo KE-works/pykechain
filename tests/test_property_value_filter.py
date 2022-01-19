@@ -672,7 +672,6 @@ class TestPropertyFilterAllPropertyTypes(TestBetamax):
             f"{filter_property_model.id}:{filter_value}:{filter_type}",
         )
 
-
     def test_part_reference_multiple_prefilters(self):
         greater_than_equal = FilterType.GREATER_THAN_EQUAL
         lower_than_equal = FilterType.LOWER_THAN_EQUAL
@@ -681,11 +680,11 @@ class TestPropertyFilterAllPropertyTypes(TestBetamax):
         filter_property_model_1 = self.wheel.property("Tire Thickness")
         filter_property_model_2 = self.wheel.property("Diameter")
 
-        # test_prop = self.new_part.add_property(
-        #     name=self.prop_test_name,
-        #     default_value=self.wheel,
-        #     property_type=PropertyType.REFERENCES_VALUE,
-        # )
+        test_prop = self.new_part.add_property(
+            name=self.prop_test_name,
+            default_value=self.wheel,
+            property_type=PropertyType.REFERENCES_VALUE,
+        )
         prefilter_1 = PropertyValueFilter(
             property_model=filter_property_model_1, value=filter_value_1,
             filter_type=greater_than_equal
@@ -694,7 +693,24 @@ class TestPropertyFilterAllPropertyTypes(TestBetamax):
             property_model=filter_property_model_2, value=filter_value_2,
             filter_type=lower_than_equal
         )
-        # test_prop.set_prefilters(prefilters=[prefilter_1, prefilter_2])
+        test_prop.set_prefilters(prefilters=[prefilter_1, prefilter_2])
+
+    def test_multiple_prefilters_in_grid(self):
+        greater_than_equal = FilterType.GREATER_THAN_EQUAL
+        lower_than_equal = FilterType.LOWER_THAN_EQUAL
+        filter_value_1 = 4.2
+        filter_value_2 = 150
+        filter_property_model_1 = self.wheel.property("Tire Thickness")
+        filter_property_model_2 = self.wheel.property("Diameter")
+
+        prefilter_1 = PropertyValueFilter(
+            property_model=filter_property_model_1, value=filter_value_1,
+            filter_type=greater_than_equal
+        )
+        prefilter_2 = PropertyValueFilter(
+            property_model=filter_property_model_2, value=filter_value_2,
+            filter_type=lower_than_equal
+        )
 
         widget = self.wm.add_filteredgrid_widget(
             title="Whatever",
@@ -705,7 +721,6 @@ class TestPropertyFilterAllPropertyTypes(TestBetamax):
             parent_instance=self.bike_instance,
             prefilters=[prefilter_1, prefilter_2],
         )
-        print()
 
     def test_activity_reference_property_prefilter(self):
         test_prop = self.new_part.add_property(
