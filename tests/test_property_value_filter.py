@@ -6,17 +6,11 @@ from unittest import TestCase
 import pytz
 
 from pykechain.enums import (
-    FilterType,
-    ScopeStatus,
-    Multiplicity,
-    PropertyType,
-    ActivityType,
-    ActivityRootNames,
+    ActivityRootNames, ActivityType, FilterType, Multiplicity, PropertyType, ScopeStatus,
 )
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import PropertyValueFilter
 from pykechain.models.value_filter import ScopeFilter
-from pykechain.models.widgets.enums import MetaWidget
 from tests.classes import TestBetamax
 
 TIMESTAMP = datetime.datetime(year=2020, month=1, day=1, tzinfo=pytz.UTC)
@@ -694,6 +688,7 @@ class TestPropertyFilterAllPropertyTypes(TestBetamax):
             filter_type=lower_than_equal
         )
         test_prop.set_prefilters(prefilters=[prefilter_1, prefilter_2])
+        # TODO: make assertions
 
     def test_multiple_prefilters_in_grid(self):
         greater_than_equal = FilterType.GREATER_THAN_EQUAL
@@ -721,6 +716,8 @@ class TestPropertyFilterAllPropertyTypes(TestBetamax):
             parent_instance=self.bike_instance,
             prefilters=[prefilter_1, prefilter_2],
         )
+
+        # TODO: make assertions
 
     def test_activity_reference_property_prefilter(self):
         test_prop = self.new_part.add_property(
