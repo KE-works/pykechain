@@ -4,6 +4,7 @@ from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Scope, user
 from pykechain.models.base_reference import _ReferencePropertyInScope, _ReferenceProperty
+from pykechain.models.form import Form
 from pykechain.models.value_filter import ScopeFilter
 from pykechain.utils import get_in_chunks
 
@@ -156,3 +157,26 @@ class UserReferencesProperty(_ReferenceProperty):
         :rtype list
         """
         return [value.get("pk") for value in self._value] if self.has_value() else None
+
+
+class FormReferencesProperty(_ReferencePropertyInScope):
+    """A virtual object representing a KE-chain Form References property.
+
+    .. versionadded:: 3.7
+    """
+
+    # REFERENCED_CLASS = Form
+
+    def _retrieve_objects(self, **kwargs) -> List[Form]:
+        """
+        Retrieve a list of Forms.
+
+        :param kwargs: optional inputs
+        :return: list of Form objects
+        """
+        forms = []
+        for forms_json in self._value:
+            form = Form(client=self._client, json=forms_json)
+            form.refresh()  # To populate the object with all expected data
+            forms.append(form)
+        return forms

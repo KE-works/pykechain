@@ -1,13 +1,15 @@
 from unittest import TestCase
 
-from pykechain.enums import PropertyType, FilterType, Multiplicity, ActivityRootNames
+from pykechain.enums import FormCategory, PropertyType, FilterType, Multiplicity, ActivityRootNames
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import MultiReferenceProperty
 from pykechain.models.base_reference import _ReferenceProperty
+from pykechain.models.form import Form
 from pykechain.models.property_reference import (
     ActivityReferencesProperty,
     ScopeReferencesProperty,
     UserReferencesProperty,
+    FormReferencesProperty,
 )
 from pykechain.models.validators import RequiredFieldValidator
 from pykechain.models.value_filter import PropertyValueFilter, ScopeFilter
@@ -1000,3 +1002,28 @@ class TestPropertyUserReference(TestBetamax):
             reloaded_prop,
             msg="Must be the same KE-chain prop, based on hashed UUID",
         )
+
+
+class TestPropertyFormyReference(TestBetamax):
+    def setUp(self):
+        super().setUp()
+        root = self.project.model(name="Product")
+        self.part = self.project.create_model(
+            name="The part", parent=root, multiplicity=Multiplicity.ONE
+        )
+        self.form_ref_prop = self.part.add_property(
+            name="form ref", property_type=PropertyType.FORM_REFERENCES_VALUE
+        )
+        self.form_model: Form = self.client.form("__TEST_FORM", category=FormCategory.MODEL)
+        self.form_instance_1 = self.form_model.instantiate(name="__FIRST_TEST_FORM_INSTANCE")
+        self.form_instance_2 = self.form_model.instantiate(name="__SECOND_TEST_FORM_INSTANCE ")
+
+    def tearDown(self):
+        if self.part:
+            self.part.delete()
+        if self.form_model:
+            self.form_model.delete()
+        super().tearDown()
+
+    def test_create(self):
+        self.assertIsInstance(self.form_ref_prop, FormReferencesProperty)
