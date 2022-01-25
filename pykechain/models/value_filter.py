@@ -183,9 +183,10 @@ class PropertyValueFilter(BaseFilter):
     @classmethod
     def parse_options(cls, options: Dict) -> List["PropertyValueFilter"]:
         """
-        Convert the dict & string-based definition of a property value filter to a list of PropertyValueFilter objects.
+        Convert the dict & string-based filter to a list of PropertyValueFilter objects.
 
-        :param options: options dict from a multi-reference property or meta dict from a filtered grid widget.
+        :param options: options dict from a multi-reference property or meta dict from a
+            filtered grid widget.
         :return: list of PropertyValueFilter objects
         :rtype list
         """
@@ -230,7 +231,8 @@ class ScopeFilter(BaseFilter):
     :ivar tag: string
     """
 
-    # map between KE-chain field and Pykechain attribute, and whether the filter is stored as a list (cs-string)
+    # map between KE-chain field and Pykechain attribute, and whether the filter is stored
+    # as a list (cs-string)
     MAP = [
         ("name__icontains", "name", False),
         ("status__in", "status", False),
@@ -318,9 +320,10 @@ class ScopeFilter(BaseFilter):
     @classmethod
     def parse_options(cls, options: Dict) -> List["ScopeFilter"]:
         """
-        Convert the dict & string-based definition of a scope filter to a list of ScopeFilter objects.
+        Convert the dict & string-based definition of a filter to a list of ScopeFilter objects.
 
-        :param options: options dict from a scope reference property or meta dict from a scopes widget.
+        :param options: options dict from a scope reference property or meta dict from a
+            scopes widget.
         :return: list of ScopeFilter objects
         :rtype list
         """
@@ -370,8 +373,8 @@ class ScopeFilter(BaseFilter):
 
                 if filter_value is not None:
                     if is_list:
-                        # creata a string with commaseparted prefilters, the first item directly and
-                        # consequent items with a ,
+                        # creata a string with commaseparted prefilters, the first item directly
+                        # and consequent items with a ,
                         # TODO: refactor to create a list and then join them with a ','
                         if field not in prefilters:
                             prefilters[field] = filter_value
