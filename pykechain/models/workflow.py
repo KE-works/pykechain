@@ -163,6 +163,8 @@ class Workflow(
     ) -> "Workflow":
         """Clone the current workflow into a new workflow.
 
+        Also used to 'import' a catalog workflow into a scope.
+
         :param target_scope: target scope where to clone the Workflow to
         :param name: (optional) name of the new workflow
         :param description: (optional) description of the new workflow

@@ -73,6 +73,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         name: str,
         scope: Union[Scope, ObjectID],
         workflow: Union["Workflow": ObjectID],
+        contexts: Optional[List[Union[Context, ObjectID]]] = Empty(),
         **kwargs: dict
     ) -> "Form":
         """A New Form Model created in KE-chain.
@@ -83,9 +84,26 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         :param scope: Scope or scope_id where to create the form model
         :param workflow: Workflow or workflow_id of the workflow associated to the form model,
             should be in scope.
+        :param contexts: A list of Context or context id's to link to the Form model.
         :param kwargs: Additional kwargs such as contexts.
         """
-        ...
+        from pykechain.models.workflow import Workflow
+        data = {
+            "name": check_text(name, "name"),
+            "scope": check_base(scope, Scope, "scope"),
+            "workflow": check_base(workflow, Workflow, "workflow"),
+            "contexts": check_list_of_base(contexts, Context, "contexts"),
+        }
+
+        kwargs.update(API_EXTRA_PARAMS[cls.url_list_name])
+        response = client._request(
+            "POST", client._build_url(cls.url_list_name), params=kwargs, json=data
+        )
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError(f"Could not create {cls.__name__}", response=response)
+
+        return cls(json=response.json()["results"][0], client=client)
 
     #
     # @classmethod
