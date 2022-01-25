@@ -33,7 +33,9 @@ from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
-from pykechain.utils import parse_datetime, find, Empty, clean_empty_values, empty
+from pykechain.models.workflow import Workflow
+from pykechain.typing import ObjectID
+from pykechain.utils import is_uuid, parse_datetime, find, Empty, clean_empty_values, empty
 
 
 class Scope(Base, TagsMixin):
@@ -744,3 +746,78 @@ class Scope(Base, TagsMixin):
         :return: a Context object
         """
         return self._client.create_context(scope=self, **kwargs)
+
+    #
+    # Forms Methods
+    #
+    def forms(self, **kwargs) -> List["Form"]:
+        """
+        Retrieve Form objects in a scope.
+
+        See :class:`pykechain.Client.forms` for available parameters.
+
+        :return: a list of Form objects
+        """
+        return self._client.forms(scope=self, **kwargs)
+
+    def form(self, **kwargs) -> "Form":
+        """
+        Retrieve a Form object in a scope.
+
+        See :class:`pykechain.Client.form` for available parameters.
+
+        :return: a Form object
+        """
+        return self._client.form(scope=self, **kwargs)
+
+    def create_form_model(self, *args, **kwargs) -> "Form":
+        """
+        Create a new Form object in a scope.
+
+        See :class:`Form.create_model()` for available parameters.
+
+        :return: a Form object
+        """
+        return self._client.create_form_model(*args, scope=self, **kwargs)
+
+    #
+    # Workflows Methods
+    #
+    def workflows(self, **kwargs) -> List["Workflow"]:
+        """
+        Retrieve Workflow objects in a scope.
+
+        See :class:`pykechain.Client.workflows` for available parameters.
+
+        :return: a list of Workflow objects
+        """
+        return self._client.workflows(scope=self, **kwargs)
+
+    def workflow(self, **kwargs) -> "Workflow":
+        """
+        Retrieve a Workflow object in a scope.
+
+        See :class:`pykechain.Client.workflow` for available parameters.
+
+        :return: a Workflow object
+        """
+        return self._client.workflow(scope=self, **kwargs)
+
+
+    def import_workflow(self, workflow: Union[Workflow, ObjectID], **kwargs) -> "Workflow":
+        """
+        Import a Workflow object into the current scope.
+
+        See :class:`Workflow.clone()` for available parameters.
+
+        :return: a Workflow object
+        """
+        if is_uuid(workflow):
+            workflow = self.workflow(pk=workflow)
+
+        if isinstance(workflow, Workflow):
+            return workflow.clone(target_scope=self, **kwargs)
+        else:
+            raise IllegalArgumentError(
+                f"The workflow to import could not be found. I got: '{workflow}'"
+            )

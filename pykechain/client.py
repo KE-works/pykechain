@@ -3652,17 +3652,15 @@ class Client:
 
         return Context.list(client=self, **request_params)
 
-        # response = self._request(
-        #     "GET", self._build_url("contexts"), params=request_params
-        # )
-        #
-        # if response.status_code != requests.codes.ok:  # pragma: no cover
-        #     raise NotFoundError("Could not retrieve Contexts", response=response)
-        #
-        # return [
-        #     Context(json=download, client=self)
-        #     for download in response.json()["results"]
-        # ]
+    def create_form_model(self, *args, **kwargs) -> Form:
+        """
+        Create a single Form Model.
+
+        See the `Form.create_model()` method for available arguments.
+
+        :return: a created Form Model
+        """
+        return Form.create_model(client=self, *args, **kwargs)
 
     def form(self, *args, **kwargs) -> Form:
         """
