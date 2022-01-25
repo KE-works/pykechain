@@ -1011,9 +1011,11 @@ class TestPropertyFormyReference(TestBetamax):
         self.part = self.project.create_model(
             name="The part", parent=root, multiplicity=Multiplicity.ONE
         )
-        self.form_ref_prop = self.part.add_property(
+        self.form_ref_prop_model = self.part.add_property(
             name="form ref", property_type=PropertyType.FORM_REFERENCES_VALUE
         )
+        self.form_ref_prop_instance = self.part.instance().property(
+            name=self.form_ref_prop_model.name)
         self.form_model: Form = self.client.form("__TEST_FORM", category=FormCategory.MODEL)
         self.form_instance_1 = self.form_model.instantiate(name="__FIRST_TEST_FORM_INSTANCE")
         self.form_instance_2 = self.form_model.instantiate(name="__SECOND_TEST_FORM_INSTANCE ")
@@ -1021,9 +1023,35 @@ class TestPropertyFormyReference(TestBetamax):
     def tearDown(self):
         if self.part:
             self.part.delete()
-        if self.form_model:
-            self.form_model.delete()
+        if self.form_instance_1:
+            self.form_instance_1.delete()
+        if self.form_instance_2:
+            self.form_instance_2.delete()
         super().tearDown()
 
     def test_create(self):
-        self.assertIsInstance(self.form_ref_prop, FormReferencesProperty)
+        self.assertIsInstance(self.form_ref_prop_model, FormReferencesProperty)
+
+    def test_value_model(self):
+        self.form_ref_prop_model.value = [self.form_model]
+
+        self.assertIsNotNone(self.form_ref_prop_model.value)
+        self.assertEqual(self.form_ref_prop_model.value[0].id, self.form_model.id)
+        self.assertEqual(len(self.form_ref_prop_model.value), 1)
+
+    def test_no_value_model(self):
+        self.assertIsInstance(self.form_ref_prop_model, FormReferencesProperty)
+        self.assertIsNone(self.form_ref_prop_model.value)
+
+    def test_value_instance(self):
+        self.form_ref_prop_model.value = [self.form_model]
+        self.form_ref_prop_instance.value = [self.form_instance_1]
+
+        self.assertEqual(len(self.form_ref_prop_instance.value), 1)
+        self.assertEqual(self.form_ref_prop_instance.value[0].id, self.form_instance_1.id)
+
+        self.form_ref_prop_instance.value = [self.form_instance_1, self.form_instance_2]
+
+        self.assertEqual(len(self.form_ref_prop_instance.value), 2)
+        self.assertEqual(self.form_ref_prop_instance.value[0].id, self.form_instance_1.id)
+        self.assertEqual(self.form_ref_prop_instance.value[1].id, self.form_instance_2.id)

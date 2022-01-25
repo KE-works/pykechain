@@ -53,7 +53,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         """Construct a service from provided json data."""
         super().__init__(json, **kwargs)
         self.description : str = json.get("description", "")
-        self.ref : str = json.get("ref", "")
+        self.ref: str = json.get("ref", "")
         self._workflow = json.get("workflow")
         self.active_status: "Status" = json.get("active_status")
         self.form_model_root: "Part" = json.get("form_model_root")
