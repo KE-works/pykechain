@@ -66,6 +66,27 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
     def __repr__(self):  # pragma: no cover
         return f"<pyke Form  '{self.name}' '{self.category}' id {self.id[-8:]}>"
 
+    @classmethod
+    def create_model(
+        cls,
+        client: "Client",
+        name: str,
+        scope: Union[Scope, ObjectID],
+        workflow: Union["Workflow": ObjectID],
+        **kwargs: dict
+    ) -> "Form":
+        """A New Form Model created in KE-chain.
+
+        Needs scope, name, workflow.
+        :param client: The client connection to KE-chain API
+        :param name: Name of the new form model
+        :param scope: Scope or scope_id where to create the form model
+        :param workflow: Workflow or workflow_id of the workflow associated to the form model,
+            should be in scope.
+        :param kwargs: Additional kwargs such as contexts.
+        """
+        ...
+
     #
     # @classmethod
     # def list(cls, client: "Client", **kwargs) -> List["Form"]:
