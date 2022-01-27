@@ -5,12 +5,12 @@ import requests
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import StatusCategory, TransitionType, WorkflowCategory
 from pykechain.exceptions import APIError
-from pykechain.models import Base, BaseInScope, Scope
+from pykechain.models import Base, BaseInScope
 from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMixin
 from pykechain.models.input_checks import check_base, check_enum, check_list_of_base, check_text
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID
-from pykechain.utils import Empty
+from pykechain.utils import Empty, clean_empty_values
 
 
 class Transition(Base, CrudActionsMixin):
@@ -22,7 +22,7 @@ class Transition(Base, CrudActionsMixin):
 
     def __init__(self, json, **kwargs) -> None:
         """Initialise a Transition object."""
-        super().__init__(json, *kwargs)
+        super().__init__(json, **kwargs)
         self.description: str = json.get("description", "")
         self.ref: str = json.get("ref", "")
         self.derived_from_id: Optional[ObjectID] = json.get("derived_from")
@@ -58,7 +58,7 @@ class Status(Base, CrudActionsMixin):
 
     def __init__(self, json, **kwargs) -> None:
         """Initialize a Status object."""
-        super().__init__(json, *kwargs)
+        super().__init__(json, **kwargs)
         self.description: str = json.get("description", "")
         self.ref: str = json.get("ref", "")
         self.status_category: StatusCategory = json.get("status_category")
@@ -85,7 +85,7 @@ class Workflow(
 
     def __init__(self, json, **kwargs) -> None:
         """Initialize a Workflow Object."""
-        super().__init__(json, *kwargs)
+        super().__init__(json, **kwargs)
         self.description: str = json.get("description", "")
         self.ref: str = json.get("ref", "")
         self.derived_from_id: Optional[ObjectID] = json.get("derived_from")
@@ -115,6 +115,10 @@ class Workflow(
     def get(cls, client: "Client", **kwargs) -> "Workflow":
         """Retrieve a single Workflow object using the client."""
         return super().get(client=client, **kwargs)
+
+    def delete(self):
+        """Delete Workflow."""
+        return super().delete()
 
     @property
     def status_order(self) -> List[Status]:
@@ -169,17 +173,18 @@ class Workflow(
         :param name: (optional) name of the new workflow
         :param description: (optional) description of the new workflow
         """
+        from pykechain.models import Scope
         data = {
             "target_scope": check_base(target_scope, Scope, "scope"),
             "name": check_text(name, "name"),
-            "description": check_text(description, "descrioption")
+            "description": check_text(description, "description")
         }
         url = self._client._build_url("workflow_clone", workflow_id=self.id)
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
-        response = self._client._request("POST", url=url, params=query_params, json=data)
-        if response.status_code != requests.codes.ok:  # pragma: no cover
+        response = self._client._request("POST", url=url, params=query_params, json=clean_empty_values(data))
+        if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not clone the workflow", response=response)
-        return Workflow(json=response.json()["results"][0])
+        return Workflow(json=response.json()["results"][0], client=self._client)
 
     def update_transition(
         self,
@@ -314,7 +319,8 @@ class Workflow(
                            "link it to the workflow", response=response)
         return Status(json=response.json()["results"][0])
 
-    def unlink_transition(self,
+    def unlink_transition(
+        self,
         transitions: List[Union[Transition, ObjectID]]
     ) -> None:
         """

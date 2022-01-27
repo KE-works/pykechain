@@ -55,3 +55,16 @@ class TestWorkflows(TestBetamax):
 
         retr_on_id = self.client.workflow(pk=workflow_id)
         pass
+
+    def test_clone_workflow_to_scope(self):
+        """Testing the 'import workflow'."""
+        catalog_workflow = self.client.workflow(name="Simple Workflow",
+                                                category=WorkflowCategory.CATALOG)
+
+        imported_workflow = catalog_workflow.clone(target_scope=self.project,
+                                                   name="___Imported Simple Workflow")
+
+        self.assertTrue(imported_workflow)
+        yup = self.client.workflow(name="___Imported Simple Workflow", scope=self.project)
+
+        yup.delete()

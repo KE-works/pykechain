@@ -72,7 +72,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         client: "Client",
         name: str,
         scope: Union[Scope, ObjectID],
-        workflow: Union["Workflow": ObjectID],
+        workflow: Union["Workflow", ObjectID],
         contexts: Optional[List[Union[Context, ObjectID]]] = Empty(),
         **kwargs: dict
     ) -> "Form":

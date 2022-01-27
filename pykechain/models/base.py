@@ -5,7 +5,7 @@ import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.exceptions import NotFoundError
-from pykechain.models.input_checks import check_uuid
+from pykechain.models.input_checks import check_client, check_uuid
 from pykechain.typing import ObjectID
 from pykechain.utils import parse_datetime
 
@@ -32,7 +32,7 @@ class Base:
     def __init__(self, json: Dict, client: "Client"):
         """Construct a model from provided json data."""
         self._json_data = json
-        self._client: "Client" = client
+        self._client: "Client" = check_client(client)
 
         self.id = json.get("id", None)
         self.name = json.get("name", None)
@@ -166,6 +166,22 @@ class CrudActionsMixin:
         # otherwise do the normal singular retrieve
         return client._retrieve_singular(cls.list, client=client, **kwargs)
 
+    def delete(self) -> None:
+        """
+        Delete the object.
+
+        After successful deletion on the server it will set the id to None to give feedback to the
+        user that there is no relation between the object in memery and an object in KE-chain.
+        """
+        field_name_in_api_path = self.url_pk_name or f"{self.__name__.lower()}_id"
+        url = self._client._build_url(self.url_detail_name, **{field_name_in_api_path: self.id})
+
+        response = self._client._request("DELETE", url)
+        if response.status_code != requests.codes.no_content:
+            raise NotFoundError("Could not delete object", response=response)
+        # reset the id to None to feedback that the object is deleted in KE-chain
+        self.id = None
+        return None
 
 class BaseInScope(Base):
     """
