@@ -65,6 +65,8 @@ class TestWorkflows(TestBetamax):
                                                    name="___Imported Simple Workflow")
 
         self.assertTrue(imported_workflow)
-        yup = self.client.workflow(name="___Imported Simple Workflow", scope=self.project)
+        retrieved_imported_workflow = self.client.workflow(name="___Imported Simple Workflow",
+                                                           scope=self.project)
+        self.assertEqual(imported_workflow.id, retrieved_imported_workflow.id)
 
-        yup.delete()
+        retrieved_imported_workflow.delete()
