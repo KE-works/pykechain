@@ -148,7 +148,11 @@ class Workflow(
             response = self._client._request("PUT", url=url)
             if response.status_code != requests.codes.ok:  # pragma: no cover
                 raise APIError("Could not activate the workflow", response=response)
-            self.refresh(json=response.json()["results"][0])
+
+            # we need to do a full refresh here from the server as the
+            # API of workflow/<id>/activate does not return the full object as response.
+            self.refresh(url=self._client._build_url("workflow", workflow_id=self.id),
+                         extra_params=API_EXTRA_PARAMS.get(self.url_list_name))
 
     def deactivate(self):
         """Set the active status to False."""
@@ -157,7 +161,11 @@ class Workflow(
             response = self._client._request("PUT", url=url)
             if response.status_code != requests.codes.ok:  # pragma: no cover
                 raise APIError("Could not activate the workflow", response=response)
-            self.refresh(json=response.json()["results"][0])
+
+            # we need to do a full refresh here from the server as the
+            # API of workflow/<id>/deactivate does not return the full object as response.
+            self.refresh(url=self._client._build_url("workflow", workflow_id=self.id),
+                         extra_params=API_EXTRA_PARAMS.get(self.url_list_name))
 
     def clone(
         self,
@@ -181,7 +189,8 @@ class Workflow(
         }
         url = self._client._build_url("workflow_clone", workflow_id=self.id)
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
-        response = self._client._request("POST", url=url, params=query_params, json=clean_empty_values(data))
+        response = self._client._request("POST", url=url, params=query_params,
+                                         json=clean_empty_values(data, nones=False))
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not clone the workflow", response=response)
         return Workflow(json=response.json()["results"][0], client=self._client)

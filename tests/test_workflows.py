@@ -4,12 +4,6 @@ from pykechain.enums import WorkflowCategory
 from pykechain.models.workflow import Workflow
 from tests.classes import TestBetamax
 
-
-@pytest.mark.skipif(
-    "os.getenv('GITHUB_ACTIONS', False)",
-    reason="Skipping tests when using Travis or Github Actions "
-           "as there is no public workflows world yet",
-)
 class TestWorkflows(TestBetamax):
     """
     Test retrieval and scope attributes and methods.
@@ -70,3 +64,45 @@ class TestWorkflows(TestBetamax):
         self.assertEqual(imported_workflow.id, retrieved_imported_workflow.id)
 
         retrieved_imported_workflow.delete()
+
+    def test_import_workflow_in_a_scope_with_import_workflow_method_on_scope(self):
+        """Test the create of a new workflow in a scope."""
+        imported_workflow = self.project.import_workflow(workflow=self.workflow, name="___Imported Simple Flow")
+        self.assertEqual(imported_workflow.derived_from_id, self.workflow.id)
+        imported_workflow.delete()
+
+    def test_clone_workflow_in_a_scope_in_the_same_scope(self):
+        test_wf = self.project.import_workflow(workflow=self.workflow, name="__TEST")
+
+        cloned_wf = test_wf.clone(
+            target_scope=test_wf.scope_id,
+            name = "CLONED WITHIN THE SOCPE"
+        )
+        self.assertTrue(cloned_wf)
+        self.assertEqual(cloned_wf.derived_from_id, test_wf.id)
+
+        # teardown
+        test_wf.delete()
+        cloned_wf.delete()
+
+class TestTestWorkflowMethods(TestBetamax):
+    def setUp(self):
+        super().setUp()
+        self.catalog_workflow: Workflow = self.client.workflow(
+            "Simple Workflow",
+            category=WorkflowCategory.CATALOG
+        )
+        self.workflow = self.project.import_workflow(
+            workflow=self.catalog_workflow,
+            name="__TEST Imported Simple Flow from Catalog"
+        )
+
+    def tearDown(self):
+        super().tearDown()
+        self.workflow.delete()
+
+    def test_workflow_in_and_activate(self):
+        self.workflow.deactivate()
+        self.assertFalse(self.workflow.active)
+        self.workflow.activate()
+        self.assertTrue(self.workflow.active)

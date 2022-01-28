@@ -802,7 +802,7 @@ class Scope(Base, TagsMixin):
         :return: a Workflow object
         """
         if is_uuid(workflow):
-            workflow = self.workflow(pk=workflow)
+            workflow = self._client.workflow(pk=workflow)
 
         if isinstance(workflow, Workflow):
             return workflow.clone(target_scope=self, **kwargs)
