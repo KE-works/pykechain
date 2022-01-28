@@ -98,6 +98,7 @@ class PropertyType(Enum):
     :cvar SERVICE_REFERENCES_VALUE: Service Referenes Property
     :cvar TEAM_REFERENCES_VALUE: Team References Property
     :cvar USER_REFERENCES_VALUE: User References Property
+    :cvar FORM_REFERENCES_VALUE: Form References Property
     :cvar JSON_VALUE: Generic JSON storage Property
     :cvar GEOJSON_VALUE: GEOJSON property to store map data
     :cvar WEATHER_VALUE: Weather JSON property compatible with the response of weatherapi.com
@@ -122,6 +123,7 @@ class PropertyType(Enum):
     ACTIVITY_REFERENCES_VALUE = "ACTIVITY_REFERENCES_VALUE"
     SCOPE_REFERENCES_VALUE = "SCOPE_REFERENCES_VALUE"
     SERVICE_REFERENCES_VALUE = "SERVICE_REFERENCES_VALUE"
+    FORM_REFERENCES_VALUE = "FORM_REFERENCES_VALUE"
     TEAM_REFERENCES_VALUE = "TEAM_REFERENCES_VALUE"
     USER_REFERENCES_VALUE = "USER_REFERENCES_VALUE"
     JSON_VALUE = "JSON_VALUE"
@@ -702,7 +704,8 @@ class GeoCoordinateConfig(Enum):
     # Amersfoort/RD (epsg: 28992) https://www.spatialreference.org/ref/epsg/amersfoort-rd-new/
     RD_AMERSFOORT = "rd_amersfoort"
     DD = (
-        # As WSG84 (epsg:4326) decimal degrees representation first lat (-90,+90) then lng (-180,+180)
+        # As WSG84 (epsg:4326) decimal degrees representation first lat (-90,+90) then lng
+        # (-180,+180)
         "dd"
     )
     DMS = (
@@ -1110,7 +1113,7 @@ class LanguageCodes(Enum):
 
 class FormCategory(Enum):
     """
-    Options for the Category of a the Form.
+    Options for the Category of a Form.
 
     :cvar MODEL: Model
     :cvar INSTANCE: Instance

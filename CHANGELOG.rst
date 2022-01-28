@@ -4,6 +4,7 @@ Change Log
 FORMS Feature
 -------------
 * We added the feature equivalence in pykechain for KE-chain Forms and Workflow.
+* :+1: Added the `FormReferenceProperties` and tests (#1098)
 
 UNRELEASED
 ----------

@@ -5,7 +5,7 @@ import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.exceptions import NotFoundError
-from pykechain.models.input_checks import check_client, check_uuid
+from pykechain.models.input_checks import check_uuid, check_client
 from pykechain.typing import ObjectID
 from pykechain.utils import parse_datetime
 
@@ -182,6 +182,7 @@ class CrudActionsMixin:
         # reset the id to None to feedback that the object is deleted in KE-chain
         self.id = None
         return None
+
 
 class BaseInScope(Base):
     """
