@@ -1,6 +1,9 @@
 Change Log
 ==========
 
+UNRELEASED (Forms)
+* :+1: Added the `FormReferencerProperties` and tests (#1098)
+
 UNRELEASED
 ----------
 * :+1: we upgraded all code to python 3.6 and higher preferred style. See the implemented improvements found throughout the code: https://github.com/asottile/pyupgrade/blob/master/README.md#implemented-features. We also reformatted the code using black.

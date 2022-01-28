@@ -4,7 +4,7 @@ import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import FormCategory
-from pykechain.exceptions import APIError, NotFoundError
+from pykechain.exceptions import APIError
 from pykechain.models import Scope
 from pykechain.models.base import BaseInScope, CrudActionsMixin, NameDescriptionTranslationMixin
 from pykechain.models.context import Context
@@ -52,7 +52,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
     def __init__(self, json, **kwargs):
         """Construct a service from provided json data."""
         super().__init__(json, **kwargs)
-        self.description : str = json.get("description", "")
+        self.description: str = json.get("description", "")
         self.ref: str = json.get("ref", "")
         self._workflow = json.get("workflow")
         self.active_status: "Status" = json.get("active_status")
@@ -75,7 +75,6 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
     # def get(cls, client: "Client", **kwargs) -> "Form":
     #     """Retrieve a Form object through the client."""
     #     return super().get(client=client, **kwargs)
-
 
     def instances(self, **kwargs) -> [List["Form"]]:
         """Retrieve the instances of this Form Model."""

@@ -3723,7 +3723,8 @@ class Client:
 
         return Form.list(client=self, **request_params)
 
-    def workflow(self,
+    def workflow(
+        self,
         name: Optional[str] = None,
         pk: Optional[ObjectID] = None,
         category: Optional[WorkflowCategory] = None,

@@ -10,7 +10,7 @@ from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMi
 from pykechain.models.input_checks import check_base, check_list_of_base, check_text
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID
-from pykechain.utils import Empty, empty
+from pykechain.utils import Empty
 
 
 class Transition(Base, CrudActionsMixin):

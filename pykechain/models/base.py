@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.exceptions import MultipleFoundError, NotFoundError
+from pykechain.exceptions import NotFoundError
 from pykechain.models.input_checks import check_uuid
 from pykechain.typing import ObjectID
 from pykechain.utils import parse_datetime
@@ -12,6 +12,7 @@ from pykechain.utils import parse_datetime
 
 class TooManyArgumentsWarning(UserWarning):
     """Warn a developer that too many arguments are used in the method call."""
+
     pass
 
 
