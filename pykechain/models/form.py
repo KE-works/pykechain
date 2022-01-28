@@ -65,6 +65,46 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
 
     def __repr__(self):  # pragma: no cover
         return f"<pyke Form  '{self.name}' '{self.category}' id {self.id[-8:]}>"
+
+    @classmethod
+    def create_model(
+        cls,
+        client: "Client",
+        name: str,
+        scope: Union[Scope, ObjectID],
+        workflow: Union["Workflow", ObjectID],
+        contexts: Optional[List[Union[Context, ObjectID]]] = Empty(),
+        **kwargs: dict
+    ) -> "Form":
+        """A New Form Model created in KE-chain.
+
+        Needs scope, name, workflow.
+        :param client: The client connection to KE-chain API
+        :param name: Name of the new form model
+        :param scope: Scope or scope_id where to create the form model
+        :param workflow: Workflow or workflow_id of the workflow associated to the form model,
+            should be in scope.
+        :param contexts: A list of Context or context id's to link to the Form model.
+        :param kwargs: Additional kwargs such as contexts.
+        """
+        from pykechain.models.workflow import Workflow
+        data = {
+            "name": check_text(name, "name"),
+            "scope": check_base(scope, Scope, "scope"),
+            "workflow": check_base(workflow, Workflow, "workflow"),
+            "contexts": check_list_of_base(contexts, Context, "contexts"),
+        }
+
+        kwargs.update(API_EXTRA_PARAMS[cls.url_list_name])
+        response = client._request(
+            "POST", client._build_url(cls.url_list_name), params=kwargs, json=data
+        )
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError(f"Could not create {cls.__name__}", response=response)
+
+        return cls(json=response.json()["results"][0], client=client)
+
     #
     # @classmethod
     # def list(cls, client: "Client", **kwargs) -> List["Form"]:
@@ -179,10 +219,9 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
 
         data_dict = {
             "name": check_text(name, "name") or self.name,
-            "description": check_text(kwargs.get("description"), "description")
-            or self.description,
-            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts")
-            or [],
+            "description": check_text(kwargs.get("description"),
+                                      "description") or self.description,
+            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts") or [],
         }
 
         url = self._client._build_url("form_instantiate", form_id=self.id)
@@ -210,8 +249,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         data_dict = {
             "name": check_text(name, "name") or f"{self.name}",
             "target_scope": check_base(target_scope, Scope, "scope"),
-            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts")
-            or [],
+            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts") or [],
         }
         if "description" in kwargs:
             data_dict["description"] = check_text(kwargs.get("description"), "description")
