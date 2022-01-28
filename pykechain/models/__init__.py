@@ -21,7 +21,7 @@ from .property2_multi_reference import MultiReferenceProperty2
 from .property2_datetime import DatetimeProperty2
 from .property_reference import (
     ActivityReferencesProperty,
-    ScopeReferencesProperty,
+    ContextReferencesProperty, ScopeReferencesProperty,
     UserReferencesProperty,
     FormReferencesProperty,
 )
@@ -59,7 +59,8 @@ property_type_to_class_map = {
     PropertyType.ACTIVITY_REFERENCES_VALUE: ActivityReferencesProperty,
     PropertyType.SCOPE_REFERENCES_VALUE: ScopeReferencesProperty,
     PropertyType.USER_REFERENCES_VALUE: UserReferencesProperty,
-    PropertyType.FORM_REFERENCES_VALUE: FormReferencesProperty
+    PropertyType.FORM_REFERENCES_VALUE: FormReferencesProperty,
+    PropertyType.CONTEXT_REFERENCES_VALUE: ContextReferencesProperty,
 }
 
 __all__ = (

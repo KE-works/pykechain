@@ -1004,7 +1004,7 @@ class TestPropertyUserReference(TestBetamax):
         )
 
 
-class TestPropertyFormyReference(TestBetamax):
+class TestPropertyFormReference(TestBetamax):
     def setUp(self):
         super().setUp()
         root = self.project.model(name="Product")
