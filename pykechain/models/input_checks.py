@@ -29,6 +29,7 @@ def check_type(value: Optional[Any], cls: Any, key: str) -> Optional[Any]:
             )
     return value
 
+
 def check_client(value: "Client") -> "Client":
     """Validate the input being a KE-chain Client.
 
@@ -36,6 +37,7 @@ def check_client(value: "Client") -> "Client":
     """
     from pykechain import Client
     return check_type(value, Client, "client")
+
 
 def check_uuid(uuid: Optional[str], key: Optional[str] = "pk") -> Optional[str]:
     """Validate the UUID input to be a correct UUID."""

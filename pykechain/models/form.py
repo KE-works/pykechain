@@ -76,7 +76,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         contexts: Optional[List[Union[Context, ObjectID]]] = Empty(),
         **kwargs: dict
     ) -> "Form":
-        """A New Form Model created in KE-chain.
+        """Create a new form model.
 
         Needs scope, name, workflow.
         :param client: The client connection to KE-chain API
