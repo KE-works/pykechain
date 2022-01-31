@@ -1,8 +1,14 @@
 from unittest import TestCase
 
-from pykechain.enums import ContextGroup, ContextType, FormCategory, PropertyType, FilterType, \
-    Multiplicity, \
+from pykechain.enums import (
+    ContextGroup, 
+    ContextType, 
+    FormCategory, 
+    PropertyType, 
+    FilterType,
+    Multiplicity,  
     ActivityRootNames
+)
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import MultiReferenceProperty
 from pykechain.models.base_reference import _ReferenceProperty
