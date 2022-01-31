@@ -1,13 +1,15 @@
 from unittest import TestCase
 
-from pykechain.enums import FormCategory, PropertyType, FilterType, Multiplicity, ActivityRootNames
+from pykechain.enums import ContextGroup, ContextType, FormCategory, PropertyType, FilterType, \
+    Multiplicity, \
+    ActivityRootNames
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import MultiReferenceProperty
 from pykechain.models.base_reference import _ReferenceProperty
 from pykechain.models.form import Form
 from pykechain.models.property_reference import (
     ActivityReferencesProperty,
-    ScopeReferencesProperty,
+    ContextReferencesProperty, ScopeReferencesProperty,
     UserReferencesProperty,
     FormReferencesProperty,
 )
@@ -1053,5 +1055,79 @@ class TestPropertyFormReference(TestBetamax):
         self.form_ref_prop_instance.value = [self.form_instance_1, self.form_instance_2]
 
         self.assertEqual(len(self.form_ref_prop_instance.value), 2)
-        self.assertEqual(self.form_ref_prop_instance.value[0].id, self.form_instance_1.id)
-        self.assertEqual(self.form_ref_prop_instance.value[1].id, self.form_instance_2.id)
+
+        self.assertIn(self.form_instance_1.id,
+                      [value.id for value in self.form_ref_prop_instance.value])
+        self.assertIn(self.form_instance_2.id,
+                      [value.id for value in self.form_ref_prop_instance.value])
+
+
+class TestPropertyContextReference(TestBetamax):
+    def setUp(self):
+        super().setUp()
+        root = self.project.model(name="Product")
+        self.part = self.project.create_model(
+            name="The part", parent=root, multiplicity=Multiplicity.ONE
+        )
+        self.context_ref_prop_model = self.part.add_property(
+            name="context ref", property_type=PropertyType.CONTEXT_REFERENCES_VALUE
+        )
+        self.context_ref_prop_instance = self.part.instance().property(
+            name=self.context_ref_prop_model.name)
+
+        self.context_1 = self.client.create_context(
+            name="__testing_context_1",
+            context_type=ContextType.TIME_PERIOD,
+            context_group=ContextGroup.DISCIPLINE,
+            scope=self.project.id,
+            tags=["testing"],
+        )  # type: Context
+        self.context_2 = self.client.create_context(
+            name="__testing_context_2",
+            context_type=ContextType.STATIC_LOCATION,
+            context_group=ContextGroup.LOCATION,
+            scope=self.project.id,
+            tags=["testing"],
+        )  # type: Context
+
+
+    def tearDown(self):
+        if self.part:
+            self.part.delete()
+        if self.context_1:
+            self.context_1.delete()
+        if self.context_2:
+            self.context_2.delete()
+        super().tearDown()
+
+    def test_create(self):
+        self.assertIsInstance(self.context_ref_prop_model, ContextReferencesProperty)
+
+    def test_value_model(self):
+        self.context_ref_prop_model.value = [self.context_1]
+
+        self.assertIsNotNone(self.context_ref_prop_model.value)
+        self.assertEqual(self.context_ref_prop_model.value[0].id, self.context_1.id)
+        self.assertEqual(len(self.context_ref_prop_model.value), 1)
+
+    def test_no_value_model(self):
+        self.assertIsNone(self.context_ref_prop_model.value)
+
+    def test_value_instance(self):
+        self.context_ref_prop_instance.value = [self.context_1]
+
+        self.assertIsNotNone(self.context_ref_prop_instance.value)
+        self.assertEqual(self.context_ref_prop_instance.value[0].id, self.context_1.id)
+        self.assertEqual(len(self.context_ref_prop_instance.value), 1)
+
+    def test_no_value_instance(self):
+        self.assertIsNone(self.context_ref_prop_instance.value)
+
+    def test_multiple_values(self):
+        self.context_ref_prop_instance.value = [self.context_1, self.context_2]
+
+        self.assertEqual(len(self.context_ref_prop_instance.value), 2)
+        self.assertIn(self.context_1.id,
+                      [value.id for value in self.context_ref_prop_instance.value])
+        self.assertIn(self.context_2.id,
+                      [value.id for value in self.context_ref_prop_instance.value])
