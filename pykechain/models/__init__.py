@@ -21,7 +21,7 @@ from .property2_multi_reference import MultiReferenceProperty2
 from .property2_datetime import DatetimeProperty2
 from .property_reference import (
     ActivityReferencesProperty,
-    ContextReferencesProperty, 
+    ContextReferencesProperty,
     ScopeReferencesProperty,
     UserReferencesProperty,
     FormReferencesProperty,
