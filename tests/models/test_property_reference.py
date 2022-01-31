@@ -15,7 +15,8 @@ from pykechain.models.base_reference import _ReferenceProperty
 from pykechain.models.form import Form
 from pykechain.models.property_reference import (
     ActivityReferencesProperty,
-    ContextReferencesProperty, ScopeReferencesProperty,
+    ContextReferencesProperty, 
+    ScopeReferencesProperty,
     UserReferencesProperty,
     FormReferencesProperty,
 )
