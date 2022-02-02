@@ -594,6 +594,16 @@ API_EXTRA_PARAMS = {
         )
     },
     "status": {
-        "fields": ",".join(["id", "name", "ref", "description", "status_category"])
+        "fields": ",".join(
+            [
+                "id",
+                "name",
+                "ref",
+                "description",
+                "created_at",
+                "updated_at",
+                "status_category",
+            ]
+        )
     },
 }

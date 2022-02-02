@@ -298,12 +298,12 @@ class Workflow(
         response = self._client._request(
             "POST", url=url, params=query_params, json=clean_empty_values(data)
         )
-        if response.status_code != requests.codes.ok:
+        if response.status_code != requests.codes.created:
             raise APIError(
                 "Could not create the specific transition in the " "workflow",
                 response=response,
             )
-        return Transition(json=response.json()["results"][0])
+        return Transition(json=response.json()["results"][0], client=self._client)
 
     def create_status(
         self,
@@ -332,13 +332,13 @@ class Workflow(
         response = self._client._request(
             "POST", url=url, params=query_params, json=clean_empty_values(data)
         )
-        if response.status_code != requests.codes.ok:
+        if response.status_code != requests.codes.created:
             raise APIError(
                 "Could not create the specific status, a global transition and"
                 "link it to the workflow",
                 response=response,
             )
-        return Status(json=response.json()["results"][0])
+        return Status(json=response.json()["results"][0], client=self._client)
 
     def link_transition(self, transitions: List[Union[Transition, ObjectID]]):
         """

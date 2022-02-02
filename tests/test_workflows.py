@@ -121,15 +121,17 @@ class TestWorkflowMethods(TestBetamax):
         from_status = self.workflow.create_status(
             name="__TEST FROM", category=StatusCategory.TODO
         )
-        new_transition = self.workflow.create_transition(
-            name="___test transition",
-            to_status=test_status,
-            transition_type=TransitionType.DIRECTED,
-            from_status=from_status,
-        )
-        self.workflow.delete_transition(new_transition)
-        test_status.delete()
-        from_status.delete()
+        try:
+            new_transition = self.workflow.create_transition(
+                name="___test transition",
+                to_status=test_status,
+                transition_type=TransitionType.DIRECTED,
+                from_status=[from_status],
+            )
+            self.workflow.delete_transition(new_transition)
+        finally:
+            test_status.delete()
+            from_status.delete()
 
 
 class TestWorkflowTransitions(TestBetamax):
