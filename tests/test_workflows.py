@@ -1,3 +1,5 @@
+from unittest import skip
+
 import pytest as pytest
 
 from pykechain.enums import StatusCategory, TransitionType, WorkflowCategory
@@ -113,6 +115,7 @@ class TestWorkflowMethods(TestBetamax):
         self.workflow.activate()
         self.assertTrue(self.workflow.active)
 
+    @skip("We are missing api endpoint to delete statusses directly as superuser.")
     def test_create_workflow_transition(self):
         """Test to create a transition on a workflow."""
         test_status = self.workflow.create_status(

@@ -252,14 +252,14 @@ class Workflow(
 
         :param transition: object or uuid of a transition to delete.
         """
-        data = {
-            "transition_id": check_base(transition, Transition, "transition_id"),
-        }
-        url = self._client._build_url("workflow_delete_transition", workflow_id=self.id)
-        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
-        response = self._client._request(
-            "DELETE", url=url, params=query_params, json=clean_empty_values(data)
+        transition_id = check_base(transition, Transition, "transition_id")
+        url = self._client._build_url(
+            "workflow_delete_transition",
+            workflow_id=self.id,
+            transition_id=transition_id,
         )
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request("DELETE", url=url, params=query_params)
         if response.status_code != requests.codes.no_content:
             raise APIError(
                 f"Could not delete the specific transition '{transition}' from the "

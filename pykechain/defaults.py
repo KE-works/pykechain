@@ -127,7 +127,8 @@ API_PATH = {
     "workflows": "api/v3/workflows",
     "workflow": "api/v3/workflows/{workflow_id}",
     "workflow_update_transition": "api/v3/workflows/{workflow_id}/update_transition",
-    "workflow_delete_transition": "api/v3/workflows/{workflow_id}/delete_transition",
+    "workflow_delete_transition": "api/v3/workflows/{workflow_id}/"
+                                  "delete_transition/{transition_id}",
     "workflow_create_transition": "api/v3/workflows/{workflow_id}/create_transition",
     "workflow_create_status": "api/v3/workflows/{workflow_id}/create_status",
     "workflow_link_transitions": "api/v3/workflows/{workflow_id}/link_transition",
