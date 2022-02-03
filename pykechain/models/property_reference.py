@@ -4,6 +4,7 @@ from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Scope, user
 from pykechain.models.base_reference import _ReferenceProperty, _ReferencePropertyInScope
+from pykechain.models.context import Context
 from pykechain.models.form import Form
 from pykechain.models.value_filter import ScopeFilter
 from pykechain.utils import get_in_chunks
@@ -180,3 +181,26 @@ class FormReferencesProperty(_ReferencePropertyInScope):
             form.refresh()  # To populate the object with all expected data
             forms.append(form)
         return forms
+
+
+class ContextReferencesProperty(_ReferencePropertyInScope):
+    """A virtual object representing a KE-chain Context References property.
+
+    .. versionadded:: 3.7
+    """
+
+    # REFERENCED_CLASS = Context
+
+    def _retrieve_objects(self, **kwargs) -> List[Context]:
+        """
+        Retrieve a list of Contexts.
+
+        :param kwargs: optional inputs
+        :return: list of Context objects
+        """
+        contexts = []
+        for contexts_json in self._value:
+            context = Context(client=self._client, json=contexts_json)
+            context.refresh()  # To populate the object with all expected data
+            contexts.append(context)
+        return contexts

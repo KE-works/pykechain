@@ -721,8 +721,10 @@ class TestPropertyWithValidatorFromLiveServer(TestBetamax):
         self.numeric_range_prop_instance = self.part.property(name="numericrange_validatortest")
 
     def tearDown(self):
-        self.numeric_range_prop_model.delete()
-        self.part.delete()
+        if self.numeric_range_prop_model:
+            self.numeric_range_prop_model.delete()
+        if self.part:
+            self.part.delete()
         super().tearDown()
 
     def test_numeric_property_with_validator_parses(self):

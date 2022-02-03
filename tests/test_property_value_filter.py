@@ -176,9 +176,12 @@ class TestPropertyFilterAllPropertyTypes(TestBetamax):
         self.filter_types = FilterType.values()
 
     def tearDown(self):
-        self.test_activity.delete()
-        self.new_part.delete()
-        self.new_wheel.delete()
+        if self.test_activity:
+            self.test_activity.delete()
+        if self.new_part:
+            self.new_part.delete()
+        if self.new_wheel:
+            self.new_wheel.delete()
         super().tearDown()
 
     def test_text_property_filter_in_grid(self):
