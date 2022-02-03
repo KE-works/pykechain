@@ -123,6 +123,7 @@ class TestWorkflowMethods(TestBetamax):
         test_status = self.workflow.create_status(
             name="__TEST DONE", category=StatusCategory.DONE
         )
+        test_transition = self.workflow.transition(test_status, attr="to_status")
         from_status = self.workflow.create_status(
             name="__TEST FROM", category=StatusCategory.TODO
         )

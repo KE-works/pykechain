@@ -16,7 +16,6 @@ from typing import (
 import pytz
 
 from pykechain.exceptions import MultipleFoundError, NotFoundError
-from pykechain.models import Base
 
 T = TypeVar("T")
 

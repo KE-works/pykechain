@@ -1,8 +1,8 @@
 import warnings
 from datetime import datetime
+from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
-from pykechain.enums import Enum
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.utils import Empty, empty, is_url, is_uuid, parse_datetime
 

@@ -170,7 +170,7 @@ class Workflow(
         return find_obj_in_list(value, iterable=self._transitions, attribute=attr)
 
     @property
-    def transtitions(self):
+    def transitions(self):
         return self._transitions
 
     def status(self, value: str = None, attr: str = None) -> Status:
