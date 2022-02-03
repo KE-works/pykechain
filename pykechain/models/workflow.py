@@ -15,7 +15,7 @@ from pykechain.models.input_checks import (
 )
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID
-from pykechain.utils import Empty, clean_empty_values
+from pykechain.utils import Empty, clean_empty_values, find_obj_in_list
 
 
 class Transition(Base, CrudActionsMixin):
@@ -94,13 +94,13 @@ class Workflow(
         self.description: str = json.get("description", "")
         self.ref: str = json.get("ref", "")
         self.derived_from_id: Optional[ObjectID] = json.get("derived_from")
-        self.transitions: List[Transition] = [
+        self._transitions: List[Transition] = [
             Transition(j, client=self._client) for j in json.get("transitions", [])
         ]
         self.category: WorkflowCategory = json.get("category")
         self.options: dict = json.get("options", {})
         self.active: bool = json.get("active")
-        self.statuses: List[Status] = [
+        self._statuses: List[Status] = [
             Status(j, client=self._client) for j in json.get("statuses")
         ]
 
@@ -145,6 +145,58 @@ class Workflow(
                 "Could not alter the order of the statuses", response=response
             )
         self.refresh(json=response.json()["results"][0])
+
+    #
+    # Subclass finders and managers.
+    #
+
+    def transition(self, value: str = None, attr: str = None, ) -> Transition:
+        """
+        Retrieve the Transition belonging to this workflow based on its name, ref or uuid.
+
+        :param value: transition name, ref or UUID to search for
+        :param attr: the attribute to match on. Eg. to_status=<Status Obj>
+        :return: a single :class:`Transition`
+        :raises NotFoundError: if the `Transition` is not part of the `Workflow`
+        :raises MultipleFoundError
+
+        Example
+        -------
+        >>> workflow = project.workflow('Simple Flow')
+        >>> transition = workflow.transition('in progress')
+        >>> todo_status = client.status(name="To Do")
+        >>> transition = workflow.transition(todo_status, attr="to_status")
+        """
+        return find_obj_in_list(value, iterable=self._transitions, attribute=attr)
+
+    @property
+    def transtitions(self):
+        return self._transitions
+
+    def status(self, value: str = None, attr: str = None) -> Status:
+        """
+        Retrieve the Status belonging to this workflow based on its name, ref or uuid.
+
+        :param value: status name, ref or UUID to search for
+        :param attr: the attribute to match on.
+        :return: a single :class:`Status`
+        :raises NotFoundError: if the `Status` is not part of the `Workflow`
+        :raises MultipleFoundError
+
+        Example
+        -------
+        >>> workflow = project.workflow('Simple Flow')
+        >>> status = workflow.status('To Do')
+        """
+        return find_obj_in_list(value, iterable=self._statuses, attribute=attr)
+
+    @property
+    def statuses(self):
+        return self._statuses
+
+    #
+    # Mutable methods on the object
+    #
 
     def activate(self):
         """Set the active status to True."""
@@ -242,6 +294,8 @@ class Workflow(
                 "workflow",
                 response=response,
             )
+        # an updated transition will be altered so we want to refresh the workflow.
+        self.refresh()
         return Transition(json=response.json()["results"][0])
 
     def delete_transition(self, transition: Union[Transition, ObjectID]) -> None:
@@ -266,6 +320,8 @@ class Workflow(
                 "workflow",
                 response=response,
             )
+        # a deleted transition will be unlinked so we want to refresh the workflow.
+        self.refresh()
 
     def create_transition(
         self,
@@ -303,6 +359,8 @@ class Workflow(
                 "Could not create the specific transition in the " "workflow",
                 response=response,
             )
+        # a new transition will be linked to the workflow so we want to refresh the workflow.
+        self.refresh()
         return Transition(json=response.json()["results"][0], client=self._client)
 
     def create_status(
@@ -338,6 +396,9 @@ class Workflow(
                 "link it to the workflow",
                 response=response,
             )
+        # a new status will create a new global transition to that status
+        # so we want to update the current workflow.
+        self.refresh()
         return Status(json=response.json()["results"][0], client=self._client)
 
     def link_transition(self, transitions: List[Union[Transition, ObjectID]]):
@@ -358,7 +419,7 @@ class Workflow(
                 "link it to the workflow",
                 response=response,
             )
-        return Status(json=response.json()["results"][0])
+        self.refresh(json=response.json()["results"][0])
 
     def unlink_transition(self, transitions: List[Union[Transition, ObjectID]]) -> None:
         """

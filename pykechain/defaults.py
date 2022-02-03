@@ -139,8 +139,8 @@ API_PATH = {
     "workflow_set_status_order": "api/v2/worksflows/{workflow_id}/set_status_order",
     "transitions": "api/v3/transitions",
     "transition": "api/v3/transitions/{transition_id}",
-    "statuses": "api/v3/status",
-    "status": "api/v3/status/{status_id}",
+    "statuses": "api/v3/statuses",
+    "status": "api/v3/statuses/{status_id}",
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {"fields": "__all__"}

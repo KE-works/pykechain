@@ -115,26 +115,26 @@ class TestWorkflowMethods(TestBetamax):
         self.workflow.activate()
         self.assertTrue(self.workflow.active)
 
-    @skip("We are missing api endpoint to delete statusses directly as superuser.")
+    # @skip("We are missing api endpoint to delete statusses directly as superuser.")
     def test_create_workflow_transition(self):
         """Test to create a transition on a workflow."""
+
+        count_transitions = len(self.workflow.transitions)
         test_status = self.workflow.create_status(
             name="__TEST DONE", category=StatusCategory.DONE
         )
         from_status = self.workflow.create_status(
             name="__TEST FROM", category=StatusCategory.TODO
         )
-        try:
-            new_transition = self.workflow.create_transition(
-                name="___test transition",
-                to_status=test_status,
-                transition_type=TransitionType.DIRECTED,
-                from_status=[from_status],
-            )
-            self.workflow.delete_transition(new_transition)
-        finally:
-            test_status.delete()
-            from_status.delete()
+        new_transition = self.workflow.create_transition(
+            name="___test transition",
+            to_status=test_status,
+            transition_type=TransitionType.DIRECTED,
+            from_status=[from_status],
+        )
+        self.workflow.delete_transition(new_transition)
+        test_status.delete()
+        from_status.delete()
 
 
 class TestWorkflowTransitions(TestBetamax):
