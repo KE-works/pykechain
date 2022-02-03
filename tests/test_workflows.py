@@ -141,8 +141,3 @@ class TestWorkflowMethods(TestBetamax):
         self.workflow.delete_transition(new_transition)
         test_status.delete()
         from_status.delete()
-
-
-class TestWorkflowTransitions(TestBetamax):
-    def test_create_workflow_transition(self):
-        ...
