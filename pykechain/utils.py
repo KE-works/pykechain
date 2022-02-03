@@ -601,7 +601,7 @@ def find_obj_in_list(value: str, iterable: List[Any], attribute: str = None) -> 
     """
     matches = []
     if attribute:
-        matches = [t for t in iterable if t.get(attribute) == value]
+        matches = [t for t in iterable if getattr(t, attribute) == value]
     elif is_uuid(value):
         matches = [t for t in iterable if t.id == value]
     else:
