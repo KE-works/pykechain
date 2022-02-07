@@ -136,7 +136,7 @@ API_PATH = {
     "workflow_clone": "api/v3/workflows/{workflow_id}/clone",
     "workflow_activate": "api/v3/workflows/{workflow_id}/activate",
     "workflow_deactivate": "api/v3/workflows/{workflow_id}/deactivate",
-    "workflow_set_status_order": "api/v2/worksflows/{workflow_id}/set_status_order",
+    "workflow_set_status_order": "api/v3/workflows/{workflow_id}/set_status_order",
     "transitions": "api/v3/transitions",
     "transition": "api/v3/transitions/{transition_id}",
     "statuses": "api/v3/statuses",

@@ -4,7 +4,7 @@ import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import StatusCategory, TransitionType, WorkflowCategory
-from pykechain.exceptions import APIError
+from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Base, BaseInScope
 from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMixin
 from pykechain.models.input_checks import (
@@ -137,6 +137,9 @@ class Workflow(
 
         :param value: a determined ordered list of Status or status UUID's
         """
+        if not value:
+            raise IllegalArgumentError(
+                f"To set the order of statises, provide a list of status objects, got: '{value}'")
         data = {"status_order": check_list_of_base(value, Status, "statuses")}
         url = self._client._build_url("workflow_set_status_order", workflow_id=self.id)
         response = self._client._request("PUT", url=url, json=data)
@@ -230,7 +233,7 @@ class Workflow(
 
     def clone(
         self,
-        target_scope: "Scope",
+        target_scope: "Scope" = Empty(),
         name: Optional[str] = Empty(),
         description: Optional[str] = Empty(),
     ) -> "Workflow":
@@ -238,12 +241,14 @@ class Workflow(
 
         Also used to 'import' a catalog workflow into a scope.
 
-        :param target_scope: target scope where to clone the Workflow to
+        :param target_scope: (optional) target scope where to clone the Workflow to.
+            Defaults current scope.
         :param name: (optional) name of the new workflow
         :param description: (optional) description of the new workflow
         """
         from pykechain.models import Scope
-
+        if isinstance(target_scope, Empty):
+            target_scope = self.scope_id
         data = {
             "target_scope": check_base(target_scope, Scope, "scope"),
             "name": check_text(name, "name"),
@@ -401,7 +406,7 @@ class Workflow(
         self.refresh()
         return Status(json=response.json()["results"][0], client=self._client)
 
-    def link_transition(self, transitions: List[Union[Transition, ObjectID]]):
+    def link_transitions(self, transitions: List[Union[Transition, ObjectID]]):
         """
         Link a list of Transitions to a Workflow.
 
@@ -421,7 +426,7 @@ class Workflow(
             )
         self.refresh(json=response.json()["results"][0])
 
-    def unlink_transition(self, transitions: List[Union[Transition, ObjectID]]) -> None:
+    def unlink_transitions(self, transitions: List[Union[Transition, ObjectID]]) -> None:
         """
         Unlink a list of Transitions to a Workflow.
 

@@ -1,9 +1,9 @@
-from unittest import skip
-
-import pytest as pytest
+from copy import deepcopy
+from random import shuffle
 
 from pykechain.enums import StatusCategory, TransitionType, WorkflowCategory
-from pykechain.models.workflow import Workflow
+from pykechain.models.input_checks import check_list_of_base
+from pykechain.models.workflow import Status, Workflow
 from tests.classes import TestBetamax
 
 
@@ -115,9 +115,13 @@ class TestWorkflowMethods(TestBetamax):
         self.workflow.activate()
         self.assertTrue(self.workflow.active)
 
-    # @skip("We are missing api endpoint to delete statusses directly as superuser.")
-    def test_create_workflow_transition(self):
-        """Test to create a transition on a workflow."""
+    def test_create_delete_status_and_create_delete_workflow_transition(self):
+        """Test to create a transition on a workflow.
+
+        - tests creation of status on workflow
+        - tests deletion of status
+        - tests deletion of transition on workflow
+        """
 
         count_transitions = len(self.workflow.transitions)
         test_status = self.workflow.create_status(
@@ -141,3 +145,19 @@ class TestWorkflowMethods(TestBetamax):
         self.workflow.delete_transition(new_transition)
         test_status.delete()
         from_status.delete()
+
+    def test_workflow_status_order(self):
+        cloned_wf = self.workflow.clone(name="___cloned_workflow_status_order",
+                                        target_scope=self.workflow.scope_id)
+
+        try:
+            status_ids = [s.id for s in deepcopy(cloned_wf.statuses)]
+            reversed_status_ids = list(reversed(status_ids))
+
+
+            cloned_wf.status_order=reversed_status_ids
+
+            self.assertListEqual(reversed_status_ids,
+                                 check_list_of_base(cloned_wf.status_order, Status))
+        finally:
+            cloned_wf.delete()
