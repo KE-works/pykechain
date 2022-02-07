@@ -711,7 +711,7 @@ class Scope(Base, TagsMixin):
 
         :return: a Context object
         """
-        return self._client.context(*args, scope=self, **kwargs)
+        return self._client.context(*args, scope=self.id, **kwargs)
 
     def contexts(self, *args, **kwargs) -> List[Context]:
         """
@@ -769,6 +769,12 @@ class Scope(Base, TagsMixin):
         :return: a Form object
         """
         return self._client.create_form_model(*args, scope=self, **kwargs)
+
+    def instantiate_form(self, *args, **kwargs) -> "Form":
+        """
+
+        """
+        return self._client.instantiate_form(*args, scope=self, model=0, *args, **kwargs)
 
     #
     # Workflows Methods

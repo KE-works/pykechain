@@ -73,7 +73,8 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         name: str,
         scope: Union[Scope, ObjectID],
         workflow: Union["Workflow", ObjectID],
-        contexts: Optional[List[Union[Context, ObjectID]]] = Empty(),
+        contexts: List[Union[Context, ObjectID]],
+
         **kwargs: dict
     ) -> "Form":
         """Create a new form model.
@@ -100,7 +101,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
             "POST", client._build_url(cls.url_list_name), params=kwargs, json=data
         )
 
-        if response.status_code != requests.codes.ok:  # pragma: no cover
+        if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError(f"Could not create {cls.__name__}", response=response)
 
         return cls(json=response.json()["results"][0], client=client)
@@ -210,7 +211,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         )
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError(f"Could not delete Service {self}", response=response)
+            raise APIError(f"Could not delete Form {self}", response=response)
 
     def instantiate(self, name: Optional[str], **kwargs) -> "Form":
         """Create a new Form instance based on a model."""

@@ -3662,6 +3662,16 @@ class Client:
         """
         return Form.create_model(client=self, *args, **kwargs)
 
+    def instantiate_form(self, model, *args, **kwargs) -> Form:
+        """
+        Create a new Form instance based on a model.
+
+        See the `Form.instantiate()` method for available arguments.
+
+        :return: a created Form Instance
+        """
+        return Form.instantiate(client=self, model=model, *args, **kwargs)
+
     def form(self, *args, **kwargs) -> Form:
         """
         Retrieve a single Form, see `forms()` method for available arguments.
@@ -3680,6 +3690,7 @@ class Client:
         category: Optional[FormCategory] = None,
         description: Optional[str] = None,
         scope: Optional[Union[Scope, ObjectID]] = None,
+        context: Optional[List[Union[Context, ObjectID]]] = None,
         ref: Optional[str] = None,
         **kwargs,
     ) -> List[Form]:
@@ -3693,6 +3704,7 @@ class Client:
         :param category: (optional) category of the form to search for
         :param description: (optional) description of the form to filter on
         :param scope: (optional) the scope of the form to filter on
+        :param context: (optional) the context of the form to filter on
         :param ref: (optional) the ref of the form to filter on
         :return: a list of Forms
         """
@@ -3702,6 +3714,7 @@ class Client:
             "category": check_enum(category, FormCategory, "category"),
             "description": check_text(description, "description"),
             "scope": check_base(scope, Scope, "scope"),
+            "context_id__in": check_list_of_base(context, Context, "context"),
             "ref": check_text(ref, "ref"),
         }
         if kwargs:
