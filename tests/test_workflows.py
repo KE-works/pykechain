@@ -1,5 +1,6 @@
 from copy import deepcopy
 from random import shuffle
+from unittest import skip
 
 from pykechain.enums import StatusCategory, TransitionType, WorkflowCategory
 from pykechain.models.input_checks import check_list_of_base
@@ -161,3 +162,16 @@ class TestWorkflowMethods(TestBetamax):
                                  check_list_of_base(cloned_wf.status_order, Status))
         finally:
             cloned_wf.delete()
+
+    @skip("WIP tests")
+    def test_workflow_unlink_and_link_transitions(self):
+        transitions = deepcopy(self.workflow.transitions)
+        the_transition_to_unlink= transitions[-1]
+
+        self.workflow.unlink_transitions([the_transition_to_unlink])
+
+        self.assertListEqual(self.workflow.transitions, transitions[:-1])
+
+        self.workflow.link_transitions([the_transition_to_unlink])
+
+        self.assertListEqual(self.workflow.transitions, transitions)
