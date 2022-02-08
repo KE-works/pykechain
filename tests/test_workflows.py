@@ -148,24 +148,25 @@ class TestWorkflowMethods(TestBetamax):
         from_status.delete()
 
     def test_workflow_status_order(self):
-        cloned_wf = self.workflow.clone(name="___cloned_workflow_status_order",
-                                        target_scope=self.workflow.scope_id)
+        cloned_wf = self.workflow.clone(
+            name="___cloned_workflow_status_order", target_scope=self.workflow.scope_id
+        )
 
         try:
             status_ids = [s.id for s in deepcopy(cloned_wf.statuses)]
             reversed_status_ids = list(reversed(status_ids))
 
+            cloned_wf.status_order = reversed_status_ids
 
-            cloned_wf.status_order=reversed_status_ids
-
-            self.assertListEqual(reversed_status_ids,
-                                 check_list_of_base(cloned_wf.status_order, Status))
+            self.assertListEqual(
+                reversed_status_ids, check_list_of_base(cloned_wf.status_order, Status)
+            )
         finally:
             cloned_wf.delete()
 
     def test_workflow_unlink_and_link_transitions(self):
         transitions = deepcopy(self.workflow.transitions)
-        the_transition_to_unlink= transitions[-1]
+        the_transition_to_unlink = transitions[-1]
 
         # unlink
         self.workflow.unlink_transitions([the_transition_to_unlink])
