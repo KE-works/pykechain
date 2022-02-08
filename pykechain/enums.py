@@ -1028,7 +1028,7 @@ class FontAwesomeMode(Enum):
 
 class MinimumAccessLevelOptions(Enum):
     """
-    Options for minimum access level options for the sidebar buttons
+    Options for minimum access level options for the sidebar buttons.
 
     :cvar IS_MEMBER: "is_member"
     :cvar IS_LEAD_MEMBER: "is_leadmember"
