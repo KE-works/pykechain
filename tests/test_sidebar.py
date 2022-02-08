@@ -1,4 +1,11 @@
-from pykechain.enums import SubprocessDisplayMode, KEChainPages, ScopeStatus
+from pykechain.enums import (
+    KEChainPageLabels,
+    MinimumAccessLevelOptions,
+    SubprocessDisplayMode,
+    KEChainPages,
+    ScopeStatus,
+    SidebarButtonAlignment
+)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Scope
 from pykechain.models.sidebar.sidebar_button import SideBarButton
@@ -211,7 +218,7 @@ class TestSideBar(TestBetamax):
 
             self.assertEqual(
                 0,
-                len(self.scope.options["customNavigation"]),
+                len(self.scope.options.get("customNavigation", list())),
                 msg="During bulk creation of buttons, KE-chain should not be updated yet.",
             )
 
@@ -284,3 +291,84 @@ class TestSideBar(TestBetamax):
 
         # Test attributes
         self.assertTrue(sbm.override_sidebar)
+
+    def test_alignment(self):
+        # Check whether all attributes are retrieved and set
+        with self.scope.side_bar() as sbm:
+            sbm.add_ke_chain_page(
+                page_name=KEChainPages.CONTEXTS,
+                alignment=SidebarButtonAlignment.TOP,
+            )
+            sbm.add_ke_chain_page(
+                page_name=KEChainPages.FORMS,
+                alignment=SidebarButtonAlignment.BOTTOM,
+            )
+
+        # Reload side-bar from KE-chain
+        self.scope.side_bar().refresh()
+
+        found = [False, False]
+
+        sbm = self.scope.side_bar()
+        for button in sbm:  # type: SideBarButton
+            if button.display_name == KEChainPageLabels[KEChainPages.FORMS]:
+                self.assertTrue(button.alignment == SidebarButtonAlignment.BOTTOM)
+                found[0] = True
+            if button.display_name == KEChainPageLabels[KEChainPages.CONTEXTS]:
+                self.assertTrue(button.alignment == SidebarButtonAlignment.TOP)
+                found[1] = True
+
+        self.assertTrue(all(found))
+
+    def test_side_bar_permissions(self):
+        # Check whether all attributes are retrieved and set
+        with self.scope.side_bar() as sbm:
+            sbm.add_ke_chain_page(
+                page_name=KEChainPages.FORMS,
+                minimum_access_level=MinimumAccessLevelOptions.IS_MEMBER
+            )
+            sbm.add_ke_chain_page(
+                page_name=KEChainPages.CONTEXTS,
+                minimum_access_level=MinimumAccessLevelOptions.IS_LEAD_MEMBER
+            )
+            sbm.add_ke_chain_page(
+                page_name=KEChainPages.CATALOG_FORMS,
+                minimum_access_level=MinimumAccessLevelOptions.IS_SUPERVISOR
+            )
+            sbm.add_ke_chain_page(
+                page_name=KEChainPages.WORKFLOWS,
+                minimum_access_level=MinimumAccessLevelOptions.IS_MANAGER
+            )
+            sbm.add_ke_chain_page(
+                page_name=KEChainPages.DETAIL,
+            )
+
+        # Reload side-bar from KE-chain
+        self.scope.side_bar().refresh()
+
+        found = [False, False, False, False, False]
+
+        sbm = self.scope.side_bar()
+        for button in sbm:  # type: SideBarButton
+            if button.display_name == KEChainPageLabels[KEChainPages.FORMS]:
+                self.assertTrue(button.minimum_access_level ==
+                                MinimumAccessLevelOptions.IS_MEMBER)
+                found[0] = True
+            if button.display_name == KEChainPageLabels[KEChainPages.CONTEXTS]:
+                self.assertTrue(button.minimum_access_level ==
+                                MinimumAccessLevelOptions.IS_LEAD_MEMBER)
+                found[1] = True
+            if button.display_name == KEChainPageLabels[KEChainPages.CATALOG_FORMS]:
+                self.assertTrue(button.minimum_access_level ==
+                                MinimumAccessLevelOptions.IS_SUPERVISOR)
+                found[2] = True
+            if button.display_name == KEChainPageLabels[KEChainPages.WORKFLOWS]:
+                self.assertTrue(button.minimum_access_level ==
+                                MinimumAccessLevelOptions.IS_MANAGER)
+                found[3] = True
+            if button.display_name == KEChainPageLabels[KEChainPages.DETAIL]:
+                self.assertTrue(button.minimum_access_level ==
+                                MinimumAccessLevelOptions.IS_MEMBER)
+                found[4] = True
+
+        self.assertTrue(all(found))
