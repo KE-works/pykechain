@@ -13,7 +13,7 @@ from pykechain.models.input_checks import (
 )
 from pykechain.models.property import Property
 from pykechain.models.tree_traversal import TreeObject
-from pykechain.utils import find_obj_in_list, is_uuid, find, Empty, clean_empty_values, empty
+from pykechain.utils import find_obj_in_list, find, Empty, clean_empty_values, empty
 
 
 class Part(TreeObject):
