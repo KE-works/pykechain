@@ -163,15 +163,14 @@ class TestWorkflowMethods(TestBetamax):
         finally:
             cloned_wf.delete()
 
-    @skip("WIP tests")
     def test_workflow_unlink_and_link_transitions(self):
         transitions = deepcopy(self.workflow.transitions)
         the_transition_to_unlink= transitions[-1]
 
+        # unlink
         self.workflow.unlink_transitions([the_transition_to_unlink])
-
         self.assertListEqual(self.workflow.transitions, transitions[:-1])
 
+        # relink
         self.workflow.link_transitions([the_transition_to_unlink])
-
         self.assertListEqual(self.workflow.transitions, transitions)
