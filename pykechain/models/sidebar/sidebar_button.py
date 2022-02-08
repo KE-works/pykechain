@@ -1,6 +1,7 @@
 from typing import Dict, Optional
 
-from pykechain.enums import URITarget, FontAwesomeMode
+from pykechain.enums import MinimumAccessLevelOptions, SidebarButtonAlignment, URITarget, \
+    FontAwesomeMode
 from pykechain.exceptions import IllegalArgumentError
 
 allowed_attributes = ["displayName_nl", "displayName_de", "displayName_fr", "displayName_it"]
@@ -22,6 +23,8 @@ class SideBarButton:
         title: Optional[str] = None,
         icon: Optional[str] = None,
         uri: Optional[str] = None,
+        alignment: Optional[SidebarButtonAlignment] = SidebarButtonAlignment.TOP,
+        minimum_access_level: Optional[MinimumAccessLevelOptions] = MinimumAccessLevelOptions.IS_MEMBER,
         uri_target: URITarget = URITarget.INTERNAL,
         icon_mode: FontAwesomeMode = FontAwesomeMode.REGULAR,
         **kwargs,
@@ -43,6 +46,10 @@ class SideBarButton:
         :type uri: str
         :param uri_target: type of URI, either internal or external
         :type uri_target: URITarget
+        :param alignment: alignment of the button top or bottom
+        :type alignment: SidebarButtonAlignment
+        :param minimum_access_level: the minimum permission needed to see the button
+        :type minimum_access_level: MinimumAccessLevelOptions
         :param icon_mode: FontAwesome display mode of the icon
         :type icon_mode: FontAwesomeMode
         :returns None
@@ -59,6 +66,8 @@ class SideBarButton:
         uri = uri if uri else json.get("uri")
         uri_target = json.get("uriTarget", uri_target)
         icon_mode = json.get("displayIconMode", icon_mode)
+        alignment = json.get("alignment", alignment)
+        minimum_access_level = json.get("minimumAccessLevel", minimum_access_level)
 
         if not isinstance(order, int):
             raise IllegalArgumentError(f'order must be an integer, "{order}" is not.')
@@ -91,6 +100,8 @@ class SideBarButton:
         self.uri: str = uri
         self.uri_target: URITarget = uri_target
         self.display_icon_mode: FontAwesomeMode = icon_mode
+        self.alignment: SidebarButtonAlignment = alignment
+        self.minimum_access_level: MinimumAccessLevelOptions = minimum_access_level
 
         self._other_attributes = kwargs
         for key in allowed_attributes:
@@ -147,6 +158,8 @@ class SideBarButton:
             "uri": self.uri,
             "order": self.order,
             "displayIconMode": self.display_icon_mode,
+            "alignment": self.alignment,
+            "minimumAccessLevel": self.minimum_access_level,
         }
         config.update(self._other_attributes)
 
