@@ -770,11 +770,16 @@ class Scope(Base, TagsMixin):
         """
         return self._client.create_form_model(*args, scope=self, **kwargs)
 
-    def instantiate_form(self, *args, **kwargs) -> "Form":
+    def instantiate_form(self, model, *args, **kwargs) -> "Form":
         """
 
         """
-        return self._client.instantiate_form(*args, scope=self, model=0, *args, **kwargs)
+        if self.id == model.scope_id["id"]:
+            return self._client.instantiate_form(*args, model=model, *args, **kwargs)
+        else:
+            raise IllegalArgumentError("Form Model '{}' not in Scope '{}'".format(
+                model.name, self.name
+            ))
 
     #
     # Workflows Methods

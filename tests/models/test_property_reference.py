@@ -1,12 +1,12 @@
 from unittest import TestCase
 
 from pykechain.enums import (
-    ContextGroup, 
-    ContextType, 
-    FormCategory, 
-    PropertyType, 
+    ContextGroup,
+    ContextType,
+    FormCategory,
+    PropertyType,
     FilterType,
-    Multiplicity,  
+    Multiplicity,
     ActivityRootNames
 )
 from pykechain.exceptions import IllegalArgumentError
@@ -15,7 +15,7 @@ from pykechain.models.base_reference import _ReferenceProperty
 from pykechain.models.form import Form
 from pykechain.models.property_reference import (
     ActivityReferencesProperty,
-    ContextReferencesProperty, 
+    ContextReferencesProperty,
     ScopeReferencesProperty,
     UserReferencesProperty,
     FormReferencesProperty,
@@ -1096,7 +1096,6 @@ class TestPropertyContextReference(TestBetamax):
             scope=self.project.id,
             tags=["testing"],
         )  # type: Context
-
 
     def tearDown(self):
         if self.part:

@@ -3673,7 +3673,7 @@ class Client:
 
         :return: a created Form Instance
         """
-        return Form.instantiate(client=self, model=model, *args, **kwargs)
+        return Form.instantiate(self=model, *args, **kwargs)
 
     def form(self, *args, **kwargs) -> Form:
         """
@@ -3724,6 +3724,128 @@ class Client:
             request_params.update(**kwargs)
 
         return Form.list(client=self, **request_params)
+
+    def _create_forms_bulk(
+        self,
+        forms: List[Dict],
+        asynchronous: Optional[bool] = False,
+        retrieve_instances: Optional[bool] = True,
+        **kwargs,
+    ) -> PartSet:
+        """
+        Create multiple form instances simultaneously.
+
+        :param forms: list of dicts, each specifying a form instance. Available fields per dict:
+            :param name: (optional) name provided for the new instance as string otherwise use the name of the model
+            :type name: basestring or None
+            :param description: (optional) description provided for the new instance as string otherwise use the description of the model
+            :type description: basestring or None
+            :param model_id: model of the form which to add new instances, should follow the model tree in KE-chain
+            :type model_id: UUID
+            :param contexts: list of contexts
+            :type properties: list
+        :type forms: list
+        :param asynchronous: If true, immediately returns without forms (default = False)
+        :type asynchronous: bool
+        :param retrieve_instances: If true, will retrieve the created Form Instances in a List
+        :type retrieve_instances: bool
+        :param kwargs:
+        :return: list of Form instances or list of form UUIDs
+        :rtype list
+        """
+        check_list_of_dicts(
+            forms,
+            "forms",
+            [
+                "name",
+                "model_id",
+                "contexts",
+            ],
+        )
+        for form in forms:
+            check_list_of_base(form.get("contexts"), Context, "contexts")
+
+        forms = {"forms": forms}
+        # prepare url query parameters
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS["forms"])
+        query_params["async_mode"] = asynchronous
+
+        response = self._request(
+            "POST",
+            self._build_url("forms_bulk_create"),
+            params=query_params,
+            json=forms,
+        )
+
+        if (asynchronous and response.status_code != requests.codes.accepted) or (
+            not asynchronous and response.status_code != requests.codes.created
+        ):  # pragma: no cover
+            raise APIError(
+                f"Could not create Forms. ({response.status_code})", response=response
+            )
+
+        form_ids = response.json()["results"][0]["forms_created"]
+        if retrieve_instances:
+            instances_per_id = dict()
+            for form_ids_chunk in get_in_chunks(lst=form_ids, chunk_size=50):
+                instances_per_id.update(
+                    {
+                        f.id: f for f in self.forms(id__in=",".join(form_ids_chunk))
+                    }  # `id__in` does not guarantee order
+                )
+            form_instances = [
+                instances_per_id[pk] for pk in form_ids
+            ]  # Ensures order of parts wrt request
+            return list(form_instances)
+        return form_ids
+
+    def _delete_forms_bulk(
+        self,
+        forms: List[Union[Form, str]],
+        asynchronous: Optional[bool] = False,
+        **kwargs,
+    ) -> bool:
+        """Delete multiple Forms simultaneously.
+
+        :param parts: list of Form objects or UUIDs
+        :type parts: List[Form] or List[UUID]
+        :param asynchronous: If true, immediately returns (default = False)
+        :type asynchronous: bool
+        :param kwargs:
+        :return: True if forms are deleted successfully
+        :raises APIError: if the forms could not be deleted
+        :raises IllegalArgumentError: if there were neither Forms nor UUIDs in the list of forms
+        """
+        check_type(asynchronous, bool, "asynchronous")
+
+        list_forms = list()
+        for form in forms:
+            if isinstance(form, Form):
+                list_forms.append(form.id)
+            elif is_uuid(form):
+                list_forms.append(form)
+            else:
+                raise IllegalArgumentError(f"{form} is not a Form nor an UUID")
+        payload = {"forms": list_forms}
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS["parts"])
+        query_params["async_mode"] = asynchronous
+        response = self._request(
+            "DELETE",
+            self._build_url("forms_bulk_delete"),
+            params=query_params,
+            json=payload,
+        )
+        # TODO - remove requests.codes.ok when async is implemented in the backend
+        if ((asynchronous and response.status_code not in (
+            requests.codes.ok, requests.codes.accepted))
+            or (not asynchronous and response.status_code not in (
+                requests.codes.ok, requests.codes.accepted))):  # pragma: no cover
+            raise APIError(
+                f"Could not delete Forms. ({response.status_code})", response=response
+            )
+        return True
 
     def workflow(
         self,

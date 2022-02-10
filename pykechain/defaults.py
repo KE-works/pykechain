@@ -124,6 +124,7 @@ API_PATH = {
     "form": "api/v3/forms/{form_id}",
     "form_instantiate": "api/v3/forms/{form_id}/instantiate",
     "form_clone": "api/v3/forms/{form_id}/clone",
+    "forms_bulk_delete": "api/v3/forms/bulk_delete",
     "workflows": "api/v3/workflows",
     "workflow": "api/v3/workflows/{workflow_id}",
     "workflow_update_transition": "api/v3/workflows/{workflow_id}/update_transition",

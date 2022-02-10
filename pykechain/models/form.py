@@ -139,7 +139,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         **kwargs,
     ) -> None:
         """
-        Edit Service details.
+        Edit Form details.
 
         Setting an input to None will clear out the value (exception being name).
 
