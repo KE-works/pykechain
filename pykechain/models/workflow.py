@@ -4,13 +4,18 @@ import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import StatusCategory, TransitionType, WorkflowCategory
-from pykechain.exceptions import APIError
+from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Base, BaseInScope
 from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMixin
-from pykechain.models.input_checks import check_base, check_enum, check_list_of_base, check_text
+from pykechain.models.input_checks import (
+    check_base,
+    check_enum,
+    check_list_of_base,
+    check_text, check_type,
+)
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID
-from pykechain.utils import Empty, clean_empty_values
+from pykechain.utils import Empty, clean_empty_values, find_obj_in_list
 
 
 class Transition(Base, CrudActionsMixin):
@@ -89,22 +94,48 @@ class Workflow(
         self.description: str = json.get("description", "")
         self.ref: str = json.get("ref", "")
         self.derived_from_id: Optional[ObjectID] = json.get("derived_from")
-        self.transitions: List[Transition] = [
+        self._transitions: List[Transition] = [
             Transition(j, client=self._client) for j in json.get("transitions", [])
         ]
         self.category: WorkflowCategory = json.get("category")
         self.options: dict = json.get("options", {})
         self.active: bool = json.get("active")
-        self.statuses: List[Status] = [
+        self._statuses: List[Status] = [
             Status(j, client=self._client) for j in json.get("statuses")
         ]
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<pyke Workflow '{self.name}' '{self.category}' id {self.id[-8:]}>"
 
-    def edit(self, tags: Optional[Iterable[str]] = None, *args, **kwargs) -> None:
-        """Change the workflow object."""
-        pass
+    def edit(self, name: str = Empty(), description: str= Empty(), *args, **kwargs) -> None:
+        """Change the workflow object.
+
+        Change the name and description of a workflow. It is also possible to update the workflow
+        options and also the 'active' flag. To change the active flag of the workflow we
+        kindly refer to the `activate()` and `deactivate()` methods on the workflow.
+
+        :type name: name of the workflow is required.
+        :type description: (optional) description of the workflow
+        """
+        if isinstance(name, Empty):
+            name = self.name
+        data = {
+            "name": check_text(name, "name"),
+            "description": check_text(description, "description"),
+            "active": check_type(kwargs.get("active", Empty()), bool, "active"),
+            "options": check_type(kwargs.get("options", Empty()), bool, "options")
+        }
+        url = self._client._build_url("workflow", workflow_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request(
+            "PUT",
+            url=url,
+            params=query_params,
+            json=clean_empty_values(data, nones=False),
+        )
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not clone the workflow", response=response)
+        self.refresh(json=response.json()["results"][0])
 
     @classmethod
     def list(cls, client: "Client", **kwargs) -> List["Workflow"]:
@@ -132,6 +163,9 @@ class Workflow(
 
         :param value: a determined ordered list of Status or status UUID's
         """
+        if not value:
+            raise IllegalArgumentError(
+                f"To set the order of statises, provide a list of status objects, got: '{value}'")
         data = {"status_order": check_list_of_base(value, Status, "statuses")}
         url = self._client._build_url("workflow_set_status_order", workflow_id=self.id)
         response = self._client._request("PUT", url=url, json=data)
@@ -141,6 +175,58 @@ class Workflow(
             )
         self.refresh(json=response.json()["results"][0])
 
+    #
+    # Subclass finders and managers.
+    #
+
+    def transition(self, value: str = None, attr: str = None, ) -> Transition:
+        """
+        Retrieve the Transition belonging to this workflow based on its name, ref or uuid.
+
+        :param value: transition name, ref or UUID to search for
+        :param attr: the attribute to match on. Eg. to_status=<Status Obj>
+        :return: a single :class:`Transition`
+        :raises NotFoundError: if the `Transition` is not part of the `Workflow`
+        :raises MultipleFoundError
+
+        Example
+        -------
+        >>> workflow = project.workflow('Simple Flow')
+        >>> transition = workflow.transition('in progress')
+        >>> todo_status = client.status(name="To Do")
+        >>> transition = workflow.transition(todo_status, attr="to_status")
+        """
+        return find_obj_in_list(value, iterable=self._transitions, attribute=attr)
+
+    @property
+    def transitions(self):
+        return self._transitions
+
+    def status(self, value: str = None, attr: str = None) -> Status:
+        """
+        Retrieve the Status belonging to this workflow based on its name, ref or uuid.
+
+        :param value: status name, ref or UUID to search for
+        :param attr: the attribute to match on.
+        :return: a single :class:`Status`
+        :raises NotFoundError: if the `Status` is not part of the `Workflow`
+        :raises MultipleFoundError
+
+        Example
+        -------
+        >>> workflow = project.workflow('Simple Flow')
+        >>> status = workflow.status('To Do')
+        """
+        return find_obj_in_list(value, iterable=self._statuses, attribute=attr)
+
+    @property
+    def statuses(self):
+        return self._statuses
+
+    #
+    # Mutable methods on the object
+    #
+
     def activate(self):
         """Set the active status to True."""
         if not self.active:
@@ -148,7 +234,13 @@ class Workflow(
             response = self._client._request("PUT", url=url)
             if response.status_code != requests.codes.ok:  # pragma: no cover
                 raise APIError("Could not activate the workflow", response=response)
-            self.refresh(json=response.json()["results"][0])
+
+            # we need to do a full refresh here from the server as the
+            # API of workflow/<id>/activate does not return the full object as response.
+            self.refresh(
+                url=self._client._build_url("workflow", workflow_id=self.id),
+                extra_params=API_EXTRA_PARAMS.get(self.url_list_name),
+            )
 
     def deactivate(self):
         """Set the active status to False."""
@@ -157,11 +249,17 @@ class Workflow(
             response = self._client._request("PUT", url=url)
             if response.status_code != requests.codes.ok:  # pragma: no cover
                 raise APIError("Could not activate the workflow", response=response)
-            self.refresh(json=response.json()["results"][0])
+
+            # we need to do a full refresh here from the server as the
+            # API of workflow/<id>/deactivate does not return the full object as response.
+            self.refresh(
+                url=self._client._build_url("workflow", workflow_id=self.id),
+                extra_params=API_EXTRA_PARAMS.get(self.url_list_name),
+            )
 
     def clone(
         self,
-        target_scope: "Scope",
+        target_scope: "Scope" = Empty(),
         name: Optional[str] = Empty(),
         description: Optional[str] = Empty(),
     ) -> "Workflow":
@@ -169,19 +267,27 @@ class Workflow(
 
         Also used to 'import' a catalog workflow into a scope.
 
-        :param target_scope: target scope where to clone the Workflow to
+        :param target_scope: (optional) target scope where to clone the Workflow to.
+            Defaults current scope.
         :param name: (optional) name of the new workflow
         :param description: (optional) description of the new workflow
         """
         from pykechain.models import Scope
+        if isinstance(target_scope, Empty):
+            target_scope = self.scope_id
         data = {
             "target_scope": check_base(target_scope, Scope, "scope"),
             "name": check_text(name, "name"),
-            "description": check_text(description, "description")
+            "description": check_text(description, "description"),
         }
         url = self._client._build_url("workflow_clone", workflow_id=self.id)
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
-        response = self._client._request("POST", url=url, params=query_params, json=clean_empty_values(data))
+        response = self._client._request(
+            "POST",
+            url=url,
+            params=query_params,
+            json=clean_empty_values(data, nones=False),
+        )
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not clone the workflow", response=response)
         return Workflow(json=response.json()["results"][0], client=self._client)
@@ -191,7 +297,7 @@ class Workflow(
         transition: Union[Transition, ObjectID],
         name: Optional[str] = Empty(),
         description: Optional[str] = Empty(),
-        from_status: Optional[List[str]] = Empty()
+        from_status: Optional[List[str]] = Empty(),
     ) -> Transition:
         """Update a specific Transition in the current workflow.
 
@@ -210,16 +316,20 @@ class Workflow(
         }
         url = self._client._build_url("workflow_update_transition", workflow_id=self.id)
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
-        response = self._client._request("POST", url=url, params=query_params, json=data)
+        response = self._client._request(
+            "POST", url=url, params=query_params, json=data
+        )
         if response.status_code != requests.codes.ok:
-            raise APIError(f"Could not update the specific transition '{transition}' in the "
-                           "workflow", response=response)
+            raise APIError(
+                f"Could not update the specific transition '{transition}' in the "
+                "workflow",
+                response=response,
+            )
+        # an updated transition will be altered so we want to refresh the workflow.
+        self.refresh()
         return Transition(json=response.json()["results"][0])
 
-    def delete_transition(
-        self,
-        transition: Union[Transition, ObjectID]
-    ) -> None:
+    def delete_transition(self, transition: Union[Transition, ObjectID]) -> None:
         """Remove Transition from the current Workflow and delete it.
 
         If the Transition is still connected to *other* Workflows, it will *not* be
@@ -227,15 +337,22 @@ class Workflow(
 
         :param transition: object or uuid of a transition to delete.
         """
-        data = {
-            "transition_id": check_base(transition, Transition, "transition_id"),
-        }
-        url = self._client._build_url("workflow_delete_transition", workflow_id=self.id)
+        transition_id = check_base(transition, Transition, "transition_id")
+        url = self._client._build_url(
+            "workflow_delete_transition",
+            workflow_id=self.id,
+            transition_id=transition_id,
+        )
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
-        response = self._client._request("DELETE", url=url, params=query_params, json=data)
+        response = self._client._request("DELETE", url=url, params=query_params)
         if response.status_code != requests.codes.no_content:
-            raise APIError(f"Could not delete the specific transition '{transition}' from the "
-                           "workflow", response=response)
+            raise APIError(
+                f"Could not delete the specific transition '{transition}' from the "
+                "workflow",
+                response=response,
+            )
+        # a deleted transition will be unlinked so we want to refresh the workflow.
+        self.refresh()
 
     def create_transition(
         self,
@@ -257,17 +374,25 @@ class Workflow(
         data = {
             "name": check_text(name, "name"),
             "to_status": check_base(to_status, Status, "to_status"),
-            "transition_type": check_enum(transition_type, TransitionType, "transition_type"),
+            "transition_type": check_enum(
+                transition_type, TransitionType, "transition_type"
+            ),
             "from_status": check_list_of_base(from_status, Status, "from_statuses"),
             "description": check_text(description, "description"),
         }
         url = self._client._build_url("workflow_create_transition", workflow_id=self.id)
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
-        response = self._client._request("POST", url=url, params=query_params, json=data)
-        if response.status_code != requests.codes.ok:
-            raise APIError("Could not create the specific transition in the "
-                           "workflow", response=response)
-        return Transition(json=response.json()["results"][0])
+        response = self._client._request(
+            "POST", url=url, params=query_params, json=clean_empty_values(data)
+        )
+        if response.status_code != requests.codes.created:
+            raise APIError(
+                "Could not create the specific transition in the " "workflow",
+                response=response,
+            )
+        # a new transition will be linked to the workflow so we want to refresh the workflow.
+        self.refresh()
+        return Transition(json=response.json()["results"][0], client=self._client)
 
     def create_status(
         self,
@@ -287,54 +412,64 @@ class Workflow(
         """
         data = {
             "name": check_text(name, "name"),
-            "category": check_enum(category, StatusCategory, "status_category"),
+            "status_category": check_enum(category, StatusCategory, "status_category"),
             "description": check_text(description, "description"),
         }
 
         url = self._client._build_url("workflow_create_status", workflow_id=self.id)
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
-        response = self._client._request("POST", url=url, params=query_params, json=data)
-        if response.status_code != requests.codes.ok:
-            raise APIError("Could not create the specific status, a global transition and"
-                           "link it to the workflow", response=response)
-        return Status(json=response.json()["results"][0])
+        response = self._client._request(
+            "POST", url=url, params=query_params, json=clean_empty_values(data)
+        )
+        if response.status_code != requests.codes.created:
+            raise APIError(
+                "Could not create the specific status, a global transition and"
+                "link it to the workflow",
+                response=response,
+            )
+        # a new status will create a new global transition to that status
+        # so we want to update the current workflow.
+        self.refresh()
+        return Status(json=response.json()["results"][0], client=self._client)
 
-    def link_transition(
-        self,
-        transitions: List[Union[Transition, ObjectID]]
-    ):
+    def link_transitions(self, transitions: List[Union[Transition, ObjectID]]):
         """
         Link a list of Transitions to a Workflow.
 
         :param transitions: a list of Transition Objects or transition_ids to link to the workflow.
         """
-        data = {
-            "transitions": check_list_of_base(transitions, Transition)
-        }
+        data = {"transitions": check_list_of_base(transitions, Transition)}
         url = self._client._build_url("workflow_link_transitions", workflow_id=self.id)
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
-        response = self._client._request("POST", url=url, params=query_params, json=data)
+        response = self._client._request(
+            "POST", url=url, params=query_params, json=data
+        )
         if response.status_code != requests.codes.ok:
-            raise APIError("Could not create the specific status, a global transition and"
-                           "link it to the workflow", response=response)
-        return Status(json=response.json()["results"][0])
+            raise APIError(
+                "Could not create the specific status, a global transition and"
+                "link it to the workflow",
+                response=response,
+            )
+        self.refresh(json=response.json()["results"][0])
 
-    def unlink_transition(
-        self,
-        transitions: List[Union[Transition, ObjectID]]
-    ) -> None:
+    def unlink_transitions(self, transitions: List[Union[Transition, ObjectID]]) -> None:
         """
         Unlink a list of Transitions to a Workflow.
 
         :param transitions: a list of Transition Objects or transition_ids to link to the workflow.
         """
-        data = {
-            "transitions": check_list_of_base(transitions, Transition)
-        }
-        url = self._client._build_url("workflow_unlink_transitions", workflow_id=self.id)
+        data = {"transitions": check_list_of_base(transitions, Transition)}
+        url = self._client._build_url(
+            "workflow_unlink_transitions", workflow_id=self.id
+        )
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
-        response = self._client._request("POST", url=url, params=query_params, json=data)
+        response = self._client._request(
+            "POST", url=url, params=query_params, json=data
+        )
         if response.status_code != requests.codes.ok:
-            raise APIError("Could not create the specific status, a global transition and"
-                           "link it to the workflow", response=response)
+            raise APIError(
+                "Could not create the specific status, a global transition and"
+                "link it to the workflow",
+                response=response,
+            )
         self.refresh(json=response.json()["results"][0])

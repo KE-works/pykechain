@@ -62,7 +62,10 @@ from pykechain.models.notification import Notification
 from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.widgets.widget import Widget
-from pykechain.utils import find, get_in_chunks, is_uuid, is_valid_email, slugify_ref
+from pykechain.utils import (
+    clean_empty_values, find, get_in_chunks, is_uuid, is_valid_email,
+    slugify_ref,
+)
 from .__about__ import version as pykechain_version
 from .client_utils import PykeRetry
 from .models.banner import Banner
@@ -3757,7 +3760,7 @@ class Client:
 
         if kwargs:
             request_params.update(**kwargs)
-        return Workflow.get(client=self, **request_params)
+        return Workflow.get(client=self, **clean_empty_values(request_params, nones=False))
 
     def workflows(
         self,

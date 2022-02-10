@@ -127,19 +127,20 @@ API_PATH = {
     "workflows": "api/v3/workflows",
     "workflow": "api/v3/workflows/{workflow_id}",
     "workflow_update_transition": "api/v3/workflows/{workflow_id}/update_transition",
-    "workflow_delete_transition": "api/v3/workflows/{workflow_id}/delete_transition",
+    "workflow_delete_transition": "api/v3/workflows/{workflow_id}/"
+                                  "delete_transition/{transition_id}",
     "workflow_create_transition": "api/v3/workflows/{workflow_id}/create_transition",
     "workflow_create_status": "api/v3/workflows/{workflow_id}/create_status",
-    "workflow_link_transitions": "api/v3/workflows/{workflow_id}/link_transition",
-    "workflow_unlink_transitions": "api/v3/workflows/{workflow_id}/unlink_transition",
+    "workflow_link_transitions": "api/v3/workflows/{workflow_id}/link_transitions",
+    "workflow_unlink_transitions": "api/v3/workflows/{workflow_id}/unlink_transitions",
     "workflow_clone": "api/v3/workflows/{workflow_id}/clone",
     "workflow_activate": "api/v3/workflows/{workflow_id}/activate",
     "workflow_deactivate": "api/v3/workflows/{workflow_id}/deactivate",
-    "workflow_set_status_order": "api/v2/worksflows/{workflow_id}/set_status_order",
+    "workflow_set_status_order": "api/v3/workflows/{workflow_id}/set_status_order",
     "transitions": "api/v3/transitions",
     "transition": "api/v3/transitions/{transition_id}",
-    "statuses": "api/v3/status",
-    "status": "api/v3/status/{status_id}",
+    "statuses": "api/v3/statuses",
+    "status": "api/v3/statuses/{status_id}",
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {"fields": "__all__"}
@@ -594,6 +595,16 @@ API_EXTRA_PARAMS = {
         )
     },
     "status": {
-        "fields": ",".join(["id", "name", "ref", "description", "status_category"])
+        "fields": ",".join(
+            [
+                "id",
+                "name",
+                "ref",
+                "description",
+                "created_at",
+                "updated_at",
+                "status_category",
+            ]
+        )
     },
 }

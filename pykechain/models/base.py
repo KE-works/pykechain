@@ -34,8 +34,9 @@ class Base:
         self._json_data = json
         self._client: "Client" = check_client(client)
 
-        self.id = json.get("id", None)
-        self.name = json.get("name", None)
+        self.id = json.get("id")
+        self.name = json.get("name")
+        self.ref = json.get("ref")
         self.created_at = parse_datetime(json.get("created_at"))
         self.updated_at = parse_datetime(json.get("updated_at"))
 

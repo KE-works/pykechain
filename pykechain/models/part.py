@@ -13,7 +13,7 @@ from pykechain.models.input_checks import (
 )
 from pykechain.models.property import Property
 from pykechain.models.tree_traversal import TreeObject
-from pykechain.utils import is_uuid, find, Empty, clean_empty_values, empty
+from pykechain.utils import find_obj_in_list, is_uuid, find, Empty, clean_empty_values, empty
 
 
 class Part(TreeObject):
@@ -159,19 +159,7 @@ class Part(TreeObject):
         6
 
         """
-        if is_uuid(name):
-            matches = [p for p in self.properties if p.id == name]
-        else:
-            matches = [p for p in self.properties if p.name == name]
-            if not matches:
-                matches = [p for p in self.properties if p.ref == name]
-
-        if not matches:
-            raise NotFoundError(f"Could not find a property with name, id or ref: {name}")
-        elif len(matches) > 1:
-            raise MultipleFoundError(f"Found multiple properties with name, id or ref: {name}")
-        else:
-            return matches[0]
+        return find_obj_in_list(name, iterable=self.properties)
 
     def scope(self) -> "Scope":
         """Scope this Part belongs to.
