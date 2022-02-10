@@ -11,7 +11,7 @@ from pykechain.models.input_checks import (
     check_base,
     check_enum,
     check_list_of_base,
-    check_text,
+    check_text, check_type,
 )
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID
@@ -107,9 +107,35 @@ class Workflow(
     def __repr__(self) -> str:  # pragma: no cover
         return f"<pyke Workflow '{self.name}' '{self.category}' id {self.id[-8:]}>"
 
-    def edit(self, tags: Optional[Iterable[str]] = None, *args, **kwargs) -> None:
-        """Change the workflow object."""
-        pass
+    def edit(self, name: str = Empty(), description: str= Empty(), *args, **kwargs) -> None:
+        """Change the workflow object.
+
+        Change the name and description of a workflow. It is also possible to update the workflow
+        options and also the 'active' flag. To change the active flag of the workflow we
+        kindly refer to the `activate()` and `deactivate()` methods on the workflow.
+
+        :type name: name of the workflow is required.
+        :type description: (optional) description of the workflow
+        """
+        if isinstance(name, Empty):
+            name = self.name
+        data = {
+            "name": check_text(name, "name"),
+            "description": check_text(description, "description"),
+            "active": check_type(kwargs.get("active", Empty()), bool, "active"),
+            "options": check_type(kwargs.get("options", Empty()), bool, "options")
+        }
+        url = self._client._build_url("workflow", workflow_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request(
+            "PUT",
+            url=url,
+            params=query_params,
+            json=clean_empty_values(data, nones=False),
+        )
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not clone the workflow", response=response)
+        self.refresh(json=response.json()["results"][0])
 
     @classmethod
     def list(cls, client: "Client", **kwargs) -> List["Workflow"]:

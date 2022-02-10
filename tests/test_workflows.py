@@ -116,6 +116,14 @@ class TestWorkflowMethods(TestBetamax):
             # casettes are irrelevant and returns a 404 NotFoundError
             pass
 
+    def test_edit_workflow_description(self):
+        new_description = "foo bar"
+        self.workflow.edit(
+            description=new_description
+        )
+        self.assertEqual(self.workflow.description, new_description)
+
+
     def test_workflow_in_and_activate(self):
         self.workflow.deactivate()
         self.assertFalse(self.workflow.active)
