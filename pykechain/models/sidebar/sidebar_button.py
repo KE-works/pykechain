@@ -158,7 +158,7 @@ class SideBarButton:
             "uri": self.uri,
             "order": self.order,
             "displayIconMode": self.display_icon_mode,
-            "alignment": self.alignment,
+            "align": self.alignment,
             "minimumAccessLevel": self.minimum_access_level,
         }
         config.update(self._other_attributes)
