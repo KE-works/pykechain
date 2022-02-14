@@ -4,14 +4,14 @@ import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import FormCategory
-from pykechain.exceptions import APIError
+from pykechain.exceptions import APIError, ForbiddenError
 from pykechain.models import Scope
 from pykechain.models.base import BaseInScope, CrudActionsMixin, NameDescriptionTranslationMixin
 from pykechain.models.context import Context
 from pykechain.models.input_checks import check_base, check_list_of_base, check_text
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID
-from pykechain.utils import Empty, empty
+from pykechain.utils import Empty, clean_empty_values, empty
 
 
 class StatusForm:
@@ -60,6 +60,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         self.form_instance_root: "Part" = json.get("form_instance_root")
         self.model_id: "Form" = json.get("model")
         self.derived_from_id: Optional[ObjectID] = json.get("derived_from_id")
+        self.active: bool = json.get("active")
         self.category: FormCategory = json.get("category")
         self.status_forms: List[StatusForm] = json.get("status_forms", [])
 
@@ -73,7 +74,8 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         name: str,
         scope: Union[Scope, ObjectID],
         workflow: Union["Workflow", ObjectID],
-        contexts: Optional[List[Union[Context, ObjectID]]] = Empty(),
+        contexts: List[Union[Context, ObjectID]],
+
         **kwargs: dict
     ) -> "Form":
         """Create a new form model.
@@ -100,7 +102,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
             "POST", client._build_url(cls.url_list_name), params=kwargs, json=data
         )
 
-        if response.status_code != requests.codes.ok:  # pragma: no cover
+        if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError(f"Could not create {cls.__name__}", response=response)
 
         return cls(json=response.json()["results"][0], client=client)
@@ -115,6 +117,25 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
     # def get(cls, client: "Client", **kwargs) -> "Form":
     #     """Retrieve a Form object through the client."""
     #     return super().get(client=client, **kwargs)
+
+    @property
+    def is_model(self) -> bool:
+        """The Form is a Form Model or Form Template."""
+        return self.category == FormCategory.MODEL
+
+    @property
+    def is_instance(self) -> bool:
+        """The Form is a Form Instance."""
+        return self.category == FormCategory.INSTANCE
+
+    @property
+    def is_active(self) -> bool:
+        """The Form is an active Form."""
+        return self.active is not None and self.active
+
+    #
+    # Form Model finders and searchers.
+    #
 
     def instances(self, **kwargs) -> [List["Form"]]:
         """Retrieve the instances of this Form Model."""
@@ -137,68 +158,43 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         description: Optional[Union[str, Empty]] = empty,
         **kwargs,
     ) -> None:
-        """
-        Edit Service details.
+        """Edit the details of a Form (model or instance).
 
         Setting an input to None will clear out the value (exception being name).
 
-        .. versionadded:: 1.13
-
-        :param name: (optional) name of the service to change. Cannot be cleared.
+        :param name: optional name of the form to edit. Cannot be cleared.
         :type name: basestring or None or Empty
-        :param description: (optional) description of the service. Can be cleared.
+        :param description: (optional) description of the form. Can be cleared.
         :type description: basestring or None or Empty
-        :param version: (optional) version number of the service. Can be cleared.
-        :type version: basestring or None or Empty
-        :param type: (optional) script type (Python or Notebook). Cannot be cleared.
-        :type type: ServiceType or None or Empty
-        :param environment_version: (optional) environment version of the service. Cannot be cleared.
-        :type environment_version: ServiceEnvironmentVersion or None or Empty
-        :param run_as: (optional) user to run the service as. Defaults to kenode user (bound to scope).
-                    Cannot be cleared.
-        :type run_as: ServiceScriptUser or None or Empty
-        :param trusted: (optional) flag whether the service is trusted, default if False. Cannot be cleared.
-        :type trusted: bool or None or Empty
-        :raises IllegalArgumentError: when you provide an illegal argument.
-        :raises APIError: if the service could not be updated.
-
-        Example
-        -------
-        >>> service.edit(name='Car service',version='203')
-
-        Not mentioning an input parameter in the function will leave it unchanged. Setting a parameter as None will
-        clear its value (where that is possible). The example below will clear the description and edit the name.
-
-        >>> service.edit(name="Plane service",description=None)
-
+        :param kwargs: (optional) additional kwargs that will be passed in the during the edit/update request
+        :return: None
+        :raises IllegalArgumentError: when the type or value of an argument provided is incorrect
+        :raises APIError: in case an Error occurs
         """
-        # update_dict = {
-        #     "id": self.id,
-        #     "name": check_text(name, "name") or self.name,
-        #     "description": check_text(description, "description") or "",
-        #     "trusted": check_type(trusted, bool, "trusted") or self.trusted,
-        #     "script_type": check_enum(type, ServiceType, "type") or self.type,
-        #     "env_version": check_enum(
-        #         environment_version, ServiceEnvironmentVersion, "environment version"
-        #     )
-        #     or self.environment,
-        #     "run_as": check_enum(run_as, ServiceScriptUser, "run_as") or self.run_as,
-        #     "script_version": check_text(version, "version") or "",
-        # }
-        #
-        # if kwargs:  # pragma: no cover
-        #     update_dict.update(**kwargs)
-        #
-        # update_dict = clean_empty_values(update_dict=update_dict)
-        #
-        # response = self._client._request(
-        #     "PUT", self._client._build_url(self.url_detail_name, form_id=self.id), json=update_dict
-        # )
-        #
-        # if response.status_code != requests.codes.ok:  # pragma: no cover
-        #     raise APIError(f"Could not update Service {self}", response=response)
-        #
-        # self.refresh(json=response.json()["results"][0])
+        update_dict = {
+            "id": self.id,
+            "name": check_text(name, "name") or self.name,
+            "description": check_text(description, "description") or "",
+        }
+
+        if kwargs:  # pragma: no cover
+            update_dict.update(**kwargs)
+
+        update_dict = clean_empty_values(update_dict=update_dict)
+        try:
+            response = self._client._request(
+                "PUT",
+                self._client._build_url("form", form_id=self.id),
+                params=API_EXTRA_PARAMS["form"],
+                json=update_dict,
+            )
+        except ForbiddenError:
+            raise ForbiddenError("A form model with instances created cannot be edited")
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError(f"Could not update Form {self}", response=response)
+
+        self.refresh(json=response.json().get("results")[0])
 
     def delete(self) -> None:
         """Delete this Form.
@@ -210,7 +206,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         )
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError(f"Could not delete Service {self}", response=response)
+            raise APIError(f"Could not delete Form {self}", response=response)
 
     def instantiate(self, name: Optional[str], **kwargs) -> "Form":
         """Create a new Form instance based on a model."""
@@ -267,3 +263,41 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
             )
 
         return Form(response.json()["results"][0], client=self._client)
+
+    def activate(self):
+        """Put the form to active.
+
+        Model Forms can be put to inactive. When the Form model is not active the form cannot be
+        instantiated. This methods sets the form to active.
+        """
+        if not self.active:
+            url = self._client._build_url("form_activate", form_id=self.id)
+            response = self._client._request("PUT", url=url)
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise APIError("Could not activate the form", response=response)
+
+            # we need to do a full refresh here from the server as the
+            # API of form/<id>/activate does not return the full object as response.
+            self.refresh(
+                url=self._client._build_url("form", form_id=self.id),
+                extra_params=API_EXTRA_PARAMS.get(self.url_list_name),
+            )
+
+    def deactivate(self):
+        """Put the form to inactive.
+
+        Model Forms can be put to inactive. When the Form model is not active the form cannot be
+        instantiated.
+        """
+        if self.active:
+            url = self._client._build_url("form_deactivate", form_id=self.id)
+            response = self._client._request("PUT", url=url)
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise APIError("Could not activate the form", response=response)
+
+            # we need to do a full refresh here from the server as the
+            # API of form/<id>/deactivate does not return the full object as response.
+            self.refresh(
+                url=self._client._build_url("form", form_id=self.id),
+                extra_params=API_EXTRA_PARAMS.get(self.url_list_name),
+            )

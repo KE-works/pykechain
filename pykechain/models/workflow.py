@@ -1,17 +1,17 @@
-from typing import Iterable, List, Optional, Union
+from typing import List, Optional, Union
 
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import StatusCategory, TransitionType, WorkflowCategory
-from pykechain.exceptions import APIError
+from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Base, BaseInScope
 from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMixin
 from pykechain.models.input_checks import (
     check_base,
     check_enum,
     check_list_of_base,
-    check_text,
+    check_text, check_type,
 )
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID
@@ -107,9 +107,36 @@ class Workflow(
     def __repr__(self) -> str:  # pragma: no cover
         return f"<pyke Workflow '{self.name}' '{self.category}' id {self.id[-8:]}>"
 
-    def edit(self, tags: Optional[Iterable[str]] = None, *args, **kwargs) -> None:
-        """Change the workflow object."""
-        pass
+    def edit(self, name: str = Empty(), description: str = Empty(), *args, **kwargs) -> None:
+        """Change the workflow object.
+
+        Change the name and description of a workflow. It is also possible to update the workflow
+        options and also the 'active' flag. To change the active flag of the workflow we
+        kindly refer to the `activate()` and `deactivate()` methods on the workflow.
+
+        :type name: name of the workflow is required.
+        :type description: (optional) description of the workflow
+
+        """
+        if isinstance(name, Empty):
+            name = self.name
+        data = {
+            "name": check_text(name, "name"),
+            "description": check_text(description, "description"),
+            "active": check_type(kwargs.get("active", Empty()), bool, "active"),
+            "options": check_type(kwargs.get("options", Empty()), bool, "options")
+        }
+        url = self._client._build_url("workflow", workflow_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request(
+            "PUT",
+            url=url,
+            params=query_params,
+            json=clean_empty_values(data, nones=False),
+        )
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not clone the workflow", response=response)
+        self.refresh(json=response.json()["results"][0])
 
     @classmethod
     def list(cls, client: "Client", **kwargs) -> List["Workflow"]:
@@ -137,6 +164,9 @@ class Workflow(
 
         :param value: a determined ordered list of Status or status UUID's
         """
+        if not value:
+            raise IllegalArgumentError(
+                f"To set the order of statises, provide a list of status objects, got: '{value}'")
         data = {"status_order": check_list_of_base(value, Status, "statuses")}
         url = self._client._build_url("workflow_set_status_order", workflow_id=self.id)
         response = self._client._request("PUT", url=url, json=data)
@@ -166,11 +196,17 @@ class Workflow(
         >>> transition = workflow.transition('in progress')
         >>> todo_status = client.status(name="To Do")
         >>> transition = workflow.transition(todo_status, attr="to_status")
+
         """
         return find_obj_in_list(value, iterable=self._transitions, attribute=attr)
 
     @property
     def transitions(self):
+        """
+        Retrieve the Transitions belonging to this workflow.
+
+        :return: multiple :class:`Transition`
+        """
         return self._transitions
 
     def status(self, value: str = None, attr: str = None) -> Status:
@@ -187,11 +223,17 @@ class Workflow(
         -------
         >>> workflow = project.workflow('Simple Flow')
         >>> status = workflow.status('To Do')
+
         """
         return find_obj_in_list(value, iterable=self._statuses, attribute=attr)
 
     @property
     def statuses(self):
+        """
+        Retrieve the Statuses belonging to this workflow.
+
+        :return: multiple :class:`Status`
+        """
         return self._statuses
 
     #
@@ -230,7 +272,7 @@ class Workflow(
 
     def clone(
         self,
-        target_scope: "Scope",
+        target_scope: "Scope" = Empty(),
         name: Optional[str] = Empty(),
         description: Optional[str] = Empty(),
     ) -> "Workflow":
@@ -238,12 +280,14 @@ class Workflow(
 
         Also used to 'import' a catalog workflow into a scope.
 
-        :param target_scope: target scope where to clone the Workflow to
+        :param target_scope: (optional) target scope where to clone the Workflow to.
+            Defaults current scope.
         :param name: (optional) name of the new workflow
         :param description: (optional) description of the new workflow
         """
         from pykechain.models import Scope
-
+        if isinstance(target_scope, Empty):
+            target_scope = self.scope_id
         data = {
             "target_scope": check_base(target_scope, Scope, "scope"),
             "name": check_text(name, "name"),
@@ -401,7 +445,7 @@ class Workflow(
         self.refresh()
         return Status(json=response.json()["results"][0], client=self._client)
 
-    def link_transition(self, transitions: List[Union[Transition, ObjectID]]):
+    def link_transitions(self, transitions: List[Union[Transition, ObjectID]]):
         """
         Link a list of Transitions to a Workflow.
 
@@ -421,7 +465,7 @@ class Workflow(
             )
         self.refresh(json=response.json()["results"][0])
 
-    def unlink_transition(self, transitions: List[Union[Transition, ObjectID]]) -> None:
+    def unlink_transitions(self, transitions: List[Union[Transition, ObjectID]]) -> None:
         """
         Unlink a list of Transitions to a Workflow.
 
