@@ -3665,6 +3665,16 @@ class Client:
         """
         return Form.create_model(client=self, *args, **kwargs)
 
+    def instantiate_form(self, model, *args, **kwargs) -> Form:
+        """
+        Create a new Form instance based on a model.
+
+        See the `Form.instantiate()` method for available arguments.
+
+        :return: a created Form Instance
+        """
+        return Form.instantiate(self=model, *args, **kwargs)
+
     def form(self, *args, **kwargs) -> Form:
         """
         Retrieve a single Form, see `forms()` method for available arguments.
@@ -3683,6 +3693,7 @@ class Client:
         category: Optional[FormCategory] = None,
         description: Optional[str] = None,
         scope: Optional[Union[Scope, ObjectID]] = None,
+        context: Optional[List[Union[Context, ObjectID]]] = None,
         ref: Optional[str] = None,
         **kwargs,
     ) -> List[Form]:
@@ -3696,6 +3707,7 @@ class Client:
         :param category: (optional) category of the form to search for
         :param description: (optional) description of the form to filter on
         :param scope: (optional) the scope of the form to filter on
+        :param context: (optional) the context of the form to filter on
         :param ref: (optional) the ref of the form to filter on
         :return: a list of Forms
         """
@@ -3705,12 +3717,137 @@ class Client:
             "category": check_enum(category, FormCategory, "category"),
             "description": check_text(description, "description"),
             "scope": check_base(scope, Scope, "scope"),
+            "context_id__in": check_list_of_base(context, Context, "context"),
             "ref": check_text(ref, "ref"),
         }
         if kwargs:
             request_params.update(**kwargs)
 
         return Form.list(client=self, **request_params)
+
+    def _create_forms_bulk(
+        self,
+        forms: List[Dict],
+        asynchronous: Optional[bool] = False,
+        retrieve_instances: Optional[bool] = True,
+        **kwargs,
+    ) -> PartSet:
+        """
+        Create multiple form instances simultaneously.
+
+        :param forms: list of dicts, each specifying a form instance. Available fields per dict:
+            :param name: (optional) name provided for the new instance as string otherwise use
+            the name of the model
+            :type name: basestring or None
+            :param description: (optional) description provided for the new instance as string
+            otherwise use the description of the model
+            :type description: basestring or None
+            :param model_id: model of the form which to add new instances, should follow the
+            model tree in KE-chain
+            :type model_id: UUID
+            :param contexts: list of contexts
+            :type properties: list
+        :type forms: list
+        :param asynchronous: If true, immediately returns without forms (default = False)
+        :type asynchronous: bool
+        :param retrieve_instances: If true, will retrieve the created Form Instances in a List
+        :type retrieve_instances: bool
+        :param kwargs:
+        :return: list of Form instances or list of form UUIDs
+        :rtype list
+        """
+        check_list_of_dicts(
+            forms,
+            "forms",
+            [
+                "form",
+                "values",
+            ],
+        )
+        for form in forms:
+            form["form"] = check_base(form.get("form"), Form, "form")
+            form["values"]["contexts"] = check_list_of_base(form.get("values").get(
+                "contexts"), Context, "contexts")
+
+        # prepare url query parameters
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS["forms"])
+        query_params["async_mode"] = asynchronous
+        bulk_action_input = {"bulk_action_input": forms}
+        response = self._request(
+            "POST",
+            self._build_url("forms_bulk_create_instances"),
+            params=query_params,
+            json=bulk_action_input,
+        )
+
+        if (asynchronous and response.status_code != requests.codes.accepted) or (
+            not asynchronous and response.status_code != requests.codes.created
+        ):  # pragma: no cover
+            raise APIError(
+                f"Could not create Forms. ({response.status_code})", response=response
+            )
+        form_ids = [form.get('id') for form in response.json()["results"]]
+        if retrieve_instances:
+            instances_per_id = dict()
+            for forms_ids_chunk in get_in_chunks(lst=form_ids, chunk_size=50):
+                instances_per_id.update(
+                    {
+                        p.id: p for p in self.forms(id__in=",".join(forms_ids_chunk))
+                    }  # `id__in` does not guarantee order
+                )
+            form_instances = [
+                instances_per_id[pk] for pk in form_ids
+            ]  # Ensures order of parts wrt request
+            return form_instances
+        return form_ids
+
+    def _delete_forms_bulk(
+        self,
+        forms: List[Union[Form, str]],
+        asynchronous: Optional[bool] = False,
+        **kwargs,
+    ) -> bool:
+        """Delete multiple Forms simultaneously.
+
+        :param parts: list of Form objects or UUIDs
+        :type parts: List[Form] or List[UUID]
+        :param asynchronous: If true, immediately returns (default = False)
+        :type asynchronous: bool
+        :param kwargs:
+        :return: True if forms are deleted successfully
+        :raises APIError: if the forms could not be deleted
+        :raises IllegalArgumentError: if there were neither Forms nor UUIDs in the list of forms
+        """
+        check_type(asynchronous, bool, "asynchronous")
+
+        list_forms = list()
+        for form in forms:
+            if isinstance(form, Form):
+                list_forms.append(form.id)
+            elif is_uuid(form):
+                list_forms.append(form)
+            else:
+                raise IllegalArgumentError(f"{form} is not a Form nor an UUID")
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS["parts"])
+        query_params["async_mode"] = asynchronous
+        bulk_action_input = {"bulk_action_input": list_forms}
+        response = self._request(
+            "DELETE",
+            self._build_url("forms_bulk_delete"),
+            params=query_params,
+            json=bulk_action_input,
+        )
+        # TODO - remove requests.codes.ok when async is implemented in the backend
+        if ((asynchronous and response.status_code not in (
+            requests.codes.ok, requests.codes.accepted))
+            or (not asynchronous and response.status_code not in (
+                requests.codes.ok, requests.codes.accepted))):  # pragma: no cover
+            raise APIError(
+                f"Could not delete Forms. ({response.status_code})", response=response
+            )
+        return True
 
     def workflow(
         self,
