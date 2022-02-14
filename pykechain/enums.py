@@ -580,6 +580,17 @@ class NavigationBarAlignment(Alignment):
     pass
 
 
+class SidebarButtonAlignment(Enum):
+    """The acceptable alignment options for sidebar button.
+
+    :cvar TOP: "top"
+    :cvar BOTTOM: "bottom"
+    """
+
+    TOP = "top"
+    BOTTOM = "bottom"
+
+
 class PaperSize(Enum):
     """The acceptable paper sizes options for a downloaded PDF.
 
@@ -888,16 +899,24 @@ class KEChainPages(Enum):
     URL names of built-in KE-chain pages.
 
     :cvar DETAIL: "detail"
+    :cvar FORMS: "forms"
     :cvar TASKS: "activities"
     :cvar WORK_BREAKDOWN: "activitytree"
+    :cvar CATALOG_FORMS: "catalogforms"
+    :cvar CONTEXTS: "contexts"
+    :cvar WORKFLOWS: "workflows"
     :cvar DATA_MODEL: "productmodel"
     :cvar EXPLORER: "product"
     :cvar SERVICES: "scripts"
     """
 
     DETAIL = "detail"
+    FORMS = "forms"
     TASKS = "activities"
     WORK_BREAKDOWN = "activitytree"
+    CATALOG_FORMS = "catalogforms"
+    CONTEXTS = "contexts"
+    WORKFLOWS = "workflows"
     DATA_MODEL = "productmodel"
     EXPLORER = "product"
     SERVICES = "scripts"
@@ -907,8 +926,12 @@ class KEChainPages(Enum):
 
 KEChainPageLabels = {
     KEChainPages.DETAIL: "Project details",
+    KEChainPages.FORMS: "Forms",
     KEChainPages.TASKS: "Tasks",
     KEChainPages.WORK_BREAKDOWN: "Work Breakdown",
+    KEChainPages.CATALOG_FORMS: "Form models",
+    KEChainPages.CONTEXTS: "Contexts",
+    KEChainPages.WORKFLOWS: "Workflows",
     KEChainPages.CATALOG_WBS: "Catalog",
     KEChainPages.APP_WBS: "App Screens",
     KEChainPages.DATA_MODEL: "Data model",
@@ -918,8 +941,12 @@ KEChainPageLabels = {
 
 KEChainPageLabels_nl = {
     KEChainPages.DETAIL: "Project details",
+    KEChainPages.FORMS: "Formulieren",
     KEChainPages.TASKS: "Taken",
     KEChainPages.WORK_BREAKDOWN: "Taakverdeling",
+    KEChainPages.CATALOG_FORMS: "Formuliermodellen",
+    KEChainPages.CONTEXTS: "Contexten",
+    KEChainPages.WORKFLOWS: "Workflows",
     KEChainPages.CATALOG_WBS: "Catalogus",
     KEChainPages.APP_WBS: "App schermen",
     KEChainPages.DATA_MODEL: "Data model",
@@ -929,6 +956,7 @@ KEChainPageLabels_nl = {
 
 CardWidgetKEChainPageLink = {
     KEChainPages.DETAIL: "Project",
+    KEChainPages.FORMS: "Forms",
     KEChainPages.TASKS: "Tasks",
     KEChainPages.DATA_MODEL: "Model",
     KEChainPages.EXPLORER: "Explorer",
@@ -936,12 +964,19 @@ CardWidgetKEChainPageLink = {
     KEChainPages.WORK_BREAKDOWN: "Work Breakdown",
     KEChainPages.CATALOG_WBS: "Catalog Tasks",
     KEChainPages.APP_WBS: "App Tasks",
+    KEChainPages.CATALOG_FORMS: "Form models",
+    KEChainPages.CONTEXTS: "Contexts",
+    KEChainPages.WORKFLOWS: "Workflows",
 }
 
 KEChainPageIcons = {
     KEChainPages.DETAIL: "bookmark",
+    KEChainPages.FORMS: "file-contract",
     KEChainPages.TASKS: "edit",
     KEChainPages.WORK_BREAKDOWN: "sitemap",
+    KEChainPages.CATALOG_FORMS: "file-export",
+    KEChainPages.CONTEXTS: "tags",
+    KEChainPages.WORKFLOWS: "directions",
     KEChainPages.CATALOG_WBS: "books",
     KEChainPages.APP_WBS: "tablet-alt",
     KEChainPages.DATA_MODEL: "cube",
@@ -989,6 +1024,22 @@ class FontAwesomeMode(Enum):
     SOLID = "solid"
     REGULAR = "regular"
     LIGHT = "light"
+
+
+class MinimumAccessLevelOptions(Enum):
+    """
+    Options for minimum access level options for the sidebar buttons.
+
+    :cvar IS_MEMBER: "is_member"
+    :cvar IS_LEAD_MEMBER: "is_leadmember"
+    :cvar IS_SUPERVISOR: "is_supervisor"
+    :cvar IS_MANAGER: "is_manager"
+    """
+
+    IS_MEMBER = "is_member"
+    IS_LEAD_MEMBER = "is_leadmember"
+    IS_SUPERVISOR = "is_supervisor"
+    IS_MANAGER = "is_manager"
 
 
 class SelectListRepresentations(Enum):
