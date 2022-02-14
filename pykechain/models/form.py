@@ -60,6 +60,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         self.form_instance_root: "Part" = json.get("form_instance_root")
         self.model_id: "Form" = json.get("model")
         self.derived_from_id: Optional[ObjectID] = json.get("derived_from_id")
+        self.active: bool = json.get("active")
         self.category: FormCategory = json.get("category")
         self.status_forms: List[StatusForm] = json.get("status_forms", [])
 
@@ -267,3 +268,41 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
             )
 
         return Form(response.json()["results"][0], client=self._client)
+
+    def activate(self):
+        """Put the form to active.
+
+        Model Forms can be put to inactive. When the Form model is not active the form cannot be
+        instantiated. This methods sets the form to active.
+        """
+        if not self.active:
+            url = self._client._build_url("form_activate", form_id=self.id)
+            response = self._client._request("PUT", url=url)
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise APIError("Could not activate the form", response=response)
+
+            # we need to do a full refresh here from the server as the
+            # API of form/<id>/activate does not return the full object as response.
+            self.refresh(
+                url=self._client._build_url("form", form_id=self.id),
+                extra_params=API_EXTRA_PARAMS.get(self.url_list_name),
+            )
+
+    def deactivate(self):
+        """Put the form to inactive.
+
+        Model Forms can be put to inactive. When the Form model is not active the form cannot be
+        instantiated.
+        """
+        if self.active:
+            url = self._client._build_url("form_deactivate", form_id=self.id)
+            response = self._client._request("PUT", url=url)
+            if response.status_code != requests.codes.ok:  # pragma: no cover
+                raise APIError("Could not activate the form", response=response)
+
+            # we need to do a full refresh here from the server as the
+            # API of form/<id>/deactivate does not return the full object as response.
+            self.refresh(
+                url=self._client._build_url("form", form_id=self.id),
+                extra_params=API_EXTRA_PARAMS.get(self.url_list_name),
+            )
