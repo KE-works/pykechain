@@ -3736,11 +3736,14 @@ class Client:
         Create multiple form instances simultaneously.
 
         :param forms: list of dicts, each specifying a form instance. Available fields per dict:
-            :param name: (optional) name provided for the new instance as string otherwise use the name of the model
+            :param name: (optional) name provided for the new instance as string otherwise use
+            the name of the model
             :type name: basestring or None
-            :param description: (optional) description provided for the new instance as string otherwise use the description of the model
+            :param description: (optional) description provided for the new instance as string
+            otherwise use the description of the model
             :type description: basestring or None
-            :param model_id: model of the form which to add new instances, should follow the model tree in KE-chain
+            :param model_id: model of the form which to add new instances, should follow the
+            model tree in KE-chain
             :type model_id: UUID
             :param contexts: list of contexts
             :type properties: list
@@ -3826,7 +3829,6 @@ class Client:
                 list_forms.append(form)
             else:
                 raise IllegalArgumentError(f"{form} is not a Form nor an UUID")
-        payload = {"forms": list_forms}
         query_params = kwargs
         query_params.update(API_EXTRA_PARAMS["parts"])
         query_params["async_mode"] = asynchronous

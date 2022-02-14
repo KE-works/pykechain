@@ -772,7 +772,11 @@ class Scope(Base, TagsMixin):
 
     def instantiate_form(self, model, *args, **kwargs) -> "Form":
         """
+        Create a new Form instance based on a model.
 
+        See the `Form.instantiate()` method for available arguments.
+
+        :return: a created Form Instance
         """
         if self.id == model.scope_id["id"]:
             return self._client.instantiate_form(*args, model=model, *args, **kwargs)
