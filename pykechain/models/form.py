@@ -117,6 +117,25 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
     #     """Retrieve a Form object through the client."""
     #     return super().get(client=client, **kwargs)
 
+    @property
+    def is_model(self) -> bool:
+        """The Form is a Form Model or Form Template."""
+        return self.category == FormCategory.MODEL
+
+    @property
+    def is_instance(self) -> bool:
+        """The Form is a Form Instance."""
+        return self.category == FormCategory.INSTANCE
+
+    @property
+    def is_active(self) -> bool:
+        """The Form is an active Form."""
+        return self.active is not None and self.active
+
+    #
+    # Form Model finders and searchers.
+    #
+
     def instances(self, **kwargs) -> [List["Form"]]:
         """Retrieve the instances of this Form Model."""
         if self.category == FormCategory.MODEL:
