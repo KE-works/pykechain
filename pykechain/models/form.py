@@ -120,17 +120,17 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
 
     @property
     def is_model(self) -> bool:
-        """The Form is a Form Model or Form Template."""
+        """Form is a Form Model or Form Template."""
         return self.category == FormCategory.MODEL
 
     @property
     def is_instance(self) -> bool:
-        """The Form is a Form Instance."""
+        """Form is a Form Instance."""
         return self.category == FormCategory.INSTANCE
 
     @property
     def is_active(self) -> bool:
-        """The Form is an active Form."""
+        """Form is an active Form."""
         return self.active is not None and self.active
 
     #
