@@ -3757,25 +3757,25 @@ class Client:
             forms,
             "forms",
             [
-                "name",
-                "model_id",
-                "contexts",
+                "form",
+                "values",
             ],
         )
         for form in forms:
-            check_list_of_base(form.get("contexts"), Context, "contexts")
+            form["form"] = check_base(form.get("form"), Form, "form")
+            form["values"]["contexts"] = check_list_of_base(form.get("values").get(
+                "contexts"), Context, "contexts")
 
-        forms = {"forms": forms}
         # prepare url query parameters
         query_params = kwargs
         query_params.update(API_EXTRA_PARAMS["forms"])
         query_params["async_mode"] = asynchronous
-
+        bulk_action_input = {"bulk_action_input": forms}
         response = self._request(
             "POST",
-            self._build_url("forms_bulk_create"),
+            self._build_url("forms_bulk_create_instances"),
             params=query_params,
-            json=forms,
+            json=bulk_action_input,
         )
 
         if (asynchronous and response.status_code != requests.codes.accepted) or (
@@ -3784,20 +3784,19 @@ class Client:
             raise APIError(
                 f"Could not create Forms. ({response.status_code})", response=response
             )
-
-        form_ids = response.json()["results"][0]["forms_created"]
+        form_ids = [form.get('id') for form in response.json()["results"]]
         if retrieve_instances:
             instances_per_id = dict()
-            for form_ids_chunk in get_in_chunks(lst=form_ids, chunk_size=50):
+            for forms_ids_chunk in get_in_chunks(lst=form_ids, chunk_size=50):
                 instances_per_id.update(
                     {
-                        f.id: f for f in self.forms(id__in=",".join(form_ids_chunk))
+                        p.id: p for p in self.forms(id__in=",".join(forms_ids_chunk))
                     }  # `id__in` does not guarantee order
                 )
             form_instances = [
                 instances_per_id[pk] for pk in form_ids
             ]  # Ensures order of parts wrt request
-            return list(form_instances)
+            return form_instances
         return form_ids
 
     def _delete_forms_bulk(
@@ -3831,11 +3830,12 @@ class Client:
         query_params = kwargs
         query_params.update(API_EXTRA_PARAMS["parts"])
         query_params["async_mode"] = asynchronous
+        bulk_action_input = {"bulk_action_input": list_forms}
         response = self._request(
             "DELETE",
             self._build_url("forms_bulk_delete"),
             params=query_params,
-            json=payload,
+            json=bulk_action_input,
         )
         # TODO - remove requests.codes.ok when async is implemented in the backend
         if ((asynchronous and response.status_code not in (

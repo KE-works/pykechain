@@ -1,7 +1,7 @@
 import pytest
 
 from pykechain.enums import FormCategory, WorkflowCategory
-from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
+from pykechain.exceptions import APIError, ForbiddenError, IllegalArgumentError, NotFoundError
 from pykechain.models.form import Form
 from tests.classes import TestBetamax
 
@@ -148,18 +148,10 @@ class TestForms(TestBetamax):
                 model=self.form_model
             )
 
-    def test_model_form_delete(self):
-        form_instance = self.form_model.instantiate(name="___test form from 1st")
-        self.assertTrue(form_instance.model_id, self.form_model.id)
-
-        # delete
-        form_instance.delete()
-        with self.assertRaisesRegex(NotFoundError, "Could not reload Form"):
-            form_instance.refresh()
-
     def test_model_clone(self):
         self.cloned_form_model = self.form_model.clone(name="__TEST_FORM_MODEL_CLONE",
-                                                       target_scope=self.project)
+                                                       target_scope=self.project,
+                                                       contexts=[self.asset_context, self.discipline_context])
         self.assertTrue(self.cloned_form_model)
         self.assertIsInstance(self.cloned_form_model, Form)
         self.assertIn(self.asset_context.id,
@@ -190,9 +182,21 @@ class TestForms(TestBetamax):
         self.assertTrue(form_instance.category, FormCategory.INSTANCE)
         self.assertTrue(form_instance.model_id, self.form_model.id)
 
-    # def test_forms_edit(self):
-    #     new_name = "__TEST_EDITED_FORM_MODEL"
-    #     self.form_model.edit(name=new_nam)
+    def test_form_model_edit(self):
+        new_name = "__TEST_EDITED_FORM_MODEL"
+        self.form_model_2.edit(name=new_name)
+        self.assertEqual(self.form_model_2.name, new_name)
+
+    def test_form_model_edit_with_instances(self):
+        new_name = "__TEST_EDITED_FORM_MODEL"
+        with self.assertRaises(ForbiddenError):
+            self.form_model.edit(name=new_name)
+
+    def test_form_instance_edit(self):
+        new_name = "__TEST_INSTANCE_EDITED"
+        self.form_instance.edit(name=new_name)
+        self.assertEqual(self.form_instance.name, new_name)
+
     def test_forms_delete(self):
         form_model_name = "__TEST_FORM_MODEL_FOR_DELETION"
         self.form_model_for_deletion = self.client.create_form_model(
@@ -214,26 +218,75 @@ class TestBulkForms(TestBetamax):
     Test bulk forms attributes and methods.
     """
     def setUp(self):
-        pass
+        super().setUp()
+        self.workflow = self.client.workflow(
+            name='Simple Form Flow',
+            category=WorkflowCategory.CATALOG
+        )
+        self.approval_workflow = self.client.workflow(
+            name='Strict Approval Workflow',
+            category=WorkflowCategory.CATALOG
+        )
+        self.discipline_context = self.project.context(
+            name="Discipline 1"
+        )
+        self.asset_context = self.project.context(
+            name="Object 1"
+        )
+        self.form_model_name = "__TEST__FORM_MODEL"
+        self.form_model = self.client.create_form_model(
+            name=self.form_model_name,
+            scope=self.project,
+            workflow=self.workflow,
+            category=FormCategory.MODEL,
+            contexts=[self.asset_context, self.discipline_context])
+        self.new_forms = list()
+        for idx in range(1, 5):
+            form_dict = {
+                "form": self.form_model,
+                "values": {
+                    "name": f"Form {idx}",
+                    "contexts": [self.asset_context],
+                }
+            }
+            self.new_forms.append(form_dict)
+        self.forms_created = None
 
     def tearDown(self):
-        pass
+        super().tearDown()
+        if self.forms_created:
+            for form in self.forms_created:
+                try:
+                    form.delete()
+                except APIError:
+                    pass
+        if self.form_model:
+            self.form_model.delete()
+
+    def test_bulk_instantiate_forms(self):
+        self.forms_created = self.client._create_forms_bulk(forms=self.new_forms,
+                                                            retrieve_instances=True)
+        for form in self.forms_created:
+            self.assertIsInstance(form, Form)
+            self.assertEqual(form.category, FormCategory.INSTANCE)
+            self.assertEqual(form.model_id, self.form_model.id)
 
     def test_bulk_delete_parts(self):
-        input_parts_and_uuids = [
-            self.parts_created[0],
-            self.parts_created[1],
-            self.parts_created[2].id,
-            self.parts_created[3].id,
+        self.forms_created = self.client._create_forms_bulk(forms=self.new_forms,
+                                                            retrieve_instances=True)
+        input_forms_and_uuids = [
+            self.forms_created[0],
+            self.forms_created[1],
+            self.forms_created[2].id,
+            self.forms_created[3].id,
         ]
-        self.client._delete_parts_bulk(parts=input_parts_and_uuids)
+        self.client._delete_forms_bulk(forms=input_forms_and_uuids)
         for idx in range(1, 5):
             with self.subTest(idx=idx):
                 with self.assertRaises(NotFoundError):
-                    self.project.part(name=f"Wheel {idx}")
+                    self.project.form(name=f"Form {idx}")
 
     def test_bulk_delete_parts_with_wrong_input(self):
         wrong_input = [self.project.activity(name="Specify wheel diameter")]
         with self.assertRaises(IllegalArgumentError):
-            self.client._delete_parts_bulk(parts=wrong_input)
-
+            self.client._delete_forms_bulk(forms=wrong_input)

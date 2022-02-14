@@ -124,6 +124,7 @@ API_PATH = {
     "form": "api/v3/forms/{form_id}",
     "form_instantiate": "api/v3/forms/{form_id}/instantiate",
     "form_clone": "api/v3/forms/{form_id}/clone",
+    "forms_bulk_create_instances": "api/v3/forms/bulk_instantiate",
     "forms_bulk_delete": "api/v3/forms/bulk_delete",
     "workflows": "api/v3/workflows",
     "workflow": "api/v3/workflows/{workflow_id}",
@@ -536,6 +537,27 @@ API_EXTRA_PARAMS = {
         )
     },
     "forms": {
+        "fields": ",".join(
+            [
+                "id",
+                "name",
+                "ref",
+                "created_at",
+                "updated_at",
+                "description",
+                "derived_from",
+                "tags",
+                "category",
+                "form_model_root",
+                "form_instance_root",
+                "model",
+                "workflow",
+                "status_forms",
+                "active_status",
+            ]
+        )
+    },
+    "form": {
         "fields": ",".join(
             [
                 "id",
