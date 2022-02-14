@@ -1,7 +1,6 @@
 import datetime
 import time
 import warnings
-from test.support import EnvironmentVarGuard
 from unittest import TestCase
 
 import pytz
@@ -17,7 +16,7 @@ from pykechain.exceptions import (
 )
 from pykechain.models import Base, Team
 from pykechain.models.scope import Scope
-from tests.classes import TestBetamax
+from tests.classes import EnvironmentVarGuard, TestBetamax
 
 
 class TestClient(TestCase):
