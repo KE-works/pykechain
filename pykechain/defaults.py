@@ -126,6 +126,8 @@ API_PATH = {
     "form_clone": "api/v3/forms/{form_id}/clone",
     "forms_bulk_create_instances": "api/v3/forms/bulk_instantiate",
     "forms_bulk_delete": "api/v3/forms/bulk_delete",
+    "form_activate": "api/v3/forms/{form_id}/activate",
+    "form_deactivate": "api/v3/forms/{form_id}/deactivate",
     "workflows": "api/v3/workflows",
     "workflow": "api/v3/workflows/{workflow_id}",
     "workflow_update_transition": "api/v3/workflows/{workflow_id}/update_transition",
@@ -575,6 +577,7 @@ API_EXTRA_PARAMS = {
                 "workflow",
                 "status_forms",
                 "active_status",
+                "active",
             ]
         )
     },
