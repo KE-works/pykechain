@@ -1,4 +1,4 @@
-from typing import Iterable, List, Optional, Union
+from typing import List, Optional, Union
 
 import requests
 
@@ -107,7 +107,7 @@ class Workflow(
     def __repr__(self) -> str:  # pragma: no cover
         return f"<pyke Workflow '{self.name}' '{self.category}' id {self.id[-8:]}>"
 
-    def edit(self, name: str = Empty(), description: str= Empty(), *args, **kwargs) -> None:
+    def edit(self, name: str = Empty(), description: str = Empty(), *args, **kwargs) -> None:
         """Change the workflow object.
 
         Change the name and description of a workflow. It is also possible to update the workflow
@@ -116,6 +116,7 @@ class Workflow(
 
         :type name: name of the workflow is required.
         :type description: (optional) description of the workflow
+
         """
         if isinstance(name, Empty):
             name = self.name
@@ -195,11 +196,17 @@ class Workflow(
         >>> transition = workflow.transition('in progress')
         >>> todo_status = client.status(name="To Do")
         >>> transition = workflow.transition(todo_status, attr="to_status")
+
         """
         return find_obj_in_list(value, iterable=self._transitions, attribute=attr)
 
     @property
     def transitions(self):
+        """
+        Retrieve the Transitions belonging to this workflow.
+
+        :return: multiple :class:`Transition`
+        """
         return self._transitions
 
     def status(self, value: str = None, attr: str = None) -> Status:
@@ -216,11 +223,17 @@ class Workflow(
         -------
         >>> workflow = project.workflow('Simple Flow')
         >>> status = workflow.status('To Do')
+
         """
         return find_obj_in_list(value, iterable=self._statuses, attribute=attr)
 
     @property
     def statuses(self):
+        """
+        Retrieve the Statuses belonging to this workflow.
+
+        :return: multiple :class:`Status`
+        """
         return self._statuses
 
     #

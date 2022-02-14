@@ -711,7 +711,7 @@ class Scope(Base, TagsMixin):
 
         :return: a Context object
         """
-        return self._client.context(*args, scope=self, **kwargs)
+        return self._client.context(*args, scope=self.id, **kwargs)
 
     def contexts(self, *args, **kwargs) -> List[Context]:
         """
@@ -769,6 +769,21 @@ class Scope(Base, TagsMixin):
         :return: a Form object
         """
         return self._client.create_form_model(*args, scope=self, **kwargs)
+
+    def instantiate_form(self, model, *args, **kwargs) -> "Form":
+        """
+        Create a new Form instance based on a model.
+
+        See the `Form.instantiate()` method for available arguments.
+
+        :return: a created Form Instance
+        """
+        if self.id == model.scope_id["id"]:
+            return self._client.instantiate_form(*args, model=model, *args, **kwargs)
+        else:
+            raise IllegalArgumentError("Form Model '{}' not in Scope '{}'".format(
+                model.name, self.name
+            ))
 
     #
     # Workflows Methods
