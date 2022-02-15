@@ -7,12 +7,12 @@ from pykechain.enums import (
     PropertyType,
     FilterType,
     Multiplicity,
-    ActivityRootNames
+    ActivityRootNames,
+    WorkflowCategory
 )
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import MultiReferenceProperty
 from pykechain.models.base_reference import _ReferenceProperty
-from pykechain.models.form import Form
 from pykechain.models.property_reference import (
     ActivityReferencesProperty,
     ContextReferencesProperty,
@@ -1018,14 +1018,34 @@ class TestPropertyFormReference(TestBetamax):
         super().setUp()
         root = self.project.model(name="Product")
         self.part = self.project.create_model(
-            name="The part", parent=root, multiplicity=Multiplicity.ONE
+            name="TEST_FORM_REFERENCE_PART", parent=root, multiplicity=Multiplicity.ONE
         )
         self.form_ref_prop_model = self.part.add_property(
             name="form ref", property_type=PropertyType.FORM_REFERENCES_VALUE
         )
+        self.workflow = self.client.workflow(
+            name='Simple Form Flow',
+            category=WorkflowCategory.CATALOG
+        )
+        self.approval_workflow = self.client.workflow(
+            name='Strict Approval Workflow',
+            category=WorkflowCategory.CATALOG
+        )
+        self.discipline_context = self.project.context(
+            name="Discipline 1"
+        )
+        self.asset_context = self.project.context(
+            name="Object 1"
+        )
+        self.form_model_name = "__TEST__FORM_MODEL"
+        self.form_model = self.client.create_form_model(
+            name=self.form_model_name,
+            scope=self.project,
+            workflow=self.workflow,
+            category=FormCategory.MODEL,
+            contexts=[self.asset_context, self.discipline_context])
         self.form_ref_prop_instance = self.part.instance().property(
             name=self.form_ref_prop_model.name)
-        self.form_model: Form = self.client.form("__TEST_FORM", category=FormCategory.MODEL)
         self.form_instance_1 = self.form_model.instantiate(name="__FIRST_TEST_FORM_INSTANCE")
         self.form_instance_2 = self.form_model.instantiate(name="__SECOND_TEST_FORM_INSTANCE ")
 
@@ -1036,6 +1056,8 @@ class TestPropertyFormReference(TestBetamax):
             self.form_instance_1.delete()
         if self.form_instance_2:
             self.form_instance_2.delete()
+        if self.form_model:
+            self.form_model.delete()
         super().tearDown()
 
     def test_create(self):
@@ -1074,7 +1096,7 @@ class TestPropertyContextReference(TestBetamax):
         super().setUp()
         root = self.project.model(name="Product")
         self.part = self.project.create_model(
-            name="The part", parent=root, multiplicity=Multiplicity.ONE
+            name="TEST_CONTEXT_REFERENCE_PART", parent=root, multiplicity=Multiplicity.ONE
         )
         self.context_ref_prop_model = self.part.add_property(
             name="context ref", property_type=PropertyType.CONTEXT_REFERENCES_VALUE
