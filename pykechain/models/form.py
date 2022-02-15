@@ -126,6 +126,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
 
     @property
     def status_forms(self):
+        """Retrieve the Status Forms of this Form."""
         return [StatusForm(s, client=self._client) for s in self._status_forms]
 
     #
