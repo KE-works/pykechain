@@ -261,7 +261,10 @@ class TestBulkForms(TestBetamax):
                 except APIError:
                     pass
         if self.form_model:
-            self.form_model.delete()
+            try:
+                self.form_model.delete()
+            except ForbiddenError:
+                pass
 
     def test_bulk_instantiate_forms(self):
         self.forms_created = self.client._create_forms_bulk(forms=self.new_forms,
