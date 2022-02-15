@@ -3,7 +3,7 @@ from random import shuffle
 from unittest import skip
 
 from pykechain.enums import StatusCategory, TransitionType, WorkflowCategory
-from pykechain.exceptions import NotFoundError
+from pykechain.exceptions import ForbiddenError, NotFoundError
 from pykechain.models.input_checks import check_list_of_base
 from pykechain.models.workflow import Status, Workflow
 from tests.classes import TestBetamax
@@ -111,7 +111,7 @@ class TestWorkflowMethods(TestBetamax):
         super().tearDown()
         try:
             self.workflow.delete()
-        except NotFoundError:
+        except (NotFoundError, ForbiddenError):
             # we pass this silently as workflow delete when the
             # cassettes are irrelevant and returns a 404 NotFoundError
             pass
