@@ -271,7 +271,7 @@ class TestBulkForms(TestBetamax):
             self.assertEqual(form.category, FormCategory.INSTANCE)
             self.assertEqual(form.model_id, self.form_model.id)
 
-    def test_bulk_delete_parts(self):
+    def test_bulk_delete_forms(self):
         self.forms_created = self.client._create_forms_bulk(forms=self.new_forms,
                                                             retrieve_instances=True)
         input_forms_and_uuids = [
@@ -286,7 +286,7 @@ class TestBulkForms(TestBetamax):
                 with self.assertRaises(NotFoundError):
                     self.project.form(name=f"Form {idx}")
 
-    def test_bulk_delete_parts_with_wrong_input(self):
+    def test_bulk_delete_forms_with_wrong_input(self):
         wrong_input = [self.project.activity(name="Specify wheel diameter")]
         with self.assertRaises(IllegalArgumentError):
             self.client._delete_forms_bulk(forms=wrong_input)

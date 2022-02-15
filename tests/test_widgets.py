@@ -588,7 +588,7 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertEqual(
             len(self.wm),
-            9,
+            13,
             msg=(
                 "New KE-chain page has been added to the Enum, "
                 "check if the mapping dicts in enums.py need updating too!"

@@ -394,7 +394,7 @@ class TestServiceExecutions(TestServiceSetup):
                 continue
 
             # Originating activity is an optional variable
-            if key == "activity_id":
+            if key == "activity_id" or key == "ref":
                 continue
 
             with self.subTest(msg=f"{key}: {value}"):
