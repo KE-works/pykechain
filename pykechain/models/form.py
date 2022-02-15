@@ -6,7 +6,10 @@ from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import FormCategory
 from pykechain.exceptions import APIError, ForbiddenError
 from pykechain.models import Activity, Scope
-from pykechain.models.base import BaseInScope, CrudActionsMixin, NameDescriptionTranslationMixin
+from pykechain.models.base import (
+    Base, BaseInScope, CrudActionsMixin,
+    NameDescriptionTranslationMixin,
+)
 from pykechain.models.context import Context
 from pykechain.models.input_checks import check_base, check_list_of_base, check_text
 from pykechain.models.tags import TagsMixin
@@ -15,7 +18,7 @@ from pykechain.typing import ObjectID
 from pykechain.utils import Empty, clean_empty_values, empty
 
 
-class StatusForm(BaseInScope):
+class StatusForm(Base):
     """A virtual object representing a KE-chain StatusForm.
 
     A StatusForm is an intermediate object linking the Forms to its 'subforms', where each
@@ -26,7 +29,7 @@ class StatusForm(BaseInScope):
         super().__init__(json, **kwargs)
         self.description: str = json.get("description", "")
         self.ref: str = json.get("ref", "")
-        self.status : Status = Status(json.get("status"), client=self._client)
+        self.status: Status = Status(json.get("status"), client=self._client)
         self.activity: Activity = Activity(json.get("activity"), client=self._client)
         self.form: str = json.get("form")
 
