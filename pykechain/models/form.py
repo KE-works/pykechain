@@ -1,27 +1,37 @@
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import FormCategory
 from pykechain.exceptions import APIError, ForbiddenError
-from pykechain.models import Scope
-from pykechain.models.base import BaseInScope, CrudActionsMixin, NameDescriptionTranslationMixin
+from pykechain.models import Activity, Scope
+from pykechain.models.base import (
+    Base, BaseInScope, CrudActionsMixin,
+    NameDescriptionTranslationMixin,
+)
 from pykechain.models.context import Context
 from pykechain.models.input_checks import check_base, check_list_of_base, check_text
 from pykechain.models.tags import TagsMixin
+from pykechain.models.workflow import Status
 from pykechain.typing import ObjectID
 from pykechain.utils import Empty, clean_empty_values, empty
 
 
-class StatusForm:
+class StatusForm(Base):
     """A virtual object representing a KE-chain StatusForm.
 
     A StatusForm is an intermediate object linking the Forms to its 'subforms', where each
     status of a form has a link to its Activity.
     """
-
-    pass
+    def __init__(self, json, **kwargs):
+        """Construct a service from provided json data."""
+        super().__init__(json, **kwargs)
+        self.description: str = json.get("description", "")
+        self.ref: str = json.get("ref", "")
+        self.status: Status = Status(json.get("status"), client=self._client)
+        self.activity: Activity = Activity(json.get("activity"), client=self._client)
+        self.form: str = json.get("form")
 
 
 class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationMixin):
@@ -62,7 +72,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         self.derived_from_id: Optional[ObjectID] = json.get("derived_from_id")
         self.active: bool = json.get("active")
         self.category: FormCategory = json.get("category")
-        self.status_forms: List[StatusForm] = json.get("status_forms", [])
+        self._status_forms: List[Dict] = json.get("status_forms", [])
 
     def __repr__(self):  # pragma: no cover
         return f"<pyke Form  '{self.name}' '{self.category}' id {self.id[-8:]}>"
@@ -106,6 +116,14 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
             raise APIError(f"Could not create {cls.__name__}", response=response)
 
         return cls(json=response.json()["results"][0], client=client)
+
+    #
+    # Concepts underneath the Form
+    # StatusForms
+
+    @property
+    def status_forms(self):
+        return [StatusForm(s, client=self._client) for s in self._status_forms]
 
     #
     # @classmethod
