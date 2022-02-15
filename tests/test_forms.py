@@ -278,7 +278,7 @@ class TestBulkForms(TestBetamax):
         if self.form_model:
             try:
                 self.form_model.delete()
-            except ForbiddenError:
+            except (ForbiddenError, APIError):
                 pass
 
     def test_bulk_instantiate_forms(self):
