@@ -7,12 +7,12 @@ from pykechain.enums import (
     PropertyType,
     FilterType,
     Multiplicity,
-    ActivityRootNames, WorkflowCategory
+    ActivityRootNames,
+    WorkflowCategory
 )
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import MultiReferenceProperty
 from pykechain.models.base_reference import _ReferenceProperty
-from pykechain.models.form import Form
 from pykechain.models.property_reference import (
     ActivityReferencesProperty,
     ContextReferencesProperty,
