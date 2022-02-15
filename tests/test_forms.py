@@ -55,20 +55,35 @@ class TestForms(TestBetamax):
     def tearDown(self):
         super().tearDown()
         if self.form_instance:
-            self.form_instance.delete()
+            try:
+                self.form_instance.delete()
+            except (NotFoundError, APIError):
+                pass
         if self.test_form_instance:
-            self.test_form_instance.delete()
+            try:
+                self.test_form_instance.delete()
+            except (NotFoundError, APIError):
+                pass
         if self.form_model:
-            self.form_model.delete()
+            try:
+                self.form_model.delete()
+            except (NotFoundError, APIError):
+                pass
         if self.form_model_2:
-            self.form_model_2.delete()
+            try:
+                self.form_model_2.delete()
+            except (NotFoundError, APIError):
+                pass
         if self.form_model_for_deletion:
             try:
                 self.form_model_for_deletion.delete()
-            except APIError:
+            except (NotFoundError, APIError):
                 pass
         if self. cloned_form_model:
-            self.cloned_form_model.delete()
+            try:
+                self.cloned_form_model.delete()
+            except (NotFoundError, APIError):
+                pass
 
     def test_form_attributes(self):
         attributes = [
