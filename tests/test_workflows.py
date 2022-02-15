@@ -113,7 +113,7 @@ class TestWorkflowMethods(TestBetamax):
             self.workflow.delete()
         except NotFoundError:
             # we pass this silently as workflow delete when the
-            # casettes are irrelevant and returns a 404 NotFoundError
+            # cassettes are irrelevant and returns a 404 NotFoundError
             pass
 
     def test_edit_workflow_description(self):
