@@ -7,7 +7,9 @@ from pykechain.enums import FormCategory
 from pykechain.exceptions import APIError, ForbiddenError
 from pykechain.models import Activity, Scope
 from pykechain.models.base import (
-    Base, BaseInScope, CrudActionsMixin,
+    Base,
+    BaseInScope,
+    CrudActionsMixin,
     NameDescriptionTranslationMixin,
 )
 from pykechain.models.context import Context
@@ -24,6 +26,7 @@ class StatusForm(Base):
     A StatusForm is an intermediate object linking the Forms to its 'subforms', where each
     status of a form has a link to its Activity.
     """
+
     def __init__(self, json, **kwargs):
         """Construct a service from provided json data."""
         super().__init__(json, **kwargs)
@@ -85,8 +88,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         scope: Union[Scope, ObjectID],
         workflow: Union["Workflow", ObjectID],
         contexts: List[Union[Context, ObjectID]],
-
-        **kwargs: dict
+        **kwargs: dict,
     ) -> "Form":
         """Create a new form model.
 
@@ -100,6 +102,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         :param kwargs: Additional kwargs such as contexts.
         """
         from pykechain.models.workflow import Workflow
+
         data = {
             "name": check_text(name, "name"),
             "scope": check_base(scope, Scope, "scope"),
@@ -233,9 +236,10 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
 
         data_dict = {
             "name": check_text(name, "name") or self.name,
-            "description": check_text(kwargs.get("description"),
-                                      "description") or self.description,
-            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts") or [],
+            "description": check_text(kwargs.get("description"), "description")
+            or self.description,
+            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts")
+            or [],
         }
 
         url = self._client._build_url("form_instantiate", form_id=self.id)
@@ -263,22 +267,23 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         data_dict = {
             "name": check_text(name, "name") or f"{self.name}",
             "target_scope": check_base(target_scope, Scope, "scope"),
-            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts") or [],
+            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts")
+            or [],
         }
         if "description" in kwargs:
-            data_dict["description"] = check_text(kwargs.get("description"), "description")
+            data_dict["description"] = check_text(
+                kwargs.get("description"), "description"
+            )
 
         response = self._client._request(
             "POST",
             self._client._build_url("form_clone", form_id=self.id),
             params=API_EXTRA_PARAMS["forms"],
-            json=data_dict
+            json=data_dict,
         )
 
         if response.status_code != requests.codes.created:
-            raise APIError(
-                f"Could not clone this Form: {self}", response=response
-            )
+            raise APIError(f"Could not clone this Form: {self}", response=response)
 
         return Form(response.json()["results"][0], client=self._client)
 
