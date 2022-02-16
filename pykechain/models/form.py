@@ -15,7 +15,7 @@ from pykechain.models.base import (
 from pykechain.models.context import Context
 from pykechain.models.input_checks import check_base, check_list_of_base, check_text
 from pykechain.models.tags import TagsMixin
-from pykechain.models.workflow import Status
+from pykechain.models.workflow import Status, Transition
 from pykechain.typing import ObjectID
 from pykechain.utils import Empty, clean_empty_values, empty
 
@@ -287,6 +287,31 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
             raise APIError(f"Could not clone this Form: {self}", response=response)
 
         return Form(response.json()["results"][0], client=self._client)
+
+    def possible_transitions(self) -> List[Transition]:
+        """The possible transitions that may be applied on the Form.
+
+        It will return the Transitions from the associated workflow are can be applied
+        on the Form in the current status.
+
+        :returns: A list with possible Transitions that may be applied on the Form.
+        """
+        raise NotImplementedError
+
+
+    def apply_transition(self, transition: Union[Transition, ObjectID]) -> None:
+        """Apply the transition to put the form in another state following a transition.
+
+        Apply transition is to put the Form in another state. Only transitions that
+        can apply to the form should have the 'from_status' to the current state. (or
+        it is a Global transition). If applied the Form will be set in the 'to_state' of
+        the Transition.
+
+        :param transition: Transition or transition ID to apply to the form
+        """
+        raise NotImplementedError
+
+
 
     def activate(self):
         """Put the form to active.
