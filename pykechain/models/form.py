@@ -266,27 +266,37 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
     def clone(
         self, name: Optional[str], target_scope: Optional[Scope], **kwargs
     ) -> Optional["Form"]:
-        """Clone a new Form model based on a model."""
+        """
+        Clone a new Form model based on a model. If target_scope is specified and different
+        from the scope of the form, then use the `clone_cross_scope` endpoint. Otherwise, use the
+        basic `clone` endpoint
+
+        """
         if self.category != FormCategory.MODEL:
             raise APIError("Form should be of category MODEL")
-
         data_dict = {
             "name": check_text(name, "name") or f"{self.name}",
-            "target_scope": check_base(target_scope, Scope, "scope"),
-            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts")
-            or [],
+            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts") or []
         }
         if "description" in kwargs:
-            data_dict["description"] = check_text(
-                kwargs.get("description"), "description"
-            )
+            data_dict.update({"description": check_text(kwargs.get("description"), "description")})
 
-        response = self._client._request(
-            "POST",
-            self._client._build_url("form_clone", form_id=self.id),
-            params=API_EXTRA_PARAMS["forms"],
-            json=data_dict,
-        )
+        if not target_scope or target_scope.id == self.scope_id.get("id"):
+            data_dict.update({"target_scope": self.scope_id.get("id")})
+            response = self._client._request(
+                "POST",
+                self._client._build_url("form_clone", form_id=self.id),
+                params=API_EXTRA_PARAMS["forms"],
+                json=data_dict,
+            )
+        else:
+            data_dict.update({"target_scope": check_base(target_scope, Scope, "scope")})
+            response = self._client._request(
+                "POST",
+                self._client._build_url("form_clone_cross_scope", form_id=self.id),
+                params=API_EXTRA_PARAMS["forms"],
+                json=data_dict,
+            )
 
         if response.status_code != requests.codes.created:
             raise APIError(f"Could not clone this Form: {self}", response=response)
@@ -393,6 +403,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         >>>    }
         >>>     status_assignees_list.append(status_dict)
         >>> self.form.set_status_assignees(statuses=status_assignees_list)
+
         """
         from pykechain.models import User
         check_list_of_dicts(
@@ -420,7 +431,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
 
     def apply_transition(self, transition: Transition):
         """
-        Applies a transition to a Form.
+        Apply a transition to a Form.
 
         :param transition: a Transition object belonging to the workflow of the Form
         :raises APIError: in case an Error occurs when applying the transition
@@ -431,6 +442,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
 
         >>> transition = workflow.transition("In progress")
         >>> form.apply_transition(transition=transition)
+
         """
         check_base(transition, Transition)
 
