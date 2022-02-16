@@ -16,7 +16,7 @@ from pykechain.models.context import Context
 from pykechain.models.input_checks import check_base, check_list_of_base, check_list_of_dicts, \
     check_text
 from pykechain.models.tags import TagsMixin
-from pykechain.models.workflow import Status
+from pykechain.models.workflow import Status, Transition
 from pykechain.typing import ObjectID
 from pykechain.utils import Empty, clean_empty_values, empty
 
@@ -339,7 +339,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         :raises APIError: in case an Error occurs when linking
         """
         data = {"contexts": check_list_of_base(contexts, Context)}
-        url = self._client._build_url("forms_link_contexts", form_id=self.id)
+        url = self._client._build_url("form_link_contexts", form_id=self.id)
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
         response = self._client._request(
             "POST", url=url, params=query_params, json=data
@@ -359,7 +359,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         :raises APIError: in case an Error occurs when unlinking
         """
         data = {"contexts": check_list_of_base(contexts, Context)}
-        url = self._client._build_url("forms_unlink_contexts", form_id=self.id)
+        url = self._client._build_url("form_unlink_contexts", form_id=self.id)
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
         response = self._client._request(
             "POST", url=url, params=query_params, json=data
@@ -406,7 +406,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         for status in statuses:
             status['status'] = check_base(status['status'], Status)
             status['assignees'] = check_list_of_base(status['assignees'], User)
-        url = self._client._build_url("forms_set_status_assignees", form_id=self.id)
+        url = self._client._build_url("form_set_status_assignees", form_id=self.id)
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
         response = self._client._request(
             "POST", url=url, params=query_params, json=statuses
@@ -414,6 +414,36 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         if response.status_code != requests.codes.ok:
             raise APIError(
                 "Could not set the list of status assignees to the form",
+                response=response,
+            )
+        self.refresh(json=response.json()["results"][0])
+
+    def apply_transition(self, transition: Transition):
+        """
+        Applies a transition to a Form.
+
+        :param transition: a Transition object belonging to the workflow of the Form
+        :raises APIError: in case an Error occurs when applying the transition
+
+        Example
+        -------
+        When the `Form` and `Workflow` is known, one can easily apply a transition on it, as such:
+
+        >>> transition = workflow.transition("In progress")
+        >>> form.apply_transition(transition=transition)
+        """
+        check_base(transition, Transition)
+
+        url = self._client._build_url("form_apply_transition",
+                                      form_id=self.id,
+                                      transition_id=transition.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request(
+            "POST", url=url, params=query_params,
+        )
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                "Could not transition the form",
                 response=response,
             )
         self.refresh(json=response.json()["results"][0])

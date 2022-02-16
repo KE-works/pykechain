@@ -1,6 +1,6 @@
 import pytest
 
-from pykechain.enums import FormCategory, WorkflowCategory
+from pykechain.enums import FormCategory, StatusCategory, WorkflowCategory
 from pykechain.exceptions import APIError, ForbiddenError, IllegalArgumentError, NotFoundError
 from pykechain.models.form import Form
 from tests.classes import TestBetamax
@@ -21,10 +21,6 @@ class TestForms(TestBetamax):
         self.cross_scope_project = self.client.scope(ref="cannondale-project")
         self.workflow = self.client.workflow(
             name='Simple Form Flow',
-            category=WorkflowCategory.CATALOG
-        )
-        self.approval_workflow = self.client.workflow(
-            name='Strict Approval Workflow',
             category=WorkflowCategory.CATALOG
         )
         self.discipline_context = self.project.context(
@@ -238,10 +234,6 @@ class TestBulkForms(TestBetamax):
             name='Simple Form Flow',
             category=WorkflowCategory.CATALOG
         )
-        self.approval_workflow = self.client.workflow(
-            name='Strict Approval Workflow',
-            category=WorkflowCategory.CATALOG
-        )
         self.discipline_context = self.project.context(
             name="Discipline 1"
         )
@@ -320,10 +312,6 @@ class TestFormsMethods(TestBetamax):
             name='Simple Form Flow',
             category=WorkflowCategory.CATALOG
         )
-        self.approval_workflow = self.client.workflow(
-            name='Strict Approval Workflow',
-            category=WorkflowCategory.CATALOG
-        )
         self.discipline_context = self.project.context(
             name="Discipline 1"
         )
@@ -347,6 +335,9 @@ class TestFormsMethods(TestBetamax):
         )
         self.form_instance_to_set_assignees = self.form_model.instantiate(
             name="__TEST_FORM_INSTANCE_SET_STATUS_ASSIGNEES")
+        self.form_instance_to_transition = self.form_model.instantiate(
+            name="__TEST_FORM_INSTANCE_APPLY_TRANSITION"
+        )
 
     def tearDown(self):
         super().tearDown()
@@ -363,6 +354,11 @@ class TestFormsMethods(TestBetamax):
         if self.form_instance_to_set_assignees:
             try:
                 self.form_instance_to_set_assignees.delete()
+            except (ForbiddenError, APIError):
+                pass
+        if self.form_instance_to_transition:
+            try:
+                self.form_instance_to_transition.delete()
             except (ForbiddenError, APIError):
                 pass
         if self.form_model:
@@ -446,3 +442,19 @@ class TestFormsMethods(TestBetamax):
         with self.assertRaises(APIError):
             self.form_instance_to_set_assignees.set_status_assignees(
                 statuses=status_assignees_list)
+
+    def test_apply_transition(self):
+        in_progress_transition = self.workflow.transition("In progress")
+        done_transition = self.workflow.transition("Done")
+        self.assertEqual(self.form_instance_to_transition.active_status['status_category'],
+                         StatusCategory.TODO)
+        self.form_instance_to_transition.apply_transition(transition=in_progress_transition)
+        self.assertEqual(self.form_instance_to_transition.active_status['status_category'],
+                         StatusCategory.INPROGRESS)
+        self.form_instance_to_transition.apply_transition(transition=done_transition)
+        self.assertEqual(self.form_instance_to_transition.active_status['status_category'],
+                         StatusCategory.DONE)
+
+    def test_apply_transition_with_wrong_input(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.form_instance_to_transition.apply_transition(transition=self.workflow)
