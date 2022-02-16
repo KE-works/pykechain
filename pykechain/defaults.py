@@ -126,6 +126,8 @@ API_PATH = {
     "form_clone": "api/v3/forms/{form_id}/clone",
     "forms_bulk_create_instances": "api/v3/forms/bulk_instantiate",
     "forms_bulk_delete": "api/v3/forms/bulk_delete",
+    "forms_link_contexts": "api/v3/forms/{form_id}/link_contexts",
+    "forms_unlink_contexts": "api/v3/forms/{form_id}/unlink_contexts",
     "form_activate": "api/v3/forms/{form_id}/activate",
     "form_deactivate": "api/v3/forms/{form_id}/deactivate",
     "workflows": "api/v3/workflows",

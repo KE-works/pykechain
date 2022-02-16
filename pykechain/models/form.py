@@ -326,5 +326,42 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
                 extra_params=API_EXTRA_PARAMS.get(self.url_list_name),
             )
 
-    def link_contexts(self):
-        pass
+    def link_contexts(self, contexts: List[Union[Context, ObjectID]]):
+        """
+        Link a list of Contexts to a Form.
+
+        :param contexts: a list of Context Objects or context_ids to link to the form.
+        :raises APIError: in case an Error occurs when linking
+        """
+        data = {"contexts": check_list_of_base(contexts, Context)}
+        url = self._client._build_url("forms_link_contexts", form_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request(
+            "POST", url=url, params=query_params, json=data
+        )
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                "Could not link the specific contexts to the form",
+                response=response,
+            )
+        self.refresh(json=response.json()["results"][0])
+
+    def unlink_contexts(self, contexts: List[Union[Context, ObjectID]]):
+        """
+        Unlink a list of Contexts from a Form.
+
+        :param contexts: a list of Context Objects or context_ids to unlink from the form.
+        :raises APIError: in case an Error occurs when unlinking
+        """
+        data = {"contexts": check_list_of_base(contexts, Context)}
+        url = self._client._build_url("forms_unlink_contexts", form_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request(
+            "POST", url=url, params=query_params, json=data
+        )
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                "Could not unlink the specific contexts from the form",
+                response=response,
+            )
+        self.refresh(json=response.json()["results"][0])

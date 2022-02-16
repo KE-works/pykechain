@@ -308,3 +308,91 @@ class TestBulkForms(TestBetamax):
         wrong_input = [self.project.activity(name="Specify wheel diameter")]
         with self.assertRaises(IllegalArgumentError):
             self.client._delete_forms_bulk(forms=wrong_input)
+
+
+class TestFormsContextsConnection(TestBetamax):
+    """
+    Test linking and unlinking contexts to forms.
+    """
+    def setUp(self):
+        super().setUp()
+        self.workflow = self.client.workflow(
+            name='Simple Form Flow',
+            category=WorkflowCategory.CATALOG
+        )
+        self.approval_workflow = self.client.workflow(
+            name='Strict Approval Workflow',
+            category=WorkflowCategory.CATALOG
+        )
+        self.discipline_context = self.project.context(
+            name="Discipline 1"
+        )
+        self.asset_context = self.project.context(
+            name="Object 1"
+        )
+        self.location_context = self.project.context(
+            name="Location 1"
+        )
+        self.form_model_name = "__TEST__FORM_MODEL"
+        self.form_model = self.client.create_form_model(
+            name=self.form_model_name,
+            scope=self.project,
+            workflow=self.workflow,
+            category=FormCategory.MODEL,
+            contexts=[self.asset_context])
+        self.form_instance_to_link = self.form_model.instantiate(name="__TEST_FORM_INSTANCE_LINK")
+        self.form_instance_to_unlink = self.form_model.instantiate(
+            name="__TEST_FORM_INSTANCE_UNLINK",
+            contexts=[self.asset_context, self.discipline_context, self.location_context]
+        )
+
+    def tearDown(self):
+        super().tearDown()
+        if self.form_instance_to_link:
+            try:
+                self.form_instance_to_link.delete()
+            except (ForbiddenError, APIError):
+                pass
+        if self.form_instance_to_unlink:
+            try:
+                self.form_instance_to_unlink.delete()
+            except (ForbiddenError, APIError):
+                pass
+        if self.form_model:
+            try:
+                self.form_model.delete()
+            except (ForbiddenError, APIError):
+                pass
+
+    def test_link_contexts_to_form_model(self):
+        self.form_model.link_contexts(contexts=[self.discipline_context, self.location_context])
+        self.assertIn(self.asset_context.id,
+                      [context['id'] for context in self.form_model._json_data['contexts']])
+        self.assertIn(self.discipline_context.id,
+                      [context['id'] for context in self.form_model._json_data['contexts']])
+        self.assertIn(self.location_context.id,
+                      [context['id'] for context in self.form_model._json_data['contexts']])
+        self.assertEqual(len(self.form_model._json_data['contexts']), 3)
+
+    def test_link_contexts_to_form_instance(self):
+        self.form_instance_to_link.link_contexts(contexts=[self.location_context])
+        self.assertIn(
+            self.location_context.id,
+            [context['id'] for context in self.form_instance_to_link._json_data['contexts']])
+        self.assertEqual(len(self.form_instance_to_link._json_data['contexts']), 1)
+
+    def test_unlink_contexts_to_form_model(self):
+        self.form_model.unlink_contexts(contexts=[self.asset_context])
+        self.assertEqual(len(self.form_model._json_data['contexts']), 0)
+
+    def test_unlink_contexts_to_form_instance(self):
+        self.form_instance_to_unlink.unlink_contexts(contexts=[self.location_context,
+                                                               self.asset_context])
+        self.assertIn(
+            self.discipline_context.id,
+            [context['id'] for context in self.form_instance_to_unlink._json_data['contexts']])
+        self.assertEqual(len(self.form_instance_to_unlink._json_data['contexts']), 1)
+
+    def test_unlink_non_connected_contexts_from_form(self):
+        with self.assertRaises(APIError):
+            self.form_model.unlink_contexts(contexts=[self.discipline_context, self.asset_context])
