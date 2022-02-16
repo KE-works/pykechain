@@ -128,6 +128,7 @@ API_PATH = {
     "forms_bulk_delete": "api/v3/forms/bulk_delete",
     "forms_link_contexts": "api/v3/forms/{form_id}/link_contexts",
     "forms_unlink_contexts": "api/v3/forms/{form_id}/unlink_contexts",
+    "forms_set_status_assignees": "api/v3/forms/{form_id}/set_status_assignees",
     "form_activate": "api/v3/forms/{form_id}/activate",
     "form_deactivate": "api/v3/forms/{form_id}/deactivate",
     "workflows": "api/v3/workflows",

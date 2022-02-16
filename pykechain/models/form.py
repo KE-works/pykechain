@@ -13,7 +13,8 @@ from pykechain.models.base import (
     NameDescriptionTranslationMixin,
 )
 from pykechain.models.context import Context
-from pykechain.models.input_checks import check_base, check_list_of_base, check_text
+from pykechain.models.input_checks import check_base, check_list_of_base, check_list_of_dicts, \
+    check_text
 from pykechain.models.tags import TagsMixin
 from pykechain.models.workflow import Status
 from pykechain.typing import ObjectID
@@ -28,13 +29,16 @@ class StatusForm(Base):
     """
 
     def __init__(self, json, **kwargs):
-        """Construct a service from provided json data."""
+        """Construct a status form from provided json data."""
         super().__init__(json, **kwargs)
         self.description: str = json.get("description", "")
         self.ref: str = json.get("ref", "")
         self.status: Status = Status(json.get("status"), client=self._client)
         self.activity: Activity = Activity(json.get("activity"), client=self._client)
         self.form: str = json.get("form")
+
+    def __repr__(self):  # pragma: no cover
+        return f"<pyke StatusForm  '{self.status}' id {self.id[-8:]}>"
 
 
 class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationMixin):
@@ -76,6 +80,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         self.active: bool = json.get("active")
         self.category: FormCategory = json.get("category")
         self._status_forms: List[Dict] = json.get("status_forms", [])
+        self._status_assignees: List[Dict] = json.get("status_assignees_has_widgets", [])
 
     def __repr__(self):  # pragma: no cover
         return f"<pyke Form  '{self.name}' '{self.category}' id {self.id[-8:]}>"
@@ -362,6 +367,53 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         if response.status_code != requests.codes.ok:
             raise APIError(
                 "Could not unlink the specific contexts from the form",
+                response=response,
+            )
+        self.refresh(json=response.json()["results"][0])
+
+    def set_status_assignees(self, statuses: List[dict]):
+        """
+        Set a list of assignees on each status of a Form.
+
+        :param statuses: a list of dicts, each one contains the status_id and the list of
+        assignees. Available fields per dict:
+            :param status: Status object
+            :param assignees: List of User objects
+        :raises APIError: in case an Error occurs when setting the status assignees
+
+        Example
+        -------
+        When the `Form` is known, one can easily access its status forms ids and build a
+        dictionary, as such:
+
+        >>> for status_form in form.status_forms:
+        >>>    status_dict = {
+        >>>        "status": status_form.status,
+        >>>        "assignees": [user_1, user_2]
+        >>>    }
+        >>>     status_assignees_list.append(status_dict)
+        >>> self.form.set_status_assignees(statuses=status_assignees_list)
+        """
+        from pykechain.models import User
+        check_list_of_dicts(
+            statuses,
+            'statuses',
+            [
+                "status",
+                "assignees",
+            ]
+        )
+        for status in statuses:
+            status['status'] = check_base(status['status'], Status)
+            status['assignees'] = check_list_of_base(status['assignees'], User)
+        url = self._client._build_url("forms_set_status_assignees", form_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request(
+            "POST", url=url, params=query_params, json=statuses
+        )
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                "Could not set the list of status assignees to the form",
                 response=response,
             )
         self.refresh(json=response.json()["results"][0])

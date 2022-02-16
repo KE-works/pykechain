@@ -310,7 +310,7 @@ class TestBulkForms(TestBetamax):
             self.client._delete_forms_bulk(forms=wrong_input)
 
 
-class TestFormsContextsConnection(TestBetamax):
+class TestFormsMethods(TestBetamax):
     """
     Test linking and unlinking contexts to forms.
     """
@@ -345,6 +345,8 @@ class TestFormsContextsConnection(TestBetamax):
             name="__TEST_FORM_INSTANCE_UNLINK",
             contexts=[self.asset_context, self.discipline_context, self.location_context]
         )
+        self.form_instance_to_set_assignees = self.form_model.instantiate(
+            name="__TEST_FORM_INSTANCE_SET_STATUS_ASSIGNEES")
 
     def tearDown(self):
         super().tearDown()
@@ -356,6 +358,11 @@ class TestFormsContextsConnection(TestBetamax):
         if self.form_instance_to_unlink:
             try:
                 self.form_instance_to_unlink.delete()
+            except (ForbiddenError, APIError):
+                pass
+        if self.form_instance_to_set_assignees:
+            try:
+                self.form_instance_to_set_assignees.delete()
             except (ForbiddenError, APIError):
                 pass
         if self.form_model:
@@ -396,3 +403,46 @@ class TestFormsContextsConnection(TestBetamax):
     def test_unlink_non_connected_contexts_from_form(self):
         with self.assertRaises(APIError):
             self.form_model.unlink_contexts(contexts=[self.discipline_context, self.asset_context])
+
+    def test_set_status_assignees(self):
+        status_assignees_list = list()
+        test_manager = self.client.user("testmanager")
+        supervisor = self.client.user("supervisor")
+        test_lead = self.client.user("testlead")
+        for status_form in self.form_instance_to_set_assignees.status_forms:
+            status_dict = {
+                "status": status_form.status,
+                "assignees": [test_manager, supervisor, test_lead]
+            }
+            status_assignees_list.append(status_dict)
+        self.form_instance_to_set_assignees.set_status_assignees(statuses=status_assignees_list)
+        for status_form in self.form_instance_to_set_assignees._status_assignees:
+            self.assertIn(test_manager.id,
+                          [status_assignee['id'] for status_assignee in status_form['assignees']])
+            self.assertEqual(len(status_form['assignees']), 3)
+
+    def test_set_status_assignees_with_wrong_format(self):
+        status_assignees_list = list()
+        test_manager = self.client.user("testmanager")
+        for status_form in self.form_instance_to_set_assignees.status_forms:
+            status_dict = {
+                "id": status_form.status,
+                "assignees": [test_manager]
+            }
+            status_assignees_list.append(status_dict)
+        with self.assertRaises(IllegalArgumentError):
+            self.form_instance_to_set_assignees.set_status_assignees(
+                statuses=status_assignees_list)
+
+    def test_set_status_assignees_with_wrong_input(self):
+        status_assignees_list = list()
+        test_manager = self.client.user("testmanager")
+        for status_form in self.form_instance_to_set_assignees.status_forms:
+            status_dict = {
+                "status": status_form.id,  # This should be status_form.status
+                "assignees": [test_manager]
+            }
+            status_assignees_list.append(status_dict)
+        with self.assertRaises(APIError):
+            self.form_instance_to_set_assignees.set_status_assignees(
+                statuses=status_assignees_list)
