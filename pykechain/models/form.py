@@ -325,3 +325,6 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
                 url=self._client._build_url("form", form_id=self.id),
                 extra_params=API_EXTRA_PARAMS.get(self.url_list_name),
             )
+
+    def link_contexts(self):
+        pass
