@@ -1,6 +1,6 @@
 import pytest
 
-from pykechain.enums import FormCategory, WorkflowCategory
+from pykechain.enums import FormCategory, StatusCategory, WorkflowCategory
 from pykechain.exceptions import APIError, ForbiddenError, IllegalArgumentError, NotFoundError
 from pykechain.models.form import Form
 from tests.classes import TestBetamax
@@ -21,10 +21,6 @@ class TestForms(TestBetamax):
         self.cross_scope_project = self.client.scope(ref="cannondale-project")
         self.workflow = self.client.workflow(
             name='Simple Form Flow',
-            category=WorkflowCategory.CATALOG
-        )
-        self.approval_workflow = self.client.workflow(
-            name='Strict Approval Workflow',
             category=WorkflowCategory.CATALOG
         )
         self.discipline_context = self.project.context(
@@ -163,16 +159,45 @@ class TestForms(TestBetamax):
                 model=self.form_model
             )
 
-    def test_model_clone(self):
-        self.cloned_form_model = self.form_model.clone(name="__TEST_FORM_MODEL_CLONE",
-                                                       target_scope=self.project,
-                                                       contexts=[self.asset_context, self.discipline_context])
+    def test_model_clone_same_scope(self):
+        self.cloned_form_model = self.form_model.\
+            clone(name="__TEST_FORM_MODEL_CLONE",
+                  target_scope=self.project,
+                  contexts=[self.asset_context, self.discipline_context])
         self.assertTrue(self.cloned_form_model)
         self.assertIsInstance(self.cloned_form_model, Form)
+        self.assertEqual(self.form_model.scope_id["id"], self.cloned_form_model.scope_id["id"])
         self.assertIn(self.asset_context.id,
                       [context['id'] for context in self.cloned_form_model._json_data['contexts']])
         self.assertIn(self.discipline_context.id,
                       [context['id'] for context in self.cloned_form_model._json_data['contexts']])
+
+    def test_model_clone_no_target_scope(self):
+        self.cloned_form_model = self.form_model.\
+            clone(name="__TEST_FORM_MODEL_CLONE",
+                  contexts=[self.asset_context, self.discipline_context])
+        self.assertTrue(self.cloned_form_model)
+        self.assertIsInstance(self.cloned_form_model, Form)
+        self.assertEqual(self.form_model.scope_id["id"], self.cloned_form_model.scope_id["id"])
+        self.assertIn(self.asset_context.id,
+                      [context['id'] for context in self.cloned_form_model._json_data['contexts']])
+        self.assertIn(self.discipline_context.id,
+                      [context['id'] for context in self.cloned_form_model._json_data['contexts']])
+
+    def test_model_clone_cross_scope(self):
+        self.cloned_form_model = self.form_model.\
+            clone(name="__TEST_FORM_MODEL_CLONE_CROSS_SCOPE",
+                  target_scope=self.cross_scope_project,
+                  contexts=[self.asset_context, self.discipline_context])
+        self.assertTrue(self.cloned_form_model)
+        self.assertIsInstance(self.cloned_form_model, Form)
+        self.assertEqual(self.cross_scope_project.id, self.cloned_form_model.scope_id["id"])
+        self.assertIn(self.asset_context.name,
+                      [context['name'] for context in
+                       self.cloned_form_model._json_data['contexts']])
+        self.assertIn(self.discipline_context.name,
+                      [context['name'] for context in
+                       self.cloned_form_model._json_data['contexts']])
 
     def test_form_retrieve_by_name_from_scope(self):
         form = self.project.form(name=self.form_model_name)
@@ -236,10 +261,6 @@ class TestBulkForms(TestBetamax):
         super().setUp()
         self.workflow = self.client.workflow(
             name='Simple Form Flow',
-            category=WorkflowCategory.CATALOG
-        )
-        self.approval_workflow = self.client.workflow(
-            name='Strict Approval Workflow',
             category=WorkflowCategory.CATALOG
         )
         self.discipline_context = self.project.context(
@@ -308,3 +329,167 @@ class TestBulkForms(TestBetamax):
         wrong_input = [self.project.activity(name="Specify wheel diameter")]
         with self.assertRaises(IllegalArgumentError):
             self.client._delete_forms_bulk(forms=wrong_input)
+
+
+class TestFormsMethods(TestBetamax):
+    """
+    Test linking and unlinking contexts to forms.
+    """
+    def setUp(self):
+        super().setUp()
+        self.workflow = self.client.workflow(
+            name='Simple Form Flow',
+            category=WorkflowCategory.CATALOG
+        )
+        self.discipline_context = self.project.context(
+            name="Discipline 1"
+        )
+        self.asset_context = self.project.context(
+            name="Object 1"
+        )
+        self.location_context = self.project.context(
+            name="Location 1"
+        )
+        self.form_model_name = "__TEST__FORM_MODEL"
+        self.form_model = self.client.create_form_model(
+            name=self.form_model_name,
+            scope=self.project,
+            workflow=self.workflow,
+            category=FormCategory.MODEL,
+            contexts=[self.asset_context])
+        self.form_instance_to_link = self.form_model.instantiate(name="__TEST_FORM_INSTANCE_LINK")
+        self.form_instance_to_unlink = self.form_model.instantiate(
+            name="__TEST_FORM_INSTANCE_UNLINK",
+            contexts=[self.asset_context, self.discipline_context, self.location_context]
+        )
+        self.form_instance_to_set_assignees = self.form_model.instantiate(
+            name="__TEST_FORM_INSTANCE_SET_STATUS_ASSIGNEES")
+        self.form_instance_to_transition = self.form_model.instantiate(
+            name="__TEST_FORM_INSTANCE_APPLY_TRANSITION"
+        )
+
+    def tearDown(self):
+        super().tearDown()
+        if self.form_instance_to_link:
+            try:
+                self.form_instance_to_link.delete()
+            except (ForbiddenError, APIError):
+                pass
+        if self.form_instance_to_unlink:
+            try:
+                self.form_instance_to_unlink.delete()
+            except (ForbiddenError, APIError):
+                pass
+        if self.form_instance_to_set_assignees:
+            try:
+                self.form_instance_to_set_assignees.delete()
+            except (ForbiddenError, APIError):
+                pass
+        if self.form_instance_to_transition:
+            try:
+                self.form_instance_to_transition.delete()
+            except (ForbiddenError, APIError):
+                pass
+        if self.form_model:
+            try:
+                self.form_model.delete()
+            except (ForbiddenError, APIError):
+                pass
+
+    def test_link_contexts_to_form_model(self):
+        self.form_model.link_contexts(contexts=[self.discipline_context, self.location_context])
+        self.assertIn(self.asset_context.id,
+                      [context['id'] for context in self.form_model._json_data['contexts']])
+        self.assertIn(self.discipline_context.id,
+                      [context['id'] for context in self.form_model._json_data['contexts']])
+        self.assertIn(self.location_context.id,
+                      [context['id'] for context in self.form_model._json_data['contexts']])
+        self.assertEqual(len(self.form_model._json_data['contexts']), 3)
+
+    def test_link_contexts_to_form_instance(self):
+        self.form_instance_to_link.link_contexts(contexts=[self.location_context])
+        self.assertIn(
+            self.location_context.id,
+            [context['id'] for context in self.form_instance_to_link._json_data['contexts']])
+        self.assertEqual(len(self.form_instance_to_link._json_data['contexts']), 1)
+
+    def test_unlink_contexts_to_form_model(self):
+        self.form_model.unlink_contexts(contexts=[self.asset_context])
+        self.assertEqual(len(self.form_model._json_data['contexts']), 0)
+
+    def test_unlink_contexts_to_form_instance(self):
+        self.form_instance_to_unlink.unlink_contexts(contexts=[self.location_context,
+                                                               self.asset_context])
+        self.assertIn(
+            self.discipline_context.id,
+            [context['id'] for context in self.form_instance_to_unlink._json_data['contexts']])
+        self.assertEqual(len(self.form_instance_to_unlink._json_data['contexts']), 1)
+
+    def test_unlink_non_connected_contexts_from_form(self):
+        with self.assertRaises(APIError):
+            self.form_model.unlink_contexts(contexts=[self.discipline_context, self.asset_context])
+
+    def test_set_status_assignees(self):
+        status_assignees_list = list()
+        test_manager = self.client.user("testmanager")
+        supervisor = self.client.user("supervisor")
+        test_lead = self.client.user("testlead")
+        for status_form in self.form_instance_to_set_assignees.status_forms:
+            status_dict = {
+                "status": status_form.status,
+                "assignees": [test_manager, supervisor, test_lead]
+            }
+            status_assignees_list.append(status_dict)
+        self.form_instance_to_set_assignees.set_status_assignees(statuses=status_assignees_list)
+        for status_form in self.form_instance_to_set_assignees._status_assignees:
+            self.assertIn(test_manager.id,
+                          [status_assignee['id'] for status_assignee in status_form['assignees']])
+            self.assertEqual(len(status_form['assignees']), 3)
+
+    def test_set_status_assignees_with_wrong_format(self):
+        status_assignees_list = list()
+        test_manager = self.client.user("testmanager")
+        for status_form in self.form_instance_to_set_assignees.status_forms:
+            status_dict = {
+                "id": status_form.status,
+                "assignees": [test_manager]
+            }
+            status_assignees_list.append(status_dict)
+        with self.assertRaises(IllegalArgumentError):
+            self.form_instance_to_set_assignees.set_status_assignees(
+                statuses=status_assignees_list)
+
+    def test_set_status_assignees_with_wrong_input(self):
+        status_assignees_list = list()
+        test_manager = self.client.user("testmanager")
+        for status_form in self.form_instance_to_set_assignees.status_forms:
+            status_dict = {
+                "status": status_form.id,  # This should be status_form.status
+                "assignees": [test_manager]
+            }
+            status_assignees_list.append(status_dict)
+        with self.assertRaises(APIError):
+            self.form_instance_to_set_assignees.set_status_assignees(
+                statuses=status_assignees_list)
+
+    def test_apply_transition(self):
+        in_progress_transition = self.workflow.transition("In progress")
+        done_transition = self.workflow.transition("Done")
+        self.assertEqual(self.form_instance_to_transition.active_status['status_category'],
+                         StatusCategory.TODO)
+        self.form_instance_to_transition.apply_transition(transition=in_progress_transition)
+        self.assertEqual(self.form_instance_to_transition.active_status['status_category'],
+                         StatusCategory.INPROGRESS)
+        self.form_instance_to_transition.apply_transition(transition=done_transition)
+        self.assertEqual(self.form_instance_to_transition.active_status['status_category'],
+                         StatusCategory.DONE)
+
+    def test_apply_transition_with_wrong_input(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.form_instance_to_transition.apply_transition(transition=self.workflow)
+
+    def test_retrieve_possible_transitions(self):
+        possible_transitions = self.form_instance_to_transition.possible_transitions()
+        for transition in possible_transitions:
+            self.assertIn(transition.id, [t.id for t in self.workflow.transitions])
+        self.assertEqual(len(possible_transitions), 5)
