@@ -159,13 +159,26 @@ class TestForms(TestBetamax):
                 model=self.form_model
             )
 
-    def test_model_clone(self):
+    def test_model_clone_same_scope(self):
         self.cloned_form_model = self.form_model.\
             clone(name="__TEST_FORM_MODEL_CLONE",
                   target_scope=self.project,
                   contexts=[self.asset_context, self.discipline_context])
         self.assertTrue(self.cloned_form_model)
         self.assertIsInstance(self.cloned_form_model, Form)
+        self.assertEqual(self.form_model.scope_id["id"], self.cloned_form_model.scope_id["id"])
+        self.assertIn(self.asset_context.id,
+                      [context['id'] for context in self.cloned_form_model._json_data['contexts']])
+        self.assertIn(self.discipline_context.id,
+                      [context['id'] for context in self.cloned_form_model._json_data['contexts']])
+
+    def test_model_clone_no_target_scope(self):
+        self.cloned_form_model = self.form_model.\
+            clone(name="__TEST_FORM_MODEL_CLONE",
+                  contexts=[self.asset_context, self.discipline_context])
+        self.assertTrue(self.cloned_form_model)
+        self.assertIsInstance(self.cloned_form_model, Form)
+        self.assertEqual(self.form_model.scope_id["id"], self.cloned_form_model.scope_id["id"])
         self.assertIn(self.asset_context.id,
                       [context['id'] for context in self.cloned_form_model._json_data['contexts']])
         self.assertIn(self.discipline_context.id,
@@ -174,9 +187,17 @@ class TestForms(TestBetamax):
     def test_model_clone_cross_scope(self):
         self.cloned_form_model = self.form_model.\
             clone(name="__TEST_FORM_MODEL_CLONE_CROSS_SCOPE",
-                  # target_scope=self.cross_scope_project,
+                  target_scope=self.cross_scope_project,
                   contexts=[self.asset_context, self.discipline_context])
-        print()
+        self.assertTrue(self.cloned_form_model)
+        self.assertIsInstance(self.cloned_form_model, Form)
+        self.assertEqual(self.cross_scope_project.id, self.cloned_form_model.scope_id["id"])
+        self.assertIn(self.asset_context.name,
+                      [context['name'] for context in
+                       self.cloned_form_model._json_data['contexts']])
+        self.assertIn(self.discipline_context.name,
+                      [context['name'] for context in
+                       self.cloned_form_model._json_data['contexts']])
 
     def test_form_retrieve_by_name_from_scope(self):
         form = self.project.form(name=self.form_model_name)
@@ -466,3 +487,9 @@ class TestFormsMethods(TestBetamax):
     def test_apply_transition_with_wrong_input(self):
         with self.assertRaises(IllegalArgumentError):
             self.form_instance_to_transition.apply_transition(transition=self.workflow)
+
+    def test_retrieve_possible_transitions(self):
+        possible_transitions = self.form_instance_to_transition.possible_transitions()
+        for transition in possible_transitions:
+            self.assertIn(transition.id, [t.id for t in self.workflow.transitions])
+        self.assertEqual(len(possible_transitions), 5)

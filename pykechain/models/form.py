@@ -264,12 +264,15 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         return instantiated_form
 
     def clone(
-        self, name: Optional[str], target_scope: Optional[Scope], **kwargs
+        self,
+        name: Optional[str],
+        target_scope: Optional[Scope] = None,
+        **kwargs
     ) -> Optional["Form"]:
-        """
-        Clone a new Form model based on a model. If target_scope is specified and different
-        from the scope of the form, then use the `clone_cross_scope` endpoint. Otherwise, use the
-        basic `clone` endpoint
+        """Clone a new Form model based on a model.
+
+        If target_scope is specified and different  from the scope of the form, then use the
+        `clone_cross_scope` endpoint. Otherwise, use the basic `clone` endpoint.
 
         """
         if self.category != FormCategory.MODEL:
@@ -429,9 +432,23 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
             )
         self.refresh(json=response.json()["results"][0])
 
-    def apply_transition(self, transition: Transition):
+    def possible_transitions(self) -> List[Transition]:
+        """Retrieve the possible transitions that may be applied on the Form.
+
+        It will return the Transitions from the associated workflow are can be applied
+        on the Form in the current status.
+        :returns: A list with possible Transitions that may be applied on the Form.
         """
-        Apply a transition to a Form.
+        workflow = self._client.workflow(id=self._workflow['id'])
+        return workflow.transitions
+
+    def apply_transition(self, transition: Transition):
+        """Apply the transition to put the form in another state following a transition.
+
+        Apply transition is to put the Form in another state. Only transitions that
+        can apply to the form should have the 'from_status' to the current state. (or
+        it is a Global transition). If applied the Form will be set in the 'to_state' of
+        the Transition.
 
         :param transition: a Transition object belonging to the workflow of the Form
         :raises APIError: in case an Error occurs when applying the transition

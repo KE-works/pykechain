@@ -8,6 +8,7 @@ FORMS Feature
 * :+1: Added the `ContextReferenceProperties` and tests (#1099)
 * :+1: Added 'Forms', 'Form models', 'Contexts' and 'Workflows' sidebar buttons in the `SideBarManager' and added ability to specify 'minimum_access_level' and 'alignment' per 'SideBarButton' (#1103)
 * :+1: Added the `Forms` class and tests (#1100)
+* :+1: Added multiple `Forms` methods such as `link_contexts`, `unlink_contexts`, `clone_cross_scope`, `apply_transition`, `set_status_assignees` (#1114)
 
 UNRELEASED
 ----------
