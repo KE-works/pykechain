@@ -76,6 +76,8 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         self.active: bool = json.get("active")
         self.category: FormCategory = json.get("category")
         self._status_forms: List[Dict] = json.get("status_forms", [])
+        self.contexts = json.get("contexts")
+        self.context_groups = json.get("context_groups")
 
     def __repr__(self):  # pragma: no cover
         return f"<pyke Form  '{self.name}' '{self.category}' id {self.id[-8:]}>"
