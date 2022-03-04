@@ -13,9 +13,10 @@ from pykechain.models.base import (
     NameDescriptionTranslationMixin,
 )
 from pykechain.models.context import Context
-from pykechain.models.input_checks import check_base, check_list_of_base, check_text
+from pykechain.models.input_checks import check_base, check_list_of_base, check_list_of_dicts, \
+    check_text
 from pykechain.models.tags import TagsMixin
-from pykechain.models.workflow import Status
+from pykechain.models.workflow import Status, Transition
 from pykechain.typing import ObjectID
 from pykechain.utils import Empty, clean_empty_values, empty
 
@@ -28,13 +29,16 @@ class StatusForm(Base):
     """
 
     def __init__(self, json, **kwargs):
-        """Construct a service from provided json data."""
+        """Construct a status form from provided json data."""
         super().__init__(json, **kwargs)
         self.description: str = json.get("description", "")
         self.ref: str = json.get("ref", "")
         self.status: Status = Status(json.get("status"), client=self._client)
         self.activity: Activity = Activity(json.get("activity"), client=self._client)
         self.form: str = json.get("form")
+
+    def __repr__(self):  # pragma: no cover
+        return f"<pyke StatusForm  '{self.status}' id {self.id[-8:]}>"
 
 
 class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationMixin):
@@ -76,8 +80,9 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         self.active: bool = json.get("active")
         self.category: FormCategory = json.get("category")
         self._status_forms: List[Dict] = json.get("status_forms", [])
-        self.contexts = json.get("contexts")
-        self.context_groups = json.get("context_groups")
+        self._status_assignees: List[Dict] = json.get("status_assignees_has_widgets", [])
+        self.contexts = json.get("contexts", [])
+        self.context_groups = json.get("context_groups", [])
 
     def __repr__(self):  # pragma: no cover
         return f"<pyke Form  '{self.name}' '{self.category}' id {self.id[-8:]}>"
@@ -261,29 +266,42 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         return instantiated_form
 
     def clone(
-        self, name: Optional[str], target_scope: Optional[Scope], **kwargs
+        self,
+        name: Optional[str],
+        target_scope: Optional[Scope] = None,
+        **kwargs
     ) -> Optional["Form"]:
-        """Clone a new Form model based on a model."""
+        """Clone a new Form model based on a model.
+
+        If target_scope is specified and different  from the scope of the form, then use the
+        `clone_cross_scope` endpoint. Otherwise, use the basic `clone` endpoint.
+
+        """
         if self.category != FormCategory.MODEL:
             raise APIError("Form should be of category MODEL")
-
         data_dict = {
             "name": check_text(name, "name") or f"{self.name}",
-            "target_scope": check_base(target_scope, Scope, "scope"),
-            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts")
-            or [],
+            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts") or []
         }
         if "description" in kwargs:
-            data_dict["description"] = check_text(
-                kwargs.get("description"), "description"
-            )
+            data_dict.update({"description": check_text(kwargs.get("description"), "description")})
 
-        response = self._client._request(
-            "POST",
-            self._client._build_url("form_clone", form_id=self.id),
-            params=API_EXTRA_PARAMS["forms"],
-            json=data_dict,
-        )
+        if not target_scope or target_scope.id == self.scope_id.get("id"):
+            data_dict.update({"target_scope": self.scope_id.get("id")})
+            response = self._client._request(
+                "POST",
+                self._client._build_url("form_clone", form_id=self.id),
+                params=API_EXTRA_PARAMS["forms"],
+                json=data_dict,
+            )
+        else:
+            data_dict.update({"target_scope": check_base(target_scope, Scope, "scope")})
+            response = self._client._request(
+                "POST",
+                self._client._build_url("form_clone_cross_scope", form_id=self.id),
+                params=API_EXTRA_PARAMS["forms"],
+                json=data_dict,
+            )
 
         if response.status_code != requests.codes.created:
             raise APIError(f"Could not clone this Form: {self}", response=response)
@@ -327,3 +345,136 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
                 url=self._client._build_url("form", form_id=self.id),
                 extra_params=API_EXTRA_PARAMS.get(self.url_list_name),
             )
+
+    def link_contexts(self, contexts: List[Union[Context, ObjectID]]):
+        """
+        Link a list of Contexts to a Form.
+
+        :param contexts: a list of Context Objects or context_ids to link to the form.
+        :raises APIError: in case an Error occurs when linking
+        """
+        data = {"contexts": check_list_of_base(contexts, Context)}
+        url = self._client._build_url("form_link_contexts", form_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request(
+            "POST", url=url, params=query_params, json=data
+        )
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                "Could not link the specific contexts to the form",
+                response=response,
+            )
+        self.refresh(json=response.json()["results"][0])
+
+    def unlink_contexts(self, contexts: List[Union[Context, ObjectID]]):
+        """
+        Unlink a list of Contexts from a Form.
+
+        :param contexts: a list of Context Objects or context_ids to unlink from the form.
+        :raises APIError: in case an Error occurs when unlinking
+        """
+        data = {"contexts": check_list_of_base(contexts, Context)}
+        url = self._client._build_url("form_unlink_contexts", form_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request(
+            "POST", url=url, params=query_params, json=data
+        )
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                "Could not unlink the specific contexts from the form",
+                response=response,
+            )
+        self.refresh(json=response.json()["results"][0])
+
+    def set_status_assignees(self, statuses: List[dict]):
+        """
+        Set a list of assignees on each status of a Form.
+
+        :param statuses: a list of dicts, each one contains the status_id and the list of
+        assignees. Available fields per dict:
+            :param status: Status object
+            :param assignees: List of User objects
+        :raises APIError: in case an Error occurs when setting the status assignees
+
+        Example
+        -------
+        When the `Form` is known, one can easily access its status forms ids and build a
+        dictionary, as such:
+
+        >>> for status_form in form.status_forms:
+        >>>    status_dict = {
+        >>>        "status": status_form.status,
+        >>>        "assignees": [user_1, user_2]
+        >>>    }
+        >>>     status_assignees_list.append(status_dict)
+        >>> self.form.set_status_assignees(statuses=status_assignees_list)
+
+        """
+        from pykechain.models import User
+        check_list_of_dicts(
+            statuses,
+            'statuses',
+            [
+                "status",
+                "assignees",
+            ]
+        )
+        for status in statuses:
+            status['status'] = check_base(status['status'], Status)
+            status['assignees'] = check_list_of_base(status['assignees'], User)
+        url = self._client._build_url("form_set_status_assignees", form_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request(
+            "POST", url=url, params=query_params, json=statuses
+        )
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                "Could not set the list of status assignees to the form",
+                response=response,
+            )
+        self.refresh(json=response.json()["results"][0])
+
+    def possible_transitions(self) -> List[Transition]:
+        """Retrieve the possible transitions that may be applied on the Form.
+
+        It will return the Transitions from the associated workflow are can be applied
+        on the Form in the current status.
+        :returns: A list with possible Transitions that may be applied on the Form.
+        """
+        workflow = self._client.workflow(id=self._workflow['id'])
+        return workflow.transitions
+
+    def apply_transition(self, transition: Transition):
+        """Apply the transition to put the form in another state following a transition.
+
+        Apply transition is to put the Form in another state. Only transitions that
+        can apply to the form should have the 'from_status' to the current state. (or
+        it is a Global transition). If applied the Form will be set in the 'to_state' of
+        the Transition.
+
+        :param transition: a Transition object belonging to the workflow of the Form
+        :raises APIError: in case an Error occurs when applying the transition
+
+        Example
+        -------
+        When the `Form` and `Workflow` is known, one can easily apply a transition on it, as such:
+
+        >>> transition = workflow.transition("In progress")
+        >>> form.apply_transition(transition=transition)
+
+        """
+        check_base(transition, Transition)
+
+        url = self._client._build_url("form_apply_transition",
+                                      form_id=self.id,
+                                      transition_id=transition.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        response = self._client._request(
+            "POST", url=url, params=query_params,
+        )
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                "Could not transition the form",
+                response=response,
+            )
+        self.refresh(json=response.json()["results"][0])
