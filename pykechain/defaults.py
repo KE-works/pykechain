@@ -561,6 +561,8 @@ API_EXTRA_PARAMS = {
                 "workflow",
                 "status_forms",
                 "active_status",
+                "contexts",
+                "context_groups",
             ]
         )
     },
@@ -583,6 +585,8 @@ API_EXTRA_PARAMS = {
                 "status_forms",
                 "active_status",
                 "active",
+                "contexts",
+                "context_groups",
             ]
         )
     },
