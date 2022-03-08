@@ -47,6 +47,7 @@ class TestForms(TestBetamax):
         self.test_form_instance = None
         self.cloned_form_model = None
         self.form_model_for_deletion = None
+        self.cloned_workflow = None
 
     def tearDown(self):
         super().tearDown()
@@ -78,6 +79,11 @@ class TestForms(TestBetamax):
         if self. cloned_form_model:
             try:
                 self.cloned_form_model.delete()
+            except (NotFoundError, APIError):
+                pass
+        if self.cloned_workflow:
+            try:
+                self.cloned_workflow.delete()
             except (NotFoundError, APIError):
                 pass
 
@@ -251,6 +257,38 @@ class TestForms(TestBetamax):
             self.form_model_for_deletion.delete()
         with self.assertRaises(NotFoundError, msg="Deleted Form cannot be found!"):
             self.project.form(name=form_model_name)
+
+    def test_form_has_part_is_true(self):
+        part_model = self.project.model(name=self.form_model.name)
+        has_part_check = self.form_model.has_part(part=part_model)
+        self.assertTrue(has_part_check)
+
+        part_instance = part_model.instance()
+        has_part_check = self.form_instance.has_part(part=part_instance)
+        self.assertTrue(has_part_check)
+
+    def test_form_has_part_is_false(self):
+        part_model = self.project.model(name="Bike")
+
+        has_part_check = self.form_model.has_part(part=part_model)
+        self.assertFalse(has_part_check)
+
+    def test_form_has_part_wrong_inputs(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.form_model.has_part(part=self.discipline_context)
+
+    def test_form_workflow_compatible_within_scope(self):
+        workflows = self.form_model.workflows_compatible_with_scope(scope=self.project)
+        self.assertEqual(len(workflows), 1)
+        self.cloned_workflow = self.workflow.clone(target_scope=self.project,
+                                                   name="CLONED WORKFLOW")
+        workflows = self.form_model.workflows_compatible_with_scope(scope=self.project)
+        self.assertEqual(len(workflows), 2)
+
+    def test_form_workflow_compatible_within_scope_wrong_inputs(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.form_model.workflows_compatible_with_scope(
+                scope=self.discipline_context)
 
 
 class TestBulkForms(TestBetamax):

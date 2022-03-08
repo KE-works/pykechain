@@ -5,7 +5,7 @@ import requests
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import FormCategory
 from pykechain.exceptions import APIError, ForbiddenError
-from pykechain.models import Activity, Scope
+from pykechain.models import Activity, Part, Scope
 from pykechain.models.base import (
     Base,
     BaseInScope,
@@ -287,7 +287,6 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
             data_dict.update({"description": check_text(kwargs.get("description"), "description")})
 
         if not target_scope or target_scope.id == self.scope_id.get("id"):
-            data_dict.update({"target_scope": self.scope_id.get("id")})
             response = self._client._request(
                 "POST",
                 self._client._build_url("form_clone", form_id=self.id),
@@ -478,3 +477,55 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
                 response=response,
             )
         self.refresh(json=response.json()["results"][0])
+
+    def has_part(self, part: Part) -> bool:
+        """Returns boolean if given Part is part of the Form tree.
+
+        Based on the Parts category, either the model or the instance tree is checked.
+
+        :param part: a Part object
+        :raises IllegalArgumentError: in case not a `Part` object is used when calling the method
+        :raises APIError: in case an Error occurs when checking whether the `Form` contains the
+        `Part`
+
+        """
+
+        part_id = check_base(part, Part)
+
+        url = self._client._build_url("forms_has_part",
+                                      form_id=self.id,
+                                      part_id=part_id)
+        response = self._client._request(
+            "GET", url=url
+        )
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                "Could not process whether `Form` {} has part {}".format(self.id, part_id),
+                response=response,
+            )
+        return response.json()["results"][0]['has_part']
+
+    def workflows_compatible_with_scope(self, scope: Scope):
+        """Returns workflows from target scope that are compatible with source workflow.
+
+        :param scope: a Scope object
+        :raises IllegalArgumentError: in case not a `Scope` object is used when calling the method
+        :raises APIError: in case an Error occurs
+
+        """
+
+        scope_id = check_base(scope, Scope)
+
+        url = self._client._build_url("forms_compatible_within_scope",
+                                      form_id=self.id,
+                                      scope_id=scope_id)
+        response = self._client._request(
+            "GET", url=url
+        )
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                "Could not retrieve the compatible workflows",
+                response=response,
+            )
+        return response.json()["results"]
+
