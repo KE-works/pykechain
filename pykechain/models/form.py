@@ -479,7 +479,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         self.refresh(json=response.json()["results"][0])
 
     def has_part(self, part: Part) -> bool:
-        """Returns boolean if given Part is part of the Form tree.
+        """Return boolean if given Part is part of the Form tree.
 
         Based on the Parts category, either the model or the instance tree is checked.
 
@@ -489,7 +489,6 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         `Part`
 
         """
-
         part_id = check_base(part, Part)
 
         url = self._client._build_url("forms_has_part",
@@ -506,14 +505,13 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         return response.json()["results"][0]['has_part']
 
     def workflows_compatible_with_scope(self, scope: Scope):
-        """Returns workflows from target scope that are compatible with source workflow.
+        """Return workflows from target scope that are compatible with source workflow.
 
         :param scope: a Scope object
         :raises IllegalArgumentError: in case not a `Scope` object is used when calling the method
         :raises APIError: in case an Error occurs
 
         """
-
         scope_id = check_base(scope, Scope)
 
         url = self._client._build_url("forms_compatible_within_scope",
@@ -528,4 +526,3 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
                 response=response,
             )
         return response.json()["results"]
-
