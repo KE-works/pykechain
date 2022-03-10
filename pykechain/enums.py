@@ -964,7 +964,7 @@ CardWidgetKEChainPageLink = {
     KEChainPages.WORK_BREAKDOWN: "Work Breakdown",
     KEChainPages.CATALOG_WBS: "Catalog Tasks",
     KEChainPages.APP_WBS: "App Tasks",
-    KEChainPages.CATALOG_FORMS: "Form models",
+    KEChainPages.CATALOG_FORMS: "Template forms",
     KEChainPages.CONTEXTS: "Contexts",
     KEChainPages.WORKFLOWS: "Workflows",
 }
