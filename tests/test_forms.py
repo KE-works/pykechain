@@ -1,7 +1,12 @@
 import pytest
 
 from pykechain.enums import FormCategory, StatusCategory, WorkflowCategory
-from pykechain.exceptions import APIError, ForbiddenError, IllegalArgumentError, NotFoundError
+from pykechain.exceptions import (
+    APIError,
+    ForbiddenError,
+    IllegalArgumentError,
+    NotFoundError,
+)
 from pykechain.models.form import Form
 from tests.classes import TestBetamax
 
@@ -9,7 +14,7 @@ from tests.classes import TestBetamax
 @pytest.mark.skipif(
     "os.getenv('GITHUB_ACTIONS', False)",
     reason="Skipping tests when using Travis or Github Actions "
-           "as there is no public forms world yet",
+    "as there is no public forms world yet",
 )
 class TestForms(TestBetamax):
     """
@@ -20,15 +25,10 @@ class TestForms(TestBetamax):
         super().setUp()
         self.cross_scope_project = self.client.scope(ref="cannondale-project")
         self.workflow = self.client.workflow(
-            name='Simple Form Flow',
-            category=WorkflowCategory.CATALOG
+            name="Simple Form Flow", category=WorkflowCategory.CATALOG
         )
-        self.discipline_context = self.project.context(
-            name="Discipline 1"
-        )
-        self.asset_context = self.project.context(
-            name="Object 1"
-        )
+        self.discipline_context = self.project.context(name="Discipline 1")
+        self.asset_context = self.project.context(name="Object 1")
         self.form_model_name = "__TEST__FORM_MODEL"
         self.form_model_name_2 = "__TEST__FORM_MODEL_2"
 
@@ -37,16 +37,19 @@ class TestForms(TestBetamax):
             scope=self.project,
             workflow=self.workflow,
             category=FormCategory.MODEL,
-            contexts=[self.asset_context, self.discipline_context])
+            contexts=[self.asset_context, self.discipline_context],
+        )
         self.form_model_2 = self.project.create_form_model(
             name=self.form_model_name_2,
             workflow=self.workflow,
             category=FormCategory.MODEL,
-            contexts=[self.asset_context])
+            contexts=[self.asset_context],
+        )
         self.form_instance = self.form_model.instantiate(name="__TEST_FORM_INSTANCE")
         self.test_form_instance = None
         self.cloned_form_model = None
         self.form_model_for_deletion = None
+        self.cloned_workflow = None
 
     def tearDown(self):
         super().tearDown()
@@ -75,9 +78,14 @@ class TestForms(TestBetamax):
                 self.form_model_for_deletion.delete()
             except (NotFoundError, APIError):
                 pass
-        if self. cloned_form_model:
+        if self.cloned_form_model:
             try:
                 self.cloned_form_model.delete()
+            except (NotFoundError, APIError):
+                pass
+        if self.cloned_workflow:
+            try:
+                self.cloned_workflow.delete()
             except (NotFoundError, APIError):
                 pass
 
@@ -134,20 +142,24 @@ class TestForms(TestBetamax):
             self.assertTrue(form_instance.model_id, self.form_model.id)
 
     def test_model_form_instantiation(self):
-        self.test_form_instance = self.form_model.instantiate(name="__TEST_FORM_INSTANCE")
+        self.test_form_instance = self.form_model.instantiate(
+            name="__TEST_FORM_INSTANCE"
+        )
 
         self.assertTrue(self.test_form_instance.model_id, self.form_model.id)
 
     def test_model_form_instantiation_from_client(self):
-        self.test_form_instance = self.client.instantiate_form(name="___TEST_FORM_INSTANCE",
-                                                               model=self.form_model)
+        self.test_form_instance = self.client.instantiate_form(
+            name="___TEST_FORM_INSTANCE", model=self.form_model
+        )
         self.assertIsInstance(self.test_form_instance, Form)
         self.assertEqual(self.test_form_instance.category, FormCategory.INSTANCE)
         self.assertTrue(self.test_form_instance.model_id, self.form_model.id)
 
     def test_model_form_instantiation_from_scope(self):
-        self.test_form_instance = self.project.instantiate_form(name="___TEST_FORM_INSTANCE",
-                                                                model=self.form_model)
+        self.test_form_instance = self.project.instantiate_form(
+            name="___TEST_FORM_INSTANCE", model=self.form_model
+        )
         self.assertIsInstance(self.test_form_instance, Form)
         self.assertEqual(self.test_form_instance.category, FormCategory.INSTANCE)
         self.assertTrue(self.test_form_instance.model_id, self.form_model.id)
@@ -155,49 +167,85 @@ class TestForms(TestBetamax):
     def test_model_form_instantiation_from_wrong_scope(self):
         with self.assertRaises(IllegalArgumentError):
             self.test_form_instance = self.cross_scope_project.instantiate_form(
-                name="___TEST_FORM_INSTANCE",
-                model=self.form_model
+                name="___TEST_FORM_INSTANCE", model=self.form_model
             )
 
     def test_model_clone_same_scope(self):
-        self.cloned_form_model = self.form_model.\
-            clone(name="__TEST_FORM_MODEL_CLONE",
-                  target_scope=self.project,
-                  contexts=[self.asset_context, self.discipline_context])
+        self.cloned_form_model = self.form_model.clone(
+            name="__TEST_FORM_MODEL_CLONE",
+            target_scope=self.project,
+            contexts=[self.asset_context, self.discipline_context],
+        )
         self.assertTrue(self.cloned_form_model)
         self.assertIsInstance(self.cloned_form_model, Form)
-        self.assertEqual(self.form_model.scope_id["id"], self.cloned_form_model.scope_id["id"])
-        self.assertIn(self.asset_context.id,
-                      [context['id'] for context in self.cloned_form_model._json_data['contexts']])
-        self.assertIn(self.discipline_context.id,
-                      [context['id'] for context in self.cloned_form_model._json_data['contexts']])
+        self.assertEqual(
+            self.form_model.scope_id["id"], self.cloned_form_model.scope_id["id"]
+        )
+        self.assertIn(
+            self.asset_context.id,
+            [
+                context["id"]
+                for context in self.cloned_form_model._json_data["contexts"]
+            ],
+        )
+        self.assertIn(
+            self.discipline_context.id,
+            [
+                context["id"]
+                for context in self.cloned_form_model._json_data["contexts"]
+            ],
+        )
 
     def test_model_clone_no_target_scope(self):
-        self.cloned_form_model = self.form_model.\
-            clone(name="__TEST_FORM_MODEL_CLONE",
-                  contexts=[self.asset_context, self.discipline_context])
+        self.cloned_form_model = self.form_model.clone(
+            name="__TEST_FORM_MODEL_CLONE",
+            contexts=[self.asset_context, self.discipline_context],
+        )
         self.assertTrue(self.cloned_form_model)
         self.assertIsInstance(self.cloned_form_model, Form)
-        self.assertEqual(self.form_model.scope_id["id"], self.cloned_form_model.scope_id["id"])
-        self.assertIn(self.asset_context.id,
-                      [context['id'] for context in self.cloned_form_model._json_data['contexts']])
-        self.assertIn(self.discipline_context.id,
-                      [context['id'] for context in self.cloned_form_model._json_data['contexts']])
+        self.assertEqual(
+            self.form_model.scope_id["id"], self.cloned_form_model.scope_id["id"]
+        )
+        self.assertIn(
+            self.asset_context.id,
+            [
+                context["id"]
+                for context in self.cloned_form_model._json_data["contexts"]
+            ],
+        )
+        self.assertIn(
+            self.discipline_context.id,
+            [
+                context["id"]
+                for context in self.cloned_form_model._json_data["contexts"]
+            ],
+        )
 
     def test_model_clone_cross_scope(self):
-        self.cloned_form_model = self.form_model.\
-            clone(name="__TEST_FORM_MODEL_CLONE_CROSS_SCOPE",
-                  target_scope=self.cross_scope_project,
-                  contexts=[self.asset_context, self.discipline_context])
+        self.cloned_form_model = self.form_model.clone(
+            name="__TEST_FORM_MODEL_CLONE_CROSS_SCOPE",
+            target_scope=self.cross_scope_project,
+            contexts=[self.asset_context, self.discipline_context],
+        )
         self.assertTrue(self.cloned_form_model)
         self.assertIsInstance(self.cloned_form_model, Form)
-        self.assertEqual(self.cross_scope_project.id, self.cloned_form_model.scope_id["id"])
-        self.assertIn(self.asset_context.name,
-                      [context['name'] for context in
-                       self.cloned_form_model._json_data['contexts']])
-        self.assertIn(self.discipline_context.name,
-                      [context['name'] for context in
-                       self.cloned_form_model._json_data['contexts']])
+        self.assertEqual(
+            self.cross_scope_project.id, self.cloned_form_model.scope_id["id"]
+        )
+        self.assertIn(
+            self.asset_context.name,
+            [
+                context["name"]
+                for context in self.cloned_form_model._json_data["contexts"]
+            ],
+        )
+        self.assertIn(
+            self.discipline_context.name,
+            [
+                context["name"]
+                for context in self.cloned_form_model._json_data["contexts"]
+            ],
+        )
 
     def test_form_retrieve_by_name_from_scope(self):
         form = self.project.form(name=self.form_model_name)
@@ -214,7 +262,9 @@ class TestForms(TestBetamax):
         self.assertIn(self.form_model_2.id, [form.id for form in forms])
 
     def test_forms_retrieve_instances_by_model_from_scope(self):
-        form_instances = self.project.forms(model=self.form_model, category=FormCategory.INSTANCE)
+        form_instances = self.project.forms(
+            model=self.form_model, category=FormCategory.INSTANCE
+        )
 
         self.assertTrue(len(form_instances) == 1)
         form_instance = form_instances[0]
@@ -244,7 +294,8 @@ class TestForms(TestBetamax):
             scope=self.project,
             workflow=self.workflow,
             category=FormCategory.MODEL,
-            contexts=[self.asset_context, self.discipline_context])
+            contexts=[self.asset_context, self.discipline_context],
+        )
         self.assertIsInstance(self.form_model_for_deletion, Form)
         self.form_model_for_deletion.delete()
         with self.assertRaises(APIError, msg="Cant delete the same Form twice!"):
@@ -252,30 +303,61 @@ class TestForms(TestBetamax):
         with self.assertRaises(NotFoundError, msg="Deleted Form cannot be found!"):
             self.project.form(name=form_model_name)
 
+    def test_form_has_part_is_true(self):
+        part_model = self.project.model(name=self.form_model.name)
+        has_part_check = self.form_model.has_part(part=part_model)
+        self.assertTrue(has_part_check)
+
+        part_instance = part_model.instance()
+        has_part_check = self.form_instance.has_part(part=part_instance)
+        self.assertTrue(has_part_check)
+
+    def test_form_has_part_is_false(self):
+        part_model = self.project.model(name="Bike")
+
+        has_part_check = self.form_model.has_part(part=part_model)
+        self.assertFalse(has_part_check)
+
+    def test_form_has_part_wrong_inputs(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.form_model.has_part(part=self.discipline_context)
+
+    def test_form_workflow_compatible_within_scope(self):
+        workflows = self.form_model.workflows_compatible_with_scope(scope=self.project)
+        self.assertEqual(len(workflows), 1)
+        self.cloned_workflow = self.workflow.clone(
+            target_scope=self.project, name="CLONED WORKFLOW"
+        )
+        workflows = self.form_model.workflows_compatible_with_scope(scope=self.project)
+        self.assertEqual(len(workflows), 2)
+
+    def test_form_workflow_compatible_within_scope_wrong_inputs(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.form_model.workflows_compatible_with_scope(
+                scope=self.discipline_context
+            )
+
 
 class TestBulkForms(TestBetamax):
     """
     Test bulk forms attributes and methods.
     """
+
     def setUp(self):
         super().setUp()
         self.workflow = self.client.workflow(
-            name='Simple Form Flow',
-            category=WorkflowCategory.CATALOG
+            name="Simple Form Flow", category=WorkflowCategory.CATALOG
         )
-        self.discipline_context = self.project.context(
-            name="Discipline 1"
-        )
-        self.asset_context = self.project.context(
-            name="Object 1"
-        )
+        self.discipline_context = self.project.context(name="Discipline 1")
+        self.asset_context = self.project.context(name="Object 1")
         self.form_model_name = "__TEST__FORM_MODEL"
         self.form_model = self.client.create_form_model(
             name=self.form_model_name,
             scope=self.project,
             workflow=self.workflow,
             category=FormCategory.MODEL,
-            contexts=[self.asset_context, self.discipline_context])
+            contexts=[self.asset_context, self.discipline_context],
+        )
         self.new_forms = list()
         for idx in range(1, 5):
             form_dict = {
@@ -283,7 +365,7 @@ class TestBulkForms(TestBetamax):
                 "values": {
                     "name": f"Form {idx}",
                     "contexts": [self.asset_context],
-                }
+                },
             }
             self.new_forms.append(form_dict)
         self.forms_created = None
@@ -303,16 +385,18 @@ class TestBulkForms(TestBetamax):
                 pass
 
     def test_bulk_instantiate_forms(self):
-        self.forms_created = self.client._create_forms_bulk(forms=self.new_forms,
-                                                            retrieve_instances=True)
+        self.forms_created = self.client._create_forms_bulk(
+            forms=self.new_forms, retrieve_instances=True
+        )
         for form in self.forms_created:
             self.assertIsInstance(form, Form)
             self.assertEqual(form.category, FormCategory.INSTANCE)
             self.assertEqual(form.model_id, self.form_model.id)
 
     def test_bulk_delete_forms(self):
-        self.forms_created = self.client._create_forms_bulk(forms=self.new_forms,
-                                                            retrieve_instances=True)
+        self.forms_created = self.client._create_forms_bulk(
+            forms=self.new_forms, retrieve_instances=True
+        )
         input_forms_and_uuids = [
             self.forms_created[0],
             self.forms_created[1],
@@ -335,35 +419,37 @@ class TestFormsMethods(TestBetamax):
     """
     Test linking and unlinking contexts to forms.
     """
+
     def setUp(self):
         super().setUp()
         self.workflow = self.client.workflow(
-            name='Simple Form Flow',
-            category=WorkflowCategory.CATALOG
+            name="Simple Form Flow", category=WorkflowCategory.CATALOG
         )
-        self.discipline_context = self.project.context(
-            name="Discipline 1"
-        )
-        self.asset_context = self.project.context(
-            name="Object 1"
-        )
-        self.location_context = self.project.context(
-            name="Location 1"
-        )
+        self.discipline_context = self.project.context(name="Discipline 1")
+        self.asset_context = self.project.context(name="Object 1")
+        self.location_context = self.project.context(name="Location 1")
         self.form_model_name = "__TEST__FORM_MODEL"
         self.form_model = self.client.create_form_model(
             name=self.form_model_name,
             scope=self.project,
             workflow=self.workflow,
             category=FormCategory.MODEL,
-            contexts=[self.asset_context])
-        self.form_instance_to_link = self.form_model.instantiate(name="__TEST_FORM_INSTANCE_LINK")
+            contexts=[self.asset_context],
+        )
+        self.form_instance_to_link = self.form_model.instantiate(
+            name="__TEST_FORM_INSTANCE_LINK"
+        )
         self.form_instance_to_unlink = self.form_model.instantiate(
             name="__TEST_FORM_INSTANCE_UNLINK",
-            contexts=[self.asset_context, self.discipline_context, self.location_context]
+            contexts=[
+                self.asset_context,
+                self.discipline_context,
+                self.location_context,
+            ],
         )
         self.form_instance_to_set_assignees = self.form_model.instantiate(
-            name="__TEST_FORM_INSTANCE_SET_STATUS_ASSIGNEES")
+            name="__TEST_FORM_INSTANCE_SET_STATUS_ASSIGNEES"
+        )
         self.form_instance_to_transition = self.form_model.instantiate(
             name="__TEST_FORM_INSTANCE_APPLY_TRANSITION"
         )
@@ -397,37 +483,56 @@ class TestFormsMethods(TestBetamax):
                 pass
 
     def test_link_contexts_to_form_model(self):
-        self.form_model.link_contexts(contexts=[self.discipline_context, self.location_context])
-        self.assertIn(self.asset_context.id,
-                      [context['id'] for context in self.form_model._json_data['contexts']])
-        self.assertIn(self.discipline_context.id,
-                      [context['id'] for context in self.form_model._json_data['contexts']])
-        self.assertIn(self.location_context.id,
-                      [context['id'] for context in self.form_model._json_data['contexts']])
-        self.assertEqual(len(self.form_model._json_data['contexts']), 3)
+        self.form_model.link_contexts(
+            contexts=[self.discipline_context, self.location_context]
+        )
+        self.assertIn(
+            self.asset_context.id,
+            [context["id"] for context in self.form_model._json_data["contexts"]],
+        )
+        self.assertIn(
+            self.discipline_context.id,
+            [context["id"] for context in self.form_model._json_data["contexts"]],
+        )
+        self.assertIn(
+            self.location_context.id,
+            [context["id"] for context in self.form_model._json_data["contexts"]],
+        )
+        self.assertEqual(len(self.form_model._json_data["contexts"]), 3)
 
     def test_link_contexts_to_form_instance(self):
         self.form_instance_to_link.link_contexts(contexts=[self.location_context])
         self.assertIn(
             self.location_context.id,
-            [context['id'] for context in self.form_instance_to_link._json_data['contexts']])
-        self.assertEqual(len(self.form_instance_to_link._json_data['contexts']), 1)
+            [
+                context["id"]
+                for context in self.form_instance_to_link._json_data["contexts"]
+            ],
+        )
+        self.assertEqual(len(self.form_instance_to_link._json_data["contexts"]), 1)
 
     def test_unlink_contexts_to_form_model(self):
         self.form_model.unlink_contexts(contexts=[self.asset_context])
-        self.assertEqual(len(self.form_model._json_data['contexts']), 0)
+        self.assertEqual(len(self.form_model._json_data["contexts"]), 0)
 
     def test_unlink_contexts_to_form_instance(self):
-        self.form_instance_to_unlink.unlink_contexts(contexts=[self.location_context,
-                                                               self.asset_context])
+        self.form_instance_to_unlink.unlink_contexts(
+            contexts=[self.location_context, self.asset_context]
+        )
         self.assertIn(
             self.discipline_context.id,
-            [context['id'] for context in self.form_instance_to_unlink._json_data['contexts']])
-        self.assertEqual(len(self.form_instance_to_unlink._json_data['contexts']), 1)
+            [
+                context["id"]
+                for context in self.form_instance_to_unlink._json_data["contexts"]
+            ],
+        )
+        self.assertEqual(len(self.form_instance_to_unlink._json_data["contexts"]), 1)
 
     def test_unlink_non_connected_contexts_from_form(self):
         with self.assertRaises(APIError):
-            self.form_model.unlink_contexts(contexts=[self.discipline_context, self.asset_context])
+            self.form_model.unlink_contexts(
+                contexts=[self.discipline_context, self.asset_context]
+            )
 
     def test_set_status_assignees(self):
         status_assignees_list = list()
@@ -437,27 +542,29 @@ class TestFormsMethods(TestBetamax):
         for status_form in self.form_instance_to_set_assignees.status_forms:
             status_dict = {
                 "status": status_form.status,
-                "assignees": [test_manager, supervisor, test_lead]
+                "assignees": [test_manager, supervisor, test_lead],
             }
             status_assignees_list.append(status_dict)
-        self.form_instance_to_set_assignees.set_status_assignees(statuses=status_assignees_list)
+        self.form_instance_to_set_assignees.set_status_assignees(
+            statuses=status_assignees_list
+        )
         for status_form in self.form_instance_to_set_assignees._status_assignees:
-            self.assertIn(test_manager.id,
-                          [status_assignee['id'] for status_assignee in status_form['assignees']])
-            self.assertEqual(len(status_form['assignees']), 3)
+            self.assertIn(
+                test_manager.id,
+                [status_assignee["id"] for status_assignee in status_form["assignees"]],
+            )
+            self.assertEqual(len(status_form["assignees"]), 3)
 
     def test_set_status_assignees_with_wrong_format(self):
         status_assignees_list = list()
         test_manager = self.client.user("testmanager")
         for status_form in self.form_instance_to_set_assignees.status_forms:
-            status_dict = {
-                "id": status_form.status,
-                "assignees": [test_manager]
-            }
+            status_dict = {"id": status_form.status, "assignees": [test_manager]}
             status_assignees_list.append(status_dict)
         with self.assertRaises(IllegalArgumentError):
             self.form_instance_to_set_assignees.set_status_assignees(
-                statuses=status_assignees_list)
+                statuses=status_assignees_list
+            )
 
     def test_set_status_assignees_with_wrong_input(self):
         status_assignees_list = list()
@@ -465,24 +572,33 @@ class TestFormsMethods(TestBetamax):
         for status_form in self.form_instance_to_set_assignees.status_forms:
             status_dict = {
                 "status": status_form.id,  # This should be status_form.status
-                "assignees": [test_manager]
+                "assignees": [test_manager],
             }
             status_assignees_list.append(status_dict)
         with self.assertRaises(APIError):
             self.form_instance_to_set_assignees.set_status_assignees(
-                statuses=status_assignees_list)
+                statuses=status_assignees_list
+            )
 
     def test_apply_transition(self):
         in_progress_transition = self.workflow.transition("In progress")
         done_transition = self.workflow.transition("Done")
-        self.assertEqual(self.form_instance_to_transition.active_status['status_category'],
-                         StatusCategory.TODO)
-        self.form_instance_to_transition.apply_transition(transition=in_progress_transition)
-        self.assertEqual(self.form_instance_to_transition.active_status['status_category'],
-                         StatusCategory.INPROGRESS)
+        self.assertEqual(
+            self.form_instance_to_transition.active_status["status_category"],
+            StatusCategory.TODO,
+        )
+        self.form_instance_to_transition.apply_transition(
+            transition=in_progress_transition
+        )
+        self.assertEqual(
+            self.form_instance_to_transition.active_status["status_category"],
+            StatusCategory.INPROGRESS,
+        )
         self.form_instance_to_transition.apply_transition(transition=done_transition)
-        self.assertEqual(self.form_instance_to_transition.active_status['status_category'],
-                         StatusCategory.DONE)
+        self.assertEqual(
+            self.form_instance_to_transition.active_status["status_category"],
+            StatusCategory.DONE,
+        )
 
     def test_apply_transition_with_wrong_input(self):
         with self.assertRaises(IllegalArgumentError):

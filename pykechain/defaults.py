@@ -122,6 +122,9 @@ API_PATH = {
     # forms
     "forms": "api/v3/forms",
     "form": "api/v3/forms/{form_id}",
+    "forms_has_part": "api/v3/forms/{form_id}/has_part/{part_id}",
+    "forms_compatible_within_scope": "api/v3/forms/{form_id}/workflows/"
+                                     "compatible_within_scope/{scope_id}",
     "form_instantiate": "api/v3/forms/{form_id}/instantiate",
     "form_clone": "api/v3/forms/{form_id}/clone",
     "form_clone_cross_scope": "api/v3/forms/{form_id}/clone_cross_scope",

@@ -5,7 +5,7 @@ import requests
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import FormCategory
 from pykechain.exceptions import APIError, ForbiddenError
-from pykechain.models import Activity, Scope
+from pykechain.models import Activity, Part, Scope
 from pykechain.models.base import (
     Base,
     BaseInScope,
@@ -13,8 +13,12 @@ from pykechain.models.base import (
     NameDescriptionTranslationMixin,
 )
 from pykechain.models.context import Context
-from pykechain.models.input_checks import check_base, check_list_of_base, check_list_of_dicts, \
-    check_text
+from pykechain.models.input_checks import (
+    check_base,
+    check_list_of_base,
+    check_list_of_dicts,
+    check_text,
+)
 from pykechain.models.tags import TagsMixin
 from pykechain.models.workflow import Status, Transition
 from pykechain.typing import ObjectID
@@ -80,7 +84,9 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         self.active: bool = json.get("active")
         self.category: FormCategory = json.get("category")
         self._status_forms: List[Dict] = json.get("status_forms", [])
-        self._status_assignees: List[Dict] = json.get("status_assignees_has_widgets", [])
+        self._status_assignees: List[Dict] = json.get(
+            "status_assignees_has_widgets", []
+        )
         self.contexts = json.get("contexts", [])
         self.context_groups = json.get("context_groups", [])
 
@@ -266,10 +272,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         return instantiated_form
 
     def clone(
-        self,
-        name: Optional[str],
-        target_scope: Optional[Scope] = None,
-        **kwargs
+        self, name: Optional[str], target_scope: Optional[Scope] = None, **kwargs
     ) -> Optional["Form"]:
         """Clone a new Form model based on a model.
 
@@ -281,13 +284,15 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
             raise APIError("Form should be of category MODEL")
         data_dict = {
             "name": check_text(name, "name") or f"{self.name}",
-            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts") or []
+            "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts")
+            or [],
         }
         if "description" in kwargs:
-            data_dict.update({"description": check_text(kwargs.get("description"), "description")})
+            data_dict.update(
+                {"description": check_text(kwargs.get("description"), "description")}
+            )
 
         if not target_scope or target_scope.id == self.scope_id.get("id"):
-            data_dict.update({"target_scope": self.scope_id.get("id")})
             response = self._client._request(
                 "POST",
                 self._client._build_url("form_clone", form_id=self.id),
@@ -411,17 +416,18 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
 
         """
         from pykechain.models import User
+
         check_list_of_dicts(
             statuses,
-            'statuses',
+            "statuses",
             [
                 "status",
                 "assignees",
-            ]
+            ],
         )
         for status in statuses:
-            status['status'] = check_base(status['status'], Status)
-            status['assignees'] = check_list_of_base(status['assignees'], User)
+            status["status"] = check_base(status["status"], Status)
+            status["assignees"] = check_list_of_base(status["assignees"], User)
         url = self._client._build_url("form_set_status_assignees", form_id=self.id)
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
         response = self._client._request(
@@ -441,7 +447,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         on the Form in the current status.
         :returns: A list with possible Transitions that may be applied on the Form.
         """
-        workflow = self._client.workflow(id=self._workflow['id'])
+        workflow = self._client.workflow(id=self._workflow["id"])
         return workflow.transitions
 
     def apply_transition(self, transition: Transition):
@@ -465,12 +471,14 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         """
         check_base(transition, Transition)
 
-        url = self._client._build_url("form_apply_transition",
-                                      form_id=self.id,
-                                      transition_id=transition.id)
+        url = self._client._build_url(
+            "form_apply_transition", form_id=self.id, transition_id=transition.id
+        )
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
         response = self._client._request(
-            "POST", url=url, params=query_params,
+            "POST",
+            url=url,
+            params=query_params,
         )
         if response.status_code != requests.codes.ok:
             raise APIError(
@@ -478,3 +486,46 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
                 response=response,
             )
         self.refresh(json=response.json()["results"][0])
+
+    def has_part(self, part: Part) -> bool:
+        """Return boolean if given Part is part of the Form tree.
+
+        Based on the Parts category, either the model or the instance tree is checked.
+
+        :param part: a Part object
+        :raises IllegalArgumentError: in case not a `Part` object is used when calling the method
+        :raises APIError: in case an Error occurs when checking whether `Form` contains the `Part`
+        """
+        part_id = check_base(part, Part)
+
+        url = self._client._build_url(
+            "forms_has_part", form_id=self.id, part_id=part_id
+        )
+        response = self._client._request("GET", url=url)
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                f"Could not process whether `Form` {self.id} has part {part_id}",
+                response=response,
+            )
+        return response.json()["results"][0]["has_part"]
+
+    def workflows_compatible_with_scope(self, scope: Scope):
+        """Return workflows from target scope that are compatible with source workflow.
+
+        :param scope: a Scope object
+        :raises IllegalArgumentError: in case not a `Scope` object is used when calling the method
+        :raises APIError: in case an Error occurs
+
+        """
+        scope_id = check_base(scope, Scope)
+
+        url = self._client._build_url(
+            "forms_compatible_within_scope", form_id=self.id, scope_id=scope_id
+        )
+        response = self._client._request("GET", url=url)
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                "Could not retrieve the compatible workflows",
+                response=response,
+            )
+        return response.json()["results"]

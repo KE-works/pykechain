@@ -3731,7 +3731,7 @@ class Client:
         asynchronous: Optional[bool] = False,
         retrieve_instances: Optional[bool] = True,
         **kwargs,
-    ) -> PartSet:
+    ) -> List:
         """
         Create multiple form instances simultaneously.
 
