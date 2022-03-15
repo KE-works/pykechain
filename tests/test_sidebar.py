@@ -312,10 +312,10 @@ class TestSideBar(TestBetamax):
         sbm = self.scope.side_bar()
         for button in sbm:  # type: SideBarButton
             if button.display_name == KEChainPageLabels[KEChainPages.FORMS]:
-                self.assertTrue(button.alignment == SidebarButtonAlignment.BOTTOM)
+                self.assertEqual(button.alignment, SidebarButtonAlignment.BOTTOM)
                 found[0] = True
             if button.display_name == KEChainPageLabels[KEChainPages.CONTEXTS]:
-                self.assertTrue(button.alignment == SidebarButtonAlignment.TOP)
+                self.assertEqual(button.alignment, SidebarButtonAlignment.TOP)
                 found[1] = True
 
         self.assertTrue(all(found))
