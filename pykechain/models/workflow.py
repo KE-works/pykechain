@@ -93,7 +93,7 @@ class Workflow(
         super().__init__(json, **kwargs)
         self.description: str = json.get("description", "")
         self.ref: str = json.get("ref", "")
-        self.derived_from_id: Optional[ObjectID] = json.get("derived_from")
+        self.derived_from_id: Optional[ObjectID] = json.get("derived_from_id")
         self._transitions: List[Transition] = [
             Transition(j, client=self._client) for j in json.get("transitions", [])
         ]
