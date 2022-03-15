@@ -292,7 +292,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
                 {"description": check_text(kwargs.get("description"), "description")}
             )
 
-        if not target_scope or target_scope.id == self.scope_id.get("id"):
+        if not target_scope or target_scope.id == self.scope_id:
             response = self._client._request(
                 "POST",
                 self._client._build_url("form_clone", form_id=self.id),

@@ -778,7 +778,7 @@ class Scope(Base, TagsMixin):
 
         :return: a created Form Instance
         """
-        if self.id == model.scope_id["id"]:
+        if self.id == model.scope_id:
             return self._client.instantiate_form(*args, model=model, *args, **kwargs)
         else:
             raise IllegalArgumentError("Form Model '{}' not in Scope '{}'".format(

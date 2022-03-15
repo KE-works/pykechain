@@ -179,7 +179,7 @@ class TestForms(TestBetamax):
         self.assertTrue(self.cloned_form_model)
         self.assertIsInstance(self.cloned_form_model, Form)
         self.assertEqual(
-            self.form_model.scope_id["id"], self.cloned_form_model.scope_id["id"]
+            self.form_model.scope_id, self.cloned_form_model.scope_id
         )
         self.assertIn(
             self.asset_context.id,
@@ -204,7 +204,7 @@ class TestForms(TestBetamax):
         self.assertTrue(self.cloned_form_model)
         self.assertIsInstance(self.cloned_form_model, Form)
         self.assertEqual(
-            self.form_model.scope_id["id"], self.cloned_form_model.scope_id["id"]
+            self.form_model.scope_id, self.cloned_form_model.scope_id
         )
         self.assertIn(
             self.asset_context.id,
@@ -230,7 +230,7 @@ class TestForms(TestBetamax):
         self.assertTrue(self.cloned_form_model)
         self.assertIsInstance(self.cloned_form_model, Form)
         self.assertEqual(
-            self.cross_scope_project.id, self.cloned_form_model.scope_id["id"]
+            self.cross_scope_project.id, self.cloned_form_model.scope_id
         )
         self.assertIn(
             self.asset_context.name,
@@ -338,7 +338,7 @@ class TestForms(TestBetamax):
             )
 
 
-class TestBulkForms(TestBetamax):
+class TestFormsBulk(TestBetamax):
     """
     Test bulk forms attributes and methods.
     """

@@ -566,6 +566,7 @@ API_EXTRA_PARAMS = {
                 "active_status",
                 "contexts",
                 "context_groups",
+                "scope_id",
             ]
         )
     },
@@ -590,6 +591,7 @@ API_EXTRA_PARAMS = {
                 "active",
                 "contexts",
                 "context_groups",
+                "scope_id",
             ]
         )
     },
@@ -609,6 +611,7 @@ API_EXTRA_PARAMS = {
                 "statuses",
                 "is_consistent",
                 "transitions",
+                "scope_id",
             ]
         )
     },
