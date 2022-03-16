@@ -23,7 +23,8 @@ from pykechain.enums import (
     ActivityClassification,
 )
 from pykechain.models.widgets.enums import (
-    DashboardWidgetShowForms, DashboardWidgetShowTasks,
+    DashboardWidgetShowForms,
+    DashboardWidgetShowTasks,
     DashboardWidgetShowScopes,
     TasksAssignmentFilterTypes,
 )
