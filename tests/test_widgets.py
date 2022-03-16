@@ -23,6 +23,7 @@ from pykechain.enums import (
     ActivityClassification,
 )
 from pykechain.models.widgets.enums import (
+    DashboardWidgetShowForms,
     DashboardWidgetShowTasks,
     DashboardWidgetShowScopes,
     TasksAssignmentFilterTypes,
@@ -862,6 +863,7 @@ class TestWidgetManagerInActivity(TestBetamax):
         # setUp
         title_widget_1 = "Dashboard widget"
         title_widget_2 = "Tagged projects widget"
+        title_widget_3 = "Form dashboard widget"
 
         widget_current_project = self.wm.add_dashboard_widget(
             title=title_widget_1, show_assignees=True
@@ -876,13 +878,24 @@ class TestWidgetManagerInActivity(TestBetamax):
             show_scopes=[DashboardWidgetShowScopes.CLOSED_SCOPES],
             show_assignees=False,
         )
+        widget_forms = self.wm.add_dashboard_widget(
+            title=title_widget_3,
+            show_forms=True,
+            show_form_status=[DashboardWidgetShowForms.DONE_FORMS,
+                              DashboardWidgetShowForms.TOTAL_FORMS],
+            show_form_status_per_assignees=True,
+            show_assignees_for_form_statuses=True,
+            show_status_category_forms=False,
+        )
 
         # testing
         self.assertIsInstance(widget_current_project, DashboardWidget)
         self.assertIsInstance(widget_tagged_projects, DashboardWidget)
+        self.assertIsInstance(widget_forms, DashboardWidget)
 
         self.assertEqual(widget_current_project.title, title_widget_1)
         self.assertEqual(widget_tagged_projects.title, title_widget_2)
+        self.assertEqual(widget_forms.title, title_widget_3)
 
         self.assertTrue(
             all(elem["selected"] for elem in widget_current_project.meta["showNumbers"])
@@ -903,6 +916,17 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertTrue(widget_current_project.meta["showAssignees"])
         self.assertFalse(widget_tagged_projects.meta["showAssignees"])
+
+        self.assertTrue(
+            any(
+                elem["selected"] is False
+                for elem in widget_forms.meta["showNumbersForForms"]
+            )
+        )
+
+        self.assertTrue(widget_forms.meta["showFormStatusPerAssignees"])
+        self.assertTrue(widget_forms.meta["showAssigneesForFormStatuses"])
+        self.assertFalse(widget_forms.meta["showStatusCategoryForms"])
 
     def test_add_tasks_widget(self):
         tasks_widget = self.wm.add_tasks_widget()
