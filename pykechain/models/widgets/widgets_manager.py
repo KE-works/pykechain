@@ -41,6 +41,7 @@ from pykechain.models.widgets.enums import (
     AssociatedObjectId,
     TasksAssignmentFilterTypes,
     TasksWidgetColumns,
+    DashboardWidgetShowForms,
 )
 from pykechain.models.widgets.helpers import (
     _set_title,
@@ -1619,13 +1620,18 @@ class WidgetsManager(Iterable):
         source_subprocess: Optional[List] = None,
         source_selected_scopes: Optional[List] = None,
         show_tasks: Optional[List[DashboardWidgetShowTasks]] = None,
+        show_form_status: Optional[List[DashboardWidgetShowForms]] = None,
         show_scopes: Optional[List[DashboardWidgetShowScopes]] = None,
         no_background: Optional[bool] = False,
+        show_forms: Optional[bool] = False,
         show_assignees: Optional[bool] = True,
         show_assignees_table: Optional[bool] = True,
         show_open_task_assignees: Optional[bool] = True,
         show_open_vs_closed_tasks: Optional[bool] = True,
         show_open_closed_tasks_assignees: Optional[bool] = True,
+        show_form_status_per_assignees: Optional[bool] = True,
+        show_assignees_for_form_statuses: Optional[bool] = True,
+        show_status_category_forms: Optional[bool] = True,
         **kwargs,
     ) -> Widget:
         """
@@ -1641,20 +1647,31 @@ class WidgetsManager(Iterable):
         :type parent_widget: Widget or basestring or None
         :param source_scopes: The `Project(s)` to be used as source when displaying the Widget.
             Defaults on CURRENT_SCOPE.
-        :type source_scopes: basestring (see :class:`models.widgets.enums.DashboardWidgetSourceScopes`)
-        :param source_scopes_tags: Tags on which the source projects can be filtered on. Source is selected
-            automatically as TAGGED_SCOPES
+        :type source_scopes: basestring
+            (see :class:`models.widgets.enums.DashboardWidgetSourceScopes`)
+        :param source_scopes_tags: Tags on which the source projects can be filtered on. Source is
+            selected automatically as TAGGED_SCOPES
         :type source_scopes_tags: list of tags
-        :param source_subprocess: Subprocess that the `Widget` uses as source. Source is selected automatically
-            SUBPROCESS
+        :param source_subprocess: Subprocess that the `Widget` uses as source. Source is selected
+            automatically SUBPROCESS
         :type source_subprocess: list of str (UUID of an `Activity`)
-        :param source_selected_scopes: List of `Scope` to be used by the `Widget` as source. Source is selected
-            automatically as SELECTED_SCOPES
+        :param source_selected_scopes: List of `Scope` to be used by the `Widget` as source. Source
+            is selected automatically as SELECTED_SCOPES
         :type source_selected_scopes: list of str (UUIDs of `Scopes`)
-        :param show_tasks: Type of tasks to be displayed in the `Widget`. If left None, all of them will be selected
-        :type show_tasks: list of basestring (see :class:`models.widgets.enums.DashboardWidgetShowTasks`)
-        :param show_scopes: Type of scopes to be displayed in the `Widget`. If left None, all of them will be selected
-        :type show_scopes: list of basestring (see :class:`models.widgets.enums.DashboardWidgetShowScopes`)
+        :param show_forms: Show all dashboard widgets based on forms within the scope
+        :type show_forms: bool
+        :param show_tasks: Type of tasks to be displayed in the `Widget`. If left None, all of
+            them will be selected
+        :type show_tasks: list of basestring
+            (see :class:`models.widgets.enums.DashboardWidgetShowTasks`)
+        :param show_form_status: Type of statuses to be displayed in the `Widget`. If left None,
+            all of them will be selected
+         :type show_form_status: list of basestring
+            (see :class:`models.widgets.enums.DashboardWidgetShowForms`)
+        :param show_scopes: Type of scopes to be displayed in the `Widget`. If left None, all of
+            them will be selected
+        :type show_scopes: list of basestring
+            (see: class:`models.widgets.enums.DashboardWidgetShowScopes`)
         :param no_background: Reverse the shadows (default False)
         :type no_background: bool
         :param show_assignees: Show the assignees pie chart
@@ -1665,8 +1682,16 @@ class WidgetsManager(Iterable):
         :type show_open_task_assignees: bool
         :param show_open_vs_closed_tasks: Show the `Open vs closed tasks` pie chart
         :type show_open_vs_closed_tasks: bool
-        :param show_open_closed_tasks_assignees: Show the `Open open and closed tasks per assignees` pie chart
+        :param show_open_closed_tasks_assignees: Show the `Open open and closed tasks per
+            assignees` pie chart
         :type show_open_closed_tasks_assignees: bool
+        :param show_form_status_per_assignees: Show the `Status categories per form` pie chart
+        :type show_form_status_per_assignees: bool
+        :param show_assignees_for_form_statuses: Show the `Show assignees per status form` pie
+            chart
+        :type show_assignees_for_form_statuses: bool
+        :param show_status_category_forms: Show the `Show Forms Status per assignee` chart
+        :type show_status_category_forms: bool
         :param kwargs:
         :return:
         """
@@ -1698,6 +1723,12 @@ class WidgetsManager(Iterable):
                     ),
                 }
             )
+        elif show_forms:
+            meta.update(
+                {
+                    MetaWidget.SOURCE: DashboardWidgetSourceScopes.FORMS,
+                }
+            )
         else:
             meta.update(
                 {
@@ -1706,6 +1737,40 @@ class WidgetsManager(Iterable):
                     )
                 }
             )
+
+        show_form_status_list = list()
+        if show_form_status is None:
+            for value in DashboardWidgetShowForms.values():
+                show_form_status_list.append(
+                    {
+                        MetaWidget.NAME: value,
+                        MetaWidget.ORDER: DashboardWidgetShowForms.values().index(value),
+                        MetaWidget.SELECTED: True,
+                    }
+                )
+        else:
+            check_type(show_form_status, list, "show_form_status")
+            for value in DashboardWidgetShowForms.values():
+                if value in show_form_status:
+                    show_form_status_list.append(
+                        {
+                            MetaWidget.NAME: value,
+                            MetaWidget.ORDER: DashboardWidgetShowForms.values().index(
+                                value
+                            ),
+                            MetaWidget.SELECTED: True,
+                        }
+                    )
+                else:
+                    show_form_status_list.append(
+                        {
+                            MetaWidget.NAME: value,
+                            MetaWidget.ORDER: DashboardWidgetShowForms.values().index(
+                                value
+                            ),
+                            MetaWidget.SELECTED: False,
+                        }
+                    )
 
         show_tasks_list = list()
         if show_tasks is None:
@@ -1769,6 +1834,7 @@ class WidgetsManager(Iterable):
         meta.update(
             {
                 MetaWidget.SHOW_NUMBERS: show_tasks_list,
+                MetaWidget.SHOW_NUMBERS_FORMS: show_form_status_list,
                 MetaWidget.SHOW_NUMBERS_PROJECTS: show_projects_list,
                 MetaWidget.NO_BACKGROUND: check_type(no_background, bool, "no_background"),
                 MetaWidget.SHOW_ASSIGNEES: check_type(show_assignees, bool, "show_assignees"),
@@ -1783,6 +1849,15 @@ class WidgetsManager(Iterable):
                 ),
                 MetaWidget.SHOW_OPEN_VS_CLOSED_TASKS_ASSIGNEES: check_type(
                     show_open_closed_tasks_assignees, bool, "show_open_closed_tasks_assignees"
+                ),
+                MetaWidget.SHOW_FORM_STATUS_PER_ASSIGNEES: check_type(
+                    show_form_status_per_assignees, bool, "show_form_status_per_assignees"
+                ),
+                MetaWidget.SHOW_ASSIGNEES_FOR_FORM_STATUSES: check_type(
+                    show_assignees_for_form_statuses, bool, "show_assignees_for_form_statuses"
+                ),
+                MetaWidget.SHOW_STATUS_CATEGORY_FORMS: check_type(
+                    show_status_category_forms, bool, "show_status_category_forms"
                 ),
             }
         )

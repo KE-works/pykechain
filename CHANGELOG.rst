@@ -11,6 +11,7 @@ FORMS Feature
 * :+1: Added multiple `Forms` methods such as `link_contexts`, `unlink_contexts`, `clone_cross_scope`, `apply_transition`, `set_status_assignees` (#1114)
 * :+1: Added nice to have `Forms` methods such as `has_part` and `compatible_within_scope` and tests (#1108)
 * :+1: Removed the `target_scope` parameter when cloning inside the same scope
+* :+1: Extended the `DashboardWidget` with the form numbers and charts (#1123)
 
 UNRELEASED
 ----------
