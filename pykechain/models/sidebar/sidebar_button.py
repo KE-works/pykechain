@@ -66,7 +66,7 @@ class SideBarButton:
         uri = uri if uri else json.get("uri")
         uri_target = json.get("uriTarget", uri_target)
         icon_mode = json.get("displayIconMode", icon_mode)
-        alignment = json.get("alignment", alignment)
+        alignment = json.get("align", alignment)
         minimum_access_level = json.get("minimumAccessLevel", minimum_access_level)
 
         if not isinstance(order, int):
@@ -158,7 +158,7 @@ class SideBarButton:
             "uri": self.uri,
             "order": self.order,
             "displayIconMode": self.display_icon_mode,
-            "alignment": self.alignment,
+            "align": self.alignment,
             "minimumAccessLevel": self.minimum_access_level,
         }
         config.update(self._other_attributes)
