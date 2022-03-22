@@ -1,11 +1,12 @@
 Change Log
 ==========
 
-UNRELEASED
-----------
+v3.18.0 (22MAR22)
+-----------------
 * :+1: we upgraded all code to python 3.6 and higher preferred style. See the implemented improvements found throughout the code: https://github.com/asottile/pyupgrade/blob/master/README.md#implemented-features. We also reformatted the code using black.
 * :+1: added tests to check if the prefilters of `ScopeReferenceProperties` are copied correctly (#842)
 * :bug: Added the `offset` parameter in the request of generating a PDF, such that `Datetime` objects are rendered correctly (#1129)
+* :+1: dependent versions for development: pytz (2022.1), pytest (7.1.1), mypy (0.941), coverage (6.3.2), sphinx (4.4.0), pre-commit (2.17.0), nbsphinx (0.8.8), tox (3.24.5), requests (2.27.1), jsonschema (4.4.0), pytest-xdist (2.5.0), twine (3.7.1).
 
 v3.17.1 (29NOV21)
 -----------------
