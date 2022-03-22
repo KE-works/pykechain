@@ -4,7 +4,8 @@ import unicodedata
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from typing import (
-    Any, Callable,
+    Any,
+    Callable,
     Dict,
     Iterable,
     List,
@@ -504,7 +505,7 @@ def get_in_chunks(lst: Union[List, Iterable], chunk_size: int) -> Iterable:
     :rtype: Iterable
     """
     for i in range(0, len(lst), chunk_size):
-        yield lst[i: i + chunk_size]
+        yield lst[i : i + chunk_size]
 
 
 class Empty:
@@ -619,3 +620,18 @@ def find_obj_in_list(value: str, iterable: List[Any], attribute: str = None) -> 
         )
     else:
         return matches[0]
+
+
+def get_offset_from_user_timezone(user) -> int:
+    """
+    Retrieve the offset in minutes from UTC time compared to the user defined timezone.
+
+    :param user: (optional) used to calculate the offset in minutes
+    :type user: User object
+
+    :return: number of minutes to the nearest integer
+    """
+    user_timezone = pytz.timezone(user.timezone.zone)
+    user_time = datetime.now(user_timezone)
+    offset = -int(user_time.tzinfo.utcoffset(user_time).total_seconds() / 60.0)
+    return offset

@@ -4,6 +4,7 @@ import time
 from typing import List, Dict, Optional, Union
 from urllib.parse import urljoin
 
+import pytz
 import requests
 
 from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_EXTRA_PARAMS
@@ -31,7 +32,8 @@ from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.models.user import User
 from pykechain.models.widgets.widgets_manager import WidgetsManager
-from pykechain.utils import parse_datetime, is_valid_email, empty, Empty, clean_empty_values
+from pykechain.utils import get_offset_from_user_timezone, parse_datetime, is_valid_email, empty, \
+    Empty, clean_empty_values
 
 
 class Activity(TreeObject, TagsMixin):
@@ -862,6 +864,7 @@ class Activity(TreeObject, TagsMixin):
         paper_orientation: PaperOrientation = PaperOrientation.PORTRAIT,
         include_appendices: bool = False,
         include_qr_code: bool = False,
+        user: Optional[User] = None
     ) -> str:
         """
         Retrieve the PDF of the Activity.
@@ -887,6 +890,9 @@ class Activity(TreeObject, TagsMixin):
         :type include_appendices: bool
         :param include_qr_code: True if the PDF should include a QR-code, False (default) if otherwise.
         :type include_qr_code: bool
+        :param user: (optional) used to calculate the offset needed to interpret Datetime
+            Properties. Not having a user will simply use the default UTC.
+        :type user: User object
         :raises APIError: if the pdf file could not be found.
         :raises OSError: if the file could not be written.
         :returns Path to the saved pdf file
@@ -905,6 +911,12 @@ class Activity(TreeObject, TagsMixin):
             appendices=check_type(include_appendices, bool, "include_appendices"),
             includeqr=check_type(include_qr_code, bool, "include_qr_code"),
         )
+
+        if user:
+            user_object = check_type(user, User, "user")
+            request_params.update(
+                offset=get_offset_from_user_timezone(user=user_object)
+            )
 
         url = self._client._build_url("activity_export", activity_id=self.id)
         response = self._client._request("GET", url, params=request_params)
@@ -996,7 +1008,10 @@ class Activity(TreeObject, TagsMixin):
 
         if from_user:
             check_user(from_user, User, "from_user")
-            params.update(from_user=from_user.id)
+            params.update(
+                from_user=from_user.id,
+                offset=get_offset_from_user_timezone(user=from_user)
+            )
 
         url = self._client._build_url("notification_share_activity_link")
 
@@ -1078,7 +1093,10 @@ class Activity(TreeObject, TagsMixin):
 
         if from_user:
             check_user(from_user, User, "from_user")
-            params.update(from_user=from_user.id)
+            params.update(
+                from_user=from_user.id,
+                offset=get_offset_from_user_timezone(user=from_user)
+            )
 
         url = self._client._build_url("notification_share_activity_pdf")
 

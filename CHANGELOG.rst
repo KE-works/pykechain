@@ -12,6 +12,7 @@ FORMS Feature
 * :+1: Added nice to have `Forms` methods such as `has_part` and `compatible_within_scope` and tests (#1108)
 * :+1: Removed the `target_scope` parameter when cloning inside the same scope
 * :+1: Extended the `DashboardWidget` with the form numbers and charts (#1123)
+* :bug: Added the `offset` parameter in the request of generating a PDF, such that `Datetime` objects are rendered correctly (#1129)
 
 UNRELEASED
 ----------
