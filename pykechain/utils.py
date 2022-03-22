@@ -622,13 +622,12 @@ def find_obj_in_list(value: str, iterable: List[Any], attribute: str = None) -> 
         return matches[0]
 
 
-def get_offset_from_user_timezone(user) -> int:
+def get_offset_from_user_timezone(user: "User") -> int:
     """
     Retrieve the offset in minutes from UTC time compared to the user defined timezone.
 
-    :param user: (optional) used to calculate the offset in minutes
+    :param user: (optional) User used to calculate the offset in minutes.
     :type user: User object
-
     :return: number of minutes to the nearest integer
     """
     user_timezone = pytz.timezone(user.timezone.zone)
