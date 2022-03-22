@@ -4,7 +4,6 @@ import time
 from typing import List, Dict, Optional, Union
 from urllib.parse import urljoin
 
-import pytz
 import requests
 
 from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_EXTRA_PARAMS
