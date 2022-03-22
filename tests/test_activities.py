@@ -20,7 +20,12 @@ from pykechain.enums import (
     PropertyType,
     activity_root_name_by_classification,
 )
-from pykechain.exceptions import APIError, IllegalArgumentError, MultipleFoundError, NotFoundError
+from pykechain.exceptions import (
+    APIError,
+    IllegalArgumentError,
+    MultipleFoundError,
+    NotFoundError,
+)
 from pykechain.models import Activity
 from pykechain.models.representations import CustomIconRepresentation
 from pykechain.utils import slugify_ref, temp_chdir
@@ -113,7 +118,9 @@ class TestActivityConstruction(TestBetamax):
         )
 
     # NOTE: Change this test once we release the FORMS backend to production or a testing setup.
-    @skip("This test does not work as the testing backend does not have FORMS in the codebase")
+    @skip(
+        "This test does not work as the testing backend does not have FORMS in the codebase"
+    )
     def test_create_with_classification(self):
 
         for classification in ActivityClassification.values():
@@ -179,7 +186,9 @@ class TestActivityConstruction(TestBetamax):
         sub_process_name = "__Test subprocess"
         sub_task_name = "__Test subtask"
 
-        subprocess = self.process.create(name=sub_process_name, activity_type=ActivityType.PROCESS)
+        subprocess = self.process.create(
+            name=sub_process_name, activity_type=ActivityType.PROCESS
+        )
         self.task = subprocess.create(name=sub_task_name)
         subprocess.delete()
 
@@ -188,7 +197,9 @@ class TestActivityConstruction(TestBetamax):
             subprocess.delete()
         with self.assertRaises(NotFoundError, msg="Deleted Activity cant be found!"):
             self.project.activity(name=sub_process_name)
-        with self.assertRaises(NotFoundError, msg="Children of deleted Activities cant be found!"):
+        with self.assertRaises(
+            NotFoundError, msg="Children of deleted Activities cant be found!"
+        ):
             self.project.activity(name=sub_task_name)
 
 
@@ -284,7 +295,9 @@ class TestActivityCloneParts(TestBetamax):
             PropertyType.CHAR_VALUE,
             PropertyType.DATE_VALUE,
         ]:
-            child_model.add_property(name="__TEST " + prop_type, property_type=prop_type)
+            child_model.add_property(
+                name="__TEST " + prop_type, property_type=prop_type
+            )
 
         # Add widget to add configured part models
         wm = self.task.widgets()
@@ -324,7 +337,9 @@ class TestActivityCloneParts(TestBetamax):
         clones = self.client.clone_activities(
             activities=[self.task],
             activity_parent=self.process,
-            activity_update_dicts={self.task.id: {"name": "__TEST CLONE ACTIVITY WITH PARTS"}},
+            activity_update_dicts={
+                self.task.id: {"name": "__TEST CLONE ACTIVITY WITH PARTS"}
+            },
             include_part_models=True,
             include_part_instances=True,
             include_children=True,
@@ -343,7 +358,9 @@ class TestActivityCloneParts(TestBetamax):
         clones = self.client.clone_activities(
             activities=[self.task],
             activity_parent=self.process,
-            activity_update_dicts={self.task.id: {"name": "__TEST CLONE ACTIVITY WITH PARTS"}},
+            activity_update_dicts={
+                self.task.id: {"name": "__TEST CLONE ACTIVITY WITH PARTS"}
+            },
             include_part_models=True,
             include_part_instances=True,
             include_children=True,
@@ -373,7 +390,9 @@ class TestActivities(TestBetamax):
     def setUp(self):
         super().setUp()
         self.workflow_root = self.project.activity(name=ActivityRootNames.WORKFLOW_ROOT)
-        self.task = self.project.create_activity(name=self.NAME, activity_type=ActivityType.TASK)
+        self.task = self.project.create_activity(
+            name=self.NAME, activity_type=ActivityType.TASK
+        )
 
     def tearDown(self):
         if self.task:
@@ -496,10 +515,14 @@ class TestActivities(TestBetamax):
         tzaware_start = tz.localize(datetime(2017, 6, 30, 0, 0, 0))
 
         self.task.edit(start_date=tzaware_start)
-        self.assertTrue(self.task._json_data["start_date"], tzaware_start.isoformat(sep="T"))
+        self.assertTrue(
+            self.task._json_data["start_date"], tzaware_start.isoformat(sep="T")
+        )
 
         self.task.edit(due_date=tzaware_due)
-        self.assertTrue(self.task._json_data["due_date"], tzaware_due.isoformat(sep="T"))
+        self.assertTrue(
+            self.task._json_data["due_date"], tzaware_due.isoformat(sep="T")
+        )
 
     def test_edit_cascade_down(self):
         # setup
@@ -606,7 +629,9 @@ class TestActivities(TestBetamax):
         all_tasks = self.workflow_root.all_children()
 
         self.assertIsInstance(all_tasks, list)
-        self.assertEqual(13, len(all_tasks), msg="Number of tasks has changed, expected 13.")
+        self.assertEqual(
+            13, len(all_tasks), msg="Number of tasks has changed, expected 13."
+        )
 
     def test_retrieve_activity_by_id(self):
         task = self.project.activity(name="Subprocess")  # type: Activity
@@ -646,7 +671,9 @@ class TestActivities(TestBetamax):
 
     # in 1.13
     def test_create_activity_with_incorrect_activity_class_fails(self):
-        with self.assertRaisesRegex(IllegalArgumentError, "must be an option from enum"):
+        with self.assertRaisesRegex(
+            IllegalArgumentError, "must be an option from enum"
+        ):
             self.project.create_activity(name="New", activity_type="DEFUNCTActivity")
 
     # 2.0 new activity
@@ -663,7 +690,9 @@ class TestActivities(TestBetamax):
 
         self.assertIsInstance(specify_wd._json_data.get("assignees_ids")[0], int)
 
-        self.assertEqual(specify_wd._client.last_response.status_code, requests.codes.ok)
+        self.assertEqual(
+            specify_wd._client.last_response.status_code, requests.codes.ok
+        )
 
         # Added to improve coverage. Assert whether NotFoundError is raised when 'assignee' is not part of the
         # scope members
@@ -695,7 +724,9 @@ class TestActivities(TestBetamax):
         self.assertEqual(self.project._json_data.get("workflow_root_id"), parent.id)
 
     def test_activity_test_workflow_root_object(self):
-        workflow_root = self.project.activity(id=self.project._json_data.get("workflow_root_id"))
+        workflow_root = self.project.activity(
+            id=self.project._json_data.get("workflow_root_id")
+        )
 
         self.assertTrue(workflow_root.is_root())
         self.assertTrue(workflow_root.is_workflow_root())
@@ -761,7 +792,9 @@ class TestActivities(TestBetamax):
         list_of_assignees_in_data = self.task._json_data.get("assignees_ids")
         assignees_list = self.task.assignees
 
-        self.assertSetEqual(set(list_of_assignees_in_data), {u.id for u in assignees_list})
+        self.assertSetEqual(
+            set(list_of_assignees_in_data), {u.id for u in assignees_list}
+        )
 
     def test_activity_assignees_list_no_assignees_gives_empty_list(self):
         activity_name = "Specify wheel diameter"
@@ -869,12 +902,12 @@ class TestActivityDownloadAsPDF(TestBetamax):
         # setUp
         activity_name = "Task - Form"
         activity = self.project.activity(name=activity_name)
+        user = self.client.user(id=3)  # testmanager
 
         # testing
         with temp_chdir() as target_dir:
             pdf_file = activity.download_as_pdf(
-                target_dir=target_dir,
-                pdf_filename="pdf_file",
+                target_dir=target_dir, pdf_filename="pdf_file", user=user
             )
             self.assertTrue(os.path.exists(pdf_file))
 

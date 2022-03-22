@@ -3,7 +3,16 @@ import re
 import unicodedata
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
-from typing import TypeVar, Iterable, Callable, Optional, Dict, Union, List  # noqa: F401
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    TypeVar,
+    Union,
+)  # noqa: F401
 
 import pytz
 
@@ -419,7 +428,9 @@ def slugify_ref(value: str, allow_unicode: bool = False) -> str:
         value = unicodedata.normalize("NFKC", value)
         value = re.sub(r"[^\w\s-]", "", value, flags=re.U).strip().lower()
         return re.sub(r"[-\s]+", "-", value, flags=re.U)
-    value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
+    value = (
+        unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
+    )
     value = re.sub(r"[^\w\s-]", "", value).strip().lower()
     return re.sub(r"[-\s]+", "-", value)
 
@@ -568,3 +579,17 @@ def clean_empty_values(update_dict: Dict) -> Dict:
     """
     cleaned_up_dict = {k: v for k, v in update_dict.items() if not isinstance(v, Empty)}
     return cleaned_up_dict
+
+
+def get_offset_from_user_timezone(user: "User") -> int:
+    """
+    Retrieve the offset in minutes from UTC time compared to the user defined timezone.
+
+    :param user: (optional) User used to calculate the offset in minutes.
+    :type user: User object
+    :return: number of minutes to the nearest integer
+    """
+    user_timezone = pytz.timezone(user.timezone.zone)
+    user_time = datetime.now(user_timezone)
+    offset = -int(user_time.tzinfo.utcoffset(user_time).total_seconds() / 60.0)
+    return offset

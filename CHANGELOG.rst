@@ -5,6 +5,7 @@ UNRELEASED
 ----------
 * :+1: we upgraded all code to python 3.6 and higher preferred style. See the implemented improvements found throughout the code: https://github.com/asottile/pyupgrade/blob/master/README.md#implemented-features. We also reformatted the code using black.
 * :+1: added tests to check if the prefilters of `ScopeReferenceProperties` are copied correctly (#842)
+* :bug: Added the `offset` parameter in the request of generating a PDF, such that `Datetime` objects are rendered correctly (#1129)
 
 v3.17.1 (29NOV21)
 -----------------
