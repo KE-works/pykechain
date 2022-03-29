@@ -1,6 +1,8 @@
 Change Log
 ==========
 
+pykechain-3.18.0-forms
+
 FORMS Feature
 -------------
 * We added the feature equivalence in pykechain for KE-chain Forms and Workflow.
@@ -13,15 +15,18 @@ FORMS Feature
 * :+1: Removed the `target_scope` parameter when cloning inside the same scope
 * :+1: Extended the `DashboardWidget` with the form numbers and charts (#1123)
 
-UNRELEASED
-----------
+v3.18.0 (22MAR22)
+-----------------
 * :+1: we upgraded all code to python 3.6 and higher preferred style. See the implemented improvements found throughout the code: https://github.com/asottile/pyupgrade/blob/master/README.md#implemented-features. We also reformatted the code using black.
 * :+1: added tests to check if the prefilters of `ScopeReferenceProperties` are copied correctly (#842)
+* :bug: Added the `offset` parameter in the request of generating a PDF, such that `Datetime` objects are rendered correctly (#1129)
+* :+1: dependent versions for development: pytz (2022.1), pytest (7.1.1), mypy (0.941), coverage (6.3.2), sphinx (4.4.0), pre-commit (2.17.0), nbsphinx (0.8.8), tox (3.24.5), requests (2.27.1), jsonschema (4.4.0), pytest-xdist (2.5.0), twine (3.7.1).
 
 v3.17.1 (29NOV21)
 -----------------
 A re-release of v3.17.0 due to missing version information and changelog info in the library itself. No new code.
 
+v3.17.0 (29NOV21)
 -----------------
 * :+1: When a part is searched that on its `id` or `pk` than the `Client.part()` call will perform a API call to the detail route of the part api. This will greatly reduce the overhead on large databases and improve performance. (#1064)
 * :+1: dependent versions for development: sphinx (4.3.1), twine (3.6.0), coveralls (3.3.1), coverage (6.2)

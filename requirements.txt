@@ -9,10 +9,10 @@ jsonschema==4.4.0
 semver==2.13.0
 
 # testing
-pytest==7.0.1
+pytest==7.1.1
 pytest-xdist[psutil]==2.5.0
 betamax==0.8.1
-coverage==6.3.1
+coverage==6.3.2
 pytest-cov==3.0.0
 coveralls==3.3.1
 
@@ -26,11 +26,11 @@ tox==3.24.5
 # code style
 flake8==4.0.1
 pydocstyle==6.1.1
-mypy==0.931; python_version >= '3.4'
+mypy==0.941; python_version >= '3.4'
 pre-commit==2.17.0
 
 # for package management (uploads)
 twine~=3.0; python_version >= '3.6'
 twine==3.7.1; python_version <= '3.5.99'
 
-pytz==2021.3
+pytz==2022.1
