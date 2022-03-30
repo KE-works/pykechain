@@ -17,7 +17,8 @@ class Enum:
     def options(cls):
         """Provide a sorted list of options."""
         return sorted(
-            (value, name) for (name, value) in __dict__inherited__(cls=cls, stop=Enum).items()
+            (value, name)
+            for (name, value) in __dict__inherited__(cls=cls, stop=Enum).items()
         )
 
     @classmethod
@@ -591,6 +592,17 @@ class SidebarButtonAlignment(Enum):
     BOTTOM = "bottom"
 
 
+class SidebarType(Enum):
+    """The types that can exist as a Sidebar Item.
+
+    :cvar BUTTON: a button,
+    :cvar CARD: a card
+    """
+
+    BUTTON = "BUTTON"
+    CARD = "CARD"
+
+
 class PaperSize(Enum):
     """The acceptable paper sizes options for a downloaded PDF.
 
@@ -1003,10 +1015,20 @@ class URITarget(Enum):
 
     :cvar INTERNAL: "internal"
     :cvar EXTERNAL: "external"
+    :cvar NEW: "_new"
+    :cvar SELF: "_self"
+    :cvar BLANK: "_blank"
+    :cvar PARENT: "_parent"
+    :cvar TOP: "_top"
     """
 
     INTERNAL = "internal"
     EXTERNAL = "external"
+    NEW = "_new"
+    SELF = "_self"
+    BLANK = "_blank"
+    PARENT = "_parent"
+    TOP = "_top"
 
 
 class FontAwesomeMode(Enum):
@@ -1026,9 +1048,9 @@ class FontAwesomeMode(Enum):
     LIGHT = "light"
 
 
-class MinimumAccessLevelOptions(Enum):
+class SidebarAccessLevelOptions(Enum):
     """
-    Options for minimum access level options for the sidebar buttons.
+    Options for access level options for the sidebar.
 
     :cvar IS_MEMBER: "is_member"
     :cvar IS_LEAD_MEMBER: "is_leadmember"
@@ -1040,6 +1062,18 @@ class MinimumAccessLevelOptions(Enum):
     IS_LEAD_MEMBER = "is_leadmember"
     IS_SUPERVISOR = "is_supervisor"
     IS_MANAGER = "is_manager"
+
+
+class MinimumAccessLevelOptions(SidebarAccessLevelOptions):
+    """Options for minumum access level options for the sidebar."""
+
+    pass
+
+
+class MaximumAccessLevelOptions(SidebarAccessLevelOptions):
+    """Options for maximum access level options for the sidebar."""
+
+    pass
 
 
 class SelectListRepresentations(Enum):

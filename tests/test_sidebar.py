@@ -1,6 +1,6 @@
 from pykechain.enums import (
     KEChainPageLabels,
-    MinimumAccessLevelOptions,
+    SidebarAccessLevelOptions,
     SubprocessDisplayMode,
     KEChainPages,
     ScopeStatus,
@@ -325,19 +325,19 @@ class TestSideBar(TestBetamax):
         with self.scope.side_bar() as sbm:
             sbm.add_ke_chain_page(
                 page_name=KEChainPages.FORMS,
-                minimum_access_level=MinimumAccessLevelOptions.IS_MEMBER
+                minimum_access_level=SidebarAccessLevelOptions.IS_MEMBER
             )
             sbm.add_ke_chain_page(
                 page_name=KEChainPages.CONTEXTS,
-                minimum_access_level=MinimumAccessLevelOptions.IS_LEAD_MEMBER
+                minimum_access_level=SidebarAccessLevelOptions.IS_LEAD_MEMBER
             )
             sbm.add_ke_chain_page(
                 page_name=KEChainPages.CATALOG_FORMS,
-                minimum_access_level=MinimumAccessLevelOptions.IS_SUPERVISOR
+                minimum_access_level=SidebarAccessLevelOptions.IS_SUPERVISOR
             )
             sbm.add_ke_chain_page(
                 page_name=KEChainPages.WORKFLOWS,
-                minimum_access_level=MinimumAccessLevelOptions.IS_MANAGER
+                minimum_access_level=SidebarAccessLevelOptions.IS_MANAGER
             )
             sbm.add_ke_chain_page(
                 page_name=KEChainPages.DETAIL,
@@ -352,23 +352,23 @@ class TestSideBar(TestBetamax):
         for button in sbm:  # type: SideBarButton
             if button.display_name == KEChainPageLabels[KEChainPages.FORMS]:
                 self.assertTrue(button.minimum_access_level ==
-                                MinimumAccessLevelOptions.IS_MEMBER)
+                                SidebarAccessLevelOptions.IS_MEMBER)
                 found[0] = True
             if button.display_name == KEChainPageLabels[KEChainPages.CONTEXTS]:
                 self.assertTrue(button.minimum_access_level ==
-                                MinimumAccessLevelOptions.IS_LEAD_MEMBER)
+                                SidebarAccessLevelOptions.IS_LEAD_MEMBER)
                 found[1] = True
             if button.display_name == KEChainPageLabels[KEChainPages.CATALOG_FORMS]:
                 self.assertTrue(button.minimum_access_level ==
-                                MinimumAccessLevelOptions.IS_SUPERVISOR)
+                                SidebarAccessLevelOptions.IS_SUPERVISOR)
                 found[2] = True
             if button.display_name == KEChainPageLabels[KEChainPages.WORKFLOWS]:
                 self.assertTrue(button.minimum_access_level ==
-                                MinimumAccessLevelOptions.IS_MANAGER)
+                                SidebarAccessLevelOptions.IS_MANAGER)
                 found[3] = True
             if button.display_name == KEChainPageLabels[KEChainPages.DETAIL]:
                 self.assertTrue(button.minimum_access_level ==
-                                MinimumAccessLevelOptions.IS_MEMBER)
+                                SidebarAccessLevelOptions.IS_MEMBER)
                 found[4] = True
 
         self.assertTrue(all(found))
