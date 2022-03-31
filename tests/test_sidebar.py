@@ -1,14 +1,11 @@
 from pykechain.enums import (
-    KEChainPageLabels,
-    SidebarAccessLevelOptions,
-    SubprocessDisplayMode,
-    KEChainPages,
-    ScopeStatus,
-    SidebarButtonAlignment
+    Alignment, KEChainPageLabels, KEChainPages, ScopeStatus, SidebarAccessLevelOptions,
+    SidebarItemAlignment, SubprocessDisplayMode, URITarget,
 )
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Scope
 from pykechain.models.sidebar.sidebar_button import SideBarButton
+from pykechain.models.sidebar.sidebar_card import SideBarCard
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from tests.classes import TestBetamax
 
@@ -199,7 +196,6 @@ class TestSideBar(TestBetamax):
 
     def test_context_manager(self):
         with SideBarManager(scope=self.scope) as bulk_creation_manager:
-
             bulk_creation_manager.override_sidebar = True
 
             bulk_creation_manager.add_task_button(
@@ -297,11 +293,11 @@ class TestSideBar(TestBetamax):
         with self.scope.side_bar() as sbm:
             sbm.add_ke_chain_page(
                 page_name=KEChainPages.CONTEXTS,
-                alignment=SidebarButtonAlignment.TOP,
+                alignment=SidebarItemAlignment.TOP,
             )
             sbm.add_ke_chain_page(
                 page_name=KEChainPages.FORMS,
-                alignment=SidebarButtonAlignment.BOTTOM,
+                alignment=SidebarItemAlignment.BOTTOM,
             )
 
         # Reload side-bar from KE-chain
@@ -312,10 +308,10 @@ class TestSideBar(TestBetamax):
         sbm = self.scope.side_bar()
         for button in sbm:  # type: SideBarButton
             if button.display_name == KEChainPageLabels[KEChainPages.FORMS]:
-                self.assertEqual(button.alignment, SidebarButtonAlignment.BOTTOM)
+                self.assertEqual(button.alignment, SidebarItemAlignment.BOTTOM)
                 found[0] = True
             if button.display_name == KEChainPageLabels[KEChainPages.CONTEXTS]:
-                self.assertEqual(button.alignment, SidebarButtonAlignment.TOP)
+                self.assertEqual(button.alignment, SidebarItemAlignment.TOP)
                 found[1] = True
 
         self.assertTrue(all(found))
@@ -372,3 +368,63 @@ class TestSideBar(TestBetamax):
                 found[4] = True
 
         self.assertTrue(all(found))
+
+    def test_sidebar_card_object(self):
+        """Aim to create a sidebard card."""
+        target_dict = {
+            "itemType": "CARD",
+            "order": 1,
+            "align": "top",
+            "showCloseAction": True,
+            "showActionButton": True,
+            "actionButtonUri": "https://changelog.md",
+            "actionButtonUriTarget": "_new",
+            "actionButtonName": "Discover more",
+            "actionButtonName_nl": "Ontdek meer",
+            "displayText": "This project ...",
+            "displayText_nl": "Dit project ...",
+            "displayTextAlign": "left",
+            "showBackground": True,
+            "minimumAccessLevel": "is_member",
+            "maximumAccessLevel": "is_supervisor",
+        }
+
+        sidebar_card = SideBarCard(
+            side_bar_manager=self.manager,
+            order=1,
+            alignment=SidebarItemAlignment.TOP,
+            show_close_action=True,
+            show_action_button=True,
+            action_button_name="Discover more",
+            action_button_uri="https://changelog.md",
+            action_button_uri_target=URITarget.NEW,
+            display_text="This project ...",
+            display_text_align=Alignment.LEFT,
+            show_background=True,
+            minimum_access_level=SidebarAccessLevelOptions.IS_MEMBER,
+            maximum_access_level=SidebarAccessLevelOptions.IS_SUPERVISOR,
+            displayText_nl="Dit project ...",
+            actionButtonName_nl="Ontdek meer",
+        )
+
+        card_dict = sidebar_card.as_dict()
+
+        self.maxDiff = None
+        self.assertDictEqual(target_dict, card_dict)
+
+    def test_sidebar_card_creation_inside_the_manager(self):
+        with self.scope.side_bar() as sbm:
+            sbm.create_card(
+                display_text="Foo Bar",
+                show_action_button=False,
+            )
+
+        # Reload side-bar from KE-chain
+        self.scope.side_bar().refresh()
+
+        sbm = self.scope.side_bar()
+        self.assertTrue(len(sbm) == 1)
+        for item in sbm:
+            self.assertEqual(item.display_text, "Foo Bar")
+            self.assertEqual(item.order, 0)
+            self.assertFalse(item.show_action_button)

@@ -3,7 +3,7 @@ from typing import Dict, Optional
 from pykechain.enums import (
     FontAwesomeMode,
     SidebarAccessLevelOptions,
-    SidebarButtonAlignment,
+    SidebarItemAlignment,
     SidebarType, URITarget,
 )
 from pykechain.exceptions import IllegalArgumentError
@@ -23,14 +23,14 @@ class SideBarButton(SideBarItem):
     :cvar item_type: the item type of this class. Defaults to a BUTTON.
     """
 
-    allowed_attributes = [
+    _allowed_attributes = [
         "displayName_nl",
         "displayName_en",
         "displayName_de",
         "displayName_fr",
         "displayName_it",
     ]
-    item_type = SidebarType.BUTTON
+    _item_type = SidebarType.BUTTON
 
     def __init__(
         self,
@@ -40,7 +40,7 @@ class SideBarButton(SideBarItem):
         title: Optional[str] = None,
         icon: Optional[str] = None,
         uri: Optional[str] = None,
-        alignment: SidebarButtonAlignment = SidebarButtonAlignment.TOP,
+        alignment: SidebarItemAlignment = SidebarItemAlignment.TOP,
         minimum_access_level: SidebarAccessLevelOptions = SidebarAccessLevelOptions.IS_MEMBER,
         uri_target: URITarget = URITarget.INTERNAL,
         icon_mode: FontAwesomeMode = FontAwesomeMode.REGULAR,
@@ -94,7 +94,7 @@ class SideBarButton(SideBarItem):
             )
 
         for key in kwargs.keys():
-            if key not in self.allowed_attributes:
+            if key not in self._allowed_attributes:
                 raise IllegalArgumentError(
                     f'Attribute "{key}" is not supported in the configuration of a side-bar'
                     " card."
@@ -107,11 +107,11 @@ class SideBarButton(SideBarItem):
         self.uri: str = uri
         self.uri_target: URITarget = uri_target
         self.display_icon_mode: FontAwesomeMode = icon_mode
-        self.alignment: SidebarButtonAlignment = alignment
+        self.alignment: SidebarItemAlignment = alignment
         self.minimum_access_level: SidebarAccessLevelOptions = minimum_access_level
 
         self._other_attributes = kwargs
-        for key in self.allowed_attributes:
+        for key in self._allowed_attributes:
             if key in json:
                 self._other_attributes[key] = json[key]
 
@@ -123,7 +123,7 @@ class SideBarButton(SideBarItem):
         :rtype dict
         """
         config = {
-            "itemType": self.item_type,
+            "itemType": self._item_type,
             "displayName": self.display_name,
             "displayIcon": self.display_icon,
             "uriTarget": self.uri_target,
@@ -134,5 +134,6 @@ class SideBarButton(SideBarItem):
             "minimumAccessLevel": self.minimum_access_level,
         }
         config.update(self._other_attributes)
+        config = {k: v for k, v in config.items() if v is not None}
 
         return config

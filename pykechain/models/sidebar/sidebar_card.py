@@ -3,7 +3,7 @@ from typing import Dict, Optional
 from pykechain.enums import (
     Alignment,
     SidebarAccessLevelOptions,
-    SidebarButtonAlignment,
+    SidebarItemAlignment,
     SidebarType,
     URITarget,
 )
@@ -22,7 +22,7 @@ class SideBarCard(SideBarItem):
     :cvar item_type: the item type of this class. Defaults to a BUTTON.
     """
 
-    allowed_attributes = [
+    _allowed_attributes = [
         "displayText_nl",
         "displayText_en",
         "displayText_de",
@@ -35,14 +35,14 @@ class SideBarCard(SideBarItem):
         "actionButtonName_it",
     ]
 
-    item_type = SidebarType.CARD
+    _item_type = SidebarType.CARD
 
     def __init__(
         self,
         side_bar_manager: "SideBarManager",
         json: Optional[Dict] = None,
         order: Optional[int] = None,
-        alignment: SidebarButtonAlignment = SidebarButtonAlignment.TOP,
+        alignment: SidebarItemAlignment = SidebarItemAlignment.TOP,
         minimum_access_level: SidebarAccessLevelOptions = SidebarAccessLevelOptions.IS_MEMBER,
         maximum_access_level: SidebarAccessLevelOptions = SidebarAccessLevelOptions.IS_MANAGER,
         display_text: str = None,
@@ -52,9 +52,9 @@ class SideBarCard(SideBarItem):
         action_button_name: Optional[str] = None,
         action_button_uri: Optional[str] = None,
         action_button_uri_target: Optional[str] = None,
-        display_text_align: Alignment = Optional[str],
-        **kwargs,
-    ):
+        display_text_align: Optional[Alignment] = Alignment.CENTER,
+        **kwargs: dict,
+    ) -> None:
         """
         Create a side-bar card.
 
@@ -77,7 +77,7 @@ class SideBarCard(SideBarItem):
         if json is None:
             json = {}
         self._manager: "SideBarManager" = side_bar_manager
-        self.order = order if order is not None else json.get("order")
+        self.order = json.get("order", order)
         self.align = json.get("align", alignment)
         self.minimum_access_level = json.get("minimumAccessLevel", minimum_access_level)
         self.maximum_access_level = json.get("maximumAccessLevel", maximum_access_level)
@@ -93,26 +93,29 @@ class SideBarCard(SideBarItem):
             "actionButtonUriTarget", action_button_uri_target
         )
 
-        if not isinstance(order, int):
-            raise IllegalArgumentError(f'order must be an integer, "{order}" is not.')
-        if action_button_uri_target not in URITarget.values():
+        if not isinstance(self.order, int):
+            raise IllegalArgumentError(f'order must be an integer, "{self.order}" is not.')
+        if (
+            self.action_button_uri_target is not None
+            and self.action_button_uri_target not in URITarget.values()
+        ):
             raise IllegalArgumentError(
-                f'uri_target must be a URITarget option, "{action_button_uri_target}" is not.'
+                f'uri_target must be a URITarget option, "{self.action_button_uri_target}" is not.'
             )
-        if alignment not in SidebarButtonAlignment:
+        if self.align not in SidebarItemAlignment.values():
             raise IllegalArgumentError(
-                f"alignment must be a proper `SidebarButtonAlgment` type, '{alignment} is not.'"
+                f"alignment must be a proper `SidebarButtonAlgment` type, '{self.align} is not.'"
             )
 
         for key in kwargs.keys():
-            if key not in self.allowed_attributes:
+            if key not in self._allowed_attributes:
                 raise IllegalArgumentError(
                     f'Attribute "{key}" is not supported in the configuration of a side-bar'
-                    " button."
+                    " card."
                 )
 
         self._other_attributes = kwargs
-        for key in self.allowed_attributes:
+        for key in self._allowed_attributes:
             if key in json:
                 self._other_attributes[key] = json[key]
 
@@ -141,7 +144,7 @@ class SideBarCard(SideBarItem):
         :return: dictionary of the configuration data
         """
         config = {
-            "itemType": self.item_type,
+            "itemType": self._item_type,
             "displayText": self.display_text,
             "displayTextAlign": self.display_text_align,
             "order": self.order,
@@ -156,5 +159,6 @@ class SideBarCard(SideBarItem):
             "actionButtonUriTarget": self.action_button_uri_target,
         }
         config.update(self._other_attributes)
+        config = {k: v for k, v in config.items() if v is not None}
 
         return config

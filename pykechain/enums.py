@@ -581,7 +581,7 @@ class NavigationBarAlignment(Alignment):
     pass
 
 
-class SidebarButtonAlignment(Enum):
+class SidebarItemAlignment(Enum):
     """The acceptable alignment options for sidebar button.
 
     :cvar TOP: "top"
@@ -590,6 +590,12 @@ class SidebarButtonAlignment(Enum):
 
     TOP = "top"
     BOTTOM = "bottom"
+
+
+class SidebarButtonAlignment(SidebarItemAlignment):
+    """Compatibility enumeration class for the SidebarItemAlignment."""
+
+    pass
 
 
 class SidebarType(Enum):

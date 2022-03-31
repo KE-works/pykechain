@@ -11,8 +11,8 @@ class SideBarItem:
         the specifically allowed ones.
     :cvar item_type: the item type of this class. Defaults to a BUTTON.
     """
-    allowed_attributes = []
-    item_type = SidebarType.BUTTON
+    _allowed_attributes = []
+    _item_type = SidebarType.BUTTON
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__} {self.order}: {self.display_name}"
@@ -37,7 +37,7 @@ class SideBarItem:
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
-            elif key in self.allowed_attributes:
+            elif key in self._allowed_attributes:
                 self._other_attributes[key] = value
 
         self._manager._update()
@@ -52,4 +52,4 @@ class SideBarItem:
 
     def as_dict(self) -> Dict:
         """Represent the sidebar object as a dictionary."""
-        raise NotImplementedError
+        raise NotImplementedError("The method `as_dict()` need to be implemented.")

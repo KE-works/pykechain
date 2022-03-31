@@ -2,7 +2,7 @@ from collections.abc import Iterable
 from typing import Any, Optional, List, Dict
 
 from pykechain.enums import (
-    URITarget,
+    SidebarType, URITarget,
     SubprocessDisplayMode,
     KEChainPages,
     KEChainPageLabels,
@@ -69,8 +69,11 @@ class SideBarManager(Iterable):
         self._items: List[SideBarItem] = []
 
         # Load existing buttons from the scope
-        for button_dict in scope.options.get("customNavigation", []):
-            self._items.append(SideBarButton(side_bar_manager=self, json=button_dict))
+        for item_dict in scope.options.get("customNavigation", []):
+            if item_dict.get("itemType", SidebarType.BUTTON) == SidebarType.BUTTON:
+                self._items.append(SideBarButton(side_bar_manager=self, json=item_dict))
+            elif item_dict.get("itemType") == SidebarType.CARD:
+                self._items.append(SideBarCard(side_bar_manager=self, json=item_dict))
 
         self._iter = iter(self._items)
 
