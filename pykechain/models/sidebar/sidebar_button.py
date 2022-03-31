@@ -1,19 +1,37 @@
 from typing import Dict, Optional
 
-from pykechain.enums import MinimumAccessLevelOptions, SidebarButtonAlignment, URITarget, \
-    FontAwesomeMode
+from pykechain.enums import (
+    FontAwesomeMode,
+    SidebarAccessLevelOptions,
+    SidebarItemAlignment,
+    SidebarType,
+    URITarget,
+)
 from pykechain.exceptions import IllegalArgumentError
+from pykechain.models.sidebar.sidebar_base import SideBarItem
 
-allowed_attributes = ["displayName_nl", "displayName_de", "displayName_fr", "displayName_it"]
 
-
-class SideBarButton:
+class SideBarButton(SideBarItem):
     """
     Side-bar button class.
 
     Every custom button in the side-bar is maintained as an object of this class.
-    The original KE-chain buttons for the project detail, tasks and work breakdown structure are not separate buttons.
+    The original KE-chain buttons for the project detail, tasks and work breakdown
+    structure are not separate buttons.
+
+    :cvar allowed_attributes: allowed additional attributed provided as options alongside
+        the specifically allowed ones.
+    :cvar item_type: the item type of this class. Defaults to a BUTTON.
     """
+
+    _allowed_attributes = [
+        "displayName_nl",
+        "displayName_en",
+        "displayName_de",
+        "displayName_fr",
+        "displayName_it",
+    ]
+    _item_type = SidebarType.BUTTON
 
     def __init__(
         self,
@@ -23,8 +41,8 @@ class SideBarButton:
         title: Optional[str] = None,
         icon: Optional[str] = None,
         uri: Optional[str] = None,
-        alignment: SidebarButtonAlignment = SidebarButtonAlignment.TOP,
-        minimum_access_level: MinimumAccessLevelOptions = MinimumAccessLevelOptions.IS_MEMBER,
+        alignment: SidebarItemAlignment = SidebarItemAlignment.TOP,
+        minimum_access_level: SidebarAccessLevelOptions = SidebarAccessLevelOptions.IS_MEMBER,
         uri_target: URITarget = URITarget.INTERNAL,
         icon_mode: FontAwesomeMode = FontAwesomeMode.REGULAR,
         **kwargs,
@@ -33,25 +51,15 @@ class SideBarButton:
         Create a side-bar button.
 
         :param side_bar_manager: Manager object to which the button is linked.
-        :type side_bar_manager: SideBarManager
         :param json: the json response to construct the :class:`SideBarButton` from
-        :type json: dict
         :param order: index of the button
-        :type order: int
         :param title: visible label of the button
-        :type title: str
         :param icon: FontAwesome icon of the button
-        :type icon: str
         :param uri: Uniform Resource Identifier, the address of the linked page
-        :type uri: str
         :param uri_target: type of URI, either internal or external
-        :type uri_target: URITarget
         :param alignment: alignment of the button top or bottom
-        :type alignment: SidebarButtonAlignment
         :param minimum_access_level: the minimum permission needed to see the button
-        :type minimum_access_level: MinimumAccessLevelOptions
         :param icon_mode: FontAwesome display mode of the icon
-        :type icon_mode: FontAwesomeMode
         :returns None
         :raises IllegalArgumentError: When the provided Argument is not according to the type.
         """
@@ -87,10 +95,10 @@ class SideBarButton:
             )
 
         for key in kwargs.keys():
-            if key not in allowed_attributes:
+            if key not in self._allowed_attributes:
                 raise IllegalArgumentError(
                     f'Attribute "{key}" is not supported in the configuration of a side-bar'
-                    " button."
+                    " card."
                 )
 
         self._manager: "SideBarManager" = side_bar_manager
@@ -100,49 +108,13 @@ class SideBarButton:
         self.uri: str = uri
         self.uri_target: URITarget = uri_target
         self.display_icon_mode: FontAwesomeMode = icon_mode
-        self.alignment: SidebarButtonAlignment = alignment
-        self.minimum_access_level: MinimumAccessLevelOptions = minimum_access_level
+        self.alignment: SidebarItemAlignment = alignment
+        self.minimum_access_level: SidebarAccessLevelOptions = minimum_access_level
 
         self._other_attributes = kwargs
-        for key in allowed_attributes:
+        for key in self._allowed_attributes:
             if key in json:
                 self._other_attributes[key] = json[key]
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__} {self.order}: {self.display_name}"
-
-    def refresh(self, json: Optional[Dict] = None) -> None:
-        """
-        Refresh the object in-place using the provided json.
-
-        :param json: the json response to construct the :class:`SideBarButton` from
-        :type json: dict
-        :return: None
-        """
-        self.__init__(side_bar_manager=self._manager, json=json or self.as_dict())
-
-    def edit(self, **kwargs) -> None:
-        """
-        Edit the details of the button.
-
-        :param kwargs:
-        :return: None
-        """
-        for key, value in kwargs.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
-            elif key in allowed_attributes:
-                self._other_attributes[key] = value
-
-        self._manager._update()
-
-    def delete(self) -> None:
-        """
-        Delete the side-bar button from the side-bar.
-
-        :return: None
-        """
-        self._manager.delete_button(key=self)
 
     def as_dict(self) -> Dict:
         """
@@ -152,6 +124,7 @@ class SideBarButton:
         :rtype dict
         """
         config = {
+            "itemType": self._item_type,
             "displayName": self.display_name,
             "displayIcon": self.display_icon,
             "uriTarget": self.uri_target,
@@ -162,5 +135,6 @@ class SideBarButton:
             "minimumAccessLevel": self.minimum_access_level,
         }
         config.update(self._other_attributes)
+        config = {k: v for k, v in config.items() if v is not None}
 
         return config
