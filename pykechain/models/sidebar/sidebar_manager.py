@@ -2,7 +2,8 @@ from collections.abc import Iterable
 from typing import Any, Optional, List, Dict
 
 from pykechain.enums import (
-    SidebarType, URITarget,
+    SidebarType,
+    URITarget,
     SubprocessDisplayMode,
     KEChainPages,
     KEChainPageLabels,
@@ -162,7 +163,9 @@ class SideBarManager(Iterable):
         self._update()
         return card
 
-    def create_button(self, order: Optional[int] = None, *args, **kwargs) -> SideBarButton:
+    def create_button(
+        self, order: Optional[int] = None, *args, **kwargs
+    ) -> SideBarButton:
         """
         Create a side-bar button.
 
@@ -184,7 +187,9 @@ class SideBarManager(Iterable):
         self,
         activity: "Activity",
         title: Optional[str] = None,
-        task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
+        task_display_mode: Optional[
+            SubprocessDisplayMode
+        ] = SubprocessDisplayMode.ACTIVITIES,
         *args,
         **kwargs,
     ) -> SideBarButton:
@@ -205,10 +210,14 @@ class SideBarManager(Iterable):
         uri = f"{self._scope_uri}/{task_display_mode}/{activity.id}"
 
         uri_target = (
-            URITarget.INTERNAL if activity.scope_id == self.scope.id else URITarget.EXTERNAL
+            URITarget.INTERNAL
+            if activity.scope_id == self.scope.id
+            else URITarget.EXTERNAL
         )
 
-        return self.create_button(uri=uri, uri_target=uri_target, title=title, *args, **kwargs)
+        return self.create_button(
+            uri=uri, uri_target=uri_target, title=title, *args, **kwargs
+        )
 
     def add_ke_chain_page(
         self, page_name: KEChainPages, title: Optional[str] = None, *args, **kwargs
@@ -229,10 +238,17 @@ class SideBarManager(Iterable):
         uri = f"{self._scope_uri}/{page_name}"
 
         return self.create_button(
-            uri=uri, uri_target=URITarget.INTERNAL, title=title, icon=icon, *args, **kwargs
+            uri=uri,
+            uri_target=URITarget.INTERNAL,
+            title=title,
+            icon=icon,
+            *args,
+            **kwargs,
         )
 
-    def add_external_button(self, url: str, title: str, *args, **kwargs) -> SideBarButton:
+    def add_external_button(
+        self, url: str, title: str, *args, **kwargs
+    ) -> SideBarButton:
         """
         Add a side-bar button to an external page defined by an URL.
 
@@ -249,7 +265,9 @@ class SideBarManager(Iterable):
         )
         return button
 
-    def add_buttons(self, buttons: List[Dict], override_sidebar: bool) -> List[SideBarItem]:
+    def add_buttons(
+        self, buttons: List[Dict], override_sidebar: bool
+    ) -> List[SideBarItem]:
         """
         Create a list of buttons in bulk. Each button is defined by a dict, provided in a sorted list.
 

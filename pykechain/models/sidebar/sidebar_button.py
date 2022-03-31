@@ -4,7 +4,8 @@ from pykechain.enums import (
     FontAwesomeMode,
     SidebarAccessLevelOptions,
     SidebarItemAlignment,
-    SidebarType, URITarget,
+    SidebarType,
+    URITarget,
 )
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.sidebar.sidebar_base import SideBarItem

@@ -1,6 +1,12 @@
 from pykechain.enums import (
-    Alignment, KEChainPageLabels, KEChainPages, ScopeStatus, SidebarAccessLevelOptions,
-    SidebarItemAlignment, SubprocessDisplayMode, URITarget,
+    Alignment,
+    KEChainPageLabels,
+    KEChainPages,
+    ScopeStatus,
+    SidebarAccessLevelOptions,
+    SidebarItemAlignment,
+    SubprocessDisplayMode,
+    URITarget,
 )
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import Scope
@@ -121,7 +127,9 @@ class TestSideBar(TestBetamax):
         new_button.refresh()
 
         self.assertEqual("pennant", new_button.display_icon)
-        self.assertEqual(custom_name, new_button._other_attributes.get("displayName_nl"))
+        self.assertEqual(
+            custom_name, new_button._other_attributes.get("displayName_nl")
+        )
 
     def test_delete_button(self):
         new_button = self.manager.create_button(**self.default_button_config)
@@ -321,19 +329,19 @@ class TestSideBar(TestBetamax):
         with self.scope.side_bar() as sbm:
             sbm.add_ke_chain_page(
                 page_name=KEChainPages.FORMS,
-                minimum_access_level=SidebarAccessLevelOptions.IS_MEMBER
+                minimum_access_level=SidebarAccessLevelOptions.IS_MEMBER,
             )
             sbm.add_ke_chain_page(
                 page_name=KEChainPages.CONTEXTS,
-                minimum_access_level=SidebarAccessLevelOptions.IS_LEAD_MEMBER
+                minimum_access_level=SidebarAccessLevelOptions.IS_LEAD_MEMBER,
             )
             sbm.add_ke_chain_page(
                 page_name=KEChainPages.CATALOG_FORMS,
-                minimum_access_level=SidebarAccessLevelOptions.IS_SUPERVISOR
+                minimum_access_level=SidebarAccessLevelOptions.IS_SUPERVISOR,
             )
             sbm.add_ke_chain_page(
                 page_name=KEChainPages.WORKFLOWS,
-                minimum_access_level=SidebarAccessLevelOptions.IS_MANAGER
+                minimum_access_level=SidebarAccessLevelOptions.IS_MANAGER,
             )
             sbm.add_ke_chain_page(
                 page_name=KEChainPages.DETAIL,
@@ -347,24 +355,31 @@ class TestSideBar(TestBetamax):
         sbm = self.scope.side_bar()
         for button in sbm:  # type: SideBarButton
             if button.display_name == KEChainPageLabels[KEChainPages.FORMS]:
-                self.assertTrue(button.minimum_access_level ==
-                                SidebarAccessLevelOptions.IS_MEMBER)
+                self.assertTrue(
+                    button.minimum_access_level == SidebarAccessLevelOptions.IS_MEMBER
+                )
                 found[0] = True
             if button.display_name == KEChainPageLabels[KEChainPages.CONTEXTS]:
-                self.assertTrue(button.minimum_access_level ==
-                                SidebarAccessLevelOptions.IS_LEAD_MEMBER)
+                self.assertTrue(
+                    button.minimum_access_level
+                    == SidebarAccessLevelOptions.IS_LEAD_MEMBER
+                )
                 found[1] = True
             if button.display_name == KEChainPageLabels[KEChainPages.CATALOG_FORMS]:
-                self.assertTrue(button.minimum_access_level ==
-                                SidebarAccessLevelOptions.IS_SUPERVISOR)
+                self.assertTrue(
+                    button.minimum_access_level
+                    == SidebarAccessLevelOptions.IS_SUPERVISOR
+                )
                 found[2] = True
             if button.display_name == KEChainPageLabels[KEChainPages.WORKFLOWS]:
-                self.assertTrue(button.minimum_access_level ==
-                                SidebarAccessLevelOptions.IS_MANAGER)
+                self.assertTrue(
+                    button.minimum_access_level == SidebarAccessLevelOptions.IS_MANAGER
+                )
                 found[3] = True
             if button.display_name == KEChainPageLabels[KEChainPages.DETAIL]:
-                self.assertTrue(button.minimum_access_level ==
-                                SidebarAccessLevelOptions.IS_MEMBER)
+                self.assertTrue(
+                    button.minimum_access_level == SidebarAccessLevelOptions.IS_MEMBER
+                )
                 found[4] = True
 
         self.assertTrue(all(found))

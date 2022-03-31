@@ -11,6 +11,7 @@ class SideBarItem:
         the specifically allowed ones.
     :cvar item_type: the item type of this class. Defaults to a BUTTON.
     """
+
     _allowed_attributes = []
     _item_type = SidebarType.BUTTON
 

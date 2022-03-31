@@ -94,7 +94,9 @@ class SideBarCard(SideBarItem):
         )
 
         if not isinstance(self.order, int):
-            raise IllegalArgumentError(f'order must be an integer, "{self.order}" is not.')
+            raise IllegalArgumentError(
+                f'order must be an integer, "{self.order}" is not.'
+            )
         if (
             self.action_button_uri_target is not None
             and self.action_button_uri_target not in URITarget.values()
@@ -123,7 +125,10 @@ class SideBarCard(SideBarItem):
         """
         Retrieve the configuration data, or `meta`, of the side-bar button.
 
-        Example:
+        :return: dictionary of the configuration data
+
+        Example
+        -------
         ```{
             "itemType": "CARD",
             "order": 5,
@@ -141,7 +146,6 @@ class SideBarCard(SideBarItem):
             "maximumAccessLevel": "is_supervisor",
         }```
 
-        :return: dictionary of the configuration data
         """
         config = {
             "itemType": self._item_type,
