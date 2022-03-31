@@ -85,7 +85,7 @@ in a ``Pipfile``::
 in a pip ``requirements.txt``::
 
     pykechain
-    # or when you want to install a certain branch i.e. `master`
+    # or when you want to install a certain branch i.e. `main`
     git+https://github.com/KE-works/pykechain.git@main#egg=pykechain
 
 Changelog
