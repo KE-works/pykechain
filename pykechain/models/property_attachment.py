@@ -100,7 +100,7 @@ class AttachmentProperty(Property):
             self._upload_json(data, **kwargs)
         self._value = data
 
-    def save_as(self, filename: Optional[str] = None) -> None:
+    def save_as(self, filename: Optional[str] = None, **kwargs) -> None:
         """Download the attachment to a file.
 
         :param filename: (optional) File path. If not provided, will be saved to current working dir
@@ -112,7 +112,7 @@ class AttachmentProperty(Property):
         filename = filename or os.path.join(os.getcwd(), self.filename)
 
         with open(filename, "w+b") as f:
-            for chunk in self._download():
+            for chunk in self._download(**kwargs):
                 f.write(chunk)
 
     def _upload_json(self, content, name="data.json"):
@@ -131,10 +131,13 @@ class AttachmentProperty(Property):
         self._value = name
 
     # custom for PIM2
-    def _download(self):
+    def _download(self, **kwargs):
         url = self._client._build_url("property_download", property_id=self.id)
+        request_params = dict()
+        if kwargs:
+            request_params.update(**kwargs)
 
-        response = self._client._request("GET", url)
+        response = self._client._request("GET", url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not download property value.", response=response)

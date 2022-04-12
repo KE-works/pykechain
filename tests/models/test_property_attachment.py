@@ -1,8 +1,11 @@
 import json
 import os
 
+from PIL import Image
+
 from pykechain.enums import PropertyType, Multiplicity
 from pykechain.models import AttachmentProperty
+from pykechain.utils import temp_chdir
 from tests.classes import TestBetamax
 
 
@@ -14,6 +17,9 @@ class TestAttachment(TestBetamax):
 
     def setUp(self):
         super().setUp()
+        self.test_assets_dir = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
+        )
         self.property_name = "Plot Attachment"
 
         self.root_model = self.project.model(name="Product")
@@ -98,3 +104,27 @@ class TestAttachment(TestBetamax):
             "new part",
             update_dict={self.property_name: self.project_root + "/requirements.txt"},
         )
+
+    # def test_save_as_attachment(self):
+    #     upload_path = os.path.join(
+    #         self.test_assets_dir,
+    #         "files",
+    #         "test_upload_image_to_attachment_property",
+    #         "test_upload_image.png"
+    #     )
+    #     self.property.upload(upload_path)
+    #
+    #     with temp_chdir() as target_dir:
+    #         filepath_xl = os.path.join(target_dir, 'image_xl.png')
+    #         self.property.save_as(filename=filepath_xl, size='XL')
+    #         path = os.path.join(target_dir, filepath_xl)
+    #         image_xl = Image.open(path)
+    #         self.assertEqual(image_xl.width, 2048)
+    #
+    #         filepath_sqs = os.path.join(target_dir, 'image_sqs.png')
+    #         self.property.save_as(filename=filepath_sqs, size='SQS')
+    #         image_sqs = Image.open(os.path.join(target_dir, filepath_sqs))
+    #         self.assertEqual(image_sqs.width, 320)
+    #         self.assertEqual(image_sqs.height, 320)
+    #
+    #         self.assertEqual(len(os.listdir(target_dir)), 2)

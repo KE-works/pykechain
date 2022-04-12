@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v3.18.1 (12APR22)
+-----------------
+* :+1: we are now allowing request parameters such as `size` to be passed through the `property_attachment.save_as()` function in order to resize the images on download (#1138)
+
 v3.18.0 (22MAR22)
 -----------------
 * :+1: we upgraded all code to python 3.6 and higher preferred style. See the implemented improvements found throughout the code: https://github.com/asottile/pyupgrade/blob/master/README.md#implemented-features. We also reformatted the code using black.
