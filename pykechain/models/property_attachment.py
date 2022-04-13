@@ -106,6 +106,10 @@ class AttachmentProperty(Property):
         :param filename: (optional) File path. If not provided, will be saved to current working dir
                          with `self.filename`.
         :type filename: basestring or None
+
+        One can pass the `size` parameter as kwargs. See more in Enum:ImageSize or alternatively
+        customize the desired image size like this (width_value, height_value)
+
         :raises APIError: When unable to download the data
         :raises OSError: When unable to save the data to disk
         """
