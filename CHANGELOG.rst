@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-v3.18.1 (12APR22)
+v3.18.1 (14APR22)
 -----------------
 * :+1: we are now allowing request parameters such as `size` to be passed through the `property_attachment.save_as()` function in order to resize the images on download (#1138)
 
