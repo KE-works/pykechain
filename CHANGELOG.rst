@@ -1,8 +1,6 @@
 Change Log
 ==========
 
-pykechain-3.18.0-forms
-
 FORMS Feature
 -------------
 * We added the feature equivalence in pykechain for KE-chain Forms and Workflow.
@@ -16,6 +14,11 @@ FORMS Feature
 * :+1: Extended the `DashboardWidget` with the form numbers and charts (#1123)
 * :+1: Added the concept of a sidebar card to the sidebar.
 * :+1: Added the concept of a `StatusReferencesProperty` to pykechain.
+
+
+v3.18.1 (14APR22)
+-----------------
+* :+1: we are now allowing request parameters such as `size` to be passed through the `property_attachment.save_as()` function in order to resize the images on download (#1138)
 
 v3.18.0 (22MAR22)
 -----------------

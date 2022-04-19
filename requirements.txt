@@ -17,7 +17,7 @@ pytest-cov==3.0.0
 coveralls==3.3.1
 
 # documentation
-Sphinx==4.4.0
+Sphinx==4.5.0
 nbsphinx==0.8.8
 
 # integration
@@ -26,11 +26,11 @@ tox==3.24.5
 # code style
 flake8==4.0.1
 pydocstyle==6.1.1
-mypy==0.941; python_version >= '3.4'
+mypy==0.942; python_version >= '3.4'
 pre-commit==2.17.0
 
 # for package management (uploads)
 twine~=3.0; python_version >= '3.6'
-twine==3.7.1; python_version <= '3.5.99'
+twine==4.0.0; python_version <= '3.5.99'
 
 pytz==2022.1

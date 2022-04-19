@@ -1208,6 +1208,38 @@ class LanguageCodes(Enum):
     ITALIAN = "it"
 
 
+class ImageSize(Enum):
+    """
+    Options for the Image Size the picture would be saved as from an Attachment Property.
+
+    :cvar SQXS: SQXS (100, 100)  # pixels square
+    :cvar XS: XS (100, )  # pixels width
+    :cvar S: S (320, )
+    :cvar SQS: SQS (320, 320)
+    :cvar M: M (640, )
+    :cvar SQM: SQM (640, 640)
+    :cvar L: L (1024, )
+    :cvar SQL: SQL (1024, 1024)
+    :cvar XL: XL (2048, )
+    :cvar SQXL: SQXL (2048, 2048)
+    :cvar XXL: XXL (4096, )
+    :cvar SQXXL: SQXXL (4096, 4096)
+    """
+
+    SQXS = "SQXS"
+    XS = "XS"
+    S = "S"
+    SQS = "SQS"
+    M = "M"
+    SQM = "SQM"
+    L = "L"
+    SQL = "SQL"
+    XL = "XL"
+    SQXL = "SQXL"
+    XXL = "XXL"
+    SQXXL = "SQXXL"
+
+
 class FormCategory(Enum):
     """
     Options for the Category of a Form.

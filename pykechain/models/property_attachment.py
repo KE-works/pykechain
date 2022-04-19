@@ -100,19 +100,23 @@ class AttachmentProperty(Property):
             self._upload_json(data, **kwargs)
         self._value = data
 
-    def save_as(self, filename: Optional[str] = None) -> None:
+    def save_as(self, filename: Optional[str] = None, **kwargs) -> None:
         """Download the attachment to a file.
 
         :param filename: (optional) File path. If not provided, will be saved to current working dir
                          with `self.filename`.
         :type filename: basestring or None
+
+        One can pass the `size` parameter as kwargs. See more in Enum:ImageSize or alternatively
+        customize the desired image size like this (width_value, height_value)
+
         :raises APIError: When unable to download the data
         :raises OSError: When unable to save the data to disk
         """
         filename = filename or os.path.join(os.getcwd(), self.filename)
 
         with open(filename, "w+b") as f:
-            for chunk in self._download():
+            for chunk in self._download(**kwargs):
                 f.write(chunk)
 
     def _upload_json(self, content, name="data.json"):
@@ -130,10 +134,13 @@ class AttachmentProperty(Property):
         self._upload(data)
         self._value = name
 
-    def _download(self):
+    def _download(self, **kwargs):
         url = self._client._build_url("property_download", property_id=self.id)
+        request_params = dict()
+        if kwargs:
+            request_params.update(**kwargs)
 
-        response = self._client._request("GET", url)
+        response = self._client._request("GET", url, params=request_params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not download property value.", response=response)
