@@ -8,9 +8,9 @@ from pykechain.enums import (
     FormCategory,
     Multiplicity,
     PropertyType,
-    WorkflowCategory,
+    StatusCategory, WorkflowCategory,
 )
-from pykechain.exceptions import IllegalArgumentError
+from pykechain.exceptions import ForbiddenError, IllegalArgumentError, NotFoundError
 from pykechain.models import MultiReferenceProperty
 from pykechain.models.base_reference import _ReferenceProperty
 from pykechain.models.property_reference import (
@@ -22,6 +22,7 @@ from pykechain.models.property_reference import (
 )
 from pykechain.models.validators import RequiredFieldValidator
 from pykechain.models.value_filter import PropertyValueFilter, ScopeFilter
+from pykechain.models.workflow import Status, Workflow
 from pykechain.utils import find, is_uuid
 from tests.classes import TestBetamax
 
@@ -1220,7 +1221,6 @@ class TestPropertyContextReference(TestBetamax):
         )
 
 
-@skip("This is WIP and cannot be executed before the backend is updated")
 class TestPropertyStatusReferences(TestBetamax):
     def setUp(self):
         super().setUp()
@@ -1237,28 +1237,12 @@ class TestPropertyStatusReferences(TestBetamax):
             name=self.status_ref_prop_model.name
         )
 
-        # self.status_1 = self.client.create_status(
-        #     name="__testing_status_1",
-        #     status_type=StatusType.TIME_PERIOD,
-        #     status_group=StatusGroup.DISCIPLINE,
-        #     scope=self.project.id,
-        #     tags=["testing"],
-        # )  # type: Status
-        # self.status_2 = self.client.create_status(
-        #     name="__testing_status_2",
-        #     status_type=StatusType.STATIC_LOCATION,
-        #     status_group=StatusGroup.LOCATION,
-        #     scope=self.project.id,
-        #     tags=["testing"],
-        # )  # type: Status
+        self.status_1: Status = Status.get(client=self.client, name="To Do")
+        self.status_2: Status = Status.get(client=self.client, name="Done")
 
     def tearDown(self):
         if self.part:
             self.part.delete()
-        if self.status_1:
-            self.status_1.delete()
-        if self.status_2:
-            self.status_2.delete()
         super().tearDown()
 
     def test_create(self):
