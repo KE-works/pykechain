@@ -105,6 +105,9 @@ class PropertyType(Enum):
     :cvar GEOJSON_VALUE: GEOJSON property to store map data
     :cvar WEATHER_VALUE: Weather JSON property compatible with the response of weatherapi.com
 
+    .. versionadded:: 3.19
+    :cvar STATUS_REFERENCES_VALUE: Status References Property
+
     .. _Property documentation: https://support.ke-chain.com/confluence/dosearchsite.action?queryString=concept+property
     """
 
@@ -127,6 +130,7 @@ class PropertyType(Enum):
     SERVICE_REFERENCES_VALUE = "SERVICE_REFERENCES_VALUE"
     FORM_REFERENCES_VALUE = "FORM_REFERENCES_VALUE"
     CONTEXT_REFERENCES_VALUE = "CONTEXT_REFERENCES_VALUE"
+    STATUS_REFERENCES_VALUE = "STATUS_REFERENCES_VALUE"
     TEAM_REFERENCES_VALUE = "TEAM_REFERENCES_VALUE"
     USER_REFERENCES_VALUE = "USER_REFERENCES_VALUE"
     JSON_VALUE = "JSON_VALUE"

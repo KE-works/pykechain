@@ -23,6 +23,7 @@ from .property_reference import (
     ActivityReferencesProperty,
     ContextReferencesProperty,
     ScopeReferencesProperty,
+    StatusReferencesProperty,
     UserReferencesProperty,
     FormReferencesProperty,
 )
@@ -48,6 +49,8 @@ AnyProperty = Union[
     "ScopeReferencesProperty",
     "UserReferencesProperty",
     "FormReferencesProperty",
+    "ContextReferencesProperty",
+    "StatusReferencesProperty",
 ]
 
 # This map is used to identify the correct class for the (KE-chain provided) property type.
@@ -62,6 +65,7 @@ property_type_to_class_map = {
     PropertyType.USER_REFERENCES_VALUE: UserReferencesProperty,
     PropertyType.FORM_REFERENCES_VALUE: FormReferencesProperty,
     PropertyType.CONTEXT_REFERENCES_VALUE: ContextReferencesProperty,
+    PropertyType.STATUS_REFERENCES_VALUE: StatusReferencesProperty,
 }
 
 __all__ = (
@@ -93,6 +97,7 @@ __all__ = (
     "ScopeReferencesProperty",
     "UserReferencesProperty",
     "FormReferencesProperty",
+    "StatusReferencesProperty",
     "AnyProperty",
     "PropertyValueFilter",
     "property_type_to_class_map",

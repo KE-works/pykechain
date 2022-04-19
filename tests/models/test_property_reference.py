@@ -1,27 +1,28 @@
-from unittest import TestCase
+from unittest import TestCase, skip
 
 from pykechain.enums import (
+    ActivityRootNames,
     ContextGroup,
     ContextType,
-    FormCategory,
-    PropertyType,
     FilterType,
+    FormCategory,
     Multiplicity,
-    ActivityRootNames,
-    WorkflowCategory
+    PropertyType,
+    StatusCategory, WorkflowCategory,
 )
-from pykechain.exceptions import IllegalArgumentError
+from pykechain.exceptions import ForbiddenError, IllegalArgumentError, NotFoundError
 from pykechain.models import MultiReferenceProperty
 from pykechain.models.base_reference import _ReferenceProperty
 from pykechain.models.property_reference import (
     ActivityReferencesProperty,
     ContextReferencesProperty,
-    ScopeReferencesProperty,
-    UserReferencesProperty,
     FormReferencesProperty,
+    ScopeReferencesProperty,
+    StatusReferencesProperty, UserReferencesProperty,
 )
 from pykechain.models.validators import RequiredFieldValidator
 from pykechain.models.value_filter import PropertyValueFilter, ScopeFilter
+from pykechain.models.workflow import Status, Workflow
 from pykechain.utils import find, is_uuid
 from tests.classes import TestBetamax
 
@@ -296,7 +297,9 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
 
         # testing
         self.assertIn(
-            "{}:{}:{}".format(diameter_property.id, 30.5, FilterType.GREATER_THAN_EQUAL),
+            "{}:{}:{}".format(
+                diameter_property.id, 30.5, FilterType.GREATER_THAN_EQUAL
+            ),
             filters,
         )
         self.assertIn(
@@ -307,13 +310,17 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
             "{}:{}:{}".format(rim_material_property.id, "Al", FilterType.CONTAINS),
             filters,
         )
-        self.assertIn("{}:{}:{}".format(self.bool_prop.id, "true", FilterType.EXACT), filters)
+        self.assertIn(
+            "{}:{}:{}".format(self.bool_prop.id, "true", FilterType.EXACT), filters
+        )
         self.assertIn(
             "{}:{}:{}".format(self.ssl_prop.id, "Michelin", FilterType.CONTAINS),
             filters,
         )
         self.assertIn(
-            "{}:{}:{}".format(self.datetime_prop.id, self.time, FilterType.GREATER_THAN_EQUAL),
+            "{}:{}:{}".format(
+                self.datetime_prop.id, self.time, FilterType.GREATER_THAN_EQUAL
+            ),
             filters,
         )
 
@@ -335,7 +342,9 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
         self.assertEqual(FilterType.GREATER_THAN_EQUAL, first_filter.type)
 
     def test_set_prefilters_with_validation(self):
-        prefilter_good = PropertyValueFilter(self.float_prop, 15.3, FilterType.GREATER_THAN_EQUAL)
+        prefilter_good = PropertyValueFilter(
+            self.float_prop, 15.3, FilterType.GREATER_THAN_EQUAL
+        )
         prefilter_bad = PropertyValueFilter(
             self.part_model.property("Gears"), 15.3, FilterType.GREATER_THAN_EQUAL
         )
@@ -346,7 +355,9 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
             self.ref_prop_model.set_prefilters(prefilters=[prefilter_bad])
 
         # Validate by providing the referenced model
-        self.ref_prop_model.set_prefilters(prefilters=[prefilter_good], validate=self.target_model)
+        self.ref_prop_model.set_prefilters(
+            prefilters=[prefilter_good], validate=self.target_model
+        )
         with self.assertRaises(IllegalArgumentError):
             self.ref_prop_model.set_prefilters(
                 prefilters=[prefilter_bad], validate=self.target_model
@@ -379,7 +390,9 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
 
         # testing Filters
         self.assertIn(
-            "{}:{}:{}".format(diameter_property.id, 15.13, FilterType.GREATER_THAN_EQUAL),
+            "{}:{}:{}".format(
+                diameter_property.id, 15.13, FilterType.GREATER_THAN_EQUAL
+            ),
             self.ref_prop_model._options["prefilters"]["property_value"],
         )
 
@@ -393,7 +406,9 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
 
         # testing Validators
         self.assertTrue(self.ref_prop_model.validators)
-        self.assertIsInstance(self.ref_prop_model._validators[0], RequiredFieldValidator)
+        self.assertIsInstance(
+            self.ref_prop_model._validators[0], RequiredFieldValidator
+        )
 
     def test_clear_prefilters(self):
         # setUp
@@ -530,17 +545,25 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
 
         # testing
         self.assertEqual(len(self.ref_prop_model._options["propmodels_excl"]), 2)
-        self.assertTrue(diameter_property.id in self.ref_prop_model._options["propmodels_excl"])
-        self.assertTrue(spokes_property.id in self.ref_prop_model._options["propmodels_excl"])
+        self.assertTrue(
+            diameter_property.id in self.ref_prop_model._options["propmodels_excl"]
+        )
+        self.assertTrue(
+            spokes_property.id in self.ref_prop_model._options["propmodels_excl"]
+        )
 
     def test_set_excluded_propmodels_with_validation(self):
         excluded_model_good = self.float_prop
         excluded_model_bad = self.part_model.property("Gears")
 
         # Validate automatically
-        self.ref_prop_model.set_excluded_propmodels(property_models=[excluded_model_good])
+        self.ref_prop_model.set_excluded_propmodels(
+            property_models=[excluded_model_good]
+        )
         with self.assertRaises(IllegalArgumentError):
-            self.ref_prop_model.set_excluded_propmodels(property_models=[excluded_model_bad])
+            self.ref_prop_model.set_excluded_propmodels(
+                property_models=[excluded_model_bad]
+            )
 
         # Validate by providing the referenced model
         self.ref_prop_model.set_excluded_propmodels(
@@ -570,8 +593,12 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
 
         # testing
         self.assertEqual(len(self.ref_prop_model._options["propmodels_excl"]), 2)
-        self.assertTrue(diameter_property.id in self.ref_prop_model._options["propmodels_excl"])
-        self.assertTrue(spokes_property.id in self.ref_prop_model._options["propmodels_excl"])
+        self.assertTrue(
+            diameter_property.id in self.ref_prop_model._options["propmodels_excl"]
+        )
+        self.assertTrue(
+            spokes_property.id in self.ref_prop_model._options["propmodels_excl"]
+        )
 
     def test_set_excluded_propmodels_on_reference_property_with_prefilters_and_validators(
         self,
@@ -597,13 +624,21 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
         # testing
         self.assertTrue("property_value" in self.ref_prop_model._options["prefilters"])
         self.assertTrue(
-            "{}:{}:{}".format(diameter_property.id, 15.13, FilterType.GREATER_THAN_EQUAL)
+            "{}:{}:{}".format(
+                diameter_property.id, 15.13, FilterType.GREATER_THAN_EQUAL
+            )
             in self.ref_prop_model._options["prefilters"]["property_value"]
         )
         self.assertEqual(len(self.ref_prop_model._options["propmodels_excl"]), 2)
-        self.assertTrue(diameter_property.id in self.ref_prop_model._options["propmodels_excl"])
-        self.assertTrue(spokes_property.id in self.ref_prop_model._options["propmodels_excl"])
-        self.assertTrue(isinstance(self.ref_prop_model._validators[0], RequiredFieldValidator))
+        self.assertTrue(
+            diameter_property.id in self.ref_prop_model._options["propmodels_excl"]
+        )
+        self.assertTrue(
+            spokes_property.id in self.ref_prop_model._options["propmodels_excl"]
+        )
+        self.assertTrue(
+            isinstance(self.ref_prop_model._validators[0], RequiredFieldValidator)
+        )
 
     def test_get_prefilters(self):
         # setUp
@@ -627,7 +662,9 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
 
         prefilters = self.ref_prop_model.get_prefilters(as_lists=True)
 
-        self.assertIsInstance(prefilters, tuple, msg="Prefilters should be a tuple of 3 lists!")
+        self.assertIsInstance(
+            prefilters, tuple, msg="Prefilters should be a tuple of 3 lists!"
+        )
         self.assertEqual(3, len(prefilters), msg="Expected 3 lists!")
 
         property_model_ids, values, filters = prefilters
@@ -644,7 +681,9 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
         # testing
         # When excluded propmodels are being set, but the property does not belong to the referenced part
         with self.assertRaises(IllegalArgumentError):
-            self.ref_prop_model.set_excluded_propmodels(property_models=[bike_gears_property])
+            self.ref_prop_model.set_excluded_propmodels(
+                property_models=[bike_gears_property]
+            )
 
         # When excluded propmodels are being set, but the property is an instance, not a model
         with self.assertRaises(IllegalArgumentError):
@@ -668,8 +707,12 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
 
         # testing
         self.assertEqual(len(self.ref_prop_model._options["propmodels_excl"]), 2)
-        self.assertTrue(self.float_prop.id in self.ref_prop_model._options["propmodels_excl"])
-        self.assertTrue(self.integer_prop.id in self.ref_prop_model._options["propmodels_excl"])
+        self.assertTrue(
+            self.float_prop.id in self.ref_prop_model._options["propmodels_excl"]
+        )
+        self.assertTrue(
+            self.integer_prop.id in self.ref_prop_model._options["propmodels_excl"]
+        )
 
     def test_overwrite_excluded_propmodels_on_reference_property(self):
         # setUp
@@ -689,7 +732,9 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
         self.assertTrue(
             diameter_property.id not in self.ref_prop_model._options["propmodels_excl"]
         )
-        self.assertTrue(spokes_property.id in self.ref_prop_model._options["propmodels_excl"])
+        self.assertTrue(
+            spokes_property.id in self.ref_prop_model._options["propmodels_excl"]
+        )
 
     def test_get_excluded_propmodel_ids(self):
         # setUp
@@ -746,7 +791,9 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
 
         # testing
         self.assertEqual(copied_ref_property.name, "__Copied ref property")
-        self.assertEqual(copied_ref_property.description, self.ref_prop_model.description)
+        self.assertEqual(
+            copied_ref_property.description, self.ref_prop_model.description
+        )
         self.assertEqual(copied_ref_property.unit, self.ref_prop_model.unit)
         self.assertEqual(copied_ref_property.value, self.ref_prop_model.value)
         self.assertDictEqual(copied_ref_property._options, self.ref_prop_model._options)
@@ -1024,30 +1071,30 @@ class TestPropertyFormReference(TestBetamax):
             name="form ref", property_type=PropertyType.FORM_REFERENCES_VALUE
         )
         self.workflow = self.client.workflow(
-            name='Simple Form Flow',
-            category=WorkflowCategory.CATALOG
+            name="Simple Form Flow", category=WorkflowCategory.CATALOG
         )
         self.approval_workflow = self.client.workflow(
-            name='Strict Approval Workflow',
-            category=WorkflowCategory.CATALOG
+            name="Strict Approval Workflow", category=WorkflowCategory.CATALOG
         )
-        self.discipline_context = self.project.context(
-            name="Discipline 1"
-        )
-        self.asset_context = self.project.context(
-            name="Object 1"
-        )
+        self.discipline_context = self.project.context(name="Discipline 1")
+        self.asset_context = self.project.context(name="Object 1")
         self.form_model_name = "__TEST__FORM_MODEL"
         self.form_model = self.client.create_form_model(
             name=self.form_model_name,
             scope=self.project,
             workflow=self.workflow,
             category=FormCategory.MODEL,
-            contexts=[self.asset_context, self.discipline_context])
+            contexts=[self.asset_context, self.discipline_context],
+        )
         self.form_ref_prop_instance = self.part.instance().property(
-            name=self.form_ref_prop_model.name)
-        self.form_instance_1 = self.form_model.instantiate(name="__FIRST_TEST_FORM_INSTANCE")
-        self.form_instance_2 = self.form_model.instantiate(name="__SECOND_TEST_FORM_INSTANCE ")
+            name=self.form_ref_prop_model.name
+        )
+        self.form_instance_1 = self.form_model.instantiate(
+            name="__FIRST_TEST_FORM_INSTANCE"
+        )
+        self.form_instance_2 = self.form_model.instantiate(
+            name="__SECOND_TEST_FORM_INSTANCE "
+        )
 
     def tearDown(self):
         if self.part:
@@ -1079,16 +1126,22 @@ class TestPropertyFormReference(TestBetamax):
         self.form_ref_prop_instance.value = [self.form_instance_1]
 
         self.assertEqual(len(self.form_ref_prop_instance.value), 1)
-        self.assertEqual(self.form_ref_prop_instance.value[0].id, self.form_instance_1.id)
+        self.assertEqual(
+            self.form_ref_prop_instance.value[0].id, self.form_instance_1.id
+        )
 
         self.form_ref_prop_instance.value = [self.form_instance_1, self.form_instance_2]
 
         self.assertEqual(len(self.form_ref_prop_instance.value), 2)
 
-        self.assertIn(self.form_instance_1.id,
-                      [value.id for value in self.form_ref_prop_instance.value])
-        self.assertIn(self.form_instance_2.id,
-                      [value.id for value in self.form_ref_prop_instance.value])
+        self.assertIn(
+            self.form_instance_1.id,
+            [value.id for value in self.form_ref_prop_instance.value],
+        )
+        self.assertIn(
+            self.form_instance_2.id,
+            [value.id for value in self.form_ref_prop_instance.value],
+        )
 
 
 class TestPropertyContextReference(TestBetamax):
@@ -1096,13 +1149,16 @@ class TestPropertyContextReference(TestBetamax):
         super().setUp()
         root = self.project.model(name="Product")
         self.part = self.project.create_model(
-            name="TEST_CONTEXT_REFERENCE_PART", parent=root, multiplicity=Multiplicity.ONE
+            name="TEST_CONTEXT_REFERENCE_PART",
+            parent=root,
+            multiplicity=Multiplicity.ONE,
         )
         self.context_ref_prop_model = self.part.add_property(
             name="context ref", property_type=PropertyType.CONTEXT_REFERENCES_VALUE
         )
         self.context_ref_prop_instance = self.part.instance().property(
-            name=self.context_ref_prop_model.name)
+            name=self.context_ref_prop_model.name
+        )
 
         self.context_1 = self.client.create_context(
             name="__testing_context_1",
@@ -1155,7 +1211,72 @@ class TestPropertyContextReference(TestBetamax):
         self.context_ref_prop_instance.value = [self.context_1, self.context_2]
 
         self.assertEqual(len(self.context_ref_prop_instance.value), 2)
-        self.assertIn(self.context_1.id,
-                      [value.id for value in self.context_ref_prop_instance.value])
-        self.assertIn(self.context_2.id,
-                      [value.id for value in self.context_ref_prop_instance.value])
+        self.assertIn(
+            self.context_1.id,
+            [value.id for value in self.context_ref_prop_instance.value],
+        )
+        self.assertIn(
+            self.context_2.id,
+            [value.id for value in self.context_ref_prop_instance.value],
+        )
+
+
+class TestPropertyStatusReferences(TestBetamax):
+    def setUp(self):
+        super().setUp()
+        root = self.project.model(name="Product")
+        self.part = self.project.create_model(
+            name="TEST_STATUS_REFERENCE_PART",
+            parent=root,
+            multiplicity=Multiplicity.ONE,
+        )
+        self.status_ref_prop_model = self.part.add_property(
+            name="status ref", property_type=PropertyType.STATUS_REFERENCES_VALUE
+        )
+        self.status_ref_prop_instance = self.part.instance().property(
+            name=self.status_ref_prop_model.name
+        )
+
+        self.status_1: Status = Status.get(client=self.client, name="To Do")
+        self.status_2: Status = Status.get(client=self.client, name="Done")
+
+    def tearDown(self):
+        if self.part:
+            self.part.delete()
+        super().tearDown()
+
+    def test_create(self):
+        self.assertIsInstance(self.status_ref_prop_model, StatusReferencesProperty)
+
+    def test_value_model(self):
+        self.status_ref_prop_model.value = [self.status_1]
+
+        self.assertIsNotNone(self.status_ref_prop_model.value)
+        self.assertEqual(self.status_ref_prop_model.value[0].id, self.status_1.id)
+        self.assertEqual(len(self.status_ref_prop_model.value), 1)
+
+    def test_no_value_model(self):
+        self.assertIsNone(self.status_ref_prop_model.value)
+
+    def test_value_instance(self):
+        self.status_ref_prop_instance.value = [self.status_1]
+
+        self.assertIsNotNone(self.status_ref_prop_instance.value)
+        self.assertEqual(self.status_ref_prop_instance.value[0].id, self.status_1.id)
+        self.assertEqual(len(self.status_ref_prop_instance.value), 1)
+
+    def test_no_value_instance(self):
+        self.assertIsNone(self.status_ref_prop_instance.value)
+
+    def test_multiple_values(self):
+        self.status_ref_prop_instance.value = [self.status_1, self.status_2]
+
+        self.assertEqual(len(self.status_ref_prop_instance.value), 2)
+        self.assertIn(
+            self.status_1.id,
+            [value.id for value in self.status_ref_prop_instance.value],
+        )
+        self.assertIn(
+            self.status_2.id,
+            [value.id for value in self.status_ref_prop_instance.value],
+        )
