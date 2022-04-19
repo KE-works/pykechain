@@ -1156,6 +1156,22 @@ class Client:
 
         return User(response.json()["results"][0], client=self)
 
+    def create_user(
+        self,
+        username: str,
+        email: str,
+        name: Optional[str] = None,
+        team_ids: Optional[Union[Team,ObjectID]] = None,
+    ) -> "User":
+        """New User in KE-chain.
+
+        :param username: username of the user
+        :param email: email of the user
+        :poram name: (optional) full human name of the user
+        :param team_ids: (optional) list of Team or Team id's to which the user should be added.
+        """
+        raise NotImplementedError
+
     def teams(
         self,
         name: Optional[str] = None,
