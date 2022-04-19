@@ -7,6 +7,7 @@ from pykechain.models.base_reference import _ReferenceProperty, _ReferenceProper
 from pykechain.models.context import Context
 from pykechain.models.form import Form
 from pykechain.models.value_filter import ScopeFilter
+from pykechain.models.workflow import Status
 from pykechain.utils import get_in_chunks
 
 
@@ -204,3 +205,26 @@ class ContextReferencesProperty(_ReferencePropertyInScope):
             context.refresh()  # To populate the object with all expected data
             contexts.append(context)
         return contexts
+
+
+class StatusReferencesProperty(_ReferenceProperty):
+    """A virtual object representing a KE-chain Context References property.
+
+    .. versionadded:: 3.19
+    """
+
+    # REFERENCED_CLASS = Status
+
+    def _retrieve_objects(self, **kwargs) -> List[Context]:
+        """
+        Retrieve a list of Contexts.
+
+        :param kwargs: optional inputs
+        :return: list of Context objects
+        """
+        statuses = []
+        for statuse_json in self._value:
+            status = Status(client=self._client, json=statuse_json)
+            status.refresh()  # To populate the object with all expected data
+            statuses.append(status)
+        return statuses

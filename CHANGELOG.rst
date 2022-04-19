@@ -15,6 +15,7 @@ FORMS Feature
 * :+1: Removed the `target_scope` parameter when cloning inside the same scope
 * :+1: Extended the `DashboardWidget` with the form numbers and charts (#1123)
 * :+1: Added the concept of a sidebar card to the sidebar.
+* :+1: Added the concept of a `StatusReferencesProperty` to pykechain.
 
 v3.18.0 (22MAR22)
 -----------------
