@@ -1,5 +1,8 @@
+import pytest
+import pytz
+
 from pykechain.enums import LanguageCodes
-from pykechain.exceptions import NotFoundError, MultipleFoundError
+from pykechain.exceptions import MultipleFoundError, NotFoundError
 from tests.classes import TestBetamax
 
 
@@ -75,3 +78,24 @@ class TestUsers(TestBetamax):
         import datetime
 
         self.assertIsInstance(now, datetime.datetime)
+
+
+@pytest.mark.skipif(
+    "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+    reason="Skipping tests when using Travis or Github Actions, as not we cannot delete new user",
+)
+class TestCreateUsers(TestBetamax):
+    def test_create_a_new_user(self):
+        """Create a new user.
+
+        /!\ You need to delete this one by hand as we cannot yet delete a user
+        using the API. And basically we also do not want that.
+        """
+        payload = dict(
+            username="__delete_me",
+            email="hostmaster+newuser@ke-works.com",
+            name="__Nieuwe Gebruiker made for a pykechain test - safe to delete",
+            language_code=LanguageCodes.DUTCH,
+            timezone=str(pytz.timezone("Europe/Amsterdam")),
+        )
+        self.client.create_user(**payload)
