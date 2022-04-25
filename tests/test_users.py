@@ -99,3 +99,19 @@ class TestCreateUsers(TestBetamax):
             timezone=str(pytz.timezone("Europe/Amsterdam")),
         )
         self.client.create_user(**payload)
+
+    def test_create_a_new_user_and_reset_password(self):
+        """Create a new user.
+
+        /!\ You need to delete this one by hand as we cannot yet delete a user
+        using the API. And basically we also do not want that.
+        """
+        payload = dict(
+            username="__delete_me",
+            email="hostmaster+newuser@ke-works.com",
+            name="__Nieuwe Gebruiker made for a pykechain test - safe to delete",
+            language_code=LanguageCodes.DUTCH,
+            timezone=str(pytz.timezone("Europe/Amsterdam")),
+            send_passwd_link=True,
+        )
+        self.client.create_user(**payload)
