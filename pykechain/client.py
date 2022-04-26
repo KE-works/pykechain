@@ -26,6 +26,7 @@ from pykechain.enums import (
     ContextType,
     FormCategory,
     KechainEnv,
+    LanguageCodes,
     Multiplicity,
     NotificationChannels,
     NotificationEvent,
@@ -36,7 +37,8 @@ from pykechain.enums import (
     ServiceScriptUser,
     ServiceType,
     TeamRoles,
-    WidgetTypes, WorkflowCategory,
+    WidgetTypes,
+    WorkflowCategory,
 )
 from pykechain.exceptions import (
     APIError,
@@ -63,7 +65,11 @@ from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.widgets.widget import Widget
 from pykechain.utils import (
-    clean_empty_values, find, get_in_chunks, is_uuid, is_valid_email,
+    clean_empty_values,
+    find,
+    get_in_chunks,
+    is_uuid,
+    is_valid_email,
     slugify_ref,
 )
 from .__about__ import version as pykechain_version
@@ -1156,6 +1162,54 @@ class Client:
 
         return User(response.json()["results"][0], client=self)
 
+    def create_user(
+        self,
+        username: str,
+        email: str,
+        name: Optional[str] = None,
+        team_ids: Optional[Union[Team, ObjectID]] = None,
+        timezone: Optional[str] = None,
+        language_code: Optional[LanguageCodes] = None,
+        send_passwd_link: bool = False,
+        **kwargs,
+    ) -> "User":
+        """Create a new User in KE-chain.
+
+        The user is created in KE-chain. It is highly encouraged to provide a name
+        for the user. Optionally one may choose to send out a forgot password
+        link to the newly created user.
+
+        :param username: username of the user
+        :param email: email of the user
+        :poram name: (optional) full human name of the user
+        :param team_ids: (optional) list of Team or Team id's to which the user should be added.
+        :param language_code: (optional) the Language of the user. One of LanguageCodes. Eg. "nl"
+        :param timezone: (optional) the timezone name of the user. Eg. "Europe/Amsterdam"
+        :param send_passwd_link: (optional) boolean to send out a password reset link after
+            the user is created. Defaults to False.
+        """
+        request_payload = {
+            "username": check_text(username, "username"),
+            "email": check_text(email, "email"),
+            "name": check_text(name, "name"),
+            "timezone": check_text(timezone, "timezone"),
+            "language_code": check_enum(language_code, LanguageCodes, "language"),
+            "team_ids": check_list_of_base(team_ids, Team, "team_ids") or [],
+        }
+        if kwargs:
+            request_payload.update(**kwargs)
+
+        response = self._request("POST", self._build_url("users"), json=request_payload)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create a new user", response=response)
+
+        user = User(response.json()["results"][0], client=self)
+        if send_passwd_link:
+            user.reset_password()
+
+        return user
+
     def teams(
         self,
         name: Optional[str] = None,
@@ -1462,7 +1516,10 @@ class Client:
                 include_part_instances, bool, "clone_part_instances"
             ),
             include_part_children=check_type(include_children, bool, "clone_children"),
-            excluded_part_ids=check_list_of_base(excluded_parts, Part, "excluded_models") or [],
+            excluded_part_ids=check_list_of_base(
+                excluded_parts, Part, "excluded_models"
+            )
+            or [],
             part_parent_model_id=check_base(
                 part_parent_model, Part, "part_parent_model"
             ),
@@ -1739,8 +1796,10 @@ class Client:
         if part.category == Category.MODEL:
             data.update(
                 {
-                    "multiplicity": check_enum(multiplicity, Multiplicity,
-                                               "multiplicity") or part.multiplicity,
+                    "multiplicity": check_enum(
+                        multiplicity, Multiplicity, "multiplicity"
+                    )
+                    or part.multiplicity,
                     "model_id": part.id,
                     "parent": parent.id,
                 }
@@ -1939,10 +1998,13 @@ class Client:
             json=payload,
         )
         # TODO - remove requests.codes.ok when async is implemented in the backend
-        if ((asynchronous and response.status_code not in (
-            requests.codes.ok, requests.codes.accepted))
-            or (not asynchronous and response.status_code not in (
-                requests.codes.ok, requests.codes.accepted))):  # pragma: no cover
+        if (
+            asynchronous
+            and response.status_code not in (requests.codes.ok, requests.codes.accepted)
+        ) or (
+            not asynchronous
+            and response.status_code not in (requests.codes.ok, requests.codes.accepted)
+        ):  # pragma: no cover
             raise APIError(
                 f"Could not delete Parts. ({response.status_code})", response=response
             )
@@ -3119,8 +3181,10 @@ class Client:
 
         update_dict = {
             "parent_id": parent_object.id,
-            "classification": check_enum(classification, ActivityClassification,
-                                         "classification") or parent_object.classification,
+            "classification": check_enum(
+                classification, ActivityClassification, "classification"
+            )
+            or parent_object.classification,
         }
 
         url = self._build_url("activity_move", activity_id=str(activity.id))
@@ -3766,8 +3830,9 @@ class Client:
         )
         for form in forms:
             form["form"] = check_base(form.get("form"), Form, "form")
-            form["values"]["contexts"] = check_list_of_base(form.get("values").get(
-                "contexts"), Context, "contexts")
+            form["values"]["contexts"] = check_list_of_base(
+                form.get("values").get("contexts"), Context, "contexts"
+            )
 
         # prepare url query parameters
         query_params = kwargs
@@ -3787,7 +3852,7 @@ class Client:
             raise APIError(
                 f"Could not create Forms. ({response.status_code})", response=response
             )
-        form_ids = [form.get('id') for form in response.json()["results"]]
+        form_ids = [form.get("id") for form in response.json()["results"]]
         if retrieve_instances:
             instances_per_id = dict()
             for forms_ids_chunk in get_in_chunks(lst=form_ids, chunk_size=50):
@@ -3840,10 +3905,13 @@ class Client:
             json=bulk_action_input,
         )
         # TODO - remove requests.codes.ok when async is implemented in the backend
-        if ((asynchronous and response.status_code not in (
-            requests.codes.ok, requests.codes.accepted))
-            or (not asynchronous and response.status_code not in (
-                requests.codes.ok, requests.codes.accepted))):  # pragma: no cover
+        if (
+            asynchronous
+            and response.status_code not in (requests.codes.ok, requests.codes.accepted)
+        ) or (
+            not asynchronous
+            and response.status_code not in (requests.codes.ok, requests.codes.accepted)
+        ):  # pragma: no cover
             raise APIError(
                 f"Could not delete Forms. ({response.status_code})", response=response
             )
@@ -3857,7 +3925,7 @@ class Client:
         description: Optional[str] = None,
         scope: Optional[Union[Scope, ObjectID]] = None,
         ref: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> Workflow:
         """
         Retrieve a single Workflow, see `workflows()` method for available arguments.
@@ -3884,7 +3952,9 @@ class Client:
 
         if kwargs:
             request_params.update(**kwargs)
-        return Workflow.get(client=self, **clean_empty_values(request_params, nones=False))
+        return Workflow.get(
+            client=self, **clean_empty_values(request_params, nones=False)
+        )
 
     def workflows(
         self,

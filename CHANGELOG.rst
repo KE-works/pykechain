@@ -15,7 +15,8 @@ FORMS Feature
 * :+1: Added the concept of a sidebar card to the sidebar.
 * :+1: Added the concept of a `StatusReferencesProperty` to pykechain.
 * :+1: Added the Form Classification on the parts world.
-
+* :+1: Added the ability to create a user from the frontend.
+* :+1: Added the ability to request a change password link from the frontend.
 
 v3.18.1 (14APR22)
 -----------------

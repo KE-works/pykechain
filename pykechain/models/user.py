@@ -1,9 +1,11 @@
 import datetime
 
 import pytz
+import requests
 
 from .base import Base
 from ..enums import LanguageCodes
+from ..exceptions import APIError
 
 
 class User(Base):
@@ -77,6 +79,22 @@ class User(Base):
         :rtype: basestring
         """
         return self._json_data.get("email", "")
+
+    def reset_password(self) -> None:
+        """Send a request password link to the email of the user.
+
+        curl 'https://pim3-test.ke-chain.com/accounts/password/reset/' \
+          --data-raw '{"email":"hostmaster+newuser@ke-works.com"}' \
+        """
+        payload = {"email": self.email}
+        response = self._client._request(
+            "POST",
+            url=self._client._build_url("user_reset_password"),
+            json=payload
+        )
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError(f"Could not request a reset password link for '{self}'",
+                           response=response)
 
     def now_in_my_timezone(self) -> datetime.datetime:
         """
