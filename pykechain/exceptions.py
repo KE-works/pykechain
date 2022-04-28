@@ -131,6 +131,11 @@ class InspectorComponentError(Exception):
     pass
 
 
+class PDFDownloadTimeoutError(APIError):
+    """Error downloading the PDF because of a timeouterror."""
+
+    pass
+
 class _DeprecationMixin:
 
     __notified = False

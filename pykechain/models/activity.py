@@ -1,38 +1,31 @@
 import datetime
 import os
 import time
-from typing import List, Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 from urllib.parse import urljoin
 
 import requests
 
-from pykechain.defaults import ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT, API_EXTRA_PARAMS
+from pykechain.defaults import API_EXTRA_PARAMS, ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT
 from pykechain.enums import (
-    ActivityType,
-    ActivityStatus,
-    Category,
-    ActivityClassification,
-    ActivityRootNames,
-    PaperSize,
-    PaperOrientation,
+    ActivityClassification, ActivityRootNames, ActivityStatus, ActivityType, Category,
+    PaperOrientation, PaperSize,
 )
-from pykechain.exceptions import NotFoundError, IllegalArgumentError, APIError, MultipleFoundError
+from pykechain.exceptions import (
+    APIError, IllegalArgumentError, MultipleFoundError, NotFoundError, PDFDownloadTimeoutError,
+)
 from pykechain.models.input_checks import (
-    check_datetime,
-    check_text,
-    check_list_of_text,
-    check_enum,
-    check_user,
-    check_type,
-    check_base,
+    check_base, check_datetime, check_enum, check_list_of_text, check_text, check_type, check_user,
 )
 from pykechain.models.representations.component import RepresentationsComponent
 from pykechain.models.tags import TagsMixin
 from pykechain.models.tree_traversal import TreeObject
 from pykechain.models.user import User
 from pykechain.models.widgets.widgets_manager import WidgetsManager
-from pykechain.utils import get_offset_from_user_timezone, parse_datetime, is_valid_email, empty, \
-    Empty, clean_empty_values
+from pykechain.utils import (
+    Empty, clean_empty_values, empty, get_offset_from_user_timezone,
+    is_valid_email, parse_datetime,
+)
 
 
 class Activity(TreeObject, TagsMixin):
@@ -863,7 +856,8 @@ class Activity(TreeObject, TagsMixin):
         paper_orientation: PaperOrientation = PaperOrientation.PORTRAIT,
         include_appendices: bool = False,
         include_qr_code: bool = False,
-        user: Optional[User] = None
+        user: Optional[User] = None,
+        timeout: int = ASYNC_TIMEOUT_LIMIT,
     ) -> str:
         """
         Retrieve the PDF of the Activity.
@@ -871,27 +865,24 @@ class Activity(TreeObject, TagsMixin):
         .. versionadded:: 2.1
 
         :param target_dir: (optional) directory path name where the store the log.txt to.
-        :type target_dir: basestring or None
         :param pdf_filename: (optional) log filename to write the log to, defaults to `log.txt`.
-        :type pdf_filename: basestring or None
         :param paper_size: The size of the paper to which the PDF is downloaded:
                                - a4paper (default): A4 paper size
                                - a3paper: A3 paper size
                                - a2paper: A2 paper size
                                - a1paper: A1 paper size
                                - a0paper: A0 paper size
-        :type paper_size: basestring (see :class:`enums.PaperSize`)
         :param paper_orientation: The orientation of the paper to which the PDF is downloaded:
                                - portrait (default): portrait orientation
                                - landscape: landscape orientation
-        :type paper_size: basestring (see :class:`enums.PaperOrientation`)
-        :param include_appendices: True if the PDF should contain appendices, False (default) if otherwise.
-        :type include_appendices: bool
-        :param include_qr_code: True if the PDF should include a QR-code, False (default) if otherwise.
-        :type include_qr_code: bool
+        :param include_appendices: True if the PDF should contain appendices, False (default)
+            if otherwise.
+        :param include_qr_code: True if the PDF should include a QR-code, False (default)
+            if otherwise.
         :param user: (optional) used to calculate the offset needed to interpret Datetime
             Properties. Not having a user will simply use the default UTC.
-        :type user: User object
+        :param timeout: (optional) number of seconds to wait for the PDF to be created, defaults
+            to ASYNC_TIMEOUT_LIMIT
         :raises APIError: if the pdf file could not be found.
         :raises OSError: if the file could not be written.
         :returns Path to the saved pdf file
@@ -923,7 +914,6 @@ class Activity(TreeObject, TagsMixin):
             raise APIError(f"Could not download PDF of Activity {self}", response=response)
 
         # If appendices are included, the request becomes asynchronous
-
         if include_appendices:  # pragma: no cover
             data = response.json()
 
@@ -931,8 +921,7 @@ class Activity(TreeObject, TagsMixin):
             url = urljoin(self._client.api_root, data["download_url"])
 
             count = 0
-
-            while count <= ASYNC_TIMEOUT_LIMIT:
+            while count <= timeout:
                 response = self._client._request("GET", url=url)
 
                 if response.status_code == requests.codes.ok:  # pragma: no cover
@@ -944,9 +933,9 @@ class Activity(TreeObject, TagsMixin):
                 count += ASYNC_REFRESH_INTERVAL
                 time.sleep(ASYNC_REFRESH_INTERVAL)
 
-            raise APIError(
-                "Could not download PDF of Activity {} within the time-out limit of {} "
-                "seconds".format(self, ASYNC_TIMEOUT_LIMIT),
+            raise PDFDownloadTimeoutError(
+                f"Could not download PDF of Activity {self} within the time-out limit "
+                f"of {timeout} seconds",
                 response=response,
             )
 
