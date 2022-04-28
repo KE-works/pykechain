@@ -3,7 +3,7 @@
 # Configuration of async download of activity pdf exports
 #
 ASYNC_REFRESH_INTERVAL = 2  # seconds
-ASYNC_TIMEOUT_LIMIT = 100  # seconds
+ASYNC_TIMEOUT_LIMIT = 180  # seconds
 
 #
 # Configuration of the retry options for the client requests based on `urlib3.utils.Retry`.
