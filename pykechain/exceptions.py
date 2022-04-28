@@ -1,5 +1,6 @@
 import warnings
-from requests import Response, PreparedRequest
+
+from requests import PreparedRequest, Response
 
 
 class APIError(Exception):
@@ -47,7 +48,9 @@ class APIError(Exception):
 
             if response_json:
                 self.msg = response_json.get("msg")
-                self.traceback = response_json.get("traceback", "provided no traceback.")
+                self.traceback = response_json.get(
+                    "traceback", "provided no traceback."
+                )
                 self.detail = response_json.get("detail")
                 self.results = response_json.get("results")
             else:
@@ -82,7 +85,9 @@ class APIError(Exception):
                         self.request.body
                     )  # strings (e.g. from testing cassettes) cant be decoded
                 try:
-                    body = json.loads(decoded_body)  # Convert string to Python object(s)
+                    body = json.loads(
+                        decoded_body
+                    )  # Convert string to Python object(s)
                 except json.decoder.JSONDecodeError:
                     body = decoded_body.split("&")  # parameters in URL
                 context.append(
@@ -136,15 +141,15 @@ class PDFDownloadTimeoutError(APIError):
 
     pass
 
-class _DeprecationMixin:
 
+class _DeprecationMixin:
     __notified = False
 
     def __new__(cls, *args, **kwargs):
         if not cls.__notified:
             warnings.warn(
-                "`{n}` is a wrapping class for `{nn}`. `{n}` will be deprecated in July 2021."
-                .format(n=cls.__name__, nn=str(cls.__name__)[:-1]),
+                f"`{cls.__name__}` is a wrapping class for `{str(cls.__name__)[:-1]}`. "
+                f"`{cls.__name__}` will be deprecated in July 2022.",
                 PendingDeprecationWarning,
             )
             cls.__notified = True
