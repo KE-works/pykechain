@@ -14,6 +14,7 @@ FORMS Feature
 * :+1: Extended the `DashboardWidget` with the form numbers and charts (#1123)
 * :+1: Added the concept of a sidebar card to the sidebar.
 * :+1: Added the concept of a `StatusReferencesProperty` to pykechain.
+* :+1: Added the Form Classification on the parts world.
 * :+1: Added the ability to create a user from the frontend.
 * :+1: Added the ability to request a change password link from the frontend.
 

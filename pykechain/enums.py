@@ -71,6 +71,7 @@ class Classification(Enum):
 
     PRODUCT = "PRODUCT"
     CATALOG = "CATALOG"
+    FORM = "FORM"
 
 
 class PropertyType(Enum):
