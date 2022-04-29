@@ -18,9 +18,13 @@ FORMS Feature
 * :+1: Added the ability to create a user from the frontend.
 * :+1: Added the ability to request a change password link from the frontend.
 
+v3.18.2 (28APR22)
+-----------------
+* :+1: We increased the timeout for downloading PDF's to 180 seconds per default. We futhermore add the ability to set a custom timeout on the `Activity.download_as_pdf()` method.
+
 v3.18.1 (14APR22)
 -----------------
-* :+1: we are now allowing request parameters such as `size` to be passed through the `property_attachment.save_as()` function in order to resize the images on download (#1138)
+* :+1: We are now allowing request parameters such as `size` to be passed through the `property_attachment.save_as()` function in order to resize the images on download (#1138)
 
 v3.18.0 (22MAR22)
 -----------------
