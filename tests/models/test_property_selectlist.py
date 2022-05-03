@@ -41,7 +41,9 @@ class SelectListBaseTests:
             self.select_model.options = new_options_list
 
             # testing
-            self.assertListEqual(self.select_model.options, list(map(str, new_options_list)))
+            self.assertListEqual(
+                self.select_model.options, list(map(str, new_options_list))
+            )
 
             # teardown
             self.select_model.options = current_options_list

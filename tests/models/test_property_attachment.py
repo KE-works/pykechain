@@ -112,12 +112,12 @@ class TestAttachment(TestBetamax):
             self.test_assets_dir,
             "files",
             "test_upload_image_to_attachment_property",
-            "test_upload_image.png"
+            "test_upload_image.png",
         )
         self.property.upload(upload_path)
 
         with temp_chdir() as target_dir:
-            filepath = os.path.join(target_dir, 'image_sqxs.png')
+            filepath = os.path.join(target_dir, "image_sqxs.png")
             self.property.save_as(filename=filepath, size=ImageSize.SQXS)
             path = os.path.join(target_dir, filepath)
             image_sqxs = Image.open(path)

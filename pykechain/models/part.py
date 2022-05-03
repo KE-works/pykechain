@@ -4,7 +4,12 @@ import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS, PARTS_BATCH_LIMIT
 from pykechain.enums import Category, Multiplicity, Classification, PropertyType
-from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError, MultipleFoundError
+from pykechain.exceptions import (
+    APIError,
+    IllegalArgumentError,
+    NotFoundError,
+    MultipleFoundError,
+)
 from pykechain.models.input_checks import (
     check_text,
     check_type,
@@ -90,13 +95,17 @@ class Part(TreeObject):
         self.multiplicity: str = json.get("multiplicity")
         self.classification: Classification = json.get("classification")
 
-        sorted_properties: List[Dict] = sorted(json["properties"], key=lambda p: p.get("order", 0))
+        sorted_properties: List[Dict] = sorted(
+            json["properties"], key=lambda p: p.get("order", 0)
+        )
         self.properties: List[Property] = [
             Property.create(p, client=self._client) for p in sorted_properties
         ]
 
         proxy_data: Optional[Dict] = json.get("proxy_source_id_name", dict())
-        self._proxy_model_id: Optional[str] = proxy_data.get("id") if proxy_data else None
+        self._proxy_model_id: Optional[str] = (
+            proxy_data.get("id") if proxy_data else None
+        )
 
     def __call__(self, *args, **kwargs) -> "Part":
         """Short-hand version of the `child` method."""
@@ -231,7 +240,9 @@ class Part(TreeObject):
             # if kwargs are provided, we assume no use of cache as specific filtering on the children is performed.
             return self._client.parts(parent=self.id, category=self.category, **kwargs)
 
-    def child(self, name: Optional[str] = None, pk: Optional[str] = None, **kwargs) -> "Part":
+    def child(
+        self, name: Optional[str] = None, pk: Optional[str] = None, **kwargs
+    ) -> "Part":
         """
         Retrieve a child object.
 
@@ -270,7 +281,9 @@ class Part(TreeObject):
 
         # Otherwise raise the appropriate error
         elif len(part_list) > 1:
-            raise MultipleFoundError(f"{self} has more than one matching child.{criteria}")
+            raise MultipleFoundError(
+                f"{self} has more than one matching child.{criteria}"
+            )
         else:
             raise NotFoundError(f"{self} has no matching child.{criteria}")
         return part
@@ -334,7 +347,9 @@ class Part(TreeObject):
         :raises APIError: When an error occurs.
         """
         if self.parent_id:
-            return self._client.parts(parent=self.parent_id, category=self.category, **kwargs)
+            return self._client.parts(
+                parent=self.parent_id, category=self.category, **kwargs
+            )
         else:
             from pykechain.models.partset import PartSet
 
@@ -394,7 +409,9 @@ class Part(TreeObject):
         if self.category == Category.MODEL:
             return self._client.parts(model=self, category=Category.INSTANCE, **kwargs)
         else:
-            raise NotFoundError(f"Part '{self}' is not a model, hence it has no instances.")
+            raise NotFoundError(
+                f"Part '{self}' is not a model, hence it has no instances."
+            )
 
     def instance(self) -> "Part":
         """
@@ -686,7 +703,9 @@ class Part(TreeObject):
         >>> new_wheel_model.add_proxy_to(bike_model, "Wheel", multiplicity=Multiplicity.ONE_MANY)
 
         """
-        return self._client.create_proxy_model(self, parent, name, multiplicity, **kwargs)
+        return self._client.create_proxy_model(
+            self, parent, name, multiplicity, **kwargs
+        )
 
     def add_property(self, *args, **kwargs) -> "AnyProperty":
         """Add a new property to this model.
@@ -834,7 +853,9 @@ class Part(TreeObject):
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError(f"Could not add to Part {self}", response=response)
 
-        new_part_instance: Part = Part(response.json()["results"][0], client=self._client)
+        new_part_instance: Part = Part(
+            response.json()["results"][0], client=self._client
+        )
 
         # ensure that cached children are updated
         if self._cached_children is not None:
@@ -1138,7 +1159,9 @@ class Part(TreeObject):
             property_list, Property, "property_list", method=self.property
         )
 
-        properties_fvalues = [dict(order=order, id=pk) for order, pk in enumerate(property_ids)]
+        properties_fvalues = [
+            dict(order=order, id=pk) for order, pk in enumerate(property_ids)
+        ]
 
         return self.update(properties_fvalues=properties_fvalues)
 

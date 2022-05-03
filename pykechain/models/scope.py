@@ -5,7 +5,12 @@ import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import (
-    KEChainPages, Multiplicity, ScopeCategory, ScopeMemberActions, ScopeRoles, ScopeStatus,
+    KEChainPages,
+    Multiplicity,
+    ScopeCategory,
+    ScopeMemberActions,
+    ScopeRoles,
+    ScopeStatus,
     SubprocessDisplayMode,
 )
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
@@ -13,7 +18,12 @@ from pykechain.models.activity import Activity
 from pykechain.models.base import Base
 from pykechain.models.context import Context
 from pykechain.models.input_checks import (
-    check_base, check_datetime, check_enum, check_list_of_text, check_text, check_type,
+    check_base,
+    check_datetime,
+    check_enum,
+    check_list_of_text,
+    check_text,
+    check_type,
 )
 from pykechain.models.part import Part
 from pykechain.models.property import Property
@@ -25,7 +35,14 @@ from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
 from pykechain.models.workflow import Workflow
 from pykechain.typing import ObjectID
-from pykechain.utils import Empty, clean_empty_values, empty, find, is_uuid, parse_datetime
+from pykechain.utils import (
+    Empty,
+    clean_empty_values,
+    empty,
+    find,
+    is_uuid,
+    parse_datetime,
+)
 
 
 class Scope(Base, TagsMixin):
@@ -129,7 +146,9 @@ class Scope(Base, TagsMixin):
     def workflow_root_process(self) -> "Activity":
         """Retrieve the Activity root object with classification WORKFLOW."""
         if self._workflow_root_process is None:
-            self._workflow_root_process = self.activity(id=self._json_data["workflow_root_id"])
+            self._workflow_root_process = self.activity(
+                id=self._json_data["workflow_root_id"]
+            )
         return self._workflow_root_process
 
     @property
@@ -143,35 +162,45 @@ class Scope(Base, TagsMixin):
     def catalog_root_process(self) -> "Activity":
         """Retrieve the Activity root object with classification CATALOG."""
         if self._catalog_root_process is None:
-            self._catalog_root_process = self.activity(id=self._json_data["catalog_root_id"])
+            self._catalog_root_process = self.activity(
+                id=self._json_data["catalog_root_id"]
+            )
         return self._catalog_root_process
 
     @property
     def product_root_model(self) -> "Part":
         """Retrieve the Part root object with classification PRODUCT and category MODEL."""
         if self._product_root_model is None:
-            self._product_root_model = self.model(id=self._json_data["product_model_id"])
+            self._product_root_model = self.model(
+                id=self._json_data["product_model_id"]
+            )
         return self._product_root_model
 
     @property
     def product_root_instance(self) -> "Part":
         """Retrieve the Part root object with classification PRODUCT and category INSTANCE."""
         if self._product_root_instance is None:
-            self._product_root_instance = self.part(id=self._json_data["product_instance_id"])
+            self._product_root_instance = self.part(
+                id=self._json_data["product_instance_id"]
+            )
         return self._product_root_instance
 
     @property
     def catalog_root_model(self) -> "Part":
         """Retrieve the Part root object with classification CATALOG and category MODEL."""
         if self._catalog_root_model is None:
-            self._catalog_root_model = self.model(id=self._json_data["catalog_model_id"])
+            self._catalog_root_model = self.model(
+                id=self._json_data["catalog_model_id"]
+            )
         return self._catalog_root_model
 
     @property
     def catalog_root_instance(self) -> "Part":
         """Retrieve the Part root object with classification CATALOG and category INSTANCE."""
         if self._catalog_root_instance is None:
-            self._catalog_root_instance = self.part(id=self._json_data["catalog_instance_id"])
+            self._catalog_root_instance = self.part(
+                id=self._json_data["catalog_instance_id"]
+            )
         return self._catalog_root_instance
 
     #
@@ -399,7 +428,12 @@ class Scope(Base, TagsMixin):
         return self._client.create_model(parent, name, multiplicity=multiplicity)
 
     def create_model_with_properties(
-        self, parent, name, multiplicity=Multiplicity.ZERO_MANY, properties_fvalues=None, **kwargs
+        self,
+        parent,
+        name,
+        multiplicity=Multiplicity.ZERO_MANY,
+        properties_fvalues=None,
+        **kwargs,
     ) -> "Part":
         """Create a model with its properties in a single API request.
 
@@ -445,7 +479,9 @@ class Scope(Base, TagsMixin):
     def set_landing_page(
         self,
         activity: Union["Activity", KEChainPages],
-        task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
+        task_display_mode: Optional[
+            SubprocessDisplayMode
+        ] = SubprocessDisplayMode.ACTIVITIES,
     ) -> None:
         """
         Update the landing page of the scope.
@@ -566,17 +602,25 @@ class Scope(Base, TagsMixin):
         >>> leadmembers = project.members(is_leadmember=True)
 
         """
-        members = [member for member in self._json_data["members"] if member["is_active"]]
+        members = [
+            member for member in self._json_data["members"] if member["is_active"]
+        ]
 
         if is_manager is not None:
-            members = [member for member in members if member.get("is_manager") == is_manager]
+            members = [
+                member for member in members if member.get("is_manager") == is_manager
+            ]
         if is_supervisor is not None:
             members = [
-                member for member in members if member.get("is_supervisor") == is_supervisor
+                member
+                for member in members
+                if member.get("is_supervisor") == is_supervisor
             ]
         if is_leadmember is not None:
             members = [
-                member for member in members if member.get("is_leadmember") == is_leadmember
+                member
+                for member in members
+                if member.get("is_leadmember") == is_leadmember
             ]
         return members
 
@@ -781,9 +825,9 @@ class Scope(Base, TagsMixin):
         if self.id == model.scope_id:
             return self._client.instantiate_form(*args, model=model, *args, **kwargs)
         else:
-            raise IllegalArgumentError("Form Model '{}' not in Scope '{}'".format(
-                model.name, self.name
-            ))
+            raise IllegalArgumentError(
+                "Form Model '{}' not in Scope '{}'".format(model.name, self.name)
+            )
 
     #
     # Workflows Methods
@@ -808,7 +852,9 @@ class Scope(Base, TagsMixin):
         """
         return self._client.workflow(scope=self, **kwargs)
 
-    def import_workflow(self, workflow: Union[Workflow, ObjectID], **kwargs) -> "Workflow":
+    def import_workflow(
+        self, workflow: Union[Workflow, ObjectID], **kwargs
+    ) -> "Workflow":
         """
         Import a Workflow object into the current scope.
 

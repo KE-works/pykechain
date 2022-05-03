@@ -8,7 +8,8 @@ from pykechain.enums import (
     FormCategory,
     Multiplicity,
     PropertyType,
-    StatusCategory, WorkflowCategory,
+    StatusCategory,
+    WorkflowCategory,
 )
 from pykechain.exceptions import ForbiddenError, IllegalArgumentError, NotFoundError
 from pykechain.models import MultiReferenceProperty
@@ -18,7 +19,8 @@ from pykechain.models.property_reference import (
     ContextReferencesProperty,
     FormReferencesProperty,
     ScopeReferencesProperty,
-    StatusReferencesProperty, UserReferencesProperty,
+    StatusReferencesProperty,
+    UserReferencesProperty,
 )
 from pykechain.models.validators import RequiredFieldValidator
 from pykechain.models.value_filter import PropertyValueFilter, ScopeFilter

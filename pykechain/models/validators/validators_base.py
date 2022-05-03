@@ -133,9 +133,13 @@ class PropertyValidator(BaseValidator):
         new_json = dict(vtype=self.vtype, config=self._config)
 
         if self.on_valid:
-            new_json["config"]["on_valid"] = [effect.as_json() for effect in self.on_valid]
+            new_json["config"]["on_valid"] = [
+                effect.as_json() for effect in self.on_valid
+            ]
         if self.on_invalid:
-            new_json["config"]["on_invalid"] = [effect.as_json() for effect in self.on_invalid]
+            new_json["config"]["on_invalid"] = [
+                effect.as_json() for effect in self.on_invalid
+            ]
 
         self._json = new_json
         return self._json

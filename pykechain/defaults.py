@@ -125,7 +125,7 @@ API_PATH = {
     "form": "api/v3/forms/{form_id}",
     "forms_has_part": "api/v3/forms/{form_id}/has_part/{part_id}",
     "forms_compatible_within_scope": "api/v3/forms/{form_id}/workflows/"
-                                     "compatible_within_scope/{scope_id}",
+    "compatible_within_scope/{scope_id}",
     "form_instantiate": "api/v3/forms/{form_id}/instantiate",
     "form_clone": "api/v3/forms/{form_id}/clone",
     "form_clone_cross_scope": "api/v3/forms/{form_id}/clone_cross_scope",
@@ -141,7 +141,7 @@ API_PATH = {
     "workflow": "api/v3/workflows/{workflow_id}",
     "workflow_update_transition": "api/v3/workflows/{workflow_id}/update_transition",
     "workflow_delete_transition": "api/v3/workflows/{workflow_id}/"
-                                  "delete_transition/{transition_id}",
+    "delete_transition/{transition_id}",
     "workflow_create_transition": "api/v3/workflows/{workflow_id}/create_transition",
     "workflow_create_status": "api/v3/workflows/{workflow_id}/create_status",
     "workflow_link_transitions": "api/v3/workflows/{workflow_id}/link_transitions",

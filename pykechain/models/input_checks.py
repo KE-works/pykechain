@@ -36,6 +36,7 @@ def check_client(value: "Client") -> "Client":
     :param value: the client to test
     """
     from pykechain import Client
+
     return check_type(value, Client, "client")
 
 
@@ -84,7 +85,9 @@ def check_list_of_text(
                 )
             )
         if unique:
-            list_of_text = [t for i, t in enumerate(list_of_text) if list_of_text.index(t) == i]
+            list_of_text = [
+                t for i, t in enumerate(list_of_text) if list_of_text.index(t) == i
+            ]
     return list_of_text
 
 
@@ -126,7 +129,8 @@ def check_list_of_dicts(
                 raise IllegalArgumentError(
                     'Not every dict contains the required fields: "{}"\n'
                     'Missing fields: "{}"'.format(
-                        '", "'.join(fields), '", "'.join(list(missing_fields)))
+                        '", "'.join(fields), '", "'.join(list(missing_fields))
+                    )
                 )
     return list_of_dicts
 
@@ -137,7 +141,7 @@ def check_enum(value: Optional[Any], enum: type(Enum), key: str) -> Optional[Any
         if value not in enum.values():
             raise IllegalArgumentError(
                 '`{}` must be an option from enum {}, "{}" ({}) is not.\n'
-                'Choose from: {}'.format(
+                "Choose from: {}".format(
                     key, enum.__class__.__name__, value, type(value), enum.values()
                 )
             )

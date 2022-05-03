@@ -21,7 +21,9 @@ from pykechain.typing import ObjectID, ObjectIDs
 from pykechain.utils import Empty, clean_empty_values, empty, parse_datetime
 
 
-class Context(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationMixin):
+class Context(
+    BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationMixin
+):
     """
     A virtual object representing a KE-chain Context.
 
@@ -77,7 +79,6 @@ class Context(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslati
         scope: Optional[Union["Scope", ObjectID]] = empty,
         options: Optional[dict] = empty,
         activities: Optional[Union[List["Activity"], ObjectIDs]] = empty,
-
         feature_collection: Optional[dict] = empty,
         start_date: Optional[datetime] = empty,
         due_date: Optional[datetime] = empty,
@@ -110,7 +111,9 @@ class Context(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslati
             "context_group": check_enum(context_group, ContextGroup, "context_group"),
             "activities": check_list_of_base(activities, Activity, "activities"),
             "options": check_type(options, dict, "options"),
-            "feature_collection": check_type(feature_collection, dict, "feature_collection"),
+            "feature_collection": check_type(
+                feature_collection, dict, "feature_collection"
+            ),
             "start_date": check_datetime(start_date, "start_date"),
             "due_date": check_datetime(due_date, "due_date"),
         }

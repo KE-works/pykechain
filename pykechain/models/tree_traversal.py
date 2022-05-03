@@ -28,7 +28,9 @@ class TreeObject(BaseInScope, ABC):
         """Short-hand version of the `child` method."""
         return self.child(*args, **kwargs)
 
-    def child(self: T, name: Optional[str] = None, pk: Optional[str] = None, **kwargs) -> T:
+    def child(
+        self: T, name: Optional[str] = None, pk: Optional[str] = None, **kwargs
+    ) -> T:
         """
         Retrieve a child object.
 
@@ -99,7 +101,9 @@ class TreeObject(BaseInScope, ABC):
         if kwargs:
             parameters.update(kwargs)
 
-        response = self._client._request("GET", self._client._build_url(method), params=parameters)
+        response = self._client._request(
+            "GET", self._client._build_url(method), params=parameters
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError(f"Could not retrieve {method}")

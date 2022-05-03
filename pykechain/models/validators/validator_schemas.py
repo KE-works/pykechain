@@ -10,7 +10,10 @@ effects_jsonschema_stub = {
     "type": "object",
     "additionalProperties": False,
     "required": ["effect", "config"],
-    "properties": {"effect": {"type": ["string", "null"]}, "config": {"type": "object"}},
+    "properties": {
+        "effect": {"type": ["string", "null"]},
+        "config": {"type": "object"},
+    },
 }
 
 validator_jsonschema_stub = {

@@ -151,7 +151,10 @@ class AttachmentProperty(Property):
         url = self._client._build_url("property_upload", property_id=self.id)
 
         response = self._client._request(
-            "POST", url, data={"part": self._json_data["part_id"]}, files={"attachment": data}
+            "POST",
+            url,
+            data={"part": self._json_data["part_id"]},
+            files={"attachment": data},
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover

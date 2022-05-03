@@ -175,7 +175,9 @@ class CrudActionsMixin:
         user that there is no relation between the object in memery and an object in KE-chain.
         """
         field_name_in_api_path = self.url_pk_name or f"{self.__name__.lower()}_id"
-        url = self._client._build_url(self.url_detail_name, **{field_name_in_api_path: self.id})
+        url = self._client._build_url(
+            self.url_detail_name, **{field_name_in_api_path: self.id}
+        )
 
         response = self._client._request("DELETE", url)
         if response.status_code != requests.codes.no_content:

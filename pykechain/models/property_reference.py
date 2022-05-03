@@ -3,7 +3,10 @@ from typing import List, Optional
 from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Scope, user
-from pykechain.models.base_reference import _ReferenceProperty, _ReferencePropertyInScope
+from pykechain.models.base_reference import (
+    _ReferenceProperty,
+    _ReferencePropertyInScope,
+)
 from pykechain.models.context import Context
 from pykechain.models.form import Form
 from pykechain.models.value_filter import ScopeFilter
@@ -55,7 +58,9 @@ class ScopeReferencesProperty(_ReferenceProperty):
         if scope_ids:
             scopes = list()
             for chunk in get_in_chunks(scope_ids, PARTS_BATCH_LIMIT):
-                scopes.extend(list(self._client.scopes(id__in=",".join(chunk), status=None)))
+                scopes.extend(
+                    list(self._client.scopes(id__in=",".join(chunk), status=None))
+                )
         return scopes
 
     def set_prefilters(
@@ -131,7 +136,9 @@ class UserReferencesProperty(_ReferenceProperty):
             elif isinstance(value, (int, str)):
                 object_ids.append(str(value))
             else:  # pragma: no cover
-                raise ValueError(f'Value "{value}" must be a dict with field `pk` or a UUID.')
+                raise ValueError(
+                    f'Value "{value}" must be a dict with field `pk` or a UUID.'
+                )
         return object_ids
 
     def _retrieve_objects(self, **kwargs) -> List[user.User]:

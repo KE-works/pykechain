@@ -10,7 +10,9 @@ class TextEffect(ValidatorEffect):
 
     effect = ValidatorEffectTypes.TEXT_EFFECT
 
-    def __init__(self, json=None, text="The validation resulted in an error.", **kwargs):
+    def __init__(
+        self, json=None, text="The validation resulted in an error.", **kwargs
+    ):
         """Construct an helptext effect.
 
         :param json: (optional) dict (json) object to construct the object from
@@ -37,7 +39,9 @@ class ErrorTextEffect(ValidatorEffect):
 
     effect = ValidatorEffectTypes.ERRORTEXT_EFFECT
 
-    def __init__(self, json=None, text="The validation resulted in an error.", **kwargs):
+    def __init__(
+        self, json=None, text="The validation resulted in an error.", **kwargs
+    ):
         """Construct an errortext effect.
 
         :param json: (optional) dict (json) object to construct the object from

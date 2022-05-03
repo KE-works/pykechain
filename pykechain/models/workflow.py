@@ -11,7 +11,8 @@ from pykechain.models.input_checks import (
     check_base,
     check_enum,
     check_list_of_base,
-    check_text, check_type,
+    check_text,
+    check_type,
 )
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID
@@ -107,7 +108,9 @@ class Workflow(
     def __repr__(self) -> str:  # pragma: no cover
         return f"<pyke Workflow '{self.name}' '{self.category}' id {self.id[-8:]}>"
 
-    def edit(self, name: str = Empty(), description: str = Empty(), *args, **kwargs) -> None:
+    def edit(
+        self, name: str = Empty(), description: str = Empty(), *args, **kwargs
+    ) -> None:
         """Change the workflow object.
 
         Change the name and description of a workflow. It is also possible to update the workflow
@@ -124,7 +127,7 @@ class Workflow(
             "name": check_text(name, "name"),
             "description": check_text(description, "description"),
             "active": check_type(kwargs.get("active", Empty()), bool, "active"),
-            "options": check_type(kwargs.get("options", Empty()), bool, "options")
+            "options": check_type(kwargs.get("options", Empty()), bool, "options"),
         }
         url = self._client._build_url("workflow", workflow_id=self.id)
         query_params = API_EXTRA_PARAMS.get(self.url_list_name)
@@ -166,7 +169,8 @@ class Workflow(
         """
         if not value:
             raise IllegalArgumentError(
-                f"To set the order of statises, provide a list of status objects, got: '{value}'")
+                f"To set the order of statises, provide a list of status objects, got: '{value}'"
+            )
         data = {"status_order": check_list_of_base(value, Status, "statuses")}
         url = self._client._build_url("workflow_set_status_order", workflow_id=self.id)
         response = self._client._request("PUT", url=url, json=data)
@@ -180,7 +184,11 @@ class Workflow(
     # Subclass finders and managers.
     #
 
-    def transition(self, value: str = None, attr: str = None, ) -> Transition:
+    def transition(
+        self,
+        value: str = None,
+        attr: str = None,
+    ) -> Transition:
         """
         Retrieve the Transition belonging to this workflow based on its name, ref or uuid.
 
@@ -286,6 +294,7 @@ class Workflow(
         :param description: (optional) description of the new workflow
         """
         from pykechain.models import Scope
+
         if isinstance(target_scope, Empty):
             target_scope = self.scope_id
         data = {
@@ -465,7 +474,9 @@ class Workflow(
             )
         self.refresh(json=response.json()["results"][0])
 
-    def unlink_transitions(self, transitions: List[Union[Transition, ObjectID]]) -> None:
+    def unlink_transitions(
+        self, transitions: List[Union[Transition, ObjectID]]
+    ) -> None:
         """
         Unlink a list of Transitions to a Workflow.
 

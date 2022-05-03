@@ -88,13 +88,13 @@ class User(Base):
         """
         payload = {"email": self.email}
         response = self._client._request(
-            "POST",
-            url=self._client._build_url("user_reset_password"),
-            json=payload
+            "POST", url=self._client._build_url("user_reset_password"), json=payload
         )
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError(f"Could not request a reset password link for '{self}'",
-                           response=response)
+            raise APIError(
+                f"Could not request a reset password link for '{self}'",
+                response=response,
+            )
 
     def now_in_my_timezone(self) -> datetime.datetime:
         """

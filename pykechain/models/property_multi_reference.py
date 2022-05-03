@@ -8,7 +8,10 @@ from pykechain.models.input_checks import check_type
 from pykechain.models.part import Part
 from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets.enums import MetaWidget
-from pykechain.models.widgets.helpers import _check_prefilters, _check_excluded_propmodels
+from pykechain.models.widgets.helpers import (
+    _check_prefilters,
+    _check_excluded_propmodels,
+)
 from pykechain.utils import get_in_chunks
 
 
@@ -123,7 +126,9 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
         :raises IllegalArgumentError: when the type of the input is provided incorrect.
         """
         if not clear:
-            list_of_prefilters = PropertyValueFilter.parse_options(options=self._options)
+            list_of_prefilters = PropertyValueFilter.parse_options(
+                options=self._options
+            )
         else:
             list_of_prefilters = list()
 
@@ -160,7 +165,9 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
 
         # Only update the options if there are any prefilters to be set, or if the original filters have to overwritten
         if list_of_prefilters or clear:
-            self._options.update(PropertyValueFilter.write_options(filters=list_of_prefilters))
+            self._options.update(
+                PropertyValueFilter.write_options(filters=list_of_prefilters)
+            )
             self.edit(options=self._options)
 
     def get_prefilters(

@@ -43,7 +43,9 @@ class _ReferenceProperty(Property):
         value = self.serialize_value(value)
         if self.use_bulk_update:
             self._pend_update(dict(value=value))
-            self._value = [dict(id=pk) for pk in value] if isinstance(value, list) else None
+            self._value = (
+                [dict(id=pk) for pk in value] if isinstance(value, list) else None
+            )
             self._cached_values = None
         else:
             self._put_value(value)
@@ -74,7 +76,9 @@ class _ReferenceProperty(Property):
             elif isinstance(value, (int, str)):
                 object_ids.append(str(value))
             else:  # pragma: no cover
-                raise ValueError(f'Value "{value}" must be a dict with field `id` or a UUID.')
+                raise ValueError(
+                    f'Value "{value}" must be a dict with field `id` or a UUID.'
+                )
         return object_ids
 
     @abstractmethod
@@ -102,7 +106,9 @@ class _ReferenceProperty(Property):
             return [value] if value is not None else value
         except IllegalArgumentError:
             # expected to fail, as value should be an iterable
-            return check_list_of_base(value, cls=self.REFERENCED_CLASS, key="references")
+            return check_list_of_base(
+                value, cls=self.REFERENCED_CLASS, key="references"
+            )
 
     def set_prefilters(
         self,

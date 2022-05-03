@@ -21,9 +21,9 @@ class BaseFilter:
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self.__class__.write_options(filters=[self]) == self.__class__.write_options(
-                filters=[other]
-            )
+            return self.__class__.write_options(
+                filters=[self]
+            ) == self.__class__.write_options(filters=[other])
         else:
             return False
 
@@ -156,7 +156,10 @@ class PropertyValueFilter(BaseFilter):
                 PropertyType.FLOAT_VALUE,
                 PropertyType.DATE_VALUE,
                 PropertyType.DATETIME_VALUE,
-            ) and self.type not in (FilterType.LOWER_THAN_EQUAL, FilterType.GREATER_THAN_EQUAL):
+            ) and self.type not in (
+                FilterType.LOWER_THAN_EQUAL,
+                FilterType.GREATER_THAN_EQUAL,
+            ):
                 warnings.warn(
                     "A PropertyValueFilter on a `{}` property should use "
                     "filter type `{}` or `{}`, not `{}`".format(
@@ -273,7 +276,9 @@ class ScopeFilter(BaseFilter):
             progress_lte,
         ]
         if sum(p is not None for p in filters) + len(kwargs) != 1:
-            raise IllegalArgumentError("Every ScopeFilter object must apply only 1 filter!")
+            raise IllegalArgumentError(
+                "Every ScopeFilter object must apply only 1 filter!"
+            )
 
         self.status = check_enum(status, ScopeStatus, "status")
         self.name = check_text(name, "name")
