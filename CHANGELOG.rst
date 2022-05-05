@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v4.0.1 (5MAY22) Patch Release
+-----------------------------
+
+Small patch release with a fixed MANIFEST file.
+
 v4.0.0 (5MAY22) FORMS Release
 -----------------------------
 
