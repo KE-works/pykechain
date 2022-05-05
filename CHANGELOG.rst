@@ -1,6 +1,30 @@
 Change Log
 ==========
 
+v4.0.0 (29APR22) FORMS Release
+------------------------------
+
+This is version 4 of pykechain in sync with the "Forms Release" of KE-chain. We added a number
+of features to this release that is in full sync with the general availability of Forms in KE-chain.
+The most dominant features are `Form`, `Workflow` with their `Transition`'s and `Status`-es and a
+greatly improved `Context` featureset.
+
+* We added the feature equivalence in pykechain for KE-chain Forms and Workflow.
+* :star: Added the `Forms`, `Workflow`, `Transition`, and `Status` classes. (#1100)
+* :star: Added multiple `Forms` methods such as `link_contexts`, `unlink_contexts`, `clone_cross_scope`, `apply_transition`, `set_status_assignees`. (#1114)
+* :star: Added additional `Form` methods such as `has_part` and `compatible_within_scope`. (#1108)
+* :star: Extended the `DashboardWidget` with the form numbers and charts (#1123)
+* :star: Added the `FormReferenceProperties`. (#1098)
+* :star: Added the `ContextReferenceProperties`. (#1099)
+* :star: Added the concept of a `StatusReferencesProperty`.
+* :star: Added 'Forms', 'Form models', 'Contexts' and 'Workflows' sidebar buttons in the `SideBarManager' and added ability to specify 'minimum_access_level' and 'alignment' per 'SideBarButton'. (#1103)
+* :star: Added the concept of a sidebar card to the sidebar.
+* :star: Added the Form Classification on the parts world.
+* :star: Added the ability to create a user from the frontend.
+* :star: Added the ability to request a change password link from the frontend.
+* :+1: Removed the `target_scope` parameter when cloning inside the same scope
+
+
 v3.18.2 (28APR22)
 -----------------
 * :+1: We increased the timeout for downloading PDF's to 180 seconds per default. We futhermore add the ability to set a custom timeout on the `Activity.download_as_pdf()` method.

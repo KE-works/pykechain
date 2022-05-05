@@ -58,6 +58,7 @@ API_PATH = {
     "service_execution_log": "api/service_executions/{service_execution_id}/log",
     "users": "api/users.json",
     "user_current": "api/users/get_current_user",
+    "user_reset_password": "accounts/password/reset/",
     "teams": "api/teams.json",
     "team": "api/teams/{team_id}.json",
     "team_add_members": "api/teams/{team_id}/add_members",
@@ -119,10 +120,40 @@ API_PATH = {
     "context": "api/v3/contexts/contexts/{context_id}.json",
     "context_link_activities": "api/v3/contexts/contexts/{context_id}/link_activities",
     "context_unlink_activities": "api/v3/contexts/contexts/{context_id}/unlink_activities",
-    # 'feature_collections': 'api/v3/contexts/feature_collections.json',
-    # 'feature_collection': 'api/v3/contexts/feature_collections/{context_id}.json',
-    # 'time_periods': 'api/v3/contexts/time_periods.json',
-    # 'time_period': 'api/v3/contexts/time_periods/{context_id}.json'
+    # forms
+    "forms": "api/v3/forms",
+    "form": "api/v3/forms/{form_id}",
+    "forms_has_part": "api/v3/forms/{form_id}/has_part/{part_id}",
+    "forms_compatible_within_scope": "api/v3/forms/{form_id}/workflows/"
+    "compatible_within_scope/{scope_id}",
+    "form_instantiate": "api/v3/forms/{form_id}/instantiate",
+    "form_clone": "api/v3/forms/{form_id}/clone",
+    "form_clone_cross_scope": "api/v3/forms/{form_id}/clone_cross_scope",
+    "forms_bulk_create_instances": "api/v3/forms/bulk_instantiate",
+    "forms_bulk_delete": "api/v3/forms/bulk_delete",
+    "form_link_contexts": "api/v3/forms/{form_id}/link_contexts",
+    "form_unlink_contexts": "api/v3/forms/{form_id}/unlink_contexts",
+    "form_set_status_assignees": "api/v3/forms/{form_id}/set_status_assignees",
+    "form_apply_transition": "api/v3/forms/{form_id}/apply_transition/{transition_id}",
+    "form_activate": "api/v3/forms/{form_id}/activate",
+    "form_deactivate": "api/v3/forms/{form_id}/deactivate",
+    "workflows": "api/v3/workflows",
+    "workflow": "api/v3/workflows/{workflow_id}",
+    "workflow_update_transition": "api/v3/workflows/{workflow_id}/update_transition",
+    "workflow_delete_transition": "api/v3/workflows/{workflow_id}/"
+    "delete_transition/{transition_id}",
+    "workflow_create_transition": "api/v3/workflows/{workflow_id}/create_transition",
+    "workflow_create_status": "api/v3/workflows/{workflow_id}/create_status",
+    "workflow_link_transitions": "api/v3/workflows/{workflow_id}/link_transitions",
+    "workflow_unlink_transitions": "api/v3/workflows/{workflow_id}/unlink_transitions",
+    "workflow_clone": "api/v3/workflows/{workflow_id}/clone",
+    "workflow_activate": "api/v3/workflows/{workflow_id}/activate",
+    "workflow_deactivate": "api/v3/workflows/{workflow_id}/deactivate",
+    "workflow_set_status_order": "api/v3/workflows/{workflow_id}/set_status_order",
+    "transitions": "api/v3/transitions",
+    "transition": "api/v3/transitions/{transition_id}",
+    "statuses": "api/v3/statuses",
+    "status": "api/v3/statuses/{status_id}",
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {"fields": "__all__"}
@@ -445,12 +476,30 @@ API_EXTRA_PARAMS = {
     },
     "notifications": {
         "fields": ",".join(
-            ["id", "subject", "status", "message", "team", "created_at", "options", "updated_at"]
+            [
+                "id",
+                "subject",
+                "status",
+                "message",
+                "team",
+                "created_at",
+                "options",
+                "updated_at",
+            ]
         )
     },
     "notification": {
         "fields": ",".join(
-            ["id", "subject", "status", "message", "team", "created_at", "options", "updated_at"]
+            [
+                "id",
+                "subject",
+                "status",
+                "message",
+                "team",
+                "created_at",
+                "options",
+                "updated_at",
+            ]
         )
     },
     "expiring_downloads": {
@@ -495,6 +544,121 @@ API_EXTRA_PARAMS = {
                 "feature_collection",
                 "start_date",
                 "due_date",
+            ]
+        )
+    },
+    "forms": {
+        "fields": ",".join(
+            [
+                "id",
+                "name",
+                "ref",
+                "created_at",
+                "updated_at",
+                "description",
+                "derived_from",
+                "tags",
+                "category",
+                "form_model_root",
+                "form_instance_root",
+                "model",
+                "workflow",
+                "status_forms",
+                "active_status",
+                "contexts",
+                "context_groups",
+                "scope_id",
+            ]
+        )
+    },
+    "form": {
+        "fields": ",".join(
+            [
+                "id",
+                "name",
+                "ref",
+                "created_at",
+                "updated_at",
+                "description",
+                "derived_from",
+                "tags",
+                "category",
+                "form_model_root",
+                "form_instance_root",
+                "model",
+                "workflow",
+                "status_forms",
+                "active_status",
+                "active",
+                "contexts",
+                "context_groups",
+                "scope_id",
+            ]
+        )
+    },
+    "workflows": {
+        "fields": ",".join(
+            [
+                "id",
+                "name",
+                "ref",
+                "created_at",
+                "updated_at",
+                "description",
+                "derived_from",
+                "options",
+                "category",
+                "active",
+                "statuses",
+                "is_consistent",
+                "transitions",
+                "scope_id",
+            ]
+        )
+    },
+    "transitions": {
+        "fields": ",".join(
+            [
+                "id",
+                "name",
+                "ref",
+                "created_at",
+                "updated_at",
+                "description",
+                "derived_from",
+                "from_status",
+                "to_status",
+                "transition_type",
+                "conditions",
+                "validators",
+                "post_functions",
+                "transition_screen",
+            ]
+        )
+    },
+    "status": {
+        "fields": ",".join(
+            [
+                "id",
+                "name",
+                "ref",
+                "description",
+                "created_at",
+                "updated_at",
+                "status_category",
+            ]
+        )
+    },
+    "statuses": {
+        "fields": ",".join(
+            [
+                "id",
+                "name",
+                "ref",
+                "description",
+                "created_at",
+                "updated_at",
+                "status_category",
             ]
         )
     },

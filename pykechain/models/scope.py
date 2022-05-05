@@ -1,28 +1,28 @@
 from datetime import datetime
-from typing import Union, Dict, Optional, List  # noqa: F401
+from typing import Dict, List, Optional, Union  # noqa: F401
 
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import (
+    KEChainPages,
     Multiplicity,
+    ScopeCategory,
+    ScopeMemberActions,
+    ScopeRoles,
     ScopeStatus,
     SubprocessDisplayMode,
-    KEChainPages,
-    ScopeRoles,
-    ScopeMemberActions,
-    ScopeCategory,
 )
-from pykechain.exceptions import APIError, NotFoundError, IllegalArgumentError
+from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models.activity import Activity
 from pykechain.models.base import Base
 from pykechain.models.context import Context
 from pykechain.models.input_checks import (
-    check_text,
+    check_base,
     check_datetime,
     check_enum,
     check_list_of_text,
-    check_base,
+    check_text,
     check_type,
 )
 from pykechain.models.part import Part
@@ -33,7 +33,16 @@ from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
-from pykechain.utils import parse_datetime, find, Empty, clean_empty_values, empty
+from pykechain.models.workflow import Workflow
+from pykechain.typing import ObjectID
+from pykechain.utils import (
+    Empty,
+    clean_empty_values,
+    empty,
+    find,
+    is_uuid,
+    parse_datetime,
+)
 
 
 class Scope(Base, TagsMixin):
@@ -137,7 +146,9 @@ class Scope(Base, TagsMixin):
     def workflow_root_process(self) -> "Activity":
         """Retrieve the Activity root object with classification WORKFLOW."""
         if self._workflow_root_process is None:
-            self._workflow_root_process = self.activity(id=self._json_data["workflow_root_id"])
+            self._workflow_root_process = self.activity(
+                id=self._json_data["workflow_root_id"]
+            )
         return self._workflow_root_process
 
     @property
@@ -151,35 +162,45 @@ class Scope(Base, TagsMixin):
     def catalog_root_process(self) -> "Activity":
         """Retrieve the Activity root object with classification CATALOG."""
         if self._catalog_root_process is None:
-            self._catalog_root_process = self.activity(id=self._json_data["catalog_root_id"])
+            self._catalog_root_process = self.activity(
+                id=self._json_data["catalog_root_id"]
+            )
         return self._catalog_root_process
 
     @property
     def product_root_model(self) -> "Part":
         """Retrieve the Part root object with classification PRODUCT and category MODEL."""
         if self._product_root_model is None:
-            self._product_root_model = self.model(id=self._json_data["product_model_id"])
+            self._product_root_model = self.model(
+                id=self._json_data["product_model_id"]
+            )
         return self._product_root_model
 
     @property
     def product_root_instance(self) -> "Part":
         """Retrieve the Part root object with classification PRODUCT and category INSTANCE."""
         if self._product_root_instance is None:
-            self._product_root_instance = self.part(id=self._json_data["product_instance_id"])
+            self._product_root_instance = self.part(
+                id=self._json_data["product_instance_id"]
+            )
         return self._product_root_instance
 
     @property
     def catalog_root_model(self) -> "Part":
         """Retrieve the Part root object with classification CATALOG and category MODEL."""
         if self._catalog_root_model is None:
-            self._catalog_root_model = self.model(id=self._json_data["catalog_model_id"])
+            self._catalog_root_model = self.model(
+                id=self._json_data["catalog_model_id"]
+            )
         return self._catalog_root_model
 
     @property
     def catalog_root_instance(self) -> "Part":
         """Retrieve the Part root object with classification CATALOG and category INSTANCE."""
         if self._catalog_root_instance is None:
-            self._catalog_root_instance = self.part(id=self._json_data["catalog_instance_id"])
+            self._catalog_root_instance = self.part(
+                id=self._json_data["catalog_instance_id"]
+            )
         return self._catalog_root_instance
 
     #
@@ -407,7 +428,12 @@ class Scope(Base, TagsMixin):
         return self._client.create_model(parent, name, multiplicity=multiplicity)
 
     def create_model_with_properties(
-        self, parent, name, multiplicity=Multiplicity.ZERO_MANY, properties_fvalues=None, **kwargs
+        self,
+        parent,
+        name,
+        multiplicity=Multiplicity.ZERO_MANY,
+        properties_fvalues=None,
+        **kwargs,
     ) -> "Part":
         """Create a model with its properties in a single API request.
 
@@ -453,7 +479,9 @@ class Scope(Base, TagsMixin):
     def set_landing_page(
         self,
         activity: Union["Activity", KEChainPages],
-        task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
+        task_display_mode: Optional[
+            SubprocessDisplayMode
+        ] = SubprocessDisplayMode.ACTIVITIES,
     ) -> None:
         """
         Update the landing page of the scope.
@@ -574,17 +602,25 @@ class Scope(Base, TagsMixin):
         >>> leadmembers = project.members(is_leadmember=True)
 
         """
-        members = [member for member in self._json_data["members"] if member["is_active"]]
+        members = [
+            member for member in self._json_data["members"] if member["is_active"]
+        ]
 
         if is_manager is not None:
-            members = [member for member in members if member.get("is_manager") == is_manager]
+            members = [
+                member for member in members if member.get("is_manager") == is_manager
+            ]
         if is_supervisor is not None:
             members = [
-                member for member in members if member.get("is_supervisor") == is_supervisor
+                member
+                for member in members
+                if member.get("is_supervisor") == is_supervisor
             ]
         if is_leadmember is not None:
             members = [
-                member for member in members if member.get("is_leadmember") == is_leadmember
+                member
+                for member in members
+                if member.get("is_leadmember") == is_leadmember
             ]
         return members
 
@@ -719,7 +755,7 @@ class Scope(Base, TagsMixin):
 
         :return: a Context object
         """
-        return self._client.context(*args, scope=self, **kwargs)
+        return self._client.context(*args, scope=self.id, **kwargs)
 
     def contexts(self, *args, **kwargs) -> List[Context]:
         """
@@ -744,3 +780,94 @@ class Scope(Base, TagsMixin):
         :return: a Context object
         """
         return self._client.create_context(scope=self, **kwargs)
+
+    #
+    # Forms Methods
+    #
+    def forms(self, **kwargs) -> List["Form"]:
+        """
+        Retrieve Form objects in a scope.
+
+        See :class:`pykechain.Client.forms` for available parameters.
+
+        :return: a list of Form objects
+        """
+        return self._client.forms(scope=self, **kwargs)
+
+    def form(self, **kwargs) -> "Form":
+        """
+        Retrieve a Form object in a scope.
+
+        See :class:`pykechain.Client.form` for available parameters.
+
+        :return: a Form object
+        """
+        return self._client.form(scope=self, **kwargs)
+
+    def create_form_model(self, *args, **kwargs) -> "Form":
+        """
+        Create a new Form object in a scope.
+
+        See :class:`Form.create_model()` for available parameters.
+
+        :return: a Form object
+        """
+        return self._client.create_form_model(*args, scope=self, **kwargs)
+
+    def instantiate_form(self, model, *args, **kwargs) -> "Form":
+        """
+        Create a new Form instance based on a model.
+
+        See the `Form.instantiate()` method for available arguments.
+
+        :return: a created Form Instance
+        """
+        if self.id == model.scope_id:
+            return self._client.instantiate_form(*args, model=model, *args, **kwargs)
+        else:
+            raise IllegalArgumentError(
+                "Form Model '{}' not in Scope '{}'".format(model.name, self.name)
+            )
+
+    #
+    # Workflows Methods
+    #
+    def workflows(self, **kwargs) -> List["Workflow"]:
+        """
+        Retrieve Workflow objects in a scope.
+
+        See :class:`pykechain.Client.workflows` for available parameters.
+
+        :return: a list of Workflow objects
+        """
+        return self._client.workflows(scope=self, **kwargs)
+
+    def workflow(self, **kwargs) -> "Workflow":
+        """
+        Retrieve a Workflow object in a scope.
+
+        See :class:`pykechain.Client.workflow` for available parameters.
+
+        :return: a Workflow object
+        """
+        return self._client.workflow(scope=self, **kwargs)
+
+    def import_workflow(
+        self, workflow: Union[Workflow, ObjectID], **kwargs
+    ) -> "Workflow":
+        """
+        Import a Workflow object into the current scope.
+
+        See :class:`Workflow.clone()` for available parameters.
+
+        :return: a Workflow object
+        """
+        if is_uuid(workflow):
+            workflow = self._client.workflow(pk=workflow)
+
+        if isinstance(workflow, Workflow):
+            return workflow.clone(target_scope=self, **kwargs)
+        else:
+            raise IllegalArgumentError(
+                f"The workflow to import could not be found. I got: '{workflow}'"
+            )

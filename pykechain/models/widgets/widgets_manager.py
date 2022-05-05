@@ -41,6 +41,7 @@ from pykechain.models.widgets.enums import (
     AssociatedObjectId,
     TasksAssignmentFilterTypes,
     TasksWidgetColumns,
+    DashboardWidgetShowForms,
 )
 from pykechain.models.widgets.helpers import (
     _set_title,
@@ -65,7 +66,9 @@ class WidgetsManager(Iterable):
     widget title or widget 'ref'.
     """
 
-    def __init__(self, widgets: Iterable[Widget], activity: "Activity", **kwargs) -> None:
+    def __init__(
+        self, widgets: Iterable[Widget], activity: "Activity", **kwargs
+    ) -> None:
         """Construct a Widget Manager from a list of widgets.
 
         You need to provide an :class:`Activity` to initiate the WidgetsManager. Alternatively you may provide both a
@@ -126,7 +129,9 @@ class WidgetsManager(Iterable):
 
         if found is not None:
             return found
-        raise NotFoundError(f"Could not find widget with index, title, ref, or id '{key}'")
+        raise NotFoundError(
+            f"Could not find widget with index, title, ref, or id '{key}'"
+        )
 
     def __contains__(self, item: Widget) -> bool:
         return item in self._widgets
@@ -323,7 +328,9 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_model: "Part" = _retrieve_object(obj=part_model, method=self._client.model)  # noqa
+        part_model: "Part" = _retrieve_object(
+            obj=part_model, method=self._client.model
+        )  # noqa
         parent_instance: "Part" = _retrieve_object_id(obj=parent_instance)  # noqa
         sort_property_id = _retrieve_object_id(obj=sort_property)
 
@@ -333,12 +340,16 @@ class WidgetsManager(Iterable):
                 # grid
                 AssociatedObjectId.PART_MODEL_ID: part_model.id,
                 # columns
-                MetaWidget.SORTED_COLUMN: sort_property_id if sort_property_id else None,
+                MetaWidget.SORTED_COLUMN: sort_property_id
+                if sort_property_id
+                else None,
                 MetaWidget.SORTED_DIRECTION: sort_direction,
                 MetaWidget.SHOW_NAME_COLUMN: show_name_column,
                 MetaWidget.SHOW_IMAGES: show_images,
                 # buttons
-                MetaWidget.VISIBLE_ADD_BUTTON: new_instance if parent_instance else False,
+                MetaWidget.VISIBLE_ADD_BUTTON: new_instance
+                if parent_instance
+                else False,
                 MetaWidget.VISIBLE_EDIT_BUTTON: edit,
                 MetaWidget.VISIBLE_DELETE_BUTTON: delete,
                 MetaWidget.VISIBLE_CLONE_BUTTON: clone,
@@ -481,14 +492,18 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_model: "Part" = _retrieve_object(obj=part_model, method=self._client.model)  # noqa
+        part_model: "Part" = _retrieve_object(
+            obj=part_model, method=self._client.model
+        )  # noqa
         parent_instance_id: str = _retrieve_object_id(obj=parent_instance)
         sort_property_id: str = _retrieve_object_id(obj=sort_property)
         if not sort_property_id and sort_name:
             sort_property_id = MetaWidget.NAME
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         if prefilters:
-            list_of_prefilters = _check_prefilters(part_model=part_model, prefilters=prefilters)
+            list_of_prefilters = _check_prefilters(
+                part_model=part_model, prefilters=prefilters
+            )
             prefilters = {
                 MetaWidget.PROPERTY_VALUE_PREFILTER: ",".join(
                     [pf.format() for pf in list_of_prefilters]
@@ -506,7 +521,9 @@ class WidgetsManager(Iterable):
                 # grid
                 AssociatedObjectId.PART_MODEL_ID: part_model.id,
                 # columns
-                MetaWidget.SORTED_COLUMN: sort_property_id if sort_property_id else None,
+                MetaWidget.SORTED_COLUMN: sort_property_id
+                if sort_property_id
+                else None,
                 MetaWidget.SORTED_DIRECTION: sort_direction,
                 MetaWidget.COLLAPSE_FILTERS: collapse_filters,
                 MetaWidget.SHOW_FILTERS: collapse_filters is not None,
@@ -514,7 +531,9 @@ class WidgetsManager(Iterable):
                 MetaWidget.SHOW_NAME_COLUMN: show_name_column,
                 MetaWidget.SHOW_IMAGES: show_images,
                 # buttons
-                MetaWidget.VISIBLE_ADD_BUTTON: new_instance if parent_instance_id else False,
+                MetaWidget.VISIBLE_ADD_BUTTON: new_instance
+                if parent_instance_id
+                else False,
                 MetaWidget.VISIBLE_EDIT_BUTTON: edit,
                 MetaWidget.VISIBLE_DELETE_BUTTON: delete,
                 MetaWidget.VISIBLE_CLONE_BUTTON: clone,
@@ -610,8 +629,9 @@ class WidgetsManager(Iterable):
             if deprecated_kw in kwargs:
                 kwargs.pop(deprecated_kw)
                 warnings.warn(
-                    "Argument `{}` is no longer supported as input to `add_attachment_viewer`."
-                    .format(deprecated_kw),
+                    "Argument `{}` is no longer supported as input to `add_attachment_viewer`.".format(
+                        deprecated_kw
+                    ),
                     Warning,
                 )
 
@@ -708,14 +728,23 @@ class WidgetsManager(Iterable):
                     "Button {} has neither.".format(nr + 1)
                 )
 
-            if MetaWidget.CUSTOM_TEXT not in input_dict or not input_dict[MetaWidget.CUSTOM_TEXT]:
+            if (
+                MetaWidget.CUSTOM_TEXT not in input_dict
+                or not input_dict[MetaWidget.CUSTOM_TEXT]
+            ):
                 button_dict[MetaWidget.CUSTOM_TEXT] = ""
             else:
-                button_dict[MetaWidget.CUSTOM_TEXT] = str(input_dict[MetaWidget.CUSTOM_TEXT])
+                button_dict[MetaWidget.CUSTOM_TEXT] = str(
+                    input_dict[MetaWidget.CUSTOM_TEXT]
+                )
 
-            button_dict[MetaWidget.EMPHASIZE] = input_dict.get(MetaWidget.EMPHASIZE, False)
+            button_dict[MetaWidget.EMPHASIZE] = input_dict.get(
+                MetaWidget.EMPHASIZE, False
+            )
 
-            button_dict[MetaWidget.IS_DISABLED] = input_dict.get(MetaWidget.IS_DISABLED, False)
+            button_dict[MetaWidget.IS_DISABLED] = input_dict.get(
+                MetaWidget.IS_DISABLED, False
+            )
 
         meta = _initiate_meta(
             kwargs, activity=self.activity, ignores=(MetaWidget.SHOW_HEIGHT_VALUE,)
@@ -724,7 +753,10 @@ class WidgetsManager(Iterable):
         meta[MetaWidget.ALIGNMENT] = check_enum(alignment, Alignment, "alignment")
 
         widget = self.create_widget(
-            widget_type=WidgetTypes.TASKNAVIGATIONBAR, meta=meta, parent=parent_widget, **kwargs
+            widget_type=WidgetTypes.TASKNAVIGATIONBAR,
+            meta=meta,
+            parent=parent_widget,
+            **kwargs,
         )
 
         return widget
@@ -868,7 +900,9 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the script is uuid type or class `Service`
-        service: "Service" = _retrieve_object(obj=service, method=self._client.service)  # noqa
+        service: "Service" = _retrieve_object(
+            obj=service, method=self._client.service
+        )  # noqa
 
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
@@ -878,13 +912,17 @@ class WidgetsManager(Iterable):
 
         from pykechain.models import Service
 
-        service_id = check_base(service, Service, "service", method=self._client.service)
+        service_id = check_base(
+            service, Service, "service", method=self._client.service
+        )
 
         meta.update(
             {
                 AssociatedObjectId.SERVICE_ID: service_id,
                 MetaWidget.EMPHASIZE_BUTTON: emphasize_run,
-                MetaWidget.SHOW_DOWNLOAD_LOG: check_type(download_log, bool, "download_log"),
+                MetaWidget.SHOW_DOWNLOAD_LOG: check_type(
+                    download_log, bool, "download_log"
+                ),
                 MetaWidget.SHOW_LOG: True
                 if download_log
                 else check_type(show_log, bool, "show_log"),
@@ -1077,9 +1115,13 @@ class WidgetsManager(Iterable):
                     # if the progress = True -> bar = False. Also when the bar is set to True,
                     # if progress=False and Bar=True, the bar is True
                     # if progress=False and Bar=False, both are False
-                    showProgress=show_progress and not show_progressbar or show_progress,
+                    showProgress=show_progress
+                    and not show_progressbar
+                    or show_progress,
                     showProgressBar=show_progressbar and not show_progress,
-                    breadcrumbAncestor=check_base(breadcrumb_root, Activity, "breadcrumb_root")
+                    breadcrumbAncestor=check_base(
+                        breadcrumb_root, Activity, "breadcrumb_root"
+                    )
                     or None,
                 )
             )
@@ -1088,12 +1130,16 @@ class WidgetsManager(Iterable):
                 dict(
                     progressBarSettings=dict(
                         colorNoProgress=progress_bar.get(
-                            MetaWidget.COLOR_NO_PROGRESS, ProgressBarColors.DEFAULT_NO_PROGRESS
+                            MetaWidget.COLOR_NO_PROGRESS,
+                            ProgressBarColors.DEFAULT_NO_PROGRESS,
                         ),
-                        showProgressText=progress_bar.get(MetaWidget.SHOW_PROGRESS_TEXT, True),
+                        showProgressText=progress_bar.get(
+                            MetaWidget.SHOW_PROGRESS_TEXT, True
+                        ),
                         customHeight=progress_bar.get(MetaWidget.CUSTOM_HEIGHT, 25),
                         colorInProgress=progress_bar.get(
-                            MetaWidget.COLOR_IN_PROGRESS, ProgressBarColors.DEFAULT_IN_PROGRESS
+                            MetaWidget.COLOR_IN_PROGRESS,
+                            ProgressBarColors.DEFAULT_IN_PROGRESS,
                         ),
                         colorCompleted=progress_bar.get(
                             MetaWidget.COLOR_COMPLETED_PROGRESS,
@@ -1159,7 +1205,9 @@ class WidgetsManager(Iterable):
                 MetaWidget.COLOR_IN_PROGRESS_BACKGROUND: color_in_progress_background,
             }
         )
-        widget = self.create_widget(widget_type=WidgetTypes.PROGRESS, meta=meta, **kwargs)
+        widget = self.create_widget(
+            widget_type=WidgetTypes.PROGRESS, meta=meta, **kwargs
+        )
         return widget
 
     def add_multicolumn_widget(self, title: TITLE_TYPING = None, **kwargs) -> Widget:
@@ -1313,8 +1361,12 @@ class WidgetsManager(Iterable):
                 MetaWidget.SORTED_DIRECTION: check_enum(
                     sorted_direction, SortTable, "sorted_direction"
                 ),
-                MetaWidget.VISIBLE_ACTIVE_FILTER: check_type(active_filter, bool, "active_filter"),
-                MetaWidget.VISIBLE_SEARCH_FILTER: check_type(search_filter, bool, "search_filter"),
+                MetaWidget.VISIBLE_ACTIVE_FILTER: check_type(
+                    active_filter, bool, "active_filter"
+                ),
+                MetaWidget.VISIBLE_SEARCH_FILTER: check_type(
+                    search_filter, bool, "search_filter"
+                ),
                 MetaWidget.VISIBLE_ADD_BUTTON: add,
                 MetaWidget.VISIBLE_EDIT_BUTTON: edit,
                 MetaWidget.VISIBLE_DELETE_BUTTON: delete,
@@ -1329,7 +1381,11 @@ class WidgetsManager(Iterable):
         )
 
         widget = self.create_widget(
-            widget_type=WidgetTypes.SCOPE, title=title, meta=meta, parent=parent_widget, **kwargs
+            widget_type=WidgetTypes.SCOPE,
+            title=title,
+            meta=meta,
+            parent=parent_widget,
+            **kwargs,
         )
         return widget
 
@@ -1461,11 +1517,17 @@ class WidgetsManager(Iterable):
         meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
         meta = _set_description(meta, description=description, **kwargs)
-        meta = _set_link(meta, link=link, link_value=link_value, link_target=link_target, **kwargs)
+        meta = _set_link(
+            meta, link=link, link_value=link_value, link_target=link_target, **kwargs
+        )
         meta = _set_image(meta, image=image, image_fit=image_fit, **kwargs)
 
         widget = self.create_widget(
-            widget_type=WidgetTypes.CARD, meta=meta, title=title, parent=parent_widget, **kwargs
+            widget_type=WidgetTypes.CARD,
+            meta=meta,
+            title=title,
+            parent=parent_widget,
+            **kwargs,
         )
         return widget
 
@@ -1576,12 +1638,16 @@ class WidgetsManager(Iterable):
         :return: Service Card Widget
         """
         # Check whether the script is uuid type or class `Service`
-        service: "Service" = _retrieve_object(obj=service, method=self._client.service)  # noqa
+        service: "Service" = _retrieve_object(
+            obj=service, method=self._client.service
+        )  # noqa
 
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
         meta = _set_description(meta, description=description, **kwargs)
-        meta = _set_link(meta, link=link, link_value=link_value, link_target=link_target, **kwargs)
+        meta = _set_link(
+            meta, link=link, link_value=link_value, link_target=link_target, **kwargs
+        )
         meta = _set_image(meta, image=image, image_fit=image_fit, **kwargs)
         meta = _set_button_text(
             meta, custom_button_text=custom_button_text, service=service, **kwargs
@@ -1589,7 +1655,9 @@ class WidgetsManager(Iterable):
 
         from pykechain.models import Service
 
-        service_id = check_base(service, Service, "service", method=self._client.service)
+        service_id = check_base(
+            service, Service, "service", method=self._client.service
+        )
 
         meta.update(
             {
@@ -1619,13 +1687,18 @@ class WidgetsManager(Iterable):
         source_subprocess: Optional[List] = None,
         source_selected_scopes: Optional[List] = None,
         show_tasks: Optional[List[DashboardWidgetShowTasks]] = None,
+        show_form_status: Optional[List[DashboardWidgetShowForms]] = None,
         show_scopes: Optional[List[DashboardWidgetShowScopes]] = None,
         no_background: Optional[bool] = False,
+        show_forms: Optional[bool] = False,
         show_assignees: Optional[bool] = True,
         show_assignees_table: Optional[bool] = True,
         show_open_task_assignees: Optional[bool] = True,
         show_open_vs_closed_tasks: Optional[bool] = True,
         show_open_closed_tasks_assignees: Optional[bool] = True,
+        show_form_status_per_assignees: Optional[bool] = True,
+        show_assignees_for_form_statuses: Optional[bool] = True,
+        show_status_category_forms: Optional[bool] = True,
         **kwargs,
     ) -> Widget:
         """
@@ -1641,20 +1714,31 @@ class WidgetsManager(Iterable):
         :type parent_widget: Widget or basestring or None
         :param source_scopes: The `Project(s)` to be used as source when displaying the Widget.
             Defaults on CURRENT_SCOPE.
-        :type source_scopes: basestring (see :class:`models.widgets.enums.DashboardWidgetSourceScopes`)
-        :param source_scopes_tags: Tags on which the source projects can be filtered on. Source is selected
-            automatically as TAGGED_SCOPES
+        :type source_scopes: basestring
+            (see :class:`models.widgets.enums.DashboardWidgetSourceScopes`)
+        :param source_scopes_tags: Tags on which the source projects can be filtered on. Source is
+            selected automatically as TAGGED_SCOPES
         :type source_scopes_tags: list of tags
-        :param source_subprocess: Subprocess that the `Widget` uses as source. Source is selected automatically
-            SUBPROCESS
+        :param source_subprocess: Subprocess that the `Widget` uses as source. Source is selected
+            automatically SUBPROCESS
         :type source_subprocess: list of str (UUID of an `Activity`)
-        :param source_selected_scopes: List of `Scope` to be used by the `Widget` as source. Source is selected
-            automatically as SELECTED_SCOPES
+        :param source_selected_scopes: List of `Scope` to be used by the `Widget` as source. Source
+            is selected automatically as SELECTED_SCOPES
         :type source_selected_scopes: list of str (UUIDs of `Scopes`)
-        :param show_tasks: Type of tasks to be displayed in the `Widget`. If left None, all of them will be selected
-        :type show_tasks: list of basestring (see :class:`models.widgets.enums.DashboardWidgetShowTasks`)
-        :param show_scopes: Type of scopes to be displayed in the `Widget`. If left None, all of them will be selected
-        :type show_scopes: list of basestring (see :class:`models.widgets.enums.DashboardWidgetShowScopes`)
+        :param show_forms: Show all dashboard widgets based on forms within the scope
+        :type show_forms: bool
+        :param show_tasks: Type of tasks to be displayed in the `Widget`. If left None, all of
+            them will be selected
+        :type show_tasks: list of basestring
+            (see :class:`models.widgets.enums.DashboardWidgetShowTasks`)
+        :param show_form_status: Type of statuses to be displayed in the `Widget`. If left None,
+            all of them will be selected
+         :type show_form_status: list of basestring
+            (see :class:`models.widgets.enums.DashboardWidgetShowForms`)
+        :param show_scopes: Type of scopes to be displayed in the `Widget`. If left None, all of
+            them will be selected
+        :type show_scopes: list of basestring
+            (see: class:`models.widgets.enums.DashboardWidgetShowScopes`)
         :param no_background: Reverse the shadows (default False)
         :type no_background: bool
         :param show_assignees: Show the assignees pie chart
@@ -1665,8 +1749,16 @@ class WidgetsManager(Iterable):
         :type show_open_task_assignees: bool
         :param show_open_vs_closed_tasks: Show the `Open vs closed tasks` pie chart
         :type show_open_vs_closed_tasks: bool
-        :param show_open_closed_tasks_assignees: Show the `Open open and closed tasks per assignees` pie chart
+        :param show_open_closed_tasks_assignees: Show the `Open open and closed tasks per
+            assignees` pie chart
         :type show_open_closed_tasks_assignees: bool
+        :param show_form_status_per_assignees: Show the `Status categories per form` pie chart
+        :type show_form_status_per_assignees: bool
+        :param show_assignees_for_form_statuses: Show the `Show assignees per status form` pie
+            chart
+        :type show_assignees_for_form_statuses: bool
+        :param show_status_category_forms: Show the `Show Forms Status per assignee` chart
+        :type show_status_category_forms: bool
         :param kwargs:
         :return:
         """
@@ -1686,7 +1778,9 @@ class WidgetsManager(Iterable):
             meta.update(
                 {
                     MetaWidget.SOURCE: DashboardWidgetSourceScopes.SUBPROCESS,
-                    MetaWidget.SCOPE_TAG: check_type(source_subprocess, list, "source_subprocess"),
+                    MetaWidget.SCOPE_TAG: check_type(
+                        source_subprocess, list, "source_subprocess"
+                    ),
                 }
             )
         elif source_selected_scopes:
@@ -1698,6 +1792,12 @@ class WidgetsManager(Iterable):
                     ),
                 }
             )
+        elif show_forms:
+            meta.update(
+                {
+                    MetaWidget.SOURCE: DashboardWidgetSourceScopes.FORMS,
+                }
+            )
         else:
             meta.update(
                 {
@@ -1707,13 +1807,51 @@ class WidgetsManager(Iterable):
                 }
             )
 
+        show_form_status_list = list()
+        if show_form_status is None:
+            for value in DashboardWidgetShowForms.values():
+                show_form_status_list.append(
+                    {
+                        MetaWidget.NAME: value,
+                        MetaWidget.ORDER: DashboardWidgetShowForms.values().index(
+                            value
+                        ),
+                        MetaWidget.SELECTED: True,
+                    }
+                )
+        else:
+            check_type(show_form_status, list, "show_form_status")
+            for value in DashboardWidgetShowForms.values():
+                if value in show_form_status:
+                    show_form_status_list.append(
+                        {
+                            MetaWidget.NAME: value,
+                            MetaWidget.ORDER: DashboardWidgetShowForms.values().index(
+                                value
+                            ),
+                            MetaWidget.SELECTED: True,
+                        }
+                    )
+                else:
+                    show_form_status_list.append(
+                        {
+                            MetaWidget.NAME: value,
+                            MetaWidget.ORDER: DashboardWidgetShowForms.values().index(
+                                value
+                            ),
+                            MetaWidget.SELECTED: False,
+                        }
+                    )
+
         show_tasks_list = list()
         if show_tasks is None:
             for value in DashboardWidgetShowTasks.values():
                 show_tasks_list.append(
                     {
                         MetaWidget.NAME: value,
-                        MetaWidget.ORDER: DashboardWidgetShowTasks.values().index(value),
+                        MetaWidget.ORDER: DashboardWidgetShowTasks.values().index(
+                            value
+                        ),
                         MetaWidget.SELECTED: True,
                     }
                 )
@@ -1724,7 +1862,9 @@ class WidgetsManager(Iterable):
                     show_tasks_list.append(
                         {
                             MetaWidget.NAME: value,
-                            MetaWidget.ORDER: DashboardWidgetShowTasks.values().index(value),
+                            MetaWidget.ORDER: DashboardWidgetShowTasks.values().index(
+                                value
+                            ),
                             MetaWidget.SELECTED: True,
                         }
                     )
@@ -1732,7 +1872,9 @@ class WidgetsManager(Iterable):
                     show_tasks_list.append(
                         {
                             MetaWidget.NAME: value,
-                            MetaWidget.ORDER: DashboardWidgetShowTasks.values().index(value),
+                            MetaWidget.ORDER: DashboardWidgetShowTasks.values().index(
+                                value
+                            ),
                             MetaWidget.SELECTED: False,
                         }
                     )
@@ -1743,7 +1885,9 @@ class WidgetsManager(Iterable):
                 show_projects_list.append(
                     {
                         MetaWidget.NAME: value,
-                        MetaWidget.ORDER: DashboardWidgetShowScopes.values().index(value),
+                        MetaWidget.ORDER: DashboardWidgetShowScopes.values().index(
+                            value
+                        ),
                         MetaWidget.SELECTED: True,
                     }
                 )
@@ -1754,7 +1898,9 @@ class WidgetsManager(Iterable):
                     show_projects_list.append(
                         {
                             MetaWidget.NAME: value,
-                            MetaWidget.ORDER: DashboardWidgetShowScopes.values().index(value),
+                            MetaWidget.ORDER: DashboardWidgetShowScopes.values().index(
+                                value
+                            ),
                             MetaWidget.SELECTED: True,
                         }
                     )
@@ -1762,16 +1908,23 @@ class WidgetsManager(Iterable):
                     show_projects_list.append(
                         {
                             MetaWidget.NAME: value,
-                            MetaWidget.ORDER: DashboardWidgetShowScopes.values().index(value),
+                            MetaWidget.ORDER: DashboardWidgetShowScopes.values().index(
+                                value
+                            ),
                             MetaWidget.SELECTED: False,
                         }
                     )
         meta.update(
             {
                 MetaWidget.SHOW_NUMBERS: show_tasks_list,
+                MetaWidget.SHOW_NUMBERS_FORMS: show_form_status_list,
                 MetaWidget.SHOW_NUMBERS_PROJECTS: show_projects_list,
-                MetaWidget.NO_BACKGROUND: check_type(no_background, bool, "no_background"),
-                MetaWidget.SHOW_ASSIGNEES: check_type(show_assignees, bool, "show_assignees"),
+                MetaWidget.NO_BACKGROUND: check_type(
+                    no_background, bool, "no_background"
+                ),
+                MetaWidget.SHOW_ASSIGNEES: check_type(
+                    show_assignees, bool, "show_assignees"
+                ),
                 MetaWidget.SHOW_ASSIGNEES_TABLE: check_type(
                     show_assignees_table, bool, "show_assignees_table"
                 ),
@@ -1782,7 +1935,22 @@ class WidgetsManager(Iterable):
                     show_open_vs_closed_tasks, bool, "show_open_vs_closed_tasks"
                 ),
                 MetaWidget.SHOW_OPEN_VS_CLOSED_TASKS_ASSIGNEES: check_type(
-                    show_open_closed_tasks_assignees, bool, "show_open_closed_tasks_assignees"
+                    show_open_closed_tasks_assignees,
+                    bool,
+                    "show_open_closed_tasks_assignees",
+                ),
+                MetaWidget.SHOW_FORM_STATUS_PER_ASSIGNEES: check_type(
+                    show_form_status_per_assignees,
+                    bool,
+                    "show_form_status_per_assignees",
+                ),
+                MetaWidget.SHOW_ASSIGNEES_FOR_FORM_STATUSES: check_type(
+                    show_assignees_for_form_statuses,
+                    bool,
+                    "show_assignees_for_form_statuses",
+                ),
+                MetaWidget.SHOW_STATUS_CATEGORY_FORMS: check_type(
+                    show_status_category_forms, bool, "show_status_category_forms"
                 ),
             }
         )
@@ -1812,10 +1980,14 @@ class WidgetsManager(Iterable):
         show_open_tasks_filter: Optional[bool] = True,
         show_search_filter: Optional[bool] = True,
         parent_activity: Optional[Union["Activity", str]] = None,
-        assigned_filter: Optional[TasksAssignmentFilterTypes] = TasksAssignmentFilterTypes.ALL,
+        assigned_filter: Optional[
+            TasksAssignmentFilterTypes
+        ] = TasksAssignmentFilterTypes.ALL,
         status_filter: Optional[ActivityStatus] = None,
         activity_type_filter: Optional[ActivityType] = ActivityType.TASK,
-        classification_filter: Optional[ActivityClassification] = ActivityClassification.WORKFLOW,
+        classification_filter: Optional[
+            ActivityClassification
+        ] = ActivityClassification.WORKFLOW,
         tags_filter: Optional[List[str]] = (),
         collapse_filter: Optional[bool] = False,
         show_columns: Optional[List[TasksWidgetColumns]] = None,
@@ -1894,7 +2066,9 @@ class WidgetsManager(Iterable):
             MetaWidget.ASSIGNED: check_enum(
                 assigned_filter, TasksAssignmentFilterTypes, "assigned_filter"
             ),
-            MetaWidget.ACTIVITY_STATUS: check_enum(status_filter, ActivityStatus, "status_filter")
+            MetaWidget.ACTIVITY_STATUS: check_enum(
+                status_filter, ActivityStatus, "status_filter"
+            )
             or "",
             MetaWidget.ACTIVITY_TYPE: check_enum(
                 activity_type_filter, ActivityType, "activity_type_filter"
@@ -1902,7 +2076,9 @@ class WidgetsManager(Iterable):
             MetaWidget.ACTIVITY_CLASSIFICATION: check_enum(
                 classification_filter, ActivityClassification, "classification_filter"
             ),
-            MetaWidget.TAGS_FILTER: check_list_of_text(tags_filter, "tags_filter", unique=True),
+            MetaWidget.TAGS_FILTER: check_list_of_text(
+                tags_filter, "tags_filter", unique=True
+            ),
         }
 
         meta.update(
@@ -1913,7 +2089,9 @@ class WidgetsManager(Iterable):
                 MetaWidget.VISIBLE_CLONE_BUTTON: check_type(clone, bool, "clone"),
                 MetaWidget.VISIBLE_EDIT_BUTTON: check_type(edit, bool, "edit"),
                 MetaWidget.VISIBLE_DELETE_BUTTON: check_type(delete, bool, "delete"),
-                MetaWidget.EMPHASIZE_ADD_BUTTON: check_type(emphasize_add, bool, "emphasize_add"),
+                MetaWidget.EMPHASIZE_ADD_BUTTON: check_type(
+                    emphasize_add, bool, "emphasize_add"
+                ),
                 MetaWidget.EMPHASIZE_CLONE_BUTTON: check_type(
                     emphasize_clone, bool, "emphasize_clone"
                 ),
@@ -1933,9 +2111,13 @@ class WidgetsManager(Iterable):
                     show_search_filter, bool, "show_search_filter"
                 ),
                 MetaWidget.PREFILTERS: filters,
-                MetaWidget.COLLAPSE_FILTERS: check_type(collapse_filter, bool, "collapse_filter"),
+                MetaWidget.COLLAPSE_FILTERS: check_type(
+                    collapse_filter, bool, "collapse_filter"
+                ),
                 MetaWidget.SHOW_FILTERS: collapse_filter is not None,
-                MetaWidget.SHOW_COLUMNS: check_list_of_text(show_columns, "show_columns")
+                MetaWidget.SHOW_COLUMNS: check_list_of_text(
+                    show_columns, "show_columns"
+                )
                 or TasksWidgetColumns.values(),
                 MetaWidget.SORTED_COLUMN: check_enum(
                     sorted_column, TasksWidgetColumns, "sorted_column"
@@ -1948,7 +2130,11 @@ class WidgetsManager(Iterable):
         )
 
         widget = self.create_widget(
-            widget_type=WidgetTypes.TASKS, meta=meta, title=title, parent=parent_widget, **kwargs
+            widget_type=WidgetTypes.TASKS,
+            meta=meta,
+            title=title,
+            parent=parent_widget,
+            **kwargs,
         )
 
         return widget

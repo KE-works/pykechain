@@ -2,6 +2,7 @@ from collections.abc import Iterable
 from typing import Any, Optional, List, Dict
 
 from pykechain.enums import (
+    SidebarType,
     URITarget,
     SubprocessDisplayMode,
     KEChainPages,
@@ -16,7 +17,9 @@ from pykechain.models.input_checks import (
     check_list_of_dicts,
     check_type,
 )
+from pykechain.models.sidebar.sidebar_base import SideBarItem
 from pykechain.models.sidebar.sidebar_button import SideBarButton
+from pykechain.models.sidebar.sidebar_card import SideBarCard
 from pykechain.utils import find
 
 
@@ -25,10 +28,8 @@ class SideBarManager(Iterable):
     Sidebar manager class.
 
     :ivar scope: Scope object for which the side-bar is managed.
-    :type scope: Scope
     :ivar bulk_creation: boolean to create buttons in bulk, postponing updating of KE-chain until the manager is
                          deleted from memory (end of your function)
-    :type bulk_creation: bool
     """
 
     __existing_managers = (
@@ -52,9 +53,7 @@ class SideBarManager(Iterable):
         Create a side-bar manager object for the Scope object.
 
         :param scope: Scope for which to create the side-bar manager.
-        :type scope: Scope
         :param bulk_creation: flag whether to update once (True) or continuously (False, default)
-        :type bulk_creation: bool
         """
         super().__init__(**kwargs)
 
@@ -68,13 +67,16 @@ class SideBarManager(Iterable):
         self._scope_uri = f"#/scopes/{self.scope.id}"
         self._perform_bulk_creation = False
 
-        self._buttons: List[SideBarButton] = []
+        self._items: List[SideBarItem] = []
 
         # Load existing buttons from the scope
-        for button_dict in scope.options.get("customNavigation", []):
-            self._buttons.append(SideBarButton(side_bar_manager=self, json=button_dict))
+        for item_dict in scope.options.get("customNavigation", []):
+            if item_dict.get("itemType", SidebarType.BUTTON) == SidebarType.BUTTON:
+                self._items.append(SideBarButton(side_bar_manager=self, json=item_dict))
+            elif item_dict.get("itemType") == SidebarType.CARD:
+                self._items.append(SideBarCard(side_bar_manager=self, json=item_dict))
 
-        self._iter = iter(self._buttons)
+        self._iter = iter(self._items)
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<pyke {self.__class__.__name__} object {self.__len__()} buttons>"
@@ -83,22 +85,21 @@ class SideBarManager(Iterable):
         return self
 
     def __len__(self) -> int:
-        return len(self._buttons)
+        return len(self._items)
 
-    def __next__(self) -> SideBarButton:
-        # py3.4 and up style next
+    def __next__(self) -> SideBarItem:
         return next(self._iter)
 
-    def __getitem__(self, key: Any) -> SideBarButton:
+    def __getitem__(self, key: Any) -> SideBarItem:
 
         found = None
-        if isinstance(key, SideBarButton):
-            found = find(self._buttons, lambda b: b == key)
+        if isinstance(key, SideBarItem):
+            found = find(self._items, lambda b: b == key)
 
         if isinstance(key, int):
-            found = self._buttons[key]
+            found = self._items[key]
         elif isinstance(key, str):
-            found = find(self._buttons, lambda p: key == p.display_name)
+            found = find(self._items, lambda p: key == p.display_name)
 
         if found is not None:
             return found
@@ -129,52 +130,66 @@ class SideBarManager(Iterable):
         Remove a button from the side-bar.
 
         :param key: either a button, index, or name.
-        :type key: Any
         :returns None
         """
         self.delete_button(key=key)
 
-    def insert(self, index: int, button: SideBarButton) -> None:
+    def insert(self, index: int, button: SideBarItem) -> None:
         """
         Place a button at index `index` of the button-list.
 
         :param index: location index of the new button
-        :type index: int
         :param button: a side-bar button object
-        :type button: SideBarButton
         """
-        if button in self._buttons:
-            self._buttons.remove(button)
+        if button in self._items:
+            self._items.remove(button)
 
-        self._buttons.insert(check_type(index, int, "index"), button)
+        self._items.insert(check_type(index, int, "index"), button)
 
-    def create_button(self, order: Optional[int] = None, *args, **kwargs) -> SideBarButton:
+    def create_card(self, order: Optional[int] = None, *args, **kwargs) -> SideBarCard:
+        """Create a side bar card.
+
+        :param order: Optional input to specify the index of the new button.
+        :return: new side-bar card
+        """
+        if order is None:
+            index = len(self._items)
+        else:
+            index = check_type(order, int, "order")
+
+        card = SideBarCard(side_bar_manager=self, order=index, *args, **kwargs)
+
+        self._items.insert(index, card)
+        self._update()
+        return card
+
+    def create_button(
+        self, order: Optional[int] = None, *args, **kwargs
+    ) -> SideBarButton:
         """
         Create a side-bar button.
 
         :param order: Optional input to specify the index of the new button.
-        :type order: int
         :return: new side-bar button
-        :rtype SideBarButton
         """
         if order is None:
-            index = len(self._buttons)
+            index = len(self._items)
         else:
             index = check_type(order, int, "order")
 
         button = SideBarButton(side_bar_manager=self, order=index, *args, **kwargs)
 
-        self._buttons.insert(index, button)
-
+        self._items.insert(index, button)
         self._update()
-
         return button
 
     def add_task_button(
         self,
         activity: "Activity",
         title: Optional[str] = None,
-        task_display_mode: Optional[SubprocessDisplayMode] = SubprocessDisplayMode.ACTIVITIES,
+        task_display_mode: Optional[
+            SubprocessDisplayMode
+        ] = SubprocessDisplayMode.ACTIVITIES,
         *args,
         **kwargs,
     ) -> SideBarButton:
@@ -182,13 +197,9 @@ class SideBarManager(Iterable):
         Add a side-bar button to a KE-chain activity.
 
         :param activity: Activity object
-        :type activity: Activity
         :param title: Title of the side-bar button, defaults to the activity name
-        :type title: str
         :param task_display_mode: for sub-processes, vary the display mode in KE-chain
-        :type task_display_mode: SubprocessDisplayMode
         :return: new side-bar button
-        :rtype SideBarButton
         """
         from pykechain.models import Activity
 
@@ -199,10 +210,14 @@ class SideBarManager(Iterable):
         uri = f"{self._scope_uri}/{task_display_mode}/{activity.id}"
 
         uri_target = (
-            URITarget.INTERNAL if activity.scope_id == self.scope.id else URITarget.EXTERNAL
+            URITarget.INTERNAL
+            if activity.scope_id == self.scope.id
+            else URITarget.EXTERNAL
         )
 
-        return self.create_button(uri=uri, uri_target=uri_target, title=title, *args, **kwargs)
+        return self.create_button(
+            uri=uri, uri_target=uri_target, title=title, *args, **kwargs
+        )
 
     def add_ke_chain_page(
         self, page_name: KEChainPages, title: Optional[str] = None, *args, **kwargs
@@ -211,11 +226,8 @@ class SideBarManager(Iterable):
         Add a side-bar button to a built-in KE-chain page.
 
         :param page_name: name of the KE-chain page
-        :type page_name: KEChainPages
         :param title: Title of the side-bar button, defaults to the page_name
-        :type title: str
         :return: new side-bar button
-        :rtype SideBarButton
         """
         page_name = check_enum(page_name, KEChainPages, "page_name")
         title = check_text(title, "title") or KEChainPageLabels[page_name]
@@ -226,19 +238,23 @@ class SideBarManager(Iterable):
         uri = f"{self._scope_uri}/{page_name}"
 
         return self.create_button(
-            uri=uri, uri_target=URITarget.INTERNAL, title=title, icon=icon, *args, **kwargs
+            uri=uri,
+            uri_target=URITarget.INTERNAL,
+            title=title,
+            icon=icon,
+            *args,
+            **kwargs,
         )
 
-    def add_external_button(self, url: str, title: str, *args, **kwargs) -> SideBarButton:
+    def add_external_button(
+        self, url: str, title: str, *args, **kwargs
+    ) -> SideBarButton:
         """
         Add a side-bar button to an external page defined by an URL.
 
         :param title: title of the button
-        :type title: str
         :param url: URL to an external page
-        :type url: str
         :return: new side-bar button
-        :rtype SideBarButton
         """
         button = self.create_button(
             title=check_text(title, "title"),
@@ -249,16 +265,15 @@ class SideBarManager(Iterable):
         )
         return button
 
-    def add_buttons(self, buttons: List[Dict], override_sidebar: bool) -> List[SideBarButton]:
+    def add_buttons(
+        self, buttons: List[Dict], override_sidebar: bool
+    ) -> List[SideBarItem]:
         """
         Create a list of buttons in bulk. Each button is defined by a dict, provided in a sorted list.
 
         :param buttons: list of dicts
-        :type buttons: list
         :param override_sidebar: whether to override the default sidebar menu items.
-        :type override_sidebar: bool
         :return: list of SideBarButton objects
-        :rtype List[SideBarButton]
         """
         check_list_of_dicts(buttons, "buttons")
         check_type(override_sidebar, bool, "override_sidebar")
@@ -266,12 +281,11 @@ class SideBarManager(Iterable):
         for index, button in enumerate(buttons):
             button = SideBarButton(side_bar_manager=self, order=index, json=button)
 
-            self._buttons.append(button)
+            self._items.append(button)
 
         self.override_sidebar = override_sidebar
         self._update()
-
-        return self._buttons
+        return self._items
 
     def delete_button(self, key: Any) -> None:
         """
@@ -280,8 +294,8 @@ class SideBarManager(Iterable):
         :param key: either a button, index or name
         :return: None
         """
-        button = self[key]
-        self._buttons.remove(button)
+        item = self[key]
+        self._items.remove(item)
         self._update()
 
     @property
@@ -290,7 +304,6 @@ class SideBarManager(Iterable):
         Flag to indicate whether the original KE-chain side-bar is still shown.
 
         :return: boolean, True if original side-bar is not visible
-        :rtype bool
         """
         return self._override
 
@@ -300,7 +313,6 @@ class SideBarManager(Iterable):
         Flag to indicate whether the original KE-chain side-bar is still shown.
 
         :param value: new boolean value
-        :type value: bool
         :return: None
         """
         check_type(value, bool, "override_sidebar")
@@ -312,7 +324,6 @@ class SideBarManager(Iterable):
         Update the side-bar using the scope.options attribute.
 
         :return: None
-        :rtype None
         """
         if self._perform_bulk_creation:
             # Update will proceed during deletion of the manager.
@@ -321,8 +332,8 @@ class SideBarManager(Iterable):
         options = dict(self.scope.options)
 
         custom_navigation = list()
-        for button in self._buttons:
-            custom_navigation.append(button.as_dict())
+        for item in self._items:
+            custom_navigation.append(item.as_dict())
 
         options.update(
             customNavigation=custom_navigation,

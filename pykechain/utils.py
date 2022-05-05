@@ -4,6 +4,7 @@ import unicodedata
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from typing import (
+    Any,
     Callable,
     Dict,
     Iterable,
@@ -14,6 +15,8 @@ from typing import (
 )  # noqa: F401
 
 import pytz
+
+from pykechain.exceptions import MultipleFoundError, NotFoundError
 
 T = TypeVar("T")
 
@@ -502,7 +505,7 @@ def get_in_chunks(lst: Union[List, Iterable], chunk_size: int) -> Iterable:
     :rtype: Iterable
     """
     for i in range(0, len(lst), chunk_size):
-        yield lst[i: i + chunk_size]
+        yield lst[i: i + chunk_size]  # noqa: E203
 
 
 class Empty:
@@ -566,18 +569,57 @@ class Empty:
 empty = Empty()
 
 
-def clean_empty_values(update_dict: Dict) -> Dict:
+def clean_empty_values(update_dict: Dict, nones: bool = True) -> Dict:
     """
     Clean a dictionary by removing all the keys that have an empty value.
 
     :param update_dict: dictionary with keys=request parameters
+    :param nones: (optional) allow None's to be in the dict when True, otherwise remove them
     :type update_dict: dict
 
     :return: same dictionary but cleaned up if there are values None
     :rtype: dict
     """
     cleaned_up_dict = {k: v for k, v in update_dict.items() if not isinstance(v, Empty)}
+    if not nones:
+        cleaned_up_dict = {k: v for k, v in cleaned_up_dict.items() if v is not None}
     return cleaned_up_dict
+
+
+def find_obj_in_list(value: str, iterable: List[Any], attribute: str = None) -> Any:
+    """
+    Retrieve a Base object belonging to an iterable list on its name, ref or uuid.
+
+    You may provide an attribute name of the Base object (such as 'id', 'derived_from', ...) on
+    where to match the val on. So it will check equivalence on `Base.get(attribute) == value`.
+
+    :param value: Base object name, ref or UUID to search for
+    :param iterable: List of Base objects to search in.
+    :param attribute: the attribute on where to match the comparison on.
+    :return: a single :class:`Base`
+    :raises NotFoundError: if the `Base` is not part of the list of Base object
+    :raises MultipleFoundError: if multiple `Base` objects are found in the list
+    """
+    matches = []
+    if attribute:
+        matches = [t for t in iterable if getattr(t, attribute) == value]
+    elif is_uuid(value):
+        matches = [t for t in iterable if t.id == value]
+    else:
+        matches = [t for t in iterable if t.name.lower() == value.lower()]
+        if not matches:
+            matches = [t for t in iterable if t.ref == value]
+
+    if not matches:
+        raise NotFoundError(
+            f"Could not find a Object with name, id, or ref in list: {value} (out of: {iterable}"
+        )
+    elif len(matches) > 1:
+        raise MultipleFoundError(
+            f"Found multiple Object with name, id or ref in list: {value} (out of: {iterable})"
+        )
+    else:
+        return matches[0]
 
 
 def get_offset_from_user_timezone(user: "User") -> int:

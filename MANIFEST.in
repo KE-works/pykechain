@@ -20,3 +20,4 @@ exclude *-OFF
 exclude *.yml
 exclude *.yaml
 exclude .editorconfig
+exclude .secrets.baseline

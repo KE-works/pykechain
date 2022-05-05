@@ -67,7 +67,9 @@ class Service(BaseInScope):
     def __repr__(self):  # pragma: no cover
         return f"<pyke Service '{self.name}' id {self.id[-8:]}>"
 
-    def execute(self, interactive: Optional[bool] = False, **kwargs) -> "ServiceExecution":
+    def execute(
+        self, interactive: Optional[bool] = False, **kwargs
+    ) -> "ServiceExecution":
         """
         Execute the service.
 
@@ -81,7 +83,9 @@ class Service(BaseInScope):
         :raises APIError: when unable to execute
         """
         request_params = dict(
-            interactive=check_type(interactive, bool, "interactive"), format="json", **kwargs
+            interactive=check_type(interactive, bool, "interactive"),
+            format="json",
+            **kwargs,
         )
 
         url = self._client._build_url("service_execute", service_id=self.id)
@@ -164,7 +168,9 @@ class Service(BaseInScope):
         update_dict = clean_empty_values(update_dict=update_dict)
 
         response = self._client._request(
-            "PUT", self._client._build_url("service", service_id=self.id), json=update_dict
+            "PUT",
+            self._client._build_url("service", service_id=self.id),
+            json=update_dict,
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
@@ -210,7 +216,8 @@ class Service(BaseInScope):
 
         if response.status_code != requests.codes.accepted:  # pragma: no cover
             raise APIError(
-                f"Could not upload script file (or kecpkg) to Service {self}", response=response
+                f"Could not upload script file (or kecpkg) to Service {self}",
+                response=response,
             )
 
         self.refresh(json=response.json()["results"][0])
@@ -251,7 +258,9 @@ class Service(BaseInScope):
         :type kwargs: dict
         :return: list of ServiceExecutions associated to the current service.
         """
-        return self._client.service_executions(service=self.id, scope=self.scope_id, **kwargs)
+        return self._client.service_executions(
+            service=self.id, scope=self.scope_id, **kwargs
+        )
 
 
 class ServiceExecution(Base):
@@ -316,7 +325,9 @@ class ServiceExecution(Base):
         :return: None if the termination request was successful
         :raises APIError: When the service execution could not be terminated.
         """
-        url = self._client._build_url("service_execution_terminate", service_execution_id=self.id)
+        url = self._client._build_url(
+            "service_execution_terminate", service_execution_id=self.id
+        )
         response = self._client._request("GET", url, params=dict(format="json"))
 
         if response.status_code != requests.codes.accepted:  # pragma: no cover
@@ -337,7 +348,9 @@ class ServiceExecution(Base):
         """
         full_path = os.path.join(target_dir or os.getcwd(), log_filename)
 
-        url = self._client._build_url("service_execution_log", service_execution_id=self.id)
+        url = self._client._build_url(
+            "service_execution_log", service_execution_id=self.id
+        )
         response = self._client._request("GET", url)
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError(
@@ -363,7 +376,9 @@ class ServiceExecution(Base):
         response = self._client._request("GET", url, params=dict(format="json"))
 
         if response.status_code != requests.codes.ok:
-            raise APIError(f"Could not retrieve notebook url of Service {self}", response=response)
+            raise APIError(
+                f"Could not retrieve notebook url of Service {self}", response=response
+            )
 
         data = response.json()
         url = data.get("results")[0].get("url")

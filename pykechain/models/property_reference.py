@@ -3,8 +3,14 @@ from typing import List, Optional
 from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Scope, user
-from pykechain.models.base_reference import _ReferencePropertyInScope, _ReferenceProperty
+from pykechain.models.base_reference import (
+    _ReferenceProperty,
+    _ReferencePropertyInScope,
+)
+from pykechain.models.context import Context
+from pykechain.models.form import Form
 from pykechain.models.value_filter import ScopeFilter
+from pykechain.models.workflow import Status
 from pykechain.utils import get_in_chunks
 
 
@@ -52,7 +58,9 @@ class ScopeReferencesProperty(_ReferenceProperty):
         if scope_ids:
             scopes = list()
             for chunk in get_in_chunks(scope_ids, PARTS_BATCH_LIMIT):
-                scopes.extend(list(self._client.scopes(id__in=",".join(chunk), status=None)))
+                scopes.extend(
+                    list(self._client.scopes(id__in=",".join(chunk), status=None))
+                )
         return scopes
 
     def set_prefilters(
@@ -128,7 +136,9 @@ class UserReferencesProperty(_ReferenceProperty):
             elif isinstance(value, (int, str)):
                 object_ids.append(str(value))
             else:  # pragma: no cover
-                raise ValueError(f'Value "{value}" must be a dict with field `pk` or a UUID.')
+                raise ValueError(
+                    f'Value "{value}" must be a dict with field `pk` or a UUID.'
+                )
         return object_ids
 
     def _retrieve_objects(self, **kwargs) -> List[user.User]:
@@ -156,3 +166,72 @@ class UserReferencesProperty(_ReferenceProperty):
         :rtype list
         """
         return [value.get("pk") for value in self._value] if self.has_value() else None
+
+
+class FormReferencesProperty(_ReferencePropertyInScope):
+    """A virtual object representing a KE-chain Form References property.
+
+    .. versionadded:: 3.7
+    """
+
+    # REFERENCED_CLASS = Form
+
+    def _retrieve_objects(self, **kwargs) -> List[Form]:
+        """
+        Retrieve a list of Forms.
+
+        :param kwargs: optional inputs
+        :return: list of Form objects
+        """
+        forms = []
+        for forms_json in self._value:
+            form = Form(client=self._client, json=forms_json)
+            form.refresh()  # To populate the object with all expected data
+            forms.append(form)
+        return forms
+
+
+class ContextReferencesProperty(_ReferencePropertyInScope):
+    """A virtual object representing a KE-chain Context References property.
+
+    .. versionadded:: 3.7
+    """
+
+    # REFERENCED_CLASS = Context
+
+    def _retrieve_objects(self, **kwargs) -> List[Context]:
+        """
+        Retrieve a list of Contexts.
+
+        :param kwargs: optional inputs
+        :return: list of Context objects
+        """
+        contexts = []
+        for contexts_json in self._value:
+            context = Context(client=self._client, json=contexts_json)
+            context.refresh()  # To populate the object with all expected data
+            contexts.append(context)
+        return contexts
+
+
+class StatusReferencesProperty(_ReferenceProperty):
+    """A virtual object representing a KE-chain Context References property.
+
+    .. versionadded:: 3.19
+    """
+
+    # REFERENCED_CLASS = Status
+
+    def _retrieve_objects(self, **kwargs) -> List[Context]:
+        """
+        Retrieve a list of Contexts.
+
+        :param kwargs: optional inputs
+        :return: list of Context objects
+        """
+        statuses = []
+        for statuse_json in self._value:
+            status = Status(client=self._client, json=statuse_json)
+            status.refresh()  # To populate the object with all expected data
+            statuses.append(status)
+        return statuses

@@ -1,10 +1,10 @@
 import warnings
 from datetime import datetime
-from typing import Optional, List, Iterable, Any, Callable, Dict, Union
+from enum import Enum
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
-from pykechain.enums import Enum
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.utils import is_uuid, is_url, Empty, empty, parse_datetime
+from pykechain.utils import Empty, empty, is_url, is_uuid, parse_datetime
 
 iter_types = (list, tuple, set)
 
@@ -14,7 +14,7 @@ def check_type(value: Optional[Any], cls: Any, key: str) -> Optional[Any]:
 
     :param value: value to check against
     :param cls: check to see if the value is of type class
-    :param key: key
+    :param key: name of the object to display in the error message
     """
     if value is not None and value is not empty:
         if not isinstance(value, cls):
@@ -28,6 +28,16 @@ def check_type(value: Optional[Any], cls: Any, key: str) -> Optional[Any]:
                 )
             )
     return value
+
+
+def check_client(value: "Client") -> "Client":
+    """Validate the input being a KE-chain Client.
+
+    :param value: the client to test
+    """
+    from pykechain import Client
+
+    return check_type(value, Client, "client")
 
 
 def check_uuid(uuid: Optional[str], key: Optional[str] = "pk") -> Optional[str]:
@@ -75,7 +85,9 @@ def check_list_of_text(
                 )
             )
         if unique:
-            list_of_text = [t for i, t in enumerate(list_of_text) if list_of_text.index(t) == i]
+            list_of_text = [
+                t for i, t in enumerate(list_of_text) if list_of_text.index(t) == i
+            ]
     return list_of_text
 
 
@@ -84,7 +96,17 @@ def check_list_of_dicts(
     key: str,
     fields: Optional[List[str]] = None,
 ) -> Optional[List[Dict]]:
-    """Validate iterable input to be a list/tuple/set of dicts, optionally checking for required field names."""
+    """
+    Validate iterable input to be a list/tuple/set of dicts.
+
+    Optionally checking for required field names.
+
+    :param list_of_dicts: list of dicts
+    :param key: name of the object to display in the error message
+    :param fields: list of fields that are required in each dict
+    :raises IllegalArgumentError: if the list_of_dicts does not conform
+    :returns: the list of dicts
+    """
     if list_of_dicts is not None and list_of_dicts is not empty:
         if not isinstance(list_of_dicts, iter_types) or not all(
             isinstance(d, dict) for d in list_of_dicts
@@ -118,7 +140,8 @@ def check_enum(value: Optional[Any], enum: type(Enum), key: str) -> Optional[Any
     if value is not None and value is not empty:
         if value not in enum.values():
             raise IllegalArgumentError(
-                '`{}` must be an option from enum {}, "{}" ({}) is not.\nChoose from: {}'.format(
+                '`{}` must be an option from enum {}, "{}" ({}) is not.\n'
+                "Choose from: {}".format(
                     key, enum.__class__.__name__, value, type(value), enum.values()
                 )
             )
@@ -134,14 +157,14 @@ def check_datetime(dt: Optional[Union[datetime, str]], key: str) -> Optional[str
         if isinstance(dt, datetime):
             if not dt.tzinfo:
                 warnings.warn(
-                    "`{}` '{}' is naive and not timezone aware, use pytz.timezone info. "
-                    "Date will be interpreted as UTC time.".format(key, dt.isoformat(sep=" "))
+                    f"`{key}` `{dt.isoformat(sep=' ')}` is naive and not timezone aware, "
+                    f"use pytz.timezone info. Date will be interpreted as UTC time."
                 )
             dt = dt.isoformat(sep="T")
         else:
             raise IllegalArgumentError(
-                "`{}` should be a correctly formatted string or a datetime.datetime() object, "
-                '"{}" ({}) is not.'.format(key, dt, type(dt))
+                f"`{key}` should be a correctly formatted string or a datetime.datetime() object, "
+                f'"{dt}" ({type(dt)}) is not.'
             )
     return dt
 
@@ -153,18 +176,20 @@ def check_base(
     method: Optional[Callable] = None,
 ) -> Optional[str]:
     """
-    Validate whether the object provided as input is a Base (or subclass) instance and return its ID.
+    Validate whether the object provided is instance of Base (or subclass) and return its ID.
 
-    When the obj is None, it returns None. Otherwise it will check if the object is a pykechain class and will
-    extract the UUID from it.
+    When the obj is None, it returns None. Otherwise it will check if the object is a pykechain
+    class and will extract the UUID from it.
 
-    It will NOT check if the uuid (if a UUID is provided) is an actual class. It won't lookup the UUID in KE-chain
-    and check that against the corresponding pykechain class.
+    It will NOT check if the uuid (if a UUID is provided) is an actual class. It won't lookup
+    the UUID in KE-chain and check that against the corresponding pykechain class.
 
     :param obj: Object that needs the checking.
     :param cls: (optional) See if the object is of a certain pykechain Class (subclass of Base)
-    :param key: (optional) a key that may be provided to improve the legability of the provided Error
-    :param method: (optional) a method that is used to convert the object into an instance that has the attribute 'id'.
+    :param key: (optional) a key that may be provided to improve the legability of the provided
+        Error
+    :param method: (optional) a method or function that is used to convert the object into an
+        instance that has the attribute 'id'.
     :returns: None or UUID
     :raises IllegalArgumentError: When the object is not of type of the class or not a UUID.
     """
@@ -227,13 +252,15 @@ def check_list_of_base(
     key: Optional[str] = "objects",
     method: Optional[Callable] = None,
 ) -> Optional[List[str]]:
-    """Validate the iterable of objects provided as input are Base (or subclass) instances and return a list of IDs.
+    """
+    Validate the iterable of objects are instance of Base (or subclass) and return a list of IDs.
 
     :param objects: list of objects to check
     :param cls: (optional) class to check objects against
     :param key: (optional) key to check
-    :param method: (optional) method used to check with
-    :return: list of UUID's in Text.
+    :param method: (optional) method or function used to extract the `id` of the
+        object (defaults `id`)
+    :returns: list of UUID's in Text.
     """
     ids = None
     if objects is not None and objects is not empty:

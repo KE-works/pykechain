@@ -111,7 +111,11 @@ class Team(Base):
 
         member_list = list(self._json_data.get("members"))
         if role:
-            return [teammember for teammember in member_list if teammember.get("role") == role]
+            return [
+                teammember
+                for teammember in member_list
+                if teammember.get("role") == role
+            ]
         else:
             return member_list
 

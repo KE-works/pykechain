@@ -17,7 +17,8 @@ class Enum:
     def options(cls):
         """Provide a sorted list of options."""
         return sorted(
-            (value, name) for (name, value) in __dict__inherited__(cls=cls, stop=Enum).items()
+            (value, name)
+            for (name, value) in __dict__inherited__(cls=cls, stop=Enum).items()
         )
 
     @classmethod
@@ -70,6 +71,7 @@ class Classification(Enum):
 
     PRODUCT = "PRODUCT"
     CATALOG = "CATALOG"
+    FORM = "FORM"
 
 
 class PropertyType(Enum):
@@ -98,9 +100,14 @@ class PropertyType(Enum):
     :cvar SERVICE_REFERENCES_VALUE: Service Referenes Property
     :cvar TEAM_REFERENCES_VALUE: Team References Property
     :cvar USER_REFERENCES_VALUE: User References Property
+    :cvar FORM_REFERENCES_VALUE: Form References Property
+    :cvar CONTEXT_REFERENCES_VALUE: Context References Property
     :cvar JSON_VALUE: Generic JSON storage Property
     :cvar GEOJSON_VALUE: GEOJSON property to store map data
     :cvar WEATHER_VALUE: Weather JSON property compatible with the response of weatherapi.com
+
+    .. versionadded:: 3.19
+    :cvar STATUS_REFERENCES_VALUE: Status References Property
 
     .. _Property documentation: https://support.ke-chain.com/confluence/dosearchsite.action?queryString=concept+property
     """
@@ -122,6 +129,9 @@ class PropertyType(Enum):
     ACTIVITY_REFERENCES_VALUE = "ACTIVITY_REFERENCES_VALUE"
     SCOPE_REFERENCES_VALUE = "SCOPE_REFERENCES_VALUE"
     SERVICE_REFERENCES_VALUE = "SERVICE_REFERENCES_VALUE"
+    FORM_REFERENCES_VALUE = "FORM_REFERENCES_VALUE"
+    CONTEXT_REFERENCES_VALUE = "CONTEXT_REFERENCES_VALUE"
+    STATUS_REFERENCES_VALUE = "STATUS_REFERENCES_VALUE"
     TEAM_REFERENCES_VALUE = "TEAM_REFERENCES_VALUE"
     USER_REFERENCES_VALUE = "USER_REFERENCES_VALUE"
     JSON_VALUE = "JSON_VALUE"
@@ -576,6 +586,34 @@ class NavigationBarAlignment(Alignment):
     pass
 
 
+class SidebarItemAlignment(Enum):
+    """The acceptable alignment options for sidebar button.
+
+    :cvar TOP: "top"
+    :cvar BOTTOM: "bottom"
+    """
+
+    TOP = "top"
+    BOTTOM = "bottom"
+
+
+class SidebarButtonAlignment(SidebarItemAlignment):
+    """Compatibility enumeration class for the SidebarItemAlignment."""
+
+    pass
+
+
+class SidebarType(Enum):
+    """The types that can exist as a Sidebar Item.
+
+    :cvar BUTTON: a button,
+    :cvar CARD: a card
+    """
+
+    BUTTON = "BUTTON"
+    CARD = "CARD"
+
+
 class PaperSize(Enum):
     """The acceptable paper sizes options for a downloaded PDF.
 
@@ -701,10 +739,13 @@ class GeoCoordinateConfig(Enum):
     APPROX_ADDRESS = "approx_address"  # As approximated address
     # Amersfoort/RD (epsg: 28992) https://www.spatialreference.org/ref/epsg/amersfoort-rd-new/
     RD_AMERSFOORT = "rd_amersfoort"
-    DD = (  # As WSG84 (epsg:4326) decimal degrees representation first lat (-90,+90) then lng (-180,+180)
+    DD = (
+        # As WSG84 (epsg:4326) decimal degrees representation first lat (-90,+90) then lng
+        # (-180,+180)
         "dd"
     )
-    DMS = (  # As WSG84 (epsg:4326) degrees, minutes, seconds representation first lat N/S then lng E/W
+    DMS = (
+        # As WSG84 (epsg:4326) degrees, minutes, seconds representation first lat N/S then lng E/W
         "dms"
     )
 
@@ -881,16 +922,24 @@ class KEChainPages(Enum):
     URL names of built-in KE-chain pages.
 
     :cvar DETAIL: "detail"
+    :cvar FORMS: "forms"
     :cvar TASKS: "activities"
     :cvar WORK_BREAKDOWN: "activitytree"
+    :cvar CATALOG_FORMS: "catalogforms"
+    :cvar CONTEXTS: "contexts"
+    :cvar WORKFLOWS: "workflows"
     :cvar DATA_MODEL: "productmodel"
     :cvar EXPLORER: "product"
     :cvar SERVICES: "scripts"
     """
 
     DETAIL = "detail"
+    FORMS = "forms"
     TASKS = "activities"
     WORK_BREAKDOWN = "activitytree"
+    CATALOG_FORMS = "catalogforms"
+    CONTEXTS = "contexts"
+    WORKFLOWS = "workflows"
     DATA_MODEL = "productmodel"
     EXPLORER = "product"
     SERVICES = "scripts"
@@ -900,8 +949,12 @@ class KEChainPages(Enum):
 
 KEChainPageLabels = {
     KEChainPages.DETAIL: "Project details",
+    KEChainPages.FORMS: "Forms",
     KEChainPages.TASKS: "Tasks",
     KEChainPages.WORK_BREAKDOWN: "Work Breakdown",
+    KEChainPages.CATALOG_FORMS: "Template forms",
+    KEChainPages.CONTEXTS: "Contexts",
+    KEChainPages.WORKFLOWS: "Workflows",
     KEChainPages.CATALOG_WBS: "Catalog",
     KEChainPages.APP_WBS: "App Screens",
     KEChainPages.DATA_MODEL: "Data model",
@@ -911,8 +964,12 @@ KEChainPageLabels = {
 
 KEChainPageLabels_nl = {
     KEChainPages.DETAIL: "Project details",
+    KEChainPages.FORMS: "Formulieren",
     KEChainPages.TASKS: "Taken",
     KEChainPages.WORK_BREAKDOWN: "Taakverdeling",
+    KEChainPages.CATALOG_FORMS: "Sjablonen",
+    KEChainPages.CONTEXTS: "Contexten",
+    KEChainPages.WORKFLOWS: "Workflows",
     KEChainPages.CATALOG_WBS: "Catalogus",
     KEChainPages.APP_WBS: "App schermen",
     KEChainPages.DATA_MODEL: "Data model",
@@ -922,6 +979,7 @@ KEChainPageLabels_nl = {
 
 CardWidgetKEChainPageLink = {
     KEChainPages.DETAIL: "Project",
+    KEChainPages.FORMS: "Forms",
     KEChainPages.TASKS: "Tasks",
     KEChainPages.DATA_MODEL: "Model",
     KEChainPages.EXPLORER: "Explorer",
@@ -929,12 +987,19 @@ CardWidgetKEChainPageLink = {
     KEChainPages.WORK_BREAKDOWN: "Work Breakdown",
     KEChainPages.CATALOG_WBS: "Catalog Tasks",
     KEChainPages.APP_WBS: "App Tasks",
+    KEChainPages.CATALOG_FORMS: "Template forms",
+    KEChainPages.CONTEXTS: "Contexts",
+    KEChainPages.WORKFLOWS: "Workflows",
 }
 
 KEChainPageIcons = {
     KEChainPages.DETAIL: "bookmark",
+    KEChainPages.FORMS: "file-contract",
     KEChainPages.TASKS: "edit",
     KEChainPages.WORK_BREAKDOWN: "sitemap",
+    KEChainPages.CATALOG_FORMS: "file-export",
+    KEChainPages.CONTEXTS: "tags",
+    KEChainPages.WORKFLOWS: "directions",
     KEChainPages.CATALOG_WBS: "books",
     KEChainPages.APP_WBS: "tablet-alt",
     KEChainPages.DATA_MODEL: "cube",
@@ -961,10 +1026,20 @@ class URITarget(Enum):
 
     :cvar INTERNAL: "internal"
     :cvar EXTERNAL: "external"
+    :cvar NEW: "_new"
+    :cvar SELF: "_self"
+    :cvar BLANK: "_blank"
+    :cvar PARENT: "_parent"
+    :cvar TOP: "_top"
     """
 
     INTERNAL = "internal"
     EXTERNAL = "external"
+    NEW = "_new"
+    SELF = "_self"
+    BLANK = "_blank"
+    PARENT = "_parent"
+    TOP = "_top"
 
 
 class FontAwesomeMode(Enum):
@@ -982,6 +1057,34 @@ class FontAwesomeMode(Enum):
     SOLID = "solid"
     REGULAR = "regular"
     LIGHT = "light"
+
+
+class SidebarAccessLevelOptions(Enum):
+    """
+    Options for access level options for the sidebar.
+
+    :cvar IS_MEMBER: "is_member"
+    :cvar IS_LEAD_MEMBER: "is_leadmember"
+    :cvar IS_SUPERVISOR: "is_supervisor"
+    :cvar IS_MANAGER: "is_manager"
+    """
+
+    IS_MEMBER = "is_member"
+    IS_LEAD_MEMBER = "is_leadmember"
+    IS_SUPERVISOR = "is_supervisor"
+    IS_MANAGER = "is_manager"
+
+
+class MinimumAccessLevelOptions(SidebarAccessLevelOptions):
+    """Options for minumum access level options for the sidebar."""
+
+    pass
+
+
+class MaximumAccessLevelOptions(SidebarAccessLevelOptions):
+    """Options for maximum access level options for the sidebar."""
+
+    pass
 
 
 class SelectListRepresentations(Enum):
@@ -1136,3 +1239,57 @@ class ImageSize(Enum):
     SQXL = "SQXL"
     XXL = "XXL"
     SQXXL = "SQXXL"
+
+
+class FormCategory(Enum):
+    """
+    Options for the Category of a Form.
+
+    :cvar MODEL: Model
+    :cvar INSTANCE: Instance
+    """
+
+    MODEL = "MODEL"
+    INSTANCE = "INSTANCE"
+
+
+class WorkflowCategory(Enum):
+    """
+    Options for the Category of a Workflow.
+
+    :cvar CATALOG: Catalog Workflow (immutable)
+    :cvar DEFINED: Defined Workflow belonging to a scope
+    """
+
+    CATALOG = "CATALOG"
+    DEFINED = "DEFINED"
+
+
+class TransitionType(Enum):
+    """
+    Options for the Type of a Transition.
+
+    :cvar INITIAL: Initial transition, the initial transition to follow when the form is created.
+    :cvar GLOBAL: Global transition, possibility to transition to all statuses from any
+    :cvar DIRECTED: A Directed transition, a transition with a specific from -> to direction
+    """
+
+    INITIAL = "INITIAL"
+    GLOBAL = "GLOBAL"
+    DIRECTED = "DIRECTED"
+
+
+class StatusCategory(Enum):
+    """
+    Category of statuses.
+
+    :cvar UNDEFINED: Undefined status
+    :cvar TODO: Todo status
+    :cvar INPROGRESS: In progress status
+    :cvar DONE: Done status
+    """
+
+    UNDEFINED = "UNDEFINED"
+    TODO = "TODO"
+    INPROGRESS = "INPROGRESS"
+    DONE = "DONE"

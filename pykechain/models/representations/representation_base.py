@@ -97,7 +97,9 @@ class BaseRepresentation:
         :return: value
         :rtype Any
         """
-        return self._config.get(self._config_value_key) if self._config_value_key else None
+        return (
+            self._config.get(self._config_value_key) if self._config_value_key else None
+        )
 
     @value.setter
     def value(self, value):

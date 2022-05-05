@@ -96,7 +96,10 @@ class Property(BaseInScope):
         return True
 
     def refresh(
-        self, json: Optional[Dict] = None, url: Optional[str] = None, extra_params: Optional = None
+        self,
+        json: Optional[Dict] = None,
+        url: Optional[str] = None,
+        extra_params: Optional = None,
     ) -> None:
         """Refresh the object in place."""
         super().refresh(
@@ -175,7 +178,9 @@ class Property(BaseInScope):
         :return: None
         """
         if cls._USE_BULK_UPDATE:
-            properties = [dict(id=key, **values) for key, values in cls._update_package.items()]
+            properties = [
+                dict(id=key, **values) for key, values in cls._update_package.items()
+            ]
             client.update_properties(properties=properties)
             cls._update_package = dict()
         cls.set_bulk_update(use_bulk_update)
@@ -236,7 +241,9 @@ class Property(BaseInScope):
         if self.category == Category.MODEL:
             return self
         elif self._model is None:
-            self._model = self._client.property(pk=self.model_id, category=Category.MODEL)
+            self._model = self._client.property(
+                pk=self.model_id, category=Category.MODEL
+            )
         return self._model
 
     @property
@@ -350,7 +357,9 @@ class Property(BaseInScope):
         self._validation_results = [
             validator.is_valid(self._value) for validator in self._validators
         ]
-        self._validation_reasons = [validator.get_reason() for validator in self._validators]
+        self._validation_reasons = [
+            validator.get_reason() for validator in self._validators
+        ]
 
         if reason:
             return list(zip(self._validation_results, self._validation_reasons))
@@ -522,7 +531,10 @@ class Property(BaseInScope):
                 options=self._options,
             )
             return copied_property_model
-        elif self.category == Category.INSTANCE and target_part.category == Category.INSTANCE:
+        elif (
+            self.category == Category.INSTANCE
+            and target_part.category == Category.INSTANCE
+        ):
             target_model = target_part.model()
             self_model = self.model()
             target_model.add_property(

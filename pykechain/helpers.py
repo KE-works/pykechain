@@ -111,7 +111,8 @@ def get_project(
         if not (
             os.getenv(kecenv.KECHAIN_TOKEN)
             or (  # noqa: W504
-                os.getenv(kecenv.KECHAIN_PASSWORD) and os.getenv(kecenv.KECHAIN_PASSWORD)
+                os.getenv(kecenv.KECHAIN_PASSWORD)
+                and os.getenv(kecenv.KECHAIN_PASSWORD)
             )
         ):
             raise ClientError(
@@ -128,15 +129,19 @@ def get_project(
         (url, username, password, token, scope, scope_id)
     ):
         check_certificates = env.bool(kecenv.KECHAIN_CHECK_CERTIFICATES, default=True)
-        client = Client.from_env(env_filename=env_filename, check_certificates=check_certificates)
+        client = Client.from_env(
+            env_filename=env_filename, check_certificates=check_certificates
+        )
         scope_id = env(kecenv.KECHAIN_SCOPE_ID, default=None)
         scope = env(kecenv.KECHAIN_SCOPE, default=None)
         status = env(kecenv.KECHAIN_SCOPE_STATUS, default=None)
-    elif (url and ((username and password) or (token)) and (scope or scope_id)) and not env.bool(
-        kecenv.KECHAIN_FORCE_ENV_USE, default=False
-    ):
+    elif (
+        url and ((username and password) or (token)) and (scope or scope_id)
+    ) and not env.bool(kecenv.KECHAIN_FORCE_ENV_USE, default=False):
         if check_certificates is None:
-            check_certificates = env.bool(kecenv.KECHAIN_CHECK_CERTIFICATES, default=True)
+            check_certificates = env.bool(
+                kecenv.KECHAIN_CHECK_CERTIFICATES, default=True
+            )
         client = Client(url=url, check_certificates=check_certificates)
         client.login(username=username, password=password, token=token)
     else:

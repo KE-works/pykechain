@@ -17,6 +17,7 @@ class DashboardWidgetSourceScopes(Enum):
     SELECTED_SCOPES = "selectedScopes"
     SUBPROCESS = "subProcess"
     OWN_SCOPES = "scopes"
+    FORMS = "forms"
 
 
 class DashboardWidgetShowTasks(Enum):
@@ -33,6 +34,22 @@ class DashboardWidgetShowTasks(Enum):
     CLOSED_TASKS = "CLOSED_TASKS"
     OVERDUE_TASKS = "OVERDUE_TASKS"
     UNASSIGNED_TASKS = "UNASSIGNED_TASKS"
+
+
+class DashboardWidgetShowForms(Enum):
+    """
+    Options to display information about forms in a Dashboard widget.
+
+    :cvar TOTAL_FORMS: all the forms
+    :cvar TODO_FORMS: forms which have an active 'to do' status
+    :cvar INPROGRESS_FORMS: forms which have an active 'in progress' status
+    :cvar DONE_FORMS: forms which have an active 'done' status
+    """
+
+    TOTAL_FORMS = "TOTAL_FORMS"
+    TODO_FORMS = "TODO_FORMS"
+    INPROGRESS_FORMS = "INPROGRESS_FORMS"
+    DONE_FORMS = "DONE_FORMS"
 
 
 class DashboardWidgetShowScopes(Enum):
@@ -173,12 +190,16 @@ class MetaWidget(Enum):
     ORDER = "order"
     SELECTED = "selected"
     SHOW_NUMBERS = "showNumbers"
+    SHOW_NUMBERS_FORMS = "showNumbersForForms"
     SHOW_NUMBERS_PROJECTS = "showNumbersProjects"
     SHOW_ASSIGNEES = "showAssignees"
     SHOW_ASSIGNEES_TABLE = "showAssigneesTable"
     SHOW_OPEN_TASK_ASSIGNEES = "showOpenTaskAssignees"
     SHOW_OPEN_VS_CLOSED_TASKS = "showOpenVsClosedTasks"
     SHOW_OPEN_VS_CLOSED_TASKS_ASSIGNEES = "showOpenClosedTasksAssignees"
+    SHOW_FORM_STATUS_PER_ASSIGNEES = "showFormStatusPerAssignees"
+    SHOW_ASSIGNEES_FOR_FORM_STATUSES = "showAssigneesForFormStatuses"
+    SHOW_STATUS_CATEGORY_FORMS = "showStatusCategoryForms"
 
     # Card Widget and Service Card Widget
     CUSTOM_IMAGE = "customImage"

@@ -5,7 +5,12 @@ import requests
 
 from pykechain.exceptions import APIError
 from pykechain.models import Base
-from pykechain.models.input_checks import check_text, check_datetime, check_type, check_url
+from pykechain.models.input_checks import (
+    check_text,
+    check_datetime,
+    check_type,
+    check_url,
+)
 from pykechain.utils import parse_datetime, Empty, clean_empty_values, empty
 
 

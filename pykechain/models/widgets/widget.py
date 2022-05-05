@@ -55,11 +55,15 @@ class Widget(BaseInScope):
         self._activity_id = json.get("activity_id")
         self._parent_id = json.get("parent_id")
         self.has_subwidgets = json.get("has_subwidgets")
-        self._scope_id = json.get("scope_id")  # TODO duplicate with `scope_id` attribute
+        self._scope_id = json.get(
+            "scope_id"
+        )  # TODO duplicate with `scope_id` attribute
         self.progress = json.get("progress")
 
     def __repr__(self):  # pragma: no cover
-        return f"<pyke {self.__class__.__name__} '{self.widget_type}' id {self.id[-8:]}>"
+        return (
+            f"<pyke {self.__class__.__name__} '{self.widget_type}' id {self.id[-8:]}>"
+        )
 
     @property
     def title_visible(self) -> Optional[str]:
@@ -81,17 +85,25 @@ class Widget(BaseInScope):
                     return self._client.part(
                         pk=self.meta.get(AssociatedObjectId.PART_INSTANCE_ID)
                     ).name
-                elif self.widget_type in [WidgetTypes.FILTEREDGRID, WidgetTypes.SUPERGRID]:
+                elif self.widget_type in [
+                    WidgetTypes.FILTEREDGRID,
+                    WidgetTypes.SUPERGRID,
+                ]:
                     return self._client.part(
-                        pk=self.meta.get(AssociatedObjectId.PART_MODEL_ID), category=None
+                        pk=self.meta.get(AssociatedObjectId.PART_MODEL_ID),
+                        category=None,
                     ).name
                 elif self.widget_type in [WidgetTypes.SERVICE, WidgetTypes.NOTEBOOK]:
                     return self._client.service(
                         pk=self.meta.get(AssociatedObjectId.SERVICE_ID)
                     ).name
-                elif self.widget_type in [WidgetTypes.ATTACHMENTVIEWER, WidgetTypes.SIGNATURE]:
+                elif self.widget_type in [
+                    WidgetTypes.ATTACHMENTVIEWER,
+                    WidgetTypes.SIGNATURE,
+                ]:
                     return self._client.property(
-                        pk=self.meta.get(AssociatedObjectId.PROPERTY_INSTANCE_ID), category=None
+                        pk=self.meta.get(AssociatedObjectId.PROPERTY_INSTANCE_ID),
+                        category=None,
                     ).name
                 elif self.widget_type == WidgetTypes.CARD:
                     return self.scope.name
@@ -157,7 +169,9 @@ class Widget(BaseInScope):
             :return: classname corresponding to the widget type
             :rtype: str
             """
-            return f"{type_widget.title()}Widget" if type_widget else WidgetTypes.UNDEFINED
+            return (
+                f"{type_widget.title()}Widget" if type_widget else WidgetTypes.UNDEFINED
+            )
 
         widget_type = json.get("widget_type")
 
@@ -209,7 +223,9 @@ class Widget(BaseInScope):
         :returns: a tuple(models of :class:`PartSet`, instances of :class:`PartSet`)
 
         """
-        models_and_instances = self._client.parts(*args, widget=self.id, category=None, **kwargs)
+        models_and_instances = self._client.parts(
+            *args, widget=self.id, category=None, **kwargs
+        )
 
         models = [p for p in models_and_instances if p.category == Category.MODEL]
         instances = [p for p in models_and_instances if p.category == Category.INSTANCE]
@@ -300,7 +316,9 @@ class Widget(BaseInScope):
             **kwargs,
         )
 
-    def remove_associations(self, models: List[Union["Property", str]], **kwargs) -> None:
+    def remove_associations(
+        self, models: List[Union["Property", str]], **kwargs
+    ) -> None:
         """
         Remove associated properties from the widget.
 
@@ -310,7 +328,10 @@ class Widget(BaseInScope):
         self._client.remove_widget_associations(widget=self, models=models, **kwargs)
 
     def edit(
-        self, title: Union[TITLE_TYPING, Empty] = empty, meta: Optional[Dict] = None, **kwargs
+        self,
+        title: Union[TITLE_TYPING, Empty] = empty,
+        meta: Optional[Dict] = None,
+        **kwargs,
     ) -> None:
         """Edit the details of a widget.
 
@@ -358,7 +379,9 @@ class Widget(BaseInScope):
         else:
             self._client.delete_widget(widget=self)
 
-    def copy(self, target_activity: "Activity", order: Optional[int] = None) -> "Widget":
+    def copy(
+        self, target_activity: "Activity", order: Optional[int] = None
+    ) -> "Widget":
         """Copy the widget.
 
         :param target_activity: `Activity` object under which the desired `Widget` is copied
@@ -379,7 +402,9 @@ class Widget(BaseInScope):
 
         if not isinstance(target_activity, Activity):
             raise IllegalArgumentError(
-                "`target_activity` needs to be an activity, got '{}'".format(type(target_activity))
+                "`target_activity` needs to be an activity, got '{}'".format(
+                    type(target_activity)
+                )
             )
 
         # Retrieve the widget manager of the target activity
@@ -407,7 +432,9 @@ class Widget(BaseInScope):
 
         return copied_widget
 
-    def move(self, target_activity: "Activity", order: Optional[int] = None) -> "Widget":
+    def move(
+        self, target_activity: "Activity", order: Optional[int] = None
+    ) -> "Widget":
         """Move the widget.
 
         :param target_activity: `Activity` object under which the desired `Widget` is moved
@@ -441,7 +468,9 @@ class Widget(BaseInScope):
             file_name = default_file_name()
         else:
             if not isinstance(file_name, str):
-                raise IllegalArgumentError(f'`file_name` must be a string, "{file_name}" is not.')
+                raise IllegalArgumentError(
+                    f'`file_name` must be a string, "{file_name}" is not.'
+                )
             elif ".xls" in file_name:
                 file_name = file_name.split(".xls")[0]
             file_name = slugify_ref(file_name)
@@ -452,7 +481,9 @@ class Widget(BaseInScope):
         from pykechain.models import User
 
         if user is not None and not isinstance(user, User):
-            raise IllegalArgumentError(f'`user` must be a Pykechain User object, "{user}" is not.')
+            raise IllegalArgumentError(
+                f'`user` must be a Pykechain User object, "{user}" is not.'
+            )
 
         return target_dir, file_name, user
 
@@ -485,7 +516,9 @@ class Widget(BaseInScope):
         parent_instance_id = self.meta.get("parentInstanceId")
 
         def default_file_name():
-            return self._client.model(pk=part_model_id).name if file_name is None else ""
+            return (
+                self._client.model(pk=part_model_id).name if file_name is None else ""
+            )
 
         target_dir, file_name, user = self._validate_excel_export_inputs(
             target_dir, file_name, user, default_file_name
@@ -512,7 +545,9 @@ class Widget(BaseInScope):
         response = self._client._request("GET", url, data=json, params=params)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError(f"Could not export widget {str(response)}: {response.content}")
+            raise APIError(
+                f"Could not export widget {str(response)}: {response.content}"
+            )
 
         full_path = os.path.join(target_dir, file_name)
 

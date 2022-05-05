@@ -21,8 +21,11 @@ from .property2_multi_reference import MultiReferenceProperty2
 from .property2_datetime import DatetimeProperty2
 from .property_reference import (
     ActivityReferencesProperty,
+    ContextReferencesProperty,
     ScopeReferencesProperty,
+    StatusReferencesProperty,
     UserReferencesProperty,
+    FormReferencesProperty,
 )
 from .partset import PartSet
 from .service import Service, ServiceExecution
@@ -41,9 +44,13 @@ AnyProperty = Union[
     "MultiReferenceProperty2",
     "AttachmentProperty2",
     "SelectListProperty2",
-    "DatetimeProperty2ActivityReferencesProperty",
+    "DatetimeProperty2",
+    "ActivityReferencesProperty",
     "ScopeReferencesProperty",
     "UserReferencesProperty",
+    "FormReferencesProperty",
+    "ContextReferencesProperty",
+    "StatusReferencesProperty",
 ]
 
 # This map is used to identify the correct class for the (KE-chain provided) property type.
@@ -56,6 +63,9 @@ property_type_to_class_map = {
     PropertyType.ACTIVITY_REFERENCES_VALUE: ActivityReferencesProperty,
     PropertyType.SCOPE_REFERENCES_VALUE: ScopeReferencesProperty,
     PropertyType.USER_REFERENCES_VALUE: UserReferencesProperty,
+    PropertyType.FORM_REFERENCES_VALUE: FormReferencesProperty,
+    PropertyType.CONTEXT_REFERENCES_VALUE: ContextReferencesProperty,
+    PropertyType.STATUS_REFERENCES_VALUE: StatusReferencesProperty,
 }
 
 __all__ = (
@@ -86,6 +96,8 @@ __all__ = (
     "ActivityReferencesProperty",
     "ScopeReferencesProperty",
     "UserReferencesProperty",
+    "FormReferencesProperty",
+    "StatusReferencesProperty",
     "AnyProperty",
     "PropertyValueFilter",
     "property_type_to_class_map",

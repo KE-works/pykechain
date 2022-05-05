@@ -832,3 +832,24 @@ class TestBulkPartsDeletion(TestBetamax):
         wrong_input = [self.project.activity(name="Specify wheel diameter")]
         with self.assertRaises(IllegalArgumentError):
             self.client._delete_parts_bulk(parts=wrong_input)
+
+class TestPartsClassificationForm(TestBetamax):
+    def setUp(self):
+        super().setUp()
+        self._part = None
+
+    def tearDown(self):
+        if self._part:
+            self._part.delete()
+        super().tearDown()
+
+    def test_classification_forms_exist(self):
+        parts = self.project.parts(category=None, classification=Classification.FORM)
+
+        for p in parts:
+            self.assertEqual(p.classification, Classification.FORM)
+            parent = p.parent()
+            if parent.name == "Root":
+                self.assertEqual(parent.classification, "ROOT")
+            else:
+                self.assertEqual(parent.classification, Classification.FORM)

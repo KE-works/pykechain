@@ -90,7 +90,9 @@ class _SelectListProperty(Property):
         if self._json_data.get("category") != Category.MODEL:
             raise IllegalArgumentError(
                 "We can only update the options list of the model of this property. The "
-                "model of this property has id '{}'".format(self._json_data.get("model"))
+                "model of this property has id '{}'".format(
+                    self._json_data.get("model")
+                )
             )
 
         # stringify the options list
@@ -128,10 +130,14 @@ class _SelectListProperty(Property):
         validate(new_options, options_json_schema)
 
         url = self._client._build_url("property", property_id=self.id)
-        response = self._client._request("PUT", url, json={"value_options": new_options})
+        response = self._client._request(
+            "PUT", url, json={"value_options": new_options}
+        )
 
         if response.status_code != 200:  # pragma: no cover
-            raise APIError(f"Could not update options of Property {self}", response=response)
+            raise APIError(
+                f"Could not update options of Property {self}", response=response
+            )
         else:
             self._options = new_options  # save the new options as the options
 

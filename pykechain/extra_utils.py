@@ -180,7 +180,10 @@ def relocate_model(
     # Try to update references to parts by updating the UUID via the mapping dictionary
     Property.set_bulk_update(True)
     mapping = get_mapping_dictionary()
-    for prop_old, references_old in get_references().items():  # type: (AnyProperty, list)
+    for (
+        prop_old,
+        references_old,
+    ) in get_references().items():  # type: (AnyProperty, list)
         prop_new = mapping.get(prop_old.id)
 
         # try to map to a new ID, default to the existing reference ID
@@ -346,7 +349,10 @@ def relocate_instance(
     # Try to update references to parts by updating the UUID via the mapping dictionary
     Property.set_bulk_update(True)
     mapping = get_mapping_dictionary()
-    for prop_old, references_old in get_references().items():  # type: (AnyProperty, list)
+    for (
+        prop_old,
+        references_old,
+    ) in get_references().items():  # type: (AnyProperty, list)
         prop_new = mapping.get(prop_old.id)
 
         # try to map to a new ID, default to the existing reference ID
@@ -404,11 +410,15 @@ def move_part_instance(
             moved_instance = moved_model.instances(parent_id=target_parent.id)[0]
             get_edited_one_many().append(moved_model.id)
         else:
-            moved_instance = target_parent.add(name=name, model=moved_model, suppress_kevents=True)
+            moved_instance = target_parent.add(
+                name=name, model=moved_model, suppress_kevents=True
+            )
     else:
         # If multiplicity is '0 or more' or '0 or 1', it means no instance has been created automatically with the
         # model, so then everything must be created and then updated.
-        moved_instance = target_parent.add(name=name, model=moved_model, suppress_kevents=True)
+        moved_instance = target_parent.add(
+            name=name, model=moved_model, suppress_kevents=True
+        )
 
     # Update properties of the instance
     map_property_instances(original_part=part_instance, new_part=moved_instance)
@@ -460,7 +470,9 @@ def update_part_with_properties(
         if prop_instance.type == PropertyType.ATTACHMENT_VALUE:
             if prop_instance.has_value():
                 with temp_chdir() as target_dir:
-                    full_path = os.path.join(target_dir or os.getcwd(), prop_instance.filename)
+                    full_path = os.path.join(
+                        target_dir or os.getcwd(), prop_instance.filename
+                    )
                     prop_instance.save_as(filename=full_path)
                     moved_prop_instance.upload(full_path)
             else:
@@ -479,7 +491,10 @@ def update_part_with_properties(
 
         elif prop_instance.type == PropertyType.MULTI_SELECT_VALUE:
             if prop_instance.has_value():
-                if all(value in prop_instance.model().options for value in prop_instance.value):
+                if all(
+                    value in prop_instance.model().options
+                    for value in prop_instance.value
+                ):
                     properties_id_dict[moved_prop_instance.id] = prop_instance.value
 
         else:
@@ -642,14 +657,18 @@ def _copy_instances_recursive(
 
         if model_new.multiplicity == Multiplicity.ONE:
             # If multiplicity is 'Exactly 1', that means the instance was automatically created with the model.
-            existing_instance = model_new.instances(parent_id=i.target_parent_instance.id)[0]
+            existing_instance = model_new.instances(
+                parent_id=i.target_parent_instance.id
+            )[0]
 
         elif model_new.multiplicity == Multiplicity.ONE_MANY:
             # If multiplicity is '1 or more', that means one instance has automatically been created with the model.
             # This first instance has to be used, but only once. Therefore, store the model in a global list after
             # doing so.
             if model_new.id not in get_edited_one_many():
-                existing_instance = model_new.instances(parent_id=i.target_parent_instance.id)[0]
+                existing_instance = model_new.instances(
+                    parent_id=i.target_parent_instance.id
+                )[0]
                 get_edited_one_many().append(model_new.id)
         else:
             # If multiplicity is '0 or more' or '0 or 1', no instance has been created automatically with the model.
@@ -657,7 +676,9 @@ def _copy_instances_recursive(
 
         if existing_instance:
             new_instances.append(existing_instance)
-            map_property_instances(original_part=i.instance_original, new_part=existing_instance)
+            map_property_instances(
+                original_part=i.instance_original, new_part=existing_instance
+            )
 
             if i.name != existing_instance.name:
                 existing_instance.edit(name=i.name)
@@ -702,7 +723,9 @@ def _copy_instances_recursive(
             created_instances_indices, created_instances, original_instances
         ):  # type: int, Part, _InstanceCopy
             new_instances[index] = new_instance
-            map_property_instances(original_part=i.instance_original, new_part=new_instance)
+            map_property_instances(
+                original_part=i.instance_original, new_part=new_instance
+            )
 
     if include_children:
         child_instances = []
@@ -760,7 +783,9 @@ def _update_references() -> None:
             else:
                 prop_value = list()
                 for part_id in references_new:
-                    referenced_part = prop_new._client.part(pk=part_id, category=prop_new.category)
+                    referenced_part = prop_new._client.part(
+                        pk=part_id, category=prop_new.category
+                    )
                     prop_value.append(referenced_part.id)
                 prop_new_options = {
                     "scope_id": prop_new._client.part(
@@ -793,7 +818,9 @@ def _update_references() -> None:
                     )
                     for ovf in original_prefilters
                 ]
-                prop_new_options.update(PropertyValueFilter.write_options(filters=new_prefilters))
+                prop_new_options.update(
+                    PropertyValueFilter.write_options(filters=new_prefilters)
+                )
 
             # Update the value and options (prefilters, excluded prop models and scope_id) in bulk
             if prop_new.category == Category.MODEL:

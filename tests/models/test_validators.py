@@ -43,12 +43,16 @@ class TestValidatorJSON(TestCase):
                         minvalue=2,
                         maxvalue=10,
                         stepsize=2,
-                        on_valid=[dict(effect="CssEffect", config=dict(applyCss="valid"))],
+                        on_valid=[
+                            dict(effect="CssEffect", config=dict(applyCss="valid"))
+                        ],
                         on_invalid=[
                             dict(effect="CssEffect", config=dict(applyCss="invalid")),
                             dict(
                                 effect="ErrorText",
-                                config=dict(text="Range should be between 2 and 10 with step 2."),
+                                config=dict(
+                                    text="Range should be between 2 and 10 with step 2."
+                                ),
                             ),
                         ],
                     ),
@@ -66,7 +70,10 @@ class TestValidatorJSON(TestCase):
                     "config": {
                         "effects_when_valid": [],
                         "effects_when_invalid": [
-                            {"effect": "ErrorText", "config": {"Text": "This field is required."}}
+                            {
+                                "effect": "ErrorText",
+                                "config": {"Text": "This field is required."},
+                            }
                         ],
                     },
                 },
@@ -86,7 +93,10 @@ class TestValidatorJSON(TestCase):
                         "is_invalid": [True, None],
                         "effects_when_valid": [],
                         "effects_when_invalid": [
-                            {"effect": "ErrorText", "text": "Value of the field should be False"}
+                            {
+                                "effect": "ErrorText",
+                                "text": "Value of the field should be False",
+                            }
                         ],
                     },
                 }
@@ -194,7 +204,9 @@ class TestValidatorParsing(TestCase):
                     dict(effect="visualEffect", config=dict(applyCss="invalid")),
                     dict(
                         effect="errorTextEffect",
-                        config=dict(text="Range should be between 2 and 10 with step 2."),
+                        config=dict(
+                            text="Range should be between 2 and 10 with step 2."
+                        ),
                     ),
                 ],
             ),
@@ -221,7 +233,9 @@ class TestValidatorDumping(TestCase):
                     dict(effect="visualEffect", config=dict(applyCss="invalid")),
                     dict(
                         effect="errorTextEffect",
-                        config=dict(text="Range should be between 2 and 10 with step 2."),
+                        config=dict(
+                            text="Range should be between 2 and 10 with step 2."
+                        ),
                     ),
                 ],
             ),
@@ -286,7 +300,9 @@ class TestNumericRangeValidator(TestCase):
         self.assertTrue(validator.is_invalid(1.3))
 
     def test_numeric_range_validates_with_stepsize_int_with_minvalue(self):
-        validator = NumericRangeValidator(minvalue=11, stepsize=2, enforce_stepsize=True)
+        validator = NumericRangeValidator(
+            minvalue=11, stepsize=2, enforce_stepsize=True
+        )
         self.assertTrue(validator.is_valid(13))
         self.assertTrue(validator.is_invalid(16))
 
@@ -294,7 +310,9 @@ class TestNumericRangeValidator(TestCase):
         with self.assertRaisesRegex(Exception, "should be smaller than the maxvalue"):
             NumericRangeValidator(minvalue=11, maxvalue=-11)
 
-    def test_numeric_range_raises_exception_when_enforce_stepsize_without_stepsize(self):
+    def test_numeric_range_raises_exception_when_enforce_stepsize_without_stepsize(
+        self,
+    ):
         with self.assertRaisesRegex(
             Exception, "The stepsize should be provided when enforcing stepsize"
         ):
@@ -309,7 +327,9 @@ class TestNumericRangeValidator(TestCase):
         """
         validator = NumericRangeValidator(maxvalue=1000)
         self.assertFalse(validator.is_valid(3333))
-        self.assertRegex(validator.get_reason(), "Value '3333' should be between -inf and 1000")
+        self.assertRegex(
+            validator.get_reason(), "Value '3333' should be between -inf and 1000"
+        )
 
 
 class TestBooleanFieldValidator(TestCase):
@@ -317,7 +337,9 @@ class TestBooleanFieldValidator(TestCase):
         validator = BooleanFieldValidator()
         self.assertIsNone(validator.validate_json())
         self.assertIsInstance(validator.as_json(), dict)
-        self.assertDictEqual(validator.as_json(), {"config": {}, "vtype": "booleanFieldValidator"})
+        self.assertDictEqual(
+            validator.as_json(), {"config": {}, "vtype": "booleanFieldValidator"}
+        )
 
 
 class TestRequiredFieldValidator(TestCase):
@@ -360,7 +382,9 @@ class TestRegexValidator(TestCase):
         validator = RegexStringValidator()
         self.assertIsNone(validator.validate_json())
         self.assertIsInstance(validator.as_json(), dict)
-        self.assertDictEqual(validator.as_json(), {"config": {}, "vtype": "regexStringValidator"})
+        self.assertDictEqual(
+            validator.as_json(), {"config": {}, "vtype": "regexStringValidator"}
+        )
 
     def test_regex_validator_with_pattern_match(self):
         validator = RegexStringValidator(pattern=r".*")
@@ -394,13 +418,17 @@ class TestOddEvenNumberValidator(TestCase):
         validator = EvenNumberValidator()
         self.assertIsNone(validator.validate_json())
         self.assertIsInstance(validator.as_json(), dict)
-        self.assertDictEqual(validator.as_json(), {"config": {}, "vtype": "evenNumberValidator"})
+        self.assertDictEqual(
+            validator.as_json(), {"config": {}, "vtype": "evenNumberValidator"}
+        )
 
     def test_odd_number_validator_without_settings(self):
         validator = OddNumberValidator()
         self.assertIsNone(validator.validate_json())
         self.assertIsInstance(validator.as_json(), dict)
-        self.assertDictEqual(validator.as_json(), {"config": {}, "vtype": "oddNumberValidator"})
+        self.assertDictEqual(
+            validator.as_json(), {"config": {}, "vtype": "oddNumberValidator"}
+        )
 
     def test_even_number_validator_is_valid(self):
         validator = EvenNumberValidator()
@@ -675,7 +703,8 @@ class TestPropertyWithValidator(TestCase):
 
     def test_property_without_value_with_filesize_validator(self):
         prop_json = dict(
-            value=None, value_options=dict(validators=[FileSizeValidator(max_size=100).as_json()])
+            value=None,
+            value_options=dict(validators=[FileSizeValidator(max_size=100).as_json()]),
         )
         prop = AttachmentProperty(json=prop_json, client=None)
         self.assertIsNone(prop.is_valid)
@@ -686,7 +715,9 @@ class TestPropertyWithValidator(TestCase):
         prop_json = dict(
             value="attachments/12345678-1234-5678-1234-567812345678/some_file.txt",
             value_options=dict(
-                validators=[FileExtensionValidator(accept=[".txt", "application/pdf"]).as_json()]
+                validators=[
+                    FileExtensionValidator(accept=[".txt", "application/pdf"]).as_json()
+                ]
             ),
         )
         prop = AttachmentProperty(json=prop_json, client=None)
@@ -698,7 +729,9 @@ class TestPropertyWithValidator(TestCase):
         prop_json = dict(
             value=None,
             value_options=dict(
-                validators=[FileExtensionValidator(accept=[".txt", "application/pdf"]).as_json()]
+                validators=[
+                    FileExtensionValidator(accept=[".txt", "application/pdf"]).as_json()
+                ]
             ),
         )
         prop = AttachmentProperty(json=prop_json, client=None)
@@ -714,20 +747,28 @@ class TestPropertyWithValidatorFromLiveServer(TestBetamax):
         self.numeric_range_prop_model = self.part_model.add_property(
             name="numericrange_validatortest", property_type=PropertyType.FLOAT_VALUE
         )
-        self.numeric_range_prop_model.validators = [NumericRangeValidator(min=0.0, max=42.0)]
+        self.numeric_range_prop_model.validators = [
+            NumericRangeValidator(min=0.0, max=42.0)
+        ]
         self.part = self.project.part(name__startswith="Catalog").add(
             self.part_model, name="Model Instance for tests"
         )
-        self.numeric_range_prop_instance = self.part.property(name="numericrange_validatortest")
+        self.numeric_range_prop_instance = self.part.property(
+            name="numericrange_validatortest"
+        )
 
     def tearDown(self):
-        self.numeric_range_prop_model.delete()
-        self.part.delete()
+        if self.numeric_range_prop_model:
+            self.numeric_range_prop_model.delete()
+        if self.part:
+            self.part.delete()
         super().tearDown()
 
     def test_numeric_property_with_validator_parses(self):
         self.assertIsInstance(self.numeric_range_prop_instance._validators, list)
-        self.assertIsInstance(self.numeric_range_prop_instance._validators[0], PropertyValidator)
+        self.assertIsInstance(
+            self.numeric_range_prop_instance._validators[0], PropertyValidator
+        )
 
     def test_numeric_property_add_requiredvalidator_on_model(self):
         # test
@@ -736,7 +777,9 @@ class TestPropertyWithValidatorFromLiveServer(TestBetamax):
         self.numeric_range_prop_model.validators = validators
 
         for validator in self.numeric_range_prop_model.validators:
-            self.assertIsInstance(validator, (NumericRangeValidator, RequiredFieldValidator))
+            self.assertIsInstance(
+                validator, (NumericRangeValidator, RequiredFieldValidator)
+            )
 
     def test_numeric_property_add_requiredvalidator_on_instance(self):
         # test

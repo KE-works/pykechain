@@ -42,7 +42,8 @@ class ExpiringDownload(Base):
         response = self._client._request("GET", url)
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError(
-                f"Could not download file from Expiring download {self}", response=response
+                f"Could not download file from Expiring download {self}",
+                response=response,
             )
 
         with open(full_path, "w+b") as f:
@@ -59,7 +60,9 @@ class ExpiringDownload(Base):
         )
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError(f"Could not delete Expiring Download {self}", response=response)
+            raise APIError(
+                f"Could not delete Expiring Download {self}", response=response
+            )
 
     def edit(
         self,
@@ -94,7 +97,9 @@ class ExpiringDownload(Base):
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError(f"Could not update Expiring Download {self}", response=response)
+            raise APIError(
+                f"Could not update Expiring Download {self}", response=response
+            )
 
         self.refresh(json=response.json()["results"][0])
 
@@ -119,7 +124,9 @@ class ExpiringDownload(Base):
 
         with open(content_path, "rb") as file:
             response = self._client._request(
-                "POST", url, files={"attachment": (os.path.basename(content_path), file)}
+                "POST",
+                url,
+                files={"attachment": (os.path.basename(content_path), file)},
             )
 
         if response.status_code not in (

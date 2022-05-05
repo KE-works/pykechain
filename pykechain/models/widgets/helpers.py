@@ -57,7 +57,9 @@ def _retrieve_object(obj: Union["Base", str], method: Callable) -> Union["Base"]
     else:
         raise IllegalArgumentError(
             "When adding the widget, obj must be a Part, Property, Service, Team, "
-            " Part id, Property id, Service id or Team id. Type is: {}".format(type(obj))
+            " Part id, Property id, Service id or Team id. Type is: {}".format(
+                type(obj)
+            )
         )
 
 
@@ -138,7 +140,9 @@ def _set_title(
     return meta, title
 
 
-def _set_description(meta: Dict, description: Optional[Union[str, bool]] = None, **kwargs) -> Dict:
+def _set_description(
+    meta: Dict, description: Optional[Union[str, bool]] = None, **kwargs
+) -> Dict:
     """
     Set the customDescription in the meta based on provided optional custom description or no description.
 
@@ -435,7 +439,9 @@ def _check_prefilters(
         )
 
     elif not all(isinstance(pf, PropertyValueFilter) for pf in prefilters):
-        raise IllegalArgumentError("`prefilters` must be a list of PropertyValueFilter objects.")
+        raise IllegalArgumentError(
+            "`prefilters` must be a list of PropertyValueFilter objects."
+        )
 
     if part_model:
         [pf.validate(part_model=part_model) for pf in prefilters]
@@ -463,7 +469,9 @@ def _check_excluded_propmodels(
         return [check_base(pm, Property, "property_model") for pm in property_models]
 
     if not isinstance(part_model, Part):
-        raise IllegalArgumentError(f'`part_model` must be a Part object, "{part_model}" is not.')
+        raise IllegalArgumentError(
+            f'`part_model` must be a Part object, "{part_model}" is not.'
+        )
 
     list_of_propmodels_excl: List["AnyProperty"] = list()
     for property_model in property_models:
@@ -485,8 +493,9 @@ def _check_excluded_propmodels(
         elif part_model.id != property_model.part_id:
             raise IllegalArgumentError(
                 "A part reference property can only exclude properties belonging to the referenced"
-                ' Part model, found referenced Part model "{}" and Properties belonging to "{}"'
-                .format(part_model.name, property_model.part.name)
+                ' Part model, found referenced Part model "{}" and Properties belonging to "{}"'.format(
+                    part_model.name, property_model.part.name
+                )
             )
         else:
             list_of_propmodels_excl.append(property_model.id)

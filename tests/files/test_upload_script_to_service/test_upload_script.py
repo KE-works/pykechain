@@ -27,13 +27,19 @@ def main(*args, **kwargs):
             time.strftime("%c", time.gmtime(mark_1)), mark_1 - start
         )
     )
-    print("--- python pip packages installed \n{}".format(os.popen("pip freeze").readlines()))
+    print(
+        "--- python pip packages installed \n{}".format(
+            os.popen("pip freeze").readlines()
+        )
+    )
     try:
         import pykechain
 
         print(f"--- importing pykechain version: {pykechain.version}")
     except ImportError:
-        print(r"/!\ pykechain is not installed, please install pykechain version 1.12 or later")
+        print(
+            r"/!\ pykechain is not installed, please install pykechain version 1.12 or later"
+        )
 
     mark_2 = time.time()
 
@@ -57,13 +63,17 @@ def main(*args, **kwargs):
                 project.name, env("KECHAIN_URL")
             )
         )
-        print(f"--- {len(project.activities())} activities, {len(project.parts())} parts")
+        print(
+            f"--- {len(project.activities())} activities, {len(project.parts())} parts"
+        )
         print("--- retrieving as user: '{}".format(env("KECHAIN_USERNAME")))
         print(f"<<< interaction with ke-chain took: {mark_3-mark_2}s")
 
     end = time.time()
     print(
-        "<<< ending on {}, duration: {}".format(time.strftime("%c", time.gmtime(end)), end - start)
+        "<<< ending on {}, duration: {}".format(
+            time.strftime("%c", time.gmtime(end)), end - start
+        )
     )
 
 

@@ -105,7 +105,9 @@ class NumericRangeValidator(PropertyValidator):
             raise Exception("The stepsize should be provided when enforcing stepsize")
 
     def _logic(self, value: Any = None) -> Tuple[Union[bool, None], str]:
-        basereason = f"Value '{value}' should be between {self.minvalue} and {self.maxvalue}"
+        basereason = (
+            f"Value '{value}' should be between {self.minvalue} and {self.maxvalue}"
+        )
         self._validation_result, self._validation_reason = None, "No reason"
 
         if value is not None:
@@ -119,7 +121,8 @@ class NumericRangeValidator(PropertyValidator):
             # to account also for floating point stepsize checks: https://stackoverflow.com/a/30445184/246235
             if self.minvalue == float("-inf"):
                 self._validation_result = (
-                    abs(value / self.stepsize - round(value / self.stepsize)) < self.accuracy
+                    abs(value / self.stepsize - round(value / self.stepsize))
+                    < self.accuracy
                 )
             else:
                 self._validation_result = (
@@ -431,7 +434,10 @@ class FileSizeValidator(PropertyValidator):
     jsonschema = filesizevalidator_schema
 
     def __init__(
-        self, json: Optional[Dict] = None, max_size: Optional[Union[int, float]] = None, **kwargs
+        self,
+        json: Optional[Dict] = None,
+        max_size: Optional[Union[int, float]] = None,
+        **kwargs,
     ):
         """Construct a file size validator.
 
@@ -501,7 +507,10 @@ class FileExtensionValidator(PropertyValidator):
     mimetype_regex = r"^[-\w.]+/[-\w.\*]+$"
 
     def __init__(
-        self, json: Optional[Dict] = None, accept: Optional[Union[str, List[str]]] = None, **kwargs
+        self,
+        json: Optional[Dict] = None,
+        accept: Optional[Union[str, List[str]]] = None,
+        **kwargs,
     ):
         """Construct a file extension validator.
 
@@ -518,7 +527,9 @@ class FileExtensionValidator(PropertyValidator):
             elif isinstance(accept, List):
                 self._config["accept"] = accept
             else:
-                raise ValueError("`accept` should be a commaseparated list or a list of strings.")
+                raise ValueError(
+                    "`accept` should be a commaseparated list or a list of strings."
+                )
 
         self.accept = self._config.get("accept", None)
         self._accepted_mimetypes = self._convert_to_mimetypes(self.accept)
@@ -549,7 +560,9 @@ class FileExtensionValidator(PropertyValidator):
             else:
                 # we assume this is an extension.
                 # we can only guess a url, we make a url like: "file.ext" to check.
-                fake_filename = f"file{item}" if item.startswith(".") else f"file.{item}"
+                fake_filename = (
+                    f"file{item}" if item.startswith(".") else f"file.{item}"
+                )
 
                 # do guess
                 guess, _ = mimetypes.guess_type(fake_filename)
@@ -557,7 +570,9 @@ class FileExtensionValidator(PropertyValidator):
 
         return marray
 
-    def _logic(self, value: Optional[str] = None) -> Tuple[Optional[bool], Optional[str]]:
+    def _logic(
+        self, value: Optional[str] = None
+    ) -> Tuple[Optional[bool], Optional[str]]:
         """Based on the filename of the property (value), the type is checked.
 
         1. convert filename to mimetype

@@ -24,7 +24,9 @@ from pykechain.enums import (
     Category,
     ContextGroup,
     ContextType,
+    FormCategory,
     KechainEnv,
+    LanguageCodes,
     Multiplicity,
     NotificationChannels,
     NotificationEvent,
@@ -36,6 +38,7 @@ from pykechain.enums import (
     ServiceType,
     TeamRoles,
     WidgetTypes,
+    WorkflowCategory,
 )
 from pykechain.exceptions import (
     APIError,
@@ -61,12 +64,20 @@ from pykechain.models.notification import Notification
 from pykechain.models.team import Team
 from pykechain.models.user import User
 from pykechain.models.widgets.widget import Widget
-from pykechain.utils import find, get_in_chunks, is_uuid, is_valid_email, slugify_ref
+from pykechain.utils import (
+    clean_empty_values,
+    find,
+    get_in_chunks,
+    is_uuid,
+    is_valid_email,
+    slugify_ref,
+)
 from .__about__ import version as pykechain_version
 from .client_utils import PykeRetry
 from .models.banner import Banner
 from .models.context import Context
 from .models.expiring_download import ExpiringDownload
+from .models.form import Form
 from .models.input_checks import (
     check_base,
     check_datetime,
@@ -80,6 +91,7 @@ from .models.input_checks import (
     check_user,
     check_uuid,
 )
+from .models.workflow import Workflow
 from .typing import ObjectID
 
 
@@ -95,7 +107,9 @@ class Client:
     """
 
     def __init__(
-        self, url: str = "http://localhost:8000/", check_certificates: Optional[bool] = None
+        self,
+        url: str = "http://localhost:8000/",
+        check_certificates: Optional[bool] = None,
     ) -> None:
         """Create a KE-chain client with given settings.
 
@@ -137,7 +151,9 @@ class Client:
         self._widget_schemas: Optional[List[Dict]] = None
 
         if check_certificates is None:
-            check_certificates = env.bool(KechainEnv.KECHAIN_CHECK_CERTIFICATES, default=True)
+            check_certificates = env.bool(
+                KechainEnv.KECHAIN_CHECK_CERTIFICATES, default=True
+            )
 
         if check_certificates is False:
             self.session.verify = False
@@ -167,7 +183,9 @@ class Client:
 
     @classmethod
     def from_env(
-        cls, env_filename: Optional[str] = None, check_certificates: Optional[bool] = None
+        cls,
+        env_filename: Optional[str] = None,
+        check_certificates: Optional[bool] = None,
     ) -> "Client":
         """Create a client from environment variable settings.
 
@@ -207,12 +225,18 @@ class Client:
             warnings.simplefilter("ignore", UserWarning)
             env.read_envfile(env_filename)
         if check_certificates is None:
-            check_certificates = env.bool(KechainEnv.KECHAIN_CHECK_CERTIFICATES, default=True)
-        client = cls(url=env(KechainEnv.KECHAIN_URL), check_certificates=check_certificates)
+            check_certificates = env.bool(
+                KechainEnv.KECHAIN_CHECK_CERTIFICATES, default=True
+            )
+        client = cls(
+            url=env(KechainEnv.KECHAIN_URL), check_certificates=check_certificates
+        )
 
         if env(KechainEnv.KECHAIN_TOKEN, None):
             client.login(token=env(KechainEnv.KECHAIN_TOKEN))
-        elif env(KechainEnv.KECHAIN_USERNAME, None) and env(KechainEnv.KECHAIN_PASSWORD, None):
+        elif env(KechainEnv.KECHAIN_USERNAME, None) and env(
+            KechainEnv.KECHAIN_PASSWORD, None
+        ):
             client.login(
                 username=env(KechainEnv.KECHAIN_USERNAME),
                 password=env(KechainEnv.KECHAIN_PASSWORD),
@@ -283,7 +307,18 @@ class Client:
         return users
 
     def _request(self, method: str, url: str, **kwargs) -> requests.Response:
-        """Perform the request on the API."""
+        """Perform the request on the API.
+
+        It includes a default ForbiddenError check if the response came back as a 403.
+        It stores the `last_response`, `last_request` and `last_url` on the Client object for
+        debugging reasons.
+
+        :param method: the HTTP method or GET, POST, PUT, PATCH, DELETE
+        :param url: the url to call
+        :param kwargs: additional arguments such as `params` (query params) and `json` data.
+        :raises ForbiddenError: If the user is forbidden to perform the URL call.
+        :returns: Response
+        """
         self.last_request = None
         if method in ("PUT", "POST", "DELETE"):
             kwargs[
@@ -295,10 +330,8 @@ class Client:
         self.last_request = self.last_response.request
         self.last_url = self.last_response.url
 
-        # print("{} {} {}".format(method, url, kwargs.get("params")))  # uncomment to track all requests
-
         if self.last_response.status_code == requests.codes.forbidden:
-            raise ForbiddenError(self.last_response.json()["results"][0]["detail"])
+            raise ForbiddenError(self.last_response.json()["results"][0])
 
         return self.last_response
 
@@ -363,9 +396,13 @@ class Client:
         """
         check_enum(widget_type, WidgetTypes, "widget_type")
 
-        found = find(self.widget_schemas, lambda ws: ws.get("widget_type") == widget_type)
+        found = find(
+            self.widget_schemas, lambda ws: ws.get("widget_type") == widget_type
+        )
         if not found:
-            raise NotFoundError(f"Could not find a widget_schema for widget_type: `{widget_type}`")
+            raise NotFoundError(
+                f"Could not find a widget_schema for widget_type: `{widget_type}`"
+            )
         return found
 
     def match_app_version(
@@ -409,7 +446,9 @@ class Client:
         """
         if not app or not label and not (app and label):
             target_app = [
-                a for a in self.app_versions if a.get("app") == app or a.get("label") == label
+                a
+                for a in self.app_versions
+                if a.get("app") == app or a.get("label") == label
             ]
             if not target_app and not isinstance(default, bool):
                 raise NotFoundError("Could not find the app or label provided")
@@ -437,7 +476,9 @@ class Client:
                     "No version found on the app '{}'".format(target_app[0].get("app"))
                 )
 
-    def reload(self, obj: Base, url: Optional[str] = None, extra_params: Optional[Dict] = None):
+    def reload(
+        self, obj: Base, url: Optional[str] = None, extra_params: Optional[Dict] = None
+    ):
         """Reload an object from server. The original object is immutable and it will return a new object.
 
         The object will be refetched from KE-chain. If the object has a 'url' field the url will be taken from
@@ -464,7 +505,8 @@ class Client:
         elif obj._json_data.get("url"):
             url = obj._json_data.get("url")
         else:
-            # No known URL to reload the object: Try to build the url from the class name (in lower case)
+            # No known URL to reload the object: Try to build the url from the
+            # class name (in lower case)
 
             extra_api_params = dict()
             superclasses = (
@@ -475,15 +517,20 @@ class Client:
                 stripped = resource.replace("2", "")
 
                 try:
-                    # set the id from the `obj.id` which is normally a keyname `<class_name>_id` (without the '2' if so)
-                    url = self._build_url(resource=resource, **{f"{stripped}_id": obj.id})
+                    # set the id from the `obj.id` which is normally a keyname
+                    # `<class_name>_id` (without the '2' if so)
+                    url = self._build_url(
+                        resource=resource, **{f"{stripped}_id": obj.id}
+                    )
                     extra_api_params = API_EXTRA_PARAMS.get(resource)
                     break
                 except KeyError:
                     if resource != stripped:
                         # Try again with stripped resource name
                         try:
-                            url = self._build_url(resource=stripped, **{f"{stripped}_id": obj.id})
+                            url = self._build_url(
+                                resource=stripped, **{f"{stripped}_id": obj.id}
+                            )
                             extra_api_params = API_EXTRA_PARAMS.get(stripped)
                             break
                         except KeyError:
@@ -500,7 +547,9 @@ class Client:
 
             # add the additional API params to the already provided extra params if they are provided.
             extra_params = (
-                extra_params.update(**extra_api_params) if extra_params else extra_api_params
+                extra_params.update(**extra_api_params)
+                if extra_params
+                else extra_api_params
             )
 
         response = self._request("GET", url, params=extra_params)
@@ -532,7 +581,9 @@ class Client:
         if len(results) == 0:
             raise NotFoundError(f"No {method.__name__} fit criteria:{criteria}")
         if len(results) != 1:
-            raise MultipleFoundError(f"Multiple {method.__name__} fit criteria:{criteria}")
+            raise MultipleFoundError(
+                f"Multiple {method.__name__} fit criteria:{criteria}"
+            )
 
         return results[0]
 
@@ -643,7 +694,9 @@ class Client:
         if kwargs:
             request_params.update(**kwargs)
 
-        response = self._request("GET", self._build_url("activities"), params=request_params)
+        response = self._request(
+            "GET", self._build_url("activities"), params=request_params
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve Activities", response=response)
@@ -870,7 +923,9 @@ class Client:
             request_params.update(**kwargs)
 
         request_params.update(API_EXTRA_PARAMS["properties"])
-        response = self._request("GET", self._build_url("properties"), params=request_params)
+        response = self._request(
+            "GET", self._build_url("properties"), params=request_params
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve Properties", response=response)
@@ -952,7 +1007,9 @@ class Client:
         if kwargs:
             request_params.update(**kwargs)
 
-        response = self._request("GET", self._build_url("services"), params=request_params)
+        response = self._request(
+            "GET", self._build_url("services"), params=request_params
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve Services", response=response)
@@ -1013,7 +1070,9 @@ class Client:
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve Service Executions", response=response)
+            raise NotFoundError(
+                "Could not retrieve Service Executions", response=response
+            )
 
         return [
             ServiceExecution(service_execution, client=self)
@@ -1090,7 +1149,9 @@ class Client:
         :rtype User
         """
         try:
-            response = self._request(method="GET", url=self._build_url(resource="user_current"))
+            response = self._request(
+                method="GET", url=self._build_url(resource="user_current")
+            )
         except Exception as e:
             raise APIError(
                 f"No authentication provided to retrieve the current user:\n{e.args[0]}"
@@ -1100,6 +1161,54 @@ class Client:
             raise NotFoundError("Could not retrieve current User", response=response)
 
         return User(response.json()["results"][0], client=self)
+
+    def create_user(
+        self,
+        username: str,
+        email: str,
+        name: Optional[str] = None,
+        team_ids: Optional[Union[Team, ObjectID]] = None,
+        timezone: Optional[str] = None,
+        language_code: Optional[LanguageCodes] = None,
+        send_passwd_link: bool = False,
+        **kwargs,
+    ) -> "User":
+        """Create a new User in KE-chain.
+
+        The user is created in KE-chain. It is highly encouraged to provide a name
+        for the user. Optionally one may choose to send out a forgot password
+        link to the newly created user.
+
+        :param username: username of the user
+        :param email: email of the user
+        :poram name: (optional) full human name of the user
+        :param team_ids: (optional) list of Team or Team id's to which the user should be added.
+        :param language_code: (optional) the Language of the user. One of LanguageCodes. Eg. "nl"
+        :param timezone: (optional) the timezone name of the user. Eg. "Europe/Amsterdam"
+        :param send_passwd_link: (optional) boolean to send out a password reset link after
+            the user is created. Defaults to False.
+        """
+        request_payload = {
+            "username": check_text(username, "username"),
+            "email": check_text(email, "email"),
+            "name": check_text(name, "name"),
+            "timezone": check_text(timezone, "timezone"),
+            "language_code": check_enum(language_code, LanguageCodes, "language"),
+            "team_ids": check_list_of_base(team_ids, Team, "team_ids") or [],
+        }
+        if kwargs:
+            request_payload.update(**kwargs)
+
+        response = self._request("POST", self._build_url("users"), json=request_payload)
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError("Could not create a new user", response=response)
+
+        user = User(response.json()["results"][0], client=self)
+        if send_passwd_link:
+            user.reset_password()
+
+        return user
 
     def teams(
         self,
@@ -1152,7 +1261,10 @@ class Client:
         return self._retrieve_singular(self.teams, *args, **kwargs)
 
     def widgets(
-        self, pk: Optional[str] = None, activity: Optional[Union[Activity, str]] = None, **kwargs
+        self,
+        pk: Optional[str] = None,
+        activity: Optional[Union[Activity, str]] = None,
+        **kwargs,
     ) -> List[Widget]:
         """
         Widgets of an activity.
@@ -1181,12 +1293,16 @@ class Client:
         if kwargs:
             request_params.update(**kwargs)
 
-        response = self._request("GET", self._build_url("widgets"), params=request_params)
+        response = self._request(
+            "GET", self._build_url("widgets"), params=request_params
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve Widgets", response=response)
 
-        return [Widget.create(json=json, client=self) for json in response.json()["results"]]
+        return [
+            Widget.create(json=json, client=self) for json in response.json()["results"]
+        ]
 
     def widget(self, *args, **kwargs) -> Widget:
         """
@@ -1258,7 +1374,9 @@ class Client:
             else:
                 classification = parent_classification
         else:
-            classification = check_enum(classification, ActivityClassification, "classification")
+            classification = check_enum(
+                classification, ActivityClassification, "classification"
+            )
 
         ref = check_text(ref, "ref")
         if ref:
@@ -1266,7 +1384,9 @@ class Client:
             if slug_ref != ref:
                 raise IllegalArgumentError(
                     "`ref` must be a slug, `{}` is not. "
-                    "Use `slugify_ref` util function to convert to `{}`.".format(ref, slug_ref)
+                    "Use `slugify_ref` util function to convert to `{}`.".format(
+                        ref, slug_ref
+                    )
                 )
 
         data = {
@@ -1290,7 +1410,10 @@ class Client:
         data = {k: v for k, v in data.items() if v is not None}
 
         response = self._request(
-            "POST", self._build_url("activities"), json=data, params=API_EXTRA_PARAMS["activities"]
+            "POST",
+            self._build_url("activities"),
+            json=data,
+            params=API_EXTRA_PARAMS["activities"],
         )
 
         if response.status_code != requests.codes.created:  # pragma: no cover
@@ -1358,14 +1481,20 @@ class Client:
         if self.match_app_version(
             label="kechain2.core.pim", version=">=3.7.0"
         ):  # pragma: no cover
-            raise APIError("Cloning of activities with parts requires KE-chain version >= 3.7.0.")
+            raise APIError(
+                "Cloning of activities with parts requires KE-chain version >= 3.7.0."
+            )
 
         update_name = "activity_update_dicts"
         activity_ids = check_list_of_base(activities, cls=Activity, key="activities")
-        update_dicts = check_type(activity_update_dicts, dict, key=update_name) or dict()
+        update_dicts = (
+            check_type(activity_update_dicts, dict, key=update_name) or dict()
+        )
 
         if not all(key in activity_ids for key in update_dicts.keys()):
-            incorrect_ids = [key for key in update_dicts.keys() if key not in activity_ids]
+            incorrect_ids = [
+                key for key in update_dicts.keys() if key not in activity_ids
+            ]
             raise IllegalArgumentError(
                 "The `{}` must contain updates to activities that are to be cloned. "
                 "Did not recognize the following UUIDs:\n{}".format(
@@ -1376,7 +1505,9 @@ class Client:
         elif not all(isinstance(value, dict) for value in update_dicts.values()):
             raise IllegalArgumentError(f"The `{update_name}` must be a dict of dicts.")
 
-        activities = [dict(id=uuid, **update_dicts.get(uuid, {})) for uuid in activity_ids]
+        activities = [
+            dict(id=uuid, **update_dicts.get(uuid, {})) for uuid in activity_ids
+        ]
 
         data = dict(
             activity_parent_id=check_base(activity_parent, cls=Activity, key="parent"),
@@ -1385,9 +1516,16 @@ class Client:
                 include_part_instances, bool, "clone_part_instances"
             ),
             include_part_children=check_type(include_children, bool, "clone_children"),
-            excluded_part_ids=check_list_of_base(excluded_parts, Part, "excluded_models") or [],
-            part_parent_model_id=check_base(part_parent_model, Part, "part_parent_model"),
-            part_parent_instance_id=check_base(part_parent_instance, Part, "part_parent_instance"),
+            excluded_part_ids=check_list_of_base(
+                excluded_parts, Part, "excluded_models"
+            )
+            or [],
+            part_parent_model_id=check_base(
+                part_parent_model, Part, "part_parent_model"
+            ),
+            part_parent_instance_id=check_base(
+                part_parent_instance, Part, "part_parent_instance"
+            ),
             part_models_rename_template=check_type(
                 part_model_rename_template, str, "part_model_rename_template"
             ),
@@ -1412,7 +1550,9 @@ class Client:
         ):  # pragma: no cover
             raise APIError("Could not clone Activities.", response=response)
 
-        cloned_activities = [Activity(d, client=self) for d in response.json()["results"]]
+        cloned_activities = [
+            Activity(d, client=self) for d in response.json()["results"]
+        ]
 
         if isinstance(activity_parent, Activity):
             activity_parent._populate_cached_children(cloned_activities)
@@ -1457,7 +1597,9 @@ class Client:
 
         return Part(response.json()["results"][0], client=self)
 
-    def create_part(self, parent: Part, model: Part, name: Optional[str] = None, **kwargs) -> Part:
+    def create_part(
+        self, parent: Part, model: Part, name: Optional[str] = None, **kwargs
+    ) -> Part:
         """Create a new part instance from a given model under a given parent.
 
         In order to prevent the backend from updating the frontend you may add `suppress_kevents=True` as
@@ -1478,7 +1620,9 @@ class Client:
         :raises APIError: if the `Part` could not be created
         """
         if not isinstance(parent, Part) or not isinstance(model, Part):
-            raise IllegalArgumentError("The `parent` and `model` should be 'Part' objects")
+            raise IllegalArgumentError(
+                "The `parent` and `model` should be 'Part' objects"
+            )
         if parent.category != Category.INSTANCE:
             raise IllegalArgumentError("The `parent` should be of category 'INSTANCE'")
         if model.category != Category.MODEL:
@@ -1652,7 +1796,9 @@ class Client:
         if part.category == Category.MODEL:
             data.update(
                 {
-                    "multiplicity": check_enum(multiplicity, Multiplicity, "multiplicity")
+                    "multiplicity": check_enum(
+                        multiplicity, Multiplicity, "multiplicity"
+                    )
                     or part.multiplicity,
                     "model_id": part.id,
                     "parent": parent.id,
@@ -1786,13 +1932,18 @@ class Client:
         query_params["async_mode"] = asynchronous
 
         response = self._request(
-            "POST", self._build_url("parts_bulk_create"), params=query_params, json=parts
+            "POST",
+            self._build_url("parts_bulk_create"),
+            params=query_params,
+            json=parts,
         )
 
         if (asynchronous and response.status_code != requests.codes.accepted) or (
             not asynchronous and response.status_code != requests.codes.created
         ):  # pragma: no cover
-            raise APIError(f"Could not create Parts. ({response.status_code})", response=response)
+            raise APIError(
+                f"Could not create Parts. ({response.status_code})", response=response
+            )
 
         part_ids = response.json()["results"][0]["parts_created"]
         if retrieve_instances:
@@ -1810,7 +1961,10 @@ class Client:
         return part_ids
 
     def _delete_parts_bulk(
-        self, parts: List[Union[Part, str]], asynchronous: Optional[bool] = False, **kwargs
+        self,
+        parts: List[Union[Part, str]],
+        asynchronous: Optional[bool] = False,
+        **kwargs,
     ) -> bool:
         """Delete multiple Parts simultaneously.
 
@@ -1838,18 +1992,22 @@ class Client:
         query_params.update(API_EXTRA_PARAMS["parts"])
         query_params["async_mode"] = asynchronous
         response = self._request(
-            "DELETE", self._build_url("parts_bulk_delete"), params=query_params, json=payload
+            "DELETE",
+            self._build_url("parts_bulk_delete"),
+            params=query_params,
+            json=payload,
         )
         # TODO - remove requests.codes.ok when async is implemented in the backend
         if (
             asynchronous
             and response.status_code not in (requests.codes.ok, requests.codes.accepted)
-            or (
-                not asynchronous
-                and response.status_code not in (requests.codes.ok, requests.codes.accepted)
-            )
+        ) or (
+            not asynchronous
+            and response.status_code not in (requests.codes.ok, requests.codes.accepted)
         ):  # pragma: no cover
-            raise APIError(f"Could not delete Parts. ({response.status_code})", response=response)
+            raise APIError(
+                f"Could not delete Parts. ({response.status_code})", response=response
+            )
         return True
 
     def create_property(
@@ -1899,7 +2057,8 @@ class Client:
         options = check_type(options, dict, "options") or dict()
 
         if (
-            property_type in (PropertyType.REFERENCE_VALUE, PropertyType.REFERENCES_VALUE)
+            property_type
+            in (PropertyType.REFERENCE_VALUE, PropertyType.REFERENCES_VALUE)
             and default_value
         ):
             # References only accept a single 'model_id' in the default value, we need to convert
@@ -1912,7 +2071,9 @@ class Client:
                 scope_options = dict(scope_id=default_value._json_data["scope_id"])
                 default_value = [default_value.id]
             elif is_uuid(default_value):
-                scope_options = dict(scope_id=self.model(id=default_value)._json_data["scope_id"])
+                scope_options = dict(
+                    scope_id=self.model(id=default_value)._json_data["scope_id"]
+                )
                 default_value = [default_value]
             else:
                 raise IllegalArgumentError(
@@ -2100,7 +2261,9 @@ class Client:
         }
 
         response = self._request(
-            "DELETE", url=self._build_url("scope", scope_id=str(scope.id)), params=query_options
+            "DELETE",
+            url=self._build_url("scope", scope_id=str(scope.id)),
+            params=query_options,
         )
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
@@ -2185,9 +2348,13 @@ class Client:
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             if response.status_code == requests.codes.forbidden:
-                raise ForbiddenError(f"Forbidden to clone Scope {source_scope}", response=response)
+                raise ForbiddenError(
+                    f"Forbidden to clone Scope {source_scope}", response=response
+                )
             else:
-                raise APIError(f"Could not clone Scope {source_scope}", response=response)
+                raise APIError(
+                    f"Could not clone Scope {source_scope}", response=response
+                )
 
         if asynchronous:
             return None
@@ -2328,12 +2495,23 @@ class Client:
         if kwargs.get("outputs"):
             writable_models = kwargs.pop("outputs")
 
-        readable_model_ids = check_list_of_base(readable_models, Property, "readable_models") or []
-        writable_model_ids = check_list_of_base(writable_models, Property, "writable_models") or []
+        readable_model_ids = (
+            check_list_of_base(readable_models, Property, "readable_models") or []
+        )
+        writable_model_ids = (
+            check_list_of_base(writable_models, Property, "writable_models") or []
+        )
         part_instance_id = check_base(part_instance, Part, "part_instance")
-        parent_part_instance_id = check_base(parent_part_instance, Part, "parent_part_instance")
+        parent_part_instance_id = check_base(
+            parent_part_instance, Part, "parent_part_instance"
+        )
 
-        return readable_model_ids, writable_model_ids, part_instance_id, parent_part_instance_id
+        return (
+            readable_model_ids,
+            writable_model_ids,
+            part_instance_id,
+            parent_part_instance_id,
+        )
 
     def create_widget(
         self,
@@ -2409,7 +2587,9 @@ class Client:
 
         # perform the call
         url = self._build_url("widgets")
-        response = self._request("POST", url, params=API_EXTRA_PARAMS["widgets"], json=data)
+        response = self._request(
+            "POST", url, params=API_EXTRA_PARAMS["widgets"], json=data
+        )
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create Widget", response=response)
@@ -2466,7 +2646,9 @@ class Client:
             )
 
         url = self._build_url("widgets_bulk_create")
-        response = self._request("POST", url, params=API_EXTRA_PARAMS["widgets"], json=bulk_data)
+        response = self._request(
+            "POST", url, params=API_EXTRA_PARAMS["widgets"], json=bulk_data
+        )
 
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create Widgets", response=response)
@@ -2477,7 +2659,9 @@ class Client:
             widget = Widget.create(json=widget_response, client=self)
             widgets.append(widget)
 
-        self.update_widgets_associations(widgets=widgets, associations=bulk_associations, **kwargs)
+        self.update_widgets_associations(
+            widgets=widgets, associations=bulk_associations, **kwargs
+        )
 
         return widgets
 
@@ -2508,7 +2692,10 @@ class Client:
             raise APIError("Could not update Widgets", response=response)
 
         widgets_response = response.json().get("results")
-        return [Widget.create(json=widget_json, client=self) for widget_json in widgets_response]
+        return [
+            Widget.create(json=widget_json, client=self)
+            for widget_json in widgets_response
+        ]
 
     def delete_widget(self, widget: Union[Widget, str]) -> None:
         """
@@ -2643,7 +2830,9 @@ class Client:
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not retrieve Associations", response=response)
 
-        associations = [Association(json=r, client=self) for r in response.json()["results"]]
+        associations = [
+            Association(json=r, client=self) for r in response.json()["results"]
+        ]
 
         return associations
 
@@ -2715,7 +2904,12 @@ class Client:
                 readable_models, writable_models = association
                 part_instance, parent_part_instance = None, None
             else:
-                readable_models, writable_models, part_instance, parent_part_instance = association
+                (
+                    readable_models,
+                    writable_models,
+                    part_instance,
+                    parent_part_instance,
+                ) = association
 
             (
                 readable_model_ids,
@@ -2749,7 +2943,9 @@ class Client:
 
         # perform the call
         url = self._build_url("widgets_update_associations")
-        response = self._request("PUT", url, params=API_EXTRA_PARAMS["widgets"], json=bulk_data)
+        response = self._request(
+            "PUT", url, params=API_EXTRA_PARAMS["widgets"], json=bulk_data
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Associations", response=response)
@@ -2826,7 +3022,12 @@ class Client:
                 readable_models, writable_models = association
                 part_instance, parent_part_instance = None, None
             else:
-                readable_models, writable_models, part_instance, parent_part_instance = association
+                (
+                    readable_models,
+                    writable_models,
+                    part_instance,
+                    parent_part_instance,
+                ) = association
 
             (
                 readable_model_ids,
@@ -2860,7 +3061,9 @@ class Client:
 
         # perform the call
         url = self._build_url("widgets_set_associations")
-        response = self._request("PUT", url, params=API_EXTRA_PARAMS["widgets"], json=bulk_data)
+        response = self._request(
+            "PUT", url, params=API_EXTRA_PARAMS["widgets"], json=bulk_data
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not set Associations", response=response)
@@ -2887,12 +3090,17 @@ class Client:
         response = self._request(method="PUT", url=url)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError(f"Could not clear Associations of Widget {widget}", response=response)
+            raise APIError(
+                f"Could not clear Associations of Widget {widget}", response=response
+            )
 
         return None
 
     def remove_widget_associations(
-        self, widget: Widget, models: Optional[List[Union["AnyProperty", str]]] = (), **kwargs
+        self,
+        widget: Widget,
+        models: Optional[List[Union["AnyProperty", str]]] = (),
+        **kwargs,
     ) -> None:
         """
         Remove specific associations from a widget.
@@ -2924,7 +3132,9 @@ class Client:
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError(f"Could not remove Associations of Widget {widget}", response=response)
+            raise APIError(
+                f"Could not remove Associations of Widget {widget}", response=response
+            )
 
         return
 
@@ -2960,14 +3170,20 @@ class Client:
             parent_id = parent
             parent_object = self.activity(id=parent)
         else:
-            raise IllegalArgumentError("Please provide either an activity object or a UUID")
+            raise IllegalArgumentError(
+                "Please provide either an activity object or a UUID"
+            )
 
         if parent_object.activity_type != ActivityType.PROCESS:
-            raise IllegalArgumentError("One can only move an `Activity` under a subprocess.")
+            raise IllegalArgumentError(
+                "One can only move an `Activity` under a subprocess."
+            )
 
         update_dict = {
             "parent_id": parent_object.id,
-            "classification": check_enum(classification, ActivityClassification, "classification")
+            "classification": check_enum(
+                classification, ActivityClassification, "classification"
+            )
             or parent_object.classification,
         }
 
@@ -3009,7 +3225,9 @@ class Client:
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not update Properties", response=response)
 
-        properties = [Property.create(client=self, json=js) for js in response.json()["results"]]
+        properties = [
+            Property.create(client=self, json=js) for js in response.json()["results"]
+        ]
 
         return properties
 
@@ -3030,14 +3248,18 @@ class Client:
         if kwargs:
             request_params.update(**kwargs)
 
-        response = self._request("GET", self._build_url("notifications"), params=request_params)
+        response = self._request(
+            "GET", self._build_url("notifications"), params=request_params
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not retrieve Notifications", response=response)
 
         data = response.json()
 
-        return [Notification(notification, client=self) for notification in data["results"]]
+        return [
+            Notification(notification, client=self) for notification in data["results"]
+        ]
 
     def notification(self, pk: Optional[str] = None, *args, **kwargs) -> Notification:
         """Retrieve a single KE-chain notification.
@@ -3123,7 +3345,9 @@ class Client:
             "recipient_emails": recipient_emails,
             "team": check_base(team, Team, "team"),
             "from_user": check_user(from_user, User, "from_user"),
-            "channels": [channel] if check_enum(channel, NotificationChannels, "channel") else [],
+            "channels": [channel]
+            if check_enum(channel, NotificationChannels, "channel")
+            else [],
         }
 
         data.update(kwargs)
@@ -3155,7 +3379,9 @@ class Client:
         response = self._request("DELETE", url)
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
-            raise APIError(f"Could not delete Notification {notification}", response=response)
+            raise APIError(
+                f"Could not delete Notification {notification}", response=response
+            )
 
     def banners(
         self,
@@ -3183,7 +3409,9 @@ class Client:
         if kwargs:  # pragma: no cover
             request_params.update(**kwargs)
 
-        response = self._request("GET", self._build_url("banners"), params=request_params)
+        response = self._request(
+            "GET", self._build_url("banners"), params=request_params
+        )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise NotFoundError("Could not retrieve Banners", response=response)
@@ -3310,10 +3538,13 @@ class Client:
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve Expiring Downloads", response=response)
+            raise NotFoundError(
+                "Could not retrieve Expiring Downloads", response=response
+            )
 
         return [
-            ExpiringDownload(json=download, client=self) for download in response.json()["results"]
+            ExpiringDownload(json=download, client=self)
+            for download in response.json()["results"]
         ]
 
     def create_expiring_download(
@@ -3339,11 +3570,15 @@ class Client:
             expires_at=expires_at.isoformat(),
             expires_in=expires_in,
         )
-        response = self._request("POST", self._build_url("expiring_downloads"), json=data)
+        response = self._request(
+            "POST", self._build_url("expiring_downloads"), json=data
+        )
         if response.status_code != requests.codes.created:  # pragma: no cover
             raise APIError("Could not create Expiring Download", response=response)
 
-        expiring_download = ExpiringDownload(response.json().get("results")[0], client=self)
+        expiring_download = ExpiringDownload(
+            response.json().get("results")[0], client=self
+        )
 
         if content_path:
             expiring_download.upload(content_path)
@@ -3386,14 +3621,16 @@ class Client:
         """
         data = {
             "name": check_text(name, "name"),
-            "description": check_text(description, "description"),
+            "description": check_text(description or "", "description"),
             "scope": check_base(scope, Scope, "scope"),
             "context_type": check_enum(context_type, ContextType, "context_type"),
             "tags": check_list_of_text(tags, "tags"),
             "context_group": check_enum(context_group, ContextGroup, "context_group"),
             "activities": check_list_of_base(activities, Activity, "activities"),
             "options": check_type(options, dict, "options"),
-            "feature_collection": check_type(feature_collection, dict, "feature_collection"),
+            "feature_collection": check_type(
+                feature_collection, dict, "feature_collection"
+            ),
             "start_date": check_datetime(start_date, "start_date"),
             "due_date": check_datetime(due_date, "due_date"),
         }
@@ -3428,7 +3665,9 @@ class Client:
         context = check_type(context, Context, "context")
         self._build_url("context", context_id=context.id)
 
-        response = self._request("DELETE", self._build_url("context", context_id=context.id))
+        response = self._request(
+            "DELETE", self._build_url("context", context_id=context.id)
+        )
 
         if response.status_code != requests.codes.no_content:  # pragma: no cover
             raise APIError("Could not delete Contexts", response=response)
@@ -3442,7 +3681,8 @@ class Client:
         :return: a single Contexts
         :rtype: Context
         """
-        return self._retrieve_singular(self.contexts, *args, **kwargs)  # noqa
+        return Context.get(client=self, **kwargs)
+        # return self._retrieve_singular(self.contexts, *args, **kwargs)  # noqa
 
     def contexts(
         self,
@@ -3477,9 +3717,278 @@ class Client:
         if kwargs:
             request_params.update(**kwargs)
 
-        response = self._request("GET", self._build_url("contexts"), params=request_params)
+        return Context.list(client=self, **request_params)
 
-        if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise NotFoundError("Could not retrieve Contexts", response=response)
+    def create_form_model(self, *args, **kwargs) -> Form:
+        """
+        Create a single Form Model.
 
-        return [Context(json=download, client=self) for download in response.json()["results"]]
+        See the `Form.create_model()` method for available arguments.
+
+        :return: a created Form Model
+        """
+        return Form.create_model(client=self, *args, **kwargs)
+
+    def instantiate_form(self, model, *args, **kwargs) -> Form:
+        """
+        Create a new Form instance based on a model.
+
+        See the `Form.instantiate()` method for available arguments.
+
+        :return: a created Form Instance
+        """
+        return Form.instantiate(self=model, *args, **kwargs)
+
+    def form(self, *args, **kwargs) -> Form:
+        """
+        Retrieve a single Form, see `forms()` method for available arguments.
+
+        .. versionadded:: 3.20
+
+        :return: a single Contexts
+        :rtype: Context
+        """
+        return self._retrieve_singular(self.forms, *args, **kwargs)  # noqa
+
+    def forms(
+        self,
+        name: Optional[str] = None,
+        pk: Optional[ObjectID] = None,
+        category: Optional[FormCategory] = None,
+        description: Optional[str] = None,
+        scope: Optional[Union[Scope, ObjectID]] = None,
+        context: Optional[List[Union[Context, ObjectID]]] = None,
+        ref: Optional[str] = None,
+        **kwargs,
+    ) -> List[Form]:
+        """
+        Retrieve Forms.
+
+        .. versionadded:: 3.20
+
+        :param pk: (optional) retrieve a single primary key (object ID)
+        :param name: (optional) name of the form to filter on
+        :param category: (optional) category of the form to search for
+        :param description: (optional) description of the form to filter on
+        :param scope: (optional) the scope of the form to filter on
+        :param context: (optional) the context of the form to filter on
+        :param ref: (optional) the ref of the form to filter on
+        :return: a list of Forms
+        """
+        request_params = {
+            "name": check_text(name, "name"),
+            "id": check_uuid(pk),
+            "category": check_enum(category, FormCategory, "category"),
+            "description": check_text(description, "description"),
+            "scope": check_base(scope, Scope, "scope"),
+            "context_id__in": check_list_of_base(context, Context, "context"),
+            "ref": check_text(ref, "ref"),
+        }
+        if kwargs:
+            request_params.update(**kwargs)
+
+        return Form.list(client=self, **request_params)
+
+    def _create_forms_bulk(
+        self,
+        forms: List[Dict],
+        asynchronous: Optional[bool] = False,
+        retrieve_instances: Optional[bool] = True,
+        **kwargs,
+    ) -> List:
+        """
+        Create multiple form instances simultaneously.
+
+        :param forms: list of dicts, each specifying a form instance. Available fields per dict:
+            :param name: (optional) name provided for the new instance as string otherwise use
+            the name of the model
+            :type name: basestring or None
+            :param description: (optional) description provided for the new instance as string
+            otherwise use the description of the model
+            :type description: basestring or None
+            :param model_id: model of the form which to add new instances, should follow the
+            model tree in KE-chain
+            :type model_id: UUID
+            :param contexts: list of contexts
+            :type properties: list
+        :type forms: list
+        :param asynchronous: If true, immediately returns without forms (default = False)
+        :type asynchronous: bool
+        :param retrieve_instances: If true, will retrieve the created Form Instances in a List
+        :type retrieve_instances: bool
+        :param kwargs:
+        :return: list of Form instances or list of form UUIDs
+        :rtype list
+        """
+        check_list_of_dicts(
+            forms,
+            "forms",
+            [
+                "form",
+                "values",
+            ],
+        )
+        for form in forms:
+            form["form"] = check_base(form.get("form"), Form, "form")
+            form["values"]["contexts"] = check_list_of_base(
+                form.get("values").get("contexts"), Context, "contexts"
+            )
+
+        # prepare url query parameters
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS["forms"])
+        query_params["async_mode"] = asynchronous
+        bulk_action_input = {"bulk_action_input": forms}
+        response = self._request(
+            "POST",
+            self._build_url("forms_bulk_create_instances"),
+            params=query_params,
+            json=bulk_action_input,
+        )
+
+        if (asynchronous and response.status_code != requests.codes.accepted) or (
+            not asynchronous and response.status_code != requests.codes.created
+        ):  # pragma: no cover
+            raise APIError(
+                f"Could not create Forms. ({response.status_code})", response=response
+            )
+        form_ids = [form.get("id") for form in response.json()["results"]]
+        if retrieve_instances:
+            instances_per_id = dict()
+            for forms_ids_chunk in get_in_chunks(lst=form_ids, chunk_size=50):
+                instances_per_id.update(
+                    {
+                        p.id: p for p in self.forms(id__in=",".join(forms_ids_chunk))
+                    }  # `id__in` does not guarantee order
+                )
+            form_instances = [
+                instances_per_id[pk] for pk in form_ids
+            ]  # Ensures order of parts wrt request
+            return form_instances
+        return form_ids
+
+    def _delete_forms_bulk(
+        self,
+        forms: List[Union[Form, str]],
+        asynchronous: Optional[bool] = False,
+        **kwargs,
+    ) -> bool:
+        """Delete multiple Forms simultaneously.
+
+        :param parts: list of Form objects or UUIDs
+        :type parts: List[Form] or List[UUID]
+        :param asynchronous: If true, immediately returns (default = False)
+        :type asynchronous: bool
+        :param kwargs:
+        :return: True if forms are deleted successfully
+        :raises APIError: if the forms could not be deleted
+        :raises IllegalArgumentError: if there were neither Forms nor UUIDs in the list of forms
+        """
+        check_type(asynchronous, bool, "asynchronous")
+
+        list_forms = list()
+        for form in forms:
+            if isinstance(form, Form):
+                list_forms.append(form.id)
+            elif is_uuid(form):
+                list_forms.append(form)
+            else:
+                raise IllegalArgumentError(f"{form} is not a Form nor an UUID")
+        query_params = kwargs
+        query_params.update(API_EXTRA_PARAMS["parts"])
+        query_params["async_mode"] = asynchronous
+        bulk_action_input = {"bulk_action_input": list_forms}
+        response = self._request(
+            "DELETE",
+            self._build_url("forms_bulk_delete"),
+            params=query_params,
+            json=bulk_action_input,
+        )
+        # TODO - remove requests.codes.ok when async is implemented in the backend
+        if (
+            asynchronous
+            and response.status_code not in (requests.codes.ok, requests.codes.accepted)
+        ) or (
+            not asynchronous
+            and response.status_code not in (requests.codes.ok, requests.codes.accepted)
+        ):  # pragma: no cover
+            raise APIError(
+                f"Could not delete Forms. ({response.status_code})", response=response
+            )
+        return True
+
+    def workflow(
+        self,
+        name: Optional[str] = None,
+        pk: Optional[ObjectID] = None,
+        category: Optional[WorkflowCategory] = None,
+        description: Optional[str] = None,
+        scope: Optional[Union[Scope, ObjectID]] = None,
+        ref: Optional[str] = None,
+        **kwargs,
+    ) -> Workflow:
+        """
+        Retrieve a single Workflow, see `workflows()` method for available arguments.
+
+        .. versionadded:: 3.20
+
+        :param pk: (optional) retrieve a single primary key (object ID)
+        :param name: (optional) name of the workflow to filter on
+        :param category: (optional) category of the workflow to search for
+        :param description: (optional) description of the workflow to filter on
+        :param scope: (optional) the scope of the workflow to filter on
+        :param ref: (optional) the ref of the workflow to filter on
+        :return: a single Contexts
+        :rtype: Context
+        """
+        request_params = {
+            "name": check_text(name, "name"),
+            "id": check_uuid(pk),
+            "category": check_enum(category, WorkflowCategory, "category"),
+            "description": check_text(description, "description"),
+            "scope": check_base(scope, Scope, "scope"),
+            "ref": check_text(ref, "ref"),
+        }
+
+        if kwargs:
+            request_params.update(**kwargs)
+        return Workflow.get(
+            client=self, **clean_empty_values(request_params, nones=False)
+        )
+
+    def workflows(
+        self,
+        name: Optional[str] = None,
+        pk: Optional[ObjectID] = None,
+        category: Optional[WorkflowCategory] = None,
+        description: Optional[str] = None,
+        scope: Optional[Union[Scope, ObjectID]] = None,
+        ref: Optional[str] = None,
+        **kwargs,
+    ) -> List[Workflow]:
+        """
+        Retrieve Workflows.
+
+        .. versionadded:: 3.20
+
+        :param pk: (optional) retrieve a single primary key (object ID)
+        :param name: (optional) name of the workflow to filter on
+        :param category: (optional) category of the workflow to search for
+        :param description: (optional) description of the workflow to filter on
+        :param scope: (optional) the scope of the workflow to filter on
+        :param ref: (optional) the ref of the workflow to filter on
+        :return: a list of Workflows
+        """
+        request_params = {
+            "name": check_text(name, "name"),
+            "id": check_uuid(pk),
+            "category": check_enum(category, WorkflowCategory, "category"),
+            "description": check_text(description, "description"),
+            "scope": check_base(scope, Scope, "scope"),
+            "ref": check_text(ref, "ref"),
+        }
+
+        if kwargs:
+            request_params.update(**kwargs)
+
+        return Workflow.list(client=self, **request_params)

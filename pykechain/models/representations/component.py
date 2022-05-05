@@ -17,7 +17,9 @@ class RepresentationsComponent:
     .. versionadded:: 3.7
     """
 
-    def __init__(self, parent_object, representation_options: Dict, update_method: Callable):
+    def __init__(
+        self, parent_object, representation_options: Dict, update_method: Callable
+    ):
         """
         Extract the json with the representation options.
 
@@ -34,7 +36,9 @@ class RepresentationsComponent:
         representations_json = self._repr_options
         for representation_json in representations_json:
             self._representations.append(
-                BaseRepresentation.parse(obj=self._parent_object, json=representation_json)
+                BaseRepresentation.parse(
+                    obj=self._parent_object, json=representation_json
+                )
             )
 
     def get_representations(self) -> List["AnyRepresentation"]:
