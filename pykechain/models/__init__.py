@@ -2,6 +2,8 @@
 from typing import Union
 
 from .base import Base, BaseInScope
+from .form import Form, StatusForm
+from .notification import Notification
 from .scope import Scope
 from .scope2 import Scope2
 from .activity import Activity
@@ -32,6 +34,7 @@ from .service import Service, ServiceExecution
 from .team import Team
 from .user import User
 from .value_filter import PropertyValueFilter
+from .workflow import Status, Transition, Workflow
 from ..enums import PropertyType
 
 AnyProperty = Union[
@@ -101,4 +104,10 @@ __all__ = (
     "AnyProperty",
     "PropertyValueFilter",
     "property_type_to_class_map",
+    "Form",
+    "Workflow",
+    "Transition",
+    "Status",
+    "StatusForm",
+    "Notification",
 )
