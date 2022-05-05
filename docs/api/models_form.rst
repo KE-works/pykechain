@@ -1,7 +1,7 @@
 
 
-models.Form
-===========
+models.form.Form
+================
 
-.. autoclass:: pykechain.models.Form
+.. autoclass:: pykechain.models.form.Form
    :members:

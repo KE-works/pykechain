@@ -1,13 +1,13 @@
 
 
-models.Workflow, Transition and Status
-=======================================
+models.workflow.Workflow, Transition and Status
+===============================================
 
-.. autoclass:: pykechain.models.Workflow
+.. autoclass:: pykechain.models.workflow.Workflow
    :members:
 
-.. autoclass:: pykechain.models.Transition
+.. autoclass:: pykechain.models.workflow.Transition
    :members:
 
-.. autoclass:: pykechain.models.Status
+.. autoclass:: pykechain.models.workflow.Status
    :members:
