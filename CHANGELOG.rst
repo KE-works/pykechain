@@ -1,8 +1,8 @@
 Change Log
 ==========
 
-v4.0.0 (29APR22) FORMS Release
-------------------------------
+v4.0.0 (5MAY22) FORMS Release
+-----------------------------
 
 This is version 4 of pykechain in sync with the "Forms Release" of KE-chain. We added a number
 of features to this release that is in full sync with the general availability of Forms in KE-chain.

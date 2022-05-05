@@ -9,15 +9,15 @@ KE-chain Python SDK
     :target: https://pypi.python.org/pypi/pykechain
     :alt: Supported Python Versions
 
-.. image:: https://github.com/KE-works/pykechain/workflows/Test%20pykechain/badge.svg?branch=master
+.. image:: https://github.com/KE-works/pykechain/workflows/Test%20pykechain/badge.svg?branch=main
     :target: https://github.com/KE-works/pykechain/actions?query=workflow%3A%22Test+pykechain%22+branch%3Amaster
     :alt: Build Status
 
-.. image:: https://readthedocs.org/projects/pykechain/badge/?version=latest
-    :target: http://pykechain.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/pykechain/badge/?version=stable
+    :target: https://pykechain.readthedocs.io/en/stable/?badge=stable
     :alt: Documentation Status
 
-.. image:: https://coveralls.io/repos/github/KE-works/pykechain/badge.svg?branch=master
+.. image:: https://coveralls.io/repos/github/KE-works/pykechain/badge.svg?branch=main
     :target: https://coveralls.io/github/KE-works/pykechain?branch=master
     :alt: Coverage Status
 
@@ -33,13 +33,17 @@ KE-chain Python SDK
 About pykechain
 ---------------
 
-pykechain is a python library for advanced users of KE-chain. It will enable users to connect and fully interact to all
-features of `KE-chain <http://www.ke-chain.com>`__, the digital verification and high tech systems design platform of
-`KE-works <http://www.ke-works.com>`__.
-With it you can interact with KE-chain, its parts, projects, activities and all other aspects of KE-chain from
-within python scripts or iPython / `Jupyter <http://jupyter.org>`__ notebooks.
+``pykechain`` is a python library for advanced users of KE-chain. It will enable users to connect and fully interact
+to all features of `KE-chain <http://www.ke-chain.com>`__, the digital verification and high tech systems design
+platform of `KE-works <http://www.ke-works.com>`__.
+With it you can interact with KE-chain, its parts, projects, forms, workflows, activities, scripts and all other
+aspects of KE-chain from within python scripts or iPython / `Jupyter <http://jupyter.org>`__ notebooks.
 
 It requires a normal user access to a KE-chain (version 3) instance for it to work.
+
+.. note::
+   This version of pykechain (> 4.0.0) is compatible with the latest release of KE-chain where we
+   added the Forms feature. It is fully backward compatible with all KE-chain versions v2022 and higher.
 
 .. note::
    This version of pykechain (> 3.0.0) is suited from KE-chain versions > 3 (or > v2021) running
@@ -73,7 +77,8 @@ Or if you want to live on the edge, install the latest and greatest from the mas
 
     pip install https://github.com/KE-works/pykechain/archive/main.zip
 
-In scripts you can either use `Pipenv <https://github.com/pypa/pipenv>`__ or a pip ``requirements.txt`` file to install ``pykechain`` as a requirement
+In scripts you can either use `Pipenv <https://github.com/pypa/pipenv>`__ or a pip ``requirements.txt`` file to
+install ``pykechain`` as a requirement
 
 in a ``Pipfile``::
 
