@@ -1181,7 +1181,7 @@ class Client:
 
         :param username: username of the user
         :param email: email of the user
-        :poram name: (optional) full human name of the user
+        :param name: (optional) full human name of the user
         :param team_ids: (optional) list of Team or Team id's to which the user should be added.
         :param language_code: (optional) the Language of the user. One of LanguageCodes. Eg. "nl"
         :param timezone: (optional) the timezone name of the user. Eg. "Europe/Amsterdam"
