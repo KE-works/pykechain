@@ -88,7 +88,7 @@ class TestCreateUsers(TestBetamax):
     def test_create_a_new_user(self):
         """Create a new user.
 
-        /!\ You need to delete this one by hand as we cannot yet delete a user
+        ! You need to delete this one by hand as we cannot yet delete a user
         using the API. And basically we also do not want that.
         """
         payload = dict(
@@ -103,7 +103,7 @@ class TestCreateUsers(TestBetamax):
     def test_create_a_new_user_and_reset_password(self):
         """Create a new user.
 
-        /!\ You need to delete this one by hand as we cannot yet delete a user
+        ! You need to delete this one by hand as we cannot yet delete a user
         using the API. And basically we also do not want that.
         """
         payload = dict(
