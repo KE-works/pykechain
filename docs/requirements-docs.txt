@@ -1,6 +1,0 @@
-# documentation
-Sphinx
-nbsphinx
-
-# beyond the obvious
-envparse
