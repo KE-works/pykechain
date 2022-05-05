@@ -44,10 +44,11 @@ It requires a normal user access to a KE-chain (version 3) instance for it to wo
 .. note::
    This version of pykechain (> 4.0.0) is compatible with the latest release of KE-chain where we
    added the Forms feature. It is fully backward compatible with all KE-chain versions v2022 and higher.
+   This version discontinues support for python version 3.6.
 
 .. note::
    This version of pykechain (> 3.0.0) is suited from KE-chain versions > 3 (or > v2021) running
-   on ``python >= 3.6`` exclusively. If you desire to connect to an older version of KE-chain or
+   on ``python >= 3.7`` exclusively. If you desire to connect to an older version of KE-chain or
    run on ``python 2.7``, please use a ``pykechain v2`` release. Put in the requirements ``pykechain~=2.7``.
 
 Basic usage
@@ -68,7 +69,7 @@ Now interact with it::
 Installation
 ------------
 
-pykechain is easily installed using pip. ``pykechain`` is Python ``3.6``, ``3.7``, ``3.8``, ``3.9``, ``3.10``
+pykechain is easily installed using pip. ``pykechain`` is Python ``3.7``, ``3.8``, ``3.9``, ``3.10``
 and ``pypy3`` compatible::
 
     pip install pykechain

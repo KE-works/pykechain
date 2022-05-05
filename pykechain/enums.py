@@ -30,7 +30,8 @@ class Enum:
 class Multiplicity(Enum):
     """The various multiplicities that are accepted by KE-chain.
 
-    For more information on the representation in KE-chain, please consult the KE-chain `Part documentation`_.
+    For more information on the representation in KE-chain, please consult the KE-chain
+    `Part documentation`_.
 
     :cvar ZERO_ONE: Multiplicity 0 to 1
     :cvar ONE: Multiplicity 1
@@ -48,7 +49,8 @@ class Multiplicity(Enum):
 class Category(Enum):
     """The various categories of Parts that are accepted by KE-chain.
 
-    For more information on the representation in KE-chain, please consult the KE-chain `Part documentation`_.
+    For more information on the representation in KE-chain, please consult the KE-chain
+    `Part documentation`_.
 
     :cvar INSTANCE: Category of Instance
     :cvar MODEL: Category of Model
@@ -61,12 +63,14 @@ class Category(Enum):
 class Classification(Enum):
     """The various classification of Parts that are accepted by KE-chain.
 
-    For more information on the representation in KE-chain, please consult the KE-chain `Part documentation`_.
+    For more information on the representation in KE-chain, please consult the KE-chain
+    `Part documentation`_.
 
     :cvar PRODUCT: Classification of the part object is Product
     :cvar CATALOG: Classification of the part object is a CATALOG
 
-    .. _Part documentation: https://support.ke-chain.com/confluence/dosearchsite.action?queryString=concept+part
+    .. _Part documentation: https://support.ke-chain.com/confluence/dosearchsite.action?
+            queryString=concept+part
     """
 
     PRODUCT = "PRODUCT"
@@ -77,7 +81,8 @@ class Classification(Enum):
 class PropertyType(Enum):
     """The various property types that are accepted by KE-chain.
 
-    For more information on the representation in KE-chain, please consult the KE-chain `Property documentation`_.
+    For more information on the representation in KE-chain, please consult the KE-chain
+    `Property documentation`_.
 
     :cvar CHAR_VALUE: a charfield property (single line text)
     :cvar TEXT_VALUE: text property (long text, may span multiple lines)
@@ -92,7 +97,8 @@ class PropertyType(Enum):
     .. versionadded:: 1.14
 
     :cvar SINGLE_SELECT_VALUE: single select list property (choose from a list)
-    :cvar REFERENCES_VALUE: a multi reference property, a list of UUID values referring to other part models
+    :cvar REFERENCES_VALUE: a multi reference property, a list of UUID values referring to
+        other part models
 
     .. versionadded:: 3.6
     :cvar ACTIVITY_REFERENCES_VALUE: Activity References Property
@@ -109,7 +115,8 @@ class PropertyType(Enum):
     .. versionadded:: 3.19
     :cvar STATUS_REFERENCES_VALUE: Status References Property
 
-    .. _Property documentation: https://support.ke-chain.com/confluence/dosearchsite.action?queryString=concept+property
+    .. _Property documentation: https://support.ke-chain.com/confluence/dosearchsite.action?
+        queryString=concept+property
     """
 
     CHAR_VALUE = "CHAR_VALUE"
@@ -397,27 +404,38 @@ class ServiceType(Enum):
 class ServiceEnvironmentVersion(Enum):
     """The acceptable versions of python where services run on.
 
-    :cvar PYTHON_3_6: Service execution environment is a python 3.6 container
+    :cvar PYTHON_3_6: Service execution environment is a python 3.6 container (unsupported)
     :cvar PYTHON_3_7: Service execution environment is a python 3.7 container
     :cvar PYTHON_3_8: Service execution environment is a python 3.8 container
-    :cvar PYTHON_3_6_NOTEBOOKS: execution environment is a python 3.6 container with jupyter notebook preinstalled
-    :cvar PYTHON_3_8_NOTEBOOKS: execution environment is a python 3.8 container with jupyter notebook preinstalled
+    :cvar PYTHON_3_9: Service execution environment is a python 3.9 container
+    :cvar PYTHON_3_10: Service execution environment is a python 3.10 container
+    :cvar PYTHON_3_6_NOTEBOOKS: execution environment is a python 3.6 container with jupyter
+        notebook preinstalled (unsupported)
+    :cvar PYTHON_3_8_NOTEBOOKS: execution environment is a python 3.8 container with jupyter
+        notebook preinstalled
+    :cvar PYTHON_3_9_NOTEBOOKS: execution environment is a python 3.9 container with jupyter
+        notebook preinstalled
+    :cvar PYTHON_3_10_NOTEBOOKS: execution environment is a python 3.10 container with jupyter
+        notebook preinstalled
     """
 
-    PYTHON_3_6 = "3.6"
+    PYTHON_3_6 = "3.6"  # unsupported
     PYTHON_3_7 = "3.7"
     PYTHON_3_8 = "3.8"
     PYTHON_3_9 = "3.9"
-    PYTHON_3_6_NOTEBOOKS = "3.6_notebook"
+    PYTHON_3_10 = "3.10"
+    PYTHON_3_6_NOTEBOOKS = "3.6_notebook"  # unsupported
     PYTHON_3_8_NOTEBOOKS = "3.8_notebook"
     PYTHON_3_9_NOTEBOOKS = "3.9_notebook"
+    PYTHON_3_10_NOTEBOOKS = "3.10_notebook"
 
 
 class ServiceScriptUser(Enum):
     """The acceptable usertypes under which a (trusted) service is run.
 
     :cvar KENODE_USER: Run as "kenode" user. Equivalent to a manager in a scope.
-    :cvar TEAMMANAGER_USER: Run as "kenode_team". Equivalent to a manager in a team. (disabled until available)
+    :cvar TEAMMANAGER_USER: Run as "kenode_team". Equivalent to a manager in a team.
+        (disabled until available)
     :cvar CONFIGURATOR_USER: Run as "kenode_configurator". Equivalent to GG:Configurator.
     """
 
@@ -463,8 +481,10 @@ class ScopeRoles(Enum):
     Roles that exist for a member of a scope.
 
     :cvar MANAGER: owner of the scope, has full rights
-    :cvar SUPERVISOR: supervisor member of a scope, has the rights as leadmember and rights to manage catalog tasks.
-    :cvar LEADMEMBER: elevated member, has assignment rights, no rights on App tasks or Catalog tasks.
+    :cvar SUPERVISOR: supervisor member of a scope, has the rights as leadmember and rights to
+        manage catalog tasks.
+    :cvar LEADMEMBER: elevated member, has assignment rights, no rights on App tasks or
+        Catalog tasks.
     :cvar MEMBER: normal member, only has viewing rights
     """
 
@@ -515,7 +535,8 @@ class ContextGroup(Enum):
     :cvar LOCATION: Location, in nl: Locatie
     :cvar PHASE: Phase, in nl: Fase
     :cvar REQUIREMENT: Requirement, in nl: Eis
-    :cvar EXTERNALID: External identifier, to be used to provide a generic link to an external application
+    :cvar EXTERNALID: External identifier, to be used to provide a generic link to an
+        external application
     :cvar WORKPACKAGE: Workpackage, in nl: Werkpakket
     """
 
@@ -535,13 +556,16 @@ class KechainEnv(Enum):
     """Environment variables that can be set for pykechain.
 
     :cvar KECHAIN_URL: full url of KE-chain where to connect to eg: 'https://<some>.ke-chain.com'
-    :cvar KECHAIN_TOKEN: authentication token for the KE-chain user provided from KE-chain user account control
+    :cvar KECHAIN_TOKEN: authentication token for the KE-chain user provided from KE-chain user
+        account control
     :cvar KECHAIN_USERNAME: the username for the credentials
     :cvar KECHAIN_PASSWORD: the password for the credentials
     :cvar KECHAIN_SCOPE: the name of the project / scope. Should be unique, otherwise use scope_id
     :cvar KECHAIN_SCOPE_ID: the UUID of the project / scope.
-    :cvar KECHAIN_FORCE_ENV_USE: set to 'true', '1', 'ok', or 'yes' to always use the environment variables.
-    :cvar KECHAIN_SCOPE_STATUS: the status of the Scope to retrieve, defaults to None to retrieve all scopes
+    :cvar KECHAIN_FORCE_ENV_USE: set to 'true', '1', 'ok', or 'yes' to always use the environment
+        variables.
+    :cvar KECHAIN_SCOPE_STATUS: the status of the Scope to retrieve, defaults to None to retrieve
+        all scopes
     :cvar KECHAIN_CHECK_CERTIFICATES: if the certificates of the URL should be checked.
     """
 
@@ -568,7 +592,7 @@ class SortTable(Enum):
 
 
 class Alignment(Enum):
-    """The acceptable alignment options for attachment viewer, navigation bar widgets and service widgets.
+    """The alignment options for attachment viewer, navigation bar widgets and service widgets.
 
     :cvar LEFT: Aligned to the left
     :cvar CENTER: Aligned to the center
@@ -1146,7 +1170,8 @@ class NotificationStatus(Enum):
         next states: ARCHIVED
     - FAILED: when the message is not successfully sent out
         next states: ARCHIVED
-    - ARCHIVED: when the message is archives and waiting for its deletion against a certain retention policy
+    - ARCHIVED: when the message is archives and waiting for its deletion against a certain
+        retention policy
         next states: None
 
     :cvar ARCHIVED: "archived" notifications

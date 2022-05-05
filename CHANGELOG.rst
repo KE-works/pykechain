@@ -23,6 +23,7 @@ greatly improved `Context` featureset.
 * :star: Added the ability to create a user from the frontend.
 * :star: Added the ability to request a change password link from the frontend.
 * :+1: Removed the `target_scope` parameter when cloning inside the same scope
+* :+1: We discontinued support for python version 3.6.
 
 
 v3.18.2 (28APR22)
