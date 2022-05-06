@@ -74,7 +74,10 @@ class PropertyValueFilter(BaseFilter):
         check_enum(filter_type, FilterType, "filter_type")
 
         self.id = property_model_id
-        self.value = value
+        if isinstance(value, str):
+            self.value = urllib.parse.unquote(value)
+        else:
+            self.value = value
         self.type = filter_type
 
     def __repr__(self):
