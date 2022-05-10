@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v4.0.2 (10MAY22)
+----------------
+ * :+1: Fixed a small decoding issue which was causing prefilters to be double encoded when copying/moving a part.
+
+
 v4.0.1 (5MAY22) Patch Release
 -----------------------------
 

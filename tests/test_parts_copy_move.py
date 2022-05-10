@@ -188,10 +188,16 @@ class TestPartsCopyMove(TestBetamax):
             default_value=self.sub_part2,
             property_type=PropertyType.REFERENCES_VALUE,
         )
-        self.model_to_be_copied.add_property(
+        self.ref_property = self.model_to_be_copied.add_property(
             name=self.p_part_reference_name_cross_scope,
             default_value=self.wheel,
             property_type=PropertyType.REFERENCES_VALUE,
+        )
+        self.ref_property.set_prefilters(
+            property_models=[self.wheel.property(name="Rim Material"),
+                             self.wheel.property(name="Country of manufacture")],
+            values=['Aliminium', 'United States'],
+            filters_type=[FilterType.CONTAINS, FilterType.CONTAINS],
         )
         self.model_to_be_copied.add_property(
             name=self.p_geo_json_name,
