@@ -3,8 +3,8 @@ Change Log
 
 v4.0.2 (10MAY22)
 ----------------
- * :+1: Fixed a small decoding issue which was causing prefilters to be double encoded when copying/moving a part.
-
+* :+1: Fixed a small decoding issue which was causing prefilters to be double encoded when copying/moving a part. (#1148)
+* :+1: dependent versions for development: pre-commit (2.18.1), jsonschema (4.5.1)
 
 v4.0.1 (5MAY22) Patch Release
 -----------------------------
