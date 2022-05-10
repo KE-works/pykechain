@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v4.1.0 (UNRELEASED)
+-------------------
+* :star: We added the ChecklistForms and ChecklistGrid widget.
+
+
 v4.0.2 (10MAY22)
 ----------------
 * :+1: Fixed a small decoding issue which was causing prefilters to be double encoded when copying/moving a part. (#1148)
