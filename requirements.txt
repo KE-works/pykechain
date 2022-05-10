@@ -3,7 +3,7 @@ requests==2.27.1
 envparse==0.2.0
 
 # json validation (inspector)
-jsonschema==4.4.0
+jsonschema==4.5.1
 
 # for version comparison
 semver==2.13.0
@@ -28,7 +28,7 @@ flake8==4.0.1
 importlib-metadata
 pydocstyle==6.1.1
 mypy==0.950; python_version >= '3.4'
-pre-commit==2.18.1
+pre-commit==2.19.0
 
 # for package management (uploads)
 twine~=4.0; python_version >= '3.7'
