@@ -1,62 +1,27 @@
 import warnings
-from typing import (
-    Iterable,
-    Union,
-    Optional,
-    Dict,
-    List,
-    Any,
-)
+from typing import (Any, Dict, Iterable, List, Optional, Union)
 
 from pykechain.enums import (
-    SortTable,
-    WidgetTypes,
-    ShowColumnTypes,
-    ScopeWidgetColumnTypes,
-    ProgressBarColors,
-    CardWidgetLinkValue,
-    LinkTargets,
-    ImageFitValue,
-    KEChainPages,
-    Alignment,
-    ActivityStatus,
-    ActivityType,
-    ActivityClassification,
+    ActivityClassification, ActivityStatus, ActivityType, Alignment, CardWidgetLinkValue,
+    ImageFitValue, KEChainPages, LinkTargets, ProgressBarColors, ScopeWidgetColumnTypes,
+    ShowColumnTypes, SortTable, WidgetTypes,
 )
-from pykechain.exceptions import NotFoundError, IllegalArgumentError
+from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models.input_checks import (
-    check_enum,
-    check_text,
-    check_base,
-    check_type,
-    check_list_of_text,
+    check_base, check_enum, check_list_of_text, check_text, check_type,
 )
 from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.enums import (
-    DashboardWidgetSourceScopes,
-    DashboardWidgetShowTasks,
-    DashboardWidgetShowScopes,
-    MetaWidget,
-    AssociatedObjectId,
-    TasksAssignmentFilterTypes,
+    AssociatedObjectId, DashboardWidgetShowForms, DashboardWidgetShowScopes,
+    DashboardWidgetShowTasks, DashboardWidgetSourceScopes, MetaWidget, TasksAssignmentFilterTypes,
     TasksWidgetColumns,
-    DashboardWidgetShowForms,
 )
 from pykechain.models.widgets.helpers import (
-    _set_title,
-    _initiate_meta,
-    _retrieve_object,
-    _retrieve_object_id,
-    _check_prefilters,
-    _check_excluded_propmodels,
-    _set_description,
-    _set_link,
-    _set_image,
-    _set_button_text,
-    TITLE_TYPING,
+    TITLE_TYPING, _check_excluded_propmodels, _check_prefilters, _initiate_meta, _retrieve_object,
+    _retrieve_object_id, _set_button_text, _set_description, _set_image, _set_link, _set_title,
 )
-from pykechain.utils import is_uuid, find, snakecase, is_url
+from pykechain.utils import find, is_url, is_uuid, snakecase
 
 
 class WidgetsManager(Iterable):
@@ -1116,13 +1081,13 @@ class WidgetsManager(Iterable):
                     # if progress=False and Bar=True, the bar is True
                     # if progress=False and Bar=False, both are False
                     showProgress=show_progress
-                    and not show_progressbar
-                    or show_progress,
+                                 and not show_progressbar
+                                 or show_progress,
                     showProgressBar=show_progressbar and not show_progress,
                     breadcrumbAncestor=check_base(
                         breadcrumb_root, Activity, "breadcrumb_root"
                     )
-                    or None,
+                                       or None,
                 )
             )
         if progress_bar:
@@ -2069,7 +2034,7 @@ class WidgetsManager(Iterable):
             MetaWidget.ACTIVITY_STATUS: check_enum(
                 status_filter, ActivityStatus, "status_filter"
             )
-            or "",
+                                        or "",
             MetaWidget.ACTIVITY_TYPE: check_enum(
                 activity_type_filter, ActivityType, "activity_type_filter"
             ),
@@ -2118,7 +2083,7 @@ class WidgetsManager(Iterable):
                 MetaWidget.SHOW_COLUMNS: check_list_of_text(
                     show_columns, "show_columns"
                 )
-                or TasksWidgetColumns.values(),
+                                         or TasksWidgetColumns.values(),
                 MetaWidget.SORTED_COLUMN: check_enum(
                     sorted_column, TasksWidgetColumns, "sorted_column"
                 ),
@@ -2212,6 +2177,24 @@ class WidgetsManager(Iterable):
         )
 
         return widget
+
+    def add_projectinfo_widget(self, *args, **kwargs):
+        """Add a KE-chain Project Info Widget to the WidgetManager and the activity.
+
+        The widget will be saved in KE-chain."""
+        raise NotImplementedError("The Project Info Widget is not yet implemented")
+
+    def add_checklistgrid_widget(self, *args, **kwargs):
+        """Add a KE-chain Checklist Grid Widget to the WidgetManager and the activity.
+
+        The widget will be saved in KE-chain."""
+        raise NotImplementedError("The Checklist Grid Widget is not yet implemented")
+
+    def add_checklistform_widget(self, *args, **kwargs):
+        """Add a KE-chain Checklist Form Widget to the WidgetManager and the activity.
+
+        The widget will be saved in KE-chain."""
+        raise NotImplementedError("The Checklist Form Widget is not yet implemented")
 
     #
     # Widget manager methods
