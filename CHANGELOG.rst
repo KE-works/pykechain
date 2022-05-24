@@ -1,9 +1,13 @@
 Change Log
 ==========
 
+v4.0.4 (UNRELEASED)
+-------------------
+* :star: Added the method to create workflow in a certain project. `Client.create_workflow(scope=...)` or `Scope.create_workflow()`.
+
 v4.0.3 (24MAY22)
 ----------------
-+ :+1: Ensuring that the order attribute is removed from sidebar items in sync with the deprecation of the order in backend.
+* :+1: Ensuring that the order attribute is removed from sidebar items in sync with the deprecation of the order in backend.
 
 v4.0.2 (10MAY22)
 ----------------
