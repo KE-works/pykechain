@@ -155,6 +155,52 @@ class Workflow(
         """Delete Workflow."""
         return super().delete()
 
+    @classmethod
+    def create(
+        cls,
+        client: "Client",
+        name: str,
+        scope: Union["Scope", ObjectID],
+        category: WorkflowCategory = WorkflowCategory.DEFINED,
+        description: str = None,
+        options: dict = None,
+        active: bool = False,
+        **kwargs,
+    ) -> "Workflow":
+        """
+        Create a new Workflow object using the client.
+
+        :param client: Client object.
+        :param name: Name of the workflow
+        :param scope: Scope of the workflow
+        :param category: (optional) category of the workflow, defaults to WorkflowCategory.DEFINED
+        :param description: (optional) description of the workflow
+        :param options: (optional) JSON/dictionary with workflow options
+        :param active: (optional) boolean flag to set the workflow to active. Defaults to False
+        :param kwargs: (optional) additional kwargs.
+        :return: a Workflow object
+        :raises APIError: When the Workflow could not be created.
+        """
+        from pykechain.models import Scope  # avoiding circular imports here.
+
+        data = {
+            "name": check_text(name, "name"),
+            "scope": check_base(scope, Scope, "scope"),
+            "category": check_enum(category, WorkflowCategory, "category"),
+            "description": check_text(description, "description"),
+            "options": check_type(options, dict, "options"),
+            "active": check_type(active, bool, "active"),
+        }
+        kwargs.update(API_EXTRA_PARAMS[cls.url_list_name])
+        response = client._request(
+            "POST", client._build_url(cls.url_list_name), params=kwargs, json=data
+        )
+
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError(f"Could not create {cls.__name__}", response=response)
+
+        return cls(json=response.json()["results"][0], client=client)
+
     @property
     def status_order(self) -> List[Status]:
         """Statuses in the right order."""
@@ -193,7 +239,7 @@ class Workflow(
         Retrieve the Transition belonging to this workflow based on its name, ref or uuid.
 
         :param value: transition name, ref or UUID to search for
-        :param attr: the attribute to match on. Eg. to_status=<Status Obj>
+        :param attr: the attribute to match on. E.g. to_status=<Status Obj>
         :return: a single :class:`Transition`
         :raises NotFoundError: if the `Transition` is not part of the `Workflow`
         :raises MultipleFoundError
@@ -347,7 +393,7 @@ class Workflow(
                 "workflow",
                 response=response,
             )
-        # an updated transition will be altered so we want to refresh the workflow.
+        # an updated transition will be altered, so we want to refresh the workflow.
         self.refresh()
         return Transition(json=response.json()["results"][0])
 
@@ -373,7 +419,7 @@ class Workflow(
                 "workflow",
                 response=response,
             )
-        # a deleted transition will be unlinked so we want to refresh the workflow.
+        # a deleted transition will be unlinked, so we want to refresh the workflow.
         self.refresh()
 
     def create_transition(
@@ -412,7 +458,7 @@ class Workflow(
                 "Could not create the specific transition in the " "workflow",
                 response=response,
             )
-        # a new transition will be linked to the workflow so we want to refresh the workflow.
+        # a new transition will be linked to the workflow, so we want to refresh the workflow.
         self.refresh()
         return Transition(json=response.json()["results"][0], client=self._client)
 
@@ -449,7 +495,7 @@ class Workflow(
                 "link it to the workflow",
                 response=response,
             )
-        # a new status will create a new global transition to that status
+        # a new status will create a new global transition to that status,
         # so we want to update the current workflow.
         self.refresh()
         return Status(json=response.json()["results"][0], client=self._client)
