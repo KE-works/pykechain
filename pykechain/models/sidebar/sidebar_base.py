@@ -16,7 +16,13 @@ class SideBarItem:
     _item_type = SidebarType.BUTTON
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}: {self.display_name}"
+        if hasattr(self, "title"):
+            name = getattr(self, "title")
+        elif hasattr(self, "display_text"):
+            name = getattr(self, "display_text")
+        else:
+            name = "<no name>"
+        return f"<pyke {self.__class__.__name__}: '{name}'>"
 
     def refresh(self, json: Optional[Dict] = None) -> None:
         """

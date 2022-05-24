@@ -79,7 +79,7 @@ class SideBarManager(Iterable):
         self._iter = iter(self._items)
 
     def __repr__(self) -> str:  # pragma: no cover
-        return f"<pyke {self.__class__.__name__} object {self.__len__()} buttons>"
+        return f"<pyke {self.__class__.__name__}: {self.__len__()} items>"
 
     def __iter__(self):
         return self
@@ -279,7 +279,7 @@ class SideBarManager(Iterable):
         check_type(override_sidebar, bool, "override_sidebar")
 
         for index, button in enumerate(buttons):
-            button = SideBarButton(side_bar_manager=self, order=index, json=button)
+            button = SideBarButton(side_bar_manager=self, json=button)
 
             self._items.append(button)
 

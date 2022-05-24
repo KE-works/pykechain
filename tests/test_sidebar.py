@@ -388,7 +388,6 @@ class TestSideBar(TestBetamax):
         """Aim to create a sidebard card."""
         target_dict = {
             "itemType": "CARD",
-            "order": 1,
             "align": "top",
             "showCloseAction": True,
             "showActionButton": True,
@@ -406,7 +405,6 @@ class TestSideBar(TestBetamax):
 
         sidebar_card = SideBarCard(
             side_bar_manager=self.manager,
-            order=1,
             alignment=SidebarItemAlignment.TOP,
             show_close_action=True,
             show_action_button=True,
@@ -441,5 +439,5 @@ class TestSideBar(TestBetamax):
         self.assertTrue(len(sbm) == 1)
         for item in sbm:
             self.assertEqual(item.display_text, "Foo Bar")
-            self.assertEqual(item.order, 0)
+            self.assertFalse(hasattr(item, "order"))
             self.assertFalse(item.show_action_button)
