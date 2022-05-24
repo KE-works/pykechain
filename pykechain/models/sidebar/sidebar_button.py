@@ -37,7 +37,6 @@ class SideBarButton(SideBarItem):
         self,
         side_bar_manager: "SideBarManager",
         json: Optional[Dict] = None,
-        order: Optional[int] = None,
         title: Optional[str] = None,
         icon: Optional[str] = None,
         uri: Optional[str] = None,
@@ -52,7 +51,6 @@ class SideBarButton(SideBarItem):
 
         :param side_bar_manager: Manager object to which the button is linked.
         :param json: the json response to construct the :class:`SideBarButton` from
-        :param order: index of the button
         :param title: visible label of the button
         :param icon: FontAwesome icon of the button
         :param uri: Uniform Resource Identifier, the address of the linked page
@@ -69,7 +67,6 @@ class SideBarButton(SideBarItem):
             json = {}
 
         title = title if title else json.get("displayName")
-        order = order if order is not None else json.get("order")
         icon = icon if icon else json.get("displayIcon")
         uri = uri if uri else json.get("uri")
         uri_target = json.get("uriTarget", uri_target)
@@ -77,8 +74,6 @@ class SideBarButton(SideBarItem):
         alignment = json.get("align", alignment)
         minimum_access_level = json.get("minimumAccessLevel", minimum_access_level)
 
-        if not isinstance(order, int):
-            raise IllegalArgumentError(f'order must be an integer, "{order}" is not.')
         if not isinstance(title, str):
             raise IllegalArgumentError(f'title must be a string, "{title}" is not.')
         if not isinstance(icon, str):
@@ -103,7 +98,6 @@ class SideBarButton(SideBarItem):
 
         self._manager: "SideBarManager" = side_bar_manager
         self.display_name: str = title
-        self.order: int = order
         self.display_icon: str = icon
         self.uri: str = uri
         self.uri_target: URITarget = uri_target
@@ -129,7 +123,6 @@ class SideBarButton(SideBarItem):
             "displayIcon": self.display_icon,
             "uriTarget": self.uri_target,
             "uri": self.uri,
-            "order": self.order,
             "displayIconMode": self.display_icon_mode,
             "align": self.alignment,
             "minimumAccessLevel": self.minimum_access_level,
