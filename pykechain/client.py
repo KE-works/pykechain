@@ -3992,3 +3992,12 @@ class Client:
             request_params.update(**kwargs)
 
         return Workflow.list(client=self, **request_params)
+
+    def create_workflow(self, scope: ObjectID, **kwargs) -> Workflow:
+        """Create a new Defined Workflow object in a scope.
+
+        See `Workflow.create_workflow` for available parameters.
+
+        :return: a Workflow object
+        """
+        return Workflow.create(client=self, scope=scope, **kwargs)

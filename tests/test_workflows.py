@@ -1,6 +1,4 @@
 from copy import deepcopy
-from random import shuffle
-from unittest import skip
 
 from pykechain.enums import StatusCategory, TransitionType, WorkflowCategory
 from pykechain.exceptions import ForbiddenError, NotFoundError
@@ -53,8 +51,7 @@ class TestWorkflows(TestBetamax):
     def test_single_workflow_retrieve_on_pk(self):
         workflow_id = self.workflow.id
 
-        retr_on_id = self.client.workflow(pk=workflow_id)
-        pass
+        _ = self.client.workflow(pk=workflow_id)
 
     def test_clone_workflow_to_scope(self):
         """Testing the 'import workflow'."""
@@ -95,6 +92,54 @@ class TestWorkflows(TestBetamax):
         test_wf.delete()
         cloned_wf.delete()
 
+    def test_create_a_new_workflow_using_classmethod_create_workflow(self):
+        payload = dict(
+            name="___TEST WORKFLOW__DELETE_ME",
+            description="This is a test workflow created in a scope",
+            active=True,
+            options=dict(foo="bar"),
+        )
+        test_wf = Workflow.create(client=self.client, scope=self.project, **payload)
+
+        self.assertEqual(test_wf.name, payload["name"])
+        self.assertEqual(test_wf.description, payload["description"])
+        self.assertEqual(test_wf.active, payload["active"])
+        self.assertEqual(test_wf.category, WorkflowCategory.DEFINED)
+
+        test_wf.delete()
+
+    def test_create_a_new_workflow_using_client_create_workflow(self):
+        payload = dict(
+            name="___TEST WORKFLOW__DELETE_ME",
+            description="This is a test workflow created in a scope",
+            active=True,
+            options=dict(foo="bar"),
+        )
+        test_wf = self.client.create_workflow(scope=self.project, **payload)
+
+        self.assertEqual(test_wf.name, payload["name"])
+        self.assertEqual(test_wf.description, payload["description"])
+        self.assertEqual(test_wf.active, payload["active"])
+        self.assertEqual(test_wf.category, WorkflowCategory.DEFINED)
+
+        test_wf.delete()
+
+    def test_create_a_new_workflow_using_scope_create_workflow(self):
+        payload = dict(
+            name="___TEST WORKFLOW__DELETE_ME",
+            description="This is a test workflow created in a scope",
+            active=True,
+            options=dict(foo="bar"),
+        )
+        test_wf = self.project.create_workflow(**payload)
+
+        self.assertEqual(test_wf.name, payload["name"])
+        self.assertEqual(test_wf.description, payload["description"])
+        self.assertEqual(test_wf.active, payload["active"])
+        self.assertEqual(test_wf.category, WorkflowCategory.DEFINED)
+
+        test_wf.delete()
+
 
 class TestWorkflowMethods(TestBetamax):
     def setUp(self):
@@ -118,11 +163,8 @@ class TestWorkflowMethods(TestBetamax):
 
     def test_edit_workflow_description(self):
         new_description = "foo bar"
-        self.workflow.edit(
-            description=new_description
-        )
+        self.workflow.edit(description=new_description)
         self.assertEqual(self.workflow.description, new_description)
-
 
     def test_workflow_in_and_activate(self):
         self.workflow.deactivate()
@@ -137,8 +179,6 @@ class TestWorkflowMethods(TestBetamax):
         - tests deletion of status
         - tests deletion of transition on workflow
         """
-
-        count_transitions = len(self.workflow.transitions)
         test_status = self.workflow.create_status(
             name="__TEST DONE", category=StatusCategory.DONE
         )
