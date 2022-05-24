@@ -1,5 +1,4 @@
 from copy import deepcopy
-from datetime import datetime
 
 from pykechain.enums import StatusCategory, TransitionType, WorkflowCategory
 from pykechain.exceptions import ForbiddenError, NotFoundError
@@ -95,7 +94,7 @@ class TestWorkflows(TestBetamax):
 
     def test_create_a_new_workflow_using_classmethod_create_workflow(self):
         payload = dict(
-            name=f"___TEST WORKFLOW__DELETE_ME",
+            name="___TEST WORKFLOW__DELETE_ME",
             description="This is a test workflow created in a scope",
             active=True,
             options=dict(foo="bar"),
@@ -111,7 +110,7 @@ class TestWorkflows(TestBetamax):
 
     def test_create_a_new_workflow_using_client_create_workflow(self):
         payload = dict(
-            name=f"___TEST WORKFLOW__DELETE_ME",
+            name="___TEST WORKFLOW__DELETE_ME",
             description="This is a test workflow created in a scope",
             active=True,
             options=dict(foo="bar"),
@@ -127,7 +126,7 @@ class TestWorkflows(TestBetamax):
 
     def test_create_a_new_workflow_using_scope_create_workflow(self):
         payload = dict(
-            name=f"___TEST WORKFLOW__DELETE_ME",
+            name="___TEST WORKFLOW__DELETE_ME",
             description="This is a test workflow created in a scope",
             active=True,
             options=dict(foo="bar"),

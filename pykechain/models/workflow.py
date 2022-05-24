@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional, TYPE_CHECKING, Union
 
 import requests
 
@@ -17,6 +17,10 @@ from pykechain.models.input_checks import (
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID
 from pykechain.utils import Empty, clean_empty_values, find_obj_in_list
+
+if TYPE_CHECKING:
+    from pykechain.client import Client
+    from pykechain.models import Scope
 
 
 class Transition(Base, CrudActionsMixin):
