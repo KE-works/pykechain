@@ -1,8 +1,8 @@
 Change Log
 ==========
 
-v4.0.3 (UNRELEASED)
--------------------
+v4.0.3 (24MAY22)
+----------------
 + :+1: Ensuring that the order attribute is removed from sidebar items in sync with the deprecation of the order in backend.
 
 v4.0.2 (10MAY22)
