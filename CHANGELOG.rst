@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v4.0.3 (UNRELEASED)
+-------------------
++ :+1: Ensuring that the order attribute is removed from sidebar items in sync with the deprecation of the order in backend.
+
 v4.0.2 (10MAY22)
 ----------------
 * :+1: Fixed a small decoding issue which was causing prefilters to be double encoded when copying/moving a part. (#1148)

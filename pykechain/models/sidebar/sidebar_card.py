@@ -41,7 +41,6 @@ class SideBarCard(SideBarItem):
         self,
         side_bar_manager: "SideBarManager",
         json: Optional[Dict] = None,
-        order: Optional[int] = None,
         alignment: SidebarItemAlignment = SidebarItemAlignment.TOP,
         minimum_access_level: SidebarAccessLevelOptions = SidebarAccessLevelOptions.IS_MEMBER,
         maximum_access_level: SidebarAccessLevelOptions = SidebarAccessLevelOptions.IS_MANAGER,
@@ -60,7 +59,6 @@ class SideBarCard(SideBarItem):
 
         :param side_bar_manager: Manager object to which the button is linked.
         :param json: the json response to construct the :class:`SideBarButton` from
-        :param order: index of the button
         :param title: visible label of the button
         :param icon: FontAwesome icon of the button
         :param uri: Uniform Resource Identifier, the address of the linked page
@@ -77,7 +75,6 @@ class SideBarCard(SideBarItem):
         if json is None:
             json = {}
         self._manager: "SideBarManager" = side_bar_manager
-        self.order = json.get("order", order)
         self.align = json.get("align", alignment)
         self.minimum_access_level = json.get("minimumAccessLevel", minimum_access_level)
         self.maximum_access_level = json.get("maximumAccessLevel", maximum_access_level)
@@ -93,10 +90,6 @@ class SideBarCard(SideBarItem):
             "actionButtonUriTarget", action_button_uri_target
         )
 
-        if not isinstance(self.order, int):
-            raise IllegalArgumentError(
-                f'order must be an integer, "{self.order}" is not.'
-            )
         if (
             self.action_button_uri_target is not None
             and self.action_button_uri_target not in URITarget.values()
@@ -151,7 +144,6 @@ class SideBarCard(SideBarItem):
             "itemType": self._item_type,
             "displayText": self.display_text,
             "displayTextAlign": self.display_text_align,
-            "order": self.order,
             "align": self.align,
             "minimumAccessLevel": self.minimum_access_level,
             "maximumAccessLevel": self.maximum_access_level,

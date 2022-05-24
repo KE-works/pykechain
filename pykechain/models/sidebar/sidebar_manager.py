@@ -149,7 +149,7 @@ class SideBarManager(Iterable):
     def create_card(self, order: Optional[int] = None, *args, **kwargs) -> SideBarCard:
         """Create a side bar card.
 
-        :param order: Optional input to specify the index of the new button.
+        :param order: Optional input to specify where the button is injected in the list of items.
         :return: new side-bar card
         """
         if order is None:
@@ -157,8 +157,8 @@ class SideBarManager(Iterable):
         else:
             index = check_type(order, int, "order")
 
-        card = SideBarCard(side_bar_manager=self, order=index, *args, **kwargs)
-
+        card = SideBarCard(side_bar_manager=self, *args, **kwargs)
+        # insert the button on a certain position in the list of items.
         self._items.insert(index, card)
         self._update()
         return card
@@ -169,7 +169,7 @@ class SideBarManager(Iterable):
         """
         Create a side-bar button.
 
-        :param order: Optional input to specify the index of the new button.
+        :param order: Optional input to specify where the button is injected in the list of items.
         :return: new side-bar button
         """
         if order is None:
@@ -177,8 +177,8 @@ class SideBarManager(Iterable):
         else:
             index = check_type(order, int, "order")
 
-        button = SideBarButton(side_bar_manager=self, order=index, *args, **kwargs)
-
+        button = SideBarButton(side_bar_manager=self, *args, **kwargs)
+        # insert the button on a certain position in the list of items.
         self._items.insert(index, button)
         self._update()
         return button

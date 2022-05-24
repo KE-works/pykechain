@@ -16,7 +16,7 @@ class SideBarItem:
     _item_type = SidebarType.BUTTON
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__} {self.order}: {self.display_name}"
+        return f"{self.__class__.__name__}: {self.display_name}"
 
     def refresh(self, json: Optional[Dict] = None) -> None:
         """
