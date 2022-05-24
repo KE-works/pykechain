@@ -1,9 +1,10 @@
 Change Log
 ==========
 
-v4.0.4 (UNRELEASED)
--------------------
+v4.1.0 (24MAY22)
+----------------
 * :star: Added the method to create workflow in a certain project. `Client.create_workflow(scope=...)` or `Scope.create_workflow()`.
+* :+1: dependent versions for development: coverage (6.4)
 
 v4.0.3 (24MAY22)
 ----------------
