@@ -35,14 +35,7 @@ from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
 from pykechain.models.workflow import Workflow
 from pykechain.typing import ObjectID
-from pykechain.utils import (
-    Empty,
-    clean_empty_values,
-    empty,
-    find,
-    is_uuid,
-    parse_datetime,
-)
+from pykechain.utils import Empty, clean_empty_values, empty, find, is_uuid, parse_datetime
 
 
 class Scope(Base, TagsMixin):
@@ -826,7 +819,7 @@ class Scope(Base, TagsMixin):
             return self._client.instantiate_form(*args, model=model, *args, **kwargs)
         else:
             raise IllegalArgumentError(
-                "Form Model '{}' not in Scope '{}'".format(model.name, self.name)
+                f"Form Model '{model.name}' not in Scope '{self.name}'"
             )
 
     #
@@ -851,6 +844,15 @@ class Scope(Base, TagsMixin):
         :return: a Workflow object
         """
         return self._client.workflow(scope=self, **kwargs)
+
+    def create_workflow(self, **kwargs) -> Workflow:
+        """Create a new Defined Workflow object in this scope.
+
+        See `Workflow.create_workflow` for available parameters.
+
+        :return: a Workflow object
+        """
+        return Workflow.create(client=self._client, scope=self, **kwargs)
 
     def import_workflow(
         self, workflow: Union[Workflow, ObjectID], **kwargs
