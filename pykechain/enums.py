@@ -258,9 +258,6 @@ class WidgetNames(Enum):
     DASHBOARDWIDGET = "dashboardWidget"
     SCOPEMEMBERS = "scopeMembersWidget"
     PROJECTINFO = "projectInfoWidget"
-    # New Forms Checklist Style widgets
-    CHECKLISTGRID = "checklistGridWidget"
-    CHECKLISTFORM = "checklistFormWidget"
 
 
 class WidgetTypes(Enum):
@@ -318,9 +315,6 @@ class WidgetTypes(Enum):
     DASHBOARD = "DASHBOARD"
     SCOPEMEMBERS = "SCOPEMEMBERS"
     PROJECTINFO = "PROJECTINFO"
-    # New Forms Checklist Style widgets
-    CHECKLISTGRID = "CHECKLISTGRID"
-    CHECKLISTFORM = "CHECKLISTFORM"
 
 
 WidgetCompatibleTypes = {
@@ -344,8 +338,6 @@ WidgetCompatibleTypes = {
     WidgetNames.DASHBOARDWIDGET: WidgetTypes.DASHBOARD,
     WidgetNames.SCOPEMEMBERS: WidgetTypes.SCOPEMEMBERS,
     WidgetNames.PROJECTINFO: WidgetTypes.PROJECTINFO,
-    WidgetNames.CHECKLISTGRID: WidgetTypes.CHECKLISTGRID,
-    WidgetNames.CHECKLISTFORM: WidgetTypes.CHECKLISTFORM,
 }
 
 default_metapanel_widget = dict(

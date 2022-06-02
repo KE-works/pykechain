@@ -3,7 +3,7 @@ Change Log
 
 v4.1.1 (UNRELEASED)
 -------------------
-* :star: We added the ChecklistForms and ChecklistGrid widget.
+* :star: We added the ProjectInfo widget.
 
 v4.1.0 (24MAY22)
 ----------------

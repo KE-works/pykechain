@@ -24,8 +24,6 @@ from pykechain.models.widgets.widget_schemas import undefined_meta_schema
 # DASHBOARD
 # SCOPEMEMBERS
 # PROJECTINFO
-# CHECKLISTGIRD
-
 
 #
 # The names of all the widgets do have a Pattern conforming to the following
@@ -130,11 +128,3 @@ class ScopemembersWidget(Widget):
 
 class ProjectinfoWidget(Widget):
     """Project Info Widget."""
-
-
-class ChecklistgridWidget(Widget):
-    """Checklist Grid Widget."""
-
-
-class ChecklistformWidget(Widget):
-    """Checklist Form Widget."""

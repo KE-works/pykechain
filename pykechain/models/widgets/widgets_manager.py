@@ -2214,22 +2214,6 @@ class WidgetsManager(Iterable):
         """
         raise NotImplementedError("The Project Info Widget is not yet implemented")
 
-    def add_checklistgrid_widget(self, *args, **kwargs):
-        """
-        Add a KE-chain Checklist Grid Widget to the WidgetManager and the activity.
-
-        The widget will be saved in KE-chain.
-        """
-        raise NotImplementedError("The Checklist Grid Widget is not yet implemented")
-
-    def add_checklistform_widget(self, *args, **kwargs):
-        """
-        Add a KE-chain Checklist Form Widget to the WidgetManager and the activity.
-
-        The widget will be saved in KE-chain.
-        """
-        raise NotImplementedError("The Checklist Form Widget is not yet implemented")
-
     #
     # Widget manager methods
     #
