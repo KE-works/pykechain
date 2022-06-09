@@ -300,12 +300,12 @@ def check_json(value: Union[dict, list], schema: dict, key: Optional[str] = None
     :param value: a dictionary or list that is to be validated against a jsonschema
     :param schema: the jsonschema in a jsonschema format
     :param key: the key to name inside the exception
-    :return: boolean True when passing, when not passing it raises a jsonschema.ValidationError
+    :return: The value when passing, when not passing it raises a jsonschema.ValidationError
     :raise jsonschema.ValidationError: When the json is not conforming the jsonschame
     :raises jsonschema.SchemaError: When the schema is incorrect.
     """
     jsonschema.validate(value, schema)
-    return True
+    return value
 
 def check_empty(value: Optional[Any]):
     """Validate whether the value provided is of class `Empty`."""

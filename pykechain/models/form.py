@@ -15,14 +15,15 @@ from pykechain.models.base import (
 from pykechain.models.context import Context
 from pykechain.models.input_checks import (
     check_base,
-    check_json, check_list_of_base,
+    check_json,
+    check_list_of_base,
     check_list_of_dicts,
-    check_text, check_type,
+    check_text,
 )
 from pykechain.models.tags import TagsMixin
 from pykechain.models.workflow import Status, Transition
 from pykechain.typing import ObjectID
-from pykechain.utils import Empty, UUID_REGEX_PATTERN, clean_empty_values, empty
+from pykechain.utils import UUID_REGEX_PATTERN, Empty, clean_empty_values, empty
 
 
 class StatusForm(Base):
@@ -512,13 +513,17 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         return response.json()["results"][0]["has_part"]
 
     def set_prefill_parts(self, prefill_parts: dict) -> None:
-        """Set the prefill parts on the Form.
+        """Set the prefill_parts on the Form.
 
-        Set the prefill parts on the form collection using a special
+        Prefill parts are insatnces of a part model that are stored on the
+        Form Model (only for models) and these instances of the parts are
+        instantiated by the backend when the Form is also instantiated.
+
+        Set the prefill_parts on the form collection model using a special
         structure. The structure is jsonschema validated by the backend before
         the `Form` is updated.
 
-        The prefill parts on the form should be in the following structure:
+        The prefill_parts on the form should be in the following structure:
         ```
         {
             <uuid of the part_model> : [
@@ -536,13 +541,19 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
             <uuid of another part_model>: [...]
         }
         ```
+        :param prefill_parts: dictionary of `<part_model_id>: [array of instances to create]`
+        :raises APIError: When the prefill_parts is tried to be set on Form Instances
+        :raises APIError: WHen the update of the prefill_parts on the Form does not succeed.
         """
         # this is integregal copy of the definition in the KE-chain backend.
         prefill_property_stub = {
             "type": "object",
             "additionalProperties": False,
             "required": ["property_id", "value"],
-            "properties": {"property_id": {"$ref": "#/definitions/uuidString"}, "value": {}},
+            "properties": {
+                "property_id": {"$ref": "#/definitions/uuidString"},
+                "value": {},
+            },
         }
         prefill_part_stub = {
             "type": "object",
@@ -584,14 +595,33 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
                 "booleanNull": {"type": ["boolean", "null"]},
             },
         }
+
+        # only works for Form Models.
+        if not self.is_model:
+            raise APIError(
+                "The update of the prefill parts is only applicable to Form Models."
+            )
+
         payload = dict(
-            prefill_parts = check_json(value=prefill_parts, schema=form_collection_prefill_parts_schema, key="prefill_parts")
+            prefill_parts=check_json(
+                value=prefill_parts,
+                schema=form_collection_prefill_parts_schema,
+                key="prefill_parts",
+            )
         )
-        raise NotImplementedError("not yet done")
 
+        url = self._client._build_url("form", form_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
 
-
-
+        response = self._client._request(
+            "PATCH", url=url, params=query_params, json=payload
+        )
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                "Could not update the prefill_parts dictionary on the form collection",
+                response=response,
+            )
+        self.refresh(json=response.json()["results"][0])
 
     def workflows_compatible_with_scope(self, scope: Scope):
         """Return workflows from target scope that are compatible with source workflow.

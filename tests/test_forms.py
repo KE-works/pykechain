@@ -1,6 +1,15 @@
+import uuid
+
+import jsonschema
 import pytest
 
-from pykechain.enums import FormCategory, StatusCategory, WorkflowCategory
+from pykechain.enums import (
+    FormCategory,
+    Multiplicity,
+    PropertyType,
+    StatusCategory,
+    WorkflowCategory,
+)
 from pykechain.exceptions import (
     APIError,
     ForbiddenError,
@@ -137,7 +146,7 @@ class TestForms(TestBetamax):
             self.assertTrue(form_instance.model_id, self.form_model.id)
 
         with self.subTest("testing instance"):
-            form_instance = self.form_model.instance()
+            form_instance = self.form_model.instances()[0]
             self.assertTrue(form_instance.category, FormCategory.INSTANCE)
             self.assertTrue(form_instance.model_id, self.form_model.id)
 
@@ -178,9 +187,7 @@ class TestForms(TestBetamax):
         )
         self.assertTrue(self.cloned_form_model)
         self.assertIsInstance(self.cloned_form_model, Form)
-        self.assertEqual(
-            self.form_model.scope_id, self.cloned_form_model.scope_id
-        )
+        self.assertEqual(self.form_model.scope_id, self.cloned_form_model.scope_id)
         self.assertIn(
             self.asset_context.id,
             [
@@ -203,9 +210,7 @@ class TestForms(TestBetamax):
         )
         self.assertTrue(self.cloned_form_model)
         self.assertIsInstance(self.cloned_form_model, Form)
-        self.assertEqual(
-            self.form_model.scope_id, self.cloned_form_model.scope_id
-        )
+        self.assertEqual(self.form_model.scope_id, self.cloned_form_model.scope_id)
         self.assertIn(
             self.asset_context.id,
             [
@@ -229,9 +234,7 @@ class TestForms(TestBetamax):
         )
         self.assertTrue(self.cloned_form_model)
         self.assertIsInstance(self.cloned_form_model, Form)
-        self.assertEqual(
-            self.cross_scope_project.id, self.cloned_form_model.scope_id
-        )
+        self.assertEqual(self.cross_scope_project.id, self.cloned_form_model.scope_id)
         self.assertIn(
             self.asset_context.name,
             [
@@ -279,8 +282,8 @@ class TestForms(TestBetamax):
 
     def test_form_model_edit_with_instances(self):
         new_name = "__TEST_EDITED_FORM_MODEL"
-        with self.assertRaises(ForbiddenError):
-            self.form_model.edit(name=new_name)
+        self.form_model.edit(name=new_name)
+        self.assertEqual(self.form_model.name, new_name)
 
     def test_form_instance_edit(self):
         new_name = "__TEST_INSTANCE_EDITED"
@@ -609,3 +612,79 @@ class TestFormsMethods(TestBetamax):
         for transition in possible_transitions:
             self.assertIn(transition.id, [t.id for t in self.workflow.transitions])
         self.assertEqual(len(possible_transitions), 5)
+
+
+class TestFormsPreFillPartMethods(TestBetamax):
+    """
+    Test linking and unlinking contexts to forms.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.workflow = self.client.workflow(
+            name="Simple Form Flow", category=WorkflowCategory.CATALOG
+        )
+        self.form_model_name = "__TEST__FORM_MODEL"
+        self.form_model = self.client.create_form_model(
+            name=self.form_model_name,
+            scope=self.project,
+            workflow=self.workflow,
+            category=FormCategory.MODEL,
+            contexts=[],
+        )
+        self.form_model_root = self.form_model.form_model_root
+        self.a_part_model = self.client.create_model(
+            parent=self.form_model_root,
+            name="A Part Model",
+            multiplicity=Multiplicity.ZERO_MANY,
+        )
+        self.p1 = self.client.create_property(
+            model=self.a_part_model, name="p1", property_type=PropertyType.CHAR_VALUE
+        )
+
+    def tearDown(self):
+        super().tearDown()
+        if self.form_model:
+            try:
+                self.form_model.delete()
+            except (ForbiddenError, APIError):
+                pass
+
+    def test_form_prefill_parts_can_be_set(self):
+        prefill_parts = {
+            self.a_part_model.id: [
+                dict(
+                    name="1st instance",
+                    part_properties=[dict(property_id=self.p1.id, value=1)],
+                ),
+                dict(
+                    name="2nd instance",
+                    part_properties=[dict(property_id=self.p1.id, value=2)]
+                )
+            ]
+        }
+
+        self.assertDictEqual(self.form_model._prefill_parts, {})
+        self.form_model.set_prefill_parts(prefill_parts=prefill_parts)
+        self.assertDictEqual(prefill_parts, self.form_model._prefill_parts)
+
+    def test_form_prefill_parts_with_wrong_payload(self):
+        prefill_parts = {"foo": "bar"}
+        self.assertDictEqual(self.form_model._prefill_parts, {})
+        with self.assertRaisesRegex(jsonschema.ValidationError, "'foo' does not match"):
+            self.form_model.set_prefill_parts(prefill_parts=prefill_parts)
+
+        prefill_parts = {str(uuid.uuid4()): ["bar"]}
+        self.assertDictEqual(self.form_model._prefill_parts, {})
+        with self.assertRaisesRegex(jsonschema.ValidationError, "'bar' is not of type 'object'"):
+            self.form_model.set_prefill_parts(prefill_parts=prefill_parts)
+
+        prefill_parts = {str(uuid.uuid4()): [{"name": "bar"}]}
+        self.assertDictEqual(self.form_model._prefill_parts, {})
+        with self.assertRaisesRegex(jsonschema.ValidationError, "'part_properties' is a required property"):
+            self.form_model.set_prefill_parts(prefill_parts=prefill_parts)
+
+        prefill_parts = {str(uuid.uuid4()): [{"name": "bar", "part_properties": {}}]}
+        self.assertDictEqual(self.form_model._prefill_parts, {})
+        with self.assertRaisesRegex(jsonschema.ValidationError, "{} is not of type 'array'"):
+            self.form_model.set_prefill_parts(prefill_parts=prefill_parts)
