@@ -586,6 +586,7 @@ API_EXTRA_PARAMS = {
                 "form_model_root",
                 "form_instance_root",
                 "model",
+                "prefill_parts",
                 "workflow",
                 "status_forms",
                 "active_status",
