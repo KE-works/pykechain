@@ -4,6 +4,7 @@ Change Log
 v4.1.1 (UNRELEASED)
 -------------------
 * :star: We added the ProjectInfo widget.
+* :star: We added the concept of prefilled_parts that are stored on the Form. These prefilled parts are instance that are created on form instantiation. This in combination with grid like forms in any Form.
 
 v4.1.0 (24MAY22)
 ----------------
