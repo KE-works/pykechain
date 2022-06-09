@@ -6,7 +6,6 @@ from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 import jsonschema
-from traitlets import Bool
 
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.utils import Empty, empty, is_url, is_uuid, parse_datetime
@@ -306,6 +305,7 @@ def check_json(value: Union[dict, list], schema: dict, key: Optional[str] = None
     """
     jsonschema.validate(value, schema)
     return value
+
 
 def check_empty(value: Optional[Any]):
     """Validate whether the value provided is of class `Empty`."""
