@@ -2216,7 +2216,7 @@ class WidgetsManager(Iterable):
 
         The widget will be saved in KE-chain.
 
-        param title: A custom title for the card widget
+        :param title: A custom title for the card widget.
             * False (default): Card name
             * String value: Custom title
             * None: No title
