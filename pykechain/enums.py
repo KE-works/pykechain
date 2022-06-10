@@ -111,6 +111,9 @@ class PropertyType(Enum):
     :cvar JSON_VALUE: Generic JSON storage Property
     :cvar GEOJSON_VALUE: GEOJSON property to store map data
     :cvar WEATHER_VALUE: Weather JSON property compatible with the response of weatherapi.com
+    :cvar DATE_VALUE: Date value
+    :cvar TIME_VALUE: Time value
+    :cvar DURATION_VALUE: Duration value
 
     .. versionadded:: 3.19
     :cvar STATUS_REFERENCES_VALUE: Status References Property
@@ -127,6 +130,7 @@ class PropertyType(Enum):
     DATETIME_VALUE = "DATETIME_VALUE"
     DATE_VALUE = "DATE_VALUE"
     TIME_VALUE = "TIME_VALUE"
+    DURATION_VALUE = "DURATION_VALUE"
     ATTACHMENT_VALUE = "ATTACHMENT_VALUE"
     LINK_VALUE = "LINK_VALUE"
     SINGLE_SELECT_VALUE = "SINGLE_SELECT_VALUE"

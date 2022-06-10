@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Dict, List, Optional, Union  # noqa: F401
 
@@ -7,7 +9,6 @@ from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import (
     KEChainPages,
     Multiplicity,
-    PropertyType,
     ScopeCategory,
     ScopeMemberActions,
     ScopeRoles,
@@ -35,6 +36,7 @@ from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
+from pykechain.models.validators.validator_schemas import scope_project_info_jsonschema
 from pykechain.models.workflow import Workflow
 from pykechain.typing import ObjectID
 from pykechain.utils import (
@@ -67,6 +69,10 @@ class Scope(Base, TagsMixin):
     :ivar type: Type of the Scope. One of :class:`pykechain.enums.ScopeType` for WIM version 2
     :type type: basestring
     """
+
+    url_detail_name = "scope"
+    url_list_name = "scopes"
+    url_pk_name = "scope_id"
 
     def __init__(self, json: Dict, **kwargs) -> None:
         """Construct a scope from provided json data."""
@@ -244,14 +250,53 @@ class Scope(Base, TagsMixin):
 
         self.refresh(json=response.json().get("results")[0])
 
-    def set_project_info(self, value: dict) -> None:
+    def set_project_info(self, project_info: list) -> None:
         """
         Set the project info attribute on the Scope.
 
-        :param value:
-        :return:
+        The `Scope` attribute `project_info` hold scope 'meta' information for end-user to
+        add some user-defined fields and values. This project_info can be displayed in a
+        `WidgetType.PROJECTINFO` widget that can be included on every `Activity` or `StatusForm`.
+
+        The structure of the `project_info` is the following:
+        ```
+        project_info = [
+            {
+                "id": 0,
+                "name":"fieldname",
+                "value":"field value",
+                "property_type":PropertyType.CHARVALUE,
+                "unit":"kg",  # optional
+                "description": "a short description"  # optional
+            },
+            {...}
+        ]
+        ```
+        The allowed propertypes are: CHAR, TEXT, INT, FLOAT, LINK, DATETIME, DATE, TIME, DURATION
+
+        :param value: value array with project info key, value
+        :return: the updated forms
         """
-        raise NotImplementedError("Not implemented yet!")
+        payload = dict(
+            project_info=check_json(
+                value=project_info,
+                schema=scope_project_info_jsonschema,
+                key="prefill_parts",
+            )
+        )
+
+        url = self._client._build_url("form", form_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+
+        response = self._client._request(
+            "PATCH", url=url, params=query_params, json=payload
+        )
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                "Could not update the prefill_parts dictionary on the form collection",
+                response=response,
+            )
+        self.refresh(json=response.json()["results"][0])
 
     def edit(
         self,
@@ -331,46 +376,6 @@ class Scope(Base, TagsMixin):
         >>> project.edit(due_date=None)
 
         """
-        project_info_property_types = [
-            PropertyType.CHAR_VALUE,
-            PropertyType.TEXT_VALUE,
-            PropertyType.INT_VALUE,
-            PropertyType.FLOAT_VALUE,
-            PropertyType.LINK_VALUE,
-            PropertyType.DATETIME_VALUE,
-            PropertyType.DATE_VALUE,
-            PropertyType.TIME_VALUE,
-        ]
-        scope_project_info_jsonschema = {
-            "$schema": "http://json-schema.org/draft-07/schema#",
-            "title": "Toplevel Scope Project info JSON schema",
-            "description": "The project information properties that are part of the scope",
-            "type": "array",
-            "items": {
-                "type": "object",
-                "additionalProperties": False,
-                "required": ["id", "name", "property_type", "value"],
-                "properties": {
-                    "id": {"type": "integer", "minimum": 0},
-                    "name": {
-                        "type": ["string", "null"],
-                    },
-                    "property_type": {
-                        "type": "string",
-                        "enum": project_info_property_types,
-                        "default": PropertyType.CHAR_VALUE,
-                    },
-                    "value": {},
-                    "unit": {
-                        "type": ["string", "null"],
-                    },
-                    "description": {
-                        "type": ["string", "null"],
-                    },
-                },
-            },
-        }
-
         update_dict = {
             "id": self.id,
             "name": check_text(name, "name") or self.name,
