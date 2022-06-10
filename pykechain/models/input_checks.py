@@ -303,7 +303,8 @@ def check_json(value: Union[dict, list], schema: dict, key: Optional[str] = None
     :raise jsonschema.ValidationError: When the json is not conforming the jsonschame
     :raises jsonschema.SchemaError: When the schema is incorrect.
     """
-    jsonschema.validate(value, schema)
+    if value is not None:
+        jsonschema.validate(value, schema)
     return value
 
 

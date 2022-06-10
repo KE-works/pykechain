@@ -7,6 +7,7 @@ from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import (
     KEChainPages,
     Multiplicity,
+    PropertyType,
     ScopeCategory,
     ScopeMemberActions,
     ScopeRoles,
@@ -21,6 +22,7 @@ from pykechain.models.input_checks import (
     check_base,
     check_datetime,
     check_enum,
+    check_json,
     check_list_of_text,
     check_text,
     check_type,
@@ -35,7 +37,14 @@ from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
 from pykechain.models.workflow import Workflow
 from pykechain.typing import ObjectID
-from pykechain.utils import Empty, clean_empty_values, empty, find, is_uuid, parse_datetime
+from pykechain.utils import (
+    Empty,
+    clean_empty_values,
+    empty,
+    find,
+    is_uuid,
+    parse_datetime,
+)
 
 
 class Scope(Base, TagsMixin):
@@ -313,6 +322,46 @@ class Scope(Base, TagsMixin):
         >>> project.edit(due_date=None)
 
         """
+        project_info_property_types = [
+            PropertyType.CHAR_VALUE,
+            PropertyType.TEXT_VALUE,
+            PropertyType.INT_VALUE,
+            PropertyType.FLOAT_VALUE,
+            PropertyType.LINK_VALUE,
+            PropertyType.DATETIME_VALUE,
+            PropertyType.DATE_VALUE,
+            PropertyType.TIME_VALUE,
+        ]
+        scope_project_info_jsonschema = {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "title": "Toplevel Scope Project info JSON schema",
+            "description": "The project information properties that are part of the scope",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["id", "name", "property_type", "value"],
+                "properties": {
+                    "id": {"type": "integer", "minimum": 0},
+                    "name": {
+                        "type": ["string", "null"],
+                    },
+                    "property_type": {
+                        "type": "string",
+                        "enum": project_info_property_types,
+                        "default": PropertyType.CHAR_VALUE,
+                    },
+                    "value": {},
+                    "unit": {
+                        "type": ["string", "null"],
+                    },
+                    "description": {
+                        "type": ["string", "null"],
+                    },
+                },
+            },
+        }
+
         update_dict = {
             "id": self.id,
             "name": check_text(name, "name") or self.name,
@@ -324,6 +373,11 @@ class Scope(Base, TagsMixin):
             "tags": check_list_of_text(tags, "tags", True) or list(),
             "team_id": check_base(team, Team, "team") or "",
             "scope_options": check_type(options, dict, "options") or dict(),
+            "project_info": check_json(
+                kwargs.get("project_info"),
+                scope_project_info_jsonschema,
+                "project_info",
+            ),
         }
 
         if kwargs:  # pragma: no cover
