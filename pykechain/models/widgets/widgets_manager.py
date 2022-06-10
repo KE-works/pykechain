@@ -2211,7 +2211,7 @@ class WidgetsManager(Iterable):
         title: TITLE_TYPING = False,
         parent_widget: Optional[Union[Widget, str]] = None,
         **kwargs,
-    ):
+    ) -> Widget:
         """
         Add a KE-chain Project Info Widget to the WidgetManager and the activity.
 
