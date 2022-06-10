@@ -2241,6 +2241,14 @@ class WidgetsManager(Iterable):
 
         return widget
 
+    def add_projectinfo_widget(self, *args, **kwargs):
+        """
+        Add a KE-chain Project Info Widget to the WidgetManager and the activity.
+
+        The widget will be saved in KE-chain.
+        """
+        raise NotImplementedError("The Project Info Widget is not yet implemented")
+
     #
     # Widget manager methods
     #

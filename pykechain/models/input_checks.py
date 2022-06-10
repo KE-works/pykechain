@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 import warnings
 from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Union
+
+import jsonschema
 
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.utils import Empty, empty, is_url, is_uuid, parse_datetime
@@ -286,6 +290,21 @@ def check_list_of_base(
                 )
             )
     return ids
+
+
+def check_json(value: Union[dict, list], schema: dict, key: Optional[str] = None) -> bool:
+    """
+    Validate value against a jsonschema.
+
+    :param value: a dictionary or list that is to be validated against a jsonschema
+    :param schema: the jsonschema in a jsonschema format
+    :param key: the key to name inside the exception
+    :return: The value when passing, when not passing it raises a jsonschema.ValidationError
+    :raise jsonschema.ValidationError: When the json is not conforming the jsonschame
+    :raises jsonschema.SchemaError: When the schema is incorrect.
+    """
+    jsonschema.validate(value, schema)
+    return value
 
 
 def check_empty(value: Optional[Any]):

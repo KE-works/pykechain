@@ -15,6 +15,7 @@ from pykechain.models.base import (
 from pykechain.models.context import Context
 from pykechain.models.input_checks import (
     check_base,
+    check_json,
     check_list_of_base,
     check_list_of_dicts,
     check_text,
@@ -22,7 +23,7 @@ from pykechain.models.input_checks import (
 from pykechain.models.tags import TagsMixin
 from pykechain.models.workflow import Status, Transition
 from pykechain.typing import ObjectID
-from pykechain.utils import Empty, clean_empty_values, empty
+from pykechain.utils import UUID_REGEX_PATTERN, Empty, clean_empty_values, empty
 
 
 class StatusForm(Base):
@@ -60,7 +61,8 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
     :ivar form_model_root: the form model root Part
     :ivar form_instance_root: the form instance root Part
     :ivar model_id: the pk of the model of this form instance
-    :ivar status_form: The StatusForms of this form
+    :ivar status_forms: The StatusForms of this form
+    :ivar prefill_parts: The parts to prefill when a Form Model is isntantiated.
     :ivar created_at: datetime in UTC timezone when the form was created
     :ivar updated_at: datetime in UTC timezone when the form was last updated
     :ivar derived_from_id: (optional) id where the objects is derived from.
@@ -80,6 +82,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         self.form_model_root: "Part" = json.get("form_model_root")
         self.form_instance_root: "Part" = json.get("form_instance_root")
         self.model_id: "Form" = json.get("model")
+        self._prefill_parts: dict = json.get("prefill_parts")
         self.derived_from_id: Optional[ObjectID] = json.get("derived_from_id")
         self.active: bool = json.get("active")
         self.category: FormCategory = json.get("category")
@@ -508,6 +511,117 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
                 response=response,
             )
         return response.json()["results"][0]["has_part"]
+
+    def set_prefill_parts(self, prefill_parts: dict) -> None:
+        """Set the prefill_parts on the Form.
+
+        Prefill parts are insatnces of a part model that are stored on the
+        Form Model (only for models) and these instances of the parts are
+        instantiated by the backend when the Form is also instantiated.
+
+        Set the prefill_parts on the form collection model using a special
+        structure. The structure is jsonschema validated by the backend before
+        the `Form` is updated.
+
+        The prefill_parts on the form should be in the following structure:
+        ```
+        {
+            <uuid of the part_model> : [
+                {
+                    # an individual instance with 'partname'='name'
+                    name: null_string,
+                    part_properties: [
+                        {
+                            property_id: <uuid>,
+                            value: <null_string>
+                        },{...}
+                    ]
+                }, {...}
+            ],
+            <uuid of another part_model>: [...]
+        }
+        ```
+        :param prefill_parts: dictionary of `<part_model_id>: [array of instances to create]`
+        :raises APIError: When the prefill_parts is tried to be set on Form Instances
+        :raises APIError: WHen the update of the prefill_parts on the Form does not succeed.
+        """
+        # this is integregal copy of the definition in the KE-chain backend.
+        prefill_property_stub = {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["property_id", "value"],
+            "properties": {
+                "property_id": {"$ref": "#/definitions/uuidString"},
+                "value": {},
+            },
+        }
+        prefill_part_stub = {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["name", "part_properties"],
+            "properties": {
+                "name": {"type": "string"},
+                "part_properties": {"type": "array", "items": prefill_property_stub},
+            },
+        }
+        form_collection_prefill_parts_schema = {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "title": "FormCollection Prefill Parts schema",
+            "version": "1.0.0",
+            "type": "object",
+            "additionalProperties": True,
+            # propertyNames is a schema that all of an object's properties must be valid against
+            # ref: https://json-schema.org/understanding-json-schema/reference/object.html#property-names
+            "propertyNames": {"pattern": UUID_REGEX_PATTERN},
+            # patternProperties is a schema that all of an objects property (named) must be valid against
+            # ref: https://json-schema.org/understanding-json-schema/reference/object.html#pattern-properties
+            "patternProperties": {
+                UUID_REGEX_PATTERN: {
+                    "type": "array",
+                    "items": prefill_part_stub,
+                }
+            },
+            "definitions": {
+                "uuidString": {
+                    "type": "string",
+                    "pattern": UUID_REGEX_PATTERN,
+                },
+                "nullUuidString": {
+                    "type": ["string", "null"],
+                    "pattern": UUID_REGEX_PATTERN,
+                },
+                "nullString": {"type": ["string", "null"]},
+                "positiveInteger": {"type": ["integer", "null"], "minimum": 0},
+                "booleanNull": {"type": ["boolean", "null"]},
+            },
+        }
+
+        # only works for Form Models.
+        if not self.is_model:
+            raise APIError(
+                "The update of the prefill parts is only applicable to Form Models."
+            )
+
+        payload = dict(
+            prefill_parts=check_json(
+                value=prefill_parts,
+                schema=form_collection_prefill_parts_schema,
+                key="prefill_parts",
+            )
+        )
+
+        url = self._client._build_url("form", form_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+
+        response = self._client._request(
+            "PATCH", url=url, params=query_params, json=payload
+        )
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                "Could not update the prefill_parts dictionary on the form collection",
+                response=response,
+            )
+        self.refresh(json=response.json()["results"][0])
 
     def workflows_compatible_with_scope(self, scope: Scope):
         """Return workflows from target scope that are compatible with source workflow.
