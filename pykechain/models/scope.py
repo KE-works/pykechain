@@ -244,6 +244,15 @@ class Scope(Base, TagsMixin):
 
         self.refresh(json=response.json().get("results")[0])
 
+    def set_project_info(self, value: dict) -> None:
+        """
+        Set the project info attribute on the Scope.
+
+        :param value:
+        :return:
+        """
+        raise NotImplementedError("Not implemented yet!")
+
     def edit(
         self,
         name: Optional[Union[str, Empty]] = empty,
