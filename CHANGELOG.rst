@@ -3,7 +3,7 @@ Change Log
 
 v4.1.1 (UNRELEASED)
 -------------------
-* :star: We added the ProjectInfo widget.
+* :star: ProjectInfo widget has been added
 
 v4.1.0 (24MAY22)
 ----------------

@@ -2206,13 +2206,36 @@ class WidgetsManager(Iterable):
 
         return widget
 
-    def add_projectinfo_widget(self, *args, **kwargs):
+    def add_project_info_widget(
+            self,
+            title: TITLE_TYPING = False,
+            parent_widget: Optional[Union[Widget, str]] = None,
+            **kwargs):
         """
         Add a KE-chain Project Info Widget to the WidgetManager and the activity.
 
         The widget will be saved in KE-chain.
+
+        param title: A custom title for the card widget
+            * False (default): Card name
+            * String value: Custom title
+            * None: No title
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or basestring or None
+
         """
-        raise NotImplementedError("The Project Info Widget is not yet implemented")
+        meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
+        meta, title = _set_title(meta, title=title, **kwargs)
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.PROJECTINFO,
+            meta=meta,
+            title=title,
+            parent=parent_widget,
+            **kwargs,
+        )
+
+        return widget
 
     #
     # Widget manager methods
