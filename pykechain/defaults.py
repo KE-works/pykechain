@@ -262,6 +262,7 @@ API_EXTRA_PARAMS = {
                 "product_instance_id",
                 "catalog_model_id",
                 "catalog_instance_id",
+                "project_info",
             ]
         )
     },
@@ -291,6 +292,7 @@ API_EXTRA_PARAMS = {
                 "product_instance_id",
                 "catalog_model_id",
                 "catalog_instance_id",
+                "project_info",
             ]
         )
     },

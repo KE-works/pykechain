@@ -97,6 +97,7 @@ class Scope(Base, TagsMixin):
         self.category = json.get("category")
 
         self._tags = json.get("tags")
+        self._project_info = json.get("project_info")
 
         self.start_date = parse_datetime(json.get("start_date"))
         self.due_date = parse_datetime(json.get("due_date"))
@@ -281,12 +282,12 @@ class Scope(Base, TagsMixin):
             project_info=check_json(
                 value=project_info,
                 schema=scope_project_info_jsonschema,
-                key="prefill_parts",
+                key="project_info",
             )
         )
 
-        url = self._client._build_url("form", form_id=self.id)
-        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        url = self._client._build_url(self.url_detail_name, scope_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_detail_name)
 
         response = self._client._request(
             "PATCH", url=url, params=query_params, json=payload
