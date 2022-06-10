@@ -1,9 +1,9 @@
 # basis
-requests==2.27.1
+requests==2.28.0
 envparse==0.2.0
 
 # json validation (inspector)
-jsonschema==4.5.1
+jsonschema==4.6.0
 
 # for version comparison
 semver==2.13.0
