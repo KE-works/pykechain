@@ -1,10 +1,11 @@
 Change Log
 ==========
 
-v4.1.1 (UNRELEASED)
--------------------
+v4.2.0 (10JUN22)
+----------------
 * :star: We added the ProjectInfo widget.
 * :star: We added the concept of prefilled_parts that are stored on the Form. These prefilled parts are instance that are created on form instantiation. This in combination with grid like forms in any Form.
+* :+1: dependent versions for development: mypy (0.961), requests (2.28.0), jsonschema (4.6.0), sphinx (5.0.1), nbsphinx (0.8.9), coverage (6.4.1)
 
 v4.1.0 (24MAY22)
 ----------------
