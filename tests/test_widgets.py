@@ -950,6 +950,12 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertIsInstance(scope_members_widget, ScopemembersWidget)
 
+    def test_add_project_info_widget(self):
+        title = "__TEST_PROJECT_TEAM"
+        project_info_widget = self.wm.add_project_info_widget(title=title, collapsible=True, collapsed=True)
+
+        self.assertEqual(project_info_widget.title, title)
+
 
 class TestWidgetManagerWeatherWidget(TestBetamax):
     def setUp(self):
