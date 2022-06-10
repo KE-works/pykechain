@@ -257,6 +257,7 @@ class WidgetNames(Enum):
     SERVICECARDWIDGET = "serviceCardWidget"
     DASHBOARDWIDGET = "dashboardWidget"
     SCOPEMEMBERS = "scopeMembersWidget"
+    PROJECTINFO = "projectInfoWidget"
 
 
 class WidgetTypes(Enum):
@@ -313,6 +314,7 @@ class WidgetTypes(Enum):
     SERVICECARD = "SERVICECARD"
     DASHBOARD = "DASHBOARD"
     SCOPEMEMBERS = "SCOPEMEMBERS"
+    PROJECTINFO = "PROJECTINFO"
 
 
 WidgetCompatibleTypes = {
@@ -335,6 +337,7 @@ WidgetCompatibleTypes = {
     WidgetNames.SERVICECARDWIDGET: WidgetTypes.SERVICECARD,
     WidgetNames.DASHBOARDWIDGET: WidgetTypes.DASHBOARD,
     WidgetNames.SCOPEMEMBERS: WidgetTypes.SCOPEMEMBERS,
+    WidgetNames.PROJECTINFO: WidgetTypes.PROJECTINFO,
 }
 
 default_metapanel_widget = dict(

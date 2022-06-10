@@ -1,62 +1,55 @@
 import warnings
-from typing import (
-    Iterable,
-    Union,
-    Optional,
-    Dict,
-    List,
-    Any,
-)
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 from pykechain.enums import (
-    SortTable,
-    WidgetTypes,
-    ShowColumnTypes,
-    ScopeWidgetColumnTypes,
-    ProgressBarColors,
-    CardWidgetLinkValue,
-    LinkTargets,
-    ImageFitValue,
-    KEChainPages,
-    Alignment,
+    ActivityClassification,
     ActivityStatus,
     ActivityType,
-    ActivityClassification,
+    Alignment,
+    CardWidgetLinkValue,
+    ImageFitValue,
+    KEChainPages,
+    LinkTargets,
+    ProgressBarColors,
+    ScopeWidgetColumnTypes,
+    ShowColumnTypes,
+    SortTable,
+    WidgetTypes,
 )
-from pykechain.exceptions import NotFoundError, IllegalArgumentError
+from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models.input_checks import (
-    check_enum,
-    check_text,
     check_base,
-    check_type,
+    check_enum,
     check_list_of_text,
+    check_text,
+    check_type,
 )
 from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets import Widget
 from pykechain.models.widgets.enums import (
-    DashboardWidgetSourceScopes,
-    DashboardWidgetShowTasks,
-    DashboardWidgetShowScopes,
-    MetaWidget,
     AssociatedObjectId,
+    DashboardWidgetShowForms,
+    DashboardWidgetShowScopes,
+    DashboardWidgetShowTasks,
+    DashboardWidgetSourceScopes,
+    MetaWidget,
     TasksAssignmentFilterTypes,
     TasksWidgetColumns,
-    DashboardWidgetShowForms,
 )
 from pykechain.models.widgets.helpers import (
-    _set_title,
+    TITLE_TYPING,
+    _check_excluded_propmodels,
+    _check_prefilters,
     _initiate_meta,
     _retrieve_object,
     _retrieve_object_id,
-    _check_prefilters,
-    _check_excluded_propmodels,
-    _set_description,
-    _set_link,
-    _set_image,
     _set_button_text,
-    TITLE_TYPING,
+    _set_description,
+    _set_image,
+    _set_link,
+    _set_title,
 )
-from pykechain.utils import is_uuid, find, snakecase, is_url
+from pykechain.utils import find, is_url, is_uuid, snakecase
 
 
 class WidgetsManager(Iterable):
@@ -2205,6 +2198,41 @@ class WidgetsManager(Iterable):
 
         widget = self.create_widget(
             widget_type=WidgetTypes.SCOPEMEMBERS,
+            meta=meta,
+            title=title,
+            parent=parent_widget,
+            **kwargs,
+        )
+
+        return widget
+
+    def add_project_info_widget(
+        self,
+        title: TITLE_TYPING = False,
+        parent_widget: Optional[Union[Widget, str]] = None,
+        **kwargs,
+    ) -> Widget:
+        """
+        Add a KE-chain Project Info Widget to the WidgetManager and the activity.
+
+        The widget will be saved in KE-chain.
+
+        :param title: A custom title for the card widget.
+            * False (default): Card name
+            * String value: Custom title
+            * None: No title
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or basestring or None
+
+        :return: Project info Widget
+        :rtype Widget
+
+        """
+        meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
+        meta, title = _set_title(meta, title=title, **kwargs)
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.PROJECTINFO,
             meta=meta,
             title=title,
             parent=parent_widget,

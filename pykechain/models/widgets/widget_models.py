@@ -2,28 +2,35 @@ from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widget_schemas import undefined_meta_schema
 
 
-# UNDEFINED = 'UNDEFINED'
-# PROPERTYGRID = 'PROPERTYGRID'
-# SUPERGRID = 'SUPERGRID'
-# HTML = 'HTML'
-# FILTEREDGRID = 'FILTEREDGRID'
-# SERVICE = 'SERVICE'
-# NOTEBOOK = 'NOTEBOOK'
-# ATTACHMENTVIEWER = 'ATTACHMENTVIEWER'
-# TASKNAVIGATIONBAR = 'TASKNAVIGATIONBAR'
-# JSON = 'JSON'
-# METAPANEL = 'METAPANEL'
-# FORMMETAPANEL = 'FORMMETAPANEL'
-# MULTICOLUMN = 'MULTICOLUMN'
-# SCOPE_WIDGET = 'SCOPE_WIDGET'
-# THIRD_PARTY = 'THIRD_PARTY'
-# PROGRESS = 'PROGRESS'
-# SIGNATURE = 'SIGNATURE'
-# CARD = 'CARD'
-# WEATHER = 'WEATHER'
-# DASHBOARD = 'DASHBOARD'
-# SCOPEMEMBERS = 'SCOPEMEMBERS'
+# UNDEFINED
+# PROPERTYGRID
+# SUPERGRID
+# HTML
+# FILTEREDGRID
+# SERVICE
+# NOTEBOOK
+# ATTACHMENTVIEWER
+# TASKNAVIGATIONBAR
+# JSON
+# METAPANEL
+# FORMMETAPANEL
+# MULTICOLUMN
+# SCOPE_WIDGET
+# THIRD_PARTY
+# PROGRESS
+# SIGNATURE
+# CARD =
+# WEATHER
+# DASHBOARD
+# SCOPEMEMBERS
+# PROJECTINFO
 
+#
+# The names of all the widgets do have a Pattern conforming to the following
+#
+# rule: "<widget_type_in_undercast_with_first_letter_capitalized>Widget"
+# In regex terms: r"[A-Z][a-z]+Widget"
+#
 
 class MetapanelWidget(Widget):
     """Metapanel Widget."""
@@ -117,3 +124,7 @@ class DashboardWidget(Widget):
 
 class ScopemembersWidget(Widget):
     """ScopeMembers Widget."""
+
+
+class ProjectinfoWidget(Widget):
+    """Project Info Widget."""

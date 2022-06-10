@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v4.1.1 (UNRELEASED)
+-------------------
+* :star: ProjectInfo widget has been added
+
 v4.1.0 (24MAY22)
 ----------------
 * :star: Added the method to create workflow in a certain project. `Client.create_workflow(scope=...)` or `Scope.create_workflow()`.
