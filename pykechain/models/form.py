@@ -21,7 +21,9 @@ from pykechain.models.input_checks import (
     check_text,
 )
 from pykechain.models.tags import TagsMixin
-from pykechain.models.validators.validator_schemas import form_collection_prefill_parts_schema
+from pykechain.models.validators.validator_schemas import (
+    form_collection_prefill_parts_schema,
+)
 from pykechain.models.workflow import Status, Transition
 from pykechain.typing import ObjectID
 from pykechain.utils import Empty, clean_empty_values, empty
@@ -255,9 +257,9 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         data_dict = {
             "name": check_text(name, "name") or self.name,
             "description": check_text(kwargs.get("description"), "description")
-                           or self.description,
+            or self.description,
             "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts")
-                        or [],
+            or [],
         }
 
         url = self._client._build_url("form_instantiate", form_id=self.id)
@@ -289,7 +291,7 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         data_dict = {
             "name": check_text(name, "name") or f"{self.name}",
             "contexts": check_list_of_base(kwargs.get("contexts"), Context, "contexts")
-                        or [],
+            or [],
         }
         if "description" in kwargs:
             data_dict.update(
