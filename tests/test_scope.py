@@ -445,3 +445,6 @@ class TestScopeEdit(TestBetamax):
 
         self.assertIsInstance(landing_page, str)
         self.assertTrue(is_url(self.client.api_root + landing_page))
+
+    def test_get_project_info(self):
+        project_info = self.scope.get_

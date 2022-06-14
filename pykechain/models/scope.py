@@ -251,6 +251,9 @@ class Scope(Base, TagsMixin):
 
         self.refresh(json=response.json().get("results")[0])
 
+    def get_project_info(self):
+        pass
+
     def set_project_info(self, project_info: list) -> None:
         """
         Set the project info attribute on the Scope.
