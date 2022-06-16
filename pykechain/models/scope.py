@@ -252,7 +252,7 @@ class Scope(Base, TagsMixin):
         self.refresh(json=response.json().get("results")[0])
 
     def get_project_info(self):
-        pass
+        return self.options.get("_project_info")
 
     def set_project_info(self, project_info: list) -> None:
         """
@@ -264,7 +264,7 @@ class Scope(Base, TagsMixin):
 
         The structure of the `project_info` is the following:
         ```
-        project_info = [
+        :param project_info = [
             {
                 "id": 0,
                 "name":"fieldname",

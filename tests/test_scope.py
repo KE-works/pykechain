@@ -1,7 +1,7 @@
 import datetime
 
 from pykechain.enums import (
-    ScopeStatus,
+    PropertyType, ScopeStatus,
     KEChainPages,
     ScopeMemberActions,
     ScopeRoles,
@@ -447,4 +447,25 @@ class TestScopeEdit(TestBetamax):
         self.assertTrue(is_url(self.client.api_root + landing_page))
 
     def test_get_project_info(self):
-        project_info = self.scope.get_
+        retrieved_project_info = self.scope.get_project_info()
+
+        self.assertIsNone(retrieved_project_info)
+
+        project_info = [{
+                "id": 0,
+                "name": "Project name",
+                "value": "Bike project wannabe",
+                "property_type": PropertyType.CHAR_VALUE,
+            },
+            {
+                "id": 1,
+                "name": "Project number",
+                "value": 12,
+                "property_type": PropertyType.INT_VALUE,
+            },
+        ]
+
+        self.scope.set_project_info(project_info=project_info)
+
+        retrieved_project_info = self.scope.get_project_info()
+        self.assertIsNotNone(retrieved_project_info)
