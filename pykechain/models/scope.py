@@ -312,6 +312,7 @@ class Scope(Base, TagsMixin):
         category: Optional[Union[str, ScopeCategory, Empty]] = empty,
         tags: Optional[Union[List[str], Empty]] = empty,
         team: Optional[Union[Team, str, Empty]] = empty,
+        project_info: Optional[Union[List[Dict], Empty]] = empty,
         options: Optional[Union[Dict, Empty]] = empty,
         **kwargs,
     ) -> None:
@@ -321,26 +322,18 @@ class Scope(Base, TagsMixin):
         Setting an input to None will clear out the value (exception being name and status).
 
         :param name: (optionally) edit the name of the scope. Name cannot be cleared.
-        :type name: basestring or None or Empty
         :param description: (optionally) edit the description of the scope or clear it
-        :type description: basestring or None or Empty
         :param start_date: (optionally) edit the start date of the scope as a datetime object (UTC time/timezone
                             aware preferred) or clear it
-        :type start_date: datetime or None or Empty
         :param due_date: (optionally) edit the due_date of the scope as a datetime object (UTC time/timzeone
                             aware preferred) or clear it
-        :type due_date: datetime or None or Empty
         :param status: (optionally) edit the status of the scope as a string based. Status cannot be cleared.
-        :type status: ScopeStatus or Empty
         :param category (optionally) edit the category of the scope
-        :type category: ScopeCategory or Empty
         :param tags: (optionally) replace the tags on a scope, which is a list of strings ["one","two","three"] or
                     clear them
-        :type tags: list of basestring or None or Empty
         :param team: (optionally) add the scope to a team. Team cannot be cleared.
-        :type team: UUIDstring or None or Empty
+        :param project_info: (optionally) update the project_info on a scope.
         :param options: (optionally) custom options dictionary stored on the scope object
-        :type options: dict or None or Empty
 
         :raises IllegalArgumentError: if the type of the inputs is not correct
         :raises APIError: if another Error occurs
@@ -395,8 +388,9 @@ class Scope(Base, TagsMixin):
                 kwargs.get("project_info"),
                 scope_project_info_jsonschema,
                 "project_info",
-            ),
+            ) or [],
         }
+
 
         if kwargs:  # pragma: no cover
             update_dict.update(kwargs)
