@@ -67,7 +67,7 @@ class TestAssociations(TestBetamax):
             (dict(part=self.frame), 11),
             (dict(property=self.frame_model.properties[0]), 5),
             (dict(property=self.frame.properties[0]), 4),
-            (dict(scope=self.project), 59),
+            (dict(scope=self.project), 58),
         ]:
             with self.subTest(msg=f"{inputs} should be len={nr}"):
                 # setUp
