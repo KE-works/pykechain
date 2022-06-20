@@ -252,7 +252,12 @@ class Scope(Base, TagsMixin):
         self.refresh(json=response.json().get("results")[0])
 
     def get_project_info(self):
-        return self.options.get("_project_info")
+        """
+        Retrieve the project info attribute set on the Scope.
+
+        :return: the project info
+        """
+        return self._project_info
 
     def set_project_info(self, project_info: list) -> None:
         """
@@ -275,10 +280,10 @@ class Scope(Base, TagsMixin):
             },
             {...}
         ]
+        :type project_info: list of dicts
         ```
         The allowed propertypes are: CHAR, TEXT, INT, FLOAT, LINK, DATETIME, DATE, TIME, DURATION
 
-        :param value: value array with project info key, value
         :return: the updated forms
         """
         payload = dict(
@@ -390,7 +395,6 @@ class Scope(Base, TagsMixin):
                 "project_info",
             ) or [],
         }
-
 
         if kwargs:  # pragma: no cover
             update_dict.update(kwargs)
