@@ -54,7 +54,7 @@ class TestActivityConstruction(TestBetamax):
         super().tearDown()
 
     def test_create_with_inputs(self):
-        name = "__Testing task"
+        name = "Testing task"
         ref = slugify_ref(name)
         description = "My new task"
         status = ActivityStatus.OPEN
@@ -117,10 +117,6 @@ class TestActivityConstruction(TestBetamax):
             msg="New child task should be among the children.",
         )
 
-    # NOTE: Change this test once we release the FORMS backend to production or a testing setup.
-    @skip(
-        "This test does not work as the testing backend does not have FORMS in the codebase"
-    )
     def test_create_with_classification(self):
 
         for classification in ActivityClassification.values():
@@ -385,7 +381,7 @@ class TestActivityCloneParts(TestBetamax):
 
 
 class TestActivities(TestBetamax):
-    NAME = "__TEST ACTIVITY"
+    NAME = "TEST ACTIVITY"
 
     def setUp(self):
         super().setUp()
@@ -630,7 +626,7 @@ class TestActivities(TestBetamax):
 
         self.assertIsInstance(all_tasks, list)
         self.assertEqual(
-            13, len(all_tasks), msg="Number of tasks has changed, expected 13."
+            13, len(all_tasks), msg="Number of tasks has changed, expected 12."
         )
 
     def test_retrieve_activity_by_id(self):
