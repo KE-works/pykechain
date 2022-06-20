@@ -8,7 +8,7 @@ from tests.classes import TestBetamax
 class _TestNotification(TestBetamax):
     SUBJECT = "_TEST_SUBJECT"
     MESSAGE = "_TEST_MESSAGE"
-    USER_ID = 1
+    USER_ID = 98
 
     def setUp(self) -> None:
         super().setUp()

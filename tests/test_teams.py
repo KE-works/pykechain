@@ -104,17 +104,12 @@ class TestTeams(TestBetamax):
 
     def test_add_scope_to_team(self):
         # setup
-        old_team = self.project._json_data.get("team")
-
         self.project.edit(team=self.team.id)
         self.assertEqual(self.project.team, self.team)
 
         # check
         team_scopes = self.team.scopes()
         self.assertEqual([t.id for t in team_scopes], [self.project.id])
-
-        # teardown
-        self.project.edit(team=old_team and old_team.get("id") or None)
 
     def test_team_attributes(self):
         attributes = ["_client", "_json_data", "id", "name", "created_at", "updated_at", "ref"]
