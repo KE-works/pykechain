@@ -16,7 +16,7 @@ class TestAssociations(TestBetamax):
         self.frame_model = self.project.model(name="Frame")
 
         # Zero or more model
-        self.wheel_parent = self.project.model(name="Bike")  # type: Property
+        self.wheel_parent = self.project.model(name="Bike")  # type: Part
         self.wheel_model = self.project.model(name="Wheel")
 
         widgets_manager = self.task.widgets()
@@ -28,13 +28,14 @@ class TestAssociations(TestBetamax):
 
         self.table_widget = widgets_manager.add_supergrid_widget(
             part_model=self.wheel_model,
-            parent_instance=self.wheel_parent,
+            parent_instance=self.wheel_parent.instance(),
             readable_models=[],
-            writable_models=self.frame_model.properties[:2],
+            writable_models=self.wheel_model.properties[:2],
         )
 
     def tearDown(self):
-        self.task.delete()
+        if self.task:
+            self.task.delete()
         super().tearDown()
 
     def test_retrieve_associations_interface(self):
@@ -61,12 +62,12 @@ class TestAssociations(TestBetamax):
     def test_retrieve_associations(self):
         for inputs, nr in [
             (dict(widget=self.form_widget), 4),
-            (dict(activity=self.task), 8),
-            (dict(part=self.frame_model), 14),
-            (dict(part=self.frame), 10),
-            (dict(property=self.frame_model.properties[0]), 6),
+            (dict(activity=self.task), 10),
+            (dict(part=self.frame_model), 13),
+            (dict(part=self.frame), 11),
+            (dict(property=self.frame_model.properties[0]), 5),
             (dict(property=self.frame.properties[0]), 4),
-            (dict(scope=self.project), 48),
+            (dict(scope=self.project), 58),
         ]:
             with self.subTest(msg=f"{inputs} should be len={nr}"):
                 # setUp
@@ -204,7 +205,7 @@ class TestAssociations(TestBetamax):
         with self.assertRaises(APIError):
             self.client.update_widget_associations(
                 widget=self.table_widget,
-                readable_models=self.frame.properties,
+                readable_models=[self.project.id],
             )
 
     def test_writable_models(self):
@@ -221,5 +222,5 @@ class TestAssociations(TestBetamax):
         with self.assertRaises(APIError):
             self.client.update_widget_associations(
                 widget=self.table_widget,
-                writable_models=self.frame.properties,
+                writable_models=[self.project.id],
             )

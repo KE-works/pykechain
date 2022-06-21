@@ -1,7 +1,9 @@
 import datetime
 
+from jsonschema.exceptions import ValidationError
+
 from pykechain.enums import (
-    ScopeStatus,
+    PropertyType, ScopeStatus,
     KEChainPages,
     ScopeMemberActions,
     ScopeRoles,
@@ -297,6 +299,18 @@ class TestScopeEdit(TestBetamax):
         super().setUp()
         testing_project = self.project
         self.project = None
+        self.project_info = [{
+                "id": 0,
+                "name": "Project name",
+                "value": "Bike project wannabe",
+                "property_type": PropertyType.CHAR_VALUE,
+            },
+            {
+                "id": 1,
+                "name": "Project number",
+                "value": 12,
+                "property_type": PropertyType.INT_VALUE,
+            }]
         self.scope = testing_project.clone()
 
     def tearDown(self):
@@ -445,3 +459,50 @@ class TestScopeEdit(TestBetamax):
 
         self.assertIsInstance(landing_page, str)
         self.assertTrue(is_url(self.client.api_root + landing_page))
+
+    def test_set_project_info(self):
+        self.scope.set_project_info(project_info=self.project_info)
+
+        retrieved_project_info = self.scope.get_project_info()
+
+        self.assertIsInstance(retrieved_project_info, list)
+        self.assertListEqual(retrieved_project_info, self.project_info)
+
+    def test_get_project_info(self):
+        retrieved_project_info = self.scope.get_project_info()
+
+        self.assertListEqual(retrieved_project_info, [])
+
+        self.scope.set_project_info(project_info=self.project_info)
+
+        retrieved_project_info = self.scope.get_project_info()
+        self.assertListEqual(retrieved_project_info, self.project_info)
+
+    def test_set_project_info_with_wrong_attributes(self):
+        with self.assertRaises(ValidationError):
+            self.scope.set_project_info(project_info={})
+        with self.assertRaises(ValidationError):
+            project_info_too_many_attributes = self.project_info
+            for prop_dict in project_info_too_many_attributes:
+                prop_dict['some_key'] = "some value"
+            self.scope.set_project_info(project_info=project_info_too_many_attributes)
+        with self.assertRaises(ValidationError):
+            for prop in self.project_info:
+                prop.pop('id')
+            self.scope.set_project_info(project_info=self.project_info)
+
+    def test_empty_project_info(self):
+        self.scope.set_project_info(project_info=self.project_info)
+
+        retrieved_project_info = self.scope.get_project_info()
+
+        self.assertIsInstance(retrieved_project_info, list)
+        self.assertListEqual(retrieved_project_info, self.project_info)
+
+        # clean up the project info
+        self.scope.set_project_info(project_info=list())
+
+        retrieved_project_info = self.scope.get_project_info()
+
+        self.assertIsInstance(retrieved_project_info, list)
+        self.assertListEqual(retrieved_project_info, [])

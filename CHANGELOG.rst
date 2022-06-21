@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v4.2.1 (UNRELEASED)
+------------------
+* :star: We added helpers and tests to manage the alteration of the project_info attribute on the Scope object better.
+
 v4.2.0 (10JUN22)
 ----------------
 * :star: We added the ProjectInfo widget.

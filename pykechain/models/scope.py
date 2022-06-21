@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Dict, List, Optional, Union  # noqa: F401
 
@@ -21,6 +23,7 @@ from pykechain.models.input_checks import (
     check_base,
     check_datetime,
     check_enum,
+    check_json,
     check_list_of_text,
     check_text,
     check_type,
@@ -33,9 +36,17 @@ from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
+from pykechain.models.validators.validator_schemas import scope_project_info_jsonschema
 from pykechain.models.workflow import Workflow
 from pykechain.typing import ObjectID
-from pykechain.utils import Empty, clean_empty_values, empty, find, is_uuid, parse_datetime
+from pykechain.utils import (
+    Empty,
+    clean_empty_values,
+    empty,
+    find,
+    is_uuid,
+    parse_datetime,
+)
 
 
 class Scope(Base, TagsMixin):
@@ -58,6 +69,10 @@ class Scope(Base, TagsMixin):
     :ivar type: Type of the Scope. One of :class:`pykechain.enums.ScopeType` for WIM version 2
     :type type: basestring
     """
+
+    url_detail_name = "scope"
+    url_list_name = "scopes"
+    url_pk_name = "scope_id"
 
     def __init__(self, json: Dict, **kwargs) -> None:
         """Construct a scope from provided json data."""
@@ -82,6 +97,7 @@ class Scope(Base, TagsMixin):
         self.category = json.get("category")
 
         self._tags = json.get("tags")
+        self._project_info = json.get("project_info")
 
         self.start_date = parse_datetime(json.get("start_date"))
         self.due_date = parse_datetime(json.get("due_date"))
@@ -235,6 +251,62 @@ class Scope(Base, TagsMixin):
 
         self.refresh(json=response.json().get("results")[0])
 
+    def get_project_info(self):
+        """
+        Retrieve the project info attribute set on the Scope.
+
+        :return: the project info
+        """
+        return self._project_info
+
+    def set_project_info(self, project_info: list) -> None:
+        """
+        Set the project info attribute on the Scope.
+
+        The `Scope` attribute `project_info` hold scope 'meta' information for end-user to
+        add some user-defined fields and values. This project_info can be displayed in a
+        `WidgetType.PROJECTINFO` widget that can be included on every `Activity` or `StatusForm`.
+
+        The structure of the `project_info` is the following:
+        ```
+        :param project_info = [
+            {
+                "id": 0,
+                "name":"fieldname",
+                "value":"field value",
+                "property_type":PropertyType.CHARVALUE,
+                "unit":"kg",  # optional
+                "description": "a short description"  # optional
+            },
+            {...}
+        ]
+        :type project_info: list of dicts
+        ```
+        The allowed propertypes are: CHAR, TEXT, INT, FLOAT, LINK, DATETIME, DATE, TIME, DURATION
+
+        :return: the updated forms
+        """
+        payload = dict(
+            project_info=check_json(
+                value=project_info,
+                schema=scope_project_info_jsonschema,
+                key="project_info",
+            )
+        )
+
+        url = self._client._build_url(self.url_detail_name, scope_id=self.id)
+        query_params = API_EXTRA_PARAMS.get(self.url_detail_name)
+
+        response = self._client._request(
+            "PATCH", url=url, params=query_params, json=payload
+        )
+        if response.status_code != requests.codes.ok:
+            raise APIError(
+                "Could not update the prefill_parts dictionary on the form collection",
+                response=response,
+            )
+        self.refresh(json=response.json()["results"][0])
+
     def edit(
         self,
         name: Optional[Union[str, Empty]] = empty,
@@ -245,6 +317,7 @@ class Scope(Base, TagsMixin):
         category: Optional[Union[str, ScopeCategory, Empty]] = empty,
         tags: Optional[Union[List[str], Empty]] = empty,
         team: Optional[Union[Team, str, Empty]] = empty,
+        project_info: Optional[Union[List[Dict], Empty]] = empty,
         options: Optional[Union[Dict, Empty]] = empty,
         **kwargs,
     ) -> None:
@@ -254,26 +327,18 @@ class Scope(Base, TagsMixin):
         Setting an input to None will clear out the value (exception being name and status).
 
         :param name: (optionally) edit the name of the scope. Name cannot be cleared.
-        :type name: basestring or None or Empty
         :param description: (optionally) edit the description of the scope or clear it
-        :type description: basestring or None or Empty
         :param start_date: (optionally) edit the start date of the scope as a datetime object (UTC time/timezone
                             aware preferred) or clear it
-        :type start_date: datetime or None or Empty
         :param due_date: (optionally) edit the due_date of the scope as a datetime object (UTC time/timzeone
                             aware preferred) or clear it
-        :type due_date: datetime or None or Empty
         :param status: (optionally) edit the status of the scope as a string based. Status cannot be cleared.
-        :type status: ScopeStatus or Empty
         :param category (optionally) edit the category of the scope
-        :type category: ScopeCategory or Empty
         :param tags: (optionally) replace the tags on a scope, which is a list of strings ["one","two","three"] or
                     clear them
-        :type tags: list of basestring or None or Empty
         :param team: (optionally) add the scope to a team. Team cannot be cleared.
-        :type team: UUIDstring or None or Empty
+        :param project_info: (optionally) update the project_info on a scope.
         :param options: (optionally) custom options dictionary stored on the scope object
-        :type options: dict or None or Empty
 
         :raises IllegalArgumentError: if the type of the inputs is not correct
         :raises APIError: if another Error occurs
@@ -324,6 +389,11 @@ class Scope(Base, TagsMixin):
             "tags": check_list_of_text(tags, "tags", True) or list(),
             "team_id": check_base(team, Team, "team") or "",
             "scope_options": check_type(options, dict, "options") or dict(),
+            "project_info": check_json(
+                kwargs.get("project_info"),
+                scope_project_info_jsonschema,
+                "project_info",
+            ) or [],
         }
 
         if kwargs:  # pragma: no cover

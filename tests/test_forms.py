@@ -1,7 +1,6 @@
 import uuid
 
 import jsonschema
-import pytest
 
 from pykechain.enums import (
     FormCategory,
@@ -20,11 +19,6 @@ from pykechain.models.form import Form
 from tests.classes import TestBetamax
 
 
-@pytest.mark.skipif(
-    "os.getenv('GITHUB_ACTIONS', False)",
-    reason="Skipping tests when using Travis or Github Actions "
-    "as there is no public forms world yet",
-)
 class TestForms(TestBetamax):
     """
     Test retrieval and forms attributes and methods.

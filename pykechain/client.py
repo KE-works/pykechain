@@ -2947,7 +2947,7 @@ class Client:
             "PUT", url, params=API_EXTRA_PARAMS["widgets"], json=bulk_data
         )
 
-        if response.status_code != requests.codes.ok:  # pragma: no cover
+        if response.status_code != requests.codes.ok:
             raise APIError("Could not update Associations", response=response)
 
         return None

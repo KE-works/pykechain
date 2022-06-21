@@ -21,9 +21,12 @@ from pykechain.models.input_checks import (
     check_text,
 )
 from pykechain.models.tags import TagsMixin
+from pykechain.models.validators.validator_schemas import (
+    form_collection_prefill_parts_schema,
+)
 from pykechain.models.workflow import Status, Transition
 from pykechain.typing import ObjectID
-from pykechain.utils import UUID_REGEX_PATTERN, Empty, clean_empty_values, empty
+from pykechain.utils import Empty, clean_empty_values, empty
 
 
 class StatusForm(Base):
@@ -545,57 +548,6 @@ class Form(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationM
         :raises APIError: When the prefill_parts is tried to be set on Form Instances
         :raises APIError: WHen the update of the prefill_parts on the Form does not succeed.
         """
-        # this is integregal copy of the definition in the KE-chain backend.
-        prefill_property_stub = {
-            "type": "object",
-            "additionalProperties": False,
-            "required": ["property_id", "value"],
-            "properties": {
-                "property_id": {"$ref": "#/definitions/uuidString"},
-                "value": {},
-            },
-        }
-        prefill_part_stub = {
-            "type": "object",
-            "additionalProperties": False,
-            "required": ["name", "part_properties"],
-            "properties": {
-                "name": {"type": "string"},
-                "part_properties": {"type": "array", "items": prefill_property_stub},
-            },
-        }
-        form_collection_prefill_parts_schema = {
-            "$schema": "http://json-schema.org/draft-07/schema#",
-            "title": "FormCollection Prefill Parts schema",
-            "version": "1.0.0",
-            "type": "object",
-            "additionalProperties": True,
-            # propertyNames is a schema that all of an object's properties must be valid against
-            # ref: https://json-schema.org/understanding-json-schema/reference/object.html#property-names
-            "propertyNames": {"pattern": UUID_REGEX_PATTERN},
-            # patternProperties is a schema that all of an objects property (named) must be valid against
-            # ref: https://json-schema.org/understanding-json-schema/reference/object.html#pattern-properties
-            "patternProperties": {
-                UUID_REGEX_PATTERN: {
-                    "type": "array",
-                    "items": prefill_part_stub,
-                }
-            },
-            "definitions": {
-                "uuidString": {
-                    "type": "string",
-                    "pattern": UUID_REGEX_PATTERN,
-                },
-                "nullUuidString": {
-                    "type": ["string", "null"],
-                    "pattern": UUID_REGEX_PATTERN,
-                },
-                "nullString": {"type": ["string", "null"]},
-                "positiveInteger": {"type": ["integer", "null"], "minimum": 0},
-                "booleanNull": {"type": ["boolean", "null"]},
-            },
-        }
-
         # only works for Form Models.
         if not self.is_model:
             raise APIError(

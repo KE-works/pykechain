@@ -277,7 +277,8 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.wm = self.task.widgets()  # type: WidgetsManager
 
     def tearDown(self):
-        self.task.delete()
+        if self.task:
+            self.task.delete()
         super().tearDown()
 
     def test_new_widget_using_widget_manager(self):
@@ -977,9 +978,10 @@ class TestWidgetManagerWeatherWidget(TestBetamax):
         )
 
     def tearDown(self):
-        self.weather_widget.delete()
-        self.part_model_with_weather_prop.delete()
-        self.task.delete()
+        if self.task:
+            self.task.delete()
+        if self.part_model_with_weather_prop:
+            self.part_model_with_weather_prop.delete()
         super().tearDown()
 
     def test_weather_widget(self):
@@ -1009,7 +1011,8 @@ class TestWidgetNavigationBarWidget(TestBetamax):
         ]
 
     def tearDown(self):
-        self.task.delete()
+        if self.task:
+            self.task.delete()
         super().tearDown()
 
     def test_add_navbar_widget(self):

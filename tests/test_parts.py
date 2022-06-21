@@ -616,7 +616,9 @@ class TestBulkPartsCreation(TestBetamax):
         }
 
     def tearDown(self):
-        self.part_model.delete()
+        if self.part_model:
+            self.part_model.delete()
+        super().tearDown()
 
     """Bulk parts creation"""
 
