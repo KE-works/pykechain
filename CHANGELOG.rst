@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v4.2.2 (UNRELEASED)
+----------------
+* :bug: Editing a project would fail the schema validation if no `project_info` was provided. This has now been fixed (#1174)
+
 v4.2.1 (21JUN22)
 ----------------
 * :star: We added helpers and tests to manage the alteration of the project_info attribute on the Scope object better.

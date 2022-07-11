@@ -439,6 +439,31 @@ class TestScopeEdit(TestBetamax):
         self.scope.edit(team=team_two)
         self.assertEqual(self.scope.team, team_two)
 
+    def test_edit_project_info(self):
+        self.scope.edit(project_info=self.project_info)
+
+        retrieved_project_info = self.scope.get_project_info()
+
+        self.assertIsInstance(retrieved_project_info, list)
+        self.assertListEqual(retrieved_project_info, self.project_info)
+
+    def test_clear_project_info_edit_project(self):
+        self.scope.set_project_info(project_info=self.project_info)
+
+        retrieved_project_info = self.scope.get_project_info()
+
+        self.assertIsInstance(retrieved_project_info, list)
+        self.assertListEqual(retrieved_project_info, self.project_info)
+
+        # clean up the project info
+        self.scope.edit(project_info=list())
+
+        retrieved_project_info = self.scope.get_project_info()
+
+        self.assertIsInstance(retrieved_project_info, list)
+        self.assertListEqual(retrieved_project_info, [])
+
+
     def test_set_landing_page(self):
         tasks = [
             self.scope.activities()[0],
