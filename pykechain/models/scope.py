@@ -390,7 +390,7 @@ class Scope(Base, TagsMixin):
             "team_id": check_base(team, Team, "team") or "",
             "scope_options": check_type(options, dict, "options") or dict(),
             "project_info": check_json(
-                kwargs.get("project_info"),
+                project_info,
                 scope_project_info_jsonschema,
                 "project_info",
             ) or [],
