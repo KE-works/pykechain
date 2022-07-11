@@ -1,9 +1,10 @@
 Change Log
 ==========
 
-v4.2.2 (UNRELEASED)
+v4.2.2 (11JUL22)
 ----------------
 * :bug: Editing a project would fail the schema validation if no `project_info` was provided. This has now been fixed (#1174)
+* :+1: dependent versions for development:  requests (2.28.1), jsonschema (4.6.2), tox (3.25.1)
 
 v4.2.1 (21JUN22)
 ----------------
