@@ -91,6 +91,7 @@ class Activity(TreeObject, TagsMixin):
         self.due_date = parse_datetime(json.get("due_date"))
         self.assignees_ids: List[str] = json.get("assignees_ids", [])
         self._options = json.get("activity_options", {})
+        self._form_collection = json.get("form_collection")
 
         self._tags: List[str] = json.get("tags", [])
         self._representations_container = RepresentationsComponent(

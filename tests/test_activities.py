@@ -13,7 +13,7 @@ from pykechain.enums import (
     ActivityStatus,
     ActivityType,
     Category,
-    Multiplicity,
+    Classification, Multiplicity,
     NotificationEvent,
     PaperOrientation,
     PaperSize,
@@ -891,6 +891,11 @@ class TestActivities(TestBetamax):
                 self.assertTrue(model.property(name="Website").output)
                 self.assertTrue(model.property(name="Sale?").output)
         self.assertTrue(len(associated_models) == 3)
+
+    def test_activity_retrieve_form_collection(self):
+        forms = self.project.forms(classification=Classification.CATALOG)
+        for status_form in forms[0].status_forms:
+            self.assertEqual(status_form.activity._form_collection, forms[0].id)
 
 
 class TestActivityDownloadAsPDF(TestBetamax):
