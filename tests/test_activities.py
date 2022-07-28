@@ -418,6 +418,7 @@ class TestActivities(TestBetamax):
             "_scope_id",
             "start_date",
             "due_date",
+            "_form_collection"
         ]
 
         for attribute in attributes:
