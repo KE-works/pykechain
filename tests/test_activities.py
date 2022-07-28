@@ -1,7 +1,6 @@
 import os
 import warnings
 from datetime import datetime
-from unittest import skip
 
 import pytest
 import pytz
@@ -746,7 +745,7 @@ class TestActivities(TestBetamax):
         nr = process.count_children()
 
         self.assertIsInstance(nr, int)
-        self.assertEqual(7, nr)
+        self.assertEqual(8, nr)
 
         nr = process.count_children(name__contains="Service")
         self.assertEqual(4, nr)
