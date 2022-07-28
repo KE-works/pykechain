@@ -84,6 +84,7 @@ class AssociatedObjectId(Enum):
     PART_MODEL_ID = "partModelId"
     TEAM_ID = "teamId"
     PROPERTY_INSTANCE_ID = "propertyInstanceId"
+    PROPERTY_MODEL_ID = "propertyModelId"
     SERVICE_ID = "serviceId"
     ACTIVITY_ID = "activityId"
 

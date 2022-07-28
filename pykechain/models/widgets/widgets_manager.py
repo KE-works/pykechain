@@ -603,7 +603,6 @@ class WidgetsManager(Iterable):
             attachment_property, method=self._client.property
         )
         meta = _initiate_meta(kwargs, activity=self.activity)
-
         meta.update(
             {
                 AssociatedObjectId.PROPERTY_INSTANCE_ID: attachment_property.id,
@@ -617,7 +616,10 @@ class WidgetsManager(Iterable):
                 ),
             }
         )
-
+        if self.activity.classification == ActivityClassification.FORM:
+            meta.update({
+                AssociatedObjectId.PROPERTY_MODEL_ID: attachment_property.id
+            })
         for deprecated_kw in ["widget_type", "readable_models"]:
             if deprecated_kw in kwargs:
                 kwargs.pop(deprecated_kw)
@@ -629,11 +631,20 @@ class WidgetsManager(Iterable):
                 )
 
         meta, title = _set_title(meta, title=title, **kwargs)
-
-        if check_type(editable, bool, "editable"):
-            kwargs.update({"writable_models": [attachment_property.model_id]})
-        else:
-            kwargs.update({"readable_models": [attachment_property.model_id]})
+        if self.activity.classification != ActivityClassification.FORM:
+            if check_type(editable, bool, "editable"):
+                kwargs.update({"writable_models": [attachment_property.model_id]})
+            else:
+                kwargs.update({"readable_models": [attachment_property.model_id]})
+        if self.activity.classification == ActivityClassification.FORM:
+            meta.update({
+                AssociatedObjectId.PROPERTY_MODEL_ID: attachment_property.id
+            })
+            # kwargs.update(
+            #     {
+            #         "writable_models": [attachment_property.model_id],
+            #         "readable_models": [attachment_property.model_id]
+            #     })
 
         widget = self.create_widget(
             widget_type=WidgetTypes.ATTACHMENTVIEWER,

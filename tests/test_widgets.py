@@ -3,7 +3,7 @@ from typing import List
 from unittest import TestCase
 
 from pykechain.enums import (
-    WidgetTypes,
+    FormCategory, WidgetTypes,
     ShowColumnTypes,
     FilterType,
     ProgressBarColors,
@@ -20,15 +20,16 @@ from pykechain.enums import (
     Classification,
     Multiplicity,
     ActivityStatus,
-    ActivityClassification,
+    ActivityClassification, WorkflowCategory,
 )
+from pykechain.extra_utils import _copy_part_model
 from pykechain.models.widgets.enums import (
     DashboardWidgetShowForms,
     DashboardWidgetShowTasks,
     DashboardWidgetShowScopes,
     TasksAssignmentFilterTypes,
 )
-from pykechain.exceptions import IllegalArgumentError, NotFoundError
+from pykechain.exceptions import APIError, ForbiddenError, IllegalArgumentError, NotFoundError
 from pykechain.models import Activity, Part
 from pykechain.models.widgets import (
     UndefinedWidget,
@@ -953,7 +954,9 @@ class TestWidgetManagerInActivity(TestBetamax):
 
     def test_add_project_info_widget(self):
         title = "__TEST_PROJECT_TEAM"
-        project_info_widget = self.wm.add_project_info_widget(title=title, collapsible=True, collapsed=True)
+        project_info_widget = self.wm.add_project_info_widget(title=title,
+                                                              collapsible=True,
+                                                              collapsed=True)
 
         self.assertEqual(project_info_widget.title, title)
 
@@ -1191,3 +1194,106 @@ class TestWidgetDownloadAsExcel(TestBetamax):
 
         with self.assertRaises(IllegalArgumentError):
             self.grid_widget.download_as_excel(user="Testuser")
+
+
+class TestFormWidgets(TestBetamax):
+    def setUp(self):
+        super().setUp()
+        self.workflow = self.client.workflow(
+            name="Simple Form Flow", category=WorkflowCategory.CATALOG
+        )
+        self.form_model_name = "__TEST__FORM_MODEL"
+        self.form_model = self.client.create_form_model(
+            name=self.form_model_name,
+            scope=self.project,
+            workflow=self.workflow,
+            category=FormCategory.MODEL,
+            contexts=[],
+        )
+        self.activity_to_do = self.form_model.status_forms[0].activity
+        self.form_part_model = self.project.model(name=self.form_model_name)
+        self.bike_model = self.project.model(name='Bike')
+        self.form_bike_model = _copy_part_model(
+            part=self.bike_model,
+            target_parent=self.form_part_model,
+            name="__BIKE_FORM_MODEL",
+            include_children=True,
+        )
+        self.wm = self.activity_to_do.widgets()
+
+    def tearDown(self):
+        super().tearDown()
+        if self.form_model:
+            try:
+                self.form_model.delete()
+            except (ForbiddenError, APIError):
+                pass
+
+    def test_add_attachment_widget(self):
+        picture_instance = self.form_bike_model.property(name="Picture")
+        widget = self.wm.add_attachmentviewer_widget(
+            attachment_property=picture_instance,
+        )
+
+        self.assertIsInstance(widget, AttachmentviewerWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+        self.assertEqual("Picture", widget.title_visible)
+
+    def test_add_attachment_widget_with_associations_using_widget_manager(self):
+        photo_property = self.project.property("Picture")
+
+        widget = self.wm.add_attachmentviewer_widget(
+            title="Attachment Viewer",
+            attachment_property=photo_property,
+        )
+
+        self.assertEqual("Attachment Viewer", widget.title_visible)
+        self.assertIsInstance(widget, AttachmentviewerWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+
+    def test_add_attachment_widget_with_editable_association(self):
+        photo_property = self.project.property("Picture")
+
+        widget = self.wm.add_attachmentviewer_widget(
+            title="Attachment Viewer",
+            attachment_property=photo_property,
+            editable=True,
+        )
+
+        self.assertIsInstance(widget, AttachmentviewerWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+
+    def test_add_super_grid_widget(self):
+        part_model = self.project.model(name="Wheel")
+        parent_instance = self.project.part(name="Bike")
+
+        widget = self.wm.add_supergrid_widget(
+            part_model=part_model,
+            parent_instance=parent_instance,
+            edit=False,
+            emphasize_edit=True,
+            all_readable=True,
+            incomplete_rows=True,
+        )
+
+        self.assertIsInstance(widget, SupergridWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+        self.assertEqual(part_model.name, widget.title_visible)
+
+    def test_add_filtered_grid_widget(self):
+        part_model = self.project.model(name="Wheel")
+        parent_instance = self.project.part(name="Bike")
+        widget = self.wm.add_filteredgrid_widget(
+            part_model=part_model,
+            parent_instance=parent_instance,
+            edit=True,
+            # sort_property=part_model.property(name='Diameter'),
+            emphasize_edit=True,
+            all_writable=True,
+            collapse_filters=False,
+        )
+
+        self.assertIsInstance(widget, FilteredgridWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+        self.assertEqual(part_model.name, widget.title_visible)
+
