@@ -1212,6 +1212,8 @@ class TestFormWidgets(TestBetamax):
         )
         self.activity_to_do = self.form_model.status_forms[0].activity
         self.form_part_model = self.project.model(name=self.form_model_name)
+        self.form_parent_part = self.project.part(name="Form")
+        self.form_part_model.add_to(parent=self.form_parent_part)
         self.bike_model = self.project.model(name='Bike')
         self.form_bike_model = _copy_part_model(
             part=self.bike_model,
@@ -1230,33 +1232,21 @@ class TestFormWidgets(TestBetamax):
                 pass
 
     def test_add_attachment_widget(self):
-        picture_instance = self.form_bike_model.property(name="Picture")
+        picture = self.form_bike_model.property(name="Picture")
         widget = self.wm.add_attachmentviewer_widget(
-            attachment_property=picture_instance,
+            attachment_property=picture,
         )
 
         self.assertIsInstance(widget, AttachmentviewerWidget)
         self.assertEqual(len(self.wm), 1 + 1)
         self.assertEqual("Picture", widget.title_visible)
 
-    def test_add_attachment_widget_with_associations_using_widget_manager(self):
-        photo_property = self.project.property("Picture")
-
-        widget = self.wm.add_attachmentviewer_widget(
-            title="Attachment Viewer",
-            attachment_property=photo_property,
-        )
-
-        self.assertEqual("Attachment Viewer", widget.title_visible)
-        self.assertIsInstance(widget, AttachmentviewerWidget)
-        self.assertEqual(len(self.wm), 1 + 1)
-
     def test_add_attachment_widget_with_editable_association(self):
-        photo_property = self.project.property("Picture")
+        picture = self.form_bike_model.property(name="Picture")
 
         widget = self.wm.add_attachmentviewer_widget(
             title="Attachment Viewer",
-            attachment_property=photo_property,
+            attachment_property=picture,
             editable=True,
         )
 
@@ -1264,12 +1254,12 @@ class TestFormWidgets(TestBetamax):
         self.assertEqual(len(self.wm), 1 + 1)
 
     def test_add_super_grid_widget(self):
-        part_model = self.project.model(name="Wheel")
-        parent_instance = self.project.part(name="Bike")
+        bike_part_model = self.project.model(name="__BIKE_FORM_MODEL")
+        wheel_form_part_model = self.project.model(name="Wheel", parent=bike_part_model)
 
         widget = self.wm.add_supergrid_widget(
-            part_model=part_model,
-            parent_instance=parent_instance,
+            part_model=wheel_form_part_model,
+            parent_instance=bike_part_model,
             edit=False,
             emphasize_edit=True,
             all_readable=True,
@@ -1278,7 +1268,7 @@ class TestFormWidgets(TestBetamax):
 
         self.assertIsInstance(widget, SupergridWidget)
         self.assertEqual(len(self.wm), 1 + 1)
-        self.assertEqual(part_model.name, widget.title_visible)
+        self.assertEqual(wheel_form_part_model.name, widget.title_visible)
 
     def test_add_filtered_grid_widget(self):
         part_model = self.project.model(name="Wheel")

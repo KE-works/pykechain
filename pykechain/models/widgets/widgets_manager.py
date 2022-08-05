@@ -7,7 +7,7 @@ from pykechain.enums import (
     ActivityType,
     Alignment,
     CardWidgetLinkValue,
-    ImageFitValue,
+    Category, ImageFitValue,
     KEChainPages,
     LinkTargets,
     ProgressBarColors,
@@ -324,7 +324,13 @@ class WidgetsManager(Iterable):
         part_model: "Part" = _retrieve_object(
             obj=part_model, method=self._client.model
         )  # noqa
-        parent_instance: "Part" = _retrieve_object_id(obj=parent_instance)  # noqa
+        if parent_instance.category == Category.INSTANCE:
+            parent_instance_id: "Part" = _retrieve_object_id(obj=parent_instance)  # noqa
+            parent_model_id: "Part" = _retrieve_object_id(obj=parent_instance.model())  # noqa
+        else:
+            parent_instance_id = None
+            parent_model_id: "Part" = _retrieve_object_id(obj=parent_instance)  # noqa
+
         sort_property_id = _retrieve_object_id(obj=sort_property)
 
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
@@ -355,9 +361,10 @@ class WidgetsManager(Iterable):
                 MetaWidget.EMPHASIZE_DELETE_BUTTON: emphasize_delete,
             }
         )
-
-        if parent_instance:
-            meta[AssociatedObjectId.PARENT_INSTANCE_ID] = parent_instance
+        if parent_instance_id:
+            meta[AssociatedObjectId.PARENT_INSTANCE_ID] = parent_instance_id
+        if parent_model_id:
+            meta[AssociatedObjectId.PARENT_MODEL_ID] = parent_model_id
 
         meta, title = _set_title(meta, title=title, **kwargs)
 
