@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+vUNRLEASED
+--------------
+* :+1: added the possibility to create widgets inside `Forms`, by using the correct model ids (#1168)
+
 v4.2.2 (11JUL22)
 ----------------
 * :bug: Editing a project would fail the schema validation if no `project_info` was provided. This has now been fixed (#1174)
