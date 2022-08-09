@@ -1196,7 +1196,7 @@ class TestWidgetDownloadAsExcel(TestBetamax):
             self.grid_widget.download_as_excel(user="Testuser")
 
 
-class TestFormWidgets(TestBetamax):
+class TestWidgetsInForm(TestBetamax):
     def setUp(self):
         super().setUp()
         self.workflow = self.client.workflow(
@@ -1221,6 +1221,10 @@ class TestFormWidgets(TestBetamax):
             name="__BIKE_FORM_MODEL",
             include_children=True,
         )
+        self.weather_prop_model = \
+            self.form_bike_model.add_property(
+                name="weather_prop",
+                property_type=PropertyType.WEATHER_VALUE)
         self.wm = self.activity_to_do.widgets()
 
     def tearDown(self):
@@ -1271,19 +1275,63 @@ class TestFormWidgets(TestBetamax):
         self.assertEqual(wheel_form_part_model.name, widget.title_visible)
 
     def test_add_filtered_grid_widget(self):
-        part_model = self.project.model(name="Wheel")
-        parent_instance = self.project.part(name="Bike")
+        bike_part_model = self.project.model(name="__BIKE_FORM_MODEL")
+        wheel_form_part_model = self.project.model(name="Wheel", parent=bike_part_model)
+
         widget = self.wm.add_filteredgrid_widget(
-            part_model=part_model,
-            parent_instance=parent_instance,
-            edit=True,
-            # sort_property=part_model.property(name='Diameter'),
+            part_model=wheel_form_part_model,
+            parent_instance=bike_part_model,
+            edit=False,
             emphasize_edit=True,
-            all_writable=True,
-            collapse_filters=False,
+            all_readable=True,
+            incomplete_rows=True,
         )
 
         self.assertIsInstance(widget, FilteredgridWidget)
         self.assertEqual(len(self.wm), 1 + 1)
-        self.assertEqual(part_model.name, widget.title_visible)
+        self.assertEqual(wheel_form_part_model.name, widget.title_visible)
 
+    def test_add_propertygrid_widget(self):
+        bike_part_model = self.project.model(name="__BIKE_FORM_MODEL")
+        widget = self.wm.add_propertygrid_widget(
+            part_instance=bike_part_model,
+            show_headers=False,
+            show_columns=[ShowColumnTypes.UNIT],
+            readable_models=bike_part_model.properties[:2],
+            writable_models=bike_part_model.properties[3:],
+        )
+
+        self.assertIsInstance(widget, PropertygridWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+        self.assertEqual(bike_part_model.name, widget.title_visible)
+
+    def test_add_signature_widget(self):
+        picture = self.form_bike_model.property(name="Picture")
+
+        widget1 = self.wm.add_signature_widget(
+            attachment_property=picture,
+            title="Yes, my precious",
+            custom_undo_button_text="Remove za widget",
+            custom_button_text="Sign za widget, plz",
+            show_name_and_date=False,
+        )
+        widget2 = self.wm.add_signature_widget(
+            attachment_property=picture,
+            title=False,
+            custom_undo_button_text=False,
+            custom_button_text=False,
+        )
+        widget3 = self.wm.add_signature_widget(attachment_property=picture)
+        self.assertIsInstance(widget1, SignatureWidget)
+        self.assertIsInstance(widget2, SignatureWidget)
+        self.assertIsInstance(widget3, SignatureWidget)
+        self.assertEqual(len(self.wm), 1 + 3)
+
+        with self.assertRaises(IllegalArgumentError):
+            self.wm.add_signature_widget(attachment_property="Failed script")
+
+    def test_weather_widget(self):
+        """Testing the weather widget."""
+        self.weather_widget = self.wm.add_weather_widget(
+            weather_property=self.weather_prop_model,
+        )

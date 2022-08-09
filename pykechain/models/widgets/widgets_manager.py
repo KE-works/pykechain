@@ -496,7 +496,14 @@ class WidgetsManager(Iterable):
         part_model: "Part" = _retrieve_object(
             obj=part_model, method=self._client.model
         )  # noqa
-        parent_instance_id: str = _retrieve_object_id(obj=parent_instance)
+
+        if parent_instance.category == Category.INSTANCE:
+            parent_instance_id: "Part" = _retrieve_object_id(obj=parent_instance)  # noqa
+            parent_model_id: "Part" = _retrieve_object_id(obj=parent_instance.model())  # noqa
+        else:
+            parent_instance_id = None
+            parent_model_id: "Part" = _retrieve_object_id(obj=parent_instance)  # noqa
+
         sort_property_id: str = _retrieve_object_id(obj=sort_property)
         if not sort_property_id and sort_name:
             sort_property_id = MetaWidget.NAME
@@ -550,6 +557,8 @@ class WidgetsManager(Iterable):
 
         if parent_instance_id:
             meta[AssociatedObjectId.PARENT_INSTANCE_ID] = parent_instance_id
+        if parent_model_id:
+            meta[AssociatedObjectId.PARENT_MODEL_ID] = parent_model_id
 
         meta, title = _set_title(meta, title=title, **kwargs)
 
@@ -817,9 +826,15 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
+
         part_instance: "Part" = _retrieve_object(
             part_instance, method=self._client.part
         )  # noqa: F821
+
+        if part_instance.category == Category.MODEL:
+            part_model_id = part_instance.id
+        else:
+            part_model_id = part_instance.model_id
 
         if not show_columns:
             show_columns = list()
@@ -843,6 +858,11 @@ class WidgetsManager(Iterable):
                 MetaWidget.SHOW_HEADERS: show_headers,
             }
         )
+
+        if self.activity.classification == ActivityClassification.FORM:
+            meta.update({
+                AssociatedObjectId.PART_MODEL_ID: part_model_id
+            })
 
         meta, title = _set_title(meta, title=title, **kwargs)
 
@@ -1437,6 +1457,10 @@ class WidgetsManager(Iterable):
         attachment_property: "AttachmentProperty" = _retrieve_object(
             attachment_property, method=self._client.property
         )  # noqa
+        if attachment_property.category == Category.MODEL:
+            attachment_model_id = attachment_property.id
+        else:
+            attachment_model_id = attachment_property.model_id
         meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
         check_type(editable, bool, "editable")
@@ -1467,14 +1491,17 @@ class WidgetsManager(Iterable):
                 MetaWidget.SHOW_NAME_AND_DATE: show_name_and_date,
             }
         )
-
+        if self.activity.classification == ActivityClassification.FORM:
+            meta.update({
+                AssociatedObjectId.PROPERTY_MODEL_ID: attachment_model_id
+            })
         widget = self.create_widget(
             widget_type=WidgetTypes.SIGNATURE,
             meta=meta,
             title=title,
             parent=parent_widget,
-            readable_models=[attachment_property.model_id] if not editable else None,
-            writable_models=[attachment_property.model_id] if editable else None,
+            readable_models=[attachment_model_id] if not editable else None,
+            writable_models=[attachment_model_id] if editable else None,
             **kwargs,
         )
         return widget
@@ -1568,6 +1595,11 @@ class WidgetsManager(Iterable):
         weather_property: "Property" = _retrieve_object(
             weather_property, method=self._client.property
         )  # noqa
+        if weather_property.category == Category.MODEL:
+            weather_property_model_id = weather_property.id
+        else:
+            weather_property_model_id = weather_property.model_id
+
         meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
 
@@ -1577,12 +1609,17 @@ class WidgetsManager(Iterable):
             }
         )
 
+        if self.activity.classification == ActivityClassification.FORM:
+            meta.update({
+                AssociatedObjectId.PROPERTY_MODEL_ID: weather_property_model_id
+            })
+
         widget = self.create_widget(
             widget_type=WidgetTypes.WEATHER,
             meta=meta,
             title=title,
             parent=parent_widget,
-            writable_models=[weather_property.model_id],
+            writable_models=[weather_property_model_id],
             **kwargs,
         )
         return widget

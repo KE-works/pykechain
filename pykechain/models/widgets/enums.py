@@ -81,7 +81,7 @@ class AssociatedObjectId(Enum):
 
     PART_INSTANCE_ID = "partInstanceId"
     PARENT_INSTANCE_ID = "parentInstanceId"
-    PARENT_MODEL_ID = "parentModelId"
+    PARENT_MODEL_ID = "parentPartModelId"
     PART_MODEL_ID = "partModelId"
     TEAM_ID = "teamId"
     PROPERTY_INSTANCE_ID = "propertyInstanceId"
