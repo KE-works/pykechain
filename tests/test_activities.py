@@ -1,7 +1,6 @@
 import os
 import warnings
 from datetime import datetime
-from unittest import skip
 
 import pytest
 import pytz
@@ -13,7 +12,7 @@ from pykechain.enums import (
     ActivityStatus,
     ActivityType,
     Category,
-    Multiplicity,
+    Classification, Multiplicity,
     NotificationEvent,
     PaperOrientation,
     PaperSize,
@@ -419,6 +418,7 @@ class TestActivities(TestBetamax):
             "_scope_id",
             "start_date",
             "due_date",
+            "_form_collection"
         ]
 
         for attribute in attributes:
@@ -746,7 +746,7 @@ class TestActivities(TestBetamax):
         nr = process.count_children()
 
         self.assertIsInstance(nr, int)
-        self.assertEqual(7, nr)
+        self.assertEqual(8, nr)
 
         nr = process.count_children(name__contains="Service")
         self.assertEqual(4, nr)
@@ -891,6 +891,11 @@ class TestActivities(TestBetamax):
                 self.assertTrue(model.property(name="Website").output)
                 self.assertTrue(model.property(name="Sale?").output)
         self.assertTrue(len(associated_models) == 3)
+
+    def test_activity_retrieve_form_collection(self):
+        forms = self.project.forms(classification=Classification.CATALOG)
+        for status_form in forms[0].status_forms:
+            self.assertEqual(status_form.activity._form_collection, forms[0].id)
 
 
 class TestActivityDownloadAsPDF(TestBetamax):

@@ -1,5 +1,8 @@
 Change Log
 ==========
+UNRELEASED
+----------------
+* :+1: Added the possibility to retrieve the `form_collection` from an `Activity`, if applicable (#1172)
 
 vUNRLEASED
 --------------
