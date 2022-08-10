@@ -1212,6 +1212,13 @@ class TestWidgetsInForm(TestBetamax):
         )
         self.activity_to_do = self.form_model.status_forms[0].activity
         self.form_part_model = self.project.model(name=self.form_model_name)
+        self.exactly_1_part_model = self.form_part_model.add_model(
+            name="__EXACTLY_1_FORM_MODEL",
+            multiplicity=Multiplicity.ONE,
+        )
+        self.attachment_property_model = self.exactly_1_part_model.add_property(
+                name="__ATTACHMENT_PROPERTY_FORM",
+                property_type=PropertyType.ATTACHMENT_VALUE)
         self.form_parent_part = self.project.part(name="Form")
         self.form_part_model.add_to(parent=self.form_parent_part)
         self.bike_model = self.project.model(name='Bike')
@@ -1236,14 +1243,13 @@ class TestWidgetsInForm(TestBetamax):
                 pass
 
     def test_add_attachment_widget(self):
-        picture = self.form_bike_model.property(name="Picture")
         widget = self.wm.add_attachmentviewer_widget(
-            attachment_property=picture,
+            attachment_property=self.attachment_property_model,
         )
 
         self.assertIsInstance(widget, AttachmentviewerWidget)
         self.assertEqual(len(self.wm), 1 + 1)
-        self.assertEqual("Picture", widget.title_visible)
+        self.assertEqual(self.attachment_property_model.name, widget.title_visible)
 
     def test_add_attachment_widget_with_editable_association(self):
         picture = self.form_bike_model.property(name="Picture")

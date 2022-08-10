@@ -622,11 +622,14 @@ class WidgetsManager(Iterable):
         meta = _initiate_meta(kwargs, activity=self.activity)
         if attachment_property.category == Category.MODEL:
             attachment_model_id = attachment_property.id
+            attachment_instance_id = None
         else:
             attachment_model_id = attachment_property.model_id
+            attachment_instance_id = attachment_property.id
         meta.update(
             {
-                AssociatedObjectId.PROPERTY_INSTANCE_ID: attachment_property.id,
+                AssociatedObjectId.PROPERTY_MODEL_ID: attachment_model_id,
+                AssociatedObjectId.PROPERTY_INSTANCE_ID: attachment_instance_id,
                 MetaWidget.ALIGNMENT: check_enum(alignment, Alignment, "alignment"),
                 MetaWidget.IMAGE_FIT: check_enum(image_fit, ImageFitValue, "image_fit"),
                 MetaWidget.SHOW_DOWNLOAD_BUTTON: check_type(
@@ -637,10 +640,7 @@ class WidgetsManager(Iterable):
                 ),
             }
         )
-        if self.activity.classification == ActivityClassification.FORM:
-            meta.update({
-                AssociatedObjectId.PROPERTY_MODEL_ID: attachment_model_id
-            })
+
         for deprecated_kw in ["widget_type", "readable_models"]:
             if deprecated_kw in kwargs:
                 kwargs.pop(deprecated_kw)
