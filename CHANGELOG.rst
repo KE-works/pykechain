@@ -3,9 +3,6 @@ Change Log
 UNRELEASED
 ----------------
 * :+1: Added the possibility to retrieve the `form_collection` from an `Activity`, if applicable (#1172)
-
-vUNRLEASED
---------------
 * :+1: added the possibility to create widgets inside `Forms`, by using the correct model ids (#1168)
 
 v4.2.2 (11JUL22)
