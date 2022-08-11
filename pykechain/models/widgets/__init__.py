@@ -22,6 +22,7 @@ from .widget_models import (
     DashboardWidget,
     TasksWidget,
     ScopemembersWidget,
+    WeatherWidget
 )
 from .widgets_manager import WidgetsManager
 
@@ -47,6 +48,7 @@ __all__ = (
     "DashboardWidget",
     "TasksWidget",
     "ScopemembersWidget",
+    "WeatherWidget",
     "ThirdpartyWidget",
     "WidgetsManager",
 )
