@@ -333,7 +333,7 @@ class WidgetsManager(Iterable):
             parent_instance_id: "Part" = parent_part.id  # noqa
             parent_model_id: "Part" = parent_part.model_id  # noqa
         else:
-            parent_instance_id = str()
+            parent_instance_id = None
             parent_model_id: "Part" = parent_part.id  # noqa
 
         sort_property_id = _retrieve_object_id(obj=sort_property)
@@ -369,8 +369,7 @@ class WidgetsManager(Iterable):
 
         if parent_instance_id:
             meta[AssociatedObjectId.PARENT_INSTANCE_ID] = parent_instance_id
-        if parent_model_id:
-            meta[AssociatedObjectId.PARENT_MODEL_ID] = parent_model_id
+        meta[AssociatedObjectId.PARENT_MODEL_ID] = parent_model_id
 
         meta, title = _set_title(meta, title=title, **kwargs)
 
@@ -567,8 +566,7 @@ class WidgetsManager(Iterable):
 
         if parent_instance_id:
             meta[AssociatedObjectId.PARENT_INSTANCE_ID] = parent_instance_id
-        if parent_model_id:
-            meta[AssociatedObjectId.PARENT_MODEL_ID] = parent_model_id
+        meta[AssociatedObjectId.PARENT_MODEL_ID] = parent_model_id
 
         widget = self.create_configured_widget(
             widget_type=WidgetTypes.FILTEREDGRID,
@@ -1460,7 +1458,7 @@ class WidgetsManager(Iterable):
         :raises IllegalArgumentError: when incorrect arguments are provided
         :raises APIError: When the widget could not be created.
         """
-        attachment_property: "Property" = _retrieve_object(
+        attachment_property: "AttachmentProperty" = _retrieve_object(
             attachment_property, method=self._client.property
         )
         meta = _initiate_meta(kwargs, activity=self.activity)
@@ -1471,7 +1469,6 @@ class WidgetsManager(Iterable):
             attachment_model_id = attachment_property.model_id
             attachment_instance_id = attachment_property.id
 
-        meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
         check_type(editable, bool, "editable")
 

@@ -82,9 +82,14 @@ class Widget(BaseInScope):
         elif show_title_value == WidgetTitleValue.DEFAULT:
             try:
                 if self.widget_type == WidgetTypes.PROPERTYGRID:
-                    return self._client.part(
-                        pk=self.meta.get(AssociatedObjectId.PART_MODEL_ID)
-                    ).name
+                    if self.meta.get(AssociatedObjectId.PART_INSTANCE_ID):
+                        return self._client.part(
+                            pk=self.meta.get(AssociatedObjectId.PART_INSTANCE_ID)
+                        ).name
+                    else:
+                        return self._client.part(
+                            pk=self.meta.get(AssociatedObjectId.PART_MODEL_ID)
+                        ).name
                 elif self.widget_type in [
                     WidgetTypes.FILTEREDGRID,
                     WidgetTypes.SUPERGRID,
@@ -102,10 +107,16 @@ class Widget(BaseInScope):
                     WidgetTypes.SIGNATURE,
                     WidgetTypes.WEATHER,
                 ]:
-                    return self._client.property(
-                        pk=self.meta.get(AssociatedObjectId.PROPERTY_MODEL_ID),
-                        category=None,
-                    ).name
+                    if self.meta.get(AssociatedObjectId.PROPERTY_INSTANCE_ID):
+                        return self._client.property(
+                            pk=self.meta.get(AssociatedObjectId.PROPERTY_INSTANCE_ID),
+                            category=None,
+                        ).name
+                    else:
+                        return self._client.property(
+                            pk=self.meta.get(AssociatedObjectId.PROPERTY_MODEL_ID),
+                            category=None,
+                        ).name
                 elif self.widget_type == WidgetTypes.CARD:
                     return self.scope.name
                 else:
