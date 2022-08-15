@@ -7,6 +7,7 @@ from pykechain.enums import (
     ActivityType,
     Alignment,
     CardWidgetLinkValue,
+    Category,
     ImageFitValue,
     KEChainPages,
     LinkTargets,
@@ -324,7 +325,17 @@ class WidgetsManager(Iterable):
         part_model: "Part" = _retrieve_object(
             obj=part_model, method=self._client.model
         )  # noqa
-        parent_instance: "Part" = _retrieve_object_id(obj=parent_instance)  # noqa
+        # Check whether the parent_part is uuid type or class `Part`
+        parent_part: "Part" = _retrieve_object(
+            obj=parent_instance, method=self._client.part
+        )
+        if parent_part.category == Category.INSTANCE:
+            parent_instance_id: "Part" = parent_part.id  # noqa
+            parent_model_id: "Part" = parent_part.model_id  # noqa
+        else:
+            parent_instance_id = None
+            parent_model_id: "Part" = parent_part.id  # noqa
+
         sort_property_id = _retrieve_object_id(obj=sort_property)
 
         meta = _initiate_meta(kwargs=kwargs, activity=self.activity)
@@ -356,8 +367,9 @@ class WidgetsManager(Iterable):
             }
         )
 
-        if parent_instance:
-            meta[AssociatedObjectId.PARENT_INSTANCE_ID] = parent_instance
+        if parent_instance_id:
+            meta[AssociatedObjectId.PARENT_INSTANCE_ID] = parent_instance_id
+        meta[AssociatedObjectId.PARENT_MODEL_ID] = parent_model_id
 
         meta, title = _set_title(meta, title=title, **kwargs)
 
@@ -488,7 +500,17 @@ class WidgetsManager(Iterable):
         part_model: "Part" = _retrieve_object(
             obj=part_model, method=self._client.model
         )  # noqa
-        parent_instance_id: str = _retrieve_object_id(obj=parent_instance)
+        # Check whether the parent_part is uuid type or class `Part`
+        parent_part: "Part" = _retrieve_object(
+            obj=parent_instance, method=self._client.part
+        )
+        if parent_part.category == Category.INSTANCE:
+            parent_instance_id: "Part" = parent_part.id  # noqa
+            parent_model_id: "Part" = parent_part.model_id  # noqa
+        else:
+            parent_instance_id = None
+            parent_model_id: "Part" = parent_part.id  # noqa
+
         sort_property_id: str = _retrieve_object_id(obj=sort_property)
         if not sort_property_id and sort_name:
             sort_property_id = MetaWidget.NAME
@@ -540,10 +562,11 @@ class WidgetsManager(Iterable):
             }
         )
 
+        meta, title = _set_title(meta, title=title, **kwargs)
+
         if parent_instance_id:
             meta[AssociatedObjectId.PARENT_INSTANCE_ID] = parent_instance_id
-
-        meta, title = _set_title(meta, title=title, **kwargs)
+        meta[AssociatedObjectId.PARENT_MODEL_ID] = parent_model_id
 
         widget = self.create_configured_widget(
             widget_type=WidgetTypes.FILTEREDGRID,
@@ -603,10 +626,16 @@ class WidgetsManager(Iterable):
             attachment_property, method=self._client.property
         )
         meta = _initiate_meta(kwargs, activity=self.activity)
-
+        if attachment_property.category == Category.MODEL:
+            attachment_model_id = attachment_property.id
+            attachment_instance_id = None
+        else:
+            attachment_model_id = attachment_property.model_id
+            attachment_instance_id = attachment_property.id
         meta.update(
             {
-                AssociatedObjectId.PROPERTY_INSTANCE_ID: attachment_property.id,
+                AssociatedObjectId.PROPERTY_MODEL_ID: attachment_model_id,
+                AssociatedObjectId.PROPERTY_INSTANCE_ID: attachment_instance_id,
                 MetaWidget.ALIGNMENT: check_enum(alignment, Alignment, "alignment"),
                 MetaWidget.IMAGE_FIT: check_enum(image_fit, ImageFitValue, "image_fit"),
                 MetaWidget.SHOW_DOWNLOAD_BUTTON: check_type(
@@ -629,11 +658,10 @@ class WidgetsManager(Iterable):
                 )
 
         meta, title = _set_title(meta, title=title, **kwargs)
-
         if check_type(editable, bool, "editable"):
-            kwargs.update({"writable_models": [attachment_property.model_id]})
+            kwargs.update({"writable_models": [attachment_model_id]})
         else:
-            kwargs.update({"readable_models": [attachment_property.model_id]})
+            kwargs.update({"readable_models": [attachment_model_id]})
 
         widget = self.create_widget(
             widget_type=WidgetTypes.ATTACHMENTVIEWER,
@@ -804,9 +832,17 @@ class WidgetsManager(Iterable):
         :raises APIError: When the widget could not be created.
         """
         # Check whether the part_model is uuid type or class `Part`
-        part_instance: "Part" = _retrieve_object(
+
+        part: "Part" = _retrieve_object(
             part_instance, method=self._client.part
         )  # noqa: F821
+
+        if part.category == Category.MODEL:
+            part_model_id = part.id
+            part_instance_id = None
+        else:
+            part_model_id = part.model_id
+            part_instance_id = part.id
 
         if not show_columns:
             show_columns = list()
@@ -825,7 +861,8 @@ class WidgetsManager(Iterable):
         meta.update(
             {
                 MetaWidget.CUSTOM_HEIGHT: max_height if max_height else None,
-                AssociatedObjectId.PART_INSTANCE_ID: part_instance.id,
+                AssociatedObjectId.PART_INSTANCE_ID: part_instance_id,
+                AssociatedObjectId.PART_MODEL_ID: part_model_id,
                 MetaWidget.SHOW_COLUMNS: show_columns,
                 MetaWidget.SHOW_HEADERS: show_headers,
             }
@@ -1423,8 +1460,15 @@ class WidgetsManager(Iterable):
         """
         attachment_property: "AttachmentProperty" = _retrieve_object(
             attachment_property, method=self._client.property
-        )  # noqa
+        )
         meta = _initiate_meta(kwargs, activity=self.activity)
+        if attachment_property.category == Category.MODEL:
+            attachment_model_id = attachment_property.id
+            attachment_instance_id = None
+        else:
+            attachment_model_id = attachment_property.model_id
+            attachment_instance_id = attachment_property.id
+
         meta, title = _set_title(meta, title=title, **kwargs)
         check_type(editable, bool, "editable")
 
@@ -1446,7 +1490,8 @@ class WidgetsManager(Iterable):
 
         meta.update(
             {
-                AssociatedObjectId.PROPERTY_INSTANCE_ID: attachment_property.id,
+                AssociatedObjectId.PROPERTY_INSTANCE_ID: attachment_instance_id,
+                AssociatedObjectId.PROPERTY_MODEL_ID: attachment_model_id,
                 MetaWidget.SHOW_UNDO_BUTTON: show_undo_button_value,
                 MetaWidget.CUSTOM_UNDO_BUTTON_TEXT: undo_button_text,
                 MetaWidget.CUSTOM_TEXT: button_text,
@@ -1460,8 +1505,8 @@ class WidgetsManager(Iterable):
             meta=meta,
             title=title,
             parent=parent_widget,
-            readable_models=[attachment_property.model_id] if not editable else None,
-            writable_models=[attachment_property.model_id] if editable else None,
+            readable_models=[attachment_model_id] if not editable else None,
+            writable_models=[attachment_model_id] if editable else None,
             **kwargs,
         )
         return widget
@@ -1554,13 +1599,22 @@ class WidgetsManager(Iterable):
         """
         weather_property: "Property" = _retrieve_object(
             weather_property, method=self._client.property
-        )  # noqa
+        )
+        meta = _initiate_meta(kwargs, activity=self.activity)
+        if weather_property.category == Category.MODEL:
+            weather_model_id = weather_property.id
+            weather_instance_id = None
+        else:
+            weather_model_id = weather_property.model_id
+            weather_instance_id = weather_property.id
+
         meta = _initiate_meta(kwargs, activity=self.activity)
         meta, title = _set_title(meta, title=title, **kwargs)
 
         meta.update(
             {
-                AssociatedObjectId.PROPERTY_INSTANCE_ID: weather_property.id,
+                AssociatedObjectId.PROPERTY_INSTANCE_ID: weather_instance_id,
+                AssociatedObjectId.PROPERTY_MODEL_ID: weather_model_id
             }
         )
 
@@ -1569,7 +1623,7 @@ class WidgetsManager(Iterable):
             meta=meta,
             title=title,
             parent=parent_widget,
-            writable_models=[weather_property.model_id],
+            writable_models=[weather_model_id],
             **kwargs,
         )
         return widget

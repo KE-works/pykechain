@@ -20,15 +20,17 @@ from pykechain.enums import (
     Classification,
     Multiplicity,
     ActivityStatus,
-    ActivityClassification,
+    ActivityClassification, WorkflowCategory,
 )
+from pykechain.extra_utils import _copy_part_model
+from pykechain.models.form import Form
 from pykechain.models.widgets.enums import (
     DashboardWidgetShowForms,
     DashboardWidgetShowTasks,
     DashboardWidgetShowScopes,
     TasksAssignmentFilterTypes,
 )
-from pykechain.exceptions import IllegalArgumentError, NotFoundError
+from pykechain.exceptions import APIError, ForbiddenError, IllegalArgumentError, NotFoundError
 from pykechain.models import Activity, Part
 from pykechain.models.widgets import (
     UndefinedWidget,
@@ -52,7 +54,7 @@ from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widget_models import (
     ServicecardWidget,
     DashboardWidget,
-    ScopemembersWidget,
+    ScopemembersWidget, WeatherWidget,
 )
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import slugify_ref, temp_chdir, find
@@ -953,7 +955,9 @@ class TestWidgetManagerInActivity(TestBetamax):
 
     def test_add_project_info_widget(self):
         title = "__TEST_PROJECT_TEAM"
-        project_info_widget = self.wm.add_project_info_widget(title=title, collapsible=True, collapsed=True)
+        project_info_widget = self.wm.add_project_info_widget(title=title,
+                                                              collapsible=True,
+                                                              collapsed=True)
 
         self.assertEqual(project_info_widget.title, title)
 
@@ -1191,3 +1195,227 @@ class TestWidgetDownloadAsExcel(TestBetamax):
 
         with self.assertRaises(IllegalArgumentError):
             self.grid_widget.download_as_excel(user="Testuser")
+
+
+class TestWidgetsInForm(TestBetamax):
+    def setUp(self):
+        super().setUp()
+        self.cross_scope = self.project.clone(asynchronous=False)  # type: Scope
+
+        self.workflow = self.client.workflow(
+            name="Simple Form Flow", category=WorkflowCategory.CATALOG
+        )
+        self.form_model_name = "__TEST__FORM_MODEL"
+        self.form_model = self.client.create_form_model(
+            name=self.form_model_name,
+            scope=self.project,
+            workflow=self.workflow,
+            contexts=[],
+        )
+        self.activity_to_do = self.form_model.status_forms[0].activity
+        self.form_part_model = self.project.model(name=self.form_model_name)
+        self.exactly_1_part_model = self.form_part_model.add_model(
+            name="__EXACTLY_1_FORM_MODEL",
+            multiplicity=Multiplicity.ONE,
+        )
+        self.attachment_property_model = self.exactly_1_part_model.add_property(
+                name="__ATTACHMENT_PROPERTY_FORM",
+                property_type=PropertyType.ATTACHMENT_VALUE)
+        self.form_parent_part = self.project.part(name="Form")
+        self.bike_model = self.project.model(name='Bike')
+        self.form_bike_model = _copy_part_model(
+            part=self.bike_model,
+            target_parent=self.form_part_model,
+            name="__BIKE_FORM_MODEL",
+            include_children=True,
+        )
+        self.weather_prop_model = \
+            self.form_bike_model.add_property(
+                name="weather_prop",
+                property_type=PropertyType.WEATHER_VALUE)
+        self.wm = self.activity_to_do.widgets()
+
+    def tearDown(self):
+        super().tearDown()
+        if self.form_model:
+            try:
+                self.form_model.delete()
+            except (ForbiddenError, APIError):
+                pass
+        if self.cross_scope:
+            try:
+                self.cross_scope.delete()
+            except (ForbiddenError, APIError):
+                pass
+
+    def test_add_attachment_widget(self):
+        widget = self.wm.add_attachmentviewer_widget(
+            attachment_property=self.attachment_property_model,
+            editable=True
+        )
+        cloned_form_model = \
+            self.form_model.clone(name=self.form_model_name, target_scope=self.cross_scope)
+        cloned_activity_to_do = cloned_form_model.status_forms[0].activity
+        cloned_wm = cloned_activity_to_do.widgets()
+        cloned_widget = cloned_wm[-1]
+
+        self.assertIsInstance(widget, AttachmentviewerWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+        self.assertEqual(self.attachment_property_model.name, widget.title_visible)
+        self.assertIsInstance(self.cross_scope.form(name=self.form_model_name), Form)
+        self.assertIsInstance(cloned_widget, AttachmentviewerWidget)
+        self.assertEqual(len(cloned_wm), 1 + 1)
+        self.assertEqual(self.attachment_property_model.name, cloned_widget.title_visible)
+
+    def test_add_attachment_widget_with_editable_association(self):
+        widget = self.wm.add_attachmentviewer_widget(
+            title="Attachment Viewer",
+            attachment_property=self.attachment_property_model,
+            editable=True,
+        )
+        cloned_form_model = \
+            self.form_model.clone(name=self.form_model_name, target_scope=self.cross_scope)
+        cloned_activity_to_do = cloned_form_model.status_forms[0].activity
+        cloned_wm = cloned_activity_to_do.widgets()
+        cloned_widget = cloned_wm[-1]
+
+        self.assertIsInstance(widget, AttachmentviewerWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+        self.assertEqual("Attachment Viewer", widget.title_visible)
+        self.assertIsInstance(self.cross_scope.form(name=self.form_model_name), Form)
+        self.assertIsInstance(cloned_widget, AttachmentviewerWidget)
+        self.assertEqual(len(cloned_wm), 1 + 1)
+        self.assertEqual("Attachment Viewer", cloned_widget.title_visible)
+
+    def test_add_super_grid_widget(self):
+        bike_part_model = self.project.model(name="__BIKE_FORM_MODEL")
+        wheel_form_part_model = self.project.model(name="Wheel", parent=bike_part_model)
+
+        widget = self.wm.add_supergrid_widget(
+            part_model=wheel_form_part_model,
+            parent_instance=bike_part_model,
+            edit=False,
+            emphasize_edit=True,
+            all_readable=True,
+            incomplete_rows=True,
+        )
+        cloned_form_model = \
+            self.form_model.clone(name=self.form_model_name, target_scope=self.cross_scope)
+        cloned_activity_to_do = cloned_form_model.status_forms[0].activity
+        cloned_wm = cloned_activity_to_do.widgets()
+        cloned_widget = cloned_wm[-1]
+
+        self.assertIsInstance(widget, SupergridWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+        self.assertEqual(wheel_form_part_model.name, widget.title_visible)
+        self.assertIsInstance(self.cross_scope.form(name=self.form_model_name), Form)
+        self.assertIsInstance(cloned_widget, SupergridWidget)
+        self.assertEqual(len(cloned_wm), 1 + 1)
+        self.assertEqual(wheel_form_part_model.name, cloned_widget.title_visible)
+
+    def test_add_filtered_grid_widget(self):
+        bike_part_model = self.project.model(name="__BIKE_FORM_MODEL")
+        wheel_form_part_model = self.project.model(name="Wheel", parent=bike_part_model)
+
+        widget = self.wm.add_filteredgrid_widget(
+            part_model=wheel_form_part_model,
+            parent_instance=bike_part_model,
+            edit=False,
+            emphasize_edit=True,
+            all_readable=True,
+            incomplete_rows=True,
+        )
+        cloned_form_model = \
+            self.form_model.clone(name=self.form_model_name, target_scope=self.cross_scope)
+        cloned_activity_to_do = cloned_form_model.status_forms[0].activity
+        cloned_wm = cloned_activity_to_do.widgets()
+        cloned_widget = cloned_wm[-1]
+
+        self.assertIsInstance(widget, FilteredgridWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+        self.assertEqual(wheel_form_part_model.name, widget.title_visible)
+        self.assertIsInstance(self.cross_scope.form(name=self.form_model_name), Form)
+        self.assertIsInstance(cloned_widget, FilteredgridWidget)
+        self.assertEqual(len(cloned_wm), 1 + 1)
+        self.assertEqual(wheel_form_part_model.name, cloned_widget.title_visible)
+
+    def test_add_propertygrid_widget(self):
+        bike_part_model = self.project.model(name="__BIKE_FORM_MODEL")
+        widget = self.wm.add_propertygrid_widget(
+            part_instance=bike_part_model,
+            show_headers=False,
+            show_columns=[ShowColumnTypes.UNIT],
+            readable_models=bike_part_model.properties[:2],
+            writable_models=bike_part_model.properties[3:],
+        )
+        cloned_form_model = \
+            self.form_model.clone(name=self.form_model_name, target_scope=self.cross_scope)
+        cloned_activity_to_do = cloned_form_model.status_forms[0].activity
+        cloned_wm = cloned_activity_to_do.widgets()
+        cloned_widget = cloned_wm[-1]
+
+        self.assertIsInstance(widget, PropertygridWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+        self.assertEqual(bike_part_model.name, widget.title_visible)
+        self.assertIsInstance(self.cross_scope.form(name=self.form_model_name), Form)
+        self.assertIsInstance(cloned_widget, PropertygridWidget)
+        self.assertEqual(len(cloned_wm), 1 + 1)
+        self.assertEqual(bike_part_model.name, cloned_widget.title_visible)
+
+    def test_add_signature_widget(self):
+        widget1 = self.wm.add_signature_widget(
+            attachment_property=self.attachment_property_model,
+            title="Yes, my precious",
+            custom_undo_button_text="Remove za widget",
+            custom_button_text="Sign za widget, plz",
+            show_name_and_date=False,
+        )
+        widget2 = self.wm.add_signature_widget(
+            attachment_property=self.attachment_property_model,
+            title=False,
+            custom_undo_button_text=False,
+            custom_button_text=False,
+        )
+        widget3 = self.wm.add_signature_widget(
+            attachment_property=self.attachment_property_model
+        )
+
+        cloned_form_model = \
+            self.form_model.clone(name=self.form_model_name, target_scope=self.cross_scope)
+        cloned_activity_to_do = cloned_form_model.status_forms[0].activity
+        cloned_wm = cloned_activity_to_do.widgets()
+        cloned_widget1 = cloned_wm[-3]
+        cloned_widget2 = cloned_wm[-2]
+        cloned_widget3 = cloned_wm[-1]
+
+        self.assertIsInstance(widget1, SignatureWidget)
+        self.assertIsInstance(widget2, SignatureWidget)
+        self.assertIsInstance(widget3, SignatureWidget)
+        self.assertEqual(len(self.wm), 1 + 3)
+        self.assertIsInstance(self.cross_scope.form(name=self.form_model_name), Form)
+        self.assertIsInstance(cloned_widget1, SignatureWidget)
+        self.assertIsInstance(cloned_widget2, SignatureWidget)
+        self.assertIsInstance(cloned_widget3, SignatureWidget)
+        self.assertEqual(len(cloned_wm), 1 + 3)
+
+        with self.assertRaises(IllegalArgumentError):
+            self.wm.add_signature_widget(attachment_property="Failed script")
+
+    def test_weather_widget(self):
+        """Testing the weather widget."""
+        widget = self.wm.add_weather_widget(
+            weather_property=self.weather_prop_model,
+        )
+        cloned_form_model = \
+            self.form_model.clone(name=self.form_model_name, target_scope=self.cross_scope)
+        cloned_activity_to_do = cloned_form_model.status_forms[0].activity
+        cloned_wm = cloned_activity_to_do.widgets()
+        cloned_widget = cloned_wm[-1]
+
+        self.assertIsInstance(widget, WeatherWidget)
+        self.assertEqual(len(self.wm), 1 + 1)
+        self.assertEqual(self.weather_prop_model.name, widget.title_visible)
+        self.assertIsInstance(self.cross_scope.form(name=self.form_model_name), Form)
+        self.assertIsInstance(cloned_widget, WeatherWidget)
+        self.assertEqual(len(cloned_wm), 1 + 1)
+        self.assertEqual(self.weather_prop_model.name, cloned_widget.title_visible)

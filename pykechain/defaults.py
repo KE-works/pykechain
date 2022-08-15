@@ -179,7 +179,7 @@ API_EXTRA_PARAMS = {
                 "scope_id",
                 "customization",
                 "activity_options",
-                "form_collection"
+                "form_collection",
             ]
         )
     },
@@ -204,7 +204,7 @@ API_EXTRA_PARAMS = {
                 "scope_id",
                 "customization",
                 "activity_options",
-                "form_collection"
+                "form_collection",
             ]
         )
     },
