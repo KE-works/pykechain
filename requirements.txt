@@ -9,7 +9,7 @@ jsonschema==4.6.2
 semver==2.13.0
 
 # testing
-pytest==7.1.2
+pytest==7.1.3
 pytest-xdist[psutil]==2.5.0
 betamax==0.8.1
 coverage==6.4.1
