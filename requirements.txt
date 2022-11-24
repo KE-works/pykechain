@@ -24,7 +24,7 @@ nbsphinx==0.8.9
 tox==3.25.1
 
 # code style
-flake8==4.0.1
+flake8==6.0.0
 importlib-metadata
 pydocstyle==6.1.1
 mypy==0.961; python_version >= '3.4'
