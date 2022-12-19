@@ -86,6 +86,7 @@ API_PATH = {
     "parts_bulk_create": "/api/v3/parts/bulk_create_part_instances",
     "parts_bulk_delete": "/api/v3/parts/bulk_delete_part_instances",
     "parts_export": "api/v3/parts/export",
+    'parts_import': 'api/v3/parts/import_parts',
     "part": "api/v3/parts/{part_id}.json",
     "properties": "api/v3/properties.json",
     "properties_bulk_update": "api/v3/properties/bulk_update",
