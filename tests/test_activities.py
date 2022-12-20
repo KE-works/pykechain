@@ -1060,3 +1060,21 @@ class TestActivityDownloadAsPDF(TestBetamax):
 
         # tearDown
         notifications[0].delete()
+
+class TestActivityCloneWidgets(TestBetamax):
+    def setUp(self):
+        super().setUp()
+
+        self.form = self.project.form(name="Test Cloning Widgets")
+        self.activity_status_to_do = self.form.status_forms[0].activity
+        self.activity_status_in_progress = self.form.status_forms[1].activity
+
+    def tearDown(self):
+        super().tearDown()
+
+        wm = self.activity_status_in_progress.widgets()
+        wm.delete_all_widgets()
+    def test_clone_widgets(self):
+        self.activity_status_in_progress.clone_widgets(from_activity=self.activity_status_to_do)
+        print()
+

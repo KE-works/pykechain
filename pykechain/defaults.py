@@ -44,6 +44,7 @@ API_PATH = {
     "activity_move": "api/activities/{activity_id}/move_activity",
     "activities_bulk_clone": "api/activities/bulk_clone",
     "activities_bulk_update": "api/activities/bulk_update",
+    "clone_widgets": "api/activities/{activity_from_id}/clone_widgets_from/{activity_to_id}",
     "widgets_config": "api/widget_config.json",
     "widget_config": "api/widget_config/{widget_config_id}.json",
     "services": "api/services.json",
