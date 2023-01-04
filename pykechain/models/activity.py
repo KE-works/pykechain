@@ -1246,7 +1246,7 @@ class Activity(TreeObject, TagsMixin):
 
         :param from_activity: An Activity object that contains the widgets that are wanted in the
             current one
-        :raises IllegalArgumentError: When the Activities belong to different Forms
+        :raises APIError: When the call is unsuccessful, for example when cloning cross-forms
         """
         # update_dict = clean_empty_values(update_dict=update_dict)
 
