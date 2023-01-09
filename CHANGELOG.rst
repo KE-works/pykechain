@@ -4,6 +4,7 @@ Change Log
 vUNRELEASED
 ---------------
 * :+1: Added the possibility to import `Parts` from an `Excel` file (#931)
+* :+1: Added a new endpoint for to help with reordering `Properties` (#1254)
 
 v4.3.0 (7NOV22)
 ---------------
