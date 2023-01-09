@@ -1,11 +1,14 @@
 Change Log
 ==========
 
-vUNRELEASED
+v4.4.0 (9JAN23)
 ---------------
-* :+1: Added the possibility to import `Parts` from an `Excel` file (#931)
-* :+1: Added a new endpoint for to help with reordering `Properties` (#1254)
-* :+1: Added the possibility to clone `Widgets` from one `Form status` to another (#1219)
+* :star: Added the possibility to import `Parts` from an `Excel` file (#931)
+* :star: Added a new endpoint for to help with reordering `Properties` (#1254)
+* :star: Added the possibility to clone `Widgets` from one `Form status` to another (#1219)
+* :+1: Switched to dependabot for package version and security monitoring.
+* :+1: dependent versions for development: jsonschema (4.17.3), pytest (7.2.0), pytest-xdist (3.1.0), coverage (7.0.4), pytest-cov (4.0.0), flake8 (6.0.0), importlib-metadata (6.0.0), pydocstyle (6.2.3), mypy (0.991), pre-commit (2.21.0), pytz (2022.7)
+
 
 v4.3.0 (7NOV22)
 ---------------
