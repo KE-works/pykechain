@@ -1241,8 +1241,9 @@ class Activity(TreeObject, TagsMixin):
 
     def clone_widgets(self, from_activity: "Activity") -> None:
         """
-        Clone widgets from another Activity to the current one. The two activities must be related
-        to the same Form.
+        Clone widgets from another Activity to the current one.
+
+        The two activities must be related to the same Form.
 
         :param from_activity: An Activity object that contains the widgets that are wanted in the
             current one
