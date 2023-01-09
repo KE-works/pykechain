@@ -1073,8 +1073,6 @@ class TestActivityCloneWidgets(TestBetamax):
         self.new_form_template = None
 
     def tearDown(self):
-        super().tearDown()
-
         wm = self.activity_status_in_progress.widgets()
         wm.delete_all_widgets()
 
@@ -1082,6 +1080,8 @@ class TestActivityCloneWidgets(TestBetamax):
             self.new_form_template.delete()
         if self.new_activity:
             self.new_activity.delete()
+        super().tearDown()
+
     def test_clone_widgets(self):
         self.activity_status_in_progress.clone_widgets(from_activity=self.activity_status_to_do)
 
