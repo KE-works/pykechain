@@ -5,6 +5,7 @@ vUNRELEASED
 ---------------
 * :+1: Added the possibility to import `Parts` from an `Excel` file (#931)
 * :+1: Added a new endpoint for to help with reordering `Properties` (#1254)
+* :+1: Added the possibility to clone `Widgets` from one `Form status` to another (#1219)
 
 v4.3.0 (7NOV22)
 ---------------

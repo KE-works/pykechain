@@ -1060,3 +1060,57 @@ class TestActivityDownloadAsPDF(TestBetamax):
 
         # tearDown
         notifications[0].delete()
+
+class TestActivityCloneWidgets(TestBetamax):
+    def setUp(self):
+        super().setUp()
+
+        self.form = self.project.form(name="Test Cloning Widgets")
+        self.workflow = self.project.workflow(name="Simple Form Flow")
+        self.activity_status_to_do = self.form.status_forms[0].activity
+        self.activity_status_in_progress = self.form.status_forms[1].activity
+        self.new_activity = None
+        self.new_form_template = None
+
+    def tearDown(self):
+        wm = self.activity_status_in_progress.widgets()
+        wm.delete_all_widgets()
+
+        if self.new_form_template:
+            self.new_form_template.delete()
+        if self.new_activity:
+            self.new_activity.delete()
+        super().tearDown()
+
+    def test_clone_widgets(self):
+        self.activity_status_in_progress.clone_widgets(from_activity=self.activity_status_to_do)
+
+        wm_to_do = self.activity_status_to_do.widgets()
+        wm_in_progress = self.activity_status_in_progress.widgets()
+
+        for widget in wm_in_progress:
+            self.assertIn(widget.title, [w.title for w in wm_to_do])
+
+    def test_clone_widgets_cross_form(self):
+        self.new_form_template = self.project.create_form_model(
+            name="Test cross form widget cloning",
+            workflow=self.workflow,
+            contexts=[]
+        )
+        self.new_form_template_status_to_do = self.new_form_template.status_forms[0].activity
+
+        with self.assertRaises(APIError):
+            self.new_form_template_status_to_do.clone_widgets(
+                from_activity=self.activity_status_to_do
+            )
+
+    def test_clone_widget_to_an_activity(self):
+        self.new_activity = self.project.create_activity(
+            name="Test cross activity widget cloning",
+            activity_type=ActivityType.TASK
+        )
+
+        with self.assertRaises(APIError):
+            self.new_activity.clone_widgets(
+                from_activity=self.activity_status_to_do
+            )

@@ -1238,3 +1238,24 @@ class Activity(TreeObject, TagsMixin):
             )
         context.unlink_activities(activities=[self])
         self.refresh()
+
+    def clone_widgets(self, from_activity: "Activity") -> None:
+        """
+        Clone widgets from another Activity to the current one.
+
+        The two activities must be related to the same Form.
+
+        :param from_activity: An Activity object that contains the widgets that are wanted in the
+            current one
+        :raises APIError: When the call is unsuccessful, for example when cloning cross-forms
+        """
+        url = self._client._build_url("clone_widgets",
+                                      activity_from_id=self.id,
+                                      activity_to_id=from_activity.id)
+
+        response = self._client._request(
+            "POST", url,
+        )
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError(f"Could not update Activity {self}", response=response)
