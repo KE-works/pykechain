@@ -89,6 +89,7 @@ API_PATH = {
     "parts_export": "api/v3/parts/export",
     'parts_import': 'api/v3/parts/import_parts',
     "part": "api/v3/parts/{part_id}.json",
+    "order_properties": "api/v3/parts/{part_id}/order_properties",
     "properties": "api/v3/properties.json",
     "properties_bulk_update": "api/v3/properties/bulk_update",
     "properties_create_model": "api/v3/properties/create_model",
