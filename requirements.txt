@@ -12,7 +12,7 @@ semver==2.13.0
 pytest==7.2.1
 pytest-xdist[psutil]==3.1.0
 betamax==0.8.1
-coverage==7.0.4
+coverage==7.0.5
 pytest-cov==4.0.0
 coveralls==3.3.1
 
