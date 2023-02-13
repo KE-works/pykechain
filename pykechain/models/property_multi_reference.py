@@ -261,7 +261,6 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
         """
         return self._options.get(PropertyReferenceOptions.PROPMODELS_EXCLUDED, [])
 
-
     def set_sorting(
         self,
         sort_property: Optional[Union["AnyProperty", str]] = None,
@@ -303,7 +302,6 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
 
         self.edit(options=options_to_set)
 
-
     def get_sorting(self) -> Dict:
         """
         Retrieve the sorted column and sorted direction, if applicable.
@@ -318,4 +316,3 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
                 PropertyReferenceOptions.SORTED_DIRECTION),
         }
         return sorting_options
-
