@@ -1,16 +1,24 @@
 import warnings
-from typing import List, Optional, Union, Any, Tuple
+from typing import Dict, List, Optional, Union, Any, Tuple
 
 from pykechain.defaults import PARTS_BATCH_LIMIT
-from pykechain.enums import Category, FilterType
+from pykechain.enums import (
+    Category,
+    FilterType,
+    SortTable
+)
 from pykechain.models.base_reference import _ReferencePropertyInScope
 from pykechain.models.input_checks import check_type
 from pykechain.models.part import Part
 from pykechain.models.value_filter import PropertyValueFilter
-from pykechain.models.widgets.enums import MetaWidget
+from pykechain.models.widgets.enums import (
+    MetaWidget,
+    PropertyReferenceOptions
+)
 from pykechain.models.widgets.helpers import (
     _check_prefilters,
     _check_excluded_propmodels,
+    _retrieve_object_id,
 )
 from pykechain.utils import get_in_chunks
 
@@ -134,9 +142,9 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
 
         if prefilters is None:
             new_prefilters = {
-                "property_models": property_models,
-                "values": values,
-                "filters_type": filters_type,
+                PropertyReferenceOptions.PREFILTER_PROPERTY_MODELS: property_models,
+                PropertyReferenceOptions.PREFILTER_VALUES: values,
+                PropertyReferenceOptions.PREFILTER_FILTER_TYPES: filters_type,
             }
         else:
             new_prefilters = prefilters
@@ -218,7 +226,9 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
         :raises IllegalArgumentError
         """
         if not overwrite:
-            list_of_propmodels_excl = self._options.get("propmodels_excl", [])
+            list_of_propmodels_excl = self._options.get(
+                PropertyReferenceOptions.PROPMODELS_EXCLUDED, []
+            )
         else:
             list_of_propmodels_excl = list()
 
@@ -237,7 +247,8 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
         )
 
         options_to_set = self._options
-        options_to_set["propmodels_excl"] = list(set(list_of_propmodels_excl))
+        options_to_set[
+            PropertyReferenceOptions.PROPMODELS_EXCLUDED] = list(set(list_of_propmodels_excl))
 
         self.edit(options=options_to_set)
 
@@ -248,4 +259,63 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
         :return: list of UUIDs
         :rtype list
         """
-        return self._options.get("propmodels_excl", [])
+        return self._options.get(PropertyReferenceOptions.PROPMODELS_EXCLUDED, [])
+
+
+    def set_sorting(
+        self,
+        sort_property: Optional[Union["AnyProperty", str]] = None,
+        sort_name: Optional[Union[bool, str]] = False,
+        sort_direction: Optional[Union[SortTable, str]] = SortTable.ASCENDING,
+        clear: Optional[bool] = False,
+    ) -> None:
+        """
+        Set sorting on a specific property (or name) of the referenced part model.
+
+        :param sort_property: The property model on which the part instances are being sorted on
+        :type sort_property: :class:`Property` or UUID
+        :param sort_name: If set to True it will sort on name of the part. It is ignored if sort_property is None
+        :type sort_name: bool
+        :param sort_direction: The direction on which the values of property instances are being sorted on:
+            * ASC (default): Sort in ascending order
+            * DESC: Sort in descending order
+        :type sort_direction: basestring (see :class:`enums.SortTable`)
+        :param clear: whether all existing sorting should be cleared. If set to True, it will ignore all
+            the other parameters
+        :type clear: bool
+
+        :raises IllegalArgumentError
+        """
+        if clear:
+            options_to_set = self._options
+            options_to_set.pop(PropertyReferenceOptions.SORTED_COLUMN)
+            options_to_set.pop(PropertyReferenceOptions.SORTED_DIRECTION)
+            self.edit(options=options_to_set)
+            return
+
+        sort_property_id: str = _retrieve_object_id(obj=sort_property)
+        if not sort_property_id and sort_name:
+            sort_property_id = PropertyReferenceOptions.NAME
+
+        options_to_set = self._options
+        options_to_set[PropertyReferenceOptions.SORTED_COLUMN] = sort_property_id
+        options_to_set[PropertyReferenceOptions.SORTED_DIRECTION] = sort_direction
+
+        self.edit(options=options_to_set)
+
+
+    def get_sorting(self) -> Dict:
+        """
+        Retrieve the sorted column and sorted direction, if applicable.
+
+        :return: dict of sorting keys and values
+        :rtype dict
+        """
+        sorting_options = {
+            PropertyReferenceOptions.SORTED_COLUMN: self._options.get(
+                PropertyReferenceOptions.SORTED_COLUMN),
+            PropertyReferenceOptions.SORTED_DIRECTION: self._options.get(
+                PropertyReferenceOptions.SORTED_DIRECTION),
+        }
+        return sorting_options
+
