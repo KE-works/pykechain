@@ -246,3 +246,18 @@ class TasksWidgetColumns(Enum):
     DUE_DATE = "due_date"
     STATUS = "status"
     TAGS = "tags"
+
+
+class PropertyReferenceOptions(Enum):
+    """Options to be set for a `Part Reference Property`."""
+
+    PREFILTER_PROPERTY_MODELS = 'property_models'
+    PREFILTER_VALUES = 'values'
+    PREFILTER_FILTER_TYPES = 'filters_type'
+
+    PROPMODELS_EXCLUDED = 'propmodels_excl'
+
+    SORTED_COLUMN = 'sorted_column'
+    SORTED_DIRECTION = 'sort_direction'
+
+    NAME = 'name'
