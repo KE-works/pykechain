@@ -249,7 +249,8 @@ class TasksWidgetColumns(Enum):
 
 
 class PropertyReferenceOptions(Enum):
-    """Options to be set for a `Part Reference Property`"""
+    """Options to be set for a `Part Reference Property`."""
+
     PREFILTER_PROPERTY_MODELS = 'property_models'
     PREFILTER_VALUES = 'values'
     PREFILTER_FILTER_TYPES = 'filters_type'
