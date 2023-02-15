@@ -1,7 +1,6 @@
 import copy
 
 from pykechain.enums import PropertyType, PropertyVTypes, _AllRepresentations
-
 #
 # Validators and Validator Effects
 #

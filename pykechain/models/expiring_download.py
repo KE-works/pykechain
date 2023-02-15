@@ -7,7 +7,7 @@ import requests
 from pykechain.exceptions import APIError
 from pykechain.models import Base
 from pykechain.models.input_checks import check_type
-from pykechain.utils import empty, clean_empty_values
+from pykechain.utils import clean_empty_values, empty
 
 
 class ExpiringDownload(Base):

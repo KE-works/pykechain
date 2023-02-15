@@ -100,8 +100,7 @@ class Context(
         :return: a created Context Object
         :return: The updated Context object
         """
-        from pykechain.models import Scope
-        from pykechain.models import Activity
+        from pykechain.models import Activity, Scope
 
         update_dict = {
             "name": check_text(name, "name"),

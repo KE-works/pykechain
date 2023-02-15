@@ -6,11 +6,7 @@ from urllib.parse import urljoin
 
 import requests
 
-from pykechain.defaults import (
-    API_EXTRA_PARAMS,
-    ASYNC_REFRESH_INTERVAL,
-    ASYNC_TIMEOUT_LIMIT,
-)
+from pykechain.defaults import API_EXTRA_PARAMS, ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT
 from pykechain.enums import (
     ActivityClassification,
     ActivityRootNames,

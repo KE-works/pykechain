@@ -5,7 +5,7 @@ import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.exceptions import NotFoundError
-from pykechain.models.input_checks import check_uuid, check_client
+from pykechain.models.input_checks import check_client, check_uuid
 from pykechain.typing import ObjectID
 from pykechain.utils import parse_datetime
 

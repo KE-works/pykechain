@@ -1,19 +1,19 @@
 import mimetypes
 import re
-from typing import (
+from typing import (  # noqa: F401 # pylint: disable=unused-import
     Any,
-    Union,
-    Tuple,
-    Optional,
     Dict,
     List,
-)  # noqa: F401 # pylint: disable=unused-import
+    Optional,
+    Tuple,
+    Union,
+)
 
 from pykechain.enums import PropertyVTypes
 from pykechain.models.validators.mime_types_defaults import predefined_mimes
 from pykechain.models.validators.validator_schemas import (
-    filesizevalidator_schema,
     fileextensionvalidator_schema,
+    filesizevalidator_schema,
 )
 from pykechain.models.validators.validators_base import PropertyValidator
 from pykechain.utils import EMAIL_REGEX_PATTERN

@@ -1,5 +1,5 @@
 import warnings
-from typing import Dict, List, Optional, Union, Any, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.enums import Category, FilterType, SortTable
@@ -9,8 +9,8 @@ from pykechain.models.part import Part
 from pykechain.models.value_filter import PropertyValueFilter
 from pykechain.models.widgets.enums import MetaWidget, PropertyReferenceOptions
 from pykechain.models.widgets.helpers import (
-    _check_prefilters,
     _check_excluded_propmodels,
+    _check_prefilters,
     _retrieve_object_id,
 )
 from pykechain.utils import get_in_chunks

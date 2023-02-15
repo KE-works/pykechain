@@ -1,18 +1,18 @@
-from typing import (
+from typing import (  # noqa: F401 # pylint: disable=unused-import
     Any,
     AnyStr,
-    Union,
-    Tuple,
     Dict,
     Optional,
-)  # noqa: F401 # pylint: disable=unused-import
+    Tuple,
+    Union,
+)
 
 from jsonschema import validate
 
 from pykechain.enums import PropertyVTypes, ValidatorEffectTypes
 from pykechain.models.validators.validator_schemas import (
-    validator_jsonschema_stub,
     effects_jsonschema_stub,
+    validator_jsonschema_stub,
 )
 
 
