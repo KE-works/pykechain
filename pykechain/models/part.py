@@ -1159,9 +1159,7 @@ class Part(TreeObject):
             property_list, Property, "property_list", method=self.property
         )
 
-        properties_fvalues = [
-            dict(id=pk) for pk in property_ids
-        ]
+        properties_fvalues = [dict(id=pk) for pk in property_ids]
 
         response = self._client._request(
             "POST",
@@ -1170,9 +1168,12 @@ class Part(TreeObject):
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError(f"Could not reorder Properties of Part {self}", response=response)
+            raise APIError(
+                f"Could not reorder Properties of Part {self}", response=response
+            )
 
         return
+
     #
     # Utility Functions
     #

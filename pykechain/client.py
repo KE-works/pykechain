@@ -4008,7 +4008,7 @@ class Client:
         model: Part,
         parent: Part,
         activity: Optional[Activity] = None,
-        async_mode: Optional[bool] = True
+        async_mode: Optional[bool] = True,
     ) -> None:
         """Import parts from an Excel file.
 
@@ -4022,23 +4022,26 @@ class Client:
         if model.category != Category.MODEL:
             raise IllegalArgumentError(f"Part {model.name} should be of category MODEL")
         if parent.category != Category.INSTANCE:
-            raise IllegalArgumentError(f"Part {parent.name} should be of category INSTANCE")
+            raise IllegalArgumentError(
+                f"Part {parent.name} should be of category INSTANCE"
+            )
 
         json = dict(
             model_id=model.id,
             parent_id=parent.id,
             activity_id=activity.id,
         )
-        params = dict(
-            async_mode=async_mode
-        )
+        params = dict(async_mode=async_mode)
         if isinstance(file, str):
-            with open(file, 'rb') as fp:
-                url = self._build_url('parts_import')
-                response = self._request('POST',
-                                         url,
-                                         data=json,
-                                         params=params,
-                                         files={"attachment": fp})
-                if response.status_code not in (requests.codes.accepted, requests.codes.ok):
-                    raise APIError(f"Could not import parts {str(response)}: {response.content}")
+            with open(file, "rb") as fp:
+                url = self._build_url("parts_import")
+                response = self._request(
+                    "POST", url, data=json, params=params, files={"attachment": fp}
+                )
+                if response.status_code not in (
+                    requests.codes.accepted,
+                    requests.codes.ok,
+                ):
+                    raise APIError(
+                        f"Could not import parts {str(response)}: {response.content}"
+                    )

@@ -1614,7 +1614,7 @@ class WidgetsManager(Iterable):
         meta.update(
             {
                 AssociatedObjectId.PROPERTY_INSTANCE_ID: weather_instance_id,
-                AssociatedObjectId.PROPERTY_MODEL_ID: weather_model_id
+                AssociatedObjectId.PROPERTY_MODEL_ID: weather_model_id,
             }
         )
 

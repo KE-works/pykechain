@@ -22,7 +22,7 @@ from .widget_models import (
     DashboardWidget,
     TasksWidget,
     ScopemembersWidget,
-    WeatherWidget
+    WeatherWidget,
 )
 from .widgets_manager import WidgetsManager
 

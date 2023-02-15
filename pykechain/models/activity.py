@@ -1249,12 +1249,13 @@ class Activity(TreeObject, TagsMixin):
             current one
         :raises APIError: When the call is unsuccessful, for example when cloning cross-forms
         """
-        url = self._client._build_url("clone_widgets",
-                                      activity_from_id=self.id,
-                                      activity_to_id=from_activity.id)
+        url = self._client._build_url(
+            "clone_widgets", activity_from_id=self.id, activity_to_id=from_activity.id
+        )
 
         response = self._client._request(
-            "POST", url,
+            "POST",
+            url,
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover

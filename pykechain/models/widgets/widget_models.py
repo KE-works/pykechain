@@ -32,6 +32,7 @@ from pykechain.models.widgets.widget_schemas import undefined_meta_schema
 # In regex terms: r"[A-Z][a-z]+Widget"
 #
 
+
 class MetapanelWidget(Widget):
     """Metapanel Widget."""
 
