@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v4.5.0 (UNRELEASED)
+-------------------
+* :star: Added the possibility to set sorting on `Multi Reference Property` (#1285)
+
+
 v4.4.0 (9JAN23)
 ---------------
 * :star: Added the possibility to import `Parts` from an `Excel` file (#931)

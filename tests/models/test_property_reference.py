@@ -8,10 +8,10 @@ from pykechain.enums import (
     FormCategory,
     Multiplicity,
     PropertyType,
-    StatusCategory,
+    SortTable,
     WorkflowCategory,
 )
-from pykechain.exceptions import ForbiddenError, IllegalArgumentError, NotFoundError
+from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import MultiReferenceProperty
 from pykechain.models.base_reference import _ReferenceProperty
 from pykechain.models.property_reference import (
@@ -24,6 +24,7 @@ from pykechain.models.property_reference import (
 )
 from pykechain.models.validators import RequiredFieldValidator
 from pykechain.models.value_filter import PropertyValueFilter, ScopeFilter
+from pykechain.models.widgets.enums import PropertyReferenceOptions
 from pykechain.models.workflow import Status, Workflow
 from pykechain.utils import find, is_uuid
 from tests.classes import TestBetamax
@@ -399,8 +400,8 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
         )
 
         # testing Excluded props
-        self.assertIn("propmodels_excl", self.ref_prop_model._options)
-        excluded = self.ref_prop_model._options["propmodels_excl"]
+        self.assertIn(PropertyReferenceOptions.PROPMODELS_EXCLUDED, self.ref_prop_model._options)
+        excluded = self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]
 
         self.assertEqual(len(excluded), 2)
         self.assertIn(diameter_property.id, excluded)
@@ -546,12 +547,12 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
         )
 
         # testing
-        self.assertEqual(len(self.ref_prop_model._options["propmodels_excl"]), 2)
+        self.assertEqual(len(self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]), 2)
         self.assertTrue(
-            diameter_property.id in self.ref_prop_model._options["propmodels_excl"]
+            diameter_property.id in self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]
         )
         self.assertTrue(
-            spokes_property.id in self.ref_prop_model._options["propmodels_excl"]
+            spokes_property.id in self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]
         )
 
     def test_set_excluded_propmodels_with_validation(self):
@@ -594,12 +595,12 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
         )
 
         # testing
-        self.assertEqual(len(self.ref_prop_model._options["propmodels_excl"]), 2)
+        self.assertEqual(len(self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]), 2)
         self.assertTrue(
-            diameter_property.id in self.ref_prop_model._options["propmodels_excl"]
+            diameter_property.id in self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]
         )
         self.assertTrue(
-            spokes_property.id in self.ref_prop_model._options["propmodels_excl"]
+            spokes_property.id in self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]
         )
 
     def test_set_excluded_propmodels_on_reference_property_with_prefilters_and_validators(
@@ -631,12 +632,12 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
             )
             in self.ref_prop_model._options["prefilters"]["property_value"]
         )
-        self.assertEqual(len(self.ref_prop_model._options["propmodels_excl"]), 2)
+        self.assertEqual(len(self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]), 2)
         self.assertTrue(
-            diameter_property.id in self.ref_prop_model._options["propmodels_excl"]
+            diameter_property.id in self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]
         )
         self.assertTrue(
-            spokes_property.id in self.ref_prop_model._options["propmodels_excl"]
+            spokes_property.id in self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]
         )
         self.assertTrue(
             isinstance(self.ref_prop_model._validators[0], RequiredFieldValidator)
@@ -708,12 +709,12 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
         )
 
         # testing
-        self.assertEqual(len(self.ref_prop_model._options["propmodels_excl"]), 2)
+        self.assertEqual(len(self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]), 2)
         self.assertTrue(
-            self.float_prop.id in self.ref_prop_model._options["propmodels_excl"]
+            self.float_prop.id in self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]
         )
         self.assertTrue(
-            self.integer_prop.id in self.ref_prop_model._options["propmodels_excl"]
+            self.integer_prop.id in self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]
         )
 
     def test_overwrite_excluded_propmodels_on_reference_property(self):
@@ -730,12 +731,12 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
         )
 
         # testing
-        self.assertEqual(len(self.ref_prop_model._options["propmodels_excl"]), 1)
+        self.assertEqual(len(self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]), 1)
         self.assertTrue(
-            diameter_property.id not in self.ref_prop_model._options["propmodels_excl"]
+            diameter_property.id not in self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]
         )
         self.assertTrue(
-            spokes_property.id in self.ref_prop_model._options["propmodels_excl"]
+            spokes_property.id in self.ref_prop_model._options[PropertyReferenceOptions.PROPMODELS_EXCLUDED]
         )
 
     def test_get_excluded_propmodel_ids(self):
@@ -803,6 +804,78 @@ class TestPropertyMultiReferenceProperty(TestBetamax):
         # tearDown
         copied_ref_property.delete()
 
+    def test_set_sorting_on_property(self):
+        self.ref_prop_model.set_sorting(
+            sort_property=self.float_prop,
+            sort_direction=SortTable.DESCENDING
+        )
+
+        self.assertIn(PropertyReferenceOptions.SORTED_COLUMN,
+                      self.ref_prop_model._options)
+        self.assertIn(PropertyReferenceOptions.SORTED_DIRECTION,
+                      self.ref_prop_model._options)
+        self.assertEqual(self.ref_prop_model._options[
+                             PropertyReferenceOptions.SORTED_COLUMN], self.float_prop.id)
+        self.assertEqual(self.ref_prop_model._options[
+                             PropertyReferenceOptions.SORTED_DIRECTION], SortTable.DESCENDING)
+
+    def test_set_sorting_on_name(self):
+        self.ref_prop_model.set_sorting(
+            sort_name=True,
+            sort_direction=SortTable.ASCENDING
+        )
+
+        self.assertIn(PropertyReferenceOptions.SORTED_COLUMN,
+                      self.ref_prop_model._options)
+        self.assertIn(PropertyReferenceOptions.SORTED_DIRECTION,
+                      self.ref_prop_model._options)
+        self.assertEqual(self.ref_prop_model._options[
+                             PropertyReferenceOptions.SORTED_COLUMN], PropertyReferenceOptions.NAME)
+        self.assertEqual(self.ref_prop_model._options[
+                             PropertyReferenceOptions.SORTED_DIRECTION], SortTable.ASCENDING)
+
+    def test_clear_sorting(self):
+        self.ref_prop_model.set_sorting(
+            sort_name=True,
+            sort_direction=SortTable.ASCENDING
+        )
+
+        self.assertIn(PropertyReferenceOptions.SORTED_COLUMN,
+                      self.ref_prop_model._options)
+        self.assertIn(PropertyReferenceOptions.SORTED_DIRECTION,
+                      self.ref_prop_model._options)
+        self.assertEqual(self.ref_prop_model._options[
+                             PropertyReferenceOptions.SORTED_COLUMN], PropertyReferenceOptions.NAME)
+        self.assertEqual(self.ref_prop_model._options[
+                             PropertyReferenceOptions.SORTED_DIRECTION], SortTable.ASCENDING)
+
+        self.ref_prop_model.set_sorting(
+            sort_name=True,
+            sort_direction=SortTable.ASCENDING,
+            clear=True
+        )
+
+        self.assertNotIn(PropertyReferenceOptions.SORTED_COLUMN,
+                      self.ref_prop_model._options)
+        self.assertNotIn(PropertyReferenceOptions.SORTED_DIRECTION,
+                      self.ref_prop_model._options)
+
+    def test_get_sorting(self):
+        self.ref_prop_model.set_sorting(
+            sort_name=True,
+            sort_direction=SortTable.ASCENDING
+        )
+
+        sorting_options = self.ref_prop_model.get_sorting()
+
+        self.assertIn(PropertyReferenceOptions.SORTED_COLUMN,
+                      sorting_options)
+        self.assertIn(PropertyReferenceOptions.SORTED_DIRECTION,
+                      sorting_options)
+        self.assertEqual(sorting_options[PropertyReferenceOptions.SORTED_COLUMN],
+                         PropertyReferenceOptions.NAME)
+        self.assertEqual(sorting_options[PropertyReferenceOptions.SORTED_DIRECTION],
+                         SortTable.ASCENDING)
 
 class TestPropertyMultiReferencePropertyXScope(TestBetamax):
     def setUp(self):
