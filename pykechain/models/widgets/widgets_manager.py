@@ -81,8 +81,8 @@ class WidgetsManager(Iterable):
         for widget in self._widgets:
             widget.manager = self
 
-        from pykechain.models import Activity
         from pykechain import Client
+        from pykechain.models import Activity
 
         if not isinstance(activity, Activity):
             raise IllegalArgumentError(
@@ -1614,7 +1614,7 @@ class WidgetsManager(Iterable):
         meta.update(
             {
                 AssociatedObjectId.PROPERTY_INSTANCE_ID: weather_instance_id,
-                AssociatedObjectId.PROPERTY_MODEL_ID: weather_model_id
+                AssociatedObjectId.PROPERTY_MODEL_ID: weather_model_id,
             }
         )
 

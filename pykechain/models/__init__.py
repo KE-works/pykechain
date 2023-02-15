@@ -1,6 +1,7 @@
 """All pykechain surrogate models based on KE-chain models."""
 from typing import Union
 
+# isort: off
 from .base import Base, BaseInScope
 from .notification import Notification
 from .scope import Scope
@@ -34,6 +35,8 @@ from .team import Team
 from .user import User
 from .value_filter import PropertyValueFilter
 from ..enums import PropertyType
+# isort: on
+
 
 AnyProperty = Union[
     "Property",

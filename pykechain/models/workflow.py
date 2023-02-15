@@ -1,4 +1,4 @@
-from typing import List, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 import requests
 

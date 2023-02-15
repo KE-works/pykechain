@@ -21,9 +21,7 @@ from pykechain.models.input_checks import (
     check_text,
 )
 from pykechain.models.tags import TagsMixin
-from pykechain.models.validators.validator_schemas import (
-    form_collection_prefill_parts_schema,
-)
+from pykechain.models.validators.validator_schemas import form_collection_prefill_parts_schema
 from pykechain.models.workflow import Status, Transition
 from pykechain.typing import ObjectID
 from pykechain.utils import Empty, clean_empty_values, empty

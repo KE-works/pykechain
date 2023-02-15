@@ -1,23 +1,16 @@
 import warnings
-from typing import Dict, List, Optional, Union, Any, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pykechain.defaults import PARTS_BATCH_LIMIT
-from pykechain.enums import (
-    Category,
-    FilterType,
-    SortTable
-)
+from pykechain.enums import Category, FilterType, SortTable
 from pykechain.models.base_reference import _ReferencePropertyInScope
 from pykechain.models.input_checks import check_type
 from pykechain.models.part import Part
 from pykechain.models.value_filter import PropertyValueFilter
-from pykechain.models.widgets.enums import (
-    MetaWidget,
-    PropertyReferenceOptions
-)
+from pykechain.models.widgets.enums import MetaWidget, PropertyReferenceOptions
 from pykechain.models.widgets.helpers import (
-    _check_prefilters,
     _check_excluded_propmodels,
+    _check_prefilters,
     _retrieve_object_id,
 )
 from pykechain.utils import get_in_chunks
@@ -247,8 +240,9 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
         )
 
         options_to_set = self._options
-        options_to_set[
-            PropertyReferenceOptions.PROPMODELS_EXCLUDED] = list(set(list_of_propmodels_excl))
+        options_to_set[PropertyReferenceOptions.PROPMODELS_EXCLUDED] = list(
+            set(list_of_propmodels_excl)
+        )
 
         self.edit(options=options_to_set)
 
@@ -311,8 +305,10 @@ class MultiReferenceProperty(_ReferencePropertyInScope):
         """
         sorting_options = {
             PropertyReferenceOptions.SORTED_COLUMN: self._options.get(
-                PropertyReferenceOptions.SORTED_COLUMN),
+                PropertyReferenceOptions.SORTED_COLUMN
+            ),
             PropertyReferenceOptions.SORTED_DIRECTION: self._options.get(
-                PropertyReferenceOptions.SORTED_DIRECTION),
+                PropertyReferenceOptions.SORTED_DIRECTION
+            ),
         }
         return sorting_options

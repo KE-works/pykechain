@@ -1,24 +1,19 @@
-from typing import Union, List, Dict, Optional, Tuple, Any  # noqa: F401
+from typing import Any, Dict, List, Optional, Tuple, Union  # noqa: F401
 
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS, PARTS_BATCH_LIMIT
-from pykechain.enums import Category, Multiplicity, Classification, PropertyType
-from pykechain.exceptions import (
-    APIError,
-    IllegalArgumentError,
-    NotFoundError,
-    MultipleFoundError,
-)
+from pykechain.enums import Category, Classification, Multiplicity, PropertyType
+from pykechain.exceptions import APIError, IllegalArgumentError, MultipleFoundError, NotFoundError
 from pykechain.models.input_checks import (
-    check_text,
-    check_type,
     check_list_of_base,
     check_list_of_dicts,
+    check_text,
+    check_type,
 )
 from pykechain.models.property import Property
 from pykechain.models.tree_traversal import TreeObject
-from pykechain.utils import find_obj_in_list, find, Empty, clean_empty_values, empty
+from pykechain.utils import Empty, clean_empty_values, empty, find, find_obj_in_list
 
 
 class Part(TreeObject):
@@ -1159,9 +1154,7 @@ class Part(TreeObject):
             property_list, Property, "property_list", method=self.property
         )
 
-        properties_fvalues = [
-            dict(id=pk) for pk in property_ids
-        ]
+        properties_fvalues = [dict(id=pk) for pk in property_ids]
 
         response = self._client._request(
             "POST",
@@ -1170,9 +1163,12 @@ class Part(TreeObject):
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError(f"Could not reorder Properties of Part {self}", response=response)
+            raise APIError(
+                f"Could not reorder Properties of Part {self}", response=response
+            )
 
         return
+
     #
     # Utility Functions
     #

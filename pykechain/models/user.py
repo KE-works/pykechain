@@ -3,9 +3,9 @@ import datetime
 import pytz
 import requests
 
-from .base import Base
 from ..enums import LanguageCodes
 from ..exceptions import APIError
+from .base import Base
 
 
 class User(Base):

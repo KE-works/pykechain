@@ -10,8 +10,8 @@ from pykechain.models.validators import (
     InvalidVisualEffect,
     NumericRangeValidator,
     PropertyValidator,
-    ValidVisualEffect,
     ValidatorEffect,
+    ValidVisualEffect,
     VisualEffect,
 )
 from pykechain.models.validators.validator_schemas import (

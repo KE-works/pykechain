@@ -1,23 +1,23 @@
 import warnings
-from typing import Dict, Optional, Union, Tuple, List, Callable
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from pykechain.enums import (
+    ActivityType,
+    CardWidgetImageValue,
+    CardWidgetKEChainPageLink,
+    CardWidgetLinkValue,
     Category,
+    ImageFitValue,
+    KEChainPages,
+    LinkTargets,
     PropertyType,
     WidgetTitleValue,
-    ActivityType,
-    CardWidgetLinkValue,
-    KEChainPages,
-    CardWidgetKEChainPageLink,
-    LinkTargets,
-    ImageFitValue,
-    CardWidgetImageValue,
 )
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models.input_checks import check_enum, check_base
+from pykechain.models.input_checks import check_base, check_enum
 from pykechain.models.value_filter import PropertyValueFilter
-from pykechain.models.widgets.enums import MetaWidget, AssociatedObjectId
-from pykechain.utils import is_uuid, snakecase, camelcase
+from pykechain.models.widgets.enums import AssociatedObjectId, MetaWidget
+from pykechain.utils import camelcase, is_uuid, snakecase
 
 # these are the common keys to all kecards.
 KECARD_COMMON_KEYS = [
@@ -461,8 +461,7 @@ def _check_excluded_propmodels(
     :rtype list
     :raises IllegalArgumentError: whenever the properties are not of category MODEL or do not belong to the part model.
     """
-    from pykechain.models import Property
-    from pykechain.models import Part
+    from pykechain.models import Part, Property
 
     if not part_model:
         # part model is unknown, only check for property_models

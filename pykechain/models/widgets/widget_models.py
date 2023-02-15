@@ -1,7 +1,6 @@
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widget_schemas import undefined_meta_schema
 
-
 # UNDEFINED
 # PROPERTYGRID
 # SUPERGRID
@@ -31,6 +30,7 @@ from pykechain.models.widgets.widget_schemas import undefined_meta_schema
 # rule: "<widget_type_in_undercast_with_first_letter_capitalized>Widget"
 # In regex terms: r"[A-Z][a-z]+Widget"
 #
+
 
 class MetapanelWidget(Widget):
     """Metapanel Widget."""

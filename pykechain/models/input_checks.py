@@ -292,7 +292,9 @@ def check_list_of_base(
     return ids
 
 
-def check_json(value: Union[dict, list], schema: dict, key: Optional[str] = None) -> bool:
+def check_json(
+    value: Union[dict, list], schema: dict, key: Optional[str] = None
+) -> bool:
     """
     Validate value against a jsonschema.
 

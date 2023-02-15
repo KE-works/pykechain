@@ -1,12 +1,12 @@
+from typing import Dict, List, Optional, Union
+
 import requests
 
-from pykechain.enums import NotificationStatus, NotificationEvent, NotificationChannels
-from pykechain.exceptions import IllegalArgumentError, APIError
+from pykechain.enums import NotificationChannels, NotificationEvent, NotificationStatus
+from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Base
-from typing import List, Optional, Dict, Union
-
-from pykechain.models.input_checks import check_text, check_enum, check_base, check_user
-from pykechain.utils import is_valid_email, Empty, clean_empty_values, empty
+from pykechain.models.input_checks import check_base, check_enum, check_text, check_user
+from pykechain.utils import Empty, clean_empty_values, empty, is_valid_email
 
 
 class Notification(Base):

@@ -39,14 +39,7 @@ from pykechain.models.team import Team
 from pykechain.models.validators.validator_schemas import scope_project_info_jsonschema
 from pykechain.models.workflow import Workflow
 from pykechain.typing import ObjectID
-from pykechain.utils import (
-    Empty,
-    clean_empty_values,
-    empty,
-    find,
-    is_uuid,
-    parse_datetime,
-)
+from pykechain.utils import Empty, clean_empty_values, empty, find, is_uuid, parse_datetime
 
 
 class Scope(Base, TagsMixin):
@@ -393,7 +386,8 @@ class Scope(Base, TagsMixin):
                 project_info,
                 scope_project_info_jsonschema,
                 "project_info",
-            ) or [],
+            )
+            or [],
         }
 
         if kwargs:  # pragma: no cover
