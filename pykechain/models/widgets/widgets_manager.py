@@ -81,8 +81,8 @@ class WidgetsManager(Iterable):
         for widget in self._widgets:
             widget.manager = self
 
-        from pykechain.models import Activity
         from pykechain import Client
+        from pykechain.models import Activity
 
         if not isinstance(activity, Activity):
             raise IllegalArgumentError(

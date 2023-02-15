@@ -1,7 +1,6 @@
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widget_schemas import undefined_meta_schema
 
-
 # UNDEFINED
 # PROPERTYGRID
 # SUPERGRID

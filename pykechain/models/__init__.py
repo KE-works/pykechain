@@ -1,39 +1,39 @@
 """All pykechain surrogate models based on KE-chain models."""
 from typing import Union
 
-from .base import Base, BaseInScope
-from .notification import Notification
-from .scope import Scope
-from .scope2 import Scope2
+from ..enums import PropertyType
 from .activity import Activity
 from .activity2 import Activity2
 from .association import Association
+from .base import Base, BaseInScope
+from .notification import Notification
 from .part import Part
 from .part2 import Part2
+from .partset import PartSet
 from .property import Property
-from .property_attachment import AttachmentProperty
-from .property_selectlist import SelectListProperty, MultiSelectListProperty
-from .property_multi_reference import MultiReferenceProperty
-from .property_datetime import DatetimeProperty
 from .property2 import Property2
 from .property2_attachment import AttachmentProperty2
-from .property2_selectlist import SelectListProperty2
-from .property2_multi_reference import MultiReferenceProperty2
 from .property2_datetime import DatetimeProperty2
+from .property2_multi_reference import MultiReferenceProperty2
+from .property2_selectlist import SelectListProperty2
+from .property_attachment import AttachmentProperty
+from .property_datetime import DatetimeProperty
+from .property_multi_reference import MultiReferenceProperty
 from .property_reference import (
     ActivityReferencesProperty,
     ContextReferencesProperty,
+    FormReferencesProperty,
     ScopeReferencesProperty,
     StatusReferencesProperty,
     UserReferencesProperty,
-    FormReferencesProperty,
 )
-from .partset import PartSet
+from .property_selectlist import MultiSelectListProperty, SelectListProperty
+from .scope import Scope
+from .scope2 import Scope2
 from .service import Service, ServiceExecution
 from .team import Team
 from .user import User
 from .value_filter import PropertyValueFilter
-from ..enums import PropertyType
 
 AnyProperty = Union[
     "Property",
