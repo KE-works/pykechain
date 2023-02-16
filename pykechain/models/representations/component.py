@@ -156,5 +156,7 @@ def _valid_object_type(representation: BaseRepresentation, obj: "Base") -> bool:
                     PropertyType.TEXT_VALUE,
                     PropertyType.CHAR_VALUE,
                 )
+            elif rtype == _AllRepresentations.SIGNATURE:
+                return obj.type == PropertyType.ATTACHMENT_VALUE
             else:
                 return False

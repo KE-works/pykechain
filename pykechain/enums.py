@@ -755,6 +755,19 @@ class PropertyRepresentation(Enum):
     GEOCOORDINATE = "geoCoordinate"
     USE_PROPERTY_NAME = "usePropertyName"
     CAMERA_SCANNER_INPUT = "cameraScannerInput"
+    SIGNATURE = "signature"
+
+
+class SignatureRepresentationValues(Enum):
+    """
+    Values that can be put in the SignatureRepresentation for representing attachments as sigs.
+
+    :cvar CLEAN: a clean signature representation.
+    :cvar NAME_AND_DATE: A name and Date background to the signature field when filling in.
+    """
+
+    CLEAN = 'clean'
+    NAME_AND_DATE = 'nameAndDate'
 
 
 class GeoCoordinateConfig(Enum):

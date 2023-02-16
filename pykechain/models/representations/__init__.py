@@ -12,6 +12,7 @@ from .representations import (
     DecimalPlaces,
     GeoCoordinateRepresentation,
     LinkTarget,
+    SignatureRepresentation,
     SignificantDigits,
     ThousandsSeparator,
     UsePropertyNameRepresentation,
@@ -37,6 +38,8 @@ AnyRepresentation = (
     UsePropertyNameRepresentation,
     # cameraScannerInput Representation for text inputs
     CameraScannerInputRepresentation,
+    # Attachment properties
+    SignatureRepresentation,
 )
 
 __all__ = (

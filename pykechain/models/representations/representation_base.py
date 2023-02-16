@@ -123,6 +123,8 @@ class BaseRepresentation:
         """
         Validate whether the representation value can be set.
 
+        Will fail on error, no need to return anything.
+
         :param value: representation value to set.
         :type value: Any
         :raises IllegalArgumentError
