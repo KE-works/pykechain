@@ -1,13 +1,13 @@
 Change Log
 ==========
 
-UNRELEASED()
--------------------
-* :star: Added `Signature` representation for `Attachment Property` (#1289)
+v4.6.0 (16FEB23)
+----------------
+* :star: Added `Signature` representation for `Attachment Property`. (#1289)
 
 v4.5.0 (15FEB23)
--------------------
-* :star: Added the possibility to set sorting on `Multi Reference Property` (#1285)
+----------------
+* :star: Added the possibility to set sorting on `Multi Reference Property` .(#1285)
 * :+1: dependent versions for development: requests (2.28.2), pytest (7.2.1), coverage (7.1.0), Sphinx (6.1.3), nbsphinx (0.8.12), tox (4.4.5), pydocstyle (6.3.0), pytz (2022.7.1)
 * :+1: blackened all code, isorted all files, pyupgraded all files as well.
 
@@ -18,7 +18,6 @@ v4.4.0 (9JAN23)
 * :star: Added the possibility to clone `Widgets` from one `Form status` to another (#1219)
 * :+1: Switched to dependabot for package version and security monitoring.
 * :+1: dependent versions for development: jsonschema (4.17.3), pytest (7.2.0), pytest-xdist (3.1.0), coverage (7.0.4), pytest-cov (4.0.0), flake8 (6.0.0), importlib-metadata (6.0.0), pydocstyle (6.2.3), mypy (0.991), pre-commit (2.21.0), pytz (2022.7)
-
 
 v4.3.0 (7NOV22)
 ---------------
