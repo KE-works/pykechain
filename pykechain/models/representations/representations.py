@@ -258,3 +258,9 @@ class CameraScannerInputRepresentation(SimpleConfigValueKeyRepresentation):
 
     rtype = PropertyRepresentation.CAMERA_SCANNER_INPUT
     _config_value_key = "camera_scanner"
+
+class SignatureRepresenation(SimpleConfigValueKeyRepresentation):
+    """Representation for the signature input in a grid or propertygrid."""
+
+    rtype = PropertyRepresentation.SIGNATURE
+    _config_value_key = PropertyRepresentation.SIGNATURE
