@@ -426,6 +426,12 @@ class TestReprSignatureRepresentationNameAndDate(Bases._TestPropertyRepresentati
     value = None
     new_value = SignatureRepresentationValues.NAME_AND_DATE
 
+class TestReprSignatureRepresentationFromCleanToNameAndDate(Bases._TestPropertyRepresentation):
+    property_type = PropertyType.ATTACHMENT_VALUE
+    representation_class = SignatureRepresentation
+    value = SignatureRepresentationValues.CLEAN
+    new_value = SignatureRepresentationValues.NAME_AND_DATE
+
 
 class TestReprActivity(Bases._TestCustomIconRepresentation):
     def _get_object(self):

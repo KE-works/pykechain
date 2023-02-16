@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+UNRELEASED()
+-------------------
+* :star: Added `Signature` representation for `Attachment Property` (#1289)
+
 v4.5.0 (15FEB23)
 -------------------
 * :star: Added the possibility to set sorting on `Multi Reference Property` (#1285)
