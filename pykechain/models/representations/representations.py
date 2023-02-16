@@ -1,12 +1,14 @@
+from typing import Any
+
 from pykechain.enums import (
     FontAwesomeMode,
     GeoCoordinateConfig,
     LinkTargets,
     PropertyRepresentation,
-    SelectListRepresentations,
+    SelectListRepresentations, SignatureRepresentationValueOptions,
 )
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models.input_checks import check_type
+from pykechain.models.input_checks import check_enum, check_type
 from pykechain.models.representations.representation_base import BaseRepresentation
 
 
@@ -259,8 +261,20 @@ class CameraScannerInputRepresentation(SimpleConfigValueKeyRepresentation):
     rtype = PropertyRepresentation.CAMERA_SCANNER_INPUT
     _config_value_key = "camera_scanner"
 
-class SignatureRepresenation(SimpleConfigValueKeyRepresentation):
+
+class SignatureRepresentation(SimpleConfigValueKeyRepresentation):
     """Representation for the signature input in a grid or propertygrid."""
 
     rtype = PropertyRepresentation.SIGNATURE
     _config_value_key = PropertyRepresentation.SIGNATURE
+
+    def validate_representation(self, value: Any) -> None:
+        """
+        Validate whether the representation value can be set.
+
+        :param value: representation value to set.
+        :type value: Any
+        :raises IllegalArgumentError
+        :return: None
+        """
+        check_enum(value, SignatureRepresentationValueOptions, "signature representation values")
