@@ -757,7 +757,7 @@ class PropertyRepresentation(Enum):
     CAMERA_SCANNER_INPUT = "cameraScannerInput"
     SIGNATURE = "signature"
 
-class SignatureRepresentationValueOptions(Enum):
+class SignatureRepresentationValues(Enum):
     """
     Values that can be put in the SignatureRepresentation for representing attachments as sigs.
 

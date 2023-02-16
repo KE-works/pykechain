@@ -10,7 +10,7 @@ from pykechain.enums import (
     LinkTargets,
     Multiplicity,
     PropertyType,
-    SelectListRepresentations,
+    SelectListRepresentations, SignatureRepresentationValues,
 )
 from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import Activity, AnyProperty, Property, Scope, SelectListProperty
@@ -23,7 +23,7 @@ from pykechain.models.representations.representations import (
     DecimalPlaces,
     GeoCoordinateRepresentation,
     LinkTarget,
-    SignificantDigits,
+    SignatureRepresentation, SignificantDigits,
     ThousandsSeparator,
     UsePropertyNameRepresentation,
 )
@@ -413,6 +413,18 @@ class TestReprAutofillUser(Bases._TestPropertyRepresentation):
     representation_class = Autofill
     value = False
     new_value = True
+
+class TestReprSignatureRepresentationClean(Bases._TestPropertyRepresentation):
+    property_type = PropertyType.ATTACHMENT_VALUE
+    representation_class = SignatureRepresentation
+    value = None
+    new_value = SignatureRepresentationValues.CLEAN
+
+class TestReprSignatureRepresentationNameAndDate(Bases._TestPropertyRepresentation):
+    property_type = PropertyType.ATTACHMENT_VALUE
+    representation_class = SignatureRepresentation
+    value = None
+    new_value = SignatureRepresentationValues.NAME_AND_DATE
 
 
 class TestReprActivity(Bases._TestCustomIconRepresentation):

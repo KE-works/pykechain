@@ -5,7 +5,7 @@ from pykechain.enums import (
     GeoCoordinateConfig,
     LinkTargets,
     PropertyRepresentation,
-    SelectListRepresentations, SignatureRepresentationValueOptions,
+    SelectListRepresentations, SignatureRepresentationValues,
 )
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models.input_checks import check_enum, check_type
@@ -277,4 +277,4 @@ class SignatureRepresentation(SimpleConfigValueKeyRepresentation):
         :raises IllegalArgumentError
         :return: None
         """
-        check_enum(value, SignatureRepresentationValueOptions, "signature representation values")
+        check_enum(value, SignatureRepresentationValues, "signature representation values")
