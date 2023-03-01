@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Text, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -36,7 +36,7 @@ from pykechain.enums import (
     ServiceEnvironmentVersion,
     ServiceScriptUser,
     ServiceType,
-    TeamRoles,
+    StoredFileCategory, StoredFileClassification, TeamRoles,
     WidgetTypes,
     WorkflowCategory,
 )
@@ -91,6 +91,7 @@ from .models.input_checks import (
     check_user,
     check_uuid,
 )
+from .models.stored_file import StoredFile
 from .models.workflow import Workflow
 from .typing import ObjectID
 
@@ -4045,3 +4046,25 @@ class Client:
                     raise APIError(
                         f"Could not import parts {str(response)}: {response.content}"
                     )
+
+    def create_stored_file(
+        self,
+        name: Text,
+        filepath: Text,
+        scope: Optional[Union[Scope, ObjectID]] = None,
+        category: Optional[StoredFileCategory] = StoredFileCategory.GLOBAL,
+        classification: Optional[StoredFileClassification] = StoredFileClassification.GLOBAL,
+        **kwargs) -> StoredFile:
+        """Create a new Stored File object in a scope.
+
+        See `Workflow.create_workflow` for available parameters.
+
+        :return: a Workflow object
+        """
+        return StoredFile.create(client=self,
+                                 name=name,
+                                 category=category,
+                                 filepath=filepath,
+                                 classification=classification,
+                                 scope=scope,
+                                 **kwargs)
