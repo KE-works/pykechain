@@ -1,19 +1,16 @@
-from typing import List, TYPE_CHECKING, Union
+from typing import List, Union
 
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import StoredFileCategory, StoredFileClassification
 from pykechain.exceptions import APIError
-from pykechain.models import BaseInScope, Scope
+from pykechain.models import BaseInScope
 from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMixin
 from pykechain.models.input_checks import check_base, check_enum, check_text
 from pykechain.models.tags import TagsMixin
 from pykechain.typing import ObjectID
 from pykechain.utils import Empty, clean_empty_values
-
-if TYPE_CHECKING:
-    from pykechain.client import Client
 
 
 class StoredFile(
@@ -62,6 +59,8 @@ class StoredFile(
         :type scope: (optional) if left empty, it will not be affected
 
         """
+        from pykechain.models import Scope
+
         if isinstance(name, Empty):
             name = self.name
         data = {
