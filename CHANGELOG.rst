@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+UNRELEASED
+_______________
+* :star: Added the possibility to created, edit and delete `StoredFiles` (#1298)
+
 v4.6.0 (16FEB23)
 ----------------
 * :star: Added `Signature` representation for `Attachment Property`. (#1289)

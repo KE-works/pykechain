@@ -6,7 +6,7 @@ import requests
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import StoredFileCategory, StoredFileClassification
 from pykechain.exceptions import APIError
-from pykechain.models import BaseInScope
+from pykechain.models import BaseInScope, Scope
 from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMixin
 from pykechain.models.input_checks import check_base, check_enum, check_text
 from pykechain.models.tags import TagsMixin
@@ -25,7 +25,6 @@ class StoredFile(
     url_detail_name = "stored_file"
     url_list_name = "stored_files"
     url_pk_name: str = "file_id"
-
     def __init__(self, json, **kwargs):
         """Initialize a Stored File Object."""
         super().__init__(json, **kwargs)
@@ -34,6 +33,7 @@ class StoredFile(
         self.classification = json.get("classification", "")
         self.content_type = json.get("content_type")
         self.description = json.get("description")
+        self.file = json.get("file")
         self.name = json.get("name")
 
     def __repr__(self):  # pragma: no cover
@@ -43,12 +43,22 @@ class StoredFile(
         self,
         name: str = Empty(),
         description: str = Empty(),
-        category: str = Empty(),
-        classification: str = Empty(),
+        scope:  Union["Scope", ObjectID] = Empty(),
+        category: StoredFileCategory = Empty(),
+        classification: StoredFileClassification = Empty(),
         *args,
         **kwargs
     ) -> None:
-        """
+        """Change the StoredFile object.
+
+        Change the name, description, scope, category and classification of a
+        StoredFile.
+
+        :type name: name of the StoredFile is required.
+        :type description: (optional) description of the StoredFile
+        :type category: (optional) if left empty, it will not be affected
+        :type classification: (optional) if left empty, it will not be affected
+        :type scope: (optional) if left empty, it will not be affected
 
         """
         if isinstance(name, Empty):
@@ -61,13 +71,11 @@ class StoredFile(
             "classification": check_enum(classification, StoredFileClassification,
                                          "classification"),
         }
-
-        query_params = API_EXTRA_PARAMS.get(self.url_list_name)
+        url = self._client._build_url("stored_file", file_id=self.id)
         response = self._client._request(
-            method="PUT",
-            url=self._client._build_url("stored_files", file_id=self.id),
-            params=query_params,
-            json=clean_empty_values(data, nones=False),
+            method="PATCH",
+            url=url,
+            json=clean_empty_values(data, nones=True),
         )
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not edit the stored file", response=response)
@@ -75,12 +83,12 @@ class StoredFile(
 
     @classmethod
     def list(cls, client: "Client", **kwargs) -> List["StoredFile"]:
-        """Retrieve a list of Workflow objects through the client."""
+        """Retrieve a list of StoredFiles objects through the client."""
         return super().list(client=client, **kwargs)
 
     @classmethod
     def get(cls, client: "Client", **kwargs) -> "StoredFile":
-        """Retrieve a single Workflow object using the client."""
+        """Retrieve a single StoredFile object using the client."""
         return super().get(client=client, **kwargs)
 
     @classmethod
@@ -96,18 +104,20 @@ class StoredFile(
         **kwargs,
     ) -> "StoredFile":
         """
-        Create a new Workflow object using the client.
+        Create a new StoredFile object using the client.
 
         :param client: Client object.
-        :param name: Name of the workflow
-        :param scope: Scope of the workflow
-        :param category: (optional) category of the workflow, defaults to WorkflowCategory.DEFINED
-        :param description: (optional) description of the workflow
-        :param options: (optional) JSON/dictionary with workflow options
-        :param active: (optional) boolean flag to set the workflow to active. Defaults to False
+        :param name: Name of the StoredFile
+        :param scope: Scope of the StoredFile
+        :param filepath: mandatory, a StoredFile must have an attachment
+        :param category: (optional) category of the StoredFile, defaults to
+                         StoredFileCategory.GLOBAL
+        :param classification: (optional) classification of the StoredFile,
+                               defaults to StoredFileClassification.GLOBAL
+        :param description: (optional) description of the StoredFile
         :param kwargs: (optional) additional kwargs.
-        :return: a Workflow object
-        :raises APIError: When the Workflow could not be created.
+        :return: a StoredFile object
+        :raises APIError: When the StoredFile could not be created.
         """
         from pykechain.models import Scope  # avoiding circular imports here.
 
@@ -118,9 +128,10 @@ class StoredFile(
             "category": check_enum(category, StoredFileCategory, "category"),
             "classification": check_enum(classification, StoredFileClassification, "classification"),
         }
-        files = {
-            "file": open(filepath, 'rb'),
-        }
+        with open(filepath, 'rb') as f:
+            files = {
+                "file": f.read()
+            }
         kwargs.update(API_EXTRA_PARAMS[cls.url_upload_name])
         response = client._request(
             method="POST",
@@ -135,7 +146,5 @@ class StoredFile(
         return cls(json=response.json()["results"][0], client=client)
 
     def delete(self):
-        """Delete Workflow."""
+        """Delete StoredFile."""
         return super().delete()
-
-

@@ -520,7 +520,7 @@ class Empty:
             self.due_date = due_date
             self.save()
 
-    This OK, we can edit both the start and due date. But what if we want to be able to edit one of the two dates
+    This is ok, we can edit both the start and due date. But what if we want to be able to edit one of the two dates
     without providing or touching the other.
 
     We would have to change it as follows:
@@ -535,7 +535,7 @@ class Empty:
     Now, if we provide a start_date but not a due_date, the due_date would automatically get a None value. This way
     only the non-None values are edited and saved. Looks OK.
 
-    But what if we want to empty a date and set it to null(None) in the database? If we we send None as a due_date value
+    But what if we want to empty a date and set it to null(None) in the database? If we send None as a due_date value
     it would not get saved due to the None value checker we implemented in order to have optional parameters.
 
     Here comes the Empty class into play!
@@ -551,7 +551,7 @@ class Empty:
                 self.due_date = due_date
             self.save()
 
-    Now both start_date and due_date are optional but they can also hold a None value which will lead to an actual
+    Now both start_date and due_date are optional, but they can also hold a None value which will lead to an actual
     edit.
 
     Happy coding!
