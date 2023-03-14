@@ -1,5 +1,4 @@
-from io import BytesIO
-from typing import List, TYPE_CHECKING, Text, Union
+from typing import List, TYPE_CHECKING, Union
 
 import requests
 
@@ -15,16 +14,16 @@ from pykechain.utils import Empty, clean_empty_values
 
 if TYPE_CHECKING:
     from pykechain.client import Client
-    from pykechain.models import Scope
-class StoredFile(
-    BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationMixin
-):
-    """Stored File object"""
+
+
+class StoredFile(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationMixin):
+    """Stored File object."""
 
     url_upload_name = "upload_stored_file"
     url_detail_name = "stored_file"
     url_list_name = "stored_files"
     url_pk_name: str = "file_id"
+
     def __init__(self, json, **kwargs):
         """Initialize a Stored File Object."""
         super().__init__(json, **kwargs)
@@ -43,7 +42,7 @@ class StoredFile(
         self,
         name: str = Empty(),
         description: str = Empty(),
-        scope:  Union["Scope", ObjectID] = Empty(),
+        scope: Union["Scope", ObjectID] = Empty(),
         category: StoredFileCategory = Empty(),
         classification: StoredFileClassification = Empty(),
         *args,

@@ -1,6 +1,6 @@
 import datetime
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Text, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -4047,9 +4047,7 @@ class Client:
                         f"Could not import parts {str(response)}: {response.content}"
                     )
 
-    def create_stored_file(
-        self,
-        **kwargs) -> StoredFile:
+    def create_stored_file(self, **kwargs) -> StoredFile:
         """Create a new Stored File object in a scope.
 
         See `StoredFile.create` for available parameters.
@@ -4070,7 +4068,7 @@ class Client:
         **kwargs,
     ) -> StoredFile:
         """
-        Retrieve a single Stored File
+        Retrieve a single Stored File.
 
         .. versionadded:: 4.7.0
 
@@ -4114,7 +4112,7 @@ class Client:
         **kwargs,
     ) -> List[StoredFile]:
         """
-        Retrieve a single Stored File
+        Retrieve a single Stored File.
 
         .. versionadded:: 4.7.0
 
