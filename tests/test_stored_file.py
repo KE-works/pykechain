@@ -25,7 +25,7 @@ class TestStoredFiles(TestBetamax):
             scope=self.project,
             classification=StoredFileClassification.SCOPED,
             filepath=self.upload_path,
-            description="__TEST_STORED_FILE_DESCRIPTION"
+            description="__TEST_STORED_FILE_DESCRIPTION",
         )
         self.added_stored_file = None
 
@@ -37,7 +37,7 @@ class TestStoredFiles(TestBetamax):
         super().tearDown()
 
     def test_add_stored_file(self):
-        name = '__TEST_ADD_STORED_FILE'
+        name = "__TEST_ADD_STORED_FILE"
         self.client.create_stored_file(
             name=name,
             scope=self.project,
@@ -47,15 +47,16 @@ class TestStoredFiles(TestBetamax):
         )
 
         self.added_stored_file = self.client.stored_file(name=name)
-        self.assertEqual(self.added_stored_file.category,
-                         StoredFileCategory.REFERENCED)
-        self.assertEqual(self.added_stored_file.classification,
-                         StoredFileClassification.SCOPED)
+        self.assertEqual(self.added_stored_file.category, StoredFileCategory.REFERENCED)
+        self.assertEqual(
+            self.added_stored_file.classification, StoredFileClassification.SCOPED
+        )
         self.assertIsInstance(self.added_stored_file, StoredFile)
 
     def test_retrieve_stored_file(self):
         existing_file = self.client.stored_file(
-            classification=StoredFileClassification.SCOPED)
+            classification=StoredFileClassification.SCOPED
+        )
 
         self.assertEqual(existing_file.category, StoredFileCategory.GLOBAL)
         self.assertEqual(existing_file.name, self.name)
@@ -63,18 +64,19 @@ class TestStoredFiles(TestBetamax):
 
     def test_retrieve_stored_files(self):
         existing_files = self.client.stored_files(
-            classification=StoredFileClassification.SCOPED)
+            classification=StoredFileClassification.SCOPED
+        )
 
         self.assertEqual(len(existing_files), 1)
-        self.assertEqual(existing_files[0].classification,
-                         StoredFileClassification.SCOPED)
+        self.assertEqual(
+            existing_files[0].classification, StoredFileClassification.SCOPED
+        )
         self.assertEqual(existing_files[0].category, StoredFileCategory.GLOBAL)
         self.assertEqual(existing_files[0].name, self.name)
         self.assertIsInstance(existing_files[0], StoredFile)
 
     def test_delete_stored_file(self):
-        self.assertIsInstance(self.client.stored_file(name=self.name),
-                              StoredFile)
+        self.assertIsInstance(self.client.stored_file(name=self.name), StoredFile)
 
         self.stored_file.delete()
 
@@ -89,10 +91,14 @@ class TestStoredFiles(TestBetamax):
         self.assertEqual(self.stored_file.name, "__TEST_EDIT_NAME")
 
     def test_edit_stored_file_attributes(self):
-        self.stored_file.edit(description="__TEST_EDIT_DESCRIPTION",
-                              classification=StoredFileClassification.GLOBAL,
-                              category=StoredFileCategory.REFERENCED,
-                              scope=None)
-        self.assertEqual(self.stored_file.classification, StoredFileClassification.GLOBAL)
+        self.stored_file.edit(
+            description="__TEST_EDIT_DESCRIPTION",
+            classification=StoredFileClassification.GLOBAL,
+            category=StoredFileCategory.REFERENCED,
+            scope=None,
+        )
+        self.assertEqual(
+            self.stored_file.classification, StoredFileClassification.GLOBAL
+        )
         self.assertEqual(self.stored_file.category, StoredFileCategory.REFERENCED)
         self.assertEqual(self.stored_file.scope, None)

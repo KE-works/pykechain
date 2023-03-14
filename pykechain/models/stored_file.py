@@ -16,7 +16,9 @@ if TYPE_CHECKING:
     from pykechain.client import Client
 
 
-class StoredFile(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationMixin):
+class StoredFile(
+    BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTranslationMixin
+):
     """Stored File object."""
 
     url_upload_name = "upload_stored_file"
@@ -46,7 +48,7 @@ class StoredFile(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTransl
         category: StoredFileCategory = Empty(),
         classification: StoredFileClassification = Empty(),
         *args,
-        **kwargs
+        **kwargs,
     ) -> None:
         """Change the StoredFile object.
 
@@ -67,8 +69,9 @@ class StoredFile(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTransl
             "scope": check_base(scope, Scope, "scope"),
             "description": check_text(description, "description"),
             "category": check_enum(category, StoredFileCategory, "category"),
-            "classification": check_enum(classification, StoredFileClassification,
-                                         "classification"),
+            "classification": check_enum(
+                classification, StoredFileClassification, "classification"
+            ),
         }
         url = self._client._build_url("stored_file", file_id=self.id)
         response = self._client._request(
@@ -125,12 +128,12 @@ class StoredFile(BaseInScope, CrudActionsMixin, TagsMixin, NameDescriptionTransl
             "scope": check_base(scope, Scope, "scope"),
             "description": check_text(description, "description"),
             "category": check_enum(category, StoredFileCategory, "category"),
-            "classification": check_enum(classification, StoredFileClassification, "classification"),
+            "classification": check_enum(
+                classification, StoredFileClassification, "classification"
+            ),
         }
-        with open(filepath, 'rb') as f:
-            files = {
-                "file": f.read()
-            }
+        with open(filepath, "rb") as f:
+            files = {"file": f.read()}
         kwargs.update(API_EXTRA_PARAMS[cls.url_upload_name])
         response = client._request(
             method="POST",
