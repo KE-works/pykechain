@@ -996,7 +996,7 @@ KEChainPageLabels = {
     KEChainPages.FORMS: "Forms",
     KEChainPages.TASKS: "Tasks",
     KEChainPages.WORK_BREAKDOWN: "Work Breakdown",
-    KEChainPages.CATALOG_FORMS: "Template forms",
+    KEChainPages.CATALOG_FORMS: "Template Forms",
     KEChainPages.CONTEXTS: "Contexts",
     KEChainPages.WORKFLOWS: "Workflows",
     KEChainPages.CATALOG_WBS: "Catalog",
@@ -1031,7 +1031,7 @@ CardWidgetKEChainPageLink = {
     KEChainPages.WORK_BREAKDOWN: "Work Breakdown",
     KEChainPages.CATALOG_WBS: "Catalog Tasks",
     KEChainPages.APP_WBS: "App Tasks",
-    KEChainPages.CATALOG_FORMS: "Template forms",
+    KEChainPages.CATALOG_FORMS: "Template Forms",
     KEChainPages.CONTEXTS: "Contexts",
     KEChainPages.WORKFLOWS: "Workflows",
 }
