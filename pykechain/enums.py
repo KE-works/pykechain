@@ -1338,3 +1338,27 @@ class StatusCategory(Enum):
     TODO = "TODO"
     INPROGRESS = "INPROGRESS"
     DONE = "DONE"
+
+
+class StoredFileCategory(Enum):
+    """
+    Category of Stored files.
+
+    :cvar GLOBAL: Global status
+    :cvar REFERENCED: Referenced status
+    """
+
+    GLOBAL = "GLOBAL"
+    REFERENCED = "REFERENCED"
+
+
+class StoredFileClassification(Enum):
+    """
+    Classification of Stored files.
+
+    :cvar GLOBAL: Global classification
+    :cvar SCOPED: Scoped classification
+    """
+
+    GLOBAL = "GLOBAL"
+    SCOPED = "SCOPED"
