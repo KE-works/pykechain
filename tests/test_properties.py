@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pykechain.enums import PropertyType, Category, Multiplicity
+from pykechain.enums import ContextGroup, PropertyType, Category, Multiplicity
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models import Property
 from pykechain.models.validators import SingleReferenceValidator
@@ -91,6 +91,7 @@ class TestPropertyCreation(TestBetamax):
             PropertyType.SCOPE_REFERENCES_VALUE,
             PropertyType.FORM_REFERENCES_VALUE,
             PropertyType.CONTEXT_REFERENCES_VALUE,
+            # PropertyType.STOREDFILE_REFERENCES_VALUE,
             PropertyType.STATUS_REFERENCES_VALUE,
             PropertyType.USER_REFERENCES_VALUE,
             PropertyType.GEOJSON_VALUE,
@@ -114,7 +115,8 @@ class TestPropertyCreation(TestBetamax):
             [self.project.activity(name='Specify wheel diameter').id],
             [self.project.id],
             [self.project.form(name='Test').id],
-            None,
+            [c.id for c in self.project.contexts(context_group=ContextGroup.ASSET)],
+            # [self.client.stored_file(name="__PERMANENT_STORED_FILED").id],
             None,
             None,
             None,
