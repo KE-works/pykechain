@@ -76,27 +76,49 @@ class TestPropertyCreation(TestBetamax):
         types = [
             PropertyType.CHAR_VALUE,
             PropertyType.TEXT_VALUE,
+            PropertyType.BOOLEAN_VALUE,
             PropertyType.INT_VALUE,
             PropertyType.FLOAT_VALUE,
-            PropertyType.BOOLEAN_VALUE,
             PropertyType.DATETIME_VALUE,
+            PropertyType.DATE_VALUE,
+            PropertyType.TIME_VALUE,
+            PropertyType.ATTACHMENT_VALUE,
             PropertyType.LINK_VALUE,
-            PropertyType.DATETIME_VALUE,
             PropertyType.SINGLE_SELECT_VALUE,
+            PropertyType.MULTI_SELECT_VALUE,
             PropertyType.REFERENCES_VALUE,
+            PropertyType.ACTIVITY_REFERENCES_VALUE,
+            PropertyType.SCOPE_REFERENCES_VALUE,
+            PropertyType.FORM_REFERENCES_VALUE,
+            PropertyType.CONTEXT_REFERENCES_VALUE,
+            PropertyType.STATUS_REFERENCES_VALUE,
+            PropertyType.USER_REFERENCES_VALUE,
+            PropertyType.GEOJSON_VALUE,
+            PropertyType.WEATHER_VALUE
         ]
 
         values = [
             "string",
             "text",
+            True,
             0,
             3.1415,
-            False,
-            datetime.now().isoformat(sep="T"),
+            datetime.now(),
+            datetime.now().isoformat('T'),
+            datetime.now(),
+            None,
             "https://google.com",
             None,
             None,
             None,
+            [self.project.activity(name='Specify wheel diameter').id],
+            [self.project.id],
+            [self.project.form(name='Test').id],
+            None,
+            None,
+            None,
+            None,
+            None
         ]
 
         for property_type, value in zip(types, values):

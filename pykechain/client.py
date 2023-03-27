@@ -2083,6 +2083,13 @@ class Client:
                 )
             options.update(scope_options)
 
+        elif property_type == PropertyType.DATETIME_VALUE:
+            default_value = check_datetime(dt=default_value, key="default_value")
+        elif property_type == PropertyType.DATE_VALUE:
+            default_value = check_datetime(dt=default_value, only_date=True, key="default_value")
+        elif property_type == PropertyType.TIME_VALUE:
+            default_value = check_datetime(dt=default_value, only_time=True, key="default_value")
+
         data = dict(
             name=check_text(name, "name"),
             part_id=model.id,

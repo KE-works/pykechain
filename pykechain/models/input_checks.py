@@ -152,26 +152,32 @@ def check_enum(value: Optional[Any], enum: type(Enum), key: str) -> Optional[Any
     return value
 
 
-def check_datetime(dt: Optional[Union[datetime, str]], key: str) -> Optional[str]:
+def check_datetime(dt: Optional[Union[datetime, str]],
+                   key: str,
+                   only_date: bool = False,
+                   only_time: bool = False) -> Optional[str]:
     """Validate a datetime value to be a datetime and be timezone aware."""
     if dt is not None and dt is not empty:
         if isinstance(dt, str):
             dt = parse_datetime(dt)
-
         if isinstance(dt, datetime):
-            if not dt.tzinfo:
-                warnings.warn(
-                    f"`{key}` `{dt.isoformat(sep=' ')}` is naive and not timezone aware, "
-                    f"use pytz.timezone info. Date will be interpreted as UTC time."
-                )
-            dt = dt.isoformat(sep="T")
+            if only_date:
+                dt = dt.strftime("%Y-%m-%d")
+            elif only_time:
+                dt = dt.strftime("%H:%M:%S")
+            else:
+                if not dt.tzinfo:
+                    warnings.warn(
+                        f"`{key}` `{dt.isoformat(sep=' ')}` is naive and not timezone aware, "
+                        f"use pytz.timezone info. Date will be interpreted as UTC time."
+                    )
+                dt = dt.isoformat(sep="T")
         else:
             raise IllegalArgumentError(
                 f"`{key}` should be a correctly formatted string or a datetime.datetime() object, "
                 f'"{dt}" ({type(dt)}) is not.'
             )
     return dt
-
 
 def check_base(
     obj: Optional[Any],
