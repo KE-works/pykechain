@@ -6,6 +6,7 @@ from pykechain.models import Activity, Scope, user
 from pykechain.models.base_reference import _ReferenceProperty, _ReferencePropertyInScope
 from pykechain.models.context import Context
 from pykechain.models.form import Form
+from pykechain.models.stored_file import StoredFile
 from pykechain.models.value_filter import ScopeFilter
 from pykechain.models.workflow import Status
 from pykechain.utils import get_in_chunks
@@ -212,23 +213,46 @@ class ContextReferencesProperty(_ReferencePropertyInScope):
 
 
 class StatusReferencesProperty(_ReferenceProperty):
-    """A virtual object representing a KE-chain Context References property.
+    """A virtual object representing a KE-chain Status References property.
 
     .. versionadded:: 3.19
     """
 
     # REFERENCED_CLASS = Status
 
-    def _retrieve_objects(self, **kwargs) -> List[Context]:
+    def _retrieve_objects(self, **kwargs) -> List[Status]:
         """
-        Retrieve a list of Contexts.
+        Retrieve a list of Statuses.
 
         :param kwargs: optional inputs
-        :return: list of Context objects
+        :return: list of Status objects
         """
         statuses = []
-        for statuse_json in self._value:
-            status = Status(client=self._client, json=statuse_json)
+        for status_json in self._value:
+            status = Status(client=self._client, json=status_json)
             status.refresh()  # To populate the object with all expected data
             statuses.append(status)
         return statuses
+
+
+class StoredFilesReferenceProperty(_ReferenceProperty):
+    """A virtual object representing a KE-chain StoredFile References property.
+
+    .. versionadded:: 4.7
+    """
+
+    # REFERENCED_CLASS = StoredFile
+
+    def _retrieve_objects(self, **kwargs) -> List[StoredFile]:
+        """
+        Retrieve a list of StoredFile.
+
+        :param kwargs: optional inputs
+        :return: list of StoredFile objects
+        """
+        stored_files = []
+        for stored_files_json in self._value:
+            stored_file = StoredFile(client=self._client, json=stored_files_json)
+            stored_file.refresh()  # To populate the object with all expected data
+            stored_files.append(stored_file)
+        return stored_files

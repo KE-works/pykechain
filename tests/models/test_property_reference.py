@@ -1,3 +1,4 @@
+import os
 from unittest import TestCase, skip
 
 from pykechain.enums import (
@@ -9,6 +10,7 @@ from pykechain.enums import (
     Multiplicity,
     PropertyType,
     SortTable,
+    StoredFileClassification,
     WorkflowCategory,
 )
 from pykechain.exceptions import IllegalArgumentError
@@ -22,6 +24,7 @@ from pykechain.models.property_reference import (
     StatusReferencesProperty,
     UserReferencesProperty,
 )
+from pykechain.models.stored_file import StoredFile
 from pykechain.models.validators import RequiredFieldValidator
 from pykechain.models.value_filter import PropertyValueFilter, ScopeFilter
 from pykechain.models.widgets.enums import PropertyReferenceOptions
@@ -1440,4 +1443,81 @@ class TestPropertyStatusReferences(TestBetamax):
         self.assertIn(
             self.status_2.id,
             [value.id for value in self.status_ref_prop_instance.value],
+        )
+
+
+class TestPropertyStoredFileReference(TestBetamax):
+    def setUp(self):
+        super().setUp()
+        root = self.project.model(name="Product")
+        self.part = self.project.create_model(
+            name="TEST_STOREDFILE_REFERENCE_PART",
+            parent=root,
+            multiplicity=Multiplicity.ONE,
+        )
+        self.storedfile_ref_prop_model = self.part.add_property(
+            name="storedfile ref", property_type=PropertyType.STOREDFILE_REFERENCES_VALUE
+        )
+        self.storedfile_ref_prop_instance = self.part.instance().property(
+            name=self.storedfile_ref_prop_model.name
+        )
+        self.test_files_dir = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
+        )
+        self.upload_path = os.path.join(
+            self.test_files_dir,
+            "tests",
+            "files",
+            "test_upload_image_to_attachment_property",
+            "test_upload_image.png",
+        )
+        self.name = "__STORED_FILE_TEMPORARY"
+        self.stored_file = self.client.create_stored_file(
+            name=self.name,
+            scope=self.project,
+            classification=StoredFileClassification.SCOPED,
+            filepath=self.upload_path,
+        )
+
+    def tearDown(self):
+        if self.stored_file:
+            self.stored_file.delete()
+        if self.part:
+            self.part.delete()
+        super().tearDown()
+
+    def test_create(self):
+        self.assertIsInstance(self.storedfile_ref_prop_model, StatusReferencesProperty)
+
+    def test_value_model(self):
+        self.storedfile_ref_prop_model.value = [self.stored_file]
+
+        self.assertIsNotNone(self.storedfile_ref_prop_model.value)
+        self.assertEqual(self.storedfile_ref_prop_model.value[0].id, self.stored_file.id)
+        self.assertEqual(len(self.storedfile_ref_prop_model.value), 1)
+
+    def test_no_value_model(self):
+        self.assertIsNone(self.storedfile_ref_prop_model.value)
+
+    def test_value_instance(self):
+        self.storedfile_ref_prop_instance.value = [self.stored_file]
+
+        self.assertIsNotNone(self.storedfile_ref_prop_instance.value)
+        self.assertEqual(self.storedfile_ref_prop_instance.value[0].id, self.stored_file.id)
+        self.assertEqual(len(self.storedfile_ref_prop_instance.value), 1)
+
+    def test_no_value_instance(self):
+        self.assertIsNone(self.storedfile_ref_prop_instance.value)
+
+    def test_multiple_values(self):
+        self.storedfile_ref_prop_instance.value = [self.stored_file, self.status_2]
+
+        self.assertEqual(len(self.storedfile_ref_prop_instance.value), 2)
+        self.assertIn(
+            self.stored_file.id,
+            [value.id for value in self.storedfile_ref_prop_instance.value],
+        )
+        self.assertIn(
+            self.status_2.id,
+            [value.id for value in self.storedfile_ref_prop_instance.value],
         )
