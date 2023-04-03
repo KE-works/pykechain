@@ -235,7 +235,7 @@ class StatusReferencesProperty(_ReferenceProperty):
         return statuses
 
 
-class StoredFilesReferenceProperty(_ReferenceProperty):
+class StoredFilesReferencesProperty(_ReferenceProperty):
     """A virtual object representing a KE-chain StoredFile References property.
 
     .. versionadded:: 4.7
@@ -253,6 +253,5 @@ class StoredFilesReferenceProperty(_ReferenceProperty):
         stored_files = []
         for stored_files_json in self._value:
             stored_file = StoredFile(client=self._client, json=stored_files_json)
-            stored_file.refresh()  # To populate the object with all expected data
             stored_files.append(stored_file)
         return stored_files

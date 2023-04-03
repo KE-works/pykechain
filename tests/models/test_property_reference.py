@@ -22,6 +22,7 @@ from pykechain.models.property_reference import (
     FormReferencesProperty,
     ScopeReferencesProperty,
     StatusReferencesProperty,
+    StoredFilesReferencesProperty,
     UserReferencesProperty,
 )
 from pykechain.models.stored_file import StoredFile
@@ -1451,12 +1452,13 @@ class TestPropertyStoredFileReference(TestBetamax):
         super().setUp()
         root = self.project.model(name="Product")
         self.part = self.project.create_model(
-            name="TEST_STOREDFILE_REFERENCE_PART",
+            name="__TEST_STOREDFILE_REFERENCE_PART",
             parent=root,
             multiplicity=Multiplicity.ONE,
         )
         self.storedfile_ref_prop_model = self.part.add_property(
-            name="storedfile ref", property_type=PropertyType.STOREDFILE_REFERENCES_VALUE
+            name="storedfile ref",
+            property_type=PropertyType.STOREDFILE_REFERENCES_VALUE,
         )
         self.storedfile_ref_prop_instance = self.part.instance().property(
             name=self.storedfile_ref_prop_model.name
@@ -1466,7 +1468,6 @@ class TestPropertyStoredFileReference(TestBetamax):
         )
         self.upload_path = os.path.join(
             self.test_files_dir,
-            "tests",
             "files",
             "test_upload_image_to_attachment_property",
             "test_upload_image.png",
@@ -1478,22 +1479,35 @@ class TestPropertyStoredFileReference(TestBetamax):
             classification=StoredFileClassification.SCOPED,
             filepath=self.upload_path,
         )
+        self.stored_file_2 = self.client.create_stored_file(
+            name=self.name + "2",
+            scope=self.project,
+            classification=StoredFileClassification.SCOPED,
+            filepath=self.upload_path,
+        )
 
     def tearDown(self):
         if self.stored_file:
             self.stored_file.delete()
+        if self.stored_file_2:
+            self.stored_file_2.delete()
         if self.part:
             self.part.delete()
         super().tearDown()
 
     def test_create(self):
-        self.assertIsInstance(self.storedfile_ref_prop_model, StatusReferencesProperty)
+        self.assertIsInstance(
+            self.storedfile_ref_prop_model, StoredFilesReferencesProperty
+        )
 
     def test_value_model(self):
         self.storedfile_ref_prop_model.value = [self.stored_file]
 
+        self.storedfile_ref_prop_model.refresh()
         self.assertIsNotNone(self.storedfile_ref_prop_model.value)
-        self.assertEqual(self.storedfile_ref_prop_model.value[0].id, self.stored_file.id)
+        self.assertEqual(
+            self.storedfile_ref_prop_model.value[0].id, self.stored_file.id
+        )
         self.assertEqual(len(self.storedfile_ref_prop_model.value), 1)
 
     def test_no_value_model(self):
@@ -1503,14 +1517,16 @@ class TestPropertyStoredFileReference(TestBetamax):
         self.storedfile_ref_prop_instance.value = [self.stored_file]
 
         self.assertIsNotNone(self.storedfile_ref_prop_instance.value)
-        self.assertEqual(self.storedfile_ref_prop_instance.value[0].id, self.stored_file.id)
+        self.assertEqual(
+            self.storedfile_ref_prop_instance.value[0].id, self.stored_file.id
+        )
         self.assertEqual(len(self.storedfile_ref_prop_instance.value), 1)
 
     def test_no_value_instance(self):
-        self.assertIsNone(self.storedfile_ref_prop_instance.value)
+        self.assertEqual(self.storedfile_ref_prop_instance.value, None)
 
     def test_multiple_values(self):
-        self.storedfile_ref_prop_instance.value = [self.stored_file, self.status_2]
+        self.storedfile_ref_prop_instance.value = [self.stored_file, self.stored_file_2]
 
         self.assertEqual(len(self.storedfile_ref_prop_instance.value), 2)
         self.assertIn(
@@ -1518,6 +1534,6 @@ class TestPropertyStoredFileReference(TestBetamax):
             [value.id for value in self.storedfile_ref_prop_instance.value],
         )
         self.assertIn(
-            self.status_2.id,
+            self.stored_file_2.id,
             [value.id for value in self.storedfile_ref_prop_instance.value],
         )
