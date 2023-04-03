@@ -179,6 +179,7 @@ def check_datetime(dt: Optional[Union[datetime, str]],
             )
     return dt
 
+
 def check_base(
     obj: Optional[Any],
     cls: Optional[type(object)] = None,

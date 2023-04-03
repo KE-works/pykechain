@@ -282,6 +282,7 @@ class SignatureRepresentation(SimpleConfigValueKeyRepresentation):
             value, SignatureRepresentationValues, "signature representation values"
         )
 
+
 class StoredFilesDisplayRepresentation(SimpleConfigValueKeyRepresentation):
     """Representation for the stored files display inside a `StoredFilesReferencesProperty`."""
 

@@ -762,8 +762,7 @@ class PropertyRepresentation(Enum):
 
 class FileDisplayRepresentationValues(Enum):
     """
-    Values that can be put in the FileDisplayRepresentationValues for representing storedfiles
-    as cards or text.
+    Values that can be put in the FileDisplayRepresentationValues for representing stored files.
 
     :cvar CARDS: thumbnails of attachments inside stored files, when applicable.
     :cvar TEXT: name of the attachments inside stored files.
