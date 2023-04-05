@@ -1,14 +1,22 @@
 from __future__ import annotations
 
 import warnings
-from datetime import datetime
+from datetime import date, datetime, time
 from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 import jsonschema
 
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.utils import Empty, empty, is_url, is_uuid, parse_datetime
+from pykechain.utils import (
+    Empty,
+    empty,
+    is_url,
+    is_uuid,
+    parse_date,
+    parse_datetime,
+    parse_time,
+)
 
 iter_types = (list, tuple, set)
 
@@ -152,29 +160,51 @@ def check_enum(value: Optional[Any], enum: type(Enum), key: str) -> Optional[Any
     return value
 
 
-def check_datetime(dt: Optional[Union[datetime, str]],
-                   key: str,
-                   only_date: bool = False,
-                   only_time: bool = False) -> Optional[str]:
+def check_datetime(dt: Optional[Union[datetime, str]], key: str) -> Optional[str]:
     """Validate a datetime value to be a datetime and be timezone aware."""
     if dt is not None and dt is not empty:
         if isinstance(dt, str):
             dt = parse_datetime(dt)
         if isinstance(dt, datetime):
-            if only_date:
-                dt = dt.strftime("%Y-%m-%d")
-            elif only_time:
-                dt = dt.strftime("%H:%M:%S")
-            else:
-                if not dt.tzinfo:
-                    warnings.warn(
-                        f"`{key}` `{dt.isoformat(sep=' ')}` is naive and not timezone aware, "
-                        f"use pytz.timezone info. Date will be interpreted as UTC time."
-                    )
-                dt = dt.isoformat(sep="T")
+            if not dt.tzinfo:
+                warnings.warn(
+                    f"`{key}` `{dt.isoformat(sep=' ')}` is naive and not timezone aware, "
+                    f"use pytz.timezone info. Date will be interpreted as UTC time."
+                )
+            dt = dt.isoformat(sep="T")
         else:
             raise IllegalArgumentError(
                 f"`{key}` should be a correctly formatted string or a datetime.datetime() object, "
+                f'"{dt}" ({type(dt)}) is not.'
+            )
+    return dt
+
+
+def check_date(dt: Optional[Union[datetime, str]], key: str) -> Optional[str]:
+    """Validate a date value to be a date."""
+    if dt is not None and dt is not empty:
+        if isinstance(dt, str):
+            dt = parse_date(dt)
+        if isinstance(dt, date):
+            dt = dt.strftime("%Y-%m-%d")
+        else:
+            raise IllegalArgumentError(
+                f"`{key}` should be a correctly formatted string or a datetime.date() object, "
+                f'"{dt}" ({type(dt)}) is not.'
+            )
+    return dt
+
+
+def check_time(dt: Optional[Union[datetime, str]], key: str) -> Optional[str]:
+    """Validate a time value to be a time."""
+    if dt is not None and dt is not empty:
+        if isinstance(dt, str):
+            dt = parse_time(dt)
+        if isinstance(dt, time):
+            dt = dt.strftime("%H:%M:%S")
+        else:
+            raise IllegalArgumentError(
+                f"`{key}` should be a correctly formatted string or a datetime.time() object, "
                 f'"{dt}" ({type(dt)}) is not.'
             )
     return dt

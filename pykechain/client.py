@@ -80,12 +80,14 @@ from .models.expiring_download import ExpiringDownload
 from .models.form import Form
 from .models.input_checks import (
     check_base,
+    check_date,
     check_datetime,
     check_enum,
     check_list_of_base,
     check_list_of_dicts,
     check_list_of_text,
     check_text,
+    check_time,
     check_type,
     check_url,
     check_user,
@@ -2086,9 +2088,9 @@ class Client:
         elif property_type == PropertyType.DATETIME_VALUE:
             default_value = check_datetime(dt=default_value, key="default_value")
         elif property_type == PropertyType.DATE_VALUE:
-            default_value = check_datetime(dt=default_value, only_date=True, key="default_value")
+            default_value = check_date(dt=default_value, key="default_value")
         elif property_type == PropertyType.TIME_VALUE:
-            default_value = check_datetime(dt=default_value, only_time=True, key="default_value")
+            default_value = check_time(dt=default_value, key="default_value")
 
         data = dict(
             name=check_text(name, "name"),

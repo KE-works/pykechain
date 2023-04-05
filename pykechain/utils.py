@@ -2,7 +2,7 @@ import os
 import re
 import unicodedata
 from contextlib import contextmanager
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from typing import (
     Any,
     Callable,
@@ -264,14 +264,14 @@ def parse_datetime(value: Optional[str]) -> Optional[datetime]:
         name = sign + hhmm
         return timezone(timedelta(minutes=offset), name)
 
-    DATETIME_RE = re.compile(
+    datetime_re = re.compile(
         r"(?P<year>\d{4})-(?P<month>\d{1,2})-(?P<day>\d{1,2})"
         r"[T ](?P<hour>\d{1,2}):(?P<minute>\d{1,2})"
         r"(?::(?P<second>\d{1,2})(?:\.(?P<microsecond>\d{1,6})\d{0,6})?)?"
         r"(?P<tzinfo>Z|[+-]\d{2}(?::?\d{2})?)?$"
     )
 
-    match = DATETIME_RE.match(value)
+    match = datetime_re.match(value)
     if match:
         kw = match.groupdict()
         if kw["microsecond"]:
@@ -288,6 +288,57 @@ def parse_datetime(value: Optional[str]) -> Optional[datetime]:
         kw = {k: int(v) for k, v in kw.items() if v is not None}
         kw["tzinfo"] = tzinfo
         return datetime(**kw)
+
+
+def parse_date(value: Optional[str]) -> Optional[date]:
+    """Convert datetime string to date object.
+
+    Helper function to convert a datetime string to a date.
+
+    Inspired on the Django project. From `django.utils.dateparse.parse_date`.
+
+    ..versionadded 4.7:
+
+    :param value: datetime string
+    :type value: str or None
+    :return: date of the value is well formatted. Otherwise (including if value is None) returns None
+    :rtype: date or None
+    :raises ValueError: if the value is well formatted but not a valid date
+    """
+    date_re = re.compile(r"(?P<year>\d{4})-(?P<month>\d{1,2})-(?P<day>\d{1,2})$")
+
+    match = date_re.match(value)
+    if match:
+        kw = {k: int(v) for k, v in match.groupdict().items()}
+        return date(**kw)
+
+
+def parse_time(value: Optional[str]) -> Optional[time]:
+    """Convert datetime string to time object.
+
+    Helper function to convert a datetime string to a time.
+
+    Inspired on the Django project. From `django.utils.dateparse.parse_time`.
+
+    ..versionadded 4.7:
+
+    :param value: datetime string
+    :type value: str or None
+    :return: time of the value is well formatted. Otherwise (including if value is None) returns None
+    :rtype: time or None
+    :raises ValueError: if the value is well formatted but not a valid time
+    """
+    time_re = re.compile(
+        r"(?P<hour>\d{1,2}):(?P<minute>\d{1,2})"
+        r"(?::(?P<second>\d{1,2})(?:\.(?P<microsecond>\d{1,6})\d{0,6})?)?"
+    )
+
+    match = time_re.match(value)
+    if match:
+        kw = match.groupdict()
+        kw["microsecond"] = kw["microsecond"] and kw["microsecond"].ljust(6, "0")
+        kw = {k: int(v) for k, v in kw.items() if v is not None}
+        return time(**kw)
 
 
 #

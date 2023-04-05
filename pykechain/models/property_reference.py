@@ -3,7 +3,10 @@ from typing import List, Optional
 from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Scope, user
-from pykechain.models.base_reference import _ReferenceProperty, _ReferencePropertyInScope
+from pykechain.models.base_reference import (
+    _ReferenceProperty,
+    _ReferencePropertyInScope,
+)
 from pykechain.models.context import Context
 from pykechain.models.form import Form
 from pykechain.models.stored_file import StoredFile
@@ -172,7 +175,7 @@ class FormReferencesProperty(_ReferencePropertyInScope):
     .. versionadded:: 3.7
     """
 
-    # REFERENCED_CLASS = Form
+    REFERENCED_CLASS = Form
 
     def _retrieve_objects(self, **kwargs) -> List[Form]:
         """
@@ -195,7 +198,7 @@ class ContextReferencesProperty(_ReferencePropertyInScope):
     .. versionadded:: 3.7
     """
 
-    # REFERENCED_CLASS = Context
+    REFERENCED_CLASS = Context
 
     def _retrieve_objects(self, **kwargs) -> List[Context]:
         """
@@ -218,7 +221,7 @@ class StatusReferencesProperty(_ReferenceProperty):
     .. versionadded:: 3.19
     """
 
-    # REFERENCED_CLASS = Status
+    REFERENCED_CLASS = Status
 
     def _retrieve_objects(self, **kwargs) -> List[Status]:
         """
@@ -241,7 +244,7 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
     .. versionadded:: 4.7
     """
 
-    # REFERENCED_CLASS = StoredFile
+    REFERENCED_CLASS = StoredFile
 
     def _retrieve_objects(self, **kwargs) -> List[StoredFile]:
         """
