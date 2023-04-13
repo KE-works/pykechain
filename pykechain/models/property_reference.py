@@ -253,8 +253,5 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
         :param kwargs: optional inputs
         :return: list of StoredFile objects
         """
-        stored_files = []
-        for stored_files_json in self._value:
-            stored_file = StoredFile(client=self._client, json=stored_files_json)
-            stored_files.append(stored_file)
-        return stored_files
+        return [StoredFile(client=self._client, json=stored_files_json) for stored_files_json in
+                self._value]
