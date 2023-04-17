@@ -14,6 +14,7 @@ from .representations import (
     LinkTarget,
     SignatureRepresentation,
     SignificantDigits,
+    StoredFilesDisplayRepresentation,
     ThousandsSeparator,
     UsePropertyNameRepresentation,
 )
@@ -40,6 +41,8 @@ AnyRepresentation = (
     CameraScannerInputRepresentation,
     # Attachment properties
     SignatureRepresentation,
+    # Stored files reference properties
+    StoredFilesDisplayRepresentation,
 )
 
 __all__ = (

@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import date, datetime, time
 
-from pykechain.enums import PropertyType, Category, Multiplicity
+from pykechain.enums import ContextGroup, PropertyType, Category, Multiplicity
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
 from pykechain.models import Property
 from pykechain.models.validators import SingleReferenceValidator
@@ -76,24 +76,48 @@ class TestPropertyCreation(TestBetamax):
         types = [
             PropertyType.CHAR_VALUE,
             PropertyType.TEXT_VALUE,
+            PropertyType.BOOLEAN_VALUE,
             PropertyType.INT_VALUE,
             PropertyType.FLOAT_VALUE,
-            PropertyType.BOOLEAN_VALUE,
             PropertyType.DATETIME_VALUE,
+            PropertyType.DATE_VALUE,
+            PropertyType.TIME_VALUE,
+            PropertyType.ATTACHMENT_VALUE,
             PropertyType.LINK_VALUE,
-            PropertyType.DATETIME_VALUE,
             PropertyType.SINGLE_SELECT_VALUE,
+            PropertyType.MULTI_SELECT_VALUE,
             PropertyType.REFERENCES_VALUE,
+            PropertyType.ACTIVITY_REFERENCES_VALUE,
+            PropertyType.SCOPE_REFERENCES_VALUE,
+            PropertyType.FORM_REFERENCES_VALUE,
+            PropertyType.CONTEXT_REFERENCES_VALUE,
+            PropertyType.STOREDFILE_REFERENCES_VALUE,
+            PropertyType.STATUS_REFERENCES_VALUE,
+            PropertyType.USER_REFERENCES_VALUE,
+            PropertyType.GEOJSON_VALUE,
+            PropertyType.WEATHER_VALUE,
         ]
 
         values = [
             "string",
             "text",
+            True,
             0,
             3.1415,
-            False,
-            datetime.now().isoformat(sep="T"),
+            datetime.now(),
+            date.today(),
+            time(17, 45, 13),
+            None,
             "https://google.com",
+            None,
+            None,
+            None,
+            [self.project.activity(name="Specify wheel diameter").id],
+            [self.project.id],
+            [self.project.form(name="Test").id],
+            [c.id for c in self.project.contexts(context_group=ContextGroup.ASSET)],
+            None,
+            None,
             None,
             None,
             None,
@@ -199,14 +223,18 @@ class TestProperties(TestBetamax):
                 self.assertEqual(prop.part.id, self.bike.id)
 
     def test_get_property_by_name(self):
-        gears_property = self.project.properties(name="Gears", category=Category.INSTANCE)[0]
+        gears_property = self.project.properties(
+            name="Gears", category=Category.INSTANCE
+        )[0]
 
         self.assertEqual(self.bike.property("Gears"), gears_property)
 
     def test_get_property_by_uuid(self):
         gears_id = self.bike.property("Gears").id
 
-        gears_property = self.project.properties(pk=gears_id, category=Category.INSTANCE)[0]
+        gears_property = self.project.properties(
+            pk=gears_id, category=Category.INSTANCE
+        )[0]
 
         self.assertEqual(self.bike.property(gears_id), gears_property)
 
@@ -280,7 +308,9 @@ class TestProperties(TestBetamax):
         initial_description = "Property created to test clearing values."
         initial_unit = "mm"
 
-        self.prop_model.edit(name=initial_name, description=initial_description, unit=initial_unit)
+        self.prop_model.edit(
+            name=initial_name, description=initial_description, unit=initial_unit
+        )
 
         # Edit without mentioning values, everything should stay the same
         new_name = "Property second name"
@@ -306,7 +336,9 @@ class TestProperties(TestBetamax):
         self.assertEqual("unit of the property", str(self.prop_model.unit))
 
     def test_property_description(self):
-        self.assertEqual("description of the property", str(self.prop_model.description))
+        self.assertEqual(
+            "description of the property", str(self.prop_model.description)
+        )
 
     # 3.0
     def test_copy_property_model(self):
@@ -328,7 +360,8 @@ class TestProperties(TestBetamax):
         # setUp
         self.prop.value = 200
         copied_property = self.prop.copy(
-            target_part=self.project.part(name="Front Wheel"), name="Copied property instance"
+            target_part=self.project.part(name="Front Wheel"),
+            name="Copied property instance",
         )
 
         # testing
@@ -346,7 +379,9 @@ class TestProperties(TestBetamax):
 
     def test_move_property_model(self):
         # setUp
-        moved_property = self.prop_model.move(target_part=self.wheel_model, name="Moved property")
+        moved_property = self.prop_model.move(
+            target_part=self.wheel_model, name="Moved property"
+        )
 
         # testing
         self.assertEqual(moved_property.name, "Moved property")
@@ -379,7 +414,9 @@ class TestProperties(TestBetamax):
         dual_pad_ref = "dual-pad"
         dual_pad_name = "Dual Pad?"
         dual_pad_property = self.project.property(ref=dual_pad_ref)
-        dual_pad_property_model = self.project.property(ref=dual_pad_ref, category=Category.MODEL)
+        dual_pad_property_model = self.project.property(
+            ref=dual_pad_ref, category=Category.MODEL
+        )
         seat_part = self.project.part(name="Seat")
         dual_pad_prop_retrieved_from_seat = seat_part.property(dual_pad_ref)
 
@@ -404,7 +441,9 @@ class TestPropertiesUpdateProperties(TestBetamax):
         super().setUp()
 
         self.bike = self.project.model("Bike")
-        self.submodel = self.project.create_model(name="_test submodel", parent=self.bike)
+        self.submodel = self.project.create_model(
+            name="_test submodel", parent=self.bike
+        )
 
         self.prop_1 = self.submodel.add_property(
             name=PropertyType.CHAR_VALUE, property_type=PropertyType.CHAR_VALUE
@@ -503,10 +542,14 @@ class TestPropertiesWithReferenceProperty(TestBetamax):
 
         # testing
         self.assertEqual(copied_ref_property.name, "__Copied ref property")
-        self.assertEqual(copied_ref_property.description, self.test_ref_property_model.description)
+        self.assertEqual(
+            copied_ref_property.description, self.test_ref_property_model.description
+        )
         self.assertEqual(copied_ref_property.unit, self.test_ref_property_model.unit)
         self.assertEqual(copied_ref_property.value, self.test_ref_property_model.value)
-        self.assertEqual(copied_ref_property._options, self.test_ref_property_model._options)
+        self.assertEqual(
+            copied_ref_property._options, self.test_ref_property_model._options
+        )
 
         # tearDown
         copied_ref_property.delete()

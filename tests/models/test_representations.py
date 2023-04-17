@@ -5,6 +5,7 @@ from unittest import TestCase
 from jsonschema import validate
 
 from pykechain.enums import (
+    FileDisplayRepresentationValues,
     FontAwesomeMode,
     GeoCoordinateConfig,
     LinkTargets,
@@ -28,6 +29,7 @@ from pykechain.models.representations.representations import (
     SignificantDigits,
     ThousandsSeparator,
     UsePropertyNameRepresentation,
+    StoredFilesDisplayRepresentation,
 )
 from pykechain.models.validators.validator_schemas import options_json_schema
 from tests.classes import TestBetamax
@@ -438,6 +440,29 @@ class TestReprSignatureRepresentationFromCleanToNameAndDate(
     representation_class = SignatureRepresentation
     value = SignatureRepresentationValues.CLEAN
     new_value = SignatureRepresentationValues.NAME_AND_DATE
+
+
+class TestReprStoredFileDisplayRepresentationCards(Bases._TestPropertyRepresentation):
+    property_type = PropertyType.STOREDFILE_REFERENCES_VALUE
+    representation_class = StoredFilesDisplayRepresentation
+    value = None
+    new_value = FileDisplayRepresentationValues.CARDS
+
+
+class TestReprStoredFileDisplayRepresentationText(Bases._TestPropertyRepresentation):
+    property_type = PropertyType.STOREDFILE_REFERENCES_VALUE
+    representation_class = StoredFilesDisplayRepresentation
+    value = None
+    new_value = FileDisplayRepresentationValues.TEXT
+
+
+class TestReprStoredFileDisplayRepresentationFromCardsToText(
+    Bases._TestPropertyRepresentation
+):
+    property_type = PropertyType.STOREDFILE_REFERENCES_VALUE
+    representation_class = StoredFilesDisplayRepresentation
+    value = FileDisplayRepresentationValues.CARDS
+    new_value = FileDisplayRepresentationValues.TEXT
 
 
 class TestReprActivity(Bases._TestCustomIconRepresentation):

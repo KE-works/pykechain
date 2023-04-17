@@ -142,7 +142,7 @@ class Workflow(
             json=clean_empty_values(data, nones=False),
         )
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError("Could not clone the workflow", response=response)
+            raise APIError("Could not edit the workflow", response=response)
         self.refresh(json=response.json()["results"][0])
 
     @classmethod

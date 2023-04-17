@@ -36,7 +36,7 @@ from pykechain.enums import (
     ServiceEnvironmentVersion,
     ServiceScriptUser,
     ServiceType,
-    TeamRoles,
+    StoredFileCategory, StoredFileClassification, TeamRoles,
     WidgetTypes,
     WorkflowCategory,
 )
@@ -80,17 +80,20 @@ from .models.expiring_download import ExpiringDownload
 from .models.form import Form
 from .models.input_checks import (
     check_base,
+    check_date,
     check_datetime,
     check_enum,
     check_list_of_base,
     check_list_of_dicts,
     check_list_of_text,
     check_text,
+    check_time,
     check_type,
     check_url,
     check_user,
     check_uuid,
 )
+from .models.stored_file import StoredFile
 from .models.workflow import Workflow
 from .typing import ObjectID
 
@@ -2082,6 +2085,13 @@ class Client:
                 )
             options.update(scope_options)
 
+        elif property_type == PropertyType.DATETIME_VALUE:
+            default_value = check_datetime(dt=default_value, key="default_value")
+        elif property_type == PropertyType.DATE_VALUE:
+            default_value = check_date(dt=default_value, key="default_value")
+        elif property_type == PropertyType.TIME_VALUE:
+            default_value = check_time(dt=default_value, key="default_value")
+
         data = dict(
             name=check_text(name, "name"),
             part_id=model.id,
@@ -3938,8 +3948,8 @@ class Client:
         :param description: (optional) description of the workflow to filter on
         :param scope: (optional) the scope of the workflow to filter on
         :param ref: (optional) the ref of the workflow to filter on
-        :return: a single Contexts
-        :rtype: Context
+        :return: a single Workflows
+        :rtype: Workflow
         """
         request_params = {
             "name": check_text(name, "name"),
@@ -3996,7 +4006,7 @@ class Client:
     def create_workflow(self, scope: ObjectID, **kwargs) -> Workflow:
         """Create a new Defined Workflow object in a scope.
 
-        See `Workflow.create_workflow` for available parameters.
+        See `Workflow.create` for available parameters.
 
         :return: a Workflow object
         """
@@ -4045,3 +4055,99 @@ class Client:
                     raise APIError(
                         f"Could not import parts {str(response)}: {response.content}"
                     )
+
+    def create_stored_file(self, **kwargs) -> StoredFile:
+        """Create a new Stored File object in a scope.
+
+        See `StoredFile.create` for available parameters.
+
+        :return: a StoredFile object
+        """
+        return StoredFile.create(client=self, **kwargs)
+
+    def stored_file(
+        self,
+        name: Optional[str] = None,
+        pk: Optional[ObjectID] = None,
+        scope: Optional[Union[Scope, ObjectID]] = None,
+        category: Optional[StoredFileCategory] = None,
+        classification: Optional[StoredFileClassification] = None,
+        description: Optional[str] = None,
+        ref: Optional[str] = None,
+        **kwargs,
+    ) -> StoredFile:
+        """
+        Retrieve a single Stored File.
+
+        .. versionadded:: 4.7.0
+
+        :param pk: (optional) retrieve a single primary key (object ID)
+        :param name: (optional) name of the stored file to filter on
+        :param category: (optional) category of the stored file to search for
+        :param classification: (optional) classification of the stored file to search for
+        :param description: (optional) description of the stored file to filter on
+        :param scope: (optional) the scope of the stored file to filter on
+        :param ref: (optional) the ref of the stored file to filter on
+
+        :return: a single StoredFiles
+        :rtype: StoredFile
+        """
+        request_params = {
+            "name": check_text(name, "name"),
+            "id": check_uuid(pk),
+            "category": check_enum(category, StoredFileCategory, "category"),
+            "classification": check_enum(
+                classification, StoredFileClassification, "classification"),
+            "description": check_text(description, "description"),
+            "scope": check_base(scope, Scope, "scope"),
+            "ref": check_text(ref, "ref"),
+        }
+
+        if kwargs:
+            request_params.update(**kwargs)
+        return StoredFile.get(
+            client=self, **clean_empty_values(request_params, nones=False)
+        )
+
+    def stored_files(
+        self,
+        name: Optional[str] = None,
+        pk: Optional[ObjectID] = None,
+        scope: Optional[Union[Scope, ObjectID]] = None,
+        category: Optional[StoredFileCategory] = None,
+        classification: Optional[StoredFileClassification] = None,
+        description: Optional[str] = None,
+        ref: Optional[str] = None,
+        **kwargs,
+    ) -> List[StoredFile]:
+        """
+        Retrieve a single Stored File.
+
+        .. versionadded:: 4.7.0
+
+        :param pk: (optional) retrieve a single primary key (object ID)
+        :param name: (optional) name of the stored file to filter on
+        :param category: (optional) category of the stored file to search for
+        :param classification: (optional) classification of the stored file to search for
+        :param description: (optional) description of the stored file to filter on
+        :param scope: (optional) the scope of the stored file to filter on
+        :param ref: (optional) the ref of the stored file to filter on
+
+        :return: a list of StoredFiles
+        """
+        request_params = {
+            "name": check_text(name, "name"),
+            "id": check_uuid(pk),
+            "category": check_enum(category, StoredFileCategory, "category"),
+            "classification": check_enum(
+                classification, StoredFileClassification, "classification"),
+            "description": check_text(description, "description"),
+            "scope": check_base(scope, Scope, "scope"),
+            "ref": check_text(ref, "ref"),
+        }
+
+        if kwargs:
+            request_params.update(**kwargs)
+        return StoredFile.list(
+            client=self, **clean_empty_values(request_params, nones=False)
+        )

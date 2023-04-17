@@ -157,6 +157,9 @@ API_PATH = {
     "transition": "api/v3/transitions/{transition_id}",
     "statuses": "api/v3/statuses",
     "status": "api/v3/statuses/{status_id}",
+    "stored_files": "api/v3/stored_files",
+    "stored_file": "api/v3/stored_files/{file_id}",
+    "upload_stored_file": "api/v3/stored_files/upload",
 }
 
 API_QUERY_PARAM_ALL_FIELDS = {"fields": "__all__"}
@@ -668,6 +671,50 @@ API_EXTRA_PARAMS = {
                 "created_at",
                 "updated_at",
                 "status_category",
+            ]
+        )
+    },
+    "stored_file": {
+        "fields": ",".join(
+            [
+                "id",
+                "name",
+                "category",
+                "scope",
+                "classification",
+                "description",
+                "created_at",
+                "updated_at",
+                "tags"
+            ]
+        )
+    },
+    "stored_files": {
+        "fields": ",".join(
+            [
+                "id",
+                "name",
+                "category",
+                "scope",
+                "classification",
+                "description",
+                "created_at",
+                "updated_at",
+                "tags"
+            ]
+        )
+    },
+    "upload_stored_file": {
+        "fields": ",".join(
+            [
+                "id",
+                "name",
+                "category",
+                "classification",
+                "description",
+                "created_at",
+                "updated_at",
+                "tags",
             ]
         )
     },
