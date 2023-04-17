@@ -27,7 +27,7 @@ jobs:
 
     - name: Perform Testing
       run: |
-        pytest -n auto --cov=pykechain tests
+        pytest -n auto tests
 
     - name: Check docs and distribution
       if: matrix.python-version == 3.10
@@ -46,5 +46,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
-        pip install -U coveralls>=1.11.1
+        pip install -U coveralls>=3.3.1
+        coverage run --source=pykechain -m pytest tests
         coveralls
