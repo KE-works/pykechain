@@ -26,8 +26,9 @@ jobs:
         pip install -r requirements-ci.txt
 
     - name: Perform Testing
+      if: matrix.python-version != 3.10
       run: |
-        pytest -n auto --cov=pykechain tests
+        pytest -n auto tests
 
     - name: Check docs and distribution
       if: matrix.python-version == 3.10
@@ -40,11 +41,12 @@ jobs:
         python setup.py bdist_wheel --universal
         twine check dist/*
 
-    - name: Upload coverage to coveralls.io
+    - name: Perform coverage tests and upload to coveralls.io
       if: matrix.python-version == 3.10
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
-        pip install -U coveralls>=1.11.1
+        pip install -U coveralls>=3.3.1
+        coverage run --source=pykechain -m pytest -n auto tests
         coveralls
