@@ -1,7 +1,7 @@
 from typing import Any
 
 from pykechain.enums import (
-    FontAwesomeMode,
+    FileDisplayRepresentationValues, FontAwesomeMode,
     GeoCoordinateConfig,
     LinkTargets,
     PropertyRepresentation,
@@ -280,4 +280,24 @@ class SignatureRepresentation(SimpleConfigValueKeyRepresentation):
         """
         check_enum(
             value, SignatureRepresentationValues, "signature representation values"
+        )
+
+
+class StoredFilesDisplayRepresentation(SimpleConfigValueKeyRepresentation):
+    """Representation for the stored files display inside a `StoredFilesReferencesProperty`."""
+
+    rtype = PropertyRepresentation.FILE_DISPLAY
+    _config_value_key = "mode"
+
+    def validate_representation(self, value: Any) -> None:
+        """
+        Validate whether the representation value can be set.
+
+        :param value: representation value to set.
+        :type value: Any
+        :raises IllegalArgumentError
+        :return: None
+        """
+        check_enum(
+            value, FileDisplayRepresentationValues, "file display representation values"
         )

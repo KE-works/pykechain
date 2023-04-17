@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, date, timezone
+from datetime import datetime, date, time, timezone
 
 from pykechain.enums import FilterType, Multiplicity, PropertyType, ScopeStatus
 from pykechain.exceptions import NotFoundError, IllegalArgumentError
@@ -32,6 +32,7 @@ class TestPartsCopyMove(TestBetamax):
         self.p_float_name = "__Property float"
         self.p_date_name = "__Property date"
         self.p_datetime_name = "__Property datetime"
+        self.p_time_name = "__Property time"
         self.p_attach_name = "__Property attachment"
         self.p_link_name = "__Property link"
         self.p_single_select_name = "__Property single select"
@@ -50,6 +51,7 @@ class TestPartsCopyMove(TestBetamax):
         self.p_float_value = 42.42
         self.p_date_value = str(date(2021, 12, 15))
         self.p_datetime_value = str(datetime(1991, 4, 12, 13, 5, 5).isoformat())
+        self.p_time_value = str(time(12, 0, 4))
         self.p_attach_value = self.project_root + "/requirements.txt"
         self.p_link_value = "http://ke-chain.com"
         self.p_select_value_choices = ["apples", "oranges", "bananas", "lemons"]
@@ -160,6 +162,11 @@ class TestPartsCopyMove(TestBetamax):
             name=self.p_datetime_name,
             default_value=self.p_datetime_value,
             property_type=PropertyType.DATETIME_VALUE,
+        )
+        self.model_to_be_copied.add_property(
+            name=self.p_time_name,
+            default_value=self.p_time_value,
+            property_type=PropertyType.TIME_VALUE,
         )
         self.attachment_property = self.model_to_be_copied.add_property(
             name=self.p_attach_name, property_type=PropertyType.ATTACHMENT_VALUE

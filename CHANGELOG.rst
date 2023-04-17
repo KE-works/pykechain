@@ -3,7 +3,9 @@ Change Log
 
 UNRELEASED
 _______________
-* :star: Added the possibility to created, edit and delete `StoredFiles` (#1298)
+* :star: Added the possibility to create, edit and delete `StoredFiles` (#1298)
+* :star: Added the concept of a `StoredFilesReferenceProperty` (#1306)
+* :star: Added `fileDisplay` representation for `StoredFilesReferenceProperty` (#1306)
 
 v4.6.0 (16FEB23)
 ----------------

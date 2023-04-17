@@ -9,11 +9,11 @@ from tests.classes import TestBetamax
 class TestStoredFiles(TestBetamax):
     def setUp(self):
         super().setUp()
-        self.test_assets_dir = os.path.dirname(
+        self.test_files_dir = os.path.dirname(
             os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
         )
         self.upload_path = os.path.join(
-            self.test_assets_dir,
+            self.test_files_dir,
             "tests",
             "files",
             "test_upload_image_to_attachment_property",

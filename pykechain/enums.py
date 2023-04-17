@@ -145,6 +145,7 @@ class PropertyType(Enum):
     STATUS_REFERENCES_VALUE = "STATUS_REFERENCES_VALUE"
     TEAM_REFERENCES_VALUE = "TEAM_REFERENCES_VALUE"
     USER_REFERENCES_VALUE = "USER_REFERENCES_VALUE"
+    STOREDFILE_REFERENCES_VALUE = "STOREDFILE_REFERENCES_VALUE"
     JSON_VALUE = "JSON_VALUE"
     GEOJSON_VALUE = "GEOJSON_VALUE"
     WEATHER_VALUE = "WEATHER_VALUE"
@@ -756,6 +757,19 @@ class PropertyRepresentation(Enum):
     USE_PROPERTY_NAME = "usePropertyName"
     CAMERA_SCANNER_INPUT = "cameraScannerInput"
     SIGNATURE = "signature"
+    FILE_DISPLAY = "fileDisplay"
+
+
+class FileDisplayRepresentationValues(Enum):
+    """
+    Values that can be put in the FileDisplayRepresentationValues for representing stored files.
+
+    :cvar CARDS: thumbnails of attachments inside stored files, when applicable.
+    :cvar TEXT: name of the attachments inside stored files.
+    """
+
+    CARDS = "CARDS"
+    TEXT = "TEXT"
 
 
 class SignatureRepresentationValues(Enum):
@@ -766,8 +780,8 @@ class SignatureRepresentationValues(Enum):
     :cvar NAME_AND_DATE: A name and Date background to the signature field when filling in.
     """
 
-    CLEAN = 'clean'
-    NAME_AND_DATE = 'nameAndDate'
+    CLEAN = "clean"
+    NAME_AND_DATE = "nameAndDate"
 
 
 class GeoCoordinateConfig(Enum):

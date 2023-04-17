@@ -715,7 +715,6 @@ API_EXTRA_PARAMS = {
                 "created_at",
                 "updated_at",
                 "tags",
-
             ]
         )
     },
