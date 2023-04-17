@@ -28,7 +28,7 @@ flake8==6.0.0
 importlib-metadata==6.0.0
 pydocstyle==6.3.0
 mypy==0.991; python_version >= '3.4'
-pre-commit==2.21.0
+pre-commit==3.2.2
 
 # for package management (uploads)
 twine~=4.0; python_version >= '3.7'
