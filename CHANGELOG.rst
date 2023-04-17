@@ -1,11 +1,12 @@
 Change Log
 ==========
 
-UNRELEASED
+v4.7.0 (17APR23)
 _______________
 * :star: Added the possibility to create, edit and delete `StoredFiles` (#1298)
 * :star: Added the concept of a `StoredFilesReferenceProperty` (#1306)
 * :star: Added `fileDisplay` representation for `StoredFilesReferenceProperty` (#1306)
+* :+1: dependent versions for development: pre-commit (3.2.2), pytest-xdist (3.2.1), coverage (7.2.3), tox (4.4.12), mypy (1.2.0)
 
 v4.6.0 (16FEB23)
 ----------------
