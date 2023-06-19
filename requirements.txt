@@ -1,5 +1,5 @@
 # basis
-requests==2.28.2
+requests==2.31.0
 envparse==0.2.0
 
 # json validation (inspector)
@@ -18,7 +18,7 @@ coveralls==3.3.1
 
 # documentation
 Sphinx==7.0.1
-nbsphinx==0.8.12
+nbsphinx==0.9.2
 
 # integration
 tox==4.4.12
