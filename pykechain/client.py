@@ -470,7 +470,7 @@ class Client:
         if target_app and app_version and version:
             import semver
 
-            return semver.VersionInfo.parse(app_version).match(version)
+            return semver.Version.parse(app_version).match(version)
         elif not app_version:
             if isinstance(default, bool):
                 return default
