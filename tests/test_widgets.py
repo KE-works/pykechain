@@ -2,6 +2,8 @@ import os
 from typing import List
 from unittest import TestCase
 
+import pytest
+
 from pykechain.enums import (
     WidgetTypes,
     ShowColumnTypes,
@@ -20,7 +22,8 @@ from pykechain.enums import (
     Classification,
     Multiplicity,
     ActivityStatus,
-    ActivityClassification, WorkflowCategory,
+    ActivityClassification,
+    WorkflowCategory,
 )
 from pykechain.extra_utils import _copy_part_model
 from pykechain.models.form import Form
@@ -30,7 +33,12 @@ from pykechain.models.widgets.enums import (
     DashboardWidgetShowScopes,
     TasksAssignmentFilterTypes,
 )
-from pykechain.exceptions import APIError, ForbiddenError, IllegalArgumentError, NotFoundError
+from pykechain.exceptions import (
+    APIError,
+    ForbiddenError,
+    IllegalArgumentError,
+    NotFoundError,
+)
 from pykechain.models import Activity, Part
 from pykechain.models.widgets import (
     UndefinedWidget,
@@ -54,7 +62,8 @@ from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widget_models import (
     ServicecardWidget,
     DashboardWidget,
-    ScopemembersWidget, WeatherWidget,
+    ScopemembersWidget,
+    WeatherWidget,
 )
 from pykechain.models.widgets.widgets_manager import WidgetsManager
 from pykechain.utils import slugify_ref, temp_chdir, find
@@ -118,7 +127,9 @@ class TestSetTitle(TestCase):
         self.assertEqual(title_in, meta["customTitle"])
         self.assertEqual(WidgetTitleValue.CUSTOM_TITLE, meta["showTitleValue"])
 
-        meta, title = _set_title(dict(), title=title_in, show_title_value=WidgetTitleValue.DEFAULT)
+        meta, title = _set_title(
+            dict(), title=title_in, show_title_value=WidgetTitleValue.DEFAULT
+        )
 
         self.assertIsNone(title)
         self.assertIsNone(meta["customTitle"])
@@ -221,14 +232,17 @@ class TestWidgets(TestBetamax):
 
         widgets = list(test_task.widgets())[1:]  # remove meta-panel
         self.client.update_widgets(
-            widgets=[dict(id=w.id, title=f"widget {i + 1}") for i, w in enumerate(widgets)]
+            widgets=[
+                dict(id=w.id, title=f"widget {i + 1}") for i, w in enumerate(widgets)
+            ]
         )
 
         with self.assertRaises(IllegalArgumentError):
             double_update = [widgets[0], widgets[0], widgets[1]]
             self.client.update_widgets(
                 widgets=[
-                    dict(id=w.id, title=f"widget {i + 1}") for i, w in enumerate(double_update)
+                    dict(id=w.id, title=f"widget {i + 1}")
+                    for i, w in enumerate(double_update)
                 ]
             )
 
@@ -275,7 +289,9 @@ class TestWidgetManager(TestBetamax):
 class TestWidgetManagerInActivity(TestBetamax):
     def setUp(self):
         super().setUp()
-        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
+        self.task = self.project.create_activity(
+            name="widget_test_task"
+        )  # type: Activity
         self.wm = self.task.widgets()  # type: WidgetsManager
 
     def tearDown(self):
@@ -288,7 +304,9 @@ class TestWidgetManagerInActivity(TestBetamax):
         metapanel = self.wm[0]
 
         htmlwidget = self.wm.create_widget(
-            widget_type=WidgetTypes.HTML, title="Test HTML widget", meta=dict(htmlContent="Hello")
+            widget_type=WidgetTypes.HTML,
+            title="Test HTML widget",
+            meta=dict(htmlContent="Hello"),
         )
 
         self.assertIsInstance(metapanel, MetapanelWidget)
@@ -302,7 +320,9 @@ class TestWidgetManagerInActivity(TestBetamax):
             writable_models=bike_part.model().properties,
         )
 
-        widget.meta.update({"showColumns": [ShowColumnTypes.UNIT, ShowColumnTypes.DESCRIPTION]})
+        widget.meta.update(
+            {"showColumns": [ShowColumnTypes.UNIT, ShowColumnTypes.DESCRIPTION]}
+        )
         widget.edit(meta=widget.meta)
 
         live_widget = self.client.widget(pk=widget.id)
@@ -338,7 +358,9 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertFalse(live_widget.title)
         self.assertIsNone(live_widget.title_visible)
-        self.assertEqual(WidgetTitleValue.NO_TITLE, live_widget.meta.get("showTitleValue"))
+        self.assertEqual(
+            WidgetTitleValue.NO_TITLE, live_widget.meta.get("showTitleValue")
+        )
 
         widget.edit(title=False)
 
@@ -346,7 +368,9 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertFalse(live_widget.title)
         self.assertEqual("Bike", live_widget.title_visible)
-        self.assertEqual(WidgetTitleValue.DEFAULT, live_widget.meta.get("showTitleValue"))
+        self.assertEqual(
+            WidgetTitleValue.DEFAULT, live_widget.meta.get("showTitleValue")
+        )
 
     def test_edit_widget_title_and_meta(self):
         bike_part = self.project.part("Bike")
@@ -356,7 +380,9 @@ class TestWidgetManagerInActivity(TestBetamax):
         )
         new_title = "New title"
         new_meta = dict(widget.meta)
-        new_meta.update({"showColumns": [ShowColumnTypes.UNIT, ShowColumnTypes.DESCRIPTION]})
+        new_meta.update(
+            {"showColumns": [ShowColumnTypes.UNIT, ShowColumnTypes.DESCRIPTION]}
+        )
         widget.edit(
             title=new_title,
             meta=new_meta,
@@ -366,7 +392,8 @@ class TestWidgetManagerInActivity(TestBetamax):
 
         self.assertEqual(new_title, live_widget.title_visible)
         self.assertEqual(
-            [ShowColumnTypes.UNIT, ShowColumnTypes.DESCRIPTION], live_widget.meta["showColumns"]
+            [ShowColumnTypes.UNIT, ShowColumnTypes.DESCRIPTION],
+            live_widget.meta["showColumns"],
         )
 
     def test_widget_title(self):
@@ -564,7 +591,9 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(CardWidgetLinkTarget.SAME_TAB, widget2.meta.get("linkTarget"))
 
         self.assertIsInstance(widget3, CardWidget)
-        self.assertEqual(CardWidgetLinkValue.TREE_VIEW, widget3.meta.get("showLinkValue"))
+        self.assertEqual(
+            CardWidgetLinkValue.TREE_VIEW, widget3.meta.get("showLinkValue")
+        )
 
         with self.assertRaises(IllegalArgumentError):
             self.wm.add_card_widget(title=12)
@@ -653,7 +682,10 @@ class TestWidgetManagerInActivity(TestBetamax):
             height=15, showProgressText=False, colorCompleted=ProgressBarColors.RED
         )
         self.wm.add_metapanel_widget(
-            show_all=False, show_progress=False, show_progressbar=True, progress_bar=progress_bar
+            show_all=False,
+            show_progress=False,
+            show_progressbar=True,
+            progress_bar=progress_bar,
         )
         self.assertEqual(len(self.wm), 1 + 1)
 
@@ -690,7 +722,9 @@ class TestWidgetManagerInActivity(TestBetamax):
         notebook = self.project.service(name="Service Gears - Successful")
         widget1 = self.wm.add_notebook_widget(notebook=notebook, title=False)
 
-        widget2 = self.wm.add_notebook_widget(notebook=notebook, title="With custom title")
+        widget2 = self.wm.add_notebook_widget(
+            notebook=notebook, title="With custom title"
+        )
 
         widget3 = self.wm.add_notebook_widget(
             notebook=notebook.id,
@@ -731,7 +765,9 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(len(self.wm), 1 + 3)
 
     def test_parent(self):
-        multi_column_widget = self.wm.add_multicolumn_widget(title="Multi column widget")
+        multi_column_widget = self.wm.add_multicolumn_widget(
+            title="Multi column widget"
+        )
 
         child_widget = self.wm.add_html_widget(
             title="Text widget", html="Text", parent_widget=multi_column_widget
@@ -884,8 +920,10 @@ class TestWidgetManagerInActivity(TestBetamax):
         widget_forms = self.wm.add_dashboard_widget(
             title=title_widget_3,
             show_forms=True,
-            show_form_status=[DashboardWidgetShowForms.DONE_FORMS,
-                              DashboardWidgetShowForms.TOTAL_FORMS],
+            show_form_status=[
+                DashboardWidgetShowForms.DONE_FORMS,
+                DashboardWidgetShowForms.TOTAL_FORMS,
+            ],
             show_form_status_per_assignees=True,
             show_assignees_for_form_statuses=True,
             show_status_category_forms=False,
@@ -904,11 +942,17 @@ class TestWidgetManagerInActivity(TestBetamax):
             all(elem["selected"] for elem in widget_current_project.meta["showNumbers"])
         )
         self.assertTrue(
-            all(elem["selected"] for elem in widget_current_project.meta["showNumbersProjects"])
+            all(
+                elem["selected"]
+                for elem in widget_current_project.meta["showNumbersProjects"]
+            )
         )
 
         self.assertTrue(
-            any(elem["selected"] is False for elem in widget_tagged_projects.meta["showNumbers"])
+            any(
+                elem["selected"] is False
+                for elem in widget_tagged_projects.meta["showNumbers"]
+            )
         )
         self.assertTrue(
             any(
@@ -955,9 +999,9 @@ class TestWidgetManagerInActivity(TestBetamax):
 
     def test_add_project_info_widget(self):
         title = "__TEST_PROJECT_TEAM"
-        project_info_widget = self.wm.add_project_info_widget(title=title,
-                                                              collapsible=True,
-                                                              collapsed=True)
+        project_info_widget = self.wm.add_project_info_widget(
+            title=title, collapsible=True, collapsed=True
+        )
 
         self.assertEqual(project_info_widget.title, title)
 
@@ -965,21 +1009,27 @@ class TestWidgetManagerInActivity(TestBetamax):
 class TestWidgetManagerWeatherWidget(TestBetamax):
     def setUp(self):
         super().setUp()
-        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
+        self.task = self.project.create_activity(
+            name="widget_test_task"
+        )  # type: Activity
         self.wm = self.task.widgets()  # type: WidgetsManager
 
         catalog_root_model = self.project.part(
-            name="Catalog", classification=Classification.CATALOG, category=Category.MODEL
+            name="Catalog",
+            classification=Classification.CATALOG,
+            category=Category.MODEL,
         )
         self.part_model_with_weather_prop = self.project.create_model_with_properties(
             parent=catalog_root_model,
             name="___TEST PART",
             multiplicity=Multiplicity.ONE,
-            properties_fvalues=[dict(name="weather", property_type=PropertyType.WEATHER_VALUE)],
+            properties_fvalues=[
+                dict(name="weather", property_type=PropertyType.WEATHER_VALUE)
+            ],
         )
-        self.weather_prop_instance = self.part_model_with_weather_prop.instances()[0].property(
-            "weather"
-        )
+        self.weather_prop_instance = self.part_model_with_weather_prop.instances()[
+            0
+        ].property("weather")
 
     def tearDown(self):
         if self.task:
@@ -998,7 +1048,9 @@ class TestWidgetManagerWeatherWidget(TestBetamax):
 class TestWidgetNavigationBarWidget(TestBetamax):
     def setUp(self):
         super().setUp()
-        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
+        self.task = self.project.create_activity(
+            name="widget_test_task"
+        )  # type: Activity
         self.wm = self.task.widgets()  # type: WidgetsManager
 
         self.frame = self.project.part(name="Frame")
@@ -1083,8 +1135,12 @@ class TestWidgetNavigationBarWidget(TestBetamax):
 class TestWidgetsCopyMove(TestBetamax):
     def setUp(self):
         super().setUp()
-        self.task = self.project.create_activity(name="widget_test_task")  # type: Activity
-        self.task_2 = self.project.create_activity(name="test_copy_widget")  # type: Activity
+        self.task = self.project.create_activity(
+            name="widget_test_task"
+        )  # type: Activity
+        self.task_2 = self.project.create_activity(
+            name="test_copy_widget"
+        )  # type: Activity
 
     def tearDown(self):
         self.task.delete()
@@ -1141,14 +1197,22 @@ class TestWidgetsCopyMove(TestBetamax):
         self.assertEqual(1, len(self.task.widgets()))
 
 
+@pytest.mark.skipif(
+    "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+    reason="Skipping tests when using Travis or Github Actions, Downloads cannot be provided",
+)
 class TestWidgetDownloadAsExcel(TestBetamax):
     def setUp(self):
         super().setUp()
         task = self.project.activity(name="Task - Form + Tables + Service")
         all_widgets = task.widgets()  # type: List[Widget]
 
-        self.grid_widget = find(all_widgets, lambda w: w.widget_type == WidgetTypes.FILTEREDGRID)
-        self.form_widget = find(all_widgets, lambda w: w.widget_type == WidgetTypes.PROPERTYGRID)
+        self.grid_widget = find(
+            all_widgets, lambda w: w.widget_type == WidgetTypes.FILTEREDGRID
+        )
+        self.form_widget = find(
+            all_widgets, lambda w: w.widget_type == WidgetTypes.PROPERTYGRID
+        )
 
     def tearDown(self):
         super().tearDown()
@@ -1219,20 +1283,20 @@ class TestWidgetsInForm(TestBetamax):
             multiplicity=Multiplicity.ONE,
         )
         self.attachment_property_model = self.exactly_1_part_model.add_property(
-                name="__ATTACHMENT_PROPERTY_FORM",
-                property_type=PropertyType.ATTACHMENT_VALUE)
+            name="__ATTACHMENT_PROPERTY_FORM",
+            property_type=PropertyType.ATTACHMENT_VALUE,
+        )
         self.form_parent_part = self.project.part(name="Form")
-        self.bike_model = self.project.model(name='Bike')
+        self.bike_model = self.project.model(name="Bike")
         self.form_bike_model = _copy_part_model(
             part=self.bike_model,
             target_parent=self.form_part_model,
             name="__BIKE_FORM_MODEL",
             include_children=True,
         )
-        self.weather_prop_model = \
-            self.form_bike_model.add_property(
-                name="weather_prop",
-                property_type=PropertyType.WEATHER_VALUE)
+        self.weather_prop_model = self.form_bike_model.add_property(
+            name="weather_prop", property_type=PropertyType.WEATHER_VALUE
+        )
         self.wm = self.activity_to_do.widgets()
 
     def tearDown(self):
@@ -1250,11 +1314,11 @@ class TestWidgetsInForm(TestBetamax):
 
     def test_add_attachment_widget(self):
         widget = self.wm.add_attachmentviewer_widget(
-            attachment_property=self.attachment_property_model,
-            editable=True
+            attachment_property=self.attachment_property_model, editable=True
         )
-        cloned_form_model = \
-            self.form_model.clone(name=self.form_model_name, target_scope=self.cross_scope)
+        cloned_form_model = self.form_model.clone(
+            name=self.form_model_name, target_scope=self.cross_scope
+        )
         cloned_activity_to_do = cloned_form_model.status_forms[0].activity
         cloned_wm = cloned_activity_to_do.widgets()
         cloned_widget = cloned_wm[-1]
@@ -1265,7 +1329,9 @@ class TestWidgetsInForm(TestBetamax):
         self.assertIsInstance(self.cross_scope.form(name=self.form_model_name), Form)
         self.assertIsInstance(cloned_widget, AttachmentviewerWidget)
         self.assertEqual(len(cloned_wm), 1 + 1)
-        self.assertEqual(self.attachment_property_model.name, cloned_widget.title_visible)
+        self.assertEqual(
+            self.attachment_property_model.name, cloned_widget.title_visible
+        )
 
     def test_add_attachment_widget_with_editable_association(self):
         widget = self.wm.add_attachmentviewer_widget(
@@ -1273,8 +1339,9 @@ class TestWidgetsInForm(TestBetamax):
             attachment_property=self.attachment_property_model,
             editable=True,
         )
-        cloned_form_model = \
-            self.form_model.clone(name=self.form_model_name, target_scope=self.cross_scope)
+        cloned_form_model = self.form_model.clone(
+            name=self.form_model_name, target_scope=self.cross_scope
+        )
         cloned_activity_to_do = cloned_form_model.status_forms[0].activity
         cloned_wm = cloned_activity_to_do.widgets()
         cloned_widget = cloned_wm[-1]
@@ -1299,8 +1366,9 @@ class TestWidgetsInForm(TestBetamax):
             all_readable=True,
             incomplete_rows=True,
         )
-        cloned_form_model = \
-            self.form_model.clone(name=self.form_model_name, target_scope=self.cross_scope)
+        cloned_form_model = self.form_model.clone(
+            name=self.form_model_name, target_scope=self.cross_scope
+        )
         cloned_activity_to_do = cloned_form_model.status_forms[0].activity
         cloned_wm = cloned_activity_to_do.widgets()
         cloned_widget = cloned_wm[-1]
@@ -1325,8 +1393,9 @@ class TestWidgetsInForm(TestBetamax):
             all_readable=True,
             incomplete_rows=True,
         )
-        cloned_form_model = \
-            self.form_model.clone(name=self.form_model_name, target_scope=self.cross_scope)
+        cloned_form_model = self.form_model.clone(
+            name=self.form_model_name, target_scope=self.cross_scope
+        )
         cloned_activity_to_do = cloned_form_model.status_forms[0].activity
         cloned_wm = cloned_activity_to_do.widgets()
         cloned_widget = cloned_wm[-1]
@@ -1348,8 +1417,9 @@ class TestWidgetsInForm(TestBetamax):
             readable_models=bike_part_model.properties[:2],
             writable_models=bike_part_model.properties[3:],
         )
-        cloned_form_model = \
-            self.form_model.clone(name=self.form_model_name, target_scope=self.cross_scope)
+        cloned_form_model = self.form_model.clone(
+            name=self.form_model_name, target_scope=self.cross_scope
+        )
         cloned_activity_to_do = cloned_form_model.status_forms[0].activity
         cloned_wm = cloned_activity_to_do.widgets()
         cloned_widget = cloned_wm[-1]
@@ -1380,8 +1450,9 @@ class TestWidgetsInForm(TestBetamax):
             attachment_property=self.attachment_property_model
         )
 
-        cloned_form_model = \
-            self.form_model.clone(name=self.form_model_name, target_scope=self.cross_scope)
+        cloned_form_model = self.form_model.clone(
+            name=self.form_model_name, target_scope=self.cross_scope
+        )
         cloned_activity_to_do = cloned_form_model.status_forms[0].activity
         cloned_wm = cloned_activity_to_do.widgets()
         cloned_widget1 = cloned_wm[-3]
@@ -1406,8 +1477,9 @@ class TestWidgetsInForm(TestBetamax):
         widget = self.wm.add_weather_widget(
             weather_property=self.weather_prop_model,
         )
-        cloned_form_model = \
-            self.form_model.clone(name=self.form_model_name, target_scope=self.cross_scope)
+        cloned_form_model = self.form_model.clone(
+            name=self.form_model_name, target_scope=self.cross_scope
+        )
         cloned_activity_to_do = cloned_form_model.status_forms[0].activity
         cloned_wm = cloned_activity_to_do.widgets()
         cloned_widget = cloned_wm[-1]
