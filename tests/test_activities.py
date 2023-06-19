@@ -12,7 +12,8 @@ from pykechain.enums import (
     ActivityStatus,
     ActivityType,
     Category,
-    Classification, Multiplicity,
+    Classification,
+    Multiplicity,
     NotificationEvent,
     PaperOrientation,
     PaperSize,
@@ -418,7 +419,7 @@ class TestActivities(TestBetamax):
             "_scope_id",
             "start_date",
             "due_date",
-            "_form_collection"
+            "_form_collection",
         ]
 
         for attribute in attributes:
@@ -898,6 +899,10 @@ class TestActivities(TestBetamax):
             self.assertEqual(status_form.activity._form_collection, forms[0].id)
 
 
+@pytest.mark.skipif(
+    "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+    reason="Skipping tests when using Travis or Github Actions, as downloads cannot be provided",
+)
 class TestActivityDownloadAsPDF(TestBetamax):
     def test_activity_download_as_pdf(self):
         # setUp
@@ -917,10 +922,6 @@ class TestActivityDownloadAsPDF(TestBetamax):
             )
             self.assertTrue(os.path.exists(pdf_file_called_after_activity))
 
-    @pytest.mark.skipif(
-        "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
-        reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided",
-    )
     def test_activity_download_as_pdf_async(self):
         activity_name = "Task - Form"
         activity = self.project.activity(name=activity_name)
@@ -1061,6 +1062,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
         # tearDown
         notifications[0].delete()
 
+
 class TestActivityCloneWidgets(TestBetamax):
     def setUp(self):
         super().setUp()
@@ -1083,7 +1085,9 @@ class TestActivityCloneWidgets(TestBetamax):
         super().tearDown()
 
     def test_clone_widgets(self):
-        self.activity_status_in_progress.clone_widgets(from_activity=self.activity_status_to_do)
+        self.activity_status_in_progress.clone_widgets(
+            from_activity=self.activity_status_to_do
+        )
 
         wm_to_do = self.activity_status_to_do.widgets()
         wm_in_progress = self.activity_status_in_progress.widgets()
@@ -1093,11 +1097,11 @@ class TestActivityCloneWidgets(TestBetamax):
 
     def test_clone_widgets_cross_form(self):
         self.new_form_template = self.project.create_form_model(
-            name="Test cross form widget cloning",
-            workflow=self.workflow,
-            contexts=[]
+            name="Test cross form widget cloning", workflow=self.workflow, contexts=[]
         )
-        self.new_form_template_status_to_do = self.new_form_template.status_forms[0].activity
+        self.new_form_template_status_to_do = self.new_form_template.status_forms[
+            0
+        ].activity
 
         with self.assertRaises(APIError):
             self.new_form_template_status_to_do.clone_widgets(
@@ -1106,11 +1110,8 @@ class TestActivityCloneWidgets(TestBetamax):
 
     def test_clone_widget_to_an_activity(self):
         self.new_activity = self.project.create_activity(
-            name="Test cross activity widget cloning",
-            activity_type=ActivityType.TASK
+            name="Test cross activity widget cloning", activity_type=ActivityType.TASK
         )
 
         with self.assertRaises(APIError):
-            self.new_activity.clone_widgets(
-                from_activity=self.activity_status_to_do
-            )
+            self.new_activity.clone_widgets(from_activity=self.activity_status_to_do)
