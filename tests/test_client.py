@@ -89,7 +89,9 @@ class TestClient(TestCase):
         ):
             client.reload(not_a_kechain_object)
 
-        empty_kechain_object = Base(json=dict(name="empty", id="1234567890"), client=client)
+        empty_kechain_object = Base(
+            json=dict(name="empty", id="1234567890"), client=client
+        )
         with self.assertRaises(
             IllegalArgumentError, msg="Reload cant find API resource for type Base"
         ):
@@ -142,14 +144,18 @@ class TestClientLive(TestBetamax):
         new_wheel_1 = bike.add(name=wheel_name, model=wheel_model)
         new_wheel_2 = self.project.part(name=wheel_name)
 
-        self.assertFalse(new_wheel_1 is new_wheel_2, "Parts must be separate in Python memory")
+        self.assertFalse(
+            new_wheel_1 is new_wheel_2, "Parts must be separate in Python memory"
+        )
         self.assertEqual(new_wheel_1, new_wheel_2, "Parts must be identical in UUIDs")
 
         new_wheel_2.delete()
         with self.assertRaises(NotFoundError):
             self.project.part(name=wheel_name)
 
-        with self.assertRaises(NotFoundError, msg="Wheel cant be reloaded after it was deleted"):
+        with self.assertRaises(
+            NotFoundError, msg="Wheel cant be reloaded after it was deleted"
+        ):
             self.client.reload(new_wheel_1)
 
     # 2.6.0
@@ -338,7 +344,9 @@ class TestClientAppVersions(TestBetamax):
     def test_compare_versions(self):
         """Multitest to check all the matchings versions"""
 
-        self.assertTrue(self.client.match_app_version(app="kechain2.core.wim", version=">=1.0.0"))
+        self.assertTrue(
+            self.client.match_app_version(app="kechain2.core.wim", version=">=1.0.0")
+        )
         self.assertTrue(self.client.match_app_version(label="wim", version=">=1.0.0"))
         self.assertFalse(self.client.match_app_version(label="wim", version="==0.0.1"))
 
@@ -347,52 +355,72 @@ class TestClientAppVersions(TestBetamax):
         with self.assertRaises(ValueError):
             self.client.match_app_version(app="kechain2.core.wim", version="1.0")
 
-        # right version, no operand in version
-        with self.assertRaises(ValueError):
-            self.client.match_app_version(app="kechain2.core.wim", version="1.0.0")
-
-        # wrong operand (should be ==)
-        with self.assertRaises(ValueError):
-            self.client.match_app_version(app="kechain2.core.wim", version="=1.0.0")
-
-        # not found a match version
-        with self.assertRaises(IllegalArgumentError):
-            self.client.match_app_version(app="kechain2.core.wim", version="")
-
-        # no version found on the app kechain2.metrics
-        with self.assertRaises(NotFoundError):
-            self.client.match_app_version(
-                app="kechain2.core.activitylog", version=">0.0.0", default=None
+        with self.subTest(
+            "right version, no operand in version, works as equality ops, should return False"
+        ):
+            self.assertFalse(
+                self.client.match_app_version(app="kechain2.core.wim", version="99.99.99")
             )
 
-        # no version found on the app kechain2.metrics, default = True, returns True
-        self.assertTrue(
-            self.client.match_app_version(
-                app="kechain2.core.activitylog", version=">0.0.0", default=True
+        with self.subTest("wrong operand (should be ==)"):
+            with self.assertRaises(ValueError):
+                self.client.match_app_version(app="kechain2.core.wim", version="=1.0.0")
+
+        with self.subTest("not found a match version"):
+            with self.assertRaises(IllegalArgumentError):
+                self.client.match_app_version(app="kechain2.core.wim", version="")
+
+        with self.subTest("no version found on the app kechain2.metrics"):
+            with self.assertRaises(NotFoundError):
+                self.client.match_app_version(
+                    app="kechain2.core.activitylog", version=">0.0.0", default=None
+                )
+
+        with self.subTest(
+            "no version found on the app kechain2.metrics, default = True, returns True"
+        ):
+            self.assertTrue(
+                self.client.match_app_version(
+                    app="kechain2.core.activitylog", version=">0.0.0", default=True
+                )
             )
-        )
 
-        # no version found on the app kechain2.metrics, default = False, returns False
-        self.assertFalse(
-            self.client.match_app_version(
-                app="kechain2.core.activitylog", version=">0.0.0", default=False
+        with self.subTest(
+            "no version found on the app kechain2.metrics, default = False, returns False"
+        ):
+            self.assertFalse(
+                self.client.match_app_version(
+                    app="kechain2.core.activitylog", version=">0.0.0", default=False
+                )
             )
-        )
 
-        # no version found on the app kechain2.metrics, default = False, returns False
-        # default is set to return False in the method
-        self.assertFalse(
-            self.client.match_app_version(app="kechain2.core.activitylog", version=">0.0.0")
-        )
+        with self.subTest(
+            "no version found on the app kechain2.metrics, default = False, returns False. "
+            "default is set to return False in the method"
+        ):
+            self.assertFalse(
+                self.client.match_app_version(
+                    app="kechain2.core.activitylog", version=">0.0.0"
+                )
+            )
 
-        # did not find the app
-        with self.assertRaises(NotFoundError):
-            self.client.match_app_version(app="nonexistingapp", version=">0.0.0", default=None)
+        with self.subTest("did not find the app"):
+            with self.assertRaises(NotFoundError):
+                self.client.match_app_version(
+                    app="nonexistingapp", version=">0.0.0", default=None
+                )
 
-        # did not find the app, but the default returns a False
-        self.assertFalse(
-            self.client.match_app_version(app="nonexistingapp", version=">0.0.0", default=False)
-        )
+        with self.subTest("did not find the app, but the default returns a False"):
+            self.assertFalse(
+                self.client.match_app_version(
+                    app="nonexistingapp", version=">0.0.0", default=False
+                )
+            )
 
-        # did not find the app, but the default returns a False, without providing the default, as the default is False
-        self.assertFalse(self.client.match_app_version(app="nonexistingapp", version=">0.0.0"))
+        with self.subTest(
+            "did not find the app, but the default returns a False, without providing the "
+            "default, as the default is False"
+        ):
+            self.assertFalse(
+                self.client.match_app_version(app="nonexistingapp", version=">0.0.0")
+            )
