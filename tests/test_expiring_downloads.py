@@ -1,6 +1,8 @@
 import datetime
 import os
 
+import pytest
+
 from pykechain.utils import temp_chdir
 
 from pykechain.models.expiring_download import ExpiringDownload
@@ -40,7 +42,9 @@ class TestExpiringDownloads(TestBetamax):
             "test_upload_content.pdf",
         )
         new_expiring_download = self.client.create_expiring_download(
-            expires_at=datetime.datetime.now(), expires_in=42000, content_path=content_path
+            expires_at=datetime.datetime.now(),
+            expires_in=42000,
+            content_path=content_path,
         )
         self.assertTrue(isinstance(new_expiring_download, ExpiringDownload))
         new_expiring_download.delete()
@@ -63,7 +67,9 @@ class TestExpiringDownloads(TestBetamax):
         )
         self.test_expiring_download.upload(content_path=upload_path)
         self.assertIsNotNone(self.test_expiring_download.filename)
-        self.assertEqual(self.test_expiring_download.filename, "test_upload_content.pdf")
+        self.assertEqual(
+            self.test_expiring_download.filename, "test_upload_content.pdf"
+        )
 
     def test_upload_wrong_content_path(self):
         upload_path = os.path.join(
@@ -76,6 +82,10 @@ class TestExpiringDownloads(TestBetamax):
         with self.assertRaises(OSError):
             self.test_expiring_download.upload(content_path=upload_path)
 
+    @pytest.mark.skipif(
+        "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+        reason="Skipping tests when using Travis or Github Actions, Downloads cannot be provided",
+    )
     def test_save_expiring_download_content(self):
         upload_path = os.path.join(
             self.test_assets_dir,
