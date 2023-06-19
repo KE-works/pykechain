@@ -8,15 +8,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 import jsonschema
 
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.utils import (
-    Empty,
-    empty,
-    is_url,
-    is_uuid,
-    parse_date,
-    parse_datetime,
-    parse_time,
-)
+from pykechain.utils import Empty, empty, is_url, is_uuid, parse_date, parse_datetime, parse_time
 
 iter_types = (list, tuple, set)
 

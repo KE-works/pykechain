@@ -3,16 +3,7 @@ import re
 import unicodedata
 from contextlib import contextmanager
 from datetime import date, datetime, time, timedelta, timezone
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    TypeVar,
-    Union,
-)  # noqa: F401
+from typing import Any, Callable, Dict, Iterable, List, Optional, TypeVar, Union  # noqa: F401
 
 import pytz
 

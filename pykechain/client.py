@@ -36,7 +36,9 @@ from pykechain.enums import (
     ServiceEnvironmentVersion,
     ServiceScriptUser,
     ServiceType,
-    StoredFileCategory, StoredFileClassification, TeamRoles,
+    StoredFileCategory,
+    StoredFileClassification,
+    TeamRoles,
     WidgetTypes,
     WorkflowCategory,
 )
@@ -72,6 +74,7 @@ from pykechain.utils import (
     is_valid_email,
     slugify_ref,
 )
+
 from .__about__ import version as pykechain_version
 from .client_utils import PykeRetry
 from .models.banner import Banner

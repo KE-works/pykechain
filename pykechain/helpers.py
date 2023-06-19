@@ -3,7 +3,8 @@ import os
 from envparse import env
 
 from pykechain.client import Client
-from pykechain.enums import KechainEnv as kecenv, ScopeStatus
+from pykechain.enums import KechainEnv as kecenv
+from pykechain.enums import ScopeStatus
 from pykechain.exceptions import ClientError
 
 
