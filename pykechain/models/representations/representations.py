@@ -1,7 +1,8 @@
 from typing import Any
 
 from pykechain.enums import (
-    FileDisplayRepresentationValues, FontAwesomeMode,
+    FileDisplayRepresentationValues,
+    FontAwesomeMode,
     GeoCoordinateConfig,
     LinkTargets,
     PropertyRepresentation,
