@@ -586,8 +586,8 @@ class TestFileSizeValidator(TestCase):
     def test_filesizevalidator_being_invalid(self):
         validator = FileSizeValidator(max_size=100)
 
-        self.assertFalse(validator.is_valid(101))
-        self.assertFalse(validator.is_valid(101.0))
+        self.assertFalse(validator.is_valid(101*1024**2))
+        self.assertFalse(validator.is_valid(101*1024**2))
         self.assertFalse(validator.is_valid(-1))
 
     def test_filesizevalidator_being_none(self):
