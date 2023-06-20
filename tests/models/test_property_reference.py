@@ -26,7 +26,9 @@ from pykechain.models.property_reference import (
     UserReferencesProperty,
 )
 from pykechain.models.stored_file import StoredFile
-from pykechain.models.validators import RequiredFieldValidator
+from pykechain.models.validators import FileExtensionValidator, FileSizeValidator, \
+    RequiredFieldValidator, \
+    SingleReferenceValidator
 from pykechain.models.value_filter import PropertyValueFilter, ScopeFilter
 from pykechain.models.widgets.enums import PropertyReferenceOptions
 from pykechain.models.workflow import Status, Workflow
@@ -1537,3 +1539,20 @@ class TestPropertyStoredFileReference(TestBetamax):
             self.stored_file_2.id,
             [value.id for value in self.storedfile_ref_prop_instance.value],
         )
+
+    def test_edit_property_model_description(self):
+        self.storedfile_ref_prop_model.edit(description="Test edit description")
+
+        self.assertIsNotNone(self.storedfile_ref_prop_model.description)
+
+    def test_edit_property_model_validators(self):
+        self.storedfile_ref_prop_model.validators = [SingleReferenceValidator(),
+                                                     FileSizeValidator(max_size=200),
+                                                     FileExtensionValidator(accept=".csv,.pdf")]
+        self.assertEqual(len(self.storedfile_ref_prop_model.validators), 3)
+        self.assertTrue(any(isinstance(v, FileSizeValidator)
+                            for v in self.storedfile_ref_prop_model.validators))
+        self.assertTrue(any(isinstance(v, SingleReferenceValidator)
+                            for v in self.storedfile_ref_prop_model.validators))
+        self.assertTrue(any(isinstance(v, FileExtensionValidator)
+                            for v in self.storedfile_ref_prop_model.validators))

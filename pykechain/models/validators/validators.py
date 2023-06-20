@@ -413,7 +413,7 @@ class FileSizeValidator(PropertyValidator):
     The actual size of the file cannot be checked in pykechain without downloading this from the server, hence
     when the validator is used inside an attachment property, the validator returns always being valid.
 
-    :ivar max_size: maximum size to check
+    :ivar max_size: maximum size to check, in MB
     :type max_size: Union[int,float]
 
     Example
@@ -443,14 +443,14 @@ class FileSizeValidator(PropertyValidator):
 
         :param json: (optional) dict (json) object to construct the object from
         :type json: Optional[Dict]
-        :param max_size: (optional) number that counts as maximum size of the file
+        :param max_size: (optional) number that counts as maximum size of the file, in MB
         :type accept: Optional[Union[int,float]]
         :param kwargs: (optional) additional kwargs to pass down
         """
         super().__init__(json=json, **kwargs)
         if max_size is not None:
             if isinstance(max_size, (int, float)):
-                self._config["maxSize"] = int(max_size)
+                self._config["maxSize"] = int(max_size) * 1024**2  # converting from bytes to MB
             else:
                 raise ValueError("`max_size` should be a number.")
         self.max_size = self._config.get("maxSize", float("inf"))
