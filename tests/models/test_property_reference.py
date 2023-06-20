@@ -26,9 +26,12 @@ from pykechain.models.property_reference import (
     UserReferencesProperty,
 )
 from pykechain.models.stored_file import StoredFile
-from pykechain.models.validators import FileExtensionValidator, FileSizeValidator, \
-    RequiredFieldValidator, \
-    SingleReferenceValidator
+from pykechain.models.validators import (
+    FileExtensionValidator,
+    FileSizeValidator,
+    RequiredFieldValidator,
+    SingleReferenceValidator,
+)
 from pykechain.models.value_filter import PropertyValueFilter, ScopeFilter
 from pykechain.models.widgets.enums import PropertyReferenceOptions
 from pykechain.models.workflow import Status, Workflow
