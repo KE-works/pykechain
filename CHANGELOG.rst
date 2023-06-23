@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v4.8.0 (23JUN23)
+* :star: Number of tests on certain modules has been increased (#1328)
+* :star: The unit of `max_size` on a `FileSizeValidator` has been changed to MB (#1328)
+
 v4.7.0 (17APR23)
 _______________
 * :star: Added the possibility to create, edit and delete `StoredFiles` (#1298)
