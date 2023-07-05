@@ -1376,3 +1376,14 @@ class StoredFileClassification(Enum):
 
     GLOBAL = "GLOBAL"
     SCOPED = "SCOPED"
+
+
+class ScopeReferenceColumns(Enum):
+    """
+
+    """
+    START_DATE = "start_date"
+    DUE_DATE = "due_date"
+    STATUS = "status"
+    PROGRESS = "progress"
+    TAGS = "tags"

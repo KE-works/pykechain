@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from pykechain.defaults import PARTS_BATCH_LIMIT
+from pykechain.enums import ScopeReferenceColumns
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Scope, user
 from pykechain.models.base_reference import (
@@ -109,6 +110,17 @@ class ScopeReferencesProperty(_ReferenceProperty):
         :rtype list
         """
         return ScopeFilter.parse_options(self._options)
+
+    def set_active_filter_switch(self, switch_visible: bool):
+        """
+        Set the switch between active and inactive scopes on the scope reference property
+        """
+        self._options.update({'show_active_status_filter': switch_visible})
+        self.edit(options=self._options)
+
+    def set_columns(self, list_of_columns: List[ScopeReferenceColumns] = None):
+        self._options.update({'columns': list_of_columns})
+        self.edit(options=self._options)
 
 
 class UserReferencesProperty(_ReferenceProperty):

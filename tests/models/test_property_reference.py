@@ -9,7 +9,7 @@ from pykechain.enums import (
     FormCategory,
     Multiplicity,
     PropertyType,
-    SortTable,
+    ScopeReferenceColumns, SortTable,
     StoredFileClassification,
     WorkflowCategory,
 )
@@ -1170,6 +1170,26 @@ class TestPropertyScopeReference(TestBetamax):
             # noinspection PyTypeChecker
             self.scope_ref_prop.set_prefilters(prefilters=filters[0])
 
+    def test_set_columns(self):
+        self.scope_ref_prop.set_columns(list_of_columns=[
+            ScopeReferenceColumns.PROGRESS,
+            ScopeReferenceColumns.DUE_DATE])
+
+        self.assertIn('columns', self.scope_ref_prop._options)
+        self.assertIn(ScopeReferenceColumns.PROGRESS, self.scope_ref_prop._options['columns'])
+        self.assertIn(ScopeReferenceColumns.DUE_DATE, self.scope_ref_prop._options['columns'])
+        self.assertNotIn(ScopeReferenceColumns.START_DATE, self.scope_ref_prop._options['columns'])
+        self.assertNotIn(ScopeReferenceColumns.STATUS, self.scope_ref_prop._options['columns'])
+        self.assertNotIn(ScopeReferenceColumns.TAGS, self.scope_ref_prop._options['columns'])
+
+    def test_set_active_switch(self):
+        self.scope_ref_prop.set_active_filter_switch(switch_visible=True)
+        self.assertIn('show_active_status_filter', self.scope_ref_prop._options)
+        self.assertTrue(self.scope_ref_prop._options['show_active_status_filter'])
+
+        self.scope_ref_prop.set_active_filter_switch(switch_visible=False)
+        self.assertIn('show_active_status_filter', self.scope_ref_prop._options)
+        self.assertFalse(self.scope_ref_prop._options['show_active_status_filter'])
 
 class TestPropertyUserReference(TestBetamax):
     def setUp(self):
