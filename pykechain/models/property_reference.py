@@ -118,7 +118,6 @@ class ScopeReferencesProperty(_ReferenceProperty):
         :param switch_visible: trigger the switch of showing active or inactive scopes
         :type switch_visible: bool
         """
-
         self._options.update({"show_active_status_filter": switch_visible})
         self.edit(options=self._options)
 
@@ -129,7 +128,6 @@ class ScopeReferencesProperty(_ReferenceProperty):
         :param list_of_columns: all the columns possible of a Scope
         :type list_of_columns: List of columns
         """
-
         self._options.update({"columns": list_of_columns})
         self.edit(options=self._options)
 
