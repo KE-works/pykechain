@@ -119,7 +119,7 @@ class ScopeReferencesProperty(_ReferenceProperty):
         :type switch_visible: bool
         """
 
-        self._options.update({'show_active_status_filter': switch_visible})
+        self._options.update({"show_active_status_filter": switch_visible})
         self.edit(options=self._options)
 
     def set_columns(self, list_of_columns: List[ScopeReferenceColumns] = None):
@@ -130,7 +130,7 @@ class ScopeReferencesProperty(_ReferenceProperty):
         :type list_of_columns: List of columns
         """
 
-        self._options.update({'columns': list_of_columns})
+        self._options.update({"columns": list_of_columns})
         self.edit(options=self._options)
 
 
@@ -276,5 +276,7 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
         :param kwargs: optional inputs
         :return: list of StoredFile objects
         """
-        return [StoredFile(client=self._client, json=stored_files_json) for stored_files_json in
-                self._value]
+        return [
+            StoredFile(client=self._client, json=stored_files_json)
+            for stored_files_json in self._value
+        ]
