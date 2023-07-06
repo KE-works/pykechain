@@ -3,18 +3,20 @@ Change Log
 
 v4.8.1 (06JUL23)
 ---------------
-* :star: Added the possibility to set the list of columns and the active switch on a `ScopeReferenceProperty` (#1340)
+* :star: Added the possibility to set the list of columns and the active switch on a `ScopeReferenceProperty`. (#1340)
+* :+1: dependent versions for development: mypy (1.4.1), tox (4.6.3), pytest (7.4.0), pytest-cov (4.1.0), pytest-xdist (3.3.1)
 
 v4.8.0 (23JUN23)
 ---------------
-* :star: Number of tests on certain modules has been increased (#1328)
-* :star: The unit of `max_size` on a `FileSizeValidator` has been changed to MB (#1328)
+* :star: Number of tests on certain modules has been increased. (#1328)
+* :star: The unit of `max_size` on a `FileSizeValidator` has been changed to MB. (#1328)
+* :+1: dependent versions for development: tox (4.6.2), pytest (7.3.2), coverage (7.2.7), semver (3.0.1), pre-commit (3.3.3), importlib-metadata (6.6.0), pytz (2023.3), sphinx (7.0.1), nbsphinx (0.9.2), requests (2.31.0)
 
 v4.7.0 (17APR23)
 _______________
-* :star: Added the possibility to create, edit and delete `StoredFiles` (#1298)
-* :star: Added the concept of a `StoredFilesReferenceProperty` (#1306)
-* :star: Added `fileDisplay` representation for `StoredFilesReferenceProperty` (#1306)
+* :star: Added the possibility to create, edit and delete `StoredFiles`. (#1298)
+* :star: Added the concept of a `StoredFilesReferenceProperty`. (#1306)
+* :star: Added `fileDisplay` representation for `StoredFilesReferenceProperty`. (#1306)
 * :+1: dependent versions for development: pre-commit (3.2.2), pytest-xdist (3.2.1), coverage (7.2.3), tox (4.4.12), mypy (1.2.0)
 
 v4.6.0 (16FEB23)
