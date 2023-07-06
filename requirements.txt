@@ -9,7 +9,7 @@ jsonschema==4.17.3
 semver==3.0.1
 
 # testing
-pytest==7.3.2
+pytest==7.4.0
 pytest-xdist[psutil]==3.2.1
 betamax==0.8.1
 coverage==7.2.7
@@ -27,7 +27,7 @@ tox==4.6.3
 flake8==6.0.0
 importlib-metadata==6.6.0
 pydocstyle==6.3.0
-mypy==1.2.0; python_version >= '3.4'
+mypy==1.4.1; python_version >= '3.4'
 pre-commit==3.3.3
 
 # for package management (uploads)
