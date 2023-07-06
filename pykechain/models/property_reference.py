@@ -113,7 +113,7 @@ class ScopeReferencesProperty(_ReferenceProperty):
 
     def set_active_filter_switch(self, switch_visible: bool):
         """
-        Set the switch between active and inactive scopes on the scope reference property
+        Set the switch between active and inactive scopes on the scope reference property.
 
         :param switch_visible: trigger the switch of showing active or inactive scopes
         :type switch_visible: bool
@@ -124,7 +124,7 @@ class ScopeReferencesProperty(_ReferenceProperty):
 
     def set_columns(self, list_of_columns: List[ScopeReferenceColumns] = None):
         """
-        Set the columns visible inside the Scope selection dialog
+        Set the columns visible inside the Scope selection dialog.
 
         :param list_of_columns: all the columns possible of a Scope
         :type list_of_columns: List of columns
