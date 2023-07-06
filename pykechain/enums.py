@@ -1376,3 +1376,21 @@ class StoredFileClassification(Enum):
 
     GLOBAL = "GLOBAL"
     SCOPED = "SCOPED"
+
+
+class ScopeReferenceColumns(Enum):
+    """
+    List of columns visible in the Scope Reference dialog.
+
+    :cvar START_DATE: start date of the scope
+    :cvar DUE_DATE: due date of the scope
+    :cvar STATUS: status of the scope
+    :cvar PROGRESS: progress of the scope
+    :cvar TAGS: tags of the scope
+    """
+
+    START_DATE = "start_date"
+    DUE_DATE = "due_date"
+    STATUS = "status"
+    PROGRESS = "progress"
+    TAGS = "tags"

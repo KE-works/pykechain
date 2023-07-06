@@ -9,6 +9,7 @@ from pykechain.enums import (
     FormCategory,
     Multiplicity,
     PropertyType,
+    ScopeReferenceColumns,
     SortTable,
     StoredFileClassification,
     WorkflowCategory,
@@ -25,7 +26,6 @@ from pykechain.models.property_reference import (
     StoredFilesReferencesProperty,
     UserReferencesProperty,
 )
-from pykechain.models.stored_file import StoredFile
 from pykechain.models.validators import (
     FileExtensionValidator,
     FileSizeValidator,
@@ -34,7 +34,7 @@ from pykechain.models.validators import (
 )
 from pykechain.models.value_filter import PropertyValueFilter, ScopeFilter
 from pykechain.models.widgets.enums import PropertyReferenceOptions
-from pykechain.models.workflow import Status, Workflow
+from pykechain.models.workflow import Status
 from pykechain.utils import find, is_uuid
 from tests.classes import TestBetamax
 
@@ -1170,6 +1170,40 @@ class TestPropertyScopeReference(TestBetamax):
             # noinspection PyTypeChecker
             self.scope_ref_prop.set_prefilters(prefilters=filters[0])
 
+    def test_set_columns(self):
+        self.scope_ref_prop.set_columns(
+            list_of_columns=[
+                ScopeReferenceColumns.PROGRESS,
+                ScopeReferenceColumns.DUE_DATE,
+            ]
+        )
+
+        self.assertIn("columns", self.scope_ref_prop._options)
+        self.assertIn(
+            ScopeReferenceColumns.PROGRESS, self.scope_ref_prop._options["columns"]
+        )
+        self.assertIn(
+            ScopeReferenceColumns.DUE_DATE, self.scope_ref_prop._options["columns"]
+        )
+        self.assertNotIn(
+            ScopeReferenceColumns.START_DATE, self.scope_ref_prop._options["columns"]
+        )
+        self.assertNotIn(
+            ScopeReferenceColumns.STATUS, self.scope_ref_prop._options["columns"]
+        )
+        self.assertNotIn(
+            ScopeReferenceColumns.TAGS, self.scope_ref_prop._options["columns"]
+        )
+
+    def test_set_active_switch(self):
+        self.scope_ref_prop.set_active_filter_switch(switch_visible=True)
+        self.assertIn("show_active_status_filter", self.scope_ref_prop._options)
+        self.assertTrue(self.scope_ref_prop._options["show_active_status_filter"])
+
+        self.scope_ref_prop.set_active_filter_switch(switch_visible=False)
+        self.assertIn("show_active_status_filter", self.scope_ref_prop._options)
+        self.assertFalse(self.scope_ref_prop._options["show_active_status_filter"])
+
 
 class TestPropertyUserReference(TestBetamax):
     def setUp(self):
@@ -1549,13 +1583,27 @@ class TestPropertyStoredFileReference(TestBetamax):
         self.assertIsNotNone(self.storedfile_ref_prop_model.description)
 
     def test_edit_property_model_validators(self):
-        self.storedfile_ref_prop_model.validators = [SingleReferenceValidator(),
-                                                     FileSizeValidator(max_size=200),
-                                                     FileExtensionValidator(accept=".csv,.pdf")]
+        self.storedfile_ref_prop_model.validators = [
+            SingleReferenceValidator(),
+            FileSizeValidator(max_size=200),
+            FileExtensionValidator(accept=".csv,.pdf"),
+        ]
         self.assertEqual(len(self.storedfile_ref_prop_model.validators), 3)
-        self.assertTrue(any(isinstance(v, FileSizeValidator)
-                            for v in self.storedfile_ref_prop_model.validators))
-        self.assertTrue(any(isinstance(v, SingleReferenceValidator)
-                            for v in self.storedfile_ref_prop_model.validators))
-        self.assertTrue(any(isinstance(v, FileExtensionValidator)
-                            for v in self.storedfile_ref_prop_model.validators))
+        self.assertTrue(
+            any(
+                isinstance(v, FileSizeValidator)
+                for v in self.storedfile_ref_prop_model.validators
+            )
+        )
+        self.assertTrue(
+            any(
+                isinstance(v, SingleReferenceValidator)
+                for v in self.storedfile_ref_prop_model.validators
+            )
+        )
+        self.assertTrue(
+            any(
+                isinstance(v, FileExtensionValidator)
+                for v in self.storedfile_ref_prop_model.validators
+            )
+        )
