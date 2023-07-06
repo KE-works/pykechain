@@ -9,7 +9,8 @@ from pykechain.enums import (
     FormCategory,
     Multiplicity,
     PropertyType,
-    ScopeReferenceColumns, SortTable,
+    ScopeReferenceColumns,
+    SortTable,
     StoredFileClassification,
     WorkflowCategory,
 )
@@ -1190,6 +1191,7 @@ class TestPropertyScopeReference(TestBetamax):
         self.scope_ref_prop.set_active_filter_switch(switch_visible=False)
         self.assertIn('show_active_status_filter', self.scope_ref_prop._options)
         self.assertFalse(self.scope_ref_prop._options['show_active_status_filter'])
+
 
 class TestPropertyUserReference(TestBetamax):
     def setUp(self):

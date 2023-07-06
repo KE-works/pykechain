@@ -1,7 +1,12 @@
 Change Log
 ==========
 
+v4.8.1 (06JUL23)
+---------------
+* :star: Added the possibility to set the list of columns and the active switch on a `ScopeReferenceProperty` (#1340)
+
 v4.8.0 (23JUN23)
+---------------
 * :star: Number of tests on certain modules has been increased (#1328)
 * :star: The unit of `max_size` on a `FileSizeValidator` has been changed to MB (#1328)
 
