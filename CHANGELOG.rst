@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+vxxxx (UNRELEASED)
+------------------
+* :+1: dependent versions for development: sphinx (7.2.5), tox (4.11.3), flake8 (6.1.0), jsonschema (4.19.0), importlib-metadata (6.8.0)
+
 v4.8.1 (06JUL23)
 ---------------
 * :star: Added the possibility to set the list of columns and the active switch on a `ScopeReferenceProperty`. (#1340)
