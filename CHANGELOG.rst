@@ -3,7 +3,7 @@ Change Log
 
 vxxxx (UNRELEASED)
 ------------------
-* :+1: dependent versions for development: sphinx (7.2.5), tox (4.11.3), flake8 (6.1.0), jsonschema (4.19.0), importlib-metadata (6.8.0)
+* :+1: dependent versions for development: sphinx (7.2.5 for >= py3.9+ 7.1.2 for <= py3.8), tox (4.11.3), flake8 (6.1.0), jsonschema (4.19.0), importlib-metadata (6.8.0)
 
 v4.8.1 (06JUL23)
 ---------------
