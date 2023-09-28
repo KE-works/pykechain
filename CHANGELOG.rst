@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-vxxxx (UNRELEASED)
+v4.9.0 (28SEP23)
 ------------------
 * :+1: changed the way we download pdf's from activity where we now provide the timezone info for a more accurate determination of the display of time information in the pdf taking into account summer and wintertime.
 * :+1: dependent versions for development: sphinx (7.2.6 for >= py3.9+ 7.1.2 for <= py3.8), tox (4.11.3), flake8 (6.1.0), jsonschema (4.19.0), importlib-metadata (6.8.0), mypy (1.5.1), pytest (7.4.2), pytz (2023.3.post1), nbsphinx (0.9.3)
