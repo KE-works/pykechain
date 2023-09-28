@@ -15,6 +15,7 @@ from typing import (
 )  # noqa: F401
 
 import pytz
+from pytz.exceptions import UnknownTimeZoneError
 
 from pykechain.exceptions import MultipleFoundError, NotFoundError
 
@@ -691,10 +692,18 @@ def get_timezone_from_user(user: "User") -> pytz.BaseTzInfo:
     """
     Get the timezone from the given user.
 
+    If you need the timezone as a string, either wrap it in str() or access
+    timezone.zone.
+
     :param user: The user object.
-    :return: The timezone as a string.
+    :return: The timezone object
     """
-    user_timezone = pytz.timezone(user.timezone.zone)
+    try:
+        user_timezone = pytz.timezone(user.timezone.zone)
+    except UnknownTimeZoneError:
+        # when there is no timezone defined on the user object, this error is
+        # triggered, so we return UTC by default
+        return pytz.UTC
     if not user_timezone:
-        user_timezone = pytz.UTC
+        return pytz.UTC
     return user_timezone

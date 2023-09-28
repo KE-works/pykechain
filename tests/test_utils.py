@@ -1,6 +1,14 @@
 from unittest import TestCase
 
-from pykechain.utils import Empty, get_in_chunks, is_url, is_valid_email
+from pykechain.utils import (
+    Empty,
+    get_in_chunks,
+    get_offset_from_user_timezone,
+    get_timezone_from_user,
+    is_url,
+    is_valid_email
+)
+from tests.classes import TestBetamax
 
 
 class TestIsURL(TestCase):
@@ -183,3 +191,23 @@ class TestChunks(TestCase):
 
         chunks_list = list(chunks)
         self.assertEqual(9, len(chunks_list))
+
+
+class TestTimezoneHelperFunctions(TestBetamax):
+    def setUp(self):
+        super().setUp()
+
+        self.user_with_timezone = self.client.user("testlead")
+        self.user_without_timezone = self.client.user("radu.test")
+
+    def test_retrieve_offset_from_user_timezone(self):
+        offset = get_offset_from_user_timezone(user=self.user_with_timezone)
+        self.assertEqual(offset, -600)
+
+    def test_retrieve_timezone_from_user(self):
+        timezone = get_timezone_from_user(user=self.user_with_timezone)
+        self.assertEqual(str(timezone), "Pacific/Guam")
+
+    def test_retrieve_timezone_from_user_without_timezone(self):
+        timezone = get_timezone_from_user(user=self.user_without_timezone)
+        self.assertEqual(str(timezone), "UTC")
