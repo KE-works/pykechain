@@ -685,3 +685,16 @@ def get_offset_from_user_timezone(user: "User") -> int:
     user_time = datetime.now(user_timezone)
     offset = -int(user_time.tzinfo.utcoffset(user_time).total_seconds() / 60.0)
     return offset
+
+
+def get_timezone_from_user(user: "User") -> pytz.BaseTzInfo:
+    """
+    Get the timezone from the given user.
+
+    :param user: The user object.
+    :return: The timezone as a string.
+    """
+    user_timezone = pytz.timezone(user.timezone.zone)
+    if not user_timezone:
+        user_timezone = pytz.UTC
+    return user_timezone

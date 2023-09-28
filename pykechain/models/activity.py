@@ -42,7 +42,7 @@ from pykechain.utils import (
     clean_empty_values,
     empty,
     get_offset_from_user_timezone,
-    is_valid_email,
+    get_timezone_from_user, is_valid_email,
     parse_datetime,
 )
 
@@ -956,7 +956,8 @@ class Activity(TreeObject, TagsMixin):
         if user:
             user_object = check_type(user, User, "user")
             request_params.update(
-                offset=get_offset_from_user_timezone(user=user_object)
+                offset=get_offset_from_user_timezone(user=user_object),
+                timezone=get_timezone_from_user(user=user_object),
             )
 
         url = self._client._build_url("activity_export", activity_id=self.id)
@@ -1055,6 +1056,7 @@ class Activity(TreeObject, TagsMixin):
             params.update(
                 from_user=from_user.id,
                 offset=get_offset_from_user_timezone(user=from_user),
+                timezone=get_timezone_from_user(user=from_user),
             )
 
         url = self._client._build_url("notification_share_activity_link")
@@ -1146,6 +1148,7 @@ class Activity(TreeObject, TagsMixin):
             params.update(
                 from_user=from_user.id,
                 offset=get_offset_from_user_timezone(user=from_user),
+                timezone=get_timezone_from_user(user=from_user),
             )
 
         url = self._client._build_url("notification_share_activity_pdf")
