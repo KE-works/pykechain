@@ -15,6 +15,7 @@ betamax==0.8.1
 coverage~=6.5.0  # pinned to <7 as coveralls is preventing v7 for coverage
 pytest-cov==4.1.0
 coveralls==3.3.1
+Pillow==10.0.1
 
 # documentation
 Sphinx==7.2.5; python_version >= '3.9'

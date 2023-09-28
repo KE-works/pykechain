@@ -3,7 +3,9 @@ import os
 from pykechain.enums import StoredFileCategory, StoredFileClassification
 from pykechain.exceptions import NotFoundError
 from pykechain.models.stored_file import StoredFile
+from pykechain.utils import temp_chdir
 from tests.classes import TestBetamax
+from PIL import Image
 
 
 class TestStoredFiles(TestBetamax):
@@ -102,3 +104,43 @@ class TestStoredFiles(TestBetamax):
         )
         self.assertEqual(self.stored_file.category, StoredFileCategory.REFERENCED)
         self.assertEqual(self.stored_file.scope, None)
+
+
+class TestDownloadStoredFiles(TestBetamax):
+    def setUp(self):
+        super().setUp()
+        self.test_files_dir = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
+        )
+        self.upload_path = os.path.join(
+            self.test_files_dir,
+            "tests",
+            "files",
+            "test_upload_image_to_attachment_property",
+            "test_upload_pdf.pdf",
+        )
+        self.name = "__TEST_TEMPORARY_STORED_FILE"
+        self.stored_file = self.client.create_stored_file(
+            name=self.name,
+            scope=self.project,
+            classification=StoredFileClassification.SCOPED,
+            filepath=self.upload_path,
+            description="__TEST_STORED_FILE_DESCRIPTION",
+        )
+        self.added_stored_file = None
+
+    def tearDown(self):
+        if self.stored_file:
+            self.stored_file.delete()
+        if self.added_stored_file:
+            self.added_stored_file.delete()
+        super().tearDown()
+
+    def test_download_attachment_from_stored_file(self):
+        with temp_chdir() as target_dir:
+            filepath = os.path.join(target_dir, "test_upload_pdf.pdf")
+            self.stored_file.save_as(filepath=filepath)
+            print()
+            # image = Image.open(filepath)
+            # self.assertEqual(image.width, 100)
+            # self.assertEqual(image.height, 100)

@@ -1,10 +1,11 @@
-from typing import List, Union
+import os
+from typing import List, Optional, Union
 
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.enums import StoredFileCategory, StoredFileClassification
-from pykechain.exceptions import APIError
+from pykechain.enums import StoredFileCategory, StoredFileClassification, StoredFileSize
+from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models import BaseInScope
 from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMixin
 from pykechain.models.input_checks import check_base, check_enum, check_text
@@ -149,3 +150,64 @@ class StoredFile(
     def delete(self):
         """Delete StoredFile."""
         return super().delete()
+
+    def upload(self,
+               filepath: str,
+               ):
+        """
+
+        """
+        with open(filepath, "rb") as f:
+            files = {"file": f.read()}
+        from pykechain.models import Scope
+        data = {
+            "name": self.name,
+            "classification": self.classification,
+            "scope": check_base(self.scope, Scope, "scope"),
+            "category": self.category
+        }
+        response = self._client._request(
+            method="POST",
+            url=self._client._build_url(self.url_change_file, file_id=self.id),
+            data=data,
+            files=files,
+        )
+        if response.status_code != requests.codes.created:  # pragma: no cover
+            raise APIError(f"Could not create {self.__name__}", response=response)
+
+    def save_as(
+        self,
+        filepath: str,
+        size: StoredFileSize = StoredFileSize.FULL_SIZE,
+        **kwargs,
+    ) -> None:
+        """Download the attachment to a file.
+
+        :param filepath: File path. Has to be provided.
+        :type filepath: basestring or None
+        :param size: Size of file
+
+        One can pass the `size` parameter as kwargs. See more in Enum:ImageSize or alternatively
+        customize the desired image size like this (width_value, height_value)
+
+        :raises APIError: When unable to download the data
+        :raises OSError: When unable to save the data to disk
+        """
+        if not filepath:
+            raise IllegalArgumentError("Filepath has to be specified")
+        with open(filepath, "w+b") as f:
+            for chunk in self._download(size=size, **kwargs):
+                f.write(chunk)
+
+    def _download(self, size: StoredFileSize.FULL_SIZE, **kwargs):
+        if "size" in kwargs:
+            url = self.file[kwargs.get("size")]
+        else:
+            url = self.file['full_size']
+
+        response = requests.get(url)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not download property value.", response=response)
+
+        return response
