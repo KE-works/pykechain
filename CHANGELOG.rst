@@ -2,24 +2,23 @@ Change Log
 ==========
 
 v4.9.0 (28SEP23)
-------------------
+----------------
 * :+1: changed the way we download pdf's from activity where we now provide the timezone info for a more accurate determination of the display of time information in the pdf taking into account summer and wintertime.
 * :+1: dependent versions for development: sphinx (7.2.6 for >= py3.9+ 7.1.2 for <= py3.8), tox (4.11.3), flake8 (6.1.0), jsonschema (4.19.0), importlib-metadata (6.8.0), mypy (1.5.1), pytest (7.4.2), pytz (2023.3.post1), nbsphinx (0.9.3)
 
-
 v4.8.1 (06JUL23)
----------------
+----------------
 * :star: Added the possibility to set the list of columns and the active switch on a `ScopeReferenceProperty`. (#1340)
 * :+1: dependent versions for development: mypy (1.4.1), tox (4.6.3), pytest (7.4.0), pytest-cov (4.1.0), pytest-xdist (3.3.1)
 
 v4.8.0 (23JUN23)
----------------
+----------------
 * :star: Number of tests on certain modules has been increased. (#1328)
 * :star: The unit of `max_size` on a `FileSizeValidator` has been changed to MB. (#1328)
 * :+1: dependent versions for development: tox (4.6.2), pytest (7.3.2), coverage (7.2.7), semver (3.0.1), pre-commit (3.3.3), importlib-metadata (6.6.0), pytz (2023.3), sphinx (7.0.1), nbsphinx (0.9.2), requests (2.31.0)
 
 v4.7.0 (17APR23)
-_______________
+----------------
 * :star: Added the possibility to create, edit and delete `StoredFiles`. (#1298)
 * :star: Added the concept of a `StoredFilesReferenceProperty`. (#1306)
 * :star: Added `fileDisplay` representation for `StoredFilesReferenceProperty`. (#1306)
