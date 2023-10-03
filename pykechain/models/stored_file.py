@@ -10,6 +10,7 @@ from pykechain.models import BaseInScope
 from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMixin
 from pykechain.models.input_checks import check_base, check_enum, check_text
 from pykechain.models.tags import TagsMixin
+from pykechain.models.validators.mime_types_defaults import predefined_mimes
 from pykechain.typing import ObjectID
 from pykechain.utils import Empty, clean_empty_values
 
@@ -151,20 +152,20 @@ class StoredFile(
         """Delete StoredFile."""
         return super().delete()
 
-    def upload(self,
-               filepath: str,
-               ):
-        """
-
-        """
+    def upload(
+        self,
+        filepath: str,
+    ):
+        """ """
         with open(filepath, "rb") as f:
             files = {"file": f.read()}
         from pykechain.models import Scope
+
         data = {
             "name": self.name,
             "classification": self.classification,
             "scope": check_base(self.scope, Scope, "scope"),
-            "category": self.category
+            "category": self.category,
         }
         response = self._client._request(
             method="POST",
@@ -181,14 +182,12 @@ class StoredFile(
         size: StoredFileSize = StoredFileSize.FULL_SIZE,
         **kwargs,
     ) -> None:
-        """Download the attachment to a file.
+        """Download the stored file attachment to a file.
 
         :param filepath: File path. Has to be provided.
         :type filepath: basestring or None
         :param size: Size of file
-
-        One can pass the `size` parameter as kwargs. See more in Enum:ImageSize or alternatively
-        customize the desired image size like this (width_value, height_value)
+        :type size: see enum.StoredFileSize
 
         :raises APIError: When unable to download the data
         :raises OSError: When unable to save the data to disk
@@ -199,11 +198,14 @@ class StoredFile(
             for chunk in self._download(size=size, **kwargs):
                 f.write(chunk)
 
-    def _download(self, size: StoredFileSize.FULL_SIZE, **kwargs):
-        if "size" in kwargs:
-            url = self.file[kwargs.get("size")]
+    def _download(
+        self,
+        size: StoredFileSize.FULL_SIZE,
+    ):
+        if self.content_type in predefined_mimes["image/*"]:
+            url = self.file.get(size, "full_size")
         else:
-            url = self.file['full_size']
+            url = self.file.get("source")
 
         response = requests.get(url)
 
