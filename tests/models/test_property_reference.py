@@ -35,7 +35,7 @@ from pykechain.models.validators import (
 from pykechain.models.value_filter import PropertyValueFilter, ScopeFilter
 from pykechain.models.widgets.enums import PropertyReferenceOptions
 from pykechain.models.workflow import Status
-from pykechain.utils import find, is_uuid
+from pykechain.utils import find, is_uuid, temp_chdir
 from tests.classes import TestBetamax
 
 
@@ -1607,3 +1607,7 @@ class TestPropertyStoredFileReference(TestBetamax):
                 for v in self.storedfile_ref_prop_model.validators
             )
         )
+
+    def test_download_files_from_stored_reference_property(self):
+        with temp_chdir() as target_dir:
+            self.storedfile_ref_prop_instance.download(directory=target_dir)

@@ -278,3 +278,6 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
             StoredFile(client=self._client, json=stored_files_json)
             for stored_files_json in self._value
         ]
+
+    def download(self, directory: str, **kwargs):
+        print()
