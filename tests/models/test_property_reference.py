@@ -1609,5 +1609,9 @@ class TestPropertyStoredFileReference(TestBetamax):
         )
 
     def test_download_files_from_stored_reference_property(self):
+        self.storedfile_ref_prop_instance.value = [
+            self.stored_file_1,
+            self.stored_file_2,
+        ]
         with temp_chdir() as target_dir:
             self.storedfile_ref_prop_instance.download(directory=target_dir)

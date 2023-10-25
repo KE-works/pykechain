@@ -274,10 +274,13 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
         :param kwargs: optional inputs
         :return: list of StoredFile objects
         """
-        return [
-            StoredFile(client=self._client, json=stored_files_json)
-            for stored_files_json in self._value
-        ]
+        stored_files = []
+        for stored_file_json in self._value:
+            stored_file = StoredFile(client=self._client, json=stored_file_json)
+            # stored_file.refresh()  # To populate the object with all expected data
+            stored_files.append(stored_file)
+        return stored_files
 
     def download(self, directory: str, **kwargs):
-        print()
+        for stored_file in self.value:
+            stored_file.save_as(filepath=directory)
