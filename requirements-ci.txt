@@ -6,7 +6,7 @@ envparse
 typing
 six
 jsonschema
-semver==3.0.1
+semver==3.0.2
 pytz
 
 # These requirements are needed for ci testing
