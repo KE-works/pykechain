@@ -6,7 +6,7 @@ envparse==0.2.0
 jsonschema==4.19.0
 
 # for version comparison
-semver==3.0.1
+semver==3.0.2
 
 # testing
 pytest==7.4.2
