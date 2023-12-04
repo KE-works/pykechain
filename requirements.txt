@@ -3,7 +3,7 @@ requests==2.31.0
 envparse==0.2.0
 
 # json validation (inspector)
-jsonschema==4.19.1
+jsonschema==4.20.0
 
 # for version comparison
 semver==3.0.2
