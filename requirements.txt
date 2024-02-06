@@ -28,7 +28,7 @@ tox==4.11.3
 flake8==6.1.0
 importlib-metadata==7.0.1
 pydocstyle==6.3.0
-mypy==1.6.1; python_version >= '3.4'
+mypy==1.8.0; python_version >= '3.4'
 pre-commit==3.5.0
 
 # for package management (uploads)
