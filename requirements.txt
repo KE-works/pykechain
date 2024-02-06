@@ -3,14 +3,14 @@ requests==2.31.0
 envparse==0.2.0
 
 # json validation (inspector)
-jsonschema==4.19.1
+jsonschema==4.21.1
 
 # for version comparison
 semver==3.0.2
 
 # testing
 pytest==7.4.3
-pytest-xdist[psutil]==3.3.1
+pytest-xdist[psutil]==3.5.0
 betamax==0.8.1
 coverage~=7.3.2  # pinned to <7 as coveralls is preventing v7 for coverage
 pytest-cov==4.1.0
@@ -26,7 +26,7 @@ tox==4.11.3
 
 # code style
 flake8==6.1.0
-importlib-metadata==6.8.0
+importlib-metadata==7.0.1
 pydocstyle==6.3.0
 mypy==1.8.0; python_version >= '3.4'
 pre-commit==3.5.0
