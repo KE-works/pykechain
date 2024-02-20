@@ -260,10 +260,7 @@ class StatusReferencesProperty(_ReferenceProperty):
 
 
 class StoredFilesReferencesProperty(_ReferenceProperty):
-    """A virtual object representing a KE-chain StoredFile References property.
-
-    .. versionadded:: 4.7
-    """
+    """A virtual object representing a KE-chain StoredFile References property."""
 
     REFERENCED_CLASS = StoredFile
 
@@ -280,6 +277,21 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
             # stored_file.refresh()  # To populate the object with all expected data
             stored_files.append(stored_file)
         return stored_files
+
+    def clear(self) -> None:
+        """
+        Clear the stored files from the value of the property
+
+        Introduced in order to minimize the effect on custom scripts when converting
+        from `AttachmentProperty` to `StoredFileReferenceProperty`.
+        """
+        if self.value:
+            self.value = []
+
+    @property
+    def filename(self) -> Optional[str]:
+        "Filename of the file stored in the property"
+        return self._value.split("/")[-1] if self.has_value() else None
 
     def download(self, directory: str, **kwargs):
         for stored_file in self.value:

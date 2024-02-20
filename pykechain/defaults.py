@@ -685,7 +685,7 @@ API_EXTRA_PARAMS = {
                 "description",
                 "created_at",
                 "updated_at",
-                "tags"
+                "tags",
             ]
         )
     },
@@ -700,7 +700,7 @@ API_EXTRA_PARAMS = {
                 "description",
                 "created_at",
                 "updated_at",
-                "tags"
+                "tags",
             ]
         )
     },
