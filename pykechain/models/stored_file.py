@@ -35,6 +35,9 @@ class StoredFile(
         self.description = json.get("description")
         self.file = json.get("file")
         self.name = json.get("name")
+        self.filename = os.path.basename(
+            json.get("file").get("full_size").split("?", 1)[0]
+        )
 
     def __repr__(self):  # pragma: no cover
         return f"<pyke StoredFile '{self.name}' id {self.id[-8:]}>"
@@ -133,8 +136,7 @@ class StoredFile(
                 classification, StoredFileClassification, "classification"
             ),
         }
-        with open(filepath, "rb") as f:
-            files = {"file": f.read()}
+        files = {"file": open(filepath, "rb")}
         kwargs.update(API_EXTRA_PARAMS[cls.url_upload_name])
         response = client._request(
             method="POST",
@@ -156,7 +158,14 @@ class StoredFile(
         self,
         filepath: str,
     ):
-        """ """
+        """
+        Upload a file to the StoredFile object.
+
+        :param filepath: File path
+        :type filepath: basestring
+        :raises APIError: When unable to upload the file to KE-chain
+        :raises OSError: When the path to the file is incorrect or file could not be found
+        """
         with open(filepath, "rb") as f:
             files = {"file": f.read()}
         from pykechain.models import Scope
@@ -178,30 +187,27 @@ class StoredFile(
 
     def save_as(
         self,
-        filepath: str,
+        filename: Optional[str] = None,
         size: StoredFileSize = StoredFileSize.FULL_SIZE,
         **kwargs,
     ) -> None:
         """Download the stored file attachment to a file.
 
-        :param filepath: File path. Has to be provided.
-        :type filepath: basestring or None
+        :param filename: (optional) File path. If not provided, will be saved to current working dir
+                         with `self.filename`.
+        :type filename: basestring or None
         :param size: Size of file
         :type size: see enum.StoredFileSize
 
         :raises APIError: When unable to download the data
         :raises OSError: When unable to save the data to disk
         """
-        if not filepath:
-            raise IllegalArgumentError("Filepath has to be specified")
-        with open(filepath, "w+b") as f:
+        filename = filename or os.path.join(os.getcwd(), self.filename)
+        with open(filename, "w+b") as f:
             for chunk in self._download(size=size, **kwargs):
                 f.write(chunk)
 
-    def _download(
-        self,
-        size: StoredFileSize.FULL_SIZE,
-    ):
+    def _download(self, size: StoredFileSize.FULL_SIZE, **kwargs):
         if self.content_type in predefined_mimes["image/*"]:
             url = self.file.get(size, "full_size")
         else:

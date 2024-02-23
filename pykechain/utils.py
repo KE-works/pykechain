@@ -685,3 +685,17 @@ def get_offset_from_user_timezone(user: "User") -> int:
     user_time = datetime.now(user_timezone)
     offset = -int(user_time.tzinfo.utcoffset(user_time).total_seconds() / 60.0)
     return offset
+
+
+def uniquify(path):
+    """
+    Create a unique filename based on whether there are other files with the same name inside the same directory
+    """
+    filename, extension = os.path.splitext(path)
+    counter = 1
+
+    while os.path.exists(path):
+        path = filename + " (" + str(counter) + ")" + extension
+        counter += 1
+
+    return path
