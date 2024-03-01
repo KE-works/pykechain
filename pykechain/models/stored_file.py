@@ -228,7 +228,7 @@ class StoredFile(
             files=files,
         )
         if response.status_code != requests.codes.ok:  # pragma: no cover
-            raise APIError(f"Could not upload file", response=response)
+            raise APIError("Could not upload file", response=response)
         self.refresh(json=response.json()["results"][0])
 
     def save_as(
