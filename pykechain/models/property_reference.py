@@ -282,7 +282,7 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
 
     def clear(self) -> None:
         """
-        Clear the stored files from the value of the property
+        Clear the stored files from the value of the property.
 
         Introduced in order to minimize the effect on custom scripts when converting
         from `AttachmentProperty` to `StoredFileReferenceProperty`.
@@ -292,7 +292,7 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
 
     @property
     def filename(self) -> Optional[Union[str, list, None]]:
-        """Filename of the file stored in the property"""
+        """Filename of the file stored in the property."""
         if self.value:
             if len(self.value) == 1:
                 return self.value[0].filename
@@ -315,7 +315,7 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
             stored_file.save_as(filename=filename, **kwargs)
 
     def upload(self, data: Any) -> None:
-        """Upload a stored file to the StoredFileReferenceProperty
+        """Upload a stored file to the StoredFileReferenceProperty.
 
         :param data: File path
         :type data: basestring

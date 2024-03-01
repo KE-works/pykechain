@@ -43,6 +43,7 @@ class StoredFile(
 
     @property
     def filename(self):
+        """Filename of the file inside a StoredFile, without the full path."""
         if self.file:
             if self.file.get("full_size"):
                 return os.path.basename(self.file.get("full_size").split("?", 1)[0])

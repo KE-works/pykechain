@@ -710,9 +710,7 @@ def get_timezone_from_user(user: "User") -> pytz.BaseTzInfo:
 
 
 def uniquify(path):
-    """
-    Create a unique filename based on whether there are other files with the same name inside the same directory
-    """
+    """Create a unique filename based on whether there are other files with the same name inside the same directory."""
     filename, extension = os.path.splitext(path)
     counter = 1
 
