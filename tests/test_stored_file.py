@@ -1,5 +1,6 @@
 import json
 import os
+import pytest
 
 from pykechain.enums import StoredFileCategory, StoredFileClassification, StoredFileSize
 from pykechain.exceptions import NotFoundError
@@ -199,6 +200,10 @@ class TestStoredFilesUpload(TestStoredFilesDownload):
         self.assertEqual(self.stored_pdf_file.filename, self.test_json_file_name)
         self.assertEqual(self.stored_pdf_file.content_type, "application/octet-stream")
 
+    @pytest.mark.skipif(
+        "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+        reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided",
+    )
     def test_upload_plot_to_stored_file(self):
         import matplotlib.pyplot as plt
         from matplotlib import lines

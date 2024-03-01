@@ -2,6 +2,7 @@ Change Log
 ==========
 
 # UNRELEASED
+------------
 * :+1: Added the possibility to download, upload and reference `StoredFiles`. (#1361)
 * :+1: Added functions to handle `StoredFileReferenceProperty`. The behaviour is consistent to the one for the `AttachmentProperty` to facilitate conversion. (#1361)
 

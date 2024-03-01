@@ -7,7 +7,7 @@ import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import StoredFileCategory, StoredFileClassification, StoredFileSize
-from pykechain.exceptions import APIError, IllegalArgumentError
+from pykechain.exceptions import APIError
 from pykechain.models import BaseInScope
 from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMixin
 from pykechain.models.input_checks import check_base, check_enum, check_text
@@ -25,7 +25,7 @@ class StoredFile(
     url_upload_name = "upload_stored_file"
     url_detail_name = "stored_file"
     url_list_name = "stored_files"
-    url_pk_name: str = "file_id"
+    url_pk_name = "file_id"
 
     def __init__(self, json, **kwargs):
         """Initialize a Stored File Object."""
