@@ -291,8 +291,8 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
             self.value = []
 
     @property
-    def filename(self) -> Optional[Union[str, list, None]]:
-        """Filename of the file stored in the property."""
+    def filename(self) -> Optional[Union[str, list]]:
+        """Filename or list of filenames of the file(s) stored in the property."""
         if self.value:
             if len(self.value) == 1:
                 return self.value[0].filename
