@@ -1,5 +1,7 @@
+import io
+import json
 import os
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
 import requests
 
@@ -35,12 +37,18 @@ class StoredFile(
         self.description = json.get("description")
         self.file = json.get("file")
         self.name = json.get("name")
-        self.filename = os.path.basename(
-            json.get("file").get("full_size").split("?", 1)[0]
-        )
 
     def __repr__(self):  # pragma: no cover
         return f"<pyke StoredFile '{self.name}' id {self.id[-8:]}>"
+
+    @property
+    def filename(self):
+        if self.file:
+            if self.file.get("full_size"):
+                return os.path.basename(self.file.get("full_size").split("?", 1)[0])
+            if self.file.get("source"):
+                return os.path.basename(self.file.get("source").split("?", 1)[0])
+        return None
 
     def edit(
         self,
@@ -52,7 +60,8 @@ class StoredFile(
         *args,
         **kwargs,
     ) -> None:
-        """Change the StoredFile object.
+        """
+        Change the StoredFile object.
 
         Change the name, description, scope, category and classification of a
         StoredFile.
@@ -154,36 +163,73 @@ class StoredFile(
         """Delete StoredFile."""
         return super().delete()
 
-    def upload(
+    def upload(self, data: Any, **kwargs: Any) -> None:
+        """
+        Upload a file to the StoredFile object.
+
+        When providing a :class:`matplotlib.figure.Figure` object as data,
+        the figure is uploaded as PNG.
+        For this, `matplotlib`_ should be installed.
+
+        :param data: File path
+        :type data: basestring
+        :raises APIError: When unable to upload the file to KE-chain
+        :raises OSError: When the path to the file is incorrect or file could not be found
+
+        . _matplotlib: https://matplotlib.org/
+        """
+        try:
+            import matplotlib.figure
+
+            if isinstance(data, matplotlib.figure.Figure):
+                self._upload_plot(data, **kwargs)
+                return
+        except ImportError:
+            pass
+
+        if isinstance(data, str):
+            with open(data, "rb") as fp:
+                self._upload(data=fp)
+        else:
+            self._upload_json(data, **kwargs)
+
+    def _upload_json(self, content, name="data.json"):
+        data = (name, json.dumps(content), "application/json")
+
+        self._upload(data=data)
+
+    def _upload_plot(self, figure, name="plot.png"):
+        buffer = io.BytesIO()
+
+        figure.savefig(buffer, format="png")
+
+        data = (name, buffer.getvalue(), "image/png")
+
+        self._upload(data=data)
+        self._value = name
+
+    def _upload(
         self,
-        filepath: str,
+        data: Any,
     ):
         """
         Upload a file to the StoredFile object.
 
-        :param filepath: File path
-        :type filepath: basestring
+        :param data: file object
+        :type data: BufferedReader
         :raises APIError: When unable to upload the file to KE-chain
         :raises OSError: When the path to the file is incorrect or file could not be found
         """
-        with open(filepath, "rb") as f:
-            files = {"file": f.read()}
-        from pykechain.models import Scope
+        files = {"file": data}
 
-        data = {
-            "name": self.name,
-            "classification": self.classification,
-            "scope": check_base(self.scope, Scope, "scope"),
-            "category": self.category,
-        }
         response = self._client._request(
-            method="POST",
-            url=self._client._build_url(self.url_change_file, file_id=self.id),
-            data=data,
+            method="PATCH",
+            url=self._client._build_url(self.url_detail_name, file_id=self.id),
             files=files,
         )
-        if response.status_code != requests.codes.created:  # pragma: no cover
-            raise APIError(f"Could not create {self.__name__}", response=response)
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError(f"Could not upload file", response=response)
+        self.refresh(json=response.json()["results"][0])
 
     def save_as(
         self,

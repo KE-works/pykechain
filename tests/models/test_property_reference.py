@@ -1487,7 +1487,7 @@ class TestPropertyStatusReferences(TestBetamax):
         )
 
 
-class TestPropertyStoredFileReference(TestBetamax):
+class TestStoredFileReferenceProperty(TestBetamax):
     def setUp(self):
         super().setUp()
         root = self.project.model(name="Product")
