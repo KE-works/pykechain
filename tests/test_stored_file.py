@@ -108,7 +108,7 @@ class TestStoredFiles(TestBetamax):
         self.assertEqual(self.stored_file.scope, None)
 
 
-class TestStoredFilesDownload(TestBetamax):
+class TestStoredFilesBaseTestCase(TestBetamax):
     def setUp(self):
         super().setUp()
         self.test_files_dir = os.path.dirname(
@@ -158,6 +158,13 @@ class TestStoredFilesDownload(TestBetamax):
             self.added_stored_file.delete()
         super().tearDown()
 
+
+@pytest.mark.skipif(
+    "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+    reason="Skipping tests when using Travis or Github Actions, as stored_files "
+    "download links have time limited access keys in the uri",
+)
+class TestStoredFilesDownload(TestStoredFilesBaseTestCase):
     def test_download_pdf_from_stored_file(self):
         with temp_chdir() as target_dir:
             filepath = os.path.join(target_dir, "test_upload_pdf.pdf")
@@ -173,7 +180,7 @@ class TestStoredFilesDownload(TestBetamax):
             self.assertEqual(image.format, "JPEG")
 
 
-class TestStoredFilesUpload(TestStoredFilesDownload):
+class TestStoredFilesUpload(TestStoredFilesBaseTestCase):
     def setUp(self):
         super().setUp()
         self.test_json_file_name = "test_upload_json.json"

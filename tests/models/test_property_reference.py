@@ -1,6 +1,8 @@
 import os
 from unittest import TestCase, skip
 
+import pytest
+
 from pykechain.enums import (
     ActivityRootNames,
     ContextGroup,
@@ -1645,6 +1647,11 @@ class TestStoredFileReferenceProperty(TestBetamax):
     def test_filename_of_stored_reference_property_no_stored_file(self):
         self.assertEqual(self.storedfile_ref_prop_instance.filename, None)
 
+    @pytest.mark.skipif(
+        "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+        reason="Skipping tests when using Travis or Github Actions, as stored_files "
+        "download links have time limited access keys in the uri",
+    )
     def test_download_files_from_stored_reference_property(self):
         self.storedfile_ref_prop_instance.value = [
             self.stored_file,
