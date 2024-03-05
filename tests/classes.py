@@ -11,8 +11,13 @@ from tests.utils import TEST_RECORD_CASSETTES, TEST_SCOPE_ID, TEST_SCOPE_NAME, T
 
 with Betamax.configure() as config:
     config.cassette_library_dir = os.path.join(os.path.dirname(__file__), "cassettes")
+    config.default_cassette_options['match_requests_on'] = [
+        'method',
+        'uri',
+    ]
     config.define_cassette_placeholder("<API_URL>", TEST_URL)
     config.define_cassette_placeholder("<AUTH_TOKEN>", TEST_TOKEN)
+    config.define_cassette_placeholder("<STORED_FILE_CDN_URL>", "https://ams3.digitaloceanspaces.com")
 
 
 class TestBetamax(TestCase):
