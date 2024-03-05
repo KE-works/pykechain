@@ -1,7 +1,12 @@
-from typing import List, Optional
+import os
+from typing import Any, List, Optional, Union
 
 from pykechain.defaults import PARTS_BATCH_LIMIT
-from pykechain.enums import ScopeReferenceColumns
+from pykechain.enums import (
+    ScopeReferenceColumns,
+    StoredFileCategory,
+    StoredFileClassification,
+)
 from pykechain.exceptions import IllegalArgumentError
 from pykechain.models import Activity, Scope, user
 from pykechain.models.base_reference import (
@@ -13,7 +18,7 @@ from pykechain.models.form import Form
 from pykechain.models.stored_file import StoredFile
 from pykechain.models.value_filter import ScopeFilter
 from pykechain.models.workflow import Status
-from pykechain.utils import get_in_chunks
+from pykechain.utils import get_in_chunks, uniquify
 
 
 class ActivityReferencesProperty(_ReferencePropertyInScope):
@@ -260,10 +265,7 @@ class StatusReferencesProperty(_ReferenceProperty):
 
 
 class StoredFilesReferencesProperty(_ReferenceProperty):
-    """A virtual object representing a KE-chain StoredFile References property.
-
-    .. versionadded:: 4.7
-    """
+    """A virtual object representing a KE-chain StoredFile References property."""
 
     REFERENCED_CLASS = StoredFile
 
@@ -274,7 +276,58 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
         :param kwargs: optional inputs
         :return: list of StoredFile objects
         """
-        return [
-            StoredFile(client=self._client, json=stored_files_json)
-            for stored_files_json in self._value
-        ]
+        if self._value:
+            stored_files_ids = [sf.get("id") for sf in self._value]
+            return self._client.stored_files(id__in=",".join(stored_files_ids))
+
+    def clear(self) -> None:
+        """
+        Clear the stored files from the value of the property.
+
+        Introduced in order to minimize the effect on custom scripts when converting
+        from `AttachmentProperty` to `StoredFileReferenceProperty`.
+        """
+        if self.value:
+            self.value = []
+
+    @property
+    def filename(self) -> Optional[Union[str, list]]:
+        """Filename or list of filenames of the file(s) stored in the property."""
+        if self.value:
+            if len(self.value) == 1:
+                return self.value[0].filename
+            else:
+                return [stored_file.filename for stored_file in self.value]
+        else:
+            return None
+
+    def download(self, directory: str, **kwargs):
+        """Download stored files from the StoredFileReferenceProperty.
+
+        Downloads multiple files in the provided directory and names them according to the
+        filename. If multiple files have the same name, it makes them unique.
+
+        :param directory: Directory path
+        :type directory: basestring
+        """
+        for stored_file in self.value:
+            filename = uniquify(os.path.join(directory, stored_file.filename))
+            stored_file.save_as(filename=filename, **kwargs)
+
+    def upload(self, data: Any) -> None:
+        """Upload a stored file to the StoredFileReferenceProperty.
+
+        :param data: File path
+        :type data: basestring
+        :raises APIError: When unable to upload the file to KE-chain
+        :raises OSError: When the path to the file is incorrect or file could not be found
+        """
+        filename = os.path.basename(data)
+        stored_file = self._client.create_stored_file(
+            name=filename,
+            scope=self.scope,
+            classification=StoredFileClassification.SCOPED,
+            category=StoredFileCategory.REFERENCED,
+            filepath=data,
+        )
+        self.value = self.value + [stored_file] if self.value else [stored_file]

@@ -1300,6 +1300,26 @@ class ImageSize(Enum):
     SQXXL = "SQXXL"
 
 
+class StoredFileSize(Enum):
+    """
+    Options for the StoredFile Size.
+
+    :cvar XS: XS (100, None)  # pixels width
+    :cvar S: S (320, None)
+    :cvar M: M (640, None)
+    :cvar L: L (1024, None)
+    :cvar XL: XL (2048, None)
+    :cvar FULL_SIZE: full_size
+    """
+
+    XS = "XS"
+    S = "S"
+    M = "M"
+    L = "L"
+    XL = "XL"
+    FULL_SIZE = "full_size"
+
+
 class FormCategory(Enum):
     """
     Options for the Category of a Form.

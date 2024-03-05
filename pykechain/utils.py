@@ -707,3 +707,15 @@ def get_timezone_from_user(user: "User") -> pytz.BaseTzInfo:
     if not user_timezone:
         return pytz.UTC
     return user_timezone
+
+
+def uniquify(path):
+    """Create a unique filename based on whether there are other files with the same name inside the same directory."""
+    filename, extension = os.path.splitext(path)
+    counter = 1
+
+    while os.path.exists(path):
+        path = f"{filename}({counter}){extension}"
+        counter += 1
+
+    return path

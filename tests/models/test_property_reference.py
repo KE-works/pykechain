@@ -1,6 +1,8 @@
 import os
 from unittest import TestCase, skip
 
+import pytest
+
 from pykechain.enums import (
     ActivityRootNames,
     ContextGroup,
@@ -14,7 +16,7 @@ from pykechain.enums import (
     StoredFileClassification,
     WorkflowCategory,
 )
-from pykechain.exceptions import IllegalArgumentError
+from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models import MultiReferenceProperty
 from pykechain.models.base_reference import _ReferenceProperty
 from pykechain.models.property_reference import (
@@ -26,6 +28,7 @@ from pykechain.models.property_reference import (
     StoredFilesReferencesProperty,
     UserReferencesProperty,
 )
+from pykechain.models.stored_file import StoredFile
 from pykechain.models.validators import (
     FileExtensionValidator,
     FileSizeValidator,
@@ -35,7 +38,7 @@ from pykechain.models.validators import (
 from pykechain.models.value_filter import PropertyValueFilter, ScopeFilter
 from pykechain.models.widgets.enums import PropertyReferenceOptions
 from pykechain.models.workflow import Status
-from pykechain.utils import find, is_uuid
+from pykechain.utils import find, is_uuid, temp_chdir
 from tests.classes import TestBetamax
 
 
@@ -1486,7 +1489,7 @@ class TestPropertyStatusReferences(TestBetamax):
         )
 
 
-class TestPropertyStoredFileReference(TestBetamax):
+class TestStoredFileReferenceProperty(TestBetamax):
     def setUp(self):
         super().setUp()
         root = self.project.model(name="Product")
@@ -1505,11 +1508,12 @@ class TestPropertyStoredFileReference(TestBetamax):
         self.test_files_dir = os.path.dirname(
             os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
         )
+        self.filename = "test_upload_image.png"
         self.upload_path = os.path.join(
             self.test_files_dir,
             "files",
             "test_upload_image_to_attachment_property",
-            "test_upload_image.png",
+            self.filename,
         )
         self.name = "__STORED_FILE_TEMPORARY"
         self.stored_file = self.client.create_stored_file(
@@ -1532,6 +1536,12 @@ class TestPropertyStoredFileReference(TestBetamax):
             self.stored_file_2.delete()
         if self.part:
             self.part.delete()
+        try:
+            self.uploaded_files = self.client.stored_files(name=self.filename)
+            for uploaded_file in self.uploaded_files:
+                uploaded_file.delete()
+        except NotFoundError:
+            pass
         super().tearDown()
 
     def test_create(self):
@@ -1607,3 +1617,69 @@ class TestPropertyStoredFileReference(TestBetamax):
                 for v in self.storedfile_ref_prop_model.validators
             )
         )
+
+    def test_clear_stored_files_from_value(self):
+        self.storedfile_ref_prop_instance.value = [
+            self.stored_file,
+            self.stored_file_2,
+        ]
+        self.storedfile_ref_prop_instance.clear()
+
+        self.assertIsNone(self.storedfile_ref_prop_instance.value)
+
+    def test_filename_of_stored_reference_property_multiple_stored_files(self):
+        self.storedfile_ref_prop_instance.value = [
+            self.stored_file,
+            self.stored_file_2,
+        ]
+        self.assertIsInstance(self.storedfile_ref_prop_instance.filename, list)
+        self.assertEqual(len(self.storedfile_ref_prop_instance.filename), 2)
+        self.assertEqual(self.storedfile_ref_prop_instance.filename[0], self.filename)
+        self.assertEqual(self.storedfile_ref_prop_instance.filename[1], self.filename)
+
+    def test_filename_of_stored_reference_property_one_stored_file(self):
+        self.storedfile_ref_prop_instance.value = [
+            self.stored_file,
+        ]
+        self.assertIsInstance(self.storedfile_ref_prop_instance.filename, str)
+        self.assertEqual(self.storedfile_ref_prop_instance.filename, self.filename)
+
+    def test_filename_of_stored_reference_property_no_stored_file(self):
+        self.assertEqual(self.storedfile_ref_prop_instance.filename, None)
+
+    @pytest.mark.skipif(
+        "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+        reason="Skipping tests when using Travis or Github Actions, as stored_files "
+        "download links have time limited access keys in the uri",
+    )
+    def test_download_files_from_stored_reference_property(self):
+        self.storedfile_ref_prop_instance.value = [
+            self.stored_file,
+            self.stored_file_2,
+        ]
+        with temp_chdir() as target_dir:
+            self.storedfile_ref_prop_instance.download(directory=target_dir)
+            self.assertEqual(
+                len(
+                    [
+                        entry
+                        for entry in os.listdir(target_dir)
+                        if os.path.isfile(os.path.join(target_dir, entry))
+                    ]
+                ),
+                2,
+            )
+
+    def test_upload_file_to_empty_value_stored_reference_property(self):
+        self.storedfile_ref_prop_instance.upload(self.upload_path)
+        self.assertEqual(len(self.storedfile_ref_prop_instance.value), 1)
+        self.assertIsInstance(self.storedfile_ref_prop_instance.value[0], StoredFile)
+        self.assertEqual(self.storedfile_ref_prop_instance.value[0].name, self.filename)
+
+    def test_upload_file_to_already_filled_in_stored_reference_property(self):
+        self.storedfile_ref_prop_instance.value = [self.stored_file, self.stored_file_2]
+        self.storedfile_ref_prop_instance.upload(self.upload_path)
+        self.assertEqual(len(self.storedfile_ref_prop_instance.value), 3)
+        for stored_file in self.storedfile_ref_prop_instance.value:
+            self.assertIsInstance(stored_file, StoredFile)
+        self.assertEqual(self.storedfile_ref_prop_instance.value[2].name, self.filename)

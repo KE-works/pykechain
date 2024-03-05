@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+# UNRELEASED
+------------
+* :+1: Added the possibility to download, upload and reference `StoredFiles`. (#1361)
+* :+1: Added functions to handle `StoredFileReferenceProperty`. The behaviour is consistent to the one for the `AttachmentProperty` to facilitate conversion. (#1361)
+
 v4.9.0 (28SEP23)
 ----------------
 * :+1: Changed the way we download pdf's from activity where we now provide the `timezone` query param in the request URL with timezone info for a more accurate determination of the display of time information in the pdf taking into account the timezone and timesystem info. For compatability sake we maintain the `offset` query param in the request to support older KE-chain backend versions.

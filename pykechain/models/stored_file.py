@@ -1,14 +1,18 @@
-from typing import List, Union
+import io
+import json
+import os
+from typing import Any, List, Optional, Union
 
 import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS
-from pykechain.enums import StoredFileCategory, StoredFileClassification
+from pykechain.enums import StoredFileCategory, StoredFileClassification, StoredFileSize
 from pykechain.exceptions import APIError
 from pykechain.models import BaseInScope
 from pykechain.models.base import CrudActionsMixin, NameDescriptionTranslationMixin
 from pykechain.models.input_checks import check_base, check_enum, check_text
 from pykechain.models.tags import TagsMixin
+from pykechain.models.validators.mime_types_defaults import predefined_mimes
 from pykechain.typing import ObjectID
 from pykechain.utils import Empty, clean_empty_values
 
@@ -21,7 +25,7 @@ class StoredFile(
     url_upload_name = "upload_stored_file"
     url_detail_name = "stored_file"
     url_list_name = "stored_files"
-    url_pk_name: str = "file_id"
+    url_pk_name = "file_id"
 
     def __init__(self, json, **kwargs):
         """Initialize a Stored File Object."""
@@ -37,6 +41,16 @@ class StoredFile(
     def __repr__(self):  # pragma: no cover
         return f"<pyke StoredFile '{self.name}' id {self.id[-8:]}>"
 
+    @property
+    def filename(self):
+        """Filename of the file inside a StoredFile, without the full path."""
+        if self.file:
+            if self.file.get("full_size"):
+                return os.path.basename(self.file.get("full_size").split("?", 1)[0])
+            if self.file.get("source"):
+                return os.path.basename(self.file.get("source").split("?", 1)[0])
+        return None
+
     def edit(
         self,
         name: str = Empty(),
@@ -47,7 +61,8 @@ class StoredFile(
         *args,
         **kwargs,
     ) -> None:
-        """Change the StoredFile object.
+        """
+        Change the StoredFile object.
 
         Change the name, description, scope, category and classification of a
         StoredFile.
@@ -131,8 +146,7 @@ class StoredFile(
                 classification, StoredFileClassification, "classification"
             ),
         }
-        with open(filepath, "rb") as f:
-            files = {"file": f.read()}
+        files = {"file": open(filepath, "rb")}
         kwargs.update(API_EXTRA_PARAMS[cls.url_upload_name])
         response = client._request(
             method="POST",
@@ -149,3 +163,106 @@ class StoredFile(
     def delete(self):
         """Delete StoredFile."""
         return super().delete()
+
+    def upload(self, data: Any, **kwargs: Any) -> None:
+        """
+        Upload a file to the StoredFile object.
+
+        When providing a :class:`matplotlib.figure.Figure` object as data,
+        the figure is uploaded as PNG.
+        For this, `matplotlib`_ should be installed.
+
+        :param data: File path
+        :type data: basestring
+        :raises APIError: When unable to upload the file to KE-chain
+        :raises OSError: When the path to the file is incorrect or file could not be found
+
+        . _matplotlib: https://matplotlib.org/
+        """
+        try:
+            import matplotlib.figure
+
+            if isinstance(data, matplotlib.figure.Figure):
+                self._upload_plot(data, **kwargs)
+                return
+        except ImportError:
+            pass
+
+        if isinstance(data, str):
+            with open(data, "rb") as fp:
+                self._upload(data=fp)
+        else:
+            self._upload_json(data, **kwargs)
+
+    def _upload_json(self, content, name="data.json"):
+        data = (name, json.dumps(content), "application/json")
+
+        self._upload(data=data)
+
+    def _upload_plot(self, figure, name="plot.png"):
+        buffer = io.BytesIO()
+
+        figure.savefig(buffer, format="png")
+
+        data = (name, buffer.getvalue(), "image/png")
+
+        self._upload(data=data)
+        self._value = name
+
+    def _upload(
+        self,
+        data: Any,
+    ):
+        """
+        Upload a file to the StoredFile object.
+
+        :param data: file object
+        :type data: BufferedReader
+        :raises APIError: When unable to upload the file to KE-chain
+        :raises OSError: When the path to the file is incorrect or file could not be found
+        """
+        files = {"file": data}
+
+        response = self._client._request(
+            method="PATCH",
+            url=self._client._build_url(self.url_detail_name, file_id=self.id),
+            files=files,
+        )
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not upload file", response=response)
+        self.refresh(json=response.json()["results"][0])
+
+    def save_as(
+        self,
+        filename: Optional[str] = None,
+        size: StoredFileSize = StoredFileSize.FULL_SIZE,
+        **kwargs,
+    ) -> None:
+        """Download the stored file attachment to a file.
+
+        :param filename: (optional) File path. If not provided, will be saved to current working dir
+                         with `self.filename`.
+        :type filename: basestring or None
+        :param size: Size of file
+        :type size: see enum.StoredFileSize
+
+        :raises APIError: When unable to download the data
+        :raises OSError: When unable to save the data to disk
+        """
+        filename = filename or os.path.join(os.getcwd(), self.filename)
+        with open(filename, "w+b") as f:
+            for chunk in self._download(size=size, **kwargs):
+                f.write(chunk)
+
+    def _download(self, size: StoredFileSize.FULL_SIZE, **kwargs):
+        if self.content_type in predefined_mimes["image/*"]:
+            url = self.file.get(size, "full_size")
+        else:
+            url = self.file.get("source")
+
+        response = requests.get(url)
+
+        if response.status_code != requests.codes.ok:  # pragma: no cover
+            raise APIError("Could not download property value.", response=response)
+
+        return response

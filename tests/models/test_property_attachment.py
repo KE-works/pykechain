@@ -2,12 +2,11 @@ import json
 import os
 import unittest
 
-from PIL import Image
-
 from pykechain.enums import ImageSize, Multiplicity, PropertyType
 from pykechain.models import AttachmentProperty
 from pykechain.utils import temp_chdir
 from tests.classes import TestBetamax
+from PIL import Image
 
 
 class TestAttachment(TestBetamax):

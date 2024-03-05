@@ -682,10 +682,12 @@ API_EXTRA_PARAMS = {
                 "category",
                 "scope",
                 "classification",
+                "file",
+                "content_type",
                 "description",
                 "created_at",
                 "updated_at",
-                "tags"
+                "tags",
             ]
         )
     },
@@ -697,10 +699,12 @@ API_EXTRA_PARAMS = {
                 "category",
                 "scope",
                 "classification",
+                "file",
+                "content_type",
                 "description",
                 "created_at",
                 "updated_at",
-                "tags"
+                "tags",
             ]
         )
     },
