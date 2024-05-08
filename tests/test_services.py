@@ -4,8 +4,17 @@ from datetime import datetime
 
 import pytest
 
-from pykechain.enums import ServiceEnvironmentVersion, ServiceExecutionStatus, ServiceType
-from pykechain.exceptions import APIError, IllegalArgumentError, MultipleFoundError, NotFoundError
+from pykechain.enums import (
+    ServiceEnvironmentVersion,
+    ServiceExecutionStatus,
+    ServiceType,
+)
+from pykechain.exceptions import (
+    APIError,
+    IllegalArgumentError,
+    MultipleFoundError,
+    NotFoundError,
+)
 
 # new in 1.13
 from pykechain.models import Service
@@ -37,7 +46,9 @@ class TestServiceSetup(TestBetamax):
 
         # testing
         new_service.upload(pkg_path=upload_path)
-        self.assertEqual(new_service._json_data["script_file_name"], "test_upload_script.py")
+        self.assertEqual(
+            new_service._json_data["script_file_name"], "test_upload_script.py"
+        )
         return new_service
 
     def setUp(self):
@@ -67,7 +78,9 @@ class TestServices(TestBetamax):
         # testing
         new_service.upload(pkg_path=upload_path)
         new_service.refresh()
-        self.assertEqual(new_service._json_data["script_file_name"], "test_upload_script.py")
+        self.assertEqual(
+            new_service._json_data["script_file_name"], "test_upload_script.py"
+        )
         return new_service
 
     def setUp(self):
@@ -88,7 +101,9 @@ class TestServices(TestBetamax):
         # testing
         self.assertTrue(retrieved_services_with_kwargs)
         for service in retrieved_services_with_kwargs:
-            self.assertEqual(ServiceType.PYTHON_SCRIPT, service._json_data["script_type"])
+            self.assertEqual(
+                ServiceType.PYTHON_SCRIPT, service._json_data["script_type"]
+            )
 
     def test_retrieve_service_but_found_multiple(self):
         with self.assertRaises(MultipleFoundError):
@@ -164,16 +179,23 @@ class TestServices(TestBetamax):
         version_after = "-latest"
 
         # testing
-        service.edit(name=name_after, description=description_after, version=version_after)
+        service.edit(
+            name=name_after, description=description_after, version=version_after
+        )
         service.refresh()
         self.assertEqual(service.name, name_after)
         self.assertEqual(service._json_data["description"], description_after)
         self.assertEqual(service.version, version_after)
 
         # tearDown
-        service.edit(name=name_before, description=description_before, version=version_before)
+        service.edit(
+            name=name_before, description=description_before, version=version_before
+        )
 
-    # test added due to #847 - providing no inputs overwrites values
+    @pytest.mark.skipif(
+        "os.getenv('TRAVIS', False) or os.getenv('GITHUB_ACTIONS', False)",
+        reason="Skipping tests when using Travis or Github Actions, as not Auth can be provided",
+    )
     def test_edit_service_clear_values(self):
         # setup
         initial_name = "Service testing editing"
@@ -279,13 +301,17 @@ class TestServicesWithCustomUploadedService(TestServiceSetup):
             self.project.service(pk=new_service.id)
 
     def test_create_service_with_wrong_service_type(self):
-        with self.assertRaisesRegex(IllegalArgumentError, "must be an option from enum"):
+        with self.assertRaisesRegex(
+            IllegalArgumentError, "must be an option from enum"
+        ):
             self.project.create_service(
                 name="This service type does not exist", service_type="RUBY_SCRIPT"
             )
 
     def test_create_service_with_wrong_environment_version(self):
-        with self.assertRaisesRegex(IllegalArgumentError, "must be an option from enum"):
+        with self.assertRaisesRegex(
+            IllegalArgumentError, "must be an option from enum"
+        ):
             self.project.create_service(
                 name="This env version does not exist", environment_version="0.0"
             )
@@ -309,16 +335,24 @@ class TestServicesWithCustomUploadedService(TestServiceSetup):
         # testing
         self.service.upload(pkg_path=upload_path)
         # second upload modified filename
-        self.assertRegex(self.service._json_data["script_file_name"], r"test_upload_\w+.py")
+        self.assertRegex(
+            self.service._json_data["script_file_name"], r"test_upload_\w+.py"
+        )
 
     def test_upload_script_to_service_with_wrong_path(self):
         # setUp
         upload_path = os.path.join(
-            self.test_assets_dir, "tests", "files", "uploaded", "this_file_does_exists.not"
+            self.test_assets_dir,
+            "tests",
+            "files",
+            "uploaded",
+            "this_file_does_exists.not",
         )
 
         # testing
-        with self.assertRaisesRegex(OSError, "Could not locate python package to upload in"):
+        with self.assertRaisesRegex(
+            OSError, "Could not locate python package to upload in"
+        ):
             self.service.upload(pkg_path=upload_path)
 
 
@@ -341,7 +375,8 @@ class TestServiceExecutions(TestServiceSetup):
         service_execution_1 = service_executions[0]
 
         self.assertEqual(
-            self.project.service_execution(pk=service_execution_1.id), service_execution_1
+            self.project.service_execution(pk=service_execution_1.id),
+            service_execution_1,
         )
 
     def test_retrieve_single_service_execution_but_found_none(self):
@@ -378,7 +413,9 @@ class TestServiceExecutions(TestServiceSetup):
         service_name = "Service Gears - Successful"
         service = self.project.service(name=service_name)
 
-        service_executions = self.project.service_executions(service=service.id, limit=1)
+        service_executions = self.project.service_executions(
+            service=service.id, limit=1
+        )
         self.assertTrue(service_executions)
 
         service_execution = service_executions[0]
