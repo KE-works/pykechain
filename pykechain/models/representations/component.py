@@ -160,5 +160,7 @@ def _valid_object_type(representation: BaseRepresentation, obj: "Base") -> bool:
                 return obj.type == PropertyType.ATTACHMENT_VALUE
             elif rtype == _AllRepresentations.FILE_DISPLAY:
                 return obj.type == PropertyType.STOREDFILE_REFERENCES_VALUE
+            elif rtype == _AllRepresentations.SHOW_ONLY_SCOPE_MEMBERS:
+                return obj.type == PropertyType.USER_REFERENCES_VALUE
             else:
                 return False

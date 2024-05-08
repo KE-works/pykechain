@@ -758,6 +758,7 @@ class PropertyRepresentation(Enum):
     CAMERA_SCANNER_INPUT = "cameraScannerInput"
     SIGNATURE = "signature"
     FILE_DISPLAY = "fileDisplay"
+    SHOW_ONLY_SCOPE_MEMBERS = "showOnlyScopeMembers"
 
 
 class FileDisplayRepresentationValues(Enum):

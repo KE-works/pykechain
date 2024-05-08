@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v4.11.0 (TBD)
+----------------
+* :+1: Added the `ShowScopeMembersOnly` representation on the `UserReferenceProperty`. (#1418)
+
 v4.10.0 (5MAR24)
 ----------------
 * :+1: Added the possibility to download, upload and reference `StoredFiles`. (#1361)
