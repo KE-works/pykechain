@@ -17,6 +17,7 @@ from .representations import (
     StoredFilesDisplayRepresentation,
     ThousandsSeparator,
     UsePropertyNameRepresentation,
+    ScopeMembersOnlyRepresentation,
 )
 
 AnyRepresentation = (
@@ -43,6 +44,8 @@ AnyRepresentation = (
     SignatureRepresentation,
     # Stored files reference properties
     StoredFilesDisplayRepresentation,
+    # User reference properties
+    ScopeMembersOnlyRepresentation,
 )
 
 __all__ = (
