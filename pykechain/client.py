@@ -2125,7 +2125,7 @@ class Client:
         service_type: Optional[ServiceType] = ServiceType.PYTHON_SCRIPT,
         environment_version: Optional[
             ServiceEnvironmentVersion
-        ] = ServiceEnvironmentVersion.PYTHON_3_8,
+        ] = ServiceEnvironmentVersion.PYTHON_3_12,
         run_as: Optional[ServiceScriptUser] = ServiceScriptUser.KENODE_USER,
         pkg_path: Optional[str] = None,
     ) -> Service:

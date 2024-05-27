@@ -413,29 +413,33 @@ class ServiceEnvironmentVersion(Enum):
     """The acceptable versions of python where services run on.
 
     :cvar PYTHON_3_6: Service execution environment is a python 3.6 container (unsupported)
-    :cvar PYTHON_3_7: Service execution environment is a python 3.7 container
-    :cvar PYTHON_3_8: Service execution environment is a python 3.8 container
-    :cvar PYTHON_3_9: Service execution environment is a python 3.9 container
-    :cvar PYTHON_3_10: Service execution environment is a python 3.10 container
+    :cvar PYTHON_3_7: Service execution environment is a python 3.7 container (unsupported)
+    :cvar PYTHON_3_8: Service execution environment is a python 3.8 container (unsupported)
+    :cvar PYTHON_3_9: Service execution environment is a python 3.9 container (legacy)
+    :cvar PYTHON_3_10: Service execution environment is a python 3.10 container (unsupported)
+    :cvar PYTHON_3_11: Service execution environment is a python 3.11 container (unsupported)
+    :cvar PYTHON_3_12: Service execution environment is a python 3.12 container (default)
     :cvar PYTHON_3_6_NOTEBOOKS: execution environment is a python 3.6 container with jupyter
         notebook preinstalled (unsupported)
     :cvar PYTHON_3_8_NOTEBOOKS: execution environment is a python 3.8 container with jupyter
-        notebook preinstalled
+        notebook preinstalled  (unsupported)
     :cvar PYTHON_3_9_NOTEBOOKS: execution environment is a python 3.9 container with jupyter
-        notebook preinstalled
+        notebook preinstalled (unsupported)
     :cvar PYTHON_3_10_NOTEBOOKS: execution environment is a python 3.10 container with jupyter
-        notebook preinstalled
+        notebook preinstalled (unsupported)
     """
 
     PYTHON_3_6 = "3.6"  # unsupported
-    PYTHON_3_7 = "3.7"
-    PYTHON_3_8 = "3.8"
-    PYTHON_3_9 = "3.9"
-    PYTHON_3_10 = "3.10"
+    PYTHON_3_7 = "3.7"  # unsupported
+    PYTHON_3_8 = "3.8"  # unsupported
+    PYTHON_3_9 = "3.9"  # legacy
+    PYTHON_3_10 = "3.10"  # unsupported
+    PYTHON_3_11 = "3.11"  # unsupported
+    PYTHON_3_12 = "3.12"  # default
     PYTHON_3_6_NOTEBOOKS = "3.6_notebook"  # unsupported
-    PYTHON_3_8_NOTEBOOKS = "3.8_notebook"
-    PYTHON_3_9_NOTEBOOKS = "3.9_notebook"
-    PYTHON_3_10_NOTEBOOKS = "3.10_notebook"
+    PYTHON_3_8_NOTEBOOKS = "3.8_notebook"  # unsupported
+    PYTHON_3_9_NOTEBOOKS = "3.9_notebook"  # unsupported
+    PYTHON_3_10_NOTEBOOKS = "3.10_notebook"  # unsupported
 
 
 class ServiceScriptUser(Enum):
