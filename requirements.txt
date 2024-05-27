@@ -20,7 +20,7 @@ Pillow==10.3.0
 # documentation
 Sphinx==7.2.6; python_version >= '3.9'
 Sphinx~=7.1.2; python_version <= '3.8'
-nbsphinx==0.9.3
+nbsphinx==0.9.4
 
 # integration
 tox==4.14.2
