@@ -25,6 +25,7 @@ from pykechain.models.representations.representations import (
     DecimalPlaces,
     GeoCoordinateRepresentation,
     LinkTarget,
+    ScopeMembersOnlyRepresentation,
     SignatureRepresentation,
     SignificantDigits,
     ThousandsSeparator,
@@ -197,7 +198,6 @@ class Bases:
             self.assertEqual(first_repr.value, first_representation.value)
 
         def test_unsupported_value(self):
-
             with self.assertRaises(IllegalArgumentError):
                 self.representation_class(
                     obj=self.obj,
@@ -473,3 +473,10 @@ class TestReprActivity(Bases._TestCustomIconRepresentation):
 class TestReprScope(Bases._TestCustomIconRepresentation):
     def _get_object(self):
         return self.client.create_scope(name=self.test_object_name)
+
+
+class TestReprScopeMembersOnlyRepresentation(Bases._TestPropertyRepresentation):
+    property_type = PropertyType.USER_REFERENCES_VALUE
+    representation_class = ScopeMembersOnlyRepresentation
+    value = None
+    new_value = None

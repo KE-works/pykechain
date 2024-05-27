@@ -3,8 +3,11 @@ Change Log
 
 UNRELEASED
 ----------
-
 * :+1: We upgraded the available python versions for service execution python scripts to 3.12 (default) or python 3.9 (legacy). We deprecated the functionality to work with python notebooks. (KE-4413)
+
+v4.11.0 (TBD)
+----------------
+* :+1: Added the `ShowScopeMembersOnly` representation on the `UserReferenceProperty`. (#1418)
 
 v4.10.0 (5MAR24)
 ----------------

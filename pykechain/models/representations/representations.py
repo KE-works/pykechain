@@ -302,3 +302,9 @@ class StoredFilesDisplayRepresentation(SimpleConfigValueKeyRepresentation):
         check_enum(
             value, FileDisplayRepresentationValues, "file display representation values"
         )
+
+
+class ScopeMembersOnlyRepresentation(SimpleConfigValueKeyRepresentation):
+    """Representation for the users shown inside a `ScopeMembersReferencesProperty`."""
+
+    rtype = PropertyRepresentation.SHOW_ONLY_SCOPE_MEMBERS
