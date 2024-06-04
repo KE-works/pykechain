@@ -227,6 +227,7 @@ class WidgetNames(Enum):
     :cvar SERVICEWIDGET: serviceWidget
     :cvar NOTEBOOKWIDGET: notebookWidget
     :cvar ATTACHMENTVIEWERWIDGET: attachmentViewerWidget
+    :cvar MULTIATTACHMENTVIEWERWIDGET: multiAttachmentViewerWidget
     :cvar TASKNAVIGATIONBARWIDGET: taskNavigationBarWidget
     :cvar JSONWIDGET: jsonWidget
 
@@ -250,6 +251,7 @@ class WidgetNames(Enum):
     SERVICEWIDGET = "serviceWidget"
     NOTEBOOKWIDGET = "notebookWidget"
     ATTACHMENTVIEWERWIDGET = "attachmentViewerWidget"
+    MULTIATTACHMENTVIEWERWIDGET = "multiAttachmentViewerWidget"
     TASKNAVIGATIONBARWIDGET = "taskNavigationBarWidget"
     JSONWIDGET = "jsonWidget"
     METAPANELWIDGET = "metaPanelWidget"
@@ -279,6 +281,7 @@ class WidgetTypes(Enum):
     :cvar SERVICE: Service widget
     :cvar NOTEBOOK: Notebook widget
     :cvar ATTACHMENTVIEWER: Attachmentviewer widget
+    :cvar MULTIATTACHMENTVIEWER: MultiAttachmentviewer widget
     :cvar TASKNAVIGATIONBAR: Tasknavigationbar widget
     :cvar JSON: Json widget
     :cvar METAPANEL: Metapanel widget
@@ -304,6 +307,7 @@ class WidgetTypes(Enum):
     SERVICE = "SERVICE"
     NOTEBOOK = "NOTEBOOK"
     ATTACHMENTVIEWER = "ATTACHMENTVIEWER"
+    MULTIATTACHMENTVIEWER = "MULTIATTACHMENTVIEWER"
     TASKNAVIGATIONBAR = "TASKNAVIGATIONBAR"
     JSON = "JSON"
     METAPANEL = "METAPANEL"
@@ -330,6 +334,7 @@ WidgetCompatibleTypes = {
     WidgetNames.SERVICEWIDGET: WidgetTypes.SERVICE,
     WidgetNames.NOTEBOOKWIDGET: WidgetTypes.NOTEBOOK,
     WidgetNames.ATTACHMENTVIEWERWIDGET: WidgetTypes.ATTACHMENTVIEWER,
+    WidgetNames.MULTIATTACHMENTVIEWERWIDGET: WidgetTypes.MULTIATTACHMENTVIEWER,
     WidgetNames.TASKNAVIGATIONBARWIDGET: WidgetTypes.TASKNAVIGATIONBAR,
     WidgetNames.JSONWIDGET: WidgetTypes.JSON,
     WidgetNames.METAPANELWIDGET: WidgetTypes.METAPANEL,
