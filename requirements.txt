@@ -23,7 +23,7 @@ Sphinx~=7.1.2; python_version <= '3.8'
 nbsphinx==0.9.4
 
 # integration
-tox==4.15.0
+tox==4.15.1
 
 # code style
 flake8==7.0.0
