@@ -682,7 +682,7 @@ class WidgetsManager(Iterable):
 
         return widget
 
-    def add_mutliattachmentviewer_widget(
+    def add_multiattachmentviewer_widget(
         self,
         attachment_property: Union[str, "AttachmentProperty"],
         editable: Optional[bool] = False,
