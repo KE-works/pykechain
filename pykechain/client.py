@@ -36,7 +36,9 @@ from pykechain.enums import (
     ServiceEnvironmentVersion,
     ServiceScriptUser,
     ServiceType,
-    StoredFileCategory, StoredFileClassification, TeamRoles,
+    StoredFileCategory,
+    StoredFileClassification,
+    TeamRoles,
     WidgetTypes,
     WorkflowCategory,
 )
@@ -2572,6 +2574,12 @@ class Client:
         :raises IllegalArgumentError: when an illegal argument is send.
         :raises APIError: when an API Error occurs.
         """
+        if widget_type == WidgetTypes.PROGRESS:
+            warnings.warn(
+                "The progress widget is not available in KE-chain from June 2024 onwards.",
+                DeprecationWarning,
+            )
+
         data = self._validate_widget(
             activity=activity,
             widget_type=widget_type,
@@ -2634,6 +2642,11 @@ class Client:
         bulk_data = list()
         bulk_associations = list()
         for widget in widgets:
+            if widget.get("widget_type") == WidgetTypes.PROGRESS:
+                warnings.warn(
+                    "The progress widget is not available in KE-chain from June 2024 onwards.",
+                    DeprecationWarning,
+                )
             data = self._validate_widget(
                 activity=widget.get("activity"),
                 widget_type=widget.get("widget_type"),
@@ -4097,7 +4110,8 @@ class Client:
             "id": check_uuid(pk),
             "category": check_enum(category, StoredFileCategory, "category"),
             "classification": check_enum(
-                classification, StoredFileClassification, "classification"),
+                classification, StoredFileClassification, "classification"
+            ),
             "description": check_text(description, "description"),
             "scope": check_base(scope, Scope, "scope"),
             "ref": check_text(ref, "ref"),
@@ -4140,7 +4154,8 @@ class Client:
             "id": check_uuid(pk),
             "category": check_enum(category, StoredFileCategory, "category"),
             "classification": check_enum(
-                classification, StoredFileClassification, "classification"),
+                classification, StoredFileClassification, "classification"
+            ),
             "description": check_text(description, "description"),
             "scope": check_base(scope, Scope, "scope"),
             "ref": check_text(ref, "ref"),
