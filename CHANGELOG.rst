@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+v4.12.0 (UNRELEASED)
+--------------------
+* :star: Added the multiattachment viewer widget to the codebase in alignment with KE-chain-2 backend. (#1434)
+* :+1: dependent versions for development
+
 v4.11.0 (27MAY24)
 -----------------
 * :+1: Added the `ShowScopeMembersOnly` representation on the `UserReferenceProperty`. (#1418)

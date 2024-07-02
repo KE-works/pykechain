@@ -663,8 +663,17 @@ class WidgetsManager(Iterable):
         else:
             kwargs.update({"readable_models": [attachment_model_id]})
 
+        widget_type = WidgetTypes.ATTACHMENTVIEWER
+        # we also use this function to make the MULTI ATTACHMENT VIEWER widget
+        # this can be provided in the kwargs as 'widget_type' argument
+        if (
+            "widget_type" in kwargs
+            and kwargs.get("widget_type") == WidgetTypes.MULTIATTACHMENTVIEWER
+        ):
+            widget_type = kwargs.get("widget_type")
+
         widget = self.create_widget(
-            widget_type=WidgetTypes.ATTACHMENTVIEWER,
+            widget_type=widget_type,
             meta=meta,
             title=title,
             parent=parent_widget,
@@ -672,6 +681,59 @@ class WidgetsManager(Iterable):
         )
 
         return widget
+
+    def add_multiattachmentviewer_widget(
+        self,
+        attachment_property: Union[str, "AttachmentProperty"],
+        editable: Optional[bool] = False,
+        title: TITLE_TYPING = False,
+        parent_widget: Optional[Union[Widget, str]] = None,
+        alignment: Optional[Alignment] = None,
+        image_fit: Optional[Union[ImageFitValue, str]] = ImageFitValue.CONTAIN,
+        show_download_button: Optional[bool] = True,
+        show_full_screen_button: Optional[bool] = True,
+        **kwargs,
+    ) -> Widget:
+        """
+        Add a KE-chain Multi Attachment widget widget manager.
+
+        The widget will be saved to KE-chain.
+
+        :param attachment_property: KE-chain Attachment property to display
+        :type attachment_property: AttachmentProperty
+        :param editable: Whether the attachment can be added, edited or deleted (default: False)
+        :type editable: bool
+        :param title: A custom title for the script widget
+            * False (default): Property name
+            * String value: Custom title
+            * None: No title
+        :type title: bool or basestring or None
+        :param alignment: horizontal alignment of the previewed attachment (Alignment enum class)
+        :type alignment: Alignment
+        :param image_fit: (O) enumeration to address the image_fit (defaults to 'contain', otherwise 'cover')
+        :type image_fit: basestring or None
+        :param show_download_button: (O) whether a user can download the attached figure (defaults to True)
+        :type show_download_button: bool
+        :param show_full_screen_button: (O) whether the figure can be expanded to fit the full screen (defaults to True)
+        :type show_full_screen_button: bool
+        :param kwargs: additional keyword arguments to pass
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
+        """
+        return self.add_attachmentviewer_widget(
+            attachment_property,
+            editable,
+            title,
+            parent_widget,
+            alignment,
+            image_fit,
+            show_download_button,
+            show_full_screen_button,
+            widget_type=WidgetTypes.MULTIATTACHMENTVIEWER,
+            **kwargs,
+        )
 
     def add_tasknavigationbar_widget(
         self,
