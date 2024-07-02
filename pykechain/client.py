@@ -2463,12 +2463,18 @@ class Client:
         **kwargs,
     ) -> Dict:
         """Validate the format and content of the configuration of a widget."""
+        if widget_type == WidgetTypes.PROGRESS:
+            warnings.warn(
+                "The progress widget is not available in KE-chain from June 2024 onwards.",
+                DeprecationWarning,
+            )
         data = dict(
             activity_id=check_base(activity, Activity, "activity"),
             widget_type=check_enum(widget_type, WidgetTypes, "widget_type"),
             meta=meta,
             parent_id=check_base(parent, Widget, "parent"),
         )
+
 
         title = check_text(title, "title")
         if title is not None and not title.strip():
