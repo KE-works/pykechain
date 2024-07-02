@@ -92,7 +92,11 @@ class MulticolumnWidget(Widget):
 
 
 class ProgressWidget(Widget):
-    """Progress bar Widget."""
+    """
+    Progress bar Widget.
+
+    This widget is deprecated as of June 2024.
+    """
 
 
 class ScopeWidget(Widget):

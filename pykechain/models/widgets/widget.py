@@ -58,7 +58,6 @@ class Widget(BaseInScope):
         self._scope_id = json.get(
             "scope_id"
         )  # TODO duplicate with `scope_id` attribute
-        self.progress = json.get("progress")
 
     def __repr__(self):  # pragma: no cover
         return (

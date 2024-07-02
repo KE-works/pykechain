@@ -36,7 +36,9 @@ from pykechain.enums import (
     ServiceEnvironmentVersion,
     ServiceScriptUser,
     ServiceType,
-    StoredFileCategory, StoredFileClassification, TeamRoles,
+    StoredFileCategory,
+    StoredFileClassification,
+    TeamRoles,
     WidgetTypes,
     WorkflowCategory,
 )
@@ -2461,6 +2463,11 @@ class Client:
         **kwargs,
     ) -> Dict:
         """Validate the format and content of the configuration of a widget."""
+        if widget_type == WidgetTypes.PROGRESS:
+            warnings.warn(
+                "The progress widget is not available in KE-chain from June 2024 onwards.",
+                DeprecationWarning,
+            )
         data = dict(
             activity_id=check_base(activity, Activity, "activity"),
             widget_type=check_enum(widget_type, WidgetTypes, "widget_type"),
@@ -4097,7 +4104,8 @@ class Client:
             "id": check_uuid(pk),
             "category": check_enum(category, StoredFileCategory, "category"),
             "classification": check_enum(
-                classification, StoredFileClassification, "classification"),
+                classification, StoredFileClassification, "classification"
+            ),
             "description": check_text(description, "description"),
             "scope": check_base(scope, Scope, "scope"),
             "ref": check_text(ref, "ref"),
@@ -4140,7 +4148,8 @@ class Client:
             "id": check_uuid(pk),
             "category": check_enum(category, StoredFileCategory, "category"),
             "classification": check_enum(
-                classification, StoredFileClassification, "classification"),
+                classification, StoredFileClassification, "classification"
+            ),
             "description": check_text(description, "description"),
             "scope": check_base(scope, Scope, "scope"),
             "ref": check_text(ref, "ref"),

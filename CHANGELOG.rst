@@ -5,6 +5,7 @@ v4.12.0 (UNRELEASED)
 -----------------
 * :+1: We've refactored the way we handle the retrieval of descendants of a `Part`, by properly targeting the root to be removed from the list. (#1444)
 * :star: Added the multiattachment viewer widget to the codebase in alignment with KE-chain-2 backend. (#1434)
+* :+1: We included Deprecation warnings when the developer is using Progress widgets in their scripts to inform them that Progress widgets are deprecated from June 2024 onwards. Later we will remove this function completely. (#1445)
 * :+1: dependent versions for development
 
 v4.11.0 (27MAY24)

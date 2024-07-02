@@ -1275,6 +1275,8 @@ class WidgetsManager(Iterable):
 
         The widget will be saved to KE-chain.
 
+        This widget is deprecated as of June 2024
+
         :param height: height of the progress bar, counted in pixels
         :param color_no_progress: color option for when the progress bar is empty
         :param color_completed: color option for when the progress bar is fully completed
@@ -1285,6 +1287,10 @@ class WidgetsManager(Iterable):
         :return: newly created widget
         :rtype Widget
         """
+        warnings.warn(
+            "The progress widget is not available in KE-chain from June 2024 onwards.",
+            DeprecationWarning,
+        )
         meta = _initiate_meta(kwargs, activity=self.activity)
 
         meta.update(
