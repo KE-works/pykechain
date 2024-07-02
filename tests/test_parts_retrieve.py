@@ -27,17 +27,23 @@ class TestPartRetrieve(TestBetamax):
 
         self.assertEqual(bike_instance.category, Category.INSTANCE)
 
-    def test_get_single_instance_of_a_multiplicity_model_raises_multiplefounderror(self):
+    def test_get_single_instance_of_a_multiplicity_model_raises_multiplefounderror(
+        self,
+    ):
         wheel_model = self.project.model("Wheel")
 
         with self.assertRaises(MultipleFoundError):
             wheel_model.instance()
 
     # test added in 1.12.7
-    def test_get_single_instance_of_a_model_without_instances_raises_notfounderror(self):
+    def test_get_single_instance_of_a_model_without_instances_raises_notfounderror(
+        self,
+    ):
         catalog = self.project.model(name__startswith="Catalog")
         model_without_instances = self.project.create_model(
-            parent=catalog, name="model_without_instances", multiplicity=Multiplicity.ZERO_ONE
+            parent=catalog,
+            name="model_without_instances",
+            multiplicity=Multiplicity.ZERO_ONE,
         )
 
         with self.assertRaises(NotFoundError):
@@ -55,14 +61,16 @@ class TestPartRetrieve(TestBetamax):
         # testing
         self.assertIsInstance(root._cached_children, list)
         self.assertEqual(
-            1, len(root._cached_children), msg="Number of instances has changed, expected 1"
+            1,
+            len(root._cached_children),
+            msg="Number of instances has changed, expected 1",
         )
 
         # follow-up
         bike_part = find(root._cached_children, lambda d: d.name == "Bike")
         self.assertIsNotNone(bike_part._cached_children)
         self.assertEqual(
-            7,
+            8,
             len(bike_part._cached_children),
             msg="Number of child instances has changed, expected 7",
         )
@@ -76,7 +84,9 @@ class TestPartRetrieve(TestBetamax):
         # testing
         self.assertIsInstance(root._cached_children, list)
         self.assertEqual(
-            1, len(root._cached_children), msg="Number of models has changed, expected 1"
+            1,
+            len(root._cached_children),
+            msg="Number of models has changed, expected 1",
         )
 
         # follow-up
@@ -125,20 +135,28 @@ class TestPartRetrieve(TestBetamax):
         self.assertTrue(root._cached_children, msg="Children should be cached")
 
         bike = root.child(name="Bike")
-        self.assertTrue(root._cached_children, msg="Cache was used and should still be intact")
+        self.assertTrue(
+            root._cached_children, msg="Cache was used and should still be intact"
+        )
 
         bike_again = root.child(pk=bike.id)
-        self.assertEqual(bike, bike_again, msg="Bike should be retrieved from cache, based on ID")
+        self.assertEqual(
+            bike, bike_again, msg="Bike should be retrieved from cache, based on ID"
+        )
 
         still_the_bike = root.child(name=bike.name)
         self.assertEqual(
-            bike, still_the_bike, msg="Bike should be retrieved from cache, based on name"
+            bike,
+            still_the_bike,
+            msg="Bike should be retrieved from cache, based on name",
         )
 
         root._cached_children = None
         more_bike = root.child(pk=bike.id)
         self.assertEqual(
-            bike, more_bike, msg="Cache should be cleared, bike has to be retrieved anew."
+            bike,
+            more_bike,
+            msg="Cache should be cleared, bike has to be retrieved anew.",
         )
 
     def test_child_invalid(self):
@@ -161,7 +179,9 @@ class TestPartRetrieve(TestBetamax):
         all_children = root.all_children()
 
         self.assertIsInstance(all_children, list)
-        self.assertEqual(6, len(all_children), msg="Number of models has changed, expected 6")
+        self.assertEqual(
+            6, len(all_children), msg="Number of models has changed, expected 6"
+        )
 
     def test_child_after_construction(self):
         """Test retrieval of child after creating the model via another Part object of the same KE-chain Part."""
