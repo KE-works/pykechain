@@ -9,6 +9,7 @@ from pykechain.models.widgets.widget_schemas import undefined_meta_schema
 # SERVICE
 # NOTEBOOK
 # ATTACHMENTVIEWER
+# MULTIATTACHMENTVIEWER
 # TASKNAVIGATIONBAR
 # JSON
 # METAPANEL
@@ -60,6 +61,10 @@ class SupergridWidget(Widget):
 
 class AttachmentviewerWidget(Widget):
     """Attachmentviewer Widget."""
+
+
+class MultiAttachmentviewerWidget(Widget):
+    """Multi Attachmentviewer Widget."""
 
 
 class TasknavigationbarWidget(Widget):
