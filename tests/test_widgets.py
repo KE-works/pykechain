@@ -190,7 +190,6 @@ class TestWidgets(TestBetamax):
             "_parent_id",
             "has_subwidgets",
             "_scope_id",
-            "progress",
         ]
         first_widget = self.activity.widgets()[0]
 
