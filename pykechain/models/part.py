@@ -318,10 +318,12 @@ class Part(TreeObject):
                 descendants=self.id,
             )
         )
-        all_descendants.remove(
-            self
-        )  # remove the part itself, which is returned on index 0
-
+        try:
+            all_descendants.remove(
+                self
+            )  # remove the part itself because it is not needed for the direct descendants
+        except ValueError:
+            pass
         self._populate_cached_children(all_descendants=all_descendants, overwrite=True)
 
         return None
