@@ -2475,7 +2475,6 @@ class Client:
             parent_id=check_base(parent, Widget, "parent"),
         )
 
-
         title = check_text(title, "title")
         if title is not None and not title.strip():
             raise IllegalArgumentError("`title` can not be empty")
