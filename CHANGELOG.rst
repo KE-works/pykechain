@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+v4.12.0 (UNRELEASED)
+-----------------
+* :+1: We've refactored the way we handle the retrieval of descendants of a `Part`, by properly targeting the root to be removed from the list. (#1444)
+
 v4.11.0 (27MAY24)
 -----------------
 * :+1: Added the `ShowScopeMembersOnly` representation on the `UserReferenceProperty`. (#1418)

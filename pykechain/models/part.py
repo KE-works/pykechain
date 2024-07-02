@@ -4,7 +4,12 @@ import requests
 
 from pykechain.defaults import API_EXTRA_PARAMS, PARTS_BATCH_LIMIT
 from pykechain.enums import Category, Classification, Multiplicity, PropertyType
-from pykechain.exceptions import APIError, IllegalArgumentError, MultipleFoundError, NotFoundError
+from pykechain.exceptions import (
+    APIError,
+    IllegalArgumentError,
+    MultipleFoundError,
+    NotFoundError,
+)
 from pykechain.models.input_checks import (
     check_list_of_base,
     check_list_of_dicts,
@@ -312,9 +317,10 @@ class Part(TreeObject):
                 batch=batch,
                 descendants=self.id,
             )
-        )[
-            1:
-        ]  # remove the part itself, which is returned on index 0
+        )
+        all_descendants.remove(
+            self
+        )  # remove the part itself, which is returned on index 0
 
         self._populate_cached_children(all_descendants=all_descendants, overwrite=True)
 
