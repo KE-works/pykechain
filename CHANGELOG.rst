@@ -3,7 +3,7 @@ Change Log
 
 UNRELEASED
 ----------
-* :star: Added the option not to include PDF's inline inside the PDF. The PDF will return a zip with the PDF and all attachments that cannot be put inline inside an attachment folder.
+* :star: Added the option not to include PDF's inline inside the PDF. The PDF will return a zip with the PDF and all attachments that cannot be put inline inside an attachment folder. (#1448)
 
 v4.12.0 (2JUL24)
 ----------------
