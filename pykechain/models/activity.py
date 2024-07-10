@@ -1093,6 +1093,7 @@ class Activity(TreeObject, TagsMixin):
         paper_orientation: Optional[PaperOrientation] = PaperOrientation.PORTRAIT,
         from_user: Optional[User] = None,
         include_appendices: Optional[bool] = False,
+        include_pdf_appendices_inline: bool = True,
         include_qr_code: Optional[bool] = False,
         **kwargs,
     ) -> None:
@@ -1121,6 +1122,11 @@ class Activity(TreeObject, TagsMixin):
         :param include_appendices: True if the PDF should contain appendices, False (default)
             if otherwise.
         :type include_appendices: bool
+        :param include_pdf_appendices_inline: The PDF appendices, if appendices are enable are
+            rendered inline inside the PDF. If this is set to False, then a ZIP will be returned
+            where all attachments that cannot be rendered, including the PDF attachments are
+            included in that zip in a subdirectory 'attachments'.
+        :type include_pdf_appendices_inline: bool
         :param include_qr_code: True if the PDF should include a QR-code, False (default)
             if otherwise.
         :type include_qr_code: bool
@@ -1153,6 +1159,9 @@ class Activity(TreeObject, TagsMixin):
                 paper_orientation, PaperOrientation, "paper_orientation"
             ),
             appendices=check_type(include_appendices, bool, "include_appendices"),
+            include_pdf_appendices_inline=check_type(
+                include_pdf_appendices_inline, bool, "include_pdf_appendices_inline"
+            ),
             includeqr=check_type(include_qr_code, bool, "include_qr_code"),
         )
 

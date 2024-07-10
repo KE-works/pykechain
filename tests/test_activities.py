@@ -118,7 +118,6 @@ class TestActivityConstruction(TestBetamax):
         )
 
     def test_create_with_classification(self):
-
         for classification in ActivityClassification.values():
             with self.subTest(msg=f"Classification: {classification}"):
                 # setUp 1
@@ -904,50 +903,59 @@ class TestActivities(TestBetamax):
     reason="Skipping tests when using Travis or Github Actions, as downloads cannot be provided",
 )
 class TestActivityDownloadAsPDF(TestBetamax):
-    def test_activity_download_as_pdf(self):
-        # setUp
-        activity_name = "Task - Form"
-        activity = self.project.activity(name=activity_name)
-        user = self.client.user(id=3)  # testmanager
+    def setUp(self):
+        super().setUp()
+        self.activity_name = "Task - Form"
+        self.activity = self.project.activity(name=self.activity_name)
+        self.user = self.client.user(id=3)  # testmanager
 
+    def test_activity_download_as_pdf(self):
         # testing
         with temp_chdir() as target_dir:
-            pdf_file = activity.download_as_pdf(
-                target_dir=target_dir, pdf_filename="pdf_file", user=user
+            pdf_file = self.activity.download_as_pdf(
+                target_dir=target_dir, pdf_filename="pdf_file", user=self.user
             )
             self.assertTrue(os.path.exists(pdf_file))
-
-            pdf_file_called_after_activity = activity.download_as_pdf(
+            self.assertTrue(pdf_file.endswith(".pdf"))
+            pdf_file_called_after_activity = self.activity.download_as_pdf(
                 target_dir=target_dir,
             )
             self.assertTrue(os.path.exists(pdf_file_called_after_activity))
+            self.assertTrue(pdf_file_called_after_activity.endswith(".pdf"))
 
     def test_activity_download_as_pdf_async(self):
-        activity_name = "Task - Form"
-        activity = self.project.activity(name=activity_name)
-
         # testing
         with temp_chdir() as target_dir:
-            pdf_file = activity.download_as_pdf(
+            pdf_file = self.activity.download_as_pdf(
                 target_dir=target_dir,
                 pdf_filename="pdf_file",
                 include_appendices=True,
                 include_qr_code=True,
             )
             self.assertTrue(os.path.exists(pdf_file))
+            self.assertTrue(pdf_file.endswith(".pdf"))
+
+    def test_activity_download_as_pdf_without_inline_pdfs(self):
+        # testing
+        with temp_chdir() as target_dir:
+            zip_file = self.activity.download_as_pdf(
+                target_dir=target_dir,
+                pdf_filename="pdf_file",
+                user=self.user,
+                include_pdf_appendices_inline=False,
+            )
+            self.assertTrue(os.path.exists(zip_file))
+            self.assertTrue(zip_file.endswith(".zip"))
 
     def test_activity_share_link(self):
         # setUp
         test_user = self.client.user(username="testuser")
 
-        activity_name = "Task - Form"
         message = "EXAMPLE_MESSAGE"
         subject = "EXAMPLE_SUBJECT"
         recipient_users = [test_user]
 
-        activity = self.project.activity(name=activity_name)
-
-        activity.share_link(
+        self.activity.share_link(
             subject=subject,
             message=message,
             recipient_users=recipient_users,
@@ -968,16 +976,13 @@ class TestActivityDownloadAsPDF(TestBetamax):
     def test_activity_share_pdf(self):
         # setUp
         test_user = self.client.user(username="testuser")
-        activity_name = "Task - Form"
         message = "EXAMPLE_MESSAGE"
         subject = "EXAMPLE_SUBJECT"
         paper_size = PaperSize.A2
         paper_orientation = PaperOrientation.PORTRAIT
         recipient_users = [test_user]
 
-        activity = self.project.activity(name=activity_name)
-
-        activity.share_pdf(
+        self.activity.share_pdf(
             subject=subject,
             message=message,
             recipient_users=recipient_users,
@@ -1001,16 +1006,13 @@ class TestActivityDownloadAsPDF(TestBetamax):
         # setUp
         test_user = self.client.user(username="anotheruser")
         from_user = self.client.user(username="testuser")
-        activity_name = "Task - Form"
         message = "EXAMPLE_MESSAGE"
         subject = "EXAMPLE_SUBJECT"
         paper_size = PaperSize.A2
         paper_orientation = PaperOrientation.PORTRAIT
         recipient_users = [test_user]
 
-        activity = self.project.activity(name=activity_name)
-
-        activity.share_pdf(
+        self.activity.share_pdf(
             from_user=from_user,
             subject=subject,
             message=message,
@@ -1036,14 +1038,11 @@ class TestActivityDownloadAsPDF(TestBetamax):
         test_user = self.client.user(username="anotheruser")
         from_user = self.client.user(username="testuser")
 
-        activity_name = "Task - Form"
         message = "EXAMPLE_MESSAGE"
         subject = "EXAMPLE_SUBJECT"
         recipient_users = [test_user]
 
-        activity = self.project.activity(name=activity_name)
-
-        activity.share_link(
+        self.activity.share_link(
             from_user=from_user,
             subject=subject,
             message=message,
