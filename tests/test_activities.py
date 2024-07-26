@@ -942,7 +942,7 @@ class TestActivityDownloadAsPDF(TestBetamax):
                 target_dir=target_dir,
                 pdf_filename="pdf_file",
                 user=self.user,
-                include_pdf_appendices_inline=False,
+                as_zip=True,
             )
             self.assertTrue(os.path.exists(zip_file))
             self.assertTrue(zip_file.endswith(".zip"))
