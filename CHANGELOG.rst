@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-UNRELEASED
+v4.13.0 (15AUG24)
 ----------
 * :star: Added the option not to include PDF's inline inside the PDF. The PDF will return a zip with the PDF and all attachments that cannot be put inline inside an attachment folder. (#1448)
 * :+1: Also accept a 202 Accepted HTTP response for the scope clone and improved API error handling.(#1459)
