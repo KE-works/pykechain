@@ -2360,7 +2360,7 @@ class Client:
 
         try:
             response.raise_for_status()
-        except requests.exceptions.HTTPError as err:
+        except requests.exceptions.HTTPError:
             if response.status_code == requests.codes.forbidden:
                 raise ForbiddenError(
                     f"Forbidden to clone Scope {source_scope}", response=response
