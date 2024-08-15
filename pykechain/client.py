@@ -2358,7 +2358,7 @@ class Client:
         query_params = API_EXTRA_PARAMS["scopes"]
         response = self._request("POST", url, params=query_params, json=data_dict)
 
-        if response.status_code != requests.codes.created:  # pragma: no cover
+        if response.status_code not in (requests.codes.created, requests.codes.accepted):
             if response.status_code == requests.codes.forbidden:
                 raise ForbiddenError(
                     f"Forbidden to clone Scope {source_scope}", response=response
@@ -2369,7 +2369,7 @@ class Client:
                 )
 
         if asynchronous:
-            return None
+            return
 
         cloned_scope = Scope(response.json()["results"][0], client=source_scope._client)
 
