@@ -2358,7 +2358,9 @@ class Client:
         query_params = API_EXTRA_PARAMS["scopes"]
         response = self._request("POST", url, params=query_params, json=data_dict)
 
-        if response.status_code != requests.codes.created:  # pragma: no cover
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as err:
             if response.status_code == requests.codes.forbidden:
                 raise ForbiddenError(
                     f"Forbidden to clone Scope {source_scope}", response=response
@@ -2368,16 +2370,21 @@ class Client:
                     f"Could not clone Scope {source_scope}", response=response
                 )
 
-        if asynchronous:
+        if asynchronous and response.status_code == requests.codes.accepted:
             return None
+        elif response.status_code == requests.codes.created:
 
-        cloned_scope = Scope(response.json()["results"][0], client=source_scope._client)
+            cloned_scope = Scope(response.json()["results"][0], client=source_scope._client)
 
-        # TODO work-around, some attributes are not (yet) in the KE-chain response.json()
-        cloned_scope._tags = tags
-        cloned_scope.start_date = start_date
-        cloned_scope.due_date = due_date
-        return cloned_scope
+            # TODO work-around, some attributes are not (yet) in the KE-chain response.json()
+            cloned_scope._tags = tags
+            cloned_scope.start_date = start_date
+            cloned_scope.due_date = due_date
+            return cloned_scope
+        else:
+            raise APIError(
+                f"Unexpected response. Could not clone Scope {source_scope}", response=response
+            )
 
     def create_team(
         self,
