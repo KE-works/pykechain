@@ -6,7 +6,11 @@ from urllib.parse import urljoin
 
 import requests
 
-from pykechain.defaults import API_EXTRA_PARAMS, ASYNC_REFRESH_INTERVAL, ASYNC_TIMEOUT_LIMIT
+from pykechain.defaults import (
+    API_EXTRA_PARAMS,
+    ASYNC_REFRESH_INTERVAL,
+    ASYNC_TIMEOUT_LIMIT,
+)
 from pykechain.enums import (
     ActivityClassification,
     ActivityRootNames,
@@ -905,6 +909,7 @@ class Activity(TreeObject, TagsMixin):
         paper_size: PaperSize = PaperSize.A4,
         paper_orientation: PaperOrientation = PaperOrientation.PORTRAIT,
         include_appendices: bool = False,
+        as_zip: bool = False,
         include_qr_code: bool = False,
         user: Optional[User] = None,
         timeout: int = ASYNC_TIMEOUT_LIMIT,
@@ -927,6 +932,10 @@ class Activity(TreeObject, TagsMixin):
                                - landscape: landscape orientation
         :param include_appendices: True if the PDF should contain appendices, False (default)
             if otherwise.
+        :param as_zip: The PDF appendices, if appendices are enabled are
+            rendered inline inside the PDF. If this is set to True, then a ZIP will be returned
+            where all attachments that cannot be rendered, including the PDF attachments are
+            included in that zip in a subdirectory 'attachments'. (defaults to False)
         :param include_qr_code: True if the PDF should include a QR-code, False (default)
             if otherwise.
         :param user: (optional) used to calculate the offset needed to interpret Datetime
@@ -951,6 +960,7 @@ class Activity(TreeObject, TagsMixin):
                 paper_orientation, PaperOrientation, "paper_orientation"
             ),
             appendices=check_type(include_appendices, bool, "include_appendices"),
+            as_zip=check_type(as_zip, bool, "as_zip"),
             includeqr=check_type(include_qr_code, bool, "include_qr_code"),
         )
 
@@ -1081,6 +1091,7 @@ class Activity(TreeObject, TagsMixin):
         paper_orientation: Optional[PaperOrientation] = PaperOrientation.PORTRAIT,
         from_user: Optional[User] = None,
         include_appendices: Optional[bool] = False,
+        as_zip: bool = False,
         include_qr_code: Optional[bool] = False,
         **kwargs,
     ) -> None:
@@ -1109,6 +1120,11 @@ class Activity(TreeObject, TagsMixin):
         :param include_appendices: True if the PDF should contain appendices, False (default)
             if otherwise.
         :type include_appendices: bool
+        :param as_zip: The PDF appendices, if appendices are enabled are
+            rendered inline inside the PDF. If this is set to True, then a ZIP will be returned
+            where all attachments that cannot be rendered, including the PDF attachments are
+            included in that zip in a subdirectory 'attachments'. (Defaults to False)
+        :type as_zip: bool
         :param include_qr_code: True if the PDF should include a QR-code, False (default)
             if otherwise.
         :type include_qr_code: bool
@@ -1141,6 +1157,7 @@ class Activity(TreeObject, TagsMixin):
                 paper_orientation, PaperOrientation, "paper_orientation"
             ),
             appendices=check_type(include_appendices, bool, "include_appendices"),
+            as_zip=check_type(as_zip, bool, "as_zip"),
             includeqr=check_type(include_qr_code, bool, "include_qr_code"),
         )
 
