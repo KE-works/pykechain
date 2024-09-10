@@ -1,8 +1,14 @@
+import os
 from datetime import date, datetime, time
+from unittest import skip
 
-from pykechain.enums import ContextGroup, PropertyType, Category, Multiplicity
+from build.lib.pykechain.models.stored_file import StoredFile
+from pykechain.enums import (
+    ContextGroup, PropertyType, Category, Multiplicity,
+    StoredFileClassification,
+)
 from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
-from pykechain.models import Property
+from pykechain.models import Property, SignatureProperty
 from pykechain.models.validators import SingleReferenceValidator
 from tests.classes import TestBetamax
 
@@ -93,6 +99,7 @@ class TestPropertyCreation(TestBetamax):
             PropertyType.CONTEXT_REFERENCES_VALUE,
             PropertyType.STOREDFILE_REFERENCES_VALUE,
             PropertyType.STATUS_REFERENCES_VALUE,
+            PropertyType.SIGNATURE_VALUE,
             PropertyType.USER_REFERENCES_VALUE,
             PropertyType.GEOJSON_VALUE,
             PropertyType.WEATHER_VALUE,
@@ -553,3 +560,52 @@ class TestPropertiesWithReferenceProperty(TestBetamax):
 
         # tearDown
         copied_ref_property.delete()
+
+class TestPropertiesSignatureProperty(TestBetamax):
+    def setUp(self):
+        super().setUp()
+
+        self.wheel_model = self.project.model("Wheel")
+        self.bike = self.project.model("Bike")
+
+        self.test_files_dir = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
+        )
+        self.upload_path = os.path.join(
+            self.test_files_dir,
+            "tests",
+            "files",
+            "test_upload_image_to_attachment_property",
+            "test_upload_image.png",
+        )
+
+        self.test_signature_property_model: SignatureProperty = self.bike.add_property(
+            name=f"__Test signature property @ {datetime.now()}",
+            property_type=PropertyType.SIGNATURE_VALUE,
+            description="Description of test signature property",
+            unit="no unit",
+            default_value=None,
+        )
+    def tearDown(self):
+        self.test_signature_property_model.delete()
+        super().tearDown()
+
+    def test_create_signature_property(self):
+        # implicit inside the setUp
+        pass
+
+    @skip("TODO: still to fix this one")
+    def test_upload_new_signature_to_property(self):
+        file_name = "__TEST_STORED_FILE"
+        stored_file = self.client.create_stored_file(
+            name=file_name,
+            scope=self.project,
+            classification=StoredFileClassification.SCOPED,
+            filepath=self.upload_path,
+            description="__TEST_STORED_FILE_DESCRIPTION",
+        )
+
+        self.test_signature_property_model.value = stored_file
+
+        self.test_signature_property_model.refresh()
+        self.assertIsNotNone(self.test_signature_property_model.value)
