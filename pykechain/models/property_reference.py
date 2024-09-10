@@ -8,7 +8,7 @@ from pykechain.enums import (
     StoredFileClassification,
 )
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Activity, Scope, user
+from pykechain.models import Activity, Base, Scope, user
 from pykechain.models.base_reference import (
     _ReferenceProperty,
     _ReferencePropertyInScope,
@@ -331,3 +331,89 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
             filepath=data,
         )
         self.value = self.value + [stored_file] if self.value else [stored_file]
+
+class SignatureProperty(_ReferenceProperty):
+    """A virtual object representing a KE-chain StoredFile References property."""
+
+    REFERENCED_CLASS = StoredFile
+
+    @property
+    def value(self) -> Optional[StoredFile]:
+        if not self._value:
+            return None
+        elif not self._cached_values:
+            self._cached_values = self._retrieve_object()
+        return self._cached_values
+
+    @value.setter
+    def value(self, value: Any) -> None:
+        value = self.serialize_value(value)
+        if self.use_bulk_update:
+            self._pend_update(dict(value=value))
+            self._value = dict(id=value) if isinstance(value, str) else None
+            self._cached_values = None
+        else:
+            self._put_value(value)
+
+    def _retrieve_object(self, **kwargs) -> StoredFile:
+        return self._retrieve_objects(**kwargs)
+
+    def _retrieve_objects(self, **kwargs) -> StoredFile:
+        """
+        Retrieve a StoredFile which contains the signature.
+
+        :param kwargs: optional inputs
+        :return: list of StoredFile objects
+        """
+        if self._value:
+            stored_files_id = self._value
+            return self._client.stored_files(id=stored_files_id)
+
+    def clear(self) -> None:
+        """
+        Clear the signature from the value of the property.
+
+        Introduced in order to minimize the effect on custom scripts when converting
+        from `AttachmentProperty` to `StoredFileReferenceProperty`.
+        """
+        if self.value:
+            self.value = None
+
+    @property
+    def filename(self) -> Optional[Union[str, list]]:
+        """Filename of the file stored in the signature property."""
+        if self.value:
+            return self.value.filename
+        else:
+            return None
+
+    def download(self, directory: str, **kwargs):
+        """Download stored files from the SignatureProperty.
+
+        Downloads multiple files in the provided directory and names them according to the
+        filename. If multiple files have the same name, it makes them unique.
+
+        :param directory: Directory path
+        :type directory: basestring
+        """
+        stored_file = self.value
+        filename = uniquify(os.path.join(directory, stored_file.filename))
+        stored_file.save_as(filename=filename, **kwargs)
+
+    def upload(self, data: Any) -> None:
+        """Upload a stored file to the SignatureProperty.
+
+        :param data: File path
+        :type data: basestring
+        :raises APIError: When unable to upload the file to KE-chain
+        :raises OSError: When the path to the file is incorrect or file could not be found
+        """
+        filename = os.path.basename(data)
+        stored_file = self._client.create_stored_file(
+            name=filename,
+            scope=self.scope,
+            classification=StoredFileClassification.SCOPED,
+            category=StoredFileCategory.REFERENCED,
+            filepath=data,
+        )
+        self.value = stored_file
