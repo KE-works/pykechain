@@ -594,9 +594,9 @@ class TestPropertiesSignatureProperty(TestBetamax):
         # implicit inside the setUp
         pass
 
-    @skip("TODO: still to fix this one")
+    @skip("TODO: fix this test")
     def test_upload_new_signature_to_property(self):
-        file_name = "__TEST_STORED_FILE"
+        file_name = "__TEST_SIGNATURE_STORED_FILE"
         stored_file = self.client.create_stored_file(
             name=file_name,
             scope=self.project,
@@ -607,5 +607,13 @@ class TestPropertiesSignatureProperty(TestBetamax):
 
         self.test_signature_property_model.value = stored_file
 
+        ### Results in a 400
+        # [
+        #     "Cannot assign \"'151b1665-d738-40a3-a699-be32690d88b2'\": \"Property.signature_val\" must be a \"StoredFile\" instance."
+        # ]
+
         self.test_signature_property_model.refresh()
         self.assertIsNotNone(self.test_signature_property_model.value)
+
+        # tearDown
+        stored_file.delete()

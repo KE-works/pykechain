@@ -347,7 +347,10 @@ class SignatureProperty(_ReferenceProperty):
 
     @value.setter
     def value(self, value: Any) -> None:
-        value = self.serialize_value(value)
+        # This serialize_value helper function returns a list of value
+        value: List[Any] = self.serialize_value(value)
+        if value and isinstance(value, list):
+            value = value[0]  # de-list this temp_value
         if self.use_bulk_update:
             self._pend_update(dict(value=value))
             self._value = dict(id=value) if isinstance(value, str) else None
