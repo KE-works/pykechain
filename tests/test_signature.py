@@ -44,7 +44,6 @@ class TestPropertySignatureProperty(TestBetamax):
         # implicit inside the setUp
         pass
 
-    # @skip("TODO: fix this test")
     def test_upload_new_signature_to_property(self):
         self.test_signature_property_model.value = self.signature_stored_file
         ### Results in a 400
