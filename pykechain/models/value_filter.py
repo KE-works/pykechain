@@ -127,10 +127,10 @@ class PropertyValueFilter(BaseFilter):
             if (
                 property_type
                 in (
-                PropertyType.BOOLEAN_VALUE,
-                PropertyType.REFERENCES_VALUE,
-                PropertyType.ACTIVITY_REFERENCES_VALUE,
-            )
+                    PropertyType.BOOLEAN_VALUE,
+                    PropertyType.REFERENCES_VALUE,
+                    PropertyType.ACTIVITY_REFERENCES_VALUE,
+                )
                 and self.type != FilterType.EXACT
             ):
                 warnings.warn(
