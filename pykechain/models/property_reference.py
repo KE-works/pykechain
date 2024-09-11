@@ -8,7 +8,7 @@ from pykechain.enums import (
     StoredFileClassification,
 )
 from pykechain.exceptions import IllegalArgumentError
-from pykechain.models import Activity, Base, Scope, user
+from pykechain.models import Activity, Scope, user
 from pykechain.models.base_reference import (
     _ReferenceProperty,
     _ReferencePropertyInScope,
@@ -331,6 +331,7 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
             filepath=data,
         )
         self.value = self.value + [stored_file] if self.value else [stored_file]
+
 
 class SignatureProperty(_ReferenceProperty):
     """A virtual object representing a KE-chain StoredFile References property."""
