@@ -325,7 +325,7 @@ class TestProperties(TestBetamax):
         # testing
         self.assertEqual(self.prop_model.name, new_name)
         self.assertEqual(self.prop_model.description, initial_description)
-        (self.assertEqual(self.prop_model.unit, initial_unit),)
+        self.assertEqual(self.prop_model.unit, initial_unit)
 
         # Edit with clearing the values, name and status cannot be cleared
         self.prop_model.edit(name=None, description=None, unit=None)
