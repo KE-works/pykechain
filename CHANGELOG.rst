@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+UNRELEASED
+----------
+* :star: Add the possibility to add a prefilter option to the context reference property. It will be stored in the prefilter section of the value options of a the reference property.
+
+
 v4.13.0 (15AUG24)
 ----------
 * :star: Added the option not to include PDF's inline inside the PDF. The PDF will return a zip with the PDF and all attachments that cannot be put inline inside an attachment folder. (#1448)

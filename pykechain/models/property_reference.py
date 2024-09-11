@@ -226,6 +226,23 @@ class ContextReferencesProperty(_ReferencePropertyInScope):
 
     REFERENCED_CLASS = Context
 
+    def set_prefilters(
+        self,
+        prefilters: List[ScopeFilter] = None,
+        clear: Optional[bool] = False,
+    ) -> None:
+        """
+        Set pre-filters on the scope reference property.
+
+        :param prefilters: list of Scope Filter objects
+        :type prefilters: list
+        :param clear: whether all existing pre-filters should be cleared. (default = False)
+        :type clear: bool
+
+        :return: None
+        """
+        pass
+
     def _retrieve_objects(self, **kwargs) -> List[Context]:
         """
         Retrieve a list of Contexts.
