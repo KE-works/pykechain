@@ -340,6 +340,12 @@ class SignatureProperty(_ReferenceProperty):
 
     @property
     def value(self) -> Optional[StoredFile]:
+        """
+        Retrieve the signature of this signature property.
+
+        :return: an optional `StoredFile` object containing the signature.
+        :rtype StoredFile
+        """
         if not self._value:
             return None
         elif not self._cached_values:
