@@ -369,8 +369,8 @@ class SignatureProperty(_ReferenceProperty):
         :return: list of StoredFile objects
         """
         if self._value:
-            stored_files_id = self._value
-            return self._client.stored_files(id=stored_files_id)
+            stored_files_id = self._value.get("id")
+            return self._client.stored_file(id=stored_files_id)
 
     def clear(self) -> None:
         """
