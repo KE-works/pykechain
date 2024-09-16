@@ -249,7 +249,7 @@ class ContextReferencesProperty(_ReferencePropertyInScope):
         prefilters_dict = self._options.get("prefilters", dict())
         if prefilters:
             raise IllegalArgumentError(
-                f"`prefilters` argument is unused. Use `context_group` instead."
+                "`prefilters` argument is unused. Use `context_group` instead."
             )
         if clear:
             prefilters_dict = dict()
