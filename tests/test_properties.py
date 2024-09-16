@@ -3,12 +3,11 @@ from datetime import date, datetime, time
 from pykechain.enums import (
     Category,
     ContextGroup,
-    ContextType,
     Multiplicity,
     PropertyType,
 )
 from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
-from pykechain.models import ContextReferencesProperty, Property
+from pykechain.models import Property
 from pykechain.models.validators import SingleReferenceValidator
 from tests.classes import TestBetamax
 
