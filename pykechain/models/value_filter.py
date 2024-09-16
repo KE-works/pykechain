@@ -194,8 +194,7 @@ class PropertyValueFilter(BaseFilter):
     @classmethod
     def parse_options(cls, options: Dict) -> List["PropertyValueFilter"]:
         """
-        Convert the dict & string-based definition of a property value filter to a list of
-        PropertyValueFilter objects.
+        Convert dict and string filters to PropertyValueFilter objects.
 
         :param options: options dict from a multi-reference property or meta dict from a filtered
             grid widget.
