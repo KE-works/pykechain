@@ -46,10 +46,6 @@ class TestPropertySignatureProperty(TestBetamax):
 
     def test_upload_new_signature_to_property(self):
         self.test_signature_property_model.value = self.signature_stored_file
-        ### Results in a 400
-        # [
-        #     "Cannot assign \"'151b1665-d738-40a3-a699-be32690d88b2'\": \"Property.signature_val\" must be a \"StoredFile\" instance."
-        # ]
 
         self.test_signature_property_model.refresh()
         self.assertIsNotNone(self.test_signature_property_model.value)
