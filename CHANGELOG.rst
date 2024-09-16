@@ -3,8 +3,9 @@ Change Log
 
 UNRELEASED
 ----------
-* :star: Add the possibility to add a prefilter option to the context reference property. It will be stored in the prefilter section of the value options of a the reference property.
 
+* :star: We added the concept of signature property. With this property we handle signature's better and more explicit in KE-chain. Signatures are stored as StoredFiles. (#1467)
+* :star: Add the possibility to add a prefilter option to the context reference property. It will be stored in the prefilter section of the value options of a the reference property.
 
 v4.13.0 (15AUG24)
 ----------

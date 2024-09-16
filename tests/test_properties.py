@@ -1,7 +1,12 @@
 from datetime import date, datetime, time
 
-from pykechain.enums import ContextGroup, PropertyType, Category, Multiplicity
-from pykechain.exceptions import NotFoundError, APIError, IllegalArgumentError
+from pykechain.enums import (
+    Category,
+    ContextGroup,
+    Multiplicity,
+    PropertyType,
+)
+from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
 from pykechain.models import Property
 from pykechain.models.validators import SingleReferenceValidator
 from tests.classes import TestBetamax
@@ -93,6 +98,7 @@ class TestPropertyCreation(TestBetamax):
             PropertyType.CONTEXT_REFERENCES_VALUE,
             PropertyType.STOREDFILE_REFERENCES_VALUE,
             PropertyType.STATUS_REFERENCES_VALUE,
+            PropertyType.SIGNATURE_VALUE,
             PropertyType.USER_REFERENCES_VALUE,
             PropertyType.GEOJSON_VALUE,
             PropertyType.WEATHER_VALUE,
@@ -319,7 +325,7 @@ class TestProperties(TestBetamax):
         # testing
         self.assertEqual(self.prop_model.name, new_name)
         self.assertEqual(self.prop_model.description, initial_description)
-        self.assertEqual(self.prop_model.unit, initial_unit),
+        self.assertEqual(self.prop_model.unit, initial_unit)
 
         # Edit with clearing the values, name and status cannot be cleared
         self.prop_model.edit(name=None, description=None, unit=None)
