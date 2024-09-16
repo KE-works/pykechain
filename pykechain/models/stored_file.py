@@ -4,6 +4,7 @@ import os
 from typing import Any, List, Optional, Union
 
 import requests
+from six import BytesIO
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import StoredFileCategory, StoredFileClassification, StoredFileSize
@@ -146,7 +147,13 @@ class StoredFile(
                 classification, StoredFileClassification, "classification"
             ),
         }
-        files = {"file": open(filepath, "rb")}
+        if filepath and isinstance(filepath, str) and os.path.isfile(filepath):
+            files = {"file": open(filepath, "rb")}
+        elif filepath and isinstance(filepath, (bytes, bytearray, BytesIO)):
+            files = {"file": filepath}
+        else:
+            files = {}
+
         kwargs.update(API_EXTRA_PARAMS[cls.url_upload_name])
         response = client._request(
             method="POST",

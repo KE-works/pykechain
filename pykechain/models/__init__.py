@@ -29,6 +29,7 @@ from .property_reference import (
     StoredFilesReferencesProperty,
     UserReferencesProperty,
     FormReferencesProperty,
+    SignatureProperty,
 )
 from .partset import PartSet
 from .service import Service, ServiceExecution
@@ -73,6 +74,7 @@ property_type_to_class_map = {
     PropertyType.CONTEXT_REFERENCES_VALUE: ContextReferencesProperty,
     PropertyType.STATUS_REFERENCES_VALUE: StatusReferencesProperty,
     PropertyType.STOREDFILE_REFERENCES_VALUE: StoredFilesReferencesProperty,
+    PropertyType.SIGNATURE_VALUE: SignatureProperty,
 }
 
 __all__ = (
@@ -106,6 +108,7 @@ __all__ = (
     "FormReferencesProperty",
     "StatusReferencesProperty",
     "StoredFilesReferencesProperty",
+    "SignatureProperty",
     "AnyProperty",
     "PropertyValueFilter",
     "Notification",

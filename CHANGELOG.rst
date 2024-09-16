@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+UNRELEASED
+----------
+
+* :star: We added the concept of signature property. With this property we handle signature's better and more explicit in KE-chain. Signatures are stored as StoredFiles. (#1467)
+
 v4.13.0 (15AUG24)
 ----------
 * :star: Added the option not to include PDF's inline inside the PDF. The PDF will return a zip with the PDF and all attachments that cannot be put inline inside an attachment folder. (#1448)
