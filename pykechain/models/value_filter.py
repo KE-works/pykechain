@@ -7,7 +7,6 @@ from urllib.parse import unquote
 
 from pykechain.enums import (
     Category,
-    ContextGroup,
     FilterType,
     PropertyType,
     ScopeStatus,
@@ -127,10 +126,10 @@ class PropertyValueFilter(BaseFilter):
             if (
                 property_type
                 in (
-                    PropertyType.BOOLEAN_VALUE,
-                    PropertyType.REFERENCES_VALUE,
-                    PropertyType.ACTIVITY_REFERENCES_VALUE,
-                )
+                PropertyType.BOOLEAN_VALUE,
+                PropertyType.REFERENCES_VALUE,
+                PropertyType.ACTIVITY_REFERENCES_VALUE,
+            )
                 and self.type != FilterType.EXACT
             ):
                 warnings.warn(
@@ -386,7 +385,7 @@ class ScopeFilter(BaseFilter):
 
                 if filter_value is not None:
                     if is_list:
-                        # creata a string with commaseparted prefilters, the first item directly
+                        # create a string with comma separted prefilters, the first item directly
                         # and consequent items with a ,
                         # TODO: refactor to create a list and then join them with a ','
                         if field not in prefilters:
@@ -401,68 +400,5 @@ class ScopeFilter(BaseFilter):
 
             if not found:
                 prefilters.update(f.extra_filter)
-
-        return options
-
-
-class ContextgroupFilter(BaseFilter):
-    """A representation object for a ContextGroup filter.
-
-    There can only be a single context_group prefilter. So no  lists involved.
-
-    :ivar value: the value of the context_group filter, containing a
-        ContextGroup enumeration
-    """
-
-    def __init__(
-        self,
-        context_group: Union[str, ContextGroup],
-    ):
-        """Create ContextgroupFilter instance.
-
-        :var context_group: the value of the context_group filter, containing a
-            ContextGroup enumeration
-        """
-        check_enum(context_group, ContextGroup, "context_group")
-        self.value: ContextGroup = context_group
-
-    @classmethod
-    def parse_options(cls, options: Dict) -> "ContextgroupFilter":
-        """
-        Convert the dict definition of a context_group filter to a list of ContextgroupFilter obj.
-
-        The value_options of the context reference properties looks like:
-
-        ```
-        {
-            "prefilters": {
-                "context_group": "DISCIPLINE"
-            },
-        }
-        ```
-
-        :param options: options dict from a scope reference property or meta dict from a scopes
-            widget.
-        :return: list of ScopeFilter objects
-        :rtype list
-        """
-        filters_dict = options.get(MetaWidget.PREFILTERS, {})
-        for field, value in filters_dict.items():
-            if field == "context_group":
-                return cls(context_group=value)
-
-    @classmethod
-    def write_options(cls, filter: "ContextgroupFilter") -> Dict:
-        """
-        Convert the list of Filter objects to a dict.
-
-        :param filters: List of BaseFilter objects
-        :returns options dict to be used to update the options dict of a property
-        """
-        prefilters = dict()
-        options = {MetaWidget.PREFILTERS: prefilters}
-
-        if filter.value in ContextGroup:
-            prefilters.update({"context_group": str(filter.value)})
 
         return options
