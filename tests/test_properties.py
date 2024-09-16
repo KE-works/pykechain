@@ -559,3 +559,56 @@ class TestPropertiesWithReferenceProperty(TestBetamax):
 
         # tearDown
         copied_ref_property.delete()
+
+
+class TestPropertiesContextReferencesPropertyPrefilters(TestBetamax):
+    def setUp(self):
+        super().setUp()
+
+        self.wheel_model = self.project.model("Wheel")
+        self.bike = self.project.model("Bike")
+
+        self.context_references_property = self.bike.add_property(
+            name=f"__Test context ref property @ {datetime.now()}",
+            property_type=PropertyType.CONTEXT_REFERENCES_VALUE,
+            description="Description of test ref property",
+            unit="no unit",
+        )
+
+    def tearDown(self):
+        self.context_references_property.delete()
+        super().tearDown()
+
+    def test_set_prefilters_no_params(self):
+        self.context_references_property.set_prefilters()
+        self.assertEqual(
+            self.context_references_property._options.get("prefilters", {}), {}
+        )
+
+    def test_set_prefilters_with_prefilters(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.context_references_property.set_prefilters(
+                prefilters={"something": "test"}
+            )
+
+    def test_set_prefilters_with_clear(self):
+        self.context_references_property._options["prefilters"] = {
+            "context_group": ContextGroup.ASSET
+        }
+        self.context_references_property.set_prefilters(clear=True)
+        self.assertEqual(
+            self.context_references_property._options.get("prefilters", {}), {}
+        )
+
+    def test_set_prefilters_with_valid_context_group(self):
+        self.context_references_property.set_prefilters(
+            context_group=ContextGroup.ASSET
+        )
+        filter_option = self.context_references_property._options.get(
+            "prefilters", {}
+        ).get("context_group")
+        self.assertEqual(filter_option, ContextGroup.ASSET)
+
+    def test_set_prefilters_with_invalid_context_group(self):
+        with self.assertRaises(IllegalArgumentError):
+            self.context_references_property.set_prefilters(context_group="invalid")

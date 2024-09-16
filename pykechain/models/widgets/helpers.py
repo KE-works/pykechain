@@ -412,6 +412,7 @@ def _check_prefilters(
     :raises IllegalArgumentError: when the type of the input is provided incorrect.
     """
     if isinstance(prefilters, dict):
+        from pykechain.models import Property
         property_models: List[Property, str] = prefilters.get(
             MetaWidget.PROPERTY_MODELS, []
         )  # noqa

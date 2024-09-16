@@ -3,8 +3,14 @@ import urllib
 import warnings
 from abc import abstractmethod
 from typing import Any, Dict, List, Optional, Union
+from urllib.parse import unquote
 
-from pykechain.enums import Category, FilterType, PropertyType, ScopeStatus
+from pykechain.enums import (
+    Category,
+    FilterType,
+    PropertyType,
+    ScopeStatus,
+)
 from pykechain.exceptions import IllegalArgumentError, NotFoundError
 from pykechain.models.input_checks import (
     check_base,
@@ -75,7 +81,7 @@ class PropertyValueFilter(BaseFilter):
 
         self.id = property_model_id
         if isinstance(value, str):
-            self.value = urllib.parse.unquote(value)
+            self.value = unquote(value)
         else:
             self.value = value
         self.type = filter_type
@@ -113,9 +119,7 @@ class PropertyValueFilter(BaseFilter):
 
         if prop.category != Category.MODEL:
             raise IllegalArgumentError(
-                'Property value filters can only be set on Property models, received "{}".'.format(
-                    prop
-                )
+                f'Property value filters can only be set on Property models, received "{prop}".'
             )
         else:
             property_type = prop.type
@@ -190,9 +194,10 @@ class PropertyValueFilter(BaseFilter):
     @classmethod
     def parse_options(cls, options: Dict) -> List["PropertyValueFilter"]:
         """
-        Convert the dict & string-based definition of a property value filter to a list of PropertyValueFilter objects.
+        Convert dict and string filters to PropertyValueFilter objects.
 
-        :param options: options dict from a multi-reference property or meta dict from a filtered grid widget.
+        :param options: options dict from a multi-reference property or meta dict from a filtered
+            grid widget.
         :return: list of PropertyValueFilter objects
         :rtype list
         """
@@ -235,7 +240,8 @@ class ScopeFilter(BaseFilter):
     :ivar tag: string
     """
 
-    # map between KE-chain field and Pykechain attribute, and whether the filter is stored as a list (cs-string)
+    # map between KE-chain field and Pykechain attribute, and whether the filter is stored as a
+    # list (cs-string)
     MAP = [
         ("name__icontains", "name", False),
         ("status__in", "status", False),
@@ -325,9 +331,10 @@ class ScopeFilter(BaseFilter):
     @classmethod
     def parse_options(cls, options: Dict) -> List["ScopeFilter"]:
         """
-        Convert the dict & string-based definition of a scope filter to a list of ScopeFilter objects.
+        Convert the dict & string-based definition of a scope filter to a list of ScopeFilter obj.
 
-        :param options: options dict from a scope reference property or meta dict from a scopes widget.
+        :param options: options dict from a scope reference property or meta dict from a scopes
+            widget.
         :return: list of ScopeFilter objects
         :rtype list
         """
@@ -377,8 +384,8 @@ class ScopeFilter(BaseFilter):
 
                 if filter_value is not None:
                     if is_list:
-                        # creata a string with commaseparted prefilters, the first item directly and
-                        # consequent items with a ,
+                        # create a string with comma separted prefilters, the first item directly
+                        # and consequent items with a ,
                         # TODO: refactor to create a list and then join them with a ','
                         if field not in prefilters:
                             prefilters[field] = filter_value
