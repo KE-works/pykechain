@@ -179,6 +179,12 @@ class TestStoredFilesDownload(TestStoredFilesBaseTestCase):
             self.assertEqual(image.height, 105)
             self.assertEqual(image.format, "JPEG")
 
+    def test_upload_and_download_of_json_file(self):
+        with temp_chdir() as target_dir:
+            the_json = {"foo": "bar", "hello": "world"}
+            self.stored_pdf_file._upload_json(content=the_json)
+            downloaded_json = self.stored_pdf_file.json_load()
+            self.assertDictEqual(the_json, downloaded_json)
 
 class TestStoredFilesUpload(TestStoredFilesBaseTestCase):
     def setUp(self):
