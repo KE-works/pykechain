@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-UNRELEASED
+v4.15.0 (14NOV24)
 ----------
 * :star: We added a `json_load()` method on the `StoredFile` to be compatible with the same interface as the attachment property. (#1485)
 
