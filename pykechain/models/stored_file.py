@@ -263,7 +263,7 @@ class StoredFile(
 
     def _download(self, size: StoredFileSize = StoredFileSize.SOURCE, **kwargs):
         """
-        Downloads the file with an optional image size and returns the file as file object.
+        Download the file as file object with an optional image size.
 
         Detects whether the content type falls under predefined image mime types and manages URL
         accordingly. Raises APIError if the download fails.
