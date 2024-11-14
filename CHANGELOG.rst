@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+UNRELEASED
+----------
+* :star: We added a `json_load()` method on the `StoredFile` to be compatible with the same interface as the attachment property.
+
 v4.14.0 (20SEP24)
 -----------------
 * :star: We added the concept of the `Signature` property. With this property we handle signature's better and more explicit in KE-chain. Signatures are stored as `StoredFiles` in the backend. (#1467)

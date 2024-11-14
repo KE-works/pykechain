@@ -1321,6 +1321,7 @@ class StoredFileSize(Enum):
     :cvar L: L (1024, None)
     :cvar XL: XL (2048, None)
     :cvar FULL_SIZE: full_size
+    :cvar SOURCE: source file
     """
 
     XS = "XS"
@@ -1329,6 +1330,7 @@ class StoredFileSize(Enum):
     L = "L"
     XL = "XL"
     FULL_SIZE = "full_size"
+    SOURCE = "source"
 
 
 class FormCategory(Enum):

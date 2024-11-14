@@ -258,18 +258,46 @@ class StoredFile(
         """
         filename = filename or os.path.join(os.getcwd(), self.filename)
         with open(filename, "w+b") as f:
-            for chunk in self._download(size=size, **kwargs):
+            for chunk in self._download(size=size, stream=True, **kwargs):
                 f.write(chunk)
 
-    def _download(self, size: StoredFileSize.FULL_SIZE, **kwargs):
+    def _download(self, size: StoredFileSize = StoredFileSize.SOURCE, **kwargs):
+        """
+        Downloads the file with an optional image size and returns the file as file object.
+
+        Detects whether the content type falls under predefined image mime types and manages URL
+        accordingly. Raises APIError if the download fails.
+        When the file is not an image the 'source' file will be donwloaded. If the image
+        size is not specified the full size image will be downloaded.
+
+        :param size: Specifies the size of the file to be downloaded based
+        :param kwargs: Additional keyword arguments
+        :return: Response object of the download request as file descriptor
+        :raises APIError: If the download request does not succeed
+        """
         if self.content_type in predefined_mimes["image/*"]:
             url = self.file.get(size, "full_size")
         else:
             url = self.file.get("source")
 
-        response = requests.get(url)
+        # handle kwargs
+        request_params = dict()
+        do_stream = kwargs.pop("stream", False)
+        if kwargs:
+            request_params.update(**kwargs)
+
+        response = requests.get(url, params=request_params, stream=do_stream)
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
             raise APIError("Could not download property value.", response=response)
 
         return response
+
+    def json_load(self):
+        """Download the data from the storedfile and deserialise the contained json.
+
+        :return: deserialised json data as :class:`dict`
+        :raises APIError: When unable to retrieve the json from KE-chain
+        :raises JSONDecodeError: When there was a problem in deserialising the json
+        """
+        return self._download(size=StoredFileSize.SOURCE, stream=False).json()
