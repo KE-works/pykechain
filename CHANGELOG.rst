@@ -1,8 +1,12 @@
 Change Log
 ==========
 
-v4.15.0 (14NOV24)
+UNRELEASED
 ----------
+* :star: Add the possibility to add a prefilter option to the context reference property. It will be stored in the prefilter section of the value options of a the reference property.
+
+v4.15.0 (14NOV24)
+-----------------
 * :star: We added a `json_load()` method on the `StoredFile` to be compatible with the same interface as the attachment property. (#1485)
 
 v4.14.0 (20SEP24)
@@ -33,7 +37,6 @@ v4.10.0 (5MAR24)
 * :+1: Added functions to handle `StoredFileReferenceProperty`. The behaviour is consistent to the one for the `AttachmentProperty` to facilitate conversion. (#1361)
 * :+1: Added python tests for 3.12. (#1389)
 * :+1: dependent versions for development: tox (4.12.1), flake8 (7.0.0), jsonschema (4.21.1), importlib-metadata (7.0.1), mypy (1.8.0), pytest (8.1.0), coverage (7.4.3), pre-commit (3.6.2), pytz (2024.1), pytest-xdist (3.5.0), semver (3.0.2), Pillow (10.2.0)
-
 
 v4.9.0 (28SEP23)
 ----------------

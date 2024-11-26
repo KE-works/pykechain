@@ -3,6 +3,7 @@ from typing import Any, List, Optional, Union
 
 from pykechain.defaults import PARTS_BATCH_LIMIT
 from pykechain.enums import (
+    ContextGroup,
     ScopeReferenceColumns,
     StoredFileCategory,
     StoredFileClassification,
@@ -15,6 +16,7 @@ from pykechain.models.base_reference import (
 )
 from pykechain.models.context import Context
 from pykechain.models.form import Form
+from pykechain.models.input_checks import check_enum
 from pykechain.models.stored_file import StoredFile
 from pykechain.models.value_filter import ScopeFilter
 from pykechain.models.workflow import Status
@@ -225,6 +227,38 @@ class ContextReferencesProperty(_ReferencePropertyInScope):
     """
 
     REFERENCED_CLASS = Context
+
+    def set_prefilters(
+        self,
+        prefilters: Optional = None,
+        clear: Optional[bool] = False,
+        context_group: Optional[ContextGroup] = None,
+    ) -> None:
+        """
+        Set pre-filters on the Context reference property.
+
+        On the Context only a context_group prefilter can be set to a single ContextGroup.
+
+        :param prefilters: Not used
+        :param clear: whether all existing pre-filters should be cleared. (default = False)
+        :param context_group: An optional ContextGroup to prefilter on. One single prefilter is
+            allowed.
+
+        :return: None
+        """
+        prefilters_dict = self._options.get("prefilters", dict())
+        if prefilters:
+            raise IllegalArgumentError(
+                "`prefilters` argument is unused. Use `context_group` instead."
+            )
+        if clear:
+            prefilters_dict = dict()
+        if context_group:
+            context_group = check_enum(context_group, ContextGroup, "context_group")
+            prefilters_dict = {"context_group": context_group}
+
+        if context_group or clear:
+            self._options.update({"prefilters": prefilters_dict})
 
     def _retrieve_objects(self, **kwargs) -> List[Context]:
         """
