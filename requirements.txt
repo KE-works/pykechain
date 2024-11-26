@@ -12,10 +12,11 @@ semver==3.0.2
 pytest==8.3.3
 pytest-xdist[psutil]==3.6.1
 betamax==0.9.0
-coverage~=7.6.1  # pinned to <7 as coveralls is preventing v7 for coverage
-pytest-cov==5.0.0
+
+coverage~=7.6.8  # pinned to <7 as coveralls is preventing v7 for coverage
+pytest-cov==6.0.0
 coveralls==4.0.1
-Pillow==10.4.0
+Pillow==11.0.0
 
 # documentation
 Sphinx==7.2.6; python_version >= '3.9'
@@ -23,14 +24,14 @@ Sphinx~=7.1.2; python_version <= '3.8'
 nbsphinx==0.9.5
 
 # integration
-tox==4.18.1
+tox==4.23.2
 
 # code style
 flake8==7.1.1
 importlib-metadata==8.5.0
 pydocstyle==6.3.0
-mypy==1.11.2; python_version >= '3.4'
-pre-commit==3.8.0
+mypy==1.13.0; python_version >= '3.4'
+pre-commit==4.0.1
 
 # for package management (uploads)
 twine~=5.1; python_version >= '3.7'
