@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterable, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, TypeVar, Union
 
 import requests
 from jsonschema import validate
@@ -138,9 +138,9 @@ class Property(BaseInScope):
     @classmethod
     def set_bulk_update(cls, value):
         """Set global class attribute to toggle the use of bulk-updates of properties."""
-        assert isinstance(
-            value, bool
-        ), f"`bulk_update` must be set to a boolean, not {type(value)}"
+        assert isinstance(value, bool), (
+            f"`bulk_update` must be set to a boolean, not {type(value)}"
+        )
         cls._USE_BULK_UPDATE = value
 
     @property
@@ -365,6 +365,21 @@ class Property(BaseInScope):
             return list(zip(self._validation_results, self._validation_reasons))
         else:
             return self._validation_results
+
+    def has_validator(self, validator_klass: Type[PropertyValidator]) -> Optional[bool]:
+        """
+        Check if any validator matches the given class.
+
+        :param validator_klass: The class of the validator to check.
+        :type validator_klass: Type[PropertyValidator]
+        :return: True if a matching validator exists, False otherwise, or None if no validators are set.
+        :rtype: bool or None
+        """
+        if not self._validators:
+            return None
+        return any(
+            isinstance(validator, validator_klass) for validator in self._validators
+        )
 
     @property
     def representations(self):
