@@ -1,6 +1,7 @@
 from pykechain.models.widgets.widget import Widget
 from pykechain.models.widgets.widget_schemas import undefined_meta_schema
 
+
 # UNDEFINED
 # PROPERTYGRID
 # SUPERGRID
@@ -72,6 +73,10 @@ class TasknavigationbarWidget(Widget):
 
 
 class HtmlWidget(Widget):
+    """HTML Widget."""
+
+
+class MarkdownWidget(Widget):
     """HTML Widget."""
 
 
