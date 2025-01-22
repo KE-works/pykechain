@@ -368,7 +368,10 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
         if self.has_validator(SingleReferenceValidator):
             self.value = [new_stored_file]
         else:
-            self.value = self.value + [new_stored_file] if self.value else [new_stored_file]
+            self.value = (
+                self.value + [new_stored_file] if self.value else [new_stored_file]
+            )
+
 
 class SignatureProperty(_ReferenceProperty):
     """A virtual object representing a KE-chain StoredFile References property."""
