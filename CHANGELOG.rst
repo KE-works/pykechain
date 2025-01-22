@@ -4,7 +4,7 @@ Change Log
 UNRELEASED
 ----------
 * :star: Add the possibility to add a prefilter option to the context reference property. It will be stored in the prefilter section of the value options of a the reference property.
-* :+1: When the multi-attachment property (`StoredFileReferenceProperty`) is configured to only take a single 'reference' using a `SingleReferenceValidator`, then an upload to this property should replace the value instead of append the value. ()
+* :+1: When the multi-attachment property (`StoredFileReferenceProperty`) is configured to only take a single 'reference' using a `SingleReferenceValidator`, then an upload to this property should replace the value instead of append the value. (#1500)
 
 v4.15.0 (14NOV24)
 -----------------
