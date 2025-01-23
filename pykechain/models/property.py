@@ -366,17 +366,15 @@ class Property(BaseInScope):
         else:
             return self._validation_results
 
-    def has_validator(self, validator_klass: Type[PropertyValidator]) -> Optional[bool]:
+    def has_validator(self, validator_klass: Type[PropertyValidator]) -> bool:
         """
         Check if any validator matches the given class.
 
         :param validator_klass: The class of the validator to check.
         :type validator_klass: Type[PropertyValidator]
-        :return: True if a matching validator exists, False otherwise, or None if no validators are set.
-        :rtype: bool or None
+        :return: True if a matching validator exists, False otherwise.
+        :rtype: bool
         """
-        if not self._validators:
-            return None
         return any(
             isinstance(validator, validator_klass) for validator in self._validators
         )
