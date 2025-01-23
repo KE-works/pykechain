@@ -218,12 +218,10 @@ activity_root_name_by_classification = {
 class WidgetNames(Enum):
     """The various Names of the Widget that can be configured.
 
-    .. versionchanged:: 3.14
-       Added FORMMETAPANEL for KE-chain versions >= v2021.10
-
     :cvar SUPERGRIDWIDGET: superGridWidget
     :cvar PROPERTYGRIDWIDGET: propertyGridWidget
     :cvar HTMLWIDGET: htmlWidget
+    :cvar MARKDOWNWIDGET: markdownWidget
     :cvar FILTEREDGRIDWIDGET: filteredGridWidget
     :cvar SERVICEWIDGET: serviceWidget
     :cvar NOTEBOOKWIDGET: notebookWidget
@@ -248,6 +246,7 @@ class WidgetNames(Enum):
     SUPERGRIDWIDGET = "superGridWidget"
     PROPERTYGRIDWIDGET = "propertyGridWidget"
     HTMLWIDGET = "htmlWidget"
+    MARKDOWNWIDGET = "markdownWidget"
     FILTEREDGRIDWIDGET = "filteredGridWidget"
     SERVICEWIDGET = "serviceWidget"
     NOTEBOOKWIDGET = "notebookWidget"
@@ -278,6 +277,7 @@ class WidgetTypes(Enum):
     :cvar PROPERTYGRID: Propertygrid widget
     :cvar SUPERGRID: Supergrid widget
     :cvar HTML: Html widget
+    :cvar MARKDOWN: Markdown widget
     :cvar FILTEREDGRID: Filteredgrid widget
     :cvar SERVICE: Service widget
     :cvar NOTEBOOK: Notebook widget
@@ -304,6 +304,7 @@ class WidgetTypes(Enum):
     PROPERTYGRID = "PROPERTYGRID"
     SUPERGRID = "SUPERGRID"
     HTML = "HTML"
+    MARKDOWN = "MARKDOWN"
     FILTEREDGRID = "FILTEREDGRID"
     SERVICE = "SERVICE"
     NOTEBOOK = "NOTEBOOK"
@@ -331,6 +332,7 @@ WidgetCompatibleTypes = {
     WidgetNames.SUPERGRIDWIDGET: WidgetTypes.SUPERGRID,
     WidgetNames.PROPERTYGRIDWIDGET: WidgetTypes.PROPERTYGRID,
     WidgetNames.HTMLWIDGET: WidgetTypes.HTML,
+    WidgetNames.MARKDOWNWIDGET: WidgetTypes.MARKDOWN,
     WidgetNames.FILTEREDGRIDWIDGET: WidgetTypes.FILTEREDGRID,
     WidgetNames.SERVICEWIDGET: WidgetTypes.SERVICE,
     WidgetNames.NOTEBOOKWIDGET: WidgetTypes.NOTEBOOK,
@@ -374,9 +376,6 @@ class ActivityStatus(Enum):
 class ScopeStatus(Enum):
     """The various status of a scope.
 
-    .. versionchanged:: 3.0
-      The `TEMPLATE` ScopeStatus is deprecated in KE-chain 3
-
     :cvar ACTIVE: Status of a scope is active (default)
     :cvar CLOSED: Status of a scope is closed
     :cvar TEMPLATE: Status of a scope is a template (not actively used)(deprecated in KE-chain 3.0)
@@ -391,8 +390,6 @@ class ScopeStatus(Enum):
 
 class ScopeCategory(Enum):
     """The various categories of a scope.
-
-    .. versionadded::3.0
 
     :cvar LIBRARY_SCOPE: The scope is a library scope
     :cvar USER_SCOPE: The scope is a normal user scope
@@ -442,6 +439,7 @@ class ServiceEnvironmentVersion(Enum):
     PYTHON_3_10 = "3.10"  # unsupported
     PYTHON_3_11 = "3.11"  # unsupported
     PYTHON_3_12 = "3.12"  # default
+    PYTHON_3_13 = "3.13"  # default
     PYTHON_3_6_NOTEBOOKS = "3.6_notebook"  # unsupported
     PYTHON_3_8_NOTEBOOKS = "3.8_notebook"  # unsupported
     PYTHON_3_9_NOTEBOOKS = "3.9_notebook"  # unsupported
