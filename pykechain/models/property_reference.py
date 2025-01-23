@@ -18,6 +18,7 @@ from pykechain.models.context import Context
 from pykechain.models.form import Form
 from pykechain.models.input_checks import check_enum
 from pykechain.models.stored_file import StoredFile
+from pykechain.models.validators import SingleReferenceValidator
 from pykechain.models.value_filter import ScopeFilter
 from pykechain.models.workflow import Status
 from pykechain.utils import get_in_chunks, uniquify
@@ -357,14 +358,21 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
         :raises OSError: When the path to the file is incorrect or file could not be found
         """
         filename = os.path.basename(data)
-        stored_file = self._client.create_stored_file(
+        new_stored_file = self._client.create_stored_file(
             name=filename,
             scope=self.scope,
             classification=StoredFileClassification.SCOPED,
             category=StoredFileCategory.REFERENCED,
             filepath=data,
         )
-        self.value = self.value + [stored_file] if self.value else [stored_file]
+        if self.has_validator(SingleReferenceValidator):
+            # we want to replace value
+            self.value = [new_stored_file]
+        else:
+            if self.value:
+                self.value.append(new_stored_file)
+            else:
+                self.value = [new_stored_file]
 
 
 class SignatureProperty(_ReferenceProperty):
