@@ -366,11 +366,13 @@ class StoredFilesReferencesProperty(_ReferenceProperty):
             filepath=data,
         )
         if self.has_validator(SingleReferenceValidator):
+            # we want to replace value
             self.value = [new_stored_file]
         else:
-            self.value = (
-                self.value + [new_stored_file] if self.value else [new_stored_file]
-            )
+            if self.value:
+                self.value.append(new_stored_file)
+            else:
+                self.value = [new_stored_file]
 
 
 class SignatureProperty(_ReferenceProperty):
