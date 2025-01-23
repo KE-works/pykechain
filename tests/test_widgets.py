@@ -653,18 +653,15 @@ class TestWidgetManagerInActivity(TestBetamax):
         self.assertEqual(service_gears_successful.name, widget1.title_visible)
 
     def test_add_html_widget(self):
-        widget_1 = self.wm.add_html_widget(
-            html="Or is this just fantasy?", title="Is this the real life?"
-        )
+        widget_1 = self.wm.add_markdown_widget(markdown="Or is this just fantasy?",
+                                               title="Is this the real life?")
 
         self.assertIsInstance(widget_1, HtmlWidget)
         self.assertEqual(len(self.wm), 1 + 1)
 
-        widget_2 = self.wm.add_html_widget(
-            title="Caught in a landslide",
-            show_title_value=WidgetTitleValue.NO_TITLE,
-            html="No escape from reality",
-        )
+        widget_2 = self.wm.add_markdown_widget(markdown="No escape from reality",
+                                               title="Caught in a landslide",
+                                               show_title_value=WidgetTitleValue.NO_TITLE)
 
         self.assertEqual(widget_2.ref, slugify_ref("Caught in a landslide"))
 
@@ -768,9 +765,8 @@ class TestWidgetManagerInActivity(TestBetamax):
             title="Multi column widget"
         )
 
-        child_widget = self.wm.add_html_widget(
-            title="Text widget", html="Text", parent_widget=multi_column_widget
-        )
+        child_widget = self.wm.add_markdown_widget(markdown="Text", title="Text widget",
+                                                   parent_widget=multi_column_widget)
 
         parent_widget = child_widget.parent()
 

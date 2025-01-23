@@ -1074,6 +1074,48 @@ class WidgetsManager(Iterable):
         )
         return widget
 
+    def add_markdown_widget(
+        self,
+        markdown: Optional[str],
+        title: TITLE_TYPING = None,
+        parent_widget: Optional[Union[Widget, str]] = None,
+        **kwargs,
+    ) -> Widget:
+        """
+        Add a KE-chain HTML widget to the widget manager.
+
+        The widget will be saved to KE-chain.
+
+        :param markdown: The text that will be shown by the widget.
+        :type markdown: basestring or None
+        :param title: A custom title for the text panel::
+            * None (default): No title
+            * String value: Custom title
+        :type title: basestring or None
+        :param parent_widget: (O) parent of the widget for Multicolumn and Multirow widget.
+        :type parent_widget: Widget or basestring or None
+        :param kwargs: additional keyword arguments to pass
+        :return: newly created widget
+        :rtype: Widget
+        :raises IllegalArgumentError: when incorrect arguments are provided
+        :raises APIError: When the widget could not be created.
+        """
+        check_text(markdown, "markdown")
+
+        meta = _initiate_meta(kwargs, activity=self.activity)
+        meta, title = _set_title(meta, title=title, **kwargs)
+
+        meta["markdownContent"] = markdown
+
+        widget = self.create_widget(
+            widget_type=WidgetTypes.MARKDOWN,
+            title=title,
+            meta=meta,
+            parent=parent_widget,
+            **kwargs,
+        )
+        return widget
+
     def add_notebook_widget(
         self,
         notebook: "Service",

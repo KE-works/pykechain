@@ -4,6 +4,7 @@ Change Log
 UNRELEASED
 ----------
 * :star: Add the possibility to add a prefilter option to the context reference property. It will be stored in the prefilter section of the value options of a the reference property.
+* :star: We added support for the Markdown Widget in pykechain. (#1499)
 
 v4.15.0 (14NOV24)
 -----------------
