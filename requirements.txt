@@ -28,7 +28,7 @@ tox==4.23.2
 
 # code style
 flake8==7.1.1
-importlib-metadata==8.5.0
+importlib-metadata==8.6.1
 pydocstyle==6.3.0
 mypy==1.14.1; python_version >= '3.4'
 pre-commit==4.0.1
