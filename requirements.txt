@@ -37,4 +37,4 @@ pre-commit==4.1.0
 twine~=6.1; python_version >= '3.7'
 twine~=3.0; python_version <= '3.6'
 
-pytz==2024.2
+pytz==2025.2
