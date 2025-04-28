@@ -297,20 +297,6 @@ class Client:
         """
         return urljoin(self.api_root, API_PATH[resource].format(**kwargs))
 
-    def _retrieve_users(self) -> List[Dict]:
-        """
-        Retrieve user objects of the entire administration.
-
-        :return: list of dictionary with users information
-        :rtype: list(dict)
-        -------
-
-        """
-        users_url = self._build_url("users")
-        response = self._request("GET", users_url)
-        users = response.json()
-        return users
-
     def _request(self, method: str, url: str, **kwargs) -> requests.Response:
         """Perform the request on the API.
 

@@ -36,6 +36,7 @@ from pykechain.models.service import Service, ServiceExecution
 from pykechain.models.sidebar.sidebar_manager import SideBarManager
 from pykechain.models.tags import TagsMixin
 from pykechain.models.team import Team
+from pykechain.models.user import User
 from pykechain.models.validators.validator_schemas import scope_project_info_jsonschema
 from pykechain.models.workflow import Workflow
 from pykechain.typing import ObjectID
@@ -225,18 +226,14 @@ class Scope(Base, TagsMixin):
         role = check_enum(role, ScopeRoles, "role")
         user = check_text(user, "user")
 
-        users: List[Dict] = self._client._retrieve_users()["results"]
-        user_object: Dict = find(users, lambda u: u["username"] == user)
-        if user_object is None:
-            raise NotFoundError(f'User "{user}" does not exist')
-
+        retrieved_user: User = self._client.user(username=user["username"])
         url = self._client._build_url(f"scope_{action}_{role}", scope_id=self.id)
 
         response = self._client._request(
             "PUT",
             url,
             params=API_EXTRA_PARAMS[self.__class__.__name__.lower()],
-            data={"user_id": user_object["pk"]},
+            data={"user_id": retrieved_user.id},
         )
 
         if response.status_code != requests.codes.ok:  # pragma: no cover
