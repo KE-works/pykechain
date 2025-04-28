@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+UNRELEASED
+-----------------
+* :star: Replace suboptimal `_retrieve_users` method from client. (KE-5237)
+
 v4.16.0 (23JAN25)
 -----------------
 * :star: Add the possibility to add a prefilter option to the context reference property. It will be stored in the prefilter section of the value options of a the reference property.
