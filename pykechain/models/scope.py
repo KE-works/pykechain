@@ -15,7 +15,7 @@ from pykechain.enums import (
     ScopeStatus,
     SubprocessDisplayMode,
 )
-from pykechain.exceptions import APIError, IllegalArgumentError, NotFoundError
+from pykechain.exceptions import APIError, IllegalArgumentError
 from pykechain.models.activity import Activity
 from pykechain.models.base import Base
 from pykechain.models.context import Context
@@ -40,7 +40,7 @@ from pykechain.models.user import User
 from pykechain.models.validators.validator_schemas import scope_project_info_jsonschema
 from pykechain.models.workflow import Workflow
 from pykechain.typing import ObjectID
-from pykechain.utils import Empty, clean_empty_values, empty, find, is_uuid, parse_datetime
+from pykechain.utils import Empty, clean_empty_values, empty, is_uuid, parse_datetime
 
 
 class Scope(Base, TagsMixin):
@@ -384,7 +384,7 @@ class Scope(Base, TagsMixin):
                 scope_project_info_jsonschema,
                 "project_info",
             )
-            or [],
+                            or [],
         }
 
         if kwargs:  # pragma: no cover
