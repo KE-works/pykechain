@@ -4,6 +4,7 @@ Change Log
 UNRELEASED
 -----------------
 * :star: Replace suboptimal `_retrieve_users` method from client. (KE-5237)
+: fixing -tests
 
 v4.16.0 (23JAN25)
 -----------------
