@@ -1,10 +1,9 @@
 Change Log
 ==========
 
-UNRELEASED
+v4.16.1 (30APR25)
 -----------------
-* :star: Replace suboptimal `_retrieve_users` method from client. (KE-5237)
-: fixing -tests
+* :star: Streamlined assignment of members to a scope.
 
 v4.16.0 (23JAN25)
 -----------------
