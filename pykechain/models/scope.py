@@ -214,7 +214,7 @@ class Scope(Base, TagsMixin):
         """
         Update the Project Team of the Scope. Updates include addition or removing of managers or members.
 
-        :param action: type of action to be applied
+        :param action: type of action to be appliede
         :type action: ScopeMemberActions
         :param role: type of role to be applied to the user
         :type role: ScopeRoles
@@ -224,9 +224,9 @@ class Scope(Base, TagsMixin):
         """
         action = check_enum(action, ScopeMemberActions, "action")
         role = check_enum(role, ScopeRoles, "role")
-        user = check_text(user, "user")
+        user = check_text(user, "user")  # this is a username, not a user object
 
-        retrieved_user: User = self._client.user(username=user["username"])
+        retrieved_user: User = self._client.user(username=user)
         url = self._client._build_url(f"scope_{action}_{role}", scope_id=self.id)
 
         response = self._client._request(
