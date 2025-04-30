@@ -383,8 +383,7 @@ class Scope(Base, TagsMixin):
                 project_info,
                 scope_project_info_jsonschema,
                 "project_info",
-            )
-                            or [],
+            ) or [],
         }
 
         if kwargs:  # pragma: no cover
