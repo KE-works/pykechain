@@ -21,7 +21,7 @@ Pillow==11.2.1
 # documentation
 Sphinx==7.2.6; python_version >= '3.9'
 Sphinx~=7.1.2; python_version <= '3.8'
-nbsphinx==0.9.6
+nbsphinx==0.9.7
 
 # integration
 tox==4.24.1
