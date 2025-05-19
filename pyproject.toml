@@ -54,6 +54,7 @@ test = [
     "pytest",
     "betamax",
     "pytest-xdist",
+    "Pillow",
 ]
 docs = [
     "sphinx",
