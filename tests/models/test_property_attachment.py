@@ -50,7 +50,7 @@ class TestAttachment(TestBetamax):
     def test_retrieve_value(self):
         self.assertIsNone(self.property.value)
 
-        self.property.upload(self.project_root + "/requirements.txt")
+        self.property.upload(self.project_root + "/LICENSE")
 
         self.assertIsNotNone(self.property.value)
 
@@ -63,7 +63,7 @@ class TestAttachment(TestBetamax):
             self.property.value = "String must be a filepath"
 
     def test_upload(self):
-        self.property.upload(self.project_root + "/requirements.txt")
+        self.property.upload(self.project_root + "/LICENSE")
 
         requirements = self.project_root + "/requirements.txt"
         self.property.upload(requirements)
@@ -71,7 +71,7 @@ class TestAttachment(TestBetamax):
     # 1.11.1
     def test_clear_an_attachment_property(self):
         # setUp
-        self.property.upload(self.project_root + "/requirements.txt")
+        self.property.upload(self.project_root + "/LICENSE")
 
         # testing
         self.assertTrue(self.property.has_value())
@@ -82,14 +82,14 @@ class TestAttachment(TestBetamax):
 
     def test_retrieve_filename_from_value(self):
         # setUp
-        self.property.upload(self.project_root + "/requirements.txt")
+        self.property.upload(self.project_root + "/LICENSE")
 
         # testing
         self.assertEqual(self.property.filename, "requirements.txt")
 
     def test_has_value_true(self):
         # setUp
-        self.property.upload(self.project_root + "/requirements.txt")
+        self.property.upload(self.project_root + "/LICENSE")
 
         # testing
         self.assertTrue(self.property.has_value())
