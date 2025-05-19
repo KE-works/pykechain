@@ -4,7 +4,6 @@
 requests>=2.20.0
 envparse
 typing
-six
 jsonschema
 semver==3.0.4
 pytz
@@ -17,3 +16,6 @@ pytest-xdist[psutil]
 coverage
 betamax
 Pillow
+
+# Used by documentation generation
+requests-mock

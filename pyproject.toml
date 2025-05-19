@@ -1,0 +1,136 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel", "setuptools-scm>=6.2"]
+build-backend = "setuptools.build_meta"
+backend-path = ["."] # Ensures setup.py can be found if still needed for dynamic metadata via setuptools_scm or __about__
+
+[project]
+name = "pykechain"
+# Version will be handled by setuptools-scm
+description = "pykechain is a an open source Python API to KE-chain." # This can also be dynamic
+readme = "README.rst"
+requires-python = ">=3.7"
+license = { file = "LICENSE" }
+keywords = ["python", "api", "rest", "sdk", "KE-chain"]
+authors = [
+    { name = "KE-works", email = "info@ke-works.com" }, # Extracted from setup.py's author/email
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Scientific/Engineering",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+]
+
+dependencies = [
+    "requests>=2.20.0",
+    "envparse",
+    # "typing", # Not needed for Python 3.7+ as a dependency
+    "six",      # Consider removing if project is fully Python 3 and no longer needs six
+    "jsonschema",
+    "semver>=2.10.0",
+    "pytz",
+]
+
+dynamic = ["version"] # Version will be supplied by setuptools-scm
+# If you want to keep description and authors dynamic from __about__.py:
+# dynamic = ["version", "description", "authors"]
+
+
+[project.urls]
+Documentation = "https://pykechain.readthedocs.io/en/latest"
+Changelog = "https://github.com/KE-works/pykechain/blob/master/CHANGELOG.rst"
+Source = "https://github.com/KE-works/pykechain/"
+Tracker = "https://github.com/KE-works/pykechain/issues"
+Company Page = "https://ke-chain.com"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "betamax",
+]
+dev = [
+    "pykechain[test]",
+    "ruff",
+    "pre-commit",
+    "tox",
+    "mypy",
+    "build",
+    "twine",
+    "setuptools-scm[toml]>=6.2", # Added to dev to ensure it's available for local versioning
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+# packages = ["pykechain"] # Explicitly list, or use find
+packages = { find = { where = ["src"], exclude = ["tests", "tests.*"] } }
+package-data = { "pykechain" = ["py.typed"] }
+include-package-data = true # Recommended to work with MANIFEST.in or auto-detection
+
+# If you want to keep description and authors dynamic from __about__.py
+# and not use setuptools-scm for versioning (or only partially)
+# [tool.setuptools.dynamic]
+# version = {attr = "pykechain.__about__.version"} # If not using setuptools-scm for version
+# description = {attr = "pykechain.__about__.description"}
+# authors = {attr = "pykechain.__about__.authors_tuple"} # Requires authors_tuple in __about__.py
+
+[tool.setuptools_scm]
+# This tells setuptools-scm to write the version to a file,
+# which your runtime code can then import.
+# This is useful if you need to access __version__ from your code.
+write_to = "src/pykechain/_version.py"
+# Example of how to customize version scheme if needed:
+# version_scheme = "guess-next-dev"
+# local_scheme = "node-and-date"
+
+[tool.ruff]
+# Placeholder - Populate with your existing Ruff config from .pre-commit-config.yaml or ruff.toml
+line-length = 88
+select = ["E", "F", "W", "I", "N", "UP", "ANN", "S", "BLE", "A", "C4", "T20", "SIM", "PT", "PTH", "Q"] # Example based on common defaults
+ignore = ["ANN101", "ANN102", "ANN204", "ANN401"] # Example
+
+# To mimic .pre-commit-config.yaml, you might have:
+# extend-exclude = [".ruff_cache", ".tox", "venv", "build", "dist", ".eggs"]
+
+[tool.mypy]
+# Placeholder - Populate with your existing mypy.ini settings
+python_version = "3.7"
+warn_return_any = true
+warn_unused_configs = true
+# Add other settings from mypy.ini, e.g.:
+# ignore_missing_imports = true
+# exclude = ['venv', '\.tox', 'build']
+
+# If you want to move tox configuration here (tox 4+):
+# [tool.tox]
+# legacy_tox_ini = """
+# [tox]
+# envlist = py37, py38, py39, py310, py311, py312, lint, docs
+# isolated_build = True
+#
+# [testenv]
+# deps =
+#     pytest
+#     betamax
+# commands = pytest
+#
+# [testenv:lint]
+# deps = pre-commit
+# commands = pre-commit run --all-files
+#
+# [testenv:docs]
+# deps = -r{toxinidir}/docs/requirements.txt
+# commands = sphinx-build -b html docs docs/_build/html
+# """ 
