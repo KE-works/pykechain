@@ -3,10 +3,10 @@
 # These requirements are used by the CI tools to install a most basic framework.
 requests>=2.20.0
 envparse
-typing
 jsonschema
 semver==3.0.4
 pytz
+
 
 # These requirements are needed for ci testing
 pytest

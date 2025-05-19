@@ -69,7 +69,7 @@ Now interact with it::
 Installation
 ------------
 
-pykechain is easily installed using pip. ``pykechain`` is Python ``3.7``, ``3.8``, ``3.9``, ``3.10``
+pykechain is easily installed using pip. ``pykechain`` is Python ``3.9``, ``3.10``, ``3.11``, ``3.12``
 and ``pypy3`` compatible::
 
     pip install pykechain
