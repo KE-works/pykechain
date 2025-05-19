@@ -4,7 +4,7 @@ import os
 from typing import Any, List, Optional, Union
 
 import requests
-from six import BytesIO
+from io import BytesIO
 
 from pykechain.defaults import API_EXTRA_PARAMS
 from pykechain.enums import StoredFileCategory, StoredFileClassification, StoredFileSize

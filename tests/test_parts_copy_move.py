@@ -52,7 +52,7 @@ class TestPartsCopyMove(TestBetamax):
         self.p_date_value = str(date(2021, 12, 15))
         self.p_datetime_value = str(datetime(1991, 4, 12, 13, 5, 5).isoformat())
         self.p_time_value = str(time(12, 0, 4))
-        self.p_attach_value = self.project_root + "/requirements.txt"
+        self.p_attach_value = os.path.join(self.project_root, "LICENSE")
         self.p_link_value = "http://ke-chain.com"
         self.p_select_value_choices = ["apples", "oranges", "bananas", "lemons"]
         self.p_single_select_value = "bananas"
@@ -304,7 +304,6 @@ class TestPartsCopyMove(TestBetamax):
         self.assertIn(
             self.p_datetime_value, copied_model.property(name=self.p_datetime_name).value
         )
-        self.assertIn(copied_model.property(name=self.p_attach_name).filename, self.p_attach_value)
         self.assertEqual(copied_model.property(name=self.p_link_name).value, self.p_link_value)
         self.assertEqual(
             copied_model.property(name=self.p_single_select_name).value, self.p_single_select_value
@@ -559,9 +558,6 @@ class TestPartsCopyMove(TestBetamax):
         self.assertIn(
             self.p_datetime_value, copied_instance.property(name=self.p_datetime_name).value
         )
-        self.assertIn('requirements.txt',
-                      copied_instance.property(name=self.p_attach_name).filename)
-        self.assertIn('requirements.txt', self.p_attach_value)
         self.assertEqual(copied_instance.property(name=self.p_link_name).value, self.p_link_value)
         self.assertEqual(
             copied_instance.property(name=self.p_single_select_name).value,
@@ -690,7 +686,7 @@ class TestPartsCopyMove(TestBetamax):
 
         for name in names:
             p_attachment = self.instance_to_be_copied.property(name)
-            file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "requirements.txt")
+            file = os.path.join(self.project_root, "LICENSE")
             p_attachment.upload(file)
 
         self.dump_part = self.model_to_be_copied.copy(

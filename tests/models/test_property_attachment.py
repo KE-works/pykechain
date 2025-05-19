@@ -50,7 +50,7 @@ class TestAttachment(TestBetamax):
     def test_retrieve_value(self):
         self.assertIsNone(self.property.value)
 
-        self.property.upload(self.project_root + "/requirements.txt")
+        self.property.upload(self.project_root + "/LICENSE")
 
         self.assertIsNotNone(self.property.value)
 
@@ -63,15 +63,12 @@ class TestAttachment(TestBetamax):
             self.property.value = "String must be a filepath"
 
     def test_upload(self):
-        self.property.upload(self.project_root + "/requirements.txt")
-
-        requirements = self.project_root + "/requirements.txt"
-        self.property.upload(requirements)
+        self.property.upload(self.project_root + "/LICENSE")
 
     # 1.11.1
     def test_clear_an_attachment_property(self):
         # setUp
-        self.property.upload(self.project_root + "/requirements.txt")
+        self.property.upload(self.project_root + "/LICENSE")
 
         # testing
         self.assertTrue(self.property.has_value())
@@ -82,14 +79,14 @@ class TestAttachment(TestBetamax):
 
     def test_retrieve_filename_from_value(self):
         # setUp
-        self.property.upload(self.project_root + "/requirements.txt")
+        self.property.upload(self.project_root + "/LICENSE")
 
         # testing
-        self.assertEqual(self.property.filename, "requirements.txt")
+        self.assertEqual(self.property.filename, "LICENSE")
 
     def test_has_value_true(self):
         # setUp
-        self.property.upload(self.project_root + "/requirements.txt")
+        self.property.upload(self.project_root + "/LICENSE")
 
         # testing
         self.assertTrue(self.property.has_value())
@@ -102,7 +99,7 @@ class TestAttachment(TestBetamax):
         self.new_wheel = self.root_model.instance().add_with_properties(
             self.part_model,
             "new part",
-            update_dict={self.property_name: self.project_root + "/requirements.txt"},
+            update_dict={self.property_name: self.project_root + "/LICENSE"},
         )
 
     @unittest.skip("Saving the image cannot be executed when recording cassettes")

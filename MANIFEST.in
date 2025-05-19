@@ -7,18 +7,18 @@ include tox.ini
 include mypy.ini
 include .env.template
 include Pipfile
-include pykechain/py.typed
 
+# pykechain/py.typed is handled by package_data in pyproject.toml for wheels
+# and should be included in sdists automatically if it's part of the package.
+
+# To include tests and docs in the sdist (source distribution):
 graft tests
 graft docs
 prune docs/_build
 
-global-exclude *.pyc
-global-exclude .ipynb_checkpoints/*
-exclude *.sh
-exclude requirements-ci.txt
-exclude *-OFF
-exclude *.yml
-exclude *.yaml
-exclude .editorconfig
+# General excludes for sdists
+global-exclude *.py[cod]
+global-exclude __pycache__
+global-exclude .DS_Store
 exclude .secrets.baseline
+exclude .editorconfig

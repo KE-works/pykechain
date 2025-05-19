@@ -4,49 +4,51 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 6
       fail-fast: False
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"] # Updated to match pyproject.toml classifiers
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install basic dependencies
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -U setuptools>=38.6.0 wheel>=0.31.0
-        pip install -r requirements-ci.txt
+        pip install -U setuptools wheel # Ensures latest setuptools and wheel for build step if needed directly
+        pip install .[dev] # Installs pykechain with all dev, test, docs dependencies
 
-    - name: Perform Testing
-      if: matrix.python-version != 3.12
+    - name: Run linters and static analysis
+      if: matrix.python-version == '3.12' # Run on one specific version to save CI time
       run: |
-        pytest -n auto tests
+        ruff check pykechain tests
+        ruff format --check pykechain tests # Optional: if you want to enforce formatting
+        mypy pykechain tests # Adjust paths if you have specific `files` in mypy config
 
-    - name: Check docs and distribution
-      if: matrix.python-version == 3.12
+    - name: Perform Testing (all versions)
       run: |
-        pip install flake8 pydocstyle check-manifest readme_renderer[md] twine>=2.0.0
+        pytest -n auto tests # pytest is installed via .[dev]
 
-        flake8 pykechain --count --show-source --statistics
-        pydocstyle pykechain
-        check-manifest
-        python setup.py bdist_wheel --universal
-        twine check dist/*
+    - name: Build and check distribution
+      if: matrix.python-version == '3.12' # Run on one specific version
+      run: |
+        check-manifest # check-manifest is installed via .[dev]
+        python -m build # build is installed via .[dev]
+        twine check dist/* # twine is installed via .[dev]
 
     - name: Perform coverage tests and upload to coveralls.io
-      if: matrix.python-version == 3.12
+      if: matrix.python-version == '3.12'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
-        pip install -U coveralls>=3.3.1
+        # coverage is installed via .[dev]
         coverage run --source=pykechain -m pytest -n auto tests
-        coveralls
+        coverage xml # Generate XML for coveralls
+        coveralls # Uploads coverage.xml by default

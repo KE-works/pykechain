@@ -74,7 +74,7 @@ class TestPartUpdate(TestBetamax):
         project_root = os.path.dirname(
             os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
         )
-        attachment_path = project_root + "/requirements.txt"
+        attachment_path = project_root + "/LICENSE"
         update_dict = {
             "Picture": attachment_path,
         }
