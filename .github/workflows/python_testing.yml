@@ -9,7 +9,7 @@ jobs:
       max-parallel: 6
       fail-fast: False
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"] # Aligned with pyproject.toml classifiers
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"] # Updated to match pyproject.toml classifiers
 
     steps:
     - uses: actions/checkout@v4
