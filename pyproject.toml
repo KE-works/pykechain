@@ -95,7 +95,6 @@ select = [
 ]
 ignore = [
     "F821", # undefined name (was ignored in flake8)
-    "W503", # line break before binary operator (was ignored in flake8)
     # Pydocstyle ignores from tox.ini translated to Ruff codes:
     "D100", # Missing docstring in public module
     "D105", # Missing docstring in magic method
