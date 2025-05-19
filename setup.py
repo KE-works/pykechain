@@ -89,7 +89,6 @@ setup(
         "requests>=2.20.0",
         "envparse",
         "typing",
-        "six",
         "jsonschema",
         "semver>=2.10.0",
         "pytz",

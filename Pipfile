@@ -10,7 +10,6 @@ jsonschema = ">=3.0.0"
 semver = "*"
 typing = "*"
 pytz = "*"
-six = "*"
 pykechain = {editable = true, path = "."}
 pyOpenSSL = {version="*", markers="python_version <= '2.7'"}
 
