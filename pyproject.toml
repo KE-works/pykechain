@@ -53,6 +53,7 @@ CompanyPage = "https://ke-chain.com"
 test = [
     "pytest",
     "betamax",
+    "pytest-xdist",
 ]
 docs = [
     "sphinx",
