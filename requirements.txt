@@ -1,23 +1,21 @@
-# Production Dependencies (from setup.py)
-requests==2.32.3
-envparse==0.2.0
-jsonschema==4.23.0
-semver==3.0.4
-pytz==2025.2
+# Base dependencies
+requests>=2.20.0
+envparse
+six
+jsonschema
+semver>=2.10.0
+pytz
 
-# Development Dependencies
-matplotlib
-jupyter==1.1.1
-Sphinx>=2.0
-nbsphinx==0.9.7
-Pillow==11.2.1
+# Test dependencies
+pytest
+betamax
 
-# Testing Dependencies
-pytest==8.3.5
-betamax==0.9.0
-flake8==7.2.0
-pydocstyle==6.3.0
-mypy==1.15.0
-twine==6.1.0
-tox==4.25.0
-coverage==7.8.0
+# Documentation dependencies
+sphinx
+sphinx-rtd-theme
+
+# Development dependencies
+ruff
+mypy
+build
+twine

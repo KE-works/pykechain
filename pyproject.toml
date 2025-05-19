@@ -1,0 +1,120 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pykechain"
+description = "pykechain is a an open source Python API to KE-chain."
+readme = "README.rst"
+requires-python = ">=3.7"
+license = { file = "LICENSE" }
+keywords = ["python", "api", "rest", "sdk", "KE-chain"]
+authors = [
+    { name = "KE-works", email = "info@ke-works.com" }
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Scientific/Engineering",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+]
+
+dependencies = [
+    "requests>=2.20.0",
+    "envparse",
+    "six",
+    "jsonschema",
+    "semver>=2.10.0",
+    "pytz",
+]
+
+dynamic = ["version"] # Version will be dynamic
+
+[project.urls]
+Documentation = "https://pykechain.readthedocs.io/en/latest"
+Changelog = "https://github.com/KE-works/pykechain/blob/master/CHANGELOG.rst"
+Source = "https://github.com/KE-works/pykechain/"
+Tracker = "https://github.com/KE-works/pykechain/issues"
+Company Page = "https://ke-chain.com"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "betamax",
+]
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+]
+dev = [
+    "pykechain[test,docs]",
+    "ruff",
+    "mypy",
+    "build",
+    "twine",
+    "check-manifest",
+    "coverage",
+]
+
+[tool.setuptools]
+# For non-src layout: find 'pykechain' package in the current directory.
+# This is similar to find_packages(exclude=["tests", "tests.*"])
+packages = { find = { where=["."], include=["pykechain*"], exclude=["tests*"] } }
+package-data = { "pykechain" = ["py.typed"] } # py.typed file inside the pykechain package
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = { attr = "pykechain.__about__.version" }
+
+[tool.ruff]
+line-length = 120
+# Select Flake8 rules (F) and Pyflakes (F). Add others as desired (e.g., E for pycodestyle errors, W for pycodestyle warnings).
+# Ruff enables many by default. `F821` (undefined name) is covered.
+# `W503` (line break before binary operator) is respected by default if not using Black, or can be added to ignore.
+# For Flake8 compatibility, specific ignores can be listed.
+# Ruff also has its own rule codes.
+select = [
+    "F", "E", "W", # Standard flake8
+    "I", # isort
+    "D", # pydocstyle
+    # Add other categories as you see fit, e.g. "C90" for mccabe complexity
+]
+ignore = [
+    "F821", # undefined name (was ignored in flake8)
+    "W503", # line break before binary operator (was ignored in flake8)
+    # Pydocstyle ignores from tox.ini translated to Ruff codes:
+    "D100", # Missing docstring in public module
+    "D105", # Missing docstring in magic method
+    "D203", # 1 blank line required before class docstring (use D211 instead for consistency if using Black)
+    "D212", # Multi-line docstring summary should start at the first line
+    "D213", # Multi-line docstring summary should start at the second line (conflicts with D212)
+    # "D416", # Section name should end with a semicolon - No direct D416 in Ruff's pydocstyle, check specific rule if needed
+]
+# Ruff discovers pykechain directory automatically.
+# If you need to specify target files/dirs:
+# files = ["pykechain", "tests"] # Adjust if tests dir is also to be linted with same rules
+
+[tool.ruff.pydocstyle]
+# Some pydocstyle rules that don't have direct top-level ignores might be configured here
+# For D416 ("Section name should end with a semicolon"), Ruff's pydocstyle integration follows numpy/google conventions.
+# If specific convention is desired:
+convention = "pep257" # or "google", "numpy" - this can affect D203, D212, D213 interpretation too.
+
+[tool.mypy]
+ignore_missing_imports = true
+strict_optional = true
+# files = ["pykechain", "tests"] # Specify files/dirs to check
+# exclude = ['venv', '\.tox', 'build', 'docs'] # Default exclusions often cover venv 
