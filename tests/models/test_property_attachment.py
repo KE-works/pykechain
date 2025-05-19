@@ -65,9 +65,6 @@ class TestAttachment(TestBetamax):
     def test_upload(self):
         self.property.upload(self.project_root + "/LICENSE")
 
-        requirements = self.project_root + "/requirements.txt"
-        self.property.upload(requirements)
-
     # 1.11.1
     def test_clear_an_attachment_property(self):
         # setUp
@@ -85,7 +82,7 @@ class TestAttachment(TestBetamax):
         self.property.upload(self.project_root + "/LICENSE")
 
         # testing
-        self.assertEqual(self.property.filename, "requirements.txt")
+        self.assertEqual(self.property.filename, "LICENSE")
 
     def test_has_value_true(self):
         # setUp
@@ -102,7 +99,7 @@ class TestAttachment(TestBetamax):
         self.new_wheel = self.root_model.instance().add_with_properties(
             self.part_model,
             "new part",
-            update_dict={self.property_name: self.project_root + "/requirements.txt"},
+            update_dict={self.property_name: self.project_root + "/LICENSE"},
         )
 
     @unittest.skip("Saving the image cannot be executed when recording cassettes")
