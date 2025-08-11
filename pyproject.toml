@@ -1,0 +1,81 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# Project metadata (PEP 621)
+[project]
+name = "pykechain"
+dynamic = ["version"]
+description = "KE-chain Python SDK"
+readme = "README.rst"
+requires-python = ">=3.8"
+license = "Apache-2.0"
+authors = [
+  { name = "KE-works BV", email = "support+pykechain@ke-works.com" }
+]
+keywords = ["python", "api", "rest", "sdk", "KE-chain"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: Scientific/Engineering",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+]
+dependencies = [
+  "requests>=2.20.0",
+  "envparse",
+  "six",
+  "jsonschema",
+  "semver>=2.10.0",
+  "pytz",
+]
+
+[project.urls]
+Documentation = "https://pykechain.readthedocs.io/en/latest"
+Changelog = "https://github.com/KE-works/pykechain/blob/master/CHANGELOG.rst"
+Source = "https://github.com/KE-works/pykechain/"
+Tracker = "https://github.com/KE-works/pykechain/issues"
+"Company Page" = "https://ke-chain.com"
+
+[tool.setuptools.dynamic]
+version = { attr = "pykechain.__about__.version" }
+
+# Match setuptools find_packages(exclude=["tests", "tests.*"]) from setup.py
+[tool.setuptools.packages.find]
+exclude = ["tests", "tests.*"]
+
+# Dependency groups for development and CI
+[tool.uv]
+dev-dependencies = [
+  "pytest",
+  "pytest-xdist[psutil]",
+  "betamax",
+  "coverage",
+  "pytest-cov",
+  "coveralls",
+  "Pillow",
+  "Sphinx==7.2.6; python_version >= '3.9'",
+  "Sphinx~=7.1.2; python_version <= '3.8'",
+  "nbsphinx",
+  "flake8",
+  "importlib-metadata",
+  "pydocstyle",
+  "mypy",
+  "pre-commit",
+  "check-manifest",
+  "readme_renderer[md]",
+]
+
+# Note: uv 0.7.x does not support `[tool.uv.scripts]`. Use direct `uv run` commands.
+
+
