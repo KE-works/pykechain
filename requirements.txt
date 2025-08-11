@@ -1,5 +1,5 @@
 # basis
-requests==2.32.3
+requests==2.32.4
 envparse==0.2.0
 
 # json validation (inspector)
@@ -10,13 +10,13 @@ semver==3.0.4
 
 # testing
 pytest==8.3.5
-pytest-xdist[psutil]==3.6.1
+pytest-xdist[psutil]==3.8.0
 betamax==0.9.0
 
-coverage~=7.8.0  # pinned to <7 as coveralls is preventing v7 for coverage
-pytest-cov==6.0.0
+coverage~=7.10.2  # pinned to <7 as coveralls is preventing v7 for coverage
+pytest-cov==6.2.1
 coveralls==4.0.1
-Pillow==11.2.1
+Pillow==11.3.0
 
 # documentation
 Sphinx==7.2.6; python_version >= '3.9'
@@ -24,13 +24,13 @@ Sphinx~=7.1.2; python_version <= '3.8'
 nbsphinx==0.9.7
 
 # integration
-tox==4.25.0
+tox==4.28.4
 
 # code style
 flake8==7.2.0
 importlib-metadata==8.7.0
 pydocstyle==6.3.0
-mypy==1.15.0; python_version >= '3.4'
+mypy==1.17.1; python_version >= '3.4'
 pre-commit==4.2.0
 
 # for package management (uploads)
